@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_METHODS;
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_TWIN;
+import static com.microsoft.azure.sdk.iot.device.transport.mqtt.Mqtt.MAX_IN_FLIGHT_COUNT;
 
 @Slf4j
 public class MqttIotHubConnection implements IotHubTransportConnection, MqttMessageListener
@@ -72,7 +73,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
      */
     // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
     // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
-    @SuppressWarnings("ConstantConditions")
     public MqttIotHubConnection(DeviceClientConfig config) throws IllegalArgumentException, TransportException
     {
         if (config == null)
@@ -183,6 +183,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         connectOptions.setCleanSession(SET_CLEAN_SESSION);
         connectOptions.setMqttVersion(MQTT_VERSION);
         connectOptions.setUserName(iotHubUserName);
+        connectOptions.setMaxInflight(MAX_IN_FLIGHT_COUNT);
         ProxySettings proxySettings = config.getProxySettings();
         if (proxySettings != null)
         {

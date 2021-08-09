@@ -82,6 +82,7 @@ import java.util.Date;
  *
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
  */
+@SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
 public class IndividualEnrollment extends Serializable
 {
     // the registration identifier

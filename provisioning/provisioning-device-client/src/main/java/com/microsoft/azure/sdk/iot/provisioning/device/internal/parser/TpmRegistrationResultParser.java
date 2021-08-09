@@ -16,6 +16,7 @@ import com.google.gson.annotations.SerializedName;
  *  Class for the representation of TpmRegistration
  *  https://docs.microsoft.com/en-us/rest/api/iot-dps/RuntimeRegistration/RegisterDevice#definitions_tpmregistrationresult
  */
+@SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
 public class TpmRegistrationResultParser
 {
     private static final String AUTHENTICATION_KEY = "authenticationKey";

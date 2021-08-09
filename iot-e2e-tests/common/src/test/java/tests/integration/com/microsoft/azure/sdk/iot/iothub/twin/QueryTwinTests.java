@@ -5,20 +5,39 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.twin;
 
+import com.azure.core.credential.AzureSasCredential;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinConnectionState;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.devicetwin.*;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
+import com.microsoft.azure.sdk.iot.service.devicetwin.QueryCollection;
+import com.microsoft.azure.sdk.iot.service.devicetwin.QueryCollectionResponse;
+import com.microsoft.azure.sdk.iot.service.devicetwin.QueryOptions;
+import com.microsoft.azure.sdk.iot.service.devicetwin.SqlQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenTools;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
@@ -27,13 +46,20 @@ import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DeviceTwinComm
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
+import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.HTTPS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
+import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
 
 /**
@@ -70,6 +96,63 @@ public class QueryTwinTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
+    public void testRawQueryTwinWithConnectionString() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    {
+        testInstance.twinServiceClient = new DeviceTwin(iotHubConnectionString);
+        testRawQueryTwin();
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void testRawQueryTwinWithAzureSasCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    {
+        IotHubConnectionString iotHubConnectionStringObj =
+                IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
+        testInstance.twinServiceClient = new DeviceTwin(iotHubConnectionStringObj.getHostName(), sasCredential);
+
+        testRawQueryTwin();
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void rawQueryTokenRenewalWithAzureSasCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    {
+        IotHubConnectionString iotHubConnectionStringObj =
+            IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+
+        AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
+        testInstance.twinServiceClient = new DeviceTwin(iotHubConnectionStringObj.getHostName(), sasCredential);
+
+        // test that the service client can query before the shared access signature expires
+        testRawQueryTwin();
+
+        // deliberately expire the SAS token to provoke a 401 to ensure that the registry manager is using the shared
+        // access signature that is set here.
+        sasCredential.update(SasTokenTools.makeSasTokenExpired(serviceSasToken.toString()));
+
+        try
+        {
+            testRawQueryTwin();
+            fail("Expected query call to throw unauthorized exception since an expired SAS token was used, but no exception was thrown");
+        }
+        catch (IotHubUnathorizedException e)
+        {
+            log.debug("IotHubUnauthorizedException was thrown as expected, continuing test");
+        }
+
+        // Renew the expired shared access signature
+        serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        sasCredential.update(serviceSasToken.toString());
+
+        // test that the service client can query after renewing the shared access signature expires
+        testRawQueryTwin();
+    }
+
     public void testRawQueryTwin() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES, false);
@@ -129,145 +212,21 @@ public class QueryTwinTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
-    @ContinuousIntegrationTest
-    public void testRawQueryMultipleInParallelTwin() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    public void testQueryTwinWithConnectionString() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
-        addMultipleDevices(MAX_DEVICES, false);
-        final Gson gson = new GsonBuilder().enableComplexMapKeySerialization().serializeNulls().create();
-        ExecutorService executor = Executors.newFixedThreadPool(2);
-
-        // Add same desired on multiple devices
-        final String queryProperty = PROPERTY_KEY_QUERY + UUID.randomUUID().toString();
-        final String queryPropertyValue = PROPERTY_VALUE_QUERY + UUID.randomUUID().toString();
-        final int expectedNumberOfDevices = MAX_DEVICES;
-
-        final String queryPropertyEven = PROPERTY_KEY_QUERY + UUID.randomUUID().toString();
-        final String queryPropertyValueEven = PROPERTY_VALUE_QUERY + UUID.randomUUID().toString();
-        int noOfEvenDevices = 0;
-
-        for (int i = 0; i < MAX_DEVICES; i++)
-        {
-            Set<Pair> desiredProperties = new HashSet<>();
-            desiredProperties.add(new Pair(queryProperty, queryPropertyValue));
-            if (i % 2 == 0)
-            {
-                desiredProperties.add(new Pair(queryPropertyEven, queryPropertyValueEven));
-                noOfEvenDevices++;
-            }
-            testInstance.devicesUnderTest[i].sCDeviceForTwin.setDesiredProperties(desiredProperties);
-
-            testInstance.twinServiceClient.updateTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin);
-            testInstance.devicesUnderTest[i].sCDeviceForTwin.clearTwin();
-        }
-
-        executor.submit(() -> {
-            try
-            {
-                // Raw Query for multiple devices having same property
-                final String select = "properties.desired." + queryProperty + " AS " + queryProperty + "," + " COUNT() AS numberOfDevices";
-                final String groupBy = "properties.desired." + queryProperty;
-                final SqlQuery sqlQuery = SqlQuery.createSqlQuery(select, SqlQuery.FromType.DEVICES, null, groupBy);
-
-                boolean querySucceeded = false;
-                long startTime = System.currentTimeMillis();
-                while (!querySucceeded)
-                {
-                    Query rawTwinQuery = testInstance.rawTwinQueryClient.query(sqlQuery.getQuery(), PAGE_SIZE);
-
-                    while (testInstance.rawTwinQueryClient.hasNext(rawTwinQuery))
-                    {
-                        String result = testInstance.rawTwinQueryClient.next(rawTwinQuery);
-                        assertNotNull(result);
-                        Map map = gson.fromJson(result, Map.class);
-                        if (map.containsKey("numberOfDevices") && map.containsKey(queryProperty))
-                        {
-                            // Casting as a double first to get the value from the map, but then casting to an int because the
-                            // number of devices should always be an integer
-                            int actualNumberOfDevices = (int) (double) map.get("numberOfDevices");
-                            if (actualNumberOfDevices == expectedNumberOfDevices)
-                            {
-                                querySucceeded = true;
-                            }
-                            else
-                            {
-                                log.info("Expected device count not correct, re-running query");
-                                Thread.sleep(200);
-                            }
-                        }
-                    }
-
-                    if (System.currentTimeMillis() - startTime > QUERY_TIMEOUT_MILLISECONDS)
-                    {
-                        fail("Timed out waiting for query results to match expectations");
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                fail(e.getMessage());
-            }
-
-        });
-
-        final double expectedNumberOfDevicesEven = noOfEvenDevices;
-        executor.submit(() -> {
-            try
-            {
-                // Raw Query for multiple devices having same property
-                final String select = "properties.desired." + queryPropertyEven + " AS " + queryPropertyEven + "," + " COUNT() AS numberOfDevices";
-                final String groupBy = "properties.desired." + queryPropertyEven;
-                final SqlQuery sqlQuery = SqlQuery.createSqlQuery(select, SqlQuery.FromType.DEVICES, null, groupBy);
-
-                boolean querySucceeded = false;
-                long startTime = System.currentTimeMillis();
-                while (!querySucceeded)
-                {
-                    Query rawTwinQuery = testInstance.rawTwinQueryClient.query(sqlQuery.getQuery(), PAGE_SIZE);
-
-                    while (testInstance.rawTwinQueryClient.hasNext(rawTwinQuery))
-                    {
-                        String result = testInstance.rawTwinQueryClient.next(rawTwinQuery);
-                        assertNotNull(result);
-                        Map map = gson.fromJson(result, Map.class);
-                        if (map.containsKey("numberOfDevices") && map.containsKey(queryPropertyEven))
-                        {
-                            // Casting as a double first to get the value from the map, but then casting to an int because the
-                            // number of devices should always be an integer
-                            int actualNumberOfDevices = (int) (double) map.get("numberOfDevices");
-                            if (actualNumberOfDevices == expectedNumberOfDevicesEven)
-                            {
-                                querySucceeded = true;
-                            }
-                            else
-                            {
-                                log.info("Expected device count not correct, re-running query");
-                                Thread.sleep(200);
-                            }
-                        }
-                    }
-
-                    if (System.currentTimeMillis() - startTime > QUERY_TIMEOUT_MILLISECONDS)
-                    {
-                        fail("Timed out waiting for query results to match expectations");
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                fail(e.getMessage());
-            }
-        });
-
-        executor.shutdown();
-        if (!executor.awaitTermination(MULTITHREADED_WAIT_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS))
-        {
-            executor.shutdownNow();
-        }
+        testInstance.twinServiceClient = new DeviceTwin(iotHubConnectionString);
+        testQueryTwin();
     }
 
     @Test
     @StandardTierHubOnlyTest
-    public void testQueryTwin() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    public void testQueryTwinWithAzureSasCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    {
+        testInstance.twinServiceClient = buildDeviceTwinClientWithAzureSasCredential();
+        testQueryTwin();
+    }
+
+    public void testQueryTwin() throws InterruptedException, ModuleClientException, IOException, GeneralSecurityException, IotHubException, URISyntaxException
     {
         addMultipleDevices(MAX_DEVICES, false);
 
@@ -394,127 +353,13 @@ public class QueryTwinTests extends DeviceTwinCommon
     public void queryCollectionCanReturnEmptyQueryResults() throws IOException, IotHubException
     {
         String fullQuery = "select * from devices where deviceId='nonexistantdevice'";
-        DeviceTwin twinClient = DeviceTwin.createFromConnectionString(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        DeviceTwin twinClient = new DeviceTwin(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
         QueryCollection twinQuery = twinClient.queryTwinCollection(fullQuery);
         QueryOptions options = new QueryOptions();
         QueryCollectionResponse<DeviceTwinDevice> response = twinClient.next(twinQuery, options);
 
         assertNull(response.getContinuationToken());
         assertTrue(response.getCollection().isEmpty());
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    @ContinuousIntegrationTest
-    public void testMultipleQueryTwinInParallel() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
-    {
-        addMultipleDevices(MAX_DEVICES, false);
-
-        // Add same desired on multiple devices
-        final String queryProperty = PROPERTY_KEY_QUERY + UUID.randomUUID().toString();
-        final String queryPropertyEven = PROPERTY_KEY_QUERY + UUID.randomUUID().toString();
-        final String queryPropertyValue = PROPERTY_VALUE_QUERY + UUID.randomUUID().toString();
-        final String queryPropertyValueEven = PROPERTY_VALUE_QUERY + UUID.randomUUID().toString();
-        int noOfEvenDevices = 0;
-        ExecutorService executor = Executors.newFixedThreadPool(2);
-
-        for (int i = 0; i < MAX_DEVICES; i++)
-        {
-            Set<Pair> desiredProperties = new HashSet<>();
-            desiredProperties.add(new Pair(queryProperty, queryPropertyValue));
-            if (i % 2 == 0)
-            {
-                desiredProperties.add(new Pair(queryPropertyEven, queryPropertyValueEven));
-                noOfEvenDevices++;
-            }
-            testInstance.devicesUnderTest[i].sCDeviceForTwin.setDesiredProperties(desiredProperties);
-
-            testInstance.twinServiceClient.updateTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin);
-            testInstance.devicesUnderTest[i].sCDeviceForTwin.clearTwin();
-        }
-
-        // Query multiple devices having same property
-
-        executor.submit(() -> {
-            try
-            {
-                final String where = "is_defined(properties.desired." + queryProperty + ")";
-                SqlQuery sqlQuery = SqlQuery.createSqlQuery("*", SqlQuery.FromType.DEVICES, where, null);
-                final Query twinQuery = testInstance.twinServiceClient.queryTwin(sqlQuery.getQuery(), PAGE_SIZE);
-
-                for (int i = 0; i < MAX_DEVICES; i++)
-                {
-                    try
-                    {
-                        if (testInstance.twinServiceClient.hasNextDeviceTwin(twinQuery))
-                        {
-                            DeviceTwinDevice d = testInstance.twinServiceClient.getNextDeviceTwin(twinQuery);
-
-                            assertNotNull(d.getVersion());
-                            for (Pair dp : d.getDesiredProperties())
-                            {
-                                assertEquals(dp.getKey(), queryProperty);
-                                assertEquals(dp.getValue(), queryPropertyValue);
-                            }
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        fail(e.getMessage());
-                    }
-
-                    assertFalse(testInstance.twinServiceClient.hasNextDeviceTwin(twinQuery));
-                }
-            }
-            catch (Exception e)
-            {
-                fail(e.getMessage());
-            }
-        });
-
-        final int maximumEvenDevices = noOfEvenDevices;
-        executor.submit(() -> {
-            try
-            {
-                final String whereEvenDevices = "is_defined(properties.desired." + queryPropertyEven + ")";
-                SqlQuery sqlQueryEvenDevices = SqlQuery.createSqlQuery("*", SqlQuery.FromType.DEVICES, whereEvenDevices, null);
-                final Query twinQueryEven = testInstance.twinServiceClient.queryTwin(sqlQueryEvenDevices.getQuery(), PAGE_SIZE);
-
-                for (int i = 0; i < maximumEvenDevices; i++)
-                {
-                    try
-                    {
-                        if (testInstance.twinServiceClient.hasNextDeviceTwin(twinQueryEven))
-                        {
-                            DeviceTwinDevice d = testInstance.twinServiceClient.getNextDeviceTwin(twinQueryEven);
-
-                            assertNotNull(d.getVersion());
-                            for (Pair dp : d.getDesiredProperties())
-                            {
-                                assertEquals(dp.getKey(), queryPropertyEven);
-                                assertEquals(dp.getValue(), queryPropertyValueEven);
-                            }
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        fail(e.getMessage());
-                    }
-
-                    assertFalse(testInstance.twinServiceClient.hasNextDeviceTwin(twinQueryEven));
-                }
-            }
-            catch (Exception e)
-            {
-                fail(e.getMessage());
-            }
-        });
-
-        executor.shutdown();
-        if (!executor.awaitTermination(MULTITHREADED_WAIT_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS))
-        {
-            executor.shutdownNow();
-        }
     }
 
     public void setDesiredProperties(String queryProperty, String queryPropertyValue, int numberOfDevices) throws IOException, IotHubException

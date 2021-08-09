@@ -1,5 +1,26 @@
 # Microsoft Azure IoT SDKs for Java
 
+## Critical Upcoming Change Notice
+
+All Azure IoT SDK users are advised to be aware of upcoming TLS certificate changes for Azure IoT hub and Device Provisioning Service 
+that will impact the SDK's ability to connect. In October 2022, both services will migrate from the current 
+[Baltimore CyberTrust CA Root](https://baltimore-cybertrust-root.chain-demos.digicert.com/info/index.html) to the 
+[DigiCert Global G2 CA root](https://global-root-g2.chain-demos.digicert.com/info/index.html). There will be a 
+transition period beforehand where your IoT devices must have both the Baltimore and Digicert public certificates 
+installed in their certificate store in order to prevent connectivity issues. 
+
+For a more in depth explanation as to why the IoT services are doing this, please see
+[this article](https://techcommunity.microsoft.com/t5/internet-of-things/azure-iot-tls-critical-changes-are-almost-here-and-why-you/ba-p/2393169).
+
+Users of this Java IoT SDK in particular will need to follow slightly different instructions in order to handle this 
+upcoming change. See [this document](./upcoming_certificate_changes_readme.md) for a more in depth explanation of how 
+to prepare your devices for this certificate migration.
+
+**Users who don't follow these instructions will begin experiencing unrecoverable, consistent connection failures from 
+their devices starting June 2022.**
+
+If you have any questions, comments, or concerns about this upcoming change, please let us know on our [discussions page](https://github.com/Azure/azure-iot-sdk-java/discussions).
+
 ### Build status
 Due to security considerations, build logs are not publicly available.
 
@@ -9,8 +30,8 @@ Due to security considerations, build logs are not publicly available.
 | Preview                  | [![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/java/pull_request_validation/Java%20Canary?branchName=preview)](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=245&branchName=preview)|
 
 This repository contains the following:
-* **Azure IoT Hub device SDK for Java**: connect client devices to Azure IoT Hub (supports Java 7+)
-* **Azure IoT Hub service SDK for Java**: enables developing back-end applications for Azure IoT (supports Java 8+)
+* **Azure IoT Hub device SDK for Java**: connect client devices to Azure IoT Hub
+* **Azure IoT Hub service SDK for Java**: enables developing back-end applications for Azure IoT
 * **Azure IoT Device Provisioning device SDK for Java**: provision devices to Azure IoT Hub using Azure IoT Device Provisioning
 * **Azure IoT Device Provisioning service SDK for Java**: manage your Provisioning service instance from a back-end Java application
 
@@ -33,8 +54,10 @@ Devices and data sources in an IoT solution can range from a simple network-conn
    * **Working with the SDKs code**: if you are working with the SDKs code to modify it or contribute changes, then you can clone the repository and build the libraries:
       * [Build Device SDK from code][device-code]
       * [Build Service SDK from code][service-code]
-* On Android: our Java device SDK can be used on Android using the API version 17 and higher:
+* On Android: our Java device SDK can be used on Android:
    * [Device SDK][device-android]
+
+For more details on what platforms this SDK supports, see [this document](./supported_platforms.md).
 
 ## API reference
 * [Azure IoT Hub device SDK][java-api-reference-device]
@@ -177,8 +200,8 @@ Below is a table showing the mapping of the LTS branches to the packages release
 
 | Maven Package | Github Branch | LTS Status | LTS Start Date | Maintenance End Date | Removed Date |
 | :-----------: | :-----------: | :--------: | :------------: | :------------------: | :----------: |
-| [2020-7-7](https://github.com/Azure/azure-iot-sdk-java/releases/tag/lts_7_2020) | lts_07_2020   | Active     | 2020-7-7     | 2020-12-31            | 2021-6-30   |
-| [2020-01-27](https://github.com/Azure/azure-iot-sdk-java/releases/tag/LTS_01_2020) | lts_01_2020   | Deprecated     | 2020-01-27     | 2020-06-30            | 2020-12-31   |
+| [2021-6-17](https://github.com/Azure/azure-iot-sdk-java/releases/tag/lts_6_2021) | lts_06_2021   | Active     | 2020-6-17     | 2021-12-31            | 2022-6-30   |
+| [2020-7-7](https://github.com/Azure/azure-iot-sdk-java/releases/tag/lts_7_2020) | lts_07_2020   | Removed     | 2020-7-7     | 2020-12-31            | 2021-6-30   |
 
 * <sup>1</sup> All scheduled dates are subject to change by the Azure IoT SDK team.
 

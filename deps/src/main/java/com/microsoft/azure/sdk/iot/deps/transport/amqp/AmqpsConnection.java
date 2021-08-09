@@ -161,6 +161,8 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
 
             try
             {
+                // Result is not used
+                //noinspection ResultOfMethodCallIgnored
                 openLatch.await(MAX_WAIT_TO_OPEN_CLOSE_CONNECTION, TimeUnit.MILLISECONDS);
             }
             catch (InterruptedException e)

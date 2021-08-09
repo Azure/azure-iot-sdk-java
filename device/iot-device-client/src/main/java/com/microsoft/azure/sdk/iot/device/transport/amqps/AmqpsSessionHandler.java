@@ -50,6 +50,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
     private boolean methodsReceiverLinkOpened;
     private boolean sessionOpenedRemotely;
     private boolean sessionHandlerClosedBeforeRemoteSessionOpened;
+    private boolean isClosing;
 
     AmqpsSessionHandler(final DeviceClientConfig deviceClientConfig, AmqpsSessionStateCallback amqpsSessionStateCallback)
     {
@@ -82,6 +83,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
         this.methodsReceiverLinkOpened = false;
         this.sessionOpenedRemotely = false;
         this.sessionHandlerClosedBeforeRemoteSessionOpened = false;
+        this.isClosing = false;
     }
 
     public void closeSession()
@@ -101,7 +103,15 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
 
                 // This is a difficult scenario to reproduce, but it typically happens during retry logic if the client gives
                 // up on a retry attempt prior to the service opening the session remotely.
+                this.isClosing = true;
                 this.session.close();
+
+                if (session.getLocalState() == EndpointState.CLOSED)
+                {
+                    // Since session was never opened, there will be no callback for onSessionRemoteClose, so now is
+                    // the appropriate time to notify the connection layer that this session has finished closing.
+                    this.amqpsSessionStateCallback.onSessionClosedAsExpected(this.getDeviceId());
+                }
             }
             else
             {
@@ -153,7 +163,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
     public void onSessionRemoteClose(Event e)
     {
         Session session = e.getSession();
-        if (session.getLocalState() == EndpointState.ACTIVE)
+        if (session.getLocalState() == EndpointState.ACTIVE || !isClosing)
         {
             //Service initiated this session close
             this.session.close();
@@ -183,11 +193,15 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
         boolean allLinksOpen = true;
         for (AmqpsSenderLinkHandler senderLinkHandler : senderLinkHandlers)
         {
+            // Ignored because Sender is passed in from elsewhere and we won't know the condition of the Link
+            //noinspection ConstantConditions
             allLinksOpen &= senderLinkHandler.senderLink != null && senderLinkHandler.senderLink.getRemoteState() == EndpointState.ACTIVE;
         }
 
         for (AmqpsReceiverLinkHandler receiverLinkHandler : receiverLinkHandlers)
         {
+            // Ignored because Sender is passed in from elsewhere and we won't know the condition of the Link
+            //noinspection ConstantConditions
             allLinksOpen &= receiverLinkHandler.receiverLink != null && receiverLinkHandler.receiverLink.getRemoteState() == EndpointState.ACTIVE;
         }
 

@@ -8,18 +8,21 @@ import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethodClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Job;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
-import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
-import mockit.*;
+import mockit.Deencapsulation;
+import mockit.Expectations;
+import mockit.Mock;
+import mockit.MockUp;
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
+import mockit.Verifications;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.Proxy;
-import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,8 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for Device Method
@@ -41,6 +43,9 @@ public class DeviceMethodTest
 
     @Mocked
     IotHubConnectionStringBuilder mockedConnectionStringBuilder;
+
+    @Mocked
+    IotHubServiceSasToken mockedIotHubServiceSasToken;
 
     private static final String STANDARD_HOSTNAME = "testHostName.azure.net";
     private static final String STANDARD_SHAREDACCESSKEYNAME = "testKeyName";
@@ -176,6 +181,13 @@ public class DeviceMethodTest
             };
 
 
+    @Test
+    public void testOptionsDefaults()
+    {
+        DeviceMethodClientOptions options = DeviceMethodClientOptions.builder().build();
+        assertEquals((int) Deencapsulation.getField(DeviceMethodClientOptions.class, "DEFAULT_HTTP_READ_TIMEOUT_MS"), options.getHttpReadTimeout());
+        assertEquals((int) Deencapsulation.getField(DeviceMethodClientOptions.class, "DEFAULT_HTTP_CONNECT_TIMEOUT_MS"), options.getHttpConnectTimeout());
+    }
 
     /* Tests_SRS_DEVICEMETHOD_21_002: [The constructor shall create an IotHubConnectionStringBuilder object from the given connection string.] */
     /* Tests_SRS_DEVICEMETHOD_21_003: [The constructor shall create a new DeviceMethod instance and return it.] */
@@ -185,6 +197,7 @@ public class DeviceMethodTest
         //arrange
 
         //act
+        constructorExpectations();
         DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
 
         //assert
@@ -215,23 +228,6 @@ public class DeviceMethodTest
 
     }
 
-    /* Tests_SRS_DEVICEMETHOD_21_001: [The constructor shall throw IllegalArgumentException if the input string is null or empty.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowOnImproperCSFailed() throws Exception
-    {
-        //arrange
-        new NonStrictExpectations()
-        {
-            {
-                IotHubConnectionStringBuilder.createConnectionString(STANDARD_CONNECTIONSTRING);
-                result = new IllegalArgumentException();
-            }
-        };
-
-        //act
-        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
-    }
-
     /* Tests_SRS_DEVICEMETHOD_21_004: [The invoke shall throw IllegalArgumentException if the provided deviceId is null or empty.] */
     /* Tests_SRS_DEVICEMETHOD_21_005: [The invoke shall throw IllegalArgumentException if the provided methodName is null, empty, or not valid.] */
     @Test
@@ -239,6 +235,7 @@ public class DeviceMethodTest
             throws Exception
     {
         //arrange
+        constructorExpectations();
         DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
 
         //act
@@ -269,6 +266,7 @@ public class DeviceMethodTest
             throws Exception
     {
         //arrange
+        constructorExpectations();
         DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
 
         //act
@@ -305,7 +303,7 @@ public class DeviceMethodTest
             {
                 methodParser.toJson();
                 result = STANDARD_JSON;
-                mockedIotHubConnectionString.getUrlModuleMethod(STANDARD_DEVICEID, STANDARD_MODULEID);
+                IotHubConnectionString.getUrlModuleMethod(anyString, STANDARD_DEVICEID, STANDARD_MODULEID);
                 result = new IllegalArgumentException();
             }
         };
@@ -392,48 +390,8 @@ public class DeviceMethodTest
             {
                 methodParser.toJson();
                 result = STANDARD_JSON;
-                mockedIotHubConnectionString.getUrlMethod(STANDARD_DEVICEID);
+                IotHubConnectionString.getUrlMethod(anyString, STANDARD_DEVICEID);
                 result = new IllegalArgumentException();
-            }
-        };
-
-        //act
-        testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP);
-    }
-
-    /* Tests_SRS_DEVICEMETHOD_21_009: [The invoke shall send the created request and get the response using the HttpRequester.] */
-    /* Tests_SRS_DEVICEMETHOD_21_010: [The invoke shall create a new HttpRequest with http method as `POST`.] */
-    @Test (expected = IotHubException.class)
-    public void invokeThrowOnHttpRequesterFailed(
-            @Mocked final MethodParser methodParser)
-            throws Exception
-    {
-        //arrange
-        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
-
-        new NonStrictExpectations()
-        {
-            {
-                methodParser.toJson();
-                result = STANDARD_JSON;
-                mockedIotHubConnectionString.getUrlMethod(STANDARD_DEVICEID);
-                result = STANDARD_URL;
-            }
-        };
-        new MockUp<DeviceOperations>()
-        {
-            @Mock HttpResponse request(
-                    IotHubConnectionString mockedIotHubConnectionString,
-                    URL url,
-                    HttpMethod method,
-                    byte[] payload,
-                    String requestId,
-                    int httpConnectTimeout,
-                    int httpReadTimeout,
-                    Proxy proxy)
-                    throws IOException, IotHubException, IllegalArgumentException
-            {
-                throw new IotHubException();
             }
         };
 
@@ -454,7 +412,7 @@ public class DeviceMethodTest
         new NonStrictExpectations()
         {
             {
-                mockedIotHubConnectionString.getUrlMethod(STANDARD_DEVICEID);
+                IotHubConnectionString.getUrlMethod(anyString, STANDARD_DEVICEID);
                 result = STANDARD_URL;
             }
         };
@@ -483,6 +441,19 @@ public class DeviceMethodTest
         testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP);
     }
 
+    private void constructorExpectations()
+    {
+        new Expectations()
+        {
+            {
+                IotHubConnectionString.createIotHubConnectionString(STANDARD_CONNECTIONSTRING);
+                result = mockedIotHubConnectionString;
+                mockedIotHubConnectionString.getHostName();
+                result = "someHostName";
+            }
+        };
+    }
+
     /* Tests_SRS_DEVICEMETHOD_21_015: [If the HttpStatus represents success, the invoke shall return the status and payload using the `MethodResult` class.] */
     @Test
     public void invokeSucceed(
@@ -492,11 +463,12 @@ public class DeviceMethodTest
             throws Exception
     {
         //arrange
+        constructorExpectations();
         DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
         new NonStrictExpectations()
         {
             {
-                mockedIotHubConnectionString.getUrlMethod(STANDARD_DEVICEID);
+                IotHubConnectionString.getUrlMethod(anyString, STANDARD_DEVICEID);
                 result = STANDARD_URL;
                 methodParser.toJson();
                 result = STANDARD_JSON;
@@ -518,7 +490,7 @@ public class DeviceMethodTest
             {
                 methodParser.toJson();
                 times = 1;
-                mockedIotHubConnectionString.getUrlMethod(STANDARD_DEVICEID);
+                IotHubConnectionString.getUrlMethod(anyString, STANDARD_DEVICEID);
                 times = 1;
                 methodParser.getPayload();
                 times = 1;
@@ -595,6 +567,7 @@ public class DeviceMethodTest
         final String queryCondition = "validQueryCondition";
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = 100;
+        constructorExpectations();
         DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
 
         new NonStrictExpectations()
@@ -602,7 +575,7 @@ public class DeviceMethodTest
             {
                 mockedIotHubConnectionString.toString();
                 result = STANDARD_CONNECTIONSTRING;
-                Deencapsulation.newInstance(Job.class, new Class[]{String.class}, STANDARD_CONNECTIONSTRING);
+                Deencapsulation.newInstance(Job.class, new Class[]{String.class}, anyString);
                 result = mockedJob;
                 times = 1;
             }
@@ -623,6 +596,7 @@ public class DeviceMethodTest
         final String queryCondition = "validQueryCondition";
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = 100;
+        constructorExpectations();
         DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
 
         new NonStrictExpectations()
@@ -630,7 +604,7 @@ public class DeviceMethodTest
             {
                 mockedIotHubConnectionString.toString();
                 result = STANDARD_CONNECTIONSTRING;
-                Deencapsulation.newInstance(Job.class, new Class[]{String.class}, STANDARD_CONNECTIONSTRING);
+                Deencapsulation.newInstance(Job.class, new Class[]{String.class}, anyString);
                 result = new IOException();
                 times = 1;
             }
@@ -648,6 +622,7 @@ public class DeviceMethodTest
         final String queryCondition = "validQueryCondition";
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = 100;
+        constructorExpectations();
         DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
 
         new NonStrictExpectations()
@@ -655,7 +630,7 @@ public class DeviceMethodTest
             {
                 mockedIotHubConnectionString.toString();
                 result = STANDARD_CONNECTIONSTRING;
-                Deencapsulation.newInstance(Job.class, new Class[]{String.class}, STANDARD_CONNECTIONSTRING);
+                Deencapsulation.newInstance(Job.class, new Class[]{String.class}, anyString);
                 result = mockedJob;
             }
         };
@@ -681,6 +656,7 @@ public class DeviceMethodTest
         final String queryCondition = "validQueryCondition";
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = 100;
+        constructorExpectations();
         DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
 
         new NonStrictExpectations()
@@ -688,7 +664,7 @@ public class DeviceMethodTest
             {
                 mockedIotHubConnectionString.toString();
                 result = STANDARD_CONNECTIONSTRING;
-                Deencapsulation.newInstance(Job.class, new Class[]{String.class}, STANDARD_CONNECTIONSTRING);
+                Deencapsulation.newInstance(Job.class, new Class[]{String.class}, anyString);
                 result = mockedJob;
                 Deencapsulation.invoke(mockedJob, "scheduleDeviceMethod", queryCondition, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP, now, maxExecutionTimeInSeconds);
                 result = new IotHubException();

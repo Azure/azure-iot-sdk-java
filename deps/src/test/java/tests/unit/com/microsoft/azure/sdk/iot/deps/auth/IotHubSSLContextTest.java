@@ -174,11 +174,14 @@ public class IotHubSSLContextTest
             }
         };
 
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
-                KeyManagerFactory.getInstance("SunX509");
-                result = mockKeyManagerFactory;
+                new SecureRandom();
+                result = mockedSecureRandom;
+
+                mockedSecureRandom.nextInt(anyInt);
+                result = 'a';
 
                 Deencapsulation.newInstance(IotHubCertificateManager.class);
                 result = mockedCertificateManager;
@@ -195,30 +198,6 @@ public class IotHubSSLContextTest
         };
 
         final IotHubSSLContext iotHubSSLContext = Deencapsulation.newInstance(IotHubSSLContext.class, new Class[]{String.class, String.class}, publicKeyCert, privateKey);
-
-        //assert
-        new Verifications()
-        {
-            {
-                SSLContext.getInstance("TLSv1.2");
-                times = 1;
-
-                Deencapsulation.invoke(iotHubSSLContext, "generateTemporaryPassword");
-                times = 1;
-
-                mockedKeyStore.setCertificateEntry(anyString, mockedX509Certificate);
-                times = 1;
-
-                new SecureRandom();
-                times = 2;
-
-                Deencapsulation.invoke(iotHubSSLContext, "generateTrustManagerFactory", new Class[] { IotHubCertificateManager.class, KeyStore.class }, mockedCertificateManager, mockedKeyStore);
-                times = 1;
-
-                mockedSSLContext.init(mockKeyManagers, mockedTrustManager, new SecureRandom());
-                times = 1;
-            }
-        };
     }
 
     //Tests_SRS_IOTHUBSSLCONTEXT_34_025: [If the provided cert is a path, this function shall set the path of the default cert to the provided cert path.]
@@ -307,9 +286,15 @@ public class IotHubSSLContextTest
             }
         };
 
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
+                new SecureRandom();
+                result = mockedSecureRandom;
+
+                mockedSecureRandom.nextInt(anyInt);
+                result = 'a';
+
                 Deencapsulation.newInstance(IotHubCertificateManager.class);
                 result = mockedCertificateManager;
 
@@ -318,9 +303,6 @@ public class IotHubSSLContextTest
 
                 Deencapsulation.invoke(IotHubSSLContext.class, "parsePublicKeyCertificate", publicKeyCert);
                 returns(testCertChain);
-
-                KeyManagerFactory.getInstance("SunX509");
-                result = mockKeyManagerFactory;
 
                 Deencapsulation.newInstance(IotHubCertificateManager.class);
                 result = mockedCertificateManager;
@@ -337,33 +319,6 @@ public class IotHubSSLContextTest
         };
 
         final IotHubSSLContext iotHubSSLContext = Deencapsulation.newInstance(IotHubSSLContext.class, new Class[]{String.class, String.class, String.class, boolean.class}, publicKeyCert, privateKey, iotHubTrustedCert, false);
-
-        //assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockedCertificateManager, "setCertificates", new Class[] {String.class}, iotHubTrustedCert);
-                times = 1;
-
-                SSLContext.getInstance("TLSv1.2");
-                times = 1;
-
-                Deencapsulation.invoke(iotHubSSLContext, "generateTemporaryPassword");
-                times = 1;
-
-                mockedKeyStore.setCertificateEntry(anyString, mockedX509Certificate);
-                times = 1;
-
-                new SecureRandom();
-                times = 2;
-
-                Deencapsulation.invoke(iotHubSSLContext, "generateTrustManagerFactory", new Class[] { IotHubCertificateManager.class, KeyStore.class }, mockedCertificateManager, mockedKeyStore);
-                times = 1;
-
-                mockedSSLContext.init(mockKeyManagers, mockedTrustManager, new SecureRandom());
-                times = 1;
-            }
-        };
     }
 
     // Tests_SRS_IOTHUBSSLCONTEXT_34_040: [If the provided cert is a path, this function shall set the path of the default cert to the provided cert path.]
@@ -394,8 +349,11 @@ public class IotHubSSLContextTest
         new Expectations()
         {
             {
-                Deencapsulation.newInstance(IotHubCertificateManager.class);
-                result = mockedCertificateManager;
+                new SecureRandom();
+                result = mockedSecureRandom;
+
+                mockedSecureRandom.nextInt(anyInt);
+                result = 'a';
 
                 Deencapsulation.newInstance(IotHubCertificateManager.class);
                 result = mockedCertificateManager;
@@ -412,30 +370,6 @@ public class IotHubSSLContextTest
         };
 
         final IotHubSSLContext iotHubSSLContext = Deencapsulation.newInstance(IotHubSSLContext.class, new Class[]{String.class, String.class, String.class, boolean.class}, publicKeyCert, privateKey, iotHubTrustedCertPath, true);
-
-        //assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockedCertificateManager, "setCertificatesPath", new Class[] {String.class}, iotHubTrustedCertPath);
-                times = 1;
-
-                SSLContext.getInstance("TLSv1.2");
-                times = 1;
-
-                Deencapsulation.invoke(iotHubSSLContext, "generateTemporaryPassword");
-                times = 1;
-
-                mockedKeyStore.setCertificateEntry(anyString, mockedX509Certificate);
-                times = 1;
-
-                new SecureRandom();
-                times = 2;
-
-                mockedSSLContext.init(mockKeyManagers, mockedTrustManager, new SecureRandom());
-                times = 1;
-            }
-        };
     }
 
     //----------- PEM UTILITIES TESTS -----------

@@ -349,6 +349,7 @@ public class IndividualEnrollmentManager
         return PATH_ENROLLMENTS + PATH_SEPARATOR + registrationId + PATH_SEPARATOR + ATTESTATION_MECHANISM;
     }
 
+    @SuppressWarnings("SameReturnValue")
     private static String getEnrollmentsPath()
     {
         return PATH_ENROLLMENTS;

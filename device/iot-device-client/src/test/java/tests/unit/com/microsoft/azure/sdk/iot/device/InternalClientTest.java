@@ -297,7 +297,7 @@ public class InternalClientTest
         InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
 
         // act
-        Deencapsulation.invoke(client, "open");
+        Deencapsulation.invoke(client, "open", false);
 
         // assert
         new Verifications()
@@ -308,7 +308,7 @@ public class InternalClientTest
                         any, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
                 times = 1;
 
-                Deencapsulation.invoke(mockDeviceIO, "open");
+                Deencapsulation.invoke(mockDeviceIO, "open", false);
                 times = 1;
             }
         };
@@ -935,7 +935,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockedDeviceTwin.updateReportedProperties(mockSet);
+                mockedDeviceTwin.updateReportedProperties(mockSet, null, null, null, null, null);
                 times = 1;
             }
         };
@@ -968,7 +968,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockedDeviceTwin.updateReportedProperties(mockSet, 10);
+                mockedDeviceTwin.updateReportedProperties(mockSet, 10, null, null, null, null);
                 times = 1;
             }
         };
@@ -2146,7 +2146,7 @@ public class InternalClientTest
                 times = 1;
                 mockConfig.getSasTokenAuthentication().setTokenValidSecs(value);
                 times = 1;
-                Deencapsulation.invoke(mockDeviceIO, "open");
+                Deencapsulation.invoke(mockDeviceIO, "open", false);
                 times = 2;
             }
         };
@@ -2253,7 +2253,7 @@ public class InternalClientTest
                 times = 1;
                 mockConfig.getSasTokenAuthentication().setTokenValidSecs(value);
                 times = 1;
-                Deencapsulation.invoke(mockDeviceIO, "open");
+                Deencapsulation.invoke(mockDeviceIO, "open", false);
                 times = 2;
             }
         };
@@ -2335,7 +2335,7 @@ public class InternalClientTest
                 times = 1;
                 mockConfig.getSasTokenAuthentication().setTokenValidSecs(value);
                 times = 1;
-                Deencapsulation.invoke(mockDeviceIO, "open");
+                Deencapsulation.invoke(mockDeviceIO, "open", false);
                 times = 2;
             }
         };
@@ -2418,7 +2418,7 @@ public class InternalClientTest
                 times = 1;
                 mockConfig.getSasTokenAuthentication().setTokenValidSecs(value);
                 times = 1;
-                Deencapsulation.invoke(mockDeviceIO, "open");
+                Deencapsulation.invoke(mockDeviceIO, "open", false);
                 times = 2;
             }
         };
@@ -2475,7 +2475,7 @@ public class InternalClientTest
                 result = true;
                 mockConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                Deencapsulation.invoke(mockDeviceIO, "open");
+                Deencapsulation.invoke(mockDeviceIO, "open", false);
                 result =  new IOException();
             }
         };

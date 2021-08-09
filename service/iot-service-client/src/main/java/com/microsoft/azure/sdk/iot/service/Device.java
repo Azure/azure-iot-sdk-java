@@ -10,6 +10,9 @@ import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * The Device class extends the BaseDevice class
  * implementing constructors and serialization functionality.
@@ -17,49 +20,45 @@ import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
 public class Device extends BaseDevice
 {
     /**
-     * Static create function
+     * Static create function.
      * Creates device object using the given name.
      * If input device status and symmetric key are null then they will be auto generated.
      *
-     * @param deviceId - String containing the device name
-     * @param status - Device status. If parameter is null, then the status will be set to Enabled.
-     * @param symmetricKey - Device key. If parameter is null, then the key will be auto generated.
+     * @param deviceId String containing the device name.
+     * @param status Device status. If parameter is null, then the status will be set to {@code "Enabled"}.
+     * @param symmetricKey Device key. If parameter is null, then the key will be auto generated.
      * @return Device object
      * @throws IllegalArgumentException This exception is thrown if {@code deviceId} is {@code null} or empty.
      */
     public static Device createFromId(String deviceId, DeviceStatus status, SymmetricKey symmetricKey)
             throws IllegalArgumentException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_DEVICE_12_002: [The function shall throw IllegalArgumentException if the input string is empty or null]
         if (Tools.isNullOrEmpty(deviceId))
         {
             throw new IllegalArgumentException(deviceId);
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_DEVICE_12_003: [The function shall create a new instance
-        // of Device using the given deviceId and return it]
         return new Device(deviceId, status, symmetricKey);
     }
 
     /**
-     * Static create function
-     * Creates device object using the given name that will use a Certificate Authority signed certificate for authentication.
-     * If input device status is null then it will be auto generated.
+     * Static create function.
+     * Creates device object using the given name that will use a Certificate Authority signed certificate for
+     * authentication.
+     * If input device status is {@code null} then it will be auto-generated.
      *
-     * @param deviceId - String containing the device name
-     * @param authenticationType - The type of authentication used by this device.
-     * @return Device object
+     * @param deviceId String containing the device name.
+     * @param authenticationType The type of authentication used by this device.
+     * @return Device object.
      * @throws IllegalArgumentException This exception is thrown if {@code deviceId} is {@code null} or empty.
      */
     public static Device createDevice(String deviceId, AuthenticationType authenticationType)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_DEVICE_34_009: [The function shall throw IllegalArgumentException if the provided deviceId or authenticationType is empty or null.]
         if (Tools.isNullOrEmpty(deviceId))
         {
             throw new IllegalArgumentException("The provided device Id must not be null or empty");
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_DEVICE_34_009: [The function shall throw IllegalArgumentException if the provided deviceId or authenticationType is empty or null.]
         if (authenticationType == null)
         {
             throw new IllegalArgumentException("The provided authentication type must not be null");
@@ -69,51 +68,45 @@ public class Device extends BaseDevice
     }
 
     /**
-     * Create an Device instance using the given device name
+     * Create an Device instance using the given device name.
      *
      * @param deviceId Name of the device (used as device id)
-     * @param status - Device status. If parameter is null, then the status will be set to Enabled.
-     * @param symmetricKey - Device key. If parameter is null, then the key will be auto generated.
-     * @throws IllegalArgumentException This exception is thrown if the encryption method is not supported by the keyGenerator
+     * @param status Device status. If parameter is null, then the status will be set to {@code "Enabled"}.
+     * @param symmetricKey Device key. If parameter is {@code null}, then the key will be auto-generated.
+     * @throws IllegalArgumentException This exception is thrown if the encryption method is not supported by the key
+     * generator.
      */
     protected Device(String deviceId, DeviceStatus status, SymmetricKey symmetricKey)
         throws IllegalArgumentException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_DEVICE_28_001: [The constructor shall set the deviceId, status and symmetricKey.]
         super(deviceId, symmetricKey);
 
-        // Codes_SRS_SERVICE_SDK_JAVA_DEVICE_12_006: [The constructor shall initialize all properties to default values]
         this.setPropertiesToDefaultValues();
         this.status = status != null ? status : DeviceStatus.Enabled;
     }
 
     /**
-     * Create an Device instance using the given device name that uses a Certificate Authority signed certificate
+     * Create an Device instance using the given device name that uses a certificate authority signed certificate.
      *
-     * @param deviceId Name of the device (used as device id)
-     * @param authenticationType - The type of authentication used by this device.
+     * @param deviceId Name of the device (used as device id).
+     * @param authenticationType The type of authentication used by this device.
      */
     private Device(String deviceId, AuthenticationType authenticationType)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_DEVICE_28_002: [The constructor shall set the deviceId and symmetricKey.]
         super(deviceId, authenticationType);
 
-        // Codes_SRS_SERVICE_SDK_JAVA_DEVICE_28_003: [The constructor shall initialize all properties to default values]
         this.setPropertiesToDefaultValues();
     }
 
-    // Codes_SRS_SERVICE_SDK_JAVA_DEVICE_12_001: [The Device class shall have the following properties: deviceId, Etag,
-    // SymmetricKey, ConnectionState, ConnectionStateUpdatedTime, LastActivityTime, symmetricKey, thumbprint, authentication]
-    /**
-     * "Enabled", "Disabled".
-     * If "Enabled", this device is authorized to connect.
-     * If "Disabled" this device cannot receive or send messages, and statusReason must be set.
-     */
     protected DeviceStatus status;
 
     /**
-     * Getter for DeviceStatus object
-     * @return The deviceStatus object
+     * Getter for DeviceStatus object.
+     * Values: {@code "Enabled"}, {@code "Disabled"}.
+     * If {@code "Enabled"}, this device is authorized to connect.
+     * If {@code "Disabled"} this device cannot receive or send messages, and {@link #statusReason} must be set.
+     *
+     * @return The deviceStatus object.
      */
     public DeviceStatus getStatus()
     {
@@ -121,9 +114,12 @@ public class Device extends BaseDevice
     }
 
     /**
-     * Setter for DeviceStatus object
+     * Setter for DeviceStatus object.
+     * Values: {@code "Enabled"}, {@code "Disabled"}.
+     * If {@code "Enabled"}, this device is authorized to connect.
+     * If {@code "Disabled"} this device cannot receive or send messages, and statusReason must be set.
      *
-     * @param status status to be set
+     * @param status status to be set.
      */
     public void setStatus(DeviceStatus status)
     {
@@ -131,32 +127,26 @@ public class Device extends BaseDevice
     }
 
     /**
-     * A 128 char long string storing the reason of suspension.
-     * (all UTF-8 chars allowed).
+     * A 128 char long string storing the reason of suspension (all UTF-8 chars allowed).
      */
     protected String statusReason;
 
-    private String scope;
-
     /**
-     * Getter for status reason
+     * Getter for status reason.
      *
-     * @return The statusReason string
+     * @return The statusReason string.
      */
     public String getStatusReason()
     {
         return statusReason;
     }
 
-    /**
-     * Datetime of last time the state was updated.
-     */
     protected String statusUpdatedTime;
 
     /**
-     * Getter for status updated time string
+     * Getter for status updated on string.
      *
-     * @return The string containing the time when the statusUpdated parameter was updated
+     * @return The string containing the time when the statusUpdatedTime object was updated.
      */
     public String getStatusUpdatedTime()
     {
@@ -166,9 +156,9 @@ public class Device extends BaseDevice
     protected DeviceCapabilities capabilities;
 
     /**
-     * Getter for capabilities
+     * Getter for capabilities.
      *
-     * @return The DeviceCapabilities containing capabilites that are enabled on the device
+     * @return The DeviceCapabilities containing capabilities that are enabled on the device.
      */
     public DeviceCapabilities getCapabilities()
     {
@@ -176,18 +166,21 @@ public class Device extends BaseDevice
     }
 
     /**
-     * Setter for DeviceCapabilities object
+     * Setter for DeviceCapabilities object.
      *
-     * @param capabilities capabilities to be set
+     * @param capabilities Capabilities to be set.
      */
     public void setCapabilities(DeviceCapabilities capabilities)
     {
         this.capabilities = capabilities;
     }
 
+    protected String scope;
+
     /**
-     * Get the security scope for this device
-     * @return the security scope for this device
+     * Gets the scope of the device.
+     *
+     * @return The scope for this device.
      */
     public String getScope()
     {
@@ -195,21 +188,42 @@ public class Device extends BaseDevice
     }
 
     /**
-     * Set the security scope for this device
-     * @param scope the security scope to set
+     * Sets the scope of the device.
+     * <p>For edge devices, this is auto-generated and immutable.</p>
+     * <p>For leaf devices, set this to create child/parent relationship. The value to set a parent edge device can be
+     * retrieved from calling the parent edge device's {@link #getScope()} method.</p>
+     * <p>For more information, see <a href="https://docs.microsoft.com/azure/iot-edge/iot-edge-as-gateway?view=iotedge-2020-11#parent-and-child-relationships">this document</a>.</p>
+     *
+     * @param scope The device scope to set.
      */
     public void setScope(String scope)
     {
         this.scope = scope;
     }
 
+    protected List<String> parentScopes = new ArrayList<>();
+
     /**
-     * Converts this into a DeviceParser object. To serialize a Device object, it must first be converted to a DeviceParser object.
-     * @return the DeviceParser object that can be serialized.
+     * Gets the scopes of the upper level edge devices, if applicable.
+     * <p>For edge devices, the value to set a parent edge device can be retrieved from the calling parent edge device's
+     * {@link #getScope()} method.</p>
+     * <p>For leaf devices, this could be set to the same value as {@link #getScope()} or left for the service to copy
+     * over.</p>
+     * <p>For now, this list can only have 1 element in the collection.</p>
+     * <p>For more information, see <a href="https://docs.microsoft.com/azure/iot-edge/iot-edge-as-gateway?view=iotedge-2020-11#parent-and-child-relationships">this document</a>.</p>
+     *
+     * @return The parent scopes for this device.
+     */
+    public List<String> getParentScopes() { return this.parentScopes; }
+
+    /**
+     * Converts this into a {@link DeviceParser} object. To serialize a Device object, it must first be converted to a
+     * {@link DeviceParser} object.
+     *
+     * @return The {@link DeviceParser} object that can be serialized.
      */
     DeviceParser toDeviceParser()
     {
-        //Codes_SRS_SERVICE_SDK_JAVA_DEVICE_34_018: [This method shall return a new instance of a DeviceParser object that is populated using the properties of this.]
         DeviceParser deviceParser = super.toDeviceParser();
         deviceParser.setStatus(this.status.toString());
         deviceParser.setStatusReason(this.statusReason);
@@ -222,20 +236,22 @@ public class Device extends BaseDevice
         }
 
         deviceParser.setScope(this.scope);
+        deviceParser.setParentScopes(this.parentScopes);
 
         return deviceParser;
     }
 
     /**
      * Retrieves information from the provided parser and saves it to this. All information on this will be overwritten.
-     * @param parser the parser to read from
-     * @throws IllegalArgumentException if the provided parser is missing the authentication field, or the deviceId field. It also shall
-     * be thrown if the authentication object in the parser uses SAS authentication and is missing one of the symmetric key fields,
-     * or if it uses SelfSigned authentication and is missing one of the thumbprint fields.
+     *
+     * @param parser The parser to read from.
+     * @throws IllegalArgumentException If the provided parser is missing the authentication field, or the deviceId
+     * field. It also shall be thrown if the authentication object in the parser uses SAS authentication and is missing
+     * one of the symmetric key fields, or if it uses SelfSigned authentication and is missing one of the thumbprint
+     * fields.
      */
     Device(DeviceParser parser) throws IllegalArgumentException
     {
-        //Codes_SRS_SERVICE_SDK_JAVA_DEVICE_34_014: [This constructor shall create a new Device object using the values within the provided parser.]
         super(parser);
 
         this.statusReason = parser.getStatusReason();
@@ -257,10 +273,12 @@ public class Device extends BaseDevice
         }
 
         this.scope = parser.getScope();
+
+        this.parentScopes = parser.getParentScopes();
     }
 
     /*
-     * Set default properties for a device
+     * Set default properties for a device.
      */
     private void setPropertiesToDefaultValues()
     {
@@ -268,5 +286,6 @@ public class Device extends BaseDevice
         this.statusReason = "";
         this.statusUpdatedTime = UTC_TIME_DEFAULT;
         this.scope = "";
+        this.parentScopes = new ArrayList<>();
     }
 }

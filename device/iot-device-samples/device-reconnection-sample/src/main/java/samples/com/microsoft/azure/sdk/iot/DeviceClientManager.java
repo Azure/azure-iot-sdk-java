@@ -60,10 +60,10 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
                 return;
             }
         }
-        doConnect();
+        doConnectWithRetry();
     }
 
-    private void doConnect() throws IOException {
+    private void doConnectWithRetry() throws IOException {
         // Device client does not have retry on the initial open() call. Will need to be re-opened by the calling application
         while (connectionStatus == ConnectionStatus.CONNECTING) {
             synchronized (lock) {
@@ -153,7 +153,7 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
                             }
                         }
                         try {
-                            doConnect();
+                            doConnectWithRetry();
                         } catch (IOException e) {
                             log.error("Exception thrown while opening DeviceClient instance: ", e);
                         }

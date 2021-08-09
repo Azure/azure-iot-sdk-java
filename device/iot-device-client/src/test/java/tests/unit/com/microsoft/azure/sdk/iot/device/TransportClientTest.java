@@ -139,7 +139,7 @@ public class TransportClientTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockDeviceIO, "open");
+                Deencapsulation.invoke(mockDeviceIO, "open", anyBoolean);
                 times = 0;
             }
         };
@@ -183,7 +183,7 @@ public class TransportClientTest
             {
                 Deencapsulation.invoke(mockDeviceClient, "setDeviceIO", actualDeviceIO);
                 times = 1;
-                Deencapsulation.invoke(mockDeviceIO, "open");
+                Deencapsulation.invoke(mockDeviceIO, "open", anyBoolean);
                 times = 1;
             }
         };

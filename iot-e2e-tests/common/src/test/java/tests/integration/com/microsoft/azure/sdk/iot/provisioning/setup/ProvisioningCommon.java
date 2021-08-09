@@ -67,6 +67,7 @@ public class ProvisioningCommon extends IntegrationTest
         customAllocationWebhookUrl = Tools.retrieveEnvironmentVariableValue(CUSTOM_ALLOCATION_WEBHOOK_URL_VAR_NAME);
         provisioningServiceGlobalEndpointWithInvalidCert = Tools.retrieveEnvironmentVariableValue(DPS_GLOBAL_ENDPOINT_WITH_INVALID_CERT_ENV_VAR_NAME);
         provisioningServiceWithInvalidCertConnectionString = Tools.retrieveEnvironmentVariableValue(DPS_CONNECTION_STRING_WITH_INVALID_CERT_ENV_VAR_NAME);
+        provisioningServiceGlobalEndpoint = Tools.retrieveEnvironmentVariableValue(DPS_GLOBAL_ENDPOINT_ENV_VAR_NAME, "global.azure-devices-provisioning.net");
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
     }
 
@@ -105,7 +106,8 @@ public class ProvisioningCommon extends IntegrationTest
     public static final String DPS_CONNECTION_STRING_WITH_INVALID_CERT_ENV_VAR_NAME = "PROVISIONING_CONNECTION_STRING_INVALIDCERT";
     public static String provisioningServiceWithInvalidCertConnectionString = "";
 
-    public static String provisioningServiceGlobalEndpoint = "global.azure-devices-provisioning.net";
+    public static final String DPS_GLOBAL_ENDPOINT_ENV_VAR_NAME = "DPS_GLOBALDEVICEENDPOINT";
+    public static String provisioningServiceGlobalEndpoint = "";
 
     public static final String DPS_GLOBAL_ENDPOINT_WITH_INVALID_CERT_ENV_VAR_NAME = "DPS_GLOBALDEVICEENDPOINT_INVALIDCERT";
     public static String provisioningServiceGlobalEndpointWithInvalidCert = "";
@@ -140,26 +142,7 @@ public class ProvisioningCommon extends IntegrationTest
         }
         else if (attestationType == AttestationType.TPM)
         {
-            if (!isPullRequest)
-            {
-                //TODO TPM tests are flakey, so only run them for CI and nightly builds
-                return Arrays.asList(
-                        new Object[][]
-                                {
-                                        {ProvisioningDeviceClientTransportProtocol.HTTPS, attestationType},
-                                        {ProvisioningDeviceClientTransportProtocol.AMQPS, attestationType},
-                                        {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, attestationType}
-
-                                        //MQTT/MQTT_WS does not support tpm attestation
-                                        //{ProvisioningDeviceClientTransportProtocol.MQTT, attestationType},
-                                        //{ProvisioningDeviceClientTransportProtocol.MQTT_WS, attestationType},
-                                });
-            }
-            else
-            {
-                //no tests to run for pull request builds
-                return Collections.emptyList();
-            }
+            return Collections.emptyList(); // TPM tests are run in the ProvisioningTPMTests file so they can be run in serial
         }
         else
         {

@@ -18,6 +18,7 @@ import java.util.Map;
 /**
  * Representation of a single Jobs response collection with a Json deserializer.
  */
+@SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
 public class JobsResponseParser
 {
     // Job identifier
@@ -189,6 +190,7 @@ public class JobsResponseParser
      * @throws IllegalArgumentException if the json is {@code null} or empty, or if any date is invalid
      * @throws JsonParseException if the json is not valid
      */
+    @SuppressWarnings("rawtypes")
     public static JobsResponseParser createFromJson(String json) throws IllegalArgumentException, JsonParseException
     {
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();

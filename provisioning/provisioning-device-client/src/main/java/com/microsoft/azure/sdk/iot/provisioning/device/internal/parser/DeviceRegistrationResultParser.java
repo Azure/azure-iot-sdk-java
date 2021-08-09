@@ -14,6 +14,7 @@ import com.google.gson.annotations.SerializedName;
  * Class that represents the REST API format for DeviceRegistrationResult
  * Format : https://docs.microsoft.com/en-us/rest/api/iot-dps/RuntimeRegistration/RegisterDevice#definitions_deviceregistrationresult
  */
+@SuppressWarnings("unused") // A number of private fields are unused but may be filled in by serialization
 public class DeviceRegistrationResultParser
 {
     private static final String REGISTRATION_ID = "registrationId";
