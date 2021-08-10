@@ -15,7 +15,7 @@ public final class DeviceMethod
     private Object deviceMethodCallbackContext;
     private final IotHubEventCallback deviceMethodStatusCallback;
     private final Object deviceMethodStatusCallbackContext;
-    private final ObjectLock DEVICE_METHOD_LOCK = new ObjectLock();
+    private final Object DEVICE_METHOD_LOCK = new Object();
 
     private boolean isSubscribed = false;
 

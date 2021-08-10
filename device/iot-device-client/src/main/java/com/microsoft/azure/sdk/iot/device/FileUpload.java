@@ -6,11 +6,10 @@ package com.microsoft.azure.sdk.iot.device;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
-import com.microsoft.azure.sdk.iot.device.IotHubMethod;
-import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
-import com.microsoft.azure.sdk.iot.device.ResponseMessage;
+import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
+import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,7 +33,7 @@ public final class FileUpload
     FileUploadSasUriResponse getFileUploadSasUri(FileUploadSasUriRequest request) throws IOException
     {
         IotHubTransportMessage message = new IotHubTransportMessage(request.toJson());
-        message.setIotHubMethod(IotHubMethod.POST);
+        message.setIotHubMethod(HttpsMethod.POST);
 
         ResponseMessage responseMessage = httpsTransportManager.getFileUploadSasUri(message);
 
@@ -52,7 +51,7 @@ public final class FileUpload
     IotHubStatusCode sendNotification(FileUploadCompletionNotification fileUploadStatusParser) throws IOException
     {
         IotHubTransportMessage message = new IotHubTransportMessage(fileUploadStatusParser.toJson());
-        message.setIotHubMethod(IotHubMethod.POST);
+        message.setIotHubMethod(HttpsMethod.POST);
 
         ResponseMessage responseMessage = httpsTransportManager.sendFileUploadNotification(message);
 

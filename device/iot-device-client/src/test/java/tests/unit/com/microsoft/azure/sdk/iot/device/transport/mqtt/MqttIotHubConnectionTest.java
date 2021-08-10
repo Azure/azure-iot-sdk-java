@@ -74,9 +74,6 @@ public class MqttIotHubConnectionTest
     private MqttAsyncClient mockedMqttConnection;
 
     @Mocked
-    private IotHubConnectionStateCallback mockConnectionStateCallback;
-
-    @Mocked
     private Message mockedMessage;
 
     @Mocked

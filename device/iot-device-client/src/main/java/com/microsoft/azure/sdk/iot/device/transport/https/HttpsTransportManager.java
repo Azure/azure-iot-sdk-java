@@ -217,7 +217,7 @@ public class HttpsTransportManager implements IotHubTransportManager
         IotHubTransportMessage message = new IotHubTransportMessage(methodRequest.toJson());
 
         //Codes_SRS_HTTPSTRANSPORTMANAGER_34_022: [This function shall set the http method to POST.]
-        message.setIotHubMethod(IotHubMethod.POST);
+        message.setIotHubMethod(HttpsMethod.POST);
 
         //Codes_SRS_HTTPSTRANSPORTMANAGER_34_023: [This function shall set the http message's uri path to the provided uri path.]
         message.setUriPath(uri.toString());
