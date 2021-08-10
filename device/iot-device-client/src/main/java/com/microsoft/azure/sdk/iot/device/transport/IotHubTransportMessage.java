@@ -245,7 +245,7 @@ public class IotHubTransportMessage extends Message
 
     /**
      * Setter for the IoT Hub method
-     * @param iotHubMethod The enum containing the IoT Hub method.
+     * @param iotHubMethod The HTTPS method.
      */
     public void setIotHubMethod(HttpsMethod iotHubMethod)
     {
