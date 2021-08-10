@@ -67,9 +67,6 @@ public class IotHubTransportTest
     MqttIotHubConnection mockedMqttIotHubConnection;
 
     @Mocked
-    IotHubConnectionStateCallback mockedIotHubConnectionStateCallback;
-
-    @Mocked
     IotHubConnectionStatusChangeCallback mockedIotHubConnectionStatusChangeCallback;
 
     @Mocked
@@ -1608,47 +1605,6 @@ public class IotHubTransportTest
         //assert
         assertEquals(1, receivedMessagesQueue.size());
         assertEquals("acknowledgeReceivedMessage", methodsCalled.toString());
-    }
-
-    //Tests_SRS_IOTHUBTRANSPORT_34_049: [If the provided callback is null, this function shall throw an IllegalArgumentException.]
-    @Test (expected = IllegalArgumentException.class)
-    public void registerConnectionStateCallbackThrowsForNullCallback()
-    {
-        //arrange
-        new Expectations()
-        {
-            {
-                mockedConfig.getDeviceId();
-                result = "someDeviceId";
-            }
-        };
-        IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
-
-        //act
-        transport.registerConnectionStateCallback(null, new Object());
-    }
-
-    //Tests_SRS_IOTHUBTRANSPORT_34_050: [This function shall save the provided callback and context.]
-    @Test
-    public void registerConnectionStateCallbackSavesProvidedCallbackAndContext()
-    {
-        //arrange
-        new Expectations()
-        {
-            {
-                mockedConfig.getDeviceId();
-                result = "someDeviceId";
-            }
-        };
-        IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
-        final Object context = new Object();
-
-        //act
-        transport.registerConnectionStateCallback(mockedIotHubConnectionStateCallback, context);
-
-        //assert
-        assertEquals(mockedIotHubConnectionStateCallback, Deencapsulation.getField(transport, "stateCallback"));
-        assertEquals(context, Deencapsulation.getField(transport, "stateCallbackContext"));
     }
 
     //Tests_SRS_IOTHUBTRANSPORT_34_051: [If the provided callback is null but the context is not, this function shall throw an IllegalArgumentException.]

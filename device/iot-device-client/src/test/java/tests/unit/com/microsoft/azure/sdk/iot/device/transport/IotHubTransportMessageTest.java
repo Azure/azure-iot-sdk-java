@@ -4,10 +4,10 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
-import com.microsoft.azure.sdk.iot.device.IotHubMethod;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
+import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 import org.junit.Test;
 
 import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_UNKNOWN;
@@ -300,10 +300,10 @@ public class IotHubTransportMessageTest
         IotHubTransportMessage iotHubTransportMessage = new IotHubTransportMessage("This is a valid body");
 
         // act
-        iotHubTransportMessage.setIotHubMethod(IotHubMethod.POST);
+        iotHubTransportMessage.setIotHubMethod(HttpsMethod.POST);
 
         // assert
-        assertEquals(IotHubMethod.POST, iotHubTransportMessage.getIotHubMethod());
+        assertEquals(HttpsMethod.POST, iotHubTransportMessage.getIotHubMethod());
     }
 
     /* Tests_SRS_IOTHUBTRANSPORTMESSAGE_21_003: [The setUriPath shall store the uriPath. This function do not evaluates this parameter.] */

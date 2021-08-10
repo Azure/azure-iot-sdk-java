@@ -3,8 +3,10 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
+import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 
 /**
  * Extends Message, adding transport artifacts.
@@ -14,7 +16,7 @@ public class IotHubTransportMessage extends Message
     /// <summary>
     /// [Required in IoTHubTransportManager] Used to specify the method invoked for the message (POST, GET).
     /// </summary>
-    private IotHubMethod iotHubMethod;
+    private HttpsMethod iotHubMethod;
 
     /// <summary>
     /// [Required in IoTHubTransportManager] Used to specify the URI path of this message.
@@ -245,7 +247,7 @@ public class IotHubTransportMessage extends Message
      * Setter for the IoT Hub method
      * @param iotHubMethod The enum containing the IoT Hub method.
      */
-    public void setIotHubMethod(IotHubMethod iotHubMethod)
+    public void setIotHubMethod(HttpsMethod iotHubMethod)
     {
         /* Codes_SRS_IOTHUBTRANSPORTMESSAGE_21_002: [The setIotHubMethod shall store the iotHubMethod. This function do not evaluates this parameter.] */
         this.iotHubMethod = iotHubMethod;
@@ -265,7 +267,7 @@ public class IotHubTransportMessage extends Message
      * Getter for the IoT Hub method
      * @return the IoT Hub method (POST, GET).
      */
-    public IotHubMethod getIotHubMethod()
+    public HttpsMethod getIotHubMethod()
     {
         /* Codes_SRS_IOTHUBTRANSPORTMESSAGE_21_004: [The getIotHubMethod shall return the stored iotHubMethod.] */
         return this.iotHubMethod;

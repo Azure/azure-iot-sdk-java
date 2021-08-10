@@ -4,9 +4,9 @@ import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotificat
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.FileUpload;
-import com.microsoft.azure.sdk.iot.device.IotHubMethod;
 import com.microsoft.azure.sdk.iot.device.ResponseMessage;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
+import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import mockit.Deencapsulation;
 import mockit.Expectations;
@@ -69,7 +69,7 @@ public class FileUploadTest
                 new IotHubTransportMessage(mockJson);
                 result = mockIotHubTransportMessage;
 
-                mockIotHubTransportMessage.setIotHubMethod(IotHubMethod.POST);
+                mockIotHubTransportMessage.setIotHubMethod(HttpsMethod.POST);
 
                 mockHttpsTransportManager.getFileUploadSasUri(mockIotHubTransportMessage);
                 result = mockResponseMessage;
@@ -105,7 +105,7 @@ public class FileUploadTest
                 new IotHubTransportMessage(mockJson);
                 result = mockIotHubTransportMessage;
 
-                mockIotHubTransportMessage.setIotHubMethod(IotHubMethod.POST);
+                mockIotHubTransportMessage.setIotHubMethod(HttpsMethod.POST);
 
                 mockHttpsTransportManager.sendFileUploadNotification(mockIotHubTransportMessage);
                 result = mockResponseMessage;
