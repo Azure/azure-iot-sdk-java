@@ -264,7 +264,7 @@ public class IotHubTransportMessage extends Message
     }
 
     /**
-     * Getter for the IoT Hub method
+     * Getter for the HTTPS method
      * @return the IoT Hub method (POST, GET).
      */
     public HttpsMethod getIotHubMethod()
