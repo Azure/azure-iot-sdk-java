@@ -29,9 +29,9 @@ import static junit.framework.TestCase.fail;
 @RunWith(Parameterized.class)
 public class SendMessagesTests extends SendMessagesCommon
 {
-    public SendMessagesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType testClientType, boolean withProxy) throws Exception
+    public SendMessagesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean withProxy) throws Exception
     {
-        super(protocol, authenticationType, testClientType, withProxy);
+        super(protocol, authenticationType, clientType, withProxy);
     }
 
     @Test

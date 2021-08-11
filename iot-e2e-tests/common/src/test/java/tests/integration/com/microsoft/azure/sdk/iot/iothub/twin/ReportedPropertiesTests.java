@@ -34,9 +34,9 @@ import static org.junit.Assert.fail;
 @RunWith(Parameterized.class)
 public class ReportedPropertiesTests extends DeviceTwinCommon
 {
-    public ReportedPropertiesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType testClientType) throws IOException
+    public ReportedPropertiesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
     {
-        super(protocol, authenticationType, testClientType);
+        super(protocol, authenticationType, clientType);
     }
 
     @Before

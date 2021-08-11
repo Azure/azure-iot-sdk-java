@@ -14,14 +14,14 @@ import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestClientType;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.errorinjection.ReportedPropertiesErrInjTests;
 
 @TestGroup8
 @RunWith(Parameterized.class)
 public class ReportedPropertiesErrInjAndroidRunner extends ReportedPropertiesErrInjTests
 {
-    public ReportedPropertiesErrInjAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType clientType) throws IOException
+    public ReportedPropertiesErrInjAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
     {
         super(protocol, authenticationType, clientType);
     }

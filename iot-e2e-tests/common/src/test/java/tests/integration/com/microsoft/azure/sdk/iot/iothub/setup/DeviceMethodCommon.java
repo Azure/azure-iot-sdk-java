@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.runners.Parameterized;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestClientType;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceConnectionString;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceEmulator;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceTestManager;
@@ -88,7 +88,7 @@ public class DeviceMethodCommon extends IntegrationTest
     {
         Collection<Object[]> inputs = new ArrayList<>();
 
-        for (TestClientType testClientType : TestClientType.values())
+        for (ClientType clientType : ClientType.values())
         {
             for (IotHubClientProtocol protocol : IotHubClientProtocol.values())
             {
@@ -98,13 +98,13 @@ public class DeviceMethodCommon extends IntegrationTest
                     {
                         if (authenticationType == SAS)
                         {
-                            inputs.add(makeSubArray(protocol, authenticationType, testClientType));
+                            inputs.add(makeSubArray(protocol, authenticationType, clientType));
                         }
                         else if (authenticationType == SELF_SIGNED)
                         {
                             if (protocol != AMQPS_WS && protocol != MQTT_WS)
                             {
-                                inputs.add(makeSubArray(protocol, authenticationType, testClientType));
+                                inputs.add(makeSubArray(protocol, authenticationType, clientType));
                             }
                         }
                     }
@@ -115,18 +115,18 @@ public class DeviceMethodCommon extends IntegrationTest
         return inputs;
     }
 
-    private static Object[] makeSubArray(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType testClientType)
+    private static Object[] makeSubArray(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType)
     {
         Object[] inputSubArray = new Object[3];
         inputSubArray[0] = protocol;
         inputSubArray[1] = authenticationType;
-        inputSubArray[2] = testClientType;
+        inputSubArray[2] = clientType;
         return inputSubArray;
     }
 
-    protected DeviceMethodCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType testClientType) throws Exception
+    protected DeviceMethodCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {
-        this.testInstance = new DeviceMethodTestInstance(protocol, authenticationType, testClientType);
+        this.testInstance = new DeviceMethodTestInstance(protocol, authenticationType, clientType);
     }
 
     public static class DeviceMethodTestInstance
@@ -134,7 +134,7 @@ public class DeviceMethodCommon extends IntegrationTest
         public DeviceTestManager deviceTestManager;
         public IotHubClientProtocol protocol;
         public AuthenticationType authenticationType;
-        public TestClientType testClientType;
+        public ClientType clientType;
         public TestIdentity identity;
         public String publicKeyCert;
         public String privateKey;
@@ -142,11 +142,11 @@ public class DeviceMethodCommon extends IntegrationTest
         public DeviceMethod methodServiceClient;
         public RegistryManager registryManager;
 
-        protected DeviceMethodTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType testClientType) throws Exception
+        protected DeviceMethodTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
         {
             this.protocol = protocol;
             this.authenticationType = authenticationType;
-            this.testClientType = testClientType;
+            this.clientType = clientType;
             this.publicKeyCert = x509CertificateGenerator.getPublicCertificate();
             this.privateKey = x509CertificateGenerator.getPrivateKey();
             this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
@@ -156,12 +156,12 @@ public class DeviceMethodCommon extends IntegrationTest
 
         public void setup() throws Exception {
 
-            if (testClientType == TestClientType.DEVICE_CLIENT)
+            if (clientType == ClientType.DEVICE_CLIENT)
             {
                 this.identity = Tools.getTestDevice(iotHubConnectionString, this.protocol, this.authenticationType, false);
                 this.deviceTestManager = new DeviceTestManager(((TestDeviceIdentity) this.identity).getDeviceClient());
             }
-            else if (testClientType == TestClientType.MODULE_CLIENT)
+            else if (clientType == ClientType.MODULE_CLIENT)
             {
                 this.identity = Tools.getTestModule(iotHubConnectionString, this.protocol, this.authenticationType, false);
                 this.deviceTestManager = new DeviceTestManager(((TestModuleIdentity) this.identity).getModuleClient());

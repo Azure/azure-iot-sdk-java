@@ -27,7 +27,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestClientType;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceEmulator;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceTestManager;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenTools;
@@ -52,9 +52,9 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
 @RunWith(Parameterized.class)
 public class DeviceMethodTests extends DeviceMethodCommon
 {
-    public DeviceMethodTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType testClientType) throws Exception
+    public DeviceMethodTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {
-        super(protocol, authenticationType, testClientType);
+        super(protocol, authenticationType, clientType);
     }
 
     @Test
@@ -79,7 +79,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     public void serviceClientTokenRenewalWithAzureSasCredential() throws Exception
     {
         if (testInstance.protocol != IotHubClientProtocol.AMQPS
-            || testInstance.testClientType != TestClientType.DEVICE_CLIENT
+            || testInstance.clientType != ClientType.DEVICE_CLIENT
             || testInstance.authenticationType != AuthenticationType.SAS)
         {
             // This test is for the service client, so no need to rerun it for all the different client types or device protocols
@@ -305,7 +305,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     @StandardTierHubOnlyTest
     public void invokeMethodWithServiceSideProxy() throws Exception
     {
-        if (testInstance.protocol != IotHubClientProtocol.MQTT || testInstance.authenticationType != AuthenticationType.SAS || testInstance.testClientType != TestClientType.DEVICE_CLIENT)
+        if (testInstance.protocol != IotHubClientProtocol.MQTT || testInstance.authenticationType != AuthenticationType.SAS || testInstance.clientType != ClientType.DEVICE_CLIENT)
         {
             // This test doesn't really care about the device side protocol or authentication, so just run it once
             // when the device is using MQTT with SAS auth

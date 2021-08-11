@@ -14,7 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestClientType;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Success;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestModuleIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
@@ -31,9 +31,9 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
 @RunWith(Parameterized.class)
 public class ReceiveMessagesTests extends ReceiveMessagesCommon
 {
-    public ReceiveMessagesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType testClientType) throws Exception
+    public ReceiveMessagesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {
-        super(protocol, authenticationType, testClientType);
+        super(protocol, authenticationType, clientType);
     }
 
     @Before

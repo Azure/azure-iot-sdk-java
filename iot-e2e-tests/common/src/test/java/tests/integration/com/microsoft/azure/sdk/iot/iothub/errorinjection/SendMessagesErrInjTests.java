@@ -11,7 +11,6 @@ import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.device.transport.NoRetry;
-import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.Ignore;
@@ -38,7 +37,7 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
 @RunWith(Parameterized.class)
 public class SendMessagesErrInjTests extends SendMessagesCommon
 {
-    public SendMessagesErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType clientType, boolean withProxy) throws Exception
+    public SendMessagesErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean withProxy) throws Exception
     {
         super(protocol, authenticationType, clientType, withProxy);
     }

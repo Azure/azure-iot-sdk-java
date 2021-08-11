@@ -49,15 +49,15 @@ public class ReceiveMessagesCommon extends IntegrationTest
                 new Object[][]
                         {
                                 //sas token module client
-                                {MQTT, SAS, TestClientType.DEVICE_CLIENT},
-                                {AMQPS, SAS, TestClientType.DEVICE_CLIENT},
-                                {MQTT_WS, SAS, TestClientType.DEVICE_CLIENT},
-                                {AMQPS_WS, SAS, TestClientType.DEVICE_CLIENT},
+                                {MQTT, SAS, ClientType.DEVICE_CLIENT},
+                                {AMQPS, SAS, ClientType.DEVICE_CLIENT},
+                                {MQTT_WS, SAS, ClientType.DEVICE_CLIENT},
+                                {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT},
 
                                 //x509 module client
-                                {HTTPS, SELF_SIGNED, TestClientType.DEVICE_CLIENT},
-                                {MQTT, SELF_SIGNED, TestClientType.DEVICE_CLIENT},
-                                {AMQPS, SELF_SIGNED, TestClientType.DEVICE_CLIENT}
+                                {HTTPS, SELF_SIGNED, ClientType.DEVICE_CLIENT},
+                                {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT},
+                                {AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT}
                         }
         ));
 
@@ -67,14 +67,14 @@ public class ReceiveMessagesCommon extends IntegrationTest
                     new Object[][]
                             {
                                     //sas token module client
-                                    {MQTT, SAS, TestClientType.MODULE_CLIENT},
-                                    {AMQPS, SAS, TestClientType.MODULE_CLIENT},
-                                    {MQTT_WS, SAS, TestClientType.MODULE_CLIENT},
-                                    {AMQPS_WS, SAS, TestClientType.MODULE_CLIENT},
+                                    {MQTT, SAS, ClientType.MODULE_CLIENT},
+                                    {AMQPS, SAS, ClientType.MODULE_CLIENT},
+                                    {MQTT_WS, SAS, ClientType.MODULE_CLIENT},
+                                    {AMQPS_WS, SAS, ClientType.MODULE_CLIENT},
 
                                     //x509 module client
-                                    {MQTT, SELF_SIGNED, TestClientType.MODULE_CLIENT},
-                                    {AMQPS, SELF_SIGNED, TestClientType.MODULE_CLIENT}
+                                    {MQTT, SELF_SIGNED, ClientType.MODULE_CLIENT},
+                                    {AMQPS, SELF_SIGNED, ClientType.MODULE_CLIENT}
                             }
             ));
         }
@@ -101,7 +101,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
 
     public ReceiveMessagesTestInstance testInstance;
 
-    public ReceiveMessagesCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType clientType) throws Exception
+    public ReceiveMessagesCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {
         this.testInstance = new ReceiveMessagesTestInstance(protocol, authenticationType, clientType);
     }
@@ -111,14 +111,14 @@ public class ReceiveMessagesCommon extends IntegrationTest
         public IotHubClientProtocol protocol;
         public TestIdentity identity;
         public AuthenticationType authenticationType;
-        public TestClientType clientType;
+        public ClientType clientType;
         public String publicKeyCert;
         public String privateKey;
         public String x509Thumbprint;
         public RegistryManager registryManager;
         public ServiceClient serviceClient;
 
-        public ReceiveMessagesTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType clientType) throws Exception
+        public ReceiveMessagesTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
         {
             this.protocol = protocol;
             this.authenticationType = authenticationType;
@@ -132,11 +132,11 @@ public class ReceiveMessagesCommon extends IntegrationTest
 
         public void setup() throws Exception
         {
-            if (clientType == TestClientType.DEVICE_CLIENT)
+            if (clientType == ClientType.DEVICE_CLIENT)
             {
                 this.identity = Tools.getTestDevice(iotHubConnectionString, this.protocol, this.authenticationType, false);
             }
-            else if (clientType == TestClientType.MODULE_CLIENT)
+            else if (clientType == ClientType.MODULE_CLIENT)
             {
                 this.identity = Tools.getTestModule(iotHubConnectionString, this.protocol, this.authenticationType, false);
             }

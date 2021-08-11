@@ -31,7 +31,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestClientType;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenTools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
@@ -67,9 +67,9 @@ public class QueryTwinTests extends DeviceTwinCommon
 {
     public static final int QUERY_TIMEOUT_MILLISECONDS = 4 * 60 * 1000; // 4 minutes
 
-    public QueryTwinTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType testClientType) throws IOException
+    public QueryTwinTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
     {
-        super(protocol, authenticationType, testClientType);
+        super(protocol, authenticationType, clientType);
     }
 
     // Override the input parameters that are defined in DeviceTwinCommon since these query tests are strictly service client tests.
@@ -85,7 +85,7 @@ public class QueryTwinTests extends DeviceTwinCommon
                     new Object[][]
                             {
                                     //Query is only supported over http and only with sas based authentication
-                                    {HTTPS, SAS, TestClientType.DEVICE_CLIENT},
+                                    {HTTPS, SAS, ClientType.DEVICE_CLIENT},
                             });
     }
 
@@ -272,7 +272,7 @@ public class QueryTwinTests extends DeviceTwinCommon
         final String where = "is_defined(properties.desired." + queryProperty + ")";
 
         SqlQuery sqlQuery;
-        if (this.testInstance.testClientType == TestClientType.MODULE_CLIENT)
+        if (this.testInstance.clientType == ClientType.MODULE_CLIENT)
         {
             sqlQuery = SqlQuery.createSqlQuery("*", SqlQuery.FromType.MODULES, where, null);
         }

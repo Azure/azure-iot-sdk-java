@@ -27,7 +27,7 @@ import org.junit.runners.Parameterized;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.BasicProxyAuthenticator;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestClientType;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceConnectionString;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.ErrorInjectionHelper;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.EventCallback;
@@ -80,23 +80,23 @@ public class SendMessagesCommon extends IntegrationTest
                 new Object[][]
                         {
                                 //sas token device client, no proxy
-                                {HTTPS, SAS, TestClientType.DEVICE_CLIENT, false},
-                                {MQTT, SAS, TestClientType.DEVICE_CLIENT, false},
-                                {AMQPS, SAS, TestClientType.DEVICE_CLIENT, false},
-                                {MQTT_WS, SAS, TestClientType.DEVICE_CLIENT, false},
-                                {AMQPS_WS, SAS, TestClientType.DEVICE_CLIENT, false},
+                                {HTTPS, SAS, ClientType.DEVICE_CLIENT, false},
+                                {MQTT, SAS, ClientType.DEVICE_CLIENT, false},
+                                {AMQPS, SAS, ClientType.DEVICE_CLIENT, false},
+                                {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, false},
+                                {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT, false},
 
                                 //x509 device client, no proxy
-                                {HTTPS, SELF_SIGNED, TestClientType.DEVICE_CLIENT, false},
-                                {MQTT, SELF_SIGNED, TestClientType.DEVICE_CLIENT, false},
-                                {AMQPS, SELF_SIGNED, TestClientType.DEVICE_CLIENT, false},
+                                {HTTPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false},
+                                {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT, false},
+                                {AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false},
 
                                 //sas token device client, with proxy
-                                {MQTT_WS, SAS, TestClientType.DEVICE_CLIENT, true},
-                                {AMQPS_WS, SAS, TestClientType.DEVICE_CLIENT, true},
+                                {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, true},
+                                {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT, true},
 
                                 //x509 device client, with proxy
-                                {HTTPS, SELF_SIGNED, TestClientType.DEVICE_CLIENT, true}
+                                {HTTPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, true}
                         }
         ));
 
@@ -106,18 +106,18 @@ public class SendMessagesCommon extends IntegrationTest
                     new Object[][]
                             {
                                     //sas token module client, no proxy
-                                    {MQTT, SAS, TestClientType.MODULE_CLIENT, false},
-                                    {AMQPS, SAS, TestClientType.MODULE_CLIENT, false},
-                                    {MQTT_WS, SAS, TestClientType.MODULE_CLIENT, false},
-                                    {AMQPS_WS, SAS, TestClientType.MODULE_CLIENT, false},
+                                    {MQTT, SAS, ClientType.MODULE_CLIENT, false},
+                                    {AMQPS, SAS, ClientType.MODULE_CLIENT, false},
+                                    {MQTT_WS, SAS, ClientType.MODULE_CLIENT, false},
+                                    {AMQPS_WS, SAS, ClientType.MODULE_CLIENT, false},
 
                                     //x509 module client, no proxy
-                                    {MQTT, SELF_SIGNED, TestClientType.MODULE_CLIENT, false},
-                                    {AMQPS, SELF_SIGNED, TestClientType.MODULE_CLIENT, false},
+                                    {MQTT, SELF_SIGNED, ClientType.MODULE_CLIENT, false},
+                                    {AMQPS, SELF_SIGNED, ClientType.MODULE_CLIENT, false},
 
                                     //sas token module client, with proxy
-                                    {MQTT_WS, SAS, TestClientType.MODULE_CLIENT, true},
-                                    {AMQPS_WS, SAS, TestClientType.MODULE_CLIENT, true}
+                                    {MQTT_WS, SAS, ClientType.MODULE_CLIENT, true},
+                                    {AMQPS_WS, SAS, ClientType.MODULE_CLIENT, true}
                             }
             ));
         }
@@ -179,9 +179,9 @@ public class SendMessagesCommon extends IntegrationTest
     protected static final String testProxyUser = "proxyUsername";
     protected static final char[] testProxyPass = "1234".toCharArray();
 
-    public SendMessagesCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType testClientType, boolean withProxy)
+    public SendMessagesCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean withProxy)
     {
-        this.testInstance = new SendMessagesTestInstance(protocol, authenticationType, testClientType, withProxy);
+        this.testInstance = new SendMessagesTestInstance(protocol, authenticationType, clientType, withProxy);
     }
 
     @BeforeClass
@@ -210,17 +210,17 @@ public class SendMessagesCommon extends IntegrationTest
         public IotHubClientProtocol protocol;
         public TestIdentity identity;
         public AuthenticationType authenticationType;
-        public TestClientType testClientType;
+        public ClientType clientType;
         public String publicKeyCert;
         public String privateKey;
         public String x509Thumbprint;
         public boolean useHttpProxy;
 
-        public SendMessagesTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType testClientType, boolean useHttpProxy)
+        public SendMessagesTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean useHttpProxy)
         {
             this.protocol = protocol;
             this.authenticationType = authenticationType;
-            this.testClientType = testClientType;
+            this.clientType = clientType;
             this.publicKeyCert = x509CertificateGenerator.getPublicCertificate();
             this.privateKey = x509CertificateGenerator.getPrivateKey();
             this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
@@ -243,7 +243,7 @@ public class SendMessagesCommon extends IntegrationTest
 
         public void setup(SSLContext customSSLContext, boolean useCustomSasTokenProvider) throws Exception
         {
-            if (testClientType == TestClientType.DEVICE_CLIENT)
+            if (clientType == ClientType.DEVICE_CLIENT)
             {
                 this.identity = Tools.getTestDevice(iotHubConnectionString, this.protocol, this.authenticationType, false);
 
@@ -261,7 +261,7 @@ public class SendMessagesCommon extends IntegrationTest
                     ((TestDeviceIdentity)this.identity).setDeviceClient(clientWithCustomSasTokenProvider);
                 }
             }
-            else if (testClientType == TestClientType.MODULE_CLIENT)
+            else if (clientType == ClientType.MODULE_CLIENT)
             {
                 this.identity = Tools.getTestModule(iotHubConnectionString, this.protocol, this.authenticationType , false);
             }

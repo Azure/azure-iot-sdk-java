@@ -35,7 +35,7 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Parameterized.class)
 public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
 {
-    public ReceiveMessagesErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType clientType) throws Exception
+    public ReceiveMessagesErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {
         super(protocol, authenticationType, clientType);
     }

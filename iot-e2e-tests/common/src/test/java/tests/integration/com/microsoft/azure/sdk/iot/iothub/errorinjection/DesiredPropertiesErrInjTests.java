@@ -39,9 +39,9 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
 {
     private final JsonParser jsonParser;
 
-    public DesiredPropertiesErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType testClientType) throws IOException
+    public DesiredPropertiesErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
     {
-        super(protocol, authenticationType, testClientType);
+        super(protocol, authenticationType, clientType);
         jsonParser = new JsonParser();
     }
 

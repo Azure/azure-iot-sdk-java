@@ -36,9 +36,9 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
 @RunWith(Parameterized.class)
 public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
 {
-    public ReportedPropertiesErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType testClientType) throws IOException
+    public ReportedPropertiesErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
     {
-        super(protocol, authenticationType, testClientType);
+        super(protocol, authenticationType, clientType);
     }
 
     @Test

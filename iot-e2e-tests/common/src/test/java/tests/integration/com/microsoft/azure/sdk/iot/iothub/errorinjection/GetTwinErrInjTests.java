@@ -33,7 +33,7 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
 @RunWith(Parameterized.class)
 public class GetTwinErrInjTests extends DeviceTwinCommon
 {
-    public GetTwinErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType clientType) throws IOException
+    public GetTwinErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
     {
         super(protocol, authenticationType, clientType);
     }

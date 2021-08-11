@@ -48,9 +48,9 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
 {
     private final JsonParser jsonParser;
 
-    public DesiredPropertiesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType testClientType) throws IOException
+    public DesiredPropertiesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
     {
-        super(protocol, authenticationType, testClientType);
+        super(protocol, authenticationType, clientType);
         jsonParser = new JsonParser();
     }
 
@@ -405,7 +405,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         }
 
         DeviceTwinDevice serviceClientTwin;
-        if (testInstance.testClientType == TestClientType.DEVICE_CLIENT)
+        if (testInstance.clientType == ClientType.DEVICE_CLIENT)
         {
             serviceClientTwin = new DeviceTwinDevice(testInstance.testIdentity.getClient().getConfig().getDeviceId());
         }
