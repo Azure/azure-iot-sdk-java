@@ -5,11 +5,9 @@ import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingDeviceUnauthorizedException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -500,7 +498,7 @@ public class MultiplexingClient
 
                 deviceClientToRegister.setAsMultiplexed();
                 deviceClientToRegister.setDeviceIO(this.deviceIO);
-                deviceClientToRegister.setConnectionType(IoTHubConnectionType.USE_MULTIPLEXING_CLIENT);
+                deviceClientToRegister.markAsMultiplexed();
 
                 // Set notifies us if the device client is already in the set
                 boolean deviceAlreadyRegistered = this.multiplexedDeviceClients.containsKey(deviceClientToRegister.getConfig().getDeviceId());
@@ -702,7 +700,7 @@ public class MultiplexingClient
      *
      * <p>Note that this callback will not be fired for device specific connection status changes. In order to be notified
      * when a particular device's connection status changes, you will need to register a connection status change callback
-     * on that device client instance using {@link DeviceClient#registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback, Object)}.
+     * on that device client instance using {@link DeviceClient#setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback, Object)}.
      *
      * <p>Note that the thread used to deliver this callback should not be used to call open()/closeNow() on the client
      * that this callback belongs to. All open()/closeNow() operations should be done on a separate thread</p>

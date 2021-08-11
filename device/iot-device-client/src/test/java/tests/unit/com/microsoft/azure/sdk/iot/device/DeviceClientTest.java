@@ -4,6 +4,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
+import com.microsoft.azure.sdk.iot.device.ClientType;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.DeviceIO;
@@ -15,7 +16,6 @@ import com.microsoft.azure.sdk.iot.device.ProductInfo;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.FileUpload;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import mockit.Deencapsulation;
 import mockit.Expectations;
@@ -28,7 +28,7 @@ import java.io.IOError;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import static com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType.SINGLE_CLIENT;
+import static com.microsoft.azure.sdk.iot.device.ClientType.SINGLE_CLIENT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -96,8 +96,8 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                IoTHubConnectionType ioTHubConnectionType = Deencapsulation.getField(client, "ioTHubConnectionType");
-                assertEquals(SINGLE_CLIENT, ioTHubConnectionType);
+                ClientType clientType = Deencapsulation.getField(client, "clientType");
+                assertEquals(SINGLE_CLIENT, clientType);
 
                 new DeviceClientConfig(mockIotHubConnectionString, mockedClientOptions);
             }
@@ -401,32 +401,6 @@ public class DeviceClientTest
         client.setOption("SetMinimumPollingInterval", "thisIsNotALong");
     }
 
-    //Tests_SRS_DEVICECLIENT_02_005: [Setting the option can only be done before open call.]
-    @Test (expected = IllegalStateException.class)
-    public void setOptionMinimumPollingIntervalAfterOpenFails()
-            throws IOException, URISyntaxException
-    {
-        // arrange
-        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;deviceId=testdevice;"
-                + "SharedAccessKey=adjkl234j52=";
-        final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
-        new NonStrictExpectations()
-        {
-            {
-                mockDeviceIO.isOpen();
-                result = true;
-                mockDeviceIO.getProtocol();
-                result = IotHubClientProtocol.HTTPS;
-            }
-        };
-        DeviceClient client = new DeviceClient(connString, protocol, (ClientOptions) null);
-        client.open();
-        long value = 3;
-
-        // act
-        client.setOption("SetMinimumPollingInterval", value);
-    }
-
     //Tests_SRS_DEVICECLIENT_02_016: ["SetMinimumPollingInterval" - time in milliseconds between 2 consecutive polls.]
     @Test
     public void setOptionMinimumPollingIntervalSucceeds()
@@ -600,7 +574,6 @@ public class DeviceClientTest
     }
 
     //Tests_SRS_DEVICECLIENT_25_021: ["SetSASTokenExpiryTime" - time in seconds after which SAS Token expires.]
-    //Tests_SRS_DEVICECLIENT_25_024: ["SetSASTokenExpiryTime" shall restart the transport if transport is already open after updating expiry time.]
     @Test
     public void setOptionSASTokenExpiryTimeAfterClientOpenHTTPSucceeds()
             throws IOException, URISyntaxException
@@ -634,12 +607,8 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                mockDeviceIO.close();
-                times = 1;
                 mockConfig.getSasTokenAuthentication().setTokenValidSecs(value);
                 times = 1;
-                Deencapsulation.invoke(mockDeviceIO, "open", false);
-                times = 2;
             }
         };
     }
@@ -681,12 +650,8 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                mockDeviceIO.close();
-                times = 1;
                 mockConfig.getSasTokenAuthentication().setTokenValidSecs(value);
                 times = 1;
-                Deencapsulation.invoke(mockDeviceIO, "open", false);
-                times = 2;
             }
         };
     }
@@ -763,12 +728,8 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                mockDeviceIO.close();
-                times = 1;
                 mockConfig.getSasTokenAuthentication().setTokenValidSecs(value);
                 times = 1;
-                Deencapsulation.invoke(mockDeviceIO, "open", false);
-                times = 2;
             }
         };
     }
@@ -846,82 +807,10 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                mockDeviceIO.close();
-                times = 1;
                 mockConfig.getSasTokenAuthentication().setTokenValidSecs(value);
                 times = 1;
-                Deencapsulation.invoke(mockDeviceIO, "open", false);
-                times = 2;
             }
         };
-    }
-
-    // Tests_SRS_DEVICECLIENT_12_027: [The function shall throw IOError if either the deviceIO or the tranportClient's open() or closeNow() throws.]
-    @Test (expected = IOError.class)
-    public void setOptionClientSASTokenExpiryTimeAfterClientOpenAMQPThrowsDeviceIOClose()
-            throws IOException, URISyntaxException
-    {
-        // arrange
-        new NonStrictExpectations()
-        {
-            {
-                mockDeviceIO.isOpen();
-                result = true;
-                mockDeviceIO.getProtocol();
-                result = IotHubClientProtocol.HTTPS;
-                mockConfig.getSasTokenAuthentication().canRefreshToken();
-                result = true;
-                mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockDeviceIO.close();
-                result =  new IOException();
-            }
-        };
-        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;deviceId=testdevice;"
-                + "SharedAccessKey=adjkl234j52=";
-        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-
-        DeviceClient client = new DeviceClient(connString, protocol);
-        Deencapsulation.setField(client, "config", mockConfig);
-        Deencapsulation.setField(client, "deviceIO", mockDeviceIO);
-        final long value = 60;
-
-        // act
-        client.setOption("SetSASTokenExpiryTime", value);
-    }
-
-    // Tests_SRS_DEVICECLIENT_12_027: [The function shall throw IOError if either the deviceIO or the tranportClient's open() or closeNow() throws.]
-    @Test (expected = IOError.class)
-    public void setOptionClientSASTokenExpiryTimeAfterClientOpenAMQPThrowsTransportDeviceIOOpen()
-            throws IOException, URISyntaxException
-    {
-        // arrange
-        new NonStrictExpectations()
-        {
-            {
-                mockDeviceIO.isOpen();
-                result = true;
-                mockDeviceIO.getProtocol();
-                result = IotHubClientProtocol.HTTPS;
-                mockConfig.getSasTokenAuthentication().canRefreshToken();
-                result = true;
-                mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                Deencapsulation.invoke(mockDeviceIO, "open", false);
-                result =  new IOException();
-            }
-        };
-        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;deviceId=testdevice;"
-                + "SharedAccessKey=adjkl234j52=";
-        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-
-        DeviceClient client = new DeviceClient(connString, protocol);
-        Deencapsulation.setField(client, "config", mockConfig);
-        Deencapsulation.setField(client, "deviceIO", mockDeviceIO);
-        final long value = 60;
-
-        // act
-        client.setOption("SetSASTokenExpiryTime", value);
     }
 
     // Tests_SRS_DEVICECLIENT_34_075: [If the provided connection string contains a module id field, this function shall throw an UnsupportedOperationException.]

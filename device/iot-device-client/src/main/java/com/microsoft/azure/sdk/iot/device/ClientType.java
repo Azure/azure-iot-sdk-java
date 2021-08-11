@@ -1,12 +1,11 @@
-package com.microsoft.azure.sdk.iot.device.transport.amqps;
+package com.microsoft.azure.sdk.iot.device;
 
 /**
- * Type of the connection
+ * The type of the device client. Used to differentiate between device clients that own their own connection from device
+ * clients that are multiplexing.
  */
-public enum IoTHubConnectionType
+public enum ClientType
 {
-    UNKNOWN,
-
     /**
      * The connection type is a non-multiplexed, single device identity connection.
      */
