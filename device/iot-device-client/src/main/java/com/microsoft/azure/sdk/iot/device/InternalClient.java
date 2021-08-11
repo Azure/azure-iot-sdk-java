@@ -888,16 +888,9 @@ public class InternalClient
     {
         if (value instanceof Long)
         {
-            try
-            {
-                verifyRegisteredIfMultiplexing();
-                log.info("Setting send period to {} milliseconds", value);
-                this.deviceIO.setSendPeriodInMilliseconds((long) value);
-            }
-            catch (IOException e)
-            {
-                throw new IOError(e);
-            }
+            verifyRegisteredIfMultiplexing();
+            log.info("Setting send period to {} milliseconds", value);
+            this.deviceIO.setSendPeriodInMilliseconds((long) value);
         }
         else
         {
@@ -909,16 +902,9 @@ public class InternalClient
     {
         if (value instanceof Long)
         {
-            try
-            {
-                verifyRegisteredIfMultiplexing();
-                log.info("Setting receive period to {} milliseconds", value);
-                this.deviceIO.setReceivePeriodInMilliseconds((long) value);
-            }
-            catch (IOException e)
-            {
-                throw new IOError(e);
-            }
+            verifyRegisteredIfMultiplexing();
+            log.info("Setting receive period to {} milliseconds", value);
+            this.deviceIO.setReceivePeriodInMilliseconds((long) value);
         }
         else
         {
