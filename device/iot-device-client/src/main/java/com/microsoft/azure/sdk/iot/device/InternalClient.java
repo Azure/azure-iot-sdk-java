@@ -782,11 +782,11 @@ public class InternalClient
     }
 
     /**
-     * Subscribes to device methods
+     * Subscribes to direct methods
      *
-     * @param methodCallback Callback on which device methods shall be invoked. Cannot be {@code null}.
+     * @param methodCallback Callback on which direct methods shall be invoked. Cannot be {@code null}.
      * @param methodCallbackContext Context for device method callback. Can be {@code null}.
-     * @param methodStatusCallback Callback for providing IotHub status for device methods. Cannot be {@code null}.
+     * @param methodStatusCallback Callback for providing IotHub status for direct methods. Cannot be {@code null}.
      * @param methodStatusCallbackContext Context for device method status callback. Can be {@code null}.
      *
      * @throws IOException if called when client is not opened.
