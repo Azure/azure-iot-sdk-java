@@ -319,7 +319,6 @@ public class ModuleClient extends InternalClient
                 return new ModuleClient(
                     iotHubAuthenticationProvider,
                     protocol,
-                    SEND_PERIOD_MILLIS,
                     getReceivePeriod(protocol));
             }
             catch (IOException | TransportException | HsmException | URISyntaxException | CertificateException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e)
@@ -329,10 +328,9 @@ public class ModuleClient extends InternalClient
         }
     }
 
-    @SuppressWarnings("SameParameterValue") // The SEND_PERIOD is currently 10ms for all protocols, but can be made configurable in the future.
-    private ModuleClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis)
+    private ModuleClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol, long receivePeriodMillis)
     {
-        super(iotHubAuthenticationProvider, protocol, sendPeriodMillis, receivePeriodMillis);
+        super(iotHubAuthenticationProvider, protocol, SEND_PERIOD_MILLIS, receivePeriodMillis);
     }
 
     /**
