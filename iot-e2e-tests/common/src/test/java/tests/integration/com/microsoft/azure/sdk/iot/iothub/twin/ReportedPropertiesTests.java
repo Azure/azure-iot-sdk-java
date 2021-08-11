@@ -10,7 +10,6 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,11 +24,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
-import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 import static org.junit.Assert.fail;
 
 /**
@@ -39,9 +34,9 @@ import static org.junit.Assert.fail;
 @RunWith(Parameterized.class)
 public class ReportedPropertiesTests extends DeviceTwinCommon
 {
-    public ReportedPropertiesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
+    public ReportedPropertiesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType testClientType) throws IOException
     {
-        super(protocol, authenticationType, clientType);
+        super(protocol, authenticationType, testClientType);
     }
 
     @Before
@@ -77,7 +72,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
             Set<Property> createdProperties = testInstance.deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(1);
-            testInstance.testIdentity.getClient().sendReportedProperties(createdProperties);
+            testInstance.testIdentity.getClient().sendReportedPropertiesAsync(createdProperties);
             waitAndVerifyTwinStatusBecomesSuccess();
         }
 
@@ -91,13 +86,13 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
         // arrange
         // send max_prop RP all at once
         testInstance.deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(MAX_PROPERTIES_TO_TEST);
-        testInstance.testIdentity.getClient().sendReportedProperties(testInstance.deviceUnderTest.dCDeviceForTwin.getReportedProp());
+        testInstance.testIdentity.getClient().sendReportedPropertiesAsync(testInstance.deviceUnderTest.dCDeviceForTwin.getReportedProp());
         Thread.sleep(REPORTED_PROPERTIES_PROPAGATION_DELAY_MILLISECONDS);
 
         // act
         // Update RP
         testInstance.deviceUnderTest.dCDeviceForTwin.updateAllExistingReportedProperties();
-        testInstance.testIdentity.getClient().sendReportedProperties(testInstance.deviceUnderTest.dCDeviceForTwin.getReportedProp());
+        testInstance.testIdentity.getClient().sendReportedPropertiesAsync(testInstance.deviceUnderTest.dCDeviceForTwin.getReportedProp());
 
         // assert
         waitAndVerifyTwinStatusBecomesSuccess();
@@ -114,7 +109,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
         // arrange
         // send max_prop RP all at once
         testInstance.deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(MAX_PROPERTIES_TO_TEST);
-        testInstance.testIdentity.getClient().sendReportedProperties(testInstance.deviceUnderTest.dCDeviceForTwin.getReportedProp());
+        testInstance.testIdentity.getClient().sendReportedPropertiesAsync(testInstance.deviceUnderTest.dCDeviceForTwin.getReportedProp());
 
         Thread.sleep(REPORTED_PROPERTIES_PROPAGATION_DELAY_MILLISECONDS);
 
@@ -125,7 +120,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
             testInstance.deviceUnderTest.dCDeviceForTwin.updateExistingReportedProperty(i);
         }
 
-        testInstance.testIdentity.getClient().sendReportedProperties(testInstance.deviceUnderTest.dCDeviceForTwin.getReportedProp());
+        testInstance.testIdentity.getClient().sendReportedPropertiesAsync(testInstance.deviceUnderTest.dCDeviceForTwin.getReportedProp());
 
         // assert
         waitAndVerifyTwinStatusBecomesSuccess();

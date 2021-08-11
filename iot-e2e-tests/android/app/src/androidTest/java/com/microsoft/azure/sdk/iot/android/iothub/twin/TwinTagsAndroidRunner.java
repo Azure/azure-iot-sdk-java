@@ -14,14 +14,14 @@ import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestClientType;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.twin.TwinTagsTests;
 
 @TestGroup17
 @RunWith(Parameterized.class)
 public class TwinTagsAndroidRunner extends TwinTagsTests
 {
-    public TwinTagsAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
+    public TwinTagsAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType clientType) throws IOException
     {
         super(protocol, authenticationType, clientType);
     }

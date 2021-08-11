@@ -36,9 +36,9 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
 @RunWith(Parameterized.class)
 public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
 {
-    public ReportedPropertiesErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
+    public ReportedPropertiesErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType testClientType) throws IOException
     {
-        super(protocol, authenticationType, clientType);
+        super(protocol, authenticationType, testClientType);
     }
 
     @Test
@@ -231,7 +231,7 @@ public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
         IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS, testInstance.testIdentity.getClient());
         // add one new reported property
         testInstance.deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(1);
-        testInstance.testIdentity.getClient().sendReportedProperties(testInstance.deviceUnderTest.dCDeviceForTwin.getReportedProp());
+        testInstance.testIdentity.getClient().sendReportedPropertiesAsync(testInstance.deviceUnderTest.dCDeviceForTwin.getReportedProp());
 
         waitAndVerifyTwinStatusBecomesSuccess();
         // verify if they are received by SC

@@ -5,7 +5,7 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
-public enum ClientType
+public enum TestClientType
 {
     DEVICE_CLIENT,
     MODULE_CLIENT

@@ -6,7 +6,6 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 import com.azure.core.credential.AzureSasCredential;
-import com.azure.core.credential.TokenCredential;
 import com.google.gson.JsonParser;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinConnectionState;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
@@ -36,7 +35,7 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.runners.Parameterized;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestClientType;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestIdentity;
@@ -79,22 +78,22 @@ public class DeviceTwinCommon extends IntegrationTest
         IntegrationTest.isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
         List inputs = new ArrayList();
-        for (ClientType clientType : ClientType.values())
+        for (TestClientType testClientType : TestClientType.values())
         {
-            if (clientType == ClientType.DEVICE_CLIENT)
+            if (testClientType == TestClientType.DEVICE_CLIENT)
             {
                 inputs.addAll(Arrays.asList(
                         new Object[][]
                                 {
                                         //sas token, device client
-                                        {AMQPS, SAS, ClientType.DEVICE_CLIENT},
-                                        {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT},
-                                        {MQTT, SAS, ClientType.DEVICE_CLIENT},
-                                        {MQTT_WS, SAS, ClientType.DEVICE_CLIENT},
+                                        {AMQPS, SAS, TestClientType.DEVICE_CLIENT},
+                                        {AMQPS_WS, SAS, TestClientType.DEVICE_CLIENT},
+                                        {MQTT, SAS, TestClientType.DEVICE_CLIENT},
+                                        {MQTT_WS, SAS, TestClientType.DEVICE_CLIENT},
 
                                         //x509, device client
-                                        {AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT},
-                                        {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT},
+                                        {AMQPS, SELF_SIGNED, TestClientType.DEVICE_CLIENT},
+                                        {MQTT, SELF_SIGNED, TestClientType.DEVICE_CLIENT},
                                 }
                 ));
             }
@@ -104,10 +103,10 @@ public class DeviceTwinCommon extends IntegrationTest
                         new Object[][]
                                 {
                                         //sas token, module client
-                                        {AMQPS, SAS, ClientType.MODULE_CLIENT},
-                                        {AMQPS_WS, SAS, ClientType.MODULE_CLIENT},
-                                        {MQTT, SAS, ClientType.MODULE_CLIENT},
-                                        {MQTT_WS, SAS, ClientType.MODULE_CLIENT}
+                                        {AMQPS, SAS, TestClientType.MODULE_CLIENT},
+                                        {AMQPS_WS, SAS, TestClientType.MODULE_CLIENT},
+                                        {MQTT, SAS, TestClientType.MODULE_CLIENT},
+                                        {MQTT_WS, SAS, TestClientType.MODULE_CLIENT}
                                 }
                 ));
             }
@@ -300,7 +299,7 @@ public class DeviceTwinCommon extends IntegrationTest
         {
             testInstance.devicesUnderTest[i] = new DeviceState();
 
-            if (testInstance.clientType == ClientType.DEVICE_CLIENT)
+            if (testInstance.testClientType == TestClientType.DEVICE_CLIENT)
             {
                 testInstance.testIdentities[i] = Tools.getTestDevice(iotHubConnectionString, testInstance.protocol, testInstance.authenticationType, true);
                 testInstance.devicesUnderTest[i].sCDeviceForRegistryManager = testInstance.testIdentities[i].getDevice();
@@ -331,11 +330,11 @@ public class DeviceTwinCommon extends IntegrationTest
             client.open();
             if (client instanceof DeviceClient)
             {
-                ((DeviceClient) client).startDeviceTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
+                ((DeviceClient) client).startTwinAsync(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
             }
             else
             {
-                ((ModuleClient) client).startTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
+                ((ModuleClient) client).startTwinAsync(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
             }
         }
 
@@ -344,7 +343,7 @@ public class DeviceTwinCommon extends IntegrationTest
         // set up twin on ServiceClient
         if (testInstance.twinServiceClient != null)
         {
-            if (testInstance.clientType == ClientType.DEVICE_CLIENT)
+            if (testInstance.testClientType == TestClientType.DEVICE_CLIENT)
             {
                 deviceState.sCDeviceForTwin = new DeviceTwinDevice(deviceState.sCDeviceForRegistryManager.getDeviceId());
             }
@@ -358,9 +357,9 @@ public class DeviceTwinCommon extends IntegrationTest
         }
     }
 
-    public DeviceTwinCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
+    public DeviceTwinCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType testClientType) throws IOException
     {
-        this.testInstance = new DeviceTwinTestInstance(protocol, authenticationType, clientType);
+        this.testInstance = new DeviceTwinTestInstance(protocol, authenticationType, testClientType);
     }
 
     public static class DeviceTwinTestInstance
@@ -370,7 +369,7 @@ public class DeviceTwinCommon extends IntegrationTest
         public String publicKeyCert;
         public String privateKey;
         public String x509Thumbprint;
-        public ClientType clientType;
+        public TestClientType testClientType;
         public DeviceTwin twinServiceClient;
         public RegistryManager registryManager;
         public RawTwinQuery rawTwinQueryClient;
@@ -379,14 +378,14 @@ public class DeviceTwinCommon extends IntegrationTest
         public TestIdentity testIdentity;
         public TestIdentity[] testIdentities; // maps 1:1 to devicesUnderTest array
 
-        public DeviceTwinTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
+        public DeviceTwinTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType testClientType) throws IOException
         {
             this.protocol = protocol;
             this.authenticationType = authenticationType;
             this.publicKeyCert = x509CertificateGenerator.getPublicCertificate();
             this.privateKey = x509CertificateGenerator.getPrivateKey();
             this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
-            this.clientType = clientType;
+            this.testClientType = testClientType;
             
             this.twinServiceClient = new DeviceTwin(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
             this.registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
@@ -403,7 +402,7 @@ public class DeviceTwinCommon extends IntegrationTest
     {
         testInstance.deviceUnderTest = new DeviceState();
 
-        if (testInstance.clientType == ClientType.DEVICE_CLIENT)
+        if (testInstance.testClientType == TestClientType.DEVICE_CLIENT)
         {
             testInstance.testIdentity = Tools.getTestDevice(iotHubConnectionString, testInstance.protocol, testInstance.authenticationType, true);
             testInstance.deviceUnderTest.sCDeviceForRegistryManager = testInstance.testIdentity.getDevice();
@@ -546,7 +545,7 @@ public class DeviceTwinCommon extends IntegrationTest
         // Act
         // send max_prop RP all at once
         testInstance.deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(numOfProp);
-        testInstance.testIdentity.getClient().sendReportedProperties(testInstance.deviceUnderTest.dCDeviceForTwin.getReportedProp());
+        testInstance.testIdentity.getClient().sendReportedPropertiesAsync(testInstance.deviceUnderTest.dCDeviceForTwin.getReportedProp());
 
         // Assert
         waitAndVerifyTwinStatusBecomesSuccess();
@@ -560,7 +559,7 @@ public class DeviceTwinCommon extends IntegrationTest
         // Act
         // send max_prop RP all at once
         testInstance.deviceUnderTest.dCDeviceForTwin.createNewReportedArrayProperties(numOfProp);
-        testInstance.testIdentity.getClient().sendReportedProperties(testInstance.deviceUnderTest.dCDeviceForTwin.getReportedProp());
+        testInstance.testIdentity.getClient().sendReportedPropertiesAsync(testInstance.deviceUnderTest.dCDeviceForTwin.getReportedProp());
 
         // Assert
         waitAndVerifyTwinStatusBecomesSuccess();
@@ -635,7 +634,7 @@ public class DeviceTwinCommon extends IntegrationTest
         }
 
         // act
-        testInstance.testIdentity.getClient().subscribeToDesiredProperties(testInstance.deviceUnderTest.dCDeviceForTwin.getDesiredProp());
+        testInstance.testIdentity.getClient().subscribeToDesiredPropertiesAsync(testInstance.deviceUnderTest.dCDeviceForTwin.getDesiredProp());
         Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
         Set<Pair> desiredProperties = new HashSet<>();
@@ -655,7 +654,7 @@ public class DeviceTwinCommon extends IntegrationTest
     {
         IotHubConnectionStatusChangeCallback connectionStatusUpdateCallback = (status, statusChangeReason, throwable, callbackContext) -> actualStatusUpdates.add(new com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<>(status, throwable));
 
-        this.testInstance.testIdentity.getClient().registerConnectionStatusChangeCallback(connectionStatusUpdateCallback, null);
+        this.testInstance.testIdentity.getClient().setConnectionStatusChangeCallback(connectionStatusUpdateCallback, null);
     }
 
     protected void testGetDeviceTwin() throws IOException, InterruptedException, IotHubException
@@ -669,7 +668,7 @@ public class DeviceTwinCommon extends IntegrationTest
             testInstance.deviceUnderTest.dCDeviceForTwin.propertyStateList[i] = propertyState;
             desiredPropertiesCB.put(propertyState.property, new com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<>(testInstance.deviceUnderTest.dCOnProperty, propertyState));
         }
-        testInstance.testIdentity.getClient().subscribeToTwinDesiredProperties(desiredPropertiesCB);
+        testInstance.testIdentity.getClient().subscribeToTwinDesiredPropertiesAsync(desiredPropertiesCB);
         Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
         Set<Pair> desiredProperties = new HashSet<>();
@@ -691,11 +690,11 @@ public class DeviceTwinCommon extends IntegrationTest
         // act
         if (testInstance.testIdentity.getClient() instanceof DeviceClient)
         {
-            ((DeviceClient)testInstance.testIdentity.getClient()).getDeviceTwin();
+            ((DeviceClient)testInstance.testIdentity.getClient()).getTwinAsync();
         }
         else
         {
-            ((ModuleClient)testInstance.testIdentity.getClient()).getTwin();
+            ((ModuleClient)testInstance.testIdentity.getClient()).getTwinAsync();
         }
 
         // assert

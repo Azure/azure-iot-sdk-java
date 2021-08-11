@@ -180,7 +180,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
         // IotHub event callback
         IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) -> {};
 
-        deviceClient.subscribeToDeviceMethod(deviceMethodCallback, commandName, iotHubEventCallback, commandName);
+        deviceClient.subscribeToMethodsAsync(deviceMethodCallback, commandName, iotHubEventCallback, commandName);
 
         // act
         DigitalTwinCommandResponse responseWithNoPayload = this.digitalTwinClient.invokeComponentCommand(deviceId, componentName, commandName, null);
@@ -228,7 +228,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
         // IotHub event callback
         IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) -> {};
 
-        deviceClient.subscribeToDeviceMethod(deviceMethodCallback, commandName, iotHubEventCallback, commandName);
+        deviceClient.subscribeToMethodsAsync(deviceMethodCallback, commandName, iotHubEventCallback, commandName);
 
         // act
         DigitalTwinCommandResponse responseWithNoPayload = this.digitalTwinClient.invokeCommand(deviceId, commandName, null);

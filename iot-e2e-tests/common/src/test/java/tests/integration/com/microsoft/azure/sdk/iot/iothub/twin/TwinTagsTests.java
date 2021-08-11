@@ -14,7 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestClientType;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DeviceTwinCommon;
@@ -36,9 +36,9 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
 @RunWith(Parameterized.class)
 public class TwinTagsTests extends DeviceTwinCommon
 {
-    public TwinTagsTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
+    public TwinTagsTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType testClientType) throws IOException
     {
-        super(protocol, authenticationType, clientType);
+        super(protocol, authenticationType, testClientType);
     }
 
     @Before

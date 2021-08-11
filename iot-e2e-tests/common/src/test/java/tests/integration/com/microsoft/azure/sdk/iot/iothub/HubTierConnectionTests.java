@@ -2,6 +2,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.ClientType;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
@@ -27,7 +28,6 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS_WS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
-import static junit.framework.TestCase.fail;
 import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 
 @IotHubTest
@@ -189,12 +189,12 @@ public class HubTierConnectionTests extends IntegrationTest
     {
         //arrange
         List<Pair<IotHubConnectionStatus, Throwable>> connectionStatusUpdates = new ArrayList<>();
-        testInstance.client.registerConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> connectionStatusUpdates.add(new Pair<>(status, throwable)), null);
+        testInstance.client.setConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> connectionStatusUpdates.add(new Pair<>(status, throwable)), null);
 
         testInstance.client.open();
 
         //act
-        testInstance.client.subscribeToDeviceMethod(new DeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
+        testInstance.client.subscribeToMethodsAsync(new DeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
 
         //assert
         waitForDisconnect(connectionStatusUpdates, WAIT_FOR_DISCONNECT_TIMEOUT_MILLISECONDS, testInstance.client);

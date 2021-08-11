@@ -41,7 +41,7 @@ public class TwinPnPTests extends IntegrationTest
     private String ModelId;
 
     @Parameterized.Parameters(name = "{0}_{1}_{2}")
-    public static Collection inputs() throws IOException
+    public static Collection inputs()
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
@@ -52,14 +52,14 @@ public class TwinPnPTests extends IntegrationTest
                 new Object[][]
                         {
                                 //sas token device client, no proxy
-                                {MQTT, SAS, ClientType.DEVICE_CLIENT},
-                                {MQTT_WS, SAS, ClientType.DEVICE_CLIENT},
+                                {MQTT, SAS, TestClientType.DEVICE_CLIENT},
+                                {MQTT_WS, SAS, TestClientType.DEVICE_CLIENT},
 
                                 //x509 device client, no proxy
-                                {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT},
+                                {MQTT, SELF_SIGNED, TestClientType.DEVICE_CLIENT},
 
                                 //sas token device client, with proxy
-                                {MQTT_WS, SAS, ClientType.DEVICE_CLIENT},
+                                {MQTT_WS, SAS, TestClientType.DEVICE_CLIENT},
                         }
         ));
 
@@ -69,14 +69,14 @@ public class TwinPnPTests extends IntegrationTest
                 new Object[][]
                     {
                             //sas token module client, no proxy
-                            {MQTT, SAS, ClientType.MODULE_CLIENT},
-                            {MQTT_WS, SAS, ClientType.MODULE_CLIENT},
+                            {MQTT, SAS, TestClientType.MODULE_CLIENT},
+                            {MQTT_WS, SAS, TestClientType.MODULE_CLIENT},
 
                             //x509 module client, no proxy
-                            {MQTT, SELF_SIGNED, ClientType.MODULE_CLIENT},
+                            {MQTT, SELF_SIGNED, TestClientType.MODULE_CLIENT},
 
                             //sas token module client, with proxy
-                            {MQTT_WS, SAS, ClientType.MODULE_CLIENT},
+                            {MQTT_WS, SAS, TestClientType.MODULE_CLIENT},
                     }
             ));
         }
@@ -86,7 +86,7 @@ public class TwinPnPTests extends IntegrationTest
 
     public TwinPnPTests.TwinPnPTestInstance testInstance;
 
-    public TwinPnPTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
+    public TwinPnPTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType clientType)
     {
         this.testInstance = new TwinPnPTestInstance(protocol, authenticationType, clientType);
     }
@@ -97,7 +97,7 @@ public class TwinPnPTests extends IntegrationTest
         public IotHubClientProtocol protocol;
         public BaseDevice identity;
         public AuthenticationType authenticationType;
-        public ClientType clientType;
+        public TestClientType clientType;
         public String publicKeyCert;
         public String privateKey;
         public String x509Thumbprint;
@@ -105,7 +105,7 @@ public class TwinPnPTests extends IntegrationTest
         private final DeviceTwin twinServiceClient;
         private DeviceTwinDevice twin;
 
-        public TwinPnPTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
+        public TwinPnPTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType clientType)
         {
             this.protocol = protocol;
             this.authenticationType = authenticationType;
@@ -142,7 +142,7 @@ public class TwinPnPTests extends IntegrationTest
             ClientOptions clientOptions = new ClientOptions();
             clientOptions.setModelId(ModelId);
 
-            if (clientType == ClientType.DEVICE_CLIENT)
+            if (clientType == TestClientType.DEVICE_CLIENT)
             {
                 if (authenticationType == SAS)
                 {
@@ -165,7 +165,7 @@ public class TwinPnPTests extends IntegrationTest
 
                 this.twin = new DeviceTwinDevice(testInstance.identity.getDeviceId());
             }
-            else if (clientType == ClientType.MODULE_CLIENT)
+            else if (clientType == TestClientType.MODULE_CLIENT)
             {
                 if (authenticationType == SAS)
                 {

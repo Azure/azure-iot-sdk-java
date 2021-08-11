@@ -27,11 +27,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestClientType;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceEmulator;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceTestManager;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenTools;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestDeviceIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestModuleIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
@@ -40,10 +39,6 @@ import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DeviceMethodCo
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
@@ -57,9 +52,9 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
 @RunWith(Parameterized.class)
 public class DeviceMethodTests extends DeviceMethodCommon
 {
-    public DeviceMethodTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
+    public DeviceMethodTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType testClientType) throws Exception
     {
-        super(protocol, authenticationType, clientType);
+        super(protocol, authenticationType, testClientType);
     }
 
     @Test
@@ -84,7 +79,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     public void serviceClientTokenRenewalWithAzureSasCredential() throws Exception
     {
         if (testInstance.protocol != IotHubClientProtocol.AMQPS
-            || testInstance.clientType != ClientType.DEVICE_CLIENT
+            || testInstance.testClientType != TestClientType.DEVICE_CLIENT
             || testInstance.authenticationType != AuthenticationType.SAS)
         {
             // This test is for the service client, so no need to rerun it for all the different client types or device protocols
@@ -310,7 +305,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     @StandardTierHubOnlyTest
     public void invokeMethodWithServiceSideProxy() throws Exception
     {
-        if (testInstance.protocol != IotHubClientProtocol.MQTT || testInstance.authenticationType != AuthenticationType.SAS || testInstance.clientType != ClientType.DEVICE_CLIENT)
+        if (testInstance.protocol != IotHubClientProtocol.MQTT || testInstance.authenticationType != AuthenticationType.SAS || testInstance.testClientType != TestClientType.DEVICE_CLIENT)
         {
             // This test doesn't really care about the device side protocol or authentication, so just run it once
             // when the device is using MQTT with SAS auth

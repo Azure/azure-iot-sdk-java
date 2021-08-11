@@ -317,7 +317,7 @@ public class CustomSasTokenProviderSample
 
         System.out.println("Successfully created an IoT Hub client.");
 
-        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
+        client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
         client.open();
 

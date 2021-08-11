@@ -175,7 +175,7 @@ public class ModuleTwinSample
         ModuleClient client = new ModuleClient(connString, protocol);
         System.out.println("Successfully created an IoT Hub client.");
 
-        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
+        client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
         try
         {
@@ -185,7 +185,7 @@ public class ModuleTwinSample
             System.out.println("Start device Twin and get remaining properties...");
             // Properties already set in the Service will shows up in the generic onProperty callback, with value and version.
             Succeed.set(false);
-            client.startTwin(new DeviceTwinStatusCallBack(), null, new onProperty(), null);
+            client.startTwinAsync(new DeviceTwinStatusCallBack(), null, new onProperty(), null);
             do
             {
                 Thread.sleep(1000);
@@ -203,10 +203,10 @@ public class ModuleTwinSample
                     put(new Property("HomeSecurityCamera", null), new Pair<TwinPropertyCallBack, Object>(new onCameraActivity(), null));
                 }
             };
-            client.subscribeToTwinDesiredProperties(desiredProperties);
+            client.subscribeToTwinDesiredPropertiesAsync(desiredProperties);
 
             System.out.println("Get device Twin...");
-            client.getTwin(); // For each desired property in the Service, the SDK will call the appropriate callback with the value and version.
+            client.getTwinAsync(); // For each desired property in the Service, the SDK will call the appropriate callback with the value and version.
 
             System.out.println("Update reported properties...");
             Set<Property> reportProperties = new HashSet<Property>()
@@ -217,22 +217,22 @@ public class ModuleTwinSample
                     add(new Property("BedroomRoomLights", LIGHTS.OFF));
                 }
             };
-            client.sendReportedProperties(reportProperties);
+            client.sendReportedPropertiesAsync(reportProperties);
 
             for(int i = 0; i < MAX_EVENTS_TO_REPORT; i++)
             {
 
                 if (Math.random() % MAX_EVENTS_TO_REPORT == 3)
                 {
-                    client.sendReportedProperties(new HashSet<Property>() {{ add(new Property("HomeSecurityCamera", CAMERA.DETECTED_BURGLAR)); }});
+                    client.sendReportedPropertiesAsync(new HashSet<Property>() {{ add(new Property("HomeSecurityCamera", CAMERA.DETECTED_BURGLAR)); }});
                 }
                 else
                 {
-                    client.sendReportedProperties(new HashSet<Property>() {{ add(new Property("HomeSecurityCamera", CAMERA.SAFELY_WORKING)); }});
+                    client.sendReportedPropertiesAsync(new HashSet<Property>() {{ add(new Property("HomeSecurityCamera", CAMERA.SAFELY_WORKING)); }});
                 }
                 if(i == MAX_EVENTS_TO_REPORT-1)
                 {
-                    client.sendReportedProperties(new HashSet<Property>() {{ add(new Property("BedroomRoomLights", null)); }});
+                    client.sendReportedPropertiesAsync(new HashSet<Property>() {{ add(new Property("BedroomRoomLights", null)); }});
                 }
                 System.out.println("Updating reported properties..");
             }

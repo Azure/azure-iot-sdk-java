@@ -18,13 +18,12 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestClientType;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenTools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
@@ -39,16 +38,16 @@ import java.security.GeneralSecurityException;
 import static junit.framework.TestCase.fail;
 
 /**
- * Test class containing all non error injection tests to be run on JVM and android pertaining to getDeviceTwin/getTwin.
+ * Test class containing all non error injection tests to be run on JVM and android pertaining to getTwinAsync/getTwinAsync.
  */
 @Slf4j
 @IotHubTest
 @RunWith(Parameterized.class)
 public class GetTwinTests extends DeviceTwinCommon
 {
-    public GetTwinTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
+    public GetTwinTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType testClientType) throws IOException
     {
-        super(protocol, authenticationType, clientType);
+        super(protocol, authenticationType, testClientType);
     }
 
     @Test
@@ -73,7 +72,7 @@ public class GetTwinTests extends DeviceTwinCommon
     public void serviceClientTokenRenewalWithAzureSasCredential() throws Exception
     {
         if (testInstance.protocol != IotHubClientProtocol.AMQPS
-            || testInstance.clientType != ClientType.DEVICE_CLIENT
+            || testInstance.testClientType != TestClientType.DEVICE_CLIENT
             || testInstance.authenticationType != AuthenticationType.SAS)
         {
             // This test is for the service client, so no need to rerun it for all the different client types or device protocols
@@ -123,7 +122,7 @@ public class GetTwinTests extends DeviceTwinCommon
     @StandardTierHubOnlyTest
     public void testGetDeviceTwinWithProxy() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
     {
-        if (testInstance.protocol != IotHubClientProtocol.MQTT || testInstance.authenticationType != AuthenticationType.SAS || testInstance.clientType != ClientType.DEVICE_CLIENT)
+        if (testInstance.protocol != IotHubClientProtocol.MQTT || testInstance.authenticationType != AuthenticationType.SAS || testInstance.testClientType != TestClientType.DEVICE_CLIENT)
         {
             // This test doesn't really care about the device side protocol or authentication, so just run it once
             // when the device is using MQTT with SAS auth

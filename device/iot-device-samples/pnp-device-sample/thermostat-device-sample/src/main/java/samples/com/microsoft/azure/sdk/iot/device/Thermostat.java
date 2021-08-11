@@ -140,16 +140,16 @@ public class Thermostat {
         }
 
         log.debug("Start twin and set handler to receive \"targetTemperature\" updates.");
-        deviceClient.startDeviceTwin(new TwinIotHubEventCallback(), null, new TargetTemperatureUpdateCallback(), null);
+        deviceClient.startTwinAsync(new TwinIotHubEventCallback(), null, new TargetTemperatureUpdateCallback(), null);
         Map<Property, Pair<TwinPropertyCallBack, Object>> desiredPropertyUpdateCallback =
                 Collections.singletonMap(
                         new Property("targetTemperature", null),
                         new Pair<>(new TargetTemperatureUpdateCallback(), null));
-        deviceClient.subscribeToTwinDesiredProperties(desiredPropertyUpdateCallback);
+        deviceClient.subscribeToTwinDesiredPropertiesAsync(desiredPropertyUpdateCallback);
 
         log.debug("Set handler to receive \"getMaxMinReport\" command.");
         String methodName = "getMaxMinReport";
-        deviceClient.subscribeToDeviceMethod(new GetMaxMinReportMethodCallback(), methodName, new MethodIotHubEventCallback(), methodName);
+        deviceClient.subscribeToMethodsAsync(new GetMaxMinReportMethodCallback(), methodName, new MethodIotHubEventCallback(), methodName);
 
         new Thread(new Runnable() {
             @SneakyThrows({InterruptedException.class, IOException.class})
@@ -233,7 +233,7 @@ public class Thermostat {
         options.setModelId(MODEL_ID);
         deviceClient = new DeviceClient(deviceConnectionString, protocol, options);
 
-        deviceClient.registerConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> {
+        deviceClient.setConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> {
             log.debug("Connection status change registered: status={}, reason={}", status, statusChangeReason);
 
             if (throwable != null) {
@@ -263,7 +263,7 @@ public class Thermostat {
                 EmbeddedPropertyUpdate pendingUpdate = new EmbeddedPropertyUpdate(targetTemperature, StatusCode.IN_PROGRESS.value, property.getVersion(), null);
                 Property reportedPropertyPending = new Property(propertyName, pendingUpdate);
                 try {
-                    deviceClient.sendReportedProperties(Collections.singleton(reportedPropertyPending));
+                    deviceClient.sendReportedPropertiesAsync(Collections.singleton(reportedPropertyPending));
                 } catch (IOException e) {
                     throw new RuntimeException("IOException when sending reported property update: ", e);
                 }
@@ -278,7 +278,7 @@ public class Thermostat {
 
                 EmbeddedPropertyUpdate completedUpdate = new EmbeddedPropertyUpdate(temperature, StatusCode.COMPLETED.value, property.getVersion(), "Successfully updated target temperature");
                 Property reportedPropertyCompleted = new Property(propertyName, completedUpdate);
-                deviceClient.sendReportedProperties(Collections.singleton(reportedPropertyCompleted));
+                deviceClient.sendReportedPropertiesAsync(Collections.singleton(reportedPropertyCompleted));
                 log.debug("Property: Update - {\"{}\": {}°C} is {}", propertyName, temperature, StatusCode.COMPLETED);
             } else {
                 log.debug("Property: Received an unrecognized property update from service.");
@@ -424,7 +424,7 @@ public class Thermostat {
         String propertyName = "maxTempSinceLastReboot";
         Property reportedProperty = new Property(propertyName, maxTemperature);
 
-        deviceClient.sendReportedProperties(Collections.singleton(reportedProperty));
+        deviceClient.sendReportedPropertiesAsync(Collections.singleton(reportedProperty));
         log.debug("Property: Update - {\"{}\": {}°C} is {}.", propertyName, maxTemperature, StatusCode.COMPLETED);
     }
 

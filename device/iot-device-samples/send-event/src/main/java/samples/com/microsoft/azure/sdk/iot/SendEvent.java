@@ -162,7 +162,7 @@ public class SendEvent
         client.setOption("SetSASTokenExpiryTime", time);
         System.out.println("Updated token expiry time to " + time);
 
-        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
+        client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
         client.open();
 

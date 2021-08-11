@@ -28,12 +28,10 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestClientType;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenTools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
@@ -53,9 +51,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.HTTPS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
@@ -72,9 +67,9 @@ public class QueryTwinTests extends DeviceTwinCommon
 {
     public static final int QUERY_TIMEOUT_MILLISECONDS = 4 * 60 * 1000; // 4 minutes
 
-    public QueryTwinTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
+    public QueryTwinTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType testClientType) throws IOException
     {
-        super(protocol, authenticationType, clientType);
+        super(protocol, authenticationType, testClientType);
     }
 
     // Override the input parameters that are defined in DeviceTwinCommon since these query tests are strictly service client tests.
@@ -90,7 +85,7 @@ public class QueryTwinTests extends DeviceTwinCommon
                     new Object[][]
                             {
                                     //Query is only supported over http and only with sas based authentication
-                                    {HTTPS, SAS, ClientType.DEVICE_CLIENT},
+                                    {HTTPS, SAS, TestClientType.DEVICE_CLIENT},
                             });
     }
 
@@ -277,7 +272,7 @@ public class QueryTwinTests extends DeviceTwinCommon
         final String where = "is_defined(properties.desired." + queryProperty + ")";
 
         SqlQuery sqlQuery;
-        if (this.testInstance.clientType == ClientType.MODULE_CLIENT)
+        if (this.testInstance.testClientType == TestClientType.MODULE_CLIENT)
         {
             sqlQuery = SqlQuery.createSqlQuery("*", SqlQuery.FromType.MODULES, where, null);
         }

@@ -217,7 +217,7 @@ public class HandleMessages
 
         System.out.println("Successfully set message callback.");
 
-        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
+        client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
         client.open();
 

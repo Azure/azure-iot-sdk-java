@@ -168,7 +168,7 @@ public class DeviceMethodSample
 
         System.out.println("Successfully created an IoT Hub client.");
 
-        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
+        client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
         try
         {
@@ -176,7 +176,7 @@ public class DeviceMethodSample
 
             System.out.println("Opened connection to IoT Hub.");
 
-            client.subscribeToDeviceMethod(new SampleDeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
+            client.subscribeToMethodsAsync(new SampleDeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
 
             System.out.println("Subscribed to device method");
 

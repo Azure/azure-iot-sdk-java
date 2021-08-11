@@ -210,7 +210,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
     {
         testInstance.deviceTwinWithVersionTestDevice.deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, testInstance.deviceForRegistryManager), protocol);
         testInstance.deviceTwinWithVersionTestDevice.deviceClient.open();
-        testInstance.deviceTwinWithVersionTestDevice.deviceClient.startDeviceTwin(new DeviceTwinStatusCallBack(), testInstance.deviceTwinWithVersionTestDevice, new DeviceTwinPropertyCallback(), testInstance.deviceTwinWithVersionTestDevice);
+        testInstance.deviceTwinWithVersionTestDevice.deviceClient.startTwinAsync(new DeviceTwinStatusCallBack(), testInstance.deviceTwinWithVersionTestDevice, new DeviceTwinPropertyCallback(), testInstance.deviceTwinWithVersionTestDevice);
     }
 
     @Before
@@ -246,7 +246,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         testInstance.deviceTwinWithVersionTestDevice.deviceTwinStatus = STATUS.UNKNOWN;
 
         // act
-        testInstance.deviceTwinWithVersionTestDevice.deviceClient.sendReportedProperties(PROPERTIES);
+        testInstance.deviceTwinWithVersionTestDevice.deviceClient.sendReportedPropertiesAsync(PROPERTIES);
 
         // assert
         // test device client
@@ -256,7 +256,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
             Thread.sleep(BREATHE_TIME);
         }
 
-        testInstance.deviceTwinWithVersionTestDevice.deviceClient.getDeviceTwin();
+        testInstance.deviceTwinWithVersionTestDevice.deviceClient.getTwinAsync();
         long startTime = System.currentTimeMillis();
         while(!testInstance.deviceTwinWithVersionTestDevice.expectedProperties.isEmpty())
         {
@@ -291,10 +291,10 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
 
         // Create the first version of the reported properties.
         testInstance.deviceTwinWithVersionTestDevice.deviceTwinStatus = STATUS.UNKNOWN;
-        testInstance.deviceTwinWithVersionTestDevice.deviceClient.sendReportedProperties(PROPERTIES);
+        testInstance.deviceTwinWithVersionTestDevice.deviceClient.sendReportedPropertiesAsync(PROPERTIES);
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
-        testInstance.deviceTwinWithVersionTestDevice.deviceClient.getDeviceTwin();
+        testInstance.deviceTwinWithVersionTestDevice.deviceClient.getTwinAsync();
         long startTime = System.currentTimeMillis();
         while(!testInstance.deviceTwinWithVersionTestDevice.expectedProperties.isEmpty())
         {
@@ -329,7 +329,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         testInstance.deviceTwinWithVersionTestDevice.receivedProperties = new HashSet<>();
 
         // act
-        testInstance.deviceTwinWithVersionTestDevice.deviceClient.sendReportedProperties(newValues, 2);
+        testInstance.deviceTwinWithVersionTestDevice.deviceClient.sendReportedPropertiesAsync(newValues, 2);
 
         // assert
         // test device client
@@ -345,7 +345,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
             testInstance.deviceTwinWithVersionTestDevice.deviceTwinStatus = STATUS.UNKNOWN;
             testInstance.deviceTwinWithVersionTestDevice.reportedPropertyVersion = null;
             testInstance.deviceTwinWithVersionTestDevice.receivedProperties = new HashSet<>();
-            testInstance.deviceTwinWithVersionTestDevice.deviceClient.getDeviceTwin();
+            testInstance.deviceTwinWithVersionTestDevice.deviceClient.getTwinAsync();
             startTime = System.currentTimeMillis();
             while(!testInstance.deviceTwinWithVersionTestDevice.expectedProperties.isEmpty())
             {
@@ -380,10 +380,10 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
 
         // Create the first version of the reported properties.
         testInstance.deviceTwinWithVersionTestDevice.deviceTwinStatus = STATUS.UNKNOWN;
-        testInstance.deviceTwinWithVersionTestDevice.deviceClient.sendReportedProperties(PROPERTIES);
+        testInstance.deviceTwinWithVersionTestDevice.deviceClient.sendReportedPropertiesAsync(PROPERTIES);
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
-        testInstance.deviceTwinWithVersionTestDevice.deviceClient.getDeviceTwin();
+        testInstance.deviceTwinWithVersionTestDevice.deviceClient.getTwinAsync();
         long startTime = System.currentTimeMillis();
         while(!testInstance.deviceTwinWithVersionTestDevice.expectedProperties.isEmpty())
         {
@@ -418,7 +418,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         testInstance.deviceTwinWithVersionTestDevice.receivedProperties = new HashSet<>();
 
         // act
-        testInstance.deviceTwinWithVersionTestDevice.deviceClient.sendReportedProperties(newValues, 1);
+        testInstance.deviceTwinWithVersionTestDevice.deviceClient.sendReportedPropertiesAsync(newValues, 1);
 
         // assert
         // test device client
@@ -431,7 +431,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         testInstance.deviceTwinWithVersionTestDevice.deviceTwinStatus = STATUS.UNKNOWN;
         testInstance.deviceTwinWithVersionTestDevice.reportedPropertyVersion = null;
         testInstance.deviceTwinWithVersionTestDevice.receivedProperties = new HashSet<>();
-        testInstance.deviceTwinWithVersionTestDevice.deviceClient.getDeviceTwin();
+        testInstance.deviceTwinWithVersionTestDevice.deviceClient.getTwinAsync();
         startTime = System.currentTimeMillis();
         while(!testInstance.deviceTwinWithVersionTestDevice.expectedProperties.isEmpty())
         {
@@ -467,10 +467,10 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
 
         // Create the first version of the reported properties.
         testInstance.deviceTwinWithVersionTestDevice.deviceTwinStatus = STATUS.UNKNOWN;
-        testInstance.deviceTwinWithVersionTestDevice.deviceClient.sendReportedProperties(PROPERTIES);
+        testInstance.deviceTwinWithVersionTestDevice.deviceClient.sendReportedPropertiesAsync(PROPERTIES);
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
-        testInstance.deviceTwinWithVersionTestDevice.deviceClient.getDeviceTwin();
+        testInstance.deviceTwinWithVersionTestDevice.deviceClient.getTwinAsync();
         long startTime = System.currentTimeMillis();
         while(!testInstance.deviceTwinWithVersionTestDevice.expectedProperties.isEmpty())
         {
@@ -505,7 +505,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         testInstance.deviceTwinWithVersionTestDevice.receivedProperties = new HashSet<>();
 
         // act
-        testInstance.deviceTwinWithVersionTestDevice.deviceClient.sendReportedProperties(newValues, 3);
+        testInstance.deviceTwinWithVersionTestDevice.deviceClient.sendReportedPropertiesAsync(newValues, 3);
 
         // assert
         // test device client
@@ -518,7 +518,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         testInstance.deviceTwinWithVersionTestDevice.deviceTwinStatus = STATUS.UNKNOWN;
         testInstance.deviceTwinWithVersionTestDevice.reportedPropertyVersion = null;
         testInstance.deviceTwinWithVersionTestDevice.receivedProperties = new HashSet<>();
-        testInstance.deviceTwinWithVersionTestDevice.deviceClient.getDeviceTwin();
+        testInstance.deviceTwinWithVersionTestDevice.deviceClient.getTwinAsync();
         startTime = System.currentTimeMillis();
         while(!testInstance.deviceTwinWithVersionTestDevice.expectedProperties.isEmpty())
         {

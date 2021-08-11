@@ -35,9 +35,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
@@ -51,9 +48,9 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
 {
     private final JsonParser jsonParser;
 
-    public DesiredPropertiesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
+    public DesiredPropertiesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType testClientType) throws IOException
     {
-        super(protocol, authenticationType, clientType);
+        super(protocol, authenticationType, testClientType);
         jsonParser = new JsonParser();
     }
 
@@ -197,7 +194,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         }
 
         // act
-        testInstance.testIdentity.getClient().subscribeToTwinDesiredProperties(desiredPropertiesCB);
+        testInstance.testIdentity.getClient().subscribeToTwinDesiredPropertiesAsync(desiredPropertiesCB);
         Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
         Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
@@ -239,7 +236,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         }
 
         // act
-        testInstance.testIdentity.getClient().subscribeToDesiredProperties(testInstance.deviceUnderTest.dCDeviceForTwin.getDesiredProp());
+        testInstance.testIdentity.getClient().subscribeToDesiredPropertiesAsync(testInstance.deviceUnderTest.dCDeviceForTwin.getDesiredProp());
         Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
@@ -365,7 +362,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         }
     }
 
-    // This test is for the startDeviceTwin/startTwin API that takes the TwinPropertiesCallback rather than the TwinPropertyCallback
+    // This test is for the startTwinAsync/startTwinAsync API that takes the TwinPropertiesCallback rather than the TwinPropertyCallback
     // This callback should receive the full twin update in one callback, rather than one callback per updated
     // desired property
     @Test
@@ -389,11 +386,11 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         testInstance.testIdentity.getClient().open();
         if (testInstance.testIdentity.getClient() instanceof DeviceClient)
         {
-            ((DeviceClient) testInstance.testIdentity.getClient()).startDeviceTwin(new DeviceTwinStatusCallBack(), testInstance.deviceUnderTest, twinPropertiesCallback, desiredPropertiesCallbackState);
+            ((DeviceClient) testInstance.testIdentity.getClient()).startTwinAsync(new DeviceTwinStatusCallBack(), testInstance.deviceUnderTest, twinPropertiesCallback, desiredPropertiesCallbackState);
         }
         else
         {
-            ((ModuleClient) testInstance.testIdentity.getClient()).startTwin(new DeviceTwinStatusCallBack(), testInstance.deviceUnderTest, twinPropertiesCallback, desiredPropertiesCallbackState);
+            ((ModuleClient) testInstance.testIdentity.getClient()).startTwinAsync(new DeviceTwinStatusCallBack(), testInstance.deviceUnderTest, twinPropertiesCallback, desiredPropertiesCallbackState);
         }
 
         long startTime = System.currentTimeMillis();
@@ -408,7 +405,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         }
 
         DeviceTwinDevice serviceClientTwin;
-        if (testInstance.clientType == ClientType.DEVICE_CLIENT)
+        if (testInstance.testClientType == TestClientType.DEVICE_CLIENT)
         {
             serviceClientTwin = new DeviceTwinDevice(testInstance.testIdentity.getClient().getConfig().getDeviceId());
         }

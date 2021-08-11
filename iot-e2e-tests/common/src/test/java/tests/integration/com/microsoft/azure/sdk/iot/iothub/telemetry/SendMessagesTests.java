@@ -6,13 +6,10 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.telemetry;
 
 
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -21,21 +18,9 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.Continu
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.SendMessagesCommon;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.security.GeneralSecurityException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static junit.framework.TestCase.fail;
-import static tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenGenerator.generateSasTokenForIotDevice;
 
 /**
  * Test class containing all non error injection tests to be run on JVM and android pertaining to sending messages from a device/module.
@@ -44,9 +29,9 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenGene
 @RunWith(Parameterized.class)
 public class SendMessagesTests extends SendMessagesCommon
 {
-    public SendMessagesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean withProxy) throws Exception
+    public SendMessagesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType testClientType, boolean withProxy) throws Exception
     {
-        super(protocol, authenticationType, clientType, withProxy);
+        super(protocol, authenticationType, testClientType, withProxy);
     }
 
     @Test

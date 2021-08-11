@@ -12,14 +12,14 @@ import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestClientType;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.methods.DeviceMethodTests;
 
 @TestGroup10
 @RunWith(Parameterized.class)
 public class DeviceMethodAndroidRunner extends DeviceMethodTests
 {
-    public DeviceMethodAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
+    public DeviceMethodAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, TestClientType clientType) throws Exception
     {
         super(protocol, authenticationType, clientType);
     }
