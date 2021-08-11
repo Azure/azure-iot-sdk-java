@@ -369,7 +369,7 @@ public class InternalClient
     }
 
     /**
-     * Registers a callback to be executed when the connection status of the device changes. The callback will be fired
+     * Sets the callback to be executed when the connection status of the device changes. The callback will be fired
      * with a status and a reason why the device's status changed. When the callback is fired, the provided context will
      * be provided alongside the status and reason.
      *
