@@ -4,7 +4,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
-import com.microsoft.azure.sdk.iot.device.ClientType;
+import com.microsoft.azure.sdk.iot.device.DeviceClientType;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.DeviceIO;
@@ -24,11 +24,10 @@ import mockit.NonStrictExpectations;
 import mockit.Verifications;
 import org.junit.Test;
 
-import java.io.IOError;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import static com.microsoft.azure.sdk.iot.device.ClientType.SINGLE_CLIENT;
+import static com.microsoft.azure.sdk.iot.device.DeviceClientType.SINGLE_CLIENT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -96,8 +95,8 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                ClientType clientType = Deencapsulation.getField(client, "clientType");
-                assertEquals(SINGLE_CLIENT, clientType);
+                DeviceClientType deviceClientType = Deencapsulation.getField(client, "deviceClientType");
+                assertEquals(SINGLE_CLIENT, deviceClientType);
 
                 new DeviceClientConfig(mockIotHubConnectionString, mockedClientOptions);
             }

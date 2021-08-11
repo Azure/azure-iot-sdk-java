@@ -42,7 +42,7 @@ public final class DeviceClient extends InternalClient implements Closeable
     private static final long RECEIVE_PERIOD_MILLIS_MQTT = 10L;
     private static final long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
 
-    private ClientType clientType = ClientType.SINGLE_CLIENT;
+    private DeviceClientType deviceClientType = DeviceClientType.SINGLE_CLIENT;
 
     private FileUpload fileUpload;
 
@@ -221,7 +221,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      */
     public void open(boolean withRetry) throws IOException
     {
-        if (this.clientType == ClientType.USE_MULTIPLEXING_CLIENT)
+        if (this.deviceClientType == DeviceClientType.USE_MULTIPLEXING_CLIENT)
         {
             throw new UnsupportedOperationException(MULTIPLEXING_OPEN_ERROR_MESSAGE);
         }
@@ -243,7 +243,7 @@ public final class DeviceClient extends InternalClient implements Closeable
     @Deprecated
     public void close() throws IOException
     {
-        if (this.clientType == ClientType.USE_MULTIPLEXING_CLIENT)
+        if (this.deviceClientType == DeviceClientType.USE_MULTIPLEXING_CLIENT)
         {
             throw new UnsupportedOperationException(MULTIPLEXING_CLOSE_ERROR_MESSAGE);
         }
@@ -267,7 +267,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      */
     public void closeNow() throws IOException
     {
-        if (this.clientType == ClientType.USE_MULTIPLEXING_CLIENT)
+        if (this.deviceClientType == DeviceClientType.USE_MULTIPLEXING_CLIENT)
         {
             throw new UnsupportedOperationException(MULTIPLEXING_CLOSE_ERROR_MESSAGE);
         }
@@ -318,7 +318,7 @@ public final class DeviceClient extends InternalClient implements Closeable
     // Used by multiplexing clients to signal to this client what kind of multiplexing client is using this device client
     void markAsMultiplexed()
     {
-        this.clientType = ClientType.USE_MULTIPLEXING_CLIENT;
+        this.deviceClientType = DeviceClientType.USE_MULTIPLEXING_CLIENT;
     }
 
     private static long getReceivePeriod(IotHubClientProtocol protocol)
