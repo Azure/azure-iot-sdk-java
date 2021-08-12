@@ -836,6 +836,8 @@ public class MultiplexingClientTests extends IntegrationTest
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
+            // The twin for this test identity is about to be modified. Set this flag so that the test identity recycler re-uses this identity only for tests
+            // that don't care about the initial twin state of an identity
             testInstance.testDevicesArrayIdentity.get(i).twinUpdated = true;
             String expectedPropertyKey = UUID.randomUUID().toString();
             String expectedPropertyValue = UUID.randomUUID().toString();
@@ -872,6 +874,8 @@ public class MultiplexingClientTests extends IntegrationTest
         List<TwinPropertyCallBackImpl> twinPropertyCallBacks = new ArrayList<>();
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
+            // The twin for this test identity is about to be modified. Set this flag so that the test identity recycler re-uses this identity only for tests
+            // that don't care about the initial twin state of an identity
             testInstance.testDevicesArrayIdentity.get(i).twinUpdated = true;
             TwinPropertyCallBackImpl twinPropertyCallBack = new TwinPropertyCallBackImpl(expectedPropertyKey, expectedPropertyValue);
             twinPropertyCallBacks.add(twinPropertyCallBack);
@@ -912,6 +916,8 @@ public class MultiplexingClientTests extends IntegrationTest
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
+            // The twin for this test identity is about to be modified. Set this flag so that the test identity recycler re-uses this identity only for tests
+            // that don't care about the initial twin state of an identity
             testInstance.testDevicesArrayIdentity.get(i).twinUpdated = true;
             TwinPropertyCallBackImpl twinPropertyCallBack = new TwinPropertyCallBackImpl(expectedPropertyKey, expectedPropertyValue);
             twinPropertyCallBacks.add(twinPropertyCallBack);
@@ -1829,6 +1835,8 @@ public class MultiplexingClientTests extends IntegrationTest
         TwinPropertyCallBackImpl[] twinPropertyCallBacks = new TwinPropertyCallBackImpl[DEVICE_MULTIPLEX_COUNT];
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
+            // The twin for this test identity is about to be modified. Set this flag so that the test identity recycler re-uses this identity only for tests
+            // that don't care about the initial twin state of an identity
             testInstance.testDevicesArrayIdentity.get(i).twinUpdated = true;
             expectedPropertyKeys[i] = UUID.randomUUID().toString();
             expectedPropertyValues[i] = UUID.randomUUID().toString();
