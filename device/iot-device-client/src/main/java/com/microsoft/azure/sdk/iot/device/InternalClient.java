@@ -5,14 +5,19 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethod;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceTwin;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.PropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertiesCallback;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOError;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -26,17 +31,17 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 public class InternalClient
 {
     // SET_MINIMUM_POLLING_INTERVAL is used for setting the interval for https message polling.
-    static final String SET_MINIMUM_POLLING_INTERVAL = "SetMinimumPollingInterval";
+    private static final String SET_MINIMUM_POLLING_INTERVAL = "SetMinimumPollingInterval";
     // SET_RECEIVE_INTERVAL is used for setting the interval for handling MQTT and AMQP messages.
-    static final String SET_RECEIVE_INTERVAL = "SetReceiveInterval";
-    static final String SET_SEND_INTERVAL = "SetSendInterval";
-    static final String SET_MAX_MESSAGES_SENT_PER_THREAD = "SetMaxMessagesSentPerThread";
-    static final String SET_SAS_TOKEN_EXPIRY_TIME = "SetSASTokenExpiryTime";
-    static final String SET_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT = "SetAmqpOpenAuthenticationSessionTimeout";
-    static final String SET_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT = "SetAmqpOpenDeviceSessionsTimeout";
+    private static final String SET_RECEIVE_INTERVAL = "SetReceiveInterval";
+    private static final String SET_SEND_INTERVAL = "SetSendInterval";
+    private static final String SET_MAX_MESSAGES_SENT_PER_THREAD = "SetMaxMessagesSentPerThread";
+    private static final String SET_SAS_TOKEN_EXPIRY_TIME = "SetSASTokenExpiryTime";
+    private static final String SET_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT = "SetAmqpOpenAuthenticationSessionTimeout";
+    private static final String SET_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT = "SetAmqpOpenDeviceSessionsTimeout";
 
-    static final String SET_HTTPS_CONNECT_TIMEOUT = "SetHttpsConnectTimeout";
-    static final String SET_HTTPS_READ_TIMEOUT = "SetHttpsReadTimeout";
+    private static final String SET_HTTPS_CONNECT_TIMEOUT = "SetHttpsConnectTimeout";
+    private static final String SET_HTTPS_READ_TIMEOUT = "SetHttpsReadTimeout";
 
     private static final String TWIN_OVER_HTTP_ERROR_MESSAGE =
         "Twin operations are only supported over MQTT, MQTT_WS, AMQPS, and AMQPS_WS";
@@ -45,7 +50,7 @@ public class InternalClient
         "Direct methods are only supported over MQTT, MQTT_WS, AMQPS, and AMQPS_WS";
 
     DeviceClientConfig config;
-    DeviceIO deviceIO;
+    private DeviceIO deviceIO;
 
     boolean isMultiplexed = false;
 
@@ -57,7 +62,6 @@ public class InternalClient
 
     InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis, ClientOptions clientOptions)
     {
-        /* Codes_SRS_INTERNALCLIENT_21_004: [If the connection string is null or empty, the function shall throw an IllegalArgumentException.] */
         commonConstructorVerification(iotHubConnectionString, protocol);
 
         this.config = new DeviceClientConfig(iotHubConnectionString, clientOptions);
@@ -76,52 +80,36 @@ public class InternalClient
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
     }
 
-    InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, SSLContext sslContext, long sendPeriodMillis, long receivePeriod)
-    {
-        commonConstructorVerification(iotHubConnectionString, protocol);
-
-        this.config = new DeviceClientConfig(iotHubConnectionString, sslContext);
-        this.config.setProtocol(protocol);
-        this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriod);
-    }
-
     InternalClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis, ClientOptions clientOptions) throws URISyntaxException, IOException
     {
         if (protocol == null)
         {
-            //Codes_SRS_INTERNALCLIENT_34_072: [If the provided protocol is null, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("The transport protocol cannot be null");
         }
 
         if (securityProvider == null)
         {
-            //Codes_SRS_INTERNALCLIENT_34_073: [If the provided securityProvider is null, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("securityProvider cannot be null");
         }
 
         if (uri == null || uri.isEmpty())
         {
-            //Codes_SRS_INTERNALCLIENT_34_074: [If the provided uri is null, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("URI cannot be null or empty");
         }
 
         if (deviceId == null || deviceId.isEmpty())
         {
-            //Codes_SRS_INTERNALCLIENT_34_075: [If the provided deviceId is null, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("deviceId cannot be null or empty");
         }
 
-        //Codes_SRS_INTERNALCLIENT_34_065: [The provided uri and device id will be used to create an iotHubConnectionString that will be saved in config.]
         IotHubConnectionString connectionString = new IotHubConnectionString(uri, deviceId, null, null);
 
-        //Codes_SRS_INTERNALCLIENT_34_066: [The provided security provider will be saved in config.]
         this.config = new DeviceClientConfig(connectionString, securityProvider);
         this.config.setProtocol(protocol);
         if (clientOptions != null) {
             this.config.modelId = clientOptions.getModelId();
         }
 
-        //Codes_SRS_INTERNALCLIENT_34_067: [The constructor shall initialize the IoT hub transport for the protocol specified, creating a instance of the deviceIO.]
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
     }
 
@@ -147,10 +135,9 @@ public class InternalClient
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
     }
 
-    //unused
+    //for mocking purposes only
     InternalClient()
     {
-        // Codes_SRS_INTERNALCLIENT_12_028: [The constructor shall shall set the config, deviceIO and tranportClient to null.]
         this.config = null;
         this.deviceIO = null;
     }
@@ -221,11 +208,7 @@ public class InternalClient
     public void sendEventAsync(Message message, IotHubEventCallback callback, Object callbackContext)
     {
         verifyRegisteredIfMultiplexing();
-
-        //Codes_SRS_INTERNALCLIENT_34_045: [This function shall set the provided message's connection device id to the config's saved device id.]
         message.setConnectionDeviceId(this.config.getDeviceId());
-
-        //Codes_SRS_INTERNALCLIENT_21_010: [The sendEventAsync shall asynchronously send the message using the deviceIO connection.]
         deviceIO.sendEventAsync(message, callback, callbackContext, this.config.getDeviceId());
     }
 
@@ -264,38 +247,35 @@ public class InternalClient
      *
      * This client will receive a callback each time a desired property is updated. That callback will either contain
      * the full desired properties set, or only the updated desired property depending on how the desired property was changed.
-     * IoT hub supports a PUT and a PATCH on the twin. The PUT will cause this device client to receive the full desired properties set, and the PATCH
-     * will cause this device client to only receive the updated desired properties. Similarly, the version
+     * IoT hub supports a PUT and a PATCH on the twin. The PUT will cause this client to receive the full desired properties set, and the PATCH
+     * will cause this client to only receive the updated desired properties. Similarly, the version
      * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
      * have its version incremented from a PATCH call. The java service client library uses the PATCH call when updated desired properties,
      * but it builds the patch such that all properties are included in the patch. As a result, the device side will receive full twin
      * updates, not partial updates.
      *
-     * See <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/replacedevicetwin">PUT</a> and
-     * <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/updatedevicetwin">PATCH</a>
+     * See <a href="https://docs.microsoft.com/rest/api/iothub/service/twin/replacedevicetwin">PUT</a> and
+     * <a href="https://docs.microsoft.com/rest/api/iothub/service/twin/updatedevicetwin">PATCH</a>
      *
      * @param onDesiredPropertyChange the Map for desired properties and their corresponding callback and context. Can be {@code null}.
      *
      * @throws IOException if called when client is not opened or called before starting twin.
      */
-    public void subscribeToDesiredProperties(Map<Property, Pair<PropertyCallBack<String, Object>, Object>> onDesiredPropertyChange) throws IOException
+    public void subscribeToDesiredPropertiesAsync(Map<Property, Pair<PropertyCallBack<String, Object>, Object>> onDesiredPropertyChange) throws IOException
     {
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
 
         if (this.twin == null)
         {
-            //Codes_SRS_INTERNALCLIENT_25_029: [If the client has not started twin before calling this method, the function shall throw an IOException.]
             throw new IOException("Start twin before using it");
         }
 
         if (!this.deviceIO.isOpen())
         {
-            //Codes_SRS_INTERNALCLIENT_25_030: [If the client has not been open, the function shall throw an IOException.]
             throw new IOException("Open the client connection before using it.");
         }
 
-        //Codes_SRS_INTERNALCLIENT_25_031: [This method shall subscribe to desired properties by calling subscribeDesiredPropertiesNotification on the twin object.]
         this.twin.subscribeDesiredPropertiesNotification(onDesiredPropertyChange);
     }
 
@@ -306,24 +286,21 @@ public class InternalClient
      *
      * @throws IOException if called when client is not opened or called before starting twin.
      */
-    public void subscribeToTwinDesiredProperties(Map<Property, Pair<TwinPropertyCallBack, Object>> onDesiredPropertyChange) throws IOException
+    public void subscribeToTwinDesiredPropertiesAsync(Map<Property, Pair<TwinPropertyCallBack, Object>> onDesiredPropertyChange) throws IOException
     {
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
 
         if (this.twin == null)
         {
-            //Codes_SRS_INTERNALCLIENT_34_087: [If the client has not started twin before calling this method, the function shall throw an IOException.]
             throw new IOException("Start twin before using it");
         }
 
         if (!this.deviceIO.isOpen())
         {
-            //Codes_SRS_INTERNALCLIENT_34_086: [If the client has not been open, the function shall throw an IOException.]
             throw new IOException("Open the client connection before using it.");
         }
 
-        //Codes_SRS_INTERNALCLIENT_34_085: [This method shall subscribe to desired properties by calling subscribeDesiredPropertiesNotification on the twin object.]
         this.twin.subscribeDesiredPropertiesTwinPropertyNotification(onDesiredPropertyChange);
     }
 
@@ -335,9 +312,9 @@ public class InternalClient
      * @throws IOException if called when client is not opened or called before starting twin.
      * @throws IllegalArgumentException if reportedProperties is null or empty.
      */
-    public void sendReportedProperties(Set<Property> reportedProperties) throws IOException, IllegalArgumentException
+    public void sendReportedPropertiesAsync(Set<Property> reportedProperties) throws IOException, IllegalArgumentException
     {
-        this.sendReportedProperties(reportedProperties, null, null, null, null, null);
+        this.sendReportedPropertiesAsync(reportedProperties, null, null, null, null, null);
     }
 
     /**
@@ -349,12 +326,13 @@ public class InternalClient
      * @throws IOException if called when client is not opened or called before starting twin.
      * @throws IllegalArgumentException if reportedProperties is null or empty or if version is negative
      */
-    public void sendReportedProperties(Set<Property> reportedProperties, int version) throws IOException, IllegalArgumentException
+    public void sendReportedPropertiesAsync(Set<Property> reportedProperties, int version) throws IOException, IllegalArgumentException
     {
-        if (version < 0) {
+        if (version < 0)
+        {
             throw new IllegalArgumentException("Version cannot be negative.");
         }
-        this.sendReportedProperties(reportedProperties, version, null, null, null, null);
+        this.sendReportedPropertiesAsync(reportedProperties, version, null, null, null, null);
     }
 
     /**
@@ -363,9 +341,9 @@ public class InternalClient
      * @throws IOException if called when client is not opened or called before starting twin.
      * @throws IllegalArgumentException if reportedProperties is null or empty or if version specified in {#reportedPropertiesParameters} is negative
      */
-    public void sendReportedProperties(ReportedPropertiesParameters reportedPropertiesParameters) throws IOException, IllegalArgumentException
+    public void sendReportedPropertiesAsync(ReportedPropertiesParameters reportedPropertiesParameters) throws IOException, IllegalArgumentException
     {
-        this.sendReportedProperties(reportedPropertiesParameters.getReportedProperties(), reportedPropertiesParameters.getVersion(), reportedPropertiesParameters.getCorrelatingMessageCallback(), reportedPropertiesParameters.getCorrelatingMessageCallbackContext(), reportedPropertiesParameters.getReportedPropertiesCallback(), reportedPropertiesParameters.getReportedPropertiesCallbackContext());
+        this.sendReportedPropertiesAsync(reportedPropertiesParameters.getReportedProperties(), reportedPropertiesParameters.getVersion(), reportedPropertiesParameters.getCorrelatingMessageCallback(), reportedPropertiesParameters.getCorrelatingMessageCallbackContext(), reportedPropertiesParameters.getReportedPropertiesCallback(), reportedPropertiesParameters.getReportedPropertiesCallbackContext());
     }
 
     /**
@@ -373,14 +351,14 @@ public class InternalClient
      *
      * @param reportedProperties the Set for desired properties and their corresponding callback and context. Cannot be {@code null}.
      * @param version the Reported property version. Cannot be negative.
-     * @param reportedPropertiesCallback the Reported property callback to be set for this message. If set to {@code null} it will fall back to {@link #sendReportedProperties(Set, int)}.
+     * @param reportedPropertiesCallback the Reported property callback to be set for this message. If set to {@code null} it will fall back to {@link #sendReportedPropertiesAsync(Set, int)}.
      * @param reportedPropertiesCallbackContext the Reported property callback context to be set for this message.
      * @param correlatingMessageCallback the correlation callback for this message.
      * @param correlatingMessageCallbackContext the correlation callback context for this message.
      * @throws IOException if called when client is not opened or called before starting twin.
-     * @throws IllegalArgumentException if reportedProperties is null or empty or if version is negatve
+     * @throws IllegalArgumentException if reportedProperties is null or empty or if version is negative
      */
-    public void sendReportedProperties(Set<Property> reportedProperties, Integer version, CorrelatingMessageCallback correlatingMessageCallback, Object correlatingMessageCallbackContext, IotHubEventCallback reportedPropertiesCallback, Object reportedPropertiesCallbackContext) throws IOException, IllegalArgumentException
+    public void sendReportedPropertiesAsync(Set<Property> reportedProperties, Integer version, CorrelatingMessageCallback correlatingMessageCallback, Object correlatingMessageCallbackContext, IotHubEventCallback reportedPropertiesCallback, Object reportedPropertiesCallbackContext) throws IOException, IllegalArgumentException
     {
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
@@ -391,7 +369,7 @@ public class InternalClient
     }
 
     /**
-     * Registers a callback to be executed when the connection status of the device changes. The callback will be fired
+     * Sets the callback to be executed when the connection status of the device changes. The callback will be fired
      * with a status and a reason why the device's status changed. When the callback is fired, the provided context will
      * be provided alongside the status and reason.
      *
@@ -403,7 +381,7 @@ public class InternalClient
      * @param callbackContext a context to be passed to the callback. Can be {@code null}.
      * @throws IllegalArgumentException if provided callback is null
      */
-    public void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext) throws IllegalArgumentException
+    public void setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext) throws IllegalArgumentException
     {
         this.connectionStatusChangeCallback = callback;
         this.connectionStatusChangeCallbackContext = callbackContext;
@@ -422,7 +400,6 @@ public class InternalClient
      */
     public void setRetryPolicy(RetryPolicy retryPolicy)
     {
-        //Codes_SRS_INTERNALCLIENT_28_001: [The function shall set the device config's RetryPolicy .]
         this.config.setRetryPolicy(retryPolicy);
     }
 
@@ -434,13 +411,11 @@ public class InternalClient
      */
     public void setOperationTimeout(long timeout) throws IllegalArgumentException
     {
-        // Codes_SRS_INTERNALCLIENT_34_070: [The function shall set the device config's operation timeout .]
         this.config.setOperationTimeout(timeout);
     }
 
     public ProductInfo getProductInfo()
     {
-        // Codes_SRS_INTERNALCLIENT_34_071: [This function shall return the product info saved in config.]
         return this.config.getProductInfo();
     }
 
@@ -513,19 +488,15 @@ public class InternalClient
      */
     // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
     // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
-    @SuppressWarnings("ConstantConditions")
     public void setOption(String optionName, Object value)
     {
         if (optionName == null)
         {
-            // Codes_SRS_DEVICECLIENT_02_015: [If optionName is null or not an option handled by the client, then
-            // it shall throw IllegalArgumentException.]
             throw new IllegalArgumentException("optionName is null");
         }
         else if (value == null)
         {
-            // Codes_SRS_DEVICECLIENT_12_026: [The function shall trow IllegalArgumentException if the value is null.]
-            throw new IllegalArgumentException("optionName is null");
+            throw new IllegalArgumentException("value is null");
         }
         else
         {
@@ -534,16 +505,7 @@ public class InternalClient
                 case SET_MINIMUM_POLLING_INTERVAL:
                 case SET_RECEIVE_INTERVAL:
                 {
-                    if (this.deviceIO.isOpen())
-                    {
-                        throw new IllegalStateException("setOption " + optionName +
-                                " only works when the transport is closed");
-                    }
-                    else
-                    {
-                        setOption_SetMinimumPollingInterval(value);
-                    }
-
+                    setOption_SetMinimumPollingInterval(value);
                     break;
                 }
                 case SET_SEND_INTERVAL:
@@ -590,7 +552,19 @@ public class InternalClient
     }
 
     /**
-     * Starts the device twin.
+     * Starts the twin for this client. This client will receive a callback with the current state of the full twin, including
+     * reported properties and desired properties. After that callback is received, this client will receive a callback
+     * each time a desired property is updated. That callback will either contain the full desired properties set, or
+     * only the updated desired property depending on how the desired property was changed. IoT hub supports a PUT and a PATCH
+     * on the twin. The PUT will cause this client to receive the full desired properties set, and the PATCH
+     * will cause this client to only receive the updated desired properties. Similarly, the version
+     * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
+     * have its version incremented from a PATCH call. The java service client library uses the PATCH call when updated desired properties,
+     * but it builds the patch such that all properties are included in the patch. As a result, the device side will receive full twin
+     * updates, not partial updates.
+     *
+     * See <a href="https://docs.microsoft.com/rest/api/iothub/service/twin/replacedevicetwin">PUT</a> and
+     * <a href="https://docs.microsoft.com/rest/api/iothub/service/twin/updatedevicetwin">PATCH</a>
      *
      * @param twinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
      * @param twinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
@@ -603,10 +577,9 @@ public class InternalClient
      * @throws UnsupportedOperationException if called more than once on the same device
      * @throws IOException if called when client is not opened
      */
-    <Type1, Type2> void startTwinInternal(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
+    public <Type1, Type2> void startTwinAsync(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
                                  PropertyCallBack<Type1, Type2> genericPropertyCallBack, Object genericPropertyCallBackContext)
             throws IOException, IllegalArgumentException, UnsupportedOperationException
-
     {
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
@@ -653,7 +626,19 @@ public class InternalClient
     }
 
     /**
-     * Starts the device twin.
+     * Starts the twin for this client. This client will receive a callback with the current state of the full twin, including
+     * reported properties and desired properties. After that callback is received, this client will receive a callback
+     * each time a desired property is updated. That callback will either contain the full desired properties set, or
+     * only the updated desired property depending on how the desired property was changed. IoT hub supports a PUT and a PATCH
+     * on the twin. The PUT will cause this client to receive the full desired properties set, and the PATCH
+     * will cause this client to only receive the updated desired properties. Similarly, the version
+     * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
+     * have its version incremented from a PATCH call. The java service client library uses the PATCH call when updated desired properties,
+     * but it builds the patch such that all properties are included in the patch. As a result, the device side will receive full twin
+     * updates, not partial updates.
+     *
+     * See <a href="https://docs.microsoft.com/rest/api/iothub/service/twin/replacedevicetwin">PUT</a> and
+     * <a href="https://docs.microsoft.com/rest/api/iothub/service/twin/updatedevicetwin">PATCH</a>
      *
      * @param twinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
      * @param twinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
@@ -663,9 +648,8 @@ public class InternalClient
      * @throws IllegalArgumentException if the callback is {@code null}
      * @throws UnsupportedOperationException if called more than once on the same device
      * @throws IOException if called when client is not opened
-     * @throws IllegalArgumentException if either callback is null
      */
-    void startTwinInternal(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
+    public void startTwinAsync(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
                                  TwinPropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext)
             throws IOException, IllegalArgumentException, UnsupportedOperationException
     {
@@ -674,43 +658,50 @@ public class InternalClient
 
         if (!this.deviceIO.isOpen())
         {
-            //Codes_SRS_INTERNALCLIENT_34_081: [If device io has not been opened yet, this function shall throw an IOException.]
             throw new IOException("Open the client connection before using it.");
         }
 
         if (twinStatusCallback == null || genericPropertyCallBack == null)
         {
-            //Codes_SRS_INTERNALCLIENT_34_082: [If either callback is null, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("Callback cannot be null");
         }
         if (this.twin == null)
         {
-            //Codes_SRS_INTERNALCLIENT_34_084: [This function shall initialize a DeviceTwin object and invoke getDeviceTwin on it.]
             twin = new DeviceTwin(this.deviceIO, this.config, twinStatusCallback, twinStatusCallbackContext,
                     genericPropertyCallBack, genericPropertyCallBackContext);
             twin.getDeviceTwin();
         }
         else
         {
-            //Codes_SRS_INTERNALCLIENT_34_083: [If either callback is null, this function shall throw an IllegalArgumentException.]
             throw new UnsupportedOperationException("You have already initialised twin");
         }
     }
 
     /**
-     * Starts the device twin.
+     * Starts the twin. This client will receive a callback with the current state of the full twin, including
+     * reported properties and desired properties. After that callback is received, this client will receive a callback
+     * each time a desired property is updated. That callback will either contain the full desired properties set, or
+     * only the updated desired property depending on how the desired property was changed. IoT hub supports a PUT and a PATCH
+     * on the twin. The PUT will cause this client to receive the full desired properties set, and the PATCH
+     * will cause this client to only receive the updated desired properties. Similarly, the version
+     * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
+     * have its version incremented from a PATCH call. The java service client library uses the PATCH call when updated desired properties,
+     * but it builds the patch such that all properties are included in the patch. As a result, the device side will receive full twin
+     * updates, not partial updates.
+     *
+     * See <a href="https://docs.microsoft.com/rest/api/iothub/service/twin/replacedevicetwin">PUT</a> and
+     * <a href="https://docs.microsoft.com/rest/api/iothub/service/twin/updatedevicetwin">PATCH</a>
      *
      * @param twinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
      * @param twinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
      * @param genericPropertiesCallBack the TwinPropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
-     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.     *
+     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.
      *
      * @throws IllegalArgumentException if the callback is {@code null}
      * @throws UnsupportedOperationException if called more than once on the same device
      * @throws IOException if called when client is not opened
-     * @throws IllegalArgumentException if either callback is null
      */
-    void startTwinInternal(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
+    public void startTwinAsync(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
                            TwinPropertiesCallback genericPropertiesCallBack, Object genericPropertyCallBackContext)
             throws IOException, IllegalArgumentException, UnsupportedOperationException
     {
@@ -745,30 +736,27 @@ public class InternalClient
     }
 
     /**
-     * Get the current desired properties for this client
-     * @throws IOException if the iot hub cannot be reached
-     * @throws IOException if the twin has not been initialized yet
-     * @throws IOException if the client has not been opened yet
+     * Get the twin for this client. This method sends a request for the twin to the service and will asynchronously
+     * provide the retrieved twin to the callback provided in {@link #startTwinAsync(IotHubEventCallback, Object, TwinPropertyCallBack, Object)}.
+     *
+     * Users must call {@link #startTwinAsync(IotHubEventCallback, Object, TwinPropertyCallBack, Object)} before using this method.
+     * @throws IOException if the iot hub cannot be reached.
      */
-    void getTwinInternal() throws IOException
+    public void getTwinAsync() throws IOException
     {
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
 
         if (this.twin == null)
         {
-            //Codes_SRS_INTERNALCLIENT_21_040: [If the client has not started twin before calling this method, the function shall throw an IOException.]
             throw new IOException("Start twin before using it");
         }
 
         if (!this.deviceIO.isOpen())
         {
-
-            //Codes_SRS_INTERNALCLIENT_21_041: [If the client has not been open, the function shall throw an IOException.]
             throw new IOException("Open the client connection before using it.");
         }
 
-        //Codes_SRS_INTERNALCLIENT_21_042: [The function shall get all desired properties by calling getDeviceTwin.]
         this.twin.getDeviceTwin();
     }
 
@@ -787,27 +775,25 @@ public class InternalClient
     {
         if (callback == null && context != null)
         {
-            /* Codes_SRS_INTERNALCLIENT_11_014: [If the callback is null but the context is non-null, the function shall throw an IllegalArgumentException.] */
             throw new IllegalArgumentException("Cannot give non-null context for a null callback.");
         }
 
-        /* Codes_SRS_INTERNALCLIENT_11_013: [The function shall set the message callback, with its associated context.] */
         this.config.setMessageCallback(callback, context);
     }
 
     /**
-     * Subscribes to methods
+     * Subscribes to direct methods
      *
-     * @param methodCallback Callback on which methods shall be invoked. Cannot be {@code null}.
-     * @param methodCallbackContext Context for method callback. Can be {@code null}.
-     * @param methodStatusCallback Callback for providing IotHub status for methods. Cannot be {@code null}.
-     * @param methodStatusCallbackContext Context for method status callback. Can be {@code null}.
+     * @param methodCallback Callback on which direct methods shall be invoked. Cannot be {@code null}.
+     * @param methodCallbackContext Context for device method callback. Can be {@code null}.
+     * @param methodStatusCallback Callback for providing IotHub status for direct methods. Cannot be {@code null}.
+     * @param methodStatusCallbackContext Context for device method status callback. Can be {@code null}.
      *
      * @throws IOException if called when client is not opened.
      * @throws IllegalArgumentException if either callback are null.
      */
-    void subscribeToMethodsInternal(DeviceMethodCallback methodCallback, Object methodCallbackContext,
-                                              IotHubEventCallback methodStatusCallback, Object methodStatusCallbackContext)
+    public void subscribeToMethodsAsync(DeviceMethodCallback methodCallback, Object methodCallbackContext,
+                                        IotHubEventCallback methodStatusCallback, Object methodStatusCallbackContext)
             throws IOException
     {
         verifyRegisteredIfMultiplexing();
@@ -862,206 +848,137 @@ public class InternalClient
         }
     }
 
-    void setOption_SetHttpsConnectTimeout(Object value)
+    private void setOption_SetHttpsConnectTimeout(Object value)
     {
-        if (value != null)
+        if (this.config.getProtocol() != HTTPS)
         {
-            if (this.config.getProtocol() != HTTPS)
-            {
-                throw new UnsupportedOperationException("Cannot set the https connect timeout when using protocol " + this.config.getProtocol());
-            }
+            throw new UnsupportedOperationException("Cannot set the https connect timeout when using protocol " + this.config.getProtocol());
+        }
 
-            if (value instanceof Integer)
-            {
-                log.info("Setting HTTPS connect timeout to {} milliseconds", value);
-                this.config.setHttpsConnectTimeout((int) value);
-            }
-            else
-            {
-                throw new IllegalArgumentException("value is not int = " + value);
-            }
+        if (value instanceof Integer)
+        {
+            log.info("Setting HTTPS connect timeout to {} milliseconds", value);
+            this.config.setHttpsConnectTimeout((int) value);
+        }
+        else
+        {
+            throw new IllegalArgumentException("value is not int = " + value);
         }
     }
 
-    void setOption_SetHttpsReadTimeout(Object value)
+    private void setOption_SetHttpsReadTimeout(Object value)
     {
-        if (value != null)
+        if (this.config.getProtocol() != HTTPS)
         {
-            if (this.config.getProtocol() != HTTPS)
-            {
-                throw new UnsupportedOperationException("Cannot set the https read timeout when using protocol " + this.config.getProtocol());
-            }
+            throw new UnsupportedOperationException("Cannot set the https read timeout when using protocol " + this.config.getProtocol());
+        }
 
-            if (value instanceof Integer)
-            {
-                log.info("Setting HTTPS read timeout to {} milliseconds", value);
-                this.config.setHttpsReadTimeout((int) value);
-            }
-            else
-            {
-                throw new IllegalArgumentException("value is not int = " + value);
-            }
+        if (value instanceof Integer)
+        {
+            log.info("Setting HTTPS read timeout to {} milliseconds", value);
+            this.config.setHttpsReadTimeout((int) value);
+        }
+        else
+        {
+            throw new IllegalArgumentException("value is not int = " + value);
         }
     }
 
-    void setOption_SetSendInterval(Object value)
+    private void setOption_SetSendInterval(Object value)
     {
-        if (value != null)
+        if (value instanceof Long)
         {
-            // Codes_SRS_DEVICECLIENT_21_041: ["SetSendInterval" needs to have value type long.]
-            if (value instanceof Long)
-            {
-                try
-                {
-                    verifyRegisteredIfMultiplexing();
-                    log.info("Setting send period to {} milliseconds", value);
-                    this.deviceIO.setSendPeriodInMilliseconds((long) value);
-                }
-                catch (IOException e)
-                {
-                    throw new IOError(e);
-                }
-            }
-            else
-            {
-                throw new IllegalArgumentException("value is not long = " + value);
-            }
+            verifyRegisteredIfMultiplexing();
+            log.info("Setting send period to {} milliseconds", value);
+            this.deviceIO.setSendPeriodInMilliseconds((long) value);
+        }
+        else
+        {
+            throw new IllegalArgumentException("value is not long = " + value);
         }
     }
 
-    void setOption_SetMinimumPollingInterval(Object value)
+    private void setOption_SetMinimumPollingInterval(Object value)
     {
-        if (value != null)
+        if (value instanceof Long)
         {
-            // Codes_SRS_DEVICECLIENT_02_018: ["SetMinimumPollingInterval" needs to have type long].
-            if (value instanceof Long)
-            {
-                try
-                {
-                    verifyRegisteredIfMultiplexing();
-                    log.info("Setting receive period to {} milliseconds", value);
-                    this.deviceIO.setReceivePeriodInMilliseconds((long) value);
-                }
-                catch (IOException e)
-                {
-                    throw new IOError(e);
-                }
-            }
-            else
-            {
-                throw new IllegalArgumentException("value is not long = " + value);
-            }
+            verifyRegisteredIfMultiplexing();
+            log.info("Setting receive period to {} milliseconds", value);
+            this.deviceIO.setReceivePeriodInMilliseconds((long) value);
+        }
+        else
+        {
+            throw new IllegalArgumentException("value is not long = " + value);
         }
     }
 
     // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
     // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
-    @SuppressWarnings("ConstantConditions")
-    void setOption_SetSASTokenExpiryTime(Object value)
+    private void setOption_SetSASTokenExpiryTime(Object value)
     {
-        if (this.config.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN)
+        if (this.config.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN || this.config.getSasTokenAuthentication() == null)
         {
             throw new IllegalStateException("Cannot set sas token validity time when not using sas token authentication");
         }
 
-        if (value != null)
+        long validTimeInSeconds;
+
+        if (value instanceof Long)
         {
-            long validTimeInSeconds;
+            validTimeInSeconds = (long) value;
+        }
+        else
+        {
+            throw new IllegalArgumentException("value is not long = " + value);
+        }
 
-            if (value instanceof Long)
-            {
-                validTimeInSeconds = (long) value;
-            }
-            else
-            {
-                throw new IllegalArgumentException("value is not long = " + value);
-            }
+        log.info("Setting generated SAS token lifespans to {} seconds", validTimeInSeconds);
+        this.config.getSasTokenAuthentication().setTokenValidSecs(validTimeInSeconds);
+    }
 
-            log.info("Setting generated SAS token lifespans to {} seconds", validTimeInSeconds);
-            this.config.getSasTokenAuthentication().setTokenValidSecs(validTimeInSeconds);
+    private void setOption_SetAmqpOpenAuthenticationSessionTimeout(Object value)
+    {
+        if (this.config.getProtocol() != AMQPS && this.config.getProtocol() != AMQPS_WS)
+        {
+            throw new UnsupportedOperationException("Cannot set the open authentication session timeout when using protocol " + this.config.getProtocol());
+        }
 
-            if (this.deviceIO != null)
-            {
-                if (this.deviceIO.isOpen())
-                {
-                    try
-                    {
-                        /* Codes_SRS_DEVICECLIENT_25_024: [**"SetSASTokenExpiryTime" shall restart the transport
-                         *                                  1. If the device currently uses device key and
-                         *                                  2. If transport is already open
-                         *                                 after updating expiry time
-                         */
-                        if (this.config.getSasTokenAuthentication().canRefreshToken())
-                        {
-                            this.deviceIO.close();
-                            this.deviceIO.open(false);
-                        }
-                    }
-                    catch (IOException e)
-                    {
-                        // Codes_SRS_DEVICECLIENT_12_027: [The function shall throw IOError if either the deviceIO or the tranportClient's open() or closeNow() throws.]
-                        throw new IOError(e);
-                    }
-                }
-            }
+        if (this.config.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN)
+        {
+            throw new UnsupportedOperationException("Cannot set the open authentication session timeout when using authentication type " + this.config.getAuthenticationType());
+        }
+
+        if (value instanceof Integer)
+        {
+            log.info("Setting generated AMQP authentication session timeout to {} seconds", value);
+            this.config.setAmqpOpenAuthenticationSessionTimeout((int) value);
+        }
+        else
+        {
+            throw new IllegalArgumentException("value is not int = " + value);
         }
     }
 
-    void setOption_SetAmqpOpenAuthenticationSessionTimeout(Object value)
+    private void setOption_SetAmqpOpenDeviceSessionsTimeout(Object value)
     {
-        if (value != null)
+        if (this.config.getProtocol() != AMQPS && this.config.getProtocol() != AMQPS_WS)
         {
-            if (this.config.getProtocol() != AMQPS && this.config.getProtocol() != AMQPS_WS)
-            {
-                throw new UnsupportedOperationException("Cannot set the open authentication session timeout when using protocol " + this.config.getProtocol());
-            }
+            throw new UnsupportedOperationException("Cannot set the open device session timeout when using protocol " + this.config.getProtocol());
+        }
 
-            if (this.config.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN)
-            {
-                throw new UnsupportedOperationException("Cannot set the open authentication session timeout when using authentication type " + this.config.getAuthenticationType());
-            }
-
-            if (value instanceof Integer)
-            {
-                log.info("Setting generated AMQP authentication session timeout to {} seconds", value);
-                this.config.setAmqpOpenAuthenticationSessionTimeout((int) value);
-            }
-            else
-            {
-                throw new IllegalArgumentException("value is not int = " + value);
-            }
+        if (value instanceof Integer)
+        {
+            log.info("Setting generated AMQP device session timeout to {} seconds", value);
+            this.config.setAmqpOpenDeviceSessionsTimeout((int) value);
+        }
+        else
+        {
+            throw new IllegalArgumentException("value is not int = " + value);
         }
     }
 
-    void setOption_SetAmqpOpenDeviceSessionsTimeout(Object value)
+    private void setOption_SetMaxMessagesSentPerThread(Object value)
     {
-        if (value != null)
-        {
-            if (this.config.getProtocol() != AMQPS && this.config.getProtocol() != AMQPS_WS)
-            {
-                throw new UnsupportedOperationException("Cannot set the open device session timeout when using protocol " + this.config.getProtocol());
-            }
-
-            if (value instanceof Integer)
-            {
-                log.info("Setting generated AMQP device session timeout to {} seconds", value);
-                this.config.setAmqpOpenDeviceSessionsTimeout((int) value);
-            }
-            else
-            {
-                throw new IllegalArgumentException("value is not int = " + value);
-            }
-        }
-    }
-
-    void setOption_SetMaxMessagesSentPerThread(Object value)
-    {
-        if (value == null)
-        {
-            throw new IllegalArgumentException("Value cannot be null");
-        }
-
-
         if (value instanceof Integer)
         {
             log.info("Setting maximum number of messages sent per send thread {} messages", value);
@@ -1147,16 +1064,20 @@ public class InternalClient
         return this.isMultiplexed;
     }
 
-    private void verifyReportedProperties(Set<Property> reportedProperties) throws IOException {
-        if (this.twin == null) {
+    private void verifyReportedProperties(Set<Property> reportedProperties) throws IOException
+    {
+        if (this.twin == null)
+        {
             throw new IOException("Start twin before using it");
         }
 
-        if (!this.deviceIO.isOpen()) {
+        if (!this.deviceIO.isOpen())
+        {
             throw new IOException("Open the client connection before using it.");
         }
 
-        if (reportedProperties == null || reportedProperties.isEmpty()) {
+        if (reportedProperties == null || reportedProperties.isEmpty())
+        {
             throw new IllegalArgumentException("Reported properties set cannot be null or empty.");
         }
     }

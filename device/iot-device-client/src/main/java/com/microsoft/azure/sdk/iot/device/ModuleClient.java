@@ -7,10 +7,6 @@ package com.microsoft.azure.sdk.iot.device;
 
 
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.PropertyCallBack;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertiesCallback;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.SignatureProvider;
 import com.microsoft.azure.sdk.iot.device.edge.HttpsHsmTrustBundleProvider;
@@ -82,11 +78,8 @@ public class ModuleClient extends InternalClient
      */
     public ModuleClient(String connectionString, IotHubClientProtocol protocol) throws IllegalArgumentException, UnsupportedOperationException, URISyntaxException
     {
-        //Codes_SRS_MODULECLIENT_34_006: [This function shall invoke the super constructor.]
         super(new IotHubConnectionString(connectionString), protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), null);
 
-        //Codes_SRS_MODULECLIENT_34_007: [If the provided protocol is not MQTT, AMQPS, MQTT_WS, or AMQPS_WS, this function shall throw an UnsupportedOperationException.]
-        //Codes_SRS_MODULECLIENT_34_004: [If the provided connection string does not contain a module id, this function shall throw an IllegalArgumentException.]
         commonConstructorVerifications(protocol, this.config);
     }
 
@@ -180,13 +173,11 @@ public class ModuleClient extends InternalClient
         log.info("Creating module client from environment with protocol {}...", protocol);
         Map<String, String> envVariables = System.getenv();
 
-        //Codes_SRS_MODULECLIENT_34_013: [This function shall check for a saved edgehub connection string.]
         log.debug("Checking for an edgehub connection string...");
         String connectionString = envVariables.get(EdgehubConnectionstringVariableName);
         if (connectionString == null)
         {
-            log.debug("No edgehub connection string was configured, checking for an IoThub connection string...");
-            //Codes_SRS_MODULECLIENT_34_019: [If no edgehub connection string is present, this function shall check for a saved iothub connection string.]
+            log.debug("No edgehub connection string was configured, checking for an IoT hub connection string...");
             connectionString = envVariables.get(IothubConnectionstringVariableName);
         }
 
@@ -245,9 +236,6 @@ public class ModuleClient extends InternalClient
         else
         {
             log.info("No connection string was configured for this module, so it will get its credentials from the edgelet");
-            //Codes_SRS_MODULECLIENT_34_014: [This function shall check for environment variables for edgedUri, deviceId, moduleId,
-            // hostname, authScheme, gatewayHostname, and generationId. If any of these other than gatewayHostname is missing,
-            // this function shall throw a ModuleClientException.]
             String edgedUri = envVariables.get(IotEdgedUriVariableName);
             String deviceId = envVariables.get(DeviceIdVariableName);
             String moduleId = envVariables.get(ModuleIdVariableName);
@@ -288,7 +276,6 @@ public class ModuleClient extends InternalClient
 
             if (!authScheme.equalsIgnoreCase(SasTokenAuthScheme))
             {
-                //Codes_SRS_MODULECLIENT_34_030: [If the auth scheme environment variable is not "SasToken", this function shall throw a moduleClientException.]
                 throw new ModuleClientException("Unsupported authentication scheme. Supported scheme is " + SasTokenAuthScheme + ".");
             }
 
@@ -332,7 +319,6 @@ public class ModuleClient extends InternalClient
                 return new ModuleClient(
                     iotHubAuthenticationProvider,
                     protocol,
-                    SEND_PERIOD_MILLIS,
                     getReceivePeriod(protocol));
             }
             catch (IOException | TransportException | HsmException | URISyntaxException | CertificateException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e)
@@ -342,10 +328,9 @@ public class ModuleClient extends InternalClient
         }
     }
 
-    @SuppressWarnings("SameParameterValue") // The SEND_PERIOD is currently 10ms for all protocols, but can be made configurable in the future.
-    private ModuleClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis) throws IOException, TransportException
+    private ModuleClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol, long receivePeriodMillis)
     {
-        super(iotHubAuthenticationProvider, protocol, sendPeriodMillis, receivePeriodMillis);
+        super(iotHubAuthenticationProvider, protocol, SEND_PERIOD_MILLIS, receivePeriodMillis);
     }
 
     /**
@@ -361,27 +346,19 @@ public class ModuleClient extends InternalClient
     {
         if (outputName == null || outputName.isEmpty())
         {
-            //Codes_SRS_MODULECLIENT_34_001: [If the provided outputName is null or empty, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("outputName cannot be null or empty");
         }
 
-        //Codes_SRS_MODULECLIENT_34_002: [This function shall set the provided message with the provided outputName.]
         message.setOutputName(outputName);
-
-        //Codes_SRS_MODULECLIENT_34_003: [This function shall invoke super.sendEventAsync(message, callback, callbackContext).]
         this.sendEventAsync(message, callback, callbackContext);
     }
 
     @Override
     public void sendEventAsync(Message message, IotHubEventCallback callback, Object callbackContext) throws IllegalArgumentException
     {
-        //Codes_SRS_MODULECLIENT_34_040: [This function shall set the message's connection moduleId to the config's saved module id.]
         message.setConnectionModuleId(this.config.getModuleId());
-
-        //Codes_SRS_MODULECLIENT_34_041: [This function shall invoke super.sendEventAsync(message, callback, callbackContext).]
         super.sendEventAsync(message, callback, callbackContext);
     }
-
 
     /**
      * Invoke a method on a device
@@ -389,26 +366,23 @@ public class ModuleClient extends InternalClient
      * @param methodRequest the request containing the method to invoke on the device
      * @return the result of the method call
      * @throws ModuleClientException if the method cannot be invoked
-     * @throws IllegalArgumentException if deviceid is null or empty
+     * @throws IllegalArgumentException if deviceId is null or empty
      */
     public MethodResult invokeMethod(String deviceId, MethodRequest methodRequest) throws ModuleClientException, IllegalArgumentException
     {
         if (deviceId == null || deviceId.isEmpty())
         {
-            //Codes_SRS_MODULECLIENT_34_039: [If the provided deviceId is null or empty, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("DeviceId cannot be null or empty");
         }
 
         try
         {
-            //Codes_SRS_MODULECLIENT_34_033: [This function shall create an HttpsTransportManager and use it to invoke the method on the device.]
             HttpsTransportManager httpsTransportManager = new HttpsTransportManager(this.config);
             httpsTransportManager.open();
             return httpsTransportManager.invokeMethod(methodRequest, deviceId, "");
         }
         catch (URISyntaxException | IOException | TransportException e)
         {
-            //Codes_SRS_MODULECLIENT_34_034: [If this function encounters an exception, it shall throw a moduleClientException with that exception nested.]
             throw new ModuleClientException("Could not invoke method", e);
         }
     }
@@ -420,156 +394,30 @@ public class ModuleClient extends InternalClient
      * @param methodRequest the request containing the method to invoke on the device
      * @return the result of the method call
      * @throws ModuleClientException if the method cannot be invoked
-     * @throws IllegalArgumentException if deviceid is null or empty, or if moduleid is null or empty
+     * @throws IllegalArgumentException if deviceId is null or empty, or if moduleId is null or empty
      */
     public MethodResult invokeMethod(String deviceId, String moduleId, MethodRequest methodRequest) throws ModuleClientException, IllegalArgumentException
     {
         if (deviceId == null || deviceId.isEmpty())
         {
-            //Codes_SRS_MODULECLIENT_34_037: [If the provided deviceId is null or empty, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("DeviceId cannot be null or empty");
         }
 
         if (moduleId == null || moduleId.isEmpty())
         {
-            //Codes_SRS_MODULECLIENT_34_038: [If the provided deviceId is null or empty, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("DeviceId cannot be null or empty");
         }
 
         try
         {
-            //Codes_SRS_MODULECLIENT_34_035: [This function shall create an HttpsTransportManager and use it to invoke the method on the module.]
             HttpsTransportManager httpsTransportManager = new HttpsTransportManager(this.config);
             httpsTransportManager.open();
             return httpsTransportManager.invokeMethod(methodRequest, deviceId, moduleId);
         }
         catch (URISyntaxException | IOException | TransportException e)
         {
-            //Codes_SRS_MODULECLIENT_34_036: [If this function encounters an exception, it shall throw a moduleClientException with that exception nested.]
             throw new ModuleClientException("Could not invoke method", e);
         }
-    }
-
-    /**
-     * Retrieves the twin's latest desired properties
-     * @throws IOException if the iothub cannot be reached
-     */
-    public void getTwin() throws IOException
-    {
-        this.getTwinInternal();
-    }
-
-    /**
-     * Starts the module twin. This module client will receive a callback with the current state of the full twin, including
-     * reported properties and desired properties. After that callback is received, this module client will receive a callback
-     * each time a desired property is updated. That callback will either contain the full desired properties set, or
-     * only the updated desired property depending on how the desired property was changed. IoT hub supports a PUT and a PATCH
-     * on the twin. The PUT will cause this module client to receive the full desired properties set, and the PATCH
-     * will cause this module client to only receive the updated desired properties. Similarly, the version
-     * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
-     * have its version incremented from a PATCH call. The java service client library uses the PATCH call when updated desired properties,
-     * but it builds the patch such that all properties are included in the patch. As a result, the device side will receive full twin
-     * updates, not partial updates.
-     *
-     * See <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/replacemoduletwin">PUT</a> and
-     * <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/updatemoduletwin">PATCH</a>
-     *
-     * @param deviceTwinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
-     * @param deviceTwinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
-     * @param genericPropertyCallBack the PropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
-     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.
-     * @param <Type1> The type of the desired property key. Since the twin is a json object, the key will always be a String.
-     * @param <Type2> The type of the desired property value.
-     *
-     * @throws IllegalArgumentException if the callback is {@code null}
-     * @throws UnsupportedOperationException if called more than once on the same device
-     * @throws IOException if called when client is not opened
-     */
-    public <Type1, Type2> void startTwin(IotHubEventCallback deviceTwinStatusCallback, Object deviceTwinStatusCallbackContext,
-                          PropertyCallBack<Type1, Type2> genericPropertyCallBack, Object genericPropertyCallBackContext)
-            throws IOException, IllegalArgumentException, UnsupportedOperationException
-    {
-        this.startTwinInternal(deviceTwinStatusCallback, deviceTwinStatusCallbackContext, genericPropertyCallBack, genericPropertyCallBackContext);
-    }
-
-    /**
-     * Starts the module twin. This module client will receive a callback with the current state of the full twin, including
-     * reported properties and desired properties. After that callback is received, this module client will receive a callback
-     * each time a desired property is updated. That callback will either contain the full desired properties set, or
-     * only the updated desired property depending on how the desired property was changed. IoT hub supports a PUT and a PATCH
-     * on the twin. The PUT will cause this module client to receive the full desired properties set, and the PATCH
-     * will cause this module client to only receive the updated desired properties. Similarly, the version
-     * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
-     * have its version incremented from a PATCH call. The java service client library uses the PATCH call when updated desired properties,
-     * but it builds the patch such that all properties are included in the patch. As a result, the device side will receive full twin
-     * updates, not partial updates.
-     *
-     * See <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/replacemoduletwin">PUT</a> and
-     * <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/updatemoduletwin">PATCH</a>
-     *
-     * @param deviceTwinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
-     * @param deviceTwinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
-     * @param genericPropertyCallBack the TwinPropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
-     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.     *
-     *
-     * @throws IllegalArgumentException if the callback is {@code null}
-     * @throws UnsupportedOperationException if called more than once on the same device
-     * @throws IOException if called when client is not opened
-     */
-    public void startTwin(IotHubEventCallback deviceTwinStatusCallback, Object deviceTwinStatusCallbackContext,
-                          TwinPropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext)
-            throws IOException, IllegalArgumentException, UnsupportedOperationException
-    {
-        this.startTwinInternal(deviceTwinStatusCallback, deviceTwinStatusCallbackContext, genericPropertyCallBack, genericPropertyCallBackContext);
-    }
-
-    /**
-     * Starts the module twin. This module client will receive a callback with the current state of the full twin, including
-     * reported properties and desired properties. After that callback is received, this module client will receive a callback
-     * each time a desired property is updated. That callback will either contain the full desired properties set, or
-     * only the updated desired property depending on how the desired property was changed. IoT hub supports a PUT and a PATCH
-     * on the twin. The PUT will cause this module client to receive the full desired properties set, and the PATCH
-     * will cause this module client to only receive the updated desired properties. Similarly, the version
-     * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
-     * have its version incremented from a PATCH call. The java service client library uses the PATCH call when updated desired properties,
-     * but it builds the patch such that all properties are included in the patch. As a result, the device side will receive full twin
-     * updates, not partial updates.
-     *
-     * See <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/replacemoduletwin">PUT</a> and
-     * <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/updatemoduletwin">PATCH</a>
-     *
-     * @param deviceTwinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
-     * @param deviceTwinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
-     * @param genericPropertiesCallBack the TwinPropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
-     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.
-     *
-     * @throws IllegalArgumentException if the callback is {@code null}
-     * @throws UnsupportedOperationException if called more than once on the same device
-     * @throws IOException if called when client is not opened
-     */
-    public void startTwin(IotHubEventCallback deviceTwinStatusCallback, Object deviceTwinStatusCallbackContext,
-                                TwinPropertiesCallback genericPropertiesCallBack, Object genericPropertyCallBackContext)
-            throws IOException, IllegalArgumentException, UnsupportedOperationException
-    {
-        this.startTwinInternal(deviceTwinStatusCallback, deviceTwinStatusCallbackContext, genericPropertiesCallBack, genericPropertyCallBackContext);
-    }
-
-    /**
-     * Subscribes to method invocations on this module. This does not include method invocations on the device the module belongs to
-     *
-     * @param methodCallback Callback on which device methods shall be invoked. Cannot be {@code null}.
-     * @param methodCallbackContext Context for device method callback. Can be {@code null}.
-     * @param methodStatusCallback Callback for providing IotHub status for device methods. Cannot be {@code null}.
-     * @param methodStatusCallbackContext Context for device method status callback. Can be {@code null}.
-     *
-     * @throws IOException if called when client is not opened.
-     * @throws IllegalArgumentException if either callback are null.
-     */
-    public void subscribeToMethod(DeviceMethodCallback methodCallback, Object methodCallbackContext,
-                                  IotHubEventCallback methodStatusCallback, Object methodStatusCallbackContext)
-            throws IOException, IllegalArgumentException
-    {
-        this.subscribeToMethodsInternal(methodCallback, methodCallbackContext, methodStatusCallback, methodStatusCallbackContext);
     }
 
     /**
@@ -606,17 +454,14 @@ public class ModuleClient extends InternalClient
     {
         if (inputName == null || inputName.isEmpty())
         {
-            //Codes_SRS_MODULECLIENT_34_011: [If the provided inputName is null or empty, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("InputName must not be null or empty");
         }
 
         if (callback == null && context != null)
         {
-            //Codes_SRS_MODULECLIENT_34_010: [If the provided callback is null and the provided context is not null, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("Cannot give non-null context for a null callback.");
         }
 
-        //Codes_SRS_MODULECLIENT_34_012: [This function shall save the provided callback with context in config tied to the provided inputName.]
         this.config.setMessageCallback(inputName, callback, context);
         return this;
     }
