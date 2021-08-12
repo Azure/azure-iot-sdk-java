@@ -836,6 +836,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
+            testInstance.testDevicesArrayIdentity.get(i).twinUpdated = true;
             String expectedPropertyKey = UUID.randomUUID().toString();
             String expectedPropertyValue = UUID.randomUUID().toString();
             TwinPropertyCallBackImpl twinPropertyCallBack = new TwinPropertyCallBackImpl(expectedPropertyKey, expectedPropertyValue);
@@ -869,14 +870,16 @@ public class MultiplexingClientTests extends IntegrationTest
         String expectedPropertyKey = UUID.randomUUID().toString();
         String expectedPropertyValue = UUID.randomUUID().toString();
         List<TwinPropertyCallBackImpl> twinPropertyCallBacks = new ArrayList<>();
-        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++) {
-
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            testInstance.testDevicesArrayIdentity.get(i).twinUpdated = true;
             TwinPropertyCallBackImpl twinPropertyCallBack = new TwinPropertyCallBackImpl(expectedPropertyKey, expectedPropertyValue);
             twinPropertyCallBacks.add(twinPropertyCallBack);
             startTwin(testInstance.deviceClientArray.get(i), new EventCallback(IotHubStatusCode.OK), twinPropertyCallBack);
         }
 
-        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++) {
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
             // Testing subscribing to desired properties
             testDesiredPropertiesFlow(testInstance.deviceClientArray.get(i), deviceTwinServiceClient, twinPropertyCallBacks.get(i), expectedPropertyKey, expectedPropertyValue);
 
@@ -888,7 +891,8 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.multiplexingClient.unregisterDeviceClients(testInstance.deviceClientArray);
         testInstance.multiplexingClient.registerDeviceClients(testInstance.deviceClientArray);
 
-        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++) {
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
             boolean expectedExceptionThrown = false;
             try
             {
@@ -906,14 +910,16 @@ public class MultiplexingClientTests extends IntegrationTest
             assertTrue("Expected twin method to throw since twin has not been started since re-registering client", expectedExceptionThrown);
         }
 
-        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++) {
-
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            testInstance.testDevicesArrayIdentity.get(i).twinUpdated = true;
             TwinPropertyCallBackImpl twinPropertyCallBack = new TwinPropertyCallBackImpl(expectedPropertyKey, expectedPropertyValue);
             twinPropertyCallBacks.add(twinPropertyCallBack);
             startTwin(testInstance.deviceClientArray.get(i), new EventCallback(IotHubStatusCode.OK), twinPropertyCallBack);
         }
 
-        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++) {
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
             // Testing subscribing to desired properties
             testDesiredPropertiesFlow(testInstance.deviceClientArray.get(i), deviceTwinServiceClient, twinPropertyCallBacks.get(i), expectedPropertyKey, expectedPropertyValue);
 
@@ -1823,6 +1829,7 @@ public class MultiplexingClientTests extends IntegrationTest
         TwinPropertyCallBackImpl[] twinPropertyCallBacks = new TwinPropertyCallBackImpl[DEVICE_MULTIPLEX_COUNT];
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
+            testInstance.testDevicesArrayIdentity.get(i).twinUpdated = true;
             expectedPropertyKeys[i] = UUID.randomUUID().toString();
             expectedPropertyValues[i] = UUID.randomUUID().toString();
             twinPropertyCallBacks[i] = new TwinPropertyCallBackImpl(expectedPropertyKeys[i], expectedPropertyValues[i]);
