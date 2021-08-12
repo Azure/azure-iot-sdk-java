@@ -813,7 +813,7 @@ public class IotHubTransport implements IotHubListener
 
                     // Since the registration failed, need to remove the device from the list of multiplexed devices
                     DeviceClientConfig configThatFailedToRegister = this.deviceClientConfigs.remove(deviceId);
-                    ((AmqpsIotHubConnection) this.iotHubTransportConnection).unregisterMultiplexedDevice(configThatFailedToRegister);
+                    ((AmqpsIotHubConnection) this.iotHubTransportConnection).unregisterMultiplexedDevice(configThatFailedToRegister, false);
                 }
             }
 
@@ -836,7 +836,7 @@ public class IotHubTransport implements IotHubListener
             if (this.iotHubTransportConnection != null)
             {
                 // Safe cast since amqps and amqps_ws always use this transport connection type.
-                ((AmqpsIotHubConnection) this.iotHubTransportConnection).unregisterMultiplexedDevice(configToRegister);
+                ((AmqpsIotHubConnection) this.iotHubTransportConnection).unregisterMultiplexedDevice(configToRegister, false);
             }
             else
             {
@@ -1266,7 +1266,7 @@ public class IotHubTransport implements IotHubListener
             return;
         }
 
-        ((AmqpsIotHubConnection) this.iotHubTransportConnection).unregisterMultiplexedDevice(config);
+        ((AmqpsIotHubConnection) this.iotHubTransportConnection).unregisterMultiplexedDevice(config, true);
         ((AmqpsIotHubConnection) this.iotHubTransportConnection).registerMultiplexedDevice(config);
     }
 
