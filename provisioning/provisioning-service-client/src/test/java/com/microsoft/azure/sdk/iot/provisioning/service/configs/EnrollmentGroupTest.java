@@ -1076,7 +1076,7 @@ public class EnrollmentGroupTest
         EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
-        enrollmentGroup.setAttestation(null);
+        enrollmentGroup.setAttestation((Attestation) null);
 
         // assert
     }

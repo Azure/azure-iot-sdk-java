@@ -851,7 +851,7 @@ public class IndividualEnrollmentTest
         IndividualEnrollment individualEnrollment = makeStandardEnrollment();
 
         // act
-        individualEnrollment.setAttestation(null);
+        individualEnrollment.setAttestation((Attestation) null);
 
         // assert
     }

@@ -71,7 +71,7 @@ public class X509CertificateWithInfoTest
     {
         // arrange
         // act
-        new X509CertificateWithInfo(null);
+        new X509CertificateWithInfo((X509CertificateWithInfo) null);
         // assert
     }
 
