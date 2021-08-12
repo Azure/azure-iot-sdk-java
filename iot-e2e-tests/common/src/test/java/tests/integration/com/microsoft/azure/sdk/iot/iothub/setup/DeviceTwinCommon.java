@@ -681,14 +681,7 @@ public class DeviceTwinCommon extends IntegrationTest
         }
 
         // act
-        if (testInstance.testIdentity.getClient() instanceof DeviceClient)
-        {
-            ((DeviceClient)testInstance.testIdentity.getClient()).getTwinAsync();
-        }
-        else
-        {
-            ((ModuleClient)testInstance.testIdentity.getClient()).getTwinAsync();
-        }
+        testInstance.testIdentity.getClient().getTwinAsync();
 
         // assert
         assertEquals(TwinConnectionState.CONNECTED.toString(), testInstance.deviceUnderTest.sCDeviceForTwin.getConnectionState());

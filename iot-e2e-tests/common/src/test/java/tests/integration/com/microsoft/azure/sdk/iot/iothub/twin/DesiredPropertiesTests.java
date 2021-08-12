@@ -384,14 +384,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         Success desiredPropertiesCallbackState = new Success();
 
         testInstance.testIdentity.getClient().open();
-        if (testInstance.testIdentity.getClient() instanceof DeviceClient)
-        {
-            ((DeviceClient) testInstance.testIdentity.getClient()).startTwinAsync(new DeviceTwinStatusCallBack(), testInstance.deviceUnderTest, twinPropertiesCallback, desiredPropertiesCallbackState);
-        }
-        else
-        {
-            ((ModuleClient) testInstance.testIdentity.getClient()).startTwinAsync(new DeviceTwinStatusCallBack(), testInstance.deviceUnderTest, twinPropertiesCallback, desiredPropertiesCallbackState);
-        }
+        testInstance.testIdentity.getClient().startTwinAsync(new DeviceTwinStatusCallBack(), testInstance.deviceUnderTest, twinPropertiesCallback, desiredPropertiesCallbackState);
 
         long startTime = System.currentTimeMillis();
         while (testInstance.deviceUnderTest.deviceTwinStatus != IotHubStatusCode.OK)
