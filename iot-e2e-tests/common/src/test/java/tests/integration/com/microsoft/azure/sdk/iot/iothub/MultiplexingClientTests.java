@@ -739,7 +739,7 @@ public class MultiplexingClientTests extends IntegrationTest
     private static void subscribeToDeviceMethod(DeviceClient deviceClient, DeviceMethodCallback deviceMethodCallback) throws InterruptedException, IOException
     {
         Success methodsSubscribedSuccess = new Success();
-        deviceClient.subscribeToDeviceMethod(deviceMethodCallback, null, (responseStatus, callbackContext) -> {
+        deviceClient.subscribeToMethodsAsync(deviceMethodCallback, null, (responseStatus, callbackContext) -> {
             ((Success) callbackContext).setCallbackStatusCode(responseStatus);
             ((Success) callbackContext).setResult(responseStatus == IotHubStatusCode.OK_EMPTY);
             ((Success) callbackContext).callbackWasFired();
@@ -844,7 +844,7 @@ public class MultiplexingClientTests extends IntegrationTest
             // Testing subscribing to desired properties
             Map<Property, Pair<TwinPropertyCallBack, Object>> onDesiredPropertyChange = new HashMap<>();
             onDesiredPropertyChange.put(new Property(expectedPropertyKey, null), new Pair<>(twinPropertyCallBack, null));
-            testInstance.deviceClientArray.get(i).subscribeToTwinDesiredProperties(onDesiredPropertyChange);
+            testInstance.deviceClientArray.get(i).subscribeToTwinDesiredPropertiesAsync(onDesiredPropertyChange);
 
             Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_DESIRED_PROPERTY_SUBSCRIPTION_ACKNOWLEDGEMENT);
 
@@ -924,7 +924,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
     private static void startTwin(DeviceClient deviceClient, IotHubEventCallback twinEventCallback, TwinPropertyCallBack twinPropertyCallBack) throws IOException, InterruptedException {
         Success twinStarted = new Success();
-        deviceClient.startDeviceTwin(twinEventCallback, twinStarted, twinPropertyCallBack, null);
+        deviceClient.startTwinAsync(twinEventCallback, twinStarted, twinPropertyCallBack, null);
 
         long startTime = System.currentTimeMillis();
         while (!twinStarted.wasCallbackFired())
@@ -967,7 +967,7 @@ public class MultiplexingClientTests extends IntegrationTest
         String expectedReportedPropertyValue = expectedPropertyValue + "-reported";
         Set<Property> reportedProperties = new HashSet<>();
         reportedProperties.add(new Property(expectedPropertyKey, expectedReportedPropertyValue));
-        deviceClient.sendReportedProperties(reportedProperties);
+        deviceClient.sendReportedPropertiesAsync(reportedProperties);
 
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_REPORTED_PROPERTY_ACKNOWLEDGEMENT);
 
@@ -1032,7 +1032,7 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.multiplexingClient.open();
 
         ConnectionStatusChangeTracker connectionStatusChangeTracker = new ConnectionStatusChangeTracker();
-        clientToRegisterAfterOpen.registerConnectionStatusChangeCallback(connectionStatusChangeTracker, null);
+        clientToRegisterAfterOpen.setConnectionStatusChangeCallback(connectionStatusChangeTracker, null);
 
         testInstance.multiplexingClient.registerDeviceClient(clientToRegisterAfterOpen);
 
@@ -1053,7 +1053,7 @@ public class MultiplexingClientTests extends IntegrationTest
         DeviceClient clientToUnregisterAfterOpen = testInstance.deviceClientArray.get(0);
 
         ConnectionStatusChangeTracker connectionStatusChangeTracker = new ConnectionStatusChangeTracker();
-        clientToUnregisterAfterOpen.registerConnectionStatusChangeCallback(connectionStatusChangeTracker, null);
+        clientToUnregisterAfterOpen.setConnectionStatusChangeCallback(connectionStatusChangeTracker, null);
 
         testInstance.multiplexingClient.open();
 
@@ -1097,7 +1097,7 @@ public class MultiplexingClientTests extends IntegrationTest
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             connectionStatusChangeTrackers[i] = new ConnectionStatusChangeTracker();
-            testInstance.deviceClientArray.get(i).registerConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
+            testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
         }
 
         testInstance.multiplexingClient.open();
@@ -1152,7 +1152,7 @@ public class MultiplexingClientTests extends IntegrationTest
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             connectionStatusChangeTrackers[i] = new ConnectionStatusChangeTracker();
-            testInstance.deviceClientArray.get(i).registerConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
+            testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
         }
 
         testInstance.multiplexingClient.open();
@@ -1202,7 +1202,7 @@ public class MultiplexingClientTests extends IntegrationTest
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             connectionStatusChangeTrackers[i] = new ConnectionStatusChangeTracker();
-            testInstance.deviceClientArray.get(i).registerConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
+            testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
         }
 
         testInstance.multiplexingClient.registerConnectionStatusChangeCallback(multiplexedConnectionStatusChangeTracker, null);
@@ -1526,7 +1526,7 @@ public class MultiplexingClientTests extends IntegrationTest
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             connectionStatusChangeTrackers[i] = new ConnectionStatusChangeTracker();
-            testInstance.deviceClientArray.get(i).registerConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
+            testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
         }
 
         testInstance.multiplexingClient.open();
@@ -1593,7 +1593,7 @@ public class MultiplexingClientTests extends IntegrationTest
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             connectionStatusChangeTrackers[i] = new ConnectionStatusChangeTracker();
-            testInstance.deviceClientArray.get(i).registerConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
+            testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
         }
 
         // Disable a device that will be on the multiplexed connection when the multiplexed connection hasn't opened yet
@@ -1657,7 +1657,7 @@ public class MultiplexingClientTests extends IntegrationTest
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             connectionStatusChangeTrackers[i] = new ConnectionStatusChangeTracker();
-            testInstance.deviceClientArray.get(i).registerConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
+            testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
         }
 
         testInstance.multiplexingClient.open();

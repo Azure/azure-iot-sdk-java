@@ -41,7 +41,7 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
     DeviceClientManager(DeviceClient deviceClient) {
         this.connectionStatus = ConnectionStatus.DISCONNECTED;
         this.client = deviceClient;
-        this.client.registerConnectionStatusChangeCallback(this, this);
+        this.client.setConnectionStatusChangeCallback(this, this);
     }
 
     public void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext) {

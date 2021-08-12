@@ -105,18 +105,9 @@ public class DeviceEmulator
             deviceMethodStatusCallbackContext = deviceStatus;
         }
 
-        if (client instanceof DeviceClient)
-        {
-            ((DeviceClient)client).subscribeToDeviceMethod(
-                    deviceMethodCallback, deviceMethodCallbackContext,
-                    deviceMethodStatusCallback, deviceMethodStatusCallbackContext);
-        }
-        else if (client instanceof ModuleClient)
-        {
-            ((ModuleClient)client).subscribeToMethod(
-                    deviceMethodCallback, deviceMethodCallbackContext,
-                    deviceMethodStatusCallback, deviceMethodStatusCallbackContext);
-        }
+        client.subscribeToMethodsAsync(
+                deviceMethodCallback, deviceMethodCallbackContext,
+                deviceMethodStatusCallback, deviceMethodStatusCallbackContext);
 
         long startTime = System.currentTimeMillis();
         while (deviceStatus.statusOk == 0)
@@ -177,18 +168,11 @@ public class DeviceEmulator
             propertyCallBackContext = twinChanges;
         }
 
-        if (client instanceof DeviceClient)
-        {
-            ((DeviceClient)client).startDeviceTwin(deviceTwinStatusCallBack, deviceTwinStatusCallbackContext, deviceTwin, propertyCallBackContext);
-        }
-        else if (client instanceof ModuleClient)
-        {
-            ((ModuleClient)client).startTwin(deviceTwinStatusCallBack, deviceTwinStatusCallbackContext, deviceTwin, propertyCallBackContext);
-        }
+        client.startTwinAsync(deviceTwinStatusCallBack, deviceTwinStatusCallbackContext, deviceTwin, propertyCallBackContext);
 
         if(mustSubscribeToDesiredProperties)
         {
-            client.subscribeToDesiredProperties(null);
+            client.subscribeToDesiredPropertiesAsync(null);
         }
     }
 

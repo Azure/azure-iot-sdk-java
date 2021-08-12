@@ -260,7 +260,7 @@ public class SendReceiveModuleSample
         long time = 2400;
         client.setOption("SetSASTokenExpiryTime", time);
 
-        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
+        client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
         client.open();
 

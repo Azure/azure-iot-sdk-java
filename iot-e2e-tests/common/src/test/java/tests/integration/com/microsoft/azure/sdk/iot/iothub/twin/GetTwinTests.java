@@ -18,7 +18,6 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -39,7 +38,7 @@ import java.security.GeneralSecurityException;
 import static junit.framework.TestCase.fail;
 
 /**
- * Test class containing all non error injection tests to be run on JVM and android pertaining to getDeviceTwin/getTwin.
+ * Test class containing all non error injection tests to be run on JVM and android pertaining to getTwinAsync/getTwinAsync.
  */
 @Slf4j
 @IotHubTest

@@ -20,7 +20,6 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubT
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 
 import javax.net.ssl.SSLContext;
-import java.io.IOException;
 import java.util.*;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
@@ -41,7 +40,7 @@ public class TwinPnPTests extends IntegrationTest
     private String ModelId;
 
     @Parameterized.Parameters(name = "{0}_{1}_{2}")
-    public static Collection inputs() throws IOException
+    public static Collection inputs()
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
@@ -86,7 +85,7 @@ public class TwinPnPTests extends IntegrationTest
 
     public TwinPnPTests.TwinPnPTestInstance testInstance;
 
-    public TwinPnPTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
+    public TwinPnPTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType)
     {
         this.testInstance = new TwinPnPTestInstance(protocol, authenticationType, clientType);
     }
@@ -105,7 +104,7 @@ public class TwinPnPTests extends IntegrationTest
         private final DeviceTwin twinServiceClient;
         private DeviceTwinDevice twin;
 
-        public TwinPnPTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
+        public TwinPnPTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType)
         {
             this.protocol = protocol;
             this.authenticationType = authenticationType;

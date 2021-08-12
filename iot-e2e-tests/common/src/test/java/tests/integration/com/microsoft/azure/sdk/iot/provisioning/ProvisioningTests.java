@@ -434,10 +434,10 @@ public class ProvisioningTests extends ProvisioningCommon
         DeviceClient deviceClient = DeviceClient.createFromSecurityProvider(iothubUri, deviceId, testInstance.securityProvider, IotHubClientProtocol.AMQPS);
         deviceClient.open();
         CountDownLatch twinLock = new CountDownLatch(2);
-        deviceClient.startDeviceTwin(new StubTwinCallback(twinLock), null, new StubTwinCallback(twinLock), null);
+        deviceClient.startTwinAsync(new StubTwinCallback(twinLock), null, new StubTwinCallback(twinLock), null);
         Set<Property> reportedProperties = new HashSet<>();
         reportedProperties.add(new Property(expectedReportedPropertyName, expectedReportedPropertyValue));
-        deviceClient.sendReportedProperties(reportedProperties);
+        deviceClient.sendReportedPropertiesAsync(reportedProperties);
         twinLock.await(MAX_TWIN_PROPAGATION_WAIT_SECONDS, TimeUnit.SECONDS);
         deviceClient.closeNow();
     }

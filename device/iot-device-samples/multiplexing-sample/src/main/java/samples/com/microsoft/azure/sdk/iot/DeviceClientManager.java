@@ -9,7 +9,7 @@ import java.io.IOException;
 
 /**
  * This class is in charge of handling reconnection logic and registering callbacks for connection status changes.
- * It will delegate all other calls other than `Open`, `Close` and registerConnectionStatusChangeCallback to the inner client (DeviceClient)
+ * It will delegate all other calls other than `Open`, `Close` and setConnectionStatusChangeCallback to the inner client (DeviceClient)
  */
 @Slf4j
 public class DeviceClientManager extends ClientManagerBase
@@ -44,7 +44,7 @@ public class DeviceClientManager extends ClientManagerBase
     {
         this.dependencyConnectionStatusTracker = dependencyConnectionStatusTracker;
         this.deviceClient = deviceClient;
-        this.deviceClient.registerConnectionStatusChangeCallback(this, this);
+        this.deviceClient.setConnectionStatusChangeCallback(this, this);
     }
 
     /**

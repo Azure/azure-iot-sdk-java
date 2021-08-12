@@ -231,7 +231,7 @@ public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
         IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS, testInstance.testIdentity.getClient());
         // add one new reported property
         testInstance.deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(1);
-        testInstance.testIdentity.getClient().sendReportedProperties(testInstance.deviceUnderTest.dCDeviceForTwin.getReportedProp());
+        testInstance.testIdentity.getClient().sendReportedPropertiesAsync(testInstance.deviceUnderTest.dCDeviceForTwin.getReportedProp());
 
         waitAndVerifyTwinStatusBecomesSuccess();
         // verify if they are received by SC

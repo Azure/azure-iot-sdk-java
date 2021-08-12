@@ -6,7 +6,6 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 import com.azure.core.credential.AzureSasCredential;
-import com.azure.core.credential.TokenCredential;
 import com.google.gson.JsonParser;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinConnectionState;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
@@ -329,14 +328,7 @@ public class DeviceTwinCommon extends IntegrationTest
         if (openDeviceClient)
         {
             client.open();
-            if (client instanceof DeviceClient)
-            {
-                ((DeviceClient) client).startDeviceTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
-            }
-            else
-            {
-                ((ModuleClient) client).startTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
-            }
+            client.startTwinAsync(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
         }
 
         deviceState.deviceTwinStatus = IotHubStatusCode.ERROR;
@@ -546,7 +538,7 @@ public class DeviceTwinCommon extends IntegrationTest
         // Act
         // send max_prop RP all at once
         testInstance.deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(numOfProp);
-        testInstance.testIdentity.getClient().sendReportedProperties(testInstance.deviceUnderTest.dCDeviceForTwin.getReportedProp());
+        testInstance.testIdentity.getClient().sendReportedPropertiesAsync(testInstance.deviceUnderTest.dCDeviceForTwin.getReportedProp());
 
         // Assert
         waitAndVerifyTwinStatusBecomesSuccess();
@@ -560,7 +552,7 @@ public class DeviceTwinCommon extends IntegrationTest
         // Act
         // send max_prop RP all at once
         testInstance.deviceUnderTest.dCDeviceForTwin.createNewReportedArrayProperties(numOfProp);
-        testInstance.testIdentity.getClient().sendReportedProperties(testInstance.deviceUnderTest.dCDeviceForTwin.getReportedProp());
+        testInstance.testIdentity.getClient().sendReportedPropertiesAsync(testInstance.deviceUnderTest.dCDeviceForTwin.getReportedProp());
 
         // Assert
         waitAndVerifyTwinStatusBecomesSuccess();
@@ -635,7 +627,7 @@ public class DeviceTwinCommon extends IntegrationTest
         }
 
         // act
-        testInstance.testIdentity.getClient().subscribeToDesiredProperties(testInstance.deviceUnderTest.dCDeviceForTwin.getDesiredProp());
+        testInstance.testIdentity.getClient().subscribeToDesiredPropertiesAsync(testInstance.deviceUnderTest.dCDeviceForTwin.getDesiredProp());
         Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
         Set<Pair> desiredProperties = new HashSet<>();
@@ -655,7 +647,7 @@ public class DeviceTwinCommon extends IntegrationTest
     {
         IotHubConnectionStatusChangeCallback connectionStatusUpdateCallback = (status, statusChangeReason, throwable, callbackContext) -> actualStatusUpdates.add(new com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<>(status, throwable));
 
-        this.testInstance.testIdentity.getClient().registerConnectionStatusChangeCallback(connectionStatusUpdateCallback, null);
+        this.testInstance.testIdentity.getClient().setConnectionStatusChangeCallback(connectionStatusUpdateCallback, null);
     }
 
     protected void testGetDeviceTwin() throws IOException, InterruptedException, IotHubException
@@ -669,7 +661,7 @@ public class DeviceTwinCommon extends IntegrationTest
             testInstance.deviceUnderTest.dCDeviceForTwin.propertyStateList[i] = propertyState;
             desiredPropertiesCB.put(propertyState.property, new com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<>(testInstance.deviceUnderTest.dCOnProperty, propertyState));
         }
-        testInstance.testIdentity.getClient().subscribeToTwinDesiredProperties(desiredPropertiesCB);
+        testInstance.testIdentity.getClient().subscribeToTwinDesiredPropertiesAsync(desiredPropertiesCB);
         Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
         Set<Pair> desiredProperties = new HashSet<>();
@@ -689,14 +681,7 @@ public class DeviceTwinCommon extends IntegrationTest
         }
 
         // act
-        if (testInstance.testIdentity.getClient() instanceof DeviceClient)
-        {
-            ((DeviceClient)testInstance.testIdentity.getClient()).getDeviceTwin();
-        }
-        else
-        {
-            ((ModuleClient)testInstance.testIdentity.getClient()).getTwin();
-        }
+        testInstance.testIdentity.getClient().getTwinAsync();
 
         // assert
         assertEquals(TwinConnectionState.CONNECTED.toString(), testInstance.deviceUnderTest.sCDeviceForTwin.getConnectionState());

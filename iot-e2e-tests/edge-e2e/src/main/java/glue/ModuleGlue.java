@@ -372,7 +372,7 @@ public class ModuleGlue
             {
                 // After we start the twin, we want to subscribe to twin properties.  This lambda will do that for us.
                 this._deviceTwinStatusCallback.setHandler(res -> {
-                    System.out.printf("startTwin completed - failed = %s%n", (res.failed() ? "true" : "false"));
+                    System.out.printf("startTwinAsync completed - failed = %s%n", (res.failed() ? "true" : "false"));
 
                     if (res.failed())
                     {
@@ -382,7 +382,7 @@ public class ModuleGlue
                     {
                         try
                         {
-                            client.subscribeToTwinDesiredProperties(null);
+                            client.subscribeToTwinDesiredPropertiesAsync(null);
                         } catch (IOException e)
                         {
                             this._deviceTwinStatusCallback.setHandler(null);
@@ -393,8 +393,8 @@ public class ModuleGlue
                     }
                     this._deviceTwinStatusCallback.setHandler(null);
                 });
-                System.out.println("calling startTwin");
-                client.startTwin(this._deviceTwinStatusCallback, null, this._deviceTwinPropertyCallback, null);
+                System.out.println("calling startTwinAsync");
+                client.startTwinAsync(this._deviceTwinStatusCallback, null, this._deviceTwinPropertyCallback, null);
             } catch (IOException e)
             {
                 handler.handle(Future.failedFuture((e)));
@@ -566,7 +566,7 @@ public class ModuleGlue
             callback.setHandler(handler);
             try
             {
-                client.subscribeToMethod(this._methodCallback, null, callback, null);
+                client.subscribeToMethodsAsync(this._methodCallback, null, callback, null);
             } catch (IOException e)
             {
                 handler.handle(Future.failedFuture(e));
@@ -670,7 +670,7 @@ public class ModuleGlue
 
     public void getTwin(String connectionId, Handler<AsyncResult<Object>> handler)
     {
-        System.out.printf("getTwin with %s%n", connectionId);
+        System.out.printf("getTwinAsync with %s%n", connectionId);
 
         ModuleClient client = getClient(connectionId);
         if (client == null)
@@ -682,7 +682,7 @@ public class ModuleGlue
             this._deviceTwinPropertyCallback.setHandler(handler);
             try
             {
-                client.getTwin();
+                client.getTwinAsync();
             } catch (IOException e)
             {
                 this._deviceTwinPropertyCallback.setHandler(null);
@@ -718,7 +718,7 @@ public class ModuleGlue
             this._deviceTwinStatusCallback.setHandler(handler);
             try
             {
-                client.sendReportedProperties(propSet);
+                client.sendReportedPropertiesAsync(propSet);
             } catch (IOException e)
             {
                 this._deviceTwinStatusCallback.setHandler(null);

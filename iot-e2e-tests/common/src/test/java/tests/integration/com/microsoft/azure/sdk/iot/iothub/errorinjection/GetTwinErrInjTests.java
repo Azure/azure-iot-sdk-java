@@ -266,14 +266,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
             propertyState.propertyNewVersion = -1;
         }
 
-        if (testInstance.testIdentity.getClient() instanceof DeviceClient)
-        {
-            ((DeviceClient)testInstance.testIdentity.getClient()).getDeviceTwin();
-        }
-        else
-        {
-            ((ModuleClient)testInstance.testIdentity.getClient()).getTwin();
-        }
+        testInstance.testIdentity.getClient().getTwinAsync();
 
         waitAndVerifyTwinStatusBecomesSuccess();
         waitAndVerifyDesiredPropertyCallback(PROPERTY_VALUE_UPDATE, true);

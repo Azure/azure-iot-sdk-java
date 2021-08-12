@@ -35,9 +35,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
@@ -197,7 +194,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         }
 
         // act
-        testInstance.testIdentity.getClient().subscribeToTwinDesiredProperties(desiredPropertiesCB);
+        testInstance.testIdentity.getClient().subscribeToTwinDesiredPropertiesAsync(desiredPropertiesCB);
         Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
         Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
@@ -239,7 +236,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         }
 
         // act
-        testInstance.testIdentity.getClient().subscribeToDesiredProperties(testInstance.deviceUnderTest.dCDeviceForTwin.getDesiredProp());
+        testInstance.testIdentity.getClient().subscribeToDesiredPropertiesAsync(testInstance.deviceUnderTest.dCDeviceForTwin.getDesiredProp());
         Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
@@ -365,7 +362,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         }
     }
 
-    // This test is for the startDeviceTwin/startTwin API that takes the TwinPropertiesCallback rather than the TwinPropertyCallback
+    // This test is for the startTwinAsync/startTwinAsync API that takes the TwinPropertiesCallback rather than the TwinPropertyCallback
     // This callback should receive the full twin update in one callback, rather than one callback per updated
     // desired property
     @Test
@@ -387,14 +384,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         Success desiredPropertiesCallbackState = new Success();
 
         testInstance.testIdentity.getClient().open();
-        if (testInstance.testIdentity.getClient() instanceof DeviceClient)
-        {
-            ((DeviceClient) testInstance.testIdentity.getClient()).startDeviceTwin(new DeviceTwinStatusCallBack(), testInstance.deviceUnderTest, twinPropertiesCallback, desiredPropertiesCallbackState);
-        }
-        else
-        {
-            ((ModuleClient) testInstance.testIdentity.getClient()).startTwin(new DeviceTwinStatusCallBack(), testInstance.deviceUnderTest, twinPropertiesCallback, desiredPropertiesCallbackState);
-        }
+        testInstance.testIdentity.getClient().startTwinAsync(new DeviceTwinStatusCallBack(), testInstance.deviceUnderTest, twinPropertiesCallback, desiredPropertiesCallbackState);
 
         long startTime = System.currentTimeMillis();
         while (testInstance.deviceUnderTest.deviceTwinStatus != IotHubStatusCode.OK)
