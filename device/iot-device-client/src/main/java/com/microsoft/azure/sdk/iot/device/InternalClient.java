@@ -135,7 +135,7 @@ public class InternalClient
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
     }
 
-    //unused
+    //for mocking purposes only
     InternalClient()
     {
         this.config = null;
