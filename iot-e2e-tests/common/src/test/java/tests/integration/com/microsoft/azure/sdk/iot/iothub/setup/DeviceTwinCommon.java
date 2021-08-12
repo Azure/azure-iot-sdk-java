@@ -328,14 +328,7 @@ public class DeviceTwinCommon extends IntegrationTest
         if (openDeviceClient)
         {
             client.open();
-            if (client instanceof DeviceClient)
-            {
-                ((DeviceClient) client).startTwinAsync(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
-            }
-            else
-            {
-                ((ModuleClient) client).startTwinAsync(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
-            }
+            client.startTwinAsync(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
         }
 
         deviceState.deviceTwinStatus = IotHubStatusCode.ERROR;
