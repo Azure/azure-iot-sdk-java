@@ -315,7 +315,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      * @throws IllegalArgumentException if the message provided is {@code null}.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
      */
-    public synchronized void sendEventAsync(Message message,
+    public void sendEventAsync(Message message,
                                IotHubEventCallback callback,
                                Object callbackContext,
                                String deviceId)

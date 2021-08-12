@@ -207,7 +207,7 @@ public class DeviceTwin
      * @throws IOException This exception is thrown if the IO operation failed.
      * @throws IotHubException This exception is thrown if the response verification failed.
      */
-    public synchronized void updateTwin(DeviceTwinDevice device) throws IotHubException, IOException
+    public void updateTwin(DeviceTwinDevice device) throws IotHubException, IOException
     {
         if (device == null || device.getDeviceId() == null || device.getDeviceId().length() == 0)
         {
@@ -244,34 +244,6 @@ public class DeviceTwin
                 options.getHttpConnectTimeout(),
                 options.getHttpReadTimeout(),
                 proxy);
-    }
-
-    /**
-     * This method replaces desired properties for the specified device. desired properties can be input
-     * via device's
-     * {@link com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice#setDesiredProperties(TwinCollection)}
-     * method.
-     *
-     * @param device The device with a valid id for which device twin is to be updated.
-     * @throws UnsupportedOperationException This exception is always thrown.
-     */
-    public void replaceDesiredProperties(DeviceTwinDevice device) throws UnsupportedOperationException
-    {
-        // Currently this is not supported by service
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * This method replaces tags for the specified device. Tags can be input via device's
-     * {@link com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice#setTags(TwinCollection)} method.
-     *
-     * @param device The device with a valid Id for which device twin is to be updated.
-     * @throws UnsupportedOperationException This exception is always thrown.
-     */
-    public void replaceTags(DeviceTwinDevice device) throws UnsupportedOperationException
-    {
-        // Currently this is not supported by service
-        throw new UnsupportedOperationException();
     }
 
     /**
@@ -352,7 +324,7 @@ public class DeviceTwin
      * @throws IotHubException If query request was not successful at the Iot hub.
      * @throws IOException If input parameters are invalid.
      */
-    public synchronized Query queryTwin(String sqlQuery, Integer pageSize) throws IotHubException, IOException
+    public Query queryTwin(String sqlQuery, Integer pageSize) throws IotHubException, IOException
     {
         if (sqlQuery == null || sqlQuery.length() == 0)
         {
@@ -390,7 +362,7 @@ public class DeviceTwin
      * @throws IotHubException If query request was not successful at the Iot hub.
      * @throws IOException If input parameters are invalid.
      */
-    public synchronized Query queryTwin(String sqlQuery) throws IotHubException, IOException
+    public Query queryTwin(String sqlQuery) throws IotHubException, IOException
     {
         return this.queryTwin(sqlQuery, DEFAULT_PAGE_SIZE);
     }
@@ -403,7 +375,7 @@ public class DeviceTwin
      * @return The created {@link QueryCollection} object that can be used to query the service.
      * @throws MalformedURLException If twin query URL is not correct.
      */
-    public synchronized QueryCollection queryTwinCollection(String sqlQuery) throws MalformedURLException
+    public QueryCollection queryTwinCollection(String sqlQuery) throws MalformedURLException
     {
         return this.queryTwinCollection(sqlQuery, DEFAULT_PAGE_SIZE);
     }
@@ -417,7 +389,7 @@ public class DeviceTwin
      * @return The created QueryCollection object that can be used to query the service.
      * @throws MalformedURLException If twin query URL is not correct.
      */
-    public synchronized QueryCollection queryTwinCollection(String sqlQuery, Integer pageSize) throws MalformedURLException
+    public QueryCollection queryTwinCollection(String sqlQuery, Integer pageSize) throws MalformedURLException
     {
         ProxyOptions proxyOptions = options.getProxyOptions();
         Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
@@ -473,7 +445,7 @@ public class DeviceTwin
      * @throws IotHubException If Iot hub could not respond back to the query successfully.
      * @throws IOException If input parameter is incorrect.
      */
-    public synchronized boolean hasNextDeviceTwin(Query deviceTwinQuery) throws IotHubException, IOException
+    public boolean hasNextDeviceTwin(Query deviceTwinQuery) throws IotHubException, IOException
     {
         if (deviceTwinQuery == null)
         {
@@ -492,7 +464,7 @@ public class DeviceTwin
      * @throws IotHubException If an unsuccessful response from IoT Hub is received.
      * @throws NoSuchElementException If no additional element was found.
      */
-    public synchronized DeviceTwinDevice getNextDeviceTwin(Query deviceTwinQuery)
+    public DeviceTwinDevice getNextDeviceTwin(Query deviceTwinQuery)
             throws IOException, IotHubException, NoSuchElementException
     {
         if (deviceTwinQuery == null)
@@ -519,7 +491,7 @@ public class DeviceTwin
      * @return {@code True} if the provided deviceTwinQueryCollection has a next page to query, {@code false} otherwise.
      * @throws IllegalArgumentException if the provided deviceTwinQueryCollection is null.
      */
-    public synchronized boolean hasNext(QueryCollection deviceTwinQueryCollection)
+    public boolean hasNext(QueryCollection deviceTwinQueryCollection)
     {
         if (deviceTwinQueryCollection == null)
         {
@@ -542,7 +514,7 @@ public class DeviceTwin
      * @throws IOException If an {@link IotHubException} occurs when querying the service or if the results of that
      * query doesn't match expectations.
      */
-    public synchronized QueryCollectionResponse<DeviceTwinDevice> next(
+    public QueryCollectionResponse<DeviceTwinDevice> next(
             QueryCollection deviceTwinQueryCollection) throws IOException, IotHubException
     {
         QueryOptions options = new QueryOptions();
@@ -568,7 +540,7 @@ public class DeviceTwin
      * @throws IOException If an {@link IotHubException} occurs when querying the service or if the results of that
      * query doesn't match expectations.
      */
-    public synchronized QueryCollectionResponse<DeviceTwinDevice> next(
+    public QueryCollectionResponse<DeviceTwinDevice> next(
             QueryCollection deviceTwinQueryCollection,
             QueryOptions options) throws IOException, IotHubException
     {

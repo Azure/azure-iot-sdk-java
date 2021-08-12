@@ -143,7 +143,7 @@ public class DeviceMethod
      * @throws IotHubException This exception is thrown if the response verification failed.
      * @throws IOException This exception is thrown if the IO operation failed.
      */
-    public synchronized MethodResult invoke(
+    public MethodResult invoke(
         String deviceId,
         String methodName,
         Long responseTimeoutInSeconds,
@@ -177,7 +177,7 @@ public class DeviceMethod
      * @throws IotHubException This exception is thrown if the response verification failed.
      * @throws IOException This exception is thrown if the IO operation failed.
      */
-    public synchronized MethodResult invoke(
+    public MethodResult invoke(
         String deviceId,
         String moduleId,
         String methodName,
@@ -217,7 +217,7 @@ public class DeviceMethod
      * @throws IotHubException This exception is thrown if the response verification failed.
      * @throws IOException This exception is thrown if the IO operation failed.
      */
-    private synchronized MethodResult invokeMethod(
+    private MethodResult invokeMethod(
         URL url,
         String methodName,
         Long responseTimeoutInSeconds,

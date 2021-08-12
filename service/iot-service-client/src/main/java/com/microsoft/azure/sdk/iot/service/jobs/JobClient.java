@@ -159,7 +159,7 @@ public class JobClient
      * @throws IOException if the function cannot create a URL for the job
      * @throws IotHubException if the http request failed
      */
-    public synchronized JobResult scheduleUpdateTwin(
+    public JobResult scheduleUpdateTwin(
         String jobId,
         String queryCondition,
         DeviceTwinDevice updateTwin,
@@ -239,7 +239,7 @@ public class JobClient
      * @throws IOException if the function cannot create a URL for the job, or the IO failed on request
      * @throws IotHubException if the http request failed
      */
-    public synchronized JobResult scheduleDeviceMethod(
+    public JobResult scheduleDeviceMethod(
         String jobId,
         String queryCondition,
         String methodName,
@@ -322,7 +322,7 @@ public class JobClient
      * @throws IOException if the function cannot create a URL for the job, or the IO failed on request
      * @throws IotHubException if the http request failed
      */
-    public synchronized JobResult getJob(String jobId)
+    public JobResult getJob(String jobId)
         throws IllegalArgumentException, IOException, IotHubException
     {
         URL url;
@@ -365,7 +365,7 @@ public class JobClient
      * @throws IOException if the function cannot create a URL for the job, or the IO failed on request
      * @throws IotHubException if the http request failed
      */
-    public synchronized JobResult cancelJob(String jobId)
+    public JobResult cancelJob(String jobId)
         throws IllegalArgumentException, IOException, IotHubException
     {
         URL url;
@@ -461,7 +461,7 @@ public class JobClient
      * @throws IotHubException When IotHub fails to respond
      * @throws IOException When any of the parameters are incorrect
      */
-    public synchronized Query queryDeviceJob(String sqlQuery, Integer pageSize) throws IotHubException, IOException
+    public Query queryDeviceJob(String sqlQuery, Integer pageSize) throws IotHubException, IOException
     {
         if (sqlQuery == null || sqlQuery.length() == 0)
         {
@@ -499,7 +499,7 @@ public class JobClient
      * @throws IotHubException When IotHub fails to respond
      * @throws IOException When any of the parameters are incorrect
      */
-    public synchronized Query queryDeviceJob(String sqlQuery) throws IotHubException, IOException
+    public Query queryDeviceJob(String sqlQuery) throws IotHubException, IOException
     {
         return queryDeviceJob(sqlQuery, DEFAULT_PAGE_SIZE);
     }
@@ -512,7 +512,7 @@ public class JobClient
      * @throws IotHubException When IotHub fails to respond
      * @throws IOException if any of the input parameters are incorrect
      */
-    public synchronized boolean hasNextJob(Query query) throws IotHubException, IOException
+    public boolean hasNextJob(Query query) throws IotHubException, IOException
     {
         if (query == null)
         {
@@ -531,7 +531,7 @@ public class JobClient
      * @throws IOException if any of the input parameters are incorrect
      * @throws NoSuchElementException if called when no further responses are left
      */
-    public synchronized JobResult getNextJob(Query query) throws IOException, IotHubException, NoSuchElementException
+    public JobResult getNextJob(Query query) throws IOException, IotHubException, NoSuchElementException
     {
         if (query == null)
         {
@@ -560,7 +560,7 @@ public class JobClient
      * @throws IOException If any of the input parameters are incorrect
      * @throws IotHubException If IotHub failed to respond
      */
-    public synchronized Query queryJobResponse(JobType jobType, JobStatus jobStatus, Integer pageSize)
+    public Query queryJobResponse(JobType jobType, JobStatus jobStatus, Integer pageSize)
         throws IOException, IotHubException
     {
         if (pageSize <= 0)
@@ -597,7 +597,7 @@ public class JobClient
      * @throws IOException If any of the input parameters are incorrect
      * @throws IotHubException If IotHub failed to respond
      */
-    public synchronized Query queryJobResponse(JobType jobType, JobStatus jobStatus)
+    public Query queryJobResponse(JobType jobType, JobStatus jobStatus)
         throws IotHubException, IOException
     {
         return queryJobResponse(jobType, jobStatus, DEFAULT_PAGE_SIZE);
