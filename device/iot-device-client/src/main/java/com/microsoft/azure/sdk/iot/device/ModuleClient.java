@@ -117,7 +117,7 @@ public class ModuleClient extends InternalClient
      * @param sasTokenProvider The provider of all SAS tokens that are used during authentication.
      * @param protocol The protocol that the client will connect over.
      */
-    public ModuleClient(String hostName, String deviceId, String moduleId, SasTokenProvider sasTokenProvider, IotHubClientProtocol protocol)
+    private ModuleClient(String hostName, String deviceId, String moduleId, SasTokenProvider sasTokenProvider, IotHubClientProtocol protocol)
     {
         this(hostName, deviceId, moduleId, sasTokenProvider, protocol, null);
     }
@@ -134,7 +134,7 @@ public class ModuleClient extends InternalClient
      * @param protocol The protocol that the client will connect over.
      * @param clientOptions The options that allow configuration of the module client instance during initialization.
      */
-    public ModuleClient(String hostName, String deviceId, String moduleId, SasTokenProvider sasTokenProvider, IotHubClientProtocol protocol, ClientOptions clientOptions)
+    private ModuleClient(String hostName, String deviceId, String moduleId, SasTokenProvider sasTokenProvider, IotHubClientProtocol protocol, ClientOptions clientOptions)
     {
         super(hostName, deviceId, moduleId, sasTokenProvider, protocol, clientOptions, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
         commonConstructorVerifications(protocol, this.getConfig());

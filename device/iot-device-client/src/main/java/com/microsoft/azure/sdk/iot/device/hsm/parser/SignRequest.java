@@ -14,8 +14,9 @@ import javax.crypto.Mac;
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 
 // This suppression below is addressing warnings of fields used for serialization.
-@SuppressWarnings({"FieldCanBeLocal", "unused"}) // A number of private members are unused but may be filled in or used by serialization
-public class SignRequest
+@SuppressWarnings({"FieldCanBeLocal", "unused"})
+public // A number of private members are unused but may be filled in or used by serialization
+class SignRequest
 {
     private static final String KEY_ID_NAME = "keyId";
     @Expose(deserialize = false)

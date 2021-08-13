@@ -18,7 +18,6 @@ import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOError;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -358,7 +357,7 @@ public class InternalClient
      * @throws IOException if called when client is not opened or called before starting twin.
      * @throws IllegalArgumentException if reportedProperties is null or empty or if version is negative
      */
-    public void sendReportedPropertiesAsync(Set<Property> reportedProperties, Integer version, CorrelatingMessageCallback correlatingMessageCallback, Object correlatingMessageCallbackContext, IotHubEventCallback reportedPropertiesCallback, Object reportedPropertiesCallbackContext) throws IOException, IllegalArgumentException
+    private void sendReportedPropertiesAsync(Set<Property> reportedProperties, Integer version, CorrelatingMessageCallback correlatingMessageCallback, Object correlatingMessageCallbackContext, IotHubEventCallback reportedPropertiesCallback, Object reportedPropertiesCallbackContext) throws IOException, IllegalArgumentException
     {
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
@@ -1020,7 +1019,7 @@ public class InternalClient
         this.config.setProxy(proxySettings);
     }
 
-    protected void setAsMultiplexed()
+    void setAsMultiplexed()
     {
         this.isMultiplexed = true;
     }

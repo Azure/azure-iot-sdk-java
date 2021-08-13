@@ -9,7 +9,6 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.hsm.HsmException;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 /**
  * Interface for a valid signature provider

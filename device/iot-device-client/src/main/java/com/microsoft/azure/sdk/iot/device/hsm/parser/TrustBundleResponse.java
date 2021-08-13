@@ -12,8 +12,9 @@ import com.google.gson.annotations.SerializedName;
 /**
  * The json parser for the response from an HSM that contains the certificates to be trusted
  */
-@SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
-public class TrustBundleResponse
+@SuppressWarnings("unused")
+public // A number of private members are unused but may be filled in or used by serialization
+class TrustBundleResponse
 {
     private static final String CERTIFICATE_NAME = "certificate";
     @Expose(serialize = false)

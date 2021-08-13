@@ -15,7 +15,7 @@ public class SignResponse
     private static final String DIGEST_NAME = "digest";
     @Expose
     @SerializedName(DIGEST_NAME)
-    public String digest;
+    private String digest;
 
     public String getDigest()
     {

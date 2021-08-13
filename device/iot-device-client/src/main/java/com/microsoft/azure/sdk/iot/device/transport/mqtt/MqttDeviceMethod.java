@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Queue;
 
 @Slf4j
-public class MqttDeviceMethod extends Mqtt
+class MqttDeviceMethod extends Mqtt
 {
     private final String subscribeTopic;
     private final String responseTopic;
