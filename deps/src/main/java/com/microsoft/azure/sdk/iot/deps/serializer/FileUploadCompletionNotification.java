@@ -118,7 +118,7 @@ public class FileUploadCompletionNotification
     /**
      * @return the correlationId that correlates this FileUploadCompletionNotification to the earlier request to get the SAS URI
      */
-    private String getCorrelationId()
+    public String getCorrelationId()
     {
         return this.correlationId;
     }
@@ -126,7 +126,7 @@ public class FileUploadCompletionNotification
     /**
      * @return Get if the file upload was successful
      */
-    private Boolean getSuccess()
+    public Boolean getSuccess()
     {
         return this.isSuccess;
     }
@@ -143,7 +143,7 @@ public class FileUploadCompletionNotification
     /**
      * @return get the status code associated with this file upload.
      */
-    private Integer getStatusCode()
+    public Integer getStatusCode()
     {
         return this.statusCode;
     }
@@ -160,7 +160,7 @@ public class FileUploadCompletionNotification
     /**
      * @return get the status description associated with this file upload.
      */
-    private String getStatusDescription()
+    public String getStatusDescription()
     {
         return this.statusDescription;
     }
