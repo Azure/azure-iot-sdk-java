@@ -66,7 +66,7 @@ public class FileUploadCompletionNotification
      * Construct this notification with json
      * @param json the json to parse.
      */
-    public FileUploadCompletionNotification(String json)
+    private FileUploadCompletionNotification(String json)
     {
         Gson gson = new GsonBuilder().disableHtmlEscaping().serializeNulls().create();
         FileUploadCompletionNotification fileUploadCompletionNotification;
@@ -118,7 +118,7 @@ public class FileUploadCompletionNotification
     /**
      * @return the correlationId that correlates this FileUploadCompletionNotification to the earlier request to get the SAS URI
      */
-    public String getCorrelationId()
+    private String getCorrelationId()
     {
         return this.correlationId;
     }
@@ -126,7 +126,7 @@ public class FileUploadCompletionNotification
     /**
      * @return Get if the file upload was successful
      */
-    public Boolean getSuccess()
+    private Boolean getSuccess()
     {
         return this.isSuccess;
     }
@@ -143,7 +143,7 @@ public class FileUploadCompletionNotification
     /**
      * @return get the status code associated with this file upload.
      */
-    public Integer getStatusCode()
+    private Integer getStatusCode()
     {
         return this.statusCode;
     }
@@ -160,7 +160,7 @@ public class FileUploadCompletionNotification
     /**
      * @return get the status description associated with this file upload.
      */
-    public String getStatusDescription()
+    private String getStatusDescription()
     {
         return this.statusDescription;
     }

@@ -14,16 +14,12 @@ import java.util.Map;
 
 public class AmqpDeviceOperations
 {
-    @SuppressWarnings("CanBeFinal") // Can be inherited and changed somewhere else besides the constructor
-    protected String senderLinkTag;
-    @SuppressWarnings({"CanBeFinal", "unused"}) // Can be inherited and changed somewhere else besides the constructor
-    protected String receiverLinkTag;
+    private final String senderLinkTag;
+    private final String receiverLinkTag;
+    private final Map<Symbol, Object> amqpProperties = new HashMap<>();
 
-    @SuppressWarnings("CanBeFinal") // Can be inherited and changed somewhere else besides the constructor
-    protected Map<Symbol, Object> amqpProperties = new HashMap<>();
-
-    protected Sender senderLink;
-    protected Receiver receiverLink;
+    private Sender senderLink;
+    private Receiver receiverLink;
 
     protected String amqpLinkAddress;
 

@@ -11,7 +11,7 @@ public class ConfigurationInfo
     private static final String STATUS_NAME = "status";
     @Expose
     @SerializedName(STATUS_NAME)
-    protected ConfigurationStatus status;
+    private ConfigurationStatus status;
 
     /**
      * Setter for status

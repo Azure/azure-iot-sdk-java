@@ -456,7 +456,7 @@ public class ParserUtility
         }
     }
 
-    public static Object getJsonPrimitiveValue(JsonPrimitive jsonPrimitive)
+    private static Object getJsonPrimitiveValue(JsonPrimitive jsonPrimitive)
     {
         if (jsonPrimitive.isNumber())
         {
@@ -481,7 +481,7 @@ public class ParserUtility
         return map;
     }
 
-    public static List<Object> getJsonArrayValue(JsonArray jsonArray)
+    private static List<Object> getJsonArrayValue(JsonArray jsonArray)
     {
         List<Object> list = new ArrayList<>();
         for (JsonElement element : jsonArray.getAsJsonArray())

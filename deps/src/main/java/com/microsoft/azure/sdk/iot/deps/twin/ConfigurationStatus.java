@@ -8,20 +8,8 @@ import com.google.gson.annotations.SerializedName;
 public enum ConfigurationStatus
 {
     @SerializedName("targeted")
-    TARGETED(1),
+    TARGETED,
 
     @SerializedName("applied")
-    APPLIED(2);
-
-    private final int numVal;
-
-    ConfigurationStatus(int numVal)
-    {
-        this.numVal = numVal;
-    }
-
-    public int getNumVal()
-    {
-        return numVal;
-    }
+    APPLIED;
 }
