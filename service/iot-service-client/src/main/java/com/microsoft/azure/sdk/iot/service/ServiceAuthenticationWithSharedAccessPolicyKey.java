@@ -11,7 +11,7 @@ package com.microsoft.azure.sdk.iot.service;
  * ServiceAuthenticationWithSharedAccessPolicyKey type policy on
  * given IotHubConnectionString object.
  */
-public class ServiceAuthenticationWithSharedAccessPolicyKey extends AuthenticationMethod
+class ServiceAuthenticationWithSharedAccessPolicyKey extends AuthenticationMethod
 {
     /**
      * Constructor to create instance from policy name and policy key
@@ -19,7 +19,7 @@ public class ServiceAuthenticationWithSharedAccessPolicyKey extends Authenticati
      * @param policyName The policy name string
      * @param key The policy key string
      */
-    public ServiceAuthenticationWithSharedAccessPolicyKey(String policyName, String key)
+    ServiceAuthenticationWithSharedAccessPolicyKey(String policyName, String key)
     {
         this.policyName = policyName;
         this.key = key;
@@ -57,7 +57,7 @@ public class ServiceAuthenticationWithSharedAccessPolicyKey extends Authenticati
      * Getter for policy name
      * @return The policy name string
      */
-    public String getPolicyName()
+    String getPolicyName()
     {
         return this.policyName;
     }
@@ -76,7 +76,7 @@ public class ServiceAuthenticationWithSharedAccessPolicyKey extends Authenticati
      * Getter for policy key
      * @return The policy key string
      */
-    public String getKey()
+    String getKey()
     {
         return this.key;
     }

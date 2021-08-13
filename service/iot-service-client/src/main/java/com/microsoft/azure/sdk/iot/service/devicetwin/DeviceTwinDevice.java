@@ -291,7 +291,7 @@ public class DeviceTwinDevice
      *
      * @param reportedProperties A map of validated key/value pairs for reported properties.
      */
-    protected void setReportedProperties(TwinCollection reportedProperties)
+    void setReportedProperties(TwinCollection reportedProperties)
     {
         this.reportedProperties = reportedProperties;
     }
@@ -301,7 +301,7 @@ public class DeviceTwinDevice
      *
      * @param desiredProperties A map of validated key/value pairs for desired properties.
      */
-    protected void setDesiredProperties(TwinCollection desiredProperties)
+    void setDesiredProperties(TwinCollection desiredProperties)
     {
         this.desiredProperties = desiredProperties;
     }
@@ -311,7 +311,7 @@ public class DeviceTwinDevice
      *
      * @param tag A map of validated key/value pairs for tags.
      */
-    protected void setTags(TwinCollection tag)
+    void setTags(TwinCollection tag)
     {
         this.tag = tag;
     }
@@ -321,7 +321,7 @@ public class DeviceTwinDevice
      *
      * @return  A map of validated key/value pairs for tags.
      */
-    protected TwinCollection getTagsMap()
+    TwinCollection getTagsMap()
     {
         return this.tag;
     }
@@ -351,7 +351,7 @@ public class DeviceTwinDevice
      *
      * @param configurations Is the configuration properties.
      */
-    protected void setConfigurations(Map<String, ConfigurationInfo> configurations)
+    void setConfigurations(Map<String, ConfigurationInfo> configurations)
     {
         this.configurations = configurations;
     }
@@ -371,7 +371,7 @@ public class DeviceTwinDevice
      *
      * @param capabilities The value of capabilities.
      */
-    protected void setCapabilities(DeviceCapabilities capabilities)
+    void setCapabilities(DeviceCapabilities capabilities)
     {
         this.capabilities = capabilities;
     }
@@ -399,7 +399,7 @@ public class DeviceTwinDevice
      *
      * @param connectionState The state to set.
      */
-    protected void setConnectionState(String connectionState)
+    void setConnectionState(String connectionState)
     {
         this.connectionState = connectionState;
     }
@@ -409,14 +409,14 @@ public class DeviceTwinDevice
      *
      * @param deviceScope The device scope to set.
      */
-    protected void setDeviceScope(String deviceScope) { this.deviceScope = deviceScope; }
+    void setDeviceScope(String deviceScope) { this.deviceScope = deviceScope; }
 
     /**
      * Sets the parent scopes.
      *
      * @param parentScopes The parent scopes.
      */
-    protected void setParentScopes(List<String> parentScopes) { this.parentScopes = parentScopes; }
+    void setParentScopes(List<String> parentScopes) { this.parentScopes = parentScopes; }
 
     /**
      * String representation for this device containing device Id, tags, desired and reported properties.

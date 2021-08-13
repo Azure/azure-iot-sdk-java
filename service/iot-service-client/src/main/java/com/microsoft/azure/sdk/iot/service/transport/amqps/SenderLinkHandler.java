@@ -23,18 +23,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-public abstract class SenderLinkHandler extends BaseHandler
+abstract class SenderLinkHandler extends BaseHandler
 {
     private static final String API_VERSION_KEY = "com.microsoft:api-version";
-    final Map<Symbol, Object> amqpProperties;
+    private final Map<Symbol, Object> amqpProperties;
     @SuppressWarnings("unused") // protected member may be used for expansion
     String senderLinkTag;
-    final String linkCorrelationId;
+    private final String linkCorrelationId;
     String senderLinkAddress;
     final Sender senderLink;
     private long nextTag = 0;
 
-    protected final LinkStateCallback linkStateCallback;
+    private final LinkStateCallback linkStateCallback;
 
     protected abstract String getLinkInstanceType();
 

@@ -16,22 +16,22 @@ import java.net.URL;
  */
 public class IotHubConnectionString extends IotHubConnectionStringBuilder
 {
-    protected static final String VALUE_PAIR_DELIMITER = ";";
-    protected static final String VALUE_PAIR_SEPARATOR = "=";
-    protected static final String HOST_NAME_SEPARATOR = ".";
+    static final String VALUE_PAIR_DELIMITER = ";";
+    static final String VALUE_PAIR_SEPARATOR = "=";
+    static final String HOST_NAME_SEPARATOR = ".";
 
-    protected static final String HOST_NAME_PROPERTY_NAME = "HostName";
-    protected static final String SHARED_ACCESS_KEY_NAME_PROPERTY_NAME = "SharedAccessKeyName";
-    protected static final String SHARED_ACCESS_KEY_PROPERTY_NAME = "SharedAccessKey";
-    protected static final String SHARED_ACCESS_SIGNATURE_PROPERTY_NAME = "SharedAccessSignature";
+    static final String HOST_NAME_PROPERTY_NAME = "HostName";
+    static final String SHARED_ACCESS_KEY_NAME_PROPERTY_NAME = "SharedAccessKeyName";
+    static final String SHARED_ACCESS_KEY_PROPERTY_NAME = "SharedAccessKey";
+    static final String SHARED_ACCESS_SIGNATURE_PROPERTY_NAME = "SharedAccessSignature";
 
     // Included in the device connection string
-    protected String hostName;
-    protected String iotHubName;
-    protected AuthenticationMethod authenticationMethod;
-    protected String sharedAccessKeyName;
-    protected String sharedAccessKey;
-    protected String sharedAccessSignature;
+    String hostName;
+    String iotHubName;
+    AuthenticationMethod authenticationMethod;
+    String sharedAccessKeyName;
+    String sharedAccessKey;
+    String sharedAccessSignature;
 
     // Connection
     private static final String URL_SEPARATOR_0 = "/";
@@ -64,7 +64,7 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     // configurations
     private static final String URL_PATH_APPLY_CONTENT_CONFIGURATION = "applyConfigurationContent";
 
-    protected IotHubConnectionString()
+    IotHubConnectionString()
     {
 
     }
@@ -918,7 +918,7 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
      *
      * @param sharedAccessKeyName The value of the signature to set
      */
-    protected void setSharedAccessKeyName(String sharedAccessKeyName)
+    void setSharedAccessKeyName(String sharedAccessKeyName)
     {
         this.sharedAccessKeyName = sharedAccessKeyName;
     }
@@ -928,7 +928,7 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
      *
      * @param sharedAccessKey The value of the signature to set
      */
-    protected void setSharedAccessKey(String sharedAccessKey)
+    void setSharedAccessKey(String sharedAccessKey)
     {
         this.sharedAccessKey = sharedAccessKey;
     }
@@ -938,7 +938,7 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
      *
      * @param sharedAccessSignature The value of the signature to set
      */
-    protected void setSharedAccessSignature(String sharedAccessSignature)
+    void setSharedAccessSignature(String sharedAccessSignature)
     {
         this.sharedAccessSignature = sharedAccessSignature;
     }

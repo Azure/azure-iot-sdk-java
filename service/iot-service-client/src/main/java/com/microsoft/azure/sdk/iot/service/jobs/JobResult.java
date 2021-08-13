@@ -87,8 +87,6 @@ public class JobResult
     // The jobId of the parent orchestration, if any.
     private final String parentJobId;
 
-    // The outcome of the job in query, if any.
-    private String outcome = null;
     private MethodResult outcomeResult = null;
 
     // The error message of the job in query, if any.
@@ -131,8 +129,6 @@ public class JobResult
 
         if (jobsResponseParser.getOutcome() != null)
         {
-            this.outcome = jobsResponseParser.getOutcome().toJson();
-
             if (this.jobType == JobType.scheduleDeviceMethod)
             {
                 try

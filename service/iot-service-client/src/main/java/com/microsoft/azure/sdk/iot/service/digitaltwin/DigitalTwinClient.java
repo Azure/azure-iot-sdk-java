@@ -15,7 +15,6 @@ import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinInvokeC
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinUpdateRequestOptions;
 import com.microsoft.rest.ServiceResponseWithHeaders;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -30,7 +29,7 @@ public class DigitalTwinClient {
      * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
      * @param connectionString The IoT Hub connection string
      */
-    public DigitalTwinClient(String connectionString) {
+    private DigitalTwinClient(String connectionString) {
         this(connectionString, DigitalTwinClientOptions.builder().build());
     }
 
@@ -163,9 +162,8 @@ public class DigitalTwinClient {
      * @param digitalTwinId The Id of the digital twin.
      * @param commandName The command to be invoked.
      * @return A {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
-     * @throws IOException can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
-    public DigitalTwinCommandResponse invokeCommand(String digitalTwinId, String commandName) throws IOException {
+    public DigitalTwinCommandResponse invokeCommand(String digitalTwinId, String commandName) {
         return invokeCommandWithResponse(digitalTwinId, commandName, null, null).body();
     }
 
@@ -175,9 +173,8 @@ public class DigitalTwinClient {
      * @param commandName The command to be invoked.
      * @param payload The command payload.
      * @return A {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
-     * @throws IOException can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
-    public DigitalTwinCommandResponse invokeCommand(String digitalTwinId, String commandName, String payload) throws IOException {
+    public DigitalTwinCommandResponse invokeCommand(String digitalTwinId, String commandName, String payload) {
         // Retrofit does not work well with null in body
         return invokeCommandWithResponse(digitalTwinId, commandName, payload, null).body();
     }
@@ -189,9 +186,9 @@ public class DigitalTwinClient {
      * @param payload The command payload.
      * @param options The optional settings for this request.
      * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinInvokeRootLevelCommandHeaders} and {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
-     * @throws IOException can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
-    public ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> invokeCommandWithResponse(String digitalTwinId, String commandName, String payload, DigitalTwinInvokeCommandRequestOptions options) throws IOException {
+    public ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> invokeCommandWithResponse(String digitalTwinId, String commandName, String payload, DigitalTwinInvokeCommandRequestOptions options)
+    {
         return digitalTwinAsyncClient
                 .invokeCommandWithResponse(digitalTwinId, commandName, payload, options)
                 .toBlocking().single();
@@ -203,9 +200,8 @@ public class DigitalTwinClient {
      * @param componentName The component name under which the command is defined.
      * @param commandName The command to be invoked.
      * @return A {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
-     * @throws IOException can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
-    public DigitalTwinCommandResponse invokeComponentCommand(String digitalTwinId, String componentName, String commandName) throws IOException {
+    public DigitalTwinCommandResponse invokeComponentCommand(String digitalTwinId, String componentName, String commandName) {
         return invokeComponentCommandWithResponse(digitalTwinId, componentName, commandName, null, null).body();
     }
 
@@ -216,9 +212,8 @@ public class DigitalTwinClient {
      * @param commandName The command to be invoked.
      * @param payload The command payload.
      * @return A {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
-     * @throws IOException can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
-    public DigitalTwinCommandResponse invokeComponentCommand(String digitalTwinId, String componentName, String commandName, String payload) throws IOException {
+    public DigitalTwinCommandResponse invokeComponentCommand(String digitalTwinId, String componentName, String commandName, String payload) {
         // Retrofit does not work well with null in body
         return invokeComponentCommandWithResponse(digitalTwinId, componentName, commandName, payload, null).body();
     }
@@ -231,9 +226,9 @@ public class DigitalTwinClient {
      * @param payload The command payload.
      * @param options The optional settings for this request.
      * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinInvokeRootLevelCommandHeaders} and {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
-     * @throws IOException can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
-    public ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> invokeComponentCommandWithResponse(String digitalTwinId, String componentName, String commandName, String payload, DigitalTwinInvokeCommandRequestOptions options) throws IOException {
+    public ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> invokeComponentCommandWithResponse(String digitalTwinId, String componentName, String commandName, String payload, DigitalTwinInvokeCommandRequestOptions options)
+    {
         return digitalTwinAsyncClient.invokeComponentCommandWithResponse(digitalTwinId, componentName, commandName, payload, options)
                 .toBlocking().single();
     }

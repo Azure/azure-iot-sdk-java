@@ -164,7 +164,7 @@ public final class UpdateOperationUtility {
      *     }
      *  </pre>
      */
-    public UpdateOperationUtility appendRemovePropertyOperation(String path) {
+    private UpdateOperationUtility appendRemovePropertyOperation(String path) {
         operations.add(
                 new UpdateOperation()
                         .setOperation(REMOVE)

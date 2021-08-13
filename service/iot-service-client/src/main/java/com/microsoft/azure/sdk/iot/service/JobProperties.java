@@ -172,7 +172,7 @@ public class JobProperties
     /**
      * @param storageAuthenticationType Specifies authentication type being used for connecting to storage account
      */
-    public void setStorageAuthenticationType(StorageAuthenticationType storageAuthenticationType) {
+    private void setStorageAuthenticationType(StorageAuthenticationType storageAuthenticationType) {
         this.storageAuthenticationType = storageAuthenticationType;
     }
 
@@ -201,7 +201,7 @@ public class JobProperties
     /**
      * @param identity The managed identity used to access the storage account for import and export jobs.
      */
-    public void setIdentity(ManagedIdentity identity) {
+    private void setIdentity(ManagedIdentity identity) {
         this.identity = identity;
     }
 

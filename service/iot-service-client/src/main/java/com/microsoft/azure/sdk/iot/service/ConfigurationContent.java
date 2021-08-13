@@ -7,8 +7,8 @@ import java.util.Map;
 
 public class ConfigurationContent
 {
-    protected Map<String, Map<String, Object>> modulesContent;
-    protected Map<String, Object> deviceContent;
+    Map<String, Map<String, Object>> modulesContent;
+    Map<String, Object> deviceContent;
 
     public ConfigurationContent()
     {

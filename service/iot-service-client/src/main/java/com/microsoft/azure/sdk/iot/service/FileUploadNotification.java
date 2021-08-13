@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-import java.io.IOException;
 import java.util.Date;
 
 public class FileUploadNotification

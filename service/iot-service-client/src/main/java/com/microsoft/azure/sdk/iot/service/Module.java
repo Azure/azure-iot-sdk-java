@@ -84,7 +84,7 @@ public class Module extends BaseDevice
      * @param symmetricKey - Device key. If parameter is null, then the key will be auto generated.
      * @throws IllegalArgumentException This exception is thrown if {@code deviceId} or {@code moduleId} is {@code null} or empty.
      */
-    protected Module(String deviceId, String moduleId, SymmetricKey symmetricKey)
+    private Module(String deviceId, String moduleId, SymmetricKey symmetricKey)
             throws IllegalArgumentException
     {
         super(deviceId, symmetricKey);
@@ -131,7 +131,7 @@ public class Module extends BaseDevice
      * of ASCII 7-bit alphanumeric chars
      * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
      */
-    protected String id;
+    private String id;
 
     /**
      * Getter for module name
@@ -146,7 +146,7 @@ public class Module extends BaseDevice
     /**
      * Specifies the module's managed by owner
      */
-    protected String managedBy;
+    private String managedBy;
 
     /**
      * Getter for module's managed by owner

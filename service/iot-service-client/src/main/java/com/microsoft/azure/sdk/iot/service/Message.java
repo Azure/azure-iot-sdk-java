@@ -7,7 +7,6 @@ package com.microsoft.azure.sdk.iot.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
@@ -19,7 +18,7 @@ import java.util.UUID;
  */
 public class Message
 {
-    private final String deliveryAcknowledgementPropertyName = "iothub-ack";
+    private final static String deliveryAcknowledgementPropertyName = "iothub-ack";
 
     /**
     * [Required for two way requests] Used to correlate two-way communication.
@@ -83,7 +82,7 @@ public class Message
     /**
     * Used in message responses and feedback
     **/
-    public String correlationId;
+    private String correlationId;
 
     public String getCorrelationId()
     {

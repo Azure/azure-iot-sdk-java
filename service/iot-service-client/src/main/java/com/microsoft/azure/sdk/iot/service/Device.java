@@ -76,7 +76,7 @@ public class Device extends BaseDevice
      * @throws IllegalArgumentException This exception is thrown if the encryption method is not supported by the key
      * generator.
      */
-    protected Device(String deviceId, DeviceStatus status, SymmetricKey symmetricKey)
+    private Device(String deviceId, DeviceStatus status, SymmetricKey symmetricKey)
         throws IllegalArgumentException
     {
         super(deviceId, symmetricKey);
@@ -98,7 +98,7 @@ public class Device extends BaseDevice
         this.setPropertiesToDefaultValues();
     }
 
-    protected DeviceStatus status;
+    private DeviceStatus status;
 
     /**
      * Getter for DeviceStatus object.
@@ -129,7 +129,7 @@ public class Device extends BaseDevice
     /**
      * A 128 char long string storing the reason of suspension (all UTF-8 chars allowed).
      */
-    protected String statusReason;
+    private String statusReason;
 
     /**
      * Getter for status reason.
@@ -141,7 +141,7 @@ public class Device extends BaseDevice
         return statusReason;
     }
 
-    protected String statusUpdatedTime;
+    private String statusUpdatedTime;
 
     /**
      * Getter for status updated on string.
@@ -153,7 +153,7 @@ public class Device extends BaseDevice
         return statusUpdatedTime;
     }
 
-    protected DeviceCapabilities capabilities;
+    private DeviceCapabilities capabilities;
 
     /**
      * Getter for capabilities.
@@ -175,7 +175,7 @@ public class Device extends BaseDevice
         this.capabilities = capabilities;
     }
 
-    protected String scope;
+    private String scope;
 
     /**
      * Gets the scope of the device.
@@ -201,7 +201,7 @@ public class Device extends BaseDevice
         this.scope = scope;
     }
 
-    protected List<String> parentScopes = new ArrayList<>();
+    private List<String> parentScopes = new ArrayList<>();
 
     /**
      * Gets the scopes of the upper level edge devices, if applicable.

@@ -16,8 +16,8 @@ import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
  */
 public class BaseDevice
 {
-    protected final String UTC_TIME_DEFAULT = "0001-01-01T00:00:00";
-    protected final String OFFSET_TIME_DEFAULT = "0001-01-01T00:00:00-00:00";
+    final String UTC_TIME_DEFAULT = "0001-01-01T00:00:00";
+    private final static String OFFSET_TIME_DEFAULT = "0001-01-01T00:00:00-00:00";
 
     /**
      * Create an BaseDevice instance using the given device name
@@ -26,7 +26,7 @@ public class BaseDevice
      * @param symmetricKey - Device key. If parameter is null, then the key will be auto generated.
      * @throws IllegalArgumentException if deviceId is null
      */
-    protected BaseDevice(String deviceId, SymmetricKey symmetricKey)
+    BaseDevice(String deviceId, SymmetricKey symmetricKey)
             throws IllegalArgumentException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_BASEDEVICE_12_004: [The constructor shall throw IllegalArgumentException
@@ -60,7 +60,7 @@ public class BaseDevice
      * @param deviceId Name of the device (used as device id)
      * @param authenticationType - The type of authentication used by this device.
      */
-    protected BaseDevice(String deviceId, AuthenticationType authenticationType)
+    BaseDevice(String deviceId, AuthenticationType authenticationType)
     {
         if (Tools.isNullOrEmpty(deviceId))
         {
@@ -90,7 +90,7 @@ public class BaseDevice
      * of ASCII 7-bit alphanumeric chars
      * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
      */
-    protected String deviceId;
+    private String deviceId;
 
     /**
      * Getter for device name
@@ -105,7 +105,7 @@ public class BaseDevice
     /**
      * Device generation Id
      */
-    protected String generationId;
+    private String generationId;
 
     /**
      * Getter for GenerationId
@@ -240,7 +240,7 @@ public class BaseDevice
      * A string representing a weak ETAG version
      * of this JSON description. This is a hash.
      */
-    protected String eTag;
+    private String eTag;
 
     /**
      * Getter for eTag
@@ -256,7 +256,7 @@ public class BaseDevice
      * Status of the device:
      * {"connected" | "disconnected"}
      */
-    protected DeviceConnectionState connectionState;
+     private DeviceConnectionState connectionState;
 
     /**
      * Getter for connection state
@@ -271,7 +271,7 @@ public class BaseDevice
     /**
      * Datetime of last time the connection state was updated.
      */
-    protected String connectionStateUpdatedTime;
+    private String connectionStateUpdatedTime;
 
     /**
      * Getter for connection state updated time
@@ -286,7 +286,7 @@ public class BaseDevice
     /**
      * Datetime of last time the device authenticated, received, or sent a message.
      */
-    protected String lastActivityTime;
+    private String lastActivityTime;
 
     /**
      * Getter for last activity time
@@ -301,7 +301,7 @@ public class BaseDevice
     /**
      * Number of messages received by the device
      */
-    protected long cloudToDeviceMessageCount;
+    private long cloudToDeviceMessageCount;
 
     /**
      * Getter for cloud to device message count
@@ -316,7 +316,7 @@ public class BaseDevice
     /*
      * Specifies whether this device uses a key for authentication, an X509 certificate, or something else
      */
-    AuthenticationMechanism authentication;
+    private AuthenticationMechanism authentication;
 
     /**
      * Getter for the authentication type of this device

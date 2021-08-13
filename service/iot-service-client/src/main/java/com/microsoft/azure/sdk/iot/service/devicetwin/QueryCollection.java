@@ -47,7 +47,7 @@ public class QueryCollection
     private AzureSasCredential azureSasCredential;
     private TokenCredentialCache credentialCache;
 
-    private Proxy proxy;
+    private final Proxy proxy;
 
     private boolean isInitialQuery;
 
@@ -67,16 +67,16 @@ public class QueryCollection
      *  or if the provided connection string is null, or if the provided url is null, or if the provided http method is null.
      */
     @SuppressWarnings("SameParameterValue") // Generic method for executing queries, "requestQueryType" and "httpMethod" can have any service-allowed value.
-    protected QueryCollection(
-            String query,
-            int pageSize,
-            QueryType requestQueryType,
-            IotHubConnectionString iotHubConnectionString,
-            URL url,
-            HttpMethod httpMethod,
-            int httpConnectTimeout,
-            int httpReadTimeout,
-            Proxy proxy)
+    QueryCollection(
+        String query,
+        int pageSize,
+        QueryType requestQueryType,
+        IotHubConnectionString iotHubConnectionString,
+        URL url,
+        HttpMethod httpMethod,
+        int httpConnectTimeout,
+        int httpReadTimeout,
+        Proxy proxy)
     {
         this.validateQueryRequestArguments(iotHubConnectionString, url, httpMethod, pageSize, requestQueryType);
 
@@ -250,7 +250,7 @@ public class QueryCollection
      *
      * @return true if there is another page to return in the query and false otherwise.
      */
-    protected boolean hasNext()
+    boolean hasNext()
     {
         if (this.isInitialQuery)
         {
@@ -285,7 +285,7 @@ public class QueryCollection
      * @throws IOException If an IOException occurs when calling the Service API, or if the results of that call are unexpected.
      * @throws IotHubException If an IotHubException occurs when calling the Service API.
      */
-    protected QueryCollectionResponse<String> next(QueryOptions options) throws IOException, IotHubException
+    QueryCollectionResponse<String> next(QueryOptions options) throws IOException, IotHubException
     {
         if (this.hasNext())
         {
@@ -301,7 +301,7 @@ public class QueryCollection
      * Getter for page size.
      * @return the page size of this.
      */
-    protected Integer getPageSize()
+    Integer getPageSize()
     {
         return this.pageSize;
     }

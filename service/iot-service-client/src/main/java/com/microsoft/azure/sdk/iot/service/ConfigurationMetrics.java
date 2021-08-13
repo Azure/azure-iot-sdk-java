@@ -5,8 +5,8 @@ import java.util.Map;
 
 public class ConfigurationMetrics
 {
-    protected Map<String, Long> results;
-    protected Map<String, String> queries;
+    Map<String, Long> results;
+    Map<String, String> queries;
 
     /**
      * Create a ConfigurationMetrics instance

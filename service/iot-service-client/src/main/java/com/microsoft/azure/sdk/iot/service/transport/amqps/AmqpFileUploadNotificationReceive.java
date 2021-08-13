@@ -60,12 +60,12 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
      * @param iotHubServiceClientProtocol protocol to use
      * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
      */
-    public AmqpFileUploadNotificationReceive(
-            String hostName,
-            String userName,
-            String sasToken,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            ProxyOptions proxyOptions)
+    private AmqpFileUploadNotificationReceive(
+        String hostName,
+        String userName,
+        String sasToken,
+        IotHubServiceClientProtocol iotHubServiceClientProtocol,
+        ProxyOptions proxyOptions)
     {
         this(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, null);
     }

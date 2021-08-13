@@ -14,13 +14,13 @@ import org.apache.qpid.proton.reactor.Reactor;
 import java.io.IOException;
 
 @Slf4j
-public class ReactorRunner
+class ReactorRunner
 {
     private final static String THREAD_NAME_PREFIX = "azure-iot-sdk-ReactorRunner-";
     private final String threadName;
     private final Reactor reactor;
-    public static final int REACTOR_TIMEOUT = 3141; // reactor timeout in milliseconds
-    public static final int CLOSE_REACTOR_GRACEFULLY_TIMEOUT = 10 * 1000;
+    private static final int REACTOR_TIMEOUT = 3141; // reactor timeout in milliseconds
+    private static final int CLOSE_REACTOR_GRACEFULLY_TIMEOUT = 10 * 1000;
 
     public ReactorRunner(BaseHandler baseHandler, String threadNamePostfix) throws IOException
     {

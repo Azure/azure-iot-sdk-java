@@ -31,7 +31,7 @@ import static com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache.IOTH
  * class defines the sender link which proactively sends renewed sas tokens to keep the device sessions authenticated.
  */
 @Slf4j
-public final class CbsSenderLinkHandler extends SenderLinkHandler
+final class CbsSenderLinkHandler extends SenderLinkHandler
 {
     private static final String SENDER_LINK_ENDPOINT_PATH = "$cbs";
 

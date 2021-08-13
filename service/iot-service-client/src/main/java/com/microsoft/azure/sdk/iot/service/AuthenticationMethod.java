@@ -15,17 +15,17 @@ public abstract class AuthenticationMethod
     /**
      * Authentication policy name
      */
-    protected String policyName;
+    String policyName;
 
     /**
      * Shared access policy key (if applies)
      */
-    protected String key;
+    String key;
 
     /**
      * Shared access policy token (if applies)
      */
-    protected String token;
+    String token;
 
     /**
      * Abstract helper function to populate {@code IotHubConnectionString} class with

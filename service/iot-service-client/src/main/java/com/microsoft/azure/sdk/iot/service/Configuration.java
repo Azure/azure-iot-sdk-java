@@ -14,7 +14,7 @@ import java.util.HashMap;
 
 public class Configuration
 {
-    protected final String UTC_TIME_DEFAULT = "0001-01-01T00:00:00";
+    private final String UTC_TIME_DEFAULT = "0001-01-01T00:00:00";
 
     /**
      * Create a Configuration instance using the given configuration name
@@ -58,7 +58,7 @@ public class Configuration
      * of ASCII 7-bit alphanumeric chars
      * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
      */
-    protected String id;
+    private String id;
 
     /**
      * Getter for configuration name
@@ -73,7 +73,7 @@ public class Configuration
     /**
      * Specifies the schemaVersion
      */
-    protected String schemaVersion;
+    private String schemaVersion;
 
     /**
      * Getter for schema version
@@ -88,7 +88,7 @@ public class Configuration
     /**
      * Specifies the labels map of the configuration
      */
-    protected HashMap<String, String> labels = null;
+    private HashMap<String, String> labels = null;
 
     /**
      * Setter for the labels of the configuration
@@ -122,7 +122,7 @@ public class Configuration
     /**
      * Specifies the configuration content
      */
-    protected ConfigurationContent content;
+    private ConfigurationContent content;
 
     /**
      * Setter for the configuration content
@@ -147,7 +147,7 @@ public class Configuration
     /**
      * Specifies the targetCondition
      */
-    protected String targetCondition;
+    private String targetCondition;
 
     /**
      * Setter for the targetCondition
@@ -172,7 +172,7 @@ public class Configuration
     /**
      * Datetime of configuration created time.
      */
-    protected String createdTimeUtc;
+    private String createdTimeUtc;
 
     /**
      * Getter for configuration created time
@@ -187,7 +187,7 @@ public class Configuration
     /**
      * Datetime of configuration last updated time.
      */
-    protected String lastUpdatedTimeUtc;
+    private String lastUpdatedTimeUtc;
 
     /**
      * Getter for configuration last updated time string
@@ -202,7 +202,7 @@ public class Configuration
     /**
      * Specifies the priority
      */
-    protected Integer priority;
+    private Integer priority;
 
     /**
      * Setter for the configuration priority
@@ -227,7 +227,7 @@ public class Configuration
     /**
      * Specifies the system configuration metrics
      */
-    protected ConfigurationMetrics systemMetrics = null;
+    private ConfigurationMetrics systemMetrics = null;
 
     /**
      * Getter for the system configuration metrics
@@ -242,7 +242,7 @@ public class Configuration
     /**
      * Specifies the custom configuration metrics
      */
-    protected ConfigurationMetrics metrics = null;
+    private ConfigurationMetrics metrics = null;
 
     /**
      * Getter for the custom configuration metrics
@@ -257,7 +257,7 @@ public class Configuration
     /**
      * A string representing a ETAG
      */
-    protected String etag;
+    private String etag;
 
     /**
      * Setter for the ETAG
