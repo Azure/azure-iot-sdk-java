@@ -507,30 +507,6 @@ public class DeviceTwinTest
         testTwin.getTwin(mockedDevice);
     }
 
-    @Test (expected = UnsupportedOperationException.class)
-    public void replaceDesiredPropertiesThrows(@Mocked DeviceTwinDevice mockedDevice) throws Exception
-    {
-        //arrange
-        final String connectionString = "testString";
-        constructorExpectations(connectionString);
-        DeviceTwin testTwin = new DeviceTwin(connectionString);
-
-        //act
-        testTwin.replaceDesiredProperties(mockedDevice);
-    }
-
-    @Test (expected = UnsupportedOperationException.class)
-    public void replaceTagsThrowsIfDeviceIsNull(@Mocked DeviceTwinDevice mockedDevice) throws Exception
-    {
-        //arrange
-        final String connectionString = "testString";
-        constructorExpectations(connectionString);
-        DeviceTwin testTwin = new DeviceTwin(connectionString);
-
-        //act
-        testTwin.replaceTags(mockedDevice);
-    }
-
     /*
     **Tests_SRS_DEVICETWIN_25_030: [** The function shall build the URL for this operation by calling getUrlTwinDesired **]**
     **Tests_SRS_DEVICETWIN_25_031: [** The function shall serialize the desired properties map by calling resetDesiredProperty Api on the twin object for the device provided by the user**]**
