@@ -1800,7 +1800,7 @@ public class MultiplexingClientTests extends IntegrationTest
     @Test
     public void multiplexedSessionsRecoverSubscriptionsFromDeviceSessionDrops() throws Exception
     {
-        testInstance.setup(DEVICE_MULTIPLEX_COUNT);
+        testInstance.setup(DEVICE_MULTIPLEX_COUNT, MultiplexingClientOptions.builder().build(), true);
         ConnectionStatusChangeTracker multiplexedConnectionStatusChangeTracker = new ConnectionStatusChangeTracker();
         testInstance.multiplexingClient.registerConnectionStatusChangeCallback(multiplexedConnectionStatusChangeTracker, null);
         ConnectionStatusChangeTracker[] connectionStatusChangeTrackers = new ConnectionStatusChangeTracker[DEVICE_MULTIPLEX_COUNT];
