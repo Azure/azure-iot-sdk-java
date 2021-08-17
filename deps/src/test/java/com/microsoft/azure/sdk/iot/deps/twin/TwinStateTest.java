@@ -265,7 +265,7 @@ public class TwinStateTest
         assertEquals(TAGS, twinState.getTags());
         assertEquals(PROPERTIES, twinState.getDesiredProperty());
         assertEquals(PROPERTIES, twinState.getReportedProperty());
-        assertEquals(expectedConnectionState.toString(), twinState.getConnectionState());
+        assertEquals(expectedConnectionState, TwinConnectionState.valueOf(twinState.getConnectionState()));
     }
 
     /* SRS_TWIN_STATE_21_006: [The getDesiredProperty shall return a TwinCollection with the stored desired property.] */

@@ -59,16 +59,12 @@ public class ConfigurationParser
     private static final String CREATED_TIME_UTC_NAME = "createdTimeUtc";
     @Expose(deserialize = false)
     @SerializedName(CREATED_TIME_UTC_NAME)
-    @Getter
-    @Setter
     private String createdTimeUtcString;
     private transient Date createdTimeUtc;
 
     private static final String LAST_UPDATED_TIME_UTC_NAME = "lastUpdatedTimeUtc";
     @Expose(deserialize = false)
     @SerializedName(LAST_UPDATED_TIME_UTC_NAME)
-    @Getter
-    @Setter
     private String lastUpdatedTimeUtcString;
     private transient Date lastUpdatedTimeUtc;
 
@@ -164,6 +160,68 @@ public class ConfigurationParser
         {
             this.lastUpdatedTimeUtcString = configurationParser.lastUpdatedTimeUtcString;
             this.lastUpdatedTimeUtc = ParserUtility.getDateTimeUtc(configurationParser.lastUpdatedTimeUtcString);
+        }
+    }
+
+    /**
+     * Getter for createdTimeUtc
+     *
+     * @return The value of createdTimeUtc
+     */
+    public Date getCreatedTimeUtc()
+    {
+        //Codes_SRS_CONFIGURATION_PARSER_28_021: [This method shall return the value of this object's createdTimeUtc.]
+        return createdTimeUtc;
+    }
+
+    /**
+     * Setter for createdTimeUtc
+     *
+     * @param createdTimeUtc the value to set createdTimeUtc to
+     */
+    public void setCreatedTimeUtc(Date createdTimeUtc)
+    {
+        //Codes_SRS_CONFIGURATION_PARSER_28_022: [This method shall set the value of this object's statusUpdatedTime equal to the provided value.]
+        this.createdTimeUtc = createdTimeUtc;
+
+        if (createdTimeUtc == null)
+        {
+            this.createdTimeUtcString = null;
+        }
+        else
+        {
+            this.createdTimeUtcString = ParserUtility.getDateStringFromDate(createdTimeUtc);
+        }
+    }
+
+    /**
+     * Getter for lastUpdatedTimeUtc
+     *
+     * @return The value of lastUpdatedTimeUtc
+     */
+    public Date getLastUpdatedTimeUtc()
+    {
+        //Codes_SRS_CONFIGURATION_PARSER_28_023: [This method shall return the value of this object's lastUpdatedTimeUtc.]
+        return lastUpdatedTimeUtc;
+    }
+
+    /**
+     * Setter for lastUpdatedTimeUtc
+     *
+     * @param lastUpdatedTimeUtc the value to set lastUpdatedTimeUtc to
+     */
+    public void setLastUpdatedTimeUtc(Date lastUpdatedTimeUtc)
+    {
+        //Codes_SRS_CONFIGURATION_PARSER_28_024: [This method shall set the value of this object's lastUpdatedTimeUtc equal to the provided value.]
+        this.lastUpdatedTimeUtc = lastUpdatedTimeUtc;
+
+        if (lastUpdatedTimeUtc == null)
+        {
+            this.lastUpdatedTimeUtcString = null;
+        }
+        else
+        {
+            this.lastUpdatedTimeUtcString = ParserUtility.getDateStringFromDate(lastUpdatedTimeUtc);
         }
     }
 

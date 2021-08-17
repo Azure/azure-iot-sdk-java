@@ -26,15 +26,12 @@ public class JobPropertiesParser
     private static final String START_TIME_UTC_NAME = "startTimeUtc";
     @Expose
     @SerializedName(START_TIME_UTC_NAME)
-    @Setter
-    @Getter
     private String startTimeUtcString;
     private transient Date startTimeUtc;
 
     private static final String END_TIME_UTC_NAME = "endTimeUtc";
     @Expose
     @SerializedName(END_TIME_UTC_NAME)
-    @Setter
     private String endTimeUtcString;
     private transient Date endTimeUtc;
 
@@ -221,5 +218,27 @@ public class JobPropertiesParser
         {
             this.endTimeUtcString = ParserUtility.getDateStringFromDate(endTimeUtc);
         }
+    }
+
+    /**
+     * Getter for startTimeUtc
+     *
+     * @return The value of startTimeUtc
+     */
+    public Date getStartTimeUtc()
+    {
+        //Codes_SRS_JOB_PROPERTIES_PARSER_34_020: [This method shall return the value of this object's startTimeUtc.]
+        return startTimeUtc;
+    }
+
+    /**
+     * Getter for endTimeUtc
+     *
+     * @return The value of endTimeUtc
+     */
+    public Date getEndTimeUtc()
+    {
+        //Codes_SRS_JOB_PROPERTIES_PARSER_34_022: [This method shall return the value of this object's endTimeUtc.]
+        return endTimeUtc;
     }
 }

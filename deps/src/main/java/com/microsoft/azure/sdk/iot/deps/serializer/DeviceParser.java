@@ -76,16 +76,12 @@ public class DeviceParser
     private static final String CONNECTION_STATE_UPDATED_TIME_NAME = "connectionStateUpdatedTime";
     @Expose(deserialize = false)
     @SerializedName(CONNECTION_STATE_UPDATED_TIME_NAME)
-    @Getter
-    @Setter
     private String connectionStateUpdatedTimeString;
     private transient Date connectionStateUpdatedTime;
 
     private static final String LAST_ACTIVITY_TIME_NAME = "lastActivityTime";
     @Expose(deserialize = false)
     @SerializedName(LAST_ACTIVITY_TIME_NAME)
-    @Getter
-    @Setter
     private String lastActivityTimeString;
     private transient Date lastActivityTime;
 
@@ -232,6 +228,93 @@ public class DeviceParser
         {
             this.statusUpdatedTimeString = deviceParser.statusUpdatedTimeString;
             this.statusUpdatedTime = ParserUtility.getDateTimeUtc(deviceParser.statusUpdatedTimeString);
+        }
+    }
+
+    /**
+     * Getter for StatusUpdatedTime.
+     *
+     * @return The value of StatusUpdatedTime.
+     */
+    public Date getStatusUpdatedTime()
+    {
+        return statusUpdatedTime;
+    }
+
+    /**
+     * Setter for StatusUpdatedTime.
+     *
+     * @param statusUpdatedTime The value to set StatusUpdatedTime to.
+     */
+    public void setStatusUpdatedTime(Date statusUpdatedTime)
+    {
+        this.statusUpdatedTime = statusUpdatedTime;
+
+        if (statusUpdatedTime == null)
+        {
+            this.statusUpdatedTimeString = null;
+        }
+        else
+        {
+            this.statusUpdatedTimeString = ParserUtility.getDateStringFromDate(statusUpdatedTime);
+        }
+    }
+
+    /**
+     * Getter for ConnectionStateUpdatedTime.
+     *
+     * @return The value of ConnectionStateUpdatedTime.
+     */
+    public Date getConnectionStateUpdatedTime()
+    {
+        return connectionStateUpdatedTime;
+    }
+
+    /**
+     * Setter for ConnectionStateUpdatedTime.
+     *
+     * @param connectionStateUpdatedTime The value to set ConnectionStateUpdatedTime to.
+     */
+    public void setConnectionStateUpdatedTime(Date connectionStateUpdatedTime)
+    {
+        this.connectionStateUpdatedTime = connectionStateUpdatedTime;
+
+        if (connectionStateUpdatedTime == null)
+        {
+            this.connectionStateUpdatedTimeString = null;
+        }
+        else
+        {
+            this.connectionStateUpdatedTimeString = ParserUtility.getDateStringFromDate(connectionStateUpdatedTime);
+        }
+    }
+
+    /**
+     * Getter for LastActivityTime.
+     *
+     * @return The value of LastActivityTime.
+     */
+    public Date getLastActivityTime()
+    {
+        return lastActivityTime;
+    }
+
+    /**
+     * Setter for LastActivityTime.
+     *
+     * @param lastActivityTime The value to set LastActivityTime to.
+     */
+    public void setLastActivityTime(Date lastActivityTime)
+    {
+        this.lastActivityTime = lastActivityTime;
+
+        if (lastActivityTime == null)
+        {
+            this.lastActivityTimeString = null;
+        }
+        else
+        {
+            this.lastActivityTimeString = ParserUtility.getDateStringFromDate(lastActivityTime);
         }
     }
 }

@@ -114,8 +114,6 @@ public class RegisterManager
     private static final String CONNECTION_STATE_TAG = "connectionState";
     @Expose
     @SerializedName(CONNECTION_STATE_TAG)
-    @Getter
-    @Setter
     protected TwinConnectionState connectionState = null;
 
     /**

@@ -7,8 +7,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * The request payload to send to IoT Hub to notify it when a file upload is completed, whether successful or not.
@@ -19,29 +17,21 @@ public class FileUploadCompletionNotification
     private static final String CORRELATION_ID_TAG = "correlationId";
     @Expose
     @SerializedName(CORRELATION_ID_TAG)
-    @Getter
-    @Setter
     private String correlationId = null;
 
     private static final String IS_SUCCESS_TAG = "isSuccess";
     @Expose
     @SerializedName(IS_SUCCESS_TAG)
-    @Getter
-    @Setter
     private Boolean isSuccess = null;
 
     private static final String STATUS_CODE_TAG = "statusCode";
     @Expose
     @SerializedName(STATUS_CODE_TAG)
-    @Getter
-    @Setter
     private Integer statusCode = null;
 
     private static final String STATUS_DESCRIPTION_TAG = "statusDescription";
     @Expose
     @SerializedName(STATUS_DESCRIPTION_TAG)
-    @Getter
-    @Setter
     private String statusDescription = null;
 
     /**
@@ -91,7 +81,7 @@ public class FileUploadCompletionNotification
         }
 
         this.correlationId = fileUploadCompletionNotification.getCorrelationId();
-        this.isSuccess = fileUploadCompletionNotification.getIsSuccess();
+        this.isSuccess = fileUploadCompletionNotification.isSuccess();
         this.statusCode = fileUploadCompletionNotification.getStatusCode();
         this.statusDescription = fileUploadCompletionNotification.getStatusDescription();
     }
@@ -113,6 +103,75 @@ public class FileUploadCompletionNotification
         Gson gson = new GsonBuilder().disableHtmlEscaping().serializeNulls().create();
 
         return gson.toJson(this);
+    }
+
+    /**
+     * Set the correlationId that correlates this FileUploadCompletionNotification to the earlier request to get the SAS URI
+     * for this upload from IoT Hub. Must equal {@link FileUploadSasUriResponse#getCorrelationId()}.
+     * @param correlationId the unique identifier that correlates this file upload status to a SAS URI that IoT Hub retreived from Azure Storage earlier.
+     */
+    public void setCorrelationId(String correlationId)
+    {
+        this.correlationId = correlationId;
+    }
+
+    /**
+     * @return the correlationId that correlates this FileUploadCompletionNotification to the earlier request to get the SAS URI
+     */
+    public String getCorrelationId()
+    {
+        return this.correlationId;
+    }
+
+    /**
+     * @return Get if the file upload was successful
+     */
+    public Boolean isSuccess()
+    {
+        return this.isSuccess;
+    }
+
+    /**
+     * Set if the file upload was a success
+     * @param success true if the file upload was a success. False otherwise.
+     */
+    public void setSuccess(Boolean success)
+    {
+        this.isSuccess = success;
+    }
+
+    /**
+     * @return get the status code associated with this file upload.
+     */
+    public Integer getStatusCode()
+    {
+        return this.statusCode;
+    }
+
+    /**
+     * Set the status code associated with this file upload request
+     * @param statusCode The status code associated with this file upload request
+     */
+    public void setStatusCode(Integer statusCode)
+    {
+        this.statusCode = statusCode;
+    }
+
+    /**
+     * @return get the status description associated with this file upload.
+     */
+    public String getStatusDescription()
+    {
+        return this.statusDescription;
+    }
+
+    /**
+     * Set the status description associated with this file upload request
+     * @param statusDescription The status description associated with this file upload request
+     */
+    public void setStatusDescription(String statusDescription)
+    {
+        this.statusDescription = statusDescription;
     }
 
     /**
