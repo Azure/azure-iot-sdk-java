@@ -9,7 +9,7 @@ package com.microsoft.azure.sdk.iot.provisioning.device;
 public enum ProvisioningDeviceClientSubstatus
 {
     /**
-     * Device has been assigned to an IoT hub for the first time
+     * Device has been assigned to an IoT hub for the first time.
      */
     INITIAL_ASSIGNMENT("initialAssignment"),
 
