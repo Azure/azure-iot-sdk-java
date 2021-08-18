@@ -165,9 +165,7 @@ public class TwinCollection extends HashMap<String, Object> {
      * accept up to 5 levels of inner Maps.
      *
      * @param map A {@code Map} of entries to add to the TwinCollection.
-     * @deprecated as of Deps version 0.7.1, please use {@link #putAll(Map)}
      */
-    @Deprecated
     @Override
     public void putAll(Map<? extends String, ?> map) {
         if ((map == null) || map.isEmpty()) {
@@ -214,10 +212,8 @@ public class TwinCollection extends HashMap<String, Object> {
      * @param key   the {@code String} that represents the key of the new entry. It cannot be {@code null} or empty.
      * @param value the {@code Object} that represents the value of the new entry. It cannot be user defined type or array.
      * @return The {@code Object} that correspond to the last value of this key. It will be {@code null} if there is no previous value.
-     * @deprecated as of Deps version 0.7.1, please use {@link #putFinal(String, Object)}
      */
     @Override
-    @Deprecated
     public Object put(String key, Object value) {
         if (key == null || key.isEmpty()) {
             throw new IllegalArgumentException("Key cannot be null or empty");
