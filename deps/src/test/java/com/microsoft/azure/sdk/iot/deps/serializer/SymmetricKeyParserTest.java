@@ -82,28 +82,6 @@ public class SymmetricKeyParserTest
         assertEquals(TEST_KEY1, parser.getSecondaryKey());
     }
 
-    //Tests_SRS_SymmetricKeyParser_34_002: [If the provided primaryKey value is null, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void setPrimaryKeyNullValueThrowsIllegalArgumentException()
-    {
-        //arrange
-        SymmetricKeyParser parser = new SymmetricKeyParser("","");
-
-        //act
-        parser.setPrimaryKey(null);
-    }
-
-    //Tests_SRS_SymmetricKeyParser_34_005: [If the provided secondaryKey value is null, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void setSecondaryKeyNullValueThrowsIllegalArgumentException()
-    {
-        //arrange
-        SymmetricKeyParser parser = new SymmetricKeyParser("","");
-
-        //act
-        parser.setSecondaryKey(null);
-    }
-
     //Tests_SRS_SYMMETRIC_KEY_PARSER_34_011: [If the provided json null, empty, or cannot be parsed to a SymmetricKeyParser object, an IllegalArgumentException shall be thrown.]
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsForNullJson()

@@ -10,7 +10,7 @@ import com.google.gson.annotations.SerializedName;
 
 /**
  * The request payload to send to IoT Hub to notify it when a file upload is completed, whether successful or not.
- * Must set {@link #setSuccess(Boolean)} and {@link #setCorrelationId(String)}, but all other fields are optional.
+ * Must set {@link #setIsSuccess(Boolean)} and {@link #setCorrelationId(String)}, but all other fields are optional.
  */
 public class FileUploadCompletionNotification
 {
@@ -66,7 +66,7 @@ public class FileUploadCompletionNotification
      * Construct this notification with json
      * @param json the json to parse.
      */
-    public FileUploadCompletionNotification(String json)
+    private FileUploadCompletionNotification(String json)
     {
         Gson gson = new GsonBuilder().disableHtmlEscaping().serializeNulls().create();
         FileUploadCompletionNotification fileUploadCompletionNotification;
@@ -81,7 +81,7 @@ public class FileUploadCompletionNotification
         }
 
         this.correlationId = fileUploadCompletionNotification.getCorrelationId();
-        this.isSuccess = fileUploadCompletionNotification.getSuccess();
+        this.isSuccess = fileUploadCompletionNotification.isSuccess();
         this.statusCode = fileUploadCompletionNotification.getStatusCode();
         this.statusDescription = fileUploadCompletionNotification.getStatusDescription();
     }
@@ -126,7 +126,7 @@ public class FileUploadCompletionNotification
     /**
      * @return Get if the file upload was successful
      */
-    public Boolean getSuccess()
+    public Boolean isSuccess()
     {
         return this.isSuccess;
     }

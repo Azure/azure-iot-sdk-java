@@ -8,7 +8,7 @@ package com.microsoft.azure.sdk.iot.deps.transport.amqp;
 import org.apache.qpid.proton.engine.HandlerException;
 import org.apache.qpid.proton.reactor.Reactor;
 
-public class AmqpReactor
+class AmqpReactor
 {
     private static final int REACTOR_TIMEOUT = 10;
 

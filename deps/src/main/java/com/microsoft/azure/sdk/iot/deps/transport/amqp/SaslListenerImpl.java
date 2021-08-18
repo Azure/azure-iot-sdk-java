@@ -5,7 +5,7 @@ import org.apache.qpid.proton.engine.Sasl;
 import org.apache.qpid.proton.engine.SaslListener;
 import org.apache.qpid.proton.engine.Transport;
 
-public class SaslListenerImpl implements SaslListener
+class SaslListenerImpl implements SaslListener
 {
     private final SaslHandler saslHandler;
     private Exception savedException;

@@ -16,10 +16,10 @@ import java.util.Map;
  */
 public class HttpResponse
 {
-    protected final int status;
-    protected final byte[] body;
-    protected final byte[] errorReason;
-    protected final Map<String, String> headerFields;
+    private final int status;
+    private final byte[] body;
+    private final byte[] errorReason;
+    private final Map<String, String> headerFields;
 
     /**
      * Constructor.
@@ -136,7 +136,7 @@ public class HttpResponse
         return this.errorReason;
     }
 
-    protected static String canonicalizeFieldName(String field)
+    private static String canonicalizeFieldName(String field)
     {
         String canonicalizedField = field;
         if (canonicalizedField != null)
@@ -147,7 +147,7 @@ public class HttpResponse
         return canonicalizedField;
     }
 
-    protected static String flattenValuesList(List<String> values)
+    private static String flattenValuesList(List<String> values)
     {
         StringBuilder valuesStr = new StringBuilder();
         for (String value : values)

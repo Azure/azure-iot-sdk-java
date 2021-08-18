@@ -11,7 +11,6 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 

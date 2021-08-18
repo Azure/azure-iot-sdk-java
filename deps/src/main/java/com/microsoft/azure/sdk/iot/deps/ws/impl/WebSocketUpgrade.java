@@ -17,10 +17,9 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 
 public class WebSocketUpgrade
 {
-    public static final String RFC_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-    @SuppressWarnings("FieldCanBeLocal")
-    private final char _colon = ':';
-    private final char _slash = '/';
+    private static final String RFC_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+    private final static char _colon = ':';
+    private final static char _slash = '/';
     private String _host = "";
     private String _path = "";
     private String _port = "";
@@ -43,7 +42,7 @@ public class WebSocketUpgrade
      *
      * @param host The host header field value.
      */
-    public final void setHost(String host)
+    private void setHost(String host)
     {
         this._host = host;
     }
@@ -53,7 +52,7 @@ public class WebSocketUpgrade
      *
      * @param port The port header field value.
      */
-    public final void setPort(int port)
+    private void setPort(int port)
     {
         this._port = "";
 
@@ -68,15 +67,15 @@ public class WebSocketUpgrade
      *
      * @param path The path field value.
      */
-    public final void setPath(String path)
+    private void setPath(String path)
     {
         this._path = path;
 
         if (!this._path.isEmpty())
         {
-            if (this._path.charAt(0) != this._slash)
+            if (this._path.charAt(0) != _slash)
             {
-                this._path = this._slash + this._path;
+                this._path = _slash + this._path;
             }
         }
     }
@@ -86,7 +85,7 @@ public class WebSocketUpgrade
      *
      * @param protocol The protocol header field value.
      */
-    public final void setProtocol(String protocol)
+    private void setProtocol(String protocol)
     {
         this._protocol = protocol;
     }
@@ -96,7 +95,7 @@ public class WebSocketUpgrade
      *
      * @param additionalHeaders The Map containing the additional headers.
      */
-    public final void setAdditionalHeaders(Map<String, String> additionalHeaders)
+    private void setAdditionalHeaders(Map<String, String> additionalHeaders)
     {
         _additionalHeaders = additionalHeaders;
     }

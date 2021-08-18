@@ -30,7 +30,7 @@ public class MqttConnection implements MqttCallback
     private static final int KEEP_ALIVE_INTERVAL = 230;
     private static final int MQTT_VERSION = 4;
     private static final boolean SET_CLEAN_SESSION = false;
-    static final int SUBSCRIBE_REQUEST_MAX_WAIT_TIME_MILLISECONDS = 60 * 1000; // 1 minute
+    private static final int SUBSCRIBE_REQUEST_MAX_WAIT_TIME_MILLISECONDS = 60 * 1000; // 1 minute
 
     private final MqttListener mqttListener;
 

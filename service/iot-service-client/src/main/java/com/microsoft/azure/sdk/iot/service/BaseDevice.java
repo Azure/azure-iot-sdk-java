@@ -344,7 +344,7 @@ public class BaseDevice
         deviceParser.setConnectionState(this.connectionState.toString());
         deviceParser.setConnectionStateUpdatedTime(ParserUtility.getDateTimeUtc(this.connectionStateUpdatedTime));
         deviceParser.setDeviceId(this.deviceId);
-        deviceParser.seteTag(this.eTag);
+        deviceParser.setETag(this.eTag);
         deviceParser.setLastActivityTime(ParserUtility.getDateTimeUtc(this.lastActivityTime));
         deviceParser.setGenerationId(this.generationId);
 
@@ -411,7 +411,7 @@ public class BaseDevice
 
         this.cloudToDeviceMessageCount = parser.getCloudToDeviceMessageCount();
         this.deviceId = parser.getDeviceId();
-        this.eTag = parser.geteTag();
+        this.eTag = parser.getETag();
         this.generationId = parser.getGenerationId();
 
         if (parser.getConnectionStateUpdatedTime() != null)

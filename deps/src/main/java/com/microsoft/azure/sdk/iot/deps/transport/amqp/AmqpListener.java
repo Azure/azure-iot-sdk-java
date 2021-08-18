@@ -3,7 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.deps.transport.amqp;
 
-
 public interface AmqpListener
 {
     void messageReceived(AmqpMessage message);

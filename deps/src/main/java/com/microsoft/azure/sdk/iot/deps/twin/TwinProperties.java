@@ -152,7 +152,7 @@ public class TwinProperties
 
      * @return The {@code JsonElement} with the content of this class.
      */
-    protected JsonElement toJsonElement()
+    JsonElement toJsonElement()
     {
         /* SRS_TWIN_PROPERTIES_21_003: [The toJsonElement shall return a JsonElement with the information in this class in a JSON format.] */
         JsonObject twinJson = new JsonObject();
@@ -188,7 +188,7 @@ public class TwinProperties
 
      * @return The {@code JsonElement} with the content of this class.
      */
-    protected JsonElement toJsonElementWithMetadata()
+    JsonElement toJsonElementWithMetadata()
     {
         /* SRS_TWIN_PROPERTIES_21_006: [The toJsonElementWithMetadata shall return a JsonElement with the information in this class, including metadata, in a JSON format.] */
         JsonObject twinJson = new JsonObject();
