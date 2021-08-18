@@ -142,7 +142,7 @@ public class DeviceTwin
                 // properties callback, then execute the callback so that they receive the full twin payload.
                 if (!desiredPropertyMap.isEmpty() && this.deviceTwinGenericTwinPropertiesChangeCallback != null)
                 {
-                    deviceTwinGenericTwinPropertiesChangeCallback.TwinPropertiesCallback(desiredPropertyMap, deviceTwinGenericPropertyChangeCallbackContext);
+                    deviceTwinGenericTwinPropertiesChangeCallback.TwinPropertiesCallBack(desiredPropertyMap, deviceTwinGenericPropertyChangeCallbackContext);
                 }
 
                 for (String propertyKey : desiredPropertyMap.keySet())
