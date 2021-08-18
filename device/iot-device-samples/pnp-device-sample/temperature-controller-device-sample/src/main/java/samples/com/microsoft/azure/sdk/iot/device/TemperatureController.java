@@ -286,7 +286,7 @@ public class TemperatureController {
 
         @SneakyThrows(InterruptedException.class)
         @Override
-        public MethodResponse call(String methodName, Object methodData, Object context) {
+        public DeviceMethodData call(String methodName, Object methodData, Object context) {
             String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
 
             switch (methodName) {
@@ -302,7 +302,7 @@ public class TemperatureController {
                     maxTemperature.put(THERMOSTAT_2, 0.0d);
 
                     temperatureReadings.clear();
-                    return new MethodResponse(StatusCode.COMPLETED.value, null);
+                    return new DeviceMethodData(StatusCode.COMPLETED.value, null);
 
                 case getMaxMinReport1:
                 case getMaxMinReport2:
@@ -342,19 +342,19 @@ public class TemperatureController {
                                     startTime,
                                     endTime);
 
-                            return new MethodResponse(StatusCode.COMPLETED.value, responsePayload);
+                            return new DeviceMethodData(StatusCode.COMPLETED.value, responsePayload);
                         }
 
                         log.debug("Command: component=\"{}\", no relevant readings found since {}, cannot generate any report.", componentName, since);
-                        return new MethodResponse(StatusCode.NOT_FOUND.value, null);
+                        return new DeviceMethodData(StatusCode.NOT_FOUND.value, null);
                     }
 
                     log.debug("Command: component=\"{}\", no temperature readings sent yet, cannot generate any report.", componentName);
-                    return new MethodResponse(StatusCode.NOT_FOUND.value, null);
+                    return new DeviceMethodData(StatusCode.NOT_FOUND.value, null);
 
                 default:
                     log.debug("Command: command=\"{}\" is not implemented, no action taken.", methodName);
-                    return new MethodResponse(StatusCode.NOT_FOUND.value, null);
+                    return new DeviceMethodData(StatusCode.NOT_FOUND.value, null);
             }
         }
     }

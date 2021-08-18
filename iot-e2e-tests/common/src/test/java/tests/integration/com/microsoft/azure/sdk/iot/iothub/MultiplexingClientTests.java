@@ -9,7 +9,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.MethodResponse;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
@@ -772,14 +772,14 @@ public class MultiplexingClientTests extends IntegrationTest
         }
 
         @Override
-        public MethodResponse call(String methodName, Object methodData, Object context) {
+        public DeviceMethodData call(String methodName, Object methodData, Object context) {
             deviceMethodCallbackFired = true;
             if (methodName.equals(expectedMethodName))
             {
                 expectedMethodReceived = true;
             }
 
-            return new MethodResponse(200, null);
+            return new DeviceMethodData(200, null);
         }
 
         public void resetExpectations()

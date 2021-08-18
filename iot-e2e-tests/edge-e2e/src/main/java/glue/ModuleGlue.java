@@ -2,7 +2,7 @@ package glue;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.MethodResponse;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
@@ -509,7 +509,7 @@ public class ModuleGlue
         }
 
         @Override
-        public MethodResponse call(String methodName, Object methodData, Object context)
+        public DeviceMethodData call(String methodName, Object methodData, Object context)
         {
             System.out.printf("method %s called%n", methodName);
             if (methodName.equals(this._methodName))
@@ -522,7 +522,7 @@ public class ModuleGlue
                 {
                     this._handler.handle(Future.failedFuture(e));
                     this.reset();
-                    return new MethodResponse(500, "exception parsing methodData");
+                    return new DeviceMethodData(500, "exception parsing methodData");
                 }
                 System.out.printf("methodData: %s%n", methodDataString);
 
@@ -532,21 +532,21 @@ public class ModuleGlue
                     System.out.printf("Method data looks correct.  Returning result: %s%n", _responseBody);
                     this._handler.handle(Future.succeededFuture());
                     this.reset();
-                    return new MethodResponse(this._statusCode, this._responseBody);
+                    return new DeviceMethodData(this._statusCode, this._responseBody);
                 }
                 else
                 {
                     System.out.printf("method data does not match.  Expected %s%n", this._requestBody);
                     this._handler.handle(Future.failedFuture("methodData does not match"));
                     this.reset();
-                    return new MethodResponse(500, "methodData not received as expected");
+                    return new DeviceMethodData(500, "methodData not received as expected");
                 }
             }
             else
             {
                 this._handler.handle(Future.failedFuture("unexpected call: " + methodName));
                 this.reset();
-                return new MethodResponse(404, "method " + methodName + " not handled");
+                return new DeviceMethodData(404, "method " + methodName + " not handled");
             }
         }
     }

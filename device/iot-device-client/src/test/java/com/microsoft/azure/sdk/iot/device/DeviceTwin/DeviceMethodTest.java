@@ -196,7 +196,7 @@ public class DeviceMethodTest
         DeviceMethod testMethod = new DeviceMethod(mockedDeviceIO, mockedConfig, mockedStatusCB, null);
         testMethod.subscribeToDeviceMethod(mockedDeviceMethodCB, null);
 
-        final MethodResponse testUserData = new MethodResponse(100, "Some test message");
+        final DeviceMethodData testUserData = new DeviceMethodData(100, "Some test message");
 
         MessageCallback testDeviceMethodResponseMessageCallback = Deencapsulation.newInnerInstance("deviceMethodResponseCallback", testMethod);
         new NonStrictExpectations()
@@ -251,7 +251,7 @@ public class DeviceMethodTest
         IotHubTransportMessage testMessage = new IotHubTransportMessage(testPayload, MessageType.DEVICE_TWIN);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
 
-        final MethodResponse testUserData = new MethodResponse(100, "Some test message");
+        final DeviceMethodData testUserData = new DeviceMethodData(100, "Some test message");
 
         MessageCallback testDeviceMethodResponseMessageCallback = Deencapsulation.newInnerInstance("deviceMethodResponseCallback", testMethod);
         new NonStrictExpectations()
@@ -290,7 +290,7 @@ public class DeviceMethodTest
         IotHubTransportMessage testMessage = new IotHubTransportMessage(testPayload, DEVICE_METHODS);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
 
-        final MethodResponse testUserData = null;
+        final DeviceMethodData testUserData = null;
 
         MessageCallback testDeviceMethodResponseMessageCallback = Deencapsulation.newInnerInstance("deviceMethodResponseCallback", testMethod);
         new NonStrictExpectations()
@@ -331,7 +331,7 @@ public class DeviceMethodTest
         IotHubTransportMessage testMessage = new IotHubTransportMessage(testPayload, DEVICE_METHODS);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
 
-        final MethodResponse testUserData = new MethodResponse(100, null);
+        final DeviceMethodData testUserData = new DeviceMethodData(100, null);
 
         MessageCallback testDeviceMethodResponseMessageCallback = Deencapsulation.newInnerInstance("deviceMethodResponseCallback", testMethod);
         new NonStrictExpectations()

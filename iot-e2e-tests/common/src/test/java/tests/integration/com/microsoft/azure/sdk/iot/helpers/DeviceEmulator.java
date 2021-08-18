@@ -8,7 +8,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.MethodResponse;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -255,10 +255,10 @@ public class DeviceEmulator
     protected class DeviceMethodInvokeCallback implements DeviceMethodCallback
     {
         @Override
-        public synchronized MethodResponse call(String methodName, Object methodData, Object context)
+        public synchronized DeviceMethodData call(String methodName, Object methodData, Object context)
         {
             System.out.println("Device invoked " + methodName);
-            MethodResponse methodResponse;
+            DeviceMethodData deviceMethodData;
             int status;
             String result;
             try
@@ -289,9 +289,9 @@ public class DeviceEmulator
                 result = e.toString();
                 status = METHOD_THROWS;
             }
-            methodResponse = new MethodResponse(status, result);
+            deviceMethodData = new DeviceMethodData(status, result);
 
-            return methodResponse;
+            return deviceMethodData;
         }
     }
 

@@ -2,7 +2,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.MethodResponse;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.*;
@@ -168,9 +168,9 @@ public class HubTierConnectionTests extends IntegrationTest
     protected static class DeviceMethodCallback implements com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback
     {
         @Override
-        public MethodResponse call(String methodName, Object methodData, Object context)
+        public DeviceMethodData call(String methodName, Object methodData, Object context)
         {
-            return new MethodResponse(200, "payload");
+            return new DeviceMethodData(200, "payload");
         }
     }
 

@@ -5,7 +5,7 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.MethodResponse;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import java.util.Scanner;
@@ -50,18 +50,18 @@ public class ModuleMethodSample
     protected static class SampleDeviceMethodCallback implements DeviceMethodCallback
     {
         @Override
-        public MethodResponse call(String methodName, Object methodData, Object context)
+        public DeviceMethodData call(String methodName, Object methodData, Object context)
         {
-            MethodResponse methodResponse;
+            DeviceMethodData deviceMethodData;
             int status = method_default(methodData);
             if ("command".equals(methodName))
             {
                 status = method_command(methodData);
             }
 
-            methodResponse = new MethodResponse(status, "executed " + methodName);
+            deviceMethodData = new DeviceMethodData(status, "executed " + methodName);
 
-            return methodResponse;
+            return deviceMethodData;
         }
     }
 

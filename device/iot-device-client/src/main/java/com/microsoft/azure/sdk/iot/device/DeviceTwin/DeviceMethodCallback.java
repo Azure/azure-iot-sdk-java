@@ -5,5 +5,5 @@ package com.microsoft.azure.sdk.iot.device.DeviceTwin;
 
 public interface DeviceMethodCallback
 {
-    MethodResponse call(String methodName, Object methodData, Object context);
+    DeviceMethodData call(String methodName, Object methodData, Object context);
 }

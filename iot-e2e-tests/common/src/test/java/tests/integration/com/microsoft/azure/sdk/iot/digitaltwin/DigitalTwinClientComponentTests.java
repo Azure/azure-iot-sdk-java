@@ -170,10 +170,10 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
         DeviceMethodCallback deviceMethodCallback = (methodName, methodData, context) -> {
             String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
             if(methodName.equalsIgnoreCase(componentCommandName)) {
-                return new MethodResponse(deviceSuccessResponseStatus, jsonRequest);
+                return new DeviceMethodData(deviceSuccessResponseStatus, jsonRequest);
             }
             else {
-                return new MethodResponse(deviceFailureResponseStatus, jsonRequest);
+                return new DeviceMethodData(deviceFailureResponseStatus, jsonRequest);
             }
         };
 
@@ -218,10 +218,10 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
         DeviceMethodCallback deviceMethodCallback = (methodName, methodData, context) -> {
             String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
             if(methodName.equalsIgnoreCase(commandName)) {
-                return new MethodResponse(deviceSuccessResponseStatus, jsonRequest);
+                return new DeviceMethodData(deviceSuccessResponseStatus, jsonRequest);
             }
             else {
-                return new MethodResponse(deviceFailureResponseStatus, jsonRequest);
+                return new DeviceMethodData(deviceFailureResponseStatus, jsonRequest);
             }
         };
 

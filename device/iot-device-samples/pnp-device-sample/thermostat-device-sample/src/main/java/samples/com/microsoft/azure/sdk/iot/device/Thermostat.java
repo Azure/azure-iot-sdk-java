@@ -312,7 +312,7 @@ public class Thermostat {
 
         @SneakyThrows
         @Override
-        public MethodResponse call(String methodName, Object methodData, Object context) {
+        public DeviceMethodData call(String methodName, Object methodData, Object context) {
             if (methodName.equalsIgnoreCase(commandName)) {
 
                 String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
@@ -352,15 +352,15 @@ public class Thermostat {
                             startTime,
                             endTime);
 
-                    return new MethodResponse(StatusCode.COMPLETED.value, responsePayload);
+                    return new DeviceMethodData(StatusCode.COMPLETED.value, responsePayload);
                 }
 
                 log.debug("Command: No relevant readings found since {}, cannot generate any report.", since);
-                return new MethodResponse(StatusCode.NOT_FOUND.value, null);
+                return new DeviceMethodData(StatusCode.NOT_FOUND.value, null);
             }
 
             log.error("Command: Unknown command {} invoked from service.", methodName);
-            return new MethodResponse(StatusCode.NOT_FOUND.value, null);
+            return new DeviceMethodData(StatusCode.NOT_FOUND.value, null);
         }
     }
 
