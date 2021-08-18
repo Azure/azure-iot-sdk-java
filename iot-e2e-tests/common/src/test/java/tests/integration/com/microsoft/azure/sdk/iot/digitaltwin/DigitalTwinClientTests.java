@@ -6,11 +6,11 @@ package tests.integration.com.microsoft.azure.sdk.iot.digitaltwin;
 import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.MethodCallback;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.MethodResponse;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.service.Device;
@@ -138,7 +138,7 @@ public class DigitalTwinClientTests extends IntegrationTest
     }
 
     private DeviceClient createDeviceClient(IotHubClientProtocol protocol) throws IOException, IotHubException, URISyntaxException {
-        ClientOptions options = new ClientOptions();
+        ClientOptions options = ClientOptions.builder().build();
         options.setModelId(E2ETestConstants.THERMOSTAT_MODEL_ID);
 
         this.deviceId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
@@ -311,7 +311,7 @@ public class DigitalTwinClientTests extends IntegrationTest
         Integer newPropertyValue = 35;
 
         // Property update callback
-        TwinPropertyCallBack twinPropertyCallBack = (property, context) -> {
+        TwinPropertyCallback twinPropertyCallBack = (property, context) -> {
             Set<Property> properties = new HashSet<>();
             properties.add(property);
             try {
@@ -325,7 +325,7 @@ public class DigitalTwinClientTests extends IntegrationTest
 
         // start device twin and setup handler for property updates in device
         deviceClient.startTwinAsync(iotHubEventCallback, null, twinPropertyCallBack, null);
-        Map<Property, Pair<TwinPropertyCallBack, Object>> desiredPropertyUpdateCallback =
+        Map<Property, Pair<TwinPropertyCallback, Object>> desiredPropertyUpdateCallback =
                 Collections.singletonMap(
                         new Property(newProperty, null),
                         new Pair<>(twinPropertyCallBack, null));
@@ -368,20 +368,20 @@ public class DigitalTwinClientTests extends IntegrationTest
         Integer deviceFailureResponseStatus = 500;
 
         // Device method callback
-        DeviceMethodCallback deviceMethodCallback = (methodName, methodData, context) -> {
+        MethodCallback methodCallback = (methodName, methodData, context) -> {
             String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
             if(methodName.equalsIgnoreCase(commandName)) {
-                return new DeviceMethodData(deviceSuccessResponseStatus, jsonRequest);
+                return new MethodResponse(deviceSuccessResponseStatus, jsonRequest);
             }
             else {
-                return new DeviceMethodData(deviceFailureResponseStatus, jsonRequest);
+                return new MethodResponse(deviceFailureResponseStatus, jsonRequest);
             }
         };
 
         // IotHub event callback
         IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) -> {};
 
-        deviceClient.subscribeToMethodsAsync(deviceMethodCallback, commandName, iotHubEventCallback, commandName);
+        deviceClient.subscribeToMethodsAsync(methodCallback, commandName, iotHubEventCallback, commandName);
 
         // act
         DigitalTwinCommandResponse responseWithNoPayload = this.digitalTwinClient.invokeCommand(deviceId, commandName, null);

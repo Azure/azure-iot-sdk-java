@@ -4,7 +4,6 @@
 package com.microsoft.azure.sdk.iot.device.DeviceTwin;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import mockit.Deencapsulation;
 import mockit.Mocked;
@@ -36,7 +35,7 @@ public class DeviceMethodTest
     MessageCallback mockeddeviceMethodResponseCB;
 
     @Mocked
-    DeviceMethodCallback mockedDeviceMethodCB;
+    MethodCallback mockedDeviceMethodCB;
 
     /*
     **Tests_SRS_DEVICEMETHOD_25_002: [**The constructor shall save the device method messages callback callback, by calling setDeviceMethodsMessageCallback, where any further messages for device method shall be delivered.**]**
@@ -197,7 +196,7 @@ public class DeviceMethodTest
         DeviceMethod testMethod = new DeviceMethod(mockedDeviceIO, mockedConfig, mockedStatusCB, null);
         testMethod.subscribeToDeviceMethod(mockedDeviceMethodCB, null);
 
-        final DeviceMethodData testUserData = new DeviceMethodData(100, "Some test message");
+        final MethodResponse testUserData = new MethodResponse(100, "Some test message");
 
         MessageCallback testDeviceMethodResponseMessageCallback = Deencapsulation.newInnerInstance("deviceMethodResponseCallback", testMethod);
         new NonStrictExpectations()
@@ -252,7 +251,7 @@ public class DeviceMethodTest
         IotHubTransportMessage testMessage = new IotHubTransportMessage(testPayload, MessageType.DEVICE_TWIN);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
 
-        final DeviceMethodData testUserData = new DeviceMethodData(100, "Some test message");
+        final MethodResponse testUserData = new MethodResponse(100, "Some test message");
 
         MessageCallback testDeviceMethodResponseMessageCallback = Deencapsulation.newInnerInstance("deviceMethodResponseCallback", testMethod);
         new NonStrictExpectations()
@@ -291,7 +290,7 @@ public class DeviceMethodTest
         IotHubTransportMessage testMessage = new IotHubTransportMessage(testPayload, DEVICE_METHODS);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
 
-        final DeviceMethodData testUserData = null;
+        final MethodResponse testUserData = null;
 
         MessageCallback testDeviceMethodResponseMessageCallback = Deencapsulation.newInnerInstance("deviceMethodResponseCallback", testMethod);
         new NonStrictExpectations()
@@ -332,7 +331,7 @@ public class DeviceMethodTest
         IotHubTransportMessage testMessage = new IotHubTransportMessage(testPayload, DEVICE_METHODS);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
 
-        final DeviceMethodData testUserData = new DeviceMethodData(100, null);
+        final MethodResponse testUserData = new MethodResponse(100, null);
 
         MessageCallback testDeviceMethodResponseMessageCallback = Deencapsulation.newInnerInstance("deviceMethodResponseCallback", testMethod);
         new NonStrictExpectations()

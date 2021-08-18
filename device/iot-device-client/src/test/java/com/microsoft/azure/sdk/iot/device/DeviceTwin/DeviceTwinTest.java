@@ -7,7 +7,6 @@ import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import mockit.*;
 import org.junit.Test;
@@ -40,7 +39,7 @@ public class DeviceTwinTest
     PropertyCallBack mockedGenericPropertyCB;
 
     @Mocked
-    TwinPropertyCallBack mockedGenericTwinPropertyCB;
+    TwinPropertyCallback mockedGenericTwinPropertyCB;
 
     /*
      **Tests_SRS_DEVICETWIN_25_003: [**The constructor shall save all the parameters specified i.e client, config, deviceTwinCallback.**]**
@@ -681,7 +680,7 @@ public class DeviceTwinTest
 
     @Test
     public void subscribeToDesiredTwinPropertySetsCorrectOperation(@Mocked final IotHubTransportMessage mockedDeviceTwinMessage,
-                                                                   @Mocked final TwinPropertyCallBack mockedDesiredCB)
+                                                                   @Mocked final TwinPropertyCallback mockedDesiredCB)
     {
         // arrange
         new NonStrictExpectations()
@@ -693,14 +692,14 @@ public class DeviceTwinTest
         };
         DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericTwinPropertyCB, null);
-        Map<Property, Pair<TwinPropertyCallBack, Object>> desiredMap = new HashMap<>();
+        Map<Property, Pair<TwinPropertyCallback, Object>> desiredMap = new HashMap<>();
         desiredMap.put(new Property("DesiredProp", "DesiredValue"), new Pair<>(mockedDesiredCB, null));
 
         // act
         testTwin.subscribeDesiredPropertiesTwinPropertyNotification(desiredMap);
 
         // assert
-        final ConcurrentSkipListMap<String, Pair<TwinPropertyCallBack, Object>> actualMap = Deencapsulation.getField(testTwin, "onDesiredTwinPropertyChangeMap");
+        final ConcurrentSkipListMap<String, Pair<TwinPropertyCallback, Object>> actualMap = Deencapsulation.getField(testTwin, "onDesiredTwinPropertyChangeMap");
 
         assertNotNull(actualMap);
         assertFalse(actualMap.isEmpty());
@@ -767,7 +766,7 @@ public class DeviceTwinTest
     @Test
     public void subscribeToDesiredTwinPropertyDoesNotSubscribeIfAlreadySubscribed(
             @Mocked final IotHubTransportMessage mockedDeviceTwinMessage,
-            @Mocked final TwinPropertyCallBack mockedDesiredCB)
+            @Mocked final TwinPropertyCallback mockedDesiredCB)
     {
         // arrange
         new NonStrictExpectations()
@@ -779,7 +778,7 @@ public class DeviceTwinTest
         };
         DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
                 mockedStatusCB, null, mockedGenericTwinPropertyCB, null);
-        Map<Property, Pair<TwinPropertyCallBack, Object>> desiredMap = new HashMap<>();
+        Map<Property, Pair<TwinPropertyCallback, Object>> desiredMap = new HashMap<>();
         desiredMap.put(new Property("DesiredProp1", null), new Pair<>(mockedDesiredCB, null));
         testTwin.subscribeDesiredPropertiesTwinPropertyNotification(desiredMap);
 
@@ -791,7 +790,7 @@ public class DeviceTwinTest
         testTwin.subscribeDesiredPropertiesTwinPropertyNotification(desiredMap);
 
         // assert
-        final ConcurrentSkipListMap<String, Pair<TwinPropertyCallBack, Object>> actualMap = Deencapsulation.getField(testTwin, "onDesiredTwinPropertyChangeMap");
+        final ConcurrentSkipListMap<String, Pair<TwinPropertyCallback, Object>> actualMap = Deencapsulation.getField(testTwin, "onDesiredTwinPropertyChangeMap");
 
         assertNotNull(actualMap);
         assertFalse(actualMap.isEmpty());
@@ -897,7 +896,7 @@ public class DeviceTwinTest
 
     @Test
     public void subscribeToDesiredTwinPropertyCallsGenericCBOnDesiredChangeIfNoUserCBFound(
-            @Mocked final TwinPropertyCallBack mockedDesiredCB)
+            @Mocked final TwinPropertyCallback mockedDesiredCB)
     {
         // arrange
         final String prop1 = "DesiredProp1";
@@ -913,7 +912,7 @@ public class DeviceTwinTest
         testMessage.setStatus(String.valueOf(200));
         testMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
 
-        Map<Property, Pair<TwinPropertyCallBack, Object>> desiredMap = new HashMap<>();
+        Map<Property, Pair<TwinPropertyCallback, Object>> desiredMap = new HashMap<>();
         desiredMap.put(new Property(prop1, null), new Pair<>(mockedDesiredCB, null));
         testTwin.subscribeDesiredPropertiesTwinPropertyNotification(desiredMap);
 
@@ -924,7 +923,7 @@ public class DeviceTwinTest
         new Verifications()
         {
             {
-                mockedGenericTwinPropertyCB.TwinPropertyCallBack((Property)any, null);
+                mockedGenericTwinPropertyCB.onTwinPropertyChanged((Property)any, null);
                 times = 1;
             }
         };
@@ -970,7 +969,7 @@ public class DeviceTwinTest
 
     @Test
     public void subscribeToDesiredTwinPropertyCallsUserCBOnDesiredChangeIfUserCBFound(
-            @Mocked final TwinPropertyCallBack mockedDesiredCB)
+            @Mocked final TwinPropertyCallback mockedDesiredCB)
     {
         // arrange
         final String prop1 = "DesiredProp1";
@@ -981,7 +980,7 @@ public class DeviceTwinTest
                 mockedStatusCB, null, mockedGenericTwinPropertyCB, null);
         MessageCallback deviceTwinResponseMessageCallback = Deencapsulation.newInnerInstance("deviceTwinResponseMessageCallback", testTwin);
 
-        Map<Property, Pair<TwinPropertyCallBack, Object>> desiredMap = new HashMap<>();
+        Map<Property, Pair<TwinPropertyCallback, Object>> desiredMap = new HashMap<>();
         desiredMap.put(new Property(prop1, null), new Pair<>(mockedDesiredCB, null));
         testTwin.subscribeDesiredPropertiesTwinPropertyNotification(desiredMap);
 
@@ -996,7 +995,7 @@ public class DeviceTwinTest
         new Verifications()
         {
             {
-                mockedDesiredCB.TwinPropertyCallBack((Property)any, null);
+                mockedDesiredCB.onTwinPropertyChanged((Property)any, null);
                 times = 1;
             }
         };
@@ -1040,7 +1039,7 @@ public class DeviceTwinTest
         new Verifications()
         {
             {
-                mockedGenericTwinPropertyCB.TwinPropertyCallBack(mockedProperty, null);
+                mockedGenericTwinPropertyCB.onTwinPropertyChanged(mockedProperty, null);
                 times = 1;
             }
         };
@@ -1084,7 +1083,7 @@ public class DeviceTwinTest
         new Verifications()
         {
             {
-                mockedGenericTwinPropertyCB.TwinPropertyCallBack(mockedProperty, null);
+                mockedGenericTwinPropertyCB.onTwinPropertyChanged(mockedProperty, null);
                 times = 1;
             }
         };
@@ -1133,7 +1132,7 @@ public class DeviceTwinTest
                         new Class[]{String.class, Object.class, Integer.class, boolean.class, Date.class, Integer.class},
                         reportedProp1, reportedVal2, reportedVersion, true, null, null);
                 times = 1;
-                mockedGenericTwinPropertyCB.TwinPropertyCallBack((Property)any, null);
+                mockedGenericTwinPropertyCB.onTwinPropertyChanged((Property)any, null);
                 times = 2;
             }
         };
@@ -1218,7 +1217,7 @@ public class DeviceTwinTest
                         new Class[]{String.class, Object.class, Integer.class, boolean.class, Date.class, Integer.class},
                         reportedProp1, reportedVal2, reportedVersion, true, (Date) any, lastUpdatedVersion);
                 times = 1;
-                mockedGenericTwinPropertyCB.TwinPropertyCallBack((Property)any, null);
+                mockedGenericTwinPropertyCB.onTwinPropertyChanged((Property)any, null);
                 times = 2;
             }
         };
@@ -1272,8 +1271,8 @@ public class DeviceTwinTest
                 mockedStatusCB, null, mockedGenericTwinPropertyCB, null);
         MessageCallback deviceTwinResponseMessageCallback = Deencapsulation.newInnerInstance("deviceTwinResponseMessageCallback", testTwin);
 
-        Map<Property, Pair<TwinPropertyCallBack, Object>> desiredMap = new HashMap<>();
-        desiredMap.put(new Property(prop1, null), new Pair<>((TwinPropertyCallBack) null, null));
+        Map<Property, Pair<TwinPropertyCallback, Object>> desiredMap = new HashMap<>();
+        desiredMap.put(new Property(prop1, null), new Pair<>((TwinPropertyCallback) null, null));
         testTwin.subscribeDesiredPropertiesTwinPropertyNotification(desiredMap);
 
         final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(), MessageType.DEVICE_TWIN);
@@ -1287,7 +1286,7 @@ public class DeviceTwinTest
         new Verifications()
         {
             {
-                mockedGenericTwinPropertyCB.TwinPropertyCallBack((Property)any, null);
+                mockedGenericTwinPropertyCB.onTwinPropertyChanged((Property)any, null);
                 times = 1;
             }
         };
@@ -1345,7 +1344,7 @@ public class DeviceTwinTest
         new Verifications()
         {
             {
-                mockedGenericTwinPropertyCB.TwinPropertyCallBack((Property)any, null);
+                mockedGenericTwinPropertyCB.onTwinPropertyChanged((Property)any, null);
                 times = 1;
             }
         };
@@ -1360,7 +1359,7 @@ public class DeviceTwinTest
         final String json = "{\"" + prop1 + "\":\"" + val2 + "\"}";
 
         DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
-                mockedStatusCB, null, (TwinPropertyCallBack)null, null);
+                mockedStatusCB, null, (TwinPropertyCallback)null, null);
         MessageCallback deviceTwinResponseMessageCallback = Deencapsulation.newInnerInstance("deviceTwinResponseMessageCallback", testTwin);
 
         final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(), MessageType.DEVICE_TWIN);

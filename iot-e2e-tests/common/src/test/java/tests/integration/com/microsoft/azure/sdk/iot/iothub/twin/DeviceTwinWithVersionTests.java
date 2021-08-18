@@ -8,7 +8,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.twin;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
@@ -129,10 +129,10 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         return null;
     }
 
-    private static class DeviceTwinPropertyCallback implements TwinPropertyCallBack
+    private static class DeviceTwinPropertyCallback implements TwinPropertyCallback
     {
         @Override
-        public void TwinPropertyCallBack(Property property, Object context)
+        public void onTwinPropertyChanged(Property property, Object context)
         {
             DeviceTwinWithVersionTestDevice state = (DeviceTwinWithVersionTestDevice) context;
             state.receivedProperties.add(property);

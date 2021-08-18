@@ -6,13 +6,13 @@
 package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethod;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.MethodCallback;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceTwin;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.PropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertiesCallback;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallback;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
@@ -167,7 +167,7 @@ public class InternalClient
     @SuppressWarnings("ConstantConditions")
     public void open(boolean withRetry) throws IOException
     {
-        if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN && this.config.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary())
+        if (this.config.getAuthenticationType() == DeviceClientConfig.AuthenticationType.SAS_TOKEN && this.config.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary())
         {
             throw new SecurityException("Your SasToken is expired");
         }
@@ -285,7 +285,7 @@ public class InternalClient
      *
      * @throws IOException if called when client is not opened or called before starting twin.
      */
-    public void subscribeToTwinDesiredPropertiesAsync(Map<Property, Pair<TwinPropertyCallBack, Object>> onDesiredPropertyChange) throws IOException
+    public void subscribeToTwinDesiredPropertiesAsync(Map<Property, Pair<TwinPropertyCallback, Object>> onDesiredPropertyChange) throws IOException
     {
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
@@ -641,7 +641,7 @@ public class InternalClient
      *
      * @param twinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
      * @param twinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
-     * @param genericPropertyCallBack the TwinPropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
+     * @param genericPropertyCallBack the TwinPropertyCallback callback for providing any changes in desired properties. Cannot be {@code null}.
      * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.     *
      *
      * @throws IllegalArgumentException if the callback is {@code null}
@@ -649,7 +649,7 @@ public class InternalClient
      * @throws IOException if called when client is not opened
      */
     public void startTwinAsync(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
-                                 TwinPropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext)
+                               TwinPropertyCallback genericPropertyCallBack, Object genericPropertyCallBackContext)
             throws IOException, IllegalArgumentException, UnsupportedOperationException
     {
         verifyRegisteredIfMultiplexing();
@@ -693,7 +693,7 @@ public class InternalClient
      *
      * @param twinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
      * @param twinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
-     * @param genericPropertiesCallBack the TwinPropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
+     * @param genericPropertiesCallBack the TwinPropertyCallback callback for providing any changes in desired properties. Cannot be {@code null}.
      * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.
      *
      * @throws IllegalArgumentException if the callback is {@code null}
@@ -736,9 +736,9 @@ public class InternalClient
 
     /**
      * Get the twin for this client. This method sends a request for the twin to the service and will asynchronously
-     * provide the retrieved twin to the callback provided in {@link #startTwinAsync(IotHubEventCallback, Object, TwinPropertyCallBack, Object)}.
+     * provide the retrieved twin to the callback provided in {@link #startTwinAsync(IotHubEventCallback, Object, TwinPropertyCallback, Object)}.
      *
-     * Users must call {@link #startTwinAsync(IotHubEventCallback, Object, TwinPropertyCallBack, Object)} before using this method.
+     * Users must call {@link #startTwinAsync(IotHubEventCallback, Object, TwinPropertyCallback, Object)} before using this method.
      * @throws IOException if the iot hub cannot be reached.
      */
     public void getTwinAsync() throws IOException
@@ -791,7 +791,7 @@ public class InternalClient
      * @throws IOException if called when client is not opened.
      * @throws IllegalArgumentException if either callback are null.
      */
-    public void subscribeToMethodsAsync(DeviceMethodCallback methodCallback, Object methodCallbackContext,
+    public void subscribeToMethodsAsync(MethodCallback methodCallback, Object methodCallbackContext,
                                         IotHubEventCallback methodStatusCallback, Object methodStatusCallbackContext)
             throws IOException
     {
@@ -915,7 +915,7 @@ public class InternalClient
     // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
     private void setOption_SetSASTokenExpiryTime(Object value)
     {
-        if (this.config.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN || this.config.getSasTokenAuthentication() == null)
+        if (this.config.getAuthenticationType() != DeviceClientConfig.AuthenticationType.SAS_TOKEN || this.config.getSasTokenAuthentication() == null)
         {
             throw new IllegalStateException("Cannot set sas token validity time when not using sas token authentication");
         }
@@ -942,7 +942,7 @@ public class InternalClient
             throw new UnsupportedOperationException("Cannot set the open authentication session timeout when using protocol " + this.config.getProtocol());
         }
 
-        if (this.config.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN)
+        if (this.config.getAuthenticationType() != DeviceClientConfig.AuthenticationType.SAS_TOKEN)
         {
             throw new UnsupportedOperationException("Cannot set the open authentication session timeout when using authentication type " + this.config.getAuthenticationType());
         }
@@ -1016,7 +1016,7 @@ public class InternalClient
             throw new IllegalArgumentException("Use of proxies is unsupported unless using HTTPS, MQTT_WS or AMQPS_WS");
         }
 
-        this.config.setProxy(proxySettings);
+        this.config.setProxySettings(proxySettings);
     }
 
     void setAsMultiplexed()

@@ -43,27 +43,30 @@ public final class DeviceClientConfig
     private static final long DEFAULT_OPERATION_TIMEOUT = 4 * 60 * 1000; //4 minutes
 
     private boolean useWebsocket;
+
+    @Getter
+    @Setter(AccessLevel.MODULE)
     private ProxySettings proxySettings;
 
     @Getter
-    @Setter(AccessLevel.PROTECTED)
+    @Setter(AccessLevel.MODULE)
     String modelId;
 
     // Initialize all the timeout values here instead of the constructor as the constructor is not always called.
     @Getter
-    @Setter
+    @Setter(AccessLevel.MODULE)
     private int httpsReadTimeout = DEFAULT_HTTPS_READ_TIMEOUT_MILLIS;
 
     @Getter
-    @Setter
+    @Setter(AccessLevel.MODULE)
     private int httpsConnectTimeout = DEFAULT_HTTPS_CONNECT_TIMEOUT_MILLIS;
 
     @Getter
-    @Setter
+    @Setter(AccessLevel.MODULE)
     private int amqpOpenAuthenticationSessionTimeout = DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT_IN_SECONDS;
 
     @Getter
-    @Setter
+    @Setter(AccessLevel.MODULE)
     private int amqpOpenDeviceSessionsTimeout = DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS;
 
     private IotHubAuthenticationProvider authenticationProvider;
@@ -91,18 +94,23 @@ public final class DeviceClientConfig
 
     private final Map<String, Pair<MessageCallback, Object>> inputChannelMessageCallbacks = new HashMap<>();
 
+    @Getter
     private ProductInfo productInfo;
 
-    public enum AuthType
+    public enum AuthenticationType
     {
         X509_CERTIFICATE,
         SAS_TOKEN
     }
 
+    @Getter
     private long operationTimeout = DEFAULT_OPERATION_TIMEOUT;
+
+    @Getter
     private IotHubClientProtocol protocol;
 
-    // Codes_SRS_DEVICECLIENTCONFIG_28_001: [The class shall have ExponentialBackOff as the default retryPolicy.]
+    @Getter
+    @Setter(AccessLevel.MODULE)
     private RetryPolicy retryPolicy = new ExponentialBackoffWithJitter();
 
     /**
@@ -115,7 +123,7 @@ public final class DeviceClientConfig
      * @throws IllegalArgumentException if the IoT Hub hostname does not contain
      * a valid IoT Hub name as its prefix.
      */
-    public DeviceClientConfig(IotHubConnectionString iotHubConnectionString) throws IllegalArgumentException
+    DeviceClientConfig(IotHubConnectionString iotHubConnectionString) throws IllegalArgumentException
     {
         configSasAuth(iotHubConnectionString);
     }
@@ -135,7 +143,7 @@ public final class DeviceClientConfig
         log.debug("Device configured to use software based SAS authentication provider");
     }
 
-    public DeviceClientConfig(IotHubAuthenticationProvider authenticationProvider) throws IllegalArgumentException
+    DeviceClientConfig(IotHubAuthenticationProvider authenticationProvider) throws IllegalArgumentException
     {
         if (!(authenticationProvider instanceof IotHubSasTokenAuthenticationProvider))
         {
@@ -147,8 +155,7 @@ public final class DeviceClientConfig
         this.productInfo = new ProductInfo();
     }
 
-
-    public DeviceClientConfig(String hostName, SasTokenProvider sasTokenProvider, ClientOptions clientOptions, String deviceId, String moduleId)
+    DeviceClientConfig(String hostName, SasTokenProvider sasTokenProvider, ClientOptions clientOptions, String deviceId, String moduleId)
     {
         SSLContext sslContext = clientOptions != null ? clientOptions.sslContext : null;
         this.authenticationProvider =
@@ -160,7 +167,7 @@ public final class DeviceClientConfig
         log.debug("Device configured to use SAS token provided authentication provider");
     }
 
-    public DeviceClientConfig(IotHubConnectionString iotHubConnectionString, ClientOptions clientOptions)
+    DeviceClientConfig(IotHubConnectionString iotHubConnectionString, ClientOptions clientOptions)
     {
         if (clientOptions != null && clientOptions.sslContext != null)
         {
@@ -172,7 +179,7 @@ public final class DeviceClientConfig
         }
     }
 
-    public DeviceClientConfig(IotHubConnectionString iotHubConnectionString, SSLContext sslContext)
+    DeviceClientConfig(IotHubConnectionString iotHubConnectionString, SSLContext sslContext)
     {
         configSsl(iotHubConnectionString, sslContext);
     }
@@ -270,14 +277,6 @@ public final class DeviceClientConfig
         this.useWebsocket = false;
     }
 
-    private void assertConnectionStringIsX509(IotHubConnectionString iotHubConnectionString)
-    {
-        if (!iotHubConnectionString.isUsingX509())
-        {
-            throw new IllegalArgumentException("Cannot use this constructor for connection strings that don't use x509 authentication.");
-        }
-    }
-
     private void assertConnectionStringIsNotX509(IotHubConnectionString iotHubConnectionString)
     {
         if (iotHubConnectionString.isUsingX509())
@@ -286,45 +285,9 @@ public final class DeviceClientConfig
         }
     }
 
-    public IotHubClientProtocol getProtocol()
-    {
-        // Codes_SRS_DEVICECLIENTCONFIG_34_047: [This function shall return the saved protocol.]
-        return this.protocol;
-    }
-
     void setProtocol(IotHubClientProtocol protocol)
     {
-        // Codes_SRS_DEVICECLIENTCONFIG_34_048: [This function shall save the provided protocol.]
         this.protocol = protocol;
-    }
-
-    /**
-     * Setter for RetryPolicy
-     *
-     * @param retryPolicy The types of retry policy to be used
-     * @throws IllegalArgumentException if retry policy is null
-     */
-    public void setRetryPolicy(RetryPolicy retryPolicy) throws IllegalArgumentException
-    {
-        // Codes_SRS_DEVICECLIENTCONFIG_28_002: [This function shall throw IllegalArgumentException retryPolicy is null.]
-        if (retryPolicy == null)
-        {
-            throw new IllegalArgumentException("Retry Policy cannot be null.");
-        }
-
-        // Codes_SRS_DEVICECLIENTCONFIG_28_003: [This function shall set retryPolicy.]
-        this.retryPolicy = retryPolicy;
-    }
-
-    /**
-     * Getter for RetryPolicy
-     *
-     * @return The value of RetryPolicy
-     */
-    public RetryPolicy getRetryPolicy()
-    {
-        // Codes_SRS_DEVICECLIENTCONFIG_28_004: [This function shall return the saved RetryPolicy object.]
-        return this.retryPolicy;
     }
 
     /**
@@ -364,7 +327,7 @@ public final class DeviceClientConfig
      * Setter for Websocket
      * @param useWebsocket true if to be set, false otherwise
      */
-    public void setUseWebsocket(boolean useWebsocket)
+    void setUseWebsocket(boolean useWebsocket)
     {
         //Codes_SRS_DEVICECLIENTCONFIG_25_038: [The function shall save useWebsocket.]
         this.useWebsocket = useWebsocket;
@@ -375,14 +338,14 @@ public final class DeviceClientConfig
      * @param callback the message callback. Can be {@code null}.
      * @param context the context to be passed in to the callback.
      */
-    public void setMessageCallback(MessageCallback callback, Object context)
+    void setMessageCallback(MessageCallback callback, Object context)
     {
         // Codes_SRS_DEVICECLIENTCONFIG_11_006: [The function shall set the message callback, with its associated context.]
         this.defaultDeviceTelemetryMessageCallback = callback;
         this.defaultDeviceTelemetryMessageContext = context;
     }
 
-    public void setMessageCallback(String inputName, MessageCallback callback, Object context)
+    void setMessageCallback(String inputName, MessageCallback callback, Object context)
     {
         if (this.inputChannelMessageCallbacks.containsKey(inputName) && callback == null)
         {
@@ -596,17 +559,17 @@ public final class DeviceClientConfig
      *
      * @return The value of AuthenticationType
      */
-    public AuthType getAuthenticationType()
+    public AuthenticationType getAuthenticationType()
     {
         if (this.authenticationProvider instanceof IotHubSasTokenAuthenticationProvider)
         {
-            // Codes_SRS_DEVICECLIENTCONFIG_34_051: [If the saved authentication provider uses sas tokens, this function return AuthType.SAS_TOKEN.]
-            return AuthType.SAS_TOKEN;
+            // Codes_SRS_DEVICECLIENTCONFIG_34_051: [If the saved authentication provider uses sas tokens, this function return AuthenticationType.SAS_TOKEN.]
+            return AuthenticationType.SAS_TOKEN;
         }
         else
         {
-            // Codes_SRS_DEVICECLIENTCONFIG_34_052: [If the saved authentication provider uses x509, this function return AuthType.X509_CERTIFICATE.]
-            return AuthType.X509_CERTIFICATE;
+            // Codes_SRS_DEVICECLIENTCONFIG_34_052: [If the saved authentication provider uses x509, this function return AuthenticationType.X509_CERTIFICATE.]
+            return AuthenticationType.X509_CERTIFICATE;
         }
     }
 
@@ -625,32 +588,6 @@ public final class DeviceClientConfig
 
         //Codes_SRS_DEVICECLIENTCONFIG_34_031: [This function shall save the provided operation timeout.]
         this.operationTimeout = timeout;
-    }
-
-    /**
-     * Getter for the device operation timeout
-     * @return the amount of time, in milliseconds, before any device operation expires
-     */
-    public long getOperationTimeout()
-    {
-        //Codes_SRS_DEVICECLIENTCONFIG_34_032: [This function shall return the saved operation timeout.]
-        return this.operationTimeout;
-    }
-
-    public ProductInfo getProductInfo()
-    {
-        //Codes_SRS_DEVICECLIENTCONFIG_34_040: [This function shall return the saved product info.]
-        return this.productInfo;
-    }
-
-    public void setProxy(ProxySettings proxySettings)
-    {
-        this.proxySettings = proxySettings;
-    }
-
-    public ProxySettings getProxySettings()
-    {
-        return this.proxySettings;
     }
 
     @SuppressWarnings("unused")

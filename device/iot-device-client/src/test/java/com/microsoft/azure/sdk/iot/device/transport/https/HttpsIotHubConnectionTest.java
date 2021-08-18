@@ -10,7 +10,6 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.net.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
-import com.microsoft.azure.sdk.iot.device.transport.https.*;
 import mockit.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -227,7 +226,7 @@ public class HttpsIotHubConnectionTest
                 mockConfig.getHttpsReadTimeout();
                 result = readTimeoutMillis;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
             }
         };
 
@@ -252,7 +251,7 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
                 mockConfig.getSasTokenAuthentication().getSSLContext();
                 result = mockContext;
             }
@@ -283,7 +282,7 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
                 mockConfig.getIotHubHostname();
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
@@ -291,7 +290,7 @@ public class HttpsIotHubConnectionTest
                 mockConfig.getSasTokenAuthentication().getSasToken();
                 result = tokenStr;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
             }
         };
 
@@ -323,7 +322,7 @@ public class HttpsIotHubConnectionTest
                 mockUri.getPath();
                 result = path;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
             }
         };
 
@@ -361,7 +360,7 @@ public class HttpsIotHubConnectionTest
                 mockedMessage.getContentEncoding();
                 result = contentEncoding;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
             }
         };
 
@@ -399,7 +398,7 @@ public class HttpsIotHubConnectionTest
                 mockedMessage.getCreationTimeUTCString();
                 result = expectedCreationTimeUTCString;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
             }
         };
 
@@ -432,7 +431,7 @@ public class HttpsIotHubConnectionTest
                 mockMsg.getContentType();
                 result = contentType;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
             }
         };
 
@@ -696,7 +695,7 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
                 mockConfig.getSasTokenAuthentication().getSSLContext();
                 result = mockContext;
             }
@@ -727,7 +726,7 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
                 mockConfig.getIotHubHostname();
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
@@ -1001,7 +1000,7 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
                 mockConfig.getIotHubHostname();
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
@@ -1085,7 +1084,7 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
                 mockConfig.getSasTokenAuthentication().getSSLContext();
                 result = mockContext;
             }
@@ -1662,7 +1661,7 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
                 mockResponse.getStatus();
                 returns(200, 204);
                 IotHubStatusCode.getIotHubStatusCode(200);
@@ -1738,7 +1737,7 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
                 mockResponse.getStatus();
                 returns(200, 204);
                 IotHubStatusCode.getIotHubStatusCode(200);
@@ -1850,7 +1849,7 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
             }
         };
         HttpsIotHubConnection connection = new HttpsIotHubConnection(mockConfig);
@@ -1877,7 +1876,7 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
             }
         };
         HttpsIotHubConnection connection = new HttpsIotHubConnection(mockConfig);
@@ -1906,7 +1905,7 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
+                result = DeviceClientConfig.AuthenticationType.X509_CERTIFICATE;
             }
         };
 
@@ -1935,7 +1934,7 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
+                result = DeviceClientConfig.AuthenticationType.X509_CERTIFICATE;
             }
         };
 
@@ -1962,7 +1961,7 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
+                result = DeviceClientConfig.AuthenticationType.X509_CERTIFICATE;
             }
         };
 
@@ -1997,7 +1996,7 @@ public class HttpsIotHubConnectionTest
                 mockResponse.getHeaderField(withMatch("(?i)etag"));
                 result = eTag;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
+                result = DeviceClientConfig.AuthenticationType.X509_CERTIFICATE;
             }
         };
 

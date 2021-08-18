@@ -3,12 +3,12 @@
 
 package com.microsoft.azure.sdk.iot.device.DeviceTwin;
 
-public class DeviceMethodData
+public class MethodResponse
 {
     private int status;
     private String responseMessage;
 
-    public DeviceMethodData(int status, String responseMessage)
+    public MethodResponse(int status, String responseMessage)
     {
         /*
         **Codes_SRS_DEVICEMETHODDATA_25_001: [**The constructor shall save the status and response message provided by user.**]**

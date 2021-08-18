@@ -3,7 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.auth.*;
 import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
@@ -228,7 +227,7 @@ public class DeviceClientConfigTest
         assertEquals(expectedModuleId, actualModuleId);
     }
 
-    // Tests_SRS_DEVICECLIENTCONFIG_34_051: [If the saved authentication provider uses sas tokens, this function return AuthType.SAS_TOKEN.]
+    // Tests_SRS_DEVICECLIENTCONFIG_34_051: [If the saved authentication provider uses sas tokens, this function return AuthenticationType.SAS_TOKEN.]
     @Test
     public void getAuthTypeReturnsSasTokenAuth()
     {
@@ -237,13 +236,13 @@ public class DeviceClientConfigTest
         Deencapsulation.setField(config, "authenticationProvider", mockSasTokenSoftwareAuthentication);
 
         //act
-        DeviceClientConfig.AuthType actualAuthType = config.getAuthenticationType();
+        DeviceClientConfig.AuthenticationType actualAuthenticationType = config.getAuthenticationType();
 
         //assert
-        assertEquals(DeviceClientConfig.AuthType.SAS_TOKEN, actualAuthType);
+        assertEquals(DeviceClientConfig.AuthenticationType.SAS_TOKEN, actualAuthenticationType);
     }
 
-    // Tests_SRS_DEVICECLIENTCONFIG_34_052: [If the saved authentication provider uses x509, this function return AuthType.X509_CERTIFICATE.]
+    // Tests_SRS_DEVICECLIENTCONFIG_34_052: [If the saved authentication provider uses x509, this function return AuthenticationType.X509_CERTIFICATE.]
     @Test
     public void getAuthTypeReturnsX509Auth()
     {
@@ -252,10 +251,10 @@ public class DeviceClientConfigTest
         Deencapsulation.setField(config, "authenticationProvider", mockAuthentication);
 
         //act
-        DeviceClientConfig.AuthType actualAuthType = config.getAuthenticationType();
+        DeviceClientConfig.AuthenticationType actualAuthenticationType = config.getAuthenticationType();
 
         //assert
-        assertEquals(DeviceClientConfig.AuthType.X509_CERTIFICATE, actualAuthType);
+        assertEquals(DeviceClientConfig.AuthenticationType.X509_CERTIFICATE, actualAuthenticationType);
     }
 
     // Tests_SRS_DEVICECLIENTCONFIG_34_055: [If the saved authentication provider uses sas tokens, this function return the saved authentication provider.]
@@ -640,13 +639,13 @@ public class DeviceClientConfigTest
         //arrange
         DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockSasTokenSoftwareAuthentication);
 
-        DeviceClientConfig.AuthType expectedAuthType = DeviceClientConfig.AuthType.SAS_TOKEN;
+        DeviceClientConfig.AuthenticationType expectedAuthenticationType = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
 
         //act
-        DeviceClientConfig.AuthType actualAuthType = config.getAuthenticationType();
+        DeviceClientConfig.AuthenticationType actualAuthenticationType = config.getAuthenticationType();
 
         //assert
-        assertEquals(expectedAuthType, actualAuthType);
+        assertEquals(expectedAuthenticationType, actualAuthenticationType);
     }
 
     @Test
@@ -1110,7 +1109,7 @@ public class DeviceClientConfigTest
         DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString);
 
         //act
-        config.setProxy(mockedProxySettings);
+        config.setProxySettings(mockedProxySettings);
 
         //assert
         ProxySettings savedProxySettings = Deencapsulation.getField(config, "proxySettings");

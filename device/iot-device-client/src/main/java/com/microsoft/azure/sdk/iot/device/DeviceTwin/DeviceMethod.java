@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public final class DeviceMethod
 {
-    private DeviceMethodCallback deviceMethodCallback;
+    private MethodCallback methodCallback;
     private Object deviceMethodCallbackContext;
     private final IotHubEventCallback deviceMethodStatusCallback;
     private final Object deviceMethodStatusCallbackContext;
@@ -51,7 +51,7 @@ public final class DeviceMethod
 
                 if (methodMessage.getDeviceOperationType() == DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST)
                 {
-                    if (deviceMethodCallback != null)
+                    if (methodCallback != null)
                     {
                         if (!isSubscribed)
                         {
@@ -63,7 +63,7 @@ public final class DeviceMethod
                              **Codes_SRS_DEVICEMETHOD_25_008: [**If the message is of type DeviceMethod and DEVICE_OPERATION_METHOD_RECEIVE_REQUEST then user registered device method callback gets invoked providing the user with method name and payload along with the user context. **]**
                              */
                             log.trace("Executing method invocation callback for method name {} for message {}", methodMessage.getMethodName(), methodMessage);
-                            DeviceMethodData responseData = deviceMethodCallback.call(methodMessage.getMethodName(), methodMessage.getBytes(), deviceMethodCallbackContext);
+                            MethodResponse responseData = methodCallback.call(methodMessage.getMethodName(), methodMessage.getBytes(), deviceMethodCallbackContext);
                             log.trace("Method invocation callback returned for method name {} for message {}", methodMessage.getMethodName(), methodMessage);
 
                             /*
@@ -167,21 +167,21 @@ public final class DeviceMethod
 
     /**
      * A method which subscribes to receive device method invocation for the user with the IotHub.
-     * @param deviceMethodCallback Callback where upon receiving the request the
+     * @param methodCallback Callback where upon receiving the request the
      *                             invoke a method shall be triggered.
-     * @param deviceMethodCallbackContext Context to be passed on when invoking the
+     * @param directMethodCallbackContext Context to be passed on when invoking the
      *                                    callback.
-     * @throws IllegalArgumentException This exception is thrown when deviceMethodCallback is provided null.
+     * @throws IllegalArgumentException This exception is thrown when methodCallback is provided null.
      */
-    public void subscribeToDeviceMethod(DeviceMethodCallback deviceMethodCallback, Object deviceMethodCallbackContext) throws IllegalArgumentException
+    public void subscribeToDeviceMethod(MethodCallback methodCallback, Object directMethodCallbackContext) throws IllegalArgumentException
     {
-        if (deviceMethodCallback == null)
+        if (methodCallback == null)
         {
             throw new IllegalArgumentException("Callback cannot be null");
         }
 
-        this.deviceMethodCallback = deviceMethodCallback;
-        this.deviceMethodCallbackContext = deviceMethodCallbackContext;
+        this.methodCallback = methodCallback;
+        this.deviceMethodCallbackContext = directMethodCallbackContext;
 
         if (!isSubscribed)
         {

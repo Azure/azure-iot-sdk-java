@@ -3,12 +3,11 @@
 
 package com.microsoft.azure.sdk.iot.device.DeviceTwin;
 
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class DeviceMethodDataTest
+public class MethodResponseTest
 {
     /*
     **Tests_SRS_DEVICEMETHODDATA_25_001: [**The constructor shall save the status and response message provided by user.**]**
@@ -17,7 +16,7 @@ public class DeviceMethodDataTest
     public void constructorSucceeds()
     {
         //act
-        DeviceMethodData testData = new DeviceMethodData(0, "testMessage");
+        MethodResponse testData = new MethodResponse(0, "testMessage");
 
         //assert
         int testStatus = testData.getStatus();
@@ -34,7 +33,7 @@ public class DeviceMethodDataTest
     public void GetStatusGets()
     {
         //arrange
-        DeviceMethodData testData = new DeviceMethodData(0, "testMessage");
+        MethodResponse testData = new MethodResponse(0, "testMessage");
 
         //act
         int testStatus = testData.getStatus();
@@ -51,7 +50,7 @@ public class DeviceMethodDataTest
     public void getResponseMessageGets()
     {
         //arrange
-        DeviceMethodData testData = new DeviceMethodData(0, "testMessage");
+        MethodResponse testData = new MethodResponse(0, "testMessage");
 
         //act
         String testResponse = testData.getResponseMessage();
@@ -67,7 +66,7 @@ public class DeviceMethodDataTest
     public void setStatusSets()
     {
         //arrange
-        DeviceMethodData testData = new DeviceMethodData(0, "testMessage");
+        MethodResponse testData = new MethodResponse(0, "testMessage");
 
         //act
         testData.setStatus(200);
@@ -85,7 +84,7 @@ public class DeviceMethodDataTest
     public void setResponseMessageSets()
     {
         //arrange
-        DeviceMethodData testData = new DeviceMethodData(0, "originalMessage");
+        MethodResponse testData = new MethodResponse(0, "originalMessage");
 
         //act
         testData.setResponseMessage("testMessage");

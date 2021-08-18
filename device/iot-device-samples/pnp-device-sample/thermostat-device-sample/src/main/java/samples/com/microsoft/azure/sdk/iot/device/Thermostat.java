@@ -141,7 +141,7 @@ public class Thermostat {
 
         log.debug("Start twin and set handler to receive \"targetTemperature\" updates.");
         deviceClient.startTwinAsync(new TwinIotHubEventCallback(), null, new TargetTemperatureUpdateCallback(), null);
-        Map<Property, Pair<TwinPropertyCallBack, Object>> desiredPropertyUpdateCallback =
+        Map<Property, Pair<TwinPropertyCallback, Object>> desiredPropertyUpdateCallback =
                 Collections.singletonMap(
                         new Property("targetTemperature", null),
                         new Pair<>(new TargetTemperatureUpdateCallback(), null));
@@ -195,7 +195,7 @@ public class Thermostat {
             Thread.sleep(MAX_TIME_TO_WAIT_FOR_REGISTRATION);
         }
 
-        ClientOptions options = new ClientOptions();
+        ClientOptions options = ClientOptions.builder().build();
         options.setModelId(MODEL_ID);
 
         if (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED) {
@@ -229,7 +229,7 @@ public class Thermostat {
      * This method also sets a connection status change callback, that will get triggered any time the device's connection status changes.
      */
     private static void initializeDeviceClient() throws URISyntaxException, IOException {
-        ClientOptions options = new ClientOptions();
+        ClientOptions options = ClientOptions.builder().build();
         options.setModelId(MODEL_ID);
         deviceClient = new DeviceClient(deviceConnectionString, protocol, options);
 
@@ -249,13 +249,14 @@ public class Thermostat {
      * The desired property update callback, which receives the target temperature as a desired property update,
      * and updates the current temperature value over telemetry and reported property update.
      */
-    private static class TargetTemperatureUpdateCallback implements TwinPropertyCallBack {
+    private static class TargetTemperatureUpdateCallback implements TwinPropertyCallback
+    {
 
         final String propertyName = "targetTemperature";
 
         @SneakyThrows({InterruptedException.class, IOException.class})
         @Override
-        public void TwinPropertyCallBack(Property property, Object context) {
+        public void onTwinPropertyChanged(Property property, Object context) {
             if (property.getKey().equalsIgnoreCase(propertyName)) {
                 double targetTemperature = ((Number)property.getValue()).doubleValue();
                 log.debug("Property: Received - {\"{}\": {}°C}.", propertyName, targetTemperature);
@@ -305,12 +306,13 @@ public class Thermostat {
      * The callback to handle "getMaxMinReport" command.
      * This method will returns the max, min and average temperature from the specified time to the current time.
      */
-    private static class GetMaxMinReportMethodCallback implements DeviceMethodCallback {
+    private static class GetMaxMinReportMethodCallback implements MethodCallback
+    {
         final String commandName = "getMaxMinReport";
 
         @SneakyThrows
         @Override
-        public DeviceMethodData call(String methodName, Object methodData, Object context) {
+        public MethodResponse call(String methodName, Object methodData, Object context) {
             if (methodName.equalsIgnoreCase(commandName)) {
 
                 String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
@@ -350,15 +352,15 @@ public class Thermostat {
                             startTime,
                             endTime);
 
-                    return new DeviceMethodData(StatusCode.COMPLETED.value, responsePayload);
+                    return new MethodResponse(StatusCode.COMPLETED.value, responsePayload);
                 }
 
                 log.debug("Command: No relevant readings found since {}, cannot generate any report.", since);
-                return new DeviceMethodData(StatusCode.NOT_FOUND.value, null);
+                return new MethodResponse(StatusCode.NOT_FOUND.value, null);
             }
 
             log.error("Command: Unknown command {} invoked from service.", methodName);
-            return new DeviceMethodData(StatusCode.NOT_FOUND.value, null);
+            return new MethodResponse(StatusCode.NOT_FOUND.value, null);
         }
     }
 

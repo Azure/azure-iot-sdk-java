@@ -90,7 +90,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
     }
 
     private DeviceClient createDeviceClient(IotHubClientProtocol protocol) throws IOException, IotHubException, URISyntaxException {
-        ClientOptions options = new ClientOptions();
+        ClientOptions options = ClientOptions.builder().build();
         options.setModelId(E2ETestConstants.TEMPERATURE_CONTROLLER_MODEL_ID);
 
         this.deviceId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
@@ -167,20 +167,20 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
 
         // Device method callback
         String componentCommandName = componentName + "*" + commandName;
-        DeviceMethodCallback deviceMethodCallback = (methodName, methodData, context) -> {
+        MethodCallback methodCallback = (methodName, methodData, context) -> {
             String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
             if(methodName.equalsIgnoreCase(componentCommandName)) {
-                return new DeviceMethodData(deviceSuccessResponseStatus, jsonRequest);
+                return new MethodResponse(deviceSuccessResponseStatus, jsonRequest);
             }
             else {
-                return new DeviceMethodData(deviceFailureResponseStatus, jsonRequest);
+                return new MethodResponse(deviceFailureResponseStatus, jsonRequest);
             }
         };
 
         // IotHub event callback
         IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) -> {};
 
-        deviceClient.subscribeToMethodsAsync(deviceMethodCallback, commandName, iotHubEventCallback, commandName);
+        deviceClient.subscribeToMethodsAsync(methodCallback, commandName, iotHubEventCallback, commandName);
 
         // act
         DigitalTwinCommandResponse responseWithNoPayload = this.digitalTwinClient.invokeComponentCommand(deviceId, componentName, commandName, null);
@@ -215,20 +215,20 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
         Integer deviceFailureResponseStatus = 500;
 
         // Device method callback
-        DeviceMethodCallback deviceMethodCallback = (methodName, methodData, context) -> {
+        MethodCallback methodCallback = (methodName, methodData, context) -> {
             String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
             if(methodName.equalsIgnoreCase(commandName)) {
-                return new DeviceMethodData(deviceSuccessResponseStatus, jsonRequest);
+                return new MethodResponse(deviceSuccessResponseStatus, jsonRequest);
             }
             else {
-                return new DeviceMethodData(deviceFailureResponseStatus, jsonRequest);
+                return new MethodResponse(deviceFailureResponseStatus, jsonRequest);
             }
         };
 
         // IotHub event callback
         IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) -> {};
 
-        deviceClient.subscribeToMethodsAsync(deviceMethodCallback, commandName, iotHubEventCallback, commandName);
+        deviceClient.subscribeToMethodsAsync(methodCallback, commandName, iotHubEventCallback, commandName);
 
         // act
         DigitalTwinCommandResponse responseWithNoPayload = this.digitalTwinClient.invokeCommand(deviceId, commandName, null);

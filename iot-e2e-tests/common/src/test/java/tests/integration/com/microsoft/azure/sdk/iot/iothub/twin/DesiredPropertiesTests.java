@@ -7,14 +7,12 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.twin;
 
 import com.google.gson.JsonParser;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertiesCallback;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
-import com.microsoft.azure.sdk.iot.device.ModuleClient;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
@@ -182,7 +180,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         // arrange
         testInstance.deviceUnderTest.sCDeviceForTwin.clearTwin();
         testInstance.deviceUnderTest.dCDeviceForTwin.getDesiredProp().clear();
-        Map<Property, Pair<TwinPropertyCallBack, Object>> desiredPropertiesCB = new HashMap<>();
+        Map<Property, Pair<TwinPropertyCallback, Object>> desiredPropertiesCB = new HashMap<>();
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
             PropertyState propertyState = new PropertyState();
@@ -329,7 +327,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         TwinCollection expectedProperties;
 
         @Override
-        public void TwinPropertiesCallBack(TwinCollection actualProperties, Object context) {
+        public void onTwinPropertiesChanged(TwinCollection actualProperties, Object context) {
             Success desiredPropertiesCallbackState = (Success) context;
             desiredPropertiesCallbackState.callbackWasFired();
 
@@ -362,7 +360,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         }
     }
 
-    // This test is for the startTwinAsync/startTwinAsync API that takes the TwinPropertiesCallback rather than the TwinPropertyCallback
+    // This test is for the startTwinAsync/startTwinAsync API that takes the onTwinPropertyChanged rather than the TwinPropertyCallback
     // This callback should receive the full twin update in one callback, rather than one callback per updated
     // desired property
     @Test

@@ -138,7 +138,7 @@ public class SendEventX509
         System.out.format("Using communication protocol %s.\n", protocol.name());
 
         SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCertificateString, privateKeyString);
-        ClientOptions clientOptions = new ClientOptions();
+        ClientOptions clientOptions = ClientOptions.builder().build();
         clientOptions.setSslContext(sslContext);
         DeviceClient client = new DeviceClient(connectionString, protocol, clientOptions);
 

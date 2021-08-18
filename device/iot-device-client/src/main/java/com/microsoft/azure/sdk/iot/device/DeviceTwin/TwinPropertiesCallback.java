@@ -6,10 +6,10 @@ package com.microsoft.azure.sdk.iot.device.DeviceTwin;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 
 /**
- * Interface for receiving desired property callbacks all at once. See {@link TwinPropertyCallBack} for the
+ * Interface for receiving desired property callbacks all at once. See {@link TwinPropertyCallback} for the
  * interface for receiving desired property callbacks one at a time.
  */
 public interface TwinPropertiesCallback
 {
-    void TwinPropertiesCallBack(TwinCollection properties, Object context);
+    void onTwinPropertiesChanged(TwinCollection properties, Object context);
 }

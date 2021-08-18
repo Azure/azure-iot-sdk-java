@@ -138,7 +138,7 @@ public class TwinPnPTests extends IntegrationTest
             moduleX509.setThumbprint(x509Thumbprint, x509Thumbprint);
             device = Tools.addDeviceWithRetry(registryManager, device);
             deviceX509 = Tools.addDeviceWithRetry(registryManager, deviceX509);
-            ClientOptions clientOptions = new ClientOptions();
+            ClientOptions clientOptions = ClientOptions.builder().build();
             clientOptions.setModelId(ModelId);
 
             if (clientType == ClientType.DEVICE_CLIENT)

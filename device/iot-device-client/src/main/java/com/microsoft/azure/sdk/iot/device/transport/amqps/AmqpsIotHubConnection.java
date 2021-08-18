@@ -68,7 +68,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     private final String hostName;
     private SSLContext sslContext;
     private final boolean isWebsocketConnection;
-    private final DeviceClientConfig.AuthType authenticationType;
+    private final DeviceClientConfig.AuthenticationType authenticationType;
     private final Set<DeviceClientConfig> deviceClientConfigs;
     private IotHubListener listener;
     private TransportException savedException;
@@ -143,7 +143,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         this.isWebsocketConnection = isWebsocketConnection;
 
         // This constructor is only called when multiplexing, and multiplexing only supports SAS auth
-        this.authenticationType = DeviceClientConfig.AuthType.SAS_TOKEN;
+        this.authenticationType = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
 
         this.hostName = hostName;
         this.proxySettings = proxySettings;
@@ -219,7 +219,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             {
                 this.openAsync();
 
-                if (this.authenticationType == DeviceClientConfig.AuthType.SAS_TOKEN)
+                if (this.authenticationType == DeviceClientConfig.AuthenticationType.SAS_TOKEN)
                 {
                     // x509 authenticated connections don't open authentication links since the SSL handshake does all the authentication
                     log.trace("Waiting for authentication links to open...");
@@ -404,7 +404,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 sslContext = new IotHubSSLContext().getSSLContext();
             }
 
-            if (this.authenticationType == DeviceClientConfig.AuthType.SAS_TOKEN)
+            if (this.authenticationType == DeviceClientConfig.AuthenticationType.SAS_TOKEN)
             {
                 Sasl sasl = transport.sasl();
                 sasl.setMechanisms("ANONYMOUS");
@@ -438,7 +438,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         log.trace("Amqp connection opened locally");
 
         //Create one session per multiplexed device, or just one session if not multiplexing
-        if (this.authenticationType == DeviceClientConfig.AuthType.SAS_TOKEN)
+        if (this.authenticationType == DeviceClientConfig.AuthenticationType.SAS_TOKEN)
         {
             // The CBS ("Claims-Based-Security") session is dedicated to sending SAS tokens to the service to authenticate
             // all of the device sessions in this AMQP connection.
@@ -627,7 +627,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         log.trace("Authentication session opened, counting down the authentication session opening latch");
         this.authenticationSessionOpenedLatch.countDown();
 
-        if (this.authenticationType == DeviceClientConfig.AuthType.SAS_TOKEN)
+        if (this.authenticationType == DeviceClientConfig.AuthenticationType.SAS_TOKEN)
         {
             if (this.isWebsocketConnection)
             {
@@ -890,7 +890,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             // expected 256 * 1024 bytes. For more context, see https://github.com/Azure/azure-iot-sdk-java/issues/742
             options.setMaxFrameSize(MAX_FRAME_SIZE);
 
-            if (this.authenticationType == DeviceClientConfig.AuthType.X509_CERTIFICATE)
+            if (this.authenticationType == DeviceClientConfig.AuthenticationType.X509_CERTIFICATE)
             {
                 // x509 authentication does not use SASL, so disable it
                 options.setEnableSaslByDefault(false);
@@ -1099,7 +1099,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     {
         this.closeReactorLatch = new CountDownLatch(REACTOR_COUNT);
 
-        if (this.authenticationType == DeviceClientConfig.AuthType.SAS_TOKEN)
+        if (this.authenticationType == DeviceClientConfig.AuthenticationType.SAS_TOKEN)
         {
             log.trace("Initializing authentication link latch count to {}", CBS_SESSION_COUNT);
             this.authenticationSessionOpenedLatch = new CountDownLatch(CBS_SESSION_COUNT);

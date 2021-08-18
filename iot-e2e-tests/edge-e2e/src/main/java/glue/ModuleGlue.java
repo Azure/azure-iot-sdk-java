@@ -1,10 +1,10 @@
 package glue;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.MethodCallback;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.MethodResponse;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallback;
 import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
 import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
@@ -235,7 +235,7 @@ public class ModuleGlue
         }
     }
 
-    private static class ModuleTwinPropertyCallBack implements TwinPropertyCallBack
+    private static class ModuleTwinPropertyCallback implements TwinPropertyCallback
     {
         private JsonObject _props = null;
         private Handler<AsyncResult<Object>> _handler;
@@ -261,7 +261,7 @@ public class ModuleGlue
         }
 
         @Override
-        public void TwinPropertyCallBack(Property property, Object context)
+        public void onTwinPropertyChanged(Property property, Object context)
         {
             System.out.println(
                     "onProperty callback for " + (property.getIsReported() ? "reported" : "desired") +
@@ -325,7 +325,7 @@ public class ModuleGlue
         }
     }
 
-    private final ModuleTwinPropertyCallBack _deviceTwinPropertyCallback = new ModuleTwinPropertyCallBack();
+    private final ModuleTwinPropertyCallback _deviceTwinPropertyCallback = new ModuleTwinPropertyCallback();
 
     private static class IotHubEventCallbackImpl implements IotHubEventCallback
     {
@@ -493,7 +493,7 @@ public class ModuleGlue
         }
     }
 
-    private static class DeviceMethodCallbackImpl implements DeviceMethodCallback
+    private static class MethodCallbackImpl implements MethodCallback
     {
         public Handler<AsyncResult<Void>> _handler;
         public String _requestBody;
@@ -509,7 +509,7 @@ public class ModuleGlue
         }
 
         @Override
-        public DeviceMethodData call(String methodName, Object methodData, Object context)
+        public MethodResponse call(String methodName, Object methodData, Object context)
         {
             System.out.printf("method %s called%n", methodName);
             if (methodName.equals(this._methodName))
@@ -522,7 +522,7 @@ public class ModuleGlue
                 {
                     this._handler.handle(Future.failedFuture(e));
                     this.reset();
-                    return new DeviceMethodData(500, "exception parsing methodData");
+                    return new MethodResponse(500, "exception parsing methodData");
                 }
                 System.out.printf("methodData: %s%n", methodDataString);
 
@@ -532,26 +532,26 @@ public class ModuleGlue
                     System.out.printf("Method data looks correct.  Returning result: %s%n", _responseBody);
                     this._handler.handle(Future.succeededFuture());
                     this.reset();
-                    return new DeviceMethodData(this._statusCode, this._responseBody);
+                    return new MethodResponse(this._statusCode, this._responseBody);
                 }
                 else
                 {
                     System.out.printf("method data does not match.  Expected %s%n", this._requestBody);
                     this._handler.handle(Future.failedFuture("methodData does not match"));
                     this.reset();
-                    return new DeviceMethodData(500, "methodData not received as expected");
+                    return new MethodResponse(500, "methodData not received as expected");
                 }
             }
             else
             {
                 this._handler.handle(Future.failedFuture("unexpected call: " + methodName));
                 this.reset();
-                return new DeviceMethodData(404, "method " + methodName + " not handled");
+                return new MethodResponse(404, "method " + methodName + " not handled");
             }
         }
     }
 
-    DeviceMethodCallbackImpl _methodCallback = new DeviceMethodCallbackImpl();
+    MethodCallbackImpl _methodCallback = new MethodCallbackImpl();
 
     public void enableMethods(String connectionId, Handler<AsyncResult<Void>> handler)
     {

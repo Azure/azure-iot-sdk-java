@@ -208,7 +208,7 @@ public class ModuleClient extends InternalClient
 
             if (clientOptions == null)
             {
-                clientOptions = new ClientOptions();
+                clientOptions = ClientOptions.builder().build();
             }
 
             // only override the SSLContext if the user didn't set it

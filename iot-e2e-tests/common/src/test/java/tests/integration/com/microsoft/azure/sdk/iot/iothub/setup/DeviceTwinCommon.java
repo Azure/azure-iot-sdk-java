@@ -8,16 +8,14 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 import com.azure.core.credential.AzureSasCredential;
 import com.google.gson.JsonParser;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinConnectionState;
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallback;
 import com.microsoft.azure.sdk.iot.device.InternalClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
-import com.microsoft.azure.sdk.iot.device.ModuleClient;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
@@ -199,10 +197,10 @@ public class DeviceTwinCommon extends IntegrationTest
         public Integer propertyNewVersion;
     }
 
-    public class OnProperty implements TwinPropertyCallBack
+    public class OnProperty implements TwinPropertyCallback
     {
         @Override
-        public void TwinPropertyCallBack(Property property,  Object context)
+        public void onTwinPropertyChanged(Property property, Object context)
         {
             PropertyState propertyState = (PropertyState) context;
             if (property.getKey().equals(propertyState.property.getKey()))
@@ -653,7 +651,7 @@ public class DeviceTwinCommon extends IntegrationTest
     protected void testGetDeviceTwin() throws IOException, InterruptedException, IotHubException
     {
         // arrange
-        Map<Property, com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<TwinPropertyCallBack, Object>> desiredPropertiesCB = new HashMap<>();
+        Map<Property, com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<TwinPropertyCallback, Object>> desiredPropertiesCB = new HashMap<>();
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
             PropertyState propertyState = new PropertyState();

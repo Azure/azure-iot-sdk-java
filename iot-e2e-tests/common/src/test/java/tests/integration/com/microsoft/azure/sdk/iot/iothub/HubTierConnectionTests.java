@@ -2,7 +2,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.MethodResponse;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.*;
@@ -86,7 +86,7 @@ public class HubTierConnectionTests extends IntegrationTest
         hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString).getHostName();
         SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCert, privateKey);
 
-        ClientOptions options = new ClientOptions();
+        ClientOptions options = ClientOptions.builder().build();
         options.sslContext = sslContext;
 
         return new ArrayList(Arrays.asList(
@@ -165,12 +165,12 @@ public class HubTierConnectionTests extends IntegrationTest
         }
     }
 
-    protected static class DeviceMethodCallback implements com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback
+    protected static class MethodCallback implements com.microsoft.azure.sdk.iot.device.DeviceTwin.MethodCallback
     {
         @Override
-        public DeviceMethodData call(String methodName, Object methodData, Object context)
+        public MethodResponse call(String methodName, Object methodData, Object context)
         {
-            return new DeviceMethodData(200, "payload");
+            return new MethodResponse(200, "payload");
         }
     }
 
@@ -193,7 +193,7 @@ public class HubTierConnectionTests extends IntegrationTest
         testInstance.client.open();
 
         //act
-        testInstance.client.subscribeToMethodsAsync(new DeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
+        testInstance.client.subscribeToMethodsAsync(new MethodCallback(), null, new DeviceMethodStatusCallBack(), null);
 
         //assert
         waitForDisconnect(connectionStatusUpdates, WAIT_FOR_DISCONNECT_TIMEOUT_MILLISECONDS, testInstance.client);

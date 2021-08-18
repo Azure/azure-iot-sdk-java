@@ -9,7 +9,6 @@ import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
 import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.exceptions.UnauthorizedException;
-import com.microsoft.azure.sdk.iot.device.transport.*;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpConnectionThrottledException;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpUnauthorizedAccessException;
@@ -2728,7 +2727,7 @@ public class IotHubTransportTest
         {
             {
                 mockedConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
                 mockedConfig.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary();
                 result = true;
             }
@@ -2758,7 +2757,7 @@ public class IotHubTransportTest
         {
             {
                 mockedConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
                 mockedConfig.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary();
                 result = false;
             }
@@ -2788,7 +2787,7 @@ public class IotHubTransportTest
         {
             {
                 mockedConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
+                result = DeviceClientConfig.AuthenticationType.X509_CERTIFICATE;
                 mockedConfig.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary();
                 result = true;
             }

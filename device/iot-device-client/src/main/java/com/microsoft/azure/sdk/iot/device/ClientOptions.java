@@ -3,7 +3,9 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.net.ssl.SSLContext;
@@ -11,12 +13,14 @@ import javax.net.ssl.SSLContext;
 /**
  * Options that allow configuration of the device client instance during initialization.
  */
+@Builder
 public final class ClientOptions
 {
     /**
      * The Digital Twin Model Id associated with the device and module identity.
-     * Non plug and play users should not set this value
-     * This feature is currently supported only over MQTT
+     * Non plug and play users should not set this value.
+     *
+     * This feature is currently supported only over MQTT.
      */
     @Setter
     @Getter

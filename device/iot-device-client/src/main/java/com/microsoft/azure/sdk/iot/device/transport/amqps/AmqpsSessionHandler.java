@@ -146,7 +146,7 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
             log.trace("Closing an out of date session now that the service has opened the session remotely.");
             this.session.close();
         }
-        else if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
+        else if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthenticationType.X509_CERTIFICATE)
         {
             log.trace("Opening worker links for device {}", this.getDeviceId());
             openLinks();

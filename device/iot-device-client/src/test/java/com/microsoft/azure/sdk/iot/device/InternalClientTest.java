@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
@@ -16,7 +15,6 @@ import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProv
 import mockit.*;
 import org.junit.Test;
 
-import java.io.IOError;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -40,7 +38,7 @@ public class InternalClientTest
     IotHubEventCallback mockedIotHubEventCallback;
 
     @Mocked
-    TwinPropertyCallBack mockedTwinPropertyCallback;
+    TwinPropertyCallback mockedTwinPropertyCallback;
 
     @Mocked
     DeviceClientConfig mockConfig;
@@ -226,7 +224,7 @@ public class InternalClientTest
             {
                 Deencapsulation.newInstance(IotHubConnectionString.class, mockIotHubConnectionString);
                 times = 1;
-                Deencapsulation.newInstance(DeviceClientConfig.class, (IotHubConnectionString)any, DeviceClientConfig.AuthType.SAS_TOKEN);
+                Deencapsulation.newInstance(DeviceClientConfig.class, (IotHubConnectionString)any, DeviceClientConfig.AuthenticationType.SAS_TOKEN);
                 times = 1;
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
                         new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
@@ -250,7 +248,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                Deencapsulation.newInstance(DeviceClientConfig.class, (IotHubConnectionString)any, DeviceClientConfig.AuthType.SAS_TOKEN);
+                Deencapsulation.newInstance(DeviceClientConfig.class, (IotHubConnectionString)any, DeviceClientConfig.AuthenticationType.SAS_TOKEN);
                 times = 1;
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
                         new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
@@ -1231,7 +1229,7 @@ public class InternalClientTest
      */
     @Test
     public void subscribeToDeviceMethodSucceeds(@Mocked final IotHubEventCallback mockedStatusCB,
-                                                @Mocked final DeviceMethodCallback mockedDeviceMethodCB,
+                                                @Mocked final MethodCallback mockedDeviceMethodCB,
                                                 @Mocked final DeviceMethod mockedMethod) throws IOException, URISyntaxException
     {
         //arrange
@@ -1249,7 +1247,7 @@ public class InternalClientTest
 
         //act
 
-        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {DeviceMethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, mockedDeviceMethodCB, NULL_OBJECT, mockedStatusCB, NULL_OBJECT);
+        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {MethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, mockedDeviceMethodCB, NULL_OBJECT, mockedStatusCB, NULL_OBJECT);
 
         //assert
         new Verifications()
@@ -1267,7 +1265,7 @@ public class InternalClientTest
      */
     @Test (expected = IOException.class)
     public void subscribeToDeviceMethodThrowsIfClientNotOpen(@Mocked final IotHubEventCallback mockedStatusCB,
-                                                             @Mocked final DeviceMethodCallback mockedDeviceMethodCB)
+                                                             @Mocked final MethodCallback mockedDeviceMethodCB)
             throws IOException, URISyntaxException
     {
         //arrange
@@ -1283,7 +1281,7 @@ public class InternalClientTest
         final InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
 
         //act
-        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {DeviceMethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, mockedDeviceMethodCB, null, mockedStatusCB, null);
+        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {MethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, mockedDeviceMethodCB, null, mockedStatusCB, null);
     }
 
     /*
@@ -1307,11 +1305,11 @@ public class InternalClientTest
         Deencapsulation.invoke(client, "open");
 
         //act
-        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {DeviceMethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, null, null, mockedStatusCB, null);
+        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {MethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, null, null, mockedStatusCB, null);
     }
 
     @Test (expected = IllegalArgumentException.class)
-    public void subscribeToDeviceMethodThrowsIfDeviceMethodStatusCallbackNull(@Mocked final DeviceMethodCallback mockedDeviceMethodCB)
+    public void subscribeToDeviceMethodThrowsIfDeviceMethodStatusCallbackNull(@Mocked final MethodCallback mockedDeviceMethodCB)
             throws IOException, URISyntaxException
     {
         //arrange
@@ -1336,7 +1334,7 @@ public class InternalClientTest
      */
     @Test
     public void subscribeToDeviceMethodWorksEvenWhenCalledTwice(@Mocked final IotHubEventCallback mockedStatusCB,
-                                                                @Mocked final DeviceMethodCallback mockedDeviceMethodCB,
+                                                                @Mocked final MethodCallback mockedDeviceMethodCB,
                                                                 @Mocked final DeviceMethod mockedMethod) throws IOException, URISyntaxException
     {
         //arrange
@@ -1350,10 +1348,10 @@ public class InternalClientTest
         };
         final InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
         Deencapsulation.invoke(client, "open");
-        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {DeviceMethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, mockedDeviceMethodCB, NULL_OBJECT, mockedStatusCB, NULL_OBJECT);
+        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {MethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, mockedDeviceMethodCB, NULL_OBJECT, mockedStatusCB, NULL_OBJECT);
 
         // act
-        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {DeviceMethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, mockedDeviceMethodCB, NULL_OBJECT, mockedStatusCB, NULL_OBJECT);
+        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {MethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, mockedDeviceMethodCB, NULL_OBJECT, mockedStatusCB, NULL_OBJECT);
 
         // assert
         new Verifications()
@@ -1375,7 +1373,7 @@ public class InternalClientTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
 
                 mockConfig.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary();
                 result = true;
@@ -1687,7 +1685,7 @@ public class InternalClientTest
         InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
         Deencapsulation.setField(client, "twin", null);
 
-        Map<Property, Pair<TwinPropertyCallBack, Object>> onDesiredPropertyChange = new HashMap<>();
+        Map<Property, Pair<TwinPropertyCallback, Object>> onDesiredPropertyChange = new HashMap<>();
 
         // act
         client.subscribeToTwinDesiredPropertiesAsync(onDesiredPropertyChange);
@@ -1710,7 +1708,7 @@ public class InternalClientTest
             }
         };
 
-        Map<Property, Pair<TwinPropertyCallBack, Object>> onDesiredPropertyChange = new HashMap<>();
+        Map<Property, Pair<TwinPropertyCallback, Object>> onDesiredPropertyChange = new HashMap<>();
 
         // act
         client.subscribeToTwinDesiredPropertiesAsync(onDesiredPropertyChange);
@@ -1733,7 +1731,7 @@ public class InternalClientTest
             }
         };
 
-        final Map<Property, Pair<TwinPropertyCallBack, Object>> onDesiredPropertyChange = new HashMap<>();
+        final Map<Property, Pair<TwinPropertyCallback, Object>> onDesiredPropertyChange = new HashMap<>();
 
         // act
         client.subscribeToTwinDesiredPropertiesAsync(onDesiredPropertyChange);
@@ -1960,7 +1958,7 @@ public class InternalClientTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
             }
         };
         InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
@@ -1982,7 +1980,7 @@ public class InternalClientTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
                 mockDeviceIO.isOpen();
                 result = false;
                 mockDeviceIO.getProtocol();
@@ -2012,7 +2010,7 @@ public class InternalClientTest
                 mockDeviceIO.getProtocol();
                 result = IotHubClientProtocol.HTTPS;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
             }
         };
         InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
@@ -2048,7 +2046,7 @@ public class InternalClientTest
                 mockConfig.getSasTokenAuthentication().canRefreshToken();
                 result = true;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
             }
         };
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2150,7 +2148,7 @@ public class InternalClientTest
                 mockDeviceIO.getProtocol();
                 result = IotHubClientProtocol.HTTPS;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
                 mockConfig.getSasTokenAuthentication().canRefreshToken();
                 result = true;
             }
@@ -2188,7 +2186,7 @@ public class InternalClientTest
                 mockDeviceIO.getProtocol();
                 result = IotHubClientProtocol.HTTPS;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
             }
         };
 
@@ -2229,7 +2227,7 @@ public class InternalClientTest
                 mockConfig.getSasTokenAuthentication().canRefreshToken();
                 result = true;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
             }
         };
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2268,7 +2266,7 @@ public class InternalClientTest
                 mockConfig.getSasTokenAuthentication().canRefreshToken();
                 result = true;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
             }
         };
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2308,7 +2306,7 @@ public class InternalClientTest
                 mockConfig.getSasTokenAuthentication().canRefreshToken();
                 result = true;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
             }
         };
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2428,7 +2426,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockConfig.setProxy(mockProxySettings);
+                mockConfig.setProxySettings(mockProxySettings);
             }
         };
     }

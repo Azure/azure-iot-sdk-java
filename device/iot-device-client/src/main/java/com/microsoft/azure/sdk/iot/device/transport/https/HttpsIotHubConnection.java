@@ -461,7 +461,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
         request.setReadTimeout(this.config.getHttpsReadTimeout());
         request.setConnectTimeout(this.config.getHttpsConnectTimeout());
 
-        if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
+        if (this.config.getAuthenticationType() == DeviceClientConfig.AuthenticationType.SAS_TOKEN)
         {
             request.setHeaderField(HTTPS_PROPERTY_AUTHORIZATION_TAG, this.getSasToken());
         }
