@@ -169,11 +169,11 @@ public final class DeviceMethod
      * A method which subscribes to receive device method invocation for the user with the IotHub.
      * @param deviceMethodCallback Callback where upon receiving the request the
      *                             invoke a method shall be triggered.
-     * @param directMethodCallbackContext Context to be passed on when invoking the
+     * @param deviceMethodCallbackContext Context to be passed on when invoking the
      *                                    callback.
      * @throws IllegalArgumentException This exception is thrown when deviceMethodCallback is provided null.
      */
-    public void subscribeToDeviceMethod(DeviceMethodCallback deviceMethodCallback, Object directMethodCallbackContext) throws IllegalArgumentException
+    public void subscribeToDeviceMethod(DeviceMethodCallback deviceMethodCallback, Object deviceMethodCallbackContext) throws IllegalArgumentException
     {
         if (deviceMethodCallback == null)
         {
@@ -181,7 +181,7 @@ public final class DeviceMethod
         }
 
         this.deviceMethodCallback = deviceMethodCallback;
-        this.deviceMethodCallbackContext = directMethodCallbackContext;
+        this.deviceMethodCallbackContext = deviceMethodCallbackContext;
 
         if (!isSubscribed)
         {
