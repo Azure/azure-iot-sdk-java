@@ -9,6 +9,7 @@ package com.microsoft.azure.sdk.iot.provisioning.device.internal.task;
 
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientRegistrationResult;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus;
+import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientSubstatus;
 
 class RegistrationResult extends ProvisioningDeviceClientRegistrationResult
 {
@@ -26,5 +27,35 @@ class RegistrationResult extends ProvisioningDeviceClientRegistrationResult
         this.deviceId = deviceId;
         this.provisioningPayload = jsonPayload;
         this.provisioningDeviceClientStatus = dpsStatus;
+    }
+
+    void setRegistrationId(String registrationId)
+    {
+        this.registrationId = registrationId;
+    }
+
+    void setCreatedDateTimeUtc(String createdDateTimeUtc)
+    {
+        this.createdDateTimeUtc = createdDateTimeUtc;
+    }
+
+    void setStatus(String status)
+    {
+        this.status = status;
+    }
+
+    void setSubstatus(ProvisioningDeviceClientSubstatus substatus)
+    {
+        this.substatus = substatus;
+    }
+
+    void setETag(String eTag)
+    {
+        this.eTag = eTag;
+    }
+
+    void setLastUpdatesDateTimeUtc(String lastUpdatesDateTimeUtc)
+    {
+        this.lastUpdatesDateTimeUtc = lastUpdatesDateTimeUtc;
     }
 }
