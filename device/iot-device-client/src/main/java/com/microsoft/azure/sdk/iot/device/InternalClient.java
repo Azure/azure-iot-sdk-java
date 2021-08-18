@@ -783,7 +783,7 @@ public class InternalClient
     /**
      * Subscribes to direct methods
      *
-     * @param deviceMethodCallback Callback on which direct methods shall be invoked. Cannot be {@code null}.
+     * @param methodCallback Callback on which direct methods shall be invoked. Cannot be {@code null}.
      * @param methodCallbackContext Context for device method callback. Can be {@code null}.
      * @param methodStatusCallback Callback for providing IotHub status for direct methods. Cannot be {@code null}.
      * @param methodStatusCallbackContext Context for device method status callback. Can be {@code null}.
@@ -791,7 +791,7 @@ public class InternalClient
      * @throws IOException if called when client is not opened.
      * @throws IllegalArgumentException if either callback are null.
      */
-    public void subscribeToMethodsAsync(DeviceMethodCallback deviceMethodCallback, Object methodCallbackContext,
+    public void subscribeToMethodsAsync(DeviceMethodCallback methodCallback, Object methodCallbackContext,
                                         IotHubEventCallback methodStatusCallback, Object methodStatusCallbackContext)
             throws IOException
     {
@@ -803,7 +803,7 @@ public class InternalClient
             throw new IOException("Open the client connection before using it.");
         }
 
-        if (deviceMethodCallback == null || methodStatusCallback == null)
+        if (methodCallback == null || methodStatusCallback == null)
         {
             throw new IllegalArgumentException("Callback cannot be null");
         }
@@ -813,7 +813,7 @@ public class InternalClient
             this.method = new DeviceMethod(this.deviceIO, this.config, methodStatusCallback, methodStatusCallbackContext);
         }
 
-        this.method.subscribeToDeviceMethod(deviceMethodCallback, methodCallbackContext);
+        this.method.subscribeToDeviceMethod(methodCallback, methodCallbackContext);
     }
 
     /**
