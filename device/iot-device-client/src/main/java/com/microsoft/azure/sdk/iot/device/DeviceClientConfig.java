@@ -13,6 +13,7 @@ import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -109,6 +110,7 @@ public final class DeviceClientConfig
     @Getter
     private IotHubClientProtocol protocol;
 
+    @NonNull
     @Getter
     @Setter(AccessLevel.MODULE)
     private RetryPolicy retryPolicy = new ExponentialBackoffWithJitter();

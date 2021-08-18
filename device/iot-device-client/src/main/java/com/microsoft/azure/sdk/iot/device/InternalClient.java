@@ -357,7 +357,7 @@ public class InternalClient
      * @throws IOException if called when client is not opened or called before starting twin.
      * @throws IllegalArgumentException if reportedProperties is null or empty or if version is negative
      */
-    private void sendReportedPropertiesAsync(Set<Property> reportedProperties, Integer version, CorrelatingMessageCallback correlatingMessageCallback, Object correlatingMessageCallbackContext, IotHubEventCallback reportedPropertiesCallback, Object reportedPropertiesCallbackContext) throws IOException, IllegalArgumentException
+    public void sendReportedPropertiesAsync(Set<Property> reportedProperties, Integer version, CorrelatingMessageCallback correlatingMessageCallback, Object correlatingMessageCallbackContext, IotHubEventCallback reportedPropertiesCallback, Object reportedPropertiesCallbackContext) throws IOException, IllegalArgumentException
     {
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
