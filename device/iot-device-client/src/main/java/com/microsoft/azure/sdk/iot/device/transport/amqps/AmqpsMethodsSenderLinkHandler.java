@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public final class AmqpsMethodsSenderLinkHandler extends AmqpsSenderLinkHandler
+final class AmqpsMethodsSenderLinkHandler extends AmqpsSenderLinkHandler
 {
     private static final String CORRELATION_ID_KEY = "com.microsoft:channel-correlation-id";
     private static final String CORRELATION_ID_KEY_PREFIX = "methods:";

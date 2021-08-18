@@ -4,6 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
@@ -45,12 +46,12 @@ public class DeviceMethodSample
         }
     }
 
-    protected static class SampleDeviceMethodCallback implements com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback
+    protected static class SampleDeviceMethodCallback implements DeviceMethodCallback
     {
         @Override
         public DeviceMethodData call(String methodName, Object methodData, Object context)
         {
-            DeviceMethodData deviceMethodData ;
+            DeviceMethodData deviceMethodData;
             int status = method_default(methodData);
             if ("command".equals(methodName))
             {

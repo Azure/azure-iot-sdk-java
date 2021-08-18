@@ -492,7 +492,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                     transportMessage.setMessageCallbackContext(this.config.getDeviceTelemetryMessageContext(transportMessage.getInputName()));
                     break;
                 case UNKNOWN:
-                case CBS_AUTHENTICATION:
                 default:
                     //do nothing
             }

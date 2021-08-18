@@ -19,7 +19,7 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64;
 
 /** Builds the authorization signature as a composition of functions. */
 @Slf4j
-public final class SignatureHelper
+final class SignatureHelper
 {
     /**
      * The device ID will be the prefix. The expiry time, as a UNIX

@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * class defines the receiver link which receives authentication status codes corresponding to each authentication attempt.
  */
 @Slf4j
-public final class AmqpsCbsReceiverLinkHandler extends AmqpsReceiverLinkHandler
+final class AmqpsCbsReceiverLinkHandler extends AmqpsReceiverLinkHandler
 {
     private final static String APPLICATION_PROPERTY_STATUS_CODE = "status-code";
     private final static String APPLICATION_PROPERTY_STATUS_DESCRIPTION = "status-description";

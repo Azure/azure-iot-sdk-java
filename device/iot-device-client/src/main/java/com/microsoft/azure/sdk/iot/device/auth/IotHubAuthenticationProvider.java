@@ -6,14 +6,9 @@
 package com.microsoft.azure.sdk.iot.device.auth;
 
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
-import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.util.Objects;
 
 /**
@@ -22,11 +17,11 @@ import java.util.Objects;
 public abstract class IotHubAuthenticationProvider
 {
     protected String hostname;
-    protected String gatewayHostname;
+    protected final String gatewayHostname;
     protected String deviceId;
-    protected String moduleId;
+    protected final String moduleId;
 
-    protected IotHubSSLContext iotHubSSLContext;
+    IotHubSSLContext iotHubSSLContext;
 
     public IotHubAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId)
     {

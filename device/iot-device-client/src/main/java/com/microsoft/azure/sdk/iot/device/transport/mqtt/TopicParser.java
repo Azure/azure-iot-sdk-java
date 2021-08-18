@@ -5,7 +5,7 @@ package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 
-public class TopicParser
+class TopicParser
 {
     private final String[] topicTokens;
 
