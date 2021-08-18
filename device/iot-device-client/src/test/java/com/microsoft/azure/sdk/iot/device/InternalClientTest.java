@@ -1638,7 +1638,7 @@ public class InternalClientTest
         };
 
         // act
-        Deencapsulation.invoke(client, "startTwinAsync", mockedIotHubEventCallback, new Object(), mockedTwinPropertyCallBack, new Object());
+        Deencapsulation.invoke(client, "startTwinAsync", mockedIotHubEventCallback, new Object(), mockedTwinPropertyCallback, new Object());
     }
 
     //Tests_SRS_INTERNALCLIENT_34_084: [This function shall initialize a DeviceTwin object and invoke getTwinAsync on it.]
