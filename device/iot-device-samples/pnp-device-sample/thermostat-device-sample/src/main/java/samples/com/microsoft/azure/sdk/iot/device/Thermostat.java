@@ -149,7 +149,7 @@ public class Thermostat {
 
         log.debug("Set handler to receive \"getMaxMinReport\" command.");
         String methodName = "getMaxMinReport";
-        deviceClient.subscribeToMethodsAsync(new GetMaxMinReportDeviceMethodCallback(), methodName, new MethodIotHubEventCallback(), methodName);
+        deviceClient.subscribeToMethodsAsync(new GetMaxMinReportDeviceMethodCallback(), methodName, new MethodIotHubEventCallBack(), methodName);
 
         new Thread(new Runnable() {
             @SneakyThrows({InterruptedException.class, IOException.class})

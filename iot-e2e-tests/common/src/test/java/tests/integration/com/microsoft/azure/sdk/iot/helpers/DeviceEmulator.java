@@ -252,7 +252,7 @@ public class DeviceEmulator
         }
     }
 
-    protected class DeviceMethodInvokeCallback implements DeviceMethodCallback
+    protected class MethodInvokeCallback implements DeviceMethodCallback
     {
         @Override
         public synchronized DeviceMethodData call(String methodName, Object methodData, Object context)
