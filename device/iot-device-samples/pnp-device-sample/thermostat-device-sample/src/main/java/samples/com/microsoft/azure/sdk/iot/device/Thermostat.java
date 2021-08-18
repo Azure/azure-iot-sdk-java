@@ -299,10 +299,9 @@ public class Thermostat
 
             final String propertyName = "targetTemperature";
 
-            @SneakyThrows({InterruptedException.class, IOException.class})
+            @SneakyThrows({InterruptedException.class})
             public void execute(ClientPropertyCollection propertyCollection, Object context)
             {
-
                 // Each of these properties will be a WritablePropertyResponse we can simply copy the value over and ack each one
                 // or we can modify each property and ack the whole collection.
                 for (String key : propertyCollection.keySet())
