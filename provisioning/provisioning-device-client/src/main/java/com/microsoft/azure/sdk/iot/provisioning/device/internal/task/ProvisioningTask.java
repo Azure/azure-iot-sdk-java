@@ -219,7 +219,7 @@ public class ProvisioningTask implements Callable<Object>
                     registrationInfo.setSubstatus(ProvisioningDeviceClientSubstatus.fromString(registrationStatus.getSubstatus()));
                     registrationInfo.setCreatedDateTimeUtc(registrationStatus.getCreatedDateTimeUtc());
                     registrationInfo.setLastUpdatesDateTimeUtc(registrationStatus.getLastUpdatesDateTimeUtc());
-                    registrationInfo.setETag(registrationStatus.getETag());
+                    registrationInfo.setETag(registrationStatus.getEtag());
 
                     if (this.securityProvider instanceof SecurityProviderTpm)
                     {
