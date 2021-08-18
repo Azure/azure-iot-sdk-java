@@ -610,20 +610,6 @@ public class InternalClient
         }
     }
 
-    // only used by the MultiplexingClient class to signal to this client that it needs to re-register twin
-    // callbacks
-    void markTwinAsUnsubscribed()
-    {
-        this.twin = null;
-    }
-
-    // only used by the MultiplexingClient class to signal to this client that it needs to re-register methods
-    // callbacks
-    void markMethodsAsUnsubscribed()
-    {
-        this.method = null;
-    }
-
     /**
      * Starts the twin for this client. This client will receive a callback with the current state of the full twin, including
      * reported properties and desired properties. After that callback is received, this client will receive a callback
@@ -760,27 +746,6 @@ public class InternalClient
     }
 
     /**
-     * Sets the message callback.
-     *
-     * @param callback the message callback. Can be {@code null}.
-     * @param context the context to be passed to the callback. Can be {@code null}.
-     *
-     * @throws IllegalArgumentException if the callback is {@code null} but a context is
-     * passed in.
-     * @throws IllegalStateException if the callback is set after the client is
-     * closed.
-     */
-    void setMessageCallbackInternal(MessageCallback callback, Object context)
-    {
-        if (callback == null && context != null)
-        {
-            throw new IllegalArgumentException("Cannot give non-null context for a null callback.");
-        }
-
-        this.config.setMessageCallback(callback, context);
-    }
-
-    /**
      * Subscribes to direct methods
      *
      * @param methodCallback Callback on which direct methods shall be invoked. Cannot be {@code null}.
@@ -817,6 +782,82 @@ public class InternalClient
     }
 
     /**
+     * Set the proxy settings for this client to connect through. If null then any previous settings will be erased
+     * @param proxySettings the settings to be used when connecting to iothub through a proxy. If null, any previously saved
+     *                      settings will be erased, and no proxy will be used
+     */
+    public void setProxySettings(ProxySettings proxySettings)
+    {
+        if (this.isMultiplexed)
+        {
+            throw new IllegalStateException(
+                    "Cannot set the proxy settings of a multiplexed device. " +
+                            "Proxy settings for the multiplexed connection can only be set at multiplexing client constructor time.");
+        }
+
+        verifyRegisteredIfMultiplexing();
+
+        if (this.deviceIO.isOpen())
+        {
+            throw new IllegalStateException("Cannot set proxy after connection was already opened");
+        }
+
+        IotHubClientProtocol protocol = this.deviceIO.getProtocol();
+        if (protocol != HTTPS && protocol != AMQPS_WS && protocol != MQTT_WS && proxySettings != null)
+        {
+            throw new IllegalArgumentException("Use of proxies is unsupported unless using HTTPS, MQTT_WS or AMQPS_WS");
+        }
+
+        this.config.setProxySettings(proxySettings);
+    }
+
+    /**
+     * Returns if this client is or ever was registered to a {@link MultiplexingClient} instance. Device clients that were
+     * cannot be used in non-multiplexed connections. Device clients that aren't registered to any multiplexing client
+     * will still return true.
+     * @return true if this client is or ever was registered to a {@link MultiplexingClient} instance, false otherwise.
+     */
+    public boolean isMultiplexed()
+    {
+        return this.isMultiplexed;
+    }
+
+    // only used by the MultiplexingClient class to signal to this client that it needs to re-register twin
+    // callbacks
+    void markTwinAsUnsubscribed()
+    {
+        this.twin = null;
+    }
+
+    // only used by the MultiplexingClient class to signal to this client that it needs to re-register methods
+    // callbacks
+    void markMethodsAsUnsubscribed()
+    {
+        this.method = null;
+    }
+
+    /**
+     * Sets the message callback.
+     *
+     * @param callback the message callback. Can be {@code null}.
+     * @param context the context to be passed to the callback. Can be {@code null}.
+     *
+     * @throws IllegalArgumentException if the callback is {@code null} but a context is
+     * passed in.
+     * @throws IllegalStateException if the callback is set after the client is
+     * closed.
+     */
+    void setMessageCallbackInternal(MessageCallback callback, Object context)
+    {
+        if (callback == null && context != null)
+        {
+            throw new IllegalArgumentException("Cannot give non-null context for a null callback.");
+        }
+
+        this.config.setMessageCallback(callback, context);
+    }
+
+    /**
      * Getter for the underlying DeviceIO for multiplexing scenarios.
      *
      * @return the value of the underlying DeviceIO.
@@ -845,6 +886,11 @@ public class InternalClient
                     this.connectionStatusChangeCallbackContext,
                     this.getConfig().getDeviceId());
         }
+    }
+
+    void setAsMultiplexed()
+    {
+        this.isMultiplexed = true;
     }
 
     private void setOption_SetHttpsConnectTimeout(Object value)
@@ -989,41 +1035,6 @@ public class InternalClient
         }
     }
 
-    /**
-     * Set the proxy settings for this client to connect through. If null then any previous settings will be erased
-     * @param proxySettings the settings to be used when connecting to iothub through a proxy. If null, any previously saved
-     *                      settings will be erased, and no proxy will be used
-     */
-    public void setProxySettings(ProxySettings proxySettings)
-    {
-        if (this.isMultiplexed)
-        {
-            throw new IllegalStateException(
-                    "Cannot set the proxy settings of a multiplexed device. " +
-                            "Proxy settings for the multiplexed connection can only be set at multiplexing client constructor time.");
-        }
-
-        verifyRegisteredIfMultiplexing();
-
-        if (this.deviceIO.isOpen())
-        {
-            throw new IllegalStateException("Cannot set proxy after connection was already opened");
-        }
-
-        IotHubClientProtocol protocol = this.deviceIO.getProtocol();
-        if (protocol != HTTPS && protocol != AMQPS_WS && protocol != MQTT_WS && proxySettings != null)
-        {
-            throw new IllegalArgumentException("Use of proxies is unsupported unless using HTTPS, MQTT_WS or AMQPS_WS");
-        }
-
-        this.config.setProxySettings(proxySettings);
-    }
-
-    void setAsMultiplexed()
-    {
-        this.isMultiplexed = true;
-    }
-
     private void commonConstructorVerification(IotHubConnectionString connectionString, IotHubClientProtocol protocol)
     {
         if (connectionString == null)
@@ -1050,17 +1061,6 @@ public class InternalClient
         {
             throw new UnsupportedOperationException("Must re-register this client to a multiplexing client before using it");
         }
-    }
-
-    /**
-     * Returns if this client is or ever was registered to a {@link MultiplexingClient} instance. Device clients that were
-     * cannot be used in non-multiplexed connections. Device clients that aren't registered to any multiplexing client
-     * will still return true.
-     * @return true if this client is or ever was registered to a {@link MultiplexingClient} instance, false otherwise.
-     */
-    public boolean isMultiplexed()
-    {
-        return this.isMultiplexed;
     }
 
     private void verifyReportedProperties(Set<Property> reportedProperties) throws IOException
