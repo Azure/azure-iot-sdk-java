@@ -555,9 +555,9 @@ public final class DeviceClientConfig
     }
 
     /**
-     * Getter for AuthType
+     * Getter for AuthenticationType
      *
-     * @return The value of AuthType
+     * @return The value of AuthenticationType
      */
     public AuthType getAuthenticationType()
     {

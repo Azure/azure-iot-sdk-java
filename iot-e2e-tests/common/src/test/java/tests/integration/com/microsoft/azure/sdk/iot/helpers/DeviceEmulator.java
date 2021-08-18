@@ -7,7 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.MethodCallback;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.MethodResponse;
 
 import java.io.IOException;
@@ -76,10 +76,10 @@ public class DeviceEmulator
 
     /**
      * Enable device method on this device.
-     * @param methodCallback is the callback called when a service invoke a method on this device. If it is null,
-     *                             the DeviceEmulator will take care of it using the MethodInvokeCallback.
-     * @param deviceMethodCallbackContext is the context for the methodCallback. Only used if the
-     *                                    methodCallback is not null.
+     * @param deviceMethodCallback is the callback called when a service invoke a method on this device. If it is null,
+     *                             the DeviceEmulator will take care of it using the DeviceMethodInvokeCallback.
+     * @param deviceMethodCallbackContext is the context for the deviceMethodCallback. Only used if the
+     *                                    deviceMethodCallback is not null.
      * @param deviceMethodStatusCallback is the callback called when the service receive the response for the invoked
      *                                   method. If it is null, the DeviceEmulator will take care of it using
      *                                   DeviceStatusCallback.
@@ -89,13 +89,13 @@ public class DeviceEmulator
      */
     @SuppressWarnings("SameParameterValue") // DeviceEmulator will subscribe to default callback in case the supplied callback is null
     void subscribeToDeviceMethod(
-        MethodCallback methodCallback, Object deviceMethodCallbackContext,
+        DeviceMethodCallback deviceMethodCallback, Object deviceMethodCallbackContext,
         IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext)
             throws IOException, InterruptedException
     {
-        if(methodCallback == null)
+        if(deviceMethodCallback == null)
         {
-            methodCallback = new MethodInvokeCallback();
+            deviceMethodCallback = new DeviceMethodInvokeCallback();
             deviceMethodCallbackContext = null;
         }
 
@@ -106,7 +106,7 @@ public class DeviceEmulator
         }
 
         client.subscribeToMethodsAsync(
-            methodCallback, deviceMethodCallbackContext,
+            deviceMethodCallback, deviceMethodCallbackContext,
                 deviceMethodStatusCallback, deviceMethodStatusCallbackContext);
 
         long startTime = System.currentTimeMillis();
@@ -252,7 +252,7 @@ public class DeviceEmulator
         }
     }
 
-    protected class MethodInvokeCallback implements MethodCallback
+    protected class DeviceMethodInvokeCallback implements DeviceMethodCallback
     {
         @Override
         public synchronized MethodResponse call(String methodName, Object methodData, Object context)

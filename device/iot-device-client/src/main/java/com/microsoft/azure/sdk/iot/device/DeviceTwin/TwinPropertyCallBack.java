@@ -7,7 +7,7 @@ package com.microsoft.azure.sdk.iot.device.DeviceTwin;
  * Interface for receiving desired property callbacks one property at a time. See {@link TwinPropertiesCallback} for the
  * interface for receiving desired property callbacks all at once.
  */
-public interface TwinPropertyCallback
+public interface TwinPropertyCallBack
 {
-    void onTwinPropertyChanged(Property property, Object context);
+    void TwinPropertyCallBack(Property property, Object context);
 }

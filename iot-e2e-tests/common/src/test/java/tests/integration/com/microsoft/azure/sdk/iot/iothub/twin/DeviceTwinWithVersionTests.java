@@ -8,7 +8,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.twin;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallback;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
@@ -129,10 +129,10 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         return null;
     }
 
-    private static class DeviceTwinPropertyCallback implements TwinPropertyCallback
+    private static class DeviceTwinPropertyCallBack implements TwinPropertyCallBack
     {
         @Override
-        public void onTwinPropertyChanged(Property property, Object context)
+        public void TwinPropertyCallBack(Property property, Object context)
         {
             DeviceTwinWithVersionTestDevice state = (DeviceTwinWithVersionTestDevice) context;
             state.receivedProperties.add(property);
@@ -210,7 +210,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
     {
         testInstance.deviceTwinWithVersionTestDevice.deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, testInstance.deviceForRegistryManager), protocol);
         testInstance.deviceTwinWithVersionTestDevice.deviceClient.open();
-        testInstance.deviceTwinWithVersionTestDevice.deviceClient.startTwinAsync(new DeviceTwinStatusCallBack(), testInstance.deviceTwinWithVersionTestDevice, new DeviceTwinPropertyCallback(), testInstance.deviceTwinWithVersionTestDevice);
+        testInstance.deviceTwinWithVersionTestDevice.deviceClient.startTwinAsync(new DeviceTwinStatusCallBack(), testInstance.deviceTwinWithVersionTestDevice, new DeviceTwinPropertyCallBack(), testInstance.deviceTwinWithVersionTestDevice);
     }
 
     @Before

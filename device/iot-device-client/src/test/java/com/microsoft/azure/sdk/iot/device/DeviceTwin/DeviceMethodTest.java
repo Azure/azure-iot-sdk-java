@@ -35,7 +35,7 @@ public class DeviceMethodTest
     MessageCallback mockeddeviceMethodResponseCB;
 
     @Mocked
-    MethodCallback mockedDeviceMethodCB;
+    DeviceMethodCallback mockedDeviceMethodCB;
 
     /*
     **Tests_SRS_DEVICEMETHOD_25_002: [**The constructor shall save the device method messages callback callback, by calling setDeviceMethodsMessageCallback, where any further messages for device method shall be delivered.**]**

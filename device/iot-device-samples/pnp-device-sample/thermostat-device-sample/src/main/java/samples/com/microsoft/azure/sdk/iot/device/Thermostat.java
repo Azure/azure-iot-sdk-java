@@ -140,16 +140,16 @@ public class Thermostat {
         }
 
         log.debug("Start twin and set handler to receive \"targetTemperature\" updates.");
-        deviceClient.startTwinAsync(new TwinIotHubEventCallback(), null, new TargetTemperatureUpdateCallback(), null);
-        Map<Property, Pair<TwinPropertyCallback, Object>> desiredPropertyUpdateCallback =
+        deviceClient.startTwinAsync(new TwinIotHubEventCallback(), null, new TargetTemperatureUpdateCallBack(), null);
+        Map<Property, Pair<TwinPropertyCallBack, Object>> desiredPropertyUpdateCallback =
                 Collections.singletonMap(
                         new Property("targetTemperature", null),
-                        new Pair<>(new TargetTemperatureUpdateCallback(), null));
+                        new Pair<>(new TargetTemperatureUpdateCallBack(), null));
         deviceClient.subscribeToTwinDesiredPropertiesAsync(desiredPropertyUpdateCallback);
 
         log.debug("Set handler to receive \"getMaxMinReport\" command.");
         String methodName = "getMaxMinReport";
-        deviceClient.subscribeToMethodsAsync(new GetMaxMinReportMethodCallback(), methodName, new MethodIotHubEventCallback(), methodName);
+        deviceClient.subscribeToMethodsAsync(new GetMaxMinReportDeviceMethodCallback(), methodName, new MethodIotHubEventCallback(), methodName);
 
         new Thread(new Runnable() {
             @SneakyThrows({InterruptedException.class, IOException.class})
@@ -249,14 +249,14 @@ public class Thermostat {
      * The desired property update callback, which receives the target temperature as a desired property update,
      * and updates the current temperature value over telemetry and reported property update.
      */
-    private static class TargetTemperatureUpdateCallback implements TwinPropertyCallback
+    private static class TargetTemperatureUpdateCallBack implements TwinPropertyCallBack
     {
 
         final String propertyName = "targetTemperature";
 
         @SneakyThrows({InterruptedException.class, IOException.class})
         @Override
-        public void onTwinPropertyChanged(Property property, Object context) {
+        public void TwinPropertyCallBack(Property property, Object context) {
             if (property.getKey().equalsIgnoreCase(propertyName)) {
                 double targetTemperature = ((Number)property.getValue()).doubleValue();
                 log.debug("Property: Received - {\"{}\": {}°C}.", propertyName, targetTemperature);
@@ -306,7 +306,7 @@ public class Thermostat {
      * The callback to handle "getMaxMinReport" command.
      * This method will returns the max, min and average temperature from the specified time to the current time.
      */
-    private static class GetMaxMinReportMethodCallback implements MethodCallback
+    private static class GetMaxMinReportDeviceMethodCallback implements DeviceMethodCallback
     {
         final String commandName = "getMaxMinReport";
 

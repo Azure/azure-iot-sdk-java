@@ -1,10 +1,10 @@
 package glue;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.MethodCallback;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.MethodResponse;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallback;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
 import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
@@ -235,7 +235,7 @@ public class ModuleGlue
         }
     }
 
-    private static class ModuleTwinPropertyCallback implements TwinPropertyCallback
+    private static class ModuleTwinPropertyCallBack implements TwinPropertyCallBack
     {
         private JsonObject _props = null;
         private Handler<AsyncResult<Object>> _handler;
@@ -261,7 +261,7 @@ public class ModuleGlue
         }
 
         @Override
-        public void onTwinPropertyChanged(Property property, Object context)
+        public void TwinPropertyCallBack(Property property, Object context)
         {
             System.out.println(
                     "onProperty callback for " + (property.getIsReported() ? "reported" : "desired") +
@@ -325,7 +325,7 @@ public class ModuleGlue
         }
     }
 
-    private final ModuleTwinPropertyCallback _deviceTwinPropertyCallback = new ModuleTwinPropertyCallback();
+    private final ModuleTwinPropertyCallBack _deviceTwinPropertyCallback = new ModuleTwinPropertyCallBack();
 
     private static class IotHubEventCallbackImpl implements IotHubEventCallback
     {
@@ -493,7 +493,7 @@ public class ModuleGlue
         }
     }
 
-    private static class MethodCallbackImpl implements MethodCallback
+    private static class DeviceMethodCallbackImpl implements DeviceMethodCallback
     {
         public Handler<AsyncResult<Void>> _handler;
         public String _requestBody;
@@ -551,7 +551,7 @@ public class ModuleGlue
         }
     }
 
-    MethodCallbackImpl _methodCallback = new MethodCallbackImpl();
+    DeviceMethodCallbackImpl _methodCallback = new DeviceMethodCallbackImpl();
 
     public void enableMethods(String connectionId, Handler<AsyncResult<Void>> handler)
     {

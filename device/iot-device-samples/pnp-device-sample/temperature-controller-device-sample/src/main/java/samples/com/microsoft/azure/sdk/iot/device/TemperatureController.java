@@ -155,17 +155,17 @@ public class TemperatureController {
 
         log.debug("Set handler for \"reboot\" command.");
         log.debug("Set handler for \"getMaxMinReport\" command.");
-        deviceClient.subscribeToMethodsAsync(new MethodCallback(), null, new MethodIotHubEventCallback(), null);
+        deviceClient.subscribeToMethodsAsync(new DeviceMethodCallback(), null, new MethodIotHubEventCallback(), null);
 
         log.debug("Set handler to receive \"targetTemperature\" updates.");
-        deviceClient.startTwinAsync(new TwinIotHubEventCallback(), null, new GenericPropertyUpdateCallback(), null);
-        Map<Property, Pair<TwinPropertyCallback, Object>> desiredPropertyUpdateCallback = Stream.of(
-                new AbstractMap.SimpleEntry<Property, Pair<TwinPropertyCallback, Object>>(
+        deviceClient.startTwinAsync(new TwinIotHubEventCallback(), null, new GenericPropertyUpdateCallBack(), null);
+        Map<Property, Pair<TwinPropertyCallBack, Object>> desiredPropertyUpdateCallback = Stream.of(
+                new AbstractMap.SimpleEntry<Property, Pair<TwinPropertyCallBack, Object>>(
                         new Property(THERMOSTAT_1, null),
-                        new Pair<>(new TargetTemperatureUpdateCallback(), THERMOSTAT_1)),
-                new AbstractMap.SimpleEntry<Property, Pair<TwinPropertyCallback, Object>>(
+                        new Pair<>(new TargetTemperatureUpdateCallBack(), THERMOSTAT_1)),
+                new AbstractMap.SimpleEntry<Property, Pair<TwinPropertyCallBack, Object>>(
                         new Property(THERMOSTAT_2, null),
-                        new Pair<>(new TargetTemperatureUpdateCallback(), THERMOSTAT_2))
+                        new Pair<>(new TargetTemperatureUpdateCallBack(), THERMOSTAT_2))
         ).collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
 
         deviceClient.subscribeToTwinDesiredPropertiesAsync(desiredPropertyUpdateCallback);
@@ -278,7 +278,7 @@ public class TemperatureController {
     /**
      * The callback to handle "reboot" command. This method will send a temperature update (of 0°C) over telemetry for both associated components.
      */
-    private static class MethodCallback implements com.microsoft.azure.sdk.iot.device.DeviceTwin.MethodCallback
+    private static class DeviceMethodCallback implements com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback
     {
         final String reboot = "reboot";
         final String getMaxMinReport1 = "thermostat1*getMaxMinReport";
@@ -363,14 +363,14 @@ public class TemperatureController {
      * The desired property update callback, which receives the target temperature as a desired property update,
      * and updates the current temperature value over telemetry and reported property update.
      */
-    private static class TargetTemperatureUpdateCallback implements TwinPropertyCallback
+    private static class TargetTemperatureUpdateCallBack implements TwinPropertyCallBack
     {
 
         final String propertyName = "targetTemperature";
 
         @SneakyThrows({IOException.class, InterruptedException.class})
         @Override
-        public void onTwinPropertyChanged(Property property, Object context) {
+        public void TwinPropertyCallBack(Property property, Object context) {
             String componentName = (String) context;
 
             if (property.getKey().equalsIgnoreCase(componentName)) {
@@ -524,11 +524,11 @@ public class TemperatureController {
     /**
      * The callback to be invoked for a property change that is not explicitly monitored by the device.
      */
-    private static class GenericPropertyUpdateCallback implements TwinPropertyCallback
+    private static class GenericPropertyUpdateCallBack implements TwinPropertyCallBack
     {
 
         @Override
-        public void onTwinPropertyChanged(Property property, Object context) {
+        public void TwinPropertyCallBack(Property property, Object context) {
             log.debug("Property - Received property unhandled by device, key={}, value={}", property.getKey(), property.getValue());
         }
     }

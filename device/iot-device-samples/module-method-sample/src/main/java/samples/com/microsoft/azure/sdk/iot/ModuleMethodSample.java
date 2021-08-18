@@ -4,7 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.MethodCallback;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.MethodResponse;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
@@ -47,7 +47,7 @@ public class ModuleMethodSample
         }
     }
 
-    protected static class SampleMethodCallback implements MethodCallback
+    protected static class SampleDeviceMethodCallback implements DeviceMethodCallback
     {
         @Override
         public MethodResponse call(String methodName, Object methodData, Object context)
@@ -166,7 +166,7 @@ public class ModuleMethodSample
 
             System.out.println("Opened connection to IoT Hub.");
 
-            client.subscribeToMethodsAsync(new SampleMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
+            client.subscribeToMethodsAsync(new SampleDeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
 
             System.out.println("Subscribed to device method");
 

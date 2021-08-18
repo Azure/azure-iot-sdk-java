@@ -165,7 +165,7 @@ public class HubTierConnectionTests extends IntegrationTest
         }
     }
 
-    protected static class MethodCallback implements com.microsoft.azure.sdk.iot.device.DeviceTwin.MethodCallback
+    protected static class DeviceMethodCallback implements com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback
     {
         @Override
         public MethodResponse call(String methodName, Object methodData, Object context)
@@ -193,7 +193,7 @@ public class HubTierConnectionTests extends IntegrationTest
         testInstance.client.open();
 
         //act
-        testInstance.client.subscribeToMethodsAsync(new MethodCallback(), null, new DeviceMethodStatusCallBack(), null);
+        testInstance.client.subscribeToMethodsAsync(new DeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
 
         //assert
         waitForDisconnect(connectionStatusUpdates, WAIT_FOR_DISCONNECT_TIMEOUT_MILLISECONDS, testInstance.client);

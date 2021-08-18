@@ -10,7 +10,7 @@ import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertiesCallback;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallback;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
@@ -180,7 +180,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         // arrange
         testInstance.deviceUnderTest.sCDeviceForTwin.clearTwin();
         testInstance.deviceUnderTest.dCDeviceForTwin.getDesiredProp().clear();
-        Map<Property, Pair<TwinPropertyCallback, Object>> desiredPropertiesCB = new HashMap<>();
+        Map<Property, Pair<TwinPropertyCallBack, Object>> desiredPropertiesCB = new HashMap<>();
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
             PropertyState propertyState = new PropertyState();
@@ -327,7 +327,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         TwinCollection expectedProperties;
 
         @Override
-        public void onTwinPropertiesChanged(TwinCollection actualProperties, Object context) {
+        public void TwinPropertiesCallback(TwinCollection actualProperties, Object context) {
             Success desiredPropertiesCallbackState = (Success) context;
             desiredPropertiesCallbackState.callbackWasFired();
 
@@ -360,7 +360,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         }
     }
 
-    // This test is for the startTwinAsync/startTwinAsync API that takes the onTwinPropertyChanged rather than the TwinPropertyCallback
+    // This test is for the startTwinAsync/startTwinAsync API that takes the TwinPropertyCallBack rather than the TwinPropertyCallBack
     // This callback should receive the full twin update in one callback, rather than one callback per updated
     // desired property
     @Test

@@ -6,13 +6,13 @@
 package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethod;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.MethodCallback;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceTwin;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.PropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertiesCallback;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallback;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
@@ -285,7 +285,7 @@ public class InternalClient
      *
      * @throws IOException if called when client is not opened or called before starting twin.
      */
-    public void subscribeToTwinDesiredPropertiesAsync(Map<Property, Pair<TwinPropertyCallback, Object>> onDesiredPropertyChange) throws IOException
+    public void subscribeToTwinDesiredPropertiesAsync(Map<Property, Pair<TwinPropertyCallBack, Object>> onDesiredPropertyChange) throws IOException
     {
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
@@ -641,7 +641,7 @@ public class InternalClient
      *
      * @param twinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
      * @param twinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
-     * @param genericPropertyCallBack the TwinPropertyCallback callback for providing any changes in desired properties. Cannot be {@code null}.
+     * @param genericPropertyCallBack the TwinPropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
      * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.     *
      *
      * @throws IllegalArgumentException if the callback is {@code null}
@@ -649,7 +649,7 @@ public class InternalClient
      * @throws IOException if called when client is not opened
      */
     public void startTwinAsync(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
-                               TwinPropertyCallback genericPropertyCallBack, Object genericPropertyCallBackContext)
+                               TwinPropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext)
             throws IOException, IllegalArgumentException, UnsupportedOperationException
     {
         verifyRegisteredIfMultiplexing();
@@ -693,7 +693,7 @@ public class InternalClient
      *
      * @param twinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
      * @param twinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
-     * @param genericPropertiesCallBack the TwinPropertyCallback callback for providing any changes in desired properties. Cannot be {@code null}.
+     * @param genericPropertiesCallBack the TwinPropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
      * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.
      *
      * @throws IllegalArgumentException if the callback is {@code null}
@@ -736,9 +736,9 @@ public class InternalClient
 
     /**
      * Get the twin for this client. This method sends a request for the twin to the service and will asynchronously
-     * provide the retrieved twin to the callback provided in {@link #startTwinAsync(IotHubEventCallback, Object, TwinPropertyCallback, Object)}.
+     * provide the retrieved twin to the callback provided in {@link #startTwinAsync(IotHubEventCallback, Object, TwinPropertyCallBack, Object)}.
      *
-     * Users must call {@link #startTwinAsync(IotHubEventCallback, Object, TwinPropertyCallback, Object)} before using this method.
+     * Users must call {@link #startTwinAsync(IotHubEventCallback, Object, TwinPropertyCallBack, Object)} before using this method.
      * @throws IOException if the iot hub cannot be reached.
      */
     public void getTwinAsync() throws IOException
@@ -783,7 +783,7 @@ public class InternalClient
     /**
      * Subscribes to direct methods
      *
-     * @param methodCallback Callback on which direct methods shall be invoked. Cannot be {@code null}.
+     * @param deviceMethodCallback Callback on which direct methods shall be invoked. Cannot be {@code null}.
      * @param methodCallbackContext Context for device method callback. Can be {@code null}.
      * @param methodStatusCallback Callback for providing IotHub status for direct methods. Cannot be {@code null}.
      * @param methodStatusCallbackContext Context for device method status callback. Can be {@code null}.
@@ -791,7 +791,7 @@ public class InternalClient
      * @throws IOException if called when client is not opened.
      * @throws IllegalArgumentException if either callback are null.
      */
-    public void subscribeToMethodsAsync(MethodCallback methodCallback, Object methodCallbackContext,
+    public void subscribeToMethodsAsync(DeviceMethodCallback deviceMethodCallback, Object methodCallbackContext,
                                         IotHubEventCallback methodStatusCallback, Object methodStatusCallbackContext)
             throws IOException
     {
@@ -803,7 +803,7 @@ public class InternalClient
             throw new IOException("Open the client connection before using it.");
         }
 
-        if (methodCallback == null || methodStatusCallback == null)
+        if (deviceMethodCallback == null || methodStatusCallback == null)
         {
             throw new IllegalArgumentException("Callback cannot be null");
         }
@@ -813,7 +813,7 @@ public class InternalClient
             this.method = new DeviceMethod(this.deviceIO, this.config, methodStatusCallback, methodStatusCallbackContext);
         }
 
-        this.method.subscribeToDeviceMethod(methodCallback, methodCallbackContext);
+        this.method.subscribeToDeviceMethod(deviceMethodCallback, methodCallbackContext);
     }
 
     /**

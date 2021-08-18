@@ -10,7 +10,7 @@ import com.google.gson.JsonParser;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinConnectionState;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallback;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.InternalClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
@@ -197,10 +197,10 @@ public class DeviceTwinCommon extends IntegrationTest
         public Integer propertyNewVersion;
     }
 
-    public class OnProperty implements TwinPropertyCallback
+    public class OnProperty implements TwinPropertyCallBack
     {
         @Override
-        public void onTwinPropertyChanged(Property property, Object context)
+        public void TwinPropertyCallBack(Property property, Object context)
         {
             PropertyState propertyState = (PropertyState) context;
             if (property.getKey().equals(propertyState.property.getKey()))
@@ -651,7 +651,7 @@ public class DeviceTwinCommon extends IntegrationTest
     protected void testGetDeviceTwin() throws IOException, InterruptedException, IotHubException
     {
         // arrange
-        Map<Property, com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<TwinPropertyCallback, Object>> desiredPropertiesCB = new HashMap<>();
+        Map<Property, com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<TwinPropertyCallBack, Object>> desiredPropertiesCB = new HashMap<>();
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
             PropertyState propertyState = new PropertyState();
