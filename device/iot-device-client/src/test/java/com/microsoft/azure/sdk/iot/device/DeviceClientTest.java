@@ -175,7 +175,7 @@ public class DeviceClientTest
             {
                 Deencapsulation.newInstance(IotHubConnectionString.class, connString);
                 times = 1;
-                Deencapsulation.newInstance(DeviceClientConfig.class, (IotHubConnectionString)any, DeviceClientConfig.AuthenticationType.SAS_TOKEN);
+                Deencapsulation.newInstance(DeviceClientConfig.class, (IotHubConnectionString)any, DeviceClientConfig.AuthType.SAS_TOKEN);
                 times = 1;
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
                         new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
@@ -201,7 +201,7 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                Deencapsulation.newInstance(DeviceClientConfig.class, (IotHubConnectionString)any, DeviceClientConfig.AuthenticationType.SAS_TOKEN);
+                Deencapsulation.newInstance(DeviceClientConfig.class, (IotHubConnectionString)any, DeviceClientConfig.AuthType.SAS_TOKEN);
                 times = 1;
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
                         new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
@@ -490,7 +490,7 @@ public class DeviceClientTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
         };
         DeviceClient client = new DeviceClient(connString, protocol);
@@ -512,7 +512,7 @@ public class DeviceClientTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockDeviceIO.isOpen();
                 result = false;
                 mockDeviceIO.getProtocol();
@@ -542,7 +542,7 @@ public class DeviceClientTest
                 mockDeviceIO.getProtocol();
                 result = IotHubClientProtocol.HTTPS;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
         };
         DeviceClient client = new DeviceClient(connString, protocol, (ClientOptions) null);
@@ -577,7 +577,7 @@ public class DeviceClientTest
                 mockConfig.getSasTokenAuthentication().canRefreshToken();
                 result = true;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
         };
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;deviceId=testdevice;"
@@ -619,7 +619,7 @@ public class DeviceClientTest
                 mockDeviceIO.getProtocol();
                 result = IotHubClientProtocol.HTTPS;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockIotHubSasTokenAuthenticationProvider.canRefreshToken();
                 result = true;
             }
@@ -657,7 +657,7 @@ public class DeviceClientTest
                 mockDeviceIO.getProtocol();
                 result = IotHubClientProtocol.HTTPS;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
         };
 
@@ -698,7 +698,7 @@ public class DeviceClientTest
                 mockConfig.getSasTokenAuthentication().canRefreshToken();
                 result = true;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
         };
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;deviceId=testdevice;"
@@ -737,7 +737,7 @@ public class DeviceClientTest
                 mockConfig.getSasTokenAuthentication().canRefreshToken();
                 result = true;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
         };
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;deviceId=testdevice;"
@@ -777,7 +777,7 @@ public class DeviceClientTest
                 mockConfig.getSasTokenAuthentication().canRefreshToken();
                 result = true;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
         };
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;deviceId=testdevice;"
@@ -817,7 +817,7 @@ public class DeviceClientTest
                 mockDeviceIO.getProtocol();
                 result = IotHubClientProtocol.HTTPS;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthenticationType.X509_CERTIFICATE;
+                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
                 mockConfig.getModuleId();
                 result = "any module id";
             }
@@ -855,7 +855,7 @@ public class DeviceClientTest
                 result = IotHubClientProtocol.AMQPS;
 
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
         };
 
@@ -887,7 +887,7 @@ public class DeviceClientTest
                 result = IotHubClientProtocol.AMQPS_WS;
 
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
         };
 
@@ -935,7 +935,7 @@ public class DeviceClientTest
                 result = IotHubClientProtocol.AMQPS;
 
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
         };
 
@@ -1035,7 +1035,7 @@ public class DeviceClientTest
         //arrange
         int timeoutInSeconds = 10;
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-        final DeviceClientConfig.AuthenticationType authenticationType = DeviceClientConfig.AuthenticationType.X509_CERTIFICATE;
+        final DeviceClientConfig.AuthType authType = DeviceClientConfig.AuthType.X509_CERTIFICATE;
         DeviceClient client = Deencapsulation.newInstance(DeviceClient.class);
         Deencapsulation.setField(client, "config", mockConfig);
         Deencapsulation.setField(client, "deviceIO", mockDeviceIO);
@@ -1047,7 +1047,7 @@ public class DeviceClientTest
                 result = protocol;
 
                 mockConfig.getAuthenticationType();
-                result = authenticationType;
+                result = authType;
             }
         };
 
@@ -1056,7 +1056,7 @@ public class DeviceClientTest
             client.setOption("SetAmqpOpenAuthenticationSessionTimeout", timeoutInSeconds);
         } catch (UnsupportedOperationException expected) {
             //assert
-            assertEquals("Cannot set the open authentication session timeout when using authentication type " + authenticationType, expected.getMessage());
+            assertEquals("Cannot set the open authentication session timeout when using authentication type " + authType, expected.getMessage());
         }
     }
 

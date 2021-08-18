@@ -227,7 +227,7 @@ public class DeviceClientConfigTest
         assertEquals(expectedModuleId, actualModuleId);
     }
 
-    // Tests_SRS_DEVICECLIENTCONFIG_34_051: [If the saved authentication provider uses sas tokens, this function return AuthenticationType.SAS_TOKEN.]
+    // Tests_SRS_DEVICECLIENTCONFIG_34_051: [If the saved authentication provider uses sas tokens, this function return AuthType.SAS_TOKEN.]
     @Test
     public void getAuthTypeReturnsSasTokenAuth()
     {
@@ -236,13 +236,13 @@ public class DeviceClientConfigTest
         Deencapsulation.setField(config, "authenticationProvider", mockSasTokenSoftwareAuthentication);
 
         //act
-        DeviceClientConfig.AuthenticationType actualAuthenticationType = config.getAuthenticationType();
+        DeviceClientConfig.AuthType actualAuthType = config.getAuthenticationType();
 
         //assert
-        assertEquals(DeviceClientConfig.AuthenticationType.SAS_TOKEN, actualAuthenticationType);
+        assertEquals(DeviceClientConfig.AuthType.SAS_TOKEN, actualAuthType);
     }
 
-    // Tests_SRS_DEVICECLIENTCONFIG_34_052: [If the saved authentication provider uses x509, this function return AuthenticationType.X509_CERTIFICATE.]
+    // Tests_SRS_DEVICECLIENTCONFIG_34_052: [If the saved authentication provider uses x509, this function return AuthType.X509_CERTIFICATE.]
     @Test
     public void getAuthTypeReturnsX509Auth()
     {
@@ -251,10 +251,10 @@ public class DeviceClientConfigTest
         Deencapsulation.setField(config, "authenticationProvider", mockAuthentication);
 
         //act
-        DeviceClientConfig.AuthenticationType actualAuthenticationType = config.getAuthenticationType();
+        DeviceClientConfig.AuthType actualAuthType = config.getAuthenticationType();
 
         //assert
-        assertEquals(DeviceClientConfig.AuthenticationType.X509_CERTIFICATE, actualAuthenticationType);
+        assertEquals(DeviceClientConfig.AuthType.X509_CERTIFICATE, actualAuthType);
     }
 
     // Tests_SRS_DEVICECLIENTCONFIG_34_055: [If the saved authentication provider uses sas tokens, this function return the saved authentication provider.]
@@ -639,13 +639,13 @@ public class DeviceClientConfigTest
         //arrange
         DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockSasTokenSoftwareAuthentication);
 
-        DeviceClientConfig.AuthenticationType expectedAuthenticationType = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
+        DeviceClientConfig.AuthType expectedAuthType = DeviceClientConfig.AuthType.SAS_TOKEN;
 
         //act
-        DeviceClientConfig.AuthenticationType actualAuthenticationType = config.getAuthenticationType();
+        DeviceClientConfig.AuthType actualAuthType = config.getAuthenticationType();
 
         //assert
-        assertEquals(expectedAuthenticationType, actualAuthenticationType);
+        assertEquals(expectedAuthType, actualAuthType);
     }
 
     @Test

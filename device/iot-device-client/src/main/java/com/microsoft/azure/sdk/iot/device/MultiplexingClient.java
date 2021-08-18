@@ -463,7 +463,7 @@ public class MultiplexingClient
                 // Overwrite the proxy settings of the new client to match the multiplexing client settings
                 configToAdd.setProxySettings(this.proxySettings);
 
-                if (configToAdd.getAuthenticationType() != DeviceClientConfig.AuthenticationType.SAS_TOKEN)
+                if (configToAdd.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN)
                 {
                     throw new UnsupportedOperationException("Can only register to multiplex a device client that uses SAS token based authentication");
                 }

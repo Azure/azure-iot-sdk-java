@@ -101,12 +101,12 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             throw new TransportException("Failed to get SSLContext", e);
         }
 
-        if (this.config.getAuthenticationType() == DeviceClientConfig.AuthenticationType.SAS_TOKEN)
+        if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
         {
             log.trace("MQTT connection will use sas token based auth");
             this.webSocketQueryString = NO_CLIENT_CERT_QUERY_STRING;
         }
-        else if (this.config.getAuthenticationType() == DeviceClientConfig.AuthenticationType.X509_CERTIFICATE)
+        else if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
         {
             log.trace("MQTT connection will use X509 certificate based auth");
         }

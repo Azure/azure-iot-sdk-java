@@ -224,7 +224,7 @@ public class InternalClientTest
             {
                 Deencapsulation.newInstance(IotHubConnectionString.class, mockIotHubConnectionString);
                 times = 1;
-                Deencapsulation.newInstance(DeviceClientConfig.class, (IotHubConnectionString)any, DeviceClientConfig.AuthenticationType.SAS_TOKEN);
+                Deencapsulation.newInstance(DeviceClientConfig.class, (IotHubConnectionString)any, DeviceClientConfig.AuthType.SAS_TOKEN);
                 times = 1;
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
                         new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
@@ -248,7 +248,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                Deencapsulation.newInstance(DeviceClientConfig.class, (IotHubConnectionString)any, DeviceClientConfig.AuthenticationType.SAS_TOKEN);
+                Deencapsulation.newInstance(DeviceClientConfig.class, (IotHubConnectionString)any, DeviceClientConfig.AuthType.SAS_TOKEN);
                 times = 1;
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
                         new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
@@ -1373,7 +1373,7 @@ public class InternalClientTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
 
                 mockConfig.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary();
                 result = true;
@@ -1958,7 +1958,7 @@ public class InternalClientTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
         };
         InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
@@ -1980,7 +1980,7 @@ public class InternalClientTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockDeviceIO.isOpen();
                 result = false;
                 mockDeviceIO.getProtocol();
@@ -2010,7 +2010,7 @@ public class InternalClientTest
                 mockDeviceIO.getProtocol();
                 result = IotHubClientProtocol.HTTPS;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
         };
         InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
@@ -2046,7 +2046,7 @@ public class InternalClientTest
                 mockConfig.getSasTokenAuthentication().canRefreshToken();
                 result = true;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
         };
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2148,7 +2148,7 @@ public class InternalClientTest
                 mockDeviceIO.getProtocol();
                 result = IotHubClientProtocol.HTTPS;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockConfig.getSasTokenAuthentication().canRefreshToken();
                 result = true;
             }
@@ -2186,7 +2186,7 @@ public class InternalClientTest
                 mockDeviceIO.getProtocol();
                 result = IotHubClientProtocol.HTTPS;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
         };
 
@@ -2227,7 +2227,7 @@ public class InternalClientTest
                 mockConfig.getSasTokenAuthentication().canRefreshToken();
                 result = true;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
         };
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2266,7 +2266,7 @@ public class InternalClientTest
                 mockConfig.getSasTokenAuthentication().canRefreshToken();
                 result = true;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
         };
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2306,7 +2306,7 @@ public class InternalClientTest
                 mockConfig.getSasTokenAuthentication().canRefreshToken();
                 result = true;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
         };
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"

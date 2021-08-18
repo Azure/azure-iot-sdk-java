@@ -167,7 +167,7 @@ public class InternalClient
     @SuppressWarnings("ConstantConditions")
     public void open(boolean withRetry) throws IOException
     {
-        if (this.config.getAuthenticationType() == DeviceClientConfig.AuthenticationType.SAS_TOKEN && this.config.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary())
+        if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN && this.config.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary())
         {
             throw new SecurityException("Your SasToken is expired");
         }
@@ -915,7 +915,7 @@ public class InternalClient
     // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
     private void setOption_SetSASTokenExpiryTime(Object value)
     {
-        if (this.config.getAuthenticationType() != DeviceClientConfig.AuthenticationType.SAS_TOKEN || this.config.getSasTokenAuthentication() == null)
+        if (this.config.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN || this.config.getSasTokenAuthentication() == null)
         {
             throw new IllegalStateException("Cannot set sas token validity time when not using sas token authentication");
         }
@@ -942,7 +942,7 @@ public class InternalClient
             throw new UnsupportedOperationException("Cannot set the open authentication session timeout when using protocol " + this.config.getProtocol());
         }
 
-        if (this.config.getAuthenticationType() != DeviceClientConfig.AuthenticationType.SAS_TOKEN)
+        if (this.config.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN)
         {
             throw new UnsupportedOperationException("Cannot set the open authentication session timeout when using authentication type " + this.config.getAuthenticationType());
         }

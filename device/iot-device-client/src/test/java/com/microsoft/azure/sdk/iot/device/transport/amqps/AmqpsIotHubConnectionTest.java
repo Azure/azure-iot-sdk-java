@@ -1183,7 +1183,7 @@ public class AmqpsIotHubConnectionTest {
         new NonStrictExpectations() {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthenticationType.SAS_TOKEN;
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockConfig.getIotHubHostname();
                 result = hostName;
                 mockConfig.getIotHubName();

@@ -238,7 +238,7 @@ public class TemperatureController {
             Thread.sleep(MAX_TIME_TO_WAIT_FOR_REGISTRATION);
         }
 
-        ClientOptions options = ClientOptions.builder().build();
+        ClientOptions options = new ClientOptions();
         options.setModelId(MODEL_ID);
 
         if (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED) {
@@ -259,7 +259,7 @@ public class TemperatureController {
      * This method also sets a connection status change callback, that will get triggered any time the device's connection status changes.
      */
     private static void initializeDeviceClient() throws URISyntaxException, IOException {
-        ClientOptions options = ClientOptions.builder().build();
+        ClientOptions options = new ClientOptions();
         options.setModelId(MODEL_ID);
         deviceClient = new DeviceClient(deviceConnectionString, protocol, options);
 

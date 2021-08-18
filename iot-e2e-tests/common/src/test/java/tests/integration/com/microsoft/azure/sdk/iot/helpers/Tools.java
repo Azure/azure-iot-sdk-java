@@ -302,7 +302,7 @@ public class Tools
             }
 
             SSLContext sslContext = SSLContextBuilder.buildSSLContext(IntegrationTest.x509CertificateGenerator.getPublicCertificate(), IntegrationTest.x509CertificateGenerator.getPrivateKey());
-            ClientOptions clientOptions = ClientOptions.builder().build();
+            ClientOptions clientOptions = new ClientOptions();
             clientOptions.sslContext = sslContext;
             DeviceClient client = new DeviceClient(getRegistyManager(iotHubConnectionString).getDeviceConnectionString(testDeviceIdentity.getDevice()), protocol, clientOptions);
             testDeviceIdentity.setDeviceClient(client);
@@ -441,7 +441,7 @@ public class Tools
             }
 
             SSLContext sslContext = SSLContextBuilder.buildSSLContext(IntegrationTest.x509CertificateGenerator.getPublicCertificate(), IntegrationTest.x509CertificateGenerator.getPrivateKey());
-            ClientOptions clientOptions = ClientOptions.builder().build();
+            ClientOptions clientOptions = new ClientOptions();
             clientOptions.sslContext = sslContext;
             ModuleClient moduleClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, testModuleIdentity.device, testModuleIdentity.module), protocol, clientOptions);
             testModuleIdentity.setModuleClient(moduleClient);

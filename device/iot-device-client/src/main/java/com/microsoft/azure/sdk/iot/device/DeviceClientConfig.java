@@ -97,7 +97,7 @@ public final class DeviceClientConfig
     @Getter
     private ProductInfo productInfo;
 
-    public enum AuthenticationType
+    public enum AuthType
     {
         X509_CERTIFICATE,
         SAS_TOKEN
@@ -555,21 +555,21 @@ public final class DeviceClientConfig
     }
 
     /**
-     * Getter for AuthenticationType
+     * Getter for AuthType
      *
-     * @return The value of AuthenticationType
+     * @return The value of AuthType
      */
-    public AuthenticationType getAuthenticationType()
+    public AuthType getAuthenticationType()
     {
         if (this.authenticationProvider instanceof IotHubSasTokenAuthenticationProvider)
         {
-            // Codes_SRS_DEVICECLIENTCONFIG_34_051: [If the saved authentication provider uses sas tokens, this function return AuthenticationType.SAS_TOKEN.]
-            return AuthenticationType.SAS_TOKEN;
+            // Codes_SRS_DEVICECLIENTCONFIG_34_051: [If the saved authentication provider uses sas tokens, this function return AuthType.SAS_TOKEN.]
+            return AuthType.SAS_TOKEN;
         }
         else
         {
-            // Codes_SRS_DEVICECLIENTCONFIG_34_052: [If the saved authentication provider uses x509, this function return AuthenticationType.X509_CERTIFICATE.]
-            return AuthenticationType.X509_CERTIFICATE;
+            // Codes_SRS_DEVICECLIENTCONFIG_34_052: [If the saved authentication provider uses x509, this function return AuthType.X509_CERTIFICATE.]
+            return AuthType.X509_CERTIFICATE;
         }
     }
 
