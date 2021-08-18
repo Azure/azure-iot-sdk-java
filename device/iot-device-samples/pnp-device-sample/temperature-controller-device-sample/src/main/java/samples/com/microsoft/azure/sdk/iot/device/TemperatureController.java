@@ -155,17 +155,17 @@ public class TemperatureController {
 
         log.debug("Set handler for \"reboot\" command.");
         log.debug("Set handler for \"getMaxMinReport\" command.");
-        deviceClient.subscribeToMethodsAsync(new DeviceMethodCallback(), null, new MethodIotHubEventCallback(), null);
+        deviceClient.subscribeToMethodsAsync(new MethodCallback(), null, new MethodIotHubEventCallback(), null);
 
         log.debug("Set handler to receive \"targetTemperature\" updates.");
-        deviceClient.startTwinAsync(new TwinIotHubEventCallback(), null, new GenericPropertyUpdateCallBack(), null);
+        deviceClient.startTwinAsync(new TwinIotHubEventCallback(), null, new GenericPropertyUpdateCallback(), null);
         Map<Property, Pair<TwinPropertyCallBack, Object>> desiredPropertyUpdateCallback = Stream.of(
                 new AbstractMap.SimpleEntry<Property, Pair<TwinPropertyCallBack, Object>>(
                         new Property(THERMOSTAT_1, null),
-                        new Pair<>(new TargetTemperatureUpdateCallBack(), THERMOSTAT_1)),
+                        new Pair<>(new TargetTemperatureUpdateCallback(), THERMOSTAT_1)),
                 new AbstractMap.SimpleEntry<Property, Pair<TwinPropertyCallBack, Object>>(
                         new Property(THERMOSTAT_2, null),
-                        new Pair<>(new TargetTemperatureUpdateCallBack(), THERMOSTAT_2))
+                        new Pair<>(new TargetTemperatureUpdateCallback(), THERMOSTAT_2))
         ).collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
 
         deviceClient.subscribeToTwinDesiredPropertiesAsync(desiredPropertyUpdateCallback);
@@ -278,7 +278,7 @@ public class TemperatureController {
     /**
      * The callback to handle "reboot" command. This method will send a temperature update (of 0°C) over telemetry for both associated components.
      */
-    private static class DeviceMethodCallback implements com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback
+    private static class MethodCallback implements DeviceMethodCallback
     {
         final String reboot = "reboot";
         final String getMaxMinReport1 = "thermostat1*getMaxMinReport";
@@ -363,7 +363,7 @@ public class TemperatureController {
      * The desired property update callback, which receives the target temperature as a desired property update,
      * and updates the current temperature value over telemetry and reported property update.
      */
-    private static class TargetTemperatureUpdateCallBack implements TwinPropertyCallBack
+    private static class TargetTemperatureUpdateCallback implements TwinPropertyCallBack
     {
 
         final String propertyName = "targetTemperature";
@@ -524,7 +524,7 @@ public class TemperatureController {
     /**
      * The callback to be invoked for a property change that is not explicitly monitored by the device.
      */
-    private static class GenericPropertyUpdateCallBack implements TwinPropertyCallBack
+    private static class GenericPropertyUpdateCallback implements TwinPropertyCallBack
     {
 
         @Override

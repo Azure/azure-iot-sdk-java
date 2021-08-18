@@ -38,7 +38,7 @@ public class InternalClientTest
     IotHubEventCallback mockedIotHubEventCallback;
 
     @Mocked
-    TwinPropertyCallBack mockedTwinPropertyCallBack;
+    TwinPropertyCallBack mockedTwinPropertyCallback;
 
     @Mocked
     DeviceClientConfig mockConfig;
@@ -1597,7 +1597,7 @@ public class InternalClientTest
         InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
 
         // act
-        Deencapsulation.invoke(client, "startTwinAsync", mockedIotHubEventCallback, new Object(), mockedTwinPropertyCallBack, new Object());
+        Deencapsulation.invoke(client, "startTwinAsync", mockedIotHubEventCallback, new Object(), mockedTwinPropertyCallback, new Object());
     }
 
     //Tests_SRS_INTERNALCLIENT_34_082: [If either callback is null, this function shall throw an IllegalArgumentException.]
@@ -1617,7 +1617,7 @@ public class InternalClientTest
         };
 
         // act
-        Deencapsulation.invoke(client, "startTwinAsync", (IotHubEventCallback) null, new Object(), mockedTwinPropertyCallBack, new Object());
+        Deencapsulation.invoke(client, "startTwinAsync", (IotHubEventCallback) null, new Object(), mockedTwinPropertyCallback, new Object());
     }
 
     //Tests_SRS_INTERNALCLIENT_34_083: [If either callback is null, this function shall throw an IllegalArgumentException.]
@@ -1657,13 +1657,13 @@ public class InternalClientTest
                 mockDeviceIO.isOpen();
                 result = true;
 
-                new DeviceTwin(mockDeviceIO, mockConfig, mockedIotHubEventCallback, any, mockedTwinPropertyCallBack, any);
+                new DeviceTwin(mockDeviceIO, mockConfig, mockedIotHubEventCallback, any, mockedTwinPropertyCallback, any);
                 result = mockedDeviceTwin;
             }
         };
 
         // act
-        Deencapsulation.invoke(client, "startTwinAsync", mockedIotHubEventCallback, new Object(), mockedTwinPropertyCallBack, new Object());
+        Deencapsulation.invoke(client, "startTwinAsync", mockedIotHubEventCallback, new Object(), mockedTwinPropertyCallback, new Object());
 
         //assert
         assertNotNull(Deencapsulation.getField(client, "twin"));

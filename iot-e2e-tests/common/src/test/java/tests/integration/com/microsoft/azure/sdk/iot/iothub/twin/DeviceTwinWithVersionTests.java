@@ -129,7 +129,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         return null;
     }
 
-    private static class DeviceTwinPropertyCallBack implements TwinPropertyCallBack
+    private static class DeviceTwinPropertyCallback implements TwinPropertyCallBack
     {
         @Override
         public void TwinPropertyCallBack(Property property, Object context)
@@ -210,7 +210,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
     {
         testInstance.deviceTwinWithVersionTestDevice.deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, testInstance.deviceForRegistryManager), protocol);
         testInstance.deviceTwinWithVersionTestDevice.deviceClient.open();
-        testInstance.deviceTwinWithVersionTestDevice.deviceClient.startTwinAsync(new DeviceTwinStatusCallBack(), testInstance.deviceTwinWithVersionTestDevice, new DeviceTwinPropertyCallBack(), testInstance.deviceTwinWithVersionTestDevice);
+        testInstance.deviceTwinWithVersionTestDevice.deviceClient.startTwinAsync(new DeviceTwinStatusCallBack(), testInstance.deviceTwinWithVersionTestDevice, new DeviceTwinPropertyCallback(), testInstance.deviceTwinWithVersionTestDevice);
     }
 
     @Before

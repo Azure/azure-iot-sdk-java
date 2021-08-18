@@ -360,7 +360,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         }
     }
 
-    // This test is for the startTwinAsync/startTwinAsync API that takes the TwinPropertyCallBack rather than the TwinPropertyCallBack
+    // This test is for the startTwinAsync/startTwinAsync API that takes the TwinPropertiesCallback rather than the TwinPropertyCallback
     // This callback should receive the full twin update in one callback, rather than one callback per updated
     // desired property
     @Test

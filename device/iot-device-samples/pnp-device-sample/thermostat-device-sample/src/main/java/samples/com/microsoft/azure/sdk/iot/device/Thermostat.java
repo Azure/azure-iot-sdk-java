@@ -140,11 +140,11 @@ public class Thermostat {
         }
 
         log.debug("Start twin and set handler to receive \"targetTemperature\" updates.");
-        deviceClient.startTwinAsync(new TwinIotHubEventCallback(), null, new TargetTemperatureUpdateCallBack(), null);
+        deviceClient.startTwinAsync(new TwinIotHubEventCallback(), null, new TargetTemperatureUpdateCallback(), null);
         Map<Property, Pair<TwinPropertyCallBack, Object>> desiredPropertyUpdateCallback =
                 Collections.singletonMap(
                         new Property("targetTemperature", null),
-                        new Pair<>(new TargetTemperatureUpdateCallBack(), null));
+                        new Pair<>(new TargetTemperatureUpdateCallback(), null));
         deviceClient.subscribeToTwinDesiredPropertiesAsync(desiredPropertyUpdateCallback);
 
         log.debug("Set handler to receive \"getMaxMinReport\" command.");

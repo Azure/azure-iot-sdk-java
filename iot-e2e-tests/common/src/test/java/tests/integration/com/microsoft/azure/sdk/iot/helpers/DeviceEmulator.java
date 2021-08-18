@@ -77,7 +77,7 @@ public class DeviceEmulator
     /**
      * Enable device method on this device.
      * @param deviceMethodCallback is the callback called when a service invoke a method on this device. If it is null,
-     *                             the DeviceEmulator will take care of it using the DeviceMethodInvokeCallback.
+     *                             the DeviceEmulator will take care of it using the MethodInvokeCallback.
      * @param deviceMethodCallbackContext is the context for the deviceMethodCallback. Only used if the
      *                                    deviceMethodCallback is not null.
      * @param deviceMethodStatusCallback is the callback called when the service receive the response for the invoked
@@ -95,7 +95,7 @@ public class DeviceEmulator
     {
         if(deviceMethodCallback == null)
         {
-            deviceMethodCallback = new DeviceMethodInvokeCallback();
+            deviceMethodCallback = new MethodInvokeCallback();
             deviceMethodCallbackContext = null;
         }
 
