@@ -7,12 +7,33 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device;
 
+import lombok.Getter;
+
 public class ProvisioningDeviceClientRegistrationResult
 {
     protected String iothubUri;
     protected String deviceId;
     protected ProvisioningDeviceClientStatus provisioningDeviceClientStatus;
     protected String payload;
+
+    @Getter
+    protected String registrationId;
+
+    @Getter
+    protected String createdDateTimeUtc;
+
+    @Getter
+    protected String status;
+
+    @Getter
+    protected ProvisioningDeviceClientSubstatus substatus;
+
+    @Getter
+    protected String eTag;
+
+    @Getter
+    protected String lastUpdatesDateTimeUtc;
+
     /**
      * Empty constructor to let users gather the data.
      */

@@ -306,6 +306,14 @@ public class ProvisioningCommon extends IntegrationTest
         Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Unexpected status", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), PROVISIONING_DEVICE_STATUS_ASSIGNED, provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus());
         testInstance.provisionedDeviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
         testInstance.provisionedIotHubUri = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri();
+
+        assertEquals(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus(), PROVISIONING_DEVICE_STATUS_ASSIGNED);
+        assertEquals(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getRegistrationId(), testInstance.registrationId);
+        assertNotNull(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getCreatedDateTimeUtc());
+        assertNotNull(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getLastUpdatesDateTimeUtc());
+        assertNotNull(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getLastUpdatesDateTimeUtc());
+        assertNotNull(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getSubstatus());
+
         assertNotNull(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Expected a device id", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), testInstance.provisionedDeviceId);
         assertFalse(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Expected a device id", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), testInstance.provisionedDeviceId.isEmpty());
         assertNotNull(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Expected uri", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), testInstance.provisionedIotHubUri);
