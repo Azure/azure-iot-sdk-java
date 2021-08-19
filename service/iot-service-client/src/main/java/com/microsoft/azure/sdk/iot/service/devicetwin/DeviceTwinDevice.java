@@ -11,7 +11,6 @@ import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.deps.util.Tools;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Setter;
 
 import java.util.*;
@@ -37,13 +36,8 @@ public class DeviceTwinDevice
     @Setter(AccessLevel.PACKAGE)
     private Integer version;
 
-    @Setter(AccessLevel.PACKAGE)
-    private TwinCollection tag;
-
-    @Setter(AccessLevel.PACKAGE)
+    private TwinCollection tags;
     private TwinCollection reportedProperties;
-
-    @Setter(AccessLevel.PACKAGE)
     private TwinCollection desiredProperties;
 
     @Getter
@@ -141,7 +135,7 @@ public class DeviceTwinDevice
         {
             throw new IllegalArgumentException("tags cannot be null");
         }
-        this.tag = this.setToMap(tags);
+        this.tags = this.setToMap(tags);
     }
 
     /**
@@ -151,7 +145,7 @@ public class DeviceTwinDevice
      */
     public Set<Pair> getTags()
     {
-        return this.mapToSet(this.tag);
+        return this.mapToSet(this.tags);
     }
 
     /**
@@ -159,7 +153,7 @@ public class DeviceTwinDevice
      */
     public void clearTags()
     {
-        this.tag = null;
+        this.tags = null;
     }
 
     /**
@@ -170,11 +164,11 @@ public class DeviceTwinDevice
      */
     public Integer getTagsVersion()
     {
-        if (this.tag == null)
+        if (this.tags == null)
         {
             throw new IllegalArgumentException("tag is null");
         }
-        return this.tag.getVersion();
+        return this.tags.getVersion();
     }
 
     /**
@@ -260,13 +254,43 @@ public class DeviceTwinDevice
     }
 
     /**
+     * Setter for the reported properties.
+     *
+     * @param reportedProperties A map of validated key/value pairs for reported properties.
+     */
+    void setReportedProperties(TwinCollection reportedProperties)
+    {
+        this.reportedProperties = reportedProperties;
+    }
+
+    /**
+     * Setter for the desired properties.
+     *
+     * @param desiredProperties A map of validated key/value pairs for desired properties.
+     */
+    void setDesiredProperties(TwinCollection desiredProperties)
+    {
+        this.desiredProperties = desiredProperties;
+    }
+
+    /**
+     * Setter for tags.
+     *
+     * @param tags A map of validated key/value pairs for tags.
+     */
+    void setTags(TwinCollection tags)
+    {
+        this.tags = tags;
+    }
+
+    /**
      * Getter for tags.
      *
      * @return  A map of validated key/value pairs for tags.
      */
     TwinCollection getTagsMap()
     {
-        return this.tag;
+        return this.tags;
     }
 
     /**
@@ -353,9 +377,9 @@ public class DeviceTwinDevice
     public String tagsToString()
     {
         StringBuilder thisDeviceTags = new StringBuilder();
-        if (tag != null)
+        if (tags != null)
         {
-            thisDeviceTags.append("Tags: ").append(this.tag.toString()).append("\n");
+            thisDeviceTags.append("Tags: ").append(this.tags.toString()).append("\n");
         }
         return thisDeviceTags.toString();
     }
