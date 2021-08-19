@@ -181,7 +181,7 @@ public class BaseDeviceTest
         assertEquals(expectedCloudToDeviceMessageCount, parser.getCloudToDeviceMessageCount());
         assertEquals(expectedConnectionState.toString(), parser.getConnectionState());
         assertEquals(expectedDeviceId, parser.getDeviceId());
-        assertEquals("\"" +expectedETag + "\"", parser.geteTag());
+        assertEquals("\"" +expectedETag + "\"", parser.getETag());
         assertEquals(expectedGenerationId, parser.getGenerationId());
         assertEquals(ParserUtility.getDateTimeUtc(expectedLastActivityTime), parser.getLastActivityTime());
     }

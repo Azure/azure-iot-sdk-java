@@ -278,7 +278,8 @@ public class TemperatureController {
     /**
      * The callback to handle "reboot" command. This method will send a temperature update (of 0°C) over telemetry for both associated components.
      */
-    private static class MethodCallback implements DeviceMethodCallback {
+    private static class MethodCallback implements DeviceMethodCallback
+    {
         final String reboot = "reboot";
         final String getMaxMinReport1 = "thermostat1*getMaxMinReport";
         final String getMaxMinReport2 = "thermostat2*getMaxMinReport";
@@ -362,7 +363,8 @@ public class TemperatureController {
      * The desired property update callback, which receives the target temperature as a desired property update,
      * and updates the current temperature value over telemetry and reported property update.
      */
-    private static class TargetTemperatureUpdateCallback implements TwinPropertyCallBack {
+    private static class TargetTemperatureUpdateCallback implements TwinPropertyCallBack
+    {
 
         final String propertyName = "targetTemperature";
 
@@ -522,7 +524,8 @@ public class TemperatureController {
     /**
      * The callback to be invoked for a property change that is not explicitly monitored by the device.
      */
-    private static class GenericPropertyUpdateCallback implements TwinPropertyCallBack {
+    private static class GenericPropertyUpdateCallback implements TwinPropertyCallBack
+    {
 
         @Override
         public void TwinPropertyCallBack(Property property, Object context) {

@@ -13,15 +13,14 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
 
 /**
  * Authentication method that uses HSM to get a SAS token.
  */
 public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithRefreshAuthenticationProvider
 {
-    final SignatureProvider signatureProvider;
-    final String generationId;
+    private final SignatureProvider signatureProvider;
+    private final String generationId;
 
     /**
      * Constructor for a IotHubSasTokenHsmAuthenticationProvider instance
@@ -152,7 +151,7 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
         return true;
     }
 
-    static IotHubSasToken createNewSasToken(
+    private static IotHubSasToken createNewSasToken(
         String hostname,
         String gatewayHostName,
         String deviceId,

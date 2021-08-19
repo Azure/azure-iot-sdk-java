@@ -147,17 +147,6 @@ public class JobPropertiesParserTest
         new JobPropertiesParser("}");
     }
 
-    //Tests_SRS_JOB_PROPERTIES_PARSER_34_005: [If the provided jobId is null, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void jobIdCannotBeSetToNull()
-    {
-        //arrange
-        JobPropertiesParser parser = new JobPropertiesParser();
-
-        //act
-        parser.setJobId(null);
-    }
-
     //Tests_SRS_JOB_PROPERTIES_PARSER_34_009: [If the provided json is missing the field for jobId, or if its value is null or empty, an IllegalArgumentException shall be thrown.]
     @Test (expected = IllegalArgumentException.class)
     public void constructorJsonMissingJobIdInJsonThrowsIllegalArgumentException()

@@ -177,7 +177,7 @@ public class DeviceParserTest
         assertEquals(AuthenticationTypeParser.CERTIFICATE_AUTHORITY, parser.getAuthenticationParser().getType());
         assertEquals(deviceId, parser.getDeviceId());
         assertEquals(generationId, parser.getGenerationId());
-        assertEquals("\"" + ETag + "\"", parser.geteTag());
+        assertEquals(ETag, parser.getETag());
         assertEquals(status, parser.getStatus());
         assertEquals(statusReason, parser.getStatusReason());
         assertEquals(connectionState, parser.getConnectionState());
@@ -296,7 +296,7 @@ public class DeviceParserTest
         parser.setAuthenticationParser(new AuthenticationParser());
         parser.setConnectionState(connectionState);
         parser.setDeviceId(deviceId);
-        parser.seteTag(eTag);
+        parser.setETag(eTag);
         parser.setConnectionStateUpdatedTime(connectionStateUpdatedTime);
         parser.setLastActivityTime(lastActivityTime);
         parser.setGenerationId(generationId);
@@ -315,7 +315,7 @@ public class DeviceParserTest
         assertEquals(connectionState, parser.getConnectionState());
         assertEquals(connectionStateUpdatedTime, parser.getConnectionStateUpdatedTime());
         assertEquals(deviceId, parser.getDeviceId());
-        assertEquals("\"" + eTag + "\"", parser.geteTag());
+        assertEquals(eTag, parser.getETag());
         assertEquals(generationId, parser.getGenerationId());
         assertEquals(lastActivityTime, parser.getLastActivityTime());
         assertEquals(status, parser.getStatus());
@@ -325,22 +325,6 @@ public class DeviceParserTest
         assertEquals(managedBy, parser.getManagedBy());
         assertEquals(new DeviceCapabilitiesParser().getIotEdge(), parser.getCapabilities().getIotEdge());
         assertEquals(scope, parser.getScope());
-    }
-
-    //Tests_SRS_DEVICE_PARSER_34_004: [For each of this parser's properties, if the setter is called with a null argument, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void cantSetAuthenticationParserNull()
-    {
-        //act
-        new DeviceParser().setAuthenticationParser(null);
-    }
-
-    //Tests_SRS_DEVICE_PARSER_34_004: [For each of this parser's properties, if the setter is called with a null argument, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void cantSetDeviceIdNull()
-    {
-        //act
-        new DeviceParser().setDeviceId(null);
     }
 
     //Tests_SRS_DEVICE_PARSER_34_005: [If the provided json is null or empty, an IllegalArgumentException shall be thrown.]
@@ -462,38 +446,5 @@ public class DeviceParserTest
 
         //act
         new DeviceParser(json);
-    }
-
-    //Tests_SRS_DEVICE_PARSER_34_010: [If the provided deviceId value is null, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void setterForDeviceIdCalledWithNullThrowsIllegalArgumentException()
-    {
-        //arrange
-        DeviceParser parser = new DeviceParser();
-
-        //act
-        parser.setDeviceId(null);
-    }
-
-    //Tests_SRS_DEVICE_PARSER_34_010: [If the provided deviceId value is null, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void setterForDeviceIdCalledWithEmptyStringThrowsIllegalArgumentException()
-    {
-        //arrange
-        DeviceParser parser = new DeviceParser();
-
-        //act
-        parser.setDeviceId("");
-    }
-
-    //Tests_SRS_DEVICE_PARSER_34_008: [If the provided authenticationParser value is null, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void setterForAuthenticationCalledWithNullThrowsIllegalArgumentException()
-    {
-        //arrange
-        DeviceParser parser = new DeviceParser();
-
-        //act
-        parser.setAuthenticationParser(null);
     }
 }

@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class HttpsRequestResponseSerializer
+class HttpsRequestResponseSerializer
 {
     private static final String SP = " ";
     private static final String CR = "\r";

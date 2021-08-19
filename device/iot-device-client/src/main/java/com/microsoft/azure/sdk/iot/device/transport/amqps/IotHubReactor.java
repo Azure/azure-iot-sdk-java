@@ -8,7 +8,7 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 import org.apache.qpid.proton.engine.HandlerException;
 import org.apache.qpid.proton.reactor.Reactor;
 
-public class IotHubReactor
+class IotHubReactor
 {
     private final Reactor reactor;
 

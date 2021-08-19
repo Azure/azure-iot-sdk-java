@@ -5,15 +5,11 @@
 
 package com.microsoft.azure.sdk.iot.device.auth;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-
 import javax.net.ssl.SSLContext;
-import java.io.IOException;
 
 public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasTokenAuthenticationProvider
 {
-    @SuppressWarnings("CanBeFinal") // Class can be inherited
-    protected String deviceKey;
+    private final String deviceKey;
 
     /**
      * Constructor that takes a connection string containing a sas token or a device key

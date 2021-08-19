@@ -9,6 +9,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.IOException;
 @SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
@@ -17,11 +19,15 @@ public class JobQueryResponseError
     // Code for the error
     private static final String CODE_TAG = "code";
     @SerializedName(CODE_TAG)
+    @Getter
+    @Setter
     private String code;
 
     // Description for the error
     private static final String DESCRIPTION_TAG = "description";
     @SerializedName(DESCRIPTION_TAG)
+    @Getter
+    @Setter
     private String description;
 
     /**
@@ -74,25 +80,5 @@ public class JobQueryResponseError
         //Codes_SRSJOB_QUERY_RESPONSE_ERROR_25_003: [The method shall build the json with the values provided to this object.]
         Gson gson = new GsonBuilder().serializeNulls().create();
         return gson.toJson(this);
-    }
-
-    /**
-     * Getter for code
-     * @return string for the code
-     */
-    public String getCode()
-    {
-        //Codes_SRSJOB_QUERY_RESPONSE_ERROR_25_001: [The getCode shall return the value of the code.]
-        return code;
-    }
-
-    /**
-     * getter for description
-     * @return string for description
-     */
-    public String getDescription()
-    {
-        //Codes_SRSJOB_QUERY_RESPONSE_ERROR_25_002: [The getDescription shall return the value of the Description.]
-        return description;
     }
 }

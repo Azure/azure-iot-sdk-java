@@ -8,6 +8,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -25,26 +27,31 @@ public class FileUploadSasUriResponse
     private static final String CORRELATION_ID_TAG = "correlationId";
     @Expose
     @SerializedName(CORRELATION_ID_TAG)
+    @Getter
     private String correlationId = null;
 
     private static final String HOST_NAME_TAG = "hostName";
     @Expose
     @SerializedName(HOST_NAME_TAG)
+    @Getter
     private String hostName = null;
 
     private static final String CONTAINER_NAME_TAG = "containerName";
     @Expose
     @SerializedName(CONTAINER_NAME_TAG)
+    @Getter
     private String containerName = null;
 
     private static final String BLOB_NAME_TAG = "blobName";
     @Expose
     @SerializedName(BLOB_NAME_TAG)
+    @Getter
     private String blobName = null;
 
     private static final String SAS_TOKEN_TAG = "sasToken";
     @Expose
     @SerializedName(SAS_TOKEN_TAG)
+    @Getter
     private String sasToken = null;
 
     /**
@@ -73,57 +80,6 @@ public class FileUploadSasUriResponse
         this.correlationId = newFileUploadSasUriResponse.correlationId;
         this.blobName = newFileUploadSasUriResponse.blobName;
         this.sasToken = newFileUploadSasUriResponse.sasToken;
-    }
-
-    /**
-     * Getter for the Azure storage correlation identification. This correlation id should be used when notifying IoT Hub
-     * that this file upload has completed.
-     *
-     * @return The correlation identification.
-     */
-    public String getCorrelationId()
-    {
-        return this.correlationId;
-    }
-
-    /**
-     * Getter for the Azure storage host name that this file upload SAS URI allows uploading to.
-     *
-     * @return The host name.
-     */
-    public String getHostName()
-    {
-        return this.hostName;
-    }
-
-    /**
-     * Getter for the container name in Azure storage that this file upload SAS URI allows uploading to.
-     *
-     * @return The container name.
-     */
-    public String getContainerName()
-    {
-        return this.containerName;
-    }
-
-    /**
-     * Getter for the blob name (aka file name) in Azure storage that this file upload SAS URI allows uploading to.
-     *
-     * @return The blob name.
-     */
-    public String getBlobName()
-    {
-        return this.blobName;
-    }
-
-    /**
-     * Getter for the file sasToken for authenticating with Azure storage while uploading.
-     *
-     * @return String with the file sasToken.
-     */
-    public String getSasToken()
-    {
-        return this.sasToken;
     }
 
     /**

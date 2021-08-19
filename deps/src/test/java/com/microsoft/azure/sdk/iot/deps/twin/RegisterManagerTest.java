@@ -36,18 +36,6 @@ public class RegisterManagerTest
             "}";
 
 
-    /* Tests_SRS_REGISTER_MANAGER_21_001: [The setDeviceId shall throw IllegalArgumentException if the provided deviceId do not fits the criteria.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setDeviceIdThrowsOnNullDeviceId()
-    {
-        // arrange
-        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
-        RegisterManager result = gson.fromJson(REGISTER_MANAGER_SAMPLE, RegisterManager.class);
-
-        // act - assert
-        result.setDeviceId(null);
-    }
-
     /* Tests_SRS_REGISTER_MANAGER_21_002: [The setDeviceId shall replace the `deviceId` by the provided one.] */
     @Test
     public void setDeviceIdSucceed()
@@ -61,18 +49,6 @@ public class RegisterManagerTest
 
         // assert
         assertEquals("newDeviceId", Deencapsulation.getField(result, "deviceId"));
-    }
-
-    /* Tests_SRS_REGISTER_MANAGER_28_001: [The setModuleId shall throw IllegalArgumentException if the provided moduleId do not fits the criteria.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setModuleIdThrowsOnNullModuleId()
-    {
-        // arrange
-        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
-        RegisterManager result = gson.fromJson(REGISTER_MANAGER_SAMPLE, RegisterManager.class);
-
-        // act - assert
-        result.setModuleId(null);
     }
 
     /* Tests_SRS_REGISTER_MANAGER_28_002: [The setModuleId shall replace the `moduleId` by the provided one.] */

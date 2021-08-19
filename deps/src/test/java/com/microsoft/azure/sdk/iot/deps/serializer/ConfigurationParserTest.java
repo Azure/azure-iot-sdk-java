@@ -190,12 +190,4 @@ public class ConfigurationParserTest
         assertEquals("etag1", parser.getETag());
         assertEquals("text/html", parser.getContentType());
     }
-
-    //Tests_SRS_CONFIGURATION_PARSER_28_008: [If the provided id value is null, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void cantSetIdNull()
-    {
-        //act
-        new ConfigurationParser().setId(null);
-    }
 }
