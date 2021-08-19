@@ -59,7 +59,7 @@ public class DigitalTwinAsyncClient {
      *
      * @param connectionString The IoTHub connection string
      */
-    private DigitalTwinAsyncClient(String connectionString) {
+    public DigitalTwinAsyncClient(String connectionString) {
         this(connectionString, DigitalTwinClientOptions.builder().build());
     }
 

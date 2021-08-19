@@ -29,7 +29,7 @@ public class DigitalTwinClient {
      * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
      * @param connectionString The IoT Hub connection string
      */
-    private DigitalTwinClient(String connectionString) {
+    public DigitalTwinClient(String connectionString) {
         this(connectionString, DigitalTwinClientOptions.builder().build());
     }
 
