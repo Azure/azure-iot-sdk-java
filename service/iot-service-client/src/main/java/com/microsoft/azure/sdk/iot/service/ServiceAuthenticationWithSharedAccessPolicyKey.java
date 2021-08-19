@@ -50,44 +50,4 @@ class ServiceAuthenticationWithSharedAccessPolicyKey extends AuthenticationMetho
 
         return iotHubConnectionString;
     }
-
-    // Codes_SRS_SERVICE_SDK_JAVA_SERVICEAUTHENTICATIONWITHSHAREDACCESSKEY_12_001: [Provide access to the following properties: policyName, key, token]
-
-    /**
-     * Getter for policy name
-     * @return The policy name string
-     */
-    String getPolicyName()
-    {
-        return this.policyName;
-    }
-
-    /**
-     * Setter for policy name
-     * @param policyName The string value to set
-     */
-    @SuppressWarnings("unused") // Used by reflection in tests
-    protected void setPolicyName(String policyName)
-    {
-        this.policyName = policyName;
-    }
-
-    /**
-     * Getter for policy key
-     * @return The policy key string
-     */
-    String getKey()
-    {
-        return this.key;
-    }
-
-    /**
-     * Setter for policy key
-     * @param key The string value to set
-     */
-    @SuppressWarnings("unused") // Used by reflection in tests
-    protected void setKey(String key)
-    {
-        this.key = key;
-    }
 }

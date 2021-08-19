@@ -52,41 +52,4 @@ class ServiceAuthenticationWithSharedAccessPolicyToken extends AuthenticationMet
         this.setPolicyName(policyName);
         this.setToken(token);
     }
-
-    /**
-     * Getter for policy name
-     * @return The policy name string
-     */
-    String getPolicyName()
-    {
-        return this.policyName;
-    }
-
-    /**
-     * Setter for policy name
-     * @param policyName The string value to set
-     */
-    private void setPolicyName(String policyName)
-    {
-        this.policyName = policyName;
-    }
-
-    /**
-     * Getter for policy token
-     * @return The policy token string
-     */
-    String getToken()
-    {
-        return this.token;
-    }
-
-    /**
-     * Setter for policy token
-     * @param token The string value to set
-     */
-    private void setToken(String token)
-    {
-        this.token = token;
-    }
-
 }

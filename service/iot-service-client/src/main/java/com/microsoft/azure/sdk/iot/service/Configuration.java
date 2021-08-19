@@ -9,6 +9,8 @@ import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationContentParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationMetricsParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.HashMap;
 
@@ -58,226 +60,74 @@ public class Configuration
      * of ASCII 7-bit alphanumeric chars
      * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
      */
+    @Getter
     private String id;
-
-    /**
-     * Getter for configuration name
-     *
-     * @return The configuration string
-     */
-    public String getId()
-    {
-        return this.id;
-    }
 
     /**
      * Specifies the schemaVersion
      */
+    @Getter
     private String schemaVersion;
-
-    /**
-     * Getter for schema version
-     *
-     * @return The schema version
-     */
-    public String getSchemaVersion()
-    {
-        return this.schemaVersion;
-    }
 
     /**
      * Specifies the labels map of the configuration
      */
+    @Getter
+    @Setter
     private HashMap<String, String> labels = null;
-
-    /**
-     * Setter for the labels of the configuration
-     *
-     * @param labels labels to be set
-     */
-    public void setLabels(HashMap<String, String> labels)
-    {
-        this.labels = labels;
-    }
-
-    /**
-     * Getter for labels
-     *
-     * @return The labels map
-     */
-    public HashMap<String, String> getLabels()
-    {
-        return labels;
-    }
-
-    /**
-     * Set the configuration metrics of this object
-     * @param metrics the metrics to set
-     */
-    public void setMetrics(ConfigurationMetrics metrics)
-    {
-        this.metrics = metrics;
-    }
 
     /**
      * Specifies the configuration content
      */
+    @Getter
+    @Setter
     private ConfigurationContent content;
-
-    /**
-     * Setter for the configuration content
-     *
-     * @param content configuration content to be set
-     */
-    public void setContent(ConfigurationContent content)
-    {
-        this.content = content;
-    }
-
-    /**
-     * Getter for configuration content
-     *
-     * @return The configuration content object
-     */
-    public ConfigurationContent getContent()
-    {
-        return this.content;
-    }
 
     /**
      * Specifies the targetCondition
      */
+    @Getter
+    @Setter
     private String targetCondition;
-
-    /**
-     * Setter for the targetCondition
-     *
-     * @param targetCondition targetCondition to be set
-     */
-    public void setTargetCondition(String targetCondition)
-    {
-        this.targetCondition = targetCondition;
-    }
-
-    /**
-     * Getter for targetCondition
-     *
-     * @return The targetCondition string
-     */
-    public String getTargetCondition()
-    {
-        return this.targetCondition;
-    }
 
     /**
      * Datetime of configuration created time.
      */
+    @Getter
     private String createdTimeUtc;
-
-    /**
-     * Getter for configuration created time
-     *
-     * @return The string containing the time when the configuration was created
-     */
-    public String getCreatedTimeUtc()
-    {
-        return createdTimeUtc;
-    }
 
     /**
      * Datetime of configuration last updated time.
      */
+    @Getter
     private String lastUpdatedTimeUtc;
-
-    /**
-     * Getter for configuration last updated time string
-     *
-     * @return The string containing the time when the configuration was last updated
-     */
-    public String getLastUpdatedTimeUtc()
-    {
-        return lastUpdatedTimeUtc;
-    }
 
     /**
      * Specifies the priority
      */
+    @Getter
+    @Setter
     private Integer priority;
-
-    /**
-     * Setter for the configuration priority
-     *
-     * @param priority to be set
-     */
-    public void setPriority(Integer priority)
-    {
-        this.priority = priority;
-    }
-
-    /**
-     * Getter for the configuration priority
-     *
-     * @return The Integer containing the priority
-     */
-    public Integer getPriority()
-    {
-        return priority;
-    }
 
     /**
      * Specifies the system configuration metrics
      */
+    @Getter
     private ConfigurationMetrics systemMetrics = null;
-
-    /**
-     * Getter for the system configuration metrics
-     *
-     * @return The system configuration metrics object
-     */
-    public ConfigurationMetrics getSystemMetrics()
-    {
-        return systemMetrics;
-    }
 
     /**
      * Specifies the custom configuration metrics
      */
+    @Getter
+    @Setter
     private ConfigurationMetrics metrics = null;
-
-    /**
-     * Getter for the custom configuration metrics
-     *
-     * @return The custom configuration metrics object
-     */
-    public ConfigurationMetrics getMetrics()
-    {
-        return metrics;
-    }
 
     /**
      * A string representing a ETAG
      */
+    @Getter
+    @Setter
     private String etag;
-
-    /**
-     * Setter for the ETAG
-     *
-     * @param etag to be set
-     */
-    public void setEtag(String etag)
-    {
-        this.etag = etag;
-    }
-
-    /**
-     * Getter for eTag
-     *
-     * @return The eTag string
-     */
-    public String getEtag()
-    {
-        return etag;
-    }
 
     /**
      * Converts this into a ConfigurationParser object. To serialize a Configuration object, it must first be converted

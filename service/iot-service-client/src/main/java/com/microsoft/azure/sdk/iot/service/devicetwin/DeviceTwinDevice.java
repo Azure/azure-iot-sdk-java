@@ -9,6 +9,10 @@ import com.microsoft.azure.sdk.iot.deps.twin.ConfigurationInfo;
 import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.deps.util.Tools;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
 
 import java.util.*;
 
@@ -18,18 +22,63 @@ import java.util.*;
  */
 public class DeviceTwinDevice
 {
-    private String deviceId = null;
-    private String moduleId = null;
-    private String eTag = null;
+    @Getter
+    private String deviceId;
+
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
+    private String moduleId;
+
+    @Getter
+    @Setter
+    private String eTag;
+
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
     private Integer version;
-    private TwinCollection tag = null;
-    private TwinCollection reportedProperties = null;
-    private TwinCollection desiredProperties = null;
-    private Map<String, ConfigurationInfo> configurations = null;
-    private DeviceCapabilities capabilities = null;
-    private String connectionState = null;
-    private String modelId = null;
-    private String deviceScope = null;
+
+    @Setter(AccessLevel.PACKAGE)
+    private TwinCollection tag;
+
+    @Setter(AccessLevel.PACKAGE)
+    private TwinCollection reportedProperties;
+
+    @Setter(AccessLevel.PACKAGE)
+    private TwinCollection desiredProperties;
+
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
+    private Map<String, ConfigurationInfo> configurations;
+
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
+    private DeviceCapabilities capabilities;
+
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
+    private String connectionState;
+
+    /**
+     * The DTDL model Id of the device.
+     * The value will be {@code null} for a non-PnP device.
+     * The value will be {@code null} for a PnP device until the device connects and registers with a model Id.
+     */
+    @Getter
+    @Setter
+    private String modelId;
+
+    /**
+     * The scope of the device. Auto-generated and immutable for edge devices and modifiable in leaf devices to create child/parent relationship.
+     * <p>For more information, see <a href="https://docs.microsoft.com/azure/iot-edge/iot-edge-as-gateway?view=iotedge-2020-11#parent-and-child-relationships">this document</a>.</p>
+     */
+    @Getter
+    private String deviceScope;
+
+    /**
+     * The scopes of the upper level edge devices if applicable. Only available for edge devices.
+     * <p>For more information, see <a href="https://docs.microsoft.com/azure/iot-edge/iot-edge-as-gateway?view=iotedge-2020-11#parent-and-child-relationships">this document</a>.</p>
+     */
+    @Getter
     private List<String> parentScopes = new ArrayList<>();
 
     /**
@@ -78,72 +127,6 @@ public class DeviceTwinDevice
         }
         this.deviceId = deviceId;
         this.moduleId = moduleId;
-    }
-
-    /**
-     * Getter to get the device Id.
-     *
-     * @return The Id for this device.
-     */
-    public String getDeviceId()
-    {
-        return this.deviceId;
-    }
-
-    /**
-     * Getter to get the module Id.
-     *
-     * @return The Id for this module.
-     */
-    public String getModuleId()
-    {
-        return this.moduleId;
-    }
-
-    /**
-     * Setter for ETag.
-     *
-     * @param eTag The value of the ETag.
-     * @throws IllegalArgumentException If the provided etag is {@code null} or empty.
-     */
-    public void setETag(String eTag) throws IllegalArgumentException
-    {
-        if (Tools.isNullOrEmpty(eTag))
-        {
-            throw new IllegalArgumentException("eTag cannot be null or empty.");
-        }
-
-        this.eTag = eTag;
-    }
-
-    /**
-     * Getter for the ETag.
-     *
-     * @return The stored ETag. It will be {@code null} if not set.
-     */
-    public String getETag()
-    {
-        return this.eTag;
-    }
-
-    /**
-     * Setter for the twin version.
-     *
-     * @param version The version of the twin.
-     */
-    void setVersion(Integer version)
-    {
-        this.version = version;
-    }
-
-    /**
-     * Getter for the twin version.
-     *
-     * @return The stored version. It can be {@code null}.
-     */
-    public Integer getVersion()
-    {
-        return this.version;
     }
 
     /**
@@ -220,16 +203,6 @@ public class DeviceTwinDevice
     }
 
     /**
-     * Sets the Id of this module.
-     *
-     * @param moduleId The id of this module, allowed to be {@code null} or empty.
-     */
-    void setModuleId(String moduleId)
-    {
-        this.moduleId = moduleId;
-    }
-
-    /**
      * Clears the desired properties set so far.
      */
     public void clearDesiredProperties()
@@ -287,36 +260,6 @@ public class DeviceTwinDevice
     }
 
     /**
-     * Setter for the reported properties.
-     *
-     * @param reportedProperties A map of validated key/value pairs for reported properties.
-     */
-    void setReportedProperties(TwinCollection reportedProperties)
-    {
-        this.reportedProperties = reportedProperties;
-    }
-
-    /**
-     * Setter for the desired properties.
-     *
-     * @param desiredProperties A map of validated key/value pairs for desired properties.
-     */
-    void setDesiredProperties(TwinCollection desiredProperties)
-    {
-        this.desiredProperties = desiredProperties;
-    }
-
-    /**
-     * Setter for tags.
-     *
-     * @param tag A map of validated key/value pairs for tags.
-     */
-    void setTags(TwinCollection tag)
-    {
-        this.tag = tag;
-    }
-
-    /**
      * Getter for tags.
      *
      * @return  A map of validated key/value pairs for tags.
@@ -344,64 +287,6 @@ public class DeviceTwinDevice
     protected TwinCollection getReportedMap()
     {
         return this.reportedProperties;
-    }
-
-    /**
-     * Setter for configuration properties.
-     *
-     * @param configurations Is the configuration properties.
-     */
-    void setConfigurations(Map<String, ConfigurationInfo> configurations)
-    {
-        this.configurations = configurations;
-    }
-
-    /**
-     * Getter for configuration properties.
-     *
-     * @return The configuration properties which can be {@code null}.
-     */
-    public Map<String, ConfigurationInfo> getConfigurations()
-    {
-        return this.configurations;
-    }
-
-    /**
-     * Setter for capabilities.
-     *
-     * @param capabilities The value of capabilities.
-     */
-    void setCapabilities(DeviceCapabilities capabilities)
-    {
-        this.capabilities = capabilities;
-    }
-
-    /**
-     * Getter for capabilities.
-     *
-     * @return The value of capabilities, which can be {@code null}.
-     */
-    public DeviceCapabilities getCapabilities()
-    {
-        return this.capabilities;
-    }
-
-    /**
-     * @return Gets the connection state as last reported by the service.
-     */
-    public String getConnectionState()
-    {
-        return this.connectionState;
-    }
-
-    /**
-     * Sets the connection state of the device.
-     *
-     * @param connectionState The state to set.
-     */
-    void setConnectionState(String connectionState)
-    {
-        this.connectionState = connectionState;
     }
 
     /**
@@ -542,41 +427,4 @@ public class DeviceTwinDevice
 
         return map;
     }
-
-    /**
-     * Getter for a model Id.
-     *
-     * @return The DTDL model Id of the device.
-     * The value will be {@code null} for a non-PnP device.
-     * The value will be {@code null} for a PnP device until the device connects and registers with a model Id.
-     */
-    public String getModelId() {
-        return this.modelId;
-    }
-
-    /**
-     * Setter for a model Id
-     *
-     * @param modelId is the DTDL model Id of the device.
-     */
-    public void setModelId(String modelId) {
-        this.modelId = modelId;
-    }
-
-    /**
-     * The scope of the device. Auto-generated and immutable for edge devices and modifiable in leaf devices to create child/parent relationship.
-     * <p>For more information, see <a href="https://docs.microsoft.com/azure/iot-edge/iot-edge-as-gateway?view=iotedge-2020-11#parent-and-child-relationships">this document</a>.</p>
-     *
-     * @return The scope of the device. Auto-generated and immutable for edge devices and modifiable in leaf devices to
-     * create child/parent relationship.
-     */
-    public String getDeviceScope() { return this.deviceScope; }
-
-    /**
-     * The scopes of the upper level edge devices if applicable. Only available for edge devices.
-     * <p>For more information, see <a href="https://docs.microsoft.com/azure/iot-edge/iot-edge-as-gateway?view=iotedge-2020-11#parent-and-child-relationships">this document</a>.</p>
-     *
-     * @return The parent scopes edge and leaf devices, if applicable.
-     */
-    public List<String> getParentScopes() { return this.parentScopes; }
 }

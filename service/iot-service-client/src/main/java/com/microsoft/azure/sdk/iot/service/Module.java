@@ -5,9 +5,10 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.*;
+import com.microsoft.azure.sdk.iot.deps.serializer.DeviceParser;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
+import lombok.Getter;
 
 public class Module extends BaseDevice
 {
@@ -131,32 +132,14 @@ public class Module extends BaseDevice
      * of ASCII 7-bit alphanumeric chars
      * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
      */
+    @Getter
     private String id;
-
-    /**
-     * Getter for module name
-     *
-     * @return The module string
-     */
-    public String getId()
-    {
-        return id;
-    }
 
     /**
      * Specifies the module's managed by owner
      */
+    @Getter
     private String managedBy;
-
-    /**
-     * Getter for module's managed by owner
-     *
-     * @return The string containing the managed by owner
-     */
-    public String getManagedBy()
-    {
-        return managedBy;
-    }
 
     Module(DeviceParser parser) throws IllegalArgumentException
     {

@@ -9,6 +9,8 @@ import com.microsoft.azure.sdk.iot.deps.serializer.*;
 import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,123 +100,54 @@ public class Device extends BaseDevice
         this.setPropertiesToDefaultValues();
     }
 
-    private DeviceStatus status;
-
     /**
-     * Getter for DeviceStatus object.
-     * Values: {@code "Enabled"}, {@code "Disabled"}.
      * If {@code "Enabled"}, this device is authorized to connect.
      * If {@code "Disabled"} this device cannot receive or send messages, and {@link #statusReason} must be set.
-     *
-     * @return The deviceStatus object.
      */
-    public DeviceStatus getStatus()
-    {
-        return status;
-    }
-
-    /**
-     * Setter for DeviceStatus object.
-     * Values: {@code "Enabled"}, {@code "Disabled"}.
-     * If {@code "Enabled"}, this device is authorized to connect.
-     * If {@code "Disabled"} this device cannot receive or send messages, and statusReason must be set.
-     *
-     * @param status status to be set.
-     */
-    public void setStatus(DeviceStatus status)
-    {
-        this.status = status;
-    }
+    @Getter
+    @Setter
+    private DeviceStatus status;
 
     /**
      * A 128 char long string storing the reason of suspension (all UTF-8 chars allowed).
      */
+    @Getter
     private String statusReason;
 
     /**
-     * Getter for status reason.
-     *
-     * @return The statusReason string.
+     * The date time when the status of this device was last updated.
      */
-    public String getStatusReason()
-    {
-        return statusReason;
-    }
-
+    @Getter
     private String statusUpdatedTime;
 
     /**
-     * Getter for status updated on string.
-     *
-     * @return The string containing the time when the statusUpdatedTime object was updated.
+     * The optional capabilities that this device has.
      */
-    public String getStatusUpdatedTime()
-    {
-        return statusUpdatedTime;
-    }
-
+    @Getter
+    @Setter
     private DeviceCapabilities capabilities;
 
     /**
-     * Getter for capabilities.
-     *
-     * @return The DeviceCapabilities containing capabilities that are enabled on the device.
-     */
-    public DeviceCapabilities getCapabilities()
-    {
-        return capabilities;
-    }
-
-    /**
-     * Setter for DeviceCapabilities object.
-     *
-     * @param capabilities Capabilities to be set.
-     */
-    public void setCapabilities(DeviceCapabilities capabilities)
-    {
-        this.capabilities = capabilities;
-    }
-
-    private String scope;
-
-    /**
-     * Gets the scope of the device.
-     *
-     * @return The scope for this device.
-     */
-    public String getScope()
-    {
-        return this.scope;
-    }
-
-    /**
-     * Sets the scope of the device.
      * <p>For edge devices, this is auto-generated and immutable.</p>
      * <p>For leaf devices, set this to create child/parent relationship. The value to set a parent edge device can be
      * retrieved from calling the parent edge device's {@link #getScope()} method.</p>
      * <p>For more information, see <a href="https://docs.microsoft.com/azure/iot-edge/iot-edge-as-gateway?view=iotedge-2020-11#parent-and-child-relationships">this document</a>.</p>
-     *
-     * @param scope The device scope to set.
      */
-    public void setScope(String scope)
-    {
-        this.scope = scope;
-    }
-
-    private List<String> parentScopes = new ArrayList<>();
+    @Setter
+    @Getter
+    private String scope;
 
     /**
-     * Gets the scopes of the upper level edge devices, if applicable.
+     * The scopes of the upper level edge devices, if applicable.
      * <p>For edge devices, the value to set a parent edge device can be retrieved from the calling parent edge device's
      * {@link #getScope()} method.</p>
      * <p>For leaf devices, this could be set to the same value as {@link #getScope()} or left for the service to copy
      * over.</p>
      * <p>For now, this list can only have 1 element in the collection.</p>
      * <p>For more information, see <a href="https://docs.microsoft.com/azure/iot-edge/iot-edge-as-gateway?view=iotedge-2020-11#parent-and-child-relationships">this document</a>.</p>
-     *
-     * @return The parent scopes for this device.
      */
-    public List<String> getParentScopes() { return this.parentScopes; }
+    @Getter
+    private List<String> parentScopes = new ArrayList<>();
 
     /**
      * Converts this into a {@link DeviceParser} object. To serialize a Device object, it must first be converted to a

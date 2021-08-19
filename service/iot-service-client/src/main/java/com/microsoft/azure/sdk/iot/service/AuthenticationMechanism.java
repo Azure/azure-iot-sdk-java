@@ -7,6 +7,7 @@ package com.microsoft.azure.sdk.iot.service;
 
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
+import lombok.Getter;
 
 /**
  * Authentication mechanism, used to store the device symmetric key.
@@ -14,20 +15,12 @@ import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
 public class AuthenticationMechanism
 {
     @SerializedName("symmetricKey")
+    @Getter
     private SymmetricKey SymmetricKey;
 
     //empty constructor for Gson
     AuthenticationMechanism()
     {
-    }
-
-    /**
-     * Getter for symmetric key.
-     * @return The symmetric key.
-     */
-    public SymmetricKey getSymmetricKey()
-    {
-        return this.SymmetricKey;
     }
 
     /**

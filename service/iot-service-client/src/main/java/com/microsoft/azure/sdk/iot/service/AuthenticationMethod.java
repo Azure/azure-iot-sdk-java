@@ -5,7 +5,11 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-/** 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+
+/**
  * Class used to abstract the different 
  * authentication methods used to use IoT Hub SDK. 
  * 
@@ -15,16 +19,22 @@ public abstract class AuthenticationMethod
     /**
      * Authentication policy name
      */
+    @Getter(AccessLevel.MODULE)
+    @Setter(AccessLevel.MODULE)
     String policyName;
 
     /**
      * Shared access policy key (if applies)
      */
+    @Getter(AccessLevel.MODULE)
+    @Setter(AccessLevel.MODULE)
     String key;
 
     /**
      * Shared access policy token (if applies)
      */
+    @Getter(AccessLevel.MODULE)
+    @Setter(AccessLevel.MODULE)
     String token;
 
     /**

@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
+import lombok.Getter;
 
 /**
  * The BaseDevice class
@@ -82,39 +83,17 @@ public class BaseDevice
         this.deviceId = deviceId;
     }
 
-    // Codes_SRS_SERVICE_SDK_JAVA_BASEDEVICE_12_001: [The Device class shall have the following properties: deviceId, Etag,
-    // SymmetricKey, ConnectionState, ConnectionStateUpdatedTime, LastActivityTime, symmetricKey, thumbprint, authentication]
     /**
      * Device name
      * A case-sensitive string (up to 128 char long)
      * of ASCII 7-bit alphanumeric chars
      * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
      */
+    @Getter
     private String deviceId;
 
-    /**
-     * Getter for device name
-     *
-     * @return The deviceId string
-     */
-    public String getDeviceId()
-    {
-        return deviceId;
-    }
-
-    /**
-     * Device generation Id
-     */
+    @Getter
     private String generationId;
-
-    /**
-     * Getter for GenerationId
-     * @return The generationId string
-     */
-    public String getGenerationId()
-    {
-        return generationId;
-    }
 
     /**
      * Getter for SymmetricKey object
@@ -256,62 +235,26 @@ public class BaseDevice
      * Status of the device:
      * {"connected" | "disconnected"}
      */
+     @Getter
      private DeviceConnectionState connectionState;
-
-    /**
-     * Getter for connection state
-     *
-     * @return The connectionState string
-     */
-    public DeviceConnectionState getConnectionState()
-    {
-        return connectionState;
-    }
 
     /**
      * Datetime of last time the connection state was updated.
      */
+    @Getter
     private String connectionStateUpdatedTime;
-
-    /**
-     * Getter for connection state updated time
-     *
-     * @return The string containing the time when the connectionState parameter was updated
-     */
-    public String getConnectionStateUpdatedTime()
-    {
-        return connectionStateUpdatedTime;
-    }
 
     /**
      * Datetime of last time the device authenticated, received, or sent a message.
      */
+    @Getter
     private String lastActivityTime;
-
-    /**
-     * Getter for last activity time
-     *
-     * @return The string containing the time when the lastActivity parameter was updated
-     */
-    public String getLastActivityTime()
-    {
-        return lastActivityTime;
-    }
 
     /**
      * Number of messages received by the device
      */
+    @Getter
     private long cloudToDeviceMessageCount;
-
-    /**
-     * Getter for cloud to device message count
-     *
-     * @return The string containing the time when the cloudToDeviceMessageCount parameter was updated
-     */
-    public long getCloudToDeviceMessageCount()
-    {
-        return cloudToDeviceMessageCount;
-    }
 
     /*
      * Specifies whether this device uses a key for authentication, an X509 certificate, or something else

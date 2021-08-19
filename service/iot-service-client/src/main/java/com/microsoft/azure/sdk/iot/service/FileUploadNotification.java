@@ -5,6 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
+import lombok.Getter;
+
 import java.util.Date;
 
 public class FileUploadNotification
@@ -19,11 +21,22 @@ public class FileUploadNotification
          *      enqueuedTimeUtc: 2016-06-01T21:22:43.7996883Z
    */
 
+    @Getter
     private final String deviceId;
+
+    @Getter
     private final String blobUri;
+
+    @Getter
     private final String blobName;
+
+    @Getter
     private final Date lastUpdatedTimeDate;
+
+    @Getter
     private final Long blobSizeInBytes;
+
+    @Getter
     private final Date enqueuedTimeUtcDate;
 
     public FileUploadNotification(String deviceId, String blobUri, String blobName, Date lastUpdatedTimeDate, Long blobSizeInBytes, Date enqueuedTimeUtcDate)
@@ -43,66 +56,4 @@ public class FileUploadNotification
         this.blobSizeInBytes = blobSizeInBytes;
         this.enqueuedTimeUtcDate = enqueuedTimeUtcDate;
     }
-
-    /**
-     * Getter for Device ID
-     * @return device id
-     */
-    public String getDeviceId()
-    {
-
-        //Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATION_25_001: [ The getter for device ID ]
-        return deviceId;
-    }
-
-    /**
-     * Getter for BlobUri
-     * @return BlobUri String
-     */
-    public String getBlobUri()
-    {
-        //Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATION_25_003: [ The getter for Blob Uri ]
-        return blobUri;
-    }
-
-    /**
-     * Getter for BlobName
-     * @return BlobName
-     */
-    public String getBlobName()
-    {
-        //Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATION_25_005: [ The getter for blobName ]
-        return blobName;
-    }
-
-    /**
-     * Getter for LastUpdatedTimeDate
-     * @return LastUpdatedTimeDate
-     */
-    public Date getLastUpdatedTimeDate()
-    {
-        //Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATION_25_007: [ The getter for lastUpdatedTimeDate ]
-        return lastUpdatedTimeDate;
-    }
-
-    /**
-     * Getter for BlobSize in Bytes
-     * @return BlobSize in Bytes
-     */
-    public Long getBlobSizeInBytes()
-    {
-        //Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATION_25_009: [ The getter for blobSizeInBytes ]
-        return blobSizeInBytes;
-    }
-
-    /**
-     * Getter for EnqueuedTimeUtcDate
-     * @return EnqueuedTimeUtcDate
-     */
-    public Date getEnqueuedTimeUtcDate()
-    {
-        //Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATION_25_011: [ The getter for enqueuedTimeUtcDate ]
-        return enqueuedTimeUtcDate;
-    }
-
 }
