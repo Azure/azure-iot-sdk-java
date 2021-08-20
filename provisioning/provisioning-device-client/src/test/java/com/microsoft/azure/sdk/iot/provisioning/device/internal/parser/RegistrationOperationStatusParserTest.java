@@ -274,7 +274,7 @@ public class RegistrationOperationStatusParserTest
         assertNotNull(operationsRegistrationOperationStatusParser.getRegistrationState().getDeviceId());
         assertEquals(TEST_DEVICE_ID, operationsRegistrationOperationStatusParser.getRegistrationState().getDeviceId());
         assertNotNull(operationsRegistrationOperationStatusParser.getRegistrationState().getStatus());
-        assertNotNull(operationsRegistrationOperationStatusParser.getRegistrationState().getEtag());
+        assertNotNull(operationsRegistrationOperationStatusParser.getRegistrationState().getETag());
         assertNotNull(operationsRegistrationOperationStatusParser.getRegistrationState().getLastUpdatesDateTimeUtc());
         assertNotNull(operationsRegistrationOperationStatusParser.getRegistrationState().getX509());
         assertNotNull(operationsRegistrationOperationStatusParser.getRegistrationState().getX509().getCertificateInfo());
@@ -953,7 +953,7 @@ public class RegistrationOperationStatusParserTest
         assertNotNull(operationsRegistrationOperationStatusParser.getRegistrationState().getDeviceId());
         assertEquals(TEST_DEVICE_ID, operationsRegistrationOperationStatusParser.getRegistrationState().getDeviceId());
         assertNotNull(operationsRegistrationOperationStatusParser.getRegistrationState().getStatus());
-        assertNotNull(operationsRegistrationOperationStatusParser.getRegistrationState().getEtag());
+        assertNotNull(operationsRegistrationOperationStatusParser.getRegistrationState().getETag());
         assertNotNull(operationsRegistrationOperationStatusParser.getRegistrationState().getLastUpdatesDateTimeUtc());
         assertNotNull(operationsRegistrationOperationStatusParser.getRegistrationState().getTpm());
         assertNotNull(operationsRegistrationOperationStatusParser.getRegistrationState().getTpm().getAuthenticationKey());
