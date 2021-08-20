@@ -1,6 +1,7 @@
 package com.microsoft.azure.sdk.iot.deps.serializer;
 
 /**
+ * The descriptions for all the possible 6 digit and 3 digit error codes returned by IoT hub for service calls.
  * See https://docs.microsoft.com/en-us/rest/api/iothub/common-error-codes for additional details
  */
 public enum ErrorCodeDescription
@@ -156,7 +157,8 @@ public enum ErrorCodeDescription
     Conflict,
 
     /**
-     * Represents status code for 429 and for status code 429001
+     * The general error for when a service request fails because it provided an out of date ETag such as when updating
+     * a twin.
      */
     PreconditionFailed,
 
@@ -167,7 +169,7 @@ public enum ErrorCodeDescription
     RequestEntityTooLarge,
 
     /**
-     * Represents status code for 429 and 429001
+     * The general error for service requests that failed because the service could not handle the current load at the moment.
      */
     ThrottlingException,
 
@@ -177,7 +179,7 @@ public enum ErrorCodeDescription
     InternalServerError,
 
     /**
-     * Defined for status code 503 and 503001
+     * The general error for service requests that failed because the service isn't available at the moment.
      */
     ServiceUnavailable;
 
