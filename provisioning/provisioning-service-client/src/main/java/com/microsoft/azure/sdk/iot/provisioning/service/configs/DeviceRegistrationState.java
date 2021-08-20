@@ -21,11 +21,11 @@ import java.util.Date;
  * {@code
  * {
  *     "registrationId":"validRegistrationId",
- *     "createdDateTimeUtcString": "2017-09-28T16:29:42.3447817Z",
+ *     "createdDateTimeUtc": "2017-09-28T16:29:42.3447817Z",
  *     "assignedHub":"ContosoIoTHub.azure-devices.net",
  *     "deviceId":"ContosoDevice-123",
  *     "status":"assigned"
- *     "lastUpdatedDateTimeUtcString": "2017-09-28T16:29:42.3447817Z",
+ *     "lastUpdatedDateTimeUtc": "2017-09-28T16:29:42.3447817Z",
  *     "errorCode":200
  *     "errorMessage":"Succeeded"
  *     "etag": "\"00000000-0000-0000-0000-00000000000\""
