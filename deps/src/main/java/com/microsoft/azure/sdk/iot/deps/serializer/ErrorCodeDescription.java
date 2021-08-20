@@ -169,7 +169,8 @@ public enum ErrorCodeDescription
     RequestEntityTooLarge,
 
     /**
-     * The general error for service requests that failed because the service could not handle the current load at the moment.
+     * IoT hub throttling limits have been exceeded for the requested operation.
+     * @see <a href="https://aka.ms/iothubthrottling">More details on throttling limits.</a>
      */
     ThrottlingException,
 
