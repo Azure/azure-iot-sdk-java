@@ -168,6 +168,9 @@ public enum ErrorCodeDescription
 
     /**
      * Represents status code for 429 and 429001
+     /**
+     * IoT hub throttling limits have been exceeded for the requested operation.
+     * @see <a href="https://aka.ms/iothubthrottling">More details on throttling limits.</a>
      */
     ThrottlingException,
 
