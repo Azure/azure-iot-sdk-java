@@ -14,7 +14,7 @@ import org.apache.qpid.proton.engine.Receiver;
 
 import java.util.Map;
 
-public final class AmqpsMethodsReceiverLinkHandler extends AmqpsReceiverLinkHandler
+final class AmqpsMethodsReceiverLinkHandler extends AmqpsReceiverLinkHandler
 {
     private static final String CORRELATION_ID_KEY = "com.microsoft:channel-correlation-id";
     private static final String CORRELATION_ID_KEY_PREFIX = "methods:";

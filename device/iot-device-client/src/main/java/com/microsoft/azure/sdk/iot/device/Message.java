@@ -109,7 +109,7 @@ public class Message
     /**
      * Security Client flag
      */
-    boolean isSecurityClient;
+    private boolean isSecurityClient;
 
     // ----- Constructors -----
 
@@ -125,7 +125,7 @@ public class Message
      * Constructor.
      * @param stream A stream to provide the body of the new Message instance.
      */
-    public Message(ByteArrayInputStream stream)
+    private Message(ByteArrayInputStream stream)
     {
         initialize();
     }

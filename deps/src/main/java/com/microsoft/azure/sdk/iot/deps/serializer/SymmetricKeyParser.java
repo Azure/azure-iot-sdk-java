@@ -8,6 +8,8 @@ package com.microsoft.azure.sdk.iot.deps.serializer;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Store primary and secondary keys
@@ -19,10 +21,14 @@ public class SymmetricKeyParser
 
     private static final String PRIMARY_KEY_SERIALIZED_NAME = "primaryKey";
     @SerializedName(PRIMARY_KEY_SERIALIZED_NAME)
+    @Getter
+    @Setter
     private String primaryKey;
 
     private static final String SECONDARY_KEY_SERIALIZED_NAME = "secondaryKey";
     @SerializedName(SECONDARY_KEY_SERIALIZED_NAME)
+    @Getter
+    @Setter
     private String secondaryKey;
 
     /**
@@ -80,61 +86,5 @@ public class SymmetricKeyParser
     {
         //Codes_SRS_SymmetricKeyParser_34_007: [This method shall return a json representation of this.]
         return gson.toJson(this);
-    }
-
-    /**
-     * Getter for PrimaryKey
-     *
-     * @return The value of PrimaryKey
-     */
-    public final String getPrimaryKey()
-    {
-        //Codes_SRS_SymmetricKeyParser_34_001: [This method shall return the value of primaryKey]
-        return primaryKey;
-    }
-
-    /**
-     * Setter for PrimaryKey
-     * @param primaryKey the value to set the primary key to
-     * @throws IllegalArgumentException if primaryKey is null
-     */
-    public void setPrimaryKey(String primaryKey) throws IllegalArgumentException
-    {
-        //Codes_SRS_SymmetricKeyParser_34_002: [If the provided primaryKey value is null, an IllegalArgumentException shall be thrown.]
-        if (primaryKey == null)
-        {
-            throw new IllegalArgumentException("primaryKey cannot be null.");
-        }
-
-        //Codes_SRS_SymmetricKeyParser_34_003: [This method shall set the value of primaryKey to the provided value.]
-        this.primaryKey = primaryKey;
-    }
-
-    /**
-     * Getter for SecondaryKey
-     *
-     * @return The value of SecondaryKey
-     */
-    public final String getSecondaryKey()
-    {
-        //Codes_SRS_SymmetricKeyParser_34_004: [This method shall return the value of secondaryKey]
-        return secondaryKey;
-    }
-
-    /**
-     * Setter for SecondaryKey
-     * @param secondaryKey the value to set the secondary key to
-     * @throws IllegalArgumentException if secondaryKey is null
-     */
-    public void setSecondaryKey(String secondaryKey) throws IllegalArgumentException
-    {
-        //Codes_SRS_SymmetricKeyParser_34_005: [If the provided secondaryKey value is null, an IllegalArgumentException shall be thrown.]
-        if (secondaryKey == null)
-        {
-            throw new IllegalArgumentException("secondaryKey cannot be null.");
-        }
-
-        //Codes_SRS_SymmetricKeyParser_34_006: [This method shall set the value of secondaryKey to the provided value.]
-        this.secondaryKey = secondaryKey;
     }
 }

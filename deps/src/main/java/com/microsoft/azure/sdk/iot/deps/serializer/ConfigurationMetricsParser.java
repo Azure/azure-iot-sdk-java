@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Map;
 
@@ -12,11 +14,15 @@ public class ConfigurationMetricsParser
     private static final String RESULTS_NAME = "results";
     @Expose
     @SerializedName(RESULTS_NAME)
+    @Getter
+    @Setter
     private Map<String, Long> results;
 
     private static final String QUERIES_NAME = "queries";
     @Expose
     @SerializedName(QUERIES_NAME)
+    @Getter
+    @Setter
     private Map<String, String> queries;
 
     private final transient static Gson gson = new Gson();
@@ -66,47 +72,5 @@ public class ConfigurationMetricsParser
     {
         //Codes_SRS_CONFIGURATION_METRICS_PARSER_28_004: [This method shall return a json representation of this.]
         return gson.toJson(this);
-    }
-
-    /**
-     * Getter for results
-     *
-     * @return The value of results
-     */
-    public Map<String, Long> getResults()
-    {
-        //Codes_SRS_CONFIGURATION_METRICS_PARSER_28_005: [This method shall return the value of this object's results.]
-        return results;
-    }
-
-    /**
-     * Setter for results
-     * @param results the value to set results to
-     */
-    public void setResults(Map<String, Long> results)
-    {
-        //Codes_SRS_CONFIGURATION_METRICS_PARSER_28_006: [This method shall set the value of results to the provided value.]
-        this.results = results;
-    }
-
-    /**
-     * Getter for queries
-     *
-     * @return The value of queries
-     */
-    public Map<String, String> getQueries()
-    {
-        //Codes_SRS_CONFIGURATION_METRICS_PARSER_28_007: [This method shall return the value of this object's queries.]
-        return queries;
-    }
-
-    /**
-     * Setter for queries
-     * @param queries the value to set queries to
-     */
-    public void setQueries(Map<String, String> queries)
-    {
-        //Codes_SRS_CONFIGURATION_METRICS_PARSER_28_008: [This method shall set the value of queries to the provided value.]
-        this.queries = queries;
     }
 }

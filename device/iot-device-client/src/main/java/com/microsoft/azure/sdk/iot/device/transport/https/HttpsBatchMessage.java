@@ -18,7 +18,7 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64String;
  * Builds a batched IoT Hub request body as a JSON array. The batched message
  * has a maximum size of 256 kb.
  */
-public final class HttpsBatchMessage implements HttpsMessage
+final class HttpsBatchMessage implements HttpsMessage
 {
     // Note: this limit is defined by the IoT Hub.
     private static final int SERVICEBOUND_MESSAGE_MAX_SIZE_BYTES = 255 * 1024 - 1;
@@ -42,7 +42,7 @@ public final class HttpsBatchMessage implements HttpsMessage
     private int numMsgs;
 
     /** Constructor. Initializes the batch body as an empty JSON array. */
-    public HttpsBatchMessage()
+    HttpsBatchMessage()
     {
         // Codes_SRS_HTTPSBATCHMESSAGE_11_001: [The constructor shall initialize the batch message with the body as an empty JSON array.]
         this.batchBody = "[]";

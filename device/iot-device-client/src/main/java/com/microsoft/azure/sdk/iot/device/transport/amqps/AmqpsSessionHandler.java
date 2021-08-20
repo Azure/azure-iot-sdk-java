@@ -19,7 +19,7 @@ import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.*;
 import static com.microsoft.azure.sdk.iot.device.MessageType.*;
 
 @Slf4j
-public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
+class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
 {
     @Getter
     private final DeviceClientConfig deviceClientConfig;

@@ -3,7 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.device.DeviceTwin;
 
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
