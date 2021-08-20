@@ -6,52 +6,153 @@ package com.microsoft.azure.sdk.iot.deps.serializer;
 public enum ErrorCodeDescription
 {
     // These descriptions belong to fully qualified status codes, such as 404001
+    /**
+     * This library could not classify the received error code into a known description.
+     */
     UnclassifiedErrorCode,
+
+    /**
+     * The API version used by the SDK is not supported by the IoT hub endpoint used in this connection.
+     * Usually this would mean that the region of the hub doesn't yet support the API version. One should
+     * consider downgrading to a previous version of the SDK that uses an older API version, or use a hub
+     * in a region that supports it.
+     */
     InvalidProtocolVersion,
-    DeviceInvalidResultCount,
+
+    /**
+     * The client has requested an operation that the hub recognizes as invalid. Check the error message
+     * for more information about what is invalid.
+     */
     InvalidOperation,
+
+    /**
+     * Something in the request payload is invalid. Check the error message for more information about what is invalid.
+     */
     ArgumentInvalid,
+
+    /**
+     * Something in the payload is unexpectedly null. Check the error message for more information about what is invalid.
+     */
     ArgumentNull,
+
+    /**
+     * Returned by the service if a JSON object provided by this library cannot be parsed, for instance, if the
+     * JSON provided for updating a twin is malformed.
+     */
     IotHubFormatError,
-    DeviceStorageEntitySerializationError,
-    BlobContainerValidationError,
-    ImportWarningExistsError,
-    InvalidSchemaVersion,
+
+    /**
+     * A devices with the same Id was present multiple times in the input request for bulk device registry operations.
+     * @see <a href="https://docs.microsoft.com/rest/api/iothub/service/bulk-registry/update-registry">Bulk registry operations</a>
+     */
     DeviceDefinedMultipleTimes,
-    DeserializationError,
+
+    /**
+     * An error was encountered processing bulk registry operations.
+     */
     BulkRegistryOperationFailure,
-    CannotRegisterModuleToModule,
-    IotHubNotFound,
+
+    /**
+     * The SAS token has expired or IoT hub couldn't authenticate the authentication header, rule, or key.
+     * @see <a href="https://docs.microsoft.com/azure/iot-hub/iot-hub-troubleshoot-error-401003-iothubunauthorized">More details</a>
+     */
     IotHubUnauthorizedAccess,
-    IotHubUnauthorized,
-    IotHubSuspended,
+
+    /**
+     * Total number of messages on the hub exceeded the allocated quota. To resolve this, increase units for this hub
+     * to increase the quota.
+     * @see <a href="https://aka.ms/iothubthrottling">More details on throttling limits.</a>
+     */
     IotHubQuotaExceeded,
-    JobQuotaExceeded,
+
+    /**
+     * The underlying cause is that the number of cloud-to-device messages enqueued for the device exceeds the queue limit.
+     * To resolve this issue, you will need to make sure your device is actively completing or abandoning the currently queued
+     * messages, or you will need to purge the cloud to device message queue.
+     * @see <a href="https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-messages-c2d">More details on cloud to device messaging</a>
+     */
     DeviceMaximumQueueDepthExceeded,
-    IotHubMaxCbsTokenExceeded,
+
+    /**
+     * The operation failed because the device cannot be found by IoT hub. The device is either not registered or
+     * disabled. May be thrown by operations such as getting a device by id.
+     */
     DeviceNotFound,
-    JobNotFound,
-    PartitionNotFound,
+
+    /**
+     * The operation failed because the module cannot be found by IoT hub. The module is either not registered or
+     * disabled. May be thrown by operations such as getting a module by id.
+     */
     ModuleNotFound,
+
+    /**
+     * There's already a device with the same device Id in the IoT hub. This can be returned on by the service when adding
+     * a device to your IoT hub with an Id that is already in use.
+     */
     DeviceAlreadyExists,
+
+    /**
+     * The operation failed because it attempted to add a module to a device when that device already has a module
+     * registered to it with the same Id. This issue can be fixed by removing the existing module from the device first.
+     */
     ModuleAlreadyExistsOnDevice,
-    DeviceMessageLockLost,
+
+    /**
+     * When the message that you attempted to send is too large for IoT hub you will receive this error.
+     * @see <a href="https://aka.ms/iothubthrottling#other-limits">More details on message size limits</a>
+     */
     MessageTooLarge,
+
+    /**
+     * Too many devices were included in the bulk operation.
+     * @see <a href="https://docs.microsoft.com/rest/api/iothub/service/bulk-registry/update-registry">More details on device count limits</a>
+     */
     TooManyDevices,
-    TooManyModulesOnDevice,
+
+    /**
+     * IoT hub throttling limits have been exceeded for the requested operation.
+     * @see <a href="https://aka.ms/iothubthrottling">More details on throttling limits.</a>
+     */
     ThrottleBacklogLimitExceeded,
-    InvalidThrottleParameter,
+
+    /**
+     * IoT hub encountered a service-side issue. There can be a number of causes for a 500xxx error response.
+     * In all cases, the issue is most likely transient. IoT hub nodes can occasionally experience transient faults.
+     * When your application tries to connect to a node that is having issues, you receive this error.
+     * To mitigate 500xxx errors, issue a retry from your application.
+     */
     ServerError,
-    JobCancelled,
-    ConnectionForcefullyClosedOnNewConnection,
+
+    /**
+     * IoT hub failed to invoke the direct method because the target device was not connected at the time. To resolve
+     * this issue, you will need to make sure that your device is connected.
+     */
     DeviceNotOnline,
-    DeviceConnectionClosedRemotely,
 
     // These descriptions belong to 3 digit http response codes such as 404.
+    /**
+     * The general error for malformed service requests.
+     */
     BadFormat,
+
+    /**
+     * The general error for unauthorized service requests.
+     */
     Unauthorized,
+
+    /**
+     * The general error for forbidden service requests.
+     */
     Forbidden,
+
+    /**
+     * The general error for service requests that failed because a resource could not be found.
+     */
     NotFound,
+
+    /**
+     * The general error for service requests that failed because the resource already exists.
+     */
     Conflict,
 
     /**
@@ -59,19 +160,26 @@ public enum ErrorCodeDescription
      */
     PreconditionFailed,
 
+    /**
+     * The general error for service requests that failed because a service request contained a resource that was larger
+     * than the service allows.
+     */
     RequestEntityTooLarge,
 
     /**
      * Represents status code for 429 and 429001
      */
     ThrottlingException,
+
+    /**
+     * The general error for service requests that failed because the service encountered an error.
+     */
     InternalServerError,
 
     /**
      * Defined for status code 503 and 503001
      */
     ServiceUnavailable;
-
 
     /**
      * Get the ErrorCodeDescription tied to the provided errorCode
@@ -84,8 +192,6 @@ public enum ErrorCodeDescription
         {
             case(400001):
                 return InvalidProtocolVersion;
-            case(400002):
-                return DeviceInvalidResultCount;
             case(400003):
                 return InvalidOperation;
             case(400004):
@@ -94,52 +200,22 @@ public enum ErrorCodeDescription
                 return ArgumentNull;
             case(400006):
                 return IotHubFormatError;
-            case(400007):
-                return DeviceStorageEntitySerializationError;
-            case(400008):
-                return BlobContainerValidationError;
-            case(400009):
-                return ImportWarningExistsError;
-            case(400010):
-                return InvalidSchemaVersion;
             case(400011):
                 return DeviceDefinedMultipleTimes;
-            case(400012):
-                return DeserializationError;
             case(400013):
                 return BulkRegistryOperationFailure;
-            case (400027):
-                return ConnectionForcefullyClosedOnNewConnection;
-            case(400301):
-                return CannotRegisterModuleToModule;
-            case(401001):
-                return IotHubNotFound;
             case(401002):
                 return IotHubUnauthorizedAccess;
-            case(401003):
-                return IotHubUnauthorized;
-            case(403001):
-                return IotHubSuspended;
             case(403002):
                 return IotHubQuotaExceeded;
-            case(403003):
-                return JobQuotaExceeded;
             case(403004):
                 return DeviceMaximumQueueDepthExceeded;
-            case(403005):
-                return IotHubMaxCbsTokenExceeded;
             case(404001):
                 return DeviceNotFound;
-            case(404002):
-                return JobNotFound;
-            case(404003):
-                return PartitionNotFound;
             case(404010):
                 return ModuleNotFound;
             case (404103):
                 return DeviceNotOnline;
-            case (404104):
-                return DeviceConnectionClosedRemotely;
             case(409001):
                 return DeviceAlreadyExists;
             case(409301):
@@ -147,26 +223,19 @@ public enum ErrorCodeDescription
             case(412001):
             case (412):
                 return PreconditionFailed;
-            case(412002):
-                return DeviceMessageLockLost;
             case(413001):
                 return MessageTooLarge;
             case(413002):
                 return TooManyDevices;
-            case(413003):
-                return TooManyModulesOnDevice;
             case(429001):
             case (429):
                 return ThrottlingException;
             case(429002):
                 return ThrottleBacklogLimitExceeded;
-            case(429003):
-                return InvalidThrottleParameter;
             case(500001):
                 return ServerError;
-            case(500002):
-                return JobCancelled;
             case(503001):
+                // intended fall through
             case (503):
                 return ServiceUnavailable;
             case (400):
