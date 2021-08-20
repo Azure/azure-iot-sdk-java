@@ -25,8 +25,8 @@ import java.util.Map;
  */
 public class HttpsTransportManager implements IotHubTransportManager
 {
-    DeviceClientConfig config;
-    HttpsIotHubConnection httpsIotHubConnection;
+    private DeviceClientConfig config;
+    private HttpsIotHubConnection httpsIotHubConnection;
 
     private static final String MODULE_ID = "x-ms-edge-moduleId";
     private final static String ModuleMethodUriFormat = "/twins/%s/modules/%s/methods";

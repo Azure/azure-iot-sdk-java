@@ -3,19 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.ClientOptions;
-import com.microsoft.azure.sdk.iot.device.DeviceClientType;
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
-import com.microsoft.azure.sdk.iot.device.DeviceIO;
-import com.microsoft.azure.sdk.iot.device.InternalClient;
-import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
-import com.microsoft.azure.sdk.iot.device.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.device.ProductInfo;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
-import com.microsoft.azure.sdk.iot.device.FileUpload;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import mockit.Deencapsulation;
 import mockit.Expectations;

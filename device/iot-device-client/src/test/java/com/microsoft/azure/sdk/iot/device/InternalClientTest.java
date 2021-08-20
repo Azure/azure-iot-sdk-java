@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
@@ -16,7 +15,6 @@ import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProv
 import mockit.*;
 import org.junit.Test;
 
-import java.io.IOError;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -2428,7 +2426,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockConfig.setProxy(mockProxySettings);
+                mockConfig.setProxySettings(mockProxySettings);
             }
         };
     }

@@ -365,22 +365,6 @@ public class ExportImportDeviceParserTest
         assertEquals(expectedId, parser.getId());
     }
 
-    //Tests_SRS_EXPORTIMPORTDEVICE_PARSER_34_007: [If the provided id is null, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void idSetterCannotTakeNullArgument()
-    {
-        //act
-        new ExportImportDeviceParser().setId(null);
-    }
-
-    //Tests_SRS_EXPORTIMPORTDEVICE_PARSER_34_006: [If the provided authentication is null, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void authenticationSetterCannotTakeNullArgument()
-    {
-        //act
-        new ExportImportDeviceParser().setAuthentication(null);
-    }
-
     //Tests_SRS_EXPORTIMPORTDEVICE_PARSER_34_009: [If the provided json is missing the Authentication field, or its value is empty, an IllegalArgumentException shall be thrown.]
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsForMissingAuthentication()

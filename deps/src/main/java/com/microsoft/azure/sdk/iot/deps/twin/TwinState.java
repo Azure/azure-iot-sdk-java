@@ -10,6 +10,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.deps.util.Tools;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -119,14 +121,20 @@ public class TwinState extends RegisterManager
     private static final String CONFIGURATION_TAG = "configurations";
     @Expose(serialize = false)
     @SerializedName(CONFIGURATION_TAG)
+    @Getter
+    @Setter
     private Map<String, ConfigurationInfo> configurations;
 
     private static final String DEVICE_SCOPE = "deviceScope";
     @SerializedName(DEVICE_SCOPE)
+    @Getter
+    @Setter
     private String deviceScope;
 
     private static final String PARENT_SCOPES = "parentScopes";
     @SerializedName(PARENT_SCOPES)
+    @Getter
+    @Setter
     private final List<String> parentScopes = new ArrayList<>();
 
     /**
@@ -242,30 +250,6 @@ public class TwinState extends RegisterManager
         }
         return this.properties.getReported();
     }
-
-    /**
-     * Getter for the configurations
-     *
-     * @return The configurations. It can be {@code null}.
-     */
-    public Map<String, ConfigurationInfo> getConfigurations()
-    {
-        return configurations;
-    }
-
-    /**
-     * Gets the device scope.
-     *
-     * @return The device scope.
-     */
-    public String getDeviceScope() { return this.deviceScope; }
-
-    /**
-     * Gets the parent scopes.
-     *
-     * @return The parent scopes.
-     */
-    public List<String> getParentScopes() { return this.parentScopes; }
 
     /**
      * Creates a pretty print JSON with the content of this class and subclasses.
@@ -408,11 +392,6 @@ public class TwinState extends RegisterManager
      */
     public String getConnectionState()
     {
-        if (this.connectionState == null)
-        {
-            return null;
-        }
-
         return this.connectionState.toString();
     }
 

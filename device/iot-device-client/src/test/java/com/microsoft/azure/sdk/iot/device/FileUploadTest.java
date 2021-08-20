@@ -1,10 +1,8 @@
-package tests.unit.com.microsoft.azure.sdk.iot.device;
+package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
-import com.microsoft.azure.sdk.iot.device.FileUpload;
-import com.microsoft.azure.sdk.iot.device.ResponseMessage;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
@@ -14,8 +12,6 @@ import mockit.Mocked;
 import org.junit.Test;
 
 import java.io.IOException;
-
-import static junit.framework.TestCase.assertEquals;
 
 public class FileUploadTest
 {

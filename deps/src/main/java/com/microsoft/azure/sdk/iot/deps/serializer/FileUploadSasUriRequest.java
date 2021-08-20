@@ -7,6 +7,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * The request parameters when getting a file upload sas uri from IoT Hub.
@@ -16,6 +18,8 @@ public class FileUploadSasUriRequest
     private static final String BLOB_NAME_TAG = "blobName";
     @Expose
     @SerializedName(BLOB_NAME_TAG)
+    @Getter
+    @Setter
     private String blobName;
 
     /**
@@ -28,23 +32,7 @@ public class FileUploadSasUriRequest
     {
         this.blobName = blobName;
     }
-
-    /**
-     * @return the blob name that will be created in Azure Storage to upload to.
-     */
-    public String getBlobName()
-    {
-        return blobName;
-    }
-
-    /**
-     * Set the blob name that will be created in Azure Storage to upload to.
-     */
-    public void setBlobName(String blobName)
-    {
-        this.blobName = blobName;
-    }
-
+    
     /**
      * Convert this class to json.
      *

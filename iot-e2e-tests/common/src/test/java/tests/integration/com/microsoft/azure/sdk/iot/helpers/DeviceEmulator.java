@@ -89,8 +89,8 @@ public class DeviceEmulator
      */
     @SuppressWarnings("SameParameterValue") // DeviceEmulator will subscribe to default callback in case the supplied callback is null
     void subscribeToDeviceMethod(
-            DeviceMethodCallback deviceMethodCallback, Object deviceMethodCallbackContext,
-            IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext)
+        DeviceMethodCallback deviceMethodCallback, Object deviceMethodCallbackContext,
+        IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext)
             throws IOException, InterruptedException
     {
         if(deviceMethodCallback == null)
@@ -106,7 +106,7 @@ public class DeviceEmulator
         }
 
         client.subscribeToMethodsAsync(
-                deviceMethodCallback, deviceMethodCallbackContext,
+            deviceMethodCallback, deviceMethodCallbackContext,
                 deviceMethodStatusCallback, deviceMethodStatusCallbackContext);
 
         long startTime = System.currentTimeMillis();

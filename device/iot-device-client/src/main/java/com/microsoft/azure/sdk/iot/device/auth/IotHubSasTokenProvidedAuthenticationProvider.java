@@ -17,8 +17,8 @@ import javax.net.ssl.SSLContext;
  */
 public class IotHubSasTokenProvidedAuthenticationProvider extends IotHubSasTokenAuthenticationProvider
 {
-    SasTokenProvider sasTokenProvider;
-    char[] lastSasToken;
+    private SasTokenProvider sasTokenProvider;
+    private char[] lastSasToken;
 
     public IotHubSasTokenProvidedAuthenticationProvider(String hostName, String deviceId, String moduleId, SasTokenProvider sasTokenProvider, SSLContext sslContext) {
         super(hostName, null, deviceId, moduleId, sslContext);

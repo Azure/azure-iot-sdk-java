@@ -365,17 +365,6 @@ public class MethodParserTest
         }
     }
 
-    /* Tests_SRS_METHODPARSER_21_035: [If the operation is not `response`, the getStatus shall throws IllegalArgumentException.] */
-    @Test(expected = IllegalArgumentException.class)
-    public void getResultsFailed()
-    {
-        // Arrange
-        MethodParser methodParser = new MethodParser();
-
-        // Act
-        methodParser.getStatus();
-    }
-
     /* Tests_SRS_METHODPARSER_21_014: [The toJsonElement shall create a String with the full information in the method collection using json format, by using the toJsonElement.] */
     /* Tests_SRS_METHODPARSER_21_015: [The toJsonElement shall include name as `methodName` in the json.] */
     /* Tests_SRS_METHODPARSER_21_016: [The toJsonElement shall include responseTimeout in seconds as `responseTimeoutInSeconds` in the json.] */

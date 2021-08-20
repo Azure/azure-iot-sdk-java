@@ -7,14 +7,12 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.twin;
 
 import com.google.gson.JsonParser;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertiesCallback;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
-import com.microsoft.azure.sdk.iot.device.ModuleClient;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;

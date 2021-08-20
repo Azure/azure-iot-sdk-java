@@ -5,22 +5,30 @@ package com.microsoft.azure.sdk.iot.deps.serializer;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
+import lombok.Setter;
 
 public class AuthenticationParser
 {
     private static final String SYMMETRIC_KEY_NAME = "symmetricKey";
     @Expose
     @SerializedName(SYMMETRIC_KEY_NAME)
+    @Getter
+    @Setter
     private SymmetricKeyParser symmetricKey;
 
     private static final String X509_THUMBPRINT_NAME = "x509Thumbprint";
     @Expose
     @SerializedName(X509_THUMBPRINT_NAME)
+    @Getter
+    @Setter
     private X509ThumbprintParser thumbprint;
 
     private static final String AUTHENTICATION_TYPE_NAME = "type";
     @Expose
     @SerializedName(AUTHENTICATION_TYPE_NAME)
+    @Getter
+    @Setter
     private AuthenticationTypeParser type;
 
     public AuthenticationParser()
@@ -29,75 +37,4 @@ public class AuthenticationParser
         //do nothing
     }
 
-    /**
-     * Getter for SymmetricKey
-     *
-     * @return The value of SymmetricKey
-     */
-    public SymmetricKeyParser getSymmetricKey()
-    {
-        //Codes_SRS_AUTHENTICATION_PARSER_34_006: [This method shall return the value of this object's symmetricKey.]
-        return symmetricKey;
-    }
-
-    /**
-     * Setter for SymmetricKey
-     *
-     * @param symmetricKey the value to set SymmetricKey to
-     */
-    public void setSymmetricKey(SymmetricKeyParser symmetricKey)
-    {
-        //Codes_SRS_AUTHENTICATION_PARSER_34_007: [This method shall set the value of symmetricKey equal to the provided value.]
-        this.symmetricKey = symmetricKey;
-    }
-
-    /**
-     * Getter for Thumbprint
-     *
-     * @return The value of Thumbprint
-     */
-    public X509ThumbprintParser getThumbprint()
-    {
-        //Codes_SRS_AUTHENTICATION_PARSER_34_004: [This method shall return the value of this object's thumbprint.]
-        return thumbprint;
-    }
-
-    /**
-     * Setter for Thumbprint
-     *
-     * @param thumbprint the value to set Thumbprint to
-     */
-    public void setThumbprint(X509ThumbprintParser thumbprint)
-    {
-        //Codes_SRS_AUTHENTICATION_PARSER_34_005: [This method shall set the value of this object's thumbprint equal to the provided value.]
-        this.thumbprint = thumbprint;
-    }
-
-    /**
-     * Getter for Type
-     *
-     * @return The value of Type
-     */
-    public AuthenticationTypeParser getType()
-    {
-        //Codes_SRS_AUTHENTICATION_PARSER_34_002: [This method shall return the value of this object's authenticationTypeParser.]
-        return type;
-    }
-
-    /**
-     * Setter for Type
-     * @param type the value to set Type to
-     * @throws IllegalArgumentException if the provided type is null
-     */
-    public void setType(AuthenticationTypeParser type) throws IllegalArgumentException
-    {
-        if (type == null)
-        {
-            //Codes_SRS_AUTHENTICATION_PARSER_34_003: [If the provided type is null, an IllegalArgumentException shall be thrown.]
-            throw new IllegalArgumentException("Type may not be set to null");
-        }
-
-        //Codes_SRS_AUTHENTICATION_PARSER_34_008: [This method shall set the value of this object's authentication type equal to the provided value.]
-        this.type = type;
-    }
 }

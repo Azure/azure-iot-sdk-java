@@ -9,7 +9,6 @@ import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
 import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.exceptions.UnauthorizedException;
-import com.microsoft.azure.sdk.iot.device.transport.*;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpConnectionThrottledException;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpUnauthorizedAccessException;

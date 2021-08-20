@@ -13,6 +13,8 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -41,29 +43,39 @@ public class MethodParser
     private static final String METHOD_NAME_TAG = "methodName";
     @Expose(deserialize = false)
     @SerializedName(METHOD_NAME_TAG)
+    @Getter
+    @Setter
     private String name;
 
     /* Codes_SRS_METHODPARSER_21_016: [The toJsonElement shall include responseTimeout in seconds as `responseTimeoutInSeconds` in the json.] */
     private static final String RESPONSE_TIMEOUT_IN_SECONDS_TAG = "responseTimeoutInSeconds";
     @Expose(deserialize = false)
     @SerializedName(RESPONSE_TIMEOUT_IN_SECONDS_TAG)
+    @Getter
+    @Setter
     private Long responseTimeout;
 
     /* Codes_SRS_METHODPARSER_21_031: [The toJsonElement shall include connectTimeout in seconds as `connectTimeoutInSeconds` in the json.] */
     private static final String CONNECT_TIMEOUT_IN_SECONDS_TAG = "connectTimeoutInSeconds";
     @Expose(deserialize = false)
     @SerializedName(CONNECT_TIMEOUT_IN_SECONDS_TAG)
+    @Getter
+    @Setter
     private Long connectTimeout;
 
     /* Codes_SRS_METHODPARSER_21_024: [The class toJsonElement include status as `status` in the json.] */
     private static final String STATUS_TAG = "status";
     @Expose(serialize = false)
     @SerializedName(STATUS_TAG)
+    @Getter
+    @Setter
     private Integer status;
 
     /* Codes_SRS_METHODPARSER_21_018: [The class toJsonElement include payload as `payload` in the json.] */
     private static final String PAYLOAD_TAG = "payload";
     @SerializedName(PAYLOAD_TAG)
+    @Getter
+    @Setter
     private Object payload;
 
     /**
@@ -279,24 +291,6 @@ public class MethodParser
     }
 
     /**
-     * Return an Integer with the response status.
-     *
-     * @return An integer with the status of the response. It can be {@code null}.
-     * @throws IllegalArgumentException This exception is thrown if the operation is not type of `response`.
-     */
-    public Integer getStatus() throws IllegalArgumentException
-    {
-        /* Codes_SRS_METHODPARSER_21_035: [If the operation is not `response`, the getStatus shall throws IllegalArgumentException.] */
-        if(operation != Operation.response)
-        {
-            throw new IllegalArgumentException("No response to report status");
-        }
-
-        /* Codes_SRS_METHODPARSER_21_012: [The getStatus shall return an Integer with the status in the parsed json.] */
-        return this.status;
-    }
-
-    /**
      * Return an Object with the payload.
      *
      * @return An Object with the payload. It can be {@code null}.
@@ -491,5 +485,4 @@ public class MethodParser
             throw new IllegalArgumentException("Negative timeout");
         }
     }
-
 }

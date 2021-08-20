@@ -13,7 +13,6 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
-import com.microsoft.azure.sdk.iot.device.transport.mqtt.*;
 import mockit.*;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
