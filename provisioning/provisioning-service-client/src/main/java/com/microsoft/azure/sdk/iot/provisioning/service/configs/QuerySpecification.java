@@ -9,6 +9,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
+import lombok.Getter;
 
 /**
  * Representation of a single Device Provisioning Service query specification with a JSON serializer.
@@ -22,6 +23,7 @@ public class QuerySpecification extends Serializable
     private static final String QUERY_TAG = "query";
     @Expose
     @SerializedName(QUERY_TAG)
+    @Getter
     private String query;
 
     /**
@@ -71,17 +73,6 @@ public class QuerySpecification extends Serializable
         /* SRS_QUERY_SPECIFICATION_21_003: [The toJsonElement shall return a JsonElement with the information in this class in a JSON format.] */
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
         return gson.toJsonTree(this);
-    }
-
-    /**
-     * Getter for the query.
-     *
-     * @return The {@code String} with the information stored in the query. It cannot be {@code null}.
-     */
-    public String getQuery()
-    {
-        /* SRS_QUERY_SPECIFICATION_21_004: [The getQuery shall return a String with the stored query.] */
-        return this.query;
     }
 
     /**

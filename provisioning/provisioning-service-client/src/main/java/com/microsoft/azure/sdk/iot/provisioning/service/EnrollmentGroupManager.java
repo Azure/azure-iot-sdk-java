@@ -25,7 +25,7 @@ import java.util.Map;
  * @see <a href="https://docs.microsoft.com/en-us/azure/iot-dps/">Azure IoT Hub Device Provisioning Service</a>
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollmentgroup">Device Enrollment Group</a>
  */
-public class EnrollmentGroupManager
+class EnrollmentGroupManager
 {
     private final ContractApiHttp contractApiHttp;
     private static final String CONDITION_KEY = "If-Match";
@@ -280,11 +280,8 @@ public class EnrollmentGroupManager
             throw new IllegalArgumentException("pageSize cannot be negative.");
         }
 
-        /* SRS_ENROLLMENT_GROUP_MANAGER_21_040: [The createQuery shall create Query iterator with a Http path `enrollmentGroups`.] */
-        String targetPath = EnrollmentGroupManager.getEnrollmentGroupsPath();
-
         /* SRS_ENROLLMENT_GROUP_MANAGER_21_041: [The createQuery shall create and return a new instance of the Query iterator.] */
-        return new Query(contractApiHttp, targetPath, querySpecification, pageSize);
+        return new Query(contractApiHttp, PATH_ENROLLMENT_GROUPS, querySpecification, pageSize);
     }
 
     private static String getEnrollmentGroupPath(String enrollmentGroupId)
@@ -295,11 +292,5 @@ public class EnrollmentGroupManager
     private static String getEnrollmentGroupAttestationMechanismPath(String enrollmentGroupId)
     {
         return PATH_ENROLLMENT_GROUPS + PATH_SEPARATOR + enrollmentGroupId + PATH_SEPARATOR + ATTESTATION_MECHANISM;
-    }
-
-    @SuppressWarnings("SameReturnValue")
-    private static String getEnrollmentGroupsPath()
-    {
-        return PATH_ENROLLMENT_GROUPS;
     }
 }

@@ -468,7 +468,7 @@ public class EnrollmentGroupTest
         MockEnrollmentGroup enrollmentGroup = new MockEnrollmentGroup(json);
 
         // assert
-        assertEquals(VALID_DATE, Deencapsulation.getField(enrollmentGroup, "createdDateTimeUtcDate"));
+        assertEquals(VALID_DATE, Deencapsulation.getField(enrollmentGroup, "createdDateTimeUtc"));
     }
 
     /* Tests_SRS_ENROLLMENT_GROUP_21_007: [If the createdDateTimeUtc is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
@@ -527,7 +527,7 @@ public class EnrollmentGroupTest
         MockEnrollmentGroup enrollmentGroup = new MockEnrollmentGroup(json);
 
         // assert
-        assertEquals(VALID_DATE, Deencapsulation.getField(enrollmentGroup, "lastUpdatedDateTimeUtcDate"));
+        assertEquals(VALID_DATE, Deencapsulation.getField(enrollmentGroup, "lastUpdatedDateTimeUtc"));
     }
 
     /* Tests_SRS_ENROLLMENT_GROUP_21_008: [If the lastUpdatedDateTimeUtc is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
@@ -812,8 +812,8 @@ public class EnrollmentGroupTest
     /* Tests_SRS_ENROLLMENT_GROUP_21_020: [The getIotHubHostName shall return a String with the stored iotHubHostName.] */
     /* Tests_SRS_ENROLLMENT_GROUP_21_023: [The getInitialTwin shall return a TwinState with the stored initialTwin.] */
     /* Tests_SRS_ENROLLMENT_GROUP_21_026: [The getProvisioningStatus shall return a TwinState with the stored provisioningStatus.] */
-    /* Tests_SRS_ENROLLMENT_GROUP_21_029: [The getCreatedDateTimeUtc shall return a Date with the stored createdDateTimeUtcDate.] */
-    /* Tests_SRS_ENROLLMENT_GROUP_21_032: [The getLastUpdatedDateTimeUtc shall return a Date with the stored lastUpdatedDateTimeUtcDate.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_029: [The getCreatedDateTimeUtc shall return a Date with the stored createdDateTimeUtc.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_032: [The getLastUpdatedDateTimeUtc shall return a Date with the stored lastUpdatedDateTimeUtc.] */
     /* Tests_SRS_ENROLLMENT_GROUP_21_035: [The getEtag shall return a String with the stored etag.] */
     @Test
     public void gettersSimpleX509Enrollment() throws ProvisioningServiceClientException
@@ -867,8 +867,8 @@ public class EnrollmentGroupTest
     /* Tests_SRS_ENROLLMENT_GROUP_21_020: [The getIotHubHostName shall return a String with the stored iotHubHostName.] */
     /* Tests_SRS_ENROLLMENT_GROUP_21_023: [The getInitialTwin shall return a TwinState with the stored initialTwin.] */
     /* Tests_SRS_ENROLLMENT_GROUP_21_026: [The getProvisioningStatus shall return a TwinState with the stored provisioningStatus.] */
-    /* Tests_SRS_ENROLLMENT_GROUP_21_029: [The getCreatedDateTimeUtc shall return a Date with the stored createdDateTimeUtcDate.] */
-    /* Tests_SRS_ENROLLMENT_GROUP_21_032: [The getLastUpdatedDateTimeUtc shall return a Date with the stored lastUpdatedDateTimeUtcDate.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_029: [The getCreatedDateTimeUtc shall return a Date with the stored createdDateTimeUtc.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_032: [The getLastUpdatedDateTimeUtc shall return a Date with the stored lastUpdatedDateTimeUtc.] */
     /* Tests_SRS_ENROLLMENT_GROUP_21_035: [The getEtag shall return a String with the stored etag.] */
     @Test
     public void gettersSimpleSymmetricKeyEnrollment() throws ProvisioningServiceClientException
@@ -1170,19 +1170,6 @@ public class EnrollmentGroupTest
         assertEquals(newHostName, Deencapsulation.getField(enrollmentGroup, "iotHubHostName"));
     }
 
-    /* Tests_SRS_ENROLLMENT_GROUP_21_024: [The setInitialTwin shall throw IllegalArgumentException if the initialTwin is null.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setInitialTwinThrowsOnNull()
-    {
-        // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
-
-        // act
-        enrollmentGroup.setInitialTwin(null);
-
-        // assert
-    }
-
     /* Tests_SRS_ENROLLMENT_GROUP_21_025: [The setInitialTwin shall store the provided initialTwin.] */
     @Test
     public void setInitialTwinSucceed(@Mocked final TwinState mockedTwinState)
@@ -1196,19 +1183,6 @@ public class EnrollmentGroupTest
 
         // assert
         assertEquals(mockedTwinState, Deencapsulation.getField(enrollmentGroup, "initialTwin"));
-    }
-
-    /* Tests_SRS_ENROLLMENT_GROUP_21_027: [The setProvisioningStatus shall throw IllegalArgumentException if the provisioningStatus is null.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setProvisioningStatusThrowsOnNull()
-    {
-        // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
-
-        // act
-        enrollmentGroup.setProvisioningStatus(null);
-
-        // assert
     }
 
     /* Tests_SRS_ENROLLMENT_GROUP_21_028: [The setProvisioningStatus shall store the provided provisioningStatus.] */
@@ -1226,56 +1200,56 @@ public class EnrollmentGroupTest
         assertEquals(ProvisioningStatus.DISABLED, Deencapsulation.getField(enrollmentGroup, "provisioningStatus"));
     }
 
-    /* Tests_SRS_ENROLLMENT_GROUP_21_030: [The setCreatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_030: [The setCreatedDateTimeUtcString shall parse the provided String as a Data and Time UTC.] */
     @Test
-    public void setCreatedDateTimeUtcSucceed()
+    public void setCreatedDateTimeUtcStringSucceed()
     {
         // arrange
         EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
-        assertNull(Deencapsulation.getField(enrollmentGroup, "createdDateTimeUtcDate"));
+        assertNull(Deencapsulation.getField(enrollmentGroup, "createdDateTimeUtc"));
 
         // act
-        Deencapsulation.invoke(enrollmentGroup,"setCreatedDateTimeUtc", new Class[] {String.class}, VALID_DATE_AS_STRING);
+        Deencapsulation.invoke(enrollmentGroup,"setCreatedDateTimeUtcString", new Class[] {String.class}, VALID_DATE_AS_STRING);
 
         // assert
-        Helpers.assertDateWithError((Date)Deencapsulation.getField(enrollmentGroup, "createdDateTimeUtcDate"), VALID_DATE_AS_STRING);
+        Helpers.assertDateWithError((Date)Deencapsulation.getField(enrollmentGroup, "createdDateTimeUtc"), VALID_DATE_AS_STRING);
     }
 
-    /* Tests_SRS_ENROLLMENT_GROUP_21_031: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_031: [The setCreatedDateTimeUtcString shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
-    public void setCreatedDateTimeUtcThrowsOnNull()
+    public void setCreatedDateTimeUtcStringThrowsOnNull()
     {
         // arrange
         EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
-        Deencapsulation.invoke(enrollmentGroup,"setCreatedDateTimeUtc", new Class[] {String.class}, (String)null);
-
-        // assert
-    }
-
-    /* Tests_SRS_ENROLLMENT_GROUP_21_031: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setCreatedDateTimeUtcThrowsOnEmpty()
-    {
-        // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
-
-        // act
-        Deencapsulation.invoke(enrollmentGroup,"setCreatedDateTimeUtc", new Class[] {String.class}, (String)"");
+        Deencapsulation.invoke(enrollmentGroup,"setCreatedDateTimeUtcString", new Class[] {String.class}, (String)null);
 
         // assert
     }
 
-    /* Tests_SRS_ENROLLMENT_GROUP_21_031: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_031: [The setCreatedDateTimeUtcString shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
-    public void setCreatedDateTimeUtcThrowsOnInvalid()
+    public void setCreatedDateTimeUtcStringThrowsOnEmpty()
     {
         // arrange
         EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
-        Deencapsulation.invoke(enrollmentGroup,"setCreatedDateTimeUtc", new Class[] {String.class}, (String)"0000-00-00 00:00:00");
+        Deencapsulation.invoke(enrollmentGroup,"setCreatedDateTimeUtcString", new Class[] {String.class}, (String)"");
+
+        // assert
+    }
+
+    /* Tests_SRS_ENROLLMENT_GROUP_21_031: [The setCreatedDateTimeUtcString shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
+    @Test (expected = IllegalArgumentException.class)
+    public void setCreatedDateTimeUtcStringThrowsOnInvalid()
+    {
+        // arrange
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
+
+        // act
+        Deencapsulation.invoke(enrollmentGroup,"setCreatedDateTimeUtcString", new Class[] {String.class}, (String)"0000-00-00 00:00:00");
 
         // assert
     }
@@ -1286,13 +1260,13 @@ public class EnrollmentGroupTest
     {
         // arrange
         EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
-        assertNull(Deencapsulation.getField(enrollmentGroup, "lastUpdatedDateTimeUtcDate"));
+        assertNull(Deencapsulation.getField(enrollmentGroup, "lastUpdatedDateTimeUtc"));
 
         // act
-        Deencapsulation.invoke(enrollmentGroup,"setLastUpdatedDateTimeUtc", new Class[] {String.class}, VALID_DATE_AS_STRING);
+        Deencapsulation.invoke(enrollmentGroup,"setLastUpdatedDateTimeUtcString", new Class[] {String.class}, VALID_DATE_AS_STRING);
 
         // assert
-        Helpers.assertDateWithError((Date)Deencapsulation.getField(enrollmentGroup, "lastUpdatedDateTimeUtcDate"), VALID_DATE_AS_STRING);
+        Helpers.assertDateWithError((Date)Deencapsulation.getField(enrollmentGroup, "lastUpdatedDateTimeUtc"), VALID_DATE_AS_STRING);
     }
 
     /* Tests_SRS_ENROLLMENT_GROUP_21_034: [The setLastUpdatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
@@ -1303,7 +1277,7 @@ public class EnrollmentGroupTest
         EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
-        Deencapsulation.invoke(enrollmentGroup,"setLastUpdatedDateTimeUtc", new Class[] {String.class}, (String)null);
+        Deencapsulation.invoke(enrollmentGroup,"setLastUpdatedDateTimeUtcString", new Class[] {String.class}, (String)null);
 
         // assert
     }
@@ -1316,7 +1290,7 @@ public class EnrollmentGroupTest
         EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
-        Deencapsulation.invoke(enrollmentGroup,"setLastUpdatedDateTimeUtc", new Class[] {String.class}, (String)"");
+        Deencapsulation.invoke(enrollmentGroup,"setLastUpdatedDateTimeUtcString", new Class[] {String.class}, (String)"");
 
         // assert
     }
@@ -1329,7 +1303,7 @@ public class EnrollmentGroupTest
         EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
-        Deencapsulation.invoke(enrollmentGroup,"setLastUpdatedDateTimeUtc", new Class[] {String.class}, (String)"0000-00-00 00:00:00");
+        Deencapsulation.invoke(enrollmentGroup,"setLastUpdatedDateTimeUtcString", new Class[] {String.class}, (String)"0000-00-00 00:00:00");
 
         // assert
     }

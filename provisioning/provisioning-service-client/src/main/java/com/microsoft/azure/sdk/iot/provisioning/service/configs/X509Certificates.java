@@ -6,6 +6,7 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
+import lombok.Getter;
 
 /**
  * Representation of a single Device Provisioning Service X509 Primary and Secondary Certificate.
@@ -94,12 +95,14 @@ public class X509Certificates
     private static final String PRIMARY_TAG = "primary";
     @Expose
     @SerializedName(PRIMARY_TAG)
+    @Getter
     private X509CertificateWithInfo primary;
 
     // the secondary X509 certificate
     private static final String SECONDARY_TAG = "secondary";
     @Expose
     @SerializedName(SECONDARY_TAG)
+    @Getter
     private X509CertificateWithInfo secondary;
 
     /**
@@ -170,28 +173,6 @@ public class X509Certificates
         {
             this.secondary = new X509CertificateWithInfo(x509Certificates.secondary);
         }
-    }
-
-    /**
-     * Getter for the primary.
-     *
-     * @return the {@link X509CertificateWithInfo} with the stored primary. It cannot be {@code null}.
-     */
-    public final X509CertificateWithInfo getPrimary()
-    {
-        /* SRS_X509_CERTIFICATES_21_007: [The getPrimary shall return the stored primary.] */
-        return this.primary;
-    }
-
-    /**
-     * Getter for the secondary.
-     *
-     * @return the {@link X509CertificateWithInfo} with the stored secondary. It can be {@code null}.
-     */
-    public final X509CertificateWithInfo getSecondary()
-    {
-        /* SRS_X509_CERTIFICATES_21_008: [The getSecondary shall return the stored secondary.] */
-        return this.secondary;
     }
 
     /**
