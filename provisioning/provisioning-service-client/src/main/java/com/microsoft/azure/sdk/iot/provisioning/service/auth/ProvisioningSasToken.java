@@ -21,7 +21,7 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64String;
  */
 public final class ProvisioningSasToken
 {
-    private static final long TOKEN_VALID_SECS = 365*24*60*60;
+    private static final long TOKEN_VALID_SECONDS = 60*60; // 1 hour
     private static final long ONE_SECOND_IN_MILLISECONDS = 1000;
 
     /**
@@ -47,7 +47,7 @@ public final class ProvisioningSasToken
 
     /**
      * Constructor. Generates a SAS token that grants access to an Provisioning for
-     * the specified amount of time. (1 year specified in TOKEN_VALID_SECS)
+     * the specified amount of time. (1 year specified in TOKEN_VALID_SECONDS)
      *
      * @param provisioningConnectionString Connection string object containing the connection parameters
      * @throws IllegalArgumentException if the provided provisioning connection string is null
@@ -119,7 +119,7 @@ public final class ProvisioningSasToken
     private long buildExpiresOn()
     {
         long expiresOnDate = System.currentTimeMillis();
-        expiresOnDate += TOKEN_VALID_SECS * ONE_SECOND_IN_MILLISECONDS;
+        expiresOnDate += TOKEN_VALID_SECONDS * ONE_SECOND_IN_MILLISECONDS;
         return expiresOnDate / ONE_SECOND_IN_MILLISECONDS;
     }
 

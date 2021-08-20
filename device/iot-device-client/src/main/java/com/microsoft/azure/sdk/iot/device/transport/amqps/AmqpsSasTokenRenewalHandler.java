@@ -15,12 +15,12 @@ import org.apache.qpid.proton.reactor.Reactor;
  * and then will schedule the next timer task appropriately.
  */
 @Slf4j
-public class AmqpsSasTokenRenewalHandler extends BaseHandler implements AuthenticationMessageCallback
+class AmqpsSasTokenRenewalHandler extends BaseHandler implements AuthenticationMessageCallback
 {
     //If the sas token renewal cannot be sent, try again in this many milliseconds
     private static final int RETRY_INTERVAL_MILLISECONDS = 5000;
 
-    final AmqpsCbsSessionHandler amqpsCbsSessionHandler;
+    private final AmqpsCbsSessionHandler amqpsCbsSessionHandler;
     final AmqpsSessionHandler amqpsSessionHandler;
     private boolean isClosed;
     private AmqpsSasTokenRenewalHandler nextToAuthenticate;

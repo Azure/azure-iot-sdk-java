@@ -8,7 +8,6 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 import com.azure.core.credential.AzureSasCredential;
 import com.google.gson.JsonParser;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinConnectionState;
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
@@ -17,7 +16,6 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
-import com.microsoft.azure.sdk.iot.device.ModuleClient;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
@@ -202,7 +200,7 @@ public class DeviceTwinCommon extends IntegrationTest
     public class OnProperty implements TwinPropertyCallBack
     {
         @Override
-        public void TwinPropertyCallBack(Property property,  Object context)
+        public void TwinPropertyCallBack(Property property, Object context)
         {
             PropertyState propertyState = (PropertyState) context;
             if (property.getKey().equals(propertyState.property.getKey()))

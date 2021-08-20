@@ -31,7 +31,7 @@ public class Property
         this.property = new Pair<>(key, value);
     }
 
-    protected Property(String key, Object value, Integer version, boolean isReported, Date lastUpdated, Integer lastUpdatedVersion)
+    Property(String key, Object value, Integer version, boolean isReported, Date lastUpdated, Integer lastUpdatedVersion)
     {
         this(key, value);
 
@@ -44,7 +44,7 @@ public class Property
         this.lastUpdatedVersion = lastUpdatedVersion;
     }
 
-    protected Property(String key, Object value, Integer version, boolean isReported, Date lastUpdated, Integer lastUpdatedVersion, String lastUpdatedBy, String lastUpdatedByDigest)
+    Property(String key, Object value, Integer version, boolean isReported, Date lastUpdated, Integer lastUpdatedVersion, String lastUpdatedBy, String lastUpdatedByDigest)
     {
         this(key, value);
         

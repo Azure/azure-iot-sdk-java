@@ -142,8 +142,8 @@ public class IotHubConnectionString
         this(hostName, deviceId, sharedAccessKey, sharedAccessToken, null);
     }
 
-    public IotHubConnectionString(String hostName, String deviceId,
-                                  String sharedAccessKey, String sharedAccessToken, String gatewayHostName)
+    private IotHubConnectionString(String hostName, String deviceId,
+                                   String sharedAccessKey, String sharedAccessToken, String gatewayHostName)
             throws IllegalArgumentException, URISyntaxException
     {
         this.isUsingX509 = (sharedAccessKey == null && sharedAccessToken == null);

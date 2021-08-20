@@ -35,8 +35,8 @@ public class MultiplexingClient
     public static final long DEFAULT_SEND_PERIOD_MILLIS = 10L;
     public static final long DEFAULT_RECEIVE_PERIOD_MILLIS = 10L;
     public static final int DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD = 10;
-    static final long DEFAULT_REGISTRATION_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
-    static final long DEFAULT_UNREGISTRATION_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
+    private static final long DEFAULT_REGISTRATION_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
+    private static final long DEFAULT_UNREGISTRATION_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
     private static final String OPEN_ERROR_MESSAGE = "Failed to open the multiplexing connection";
 
     // keys are deviceIds. Helps to optimize look ups later on which device Ids are already registered.
@@ -48,8 +48,6 @@ public class MultiplexingClient
     // This lock is used to keep open/close/register/unregister operations atomic to prevent race conditions
     private final Object operationLock = new Object();
 
-    // Optional settings from MultiplexingClientOptions
-    private final SSLContext sslContext;
     private final ProxySettings proxySettings;
 
     /**
@@ -129,7 +127,8 @@ public class MultiplexingClient
             sendMessagesPerThread = DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD;
         }
 
-        this.sslContext = options != null ? options.getSslContext() : null;
+        // Optional settings from MultiplexingClientOptions
+        SSLContext sslContext = options != null ? options.getSslContext() : null;
         this.deviceIO = new DeviceIO(hostName, protocol, sslContext, proxySettings, sendPeriod, receivePeriod);
         this.deviceIO.setMaxNumberOfMessagesSentPerSendThread(sendMessagesPerThread);
     }
@@ -462,7 +461,7 @@ public class MultiplexingClient
                 DeviceClientConfig configToAdd = deviceClientToRegister.getConfig();
 
                 // Overwrite the proxy settings of the new client to match the multiplexing client settings
-                configToAdd.setProxy(this.proxySettings);
+                configToAdd.setProxySettings(this.proxySettings);
 
                 if (configToAdd.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN)
                 {

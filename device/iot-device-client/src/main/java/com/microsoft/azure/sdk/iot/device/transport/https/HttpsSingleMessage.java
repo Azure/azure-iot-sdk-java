@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /** A single HTTPS message. */
-public final class HttpsSingleMessage implements HttpsMessage
+final class HttpsSingleMessage implements HttpsMessage
 {
     private static final String HTTPS_SINGLE_MESSAGE_CONTENT_TYPE =
             "binary/octet-stream";
@@ -22,12 +22,12 @@ public final class HttpsSingleMessage implements HttpsMessage
     /**
      * The property names as they are saved in the system properties of this object
      */
-    protected static final String CORRELATION_ID_KEY = HTTPS_SYSTEM_PROPERTY_PREFIX + "correlationid";
-    protected static final String MESSAGE_ID_KEY = HTTPS_SYSTEM_PROPERTY_PREFIX + "messageid";
-    protected static final String TO_KEY = HTTPS_SYSTEM_PROPERTY_PREFIX + "to";
-    protected static final String USER_ID_KEY = HTTPS_SYSTEM_PROPERTY_PREFIX + "userid";
-    protected static final String CONTENT_ENCODING_KEY = HTTPS_SYSTEM_PROPERTY_PREFIX + "contentencoding";
-    protected static final String CONTENT_TYPE_KEY = HTTPS_SYSTEM_PROPERTY_PREFIX + "contenttype";
+    private static final String CORRELATION_ID_KEY = HTTPS_SYSTEM_PROPERTY_PREFIX + "correlationid";
+    private static final String MESSAGE_ID_KEY = HTTPS_SYSTEM_PROPERTY_PREFIX + "messageid";
+    private static final String TO_KEY = HTTPS_SYSTEM_PROPERTY_PREFIX + "to";
+    private static final String USER_ID_KEY = HTTPS_SYSTEM_PROPERTY_PREFIX + "userid";
+    private static final String CONTENT_ENCODING_KEY = HTTPS_SYSTEM_PROPERTY_PREFIX + "contentencoding";
+    private static final String CONTENT_TYPE_KEY = HTTPS_SYSTEM_PROPERTY_PREFIX + "contenttype";
 
     private byte[] body;
     @SuppressWarnings("unused") // This is never set but there might be a case we need it in the future.

@@ -17,7 +17,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 @Slf4j
-public final class FileUpload
+final class FileUpload
 {
     private static final Charset DEFAULT_IOTHUB_MESSAGE_CHARSET = StandardCharsets.UTF_8;
 
@@ -46,8 +46,7 @@ public final class FileUpload
         return new FileUploadSasUriResponse(responseMessagePayload);
     }
 
-    @SuppressWarnings("UnusedReturnValue") // Public method
-    IotHubStatusCode sendNotification(FileUploadCompletionNotification fileUploadStatusParser) throws IOException
+    void sendNotification(FileUploadCompletionNotification fileUploadStatusParser) throws IOException
     {
         IotHubTransportMessage message = new IotHubTransportMessage(fileUploadStatusParser.toJson());
         message.setIotHubMethod(HttpsMethod.POST);
@@ -55,8 +54,6 @@ public final class FileUpload
         ResponseMessage responseMessage = httpsTransportManager.sendFileUploadNotification(message);
 
         validateServiceStatusCode(responseMessage, "Failed to complete the file upload notification");
-
-        return responseMessage.getStatus();
     }
 
     private String validateServiceStatusCode(ResponseMessage responseMessage, String errorMessage) throws IOException

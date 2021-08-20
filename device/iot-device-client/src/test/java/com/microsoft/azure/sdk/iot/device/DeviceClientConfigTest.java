@@ -3,7 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.auth.*;
 import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
@@ -1110,7 +1109,7 @@ public class DeviceClientConfigTest
         DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString);
 
         //act
-        config.setProxy(mockedProxySettings);
+        config.setProxySettings(mockedProxySettings);
 
         //assert
         ProxySettings savedProxySettings = Deencapsulation.getField(config, "proxySettings");

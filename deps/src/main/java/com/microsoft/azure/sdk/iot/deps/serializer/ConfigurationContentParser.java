@@ -6,6 +6,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,11 +17,15 @@ public class ConfigurationContentParser
     private static final String MODULES_CONTENT_NAME = "modulesContent";
     @Expose(serialize = false)
     @SerializedName(MODULES_CONTENT_NAME)
+    @Getter
+    @Setter
     private Map<String, Map<String, Object>> modulesContent;
 
     private static final String DEVICE_CONTENT_NAME = "deviceContent";
     @Expose(serialize = false)
     @SerializedName(DEVICE_CONTENT_NAME)
+    @Getter
+    @Setter
     private Map<String, Object> deviceContent;
 
     private final transient static Gson gson = new Gson();
@@ -64,48 +70,6 @@ public class ConfigurationContentParser
     public String toJson()
     {
         return gson.toJson(this);
-    }
-
-    /**
-     * Getter for modulesContent
-     *
-     * @return The value of modulesContent
-     */
-    public Map<String, Map<String, Object>> getModulesContent()
-    {
-        //Codes_SRS_CONFIGURATION_METRICS_PARSER_28_005: [This method shall return the value of this object's modulesContent.]
-        return modulesContent;
-    }
-
-    /**
-     * Setter for modulesContent
-     * @param modulesContent the value to set results to
-     */
-    public void setModulesContent(Map<String, Map<String, Object>> modulesContent)
-    {
-        //Codes_SRS_CONFIGURATION_METRICS_PARSER_28_006: [This method shall set the value of results to the provided value.]
-        this.modulesContent = modulesContent;
-    }
-
-    /**
-     * Getter for deviceContent
-     *
-     * @return The value of queries
-     */
-    public Map<String, Object> getDeviceContent()
-    {
-        //Codes_SRS_CONFIGURATION_METRICS_PARSER_28_007: [This method shall return the value of this object's deviceContent.]
-        return deviceContent;
-    }
-
-    /**
-     * Setter for deviceContent
-     * @param deviceContent the value to set deviceContent to
-     */
-    public void setDeviceContent(Map<String, Object> deviceContent)
-    {
-        //Codes_SRS_CONFIGURATION_METRICS_PARSER_28_008: [This method shall set the value of queries to the provided value.]
-        this.deviceContent = deviceContent;
     }
 
     public JsonElement toJsonElement()

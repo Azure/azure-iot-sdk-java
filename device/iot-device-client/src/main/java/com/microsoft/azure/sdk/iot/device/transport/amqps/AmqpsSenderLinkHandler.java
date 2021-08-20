@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-public abstract class AmqpsSenderLinkHandler extends BaseHandler
+abstract class AmqpsSenderLinkHandler extends BaseHandler
 {
     static final String VERSION_IDENTIFIER_KEY = "com.microsoft:client-version";
     private static final String API_VERSION_KEY = "com.microsoft:api-version";

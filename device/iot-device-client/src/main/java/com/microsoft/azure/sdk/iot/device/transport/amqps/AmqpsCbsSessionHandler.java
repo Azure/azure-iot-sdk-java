@@ -23,7 +23,7 @@ import java.util.UUID;
  * should not be created.
  */
 @Slf4j
-public class AmqpsCbsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
+class AmqpsCbsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
 {
     private Session session;
     private AmqpsCbsSenderLinkHandler cbsSenderLinkHandler;

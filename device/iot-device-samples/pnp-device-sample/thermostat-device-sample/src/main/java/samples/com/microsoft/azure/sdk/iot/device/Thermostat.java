@@ -149,7 +149,7 @@ public class Thermostat {
 
         log.debug("Set handler to receive \"getMaxMinReport\" command.");
         String methodName = "getMaxMinReport";
-        deviceClient.subscribeToMethodsAsync(new GetMaxMinReportMethodCallback(), methodName, new MethodIotHubEventCallback(), methodName);
+        deviceClient.subscribeToMethodsAsync(new GetMaxMinReportDeviceMethodCallback(), methodName, new MethodIotHubEventCallback(), methodName);
 
         new Thread(new Runnable() {
             @SneakyThrows({InterruptedException.class, IOException.class})
@@ -249,7 +249,8 @@ public class Thermostat {
      * The desired property update callback, which receives the target temperature as a desired property update,
      * and updates the current temperature value over telemetry and reported property update.
      */
-    private static class TargetTemperatureUpdateCallback implements TwinPropertyCallBack {
+    private static class TargetTemperatureUpdateCallback implements TwinPropertyCallBack
+    {
 
         final String propertyName = "targetTemperature";
 
@@ -305,7 +306,8 @@ public class Thermostat {
      * The callback to handle "getMaxMinReport" command.
      * This method will returns the max, min and average temperature from the specified time to the current time.
      */
-    private static class GetMaxMinReportMethodCallback implements DeviceMethodCallback {
+    private static class GetMaxMinReportDeviceMethodCallback implements DeviceMethodCallback
+    {
         final String commandName = "getMaxMinReport";
 
         @SneakyThrows

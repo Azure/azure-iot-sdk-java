@@ -134,7 +134,7 @@ public class ModuleClient extends InternalClient
      * @param protocol The protocol that the client will connect over.
      * @param clientOptions The options that allow configuration of the module client instance during initialization.
      */
-    public ModuleClient(String hostName, String deviceId, String moduleId, SasTokenProvider sasTokenProvider, IotHubClientProtocol protocol, ClientOptions clientOptions)
+    private ModuleClient(String hostName, String deviceId, String moduleId, SasTokenProvider sasTokenProvider, IotHubClientProtocol protocol, ClientOptions clientOptions)
     {
         super(hostName, deviceId, moduleId, sasTokenProvider, protocol, clientOptions, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
         commonConstructorVerifications(protocol, this.getConfig());

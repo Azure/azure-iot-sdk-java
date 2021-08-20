@@ -1311,7 +1311,7 @@ public class IotHubTransport implements IotHubListener
         final Queue<IotHubTransportPacket> waitingPacketsQueue;
         final Object sendThreadLock;
 
-        public MessageRetryRunnable(Queue<IotHubTransportPacket> waitingPacketsQueue, IotHubTransportPacket transportPacket, Object sendThreadLock)
+        MessageRetryRunnable(Queue<IotHubTransportPacket> waitingPacketsQueue, IotHubTransportPacket transportPacket, Object sendThreadLock)
         {
             this.waitingPacketsQueue = waitingPacketsQueue;
             this.transportPacket = transportPacket;
