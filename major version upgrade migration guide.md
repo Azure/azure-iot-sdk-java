@@ -18,6 +18,7 @@ Breaking changes:
   - See [this sample](./device/iot-device-samples/file-upload-sample) for the recommended way to upload files.
 - All other deprecated APIs have also been removed.
 - The Bouncycastle and Azure Storage SDK dependencies have been removed.
+- The "com.microsoft.azure.sdk.iot.device.DeviceTwin" namespace has been changed to "com.microsoft.azure.sdk.iot.device.twin" to remove uppercase letters from it.
 
 ## IoT hub Service Client
  

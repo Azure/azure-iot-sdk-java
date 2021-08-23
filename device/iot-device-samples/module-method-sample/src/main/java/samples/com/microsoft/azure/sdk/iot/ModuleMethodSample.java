@@ -4,8 +4,8 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodCallback;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import java.util.Scanner;

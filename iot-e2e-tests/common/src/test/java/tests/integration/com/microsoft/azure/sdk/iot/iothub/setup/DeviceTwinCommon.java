@@ -8,9 +8,9 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 import com.azure.core.credential.AzureSasCredential;
 import com.google.gson.JsonParser;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinConnectionState;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.twin.Device;
+import com.microsoft.azure.sdk.iot.device.twin.Property;
+import com.microsoft.azure.sdk.iot.device.twin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.InternalClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
@@ -641,9 +641,9 @@ public class DeviceTwinCommon extends IntegrationTest
         waitAndVerifyDesiredPropertyCallback(propertyNewValuePrefix, false);
     }
 
-    protected void setConnectionStatusCallBack(final List<com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates)
+    protected void setConnectionStatusCallBack(final List<com.microsoft.azure.sdk.iot.device.twin.Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates)
     {
-        IotHubConnectionStatusChangeCallback connectionStatusUpdateCallback = (status, statusChangeReason, throwable, callbackContext) -> actualStatusUpdates.add(new com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<>(status, throwable));
+        IotHubConnectionStatusChangeCallback connectionStatusUpdateCallback = (status, statusChangeReason, throwable, callbackContext) -> actualStatusUpdates.add(new com.microsoft.azure.sdk.iot.device.twin.Pair<>(status, throwable));
 
         this.testInstance.testIdentity.getClient().setConnectionStatusChangeCallback(connectionStatusUpdateCallback, null);
     }
@@ -651,13 +651,13 @@ public class DeviceTwinCommon extends IntegrationTest
     protected void testGetDeviceTwin() throws IOException, InterruptedException, IotHubException
     {
         // arrange
-        Map<Property, com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<TwinPropertyCallBack, Object>> desiredPropertiesCB = new HashMap<>();
+        Map<Property, com.microsoft.azure.sdk.iot.device.twin.Pair<TwinPropertyCallBack, Object>> desiredPropertiesCB = new HashMap<>();
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
             PropertyState propertyState = new PropertyState();
             propertyState.property = new Property(PROPERTY_KEY + i, PROPERTY_VALUE);
             testInstance.deviceUnderTest.dCDeviceForTwin.propertyStateList[i] = propertyState;
-            desiredPropertiesCB.put(propertyState.property, new com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<>(testInstance.deviceUnderTest.dCOnProperty, propertyState));
+            desiredPropertiesCB.put(propertyState.property, new com.microsoft.azure.sdk.iot.device.twin.Pair<>(testInstance.deviceUnderTest.dCOnProperty, propertyState));
         }
         testInstance.testIdentity.getClient().subscribeToTwinDesiredPropertiesAsync(desiredPropertiesCB);
         Thread.sleep(DELAY_BETWEEN_OPERATIONS);

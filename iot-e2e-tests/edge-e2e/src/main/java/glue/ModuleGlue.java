@@ -1,10 +1,10 @@
 package glue;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodCallback;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodData;
+import com.microsoft.azure.sdk.iot.device.twin.Property;
+import com.microsoft.azure.sdk.iot.device.twin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
 import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;

@@ -1,6 +1,6 @@
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
+import com.microsoft.azure.sdk.iot.device.twin.Property;
 
 import java.util.Set;
 

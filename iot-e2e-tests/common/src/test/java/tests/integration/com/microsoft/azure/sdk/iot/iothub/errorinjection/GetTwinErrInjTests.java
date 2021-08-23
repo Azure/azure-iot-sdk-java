@@ -245,7 +245,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
     public void errorInjectionGetDeviceTwinFlow(Message errorInjectionMessage) throws Exception
     {
         // Arrange
-        List<com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates = new ArrayList<>();
+        List<com.microsoft.azure.sdk.iot.device.twin.Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates = new ArrayList<>();
         setConnectionStatusCallBack(actualStatusUpdates);
         testGetDeviceTwin();
 

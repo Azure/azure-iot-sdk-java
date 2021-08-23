@@ -2,12 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 
-package com.microsoft.azure.sdk.iot.device.DeviceTwin;
+package com.microsoft.azure.sdk.iot.device.twin;
 
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.PropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.twin.Device;
+import com.microsoft.azure.sdk.iot.device.twin.Pair;
+import com.microsoft.azure.sdk.iot.device.twin.Property;
+import com.microsoft.azure.sdk.iot.device.twin.PropertyCallBack;
 import mockit.Deencapsulation;
 import org.junit.Test;
 

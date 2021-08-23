@@ -2,9 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 
-package com.microsoft.azure.sdk.iot.device.DeviceTwin;
+package com.microsoft.azure.sdk.iot.device.twin;
 
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import mockit.Deencapsulation;

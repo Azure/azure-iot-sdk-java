@@ -540,7 +540,7 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
         String update2Prefix) throws Exception
     {
         // Arrange
-        List<com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates = new ArrayList<>();
+        List<com.microsoft.azure.sdk.iot.device.twin.Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates = new ArrayList<>();
         setConnectionStatusCallBack(actualStatusUpdates);
         subscribeToDesiredPropertiesAndVerify(1, propertyValue, updatePropertyValue, update1Prefix);
 

@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
+import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.auth.*;
 import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;

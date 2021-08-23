@@ -1,7 +1,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
+import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
 import com.microsoft.azure.sdk.iot.device.exceptions.DeviceOperationTimeoutException;

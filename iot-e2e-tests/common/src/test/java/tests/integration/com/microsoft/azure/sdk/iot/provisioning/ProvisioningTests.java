@@ -8,8 +8,8 @@ package tests.integration.com.microsoft.azure.sdk.iot.provisioning;
 
 import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.PropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.twin.Property;
+import com.microsoft.azure.sdk.iot.device.twin.PropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;

@@ -10,10 +10,10 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodData;
+import com.microsoft.azure.sdk.iot.device.twin.Pair;
+import com.microsoft.azure.sdk.iot.device.twin.Property;
+import com.microsoft.azure.sdk.iot.device.twin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    protected static class SampleDeviceMethodCallback implements com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback
+    protected static class SampleDeviceMethodCallback implements com.microsoft.azure.sdk.iot.device.twin.DeviceMethodCallback
     {
         @Override
         public DeviceMethodData call(String methodName, Object methodData, Object context)

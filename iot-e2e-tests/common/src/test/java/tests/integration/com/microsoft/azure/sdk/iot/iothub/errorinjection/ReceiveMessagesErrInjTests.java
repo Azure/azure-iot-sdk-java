@@ -7,7 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.errorinjection;
 
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
+import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;

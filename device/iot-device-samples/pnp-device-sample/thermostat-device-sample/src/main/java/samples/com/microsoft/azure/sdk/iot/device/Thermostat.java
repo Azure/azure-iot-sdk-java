@@ -6,7 +6,7 @@ package samples.com.microsoft.azure.sdk.iot.device;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
+import com.microsoft.azure.sdk.iot.device.twin.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;

@@ -13,7 +13,7 @@ import org.apache.qpid.proton.engine.Receiver;
 
 import java.util.Map;
 
-import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_UNKNOWN;
+import static com.microsoft.azure.sdk.iot.device.twin.DeviceOperations.DEVICE_OPERATION_UNKNOWN;
 
 final class AmqpsTelemetryReceiverLinkHandler extends AmqpsReceiverLinkHandler
 {

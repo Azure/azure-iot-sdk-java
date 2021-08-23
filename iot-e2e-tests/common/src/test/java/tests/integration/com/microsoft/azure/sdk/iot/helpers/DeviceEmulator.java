@@ -6,9 +6,9 @@
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
+import com.microsoft.azure.sdk.iot.device.twin.Device;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodCallback;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodData;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

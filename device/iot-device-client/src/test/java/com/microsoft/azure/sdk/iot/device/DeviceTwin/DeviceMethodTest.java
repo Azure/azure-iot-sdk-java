@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.device.DeviceTwin;
+package com.microsoft.azure.sdk.iot.device.twin;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
@@ -11,8 +11,8 @@ import mockit.NonStrictExpectations;
 import mockit.Verifications;
 import org.junit.Test;
 
-import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST;
-import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST;
+import static com.microsoft.azure.sdk.iot.device.twin.DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST;
+import static com.microsoft.azure.sdk.iot.device.twin.DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST;
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_METHODS;
 import static org.junit.Assert.*;
 
