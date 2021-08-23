@@ -7,10 +7,10 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.twin;
 
 import com.google.gson.JsonParser;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertiesCallback;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.twin.Pair;
+import com.microsoft.azure.sdk.iot.device.twin.Property;
+import com.microsoft.azure.sdk.iot.device.twin.TwinPropertiesCallback;
+import com.microsoft.azure.sdk.iot.device.twin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
@@ -188,7 +188,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
             propertyState.propertyNewVersion = -1;
             propertyState.property = new Property(PROPERTY_KEY + i, propertyValue);
             testInstance.deviceUnderTest.dCDeviceForTwin.propertyStateList[i] = propertyState;
-            desiredPropertiesCB.put(propertyState.property, new com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<>(testInstance.deviceUnderTest.dCOnProperty, propertyState));
+            desiredPropertiesCB.put(propertyState.property, new com.microsoft.azure.sdk.iot.device.twin.Pair<>(testInstance.deviceUnderTest.dCOnProperty, propertyState));
         }
 
         // act
