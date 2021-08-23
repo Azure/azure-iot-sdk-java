@@ -10,7 +10,7 @@ import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodCallback;
 import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
-import com.microsoft.azure.sdk.iot.device.twin.TwinPropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.twin.TwinPropertyCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.service.Device;
@@ -311,7 +311,7 @@ public class DigitalTwinClientTests extends IntegrationTest
         Integer newPropertyValue = 35;
 
         // Property update callback
-        TwinPropertyCallBack twinPropertyCallBack = (property, context) -> {
+        TwinPropertyCallback twinPropertyCallback = (property, context) -> {
             Set<Property> properties = new HashSet<>();
             properties.add(property);
             try {
@@ -324,11 +324,11 @@ public class DigitalTwinClientTests extends IntegrationTest
         IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) -> {};
 
         // start device twin and setup handler for property updates in device
-        deviceClient.startTwinAsync(iotHubEventCallback, null, twinPropertyCallBack, null);
-        Map<Property, Pair<TwinPropertyCallBack, Object>> desiredPropertyUpdateCallback =
+        deviceClient.startTwinAsync(iotHubEventCallback, null, twinPropertyCallback, null);
+        Map<Property, Pair<TwinPropertyCallback, Object>> desiredPropertyUpdateCallback =
                 Collections.singletonMap(
                         new Property(newProperty, null),
-                        new Pair<>(twinPropertyCallBack, null));
+                        new Pair<>(twinPropertyCallback, null));
         deviceClient.subscribeToTwinDesiredPropertiesAsync(desiredPropertyUpdateCallback);
 
         DigitalTwinUpdateRequestOptions optionsWithoutEtag = new DigitalTwinUpdateRequestOptions();

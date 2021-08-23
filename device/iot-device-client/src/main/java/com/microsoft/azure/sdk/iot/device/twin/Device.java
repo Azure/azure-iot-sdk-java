@@ -8,10 +8,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
-abstract public class Device implements PropertyCallBack<String, Object>
+abstract public class Device implements PropertyCallback<String, Object>
 {
     private final HashSet<Property> reportedProp = new HashSet<>();
-    private final HashMap<Property, Pair<PropertyCallBack<String, Object>, Object>> desiredProp = new HashMap<>();
+    private final HashMap<Property, Pair<PropertyCallback<String, Object>, Object>> desiredProp = new HashMap<>();
 
     public HashSet<Property> getReportedProp()
     {
@@ -48,19 +48,19 @@ abstract public class Device implements PropertyCallBack<String, Object>
         this.reportedProp.add(reportedProp);
     }
 
-    public HashMap<Property, Pair<PropertyCallBack<String, Object>, Object>> getDesiredProp()
+    public HashMap<Property, Pair<PropertyCallback<String, Object>, Object>> getDesiredProp()
     {
         return this.desiredProp;
     }
 
-    public void setDesiredPropertyCallback(Property desiredProp, PropertyCallBack<String, Object> desiredPropCallBack, Object desiredPropCallBackContext)
+    public void setDesiredPropertyCallback(Property desiredProp, PropertyCallback<String, Object> desiredPropCallback, Object desiredPropCallbackContext)
     {
         if (desiredProp  == null)
         {
             throw new IllegalArgumentException("desired property cannot be null");
         }
 
-        this.desiredProp.put(desiredProp, new Pair<>(desiredPropCallBack, desiredPropCallBackContext));
+        this.desiredProp.put(desiredProp, new Pair<>(desiredPropCallback, desiredPropCallbackContext));
     }
 
     public void clean()
@@ -71,7 +71,7 @@ abstract public class Device implements PropertyCallBack<String, Object>
             repProperty.remove();
         }
 
-        for (Iterator<Map.Entry<Property, Pair<PropertyCallBack<String, Object>, Object>>> desiredProperty = desiredProp.entrySet().iterator(); desiredProperty.hasNext();)
+        for (Iterator<Map.Entry<Property, Pair<PropertyCallback<String, Object>, Object>>> desiredProperty = desiredProp.entrySet().iterator(); desiredProperty.hasNext();)
         {
             desiredProperty.next();
             desiredProperty.remove();

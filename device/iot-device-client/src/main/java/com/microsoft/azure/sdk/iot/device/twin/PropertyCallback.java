@@ -8,7 +8,7 @@ package com.microsoft.azure.sdk.iot.device.twin;
  * @param <Type1> The type of the desired property key. Since the twin is a json object, the key will always be a String.
  * @param <Type2> The type of the desired property value.
  */
-public interface PropertyCallBack<Type1, Type2>
+public interface PropertyCallback<Type1, Type2>
 {
     /**
      * The callback that is triggered when there are changes in the client's twin desired properties.

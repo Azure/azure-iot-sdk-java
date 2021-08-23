@@ -8,7 +8,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.twin;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
-import com.microsoft.azure.sdk.iot.device.twin.TwinPropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.twin.TwinPropertyCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
@@ -129,10 +129,10 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         return null;
     }
 
-    private static class DeviceTwinPropertyCallback implements TwinPropertyCallBack
+    private static class DeviceTwinPropertyCallback implements TwinPropertyCallback
     {
         @Override
-        public void TwinPropertyCallBack(Property property, Object context)
+        public void TwinPropertyCallback(Property property, Object context)
         {
             DeviceTwinWithVersionTestDevice state = (DeviceTwinWithVersionTestDevice) context;
             state.receivedProperties.add(property);
@@ -161,7 +161,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         }
     }
 
-    protected static class DeviceTwinStatusCallBack implements IotHubEventCallback
+    protected static class DeviceTwinStatusCallback implements IotHubEventCallback
     {
         public void execute(IotHubStatusCode status, Object context)
         {
@@ -210,7 +210,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
     {
         testInstance.deviceTwinWithVersionTestDevice.deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, testInstance.deviceForRegistryManager), protocol);
         testInstance.deviceTwinWithVersionTestDevice.deviceClient.open();
-        testInstance.deviceTwinWithVersionTestDevice.deviceClient.startTwinAsync(new DeviceTwinStatusCallBack(), testInstance.deviceTwinWithVersionTestDevice, new DeviceTwinPropertyCallback(), testInstance.deviceTwinWithVersionTestDevice);
+        testInstance.deviceTwinWithVersionTestDevice.deviceClient.startTwinAsync(new DeviceTwinStatusCallback(), testInstance.deviceTwinWithVersionTestDevice, new DeviceTwinPropertyCallback(), testInstance.deviceTwinWithVersionTestDevice);
     }
 
     @Before
