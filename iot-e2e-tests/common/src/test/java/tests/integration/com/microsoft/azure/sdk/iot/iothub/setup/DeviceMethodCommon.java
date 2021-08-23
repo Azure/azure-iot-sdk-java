@@ -279,7 +279,7 @@ public class DeviceMethodCommon extends IntegrationTest
         }
     }
 
-    protected void setConnectionStatusCallBack(final List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates)
+    protected void setConnectionStatusCallback(final List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates)
     {
 
         IotHubConnectionStatusChangeCallback connectionStatusUpdateCallback = (status, statusChangeReason, throwable, callbackContext) -> actualStatusUpdates.add(new Pair<>(status, throwable));

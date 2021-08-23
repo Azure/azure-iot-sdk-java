@@ -141,7 +141,7 @@ public class Thermostat {
 
         log.debug("Start twin and set handler to receive \"targetTemperature\" updates.");
         deviceClient.startTwinAsync(new TwinIotHubEventCallback(), null, new TargetTemperatureUpdateCallback(), null);
-        Map<Property, Pair<TwinPropertyCallBack, Object>> desiredPropertyUpdateCallback =
+        Map<Property, Pair<TwinPropertyCallback, Object>> desiredPropertyUpdateCallback =
                 Collections.singletonMap(
                         new Property("targetTemperature", null),
                         new Pair<>(new TargetTemperatureUpdateCallback(), null));
@@ -249,14 +249,14 @@ public class Thermostat {
      * The desired property update callback, which receives the target temperature as a desired property update,
      * and updates the current temperature value over telemetry and reported property update.
      */
-    private static class TargetTemperatureUpdateCallback implements TwinPropertyCallBack
+    private static class TargetTemperatureUpdateCallback implements TwinPropertyCallback
     {
 
         final String propertyName = "targetTemperature";
 
         @SneakyThrows({InterruptedException.class, IOException.class})
         @Override
-        public void TwinPropertyCallBack(Property property, Object context) {
+        public void TwinPropertyCallback(Property property, Object context) {
             if (property.getKey().equalsIgnoreCase(propertyName)) {
                 double targetTemperature = ((Number)property.getValue()).doubleValue();
                 log.debug("Property: Received - {\"{}\": {}°C}.", propertyName, targetTemperature);

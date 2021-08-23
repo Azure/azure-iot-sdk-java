@@ -10,9 +10,9 @@ import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodCallback;
 import com.microsoft.azure.sdk.iot.device.twin.DeviceTwin;
 import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
-import com.microsoft.azure.sdk.iot.device.twin.PropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.twin.PropertyCallback;
 import com.microsoft.azure.sdk.iot.device.twin.TwinPropertiesCallback;
-import com.microsoft.azure.sdk.iot.device.twin.TwinPropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.twin.TwinPropertyCallback;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
@@ -260,7 +260,7 @@ public class InternalClient
      *
      * @throws IOException if called when client is not opened or called before starting twin.
      */
-    public void subscribeToDesiredPropertiesAsync(Map<Property, Pair<PropertyCallBack<String, Object>, Object>> onDesiredPropertyChange) throws IOException
+    public void subscribeToDesiredPropertiesAsync(Map<Property, Pair<PropertyCallback<String, Object>, Object>> onDesiredPropertyChange) throws IOException
     {
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
@@ -285,7 +285,7 @@ public class InternalClient
      *
      * @throws IOException if called when client is not opened or called before starting twin.
      */
-    public void subscribeToTwinDesiredPropertiesAsync(Map<Property, Pair<TwinPropertyCallBack, Object>> onDesiredPropertyChange) throws IOException
+    public void subscribeToTwinDesiredPropertiesAsync(Map<Property, Pair<TwinPropertyCallback, Object>> onDesiredPropertyChange) throws IOException
     {
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
@@ -567,8 +567,8 @@ public class InternalClient
      *
      * @param twinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
      * @param twinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
-     * @param genericPropertyCallBack the PropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
-     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.
+     * @param genericPropertyCallback the PropertyCallback callback for providing any changes in desired properties. Cannot be {@code null}.
+     * @param genericPropertyCallbackContext the context to be passed to the property callback. Can be {@code null}.
      * @param <Type1> The type of the desired property key. Since the twin is a json object, the key will always be a String.
      * @param <Type2> The type of the desired property value.
      *
@@ -577,7 +577,7 @@ public class InternalClient
      * @throws IOException if called when client is not opened
      */
     public <Type1, Type2> void startTwinAsync(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
-                                 PropertyCallBack<Type1, Type2> genericPropertyCallBack, Object genericPropertyCallBackContext)
+                                 PropertyCallback<Type1, Type2> genericPropertyCallback, Object genericPropertyCallbackContext)
             throws IOException, IllegalArgumentException, UnsupportedOperationException
     {
         verifyRegisteredIfMultiplexing();
@@ -588,7 +588,7 @@ public class InternalClient
             throw new IOException("Open the client connection before using it.");
         }
 
-        if (twinStatusCallback == null || genericPropertyCallBack == null)
+        if (twinStatusCallback == null || genericPropertyCallback == null)
         {
             throw new IllegalArgumentException("Callback cannot be null");
         }
@@ -599,8 +599,8 @@ public class InternalClient
                     this.config,
                     twinStatusCallback,
                     twinStatusCallbackContext,
-                    genericPropertyCallBack,
-                    genericPropertyCallBackContext);
+                    genericPropertyCallback,
+                    genericPropertyCallbackContext);
 
             twin.getDeviceTwin();
         }
@@ -627,15 +627,15 @@ public class InternalClient
      *
      * @param twinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
      * @param twinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
-     * @param genericPropertyCallBack the TwinPropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
-     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.     *
+     * @param genericPropertyCallback the TwinPropertyCallback callback for providing any changes in desired properties. Cannot be {@code null}.
+     * @param genericPropertyCallbackContext the context to be passed to the property callback. Can be {@code null}.     *
      *
      * @throws IllegalArgumentException if the callback is {@code null}
      * @throws UnsupportedOperationException if called more than once on the same device
      * @throws IOException if called when client is not opened
      */
     public void startTwinAsync(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
-                               TwinPropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext)
+                               TwinPropertyCallback genericPropertyCallback, Object genericPropertyCallbackContext)
             throws IOException, IllegalArgumentException, UnsupportedOperationException
     {
         verifyRegisteredIfMultiplexing();
@@ -646,14 +646,14 @@ public class InternalClient
             throw new IOException("Open the client connection before using it.");
         }
 
-        if (twinStatusCallback == null || genericPropertyCallBack == null)
+        if (twinStatusCallback == null || genericPropertyCallback == null)
         {
             throw new IllegalArgumentException("Callback cannot be null");
         }
         if (this.twin == null)
         {
             twin = new DeviceTwin(this.deviceIO, this.config, twinStatusCallback, twinStatusCallbackContext,
-                    genericPropertyCallBack, genericPropertyCallBackContext);
+                    genericPropertyCallback, genericPropertyCallbackContext);
             twin.getDeviceTwin();
         }
         else
@@ -679,15 +679,15 @@ public class InternalClient
      *
      * @param twinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
      * @param twinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
-     * @param genericPropertiesCallBack the TwinPropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
-     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.
+     * @param genericPropertiesCallback the TwinPropertyCallback callback for providing any changes in desired properties. Cannot be {@code null}.
+     * @param genericPropertyCallbackContext the context to be passed to the property callback. Can be {@code null}.
      *
      * @throws IllegalArgumentException if the callback is {@code null}
      * @throws UnsupportedOperationException if called more than once on the same device
      * @throws IOException if called when client is not opened
      */
     public void startTwinAsync(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
-                           TwinPropertiesCallback genericPropertiesCallBack, Object genericPropertyCallBackContext)
+                           TwinPropertiesCallback genericPropertiesCallback, Object genericPropertyCallbackContext)
             throws IOException, IllegalArgumentException, UnsupportedOperationException
     {
         verifyRegisteredIfMultiplexing();
@@ -698,7 +698,7 @@ public class InternalClient
             throw new IOException("Open the client connection before using it.");
         }
 
-        if (twinStatusCallback == null || genericPropertiesCallBack == null)
+        if (twinStatusCallback == null || genericPropertiesCallback == null)
         {
             throw new IllegalArgumentException("Callback cannot be null");
         }
@@ -710,8 +710,8 @@ public class InternalClient
                     this.config,
                     twinStatusCallback,
                     twinStatusCallbackContext,
-                    genericPropertiesCallBack,
-                    genericPropertyCallBackContext);
+                    genericPropertiesCallback,
+                    genericPropertyCallbackContext);
             twin.getDeviceTwin();
         }
         else
@@ -722,9 +722,9 @@ public class InternalClient
 
     /**
      * Get the twin for this client. This method sends a request for the twin to the service and will asynchronously
-     * provide the retrieved twin to the callback provided in {@link #startTwinAsync(IotHubEventCallback, Object, TwinPropertyCallBack, Object)}.
+     * provide the retrieved twin to the callback provided in {@link #startTwinAsync(IotHubEventCallback, Object, TwinPropertyCallback, Object)}.
      *
-     * Users must call {@link #startTwinAsync(IotHubEventCallback, Object, TwinPropertyCallBack, Object)} before using this method.
+     * Users must call {@link #startTwinAsync(IotHubEventCallback, Object, TwinPropertyCallback, Object)} before using this method.
      * @throws IOException if the iot hub cannot be reached.
      */
     public void getTwinAsync() throws IOException

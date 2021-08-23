@@ -143,21 +143,21 @@ public class DeviceEmulator
     /**
      * Enable device twin on the emulated device.
      *
-     * @param deviceTwinStatusCallBack callback to twin status. If {@code null}, use the local status callback.
-     * @param deviceTwinStatusCallbackContext context for status callback. Used only if deviceTwinStatusCallBack is not {@code null}.
+     * @param deviceTwinStatusCallback callback to twin status. If {@code null}, use the local status callback.
+     * @param deviceTwinStatusCallbackContext context for status callback. Used only if deviceTwinStatusCallback is not {@code null}.
      * @param deviceTwin is the device twin including the properties callback. If {@code null}, use the local device with standard properties.
-     * @param propertyCallBackContext context for the properties callback. Used only if deviceTwin is not {@code null}.
+     * @param propertyCallbackContext context for the properties callback. Used only if deviceTwin is not {@code null}.
      * @param mustSubscribeToDesiredProperties is a boolean to define if it should or not subscribe to the desired properties.
      * @throws IOException if failed to start the Device twin.
      */
     @SuppressWarnings("SameParameterValue") // DeviceEmulator will subscribe to default callback in case the supplied callback is null
-    void subscribeToDeviceTwin(IotHubEventCallback deviceTwinStatusCallBack, Object deviceTwinStatusCallbackContext,
-                               Device deviceTwin, Object propertyCallBackContext, boolean mustSubscribeToDesiredProperties) throws IOException
+    void subscribeToDeviceTwin(IotHubEventCallback deviceTwinStatusCallback, Object deviceTwinStatusCallbackContext,
+                               Device deviceTwin, Object propertyCallbackContext, boolean mustSubscribeToDesiredProperties) throws IOException
     {
         // If user do not provide any status callback, use the local one.
-        if(deviceTwinStatusCallBack == null)
+        if(deviceTwinStatusCallback == null)
         {
-            deviceTwinStatusCallBack = new DeviceStatusCallback();
+            deviceTwinStatusCallback = new DeviceStatusCallback();
             deviceTwinStatusCallbackContext = deviceStatus;
         }
 
@@ -165,10 +165,10 @@ public class DeviceEmulator
         if(deviceTwin == null)
         {
             deviceTwin = new DeviceTwinProperty();
-            propertyCallBackContext = twinChanges;
+            propertyCallbackContext = twinChanges;
         }
 
-        client.startTwinAsync(deviceTwinStatusCallBack, deviceTwinStatusCallbackContext, deviceTwin, propertyCallBackContext);
+        client.startTwinAsync(deviceTwinStatusCallback, deviceTwinStatusCallbackContext, deviceTwin, propertyCallbackContext);
 
         if(mustSubscribeToDesiredProperties)
         {

@@ -39,8 +39,8 @@ public class DeviceTwin
         Callbacks to respond to its user on desired property changes
      */
     @SuppressWarnings("rawtypes")
-    private final PropertyCallBack deviceTwinGenericPropertyChangeCallback;
-    private final TwinPropertyCallBack deviceTwinGenericTwinPropertyChangeCallback;
+    private final PropertyCallback deviceTwinGenericPropertyChangeCallback;
+    private final TwinPropertyCallback deviceTwinGenericTwinPropertyChangeCallback;
     private Object deviceTwinGenericPropertyChangeCallbackContext;
 
     // Callback for providing user all of a given desired property update message's contents, rather than providing
@@ -50,8 +50,8 @@ public class DeviceTwin
     /*
         Map of callbacks to call when a particular desired property changed
      */
-    private ConcurrentSkipListMap<String, Pair<PropertyCallBack<String, Object>, Object>> onDesiredPropertyChangeMap;
-    private ConcurrentSkipListMap<String, Pair<TwinPropertyCallBack, Object>> onDesiredTwinPropertyChangeMap;
+    private ConcurrentSkipListMap<String, Pair<PropertyCallback<String, Object>, Object>> onDesiredPropertyChangeMap;
+    private ConcurrentSkipListMap<String, Pair<TwinPropertyCallback, Object>> onDesiredTwinPropertyChangeMap;
 
     /*
         Callback invoked when a response to device twin operation is issued by iothub
@@ -142,7 +142,7 @@ public class DeviceTwin
                 // properties callback, then execute the callback so that they receive the full twin payload.
                 if (!desiredPropertyMap.isEmpty() && this.deviceTwinGenericTwinPropertiesChangeCallback != null)
                 {
-                    deviceTwinGenericTwinPropertiesChangeCallback.TwinPropertiesCallBack(desiredPropertyMap, deviceTwinGenericPropertyChangeCallbackContext);
+                    deviceTwinGenericTwinPropertiesChangeCallback.TwinPropertiesCallback(desiredPropertyMap, deviceTwinGenericPropertyChangeCallbackContext);
                 }
 
                 for (String propertyKey : desiredPropertyMap.keySet())
@@ -176,7 +176,7 @@ public class DeviceTwin
                     Property property = this.getReportedProperty(reportedPropertyMap, propertyKey);
                     if (deviceTwinGenericTwinPropertyChangeCallback != null)
                     {
-                        deviceTwinGenericTwinPropertyChangeCallback.TwinPropertyCallBack(property, deviceTwinGenericPropertyChangeCallbackContext);
+                        deviceTwinGenericTwinPropertyChangeCallback.TwinPropertyCallback(property, deviceTwinGenericPropertyChangeCallbackContext);
                     }
                 }
             }
@@ -253,7 +253,7 @@ public class DeviceTwin
 
     public <Type1, Type2> DeviceTwin(DeviceIO client, DeviceClientConfig config,
                       IotHubEventCallback deviceTwinCallback, Object deviceTwinCallbackContext,
-                      PropertyCallBack<Type1, Type2> genericPropertyCallback, Object genericPropertyCallbackContext)
+                      PropertyCallback<Type1, Type2> genericPropertyCallback, Object genericPropertyCallbackContext)
     {
         deviceTwinInternal(client, config, deviceTwinCallback, deviceTwinCallbackContext, genericPropertyCallbackContext);
 
@@ -264,7 +264,7 @@ public class DeviceTwin
 
     public DeviceTwin(DeviceIO client, DeviceClientConfig config,
                       IotHubEventCallback deviceTwinCallback, Object deviceTwinCallbackContext,
-                      TwinPropertyCallBack genericPropertyCallback, Object genericPropertyCallbackContext)
+                      TwinPropertyCallback genericPropertyCallback, Object genericPropertyCallbackContext)
     {
         deviceTwinInternal(client, config, deviceTwinCallback, deviceTwinCallbackContext, genericPropertyCallbackContext);
 
@@ -367,7 +367,7 @@ public class DeviceTwin
         this.deviceIO.sendEventAsync(updateReportedPropertiesRequest, reportedPropertiesCallback, callbackContext, this.config.getDeviceId());
     }
 
-    public void subscribeDesiredPropertiesNotification(Map<Property, Pair<PropertyCallBack<String, Object>, Object>> onDesiredPropertyChange)
+    public void subscribeDesiredPropertiesNotification(Map<Property, Pair<PropertyCallback<String, Object>, Object>> onDesiredPropertyChange)
     {
         if (onDesiredPropertyChangeMap == null)
         {
@@ -376,7 +376,7 @@ public class DeviceTwin
 
         if (onDesiredPropertyChange != null)
         {
-            for (Map.Entry<Property, Pair<PropertyCallBack<String, Object>, Object>> desired : onDesiredPropertyChange.entrySet())
+            for (Map.Entry<Property, Pair<PropertyCallback<String, Object>, Object>> desired : onDesiredPropertyChange.entrySet())
             {
                 onDesiredPropertyChangeMap.put(desired.getKey().getKey(), desired.getValue());
             }
@@ -385,7 +385,7 @@ public class DeviceTwin
         checkSubscription();
     }
 
-    public void subscribeDesiredPropertiesTwinPropertyNotification(Map<Property, Pair<TwinPropertyCallBack, Object>> onDesiredPropertyChange)
+    public void subscribeDesiredPropertiesTwinPropertyNotification(Map<Property, Pair<TwinPropertyCallback, Object>> onDesiredPropertyChange)
     {
         if (onDesiredTwinPropertyChangeMap == null)
         {
@@ -394,7 +394,7 @@ public class DeviceTwin
 
         if (onDesiredPropertyChange != null)
         {
-            for (Map.Entry<Property, Pair<TwinPropertyCallBack, Object>> desired : onDesiredPropertyChange.entrySet())
+            for (Map.Entry<Property, Pair<TwinPropertyCallback, Object>> desired : onDesiredPropertyChange.entrySet())
             {
                 onDesiredTwinPropertyChangeMap.put(desired.getKey().getKey(), desired.getValue());
             }
@@ -419,7 +419,7 @@ public class DeviceTwin
 
         if (onDesiredPropertyChangeMap != null && onDesiredPropertyChangeMap.containsKey(property.getKey()))
         {
-            Pair<PropertyCallBack<String, Object>, Object> callBackObjectPair = onDesiredPropertyChangeMap.get(property.getKey());
+            Pair<PropertyCallback<String, Object>, Object> callBackObjectPair = onDesiredPropertyChangeMap.get(property.getKey());
             if (callBackObjectPair != null && callBackObjectPair.getKey() != null)
             {
                 callBackObjectPair.getKey().PropertyCall(property.getKey(), property.getValue(), callBackObjectPair.getValue());
@@ -429,10 +429,10 @@ public class DeviceTwin
 
         if (onDesiredTwinPropertyChangeMap != null && onDesiredTwinPropertyChangeMap.containsKey(property.getKey()))
         {
-            Pair<TwinPropertyCallBack, Object> callBackObjectPair = onDesiredTwinPropertyChangeMap.get(property.getKey());
+            Pair<TwinPropertyCallback, Object> callBackObjectPair = onDesiredTwinPropertyChangeMap.get(property.getKey());
             if (callBackObjectPair != null && callBackObjectPair.getKey() != null)
             {
-                callBackObjectPair.getKey().TwinPropertyCallBack(property, callBackObjectPair.getValue());
+                callBackObjectPair.getKey().TwinPropertyCallback(property, callBackObjectPair.getValue());
                 reported = true;
             }
         }
@@ -454,7 +454,7 @@ public class DeviceTwin
 
         if (deviceTwinGenericTwinPropertyChangeCallback != null)
         {
-            deviceTwinGenericTwinPropertyChangeCallback.TwinPropertyCallBack(property, deviceTwinGenericPropertyChangeCallbackContext);
+            deviceTwinGenericTwinPropertyChangeCallback.TwinPropertyCallback(property, deviceTwinGenericPropertyChangeCallbackContext);
             return true;
         }
 

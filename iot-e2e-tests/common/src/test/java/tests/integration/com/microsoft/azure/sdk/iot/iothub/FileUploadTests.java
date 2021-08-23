@@ -135,7 +135,7 @@ public class FileUploadTests extends IntegrationTest
         String blobName;
         InputStream fileInputStream;
         long fileLength;
-        boolean isCallBackTriggered;
+        boolean isCallbackTriggered;
         STATUS fileUploadStatus;
         STATUS fileUploadNotificationReceived;
     }
@@ -156,7 +156,7 @@ public class FileUploadTests extends IntegrationTest
             if (context instanceof FileUploadState)
             {
                 FileUploadState fileUploadState = (FileUploadState) context;
-                fileUploadState.isCallBackTriggered = true;
+                fileUploadState.isCallbackTriggered = true;
 
                 // On failure, Don't update fileUploadStatus any further
                 if ((responseStatus == OK || responseStatus == OK_EMPTY) && fileUploadState.fileUploadStatus != FAILURE)
@@ -199,7 +199,7 @@ public class FileUploadTests extends IntegrationTest
             testInstance.fileUploadState[i].fileLength = buf.length;
             testInstance.fileUploadState[i].fileUploadStatus = SUCCESS;
             testInstance.fileUploadState[i].fileUploadNotificationReceived = FAILURE;
-            testInstance.fileUploadState[i].isCallBackTriggered = false;
+            testInstance.fileUploadState[i].isCallbackTriggered = false;
 
             testInstance.messageStates[i] = new MessageState();
             testInstance.messageStates[i].messageBody = new String(buf);
@@ -285,16 +285,16 @@ public class FileUploadTests extends IntegrationTest
 
     private void waitForFileUploadStatusCallbackTriggered(int fileUploadStateIndex, DeviceClient deviceClient) throws InterruptedException
     {
-        if (!testInstance.fileUploadState[fileUploadStateIndex].isCallBackTriggered)
+        if (!testInstance.fileUploadState[fileUploadStateIndex].isCallbackTriggered)
         {
             //wait until file upload callback is triggered
             long startTime = System.currentTimeMillis();
-            while (!testInstance.fileUploadState[fileUploadStateIndex].isCallBackTriggered)
+            while (!testInstance.fileUploadState[fileUploadStateIndex].isCallbackTriggered)
             {
                 Thread.sleep(300);
                 if (System.currentTimeMillis() - startTime > MAXIMUM_TIME_TO_WAIT_FOR_CALLBACK_MILLISECONDS)
                 {
-                    assertTrue(buildExceptionMessage("File upload callback was not triggered", deviceClient), testInstance.fileUploadState[fileUploadStateIndex].isCallBackTriggered);
+                    assertTrue(buildExceptionMessage("File upload callback was not triggered", deviceClient), testInstance.fileUploadState[fileUploadStateIndex].isCallbackTriggered);
                 }
             }
         }

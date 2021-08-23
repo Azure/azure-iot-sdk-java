@@ -39,7 +39,7 @@ public class ModuleMethodSample
         return METHOD_NOT_DEFINED;
     }
 
-    protected static class DeviceMethodStatusCallBack implements IotHubEventCallback
+    protected static class DeviceMethodStatusCallback implements IotHubEventCallback
     {
         public void execute(IotHubStatusCode status, Object context)
         {
@@ -166,7 +166,7 @@ public class ModuleMethodSample
 
             System.out.println("Opened connection to IoT Hub.");
 
-            client.subscribeToMethodsAsync(new SampleDeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
+            client.subscribeToMethodsAsync(new SampleDeviceMethodCallback(), null, new DeviceMethodStatusCallback(), null);
 
             System.out.println("Subscribed to device method");
 
