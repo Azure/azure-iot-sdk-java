@@ -24,9 +24,9 @@ public class TelemetryMessage extends Message
      */
     public byte[] getBytes()
     {
-        if (telemetry.Convention != null && telemetry.Convention.getPayloadSerializer() != null)
+        if (getTelemetry().getConvention() != null && getTelemetry().getConvention().getPayloadSerializer() != null)
         {
-            return telemetry.Convention.getObjectBytes(telemetry);
+            return getTelemetry().getConvention().getObjectBytes(getTelemetry());
         }
         return super.getBytes();
     }

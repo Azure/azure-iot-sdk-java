@@ -12,7 +12,9 @@ import com.microsoft.azure.sdk.iot.device.convention.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
@@ -60,6 +62,7 @@ public class InternalClient
     private DeviceMethod method;
 
     @Getter
+    @Setter(AccessLevel.PRIVATE)
     private PayloadConvention payloadConvention = DefaultPayloadConvention.getInstance();
 
     InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis, ClientOptions clientOptions)
@@ -73,9 +76,7 @@ public class InternalClient
             this.config.modelId = clientOptions.getModelId();
         }
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
-        if (config.getPayloadConvention() != null) {
-            payloadConvention= config.getPayloadConvention();
-        }
+        setPayloadConvetionInternal();
     }
 
     InternalClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis) throws IOException, TransportException
@@ -83,9 +84,7 @@ public class InternalClient
         this.config = new DeviceClientConfig(iotHubAuthenticationProvider);
         this.config.setProtocol(protocol);
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
-        if (config.getPayloadConvention() != null) {
-            payloadConvention= config.getPayloadConvention();
-        }
+        setPayloadConvetionInternal();
     }
 
     InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, String publicKeyCertificate, boolean isCertificatePath, String privateKey, boolean isPrivateKeyPath, long sendPeriodMillis, long receivePeriodMillis) throws URISyntaxException
@@ -99,8 +98,14 @@ public class InternalClient
 
         // Codes_SRS_INTERNALCLIENT_34_080: [This function shall save a new DeviceIO instance using the created config and the provided send/receive periods.]
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
-        if (config.getPayloadConvention() != null) {
-            payloadConvention= config.getPayloadConvention();
+        setPayloadConvetionInternal();
+    }
+
+    private void setPayloadConvetionInternal()
+    {
+        if (config.getPayloadConvention() != null)
+        {
+            setPayloadConvention(config.getPayloadConvention());
         }
     }
 
@@ -111,9 +116,7 @@ public class InternalClient
         this.config = new DeviceClientConfig(iotHubConnectionString, sslContext);
         this.config.setProtocol(protocol);
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriod);
-        if (config.getPayloadConvention() != null) {
-            payloadConvention= config.getPayloadConvention();
-        }
+        setPayloadConvetionInternal();
     }
 
     InternalClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis, ClientOptions clientOptions) throws URISyntaxException, IOException
@@ -155,9 +158,7 @@ public class InternalClient
         //Codes_SRS_INTERNALCLIENT_34_067: [The constructor shall initialize the IoT hub transport for the protocol specified, creating a instance of the deviceIO.]
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
 
-        if (config.getPayloadConvention() != null) {
-            payloadConvention= config.getPayloadConvention();
-        }
+        setPayloadConvetionInternal();
     }
 
     InternalClient(String hostName, String deviceId, String moduleId, SasTokenProvider sasTokenProvider, IotHubClientProtocol protocol, ClientOptions clientOptions, long sendPeriodMillis, long receivePeriodMillis)
@@ -181,9 +182,7 @@ public class InternalClient
 
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
 
-        if (config.getPayloadConvention() != null) {
-            payloadConvention= config.getPayloadConvention();
-        }
+        setPayloadConvetionInternal();
     }
 
     //unused
@@ -1266,9 +1265,9 @@ public class InternalClient
 
         if (telemetryMessage.getTelemetry() != null)
         {
-            telemetryMessage.getTelemetry().Convention = payloadConvention;
-            telemetryMessage.setContentEncoding(payloadConvention.getPayloadEncoder().getContentEncoding().name());
-            telemetryMessage.setContentTypeFinal(payloadConvention.getPayloadSerializer().getContentType());
+            telemetryMessage.getTelemetry().setConvention(getPayloadConvention());
+            telemetryMessage.setContentEncoding(getPayloadConvention().getPayloadEncoder().getContentEncoding().name());
+            telemetryMessage.setContentTypeFinal(getPayloadConvention().getPayloadSerializer().getContentType());
         }
 
         sendEventAsync(telemetryMessage, callback, callbackContext);
@@ -1306,7 +1305,7 @@ public class InternalClient
             throw new IllegalArgumentException("clientProperties property cannot be null");
         }
 
-        clientProperties.Convention = payloadConvention;
+        clientProperties.setConvention(getPayloadConvention());
 
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
