@@ -10,7 +10,7 @@ import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
 import com.microsoft.azure.sdk.iot.device.twin.TwinPropertiesCallback;
-import com.microsoft.azure.sdk.iot.device.twin.TwinPropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.twin.TwinPropertyCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
@@ -180,7 +180,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         // arrange
         testInstance.deviceUnderTest.sCDeviceForTwin.clearTwin();
         testInstance.deviceUnderTest.dCDeviceForTwin.getDesiredProp().clear();
-        Map<Property, Pair<TwinPropertyCallBack, Object>> desiredPropertiesCB = new HashMap<>();
+        Map<Property, Pair<TwinPropertyCallback, Object>> desiredPropertiesCB = new HashMap<>();
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
             PropertyState propertyState = new PropertyState();
@@ -327,7 +327,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         TwinCollection expectedProperties;
 
         @Override
-        public void TwinPropertiesCallBack(TwinCollection actualProperties, Object context) {
+        public void TwinPropertiesCallback(TwinCollection actualProperties, Object context) {
             Success desiredPropertiesCallbackState = (Success) context;
             desiredPropertiesCallbackState.callbackWasFired();
 
@@ -382,7 +382,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         Success desiredPropertiesCallbackState = new Success();
 
         testInstance.testIdentity.getClient().open();
-        testInstance.testIdentity.getClient().startTwinAsync(new DeviceTwinStatusCallBack(), testInstance.deviceUnderTest, twinPropertiesCallback, desiredPropertiesCallbackState);
+        testInstance.testIdentity.getClient().startTwinAsync(new DeviceTwinStatusCallback(), testInstance.deviceUnderTest, twinPropertiesCallback, desiredPropertiesCallbackState);
 
         long startTime = System.currentTimeMillis();
         while (testInstance.deviceUnderTest.deviceTwinStatus != IotHubStatusCode.OK)

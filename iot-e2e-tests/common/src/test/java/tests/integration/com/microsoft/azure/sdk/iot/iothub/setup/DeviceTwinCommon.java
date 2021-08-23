@@ -10,7 +10,7 @@ import com.google.gson.JsonParser;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinConnectionState;
 import com.microsoft.azure.sdk.iot.device.twin.Device;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
-import com.microsoft.azure.sdk.iot.device.twin.TwinPropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.twin.TwinPropertyCallback;
 import com.microsoft.azure.sdk.iot.device.InternalClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
@@ -161,7 +161,7 @@ public class DeviceTwinCommon extends IntegrationTest
     // How much to wait until a message makes it to the server, in milliseconds
     protected static final Integer SEND_TIMEOUT_MILLISECONDS = 60000;
 
-    public class DeviceTwinStatusCallBack implements IotHubEventCallback
+    public class DeviceTwinStatusCallback implements IotHubEventCallback
     {
         public void execute(IotHubStatusCode status, Object context)
         {
@@ -197,10 +197,10 @@ public class DeviceTwinCommon extends IntegrationTest
         public Integer propertyNewVersion;
     }
 
-    public class OnProperty implements TwinPropertyCallBack
+    public class OnProperty implements TwinPropertyCallback
     {
         @Override
-        public void TwinPropertyCallBack(Property property, Object context)
+        public void TwinPropertyCallback(Property property, Object context)
         {
             PropertyState propertyState = (PropertyState) context;
             if (property.getKey().equals(propertyState.property.getKey()))
@@ -326,7 +326,7 @@ public class DeviceTwinCommon extends IntegrationTest
         if (openDeviceClient)
         {
             client.open();
-            client.startTwinAsync(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
+            client.startTwinAsync(new DeviceTwinStatusCallback(), deviceState, deviceState.dCDeviceForTwin, deviceState);
         }
 
         deviceState.deviceTwinStatus = IotHubStatusCode.ERROR;
@@ -641,7 +641,7 @@ public class DeviceTwinCommon extends IntegrationTest
         waitAndVerifyDesiredPropertyCallback(propertyNewValuePrefix, false);
     }
 
-    protected void setConnectionStatusCallBack(final List<com.microsoft.azure.sdk.iot.device.twin.Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates)
+    protected void setConnectionStatusCallback(final List<com.microsoft.azure.sdk.iot.device.twin.Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates)
     {
         IotHubConnectionStatusChangeCallback connectionStatusUpdateCallback = (status, statusChangeReason, throwable, callbackContext) -> actualStatusUpdates.add(new com.microsoft.azure.sdk.iot.device.twin.Pair<>(status, throwable));
 
@@ -651,7 +651,7 @@ public class DeviceTwinCommon extends IntegrationTest
     protected void testGetDeviceTwin() throws IOException, InterruptedException, IotHubException
     {
         // arrange
-        Map<Property, com.microsoft.azure.sdk.iot.device.twin.Pair<TwinPropertyCallBack, Object>> desiredPropertiesCB = new HashMap<>();
+        Map<Property, com.microsoft.azure.sdk.iot.device.twin.Pair<TwinPropertyCallback, Object>> desiredPropertiesCB = new HashMap<>();
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
             PropertyState propertyState = new PropertyState();

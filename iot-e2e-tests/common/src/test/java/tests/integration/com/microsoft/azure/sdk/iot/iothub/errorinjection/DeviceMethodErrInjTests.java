@@ -245,7 +245,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     {
         // Arrange
         List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates = new ArrayList<>();
-        setConnectionStatusCallBack(actualStatusUpdates);
+        setConnectionStatusCallback(actualStatusUpdates);
         invokeMethodSucceed();
 
         // Act

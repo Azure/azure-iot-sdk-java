@@ -9,7 +9,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.provisioning;
 import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
-import com.microsoft.azure.sdk.iot.device.twin.PropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.twin.PropertyCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
@@ -299,7 +299,7 @@ public class ProvisioningTests extends ProvisioningCommon
         assertTwinIsCorrect(reprovisionPolicy, expectedReportedPropertyName, expectedReportedPropertyValue, !reprovisionPolicy.getUpdateHubAssignment());
     }
 
-    private static class StubTwinCallback implements IotHubEventCallback, PropertyCallBack
+    private static class StubTwinCallback implements IotHubEventCallback, PropertyCallback
     {
         private final CountDownLatch twinLock;
 

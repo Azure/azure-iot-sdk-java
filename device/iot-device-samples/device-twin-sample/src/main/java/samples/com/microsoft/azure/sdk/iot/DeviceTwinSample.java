@@ -109,7 +109,7 @@ public class DeviceTwinSample
     }
 
 
-    protected static class DeviceTwinStatusCallBack implements IotHubEventCallback
+    protected static class DeviceTwinStatusCallback implements IotHubEventCallback
     {
         @Override
         public void execute(IotHubStatusCode status, Object context)
@@ -159,12 +159,12 @@ public class DeviceTwinSample
     }
 
     /*
-     * If you don't care about version, you can use the PropertyCallBack.
+     * If you don't care about version, you can use the PropertyCallback.
      */
-    protected static class onHomeTempChange implements TwinPropertyCallBack
+    protected static class onHomeTempChange implements TwinPropertyCallback
     {
         @Override
-        public void TwinPropertyCallBack(Property property, Object context)
+        public void TwinPropertyCallback(Property property, Object context)
         {
             System.out.println(
                     "onHomeTempChange change " + property.getKey() +
@@ -173,10 +173,10 @@ public class DeviceTwinSample
         }
     }
 
-    protected static class onCameraActivity implements TwinPropertyCallBack
+    protected static class onCameraActivity implements TwinPropertyCallback
     {
         @Override
-        public void TwinPropertyCallBack(Property property, Object context)
+        public void TwinPropertyCallback(Property property, Object context)
         {
             System.out.println(
                     "onCameraActivity change " + property.getKey() +
@@ -185,10 +185,10 @@ public class DeviceTwinSample
         }
     }
 
-    protected static class onProperty implements TwinPropertyCallBack
+    protected static class onProperty implements TwinPropertyCallback
     {
         @Override
-        public void TwinPropertyCallBack(Property property, Object context)
+        public void TwinPropertyCallback(Property property, Object context)
         {
             System.out.println(
                     "onProperty callback for " + (property.getIsReported()?"reported": "desired") +
@@ -312,7 +312,7 @@ public class DeviceTwinSample
             System.out.println("Start device Twin and get remaining properties...");
             // Properties already set in the Service will shows up in the generic onProperty callback, with value and version.
             Succeed.set(false);
-            client.startTwinAsync(new DeviceTwinStatusCallBack(), null, new onProperty(), null);
+            client.startTwinAsync(new DeviceTwinStatusCallback(), null, new onProperty(), null);
             do
             {
                 Thread.sleep(1000);
@@ -321,13 +321,13 @@ public class DeviceTwinSample
 
 
             System.out.println("Subscribe to Desired properties on device Twin...");
-            Map<Property, Pair<TwinPropertyCallBack, Object>> desiredProperties = new HashMap<Property, Pair<TwinPropertyCallBack, Object>>()
+            Map<Property, Pair<TwinPropertyCallback, Object>> desiredProperties = new HashMap<Property, Pair<TwinPropertyCallback, Object>>()
             {
                 {
-                    put(new Property("HomeTemp(F)", null), new Pair<TwinPropertyCallBack, Object>(new onHomeTempChange(), null));
-                    put(new Property("LivingRoomLights", null), new Pair<TwinPropertyCallBack, Object>(new onProperty(), null));
-                    put(new Property("BedroomRoomLights", null), new Pair<TwinPropertyCallBack, Object>(new onProperty(), null));
-                    put(new Property("HomeSecurityCamera", null), new Pair<TwinPropertyCallBack, Object>(new onCameraActivity(), null));
+                    put(new Property("HomeTemp(F)", null), new Pair<TwinPropertyCallback, Object>(new onHomeTempChange(), null));
+                    put(new Property("LivingRoomLights", null), new Pair<TwinPropertyCallback, Object>(new onProperty(), null));
+                    put(new Property("BedroomRoomLights", null), new Pair<TwinPropertyCallback, Object>(new onProperty(), null));
+                    put(new Property("HomeSecurityCamera", null), new Pair<TwinPropertyCallback, Object>(new onCameraActivity(), null));
                 }
             };
             client.subscribeToTwinDesiredPropertiesAsync(desiredProperties);

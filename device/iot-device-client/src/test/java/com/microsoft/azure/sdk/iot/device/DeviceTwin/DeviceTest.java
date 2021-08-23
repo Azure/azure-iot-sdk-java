@@ -7,7 +7,7 @@ package com.microsoft.azure.sdk.iot.device.twin;
 import com.microsoft.azure.sdk.iot.device.twin.Device;
 import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
-import com.microsoft.azure.sdk.iot.device.twin.PropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.twin.PropertyCallback;
 import mockit.Deencapsulation;
 import org.junit.Test;
 
@@ -170,7 +170,7 @@ public class DeviceTest
         testDev.setDesiredPropertyCallback(test, testDev, null);
 
         //act
-        HashMap<Property, Pair<PropertyCallBack<String, Object>, Object>> testDesiredMap = testDev.getDesiredProp();
+        HashMap<Property, Pair<PropertyCallback<String, Object>, Object>> testDesiredMap = testDev.getDesiredProp();
 
         //assert
         assertNotNull(testDesiredMap);
@@ -199,7 +199,7 @@ public class DeviceTest
         testDev.setDesiredPropertyCallback(test, testDev, null);
 
         //assert
-        HashMap<Property, Pair<PropertyCallBack<String, Object>, Object>> testDesiredMap = testDev.getDesiredProp();
+        HashMap<Property, Pair<PropertyCallback<String, Object>, Object>> testDesiredMap = testDev.getDesiredProp();
         assertNotNull(testDesiredMap);
         assertEquals(testDesiredMap.get(test).getKey(), testDev);
     }
@@ -249,7 +249,7 @@ public class DeviceTest
         testDev.setDesiredPropertyCallback(test, null, null);
 
         //assert
-        HashMap<Property, Pair<PropertyCallBack<String, Object>, Object>> testDesiredMap = testDev.getDesiredProp();
+        HashMap<Property, Pair<PropertyCallback<String, Object>, Object>> testDesiredMap = testDev.getDesiredProp();
         assertNotNull(testDesiredMap);
         assertNull(testDesiredMap.get(test).getKey());
     }
@@ -274,7 +274,7 @@ public class DeviceTest
         testDev.setDesiredPropertyCallback(test, null, null);
 
         //assert
-        HashMap<Property, Pair<PropertyCallBack<String, Object>, Object>> testDesiredMap = testDev.getDesiredProp();
+        HashMap<Property, Pair<PropertyCallback<String, Object>, Object>> testDesiredMap = testDev.getDesiredProp();
         assertNotNull(testDesiredMap);
         assertNull(testDesiredMap.get(test).getKey());
 
@@ -303,7 +303,7 @@ public class DeviceTest
         testDev.clean();
 
         //assert
-        HashMap<Property, Pair<PropertyCallBack<String, Object>, Object>> testDesiredMap = testDev.getDesiredProp();
+        HashMap<Property, Pair<PropertyCallback<String, Object>, Object>> testDesiredMap = testDev.getDesiredProp();
         HashSet<Property> testRepMap = testDev.getReportedProp();
 
         assertTrue(testDesiredMap.isEmpty());
