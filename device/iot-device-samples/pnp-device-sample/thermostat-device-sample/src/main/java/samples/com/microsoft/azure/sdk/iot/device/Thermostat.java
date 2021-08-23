@@ -299,9 +299,26 @@ public class Thermostat
 
             final String propertyName = "targetTemperature";
 
+            public class IWritablePropHolder {
+                Object value;
+                private long version;
+                int code;
+                String descripton;
+                public void AckWith(int ggg);
+            }
+
+            public sealed WritPropCollection : Clien
+        {
+            Dictionary<String, IWritablePropHolder>
+
+                    internal
+        }
+
+
             @SneakyThrows({InterruptedException.class, IOException.class})
-            public void execute(ClientPropertyCollection propertyCollection, Object context)
+            public void execute(Map<String, WritablePropertyResponse> propertyCollection, Object context)
             {
+
                 // Each of these properties will be a WritablePropertyResponse we can simply copy the value over and ack each one
                 // or we can modify each property and ack the whole collection.
                 for (String key : propertyCollection.keySet())
@@ -311,6 +328,7 @@ public class Thermostat
                         ClientPropertyCollection collection = new ClientPropertyCollection();
 
                         WritablePropertyResponse targetTemperature = propertyCollection.getValue(key, WritablePropertyResponse.class);
+                        propertyCollection
                         log.debug("Property: Received - {\"{}\": {}°C}.", propertyName, targetTemperature.getValue());
 
                         targetTemperature.setAckCode(StatusCode.IN_PROGRESS.value);

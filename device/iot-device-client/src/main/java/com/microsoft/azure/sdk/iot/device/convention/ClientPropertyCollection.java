@@ -8,7 +8,6 @@ import com.microsoft.azure.sdk.iot.deps.util.Tools;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.PayloadCollection;
-import com.sun.security.ntlm.Client;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,6 +15,9 @@ import lombok.Setter;
 import javax.naming.event.ObjectChangeListener;
 import java.util.*;
 
+/**
+ *
+ */
 public class ClientPropertyCollection extends PayloadCollection
 {
     // the Twin collection version

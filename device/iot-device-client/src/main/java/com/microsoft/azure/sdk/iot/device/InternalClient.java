@@ -1264,9 +1264,9 @@ public class InternalClient
             throw new IllegalArgumentException("telemetryMessage property cannot be null");
         }
 
-        if (telemetryMessage.Telemetry != null)
+        if (telemetryMessage.getTelemetry() != null)
         {
-            telemetryMessage.Telemetry.Convention = payloadConvention;
+            telemetryMessage.getTelemetry().Convention = payloadConvention;
             telemetryMessage.setContentEncoding(payloadConvention.getPayloadEncoder().getContentEncoding().name());
             telemetryMessage.setContentTypeFinal(payloadConvention.getPayloadSerializer().getContentType());
         }
