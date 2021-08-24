@@ -10,7 +10,7 @@ import com.google.gson.annotations.SerializedName;
 
 /**
  * The request payload to send to IoT Hub to notify it when a file upload is completed, whether successful or not.
- * Must set {@link #setIsSuccess(Boolean)} and {@link #setCorrelationId(String)}, but all other fields are optional.
+ * Must set {@link #setSuccess(Boolean)} and {@link #setCorrelationId(String)}, but all other fields are optional.
  */
 public class FileUploadCompletionNotification
 {

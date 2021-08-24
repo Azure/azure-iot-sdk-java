@@ -46,28 +46,28 @@ public final class DeviceClientConfig
     private boolean useWebsocket;
 
     @Getter
-    @Setter(AccessLevel.MODULE)
+    @Setter(AccessLevel.PACKAGE)
     private ProxySettings proxySettings;
 
     @Getter
-    @Setter(AccessLevel.MODULE)
+    @Setter(AccessLevel.PACKAGE)
     String modelId;
 
     // Initialize all the timeout values here instead of the constructor as the constructor is not always called.
     @Getter
-    @Setter(AccessLevel.MODULE)
+    @Setter(AccessLevel.PACKAGE)
     private int httpsReadTimeout = DEFAULT_HTTPS_READ_TIMEOUT_MILLIS;
 
     @Getter
-    @Setter(AccessLevel.MODULE)
+    @Setter(AccessLevel.PACKAGE)
     private int httpsConnectTimeout = DEFAULT_HTTPS_CONNECT_TIMEOUT_MILLIS;
 
     @Getter
-    @Setter(AccessLevel.MODULE)
+    @Setter(AccessLevel.PACKAGE)
     private int amqpOpenAuthenticationSessionTimeout = DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT_IN_SECONDS;
 
     @Getter
-    @Setter(AccessLevel.MODULE)
+    @Setter(AccessLevel.PACKAGE)
     private int amqpOpenDeviceSessionsTimeout = DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS;
 
     private IotHubAuthenticationProvider authenticationProvider;
@@ -112,7 +112,7 @@ public final class DeviceClientConfig
 
     @NonNull
     @Getter
-    @Setter(AccessLevel.MODULE)
+    @Setter(AccessLevel.PACKAGE)
     private RetryPolicy retryPolicy = new ExponentialBackoffWithJitter();
 
     /**
