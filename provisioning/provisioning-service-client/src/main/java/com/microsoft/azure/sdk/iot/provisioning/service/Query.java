@@ -52,9 +52,9 @@ import java.util.*;
  * <p> You can also store a query context (QuerySpecification + ContinuationToken) and restart it in the future, from
  *     the point where you stopped.
  *
- * <p> Besides the Items, the queryResult contains the continuationToken, the {@link QueryResult#getContinuationToken()}
- *     shall return it. In any point in the future, you may recreate the query using the same query factories that you
- *     used for the first time, and call {@link #next(String)} providing the stored continuationToken to get the next page.
+ * <p> Besides the Items, the queryResult contains the continuationToken. In any point in the future, you may recreate
+ *     the query using the same query factories that you used for the first time, and call
+ *     {@link #next(String)} providing the stored continuationToken to get the next page.
  *
  * @see <a href="https://docs.microsoft.com/en-us/azure/iot-dps/">Azure IoT Hub Device Provisioning Service</a>
  * @see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-query-language">Query Language</a>
