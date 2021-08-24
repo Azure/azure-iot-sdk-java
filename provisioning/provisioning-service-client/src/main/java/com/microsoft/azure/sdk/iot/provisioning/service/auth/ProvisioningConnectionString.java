@@ -28,27 +28,27 @@ public class ProvisioningConnectionString extends ProvisioningConnectionStringBu
 
     // Included in the device connection string
     @Getter
-    @Setter(AccessLevel.MODULE)
+    @Setter(AccessLevel.PACKAGE)
     String hostName;
 
     @Getter
-    @Setter(AccessLevel.MODULE)
+    @Setter(AccessLevel.PACKAGE)
     String deviceProvisioningServiceName;
 
     @Getter
-    @Setter(AccessLevel.MODULE)
+    @Setter(AccessLevel.PACKAGE)
     AuthenticationMethod authenticationMethod;
 
     @Getter
-    @Setter(AccessLevel.MODULE)
+    @Setter(AccessLevel.PACKAGE)
     String sharedAccessKeyName;
 
     @Getter
-    @Setter(AccessLevel.MODULE)
+    @Setter(AccessLevel.PACKAGE)
     String sharedAccessKey;
 
     @Getter
-    @Setter(AccessLevel.MODULE)
+    @Setter(AccessLevel.PACKAGE)
     String sharedAccessSignature;
 
     /**
