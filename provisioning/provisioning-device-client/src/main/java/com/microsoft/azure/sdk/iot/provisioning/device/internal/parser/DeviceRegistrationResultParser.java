@@ -73,7 +73,7 @@ public class DeviceRegistrationResultParser
     @Getter
     private X509RegistrationResultParser x509;
 
-    private static final String PAYLOAD = "provisioningPayload";
+    private static final String PAYLOAD = "payload";
     @SerializedName(PAYLOAD)
     @Getter
     private JsonObject jsonPayload;
