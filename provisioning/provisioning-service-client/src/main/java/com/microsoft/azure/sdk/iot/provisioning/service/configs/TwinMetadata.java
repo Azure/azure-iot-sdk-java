@@ -7,6 +7,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
+import lombok.Getter;
 
 import java.util.Date;
 import java.util.Map;
@@ -50,10 +51,14 @@ public class TwinMetadata
 {
     // the entity last updated date and time in the TwinCollection
     static final String LAST_UPDATE_TAG = "$lastUpdated";
+
+    @Getter
     private Date lastUpdated;
 
     // the entity last updated version in the TwinCollection
     static final String LAST_UPDATE_VERSION_TAG = "$lastUpdatedVersion";
+
+    @Getter
     private final Integer lastUpdatedVersion;
 
     /**
@@ -150,28 +155,6 @@ public class TwinMetadata
             return new TwinMetadata(lastUpdated, lastUpdatedVersion);
         }
         return null;
-    }
-
-    /**
-     * Getter for the lastUpdatedVersion.
-     *
-     * @return the {@code Integer} with the stored lastUpdatedVersion. It can be {@code null}.
-     */
-    public Integer getLastUpdatedVersion()
-    {
-        /* SRS_TWIN_METADATA_21_007: [The getLastUpdatedVersion shall return the stored lastUpdatedVersion.] */
-        return this.lastUpdatedVersion;
-    }
-
-    /**
-     * Getter for the lastUpdated.
-     *
-     * @return the {@code Date} with the stored lastUpdated. It can be {@code null}.
-     */
-    public Date getLastUpdated()
-    {
-        /* SRS_TWIN_METADATA_21_008: [The getLastUpdated shall return the stored lastUpdated.] */
-        return this.lastUpdated;
     }
 
     /**

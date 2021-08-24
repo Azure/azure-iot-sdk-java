@@ -6,7 +6,7 @@ package com.microsoft.azure.sdk.iot.provisioning.service.contract;
 /**
  * Contains the SDK name and version information.
  */
-public class SDKUtils
+class SDKUtils
 {
     private static final String SERVICE_API_VERSION = "2019-03-31";
     private static final String PROVISIONING_SERVICE_CLIENT = "com.microsoft.azure.sdk.iot.provisioning.service.provisioning-service-client/";
@@ -21,7 +21,7 @@ public class SDKUtils
      *
      * @return A {@code String} with the rest API version.
      */
-    public static String getServiceApiVersion()
+    static String getServiceApiVersion()
     {
         /* SRS_SDK_UTILS_21_001: [The getServiceApiVersion shall return a string with the rest API version.] */
         return SERVICE_API_VERSION;
@@ -32,7 +32,7 @@ public class SDKUtils
      *
      * @return A {@code String} with the SDK package name and version
      */
-    public static String getUserAgentString()
+    static String getUserAgentString()
     {
         /* SRS_SDK_UTILS_21_002: [The getUserAgentString shall return a string with the SDK name and version separated by `/`.] */
         return PROVISIONING_SERVICE_CLIENT + PROVISIONING_SERVICE_CLIENT_VERSION + " (" + JAVA_RUNTIME + "; " + OPERATING_SYSTEM +"; " + PROCESSOR_ARCHITECTURE + ")";

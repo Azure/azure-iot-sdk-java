@@ -7,6 +7,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
 
 /**
  * Representation of a single Twin Properties for the Device Provisioning Service.
@@ -61,6 +62,7 @@ public class TwinProperties
     private static final String DESIRED_PROPERTIES_TAG = "desired";
     @Expose
     @SerializedName(DESIRED_PROPERTIES_TAG)
+    @Getter
     private TwinCollection desired;
 
     /**
@@ -151,17 +153,6 @@ public class TwinProperties
         }
 
         return twinJson;
-    }
-
-    /**
-     * Getter for the desired property.
-     *
-     * @return The {@code TwinCollection} with the desired property content. It can be {@code null}.
-     */
-    public TwinCollection getDesired()
-    {
-        /* SRS_TWIN_PROPERTIES_21_007: [The getDesired shall return a TwinCollection with the stored desired property.] */
-        return this.desired;
     }
 
     /**

@@ -7,6 +7,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
 
 /**
  * Representation of a single Twin initial state for the Device Provisioning Service.
@@ -78,6 +79,7 @@ public class TwinState
     private static final String TAGS_TAG = "tags";
     @Expose
     @SerializedName(TAGS_TAG)
+    @Getter
     private TwinCollection tags;
 
     // the twin desired properties
@@ -161,17 +163,6 @@ public class TwinState
         }
 
         return twinJson;
-    }
-
-    /**
-     * Getter for the tags.
-     *
-     * @return The {@code TwinCollection} with the tags content. It can be {@code null}.
-     */
-    public TwinCollection getTags()
-    {
-        /* SRS_TWIN_STATE_21_005: [The getTags shall return a TwinCollection with the stored tags.] */
-        return this.tags;
     }
 
     /**
