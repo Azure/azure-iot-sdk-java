@@ -15,9 +15,6 @@ import lombok.Getter;
  *     just cast the items. In case of <b>unknown</b> type, the items will contain a list of {@code Strings}
  *     and you shall parse it by your own.
  *
- * <p> The provisioning service query result is composed by 2 system properties and a body. This class exposes
- *     it with 3 getters, {@link #getType()}, {@link #getContinuationToken()}, and {@link #getItems()}.
- *
  * <p> The system properties are:
  * <dl>
  *     <dt><b>type:</b>
