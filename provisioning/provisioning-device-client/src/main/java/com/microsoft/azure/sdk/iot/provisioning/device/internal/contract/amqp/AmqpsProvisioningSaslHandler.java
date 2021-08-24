@@ -15,7 +15,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseDat
 /**
  * Implementation of a SaslHandler that is designed to handle Sasl negotiation using TPM authentication against the Device Provisioning Service
  */
-public class AmqpsProvisioningSaslHandler implements SaslHandler
+class AmqpsProvisioningSaslHandler implements SaslHandler
 {
     private final static String TPM_MECHANISM = "TPM";
     private final static byte NULL_BYTE = (byte) '\0';

@@ -6,13 +6,12 @@
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp;
 
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.SaslHandler;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceSecurityException;
 
 /**
  * Implementation of a SaslHandler that is designed to handle Sasl negotiation using TPM authentication against the Device Provisioning Service
  */
-public class AmqpsProvisioningSymmetricKeySaslHandler implements SaslHandler
+class AmqpsProvisioningSymmetricKeySaslHandler implements SaslHandler
 {
     private final static String PLAIN_MECHANISM = "PLAIN";
     private final static String USERNAME_FORMAT = "%s/registrations/%s";

@@ -7,25 +7,15 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class AdditionalData
 {
-    private String payload;
-
     /**
-     * Set the Custom Provisioning payload to send to DPS during the registration process
-     * @param jsonPayload The json payload that will be transferred to DPS
+     * The custom provisioning provisioningPayload to send to DPS during the registration process.
      */
-    public void setProvisioningPayload(String jsonPayload)
-    {
-        this.payload = jsonPayload;
-    }
-
-    /**
-     * Gets the Custom Provisioning payload that was set for the provisioning payload
-     * @return Returns payload data for provisioning. Can be {@code null} when no data is set.
-     */
-    public String getProvisioningPayload()
-    {
-        return this.payload;
-    }
+    @Getter
+    @Setter
+    private String provisioningPayload;
 }
