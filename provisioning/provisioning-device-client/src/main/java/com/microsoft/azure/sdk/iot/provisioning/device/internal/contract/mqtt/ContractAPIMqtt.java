@@ -64,7 +64,7 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
             throw new ProvisioningDeviceClientException("The hostName cannot be null or empty.");
         }
 
-        this.useWebSockets = provisioningDeviceClientConfig.getUseWebSockets();
+        this.useWebSockets = provisioningDeviceClientConfig.isUsingWebSocket();
         this.hostname = hostName;
         this.idScope = idScope;
         this.packetId = 1;
