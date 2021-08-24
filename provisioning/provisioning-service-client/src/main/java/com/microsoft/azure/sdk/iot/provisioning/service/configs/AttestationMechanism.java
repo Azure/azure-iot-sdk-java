@@ -9,6 +9,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
+import lombok.Getter;
 
 /**
  * Representation of a single Device Provisioning Service Attestation mechanism in the IndividualEnrollment and EnrollmentGroup.
@@ -24,6 +25,7 @@ public final class AttestationMechanism
     private static final String ATTESTATION_TYPE_TAG = "type";
     @Expose
     @SerializedName(ATTESTATION_TYPE_TAG)
+    @Getter
     private final AttestationMechanismType type;
 
     // This is the TpmAttestation that contains the TPM keys. It is valid on AttestationMechanismType.TPM.
@@ -114,17 +116,6 @@ public final class AttestationMechanism
         this.tpm = result.tpm;
         this.type = result.type;
         this.x509 = result.x509;
-    }
-
-    /**
-     * Getter for the type.
-     *
-     * @return the {@link AttestationMechanismType} that contains the stored type. It cannot be {@code null}.
-     */
-    public AttestationMechanismType getType()
-    {
-        /* SRS_ATTESTATION_MECHANISM_21_009: [The getType shall return a AttestationMechanismType with the stored mechanism type.] */
-        return this.type;
     }
 
     /**

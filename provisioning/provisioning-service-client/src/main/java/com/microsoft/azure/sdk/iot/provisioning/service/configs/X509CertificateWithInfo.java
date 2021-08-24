@@ -6,6 +6,7 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
+import lombok.Getter;
 
 /**
  * Representation of a single Device Provisioning Service X509 Certificate with its info.
@@ -65,12 +66,14 @@ public class X509CertificateWithInfo
     private static final String CERTIFICATE_TAG = "certificate";
     @Expose
     @SerializedName(CERTIFICATE_TAG)
+    @Getter
     private String certificate;
 
     // the X509 certificate info
     private static final String CERTIFICATE_INFO_TAG = "info";
     @Expose
     @SerializedName(CERTIFICATE_INFO_TAG)
+    @Getter
     private X509CertificateInfo info;
 
     /**
@@ -136,28 +139,6 @@ public class X509CertificateWithInfo
         {
             this.info = new X509CertificateInfo(x509CertificateWithInfo.info);
         }
-    }
-
-    /**
-     * Getter for the certificate.
-     *
-     * @return the {@code String} with the stored certificate. It can be {@code null}.
-     */
-    public String getCertificate()
-    {
-        /* SRS_X509_CERTIFICATE_WITH_INFO_21_006: [The getCertificate shall return the stored certificate.] */
-        return this.certificate;
-    }
-
-    /**
-     * Getter for the info.
-     *
-     * @return the {@code String} with the stored info. It can be {@code null}.
-     */
-    public X509CertificateInfo getInfo()
-    {
-        /* SRS_X509_CERTIFICATE_WITH_INFO_21_007: [The getInfo shall return the stored info.] */
-        return this.info;
     }
 
     /**

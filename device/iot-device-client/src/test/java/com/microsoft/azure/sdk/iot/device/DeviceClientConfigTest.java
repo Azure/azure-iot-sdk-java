@@ -917,7 +917,7 @@ public class DeviceClientConfigTest
     }
 
     //Tests_SRS_DEVICECLIENTCONFIG_28_002: [This function shall throw IllegalArgumentException retryPolicy is null.]
-    @Test (expected = IllegalArgumentException.class)
+    @Test (expected = NullPointerException.class)
     public void setRetryPolicyThrowsIfNull()
     {
         //arrange

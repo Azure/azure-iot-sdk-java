@@ -7,6 +7,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
+import lombok.Getter;
 
 import java.util.Collection;
 
@@ -37,52 +38,37 @@ public class BulkEnrollmentOperationError
     private static final String REGISTRATION_ID_TAG = "registrationId";
     @Expose
     @SerializedName(REGISTRATION_ID_TAG)
+    /**
+     * Getter for the error registrationId.
+     *
+     * @return The {@code String} with the registrationId content. It cannot be {@code null}.
+     */
+    @Getter
     private String registrationId;
 
     // the error code
     private static final String ERROR_CODE_TAG = "errorCode";
     @Expose
     @SerializedName(ERROR_CODE_TAG)
+    /**
+     * Getter for the error code.
+     *
+     * @return The {@code Integer} with the errorCode content. It cannot be {@code null}.
+     */
+     @Getter
     private Integer errorCode;
 
     // the error status
     private static final String ERROR_STATUS_TAG = "errorStatus";
     @Expose
     @SerializedName(ERROR_STATUS_TAG)
-    private String errorStatus;
-
-    /**
-     * Getter for the error registrationId.
-     *
-     * @return The {@code String} with the registrationId content. It cannot be {@code null}.
-     */
-    public String getRegistrationId()
-    {
-        /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_001: [The getRegistrationId shall return the stored registrationId.] */
-        return this.registrationId;
-    }
-
-    /**
-     * Getter for the error code.
-     *
-     * @return The {@code Integer} with the errorCode content. It cannot be {@code null}.
-     */
-    public Integer getErrorCode()
-    {
-        /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_002: [The getErrorCode shall return the stored errorCode.] */
-        return this.errorCode;
-    }
-
     /**
      * Getter for the error status.
      *
      * @return The {@code String} with the errorStatus content. It can be {@code null}.
      */
-    public String getErrorStatus()
-    {
-        /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_003: [The getErrorStatus shall return the stored errorStatus.] */
-        return this.errorStatus;
-    }
+     @Getter
+    private String errorStatus;
 
     /**
      * Validate the parameters stored in the class as result of the deserialization.

@@ -312,7 +312,7 @@ public class ModuleTest
         assertEquals(ParserUtility.getDateTimeUtc(expectedConnectionStateUpdatedTime), parser.getConnectionStateUpdatedTime());
         assertEquals(expectedDeviceId, parser.getDeviceId());
         assertEquals(expectedModuleId, parser.getModuleId());
-        assertEquals("\"" + expectedETag + "\"", parser.getETag());
+        assertEquals(expectedETag, parser.getETag());
         assertEquals(expectedGenerationId, parser.getGenerationId());
         assertEquals(ParserUtility.getDateTimeUtc(expectedLastActivityTime), parser.getLastActivityTime());
         assertEquals(expectedManagedBy, parser.getManagedBy());

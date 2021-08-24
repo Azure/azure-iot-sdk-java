@@ -5,6 +5,7 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.*;
 import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
+import lombok.Getter;
 
 /**
  * Representation of a single Device Provisioning Service query response with a JSON deserializer.
@@ -13,9 +14,6 @@ import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
  *     return it in a best format possible. For the known formats in {@link QueryResultType}, you can
  *     just cast the items. In case of <b>unknown</b> type, the items will contain a list of {@code Strings}
  *     and you shall parse it by your own.
- *
- * <p> The provisioning service query result is composed by 2 system properties and a body. This class exposes
- *     it with 3 getters, {@link #getType()}, {@link #getContinuationToken()}, and {@link #getItems()}.
  *
  * <p> The system properties are:
  * <dl>
@@ -67,12 +65,15 @@ import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 public class QueryResult
 {
     // the query type
+    @Getter
     private QueryResultType type;
 
     // the list of items in the query result
+    @Getter
     private Object[] items;
 
     // the continuation token for the query
+    @Getter
     private String continuationToken;
 
     /**
@@ -146,40 +147,6 @@ public class QueryResult
         /* SRS_QUERY_RESULT_21_011: [The constructor shall store the provided parameters `type` and `continuationToken`.] */
         this.type = queryResultType;
         this.continuationToken = continuationToken;
-    }
-
-    /**
-     * Getter for the type.
-     *
-     * @return The {@code QueryResultType} with the type of the items Objects.
-     */
-    public QueryResultType getType()
-    {
-        /* SRS_QUERY_RESULT_21_012: [The getType shall return the stored type.] */
-        return this.type;
-    }
-
-    /**
-     * Getter for the continuationToken.
-     *
-     * @return The {@code String} with the unique token that identify the next page of this query.
-     */
-    public String getContinuationToken()
-    {
-        /* SRS_QUERY_RESULT_21_013: [The getContinuationToken shall return the stored continuationToken.] */
-        return this.continuationToken;
-    }
-
-    /**
-     * Getter for the items.
-     *
-     * @return The {@code Object[]} with the results of the query. You can cast it using the type.
-     * @see QueryResultType
-     */
-    public Object[] getItems()
-    {
-        /* SRS_QUERY_RESULT_21_014: [The getItems shall return the stored items.] */
-        return this.items;
     }
 
     /**

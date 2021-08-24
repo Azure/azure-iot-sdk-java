@@ -6,6 +6,9 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Representation of a single Device Provisioning Service TPM Attestation.
@@ -22,12 +25,16 @@ public class TpmAttestation extends Attestation
     private static final String ENDORSEMENT_KEY_TAG = "endorsementKey";
     @Expose
     @SerializedName(ENDORSEMENT_KEY_TAG)
+    @Getter
+    @Setter(AccessLevel.PRIVATE)
     private String endorsementKey;
 
     // the storage root key for TPM [optional]
     private static final String STORAGE_ROOT_KEY_TAG = "storageRootKey";
     @Expose
     @SerializedName(STORAGE_ROOT_KEY_TAG)
+    @Getter
+    @Setter(AccessLevel.PRIVATE)
     private String storageRootKey;
 
     /**
@@ -89,37 +96,6 @@ public class TpmAttestation extends Attestation
         /* SRS_TPM_ATTESTATION_21_007: [The constructor shall store the endorsementKey and storageRootKey provided in the tpm.] */
         this.setEndorsementKey(tpm.endorsementKey);
         this.storageRootKey = tpm.storageRootKey;
-    }
-
-    /**
-     * Getter for the endorsementKey.
-     *
-     * @return The {@code String} with the stored endorsementKey. It cannot be {@code null} or empty.
-     */
-    public String getEndorsementKey()
-    {
-        /* SRS_TPM_ATTESTATION_21_008: [The getEndorsementKey shall return the store endorsementKey.] */
-        return this.endorsementKey;
-    }
-
-    /**
-     * Getter for the storageRootKey.
-     *
-     * @return The {@code String} with the stored storageRootKey. It can be {@code null} or empty.
-     */
-    public String getStorageRootKey()
-    {
-        /* SRS_TPM_ATTESTATION_21_009: [The getStorageRootKey shall return the store storageRootKey.] */
-        return storageRootKey;
-    }
-
-    private void setEndorsementKey(String endorsementKey)
-    {
-        if(Tools.isNullOrEmpty(endorsementKey))
-        {
-            throw new IllegalArgumentException("endorsementKey cannot be null or empty.");
-        }
-        this.endorsementKey = endorsementKey;
     }
 
     /**

@@ -47,19 +47,18 @@ import java.util.*;
  *     first {@code next()} will return a {@code QueryResult} with 5 items. After that you call the {@code hasNext},
  *     which will returns {@code true}. Now, before you get the next page, somebody delete all the IndividualEnrollment,
  *     What happened, when you call the {@code next()}, it will return a valid {@code QueryResult}, but the
- *     {@link QueryResult#getItems()} will return a empty list.
+ *     QueryResult.getItems() will return a empty list.
  *
  * <p> You can also store a query context (QuerySpecification + ContinuationToken) and restart it in the future, from
  *     the point where you stopped.
  *
- * <p> Besides the Items, the queryResult contains the continuationToken, the {@link QueryResult#getContinuationToken()}
- *     shall return it. In any point in the future, you may recreate the query using the same query factories that you
- *     used for the first time, and call {@link #next(String)} providing the stored continuationToken to get the next page.
+ * <p> Besides the Items, the queryResult contains the continuationToken. In any point in the future, you may recreate
+ *     the query using the same query factories that you used for the first time, and call
+ *     {@link #next(String)} providing the stored continuationToken to get the next page.
  *
  * @see <a href="https://docs.microsoft.com/en-us/azure/iot-dps/">Azure IoT Hub Device Provisioning Service</a>
  * @see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-query-language">Query Language</a>
  */
-@SuppressWarnings("deprecation")
 public class Query implements Iterator<QueryResult>
 {
     private static final String CONTINUATION_TOKEN_KEY = "x-ms-continuation";
@@ -101,8 +100,7 @@ public class Query implements Iterator<QueryResult>
      * @param pageSize the {@code int} with the maximum number of items per iteration. It cannot be negative.
      * @throws IllegalArgumentException if one of the parameters is invalid.
      */
-    @SuppressWarnings("deprecation")
-    protected Query(ContractApiHttp contractApiHttp, String targetPath, QuerySpecification querySpecification, int pageSize)
+    Query(ContractApiHttp contractApiHttp, String targetPath, QuerySpecification querySpecification, int pageSize)
     {
         if (contractApiHttp == null)
         {

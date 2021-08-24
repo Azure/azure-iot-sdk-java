@@ -18,28 +18,6 @@ public class TpmAttestationTest
     private static final String VALID_ENDORSEMENT_KEY = "validEndorsementKey";
     private static final String VALID_STORAGE_ROOT_KEY = "validStorageRootKey";
 
-    /* SRS_TPM_ATTESTATION_21_001: [The constructor shall throw IllegalArgumentException if the provided endorsementKey is null or empty.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsOnNullEndorsementKey()
-    {
-        // arrange
-        // act
-        new TpmAttestation(null, VALID_STORAGE_ROOT_KEY);
-
-        // assert
-    }
-
-    /* SRS_TPM_ATTESTATION_21_001: [The constructor shall throw IllegalArgumentException if the provided endorsementKey is null or empty.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsOnEmptyEndorsementKey()
-    {
-        // arrange
-        // act
-        new TpmAttestation("", VALID_STORAGE_ROOT_KEY);
-
-        // assert
-    }
-
     /* SRS_TPM_ATTESTATION_21_002: [The constructor shall store the provided endorsementKey.] */
     /* SRS_TPM_ATTESTATION_21_003: [The constructor shall store the provided storageRootKey.] */
     @Test
@@ -52,28 +30,6 @@ public class TpmAttestationTest
         // assert
         assertEquals(VALID_ENDORSEMENT_KEY, Deencapsulation.getField(tpmAttestation, "endorsementKey"));
         assertEquals(VALID_STORAGE_ROOT_KEY, Deencapsulation.getField(tpmAttestation, "storageRootKey"));
-    }
-
-    /* SRS_TPM_ATTESTATION_21_004: [The constructor shall throw IllegalArgumentException if the provided endorsementKey is null or empty.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorOnlyEndorsementKeyThrowsOnNullEndorsementKey()
-    {
-        // arrange
-        // act
-        new TpmAttestation((String)null);
-
-        // assert
-    }
-
-    /* SRS_TPM_ATTESTATION_21_004: [The constructor shall throw IllegalArgumentException if the provided endorsementKey is null or empty.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorOnlyEndorsementKeyThrowsOnEmptyEndorsementKey()
-    {
-        // arrange
-        // act
-        new TpmAttestation("");
-
-        // assert
     }
 
     /* SRS_TPM_ATTESTATION_21_005: [The constructor shall store the provided endorsementKey.] */
