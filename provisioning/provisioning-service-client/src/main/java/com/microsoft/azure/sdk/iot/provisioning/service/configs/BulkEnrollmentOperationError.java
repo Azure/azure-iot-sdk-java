@@ -52,7 +52,12 @@ public class BulkEnrollmentOperationError
     private static final String ERROR_STATUS_TAG = "errorStatus";
     @Expose
     @SerializedName(ERROR_STATUS_TAG)
-    @Getter
+    /**
+     * Getter for the error status.
+     *
+     * @return The {@code String} with the errorStatus content. It can be {@code null}.
+     */
+     @Getter
     private String errorStatus;
 
     /**
