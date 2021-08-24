@@ -47,7 +47,7 @@ import java.util.*;
  *     first {@code next()} will return a {@code QueryResult} with 5 items. After that you call the {@code hasNext},
  *     which will returns {@code true}. Now, before you get the next page, somebody delete all the IndividualEnrollment,
  *     What happened, when you call the {@code next()}, it will return a valid {@code QueryResult}, but the
- *     {@link QueryResult#getItems()} will return a empty list.
+ *     QueryResult.getItems() will return a empty list.
  *
  * <p> You can also store a query context (QuerySpecification + ContinuationToken) and restart it in the future, from
  *     the point where you stopped.
