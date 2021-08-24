@@ -200,15 +200,6 @@ public class AmqpsIotHubConnectionTest {
     CountDownLatch mockCloseLatch;
 
     @Mocked
-    Link mockLink;
-
-    @Mocked
-    AmqpsReceiverLinkHandler mockAmqpsReceiverLinkHandler;
-
-    @Mocked
-    AmqpsTelemetryReceiverLinkHandler mockAmqpsTelemetryLinksManager;
-
-    @Mocked
     AmqpsSendResult mockAmqpsSendResult;
 
     @Mocked
@@ -639,8 +630,6 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockAmqpsTelemetryLinksManager, "close");
-                times = 1;
                 mockConnection.close();
                 times = 1;
                 mockExecutorService.shutdown();
