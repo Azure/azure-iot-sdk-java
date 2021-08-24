@@ -7,7 +7,6 @@ package com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.QueryResponseParser;
 
-import java.io.IOException;
 import java.util.Iterator;
 
 /**

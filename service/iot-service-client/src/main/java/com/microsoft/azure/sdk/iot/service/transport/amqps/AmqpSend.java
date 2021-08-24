@@ -27,31 +27,15 @@ import java.util.Objects;
 @Slf4j
 public class AmqpSend
 {
-    protected final String hostName;
-    protected String userName;
-    protected String sasToken;
+    private final String hostName;
+    private String userName;
+    private String sasToken;
     private TokenCredential credential;
     private AzureSasCredential sasTokenProvider;
-    protected AmqpSendHandler amqpSendHandler;
-    protected IotHubServiceClientProtocol iotHubServiceClientProtocol;
+    private AmqpSendHandler amqpSendHandler;
+    private IotHubServiceClientProtocol iotHubServiceClientProtocol;
     private final ProxyOptions proxyOptions;
     private final SSLContext sslContext;
-
-    /**
-     * Constructor to set up connection parameters
-     * @param hostName The address string of the service (example: AAA.BBB.CCC)
-     * @param userName The username string to use SASL authentication (example: user@sas.service)
-     * @param sasToken The SAS token string
-     * @param iotHubServiceClientProtocol protocol to use
-     */
-    public AmqpSend(
-            String hostName,
-            String userName,
-            String sasToken,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol)
-    {
-        this(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
-    }
 
     /**
      * Constructor to set up connection parameters

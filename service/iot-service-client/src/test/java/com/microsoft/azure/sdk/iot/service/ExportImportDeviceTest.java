@@ -43,7 +43,7 @@ public class ExportImportDeviceTest
 
         // act
         device.setAuthentication(expectedAuthentication);
-        device.seteTag(expectedETag);
+        device.setETag(expectedETag);
         device.setId(expectedId);
         device.setImportMode(expectedImportMode);
         device.setStatus(expectedStatus);
@@ -51,7 +51,7 @@ public class ExportImportDeviceTest
 
         // assert
         assertEquals(expectedAuthentication, device.getAuthentication());
-        assertEquals(expectedETag, device.geteTag());
+        assertEquals(expectedETag, device.getETag());
         assertEquals(expectedId, device.getId());
         assertEquals(expectedImportMode, device.getImportMode());
         assertEquals(expectedStatus, device.getStatus());

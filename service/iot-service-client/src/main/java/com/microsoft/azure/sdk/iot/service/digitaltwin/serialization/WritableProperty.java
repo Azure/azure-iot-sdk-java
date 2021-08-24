@@ -16,37 +16,37 @@ public final class WritableProperty
      * The desired value of a property.
      */
     @JsonProperty("desiredValue")
-    public Object DesiredValue;
+    private Object DesiredValue;
 
     /**
      * The version of the property with the specified desired value.
      */
     @JsonProperty("desiredVersion")
-    public int DesiredVersion;
+    private int DesiredVersion;
 
     /**
      * The version of the reported property value
      */
     @JsonProperty("ackVersion")
-    public int AckVersion;
+    private int AckVersion;
 
     /**
      * The response code of the property update request, usually an HTTP Status Code (e.g. 200).
      */
     @JsonProperty("ackCode")
-    public int AckCode;
+    private int AckCode;
 
     /**
      * The message response of the property update request.
      */
     @JsonProperty("ackDescription")
-    public String AckDescription;
+    private String AckDescription;
 
     /**
      * The time when this property was last updated.
      */
     @JsonProperty("lastUpdateTime")
-    public Date LastUpdateTime;
+    private Date LastUpdateTime;
 
     public Object getDesiredValue() {
         return this.DesiredValue;

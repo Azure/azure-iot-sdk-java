@@ -5,8 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
-import java.io.IOException;
-
 public class SqlQuery
 {
     private static final String SPACE = " ";

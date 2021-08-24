@@ -188,7 +188,7 @@ public class RoleBasedAuthenticationSample
 
             feedbackReceiver.close();
         }
-        catch (IOException | InterruptedException e)
+        catch (IOException e)
         {
             System.err.println("Failed to listen for feedback messages");
             e.printStackTrace();
@@ -216,7 +216,7 @@ public class RoleBasedAuthenticationSample
 
             fileUploadNotificationReceiver.close();
         }
-        catch (IOException | InterruptedException e)
+        catch (IOException e)
         {
             System.err.println("Failed to listen for file upload notification messages");
             e.printStackTrace();

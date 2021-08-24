@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -71,7 +70,7 @@ public class IotHubConnectionStringBuilder
      * @param connectionString The connection string to deserialize
      * @param iotHubConnectionString The target object for deserialization
      */
-    protected static void parse(String connectionString, IotHubConnectionString iotHubConnectionString)
+    private static void parse(String connectionString, IotHubConnectionString iotHubConnectionString)
     {
         Map<String, String> keyValueMap = new HashMap<>();
 
@@ -124,7 +123,7 @@ public class IotHubConnectionStringBuilder
      * @param iotHubConnectionString The source iotHubConnectionString containing the hostName
      * @return The substring of the host name until the first "." character
      */
-    protected static String parseIotHubName(IotHubConnectionString iotHubConnectionString)
+    private static String parseIotHubName(IotHubConnectionString iotHubConnectionString)
     {
         int index = iotHubConnectionString.hostName.indexOf(IotHubConnectionString.HOST_NAME_SEPARATOR);
         if (index >= 0)
@@ -141,7 +140,7 @@ public class IotHubConnectionStringBuilder
      * @param iotHubConnectionString The object to validate
      * @throws IllegalArgumentException This exception is thrown if the input object is null
      */
-    protected static void validate(IotHubConnectionString iotHubConnectionString) throws IllegalArgumentException
+    private static void validate(IotHubConnectionString iotHubConnectionString) throws IllegalArgumentException
     {
         if (Tools.isNullOrWhiteSpace(iotHubConnectionString.sharedAccessKeyName))
         {
@@ -164,7 +163,7 @@ public class IotHubConnectionStringBuilder
      * @param value The string value to validate
      * @param regex The regex used for validation
      */
-    protected static void validateFormat(String value, String regex)
+    private static void validateFormat(String value, String regex)
     {
         final Pattern pattern = Pattern.compile(regex);
         if (!pattern.matcher(value).matches())
@@ -179,7 +178,7 @@ public class IotHubConnectionStringBuilder
      * @param value string value to validate
      * @param regex regex used for validation
      */
-    protected static void validateFormatIfSpecified(String value, String regex)
+    private static void validateFormatIfSpecified(String value, String regex)
     {
         if (!Tools.isNullOrEmpty(value))
         {
@@ -193,7 +192,7 @@ public class IotHubConnectionStringBuilder
      * @param hostName host name string
      * @param iotHubConnectionString target IotHubConnectionString object
      */
-    protected static void setHostName(String hostName, IotHubConnectionString iotHubConnectionString)
+    private static void setHostName(String hostName, IotHubConnectionString iotHubConnectionString)
     {
         validateFormat(hostName, HOST_NAME_REGEX);
         iotHubConnectionString.hostName = hostName;
@@ -206,7 +205,7 @@ public class IotHubConnectionStringBuilder
      * @param authenticationMethod value to set
      * @param iotHubConnectionString target IotHubConnectionString object
      */
-    protected static void setAuthenticationMethod(AuthenticationMethod authenticationMethod, IotHubConnectionString iotHubConnectionString)
+    private static void setAuthenticationMethod(AuthenticationMethod authenticationMethod, IotHubConnectionString iotHubConnectionString)
     {
         authenticationMethod.populate(iotHubConnectionString);
         iotHubConnectionString.authenticationMethod = authenticationMethod;
