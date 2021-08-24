@@ -38,6 +38,11 @@ public class BulkEnrollmentOperationError
     private static final String REGISTRATION_ID_TAG = "registrationId";
     @Expose
     @SerializedName(REGISTRATION_ID_TAG)
+    /**
+     * Getter for the error registrationId.
+     *
+     * @return The {@code String} with the registrationId content. It cannot be {@code null}.
+     */
     @Getter
     private String registrationId;
 
