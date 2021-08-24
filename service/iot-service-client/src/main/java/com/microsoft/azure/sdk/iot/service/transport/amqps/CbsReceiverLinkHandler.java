@@ -20,7 +20,7 @@ import java.util.UUID;
  * class defines the receiver link which receives authentication status codes corresponding to each authentication attempt.
  */
 @Slf4j
-public final class CbsReceiverLinkHandler extends ReceiverLinkHandler
+final class CbsReceiverLinkHandler extends ReceiverLinkHandler
 {
     private final static String APPLICATION_PROPERTY_STATUS_CODE_TAG = "status-code";
     private final static String APPLICATION_PROPERTY_STATUS_DESCRIPTION_TAG = "status-description";
@@ -40,7 +40,7 @@ public final class CbsReceiverLinkHandler extends ReceiverLinkHandler
         this.authenticationMessageCallback = authenticationMessageCallback;
     }
 
-    protected void setAuthenticationMessageCorrelationId(UUID authenticationMessageCorrelationId)
+    void setAuthenticationMessageCorrelationId(UUID authenticationMessageCorrelationId)
     {
         this.authenticationMessageCorrelationId = authenticationMessageCorrelationId;
     }

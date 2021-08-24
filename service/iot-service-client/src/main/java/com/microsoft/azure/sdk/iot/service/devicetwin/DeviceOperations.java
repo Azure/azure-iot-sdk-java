@@ -35,7 +35,6 @@ public class DeviceOperations
     private static final String ACCEPT_CHARSET = "charset=utf-8";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String CONTENT_TYPE = "Content-Type";
-    private static final Integer DEFAULT_HTTP_TIMEOUT_MS = 24000;
     private static Map<String, String> headers = null;
 
     /**

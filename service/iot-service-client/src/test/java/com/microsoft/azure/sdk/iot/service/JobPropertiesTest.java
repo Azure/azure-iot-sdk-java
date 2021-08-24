@@ -85,13 +85,6 @@ public class JobPropertiesTest
         assertEquals(parser.getStartTimeUtc(), jobProperties.getStartTimeUtc());
     }
 
-    //Tests_SRS_SERVICE_SDK_JAVA_JOB_PROPERTIES_34_004: [If the provided jobId is null, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void cannotSetJobIdToNull()
-    {
-        new JobProperties().setJobId(null);
-    }
-
     private JobPropertiesParser toJobPropertiesParser(JobProperties jobProperties)
     {
         return Deencapsulation.invoke(jobProperties, "toJobPropertiesParser");

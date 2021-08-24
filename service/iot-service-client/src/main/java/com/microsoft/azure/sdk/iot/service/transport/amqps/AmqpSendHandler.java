@@ -33,12 +33,12 @@ import java.util.Map;
  * Creates and sets SASL authentication for transport
  */
 @Slf4j
-public class AmqpSendHandler extends AmqpConnectionHandler
+class AmqpSendHandler extends AmqpConnectionHandler
 {
-    public static final String SEND_TAG = "sender";
-    public static final String ENDPOINT = "/messages/devicebound";
-    public static final String DEVICE_PATH_FORMAT = "/devices/%s/messages/devicebound";
-    public static final String MODULE_PATH_FORMAT = "/devices/%s/modules/%s/messages/devicebound";
+    private static final String SEND_TAG = "sender";
+    private static final String ENDPOINT = "/messages/devicebound";
+    private static final String DEVICE_PATH_FORMAT = "/devices/%s/messages/devicebound";
+    private static final String MODULE_PATH_FORMAT = "/devices/%s/modules/%s/messages/devicebound";
 
     private Object correlationId;
     private Sender cloudToDeviceMessageSendingLink;
@@ -56,7 +56,7 @@ public class AmqpSendHandler extends AmqpConnectionHandler
      * @param sasToken The SAS token string
      * @param iotHubServiceClientProtocol protocol to use
      */
-    public AmqpSendHandler(
+    AmqpSendHandler(
             String hostName,
             String userName,
             String sasToken,
@@ -74,12 +74,12 @@ public class AmqpSendHandler extends AmqpConnectionHandler
      * @param iotHubServiceClientProtocol protocol to use
      * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
      */
-    public AmqpSendHandler(
-            String hostName,
-            String userName,
-            String sasToken,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            ProxyOptions proxyOptions)
+    private AmqpSendHandler(
+        String hostName,
+        String userName,
+        String sasToken,
+        IotHubServiceClientProtocol iotHubServiceClientProtocol,
+        ProxyOptions proxyOptions)
     {
         this(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, null);
     }
@@ -95,7 +95,7 @@ public class AmqpSendHandler extends AmqpConnectionHandler
      * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
      *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.
      */
-    public AmqpSendHandler(
+    AmqpSendHandler(
             String hostName,
             String userName,
             String sasToken,

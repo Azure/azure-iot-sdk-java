@@ -65,7 +65,7 @@ public class JobClient
      * @param connectionString The iot hub connection string
      * @param options The connection options to use when connecting to the service.
      */
-    public JobClient(String connectionString, JobClientOptions options)
+    private JobClient(String connectionString, JobClientOptions options)
     {
         Objects.requireNonNull(options);
         if (Tools.isNullOrEmpty(connectionString))

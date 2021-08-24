@@ -22,7 +22,7 @@ public class TokenCredentialCache
     private AccessToken accessToken;
 
     public static final String[] IOTHUB_PUBLIC_SCOPE = new String[]{"https://iothubs.azure.net/.default"};
-    public static final String BEARER_TOKEN_PREFIX = "Bearer ";
+    private static final String BEARER_TOKEN_PREFIX = "Bearer ";
 
     /**
      * Construct a new TokenCredentialCache instance.

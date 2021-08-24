@@ -43,7 +43,7 @@ public class ExportImportDeviceTest
 
         // act
         device.setAuthentication(expectedAuthentication);
-        device.seteTag(expectedETag);
+        device.setETag(expectedETag);
         device.setId(expectedId);
         device.setImportMode(expectedImportMode);
         device.setStatus(expectedStatus);
@@ -51,7 +51,7 @@ public class ExportImportDeviceTest
 
         // assert
         assertEquals(expectedAuthentication, device.getAuthentication());
-        assertEquals(expectedETag, device.geteTag());
+        assertEquals(expectedETag, device.getETag());
         assertEquals(expectedId, device.getId());
         assertEquals(expectedImportMode, device.getImportMode());
         assertEquals(expectedStatus, device.getStatus());
@@ -122,44 +122,6 @@ public class ExportImportDeviceTest
         assertEquals(DeviceStatus.Enabled.toString(), parserCA.getStatus());
     }
 
-    //Tests_SRS_SERVICE_SDK_JAVA_IMPORT_EXPORT_DEVICE_34_052: [This constructor shall use the properties of the provided parser object to set the new ExportImportDevice's properties.]
-    @Test
-    public void conversionFromDeviceParser()
-    {
-        // arrange
-        ExportImportDeviceParser parserCA = new ExportImportDeviceParser();
-        parserCA.setAuthentication(Deencapsulation.newInstance(AuthenticationParser.class));
-        parserCA.getAuthentication().setType(AuthenticationTypeParser.CERTIFICATE_AUTHORITY);
-        parserCA.setStatus("Enabled");
-        parserCA.setImportMode("Create");
-        parserCA.setId("deviceCA");
-
-        ExportImportDeviceParser parserSelf = new ExportImportDeviceParser();
-        parserSelf.setAuthentication(Deencapsulation.newInstance(AuthenticationParser.class));
-        parserSelf.getAuthentication().setType(AuthenticationTypeParser.SELF_SIGNED);
-        parserSelf.getAuthentication().setThumbprint(new X509ThumbprintParser(SAMPLE_THUMBPRINT, SAMPLE_THUMBPRINT));
-        parserSelf.setId("deviceSelf");
-
-        ExportImportDeviceParser parserSAS = new ExportImportDeviceParser();
-        parserSAS.setAuthentication(Deencapsulation.newInstance(AuthenticationParser.class));
-        parserSAS.getAuthentication().setType(AuthenticationTypeParser.SAS);
-        parserSAS.getAuthentication().setSymmetricKey(new SymmetricKeyParser(SAMPLE_THUMBPRINT,SAMPLE_THUMBPRINT));
-        parserSAS.setId("deviceSAS");
-
-        // act
-        ExportImportDevice deviceCA = reflectivelyInvokeExportImportDeviceParserConstructor(parserCA);
-        ExportImportDevice deviceSelf = reflectivelyInvokeExportImportDeviceParserConstructor(parserSelf);
-        ExportImportDevice deviceSAS = reflectivelyInvokeExportImportDeviceParserConstructor(parserSAS);
-
-        // assert
-        assertEquals(AuthenticationType.CERTIFICATE_AUTHORITY, deviceCA.getAuthentication().getAuthenticationType());
-        assertEquals(AuthenticationType.SELF_SIGNED, deviceSelf.getAuthentication().getAuthenticationType());
-        assertEquals(AuthenticationType.SAS, deviceSAS.getAuthentication().getAuthenticationType());
-
-        assertEquals(ImportMode.Create, deviceCA.getImportMode());
-        assertEquals(DeviceStatus.Enabled, deviceCA.getStatus());
-    }
-
     //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_051: [This constructor shall save the provided deviceId and authenticationType to itself.]
     @Test
     public void constructorSavesDeviceIdAndAuthType()
@@ -173,41 +135,6 @@ public class ExportImportDeviceTest
         //assert
         assertEquals(AuthenticationType.CERTIFICATE_AUTHORITY, device.getAuthentication().getAuthenticationType());
         assertEquals(deviceId, device.getId());
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_IMPORT_EXPORT_DEVICE_34_053: [If the provided parser does not have values for the properties deviceId or authentication, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void conversionFromDeviceParserMissingDeviceIdThrows()
-    {
-        // arrange
-        ExportImportDeviceParser parser = new ExportImportDeviceParser();
-        parser.setAuthentication(Deencapsulation.newInstance(AuthenticationParser.class));
-        parser.getAuthentication().setType(AuthenticationTypeParser.CERTIFICATE_AUTHORITY);
-        Deencapsulation.setField(parser, "Id", null);
-
-        // act
-        reflectivelyInvokeExportImportDeviceParserConstructor(parser);
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_IMPORT_EXPORT_DEVICE_34_053: [If the provided parser does not have values for the properties deviceId or authentication, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void conversionFromDeviceParserMissingAuthenticationThrows()
-    {
-        // arrange
-        ExportImportDeviceParser parser = new ExportImportDeviceParser();
-        Deencapsulation.setField(parser, "Authentication", null);
-        parser.setId("deviceCA");
-
-        // act
-        reflectivelyInvokeExportImportDeviceParserConstructor(parser);
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_IMPORT_EXPORT_DEVICE_34_056: [If the provided authentication is null, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void cannotSetIdNull()
-    {
-        //act
-        new ExportImportDevice().setId(null);
     }
 
     //Tests_SRS_SERVICE_SDK_JAVA_IMPORT_EXPORT_DEVICE_34_055: [If the provided id is null, an IllegalArgumentException shall be thrown.]
@@ -242,52 +169,6 @@ public class ExportImportDeviceTest
         new ExportImportDevice("someDevice", null);
     }
 
-    //Codes_SRS_SERVICE_SDK_JAVA_IMPORT_EXPORT_DEVICE_34_058: [If the provided parser uses SAS authentication and is missing one or both symmetric keys, two new keys will be generated.]
-    @Test
-    public void constructorWithParserGeneratesMissingSecondaryKeyWhenSASAuthenticated()
-    {
-        //arrange
-        ExportImportDeviceParser parser = new ExportImportDeviceParser();
-        parser.setId("someDevice");
-        parser.setAuthentication(new AuthenticationParser());
-        parser.getAuthentication().setType(AuthenticationTypeParser.SAS);
-        parser.getAuthentication().setSymmetricKey(new SymmetricKeyParser());
-        parser.getAuthentication().getSymmetricKey().setPrimaryKey(SAMPLE_KEY);
-
-        //act
-        ExportImportDevice device = reflectivelyInvokeExportImportDeviceParserConstructor(parser);
-
-        //assert
-        assertNotNull(device.getAuthentication());
-        assertNotNull(device.getAuthentication().getSymmetricKey());
-        assertNotNull(device.getAuthentication().getSymmetricKey().getPrimaryKey());
-        assertNotNull(device.getAuthentication().getSymmetricKey().getSecondaryKey());
-        assertNotEquals(SAMPLE_KEY, device.getAuthentication().getSymmetricKey().getPrimaryKey());
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_IMPORT_EXPORT_DEVICE_34_059: [If the provided parser uses self signed authentication and is missing one or both thumbprints, two new thumbprints will be generated.]
-    @Test
-    public void constructorWithParserGeneratesMissingSecondaryThumbprintsWhenSelfSigned()
-    {
-        //arrange
-        ExportImportDeviceParser parser = new ExportImportDeviceParser();
-        parser.setId("someDevice");
-        parser.setAuthentication(new AuthenticationParser());
-        parser.getAuthentication().setType(AuthenticationTypeParser.SELF_SIGNED);
-        parser.getAuthentication().setThumbprint(new X509ThumbprintParser());
-        parser.getAuthentication().getThumbprint().setPrimaryThumbprint(SAMPLE_THUMBPRINT);
-
-        //act
-        ExportImportDevice device = reflectivelyInvokeExportImportDeviceParserConstructor(parser);
-
-        //assert
-        assertNotNull(device.getAuthentication());
-        assertNotNull(device.getAuthentication().getPrimaryThumbprint());
-        assertNotNull(device.getAuthentication().getSecondaryThumbprint());
-        assertNotEquals(SAMPLE_THUMBPRINT, device.getAuthentication().getPrimaryThumbprint());
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_IMPORT_EXPORT_DEVICE_34_060: [If this device uses sas authentication, but does not have a primary and secondary symmetric key saved, an IllegalStateException shall be thrown.]
     @Test (expected = IllegalStateException.class)
     public void toParserIllegalStateThrownWhenUsingSASAuthenticationWithoutSymmetricKeySaved()
     {
@@ -296,23 +177,6 @@ public class ExportImportDeviceTest
         device.setId("someDevice");
         AuthenticationMechanism authentication = new AuthenticationMechanism(AuthenticationType.SAS);
         Deencapsulation.setField(authentication, "symmetricKey", null);
-        device.setAuthentication(authentication);
-
-        //act
-        reflectivelyInvokeToExportImportDeviceParser(device);
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_IMPORT_EXPORT_DEVICE_34_060: [If this device uses sas authentication, but does not have a primary and secondary symmetric key saved, an IllegalStateException shall be thrown.]
-    @Test (expected = IllegalStateException.class)
-    public void toParserIllegalStateThrownWhenUsingSASAuthenticationWithoutPrimaryKeySaved()
-    {
-        //arrange
-        ExportImportDevice device = new ExportImportDevice();
-        device.setId("someDevice");
-        AuthenticationMechanism authentication = new AuthenticationMechanism(AuthenticationType.SAS);
-        SymmetricKey symmetricKey = new SymmetricKey();
-        Deencapsulation.setField(symmetricKey, "primaryKey", null);
-        Deencapsulation.setField(authentication, "symmetricKey", symmetricKey);
         device.setAuthentication(authentication);
 
         //act
@@ -366,16 +230,6 @@ public class ExportImportDeviceTest
         device.setStatus(status);
 
         return device;
-    }
-
-    /**
-     * Uses refelection to invoke the constructor for an ExportImportDevice that takes an ExportImportDeviceParser object as the only argument
-     * @param parser the parser to pass into the constructor
-     * @return the created ExportImportDevice object
-     */
-    private ExportImportDevice reflectivelyInvokeExportImportDeviceParserConstructor(ExportImportDeviceParser parser)
-    {
-        return Deencapsulation.newInstance(ExportImportDevice.class, new Class[] { ExportImportDeviceParser.class }, parser);
     }
 
     /**

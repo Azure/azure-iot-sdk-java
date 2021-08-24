@@ -14,13 +14,13 @@ import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 
 @Slf4j
-public class AmqpResponseVerification implements AmqpError
+class AmqpResponseVerification implements AmqpError
 {
     private Symbol errorCondition = null;
     private String errorDescription = null;
     private IotHubException exception = null;
 
-    public AmqpResponseVerification(DeliveryState state)
+    AmqpResponseVerification(DeliveryState state)
     {
         if (state == null)
         {
@@ -72,7 +72,7 @@ public class AmqpResponseVerification implements AmqpError
         }
     }
 
-    public IotHubException getException()
+    IotHubException getException()
     {
         return this.exception;
     }

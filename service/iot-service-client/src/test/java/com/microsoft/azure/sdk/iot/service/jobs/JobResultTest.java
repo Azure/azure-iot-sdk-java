@@ -487,7 +487,7 @@ public class JobResultTest
                 "  \"updateTwin\": {\n" +
                 "    \"deviceId\": \"validDeviceId\",\n" +
                 "    \"eTag\": \"validETag\",\n" +
-                "    \"tag\": {\n" +
+                "    \"tags\": {\n" +
                 "      \"tag1\": \"val1\"\n" +
                 "    },\n" +
                 "    \"desiredProperties\": {},\n" +
@@ -546,7 +546,7 @@ public class JobResultTest
                         "  \"updateTwin\": {\n" +
                         "    \"deviceId\": \"validDeviceId\",\n" +
                         "    \"eTag\": \"validETag\",\n" +
-                        "    \"tag\": {\n" +
+                        "    \"tags\": {\n" +
                         "      \"tag1\": \"val1\"\n" +
                         "    },\n" +
                         "    \"desiredProperties\": {\n" +

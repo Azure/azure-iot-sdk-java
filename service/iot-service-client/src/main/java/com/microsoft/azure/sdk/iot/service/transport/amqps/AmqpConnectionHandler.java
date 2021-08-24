@@ -34,7 +34,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 @Slf4j
-public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup implements CbsSessionStateCallback
+abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup implements CbsSessionStateCallback
 {
     private static final String WEBSOCKET_PATH = "/$iothub/websocket";
     private static final String WEBSOCKET_SUB_PROTOCOL = "AMQPWSB10";
@@ -46,25 +46,25 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
     private boolean sessionOpenedRemotely;
     private boolean linkOpenedRemotely;
 
-    protected final String hostName;
+    private final String hostName;
     @SuppressWarnings("unused") // Leaving for future use
     protected String userName = null;
-    protected String sasToken;
+    private String sasToken;
     private TokenCredential credential;
     private AzureSasCredential sasTokenProvider;
-    protected IotHubServiceClientProtocol iotHubServiceClientProtocol;
-    protected ProxyOptions proxyOptions;
-    protected SSLContext sslContext;
+    private IotHubServiceClientProtocol iotHubServiceClientProtocol;
+    private ProxyOptions proxyOptions;
+    private SSLContext sslContext;
 
-    protected Connection connection;
+    Connection connection;
 
-    protected AmqpConnectionHandler(
-            String hostName,
-            String userName,
-            String sasToken,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            ProxyOptions proxyOptions,
-            SSLContext sslContext)
+    AmqpConnectionHandler(
+        String hostName,
+        String userName,
+        String sasToken,
+        IotHubServiceClientProtocol iotHubServiceClientProtocol,
+        ProxyOptions proxyOptions,
+        SSLContext sslContext)
     {
         if (Tools.isNullOrEmpty(hostName))
         {
@@ -86,12 +86,12 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
         commonConstructorSetup(iotHubServiceClientProtocol, proxyOptions, sslContext);
     }
 
-    protected AmqpConnectionHandler(
-            String hostName,
-            AzureSasCredential sasTokenProvider,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            ProxyOptions proxyOptions,
-            SSLContext sslContext)
+    AmqpConnectionHandler(
+        String hostName,
+        AzureSasCredential sasTokenProvider,
+        IotHubServiceClientProtocol iotHubServiceClientProtocol,
+        ProxyOptions proxyOptions,
+        SSLContext sslContext)
     {
         if (Tools.isNullOrEmpty(hostName))
         {
@@ -107,12 +107,12 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
         commonConstructorSetup(iotHubServiceClientProtocol, proxyOptions, sslContext);
     }
 
-    protected AmqpConnectionHandler(
-            String hostName,
-            TokenCredential credential,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            ProxyOptions proxyOptions,
-            SSLContext sslContext)
+    AmqpConnectionHandler(
+        String hostName,
+        TokenCredential credential,
+        IotHubServiceClientProtocol iotHubServiceClientProtocol,
+        ProxyOptions proxyOptions,
+        SSLContext sslContext)
     {
         if (Tools.isNullOrEmpty(hostName))
         {
@@ -258,7 +258,7 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
      * @throws IOException if an exception was encountered while openinging the AMQP connection. The encountered
      * exception will be the inner exception
      */
-    protected void verifyConnectionWasOpened() throws IOException
+    void verifyConnectionWasOpened() throws IOException
     {
         if (this.protonJExceptionParser != null)
         {

@@ -27,17 +27,17 @@ import java.util.Map;
  * read. Otherwise, the data remains in the stream and the connection will not
  * be reusable.
  */
-public class HttpConnection
+class HttpConnection
 {
     /** The underlying HTTPS connection. */
-    protected final HttpsURLConnection connection;
+    private final HttpsURLConnection connection;
 
     /**
      * The body. HttpsURLConnection silently calls connect() when the output
      * stream is written to. We buffer the body and defer writing to the output
      * stream until connect() is called.
      */
-    protected byte[] body;
+    private byte[] body;
 
     /**
      * Constructor. Opens a connection to the given URL.
@@ -311,7 +311,7 @@ public class HttpConnection
      *
      * @throws IOException This exception thrown if the input stream could not be read from.
      */
-    protected static byte[] readInputStream(InputStream stream)
+    private static byte[] readInputStream(InputStream stream)
             throws IOException
     {
         ArrayList<Byte> byteBuffer = new ArrayList<>();

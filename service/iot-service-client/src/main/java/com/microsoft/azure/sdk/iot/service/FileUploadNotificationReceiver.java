@@ -114,9 +114,8 @@ public class FileUploadNotificationReceiver extends Receiver
     /**
      * Open AmqpReceive object
      *
-     * @throws IOException This exception is thrown if the input AmqpReceive object is null
      */
-    public void open() throws IOException
+    public void open()
     {
         log.info("Opening file upload notification receiver");
 
@@ -148,9 +147,8 @@ public class FileUploadNotificationReceiver extends Receiver
      *
      * @return The received FileUploadNotification object
      * @throws IOException This exception is thrown if the input AmqpReceive object is null
-     * @throws InterruptedException This exception is thrown if the receive process has been interrupted
      */
-    public FileUploadNotification receive() throws IOException, InterruptedException
+    public FileUploadNotification receive() throws IOException
     {
         return receive(DEFAULT_TIMEOUT_MS);
     }
@@ -166,9 +164,8 @@ public class FileUploadNotificationReceiver extends Receiver
      * @param timeoutMs The timeout in milliseconds
      * @return The received FileUploadNotification object
      * @throws IOException This exception is thrown if the input AmqpReceive object is null
-     * @throws InterruptedException This exception is thrown if the receive process has been interrupted
      */
-    public FileUploadNotification receive(long timeoutMs) throws IOException, InterruptedException
+    public FileUploadNotification receive(long timeoutMs) throws IOException
     {
         if (this.amqpFileUploadNotificationReceive == null)
         {
@@ -188,14 +185,8 @@ public class FileUploadNotificationReceiver extends Receiver
     {
         final CompletableFuture<Void> future = new CompletableFuture<>();
         executor.submit(() -> {
-            try
-            {
-                open();
-                future.complete(null);
-            } catch (IOException e)
-            {
-                future.completeExceptionally(e);
-            }
+            open();
+            future.complete(null);
         });
         return future;
     }
@@ -245,7 +236,7 @@ public class FileUploadNotificationReceiver extends Receiver
             {
                 FileUploadNotification responseFileUploadNotification = receive(timeoutMs);
                 future.complete(responseFileUploadNotification);
-            } catch (IOException | InterruptedException e)
+            } catch (IOException e)
             {
                 future.completeExceptionally(e);
             }

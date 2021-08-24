@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Queue;
 
 @Slf4j
-abstract class Mqtt implements MqttCallback
+public abstract class Mqtt implements MqttCallback
 {
     private static final int CONNECTION_TIMEOUT = 60 * 1000;
     private static final int DISCONNECTION_TIMEOUT = 60 * 1000;

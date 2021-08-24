@@ -6,34 +6,18 @@
 package com.microsoft.azure.sdk.iot.service;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.RegistryStatisticsParser;
+import lombok.Getter;
 
 public class RegistryStatistics
 {
+    @Getter
     private final long totalDeviceCount;
+
+    @Getter
     private final long enabledDeviceCount;
+
+    @Getter
     private final long disabledDeviceCount;
-
-    private RegistryStatistics()
-    {
-        this.totalDeviceCount = 0;
-        this.enabledDeviceCount = 0;
-        this.disabledDeviceCount = 0;
-    }
-
-    public long getDisabledDeviceCount()
-    {
-        return disabledDeviceCount;
-    }
-
-    public long getEnabledDeviceCount()
-    {
-        return enabledDeviceCount;
-    }
-
-    public long getTotalDeviceCount()
-    {
-        return totalDeviceCount;
-    }
 
     /**
      * Consructs a RegistryStatisics object based off of a RegistryStatisticsParser object

@@ -206,7 +206,7 @@ public class ServiceClient
      * @param iotHubConnectionString The ConnectionString object for the IotHub
      * @param iotHubServiceClientProtocol protocol to use
      */
-    protected ServiceClient(IotHubConnectionString iotHubConnectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol)
+    private ServiceClient(IotHubConnectionString iotHubConnectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
         this(iotHubConnectionString, iotHubServiceClientProtocol, ServiceClientOptions.builder().build());
     }
@@ -218,10 +218,10 @@ public class ServiceClient
      * @param iotHubServiceClientProtocol protocol to use
      * @param options options for proxy
      */
-    protected ServiceClient(
-            IotHubConnectionString iotHubConnectionString,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            ServiceClientOptions options)
+    private ServiceClient(
+        IotHubConnectionString iotHubConnectionString,
+        IotHubServiceClientProtocol iotHubServiceClientProtocol,
+        ServiceClientOptions options)
     {
         Objects.requireNonNull(iotHubConnectionString);
 
