@@ -24,7 +24,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Slf4j
-public class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implements AuthenticationMessageCallback, LinkStateCallback
+class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implements AuthenticationMessageCallback, LinkStateCallback
 {
     // Token's should be proactively renewed at 85% of the lifespan of the previous token
     private static final double TOKEN_RENEWAL_PERCENT = .85;
@@ -116,7 +116,7 @@ public class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implem
         }
     }
 
-    public void close()
+    private void close()
     {
         log.trace("Closing this CBS session");
         this.session.close();

@@ -5,6 +5,10 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.Instant;
 
 /**
@@ -13,88 +17,31 @@ import java.time.Instant;
  */
 public class FeedbackRecord
 {
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
     private Instant enqueuedTimeUtc;
 
-    public Instant getEnqueuedTimeUtc()
-    {
-        return enqueuedTimeUtc;
-    }
-
-    public void setEnqueuedTimeUtc(Instant enqueuedTimeUtc)
-    {
-        this.enqueuedTimeUtc = enqueuedTimeUtc;
-    }
-
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
     private String originalMessageId;
 
-    public String getOriginalMessageId()
-    {
-        return originalMessageId;
-    }
-
-    public void setOriginalMessageId(String originalMessageId)
-    {
-        this.originalMessageId = originalMessageId;
-    }
-
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
     private String correlationId;
 
-    public String getCorrelationId()
-    {
-        return correlationId;
-    }
-
-    public void setCorrelationId(String correlationId)
-    {
-        this.correlationId = correlationId;
-    }
-
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
     private FeedbackStatusCode statusCode;
 
-    public FeedbackStatusCode getStatusCode()
-    {
-        return statusCode;
-    }
-
-    public void setStatusCode(FeedbackStatusCode statusCode)
-    {
-        this.statusCode = statusCode;
-    }
-
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
     private String description;
 
-    public String getDescription()
-    {
-        return description;
-    }
-
-    public void setDescription(String description)
-    {
-        this.description = description;
-    }
-
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
     private String deviceGenerationId;
 
-    public String getDeviceGenerationId()
-    {
-        return deviceGenerationId;
-    }
-
-    public void setDeviceGenerationId(String deviceGenerationId)
-    {
-        this.deviceGenerationId = deviceGenerationId;
-    }
-
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
     private String deviceId;
-
-    public String getDeviceId()
-    {
-        return deviceId;
-    }
-
-    public void setDeviceId(String deviceId)
-    {
-        this.deviceId = deviceId;
-    }
-
 }

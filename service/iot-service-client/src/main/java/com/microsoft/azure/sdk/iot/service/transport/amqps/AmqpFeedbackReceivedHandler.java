@@ -34,10 +34,10 @@ import java.util.Map;
  * Creates and sets SASL authentication for transport
  */
 @Slf4j
-public class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
+class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
 {
     public static final String RECEIVE_TAG = "receiver";
-    public static final String ENDPOINT = "/messages/servicebound/feedback";
+    private static final String ENDPOINT = "/messages/servicebound/feedback";
 
     private final AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent;
     private Receiver feedbackReceiverLink;
@@ -51,7 +51,7 @@ public class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
      * @param iotHubServiceClientProtocol protocol to use
      * @param amqpFeedbackReceivedEvent callback to delegate the received message to the user API
      */
-    public AmqpFeedbackReceivedHandler(
+    AmqpFeedbackReceivedHandler(
             String hostName,
             String userName,
             String sasToken,
@@ -71,13 +71,13 @@ public class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
      * @param amqpFeedbackReceivedEvent callback to delegate the received message to the user API
      * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
      */
-    public AmqpFeedbackReceivedHandler(
-            String hostName,
-            String userName,
-            String sasToken,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent,
-            ProxyOptions proxyOptions)
+    private AmqpFeedbackReceivedHandler(
+        String hostName,
+        String userName,
+        String sasToken,
+        IotHubServiceClientProtocol iotHubServiceClientProtocol,
+        AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent,
+        ProxyOptions proxyOptions)
     {
         this(hostName, userName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent, proxyOptions, null);
     }
@@ -94,7 +94,7 @@ public class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
      * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
      *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.
      */
-    public AmqpFeedbackReceivedHandler(
+    AmqpFeedbackReceivedHandler(
             String hostName,
             String userName,
             String sasToken,

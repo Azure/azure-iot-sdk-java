@@ -37,7 +37,7 @@ public class DeviceTwinDeviceTest
 
         //assert
         assertNotNull(testDevice);
-        TwinCollection tagsMap = Deencapsulation.getField(testDevice, "tag");
+        TwinCollection tagsMap = Deencapsulation.getField(testDevice, "tags");
         assertNull(tagsMap);
         TwinCollection repPropMap = Deencapsulation.getField(testDevice, "reportedProperties");
         assertNull(repPropMap);
@@ -60,7 +60,7 @@ public class DeviceTwinDeviceTest
         //assert
         assertEquals(deviceId, Deencapsulation.getField(testDevice, "deviceId"));
         assertNotNull(testDevice);
-        TwinCollection tagsMap = Deencapsulation.getField(testDevice, "tag");
+        TwinCollection tagsMap = Deencapsulation.getField(testDevice, "tags");
         assertNull(tagsMap);
         TwinCollection repPropMap = Deencapsulation.getField(testDevice, "reportedProperties");
         assertNull(repPropMap);
@@ -108,7 +108,7 @@ public class DeviceTwinDeviceTest
         assertEquals(deviceId, Deencapsulation.getField(testDevice, "deviceId"));
         assertEquals(moduleId, Deencapsulation.getField(testDevice, "moduleId"));
         assertNotNull(testDevice);
-        TwinCollection tagsMap = Deencapsulation.getField(testDevice, "tag");
+        TwinCollection tagsMap = Deencapsulation.getField(testDevice, "tags");
         assertNull(tagsMap);
         TwinCollection repPropMap = Deencapsulation.getField(testDevice, "reportedProperties");
         assertNull(repPropMap);
@@ -435,7 +435,7 @@ public class DeviceTwinDeviceTest
     }
 
     /*
-     **Codes_SRS_DEVICETWINDEVICE_21_035: [** The method shall return the version in the tag TwinCollection.**]**
+     **Codes_SRS_DEVICETWINDEVICE_21_035: [** The method shall return the version in the tags TwinCollection.**]**
      */
     @Test
     public void getTagsVersionReturnsValidVersion(@Mocked final TwinCollection mockedTwinCollection)

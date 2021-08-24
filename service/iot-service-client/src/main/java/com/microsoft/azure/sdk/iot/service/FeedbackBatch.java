@@ -5,6 +5,9 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.Instant;
 import java.util.ArrayList;
 
@@ -14,51 +17,19 @@ import java.util.ArrayList;
  */
 public class FeedbackBatch
 {
+    @Getter
+    @Setter
     private Instant enqueuedTimeUtc;
 
-    public Instant getEnqueuedTimeUtc()
-    {
-        return enqueuedTimeUtc;
-    }
-
-    public void setEnqueuedTimeUtc(Instant enqueuedTimeUtc)
-    {
-        this.enqueuedTimeUtc = enqueuedTimeUtc;
-    }
-
+    @Getter
+    @Setter
     private String userId;
 
-    public String getUserId()
-    {
-        return userId;
-    }
-
-    public void setUserId(String userId)
-    {
-        this.userId = userId;
-    }
-
+    @Getter
+    @Setter
     private String lockToken;
 
-    public String getLockToken()
-    {
-        return lockToken;
-    }
-
-    public void setLockToken(String lockToken)
-    {
-        this.lockToken = lockToken;
-    }
-
+    @Getter
+    @Setter
     private ArrayList<FeedbackRecord> records;
-
-    public ArrayList<FeedbackRecord> getRecords()
-    {
-        return records;
-    }
-
-    public void setRecords(ArrayList<FeedbackRecord> records)
-    {
-        this.records = records;
-    }
 }

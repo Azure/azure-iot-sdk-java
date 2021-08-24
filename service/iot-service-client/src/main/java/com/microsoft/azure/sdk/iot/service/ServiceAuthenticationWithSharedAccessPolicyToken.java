@@ -11,7 +11,7 @@ package com.microsoft.azure.sdk.iot.service;
  * ServiceAuthenticationWithSharedAccessPolicyToken type policy on
  * given IotHubConnectionString object.
  */
-public class ServiceAuthenticationWithSharedAccessPolicyToken extends AuthenticationMethod
+class ServiceAuthenticationWithSharedAccessPolicyToken extends AuthenticationMethod
 {
     /**
      * Populate given IotHubConnectionString with proper
@@ -47,46 +47,9 @@ public class ServiceAuthenticationWithSharedAccessPolicyToken extends Authentica
      * @param policyName The policy name string
      * @param token The token string
      */
-    public ServiceAuthenticationWithSharedAccessPolicyToken(String policyName, String token)
+    ServiceAuthenticationWithSharedAccessPolicyToken(String policyName, String token)
     {
         this.setPolicyName(policyName);
         this.setToken(token);
     }
-
-    /**
-     * Getter for policy name
-     * @return The policy name string
-     */
-    public String getPolicyName()
-    {
-        return this.policyName;
-    }
-
-    /**
-     * Setter for policy name
-     * @param policyName The string value to set
-     */
-    protected final void setPolicyName(String policyName)
-    {
-        this.policyName = policyName;
-    }
-
-    /**
-     * Getter for policy token
-     * @return The policy token string
-     */
-    public String getToken()
-    {
-        return this.token;
-    }
-
-    /**
-     * Setter for policy token
-     * @param token The string value to set
-     */
-    protected final void setToken(String token)
-    {
-        this.token = token;
-    }
-
 }

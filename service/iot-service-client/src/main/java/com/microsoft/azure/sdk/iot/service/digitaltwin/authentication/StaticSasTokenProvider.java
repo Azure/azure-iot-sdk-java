@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 
 @AllArgsConstructor
-public class StaticSasTokenProvider implements SasTokenProvider {
+class StaticSasTokenProvider implements SasTokenProvider {
 
     @NonNull
     private final String sharedAccessSignature;

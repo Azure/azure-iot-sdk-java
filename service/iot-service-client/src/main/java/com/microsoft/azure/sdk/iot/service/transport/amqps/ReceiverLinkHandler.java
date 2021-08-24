@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-public abstract class ReceiverLinkHandler extends BaseHandler
+abstract class ReceiverLinkHandler extends BaseHandler
 {
     private static final String API_VERSION_KEY = "com.microsoft:api-version";
 
@@ -29,12 +29,12 @@ public abstract class ReceiverLinkHandler extends BaseHandler
     // can send messages over that link to the client. Each "link credit" corresponds to 1 service to client message.
     // Upon receiving a message over a receiving link, a credit should be refunded to the service so that
     // this initial credit doesn't run out.
-    final Map<Symbol, Object> amqpProperties;
+    private final Map<Symbol, Object> amqpProperties;
     @SuppressWarnings("unused") // Used in sub classes for future expansion.
     String receiverLinkTag;
-    final String linkCorrelationId;
+    private final String linkCorrelationId;
     String receiverLinkAddress;
-    final Receiver receiverLink;
+    private final Receiver receiverLink;
 
     private final LinkStateCallback linkStateCallback;
 
@@ -69,7 +69,7 @@ public abstract class ReceiverLinkHandler extends BaseHandler
         log.trace("{} receiver link with link correlation id {} opened locally", getLinkInstanceType(), this.linkCorrelationId);
     }
 
-    protected AmqpsMessage getMessageFromReceiverLink()
+    AmqpsMessage getMessageFromReceiverLink()
     {
         Delivery delivery = receiverLink.current();
         if (delivery.isReadable() && !delivery.isPartial()) {

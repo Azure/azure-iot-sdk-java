@@ -35,7 +35,7 @@ import java.util.Map;
  * Creates and sets SASL authentication for transport
  */
 @Slf4j
-public class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHandler
+class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHandler
 {
     private static final String FILE_NOTIFICATION_RECEIVE_TAG = "filenotificationreceiver";
     private static final String FILENOTIFICATION_ENDPOINT = "/messages/serviceBound/filenotifications";
