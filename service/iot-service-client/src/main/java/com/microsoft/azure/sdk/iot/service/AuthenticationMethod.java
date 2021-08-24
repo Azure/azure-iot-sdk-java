@@ -19,22 +19,22 @@ public abstract class AuthenticationMethod
     /**
      * Authentication policy name
      */
-    @Getter(AccessLevel.MODULE)
-    @Setter(AccessLevel.MODULE)
+    @Getter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
     String policyName;
 
     /**
      * Shared access policy key (if applies)
      */
-    @Getter(AccessLevel.MODULE)
-    @Setter(AccessLevel.MODULE)
+    @Getter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
     String key;
 
     /**
      * Shared access policy token (if applies)
      */
-    @Getter(AccessLevel.MODULE)
-    @Setter(AccessLevel.MODULE)
+    @Getter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
     String token;
 
     /**
