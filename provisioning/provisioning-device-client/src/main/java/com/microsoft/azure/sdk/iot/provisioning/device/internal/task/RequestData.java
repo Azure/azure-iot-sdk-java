@@ -17,32 +17,32 @@ import javax.net.ssl.SSLContext;
 public class RequestData
 {
     @Getter
-    @Setter(AccessLevel.MODULE)
+    @Setter(AccessLevel.PACKAGE)
     private byte[] endorsementKey;
 
     @Getter
-    @Setter(AccessLevel.MODULE)
+    @Setter(AccessLevel.PACKAGE)
     private byte[] storageRootKey;
 
     @Getter
     private final String registrationId;
 
     @Getter
-    @Setter(AccessLevel.MODULE)
+    @Setter(AccessLevel.PACKAGE)
     private String operationId;
 
     @Getter
-    @Setter(AccessLevel.MODULE)
+    @Setter(AccessLevel.PACKAGE)
     private SSLContext sslContext;
 
     @Getter
-    @Setter(AccessLevel.MODULE)
+    @Setter(AccessLevel.PACKAGE)
     private String sasToken;
 
     private final boolean isX509;
 
     @Getter
-    @Setter(AccessLevel.MODULE)
+    @Setter(AccessLevel.PACKAGE)
     private String payload;
 
     /**
