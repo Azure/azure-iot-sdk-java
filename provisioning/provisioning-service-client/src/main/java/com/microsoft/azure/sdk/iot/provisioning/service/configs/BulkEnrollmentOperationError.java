@@ -45,7 +45,12 @@ public class BulkEnrollmentOperationError
     private static final String ERROR_CODE_TAG = "errorCode";
     @Expose
     @SerializedName(ERROR_CODE_TAG)
-    @Getter
+    /**
+     * Getter for the error code.
+     *
+     * @return The {@code Integer} with the errorCode content. It cannot be {@code null}.
+     */
+     @Getter
     private Integer errorCode;
 
     // the error status
