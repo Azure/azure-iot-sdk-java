@@ -9,7 +9,7 @@ import com.google.gson.JsonParseException;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsResponseParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsStatisticsParser;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import lombok.Getter;
@@ -92,7 +92,7 @@ public class JobResult
      * The Update Twin tags and desired properties.
      */
     @Getter
-    private DeviceTwinDevice updateTwin;
+    private Twin updateTwin;
 
     /**
      * The reason the job failed if the job failed.
@@ -193,7 +193,7 @@ public class JobResult
         if(twinState != null)
         {
             this.updateTwin = twinState.getDeviceId() == null || twinState.getDeviceId().isEmpty() ?
-                new DeviceTwinDevice() : new DeviceTwinDevice(twinState.getDeviceId());
+                new Twin() : new Twin(twinState.getDeviceId());
             this.updateTwin.setETag(twinState.getETag());
             this.updateTwin.setTags(mapToSet(twinState.getTags()));
             this.updateTwin.setDesiredProperties(mapToSet(twinState.getDesiredProperty()));

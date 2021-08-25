@@ -9,9 +9,10 @@ import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethodClientOptions;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodsClient;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodsClientOptions;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClient;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClientOptions;
 import lombok.extern.slf4j.Slf4j;
@@ -98,12 +99,12 @@ public class Tools
         return new DigitalTwinClient(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
     }
 
-    public static DeviceTwin buildDeviceTwinClientWithTokenCredential()
+    public static TwinClient buildDeviceTwinClientWithTokenCredential()
     {
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
         TokenCredential tokenCredential = buildTokenCredentialFromEnvironment();
-        DeviceTwinClientOptions options = DeviceTwinClientOptions.builder().build();
-        return new DeviceTwin(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
+        TwinClientOptions options = TwinClientOptions.builder().build();
+        return new TwinClient(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
     }
 
     public static TokenCredential buildTokenCredentialFromEnvironment()
@@ -123,11 +124,11 @@ public class Tools
             .build();
     }
 
-    public static com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod buildDeviceMethodClientWithTokenCredential()
+    public static DirectMethodsClient buildDeviceMethodClientWithTokenCredential()
     {
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
         TokenCredential tokenCredential = buildTokenCredentialFromEnvironment();
-        DeviceMethodClientOptions options = DeviceMethodClientOptions.builder().build();
-        return new com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
+        DirectMethodsClientOptions options = DirectMethodsClientOptions.builder().build();
+        return new DirectMethodsClient(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
     }
 }

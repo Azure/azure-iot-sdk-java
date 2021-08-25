@@ -8,7 +8,7 @@ import lombok.Getter;
  * Configurable options for all device method operations.
  */
 @Builder
-public class DeviceMethodClientOptions
+public class DirectMethodsClientOptions
 {
     protected static final Integer DEFAULT_HTTP_READ_TIMEOUT_MS = 24000; // 24 seconds
     protected static final Integer DEFAULT_HTTP_CONNECT_TIMEOUT_MS = 24000; // 24 seconds
