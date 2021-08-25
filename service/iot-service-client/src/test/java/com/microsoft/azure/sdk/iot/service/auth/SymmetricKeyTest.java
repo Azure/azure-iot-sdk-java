@@ -11,6 +11,7 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
@@ -27,7 +28,7 @@ public class SymmetricKeyTest
     public void setPrimaryKey_length_less_than_16()
     {
         // Arrange
-        String key = "012345678901234";
+        String key = encodeKey("012345678901234");
         SymmetricKey symmetricKey = new SymmetricKey();
         // Act
         symmetricKey.setPrimaryKeyFinal(key);
@@ -39,7 +40,7 @@ public class SymmetricKeyTest
     public void setPrimaryKey_length_greater_than_64()
     {
         // Arrange
-        String key = "01234567890123456789012345678901234567890123456789012345678901234";
+        String key = encodeKey("01234567890123456789012345678901234567890123456789012345678901234");
         SymmetricKey symmetricKey = new SymmetricKey();
         // Act
         symmetricKey.setPrimaryKeyFinal(key);
@@ -50,7 +51,7 @@ public class SymmetricKeyTest
     public void setPrimaryKey_length_good_case_min()
     {
         // Arrange
-        String key = "0123456789012345";
+        String key = encodeKey("0123456789012345");
         SymmetricKey symmetricKey = new SymmetricKey();
         // Act
         symmetricKey.setPrimaryKeyFinal(key);
@@ -63,7 +64,7 @@ public class SymmetricKeyTest
     public void setPrimaryKey_length_good_case_max()
     {
         // Arrange
-        String key = "0123456789012345678901234567890123456789012345678901234567890123";
+        String key = encodeKey("0123456789012345678901234567890123456789012345678901234567890123");
         SymmetricKey symmetricKey = new SymmetricKey();
         // Act
         symmetricKey.setPrimaryKeyFinal(key);
@@ -77,7 +78,7 @@ public class SymmetricKeyTest
     public void setSecondaryKey_length_less_than_16()
     {
         // Arrange
-        String key = "012345678901234";
+        String key = encodeKey("012345678901234");
         SymmetricKey symmetricKey = new SymmetricKey();
         // Act
         symmetricKey.setSecondaryKeyFinal(key);
@@ -89,7 +90,7 @@ public class SymmetricKeyTest
     public void setSecondaryKey_length_greater_than_64()
     {
         // Arrange
-        String key = "01234567890123456789012345678901234567890123456789012345678901234";
+        String key = encodeKey("01234567890123456789012345678901234567890123456789012345678901234");
         SymmetricKey symmetricKey = new SymmetricKey();
         // Act
         symmetricKey.setSecondaryKeyFinal(key);
@@ -100,7 +101,7 @@ public class SymmetricKeyTest
     public void setSecondaryKey_length_good_case_min()
     {
         // Arrange
-        String key = "0123456789012345";
+        String key = encodeKey("0123456789012345");
         SymmetricKey symmetricKey = new SymmetricKey();
         // Act
         symmetricKey.setSecondaryKeyFinal(key);
@@ -113,7 +114,7 @@ public class SymmetricKeyTest
     public void setSecondaryKey_length_good_case_max()
     {
         // Arrange
-        String key = "0123456789012345678901234567890123456789012345678901234567890123";
+        String key = encodeKey("0123456789012345678901234567890123456789012345678901234567890123");
         SymmetricKey symmetricKey = new SymmetricKey();
         // Act
         symmetricKey.setSecondaryKeyFinal(key);
@@ -186,5 +187,10 @@ public class SymmetricKeyTest
         Deencapsulation.setField(key, "primaryKey", primaryKey);
         Deencapsulation.setField(key, "secondaryKey", secondaryKey);
         return key;
+    }
+
+    private String encodeKey(String binaryKey)
+    {
+        return encodeBase64String(binaryKey.getBytes());
     }
 }
