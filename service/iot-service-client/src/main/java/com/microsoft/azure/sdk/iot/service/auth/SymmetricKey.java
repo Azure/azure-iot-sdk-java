@@ -11,6 +11,7 @@ import javax.crypto.KeyGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
+import static org.apache.commons.codec.binary.Base64.decodeBase64;
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 
 /**
@@ -134,7 +135,8 @@ public class SymmetricKey
     {
         if (key != null)
         {
-            if ((key.length() < MinKeyLengthInBytes) || (key.length() > MaxKeyLengthInBytes))
+            byte[] decodedKey = decodeBase64(key);
+            if ((decodedKey.length < MinKeyLengthInBytes) || (decodedKey.length > MaxKeyLengthInBytes))
             {
                 throw new IllegalArgumentException(DeviceKeyLengthInvalid);
             }
