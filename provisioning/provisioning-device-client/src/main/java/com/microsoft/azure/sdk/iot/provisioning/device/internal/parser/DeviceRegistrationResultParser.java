@@ -45,6 +45,7 @@ public class DeviceRegistrationResultParser
 
     private static final String SUBSTATUS = "substatus";
     @SerializedName(SUBSTATUS)
+    @Getter
     private String substatus;
 
     private static final String ETAG = "etag";
