@@ -14,8 +14,8 @@ import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodClient;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodClientOptions;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodsClient;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodsClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubGatewayTimeoutException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
@@ -35,7 +35,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestModuleIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
-import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DirectMethodClientCommon;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DirectMethodsClientCommon;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -50,9 +50,9 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
 @Slf4j
 @IotHubTest
 @RunWith(Parameterized.class)
-public class DirectMethodClientTests extends DirectMethodClientCommon
+public class DirectMethodsClientTests extends DirectMethodsClientCommon
 {
-    public DirectMethodClientTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
+    public DirectMethodsClientTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {
         super(protocol, authenticationType, clientType);
     }
@@ -91,10 +91,10 @@ public class DirectMethodClientTests extends DirectMethodClientCommon
         AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
 
         this.testInstance.methodServiceClient =
-            new DirectMethodClient(
+            new DirectMethodsClient(
                 iotHubConnectionStringObj.getHostName(),
                 sasCredential,
-                DirectMethodClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+                DirectMethodsClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
 
         super.openDeviceClientAndSubscribeToMethods();
 
@@ -323,9 +323,9 @@ public class DirectMethodClientTests extends DirectMethodClientCommon
             Proxy serviceSideProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
 
             ProxyOptions proxyOptions = new ProxyOptions(serviceSideProxy);
-            DirectMethodClientOptions options = DirectMethodClientOptions.builder().proxyOptions(proxyOptions).httpReadTimeout(HTTP_READ_TIMEOUT).build();
+            DirectMethodsClientOptions options = DirectMethodsClientOptions.builder().proxyOptions(proxyOptions).httpReadTimeout(HTTP_READ_TIMEOUT).build();
 
-            this.testInstance.methodServiceClient = new DirectMethodClient(iotHubConnectionString, options);
+            this.testInstance.methodServiceClient = new DirectMethodsClient(iotHubConnectionString, options);
 
             super.openDeviceClientAndSubscribeToMethods();
             super.invokeMethodSucceed();

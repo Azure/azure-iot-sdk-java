@@ -21,8 +21,8 @@ import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.ServiceClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodClient;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodClientOptions;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodsClient;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodsClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClientOptions;
@@ -263,16 +263,16 @@ public class RoleBasedAuthenticationSample
     {
         // JobClient has some configurable options for HTTP read and connect timeouts, as well as for setting proxies.
         // For this sample, the default options will be used though.
-        DirectMethodClientOptions options = DirectMethodClientOptions.builder().build();
+        DirectMethodsClientOptions options = DirectMethodsClientOptions.builder().build();
 
         // This constructor takes in your implementation of TokenCredential which allows you to use RBAC authentication
         // rather than symmetric key based authentication that comes with constructors that take connection strings.
-        DirectMethodClient directMethodClient = new DirectMethodClient(iotHubHostName, credential, options);
+        DirectMethodsClient directMethodsClient = new DirectMethodsClient(iotHubHostName, credential, options);
 
         try
         {
             System.out.println("Invoking method on device if it is online");
-            directMethodClient.invoke(
+            directMethodsClient.invoke(
                 deviceId,
                 "someMethodName",
                 5L,

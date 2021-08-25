@@ -16,7 +16,7 @@ import com.microsoft.azure.sdk.iot.service.Message;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodClient;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
@@ -139,7 +139,7 @@ public class TokenCredentialTests
     {
         Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
 
-        DirectMethodClient methodServiceClient = buildDeviceMethodClientWithTokenCredential();
+        DirectMethodsClient methodServiceClient = buildDeviceMethodClientWithTokenCredential();
 
         RegistryManager registryManager = new RegistryManager(iotHubConnectionString);
         Device device = Device.createDevice("some-device-" + UUID.randomUUID(), AuthenticationType.SAS);

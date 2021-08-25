@@ -31,7 +31,7 @@ import static org.junit.Assert.*;
  * Unit tests for Device Method
  * 100% methods, 100% lines covered
  */
-public class DirectMethodClientTest
+public class DirectMethodsClientTest
 {
     @Mocked
     IotHubConnectionString mockedIotHubConnectionString;
@@ -179,13 +179,13 @@ public class DirectMethodClientTest
     @Test
     public void testOptionsDefaults()
     {
-        DirectMethodClientOptions options = DirectMethodClientOptions.builder().build();
-        assertEquals((int) Deencapsulation.getField(DirectMethodClientOptions.class, "DEFAULT_HTTP_READ_TIMEOUT_MS"), options.getHttpReadTimeout());
-        assertEquals((int) Deencapsulation.getField(DirectMethodClientOptions.class, "DEFAULT_HTTP_CONNECT_TIMEOUT_MS"), options.getHttpConnectTimeout());
+        DirectMethodsClientOptions options = DirectMethodsClientOptions.builder().build();
+        assertEquals((int) Deencapsulation.getField(DirectMethodsClientOptions.class, "DEFAULT_HTTP_READ_TIMEOUT_MS"), options.getHttpReadTimeout());
+        assertEquals((int) Deencapsulation.getField(DirectMethodsClientOptions.class, "DEFAULT_HTTP_CONNECT_TIMEOUT_MS"), options.getHttpConnectTimeout());
     }
 
     /* Tests_SRS_DEVICEMETHOD_21_002: [The constructor shall create an IotHubConnectionStringBuilder object from the given connection string.] */
-    /* Tests_SRS_DEVICEMETHOD_21_003: [The constructor shall create a new DirectMethodClient instance and return it.] */
+    /* Tests_SRS_DEVICEMETHOD_21_003: [The constructor shall create a new DirectMethodsClient instance and return it.] */
     @Test
     public void constructorCreateMethodSucceed() throws Exception
     {
@@ -193,7 +193,7 @@ public class DirectMethodClientTest
 
         //act
         constructorExpectations();
-        DirectMethodClient testMethod = new DirectMethodClient(STANDARD_CONNECTIONSTRING);
+        DirectMethodsClient testMethod = new DirectMethodsClient(STANDARD_CONNECTIONSTRING);
 
         //assert
         assertNotNull(testMethod);
@@ -207,7 +207,7 @@ public class DirectMethodClientTest
         final String connectionString = null;
 
         //act
-        DirectMethodClient testMethod = new DirectMethodClient(connectionString);
+        DirectMethodsClient testMethod = new DirectMethodsClient(connectionString);
 
     }
 
@@ -219,7 +219,7 @@ public class DirectMethodClientTest
         final String connectionString = "";
 
         //act
-        DirectMethodClient testMethod = new DirectMethodClient(connectionString);
+        DirectMethodsClient testMethod = new DirectMethodsClient(connectionString);
 
     }
 
@@ -231,7 +231,7 @@ public class DirectMethodClientTest
     {
         //arrange
         constructorExpectations();
-        DirectMethodClient testMethod = new DirectMethodClient(STANDARD_CONNECTIONSTRING);
+        DirectMethodsClient testMethod = new DirectMethodsClient(STANDARD_CONNECTIONSTRING);
 
         //act
         for (TestMethod testCase: illegalParameter)
@@ -262,7 +262,7 @@ public class DirectMethodClientTest
     {
         //arrange
         constructorExpectations();
-        DirectMethodClient testMethod = new DirectMethodClient(STANDARD_CONNECTIONSTRING);
+        DirectMethodsClient testMethod = new DirectMethodsClient(STANDARD_CONNECTIONSTRING);
 
         //act
         for (TestMethod testCase: illegalParameterModule)
@@ -292,7 +292,7 @@ public class DirectMethodClientTest
             throws Exception
     {
         //arrange
-        DirectMethodClient testMethod = new DirectMethodClient(STANDARD_CONNECTIONSTRING);
+        DirectMethodsClient testMethod = new DirectMethodsClient(STANDARD_CONNECTIONSTRING);
         new NonStrictExpectations()
         {
             {
@@ -323,7 +323,7 @@ public class DirectMethodClientTest
             }
         };
 
-        DirectMethodClient testMethod = new DirectMethodClient(STANDARD_CONNECTIONSTRING);
+        DirectMethodsClient testMethod = new DirectMethodsClient(STANDARD_CONNECTIONSTRING);
 
         //act
         testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP);
@@ -337,7 +337,7 @@ public class DirectMethodClientTest
             throws Exception
     {
         //arrange
-        DirectMethodClient testMethod = new DirectMethodClient(STANDARD_CONNECTIONSTRING);
+        DirectMethodsClient testMethod = new DirectMethodsClient(STANDARD_CONNECTIONSTRING);
 
         new NonStrictExpectations()
         {
@@ -358,7 +358,7 @@ public class DirectMethodClientTest
             throws Exception
     {
         //arrange
-        DirectMethodClient testMethod = new DirectMethodClient(STANDARD_CONNECTIONSTRING);
+        DirectMethodsClient testMethod = new DirectMethodsClient(STANDARD_CONNECTIONSTRING);
 
         new NonStrictExpectations()
         {
@@ -379,7 +379,7 @@ public class DirectMethodClientTest
             throws Exception
     {
         //arrange
-        DirectMethodClient testMethod = new DirectMethodClient(STANDARD_CONNECTIONSTRING);
+        DirectMethodsClient testMethod = new DirectMethodsClient(STANDARD_CONNECTIONSTRING);
         new NonStrictExpectations()
         {
             {
@@ -403,7 +403,7 @@ public class DirectMethodClientTest
             throws Exception
     {
         //arrange
-        DirectMethodClient testMethod = new DirectMethodClient(STANDARD_CONNECTIONSTRING);
+        DirectMethodsClient testMethod = new DirectMethodsClient(STANDARD_CONNECTIONSTRING);
         new NonStrictExpectations()
         {
             {
@@ -459,7 +459,7 @@ public class DirectMethodClientTest
     {
         //arrange
         constructorExpectations();
-        DirectMethodClient testMethod = new DirectMethodClient(STANDARD_CONNECTIONSTRING);
+        DirectMethodsClient testMethod = new DirectMethodsClient(STANDARD_CONNECTIONSTRING);
         new NonStrictExpectations()
         {
             {
@@ -504,7 +504,7 @@ public class DirectMethodClientTest
         final String methodName = null;
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = 100;
-        DirectMethodClient testMethod = new DirectMethodClient(STANDARD_CONNECTIONSTRING);
+        DirectMethodsClient testMethod = new DirectMethodsClient(STANDARD_CONNECTIONSTRING);
 
         //act
         testMethod.scheduleDeviceMethod(queryCondition, methodName, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP, now, maxExecutionTimeInSeconds);
@@ -519,7 +519,7 @@ public class DirectMethodClientTest
         final String methodName = "";
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = 100;
-        DirectMethodClient testMethod = new DirectMethodClient(STANDARD_CONNECTIONSTRING);
+        DirectMethodsClient testMethod = new DirectMethodsClient(STANDARD_CONNECTIONSTRING);
 
         //act
         testMethod.scheduleDeviceMethod(queryCondition, methodName, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP, now, maxExecutionTimeInSeconds);
@@ -533,7 +533,7 @@ public class DirectMethodClientTest
         final String queryCondition = "validQueryCondition";
         final Date now = null;
         final long maxExecutionTimeInSeconds = 100;
-        DirectMethodClient testMethod = new DirectMethodClient(STANDARD_CONNECTIONSTRING);
+        DirectMethodsClient testMethod = new DirectMethodsClient(STANDARD_CONNECTIONSTRING);
 
         //act
         testMethod.scheduleDeviceMethod(queryCondition, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP, now, maxExecutionTimeInSeconds);
@@ -547,7 +547,7 @@ public class DirectMethodClientTest
         final String queryCondition = "validQueryCondition";
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = -100;
-        DirectMethodClient testMethod = new DirectMethodClient(STANDARD_CONNECTIONSTRING);
+        DirectMethodsClient testMethod = new DirectMethodsClient(STANDARD_CONNECTIONSTRING);
 
         //act
         testMethod.scheduleDeviceMethod(queryCondition, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP, now, maxExecutionTimeInSeconds);
@@ -563,7 +563,7 @@ public class DirectMethodClientTest
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = 100;
         constructorExpectations();
-        DirectMethodClient testMethod = new DirectMethodClient(STANDARD_CONNECTIONSTRING);
+        DirectMethodsClient testMethod = new DirectMethodsClient(STANDARD_CONNECTIONSTRING);
 
         new NonStrictExpectations()
         {
@@ -592,7 +592,7 @@ public class DirectMethodClientTest
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = 100;
         constructorExpectations();
-        DirectMethodClient testMethod = new DirectMethodClient(STANDARD_CONNECTIONSTRING);
+        DirectMethodsClient testMethod = new DirectMethodsClient(STANDARD_CONNECTIONSTRING);
 
         new NonStrictExpectations()
         {
@@ -618,7 +618,7 @@ public class DirectMethodClientTest
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = 100;
         constructorExpectations();
-        DirectMethodClient testMethod = new DirectMethodClient(STANDARD_CONNECTIONSTRING);
+        DirectMethodsClient testMethod = new DirectMethodsClient(STANDARD_CONNECTIONSTRING);
 
         new NonStrictExpectations()
         {
@@ -652,7 +652,7 @@ public class DirectMethodClientTest
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = 100;
         constructorExpectations();
-        DirectMethodClient testMethod = new DirectMethodClient(STANDARD_CONNECTIONSTRING);
+        DirectMethodsClient testMethod = new DirectMethodsClient(STANDARD_CONNECTIONSTRING);
 
         new NonStrictExpectations()
         {

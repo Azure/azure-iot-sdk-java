@@ -93,7 +93,7 @@ public class JobClientTest
     }
 
     /* Tests_SRS_JOBCLIENT_21_002: [The constructor shall create an IotHubConnectionStringBuilder object from the given connection string.] */
-    /* Tests_SRS_JOBCLIENT_21_003: [The constructor shall create a new DirectMethodClient instance and return it.] */
+    /* Tests_SRS_JOBCLIENT_21_003: [The constructor shall create a new DirectMethodsClient instance and return it.] */
     @Test
     public void constructorSucceed() throws IOException
     {

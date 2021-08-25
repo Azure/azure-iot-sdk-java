@@ -19,7 +19,7 @@ public class Thermostat {
     private static final String deviceId = System.getenv("IOTHUB_DEVICE_ID");
 
     private static TwinClient twinClient;
-    private static DirectMethodClient methodClient;
+    private static DirectMethodsClient methodClient;
 
     public static void main(String[] args) throws Exception {
         RunSample();
@@ -39,7 +39,7 @@ public class Thermostat {
     private static void InitializeServiceClient()
     {
         twinClient = new TwinClient(iotHubConnectionString);
-        methodClient = new DirectMethodClient(iotHubConnectionString);
+        methodClient = new DirectMethodsClient(iotHubConnectionString);
     }
 
     private static void GetAndUpdateTwin() throws IOException, IotHubException {

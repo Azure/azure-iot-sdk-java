@@ -59,7 +59,7 @@ public class DeviceTestManager
     {
         if (enableMethod)
         {
-            /* Enable DirectMethodClient on the device client using the callbacks from the DeviceEmulator */
+            /* Enable DirectMethodsClient on the device client using the callbacks from the DeviceEmulator */
             deviceEmulator.subscribeToDeviceMethod();
         }
 

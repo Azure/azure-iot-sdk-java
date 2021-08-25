@@ -26,33 +26,33 @@ import java.util.Objects;
 /**
  * The client to directly invoke direct methods on devices and modules in IoT hub.
  */
-public class DirectMethodClient
+public class DirectMethodsClient
 {
     private Integer requestId = 0;
 
-    private final DirectMethodClientOptions options;
+    private final DirectMethodsClientOptions options;
     private final String hostName;
     private TokenCredentialCache credentialCache;
     private AzureSasCredential azureSasCredential;
     private IotHubConnectionString iotHubConnectionString;
 
     /**
-     * Create a DirectMethodClient instance from the information in the connection string.
+     * Create a DirectMethodsClient instance from the information in the connection string.
      *
      * @param connectionString is the IoTHub connection string.
      */
-    public DirectMethodClient(String connectionString)
+    public DirectMethodsClient(String connectionString)
     {
-        this(connectionString, DirectMethodClientOptions.builder().build());
+        this(connectionString, DirectMethodsClientOptions.builder().build());
     }
 
     /**
-     * Create a DirectMethodClient instance from the information in the connection string.
+     * Create a DirectMethodsClient instance from the information in the connection string.
      *
      * @param connectionString is the IoTHub connection string.
      * @param options the configurable options for each operation on this client. May not be null.
      */
-    public DirectMethodClient(String connectionString, DirectMethodClientOptions options)
+    public DirectMethodsClient(String connectionString, DirectMethodsClientOptions options)
     {
         Objects.requireNonNull(options);
         if (Tools.isNullOrEmpty(connectionString))
@@ -66,26 +66,26 @@ public class DirectMethodClient
     }
 
     /**
-     * Create a new DirectMethodClient instance.
+     * Create a new DirectMethodsClient instance.
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
      * this library when they are needed. The provided tokens must be Json Web Tokens.
      */
-    public DirectMethodClient(String hostName, TokenCredential credential)
+    public DirectMethodsClient(String hostName, TokenCredential credential)
     {
-        this(hostName, credential, DirectMethodClientOptions.builder().build());
+        this(hostName, credential, DirectMethodsClientOptions.builder().build());
     }
 
     /**
-     * Create a new DirectMethodClient instance.
+     * Create a new DirectMethodsClient instance.
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
      * this library when they are needed. The provided tokens must be Json Web Tokens.
      * @param options The connection options to use when connecting to the service.
      */
-    public DirectMethodClient(String hostName, TokenCredential credential, DirectMethodClientOptions options)
+    public DirectMethodsClient(String hostName, TokenCredential credential, DirectMethodsClientOptions options)
     {
         Objects.requireNonNull(credential, "TokenCredential cannot be null");
         Objects.requireNonNull(options, "options cannot be null");
@@ -100,24 +100,24 @@ public class DirectMethodClient
     }
 
     /**
-     * Create a new DirectMethodClient instance.
+     * Create a new DirectMethodsClient instance.
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
      */
-    public DirectMethodClient(String hostName, AzureSasCredential azureSasCredential)
+    public DirectMethodsClient(String hostName, AzureSasCredential azureSasCredential)
     {
-        this(hostName, azureSasCredential, DirectMethodClientOptions.builder().build());
+        this(hostName, azureSasCredential, DirectMethodsClientOptions.builder().build());
     }
 
     /**
-     * Create a new DirectMethodClient instance.
+     * Create a new DirectMethodsClient instance.
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
      * @param options The connection options to use when connecting to the service.
      */
-    public DirectMethodClient(String hostName, AzureSasCredential azureSasCredential, DirectMethodClientOptions options)
+    public DirectMethodsClient(String hostName, AzureSasCredential azureSasCredential, DirectMethodsClientOptions options)
     {
         Objects.requireNonNull(azureSasCredential, "azureSasCredential cannot be null");
         Objects.requireNonNull(options, "options cannot be null");

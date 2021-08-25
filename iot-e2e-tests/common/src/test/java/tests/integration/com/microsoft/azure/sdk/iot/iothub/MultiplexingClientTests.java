@@ -35,8 +35,8 @@ import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodClient;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodClientOptions;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodsClient;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodsClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClientOptions;
@@ -671,7 +671,7 @@ public class MultiplexingClientTests extends IntegrationTest
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
         testInstance.multiplexingClient.open();
-        DirectMethodClient directMethodServiceClientClient = new DirectMethodClient(iotHubConnectionString);
+        DirectMethodsClient directMethodServiceClientClient = new DirectMethodsClient(iotHubConnectionString);
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
@@ -693,7 +693,7 @@ public class MultiplexingClientTests extends IntegrationTest
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
         testInstance.multiplexingClient.open();
-        DirectMethodClient directMethodServiceClientClient = new DirectMethodClient(iotHubConnectionString);
+        DirectMethodsClient directMethodServiceClientClient = new DirectMethodsClient(iotHubConnectionString);
         List<DeviceMethodCallback> deviceMethodCallbacks = new ArrayList<>();
         List<String> expectedMethodNames = new ArrayList<>();
 
@@ -725,7 +725,7 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.multiplexingClient.close();
     }
 
-    private static void testDeviceMethod(DirectMethodClient directMethodServiceClientClient, String deviceId, String expectedMethodName, DeviceMethodCallback deviceMethodCallback) throws IOException, IotHubException, InterruptedException {
+    private static void testDeviceMethod(DirectMethodsClient directMethodServiceClientClient, String deviceId, String expectedMethodName, DeviceMethodCallback deviceMethodCallback) throws IOException, IotHubException, InterruptedException {
         // Give the method subscription some extra buffer time before invoking the method
         Thread.sleep(1000);
 
@@ -1811,8 +1811,8 @@ public class MultiplexingClientTests extends IntegrationTest
         TwinClient twinClientServiceClient =
             new TwinClient(iotHubConnectionString, TwinClientOptions.builder().httpReadTimeout(0).build());
 
-        DirectMethodClient directMethodServiceClientClient =
-            new DirectMethodClient(iotHubConnectionString, DirectMethodClientOptions.builder().httpReadTimeout(0).build());
+        DirectMethodsClient directMethodServiceClientClient =
+            new DirectMethodsClient(iotHubConnectionString, DirectMethodsClientOptions.builder().httpReadTimeout(0).build());
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
