@@ -137,6 +137,26 @@ public class RegistryManagerTests extends IntegrationTest
     }
 
     @Test
+    public void serviceValidatesSymmetricKey() throws IOException, IotHubException
+    {
+        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
+        Device device = Device.createDevice(testInstance.deviceId, AuthenticationType.SAS);
+        SymmetricKey symmetricKey = new SymmetricKey();
+        symmetricKey.setPrimaryKey("1");
+        symmetricKey.setSecondaryKey("2");
+        device.setSymmetricKey(symmetricKey);
+        try
+        {
+            testInstance.registryManager.addDevice(device);
+            fail("Adding the device should have failed since an invalid symmetric key was provided");
+        }
+        catch (IotHubBadFormatException ex)
+        {
+            // expected throw
+        }
+    }
+
+    @Test
     public void deviceLifecycleWithAzureSasCredential() throws Exception
     {
         RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance(buildRegistryManagerWithAzureSasCredential());
