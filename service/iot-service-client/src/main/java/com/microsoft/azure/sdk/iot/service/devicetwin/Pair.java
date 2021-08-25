@@ -9,7 +9,6 @@ public class Pair
 {
     private final String key;
     private Object value;
-    private static final int MAX_ALLOWABLE_KEY_LENGTH = 128;
 
     public Pair(String key, Object value) throws IllegalArgumentException
     {

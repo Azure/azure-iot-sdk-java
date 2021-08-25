@@ -27,6 +27,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException
 import com.microsoft.azure.sdk.iot.device.exceptions.UnauthorizedException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.service.DeviceStatus;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
@@ -34,6 +35,7 @@ import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethodClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
@@ -88,7 +90,7 @@ import static junit.framework.TestCase.*;
 @RunWith(Parameterized.class)
 public class MultiplexingClientTests extends IntegrationTest
 {
-    private static final int DEVICE_MULTIPLEX_COUNT = 10;
+    private static final int DEVICE_MULTIPLEX_COUNT = 3;
 
     private static final int MESSAGE_SEND_TIMEOUT_MILLIS = 60 * 1000;
     private static final int FAULT_INJECTION_RECOVERY_TIMEOUT_MILLIS = 2 * 60 * 1000;
@@ -239,6 +241,22 @@ public class MultiplexingClientTests extends IntegrationTest
     }
 
     @Test
+    public void openClientWithRetry() throws Exception
+    {
+        testInstance.setup(DEVICE_MULTIPLEX_COUNT);
+        testInstance.multiplexingClient.open(true);
+        testInstance.multiplexingClient.close();
+    }
+
+    @Test
+    public void openClientWithRetryWithoutRegisteredDevices() throws Exception
+    {
+        testInstance.setup(0);
+        testInstance.multiplexingClient.open(true);
+        testInstance.multiplexingClient.close();
+    }
+
+    @Test
     public void sendMessages() throws Exception
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
@@ -247,6 +265,27 @@ public class MultiplexingClientTests extends IntegrationTest
         testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray);
 
         testInstance.multiplexingClient.close();
+    }
+
+    @Test
+    public void connectionStatusCallbackExecutedWithNoDevices() throws Exception
+    {
+        // Even with no devices registered to a multiplexed connection, the connection status callback should execute
+        // when the multiplexed connection opens and closes.
+        testInstance.setup(0);
+        ConnectionStatusChangeTracker connectionStatusChangeTracker = new ConnectionStatusChangeTracker();
+        testInstance.multiplexingClient.registerConnectionStatusChangeCallback(connectionStatusChangeTracker, null);
+        testInstance.multiplexingClient.open();
+
+        assertTrue(
+            "Connection status callback never executed with CONNECTED status after opening multiplexing client with no devices registered",
+            connectionStatusChangeTracker.isOpen);
+
+        testInstance.multiplexingClient.close();
+
+        assertTrue(
+            "Connection status callback never executed with DISCONNECTED status and CLIENT_CLOSED reason.",
+            connectionStatusChangeTracker.clientClosedGracefully);
     }
 
     // MultiplexingClient should be able to open an AMQP connection to IoTHub with no device sessions, and should
@@ -451,33 +490,6 @@ public class MultiplexingClientTests extends IntegrationTest
         log.debug("Open time: " + (finishOpenTime - startOpenTime) / 1000.0);
         log.debug("Send time: " + (finishSendTime - startSendTime) / 1000.0);
         log.debug("Close time: " + (finishCloseTime - startCloseTime) / 1000.0);
-    }
-
-    @ContinuousIntegrationTest
-    @Test
-    public void sendMessagesMaxDevicesAllowedRegisterAfterOpen() throws Exception
-    {
-        // Right now, AMQP connections can do up to 1000 devices which is consistent with the IoTHub advertised limit
-        // But AMQPS_WS is limited to ~500 for some reason. Still needs investigation.
-        if (testInstance.protocol == IotHubClientProtocol.AMQPS)
-        {
-            testInstance.setup(MultiplexingClient.MAX_MULTIPLEX_DEVICE_COUNT_AMQPS);
-        }
-        else
-        {
-            testInstance.setup(MultiplexingClient.MAX_MULTIPLEX_DEVICE_COUNT_AMQPS_WS);
-        }
-
-        // unregister all but the 0th device so that they can all be registered after opening the connection
-        testInstance.multiplexingClient.unregisterDeviceClients(testInstance.deviceClientArray.subList(1, testInstance.deviceClientArray.size()));
-
-        testInstance.multiplexingClient.open();
-
-        testInstance.multiplexingClient.registerDeviceClients(testInstance.deviceClientArray);
-
-        testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray);
-
-        testInstance.multiplexingClient.close();
     }
 
     @Test
@@ -824,6 +836,9 @@ public class MultiplexingClientTests extends IntegrationTest
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
+            // The twin for this test identity is about to be modified. Set this flag so that the test identity recycler re-uses this identity only for tests
+            // that don't care about the initial twin state of an identity
+            testInstance.testDevicesArrayIdentity.get(i).twinUpdated = true;
             String expectedPropertyKey = UUID.randomUUID().toString();
             String expectedPropertyValue = UUID.randomUUID().toString();
             TwinPropertyCallBackImpl twinPropertyCallBack = new TwinPropertyCallBackImpl(expectedPropertyKey, expectedPropertyValue);
@@ -857,14 +872,18 @@ public class MultiplexingClientTests extends IntegrationTest
         String expectedPropertyKey = UUID.randomUUID().toString();
         String expectedPropertyValue = UUID.randomUUID().toString();
         List<TwinPropertyCallBackImpl> twinPropertyCallBacks = new ArrayList<>();
-        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++) {
-
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            // The twin for this test identity is about to be modified. Set this flag so that the test identity recycler re-uses this identity only for tests
+            // that don't care about the initial twin state of an identity
+            testInstance.testDevicesArrayIdentity.get(i).twinUpdated = true;
             TwinPropertyCallBackImpl twinPropertyCallBack = new TwinPropertyCallBackImpl(expectedPropertyKey, expectedPropertyValue);
             twinPropertyCallBacks.add(twinPropertyCallBack);
             startTwin(testInstance.deviceClientArray.get(i), new EventCallback(IotHubStatusCode.OK), twinPropertyCallBack);
         }
 
-        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++) {
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
             // Testing subscribing to desired properties
             testDesiredPropertiesFlow(testInstance.deviceClientArray.get(i), deviceTwinServiceClient, twinPropertyCallBacks.get(i), expectedPropertyKey, expectedPropertyValue);
 
@@ -876,7 +895,8 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.multiplexingClient.unregisterDeviceClients(testInstance.deviceClientArray);
         testInstance.multiplexingClient.registerDeviceClients(testInstance.deviceClientArray);
 
-        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++) {
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
             boolean expectedExceptionThrown = false;
             try
             {
@@ -894,14 +914,18 @@ public class MultiplexingClientTests extends IntegrationTest
             assertTrue("Expected twin method to throw since twin has not been started since re-registering client", expectedExceptionThrown);
         }
 
-        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++) {
-
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            // The twin for this test identity is about to be modified. Set this flag so that the test identity recycler re-uses this identity only for tests
+            // that don't care about the initial twin state of an identity
+            testInstance.testDevicesArrayIdentity.get(i).twinUpdated = true;
             TwinPropertyCallBackImpl twinPropertyCallBack = new TwinPropertyCallBackImpl(expectedPropertyKey, expectedPropertyValue);
             twinPropertyCallBacks.add(twinPropertyCallBack);
             startTwin(testInstance.deviceClientArray.get(i), new EventCallback(IotHubStatusCode.OK), twinPropertyCallBack);
         }
 
-        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++) {
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
             // Testing subscribing to desired properties
             testDesiredPropertiesFlow(testInstance.deviceClientArray.get(i), deviceTwinServiceClient, twinPropertyCallBacks.get(i), expectedPropertyKey, expectedPropertyValue);
 
@@ -1078,6 +1102,8 @@ public class MultiplexingClientTests extends IntegrationTest
     public void multiplexedConnectionRecoversFromDeviceSessionDropsSequential() throws Exception
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
+        ConnectionStatusChangeTracker multiplexedConnectionStatusChangeTracker = new ConnectionStatusChangeTracker();
+        testInstance.multiplexingClient.registerConnectionStatusChangeCallback(multiplexedConnectionStatusChangeTracker, null);
         ConnectionStatusChangeTracker[] connectionStatusChangeTrackers = new ConnectionStatusChangeTracker[DEVICE_MULTIPLEX_COUNT];
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
@@ -1097,8 +1123,8 @@ public class MultiplexingClientTests extends IntegrationTest
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             log.info("Starting loop for device {}", testInstance.deviceClientArray.get(i).getConfig().getDeviceId());
-            Message errorIjectionMessage = ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(1, 10);
-            Success messageSendSuccess = testSendingMessageFromDeviceClient(testInstance.deviceClientArray.get(i), errorIjectionMessage);
+            Message errorInjectionMessage = ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(1, 10);
+            Success messageSendSuccess = testSendingMessageFromDeviceClient(testInstance.deviceClientArray.get(i), errorInjectionMessage);
             waitForMessageToBeAcknowledged(messageSendSuccess, "Timed out waiting for error injection message to be acknowledged");
 
             // Now that error injection message has been sent, need to wait for the device session to drop
@@ -1120,6 +1146,8 @@ public class MultiplexingClientTests extends IntegrationTest
 
         // double check that the recovery of any particular device did not cause a device earlier in the array to lose connection
         testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray);
+
+        assertFalse(multiplexedConnectionStatusChangeTracker.wentDisconnectedRetrying);
 
         testInstance.multiplexingClient.close();
 
@@ -1149,8 +1177,8 @@ public class MultiplexingClientTests extends IntegrationTest
         // For each multiplexed device, use fault injection to drop the session and see if it can recover, one device at a time
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
-            Message errorIjectionMessage = ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(1, 10);
-            Success messageSendSuccess = testSendingMessageFromDeviceClient(testInstance.deviceClientArray.get(i), errorIjectionMessage);
+            Message errorInjectionMessage = ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(1, 10);
+            Success messageSendSuccess = testSendingMessageFromDeviceClient(testInstance.deviceClientArray.get(i), errorInjectionMessage);
             waitForMessageToBeAcknowledged(messageSendSuccess, "Timed out waiting for error injection message to be acknowledged");
         }
 
@@ -1494,6 +1522,217 @@ public class MultiplexingClientTests extends IntegrationTest
         registrationsUnwindForUnsupportedOperationExceptions(differentProtocolDeviceClient);
     }
 
+    // If you disable a device on an active multiplexed connection, that device session should drop and all the other
+    // device sessions should be unaffected.
+    @ContinuousIntegrationTest
+    @Test
+    public void disableDeviceAfterOpenAndAfterRegistration() throws Exception
+    {
+        testInstance.setup(DEVICE_MULTIPLEX_COUNT);
+        ConnectionStatusChangeTracker multiplexedConnectionStatusChangeTracker = new ConnectionStatusChangeTracker();
+        testInstance.multiplexingClient.registerConnectionStatusChangeCallback(multiplexedConnectionStatusChangeTracker, null);
+
+        ConnectionStatusChangeTracker[] connectionStatusChangeTrackers = new ConnectionStatusChangeTracker[DEVICE_MULTIPLEX_COUNT];
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            connectionStatusChangeTrackers[i] = new ConnectionStatusChangeTracker();
+            testInstance.deviceClientArray.get(i).registerConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
+        }
+
+        testInstance.multiplexingClient.open();
+
+        // Disable a device that is on the multiplexed connection and that already has an open session
+        Device deviceToDisable = registryManager.getDevice(testInstance.deviceIdentityArray.get(0).getDeviceId());
+        deviceToDisable.setStatus(DeviceStatus.Disabled);
+        registryManager.updateDevice(deviceToDisable);
+
+        try
+        {
+            // verify that the disabled device loses its device session
+            long startTime = System.currentTimeMillis();
+            while (!connectionStatusChangeTrackers[0].wentDisconnectedRetrying)
+            {
+                Thread.sleep(200);
+
+                if (System.currentTimeMillis() - startTime > FAULT_INJECTION_TIMEOUT_MILLIS)
+                {
+                    fail("Timed out waiting for the disabled device's client to report DISCONNECTED_RETRYING");
+                }
+            }
+
+            assertFalse(connectionStatusChangeTrackers[0].isOpen);
+
+            // Verify that the other devices on the multiplexed connection were unaffected
+            for (int i = 1; i < DEVICE_MULTIPLEX_COUNT; i++)
+            {
+                assertFalse(connectionStatusChangeTrackers[i].wentDisconnectedRetrying);
+                assertTrue(connectionStatusChangeTrackers[i].isOpen);
+            }
+
+            // Verify that the multiplexed connection itself was unaffected
+            assertFalse(multiplexedConnectionStatusChangeTracker.wentDisconnectedRetrying);
+            assertTrue(multiplexedConnectionStatusChangeTracker.isOpen);
+
+            // Verify that the other devices can still send telemetry
+            testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray.subList(1, DEVICE_MULTIPLEX_COUNT));
+
+            testInstance.multiplexingClient.close();
+        }
+        finally
+        {
+            deviceToDisable.setStatus(DeviceStatus.Enabled); // re enable the device in case it gets recycled
+            registryManager.updateDevice(deviceToDisable);
+        }
+    }
+
+    // If you register a disabled device to a multiplexed connection that hasn't opened yet, the open call should succeed
+    // but the disabled device's session should drop shortly afterwards and the other devices on the multiplexed connection
+    // should be unaffected.
+    @ContinuousIntegrationTest
+    @Test
+    public void disableDeviceBeforeOpen() throws Exception
+    {
+        testInstance.setup(DEVICE_MULTIPLEX_COUNT);
+
+        String deviceIdToDisable = testInstance.deviceIdentityArray.get(0).getDeviceId();
+
+        ConnectionStatusChangeTracker multiplexedConnectionStatusChangeTracker = new ConnectionStatusChangeTracker();
+        testInstance.multiplexingClient.registerConnectionStatusChangeCallback(multiplexedConnectionStatusChangeTracker, null);
+
+        ConnectionStatusChangeTracker[] connectionStatusChangeTrackers = new ConnectionStatusChangeTracker[DEVICE_MULTIPLEX_COUNT];
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            connectionStatusChangeTrackers[i] = new ConnectionStatusChangeTracker();
+            testInstance.deviceClientArray.get(i).registerConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
+        }
+
+        // Disable a device that will be on the multiplexed connection when the multiplexed connection hasn't opened yet
+        Device deviceToDisable = registryManager.getDevice(deviceIdToDisable);
+        deviceToDisable.setStatus(DeviceStatus.Disabled);
+        registryManager.updateDevice(deviceToDisable);
+
+        try
+        {
+            testInstance.multiplexingClient.open();
+
+            // verify that the disabled device eventually loses its device session
+            long startTime = System.currentTimeMillis();
+            while (!connectionStatusChangeTrackers[0].wentDisconnectedRetrying)
+            {
+                Thread.sleep(200);
+
+                if (System.currentTimeMillis() - startTime > FAULT_INJECTION_TIMEOUT_MILLIS)
+                {
+                    fail("Timed out waiting for the disabled device's client to report DISCONNECTED_RETRYING");
+                }
+            }
+
+            // Verify that the other devices on the multiplexed connection were unaffected
+            for (int i = 1; i < DEVICE_MULTIPLEX_COUNT; i++)
+            {
+                assertTrue(connectionStatusChangeTrackers[i].isOpen);
+            }
+
+            // Verify that the multiplexed connection itself was unaffected
+            assertFalse(multiplexedConnectionStatusChangeTracker.wentDisconnectedRetrying);
+            assertTrue(multiplexedConnectionStatusChangeTracker.isOpen);
+
+            // Verify that the other devices can still send telemetry
+            testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray.subList(1, DEVICE_MULTIPLEX_COUNT));
+
+            testInstance.multiplexingClient.close();
+        }
+        finally
+        {
+            deviceToDisable.setStatus(DeviceStatus.Enabled); // re enable the device in case it gets recycled
+            registryManager.updateDevice(deviceToDisable);
+        }
+    }
+
+    // If you register a disabled device to an active multiplexed connection, the other devices on the connection
+    // should not be affected nor should the multiplexed connection itself.
+    @ContinuousIntegrationTest
+    @Test
+    public void disableDeviceAfterOpenBeforeRegister() throws Exception
+    {
+        testInstance.setup(DEVICE_MULTIPLEX_COUNT);
+
+        // Only register the soon-to-be-disabled device after opening the multiplexing client
+        testInstance.multiplexingClient.unregisterDeviceClient(testInstance.deviceClientArray.get(0));
+
+        ConnectionStatusChangeTracker multiplexedConnectionStatusChangeTracker = new ConnectionStatusChangeTracker();
+        testInstance.multiplexingClient.registerConnectionStatusChangeCallback(multiplexedConnectionStatusChangeTracker, null);
+
+        ConnectionStatusChangeTracker[] connectionStatusChangeTrackers = new ConnectionStatusChangeTracker[DEVICE_MULTIPLEX_COUNT];
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            connectionStatusChangeTrackers[i] = new ConnectionStatusChangeTracker();
+            testInstance.deviceClientArray.get(i).registerConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
+        }
+
+        testInstance.multiplexingClient.open();
+
+        // Disable a device that will be on the multiplexed connection
+        Device deviceToDisable = registryManager.getDevice(testInstance.deviceIdentityArray.get(0).getDeviceId());
+        deviceToDisable.setStatus(DeviceStatus.Disabled);
+        registryManager.updateDevice(deviceToDisable);
+
+        try
+        {
+            try
+            {
+                testInstance.multiplexingClient.registerDeviceClient(testInstance.deviceClientArray.get(0));
+                fail("Registering a disabled device to an active multiplexing connection should have thrown an exception");
+            }
+            catch (MultiplexingClientDeviceRegistrationAuthenticationException ex)
+            {
+                assertTrue(ex.getRegistrationExceptions().containsKey(deviceToDisable.getDeviceId()));
+            }
+
+            // verify that the disabled device eventually loses its device session
+            long startTime = System.currentTimeMillis();
+            while (!connectionStatusChangeTrackers[0].wentDisconnectedRetrying)
+            {
+                Thread.sleep(200);
+
+                if (System.currentTimeMillis() - startTime > FAULT_INJECTION_TIMEOUT_MILLIS)
+                {
+                    fail("Timed out waiting for the disabled device's client to report DISCONNECTED_RETRYING");
+                }
+            }
+
+            assertFalse("Device failed to be registered, but the multiplexing client still reports it as registered",
+                testInstance.multiplexingClient.isDeviceRegistered(deviceToDisable.getDeviceId()));
+
+            for (int i = 1; i < DEVICE_MULTIPLEX_COUNT; i++)
+            {
+                assertTrue("One device failed to be registered, but the other devices should still have been registered.",
+                    testInstance.multiplexingClient.isDeviceRegistered(testInstance.deviceClientArray.get(i).getConfig().getDeviceId()));
+            }
+
+            // Verify that the other devices on the multiplexed connection were unaffected
+            for (int i = 1; i < DEVICE_MULTIPLEX_COUNT; i++)
+            {
+                assertFalse(connectionStatusChangeTrackers[i].wentDisconnectedRetrying);
+                assertTrue(connectionStatusChangeTrackers[i].isOpen);
+            }
+
+            // Verify that the multiplexed connection itself was unaffected
+            assertFalse(multiplexedConnectionStatusChangeTracker.wentDisconnectedRetrying);
+            assertTrue(multiplexedConnectionStatusChangeTracker.isOpen);
+
+            // Verify that the other devices can still send telemetry
+            testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray.subList(1, DEVICE_MULTIPLEX_COUNT));
+
+            testInstance.multiplexingClient.close();
+        }
+        finally
+        {
+            deviceToDisable.setStatus(DeviceStatus.Enabled); // re enable the device in case it gets recycled
+            registryManager.updateDevice(deviceToDisable);
+        }
+    }
+
     public void registrationsUnwindForUnsupportedOperationExceptions(DeviceClient unsupportedDeviceClient) throws Exception
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
@@ -1521,6 +1760,145 @@ public class MultiplexingClientTests extends IntegrationTest
         }
     }
 
+    @ContinuousIntegrationTest
+    @Test
+    public void failedRegistrationDoesNotAffectSubsequentRegistrations() throws Exception
+    {
+        testInstance.setup(0);
+        testInstance.multiplexingClient.open();
+
+        TestDeviceIdentity testDeviceIdentity =
+            Tools.getTestDevice(iotHubConnectionString, this.testInstance.protocol, AuthenticationType.SAS, false);
+
+        String deviceConnectionString = registryManager.getDeviceConnectionString(testDeviceIdentity.getDevice());
+        String deviceNotFoundConnectionString = deviceConnectionString.replace(testDeviceIdentity.getDeviceId(), testDeviceIdentity.getDeviceId().toUpperCase());
+        DeviceClient validDeviceClient = new DeviceClient(deviceConnectionString, testInstance.protocol);
+        DeviceClient invalidDeviceClient = new DeviceClient(deviceNotFoundConnectionString, testInstance.protocol);
+
+        try
+        {
+            testInstance.multiplexingClient.registerDeviceClient(invalidDeviceClient);
+            fail("Expected multiplexingClient to throw since it registered a device that did not exist.");
+        }
+        catch (MultiplexingClientDeviceRegistrationAuthenticationException e)
+        {
+            // expected throw since the deviceId in the connection string does not exist, ignore
+        }
+
+        testInstance.multiplexingClient.registerDeviceClient(validDeviceClient);
+
+        testSendingMessageFromDeviceClient(validDeviceClient);
+
+        testInstance.multiplexingClient.close();
+    }
+
+    // If a multiplexed device is subscribed to twin and/or methods and/or cloud to device messages, then loses its
+    // session due to network issues, it should still be subscribed to twin and/or methods and/or cloud to device messages
+    // after it finishes reconnection
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
+    @Test
+    public void multiplexedSessionsRecoverSubscriptionsFromDeviceSessionDrops() throws Exception
+    {
+        testInstance.setup(DEVICE_MULTIPLEX_COUNT, MultiplexingClientOptions.builder().build(), true);
+        ConnectionStatusChangeTracker multiplexedConnectionStatusChangeTracker = new ConnectionStatusChangeTracker();
+        testInstance.multiplexingClient.registerConnectionStatusChangeCallback(multiplexedConnectionStatusChangeTracker, null);
+        ConnectionStatusChangeTracker[] connectionStatusChangeTrackers = new ConnectionStatusChangeTracker[DEVICE_MULTIPLEX_COUNT];
+
+        DeviceTwin deviceTwinServiceClient =
+            new DeviceTwin(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(0).build());
+
+        DeviceMethod deviceMethodServiceClient =
+            new DeviceMethod(iotHubConnectionString, DeviceMethodClientOptions.builder().httpReadTimeout(0).build());
+
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            connectionStatusChangeTrackers[i] = new ConnectionStatusChangeTracker();
+            testInstance.deviceClientArray.get(i).registerConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
+        }
+
+        testInstance.multiplexingClient.open();
+
+        // Subscribe to methods for all multiplexed clients
+        DeviceMethodCallback[] deviceMethodCallbacks = new DeviceMethodCallback[DEVICE_MULTIPLEX_COUNT];
+        String[] expectedMethodNames = new String[DEVICE_MULTIPLEX_COUNT];
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            expectedMethodNames[i] = UUID.randomUUID().toString();
+            deviceMethodCallbacks[i] = new DeviceMethodCallback(expectedMethodNames[i]);
+            subscribeToDeviceMethod(testInstance.deviceClientArray.get(i), deviceMethodCallbacks[i]);
+        }
+
+        // Start twin for all multiplexed clients
+        String[] expectedPropertyKeys = new String[DEVICE_MULTIPLEX_COUNT];
+        String[] expectedPropertyValues = new String[DEVICE_MULTIPLEX_COUNT];
+        TwinPropertyCallBackImpl[] twinPropertyCallBacks = new TwinPropertyCallBackImpl[DEVICE_MULTIPLEX_COUNT];
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            // The twin for this test identity is about to be modified. Set this flag so that the test identity recycler re-uses this identity only for tests
+            // that don't care about the initial twin state of an identity
+            testInstance.testDevicesArrayIdentity.get(i).twinUpdated = true;
+            expectedPropertyKeys[i] = UUID.randomUUID().toString();
+            expectedPropertyValues[i] = UUID.randomUUID().toString();
+            twinPropertyCallBacks[i] = new TwinPropertyCallBackImpl(expectedPropertyKeys[i], expectedPropertyValues[i]);
+            startTwin(testInstance.deviceClientArray.get(i), new EventCallback(IotHubStatusCode.OK), twinPropertyCallBacks[i]);
+        }
+
+        // Subscribe to cloud to device messages for all multiplexed clients
+        String[] expectedMessageCorrelationIds = new String[DEVICE_MULTIPLEX_COUNT];
+        MessageCallback[] messageCallbacks = new MessageCallback[DEVICE_MULTIPLEX_COUNT];
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            expectedMessageCorrelationIds[i] = UUID.randomUUID().toString();
+            messageCallbacks[i] = new MessageCallback(expectedMessageCorrelationIds[i]);
+            testInstance.deviceClientArray.get(i).setMessageCallback(messageCallbacks[i], null);
+        }
+
+        // For each multiplexed device, use fault injection to drop the session and see if it can recover, one device at a time
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            log.info("Starting loop for device {}", testInstance.deviceClientArray.get(i).getConfig().getDeviceId());
+            Message errorInjectionMessage = ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(1, 10);
+            Success messageSendSuccess = testSendingMessageFromDeviceClient(testInstance.deviceClientArray.get(i), errorInjectionMessage);
+            waitForMessageToBeAcknowledged(messageSendSuccess, "Timed out waiting for error injection message to be acknowledged");
+
+            // Now that error injection message has been sent, need to wait for the device session to drop
+            assertConnectionStateCallbackFiredDisconnectedRetrying(connectionStatusChangeTrackers[i]);
+
+            // Next, the faulted device should eventually recover
+            log.info("Waiting for device {} to reconnect", testInstance.deviceClientArray.get(i).getConfig().getDeviceId());
+            assertConnectionStateCallbackFiredConnected(connectionStatusChangeTrackers[i], FAULT_INJECTION_RECOVERY_TIMEOUT_MILLIS);
+
+            for (int j = i + 1; j < DEVICE_MULTIPLEX_COUNT; j++)
+            {
+                // devices above index i have not been deliberately faulted yet, so make sure they haven't seen a DISCONNECTED_RETRYING event yet.
+                assertFalse("Multiplexed device that hasn't been deliberately faulted yet saw an unexpected DISCONNECTED_RETRYING connection status callback", connectionStatusChangeTrackers[j].wentDisconnectedRetrying);
+            }
+        }
+
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            // test d2c telemetry
+            testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray);
+
+            // test receiving direct methods
+            testDeviceMethod(deviceMethodServiceClient, testInstance.deviceIdentityArray.get(i).getDeviceId(), expectedMethodNames[i], deviceMethodCallbacks[i]);
+
+            // Send desired property update to multiplexed device
+            testDesiredPropertiesFlow(testInstance.deviceClientArray.get(i), deviceTwinServiceClient, twinPropertyCallBacks[i], expectedPropertyKeys[i], expectedPropertyValues[i]);
+
+            // Testing sending reported properties
+            testReportedPropertiesFlow(testInstance.deviceClientArray.get(i), deviceTwinServiceClient, expectedPropertyKeys[i], expectedPropertyValues[i]);
+
+            testReceivingCloudToDeviceMessage(testInstance.deviceIdentityArray.get(i).getDeviceId(), messageCallbacks[i], expectedMessageCorrelationIds[i]);
+        }
+
+        assertFalse(multiplexedConnectionStatusChangeTracker.wentDisconnectedRetrying);
+
+        testInstance.multiplexingClient.close();
+
+        assertMultiplexedDevicesClosedGracefully(connectionStatusChangeTrackers);
+    }
 
     private static void assertMultiplexedDevicesClosedGracefully(ConnectionStatusChangeTracker[] connectionStatusChangeTrackers)
     {

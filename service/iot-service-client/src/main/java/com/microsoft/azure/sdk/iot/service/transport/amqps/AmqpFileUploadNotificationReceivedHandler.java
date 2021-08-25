@@ -5,6 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
+import com.azure.core.credential.AzureSasCredential;
+import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
@@ -15,9 +17,11 @@ import org.apache.qpid.proton.amqp.messaging.Accepted;
 import org.apache.qpid.proton.amqp.messaging.Data;
 import org.apache.qpid.proton.amqp.messaging.Released;
 import org.apache.qpid.proton.amqp.messaging.Source;
-import org.apache.qpid.proton.engine.*;
-import org.apache.qpid.proton.reactor.FlowController;
-import org.apache.qpid.proton.reactor.Handshaker;
+import org.apache.qpid.proton.engine.Delivery;
+import org.apache.qpid.proton.engine.EndpointState;
+import org.apache.qpid.proton.engine.Event;
+import org.apache.qpid.proton.engine.Receiver;
+import org.apache.qpid.proton.engine.Session;
 
 import javax.net.ssl.SSLContext;
 import java.util.HashMap;
@@ -50,17 +54,41 @@ public class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHan
      * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
      *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.
      */
-    AmqpFileUploadNotificationReceivedHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent, ProxyOptions proxyOptions, SSLContext sslContext)
+    AmqpFileUploadNotificationReceivedHandler(
+            String hostName,
+            String userName,
+            String sasToken,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
     {
         super(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, sslContext);
-
         this.amqpFeedbackReceivedEvent = amqpFeedbackReceivedEvent;
+    }
 
-        // Add a child handler that performs some default handshaking
-        // behaviour.
+    AmqpFileUploadNotificationReceivedHandler(
+            String hostName,
+            TokenCredential credential,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
+    {
+        super(hostName, credential, iotHubServiceClientProtocol, proxyOptions, sslContext);
+        this.amqpFeedbackReceivedEvent = amqpFeedbackReceivedEvent;
+    }
 
-        add(new Handshaker());
-        add(new FlowController());
+    AmqpFileUploadNotificationReceivedHandler(
+            String hostName,
+            AzureSasCredential sasTokenProvider,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
+    {
+        super(hostName, sasTokenProvider, iotHubServiceClientProtocol, proxyOptions, sslContext);
+        this.amqpFeedbackReceivedEvent = amqpFeedbackReceivedEvent;
     }
 
     @Override
@@ -81,19 +109,16 @@ public class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHan
     @Override
     public void onDelivery(Event event)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_004: [The event handler shall get the Link, Receiver and Delivery (Proton) objects from the event]
         Receiver recv = (Receiver)event.getLink();
         Delivery delivery = recv.current();
 
         if (delivery.isReadable() && !delivery.isPartial() && delivery.getLink().getName().equalsIgnoreCase(FILE_NOTIFICATION_RECEIVE_TAG))
         {
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_005: [The event handler shall read the received buffer]
             int size = delivery.pending();
             byte[] buffer = new byte[size];
             int read = recv.recv(buffer, 0, buffer.length);
             recv.advance();
 
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_006: [The event handler shall create a Message (Proton) object from the decoded buffer]
             org.apache.qpid.proton.message.Message msg = Proton.message();
             msg.decode(buffer, 0, read);
           
@@ -116,7 +141,6 @@ public class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHan
                 delivery.settle();
             }
 
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_009: [The event handler shall call the FeedbackReceived callback if it has been initialized]
             if (amqpFeedbackReceivedEvent != null)
             {
                 if (msg.getBody() instanceof Data)
@@ -129,50 +153,35 @@ public class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHan
     }
 
     @Override
-    public void onConnectionInit(Event event)
+    public void onAuthenticationSucceeded()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_011: [The event handler shall set the host name on the connection]
-        Connection conn = event.getConnection();
-        conn.setHostname(hostName);
-
-        // Every session or link could have their own handler(s) if we
-        // wanted simply by adding the handler to the given session
-        // or link
-
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_012: [The event handler shall create a Session (Proton) object from the connection]
-        Session ssn = conn.session();
-
-        // If a link doesn't have an event handler, the events go to
-        // its parent session. If the session doesn't have a handler
-        // the events go to its parent connection. If the connection
-        // doesn't have a handler, the events go to the reactor.
-
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_013: [The event handler shall create a Receiver (Proton) object and set the protocol tag on it to a predefined constant]
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_017: [The Receiver object shall have the properties set to service client version identifier.]
-        Map<Symbol, Object> properties = new HashMap<>();
-        properties.put(Symbol.getSymbol(TransportUtils.versionIdentifierKey), TransportUtils.USER_AGENT_STRING);
-
-        fileUploadNotificationReceiverLink = ssn.receiver(FILE_NOTIFICATION_RECEIVE_TAG);
-        fileUploadNotificationReceiverLink.setProperties(properties);
-
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_014: [The event handler shall open the Connection, the Session and the Receiver object]
-        log.debug("Opening connection, session and link for amqp file upload notification receiver");
-        conn.open();
-        ssn.open();
-        fileUploadNotificationReceiverLink.open();
-    }
-
-    @Override
-    public void onLinkInit(Event event)
-    {
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_015: [The event handler shall create a new Target (Proton) object using the given endpoint address]
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_016: [The event handler shall get the Link (Proton) object and set its target to the created Target (Proton) object]
-        Link link = event.getLink();
-        if (event.getLink().getName().equals(FILE_NOTIFICATION_RECEIVE_TAG))
+        // Only open the session and receiver link if this authentication was for the first open. This callback
+        // will be executed again after every proactive renewal, but nothing needs to be done after a proactive renewal
+        if (fileUploadNotificationReceiverLink == null)
         {
+            // Every session or link could have their own handler(s) if we
+            // wanted simply by adding the handler to the given session
+            // or link
+
+            Session ssn = this.connection.session();
+
+            // If a link doesn't have an event handler, the events go to
+            // its parent session. If the session doesn't have a handler
+            // the events go to its parent connection. If the connection
+            // doesn't have a handler, the events go to the reactor.
+
+            Map<Symbol, Object> properties = new HashMap<>();
+            properties.put(Symbol.getSymbol(TransportUtils.versionIdentifierKey), TransportUtils.USER_AGENT_STRING);
+
+            fileUploadNotificationReceiverLink = ssn.receiver(FILE_NOTIFICATION_RECEIVE_TAG);
+            fileUploadNotificationReceiverLink.setProperties(properties);
+
+            log.debug("Opening connection, session and link for amqp file upload notification receiver");
+            ssn.open();
+            fileUploadNotificationReceiverLink.open();
             Source source = new Source();
             source.setAddress(FILENOTIFICATION_ENDPOINT);
-            link.setSource(source);
+            fileUploadNotificationReceiverLink.setSource(source);
         }
     }
 }

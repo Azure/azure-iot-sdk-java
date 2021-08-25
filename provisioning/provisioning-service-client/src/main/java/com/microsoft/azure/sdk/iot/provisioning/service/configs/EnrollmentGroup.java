@@ -91,6 +91,7 @@ import java.util.Date;
  *
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollmentgroup">Device Enrollment Group</a>
  */
+@SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
 public class EnrollmentGroup extends Serializable
 {
     // the enrollment group identifier
@@ -295,6 +296,7 @@ public class EnrollmentGroup extends Serializable
         this.setAllocationPolicy(result.getAllocationPolicy());
         this.setCustomAllocationDefinition(result.getCustomAllocationDefinition());
         this.setReprovisionPolicy(result.getReprovisionPolicy());
+        this.setCapabilities(result.getCapabilities());
     }
 
     /**

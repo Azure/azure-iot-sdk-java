@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUploadTask;
+import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
@@ -85,6 +86,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      * The number of milliseconds the transport will wait between
      * sending out messages.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public static long SEND_PERIOD_MILLIS = 10L;
 
@@ -95,14 +97,15 @@ public final class DeviceClient extends InternalClient implements Closeable
      * The number of milliseconds the transport will wait between
      * polling for messages.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public static long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public static long RECEIVE_PERIOD_MILLIS_MQTT = 10L;
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public static long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
-
-    protected long RECEIVE_PERIOD_MILLIS;
 
     private IoTHubConnectionType ioTHubConnectionType = IoTHubConnectionType.UNKNOWN;
 
@@ -411,6 +414,21 @@ public final class DeviceClient extends InternalClient implements Closeable
      */
     public void open() throws IOException
     {
+        this.open(false);
+    }
+
+    /**
+     * Starts asynchronously sending and receiving messages from an IoT hub. If
+     * the client is already open, the function shall do nothing.
+     *
+     * @param withRetry if true, this open call will apply the retry policy to allow for the open call to be retried if
+     * it fails. Both the operation timeout set in {@link #setOperationTimeout(long)} and the retry policy set in
+     * {{@link #setRetryPolicy(RetryPolicy)}} will be respected while retrying to open the connection.
+     *
+     * @throws IOException if a connection to an IoT hub cannot be established.
+     */
+    public void open(boolean withRetry) throws IOException
+    {
         if (this.ioTHubConnectionType == IoTHubConnectionType.USE_MULTIPLEXING_CLIENT)
         {
             throw new UnsupportedOperationException(MULTIPLEXING_OPEN_ERROR_MESSAGE);
@@ -432,20 +450,20 @@ public final class DeviceClient extends InternalClient implements Closeable
         else
         {
             // Codes_SRS_DEVICECLIENT_21_006: [The open shall invoke super.open().]
-            super.open();
+            super.open(withRetry);
         }
 
         log.info("Device client opened successfully");
     }
 
     /**
-     * Completes all current outstanding requests and closes the IoT Hub client.
+     * Completes all current outstanding requests and closes the IoT hub client.
      * Must be called to terminate the background thread that is sending data to
-     * IoT Hub. After {@code closeNow()} is called, the IoT Hub client is no longer
+     * IoT hub. After {@code closeNow()} is called, the IoT hub client is no longer
      * usable. If the client is already closed, the function shall do nothing.
      * @deprecated : As of release 1.1.25 this call is replaced by {@link #closeNow()}
      *
-     * @throws IOException if the connection to an IoT Hub cannot be closed.
+     * @throws IOException if the connection to an IoT hub cannot be closed.
      */
     @Deprecated
     public void close() throws IOException
@@ -479,15 +497,15 @@ public final class DeviceClient extends InternalClient implements Closeable
     }
 
     /**
-     * Closes the IoT Hub client by releasing any resources held by client. When
+     * Closes the IoT hub client by releasing any resources held by client. When
      * closeNow is called all the messages that were in transit or pending to be
      * sent will be informed to the user in the callbacks and any existing
      * connection to IotHub will be closed.
      * Must be called to terminate the background thread that is sending data to
-     * IoT Hub. After {@code closeNow()} is called, the IoT Hub client is no longer
+     * IoT hub. After {@code closeNow()} is called, the IoT hub client is no longer
      * usable. If the client is already closed, the function shall do nothing.
      *
-     * @throws IOException if the connection to an IoT Hub cannot be closed.
+     * @throws IOException if the connection to an IoT hub cannot be closed.
      */
     public void closeNow() throws IOException
     {
@@ -521,7 +539,7 @@ public final class DeviceClient extends InternalClient implements Closeable
     }
 
     /**
-     * Asynchronously upload a stream to the IoT Hub.
+     * Asynchronously upload a stream to the IoT hub.
      *
      * NOTE: IotHub does not currently support CA signed devices using file upload. Please use SAS based authentication or
      * self signed certificates.
@@ -584,7 +602,7 @@ public final class DeviceClient extends InternalClient implements Closeable
     }
 
     /**
-     * Notify IoT Hub that a file upload has been completed, successfully or otherwise. See <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-file-upload#notify-iot-hub-of-a-completed-file-upload">this documentation</a> for more details.
+     * Notify IoT hub that a file upload has been completed, successfully or otherwise. See <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-file-upload#notify-iot-hub-of-a-completed-file-upload">this documentation</a> for more details.
      * @param notification The notification details, including if the file upload succeeded.
      * @throws IOException If this HTTPS request fails to send.
      * @deprecated This function is not actually async, so use {@link #completeFileUpload(FileUploadCompletionNotification)} to avoid confusion
@@ -596,7 +614,7 @@ public final class DeviceClient extends InternalClient implements Closeable
     }
 
     /**
-     * Notify IoT Hub that a file upload has been completed, successfully or otherwise. See <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-file-upload#notify-iot-hub-of-a-completed-file-upload">this documentation</a> for more details.
+     * Notify IoT hub that a file upload has been completed, successfully or otherwise. See <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-file-upload#notify-iot-hub-of-a-completed-file-upload">this documentation</a> for more details.
      * @param notification The notification details, including if the file upload succeeded.
      * @throws IOException If this HTTPS request fails to send.
      */
@@ -623,7 +641,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      * Starts the device twin. This device client will receive a callback with the current state of the full twin, including
      * reported properties and desired properties. After that callback is received, this device client will receive a callback
      * each time a desired property is updated. That callback will either contain the full desired properties set, or
-     * only the updated desired property depending on how the desired property was changed. IoT Hub supports a PUT and a PATCH
+     * only the updated desired property depending on how the desired property was changed. IoT hub supports a PUT and a PATCH
      * on the twin. The PUT will cause this device client to receive the full desired properties set, and the PATCH
      * will cause this device client to only receive the updated desired properties. Similarly, the version
      * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
@@ -656,7 +674,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      * Starts the device twin. This device client will receive a callback with the current state of the full twin, including
      * reported properties and desired properties. After that callback is received, this device client will receive a callback
      * each time a desired property is updated. That callback will either contain the full desired properties set, or
-     * only the updated desired property depending on how the desired property was changed. IoT Hub supports a PUT and a PATCH
+     * only the updated desired property depending on how the desired property was changed. IoT hub supports a PUT and a PATCH
      * on the twin. The PUT will cause this device client to receive the full desired properties set, and the PATCH
      * will cause this device client to only receive the updated desired properties. Similarly, the version
      * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
@@ -687,7 +705,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      * Starts the device twin. This device client will receive a callback with the current state of the full twin, including
      * reported properties and desired properties. After that callback is received, this device client will receive a callback
      * each time a desired property is updated. That callback will either contain the full desired properties set, or
-     * only the updated desired property depending on how the desired property was changed. IoT Hub supports a PUT and a PATCH
+     * only the updated desired property depending on how the desired property was changed. IoT hub supports a PUT and a PATCH
      * on the twin. The PUT will cause this device client to receive the full desired properties set, and the PATCH
      * will cause this device client to only receive the updated desired properties. Similarly, the version
      * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
@@ -778,6 +796,12 @@ public final class DeviceClient extends InternalClient implements Closeable
      *	      in case of MQTT and AMQP protocols, this option specifies the interval in milliseconds
      *	      between spawning a thread that dequeues a message from the SDK's queue of received messages.
      *
+     *	    - <b>SetMaxMessagesSentPerThread</b> - this option is applicable to all protocols.
+     *	      This option specifies how many messages a given send thread should attempt to send before exiting.
+     *	      This option can be used in conjunction with "SetSendInterval" to control the how frequently and in what
+     *	      batch size messages are sent. By default, this client sends 10 messages per send thread, and spawns
+     *	      a send thread every 10 milliseconds. This gives a theoretical throughput of 1000 messages per second.
+     *
      *	    - <b>SetCertificatePath</b> - this option is applicable only
      *	      when the transport configured with this client is AMQP. This
      *	      option specifies the path to the certificate used to verify peer.
@@ -843,6 +867,7 @@ public final class DeviceClient extends InternalClient implements Closeable
             case SET_HTTPS_READ_TIMEOUT:
             case SET_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT:
             case SET_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT:
+            case SET_MAX_MESSAGES_SENT_PER_THREAD:
             {
                 break;
             }
@@ -972,7 +997,7 @@ public final class DeviceClient extends InternalClient implements Closeable
                             else
                             {
                                 this.getDeviceIO().close();
-                                this.getDeviceIO().open();
+                                this.getDeviceIO().open(false);
                             }
                         }
                     }

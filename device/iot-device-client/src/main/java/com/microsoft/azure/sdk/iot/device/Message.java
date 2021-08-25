@@ -38,6 +38,7 @@ public class Message
     /**
      * Destination of the message
      */
+    @SuppressWarnings("unused") // Used in getter, leaving for future expansion
     private String to;
 
     /**
@@ -56,11 +57,6 @@ public class Message
     private String userId;
 
     /**
-     * [Optional] Used when batching on HTTP Default: false.
-     */
-    private Boolean httpBatchSerializeAsString;
-
-    /**
      * [Stamped on servicebound messages by IoT Hub] The authenticated id used to send this message.
      */
     private String connectionDeviceId;
@@ -75,10 +71,21 @@ public class Message
      */
     private IotHubConnectionString iotHubConnectionString;
 
+    /**
+     * [Optional] Used to correlate the message across the send/receive lifecycle
+     */
+    private CorrelatingMessageCallback correlatingMessageCallback;
+
+    /**
+     * [Optional] Used to specify the sender device client for multiplexing scenarios
+     */
+    private Object correlatingMessageCallbackContext;
+
     private String connectionModuleId;
     private String inputName;
     private String outputName;
 
+    @SuppressWarnings("unused") // This is not set anywhere but is used in a method
     private String deliveryAcknowledgement;
 
     /**
@@ -98,11 +105,6 @@ public class Message
     private String contentEncoding;
 
     private Date creationTimeUTC;
-
-    /**
-     * Stream that will provide the bytes for the body of the
-     */
-    private ByteArrayInputStream bodyStream;
 
     /**
      * Security Client flag
@@ -170,6 +172,7 @@ public class Message
      * The stream content of the body.
      * @return always returns null.
      */
+    @SuppressWarnings("SameReturnValue")
     public ByteArrayOutputStream getBodyStream()
     {
         return null;
@@ -634,5 +637,21 @@ public class Message
         }
 
         return s.toString();
+    }
+
+    public void setCorrelatingMessageCallback(CorrelatingMessageCallback correlatingMessageCallback) {
+        this.correlatingMessageCallback = correlatingMessageCallback;
+    }
+
+    public CorrelatingMessageCallback getCorrelatingMessageCallback() {
+        return correlatingMessageCallback;
+    }
+
+    public void setCorrelatingMessageCallbackContext(Object correlatingMessageCallbackContext) {
+        this.correlatingMessageCallbackContext = correlatingMessageCallbackContext;
+    }
+
+    public Object getCorrelatingMessageCallbackContext() {
+        return correlatingMessageCallbackContext;
     }
 }

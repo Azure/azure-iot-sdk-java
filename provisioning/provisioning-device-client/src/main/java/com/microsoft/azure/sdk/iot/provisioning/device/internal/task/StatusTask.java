@@ -28,6 +28,7 @@ public class StatusTask implements Callable<RegistrationOperationStatusParser>
     private final String operationId;
     private final Authorization authorization;
 
+    @SuppressWarnings("unused") // Called in a factory
     private static class ResponseCallbackImpl implements ResponseCallback
     {
         @Override

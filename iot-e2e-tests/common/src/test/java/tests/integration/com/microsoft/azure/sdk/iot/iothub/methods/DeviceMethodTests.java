@@ -6,22 +6,33 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.methods;
 
 
+import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethodClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubGatewayTimeoutException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceEmulator;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceTestManager;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenTools;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestDeviceIdentity;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestModuleIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
@@ -34,12 +45,14 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
 import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 
 /**
  * Test class containing all non error injection tests to be run on JVM and android pertaining to Device methods.
  */
+@Slf4j
 @IotHubTest
 @RunWith(Parameterized.class)
 public class DeviceMethodTests extends DeviceMethodCommon
@@ -59,70 +72,60 @@ public class DeviceMethodTests extends DeviceMethodCommon
 
     @Test
     @StandardTierHubOnlyTest
-    @ContinuousIntegrationTest
-    public void invokeMethodInvokeParallelSucceed() throws Exception
+    public void invokeMethodSucceedWithAzureSasCredential() throws Exception
     {
-        // Arrange
+        this.testInstance.methodServiceClient = buildDeviceMethodClientWithAzureSasCredential();
         super.openDeviceClientAndSubscribeToMethods();
-        CountDownLatch cdl = new CountDownLatch(NUMBER_INVOKES_PARALLEL);
-        List<RunnableInvoke> runs = new LinkedList<>();
-
-        for (int i = 0; i < NUMBER_INVOKES_PARALLEL; i++)
-        {
-            RunnableInvoke runnableInvoke;
-            // Create one methodServiceClient per thread since each method service client only allows one method invoke
-            // at a time. This limitation exists because the invokeMethod method is synchronized with itself
-            DeviceMethod methodServiceClient = DeviceMethod.createFromConnectionString(iotHubConnectionString, DeviceMethodClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-            if (testInstance.identity instanceof TestModuleIdentity)
-            {
-                runnableInvoke = new RunnableInvoke(methodServiceClient, testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(),"Thread" + i, cdl);
-            }
-            else
-            {
-                runnableInvoke = new RunnableInvoke(methodServiceClient, testInstance.identity.getDeviceId(), null,"Thread" + i, cdl);
-            }
-            new Thread(runnableInvoke).start();
-            runs.add(runnableInvoke);
-        }
-
-        cdl.await(3, TimeUnit.MINUTES);
-
-        for (RunnableInvoke run:runs)
-        {
-            MethodResult result = run.getResult();
-            assertNotNull(buildExceptionMessage(run.getException() == null ? "Runnable returns null without exception information" : run.getException().getMessage(), testInstance.deviceTestManager.client), result);
-            assertEquals(buildExceptionMessage("Expected SUCCESS but was " + result.getStatus(), testInstance.deviceTestManager.client), (long) DeviceEmulator.METHOD_SUCCESS,(long)result.getStatus());
-            assertEquals(buildExceptionMessage("Expected payload " + run.getExpectedPayload() + " but got " + result.getPayload().toString(), testInstance.deviceTestManager.client), run.getExpectedPayload(), result.getPayload().toString());
-        }
+        super.invokeMethodSucceed();
     }
 
     @Test
     @StandardTierHubOnlyTest
-    @ContinuousIntegrationTest
-    public void invokeMethodStandardTimeoutSucceed() throws Exception
+    public void serviceClientTokenRenewalWithAzureSasCredential() throws Exception
     {
-        // Arrange
+        if (testInstance.protocol != IotHubClientProtocol.AMQPS
+            || testInstance.clientType != ClientType.DEVICE_CLIENT
+            || testInstance.authenticationType != AuthenticationType.SAS)
+        {
+            // This test is for the service client, so no need to rerun it for all the different client types or device protocols
+            return;
+        }
+
+        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
+
+        this.testInstance.methodServiceClient =
+            new DeviceMethod(
+                iotHubConnectionStringObj.getHostName(),
+                sasCredential,
+                DeviceMethodClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+
         super.openDeviceClientAndSubscribeToMethods();
-        DeviceTestManager deviceTestManger = this.testInstance.deviceTestManager;
 
-        // Act
-        MethodResult result;
-        if (testInstance.identity instanceof TestModuleIdentity)
+        // add first device just to make sure that the first credential update worked
+        super.invokeMethodSucceed();
+
+        // deliberately expire the SAS token to provoke a 401 to ensure that the method client is using the shared
+        // access signature that is set here.
+        sasCredential.update(SasTokenTools.makeSasTokenExpired(serviceSasToken.toString()));
+
+        try
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_LOOPBACK, null, null, PAYLOAD_STRING);
+            super.invokeMethodSucceed();
+            fail("Expected invoke method call to throw unauthorized exception since an expired SAS token was used, but no exception was thrown");
         }
-        else
+        catch (IotHubUnathorizedException e)
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_LOOPBACK, null, null, PAYLOAD_STRING);
+            log.debug("IotHubUnauthorizedException was thrown as expected, continuing test");
         }
 
-        deviceTestManger.waitIotHub(1, 10);
+        // Renew the expired shared access signature
+        serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        sasCredential.update(serviceSasToken.toString());
 
-        // Assert
-        assertNotNull(buildExceptionMessage("method result was null", testInstance.deviceTestManager.client), result);
-        assertEquals(buildExceptionMessage("Expected SUCCESS but got " + result.getStatus(), testInstance.deviceTestManager.client), (long)DeviceEmulator.METHOD_SUCCESS, (long)result.getStatus());
-        assertEquals(buildExceptionMessage("Expected " + DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING + " but got " + result.getPayload(), testInstance.deviceTestManager.client), DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, result.getPayload());
-        Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
+        // final method invocation should succeed since the shared access signature has been renewed
+        super.invokeMethodSucceed();
     }
 
     @Test
@@ -150,89 +153,6 @@ public class DeviceMethodTests extends DeviceMethodCommon
         assertNotNull(buildExceptionMessage("method result was null", testInstance.deviceTestManager.client), result);
         assertEquals(buildExceptionMessage("Expected SUCCESS but got " + result.getStatus(), testInstance.deviceTestManager.client), (long)DeviceEmulator.METHOD_SUCCESS, (long)result.getStatus());
         assertEquals(buildExceptionMessage("Expected " + DeviceEmulator.METHOD_LOOPBACK + ":null" + " but got " + result.getPayload(), deviceTestManger.client), DeviceEmulator.METHOD_LOOPBACK + ":null", result.getPayload());
-        Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    @ContinuousIntegrationTest
-    public void invokeMethodNumberSucceed() throws Exception
-    {
-        // Arrange
-        super.openDeviceClientAndSubscribeToMethods();
-        DeviceTestManager deviceTestManger = this.testInstance.deviceTestManager;
-
-        // Act
-        MethodResult result;
-        if (testInstance.identity instanceof TestModuleIdentity)
-        {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, "100");
-        }
-        else
-        {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, "100");
-        }
-        deviceTestManger.waitIotHub(1, 10);
-
-        // Assert
-        assertNotNull(buildExceptionMessage("method result was null", testInstance.deviceTestManager.client), result);
-        assertEquals(buildExceptionMessage("Expected SUCCESS but got " + result.getStatus(), testInstance.deviceTestManager.client), (long)DeviceEmulator.METHOD_SUCCESS, (long)result.getStatus());
-        assertEquals(buildExceptionMessage("Expected " + DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS + ":succeed" + " But got " + result.getPayload(), testInstance.deviceTestManager.client), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS + ":succeed", result.getPayload());
-        Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    @ContinuousIntegrationTest
-    public void invokeMethodThrowsNumberFormatExceptionFailed() throws Exception
-    {
-        // Arrange
-        super.openDeviceClientAndSubscribeToMethods();
-        DeviceTestManager deviceTestManger = this.testInstance.deviceTestManager;
-
-        // Act
-        MethodResult result;
-        if (testInstance.identity instanceof TestModuleIdentity)
-        {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
-        }
-        else
-        {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
-        }
-        deviceTestManger.waitIotHub(1, 10);
-
-        // Assert
-        assertNotNull(buildExceptionMessage("method result was null", testInstance.deviceTestManager.client), result);
-        assertEquals(buildExceptionMessage("Expected " + DeviceEmulator.METHOD_THROWS + " but got " + result.getStatus(), testInstance.deviceTestManager.client), (long)DeviceEmulator.METHOD_THROWS, (long)result.getStatus());
-        assertEquals(buildExceptionMessage("Expected NumberFormatException, but got " + result.getPayload(), testInstance.deviceTestManager.client), "java.lang.NumberFormatException: For input string: \"" + PAYLOAD_STRING + "\"", result.getPayload());
-        Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    public void invokeMethodUnknownFailed() throws Exception
-    {
-        // Arrange
-        super.openDeviceClientAndSubscribeToMethods();
-        DeviceTestManager deviceTestManger = this.testInstance.deviceTestManager;
-
-        // Act
-        MethodResult result;
-        if (testInstance.identity instanceof TestModuleIdentity)
-        {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_UNKNOWN, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
-        }
-        else
-        {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_UNKNOWN, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
-        }
-        deviceTestManger.waitIotHub(1, 10);
-
-        // Assert
-        assertNotNull(buildExceptionMessage("method result was null", testInstance.deviceTestManager.client), result);
-        assertEquals(buildExceptionMessage("Expected METHOD_NOT_DEFINED but got " + result.getStatus(), testInstance.deviceTestManager.client), (long)DeviceEmulator.METHOD_NOT_DEFINED, (long)result.getStatus());
-        Assert.assertEquals(buildExceptionMessage("Expected " + "unknown:" + DeviceEmulator.METHOD_UNKNOWN + " but got " + result.getPayload(), testInstance.deviceTestManager.client), "unknown:" + DeviceEmulator.METHOD_UNKNOWN, result.getPayload());
         Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
     }
 
@@ -284,62 +204,6 @@ public class DeviceMethodTests extends DeviceMethodCommon
     @Test
     @StandardTierHubOnlyTest
     @ContinuousIntegrationTest
-    public void invokeMethodDefaultResponseTimeoutSucceed() throws Exception
-    {
-        // Arrange
-        super.openDeviceClientAndSubscribeToMethods();
-        DeviceTestManager deviceTestManger = this.testInstance.deviceTestManager;
-
-        // Act
-        MethodResult result;
-        if (testInstance.identity instanceof TestModuleIdentity)
-        {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, null, CONNECTION_TIMEOUT, "100");
-        }
-        else
-        {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, null, CONNECTION_TIMEOUT, "100");
-        }
-        deviceTestManger.waitIotHub(1, 10);
-
-        // Assert
-        assertNotNull(buildExceptionMessage("method result was null", testInstance.deviceTestManager.client), result);
-        assertEquals(buildExceptionMessage("Expected SUCCESS but got " + result.getStatus(), testInstance.deviceTestManager.client), (long)DeviceEmulator.METHOD_SUCCESS, (long)result.getStatus());
-        assertEquals(buildExceptionMessage("Expected " + DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS + ":succeed" + " But got " + result.getPayload(), testInstance.deviceTestManager.client), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS + ":succeed", result.getPayload());
-        Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    @ContinuousIntegrationTest
-    public void invokeMethodDefaultConnectionTimeoutSucceed() throws Exception
-    {
-        // Arrange
-        super.openDeviceClientAndSubscribeToMethods();
-        DeviceTestManager deviceTestManger = this.testInstance.deviceTestManager;
-
-        // Act
-        MethodResult result;
-        if (testInstance.identity instanceof TestModuleIdentity)
-        {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, null, "100");
-        }
-        else
-        {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, null, "100");
-        }
-        deviceTestManger.waitIotHub(1, 10);
-
-        // Assert
-        assertNotNull(buildExceptionMessage("method result was null", testInstance.deviceTestManager.client), result);
-        assertEquals(buildExceptionMessage("Expected SUCCESS but got " + result.getStatus(), testInstance.deviceTestManager.client), (long)DeviceEmulator.METHOD_SUCCESS, (long)result.getStatus());
-        assertEquals(buildExceptionMessage("Expected " + DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS + ":succeed" + " But got " + result.getPayload(), testInstance.deviceTestManager.client), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS + ":succeed", result.getPayload());
-        Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    @ContinuousIntegrationTest
     public void invokeMethodResponseTimeoutFailed() throws Exception
     {
         // Arrange
@@ -364,72 +228,6 @@ public class DeviceMethodTests extends DeviceMethodCommon
         }
 
         assertTrue(buildExceptionMessage("Iot Hub did not throw the expected gateway timeout exception", testInstance.deviceTestManager.client), expectedExceptionCaught);
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    @ContinuousIntegrationTest
-    public void invokeMethodUnknownDeviceFailed() throws Exception
-    {
-        // Act
-        boolean expectedExceptionCaught = false;
-        try
-        {
-            if (testInstance.identity instanceof TestModuleIdentity)
-            {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), "someModuleThatDoesNotExistOnADeviceThatDoesExist", DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
-            }
-            else
-            {
-                testInstance.methodServiceClient.invoke("someDeviceThatDoesNotExist", DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
-            }
-        }
-        catch (IotHubNotFoundException e)
-        {
-            expectedExceptionCaught = true;
-        }
-
-        assertTrue("Iot Hub did not throw the expected not found exception", expectedExceptionCaught);
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    @ContinuousIntegrationTest
-    public void invokeMethodResetDeviceFailed() throws Exception
-    {
-        // Arrange
-        super.openDeviceClientAndSubscribeToMethods();
-        DeviceTestManager deviceTestManger = this.testInstance.deviceTestManager;
-
-        // Act
-        try
-        {
-            if (testInstance.identity instanceof TestModuleIdentity)
-            {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_RESET, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, null);
-                deviceTestManger.restartDevice(getModuleConnectionString(((TestModuleIdentity) testInstance.identity).getModule()), testInstance.protocol, testInstance.publicKeyCert, testInstance.privateKey);
-            }
-            else
-            {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_RESET, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, null);
-                deviceTestManger.restartDevice(testInstance.registryManager.getDeviceConnectionString(((TestDeviceIdentity) testInstance.identity).getDevice()), testInstance.protocol, testInstance.publicKeyCert, testInstance.privateKey);
-            }
-
-            Assert.fail(buildExceptionMessage("Reset identity do not affect the method invoke on the service", testInstance.deviceTestManager.client));
-        }
-        catch (IotHubNotFoundException expected)
-        {
-            // Don't do anything, expected throw.
-        }
-
-        if (testInstance.identity instanceof TestModuleIdentity)
-        {
-            deviceTestManger.restartDevice(getModuleConnectionString(((TestModuleIdentity) testInstance.identity).getModule()), testInstance.protocol, testInstance.publicKeyCert, testInstance.privateKey);
-        }
-        else
-        {
-            deviceTestManger.restartDevice(testInstance.registryManager.getDeviceConnectionString(((TestDeviceIdentity) testInstance.identity).getDevice()), testInstance.protocol, testInstance.publicKeyCert, testInstance.privateKey);
-        }
     }
 
     @Test

@@ -67,15 +67,12 @@ import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 public class QueryResult
 {
     // the query type
-    private transient static final String TYPE_TAG = "type";
     private QueryResultType type;
 
     // the list of items in the query result
-    private transient static final String ITEMS_TAG = "items";
     private Object[] items;
 
     // the continuation token for the query
-    private transient static final String CONTINUATION_TOKEN_TAG = "continuationToken";
     private String continuationToken;
 
     /**

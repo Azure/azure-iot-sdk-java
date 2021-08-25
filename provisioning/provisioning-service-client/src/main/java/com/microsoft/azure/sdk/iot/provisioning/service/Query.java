@@ -12,7 +12,6 @@ import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningS
 
 import java.util.*;
 
-
 /**
  * The query iterator.
  *
@@ -60,6 +59,7 @@ import java.util.*;
  * @see <a href="https://docs.microsoft.com/en-us/azure/iot-dps/">Azure IoT Hub Device Provisioning Service</a>
  * @see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-query-language">Query Language</a>
  */
+@SuppressWarnings("deprecation")
 public class Query implements Iterator<QueryResult>
 {
     private static final String CONTINUATION_TOKEN_KEY = "x-ms-continuation";
@@ -101,46 +101,34 @@ public class Query implements Iterator<QueryResult>
      * @param pageSize the {@code int} with the maximum number of items per iteration. It cannot be negative.
      * @throws IllegalArgumentException if one of the parameters is invalid.
      */
+    @SuppressWarnings("deprecation")
     protected Query(ContractApiHttp contractApiHttp, String targetPath, QuerySpecification querySpecification, int pageSize)
     {
-        /* SRS_QUERY_21_001: [The constructor shall throw IllegalArgumentException if the provided contractApiHttp is null.] */
-        if(contractApiHttp == null)
+        if (contractApiHttp == null)
         {
             throw new IllegalArgumentException("contractApiHttp cannot be null.");
         }
 
-        /* SRS_QUERY_21_002: [The constructor shall throw IllegalArgumentException if the provided targetPath is null or empty.] */
-        if(Tools.isNullOrEmpty(targetPath))
+        if (Tools.isNullOrEmpty(targetPath))
         {
             throw new IllegalArgumentException("targetPath cannot be null.");
         }
 
-        /* SRS_QUERY_21_003: [The constructor shall throw IllegalArgumentException if the provided querySpecification is null.] */
-        if(querySpecification == null)
+        if (querySpecification == null)
         {
             throw new IllegalArgumentException("querySpecification cannot be null.");
         }
 
-        /* SRS_QUERY_21_004: [The constructor shall throw IllegalArgumentException if the provided pageSize is negative.] */
-        if(pageSize < 0)
+        if (pageSize < 0)
         {
             throw new IllegalArgumentException("pageSize cannot be negative.");
         }
 
-        /* SRS_QUERY_21_005: [The constructor shall store the provided `contractApiHttp` and `pageSize`.] */
         this.contractApiHttp = contractApiHttp;
         this.pageSize = pageSize;
-
-        /* SRS_QUERY_21_006: [The constructor shall create and store a JSON from the provided querySpecification.] */
         this.querySpecificationJson = querySpecification.toJson();
-
-        /* SRS_QUERY_21_007: [The constructor shall create and store a queryPath adding `/query` to the provided `targetPath`.] */
         this.queryPath = targetPath + PATH_SEPARATOR + PATH_QUERY;
-
-        /* SRS_QUERY_21_008: [The constructor shall set continuationToken as null.] */
         this.continuationToken = null;
-
-        /* SRS_QUERY_21_009: [The constructor shall set hasNext as true.] */
         this.hasNext = true;
     }
 
@@ -157,7 +145,6 @@ public class Query implements Iterator<QueryResult>
     @Override
     public boolean hasNext()
     {
-        /* SRS_QUERY_21_010: [The hasNext shall return the store hasNext.] */
         return hasNext;
     }
 
@@ -170,25 +157,21 @@ public class Query implements Iterator<QueryResult>
     @Override
     public QueryResult next()
     {
-        /* SRS_QUERY_21_011: [The next shall throw NoSuchElementException if the hasNext is false.] */
-        if(!hasNext)
+        if (!hasNext)
         {
             throw new NoSuchElementException("There are no more pending elements");
         }
 
-        /* SRS_QUERY_21_012: [If the pageSize is not 0, the next shall send the Http request with `x-ms-max-item-count=[pageSize]` in the header.] */
         Map<String, String> headerParameters = new HashMap<>();
-        if(pageSize != 0)
+        if (pageSize != 0)
         {
             headerParameters.put(PAGE_SIZE_KEY, Integer.toString(pageSize));
         }
-        /* SRS_QUERY_21_013: [If the continuationToken is not null or empty, the next shall send the Http request with `x-ms-continuation=[continuationToken]` in the header.] */
-        if(!Tools.isNullOrEmpty(this.continuationToken))
+        if (!Tools.isNullOrEmpty(this.continuationToken))
         {
             headerParameters.put(CONTINUATION_TOKEN_KEY, this.continuationToken);
         }
 
-        /* SRS_QUERY_21_014: [The next shall send a Http request with a Http verb `POST`.] */
         HttpResponse httpResponse;
         try
         {
@@ -201,24 +184,21 @@ public class Query implements Iterator<QueryResult>
         }
         catch (ProvisioningServiceClientException e)
         {
-            /* SRS_QUERY_21_015: [The next shall throw IllegalArgumentException if the Http request throws any ProvisioningServiceClientException.] */
             // Because Query implements the iterator interface, the next cannot throws ProvisioningServiceClientException.
             throw new IllegalArgumentException(e);
         }
 
-        /* SRS_QUERY_21_024: [The next shall throw IllegalArgumentException if the heepResponse contains a null body.] */
         byte[] body = httpResponse.getBody();
-        if(body == null)
+        if (body == null)
         {
             throw new IllegalArgumentException("Http response for next cannot contains a null body");
         }
-        /* SRS_QUERY_21_016: [The next shall create and return a new instance of the QueryResult using the `x-ms-item-type` as type, `x-ms-continuation` as the next continuationToken, and the message body.] */
+
         String bodyStr = new String(body);
         Map<String, String> headers = httpResponse.getHeaderFields();
         String type = headers.get(ITEM_TYPE_KEY);
         this.continuationToken = headers.get(CONTINUATION_TOKEN_KEY);
 
-        /* SRS_QUERY_21_017: [The next shall set hasNext as true if the continuationToken is not null, or false if it is null.] */
         hasNext = (this.continuationToken != null);
 
         return new QueryResult(type, bodyStr, this.continuationToken);
@@ -233,16 +213,12 @@ public class Query implements Iterator<QueryResult>
      */
     public QueryResult next(String continuationToken)
     {
-        /* SRS_QUERY_21_018: [The next shall throw NoSuchElementException if the provided continuationToken is null or empty.] */
-        if(Tools.isNullOrEmpty(continuationToken))
+        if (Tools.isNullOrEmpty(continuationToken))
         {
             throw new NoSuchElementException("There is no Continuation Token to get pending elements,");
         }
 
-        /* SRS_QUERY_21_019: [The next shall store the provided continuationToken.] */
         this.continuationToken = continuationToken;
-
-        /* SRS_QUERY_21_020: [The next shall return the next page of results by calling the next().] */
         return next();
     }
 
@@ -255,7 +231,6 @@ public class Query implements Iterator<QueryResult>
      */
     public int getPageSize()
     {
-        /* SRS_QUERY_21_021: [The getPageSize shall return the stored pageSize.] */
         return pageSize;
     }
 
@@ -270,12 +245,11 @@ public class Query implements Iterator<QueryResult>
      */
     public void setPageSize(int pageSize)
     {
-        /* SRS_QUERY_21_022: [The setPageSize shall throw IllegalArgumentException if the provided pageSize is negative.] */
-        if(pageSize < 0)
+        if (pageSize < 0)
         {
             throw new IllegalArgumentException("pageSize cannot be null");
         }
-        /* SRS_QUERY_21_023: [The setPageSize shall store the new pageSize value.] */
+
         this.pageSize = pageSize;
     }
 }

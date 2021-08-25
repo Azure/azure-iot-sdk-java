@@ -12,6 +12,8 @@ public class Property
     private boolean isReported = false;
     private Date lastUpdated;
     private Integer lastUpdatedVersion;
+    private String lastUpdatedBy;
+    private String lastUpdatedByDigest;
 
     public Property(String key, Object value)
     {
@@ -40,6 +42,18 @@ public class Property
         this.isReported = isReported;
         this.lastUpdated = lastUpdated;
         this.lastUpdatedVersion = lastUpdatedVersion;
+    }
+
+    protected Property(String key, Object value, Integer version, boolean isReported, Date lastUpdated, Integer lastUpdatedVersion, String lastUpdatedBy, String lastUpdatedByDigest)
+    {
+        this(key, value);
+        
+        this.version = version;
+        this.isReported = isReported;
+        this.lastUpdated = lastUpdated;
+        this.lastUpdatedVersion = lastUpdatedVersion;
+        this.lastUpdatedBy = lastUpdatedBy;
+        this.lastUpdatedByDigest = lastUpdatedByDigest;
     }
 
     public String getKey()
@@ -92,6 +106,16 @@ public class Property
     {
         //Codes_SRS_Property_34_014: [The function shall return the stored lastUpdatedVersion.]
         return this.lastUpdatedVersion;
+    }
+
+    public String getLastUpdatedBy()
+    {
+        return this.lastUpdatedBy;
+    }
+
+    public String getLastUpdatedByDigest()
+    {
+        return this.lastUpdatedByDigest;
     }
 
     /**

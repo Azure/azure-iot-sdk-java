@@ -3,9 +3,15 @@
 
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
+import com.azure.core.credential.AzureSasCredential;
+import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.ProxyOptions;
+import com.microsoft.azure.sdk.iot.service.Tools;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
@@ -15,32 +21,35 @@ import java.net.Proxy;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Objects;
 
 /**
- * DeviceMethod enables service client to directly invoke methods on various devices from service client.
+ * Use the DeviceMethod client to directly invoke methods on devices and modules in IoT hub.
  */
 public class DeviceMethod
 {
-    private IotHubConnectionString iotHubConnectionString = null;
     private Integer requestId = 0;
 
-    private DeviceMethodClientOptions options;
+    private final DeviceMethodClientOptions options;
+    private final String hostName;
+    private TokenCredentialCache credentialCache;
+    private AzureSasCredential azureSasCredential;
+    private IotHubConnectionString iotHubConnectionString;
 
     /**
      * Create a DeviceMethod instance from the information in the connection string.
      *
      * @param connectionString is the IoTHub connection string.
      * @return an instance of the DeviceMethod.
-     * @throws IOException This exception is thrown if the object creation failed.
+     * @throws IOException This exception is never thrown.
+     * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
+     * are recommended to use {@link #DeviceMethod(String)} instead
+     * since it does not declare this exception even though it constructs the same DeviceMethod.
      */
+    @Deprecated
     public static DeviceMethod createFromConnectionString(String connectionString) throws IOException
     {
-        return createFromConnectionString(
-                connectionString,
-                DeviceMethodClientOptions.builder()
-                    .httpConnectTimeout(DeviceMethodClientOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
-                    .httpReadTimeout(DeviceMethodClientOptions.DEFAULT_HTTP_READ_TIMEOUT_MS)
-                    .build());
+        return createFromConnectionString(connectionString, DeviceMethodClientOptions.builder().build());
     }
 
     /**
@@ -49,9 +58,15 @@ public class DeviceMethod
      * @param connectionString is the IoTHub connection string.
      * @param options the configurable options for each operation on this client. May not be null.
      * @return an instance of the DeviceMethod.
-     * @throws IOException This exception is thrown if the object creation failed.
+     * @throws IOException This exception is never thrown.
+     * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
+     * are recommended to use {@link #DeviceMethod(String, DeviceMethodClientOptions)} instead
+     * since it does not declare this exception even though it constructs the same DeviceMethod.
      */
-    public static DeviceMethod createFromConnectionString(String connectionString, DeviceMethodClientOptions options) throws IOException
+    @Deprecated
+    public static DeviceMethod createFromConnectionString(
+        String connectionString,
+        DeviceMethodClientOptions options) throws IOException
     {
         if (connectionString == null || connectionString.length() == 0)
         {
@@ -63,12 +78,102 @@ public class DeviceMethod
             throw new IllegalArgumentException("options may not be null");
         }
 
-        DeviceMethod deviceMethod = new DeviceMethod();
-        deviceMethod.options = options;
+        return new DeviceMethod(connectionString, options);
+    }
 
-        deviceMethod.iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+    /**
+     * Create a DeviceMethod instance from the information in the connection string.
+     *
+     * @param connectionString is the IoTHub connection string.
+     */
+    public DeviceMethod(String connectionString)
+    {
+        this(connectionString, DeviceMethodClientOptions.builder().build());
+    }
 
-        return deviceMethod;
+    /**
+     * Create a DeviceMethod instance from the information in the connection string.
+     *
+     * @param connectionString is the IoTHub connection string.
+     * @param options the configurable options for each operation on this client. May not be null.
+     */
+    public DeviceMethod(String connectionString, DeviceMethodClientOptions options)
+    {
+        Objects.requireNonNull(options);
+        if (Tools.isNullOrEmpty(connectionString))
+        {
+            throw new IllegalArgumentException("Connection string cannot be null or empty");
+        }
+
+        this.hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString).getHostName();
+        this.options = options;
+        this.iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
+    }
+
+    /**
+     * Create a new DeviceMethod instance.
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
+     * this library when they are needed. The provided tokens must be Json Web Tokens.
+     */
+    public DeviceMethod(String hostName, TokenCredential credential)
+    {
+        this(hostName, credential, DeviceMethodClientOptions.builder().build());
+    }
+
+    /**
+     * Create a new DeviceMethod instance.
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
+     * this library when they are needed. The provided tokens must be Json Web Tokens.
+     * @param options The connection options to use when connecting to the service.
+     */
+    public DeviceMethod(String hostName, TokenCredential credential, DeviceMethodClientOptions options)
+    {
+        Objects.requireNonNull(credential, "TokenCredential cannot be null");
+        Objects.requireNonNull(options, "options cannot be null");
+        if (Tools.isNullOrEmpty(hostName))
+        {
+            throw new IllegalArgumentException("hostName cannot be null or empty");
+        }
+
+        this.options = options;
+        this.credentialCache = new TokenCredentialCache(credential);
+        this.hostName = hostName;
+    }
+
+    /**
+     * Create a new DeviceMethod instance.
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param azureSasCredential The SAS token provider that will be used for authentication.
+     */
+    public DeviceMethod(String hostName, AzureSasCredential azureSasCredential)
+    {
+        this(hostName, azureSasCredential, DeviceMethodClientOptions.builder().build());
+    }
+
+    /**
+     * Create a new DeviceMethod instance.
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param azureSasCredential The SAS token provider that will be used for authentication.
+     * @param options The connection options to use when connecting to the service.
+     */
+    public DeviceMethod(String hostName, AzureSasCredential azureSasCredential, DeviceMethodClientOptions options)
+    {
+        Objects.requireNonNull(azureSasCredential, "azureSasCredential cannot be null");
+        Objects.requireNonNull(options, "options cannot be null");
+        if (Tools.isNullOrEmpty(hostName))
+        {
+            throw new IllegalArgumentException("hostName cannot be null or empty");
+        }
+
+        this.options = options;
+        this.azureSasCredential = azureSasCredential;
+        this.hostName = hostName;
     }
 
     /**
@@ -83,23 +188,24 @@ public class DeviceMethod
      * @throws IotHubException This exception is thrown if the response verification failed.
      * @throws IOException This exception is thrown if the IO operation failed.
      */
-    public synchronized MethodResult invoke(String deviceId, String methodName, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload) throws IotHubException, IOException
+    public synchronized MethodResult invoke(
+        String deviceId,
+        String methodName,
+        Long responseTimeoutInSeconds,
+        Long connectTimeoutInSeconds,
+        Object payload) throws IotHubException, IOException
     {
-        /* Codes_SRS_DEVICEMETHOD_21_004: [The invoke shall throw IllegalArgumentException if the provided deviceId is null or empty.] */
-        if((deviceId == null) || deviceId.isEmpty())
+        if (Tools.isNullOrEmpty(deviceId))
         {
             throw new IllegalArgumentException("deviceId is empty or null.");
         }
 
-        /* Codes_SRS_DEVICEMETHOD_21_005: [The invoke shall throw IllegalArgumentException if the provided methodName is null, empty, or not valid.] */
-        if((methodName == null) || methodName.isEmpty())
+        if (Tools.isNullOrEmpty(methodName))
         {
             throw new IllegalArgumentException("methodName is empty or null.");
         }
 
-        /* Codes_SRS_DEVICEMETHOD_21_008: [The invoke shall build the Method URL `{iot hub}/twins/{device id}/methods/` by calling getUrlMethod.] */
-        URL url = this.iotHubConnectionString.getUrlMethod(deviceId);
-
+        URL url = IotHubConnectionString.getUrlMethod(this.hostName, deviceId);
         return invokeMethod(url, methodName, responseTimeoutInSeconds, connectTimeoutInSeconds, payload);
     }
 
@@ -116,28 +222,30 @@ public class DeviceMethod
      * @throws IotHubException This exception is thrown if the response verification failed.
      * @throws IOException This exception is thrown if the IO operation failed.
      */
-    public synchronized MethodResult invoke(String deviceId, String moduleId, String methodName, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload) throws IotHubException, IOException
+    public synchronized MethodResult invoke(
+        String deviceId,
+        String moduleId,
+        String methodName,
+        Long responseTimeoutInSeconds,
+        Long connectTimeoutInSeconds,
+        Object payload) throws IotHubException, IOException
     {
-        /* Codes_SRS_DEVICEMETHOD_28_001: [The invoke shall throw IllegalArgumentException if the provided deviceId is null or empty.] */
-        if((deviceId == null) || deviceId.isEmpty())
+        if (Tools.isNullOrEmpty(deviceId))
         {
             throw new IllegalArgumentException("deviceId is empty or null.");
         }
 
-        /* Codes_SRS_DEVICEMETHOD_28_002: [The invoke shall throw IllegalArgumentException if the provided moduleId is null or empty.] */
-        if((moduleId == null) || moduleId.isEmpty())
+        if (Tools.isNullOrEmpty(moduleId))
         {
             throw new IllegalArgumentException("moduleId is empty or null.");
         }
 
-        /* Codes_SRS_DEVICEMETHOD_28_003: [The invoke shall throw IllegalArgumentException if the provided methodName is null, empty, or not valid.] */
-        if((methodName == null) || methodName.isEmpty())
+        if (Tools.isNullOrEmpty(methodName))
         {
             throw new IllegalArgumentException("methodName is empty or null.");
         }
 
-        /* Codes_SRS_DEVICEMETHOD_28_004: [The invoke shall build the Method URL `{iot hub}/twins/{device id}/modules/{module id}/methods/` by calling getUrlModuleMethod.] */
-        URL url = this.iotHubConnectionString.getUrlModuleMethod(deviceId, moduleId);
+        URL url = IotHubConnectionString.getUrlModuleMethod(this.hostName, deviceId, moduleId);
 
         return invokeMethod(url, methodName, responseTimeoutInSeconds, connectTimeoutInSeconds, payload);
     }
@@ -154,18 +262,32 @@ public class DeviceMethod
      * @throws IotHubException This exception is thrown if the response verification failed.
      * @throws IOException This exception is thrown if the IO operation failed.
      */
-    private synchronized MethodResult invokeMethod(URL url, String methodName, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload) throws IotHubException, IOException
+    private synchronized MethodResult invokeMethod(
+        URL url,
+        String methodName,
+        Long responseTimeoutInSeconds,
+        Long connectTimeoutInSeconds,
+        Object payload) throws IotHubException, IOException
     {
         MethodParser methodParser = new MethodParser(methodName, responseTimeoutInSeconds, connectTimeoutInSeconds, payload);
 
         String json = methodParser.toJson();
-        if(json == null)
+        if (json == null)
         {
             throw new IllegalArgumentException("MethodParser return null Json");
         }
 
-        Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
-        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.POST, json.getBytes(StandardCharsets.UTF_8), String.valueOf(requestId++), options.getHttpConnectTimeout(), options.getHttpReadTimeout(), proxy);
+        ProxyOptions proxyOptions = options.getProxyOptions();
+        Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
+        HttpResponse response = DeviceOperations.request(
+            this.getAuthenticationToken(),
+            url,
+            HttpMethod.POST,
+            json.getBytes(StandardCharsets.UTF_8),
+            String.valueOf(requestId++),
+            options.getHttpConnectTimeout(),
+            options.getHttpReadTimeout(),
+            proxy);
 
         MethodParser methodParserResponse = new MethodParser();
         methodParserResponse.fromJson(new String(response.getBody(), StandardCharsets.UTF_8));
@@ -187,41 +309,66 @@ public class DeviceMethod
      * @throws IOException if the function contains invalid parameters.
      * @throws IotHubException if the http request failed.
      */
-    public Job scheduleDeviceMethod(String queryCondition,
-                                    String methodName, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload,
-                                    Date startTimeUtc, long maxExecutionTimeInSeconds)
-            throws IOException, IotHubException
+    public Job scheduleDeviceMethod(
+        String queryCondition,
+        String methodName,
+        Long responseTimeoutInSeconds,
+        Long connectTimeoutInSeconds,
+        Object payload,
+        Date startTimeUtc,
+        long maxExecutionTimeInSeconds) throws IOException, IotHubException
     {
-        /* Codes_SRS_DEVICEMETHOD_21_016: [If the methodName is null or empty, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
-        if((methodName == null) || methodName.isEmpty())
+        if (Tools.isNullOrEmpty(methodName))
         {
             throw new IllegalArgumentException("null updateTwin");
         }
 
-        /* Codes_SRS_DEVICEMETHOD_21_017: [If the startTimeUtc is null, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
-        if(startTimeUtc == null)
+        if (startTimeUtc == null)
         {
             throw new IllegalArgumentException("null startTimeUtc");
         }
 
-        /* Codes_SRS_DEVICEMETHOD_21_018: [If the maxExecutionTimeInSeconds is negative, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
-        if(maxExecutionTimeInSeconds < 0)
+        if (maxExecutionTimeInSeconds < 0)
         {
             throw new IllegalArgumentException("negative maxExecutionTimeInSeconds");
         }
 
-        /* Codes_SRS_DEVICEMETHOD_21_019: [The scheduleDeviceMethod shall create a new instance of the Job class.] */
-        /* Codes_SRS_DEVICEMETHOD_21_020: [If the scheduleDeviceMethod failed to create a new instance of the Job class, it shall throws IOException. Threw by the Jobs constructor.] */
-        Job job = new Job(iotHubConnectionString.toString());
+        Job job;
+        if (this.credentialCache != null)
+        {
+            job = new Job(this.hostName, this.credentialCache.getTokenCredential());
+        }
+        else if (this.azureSasCredential != null)
+        {
+            job = new Job(this.hostName, this.azureSasCredential);
+        }
+        else
+        {
+            job = new Job(this.iotHubConnectionString.toString());
+        }
 
-        /* Codes_SRS_DEVICEMETHOD_21_021: [The scheduleDeviceMethod shall invoke the scheduleDeviceMethod in the Job class with the received parameters.] */
-        /* Codes_SRS_DEVICEMETHOD_21_022: [If scheduleDeviceMethod failed, the scheduleDeviceMethod shall throws IotHubException. Threw by the scheduleUpdateTwin.] */
         job.scheduleDeviceMethod(
-                queryCondition,
-                methodName, responseTimeoutInSeconds, connectTimeoutInSeconds, payload,
-                startTimeUtc, maxExecutionTimeInSeconds);
+            queryCondition,
+            methodName, responseTimeoutInSeconds, connectTimeoutInSeconds, payload,
+            startTimeUtc, maxExecutionTimeInSeconds);
 
-        /* Codes_SRS_DEVICEMETHOD_21_023: [The scheduleDeviceMethod shall return the created instance of the Job class.] */
         return job;
+    }
+
+    private String getAuthenticationToken()
+    {
+        // Three different constructor types for this class, and each type provides either a TokenCredential implementation,
+        // an AzureSasCredential instance, or just the connection string. The sas token can be retrieved from the non-null
+        // one of the three options.
+        if (this.credentialCache != null)
+        {
+            return this.credentialCache.getTokenString();
+        }
+        else if (this.azureSasCredential != null)
+        {
+            return this.azureSasCredential.getSignature();
+        }
+
+        return new IotHubServiceSasToken(iotHubConnectionString).toString();
     }
 }

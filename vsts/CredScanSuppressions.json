@@ -1,0 +1,9 @@
+{
+    "tool": "Credential Scanner",
+    "suppressions": [
+        {
+            "file": "SamplesArguments.java",
+            "_justification": "File uses the phrase \"Secret\" in a few places, but no credentials are present in the file"
+        }
+    ]
+}

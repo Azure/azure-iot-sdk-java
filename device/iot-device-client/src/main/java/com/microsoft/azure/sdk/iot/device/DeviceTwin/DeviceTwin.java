@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubMessageResult.ABANDON;
@@ -22,7 +23,6 @@ import static com.microsoft.azure.sdk.iot.device.IotHubMessageResult.COMPLETE;
 @Slf4j
 public class DeviceTwin
 {
-    private int requestId;
     private DeviceIO deviceIO = null;
     private DeviceClientConfig config = null;
     private boolean isSubscribed = false;
@@ -38,6 +38,7 @@ public class DeviceTwin
     /*
         Callbacks to respond to its user on desired property changes
      */
+    @SuppressWarnings("rawtypes")
     private final PropertyCallBack deviceTwinGenericPropertyChangeCallback;
     private final TwinPropertyCallBack deviceTwinGenericTwinPropertyChangeCallback;
     private Object deviceTwinGenericPropertyChangeCallbackContext;
@@ -146,7 +147,7 @@ public class DeviceTwin
 
                 for (String propertyKey : desiredPropertyMap.keySet())
                 {
-                    Property property = this.getProperty(desiredPropertyMap, propertyKey, false);
+                    Property property = this.getDesiredProperty(desiredPropertyMap, propertyKey);
 
                     if (!reportPropertyCallback(property))
                     {
@@ -172,7 +173,7 @@ public class DeviceTwin
             {
                 for (String propertyKey : reportedPropertyMap.keySet())
                 {
-                    Property property = this.getProperty(reportedPropertyMap, propertyKey, true);
+                    Property property = this.getReportedProperty(reportedPropertyMap, propertyKey);
                     if (deviceTwinGenericTwinPropertyChangeCallback != null)
                     {
                         deviceTwinGenericTwinPropertyChangeCallback.TwinPropertyCallBack(property, deviceTwinGenericPropertyChangeCallbackContext);
@@ -182,7 +183,33 @@ public class DeviceTwin
         }
     }
 
-    private Property getProperty(TwinCollection twinCollection, String key, boolean isReported)
+    private Property getDesiredProperty(TwinCollection twinCollection, String key)
+    {
+        Object value = twinCollection.get(key);
+        Integer propertyVersion = twinCollection.getVersionFinal();
+        TwinMetadata metadata = twinCollection.getTwinMetadataFinal(key);
+        Date lastUpdated = null;
+        Integer lastUpdatedVersion = null;
+        String lastUpdatedBy = null;
+        String lastUpdatedByDigest = null;
+        if (metadata != null)
+        {
+            lastUpdated = metadata.getLastUpdated();
+            lastUpdatedVersion = metadata.getLastUpdatedVersion();
+            lastUpdatedBy = metadata.getLastUpdatedBy();
+            lastUpdatedByDigest = metadata.getLastUpdatedByDigest();
+        }
+        return new Property(
+                key, value,
+                propertyVersion,
+                false,
+                lastUpdated,
+                lastUpdatedVersion,
+                lastUpdatedBy,
+                lastUpdatedByDigest);
+    }
+
+    private Property getReportedProperty(TwinCollection twinCollection, String key)
     {
         Object value = twinCollection.get(key);
         Integer propertyVersion = twinCollection.getVersionFinal();
@@ -197,7 +224,7 @@ public class DeviceTwin
         return new Property(
                 key, value,
                 propertyVersion,
-                isReported,
+                true,
                 lastUpdated,
                 lastUpdatedVersion);
     }
@@ -269,7 +296,6 @@ public class DeviceTwin
         this.deviceIO = client;
         this.config = config;
         this.config.setDeviceTwinMessageCallback(new deviceTwinResponseMessageCallback(), null);
-        this.requestId = 0;
         this.deviceTwinStatusCallback = deviceTwinCallback;
         this.deviceTwinStatusCallbackContext = deviceTwinCallbackContext;
         this.deviceTwinGenericPropertyChangeCallbackContext = genericPropertyCallbackContext;
@@ -280,17 +306,23 @@ public class DeviceTwin
         checkSubscription();
 
         IotHubTransportMessage getTwinRequestMessage = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_TWIN);
-        getTwinRequestMessage.setRequestId(String.valueOf(requestId++));
+        getTwinRequestMessage.setRequestId(UUID.randomUUID().toString());
+        getTwinRequestMessage.setCorrelationId(getTwinRequestMessage.getRequestId());
         getTwinRequestMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_GET_REQUEST);
         this.deviceIO.sendEventAsync(getTwinRequestMessage, new deviceTwinRequestMessageCallback(), null, this.config.getDeviceId());
     }
 
     public synchronized void updateReportedProperties(Set<Property> reportedProperties) throws IOException
     {
-        this.updateReportedProperties(reportedProperties, null);
+        this.updateReportedProperties(reportedProperties, null, null, null, new deviceTwinRequestMessageCallback(), null);
     }
 
     public synchronized void updateReportedProperties(Set<Property> reportedProperties, Integer version) throws IOException
+    {
+        this.updateReportedProperties(reportedProperties, version, null, null, new deviceTwinRequestMessageCallback(), null);
+    }
+
+    public synchronized void updateReportedProperties(Set<Property> reportedProperties, Integer version, CorrelatingMessageCallback correlatingMessageCallback, Object correlatingMessageCallbackContext, IotHubEventCallback reportedPropertiesCallback, Object callbackContext) throws IOException
     {
         if (reportedProperties == null)
         {
@@ -315,16 +347,24 @@ public class DeviceTwin
         }
 
         IotHubTransportMessage updateReportedPropertiesRequest = new IotHubTransportMessage(serializedReportedProperties.getBytes(), MessageType.DEVICE_TWIN);
+        updateReportedPropertiesRequest.setCorrelatingMessageCallback(correlatingMessageCallback);
+        updateReportedPropertiesRequest.setCorrelatingMessageCallbackContext(correlatingMessageCallbackContext);
         updateReportedPropertiesRequest.setConnectionDeviceId(this.config.getDeviceId());
-        updateReportedPropertiesRequest.setRequestId(String.valueOf(requestId++));
+
+        // MQTT does not have the concept of correlationId for request/response handling but it does have a requestId
+        // To handle this we are setting the correlationId to the requestId to better handle correlation
+        // whether we use MQTT or AMQP.
+        updateReportedPropertiesRequest.setRequestId(UUID.randomUUID().toString());
+        updateReportedPropertiesRequest.setCorrelationId(updateReportedPropertiesRequest.getRequestId());
 
         if (version != null)
         {
             updateReportedPropertiesRequest.setVersion(Integer.toString(version));
         }
 
+
         updateReportedPropertiesRequest.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST);
-        this.deviceIO.sendEventAsync(updateReportedPropertiesRequest, new deviceTwinRequestMessageCallback(), null, this.config.getDeviceId());
+        this.deviceIO.sendEventAsync(updateReportedPropertiesRequest, reportedPropertiesCallback, callbackContext, this.config.getDeviceId());
     }
 
     public void subscribeDesiredPropertiesNotification(Map<Property, Pair<PropertyCallBack<String, Object>, Object>> onDesiredPropertyChange)

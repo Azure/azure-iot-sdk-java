@@ -195,6 +195,7 @@ public final class UpdateOperationUtility {
     // An inner class is declared as a non-static member of another class and it is tied to a particular instance of its containing class.
     // An inner class may be static if it doesn't reference its enclosing instance.
     // A static inner class does not keep an implicit reference to its enclosing instance. This prevents a common cause of memory leaks and uses less memory per instance of the class.
+    @SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
     static class UpdateOperation {
         @JsonProperty(value = "op")
         private String operation;

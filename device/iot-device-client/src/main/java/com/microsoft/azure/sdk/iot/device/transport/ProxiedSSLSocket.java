@@ -154,6 +154,7 @@ public class ProxiedSSLSocket extends SSLSocket
         log.trace("HTTP proxy responded to connect request with status {}, so the proxy connect was successful", connectResponseStatusCode);
     }
 
+    @SuppressWarnings("unused") // Interface should not change
     private interface ProxiedSSLSocketNonDelegatedFunctions
     {
         void connect(SocketAddress socketAddress, int timeout) throws IOException;
@@ -198,6 +199,8 @@ public class ProxiedSSLSocket extends SSLSocket
                 mostRecentFourCharacters.offer(i);
             }
 
+            // Suppressed inspection because the suggestion is only valid for Java10+
+            //noinspection StringOperationCanBeSimplified
             String httpHeaderLine = new String(httpLineOutputStream.toByteArray(), byteEncoding);
             httpLineOutputStream.close();
             alreadyRead = true;

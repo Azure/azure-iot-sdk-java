@@ -11,6 +11,8 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.deps.util.Tools;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -98,6 +100,7 @@ import java.util.Map;
  * @see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-device-twins">Understand and use device twins in IoT Hub</a>
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iothub/devicetwinapi">Device Twin Api</a>
  */
+@SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
 public class TwinState extends RegisterManager
 {
     // the twin tags
@@ -117,6 +120,14 @@ public class TwinState extends RegisterManager
     @Expose(serialize = false)
     @SerializedName(CONFIGURATION_TAG)
     private Map<String, ConfigurationInfo> configurations;
+
+    private static final String DEVICE_SCOPE = "deviceScope";
+    @SerializedName(DEVICE_SCOPE)
+    private String deviceScope;
+
+    private static final String PARENT_SCOPES = "parentScopes";
+    @SerializedName(PARENT_SCOPES)
+    private final List<String> parentScopes = new ArrayList<>();
 
     /**
      * CONSTRUCTOR
@@ -152,12 +163,11 @@ public class TwinState extends RegisterManager
      */
     public TwinState(TwinCollection tags, TwinCollection desiredProperty, TwinCollection reportedProperty)
     {
-        /* SRS_TWIN_STATE_21_001: [The constructor shall store the provided tags, desiredProperty, and reportedProperty.] */
-        if(tags != null)
+        if (tags != null)
         {
             this.tags = TwinCollection.createFromRawCollection(tags);
         }
-        if((desiredProperty != null) || (reportedProperty != null))
+        if (desiredProperty != null || reportedProperty != null)
         {
             this.properties = new TwinProperties(desiredProperty, reportedProperty);
         }
@@ -178,17 +188,14 @@ public class TwinState extends RegisterManager
      */
     public JsonElement toJsonElement()
     {
-        /* SRS_TWIN_STATE_21_002: [The toJsonElement shall return a JsonElement with the information in this class in a JSON format.] */
-        /* SRS_TWIN_STATE_21_003: [If the tags is null, the toJsonElement shall not include the `tags` in the final JSON.] */
-        /* SRS_TWIN_STATE_21_004: [If the property is null, the toJsonElement shall not include the `properties` in the final JSON.] */
         Gson gson = new GsonBuilder().disableHtmlEscaping().serializeNulls().create();
         JsonElement json = gson.toJsonTree(this).getAsJsonObject();
 
-        //since null values are lost when building the json tree, need to manually re-add properties as reported properties
-        // may have contained a property with a null value. Those must be preserved so users can delete properties
+        // Since null values are lost when building the json tree, need to manually re-add properties as reported
+        // properties may have contained a property with a null value. Those must be preserved so users can delete
+        // properties.
         if (json != null && this.properties != null)
         {
-            //Codes_SRS_TWIN_STATE_34_024: [The json element shall include all null desired and reported properties.]
             json.getAsJsonObject().add("properties", this.properties.toJsonElement());
         }
 
@@ -243,9 +250,22 @@ public class TwinState extends RegisterManager
      */
     public Map<String, ConfigurationInfo> getConfigurations()
     {
-        /* SRS_TWIN_STATE_21_007: [The getReportedProperty shall return a TwinCollection with the stored reported property.] */
         return configurations;
     }
+
+    /**
+     * Gets the device scope.
+     *
+     * @return The device scope.
+     */
+    public String getDeviceScope() { return this.deviceScope; }
+
+    /**
+     * Gets the parent scopes.
+     *
+     * @return The parent scopes.
+     */
+    public List<String> getParentScopes() { return this.parentScopes; }
 
     /**
      * Creates a pretty print JSON with the content of this class and subclasses.

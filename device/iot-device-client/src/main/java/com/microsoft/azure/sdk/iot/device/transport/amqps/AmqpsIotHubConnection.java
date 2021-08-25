@@ -90,6 +90,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     // Proton-j primitives and wrappers for the device and authentication sessions
     private Connection connection;
     private Reactor reactor;
+    private final Queue<AmqpsSessionHandler> reconnectingDeviceSessionHandlers = new ConcurrentLinkedQueue<>();
     private final Queue<AmqpsSessionHandler> sessionHandlers = new ConcurrentLinkedQueue<>();
     private final Queue<AmqpsSasTokenRenewalHandler> sasTokenRenewalHandlers = new ConcurrentLinkedQueue<>();
     private AmqpsCbsSessionHandler amqpsCbsSessionHandler;
@@ -97,14 +98,18 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     // Multiplexed device registrations and un-registrations come from a non-reactor thread, so they get queued into these
     // queues and are executed when onTimerTask checks them.
     private final Set<DeviceClientConfig> multiplexingClientsToRegister;
-    private final Set<DeviceClientConfig> multiplexingClientsToUnregister;
 
-    public AmqpsIotHubConnection(DeviceClientConfig config)
+    // keys are the configs of the clients to unregister, values are the flag that determines if the session should be cached locally for re-use upon reconnection
+    private final Map<DeviceClientConfig, Boolean> multiplexingClientsToUnregister;
+
+    private final boolean isMultiplexing;
+
+    public AmqpsIotHubConnection(DeviceClientConfig config, boolean isMultiplexing)
     {
         // This allows us to create thread safe sets despite there being no such type default in Java 7 or 8
         this.deviceClientConfigs = Collections.newSetFromMap(new ConcurrentHashMap<DeviceClientConfig, Boolean>());
         this.multiplexingClientsToRegister = Collections.newSetFromMap(new ConcurrentHashMap<DeviceClientConfig, Boolean>());
-        this.multiplexingClientsToUnregister = Collections.newSetFromMap(new ConcurrentHashMap<DeviceClientConfig, Boolean>());
+        this.multiplexingClientsToUnregister = new ConcurrentHashMap<>();
 
         this.deviceClientConfigs.add(config);
 
@@ -126,6 +131,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
         add(new Handshaker());
 
+        this.isMultiplexing = isMultiplexing;
+
         this.state = IotHubConnectionStatus.DISCONNECTED;
         log.trace("AmqpsIotHubConnection object is created successfully and will use port {}", this.isWebsocketConnection ? WEB_SOCKET_PORT : AMQP_PORT);
     }
@@ -135,7 +142,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         // This allows us to create thread safe sets despite there being no such type default in Java 7 or 8
         this.deviceClientConfigs = Collections.newSetFromMap(new ConcurrentHashMap<DeviceClientConfig, Boolean>());
         this.multiplexingClientsToRegister = Collections.newSetFromMap(new ConcurrentHashMap<DeviceClientConfig, Boolean>());
-        this.multiplexingClientsToUnregister = Collections.newSetFromMap(new ConcurrentHashMap<DeviceClientConfig, Boolean>());
+        this.multiplexingClientsToUnregister = new ConcurrentHashMap<>();
 
         this.isWebsocketConnection = isWebsocketConnection;
 
@@ -147,6 +154,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         this.sslContext = sslContext;
 
         add(new Handshaker());
+
+        this.isMultiplexing = true; // This constructor is only ever called when multiplexing
 
         this.state = IotHubConnectionStatus.DISCONNECTED;
         log.trace("AmqpsIotHubConnection object is created successfully and will use port {}", this.isWebsocketConnection ? WEB_SOCKET_PORT : AMQP_PORT);
@@ -166,14 +175,28 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         deviceClientConfigs.add(config);
     }
 
-    public void unregisterMultiplexedDevice(DeviceClientConfig config)
+    /**
+     * Asynchronously unregister a multiplexed device from an active multiplexed connection or synchronously unregister
+     * a multiplexed device from a closed multiplexed connection.
+     * @param config the config of the device that should be unregistered.
+     * @param willReconnect true if the device will be re-registered soon because it is reconnecting.
+     */
+    public void unregisterMultiplexedDevice(DeviceClientConfig config, boolean willReconnect)
     {
         if (this.state == IotHubConnectionStatus.CONNECTED)
         {
             // session closing logic should be done from a proton reactor thread, not this thread. This queue gets polled
             // onTimerTask so that this client gets unregistered on that thread instead.
-            log.trace("Queuing the unregistration of device {} from an active multiplexed connection", config.getDeviceId());
-            this.multiplexingClientsToUnregister.add(config);
+            if (willReconnect)
+            {
+                log.trace("Queuing the unregistration of device {} from an active multiplexed connection. The device will be re-registered for reconnection purposes.", config.getDeviceId());
+            }
+            else
+            {
+                log.trace("Queuing the unregistration of device {} from an active multiplexed connection", config.getDeviceId());
+            }
+
+            this.multiplexingClientsToUnregister.put(config, willReconnect);
         }
 
         deviceClientConfigs.remove(config);
@@ -191,7 +214,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         {
             for (DeviceClientConfig clientConfig : deviceClientConfigs)
             {
-                this.createSessionHandler(clientConfig);
+                this.addSessionHandler(clientConfig);
             }
 
             initializeStateLatches();
@@ -200,7 +223,12 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             {
                 this.openAsync();
 
-                log.trace("Waiting for authentication links to open...");
+                if (this.authenticationType == DeviceClientConfig.AuthType.SAS_TOKEN)
+                {
+                    // x509 authenticated connections don't open authentication links since the SSL handshake does all the authentication
+                    log.trace("Waiting for authentication links to open...");
+                }
+
                 Iterator<DeviceClientConfig> configsIterator = this.deviceClientConfigs.iterator();
                 DeviceClientConfig defaultConfig = configsIterator.hasNext() ? configsIterator.next() : null;
                 int timeoutSeconds = DeviceClientConfig.DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT_IN_SECONDS;
@@ -280,6 +308,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             try
             {
                 log.trace("Waiting for reactor to close...");
+                // Result is not used
+                //noinspection ResultOfMethodCallIgnored
                 closeReactorLatch.await(MAX_WAIT_TO_CLOSE_CONNECTION, TimeUnit.MILLISECONDS);
             }
             catch (InterruptedException e)
@@ -686,16 +716,26 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     @Override
     public void onAuthenticationFailed(String deviceId, TransportException transportException)
     {
-        if (this.deviceClientConfigs.size() > 1)
+        if (this.isMultiplexing)
         {
-            if (this.savedException == null)
+            if (this.state != IotHubConnectionStatus.CONNECTED)
             {
-                this.savedException = new MultiplexingDeviceUnauthorizedException("One or more multiplexed devices failed to authenticate");
-            }
+                if (this.savedException == null)
+                {
+                    this.savedException = new MultiplexingDeviceUnauthorizedException("One or more multiplexed devices failed to authenticate");
+                }
 
-            if (this.savedException instanceof MultiplexingDeviceUnauthorizedException)
+                if (this.savedException instanceof MultiplexingDeviceUnauthorizedException)
+                {
+                    ((MultiplexingDeviceUnauthorizedException)this.savedException).addRegistrationException(deviceId, transportException);
+                }
+            }
+            else
             {
-                ((MultiplexingDeviceUnauthorizedException)this.savedException).addRegistrationException(deviceId, transportException);
+                // When the muxed connection is already open, no need to save the exception to this.savedException
+                // The call to onMultiplexedDeviceSessionRegistrationFailed will propagate the exception up to the
+                // transport layer to handle accordingly.
+                log.trace("Not saving the authentication failure locally. Just notifying upper layer directly.");
             }
         }
         else
@@ -720,7 +760,19 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     {
         TransportException savedException = AmqpsExceptionTranslator.convertFromAmqpException(errorCondition);
 
-        if (this.deviceClientConfigs.size() > 1)
+        if (this.isMultiplexing)
+        {
+            // If a device is registered to an active multiplexed connection, and the session closes locally before opening,
+            // need to notify upper layer that the register call failed, and that it shouldn't wait for it to report having opened.
+            this.listener.onMultiplexedDeviceSessionRegistrationFailed(this.connectionId, deviceId, savedException);
+        }
+
+        // If the session closes during an open call, need to decrement this latch so that the open call doesn't wait
+        // for this session to open. The above call to onMultiplexedDeviceSessionRegistrationFailed will report
+        // the relevant exception.
+        this.deviceSessionsOpenedLatches.get(deviceId).countDown();
+
+        if (isMultiplexing)
         {
             // When multiplexing, don't kill the connection just because a session dropped.
             log.error("Amqp session closed unexpectedly. notifying the transport layer to start reconnection logic...", this.savedException);
@@ -892,7 +944,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
     }
 
-    private AmqpsSessionHandler createSessionHandler(DeviceClientConfig deviceClientConfig)
+    private AmqpsSessionHandler addSessionHandler(DeviceClientConfig deviceClientConfig)
     {
         // Check if the device session still exists from a previous connection
         AmqpsSessionHandler amqpsSessionHandler = null;
@@ -905,13 +957,25 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             }
         }
 
+        // If the device session was temporarily unregistered during reconnection, reuse the cached session handler
+        // since it holds the subscription information needed to fully reconnect all links that were open prior to reconnection.
+        for (AmqpsSessionHandler cachedDeviceSessionHandler : this.reconnectingDeviceSessionHandlers)
+        {
+            if (cachedDeviceSessionHandler.getDeviceId().equals(deviceClientConfig.getDeviceId()))
+            {
+                amqpsSessionHandler = cachedDeviceSessionHandler;
+                break;
+            }
+        }
+
         // If the device session did not exist in the previous connection, or if there was no previous connection,
         // create a new session
         if (amqpsSessionHandler == null)
         {
             amqpsSessionHandler = new AmqpsSessionHandler(deviceClientConfig, this);
-            this.sessionHandlers.add(amqpsSessionHandler);
         }
+
+        this.sessionHandlers.add(amqpsSessionHandler);
 
         return amqpsSessionHandler;
     }
@@ -925,7 +989,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         Set<DeviceClientConfig> configsRegisteredSuccessfully = new HashSet<>();
         while (configToRegister != null)
         {
-            AmqpsSessionHandler amqpsSessionHandler = createSessionHandler(configToRegister);
+            AmqpsSessionHandler amqpsSessionHandler = addSessionHandler(configToRegister);
 
             log.trace("Adding device session for device {} to an active connection", configToRegister.getDeviceId());
             amqpsSessionHandler.setSession(this.connection.session());
@@ -958,7 +1022,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     // can be opened on a reactor thread instead of from one of our threads.
     private void checkForNewlyUnregisteredMultiplexedClientsToStop()
     {
-        Iterator<DeviceClientConfig> configsToUnregisterIterator = this.multiplexingClientsToUnregister.iterator();
+        Iterator<DeviceClientConfig> configsToUnregisterIterator = this.multiplexingClientsToUnregister.keySet().iterator();
         DeviceClientConfig configToUnregister = configsToUnregisterIterator.hasNext() ? configsToUnregisterIterator.next() : null;
         Set<DeviceClientConfig> configsUnregisteredSuccessfully = new HashSet<>();
         while (configToUnregister != null)
@@ -983,6 +1047,19 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             {
                 log.trace("Removing session handler for device {}", amqpsSessionHandler.getDeviceId());
                 this.sessionHandlers.remove(amqpsSessionHandler);
+
+                // if the client being unregistered is doing so for reconnection purposes
+                boolean isSessionReconnecting = this.multiplexingClientsToUnregister.get(configToUnregister);
+                if (isSessionReconnecting)
+                {
+                    // save the session handler for later since it has state for what subscriptions the device had before this reconnection
+                    this.reconnectingDeviceSessionHandlers.add(amqpsSessionHandler);
+                }
+                else
+                {
+                    // remove the cached session handler since the device is being unregistered manually if it is cached
+                    this.reconnectingDeviceSessionHandlers.remove(amqpsSessionHandler);
+                }
 
                 // Need to find the sas token renewal handler that is tied to this device
                 AmqpsSasTokenRenewalHandler sasTokenRenewalHandlerToRemove = null;
@@ -1014,7 +1091,12 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             configToUnregister = configsToUnregisterIterator.hasNext() ? configsToUnregisterIterator.next() : null;
         }
 
-        this.multiplexingClientsToUnregister.removeAll(configsUnregisteredSuccessfully);
+        for (DeviceClientConfig successfullyUnregisteredConfig : configsUnregisteredSuccessfully)
+        {
+            this.multiplexingClientsToUnregister.remove(successfullyUnregisteredConfig);
+        }
+
+        this.deviceClientConfigs.removeAll(configsUnregisteredSuccessfully);
     }
 
     private void initializeStateLatches()
@@ -1072,7 +1154,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
     private void closeAsync()
     {
-        log.trace("OpenAsync called for amqp connection");
+        log.trace("CloseAsync called for amqp connection");
 
         // This may be called before a connection or reactor have been established, so need to check the state
         if (this.connection == null && this.reactor == null) {

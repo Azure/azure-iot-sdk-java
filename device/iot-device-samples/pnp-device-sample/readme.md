@@ -1,28 +1,56 @@
-# Plug and play device sample
+---
+page_type: sample
+description: "A set of Java samples that show how a device that uses the IoT Plug and Play conventions interacts with either IoT Hub or IoT Central."
+languages:
+- java
+products:
+- azure-iot-hub
+- azure-iot-central
+- azure-iot-pnp
+urlFragment: azure-iot-pnp-device-samples-for-java
+---
 
-These samples demonstrate how a plug and play enabled device interacts with IoT hub, to:
+# IoT Plug And Play device samples
+
+[![Documentation](../../../doc/media/docs-link-buttons/azure-documentation.svg)](https://docs.microsoft.com/azure/iot-develop/)
+
+These samples demonstrate how a device that follows the [IoT Plug and Play conventions](https://docs.microsoft.com/azure/iot-pnp/concepts-convention) interacts with IoT Hub or IoT Central, to:
+
 - Send telemetry.
-- Update read-only and read-write porperties.
-- Respond to command invocation. 
+- Update read-only and read-write properties.
+- Respond to command invocation.
 
 The samples demonstrate two scenarios:
-- The device is modeled as a plug and play device, having only a root interface - [Thermostat](thermostat-device-sample)
-  - This model defines root level telemetry, read-only and read-write properties and commands.
-- The device is modeled as a plug and play device having multiple components - [Temperature controller](temperature-controller-device-sample).
-  - This model defines root level telemetry, read-only property and commands.
-  - It also defines two [Thermostat](thermostat-device-sample/src/main/resources/Thermostat.json) components, and a [device information][d-device-info] component.
 
-### Arguments Description
+- An IoT Plug and Play device that implements the [Thermostat](https://devicemodels.azure.com/dtmi/com/example/thermostat-1.json) model. This model has a single interface that defines telemetry, read-only and read-write properties, and commands.
+- An IoT Plug and Play device that implements the [Temperature controller](https://devicemodels.azure.com/dtmi/com/example/temperaturecontroller-2.json) model. This model uses multiple components:
+  - The top-level interface defines telemetry, read-only property and commands.
+  - The model includes two [Thermostat](https://devicemodels.azure.com/dtmi/com/example/thermostat-1.json) components, and a [device information](https://devicemodels.azure.com/dtmi/azure/devicemanagement/deviceinformation-1.json) component.
 
-* Device Connection String:
-  * Device connection string format:
+## Quickstarts and tutorials
 
-    ```
-    HostName=your-hub.azure-devices.net;DeviceId=yourDevice;SharedAccessKey=XXXYYYZZZ=;
-    ```
-  * Set the following environment variables on the terminal from which you want to run the application.
+To learn more about how to configure and run the Thermostat device sample with IoT Hub, see [Quickstart: Connect a sample IoT Plug and Play device application running on Linux or Windows to IoT Hub](https://docs.microsoft.com/azure/iot-pnp/quickstart-connect-device?pivots=programming-language-java).
 
-    `IOTHUB_DEVICE_CONNECTION_STRING`
+To learn more about how to configure and run the Temperature Controller device sample with:
+
+- IoT Hub, see [Tutorial: Connect an IoT Plug and Play multiple component device application running on Linux or Windows to IoT Hub](https://docs.microsoft.com/azure/iot-pnp/tutorial-multiple-components?pivots=programming-language-java)
+- IoT Central, see [Tutorial: Create and connect a client application to your Azure IoT Central application](https://docs.microsoft.com/azure/iot-central/core/tutorial-connect-device?pivots=programming-language-java)
+
+## Configuring the samples
+
+Both samples use environment variables to retrieve configuration.
+
+* If you are using a connection string to authenticate:
+  * set IOTHUB_DEVICE_SECURITY_TYPE="connectionString"
+  * set IOTHUB_DEVICE_CONNECTION_STRING="\<connection string of your device\>"
+
+* If you are using a DPS enrollment group to authenticate:
+  * set IOTHUB_DEVICE_SECURITY_TYPE="DPS"
+  * set IOTHUB_DEVICE_DPS_ID_SCOPE="\<ID Scope of DPS instance\>"
+  * set IOTHUB_DEVICE_DPS_DEVICE_ID="\<Device's ID\>"
+  * set IOTHUB_DEVICE_DPS_DEVICE_KEY="\<Device's security key \>"
+  * *OPTIONAL*, if you do not wish to use the default endpoint "global.azure-devices-provisioning.net"
+    * set IOTHUB_DEVICE_DPS_ENDPOINT="\<DPS endpoint\>"
 
 
 ## Build the sample

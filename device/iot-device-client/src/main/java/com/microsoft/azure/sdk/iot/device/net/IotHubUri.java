@@ -229,6 +229,7 @@ public final class IotHubUri
         }
     }
 
+    @SuppressWarnings("SameReturnValue")
     public static String getApiVersionString()
     {
         return API_VERSION;

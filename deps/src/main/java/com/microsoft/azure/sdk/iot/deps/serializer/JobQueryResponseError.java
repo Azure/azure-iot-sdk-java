@@ -11,7 +11,7 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.IOException;
-
+@SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
 public class JobQueryResponseError
 {
     // Code for the error

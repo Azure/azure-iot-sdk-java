@@ -146,6 +146,7 @@ public class RequestData
      * Getter for SSL Context
      * @return SSL context
      */
+    @SuppressWarnings("unused") // Public member
     public SSLContext getSslContext()
     {
         //SRS_RequestData_25_010: [ This method shall retrieve sslContext. ]
@@ -156,6 +157,7 @@ public class RequestData
      * Setter for SSL context.
      * @param sslContext sslContext value. Can be {@code null};
      */
+    @SuppressWarnings("unused") // Used in test method. Still part of the original spec
     void setSslContext(SSLContext sslContext)
     {
         //SRS_RequestData_25_011: [ This method shall set sslContext. ]
