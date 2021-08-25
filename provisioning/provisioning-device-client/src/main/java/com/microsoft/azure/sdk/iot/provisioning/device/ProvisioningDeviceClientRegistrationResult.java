@@ -24,4 +24,22 @@ public class ProvisioningDeviceClientRegistrationResult
 
     @Getter
     protected String provisioningPayload;
+
+    @Getter
+    protected String registrationId;
+
+    @Getter
+    protected String createdDateTimeUtc;
+
+    @Getter
+    protected String status;
+
+    @Getter
+    protected ProvisioningDeviceClientSubstatus substatus;
+
+    @Getter
+    protected String eTag;
+
+    @Getter
+    protected String lastUpdatesDateTimeUtc;
 }
