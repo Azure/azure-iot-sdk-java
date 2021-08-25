@@ -7,7 +7,6 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 
 import com.azure.core.credential.AzureSasCredential;
-import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsResponseParser;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
@@ -18,7 +17,7 @@ import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
@@ -253,15 +252,15 @@ public class JobClientTests extends IntegrationTest
                 jobIdsPending.add(jobId);
                 try
                 {
-                    DeviceTwinDevice deviceTwinDevice = new DeviceTwinDevice(deviceId);
+                    Twin twin = new Twin(deviceId);
                     Set<Pair> testDesProp = new HashSet<>();
                     testDesProp.add(new Pair(STANDARD_PROPERTY_HOMETEMP, jobTemperature));
-                    deviceTwinDevice.setDesiredProperties(testDesProp);
+                    twin.setDesiredProperties(testDesProp);
                     twinExpectedTemperature.put(jobId, jobTemperature);
 
                     jobClient.scheduleUpdateTwin(
                         jobId, queryCondition,
-                        deviceTwinDevice,
+                        twin,
                         new Date(), MAX_EXECUTION_TIME_IN_SECONDS);
 
                     JobResult jobResult = jobClient.getJob(jobId);
@@ -521,15 +520,15 @@ public class JobClientTests extends IntegrationTest
                     }
                     else
                     {
-                        DeviceTwinDevice deviceTwinDevice = new DeviceTwinDevice(deviceId);
+                        Twin twin = new Twin(deviceId);
                         Set<Pair> testDesProp = new HashSet<>();
                         testDesProp.add(new Pair(STANDARD_PROPERTY_HOMETEMP, jobTemperature));
-                        deviceTwinDevice.setDesiredProperties(testDesProp);
+                        twin.setDesiredProperties(testDesProp);
                         twinExpectedTemperature.put(jobId, jobTemperature);
 
                         jobClient.scheduleUpdateTwin(
                             jobId, queryCondition,
-                            deviceTwinDevice,
+                            twin,
                             new Date(), MAX_EXECUTION_TIME_IN_SECONDS);
                     }
                     JobResult jobResult = jobClient.getJob(jobId);

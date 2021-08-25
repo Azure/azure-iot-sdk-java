@@ -16,7 +16,7 @@ import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceOperations;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
 import com.microsoft.azure.sdk.iot.service.devicetwin.QueryType;
@@ -162,7 +162,7 @@ public class JobClient
     public JobResult scheduleUpdateTwin(
         String jobId,
         String queryCondition,
-        DeviceTwinDevice updateTwin,
+        Twin updateTwin,
         Date startTimeUtc,
         long maxExecutionTimeInSeconds)
         throws IllegalArgumentException, IOException, IotHubException
@@ -398,7 +398,7 @@ public class JobClient
         return new JobResult(response.getBody());
     }
 
-    private TwinState getParserFromDevice(DeviceTwinDevice device)
+    private TwinState getParserFromDevice(Twin device)
     {
         TwinCollection tags = null;
         TwinCollection desired = null;

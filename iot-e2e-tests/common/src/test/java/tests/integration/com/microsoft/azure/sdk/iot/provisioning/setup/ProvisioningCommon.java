@@ -21,9 +21,9 @@ import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClient;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClientOptions;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import junit.framework.AssertionFailedError;
@@ -440,15 +440,15 @@ public class ProvisioningCommon extends IntegrationTest
     }
 
     protected void assertProvisionedDeviceCapabilitiesAreExpected(DeviceCapabilities expectedDeviceCapabilities, String provisionedHubConnectionString) throws IOException, IotHubException, InterruptedException {
-        DeviceTwin deviceTwin = new DeviceTwin(provisionedHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        TwinClient twinClient = new TwinClient(provisionedHubConnectionString, TwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
 
         boolean deviceFoundInCorrectHub = false;
         Query query = null;
         long startTime = System.currentTimeMillis();
         while (!deviceFoundInCorrectHub)
         {
-            query = deviceTwin.queryTwin("SELECT * FROM devices WHERE deviceId = '" + testInstance.provisionedDeviceId +"'");
-            deviceFoundInCorrectHub = deviceTwin.hasNextDeviceTwin(query);
+            query = twinClient.queryTwin("SELECT * FROM devices WHERE deviceId = '" + testInstance.provisionedDeviceId +"'");
+            deviceFoundInCorrectHub = twinClient.hasNextTwin(query);
 
             Thread.sleep(3000);
 
@@ -458,7 +458,7 @@ public class ProvisioningCommon extends IntegrationTest
             }
         }
 
-        DeviceTwinDevice provisionedDevice = deviceTwin.getNextDeviceTwin(query);
+        Twin provisionedDevice = twinClient.getNextTwin(query);
         if (expectedDeviceCapabilities.isIotEdge())
         {
             assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Provisioned device isn't edge device: " + testInstance.provisionedDeviceId, getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), provisionedDevice.getCapabilities().isIotEdge());

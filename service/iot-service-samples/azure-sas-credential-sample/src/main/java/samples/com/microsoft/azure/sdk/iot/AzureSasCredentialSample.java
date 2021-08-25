@@ -20,11 +20,11 @@ import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.ServiceClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethodClientOptions;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodsClient;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodsClientOptions;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClient;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
 import com.microsoft.azure.sdk.iot.service.devicetwin.SqlQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -116,15 +116,15 @@ public class AzureSasCredentialSample
 
     private static void runTwinClientSample(String iotHubHostName, AzureSasCredential credential, String deviceId)
     {
-        // DeviceTwin has some configurable options for HTTP read and connect timeouts, as well as for setting proxies.
+        // TwinClient has some configurable options for HTTP read and connect timeouts, as well as for setting proxies.
         // For this sample, the default options will be used though.
-        DeviceTwinClientOptions options = DeviceTwinClientOptions.builder().build();
+        TwinClientOptions options = TwinClientOptions.builder().build();
 
         // This constructor takes in your implementation of AzureSasCredential which allows you to use symmetric key based
         // authentication without giving the client your connection string.
-        DeviceTwin twinClient = new DeviceTwin(iotHubHostName, credential, options);
+        TwinClient twinClient = new TwinClient(iotHubHostName, credential, options);
 
-        DeviceTwinDevice newDeviceTwin = new DeviceTwinDevice(deviceId);
+        Twin newDeviceTwin = new Twin(deviceId);
 
         try
         {
@@ -273,16 +273,16 @@ public class AzureSasCredentialSample
     {
         // JobClient has some configurable options for HTTP read and connect timeouts, as well as for setting proxies.
         // For this sample, the default options will be used though.
-        DeviceMethodClientOptions options = DeviceMethodClientOptions.builder().build();
+        DirectMethodsClientOptions options = DirectMethodsClientOptions.builder().build();
 
         // This constructor takes in your implementation of AzureSasCredential which allows you to use symmetric key based
         // authentication without giving the client your connection string.
-        DeviceMethod deviceMethod = new DeviceMethod(iotHubHostName, credential, options);
+        DirectMethodsClient directMethodsClient = new DirectMethodsClient(iotHubHostName, credential, options);
 
         try
         {
             System.out.println("Invoking method on device if it is online");
-            deviceMethod.invoke(
+            directMethodsClient.invoke(
                 deviceId,
                 "someMethodName",
                 5L,

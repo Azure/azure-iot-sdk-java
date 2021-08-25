@@ -19,7 +19,7 @@ import java.util.*;
  * Represent the twin on IoT hub. Implementing constructors and serialization functionality.
  * <p>The object is a representation of a module twin if and only if the moduleId is set.</p>
  */
-public class DeviceTwinDevice
+public class Twin
 {
     @Getter
     private String deviceId;
@@ -78,7 +78,7 @@ public class DeviceTwinDevice
     /**
      * Constructor to create an instance for a device.
      */
-    public DeviceTwinDevice()
+    public Twin()
     {
     }
 
@@ -88,7 +88,7 @@ public class DeviceTwinDevice
      * @param deviceId Id for this device.
      * @throws IllegalArgumentException This exception is thrown if the device Id is {@code null} or empty
      */
-    public DeviceTwinDevice(String deviceId) throws IllegalArgumentException
+    public Twin(String deviceId) throws IllegalArgumentException
     {
         this();
 
@@ -106,7 +106,7 @@ public class DeviceTwinDevice
      * @param moduleId Id for this device's module.
      * @throws IllegalArgumentException This exception is thrown if the device id is {@code null} or empty.
      */
-    public DeviceTwinDevice(String deviceId, String moduleId) throws IllegalArgumentException
+    public Twin(String deviceId, String moduleId) throws IllegalArgumentException
     {
         this();
 

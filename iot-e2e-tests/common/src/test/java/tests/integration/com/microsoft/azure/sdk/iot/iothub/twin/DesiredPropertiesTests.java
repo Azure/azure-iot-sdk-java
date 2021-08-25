@@ -15,7 +15,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
-import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DeviceTwinCommon;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.TwinClientCommon;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -42,7 +42,7 @@ import static org.junit.Assert.*;
 @Slf4j
 @IotHubTest
 @RunWith(Parameterized.class)
-public class DesiredPropertiesTests extends DeviceTwinCommon
+public class DesiredPropertiesTests extends TwinClientCommon
 {
     private final JsonParser jsonParser;
 
@@ -395,14 +395,14 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
             }
         }
 
-        DeviceTwinDevice serviceClientTwin;
+        Twin serviceClientTwin;
         if (testInstance.clientType == ClientType.DEVICE_CLIENT)
         {
-            serviceClientTwin = new DeviceTwinDevice(testInstance.testIdentity.getClient().getConfig().getDeviceId());
+            serviceClientTwin = new Twin(testInstance.testIdentity.getClient().getConfig().getDeviceId());
         }
         else
         {
-            serviceClientTwin = new DeviceTwinDevice(testInstance.testIdentity.getClient().getConfig().getDeviceId(), testInstance.testIdentity.getClient().getConfig().getModuleId());
+            serviceClientTwin = new Twin(testInstance.testIdentity.getClient().getConfig().getDeviceId(), testInstance.testIdentity.getClient().getConfig().getModuleId());
         }
 
         Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
