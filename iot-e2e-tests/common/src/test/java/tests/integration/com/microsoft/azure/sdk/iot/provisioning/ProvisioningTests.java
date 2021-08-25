@@ -315,7 +315,7 @@ public class ProvisioningTests extends ProvisioningCommon
         }
 
         @Override
-        public void PropertyCall(Object propertyKey, Object propertyValue, Object context)
+        public void onPropertyChanged(Object propertyKey, Object propertyValue, Object context)
         {
             //do nothing
         }

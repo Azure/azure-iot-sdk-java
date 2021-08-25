@@ -16,5 +16,5 @@ public interface PropertyCallback<Type1, Type2>
      * @param propertyValue The desired property value that was updated.
      * @param context The context passed to the callback.
      */
-    void PropertyCall(Type1 propertyKey, Type2 propertyValue,  Object context);
+    void onPropertyChanged(Type1 propertyKey, Type2 propertyValue, Object context);
 }

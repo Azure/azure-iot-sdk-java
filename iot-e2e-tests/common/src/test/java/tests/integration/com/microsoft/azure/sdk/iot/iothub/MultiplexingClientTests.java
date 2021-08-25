@@ -808,7 +808,7 @@ public class MultiplexingClientTests extends IntegrationTest
         }
 
         @Override
-        public void TwinPropertyCallback(Property property, Object context)
+        public void onPropertyChanged(Property property, Object context)
         {
             actualKey = property.getKey();
             if (actualKey.equals(expectedKey))

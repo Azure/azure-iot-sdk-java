@@ -9,6 +9,5 @@ package com.microsoft.azure.sdk.iot.device.twin;
  */
 public interface TwinPropertyCallback
 {
-    @SuppressWarnings("MethodNameSameAsClassName") //This is a public interface, renaming this method would be a breaking-change
-    void TwinPropertyCallback(Property property, Object context);
+    void onPropertyChanged(Property property, Object context);
 }

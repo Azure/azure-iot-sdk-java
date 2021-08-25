@@ -48,7 +48,7 @@ public class ModuleTwinSample
     protected static class onHomeTempChange implements TwinPropertyCallback
     {
         @Override
-        public void TwinPropertyCallback(Property property, Object context)
+        public void onPropertyChanged(Property property, Object context)
         {
             System.out.println(
                     "onHomeTempChange change " + property.getKey() +
@@ -60,7 +60,7 @@ public class ModuleTwinSample
     protected static class onCameraActivity implements TwinPropertyCallback
     {
         @Override
-        public void TwinPropertyCallback(Property property, Object context)
+        public void onPropertyChanged(Property property, Object context)
         {
             System.out.println(
                     "onCameraActivity change " + property.getKey() +
@@ -72,7 +72,7 @@ public class ModuleTwinSample
     protected static class onProperty implements TwinPropertyCallback
     {
         @Override
-        public void TwinPropertyCallback(Property property, Object context)
+        public void onPropertyChanged(Property property, Object context)
         {
             System.out.println(
                     "onProperty callback for " + (property.getIsReported()?"reported": "desired") +

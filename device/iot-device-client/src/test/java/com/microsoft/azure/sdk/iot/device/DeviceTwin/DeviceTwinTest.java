@@ -888,7 +888,7 @@ public class DeviceTwinTest
         new Verifications()
         {
             {
-                mockedGenericPropertyCB.PropertyCall(prop2, val2, null);
+                mockedGenericPropertyCB.onPropertyChanged(prop2, val2, null);
                 times = 1;
             }
         };
@@ -923,7 +923,7 @@ public class DeviceTwinTest
         new Verifications()
         {
             {
-                mockedGenericTwinPropertyCB.TwinPropertyCallback((Property)any, null);
+                mockedGenericTwinPropertyCB.onPropertyChanged((Property)any, null);
                 times = 1;
             }
         };
@@ -960,7 +960,7 @@ public class DeviceTwinTest
         new Verifications()
         {
             {
-                mockedDesiredCB.PropertyCall(prop1, val2, null);
+                mockedDesiredCB.onPropertyChanged(prop1, val2, null);
                 times = 1;
             }
         };
@@ -995,7 +995,7 @@ public class DeviceTwinTest
         new Verifications()
         {
             {
-                mockedDesiredCB.TwinPropertyCallback((Property)any, null);
+                mockedDesiredCB.onPropertyChanged((Property)any, null);
                 times = 1;
             }
         };
@@ -1039,7 +1039,7 @@ public class DeviceTwinTest
         new Verifications()
         {
             {
-                mockedGenericTwinPropertyCB.TwinPropertyCallback(mockedProperty, null);
+                mockedGenericTwinPropertyCB.onPropertyChanged(mockedProperty, null);
                 times = 1;
             }
         };
@@ -1083,7 +1083,7 @@ public class DeviceTwinTest
         new Verifications()
         {
             {
-                mockedGenericTwinPropertyCB.TwinPropertyCallback(mockedProperty, null);
+                mockedGenericTwinPropertyCB.onPropertyChanged(mockedProperty, null);
                 times = 1;
             }
         };
@@ -1132,7 +1132,7 @@ public class DeviceTwinTest
                         new Class[]{String.class, Object.class, Integer.class, boolean.class, Date.class, Integer.class},
                         reportedProp1, reportedVal2, reportedVersion, true, null, null);
                 times = 1;
-                mockedGenericTwinPropertyCB.TwinPropertyCallback((Property)any, null);
+                mockedGenericTwinPropertyCB.onPropertyChanged((Property)any, null);
                 times = 2;
             }
         };
@@ -1217,7 +1217,7 @@ public class DeviceTwinTest
                         new Class[]{String.class, Object.class, Integer.class, boolean.class, Date.class, Integer.class},
                         reportedProp1, reportedVal2, reportedVersion, true, (Date) any, lastUpdatedVersion);
                 times = 1;
-                mockedGenericTwinPropertyCB.TwinPropertyCallback((Property)any, null);
+                mockedGenericTwinPropertyCB.onPropertyChanged((Property)any, null);
                 times = 2;
             }
         };
@@ -1253,7 +1253,7 @@ public class DeviceTwinTest
         new Verifications()
         {
             {
-                mockedGenericPropertyCB.PropertyCall(prop1, val2, null);
+                mockedGenericPropertyCB.onPropertyChanged(prop1, val2, null);
                 times = 1;
             }
         };
@@ -1286,7 +1286,7 @@ public class DeviceTwinTest
         new Verifications()
         {
             {
-                mockedGenericTwinPropertyCB.TwinPropertyCallback((Property)any, null);
+                mockedGenericTwinPropertyCB.onPropertyChanged((Property)any, null);
                 times = 1;
             }
         };
@@ -1315,7 +1315,7 @@ public class DeviceTwinTest
         new Verifications()
         {
             {
-                mockedGenericPropertyCB.PropertyCall(prop1, val2, null);
+                mockedGenericPropertyCB.onPropertyChanged(prop1, val2, null);
                 times = 1;
             }
         };
@@ -1344,7 +1344,7 @@ public class DeviceTwinTest
         new Verifications()
         {
             {
-                mockedGenericTwinPropertyCB.TwinPropertyCallback((Property)any, null);
+                mockedGenericTwinPropertyCB.onPropertyChanged((Property)any, null);
                 times = 1;
             }
         };

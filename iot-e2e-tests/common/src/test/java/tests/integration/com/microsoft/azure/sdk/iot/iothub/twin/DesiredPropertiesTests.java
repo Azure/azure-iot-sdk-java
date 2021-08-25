@@ -327,7 +327,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         TwinCollection expectedProperties;
 
         @Override
-        public void TwinPropertiesCallback(TwinCollection actualProperties, Object context) {
+        public void onPropertiesChanged(TwinCollection actualProperties, Object context) {
             Success desiredPropertiesCallbackState = (Success) context;
             desiredPropertiesCallbackState.callbackWasFired();
 

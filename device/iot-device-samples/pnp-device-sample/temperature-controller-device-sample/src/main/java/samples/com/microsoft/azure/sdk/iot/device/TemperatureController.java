@@ -370,7 +370,7 @@ public class TemperatureController {
 
         @SneakyThrows({IOException.class, InterruptedException.class})
         @Override
-        public void TwinPropertyCallback(Property property, Object context) {
+        public void onPropertyChanged(Property property, Object context) {
             String componentName = (String) context;
 
             if (property.getKey().equalsIgnoreCase(componentName)) {
@@ -528,7 +528,7 @@ public class TemperatureController {
     {
 
         @Override
-        public void TwinPropertyCallback(Property property, Object context) {
+        public void onPropertyChanged(Property property, Object context) {
             log.debug("Property - Received property unhandled by device, key={}, value={}", property.getKey(), property.getValue());
         }
     }

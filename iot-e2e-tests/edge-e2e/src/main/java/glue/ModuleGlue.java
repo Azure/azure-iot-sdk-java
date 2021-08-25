@@ -261,7 +261,7 @@ public class ModuleGlue
         }
 
         @Override
-        public void TwinPropertyCallback(Property property, Object context)
+        public void onPropertyChanged(Property property, Object context)
         {
             System.out.println(
                     "onProperty callback for " + (property.getIsReported() ? "reported" : "desired") +
