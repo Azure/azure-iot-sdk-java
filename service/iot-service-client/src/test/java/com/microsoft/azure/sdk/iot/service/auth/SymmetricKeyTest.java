@@ -47,6 +47,7 @@ public class SymmetricKeyTest
         assertEquals(key, Deencapsulation.getField(symmetricKey, "primaryKey"));
     }
 
+    // Tests_SRS_SERVICE_SDK_JAVA_SYMMETRICKEY_12_003: [The function shall throw IllegalArgumentException if the length of the key less than 16 or greater than 64]
     @Test
     public void setSecondaryKey_length_good_case_min()
     {
