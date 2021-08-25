@@ -235,29 +235,6 @@ public class DeviceTwinDeviceTest
     }
 
     /*
-    **Tests_SRS_DEVICETWINDEVICE_21_029: [** The seteTag shall throw IllegalArgumentException if the input string is empty or null.**]**
-     */
-    @Test (expected = IllegalArgumentException.class)
-    public void setETagNullThrows()
-    {
-        //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
-
-        //act
-        testDevice.setETag(null);
-    }
-
-    @Test (expected = IllegalArgumentException.class)
-    public void setETagEmptyThrows()
-    {
-        //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
-
-        //act
-        testDevice.setETag("");
-    }
-
-    /*
     **Tests_SRS_DEVICETWINDEVICE_21_031: [** The geteTag shall return the stored eTag.**]**
      */
     @Test

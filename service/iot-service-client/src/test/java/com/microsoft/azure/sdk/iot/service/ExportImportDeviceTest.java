@@ -122,44 +122,6 @@ public class ExportImportDeviceTest
         assertEquals(DeviceStatus.Enabled.toString(), parserCA.getStatus());
     }
 
-    //Tests_SRS_SERVICE_SDK_JAVA_IMPORT_EXPORT_DEVICE_34_052: [This constructor shall use the properties of the provided parser object to set the new ExportImportDevice's properties.]
-    @Test
-    public void conversionFromDeviceParser()
-    {
-        // arrange
-        ExportImportDeviceParser parserCA = new ExportImportDeviceParser();
-        parserCA.setAuthentication(Deencapsulation.newInstance(AuthenticationParser.class));
-        parserCA.getAuthentication().setType(AuthenticationTypeParser.CERTIFICATE_AUTHORITY);
-        parserCA.setStatus("Enabled");
-        parserCA.setImportMode("Create");
-        parserCA.setId("deviceCA");
-
-        ExportImportDeviceParser parserSelf = new ExportImportDeviceParser();
-        parserSelf.setAuthentication(Deencapsulation.newInstance(AuthenticationParser.class));
-        parserSelf.getAuthentication().setType(AuthenticationTypeParser.SELF_SIGNED);
-        parserSelf.getAuthentication().setThumbprint(new X509ThumbprintParser(SAMPLE_THUMBPRINT, SAMPLE_THUMBPRINT));
-        parserSelf.setId("deviceSelf");
-
-        ExportImportDeviceParser parserSAS = new ExportImportDeviceParser();
-        parserSAS.setAuthentication(Deencapsulation.newInstance(AuthenticationParser.class));
-        parserSAS.getAuthentication().setType(AuthenticationTypeParser.SAS);
-        parserSAS.getAuthentication().setSymmetricKey(new SymmetricKeyParser(SAMPLE_THUMBPRINT,SAMPLE_THUMBPRINT));
-        parserSAS.setId("deviceSAS");
-
-        // act
-        ExportImportDevice deviceCA = reflectivelyInvokeExportImportDeviceParserConstructor(parserCA);
-        ExportImportDevice deviceSelf = reflectivelyInvokeExportImportDeviceParserConstructor(parserSelf);
-        ExportImportDevice deviceSAS = reflectivelyInvokeExportImportDeviceParserConstructor(parserSAS);
-
-        // assert
-        assertEquals(AuthenticationType.CERTIFICATE_AUTHORITY, deviceCA.getAuthentication().getAuthenticationType());
-        assertEquals(AuthenticationType.SELF_SIGNED, deviceSelf.getAuthentication().getAuthenticationType());
-        assertEquals(AuthenticationType.SAS, deviceSAS.getAuthentication().getAuthenticationType());
-
-        assertEquals(ImportMode.Create, deviceCA.getImportMode());
-        assertEquals(DeviceStatus.Enabled, deviceCA.getStatus());
-    }
-
     //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_051: [This constructor shall save the provided deviceId and authenticationType to itself.]
     @Test
     public void constructorSavesDeviceIdAndAuthType()
@@ -202,14 +164,6 @@ public class ExportImportDeviceTest
         reflectivelyInvokeExportImportDeviceParserConstructor(parser);
     }
 
-    //Tests_SRS_SERVICE_SDK_JAVA_IMPORT_EXPORT_DEVICE_34_056: [If the provided authentication is null, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void cannotSetIdNull()
-    {
-        //act
-        new ExportImportDevice().setId(null);
-    }
-
     //Tests_SRS_SERVICE_SDK_JAVA_IMPORT_EXPORT_DEVICE_34_055: [If the provided id is null, an IllegalArgumentException shall be thrown.]
     @Test (expected = IllegalArgumentException.class)
     public void cannotSetAuthenticationNull()
@@ -240,29 +194,6 @@ public class ExportImportDeviceTest
     {
         //act
         new ExportImportDevice("someDevice", null);
-    }
-
-    //Codes_SRS_SERVICE_SDK_JAVA_IMPORT_EXPORT_DEVICE_34_058: [If the provided parser uses SAS authentication and is missing one or both symmetric keys, two new keys will be generated.]
-    @Test
-    public void constructorWithParserGeneratesMissingSecondaryKeyWhenSASAuthenticated()
-    {
-        //arrange
-        ExportImportDeviceParser parser = new ExportImportDeviceParser();
-        parser.setId("someDevice");
-        parser.setAuthentication(new AuthenticationParser());
-        parser.getAuthentication().setType(AuthenticationTypeParser.SAS);
-        parser.getAuthentication().setSymmetricKey(new SymmetricKeyParser());
-        parser.getAuthentication().getSymmetricKey().setPrimaryKey(SAMPLE_KEY);
-
-        //act
-        ExportImportDevice device = reflectivelyInvokeExportImportDeviceParserConstructor(parser);
-
-        //assert
-        assertNotNull(device.getAuthentication());
-        assertNotNull(device.getAuthentication().getSymmetricKey());
-        assertNotNull(device.getAuthentication().getSymmetricKey().getPrimaryKey());
-        assertNotNull(device.getAuthentication().getSymmetricKey().getSecondaryKey());
-        assertNotEquals(SAMPLE_KEY, device.getAuthentication().getSymmetricKey().getPrimaryKey());
     }
 
     //Tests_SRS_SERVICE_SDK_JAVA_IMPORT_EXPORT_DEVICE_34_059: [If the provided parser uses self signed authentication and is missing one or both thumbprints, two new thumbprints will be generated.]
@@ -296,23 +227,6 @@ public class ExportImportDeviceTest
         device.setId("someDevice");
         AuthenticationMechanism authentication = new AuthenticationMechanism(AuthenticationType.SAS);
         Deencapsulation.setField(authentication, "symmetricKey", null);
-        device.setAuthentication(authentication);
-
-        //act
-        reflectivelyInvokeToExportImportDeviceParser(device);
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_IMPORT_EXPORT_DEVICE_34_060: [If this device uses sas authentication, but does not have a primary and secondary symmetric key saved, an IllegalStateException shall be thrown.]
-    @Test (expected = IllegalStateException.class)
-    public void toParserIllegalStateThrownWhenUsingSASAuthenticationWithoutPrimaryKeySaved()
-    {
-        //arrange
-        ExportImportDevice device = new ExportImportDevice();
-        device.setId("someDevice");
-        AuthenticationMechanism authentication = new AuthenticationMechanism(AuthenticationType.SAS);
-        SymmetricKey symmetricKey = new SymmetricKey();
-        Deencapsulation.setField(symmetricKey, "primaryKey", null);
-        Deencapsulation.setField(authentication, "symmetricKey", symmetricKey);
         device.setAuthentication(authentication);
 
         //act
