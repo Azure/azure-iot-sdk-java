@@ -59,13 +59,13 @@ public class DeviceTestManager
     {
         if (enableMethod)
         {
-            /* Enable DeviceMethod on the device client using the callbacks from the DeviceEmulator */
+            /* Enable DirectMethodClient on the device client using the callbacks from the DeviceEmulator */
             deviceEmulator.subscribeToDeviceMethod();
         }
 
         if (enableTwin)
         {
-            /* Enable DeviceTwin on the device client using the callbacks from the DeviceEmulator */
+            /* Enable TwinClient on the device client using the callbacks from the DeviceEmulator */
             deviceEmulator.subscribeToDeviceTwin();
         }
     }

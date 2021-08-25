@@ -18,8 +18,8 @@ public class Thermostat {
     private static final String iotHubConnectionString  = System.getenv("IOTHUB_CONNECTION_STRING");
     private static final String deviceId = System.getenv("IOTHUB_DEVICE_ID");
 
-    private static DeviceTwin twinClient;
-    private static DeviceMethod methodClient;
+    private static TwinClient twinClient;
+    private static DirectMethodClient methodClient;
 
     public static void main(String[] args) throws Exception {
         RunSample();
@@ -38,13 +38,13 @@ public class Thermostat {
 
     private static void InitializeServiceClient()
     {
-        twinClient = new DeviceTwin(iotHubConnectionString);
-        methodClient = new DeviceMethod(iotHubConnectionString);
+        twinClient = new TwinClient(iotHubConnectionString);
+        methodClient = new DirectMethodClient(iotHubConnectionString);
     }
 
     private static void GetAndUpdateTwin() throws IOException, IotHubException {
         // Get the twin and retrieve model Id set by Device client.
-        DeviceTwinDevice twin = new DeviceTwinDevice(deviceId);
+        Twin twin = new Twin(deviceId);
         twinClient.getTwin(twin);
         System.out.println("Model Id of this Twin is: " + twin.getModelId());
 

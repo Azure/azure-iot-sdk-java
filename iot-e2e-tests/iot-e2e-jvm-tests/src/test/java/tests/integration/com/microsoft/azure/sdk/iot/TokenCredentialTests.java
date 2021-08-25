@@ -16,9 +16,9 @@ import com.microsoft.azure.sdk.iot.service.Message;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodClient;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClient;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.customized.DigitalTwinGetHeaders;
@@ -139,7 +139,7 @@ public class TokenCredentialTests
     {
         Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
 
-        DeviceMethod methodServiceClient = buildDeviceMethodClientWithTokenCredential();
+        DirectMethodClient methodServiceClient = buildDeviceMethodClientWithTokenCredential();
 
         RegistryManager registryManager = new RegistryManager(iotHubConnectionString);
         Device device = Device.createDevice("some-device-" + UUID.randomUUID(), AuthenticationType.SAS);
@@ -193,13 +193,13 @@ public class TokenCredentialTests
     {
         Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
 
-        DeviceTwin twinServiceClient = buildDeviceTwinClientWithTokenCredential();
+        TwinClient twinServiceClient = buildDeviceTwinClientWithTokenCredential();
 
         RegistryManager registryManager = new RegistryManager(iotHubConnectionString);
         Device device = Device.createDevice("some-device-" + UUID.randomUUID(), AuthenticationType.SAS);
         registryManager.addDevice(device);
 
-        DeviceTwinDevice twin = new DeviceTwinDevice(device.getDeviceId());
+        Twin twin = new Twin(device.getDeviceId());
         twinServiceClient.getTwin(twin);
 
         assertNotNull(twin.getETag());

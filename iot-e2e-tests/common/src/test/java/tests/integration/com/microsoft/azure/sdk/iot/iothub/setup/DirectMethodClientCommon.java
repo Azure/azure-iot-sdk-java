@@ -18,8 +18,8 @@ import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethodClientOptions;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodClient;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +57,7 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
  * but any children class should.
  */
 @Slf4j
-public class DeviceMethodCommon extends IntegrationTest
+public class DirectMethodClientCommon extends IntegrationTest
 {
     @Parameterized.Parameters(name = "{0}_{1}_{2}")
     public static Collection inputs()
@@ -124,7 +124,7 @@ public class DeviceMethodCommon extends IntegrationTest
         return inputSubArray;
     }
 
-    protected DeviceMethodCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
+    protected DirectMethodClientCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {
         this.testInstance = new DeviceMethodTestInstance(protocol, authenticationType, clientType);
     }
@@ -139,7 +139,7 @@ public class DeviceMethodCommon extends IntegrationTest
         public String publicKeyCert;
         public String privateKey;
         public String x509Thumbprint;
-        public DeviceMethod methodServiceClient;
+        public DirectMethodClient methodServiceClient;
         public RegistryManager registryManager;
 
         protected DeviceMethodTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
@@ -150,7 +150,7 @@ public class DeviceMethodCommon extends IntegrationTest
             this.publicKeyCert = x509CertificateGenerator.getPublicCertificate();
             this.privateKey = x509CertificateGenerator.getPrivateKey();
             this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
-            this.methodServiceClient = new DeviceMethod(iotHubConnectionString, DeviceMethodClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+            this.methodServiceClient = new DirectMethodClient(iotHubConnectionString, DirectMethodClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
             this.registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
         }
 
@@ -225,10 +225,10 @@ public class DeviceMethodCommon extends IntegrationTest
         protected String testName;
         protected CountDownLatch latch;
         protected MethodResult result = null;
-        protected DeviceMethod methodServiceClient;
+        protected DirectMethodClient methodServiceClient;
         protected Exception exception = null;
 
-        public RunnableInvoke(DeviceMethod methodServiceClient, String deviceId, String moduleId, String testName, CountDownLatch latch)
+        public RunnableInvoke(DirectMethodClient methodServiceClient, String deviceId, String moduleId, String testName, CountDownLatch latch)
         {
             this.methodServiceClient = methodServiceClient;
             this.deviceId = deviceId;
@@ -317,12 +317,12 @@ public class DeviceMethodCommon extends IntegrationTest
         return DeviceConnectionString.get(iotHubConnectionString, testInstance.registryManager.getDevice(module.getDeviceId()), module);
     }
 
-    protected static DeviceMethod buildDeviceMethodClientWithAzureSasCredential()
+    protected static DirectMethodClient buildDeviceMethodClientWithAzureSasCredential()
     {
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
         IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
         AzureSasCredential azureSasCredential = new AzureSasCredential(serviceSasToken.toString());
-        DeviceMethodClientOptions options = DeviceMethodClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
-        return new DeviceMethod(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
+        DirectMethodClientOptions options = DirectMethodClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
+        return new DirectMethodClient(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
     }
 }

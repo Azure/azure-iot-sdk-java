@@ -14,6 +14,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.JobPropertiesParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.RegistryStatisticsParser;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
@@ -38,7 +39,7 @@ import java.util.concurrent.Executors;
 
 /**
  * Use the RegistryManager client to manage the identity registry in IoT hubs.
- * To access twins, use the {@link com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin} client.
+ * To access twins, use the {@link TwinClient} client.
  */
 public class RegistryManager
 {
