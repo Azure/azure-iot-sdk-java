@@ -21,9 +21,9 @@ import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderTPM
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClient;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.Assert;
@@ -375,17 +375,17 @@ public class ProvisioningTests extends ProvisioningCommon
     {
         if (reprovisionPolicy != null && reprovisionPolicy.getMigrateDeviceData())
         {
-            DeviceTwin twinClient;
+            TwinClient twinClient;
             if (inFarAwayHub)
             {
-                twinClient = new DeviceTwin(farAwayIotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+                twinClient = new TwinClient(farAwayIotHubConnectionString, TwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
             }
             else
             {
-                twinClient = new DeviceTwin(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+                twinClient = new TwinClient(iotHubConnectionString, TwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
             }
 
-            DeviceTwinDevice device = new DeviceTwinDevice(testInstance.provisionedDeviceId);
+            Twin device = new Twin(testInstance.provisionedDeviceId);
 
             twinClient.getTwin(device);
 

@@ -6,8 +6,6 @@
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.microsoft.azure.sdk.iot.deps.twin.*;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -24,7 +22,7 @@ import static org.junit.Assert.*;
  * Unit test for device twin device
  * 100% methods, 100% lines covered
  */
-public class DeviceTwinDeviceTest
+public class DeviceTwinTestClient
 {
     /*
     **Tests_SRS_DEVICETWINDEVICE_25_003: [** The constructor shall create a new instance of twin object for this device and store the device id.**]**
@@ -33,7 +31,7 @@ public class DeviceTwinDeviceTest
     public void constructorCreatesNewDeviceGroup()
     {
         //act
-        DeviceTwinDevice testDevice = new DeviceTwinDevice();
+        Twin testDevice = new Twin();
 
         //assert
         assertNotNull(testDevice);
@@ -55,7 +53,7 @@ public class DeviceTwinDeviceTest
         final String deviceId = "testDevice";
 
         //act
-        DeviceTwinDevice testDevice = new DeviceTwinDevice(deviceId);
+        Twin testDevice = new Twin(deviceId);
 
         //assert
         assertEquals(deviceId, Deencapsulation.getField(testDevice, "deviceId"));
@@ -78,7 +76,7 @@ public class DeviceTwinDeviceTest
         final String deviceId = "";
 
         //act
-        new DeviceTwinDevice(deviceId);
+        new Twin(deviceId);
     }
 
     /*
@@ -88,7 +86,7 @@ public class DeviceTwinDeviceTest
     public void constructorCreatesNewDeviceNullDeviceId()
     {
         //act
-        new DeviceTwinDevice(null);
+        new Twin(null);
     }
 
     /*
@@ -102,7 +100,7 @@ public class DeviceTwinDeviceTest
         final String moduleId = "testModule";
 
         //act
-        DeviceTwinDevice testDevice = new DeviceTwinDevice(deviceId, moduleId);
+        Twin testDevice = new Twin(deviceId, moduleId);
 
         //assert
         assertEquals(deviceId, Deencapsulation.getField(testDevice, "deviceId"));
@@ -127,7 +125,7 @@ public class DeviceTwinDeviceTest
         final String moduleId = "somemodule";
 
         //act
-        new DeviceTwinDevice(deviceId, moduleId);
+        new Twin(deviceId, moduleId);
     }
 
     /*
@@ -140,7 +138,7 @@ public class DeviceTwinDeviceTest
         final String moduleId = "somemodule";
 
         //act
-        new DeviceTwinDevice(null, moduleId);
+        new Twin(null, moduleId);
     }
 
     /*
@@ -154,7 +152,7 @@ public class DeviceTwinDeviceTest
         final String moduleId = "";
 
         //act
-        new DeviceTwinDevice(deviceId, moduleId);
+        new Twin(deviceId, moduleId);
     }
 
     /*
@@ -167,7 +165,7 @@ public class DeviceTwinDeviceTest
         final String deviceId = "somedevice";
 
         //act
-        new DeviceTwinDevice(deviceId, null);
+        new Twin(deviceId, null);
     }
 
     /*
@@ -177,7 +175,7 @@ public class DeviceTwinDeviceTest
     public void getDeviceIdGets()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
 
         //act
         String devId = testDevice.getDeviceId();
@@ -191,7 +189,7 @@ public class DeviceTwinDeviceTest
     {
         //arrange
         String expectedConnectionState = TwinConnectionState.DISCONNECTED.toString();
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         Deencapsulation.setField(testDevice, "connectionState", expectedConnectionState);
 
         //act
@@ -208,7 +206,7 @@ public class DeviceTwinDeviceTest
     public void getModuleIdGets()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice", "testModule");
+        Twin testDevice = new Twin("testDevice", "testModule");
 
         //act
         String moduleId = testDevice.getModuleId();
@@ -225,7 +223,7 @@ public class DeviceTwinDeviceTest
     public void setETagSets()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
 
         //act
         testDevice.setETag("validETag");
@@ -241,7 +239,7 @@ public class DeviceTwinDeviceTest
     public void getETagGets()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         testDevice.setETag("validETag");
 
         //act
@@ -256,7 +254,7 @@ public class DeviceTwinDeviceTest
     public void getETagGetsNull()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
 
         //act
         String etag = testDevice.getETag();
@@ -272,7 +270,7 @@ public class DeviceTwinDeviceTest
     public void setVersionSets()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
 
         //act
         Deencapsulation.invoke(testDevice, "setVersion", 10);
@@ -285,7 +283,7 @@ public class DeviceTwinDeviceTest
     public void setVersionSetsZero()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
 
         //act
         Deencapsulation.invoke(testDevice, "setVersion", 0);
@@ -299,7 +297,7 @@ public class DeviceTwinDeviceTest
     {
         //arrange
         Integer version = null;
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
 
         //act
         Deencapsulation.invoke(testDevice, "setVersion", new Class[]{Integer.class}, version);
@@ -315,7 +313,7 @@ public class DeviceTwinDeviceTest
     public void getVersionGets()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         Deencapsulation.invoke(testDevice, "setVersion", 10);
 
         //act
@@ -330,7 +328,7 @@ public class DeviceTwinDeviceTest
     public void getVersionGetsNull()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
 
         //act
         Integer version = testDevice.getVersion();
@@ -346,7 +344,7 @@ public class DeviceTwinDeviceTest
     public void getTagsGets()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         Set<Pair> testTags = new HashSet<>();
         testTags.add(new Pair("testTag", "tagObject"));
         testDevice.setTags(testTags);
@@ -370,7 +368,7 @@ public class DeviceTwinDeviceTest
     public void getTagsGetsEmptyIfNotPresent()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
 
         //act
         Set<Pair> actualTags = testDevice.getTags();
@@ -387,7 +385,7 @@ public class DeviceTwinDeviceTest
     public void getTagsVersionReturnsNullIfNoTags()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
 
         //act
         Integer version = testDevice.getTagsVersion();
@@ -399,7 +397,7 @@ public class DeviceTwinDeviceTest
     public void getTagsVersionReturnsNullIfNoVersionInTheTags()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         Set<Pair> testTags = new HashSet<>();
         testTags.add(new Pair("testTag", "tagObject"));
         testDevice.setTags(testTags);
@@ -418,7 +416,7 @@ public class DeviceTwinDeviceTest
     public void getTagsVersionReturnsValidVersion(@Mocked final TwinCollection mockedTwinCollection)
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         Deencapsulation.invoke(testDevice, "setTags", mockedTwinCollection);
 
         new NonStrictExpectations()
@@ -443,7 +441,7 @@ public class DeviceTwinDeviceTest
     public void getDesiredPropGets()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         Set<Pair> testDesProp = new HashSet<>();
         testDesProp.add(new Pair("testDes", "desObject"));
         testDevice.setDesiredProperties(testDesProp);
@@ -467,7 +465,7 @@ public class DeviceTwinDeviceTest
     public void getDesiredReturnsEmptyIfNullMap()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
 
         //act
         Set<Pair> actualDesProp = testDevice.getDesiredProperties();
@@ -484,7 +482,7 @@ public class DeviceTwinDeviceTest
     public void getReportedPropGets()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
 
         TwinCollection repMap = new TwinCollection();
         repMap.put("testRep", "repObject");
@@ -509,7 +507,7 @@ public class DeviceTwinDeviceTest
     public void getReportedPropGetsEmptyIfNotPresent()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
 
         //act
         Set<Pair> actualRepProp = testDevice.getReportedProperties();
@@ -526,7 +524,7 @@ public class DeviceTwinDeviceTest
     public void getReportedPropertiesVersionReturnsNullIfNoReportedProperties()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
 
         //act
         Integer version = testDevice.getReportedPropertiesVersion();
@@ -538,7 +536,7 @@ public class DeviceTwinDeviceTest
     public void getReportedPropertiesVersionReturnsNullIfNoVersionInTheReportedProperties(@Mocked final TwinCollection mockedTwinCollection)
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         Set<Pair> testReported = new HashSet<>();
         testReported.add(new Pair("testTag", "tagObject"));
         Deencapsulation.invoke(testDevice, "setReportedProperties", mockedTwinCollection);
@@ -564,7 +562,7 @@ public class DeviceTwinDeviceTest
     public void getReportedPropertiesVersionReturnsValidVersion(@Mocked final TwinCollection mockedTwinCollection)
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         Deencapsulation.invoke(testDevice, "setReportedProperties", mockedTwinCollection);
 
         new NonStrictExpectations()
@@ -589,7 +587,7 @@ public class DeviceTwinDeviceTest
     public void setTagsSets()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         Set<Pair> testTags = new HashSet<>();
         testTags.add(new Pair("testTag", "tagObject"));
 
@@ -614,7 +612,7 @@ public class DeviceTwinDeviceTest
     public void setTagsThrowsIsNullInput()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         Set<Pair> testTags = null;
 
         //act
@@ -628,7 +626,7 @@ public class DeviceTwinDeviceTest
     public void setDesiredPropSets()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         Set<Pair> testDesProp = new HashSet<>();
         testDesProp.add(new Pair("testDes", "desObject"));
 
@@ -653,7 +651,7 @@ public class DeviceTwinDeviceTest
     public void setDesiredThrowsIfNullInput()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         Set<Pair> testDesProp = null;
 
 
@@ -669,7 +667,7 @@ public class DeviceTwinDeviceTest
     public void getDesiredPropertiesVersionReturnsNullIfNoDesiredProperties()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
 
         //act
         Integer version = testDevice.getDesiredPropertiesVersion();
@@ -681,7 +679,7 @@ public class DeviceTwinDeviceTest
     public void getDesiredPropertiesVersionReturnsNullIfNoVersionInTheDesiredProperties()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         Set<Pair> testDesired = new HashSet<>();
         testDesired.add(new Pair("testTag", "tagObject"));
         testDevice.setDesiredProperties(testDesired);
@@ -700,7 +698,7 @@ public class DeviceTwinDeviceTest
     public void getDesiredPropertiesVersionReturnsValidVersion(@Mocked final TwinCollection mockedTwinCollection)
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         Deencapsulation.invoke(testDevice, "setDesiredProperties", mockedTwinCollection);
 
         new NonStrictExpectations()
@@ -722,7 +720,7 @@ public class DeviceTwinDeviceTest
     public void setReportedPropSets()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         TwinCollection testRepProp = new TwinCollection();
         testRepProp.put("testRep", "repObject");
 
@@ -744,7 +742,7 @@ public class DeviceTwinDeviceTest
     public void settersAlwaysCreatesNewMaps()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         Set<Pair> testDesProp = new HashSet<>();
         testDesProp.add(new Pair("testDes", "desObject"));
 
@@ -762,7 +760,7 @@ public class DeviceTwinDeviceTest
     public void gettersAlwaysCreatesNewSets()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         Set<Pair> testDesProp = new HashSet<>();
         testDesProp.add(new Pair("testDes", "desObject"));
         testDevice.setDesiredProperties(testDesProp);
@@ -783,7 +781,7 @@ public class DeviceTwinDeviceTest
     public void getterGetsMapsTags()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         TwinCollection testTags = new TwinCollection();
         testTags.put("testTag", "tagObject");
         Deencapsulation.invoke(testDevice, "setTags", testTags);
@@ -808,7 +806,7 @@ public class DeviceTwinDeviceTest
     public void setterSetsMapsTags()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         TwinCollection testTags = new TwinCollection();
         testTags.put("testTag", "tagObject");
 
@@ -830,7 +828,7 @@ public class DeviceTwinDeviceTest
     public void clearClearsMapsTags()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         TwinCollection testTags = new TwinCollection();
         testTags.put("testTag", "tagObject");
         Deencapsulation.invoke(testDevice, "setTags", testTags);
@@ -852,7 +850,7 @@ public class DeviceTwinDeviceTest
     public void getterGetsMapsRep()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         TwinCollection testRep = new TwinCollection();
         testRep.put("testRep", "repObject");
         Deencapsulation.invoke(testDevice, "setReportedProperties", testRep);
@@ -877,7 +875,7 @@ public class DeviceTwinDeviceTest
     public void setterSetsMapsRep()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         TwinCollection testRep = new TwinCollection();
         testRep.put("testRep", "repObject");
 
@@ -903,7 +901,7 @@ public class DeviceTwinDeviceTest
     public void getterGetsConfigurations()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         ConfigurationInfo info = new ConfigurationInfo();
         info.setStatus(ConfigurationStatus.TARGETED);
         Map<String, ConfigurationInfo> configs = new HashMap<String, ConfigurationInfo>(){{put("abc",info);}};
@@ -929,7 +927,7 @@ public class DeviceTwinDeviceTest
     public void setterSetsCapabilities()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         DeviceCapabilities cap = new DeviceCapabilities();
         cap.setIotEdge(true);
 
@@ -947,7 +945,7 @@ public class DeviceTwinDeviceTest
     public void getterGetsCapabilities()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         DeviceCapabilities cap = new DeviceCapabilities();
         cap.setIotEdge(true);
         Deencapsulation.setField(testDevice, "capabilities", cap);
@@ -966,7 +964,7 @@ public class DeviceTwinDeviceTest
     public void getterGetsMapsDes()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         TwinCollection testRep = new TwinCollection();
         testRep.put("testRep", "repObject");
         Deencapsulation.invoke(testDevice, "setDesiredProperties", testRep);
@@ -991,7 +989,7 @@ public class DeviceTwinDeviceTest
     public void setterSetsMapsDes()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         TwinCollection testRep = new TwinCollection();
         testRep.put("testRep", "repObject");
 
@@ -1014,7 +1012,7 @@ public class DeviceTwinDeviceTest
     public void clearClearsMapsDes()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         TwinCollection testRep = new TwinCollection();
         testRep.put("testRep", "repObject");
         Deencapsulation.invoke(testDevice, "setDesiredProperties", testRep);
@@ -1034,7 +1032,7 @@ public class DeviceTwinDeviceTest
     public void clearTwinClears()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
         TwinCollection testRep = new TwinCollection();
         testRep.put("testKey", "testObject");
         Deencapsulation.invoke(testDevice, "setDesiredProperties", testRep);
@@ -1063,7 +1061,7 @@ public class DeviceTwinDeviceTest
     {
         //arrange
         final String expectedModuleId = "someModuleId";
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
 
         Set<Pair> testDesProp = new HashSet<>();
         testDesProp.add(new Pair("testDes1", "desObject1"));
@@ -1097,7 +1095,7 @@ public class DeviceTwinDeviceTest
     public void toStringReturnsAll()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
 
         testDevice.setETag("validEtag");
         Deencapsulation.invoke(testDevice, "setVersion", 10);
@@ -1136,7 +1134,7 @@ public class DeviceTwinDeviceTest
     public void tagsToStringReturnsTags()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
 
         Set<Pair> testTags = new HashSet<>();
         testTags.add(new Pair("testTag1", "tagObject1"));
@@ -1160,7 +1158,7 @@ public class DeviceTwinDeviceTest
     public void tagsToStringReturnsEmptyIfTagsEmpty()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
 
         //act
         String testDeviceString = testDevice.tagsToString();
@@ -1176,7 +1174,7 @@ public class DeviceTwinDeviceTest
     public void desiredToStringReturnsDesired()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
 
         Set<Pair> testDesProp = new HashSet<>();
         testDesProp.add(new Pair("testDes1", "desObject1"));
@@ -1201,7 +1199,7 @@ public class DeviceTwinDeviceTest
     public void desToStringReturnsEmptyIfTagsEmpty()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
 
         //act
         String testDeviceString = testDevice.desiredPropertiesToString();
@@ -1217,7 +1215,7 @@ public class DeviceTwinDeviceTest
     public void reportedToStringReturnsReported()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
 
         TwinCollection testRepProp = new TwinCollection();
         testRepProp.put("testRep1", "repObject1");
@@ -1243,7 +1241,7 @@ public class DeviceTwinDeviceTest
     public void repToStringReturnsEmptyIfTagsEmpty()
     {
         //arrange
-        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Twin testDevice = new Twin("testDevice");
 
         //act
         String testDeviceString = testDevice.reportedPropertiesToString();
@@ -1258,12 +1256,12 @@ public class DeviceTwinDeviceTest
     {
         //arrange
         final String expectedModuleId = "someModuleId";
-        DeviceTwinDevice testDeviceTwinDevice = new DeviceTwinDevice();
+        Twin testTwin = new Twin();
 
         //act
-        Deencapsulation.invoke(testDeviceTwinDevice, "setModuleId", expectedModuleId);
+        Deencapsulation.invoke(testTwin, "setModuleId", expectedModuleId);
 
         //assert
-        assertEquals(expectedModuleId, Deencapsulation.getField(testDeviceTwinDevice, "moduleId"));
+        assertEquals(expectedModuleId, Deencapsulation.getField(testTwin, "moduleId"));
     }
 }

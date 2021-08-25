@@ -5,7 +5,7 @@
 
 package samples.com.microsoft.azure.sdk.iot.service.sdk;
 
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Job;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -51,7 +51,7 @@ public class DeviceMethodSample
     {
         System.out.println("Starting sample...");
         System.out.println("Creating the Device Method");
-        DeviceMethod methodClient = new DeviceMethod(iotHubConnectionString);
+        DirectMethodsClient methodClient = new DirectMethodsClient(iotHubConnectionString);
 
         try
         {
@@ -73,7 +73,7 @@ public class DeviceMethodSample
         System.out.println("Shutting down sample...");
     }
 
-    private static void invokeMethod(DeviceMethod methodClient) throws IotHubException, IOException
+    private static void invokeMethod(DirectMethodsClient methodClient) throws IotHubException, IOException
     {
         System.out.println("directly invoke method on the Device");
         MethodResult result = methodClient.invoke(deviceId, methodName, responseTimeout, connectTimeout, payload);
@@ -85,7 +85,7 @@ public class DeviceMethodSample
         System.out.println("Payload=" + result.getPayload());
     }
 
-    private static void scheduleInvokeMethod(DeviceMethod methodClient) throws IotHubException, IOException, InterruptedException
+    private static void scheduleInvokeMethod(DirectMethodsClient methodClient) throws IotHubException, IOException, InterruptedException
     {
         // query condition that defines the list of device to invoke
         String queryCondition = "DeviceId IN ['" + deviceId + "']";
@@ -106,7 +106,7 @@ public class DeviceMethodSample
         System.out.println("job completed");
     }
 
-    private static void cancelScheduleInvokeMethod(DeviceMethod methodClient) throws IotHubException, IOException, InterruptedException
+    private static void cancelScheduleInvokeMethod(DirectMethodsClient methodClient) throws IotHubException, IOException, InterruptedException
     {
         // query condition that defines the list of device to invoke
         String queryCondition = "DeviceId IN ['" + deviceId + "']";

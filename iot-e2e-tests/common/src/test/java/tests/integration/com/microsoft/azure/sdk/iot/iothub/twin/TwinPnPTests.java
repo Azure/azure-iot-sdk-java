@@ -7,8 +7,8 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.service.BaseDevice;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.Module;
 import org.junit.After;
@@ -101,8 +101,8 @@ public class TwinPnPTests extends IntegrationTest
         public String privateKey;
         public String x509Thumbprint;
 
-        private final DeviceTwin twinServiceClient;
-        private DeviceTwinDevice twin;
+        private final TwinClient twinServiceClient;
+        private Twin twin;
 
         public TwinPnPTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType)
         {
@@ -113,7 +113,7 @@ public class TwinPnPTests extends IntegrationTest
             this.privateKey = x509CertificateGenerator.getPrivateKey();
             this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
 
-            this.twinServiceClient = new DeviceTwin(iotHubConnectionString);
+            this.twinServiceClient = new TwinClient(iotHubConnectionString);
         }
 
         public void setup() throws Exception {
@@ -162,7 +162,7 @@ public class TwinPnPTests extends IntegrationTest
                     throw new Exception("Test code has not been written for this path yet");
                 }
 
-                this.twin = new DeviceTwinDevice(testInstance.identity.getDeviceId());
+                this.twin = new Twin(testInstance.identity.getDeviceId());
             }
             else if (clientType == ClientType.MODULE_CLIENT)
             {
@@ -172,7 +172,7 @@ public class TwinPnPTests extends IntegrationTest
                     module = Tools.addModuleWithRetry(registryManager, module);
                     this.client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), protocol, clientOptions);
                     this.identity = module;
-                    this.twin = new DeviceTwinDevice(deviceId, moduleId);
+                    this.twin = new Twin(deviceId, moduleId);
                 }
                 else if (authenticationType == SELF_SIGNED)
                 {
@@ -182,7 +182,7 @@ public class TwinPnPTests extends IntegrationTest
                     clientOptions.setSslContext(sslContext);
                     this.client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509, moduleX509), protocol, clientOptions);
                     this.identity = moduleX509;
-                    this.twin = new DeviceTwinDevice(deviceX509Id, moduleX509Id);
+                    this.twin = new Twin(deviceX509Id, moduleX509Id);
                 }
                 else
                 {

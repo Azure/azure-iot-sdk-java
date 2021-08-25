@@ -60,7 +60,7 @@ public class Job
      */
     void scheduleUpdateTwin(
         String queryCondition,
-        DeviceTwinDevice updateTwin,
+        Twin updateTwin,
         Date startTimeUtc,
         long maxExecutionTimeInSeconds)
         throws IOException, IotHubException

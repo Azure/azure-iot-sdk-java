@@ -8,7 +8,7 @@ import lombok.Getter;
  * Configurable options for all twin client operations.
  */
 @Builder
-public class DeviceTwinClientOptions
+public class TwinClientOptions
 {
     protected static final Integer DEFAULT_HTTP_READ_TIMEOUT_MS = 24000; // 24 seconds
     protected static final Integer DEFAULT_HTTP_CONNECT_TIMEOUT_MS = 24000; // 24 seconds

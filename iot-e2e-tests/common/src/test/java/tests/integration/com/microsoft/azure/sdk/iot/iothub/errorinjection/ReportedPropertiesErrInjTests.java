@@ -18,7 +18,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
-import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DeviceTwinCommon;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.TwinClientCommon;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,7 +34,7 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
  */
 @IotHubTest
 @RunWith(Parameterized.class)
-public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
+public class ReportedPropertiesErrInjTests extends TwinClientCommon
 {
     public ReportedPropertiesErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
     {
