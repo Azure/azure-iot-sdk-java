@@ -132,7 +132,7 @@ public class TwinClientWithVersionTests extends IntegrationTest
     private static class DeviceTwinPropertyCallback implements TwinPropertyCallback
     {
         @Override
-        public void TwinPropertyCallback(Property property, Object context)
+        public void onPropertyChanged(Property property, Object context)
         {
             DeviceTwinWithVersionTestDevice state = (DeviceTwinWithVersionTestDevice) context;
             state.receivedProperties.add(property);

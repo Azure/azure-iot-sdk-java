@@ -30,7 +30,7 @@ public class DeviceTest
         Device testDev = new Device()
         {
             @Override
-            public void PropertyCall(String propertyKey, Object propertyValue, Object context)
+            public void onPropertyChanged(String propertyKey, Object propertyValue, Object context)
             {
 
             }
@@ -55,7 +55,7 @@ public class DeviceTest
         Device testDev = new Device()
         {
             @Override
-            public void PropertyCall(String propertyKey, Object propertyValue, Object context)
+            public void onPropertyChanged(String propertyKey, Object propertyValue, Object context)
             {
 
             }
@@ -82,7 +82,7 @@ public class DeviceTest
         Device testDev = new Device()
         {
             @Override
-            public void PropertyCall(String propertyKey, Object propertyValue, Object context)
+            public void onPropertyChanged(String propertyKey, Object propertyValue, Object context)
             {
 
             }
@@ -109,7 +109,7 @@ public class DeviceTest
         Device testDev = new Device()
         {
             @Override
-            public void PropertyCall(String propertyKey, Object propertyValue, Object context)
+            public void onPropertyChanged(String propertyKey, Object propertyValue, Object context)
             {
 
             }
@@ -140,7 +140,7 @@ public class DeviceTest
         Device testDev = new Device()
         {
             @Override
-            public void PropertyCall(String propertyKey, Object propertyValue, Object context)
+            public void onPropertyChanged(String propertyKey, Object propertyValue, Object context)
             {
 
             }
@@ -160,7 +160,7 @@ public class DeviceTest
         Device testDev = new Device()
         {
             @Override
-            public void PropertyCall(String propertyKey, Object propertyValue, Object context)
+            public void onPropertyChanged(String propertyKey, Object propertyValue, Object context)
             {
 
             }
@@ -187,7 +187,7 @@ public class DeviceTest
         Device testDev = new Device()
         {
             @Override
-            public void PropertyCall(String propertyKey, Object propertyValue, Object context)
+            public void onPropertyChanged(String propertyKey, Object propertyValue, Object context)
             {
 
             }
@@ -214,7 +214,7 @@ public class DeviceTest
         Device testDev = new Device()
         {
             @Override
-            public void PropertyCall(String propertyKey, Object propertyValue, Object context)
+            public void onPropertyChanged(String propertyKey, Object propertyValue, Object context)
             {
 
             }
@@ -237,7 +237,7 @@ public class DeviceTest
         Device testDev = new Device()
         {
             @Override
-            public void PropertyCall(String propertyKey, Object propertyValue, Object context)
+            public void onPropertyChanged(String propertyKey, Object propertyValue, Object context)
             {
 
             }
@@ -262,7 +262,7 @@ public class DeviceTest
         Device testDev = new Device()
         {
             @Override
-            public void PropertyCall(String propertyKey, Object propertyValue, Object context)
+            public void onPropertyChanged(String propertyKey, Object propertyValue, Object context)
             {
 
             }
@@ -288,7 +288,7 @@ public class DeviceTest
         Device testDev = new Device()
         {
             @Override
-            public void PropertyCall(String propertyKey, Object propertyValue, Object context)
+            public void onPropertyChanged(String propertyKey, Object propertyValue, Object context)
             {
 
             }

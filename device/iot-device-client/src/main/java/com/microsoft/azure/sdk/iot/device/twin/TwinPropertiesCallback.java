@@ -11,5 +11,5 @@ import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
  */
 public interface TwinPropertiesCallback
 {
-    void TwinPropertiesCallback(TwinCollection properties, Object context);
+    void onPropertiesChanged(TwinCollection properties, Object context);
 }

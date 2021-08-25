@@ -142,7 +142,7 @@ public class DeviceTwin
                 // properties callback, then execute the callback so that they receive the full twin payload.
                 if (!desiredPropertyMap.isEmpty() && this.deviceTwinGenericTwinPropertiesChangeCallback != null)
                 {
-                    deviceTwinGenericTwinPropertiesChangeCallback.TwinPropertiesCallback(desiredPropertyMap, deviceTwinGenericPropertyChangeCallbackContext);
+                    deviceTwinGenericTwinPropertiesChangeCallback.onPropertiesChanged(desiredPropertyMap, deviceTwinGenericPropertyChangeCallbackContext);
                 }
 
                 for (String propertyKey : desiredPropertyMap.keySet())
@@ -176,7 +176,7 @@ public class DeviceTwin
                     Property property = this.getReportedProperty(reportedPropertyMap, propertyKey);
                     if (deviceTwinGenericTwinPropertyChangeCallback != null)
                     {
-                        deviceTwinGenericTwinPropertyChangeCallback.TwinPropertyCallback(property, deviceTwinGenericPropertyChangeCallbackContext);
+                        deviceTwinGenericTwinPropertyChangeCallback.onPropertyChanged(property, deviceTwinGenericPropertyChangeCallbackContext);
                     }
                 }
             }
@@ -422,7 +422,7 @@ public class DeviceTwin
             Pair<PropertyCallback<String, Object>, Object> callBackObjectPair = onDesiredPropertyChangeMap.get(property.getKey());
             if (callBackObjectPair != null && callBackObjectPair.getKey() != null)
             {
-                callBackObjectPair.getKey().PropertyCall(property.getKey(), property.getValue(), callBackObjectPair.getValue());
+                callBackObjectPair.getKey().onPropertyChanged(property.getKey(), property.getValue(), callBackObjectPair.getValue());
                 reported = true;
             }
         }
@@ -432,7 +432,7 @@ public class DeviceTwin
             Pair<TwinPropertyCallback, Object> callBackObjectPair = onDesiredTwinPropertyChangeMap.get(property.getKey());
             if (callBackObjectPair != null && callBackObjectPair.getKey() != null)
             {
-                callBackObjectPair.getKey().TwinPropertyCallback(property, callBackObjectPair.getValue());
+                callBackObjectPair.getKey().onPropertyChanged(property, callBackObjectPair.getValue());
                 reported = true;
             }
         }
@@ -448,13 +448,13 @@ public class DeviceTwin
     {
         if (deviceTwinGenericPropertyChangeCallback != null)
         {
-            deviceTwinGenericPropertyChangeCallback.PropertyCall(property.getKey(), property.getValue(), deviceTwinGenericPropertyChangeCallbackContext);
+            deviceTwinGenericPropertyChangeCallback.onPropertyChanged(property.getKey(), property.getValue(), deviceTwinGenericPropertyChangeCallbackContext);
             return true;
         }
 
         if (deviceTwinGenericTwinPropertyChangeCallback != null)
         {
-            deviceTwinGenericTwinPropertyChangeCallback.TwinPropertyCallback(property, deviceTwinGenericPropertyChangeCallbackContext);
+            deviceTwinGenericTwinPropertyChangeCallback.onPropertyChanged(property, deviceTwinGenericPropertyChangeCallbackContext);
             return true;
         }
 

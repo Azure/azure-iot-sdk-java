@@ -240,7 +240,7 @@ public class DeviceEmulator
     protected static class DeviceTwinProperty extends Device
     {
         @Override
-        public synchronized void PropertyCall(String propertyKey, Object propertyValue, Object context)
+        public synchronized void onPropertyChanged(String propertyKey, Object propertyValue, Object context)
         {
             System.out.println("Device updated " + propertyKey + " to " + propertyValue.toString());
             ConcurrentMap<String, ConcurrentLinkedQueue<Object>> twinChanges = (ConcurrentMap<String, ConcurrentLinkedQueue<Object>>)context;

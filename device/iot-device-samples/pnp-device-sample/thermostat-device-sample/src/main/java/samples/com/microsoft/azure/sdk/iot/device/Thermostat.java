@@ -256,7 +256,7 @@ public class Thermostat {
 
         @SneakyThrows({InterruptedException.class, IOException.class})
         @Override
-        public void TwinPropertyCallback(Property property, Object context) {
+        public void onPropertyChanged(Property property, Object context) {
             if (property.getKey().equalsIgnoreCase(propertyName)) {
                 double targetTemperature = ((Number)property.getValue()).doubleValue();
                 log.debug("Property: Received - {\"{}\": {}°C}.", propertyName, targetTemperature);

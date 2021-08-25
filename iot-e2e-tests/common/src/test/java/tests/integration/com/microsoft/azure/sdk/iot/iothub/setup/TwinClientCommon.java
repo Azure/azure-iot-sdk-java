@@ -200,7 +200,7 @@ public class TwinClientCommon extends IntegrationTest
     public class OnProperty implements TwinPropertyCallback
     {
         @Override
-        public void TwinPropertyCallback(Property property, Object context)
+        public void onPropertyChanged(Property property, Object context)
         {
             PropertyState propertyState = (PropertyState) context;
             if (property.getKey().equals(propertyState.property.getKey()))
@@ -217,7 +217,7 @@ public class TwinClientCommon extends IntegrationTest
         public PropertyState[] propertyStateList = new PropertyState[MAX_PROPERTIES_TO_TEST];
 
         @Override
-        public void PropertyCall(String propertyKey, Object propertyValue, Object context)
+        public void onPropertyChanged(String propertyKey, Object propertyValue, Object context)
         {
             PropertyState propertyState = (PropertyState) context;
             if (propertyKey.equals(propertyState.property.getKey()))
