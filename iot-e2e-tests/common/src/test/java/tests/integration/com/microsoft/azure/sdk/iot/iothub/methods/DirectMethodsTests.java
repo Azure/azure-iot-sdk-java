@@ -35,7 +35,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestModuleIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
-import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DirectMethodsClientCommon;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DirectMethodsCommon;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -50,9 +50,9 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
 @Slf4j
 @IotHubTest
 @RunWith(Parameterized.class)
-public class DirectMethodsClientTests extends DirectMethodsClientCommon
+public class DirectMethodsTests extends DirectMethodsCommon
 {
-    public DirectMethodsClientTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
+    public DirectMethodsTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {
         super(protocol, authenticationType, clientType);
     }
@@ -240,7 +240,7 @@ public class DirectMethodsClientTests extends DirectMethodsClientCommon
         try
         {
             //force the device offline
-            testInstance.deviceTestManager.client.closeNow();
+            testInstance.deviceTestManager.client.close();
 
             if (testInstance.identity instanceof TestModuleIdentity)
             {

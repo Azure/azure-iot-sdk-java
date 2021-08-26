@@ -49,7 +49,7 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
  */
 @IotHubTest
 @RunWith(Parameterized.class)
-public class TwinClientWithVersionTests extends IntegrationTest
+public class TwinWithVersionTests extends IntegrationTest
 {
     @Parameterized.Parameters(name = "{0}")
     public static Collection inputs()
@@ -181,7 +181,7 @@ public class TwinClientWithVersionTests extends IntegrationTest
 
     public DeviceTwinWithVersionTestInstance testInstance;
 
-    public TwinClientWithVersionTests(IotHubClientProtocol protocol) throws IOException
+    public TwinWithVersionTests(IotHubClientProtocol protocol) throws IOException
     {
         this.testInstance = new DeviceTwinWithVersionTestInstance(protocol);
     }
@@ -229,7 +229,7 @@ public class TwinClientWithVersionTests extends IntegrationTest
     {
         if (testInstance.deviceTwinWithVersionTestDevice.deviceClient != null)
         {
-            testInstance.deviceTwinWithVersionTestDevice.deviceClient.closeNow();
+            testInstance.deviceTwinWithVersionTestDevice.deviceClient.close();
             testInstance.deviceTwinWithVersionTestDevice.deviceClient = null;
         }
 

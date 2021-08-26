@@ -183,7 +183,7 @@ public class SendSerializedEvent
                 messageSentLatch.await();
             }
 
-            client.closeNow();
+            client.close();
         }
         catch (Exception e)
         {

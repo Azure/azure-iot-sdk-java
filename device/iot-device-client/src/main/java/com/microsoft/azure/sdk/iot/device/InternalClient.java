@@ -175,18 +175,19 @@ public class InternalClient
         this.deviceIO.open(withRetry);
     }
 
+    /**
+     * Closes the IoT hub client by releasing any resources held by client. When
+     * close is called all the messages that were in transit or pending to be
+     * sent will be informed to the user in the callbacks and any existing
+     * connection to IotHub will be closed.
+     * Must be called to terminate the background thread that is sending data to
+     * IoT hub. After close is called, the IoT hub client must be opened again
+     * before it can be used again. If the client is already closed,
+     * the function shall do nothing.
+     *
+     * @throws IOException if the connection to an IoT hub cannot be closed.
+     */
     public void close() throws IOException
-    {
-        //noinspection StatementWithEmptyBody
-        while (!this.deviceIO.isEmpty())
-        {
-            // Don't do anything until the transport layer underneath has indicated that it doesn't have any more pending messages to send.
-        }
-
-        this.deviceIO.close();
-    }
-
-    public void closeNow() throws IOException
     {
         this.deviceIO.close();
     }
@@ -372,8 +373,8 @@ public class InternalClient
      * with a status and a reason why the device's status changed. When the callback is fired, the provided context will
      * be provided alongside the status and reason.
      *
-     * <p>Note that the thread used to deliver this callback should not be used to call open()/closeNow() on the client
-     * that this callback belongs to. All open()/closeNow() operations should be done on a separate thread</p>
+     * <p>Note that the thread used to deliver this callback should not be used to call open()/close() on the client
+     * that this callback belongs to. All open()/close() operations should be done on a separate thread</p>
      *
      * @param callback The callback to be fired when the connection status of the device changes. Can be null to
      *                 unset this listener as long as the provided callbackContext is also null.
@@ -387,7 +388,7 @@ public class InternalClient
 
         if (this.deviceIO != null)
         {
-            this.deviceIO.registerConnectionStatusChangeCallback(callback, callbackContext, this.getConfig().getDeviceId());
+            this.deviceIO.setConnectionStatusChangeCallback(callback, callbackContext, this.getConfig().getDeviceId());
         }
     }
 
@@ -881,7 +882,7 @@ public class InternalClient
         // context also need to be registered when the device IO is set.
         if (this.deviceIO != null && this.connectionStatusChangeCallback != null)
         {
-            this.deviceIO.registerConnectionStatusChangeCallback(
+            this.deviceIO.setConnectionStatusChangeCallback(
                     this.connectionStatusChangeCallback,
                     this.connectionStatusChangeCallbackContext,
                     this.getConfig().getDeviceId());

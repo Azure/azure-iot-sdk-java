@@ -232,40 +232,18 @@ public final class DeviceClient extends InternalClient implements Closeable
     }
 
     /**
-     * Completes all current outstanding requests and closes the IoT hub client.
-     * Must be called to terminate the background thread that is sending data to
-     * IoT hub. After {@code closeNow()} is called, the IoT hub client is no longer
-     * usable. If the client is already closed, the function shall do nothing.
-     * @deprecated : As of release 1.1.25 this call is replaced by {@link #closeNow()}
-     *
-     * @throws IOException if the connection to an IoT hub cannot be closed.
-     */
-    @Deprecated
-    public void close() throws IOException
-    {
-        if (this.deviceClientType == DeviceClientType.USE_MULTIPLEXING_CLIENT)
-        {
-            throw new UnsupportedOperationException(MULTIPLEXING_CLOSE_ERROR_MESSAGE);
-        }
-
-        log.info("Closing device client...");
-        super.close();
-
-        log.info("Device client closed successfully");
-    }
-
-    /**
      * Closes the IoT hub client by releasing any resources held by client. When
-     * closeNow is called all the messages that were in transit or pending to be
+     * close is called all the messages that were in transit or pending to be
      * sent will be informed to the user in the callbacks and any existing
      * connection to IotHub will be closed.
      * Must be called to terminate the background thread that is sending data to
-     * IoT hub. After {@code closeNow()} is called, the IoT hub client is no longer
-     * usable. If the client is already closed, the function shall do nothing.
+     * IoT hub. After close is called, the IoT hub client must be opened again
+     * before it can be used again. If the client is already closed,
+     * the function shall do nothing.
      *
      * @throws IOException if the connection to an IoT hub cannot be closed.
      */
-    public void closeNow() throws IOException
+    public void close() throws IOException
     {
         if (this.deviceClientType == DeviceClientType.USE_MULTIPLEXING_CLIENT)
         {
@@ -278,8 +256,8 @@ public final class DeviceClient extends InternalClient implements Closeable
         {
             this.fileUpload.close();
         }
-        
-        super.closeNow();
+
+        super.close();
 
         log.info("Device client closed successfully");
     }

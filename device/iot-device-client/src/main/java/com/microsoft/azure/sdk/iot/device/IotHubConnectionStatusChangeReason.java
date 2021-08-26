@@ -23,7 +23,7 @@ public enum IotHubConnectionStatusChangeReason
 
     /**
      * The client was disconnected due to a transient exception, but the retry policy expired before a connection could be re-established.
-     * If you want to perform more operations on the device client, you should {@link DeviceClient#closeNow()} and then {@link DeviceClient#open()} the client.
+     * If you want to perform more operations on the device client, you should {@link DeviceClient#close()} and then {@link DeviceClient#open()} the client.
      * <p>This is returned with a connection status of {@link com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus#DISCONNECTED}.</p>
      */
     RETRY_EXPIRED,
@@ -40,7 +40,7 @@ public enum IotHubConnectionStatusChangeReason
      * Do NOT close or open the client instance. Once the client successfully reports {@link com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus#CONNECTED}, operations will be resumed.</p>
      * <p>When returned with a connection status of {@link com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus#DISCONNECTED}, this signifies that client is disconnected due to a non-retryable exception.
      * You should inspect the throwable supplied in the {@link IotHubConnectionStatusChangeCallback} to determine what action needs to be taken.
-     * If you want to perform more operations on the device client, you should {@link DeviceClient#closeNow()} and then {@link DeviceClient#open()} the client.</p>
+     * If you want to perform more operations on the device client, you should {@link DeviceClient#close()} and then {@link DeviceClient#open()} the client.</p>
      */
     COMMUNICATION_ERROR,
 

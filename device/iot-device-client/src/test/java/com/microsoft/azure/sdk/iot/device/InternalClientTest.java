@@ -284,10 +284,7 @@ public class InternalClientTest
         };
     }
 
-    /* Tests_SRS_INTERNALCLIENT_11_040: [The function shall finish all ongoing tasks.] */
-    /* Tests_SRS_INTERNALCLIENT_11_041: [The function shall cancel all recurring tasks.] */
-    /* Tests_SRS_INTERNALCLIENT_21_042: [The closeNow shall closeNow the deviceIO connection.] */
-    /* Tests_SRS_INTERNALCLIENT_21_043: [If the closing a connection via deviceIO is not successful, the closeNow shall throw IOException.] */
+    /* Tests_SRS_INTERNALCLIENT_21_008: [The close shall close the deviceIO connection.] */
     @Test
     public void closeClosesTransportSuccess() throws IOException, URISyntaxException
     {
@@ -295,13 +292,6 @@ public class InternalClientTest
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
         InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
         Deencapsulation.invoke(client, "open");
-        new NonStrictExpectations()
-        {
-            {
-                mockDeviceIO.isEmpty();
-                result = true;
-            }
-        };
 
         // act
         Deencapsulation.invoke(client, "close");
@@ -310,73 +300,15 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockDeviceIO.isEmpty();
-                times = 1;
                 mockDeviceIO.close();
                 times = 1;
             }
         };
     }
 
-    /* Tests_SRS_INTERNALCLIENT_11_040: [The function shall finish all ongoing tasks.] */
-    /* Tests_SRS_INTERNALCLIENT_11_041: [The function shall cancel all recurring tasks.] */
-    /* Tests_SRS_INTERNALCLIENT_21_042: [The closeNow shall closeNow the deviceIO connection.] */
-    /* Tests_SRS_INTERNALCLIENT_21_043: [If the closing a connection via deviceIO is not successful, the closeNow shall throw IOException.] */
+    /* Tests_SRS_INTERNALCLIENT_21_009: [If the closing a connection via deviceIO is not successful, the close shall throw IOException.] */
     @Test
-    public void closeWaitAndClosesTransportSuccess() throws IOException, URISyntaxException
-    {
-        //arrange
-        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
-        Deencapsulation.invoke(client, "open");
-        new NonStrictExpectations()
-        {
-            {
-                mockDeviceIO.isEmpty();
-                returns(false, false, true);
-            }
-        };
-
-        // act
-        Deencapsulation.invoke(client, "close");
-
-        // assert
-        new Verifications()
-        {
-            {
-                mockDeviceIO.isEmpty();
-                times = 3;
-                mockDeviceIO.close();
-                times = 1;
-            }
-        };
-    }
-
-    /* Tests_SRS_INTERNALCLIENT_21_008: [The closeNow shall closeNow the deviceIO connection.] */
-    @Test
-    public void closeNowClosesTransportSuccess() throws IOException, URISyntaxException
-    {
-        //arrange
-        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
-        Deencapsulation.invoke(client, "open");
-
-        // act
-        Deencapsulation.invoke(client, "closeNow");
-
-        // assert
-        new Verifications()
-        {
-            {
-                mockDeviceIO.close();
-                times = 1;
-            }
-        };
-    }
-
-    /* Tests_SRS_INTERNALCLIENT_21_009: [If the closing a connection via deviceIO is not successful, the closeNow shall throw IOException.] */
-    @Test
-    public void closeNowBadCloseTransportThrows() throws IOException, URISyntaxException
+    public void closeBadCloseTransportThrows() throws IOException, URISyntaxException
     {
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
@@ -393,7 +325,7 @@ public class InternalClientTest
         // act
         try
         {
-            Deencapsulation.invoke(client, "closeNow");
+            Deencapsulation.invoke(client, "close");
         }
         catch (Exception expected)
         {

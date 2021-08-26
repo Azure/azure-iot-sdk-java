@@ -16,17 +16,12 @@ public class DeviceClientManager extends ClientManagerBase
 {
     /**
      * Define method calls that will not be delegated to the inner client.
-     * Device client has 2 method signatures for closing the client.
-     * 1. close  -> This method is deprecated.
-     * 2. closeNow -> Currently the preferred method signature.
-     * For the purpose of this sample, we will make sure both of these methods perform the same operation.
      */
     private interface DeviceClientNonDelegatedFunction
     {
         void open();
         void close();
-        void closeNow();
-        void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext);
+        void setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext);
     }
 
     /**
@@ -62,7 +57,7 @@ public class DeviceClientManager extends ClientManagerBase
     @Override
     protected void closeClient() throws IOException
     {
-        deviceClient.closeNow();
+        deviceClient.close();
     }
 
     /**

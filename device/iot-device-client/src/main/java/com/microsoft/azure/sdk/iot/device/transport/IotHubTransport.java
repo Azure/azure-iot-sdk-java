@@ -722,7 +722,7 @@ public class IotHubTransport implements IotHubListener
      * @param callbackContext a context to be passed to the callback. Can be {@code null}.
      * @param deviceId the Id of the device whose connection status changes will go to this callback.
      */
-    public void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext, String deviceId)
+    public void setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext, String deviceId)
     {
         if (callbackContext != null && callback == null)
         {
@@ -747,7 +747,7 @@ public class IotHubTransport implements IotHubListener
         }
     }
 
-    public void registerMultiplexingConnectionStateCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext)
+    public void setMultiplexingConnectionStateCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext)
     {
         if (callback == null && callbackContext != null)
         {

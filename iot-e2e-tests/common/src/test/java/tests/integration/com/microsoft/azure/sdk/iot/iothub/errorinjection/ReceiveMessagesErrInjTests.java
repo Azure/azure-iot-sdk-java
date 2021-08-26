@@ -251,7 +251,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         }
         finally
         {
-            testInstance.identity.getClient().closeNow();
+            testInstance.identity.getClient().close();
         }
 
         assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Error Injection message did not cause service to drop TCP connection", testInstance.identity.getClient()), IotHubServicesCommon.actualStatusUpdatesContainsStatus(connectionStatusUpdates, IotHubConnectionStatus.DISCONNECTED_RETRYING));

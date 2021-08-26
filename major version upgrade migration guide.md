@@ -16,9 +16,18 @@ Breaking changes:
 - deviceClient.uploadToBlobAsync() has been removed.
   - Users can still use deviceClient.getFileUploadSasUri() to get a SAS URI that can be used with the Azure Storage SDK to upload the file.
   - See [this sample](./device/iot-device-samples/file-upload-sample) for the recommended way to upload files.
+- DeviceClient and ModuleClient APIs have been unified for consistent naming.
+- DeviceClient and ModuleClient APIs that behave asynchronously have been renamed to include an "Async" suffix. The API's behavior was not changed, however.
+  - This was done because several APIs such as startDeviceTwin were being used by users as though they were synchronous methods when they were not.
 - All other deprecated APIs have also been removed.
 - The Bouncycastle and Azure Storage SDK dependencies have been removed.
 - The "com.microsoft.azure.sdk.iot.device.DeviceTwin" namespace has been changed to "com.microsoft.azure.sdk.iot.device.twin" to remove uppercase letters from it.
+- DeviceClient and ModuleClient deprecated closeNow() and moved it's functionality into close() to match other language SDKs.
+- Renamed some twin desired property callback method names to make them match a more standard callback method naming convention.
+- Reduced access levels to classes and methods that were never intended to be public where possible.
+- Device/ModuleClient method "registerConnectionStatusChangeCallback" has been renamed to "setConnectionStatusChangeCallback".
+- Several callback interfaces and methods have been renamed to fix the spelling of callback from "CallBack" to "Callback".
+
 
 ## IoT hub Service Client
  
@@ -30,7 +39,11 @@ Breaking changes:
   - Each deprecated API in the 1.X.X versions describes which API you should use instead.
 - The Bouncycastle dependencies have been removed
   - The Bouncycastle dependencies were used for some certificate parsing logic that has been removed from the SDK.
-  
+- Reduced access levels to classes and methods that were never intended to be public where possible 
+- Removed service error code descriptions that the service would never return the error code for
+- Reduce default SAS token time to live from 1 year to 1 hour for security purposes
+- Removed unnecessary synchronization on service client APIs to allow for a single client to make multiple service APIs simultaneously
+ 
  
 ## Device Provisioning Service Device Client
 
@@ -44,6 +57,8 @@ Breaking changes:
   - See [this document](./upcoming_certificate_changes_readme.md) for additional context on which certificates need to be installed.
 - All deprecated APIs have been removed
   - Each deprecated API in the 1.X.X versions describes which API you should use instead.
+- Reduced access levels to classes and methods that were never intended to be public where possible
+- Reduce default SAS token time to live from 1 year to 1 hour for security purposes
 
 ## Security Provider Clients
 

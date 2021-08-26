@@ -439,7 +439,7 @@ public class AmqpsIotHubConnectionTest {
         connection.open();
     }
 
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_011: [If any exception is thrown while attempting to trigger the reactor, the function shall closeNow the connection and throw an IOException.]
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_011: [If any exception is thrown while attempting to trigger the reactor, the function shall close the connection and throw an IOException.]
     @Test (expected = IOException.class)
     public void openThrowsIfProtonReactorThrows() throws TransportException
     {
@@ -561,7 +561,7 @@ public class AmqpsIotHubConnectionTest {
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_012: [The function shall set the status of the AMQPS connection to DISCONNECTED.]
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_013: [The function shall closeNow the AmqpsIotHubConnection and the AMQP connection.]
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_013: [The function shall close the AmqpsIotHubConnection and the AMQP connection.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_34_014: [If this object's proton reactor is not null, this function shall stop the Proton reactor.]
     @Test
     public void closeClosesAllProtonVariablesAndStopsProtonReactor() throws TransportException

@@ -47,7 +47,7 @@ public class SendMessagesTests extends SendMessagesCommon
     {
         this.testInstance.setup();
         this.testInstance.identity.getClient().open(true);
-        this.testInstance.identity.getClient().closeNow();
+        this.testInstance.identity.getClient().close();
     }
 
     @Test
@@ -108,7 +108,7 @@ public class SendMessagesTests extends SendMessagesCommon
         msg.setProperty("TestKey1234!#$%&'*+-^_`|~", "TestValue1234!#$%&'*+-^_`|~()<>@,;:\\\"[]?={} \t");
         // ()<>@,;:\"[]?={}
         IotHubServicesCommon.sendMessageAndWaitForResponse(this.testInstance.identity.getClient(), new MessageAndResult(msg, IotHubStatusCode.OK_EMPTY), RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, testInstance.protocol);
-        this.testInstance.identity.getClient().closeNow();
+        this.testInstance.identity.getClient().close();
     }
 
     @Test

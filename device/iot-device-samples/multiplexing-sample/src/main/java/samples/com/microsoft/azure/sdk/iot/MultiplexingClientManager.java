@@ -25,7 +25,7 @@ public class MultiplexingClientManager extends ClientManagerBase
     {
         void open();
         void close();
-        void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext);
+        void setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext);
         void registerDeviceClients(Iterable<DeviceClient> deviceClients);
         void registerDeviceClient(DeviceClient deviceClient);
         void registerDeviceClients(Iterable<DeviceClient> deviceClients, long timeoutMilliseconds);
@@ -57,7 +57,7 @@ public class MultiplexingClientManager extends ClientManagerBase
     {
         this.multiplexingClient = multiplexingClient;
         this.multiplexClientId = multiplexClientId;
-        this.multiplexingClient.registerConnectionStatusChangeCallback(this, this);
+        this.multiplexingClient.setConnectionStatusChangeCallback(this, this);
     }
 
     /**

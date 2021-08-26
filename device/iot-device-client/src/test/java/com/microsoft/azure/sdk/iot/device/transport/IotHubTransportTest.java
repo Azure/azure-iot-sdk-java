@@ -1608,7 +1608,7 @@ public class IotHubTransportTest
 
     //Tests_SRS_IOTHUBTRANSPORT_34_051: [If the provided callback is null but the context is not, this function shall throw an IllegalArgumentException.]
     @Test(expected = IllegalArgumentException.class)
-    public void registerConnectionStatusChangeCallbackThrowsForNullCallback()
+    public void setConnectionStatusChangeCallbackThrowsForNullCallback()
     {
         //arrange
         new Expectations()
@@ -1621,12 +1621,12 @@ public class IotHubTransportTest
         IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
 
         //act
-        transport.registerConnectionStatusChangeCallback(null, new Object(), "someString");
+        transport.setConnectionStatusChangeCallback(null, new Object(), "someString");
     }
 
     //Tests_SRS_IOTHUBTRANSPORT_34_051: [If the provided callback is null but the context is not, this function shall throw an IllegalArgumentException.]
     @Test
-    public void registerConnectionStatusChangeCallbackDoesNotThrowForNullCallbackIfContextIsAlsoNull()
+    public void setConnectionStatusChangeCallbackDoesNotThrowForNullCallbackIfContextIsAlsoNull()
     {
         //arrange
         new Expectations()
@@ -1640,7 +1640,7 @@ public class IotHubTransportTest
         IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
 
         //act
-        transport.registerConnectionStatusChangeCallback(null, null, "someDeviceId");
+        transport.setConnectionStatusChangeCallback(null, null, "someDeviceId");
     }
 
     //Tests_SRS_IOTHUBTRANSPORT_34_053: [This function shall execute the callback associate with the provided
@@ -2653,7 +2653,7 @@ public class IotHubTransportTest
             }
         };
         final IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
-        transport.registerConnectionStatusChangeCallback(mockedIotHubConnectionStatusChangeCallback, null, deviceId);
+        transport.setConnectionStatusChangeCallback(mockedIotHubConnectionStatusChangeCallback, null, deviceId);
 
         //act
         Deencapsulation.invoke(transport, "invokeConnectionStatusChangeCallback",
@@ -2688,7 +2688,7 @@ public class IotHubTransportTest
         };
         final IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
         final String deviceId = "someDevice";
-        transport.registerConnectionStatusChangeCallback(null, null, deviceId);
+        transport.setConnectionStatusChangeCallback(null, null, deviceId);
 
         //act
         Deencapsulation.invoke(transport, "invokeConnectionStatusChangeCallback",

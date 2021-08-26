@@ -253,7 +253,7 @@ public class FileUploadTests extends IntegrationTest
 
     private void tearDownDeviceClient(DeviceClient deviceClient) throws IOException
     {
-        deviceClient.closeNow();
+        deviceClient.close();
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)

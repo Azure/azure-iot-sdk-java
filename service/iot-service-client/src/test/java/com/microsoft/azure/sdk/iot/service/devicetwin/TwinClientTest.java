@@ -1367,13 +1367,13 @@ public class TwinClientTest
 
         new MockUp<TwinClient>()
         {
-            @Mock boolean hasNext(QueryCollection deviceTwinQueryCollection)
+            @Mock boolean hasNext(QueryCollection twinQueryCollection)
             {
                 return true;
             }
 
             @Mock
-            Twin jsonToDeviceTwinDevice(String json) throws IOException
+            Twin jsonToTwin(String json) throws IOException
             {
                 return new Twin();
             }

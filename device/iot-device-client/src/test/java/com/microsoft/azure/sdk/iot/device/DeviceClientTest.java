@@ -257,9 +257,9 @@ public class DeviceClientTest
         };
     }
 
-    //Tests_SRS_DEVICECLIENT_34_041: [If this object is not using a transport client, it shall invoke super.closeNow().]
+    //Tests_SRS_DEVICECLIENT_34_041: [If this object is not using a transport client, it shall invoke super.close().]
     @Test
-    public void closeNowClosesTransportSuccess(final @Mocked InternalClient mockedInternalClient) throws IOException, URISyntaxException
+    public void closeClosesTransportSuccess(final @Mocked InternalClient mockedInternalClient) throws IOException, URISyntaxException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;deviceId=testdevice;"
@@ -268,13 +268,13 @@ public class DeviceClientTest
         DeviceClient client = new DeviceClient(connString, protocol);
 
         // act
-        client.closeNow();
+        client.close();
 
         // assert
         new Verifications()
         {
             {
-                mockedInternalClient.closeNow();
+                mockedInternalClient.close();
                 times = 1;
             }
         };

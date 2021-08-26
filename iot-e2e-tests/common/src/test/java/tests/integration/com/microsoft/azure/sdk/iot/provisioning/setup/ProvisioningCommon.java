@@ -409,7 +409,7 @@ public class ProvisioningCommon extends IntegrationTest
             {
                 if (provisioningStatus != null && provisioningStatus.provisioningDeviceClient != null)
                 {
-                    provisioningStatus.provisioningDeviceClient.closeNow();
+                    provisioningStatus.provisioningDeviceClient.close();
                 }
             }
         }
@@ -435,7 +435,7 @@ public class ProvisioningCommon extends IntegrationTest
             }
 
             DeviceClient deviceClient = DeviceClient.createFromSecurityProvider(iothubUri, deviceId, testInstance.securityProvider, iotHubClientProtocol);
-            deviceClient.closeNow();
+            deviceClient.close();
         }
     }
 

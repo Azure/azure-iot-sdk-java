@@ -229,7 +229,7 @@ public class HandleMessages
         Scanner scanner = new Scanner(System.in);
         scanner.nextLine();
 
-        client.closeNow();
+        client.close();
 
         System.out.println("Shutting down...");
     }

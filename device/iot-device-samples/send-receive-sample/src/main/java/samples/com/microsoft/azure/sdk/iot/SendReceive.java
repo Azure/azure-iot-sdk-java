@@ -331,7 +331,7 @@ public class SendReceive
 
         // close the connection        
         System.out.println("Closing"); 
-        client.closeNow();
+        client.close();
         
         if (!failedMessageListOnClose.isEmpty())
         {

@@ -13,13 +13,13 @@ import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 
-import tests.integration.com.microsoft.azure.sdk.iot.iothub.twin.DeviceTwinWithVersionTests;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.twin.TwinWithVersionTests;
 
 @TestGroup13
 @RunWith(Parameterized.class)
-public class DeviceTwinWithVersionAndroidRunner extends DeviceTwinWithVersionTests
+public class TwinWithVersionAndroidRunner extends TwinWithVersionTests
 {
-    public DeviceTwinWithVersionAndroidRunner(IotHubClientProtocol protocol) throws IOException
+    public TwinWithVersionAndroidRunner(IotHubClientProtocol protocol) throws IOException
     {
         super(protocol);
     }

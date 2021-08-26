@@ -391,7 +391,7 @@ public class DeviceTwinSample
         catch (Exception e)
         {
             System.out.println("On exception, shutting down \n" + " Cause: " + e.getCause() + " \n" +  e.getMessage());
-            client.closeNow();
+            client.close();
             System.out.println("Shutting down...");
         }
 
@@ -400,7 +400,7 @@ public class DeviceTwinSample
         Scanner scanner = new Scanner(System.in);
         scanner.nextLine();
 
-        client.closeNow();
+        client.close();
 
         System.out.println("Shutting down...");
 

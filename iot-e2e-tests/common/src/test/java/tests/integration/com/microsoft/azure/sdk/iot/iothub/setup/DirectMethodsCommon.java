@@ -57,7 +57,7 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
  * but any children class should.
  */
 @Slf4j
-public class DirectMethodsClientCommon extends IntegrationTest
+public class DirectMethodsCommon extends IntegrationTest
 {
     @Parameterized.Parameters(name = "{0}_{1}_{2}")
     public static Collection inputs()
@@ -124,7 +124,7 @@ public class DirectMethodsClientCommon extends IntegrationTest
         return inputSubArray;
     }
 
-    protected DirectMethodsClientCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
+    protected DirectMethodsCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {
         this.testInstance = new DeviceMethodTestInstance(protocol, authenticationType, clientType);
     }

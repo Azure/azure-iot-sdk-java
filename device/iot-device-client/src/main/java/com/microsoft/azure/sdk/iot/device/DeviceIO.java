@@ -433,23 +433,14 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
         return (this.state == IotHubConnectionStatus.CONNECTED || this.state == IotHubConnectionStatus.DISCONNECTED_RETRYING);
     }
 
-    /**
-     * Getter for the transport empty queue.
-     * @return a boolean true if the transport queue is empty, or false if there is messages to send.
-     */
-    public boolean isEmpty()
+    void setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback statusChangeCallback, Object callbackContext, String deviceId)
     {
-        return this.transport.isEmpty();
+        this.transport.setConnectionStatusChangeCallback(statusChangeCallback, callbackContext, deviceId);
     }
 
-    void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback statusChangeCallback, Object callbackContext, String deviceId)
+    void setMultiplexingConnectionStateCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext)
     {
-        this.transport.registerConnectionStatusChangeCallback(statusChangeCallback, callbackContext, deviceId);
-    }
-
-    void registerMultiplexingConnectionStateCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext)
-    {
-        this.transport.registerMultiplexingConnectionStateCallback(callback, callbackContext);
+        this.transport.setMultiplexingConnectionStateCallback(callback, callbackContext);
     }
 
     /*

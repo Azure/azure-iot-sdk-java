@@ -66,7 +66,7 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
  * but any child class should.
  */
 @Slf4j
-public class TwinClientCommon extends IntegrationTest
+public class TwinCommon extends IntegrationTest
 {
     @Parameterized.Parameters(name = "{0}_{1}_{2}")
     public static Collection inputs()
@@ -348,7 +348,7 @@ public class TwinClientCommon extends IntegrationTest
         }
     }
 
-    public TwinClientCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
+    public TwinCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
     {
         this.testInstance = new DeviceTwinTestInstance(protocol, authenticationType, clientType);
     }
@@ -417,7 +417,7 @@ public class TwinClientCommon extends IntegrationTest
             {
                 if (testInstance.testIdentity != null && testInstance.testIdentity.getClient() != null)
                 {
-                    testInstance.testIdentity.getClient().closeNow();
+                    testInstance.testIdentity.getClient().close();
                 }
             }
             catch (IOException e)
@@ -435,7 +435,7 @@ public class TwinClientCommon extends IntegrationTest
                     {
                         if (testIdentity != null && testIdentity.getClient() != null)
                         {
-                            testIdentity.getClient().closeNow();
+                            testIdentity.getClient().close();
                         }
                     }
                     catch (IOException e)
@@ -472,7 +472,7 @@ public class TwinClientCommon extends IntegrationTest
             for (Pair p : repProperties)
             {
                 String val = (String) p.getValue();
-                if (p.getKey().startsWith(TwinClientCommon.PROPERTY_KEY) && val.startsWith(startsWithValue))
+                if (p.getKey().startsWith(TwinCommon.PROPERTY_KEY) && val.startsWith(startsWithValue))
                 {
                     actualCount++;
                 }

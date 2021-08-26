@@ -197,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
         catch (Exception e2)
         {
             System.err.println("Exception while opening IoTHub connection: " + e2.getMessage());
-            client.closeNow();
+            client.close();
             System.out.println("Shutting down...");
         }
     }
@@ -305,7 +305,7 @@ public class MainActivity extends AppCompatActivity {
     private void stopClient() throws URISyntaxException, IOException
     {
         String OPERATING_SYSTEM = System.getProperty("os.name");
-        client.closeNow();
+        client.close();
         System.out.println("Shutting down..." + OPERATING_SYSTEM);
         android.os.Process.killProcess(android.os.Process.myPid());
     }

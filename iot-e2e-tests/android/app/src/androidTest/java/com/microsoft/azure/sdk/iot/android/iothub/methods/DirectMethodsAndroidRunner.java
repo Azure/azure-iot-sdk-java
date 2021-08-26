@@ -3,9 +3,9 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.android.iothub.errorinjection.methods;
+package com.microsoft.azure.sdk.iot.android.iothub.methods;
 
-import com.microsoft.azure.sdk.iot.android.helper.TestGroup5;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup10;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 
@@ -13,15 +13,14 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
-import tests.integration.com.microsoft.azure.sdk.iot.iothub.errorinjection.DeviceMethodErrInjTests;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.methods.DirectMethodsTests;
 
-@TestGroup5
+@TestGroup10
 @RunWith(Parameterized.class)
-public class DeviceMethodErrInjAndroidRunner extends DeviceMethodErrInjTests
+public class DirectMethodsAndroidRunner extends DirectMethodsTests
 {
-    public DeviceMethodErrInjAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
+    public DirectMethodsAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {
         super(protocol, authenticationType, clientType);
     }
 }
-

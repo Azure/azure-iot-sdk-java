@@ -197,7 +197,7 @@ public class HubTierConnectionTests extends IntegrationTest
 
         //assert
         waitForDisconnect(connectionStatusUpdates, WAIT_FOR_DISCONNECT_TIMEOUT_MILLISECONDS, testInstance.client);
-        testInstance.client.closeNow();
+        testInstance.client.close();
     }
 
     public static void waitForDisconnect(List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates, long timeout, InternalClient client) throws InterruptedException

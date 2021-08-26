@@ -186,7 +186,7 @@ public class TokenRenewalTests extends IntegrationTest
         {
             try
             {
-                client.closeNow();
+                client.close();
             }
             catch (UnsupportedOperationException ex)
             {

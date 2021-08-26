@@ -61,7 +61,7 @@ public class DeviceEmulator
     {
         if (this.client != null)
         {
-            this.client.closeNow();
+            this.client.close();
         }
     }
 

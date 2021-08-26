@@ -142,7 +142,7 @@ public class ProvisioningSymmetricKeyEnrollmentGroupSample
                     System.out.println("Device client threw an exception: " + e.getMessage());
                     if (deviceClient != null)
                     {
-                        deviceClient.closeNow();
+                        deviceClient.close();
                     }
                 }
             }
@@ -152,7 +152,7 @@ public class ProvisioningSymmetricKeyEnrollmentGroupSample
             System.out.println("Provisioning Device Client threw an exception" + e.getMessage());
             if (provisioningDeviceClient != null)
             {
-                provisioningDeviceClient.closeNow();
+                provisioningDeviceClient.close();
             }
         }
 
@@ -161,11 +161,11 @@ public class ProvisioningSymmetricKeyEnrollmentGroupSample
         scanner.nextLine();
         if (provisioningDeviceClient != null)
         {
-            provisioningDeviceClient.closeNow();
+            provisioningDeviceClient.close();
         }
         if (deviceClient != null)
         {
-            deviceClient.closeNow();
+            deviceClient.close();
         }
 
         System.out.println("Shutting down...");

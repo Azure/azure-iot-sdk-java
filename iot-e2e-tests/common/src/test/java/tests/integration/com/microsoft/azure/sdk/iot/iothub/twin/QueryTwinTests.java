@@ -39,7 +39,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
-import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.TwinClientCommon;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.TwinCommon;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -63,7 +63,7 @@ import static org.junit.Assert.*;
 @Slf4j
 @IotHubTest
 @RunWith(Parameterized.class)
-public class QueryTwinTests extends TwinClientCommon
+public class QueryTwinTests extends TwinCommon
 {
     public static final int QUERY_TIMEOUT_MILLISECONDS = 4 * 60 * 1000; // 4 minutes
 
@@ -72,7 +72,7 @@ public class QueryTwinTests extends TwinClientCommon
         super(protocol, authenticationType, clientType);
     }
 
-    // Override the input parameters that are defined in TwinClientCommon since these query tests are strictly service client tests.
+    // Override the input parameters that are defined in TwinCommon since these query tests are strictly service client tests.
     // No need to parameterize these tests on device client options.
     @Parameterized.Parameters(name = "{0}_{1}_{2}")
     public static Collection inputs()

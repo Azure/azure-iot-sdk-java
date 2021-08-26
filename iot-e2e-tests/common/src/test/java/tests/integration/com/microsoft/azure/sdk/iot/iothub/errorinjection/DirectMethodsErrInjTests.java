@@ -19,7 +19,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
-import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DirectMethodsClientCommon;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DirectMethodsCommon;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,9 +33,9 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
  */
 @IotHubTest
 @RunWith(Parameterized.class)
-public class DirectMethodsClientErrInjTests extends DirectMethodsClientCommon
+public class DirectMethodsErrInjTests extends DirectMethodsCommon
 {
-    public DirectMethodsClientErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
+    public DirectMethodsErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {
         super(protocol, authenticationType, clientType);
     }

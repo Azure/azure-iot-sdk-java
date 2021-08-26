@@ -144,7 +144,7 @@ public class ProvisioningX509Sample
                     System.out.println("Device client threw an exception: " + e.getMessage());
                     if (deviceClient != null)
                     {
-                        deviceClient.closeNow();
+                        deviceClient.close();
                     }
                 }
             }
@@ -154,7 +154,7 @@ public class ProvisioningX509Sample
             System.out.println("Provisioning Device Client threw an exception" + e.getMessage());
             if (provisioningDeviceClient != null)
             {
-                provisioningDeviceClient.closeNow();
+                provisioningDeviceClient.close();
             }
         }
 
@@ -166,11 +166,11 @@ public class ProvisioningX509Sample
         System.out.println("Shutting down...");
         if (provisioningDeviceClient != null)
         {
-            provisioningDeviceClient.closeNow();
+            provisioningDeviceClient.close();
         }
         if (deviceClient != null)
         {
-            deviceClient.closeNow();
+            deviceClient.close();
         }
     }
 

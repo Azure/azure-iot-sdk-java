@@ -192,7 +192,7 @@ public class SendEventX509
 
         // close the connection        
         System.out.println("Closing"); 
-        client.closeNow();
+        client.close();
         
         if (!failedMessageListOnClose.isEmpty())
         {

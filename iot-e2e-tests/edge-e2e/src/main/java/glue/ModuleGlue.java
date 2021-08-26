@@ -205,7 +205,7 @@ public class ModuleGlue
             this._deviceTwinStatusCallback.setHandler(null);
             try
             {
-                client.closeNow();
+                client.close();
                 this._map.remove(connectionId);
             } catch (IOException e)
             {
