@@ -10,6 +10,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+@SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
 public class QueryRequestParser
 {
     private static final String QUERY_TAG = "query";

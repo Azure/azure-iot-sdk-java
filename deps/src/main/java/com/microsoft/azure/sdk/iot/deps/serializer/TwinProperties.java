@@ -64,18 +64,6 @@ public class TwinProperties
         return this.reported.update(property);
     }
 
-    protected void clearDesired()
-    {
-        /* Codes_SRS_TWINPARSER_21_122: [If the provided `propertyMap` is null, the resetDesiredProperty shall cleanup the desired collection and return null.] */
-        this.desired = new TwinProperty();
-    }
-
-    protected void clearReported()
-    {
-        /* Codes_SRS_TWINPARSER_21_132: [If the provided `propertyMap` is null, the resetReportedProperty shall cleanup the reported collection and return null.] */
-        this.reported = new TwinProperty();
-    }
-
     protected void updateDesired(String json, TwinChangedCallback onDesiredCallback)
     {
         this.desired.update(json, onDesiredCallback);
@@ -107,13 +95,6 @@ public class TwinProperties
     {
         return this.reported.getPropertyMap();
     }
-
-
-    protected String toJson()
-    {
-        return toJsonElement().toString();
-    }
-
 
     protected JsonElement toJsonElement()
     {

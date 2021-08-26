@@ -66,6 +66,7 @@ public class ServiceAuthenticationWithSharedAccessPolicyKey extends Authenticati
      * Setter for policy name
      * @param policyName The string value to set
      */
+    @SuppressWarnings("unused") // Used by reflection in tests
     protected void setPolicyName(String policyName)
     {
         this.policyName = policyName;
@@ -84,6 +85,7 @@ public class ServiceAuthenticationWithSharedAccessPolicyKey extends Authenticati
      * Setter for policy key
      * @param key The string value to set
      */
+    @SuppressWarnings("unused") // Used by reflection in tests
     protected void setKey(String key)
     {
         this.key = key;

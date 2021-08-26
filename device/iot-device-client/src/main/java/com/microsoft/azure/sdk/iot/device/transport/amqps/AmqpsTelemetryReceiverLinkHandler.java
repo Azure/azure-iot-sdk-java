@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpsMessage;
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.MessageCallback;
 import com.microsoft.azure.sdk.iot.device.MessageType;

@@ -103,6 +103,11 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      */
     DeviceIO(DeviceClientConfig config, long sendPeriodInMilliseconds, long receivePeriodInMilliseconds)
     {
+        this(config, sendPeriodInMilliseconds, receivePeriodInMilliseconds, false);
+    }
+
+    DeviceIO(DeviceClientConfig config, long sendPeriodInMilliseconds, long receivePeriodInMilliseconds, boolean isMultiplexing)
+    {
         if (config == null)
         {
             throw new IllegalArgumentException("Config cannot be null.");
@@ -111,22 +116,16 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
         IotHubClientProtocol protocol = config.getProtocol();
         config.setUseWebsocket(protocol == IotHubClientProtocol.AMQPS_WS || protocol == MQTT_WS);
 
-        /* Codes_SRS_DEVICE_IO_21_037: [The constructor shall initialize the `sendPeriodInMilliseconds` with default value of 10 milliseconds.] */
         this.sendPeriodInMilliseconds = sendPeriodInMilliseconds;
-        /* Codes_SRS_DEVICE_IO_21_038: [The constructor shall initialize the `receivePeriodInMilliseconds` with default value of each protocol.] */
         this.receivePeriodInMilliseconds = receivePeriodInMilliseconds;
 
-        /* Codes_SRS_DEVICE_IO_21_006: [The constructor shall set the `state` as `DISCONNECTED`.] */
         this.state = IotHubConnectionStatus.DISCONNECTED;
 
-        this.transport = new IotHubTransport(config, this);
+        this.transport = new IotHubTransport(config, this, isMultiplexing);
 
-        /* Codes_SRS_DEVICE_IO_21_037: [The constructor shall initialize the `sendPeriodInMilliseconds` with default value of 10 milliseconds.] */
         this.sendPeriodInMilliseconds = sendPeriodInMilliseconds;
-        /* Codes_SRS_DEVICE_IO_21_038: [The constructor shall initialize the `receivePeriodInMilliseconds` with default value of each protocol.] */
         this.receivePeriodInMilliseconds = receivePeriodInMilliseconds;
 
-        /* Codes_SRS_DEVICE_IO_21_006: [The constructor shall set the `state` as `DISCONNECTED`.] */
         this.state = IotHubConnectionStatus.DISCONNECTED;
     }
 
@@ -144,7 +143,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      *
      * @throws IOException if a connection to an IoT Hub cannot be established.
      */
-    void open() throws IOException
+    void open(boolean withRetry) throws IOException
     {
         synchronized (this.stateLock)
         {
@@ -155,7 +154,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
 
             try
             {
-                this.transport.open();
+                this.transport.open(withRetry);
             }
             catch (DeviceClientException e)
             {
@@ -165,11 +164,11 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
     }
 
     // Functionally the same as "open()", but without wrapping any thrown TransportException into an IOException
-    void openWithoutWrappingException() throws TransportException
+    void openWithoutWrappingException(boolean withRetry) throws TransportException
     {
         try
         {
-            open();
+            open(withRetry);
         }
         catch (IOException e)
         {
@@ -201,6 +200,11 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
     void setMultiplexingRetryPolicy(RetryPolicy retryPolicy)
     {
         this.transport.setMultiplexingRetryPolicy(retryPolicy);
+    }
+
+    void setMaxNumberOfMessagesSentPerSendThread(int maxNumberOfMessagesSentPerSendThread)
+    {
+        this.transport.setMaxNumberOfMessagesSentPerSendThread(maxNumberOfMessagesSentPerSendThread);
     }
 
     /**
@@ -259,7 +263,6 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
                 this.receiveTaskScheduler.shutdown();
             }
 
-            /* Codes_SRS_DEVICE_IO_21_019: [The close shall close the transport.] */
             try
             {
                 this.transport.close(IotHubConnectionStatusChangeReason.CLIENT_CLOSE, null);
@@ -270,7 +273,6 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
                 throw new IOException(e);
             }
 
-            /* Codes_SRS_DEVICE_IO_21_021: [The close shall set the `state` as `CLOSE`.] */
             this.state = IotHubConnectionStatus.DISCONNECTED;
         }
     }
@@ -316,7 +318,6 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
                                Object callbackContext,
                                String deviceId)
     {
-        /* Codes_SRS_DEVICE_IO_21_024: [If the client is closed, the sendEventAsync shall throw an IllegalStateException.] */
         if (!this.isOpen())
         {
             throw new IllegalStateException(
@@ -324,19 +325,16 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
                             + "an IoT Hub client that is closed.");
         }
 
-        /* Codes_SRS_DEVICE_IO_21_023: [If the message given is null, the sendEventAsync shall throw an IllegalArgumentException.] */
         if (message == null)
         {
             throw new IllegalArgumentException("Cannot send message 'null'.");
         }
 
-        // Codes_SRS_DEVICE_IO_12_001: [The function shall set the deviceId on the message if the deviceId parameter is not null.]
         if (deviceId != null)
         {
             message.setConnectionDeviceId(deviceId);
         }
 
-        /* Codes_SRS_DEVICE_IO_21_022: [The sendEventAsync shall add the message, with its associated callback and callback context, to the transport.] */
         transport.addMessage(message, callback, callbackContext, deviceId);
     }
 
@@ -347,7 +345,6 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      */
     public long getReceivePeriodInMilliseconds()
     {
-        /* Codes_SRS_DEVICE_IO_21_026: [The getReceivePeriodInMilliseconds shall return the programed receive period in milliseconds.] */
         return this.receivePeriodInMilliseconds;
     }
 
@@ -360,26 +357,28 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      */
     public void setReceivePeriodInMilliseconds(long newIntervalInMilliseconds) throws IOException
     {
-        /* Codes_SRS_DEVICE_IO_21_030: [If the the provided interval is zero or negative, the setReceivePeriodInMilliseconds shall throw IllegalArgumentException.] */
         if(newIntervalInMilliseconds <= 0L)
         {
             throw new IllegalArgumentException("receive interval can not be zero or negative");
         }
 
-        /* Codes_SRS_DEVICE_IO_21_027: [The setReceivePeriodInMilliseconds shall store the new receive period in milliseconds.] */
         this.receivePeriodInMilliseconds = newIntervalInMilliseconds;
 
-        /* Codes_SRS_DEVICE_IO_21_028: [If the task scheduler already exists, the setReceivePeriodInMilliseconds shall change the `scheduleAtFixedRate` for the receiveTask to the new value.] */
         if (this.receiveTaskScheduler != null)
         {
-            /* Codes_SRS_DEVICE_IO_21_029: [If the `receiveTask` is null, the setReceivePeriodInMilliseconds shall throw IOException.] */
             if (this.receiveTask == null)
             {
                 throw new IOException("transport receive task not set");
             }
 
-            this.receiveTaskScheduler.scheduleAtFixedRate(this.receiveTask, 0,
-                    this.receivePeriodInMilliseconds, TimeUnit.MILLISECONDS);
+            // close the old scheduler and start a new one with the new receive period
+            this.receiveTaskScheduler.shutdown();
+            this.receiveTaskScheduler = Executors.newScheduledThreadPool(1);
+            this.receiveTaskScheduler.scheduleAtFixedRate(
+                this.receiveTask,
+                0,
+                this.receivePeriodInMilliseconds,
+                TimeUnit.MILLISECONDS);
         }
     }
 
@@ -390,7 +389,6 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      */
     public long getSendPeriodInMilliseconds()
     {
-        /* Codes_SRS_DEVICE_IO_21_032: [The getSendPeriodInMilliseconds shall return the programed send period in milliseconds.] */
         return this.sendPeriodInMilliseconds;
     }
 
@@ -403,26 +401,28 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      */
     public void setSendPeriodInMilliseconds(long newIntervalInMilliseconds) throws IOException
     {
-        /* Codes_SRS_DEVICE_IO_21_036: [If the the provided interval is zero or negative, the setSendPeriodInMilliseconds shall throw IllegalArgumentException.] */
         if(newIntervalInMilliseconds <= 0L)
         {
             throw new IllegalArgumentException("send interval can not be zero or negative");
         }
 
-        /* Codes_SRS_DEVICE_IO_21_033: [The setSendPeriodInMilliseconds shall store the new send period in milliseconds.] */
         this.sendPeriodInMilliseconds = newIntervalInMilliseconds;
 
-        /* Codes_SRS_DEVICE_IO_21_034: [If the task scheduler already exists, the setSendPeriodInMilliseconds shall change the `scheduleAtFixedRate` for the sendTask to the new value.] */
         if (this.sendTaskScheduler != null)
         {
-            /* Codes_SRS_DEVICE_IO_21_035: [If the `sendTask` is null, the setSendPeriodInMilliseconds shall throw IOException.] */
             if (this.sendTask == null)
             {
                 throw new IOException("transport send task not set");
             }
 
-            this.sendTaskScheduler.scheduleAtFixedRate(this.sendTask, 0,
-                    this.sendPeriodInMilliseconds, TimeUnit.MILLISECONDS);
+            // close the old scheduler and start a new one with the new send period
+            this.sendTaskScheduler.shutdown();
+            this.sendTaskScheduler = Executors.newScheduledThreadPool(1);
+            this.sendTaskScheduler.scheduleAtFixedRate(
+                this.sendTask,
+                0,
+                this.sendPeriodInMilliseconds,
+                TimeUnit.MILLISECONDS);
         }
     }
 
@@ -433,7 +433,6 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      */
     public IotHubClientProtocol getProtocol()
     {
-        /* Codes_SRS_DEVICE_IO_21_025: [The getProtocol shall return the protocol for transport.] */
         return this.transport.getProtocol();
     }
 
@@ -455,7 +454,6 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      */
     public boolean isEmpty()
     {
-        /* Codes_SRS_DEVICE_IO_21_039: [The isEmpty shall return the transport queue state, true if the queue is empty, false if there is pending messages in the queue.] */
         return this.transport.isEmpty();
     }
 

@@ -21,6 +21,7 @@ public class ServiceConnectionString {
     private final String sharedAccessSignature;
 
     @Builder
+    @SuppressWarnings("unused") // Builder annotation hides this
     ServiceConnectionString(@NonNull String hostName, @NonNull String httpsEndpoint, String sharedAccessKeyName, String sharedAccessKey, String sharedAccessSignature) {
         if (!validInput(sharedAccessKeyName, sharedAccessKey, sharedAccessSignature)) {
             throw new IllegalArgumentException("Specify either both the sharedAccessKey and sharedAccessKeyName, or sharedAccessSignature");

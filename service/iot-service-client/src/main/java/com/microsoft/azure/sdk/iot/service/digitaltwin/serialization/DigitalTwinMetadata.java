@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
 public final class DigitalTwinMetadata {
     /* The Id of the model that the digital twin or component is modeled by. This is present on a digital twin's root level metadata */
     @JsonProperty(value = "$model", required = true)

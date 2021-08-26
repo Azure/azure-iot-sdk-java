@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -85,14 +86,14 @@ public class FileUploadSimpleSample
 
             System.out.println("Using the Azure Storage SDK to upload file to Azure Storage...");
 
-            try (FileInputStream fileInputStream = new FileInputStream(file))
+            try
             {
                 BlobClient blobClient =
                     new BlobClientBuilder()
                         .endpoint(sasUriResponse.getBlobUri().toString())
                         .buildClient();
 
-                blobClient.upload(fileInputStream, file.length());
+                blobClient.uploadFromFile(fullFileName);
             }
             catch (Exception e)
             {

@@ -215,98 +215,10 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
-    @ContinuousIntegrationTest
-    public void testSubscribeToDesiredPropertiesMultiThreaded() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
-    {
-        super.setUpNewDeviceAndModule();
-        testSubscribeToDesiredPropertiesMultiThreadedFlow(PROPERTY_VALUE, PROPERTY_VALUE_UPDATE, PROPERTY_VALUE_UPDATE);
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    @ContinuousIntegrationTest
-    public void testSubscribeToDesiredArrayPropertiesMultiThreaded() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
-    {
-        super.setUpNewDeviceAndModule();
-        testSubscribeToDesiredPropertiesMultiThreadedFlow(jsonParser.parse(PROPERTY_VALUE_ARRAY), jsonParser.parse(PROPERTY_VALUE_UPDATE_ARRAY), PROPERTY_VALUE_UPDATE_ARRAY_PREFIX);
-    }
-
-    public void testSubscribeToDesiredPropertiesMultiThreadedFlow(Object propertyValue, Object updatePropertyValue, String updatePropertyPrefix) throws IOException, InterruptedException
-    {
-        // arrange
-        ExecutorService executor = Executors.newFixedThreadPool(MAX_PROPERTIES_TO_TEST);
-
-        testInstance.deviceUnderTest.dCDeviceForTwin.getDesiredProp().clear();
-        testInstance.deviceUnderTest.sCDeviceForTwin.clearTwin();
-        for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
-        {
-            PropertyState propertyState = new PropertyState();
-            propertyState.callBackTriggered = false;
-            propertyState.property = new Property(PROPERTY_KEY + i, propertyValue);
-            testInstance.deviceUnderTest.dCDeviceForTwin.propertyStateList[i] = propertyState;
-            testInstance.deviceUnderTest.dCDeviceForTwin.setDesiredPropertyCallback(propertyState.property, testInstance.deviceUnderTest.dCDeviceForTwin, propertyState);
-        }
-
-        // act
-        testInstance.testIdentity.getClient().subscribeToDesiredProperties(testInstance.deviceUnderTest.dCDeviceForTwin.getDesiredProp());
-        Thread.sleep(DELAY_BETWEEN_OPERATIONS);
-
-        //Setting desired properties in different threads leads to a race condition
-        Object desiredPropertiesUpdateLock = new Object();
-
-        for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
-        {
-            final int index = i;
-            executor.submit(() -> {
-                try
-                {
-                    Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
-                    desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(PROPERTY_KEY + index, updatePropertyValue));
-                    synchronized (desiredPropertiesUpdateLock)
-                    {
-                        Set currentDesiredProperties = testInstance.deviceUnderTest.sCDeviceForTwin.getDesiredProperties();
-                        desiredProperties.addAll(currentDesiredProperties);
-                        testInstance.deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
-                        testInstance.twinServiceClient.updateTwin(testInstance.deviceUnderTest.sCDeviceForTwin);
-                    }
-                }
-                catch (IotHubException | IOException e)
-                {
-                    fail(e.getMessage());
-                }
-            });
-            Thread.sleep(DELAY_BETWEEN_OPERATIONS);
-        }
-
-        executor.shutdown();
-        if (!executor.awaitTermination(1, TimeUnit.MINUTES))
-        {
-            executor.shutdownNow();
-        }
-
-        // assert
-        waitAndVerifyTwinStatusBecomesSuccess();
-        waitAndVerifyDesiredPropertyCallback(updatePropertyPrefix, false);
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
     public void testSubscribeToDesiredPropertiesSequentially() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
     {
         super.setUpNewDeviceAndModule();
         testSubscribeToDesiredPropertiesSequentiallyFlow(PROPERTY_VALUE, PROPERTY_VALUE_UPDATE, PROPERTY_VALUE_UPDATE);
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    @ContinuousIntegrationTest
-    public void testSubscribeToDesiredArrayPropertiesSequentially() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
-    {
-        super.setUpNewDeviceAndModule();
-        testSubscribeToDesiredPropertiesSequentiallyFlow(
-                jsonParser.parse(PROPERTY_VALUE_ARRAY),
-                jsonParser.parse(PROPERTY_VALUE_UPDATE_ARRAY),
-                PROPERTY_VALUE_UPDATE_ARRAY_PREFIX);
     }
 
     public void testSubscribeToDesiredPropertiesSequentiallyFlow(

@@ -20,6 +20,7 @@ phases:
     displayName: CredScan
     inputs:
       debugMode: false
+      suppressionsFile: vsts/CredScanSuppressions.json
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-autoapplicability.AutoApplicability@1
     displayName: AutoApplicability
@@ -70,11 +71,11 @@ phases:
       codebase: NewOrUpdate
       tsaEnvironment: PROD
       codeBaseName: 'Azure-Iot-SDK-Java-Master'
-      notificationAlias: 'timtay@microsoft.com, prmathur@microsoft.com, jasminel@microsoft.com'
-      codeBaseAdmins: 'REDMOND\timtay;REDMOND\prmathur;REDMOND\jasminel'
+      notificationAlias: 'aziotdndmgdsdk@microsoft.com'
+      codeBaseAdmins: 'REDMOND\timtay;REDMOND\jamdavi;REDMOND\azabbasi'
       instanceUrlForTsaV2: MSAZURE
       projectNameMSAZURE: One
-      areaPath: 'One\IoT\Platform\Clients\java'
+      areaPath: 'One\IoT\Platform and Devices\IoT Devices\SDKs\Managed'
       iterationPath: 'One\IoT\Backlog'
       uploadAPIScan: false
       uploadBinSkim: false

@@ -129,11 +129,10 @@ public class FileUploadSample
 
     private static void uploadFile(DeviceClient client, String baseDirectory, String relativeFileName) throws IOException, URISyntaxException {
         File file = new File(baseDirectory, relativeFileName);
-        try (InputStream inputStream = new FileInputStream(file))
-        {
-            long streamLength = file.length();
 
-            if(relativeFileName.startsWith("\\"))
+        try
+        {
+            if (relativeFileName.startsWith("\\"))
             {
                 relativeFileName = relativeFileName.substring(1);
             }
@@ -153,7 +152,7 @@ public class FileUploadSample
                         .endpoint(sasUriResponse.getBlobUri().toString())
                         .buildClient();
 
-                blobClient.upload(inputStream, streamLength);
+                blobClient.uploadFromFile(file.getPath());
             }
             catch (Exception e)
             {
@@ -167,15 +166,15 @@ public class FileUploadSample
                 e.printStackTrace();
                 return;
             }
-            finally
-            {
-                inputStream.close();
-            }
 
             FileUploadCompletionNotification completionNotification = new FileUploadCompletionNotification(sasUriResponse.getCorrelationId(), true);
             client.completeFileUpload(completionNotification);
 
             System.out.println("Finished file upload for file " + fileNameList.get(index));
+        }
+        finally
+        {
+            client.closeNow();
         }
     }
 }

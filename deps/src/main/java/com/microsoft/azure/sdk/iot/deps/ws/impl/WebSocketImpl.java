@@ -46,7 +46,6 @@ public class WebSocketImpl implements WebSocket, TransportLayer
     private WebSocketHandler.WebSocketMessageType _lastType;
     private long _lastLength;
     private long _bytesRead = 0;
-    private final int _dataStart = 0;
     private WebSocketFrameReadState _frameReadState = WebSocketFrameReadState.INIT_READ;
 
     public WebSocketImpl()
@@ -690,6 +689,7 @@ public class WebSocketImpl implements WebSocket, TransportLayer
             return new String(out);
         }
 
+        @SuppressWarnings("unused") // Unused but usefule if needed later
         private String convertToHex(ByteBuffer bb)
         {
             final byte[] data = new byte[bb.remaining()];
@@ -711,6 +711,7 @@ public class WebSocketImpl implements WebSocket, TransportLayer
             return sb.toString();
         }
 
+        @SuppressWarnings("unused") // Unused but usefule if needed later
         private String convertToBinary(ByteBuffer bb)
         {
             final byte[] data = new byte[bb.remaining()];

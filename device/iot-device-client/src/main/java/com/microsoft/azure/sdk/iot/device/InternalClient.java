@@ -30,6 +30,7 @@ public class InternalClient
     // SET_RECEIVE_INTERVAL is used for setting the interval for handling MQTT and AMQP messages.
     static final String SET_RECEIVE_INTERVAL = "SetReceiveInterval";
     static final String SET_SEND_INTERVAL = "SetSendInterval";
+    static final String SET_MAX_MESSAGES_SENT_PER_THREAD = "SetMaxMessagesSentPerThread";
     static final String SET_CERTIFICATE_PATH = "SetCertificatePath";
 	static final String SET_CERTIFICATE_AUTHORITY = "SetCertificateAuthority";
     static final String SET_SAS_TOKEN_EXPIRY_TIME = "SetSASTokenExpiryTime";
@@ -38,6 +39,12 @@ public class InternalClient
 
     static final String SET_HTTPS_CONNECT_TIMEOUT = "SetHttpsConnectTimeout";
     static final String SET_HTTPS_READ_TIMEOUT = "SetHttpsReadTimeout";
+
+    private static final String TWIN_OVER_HTTP_ERROR_MESSAGE =
+        "Twin operations are only supported over MQTT, MQTT_WS, AMQPS, and AMQPS_WS";
+
+    private static final String METHODS_OVER_HTTP_ERROR_MESSAGE =
+        "Direct methods are only supported over MQTT, MQTT_WS, AMQPS, and AMQPS_WS";
 
     DeviceClientConfig config;
     DeviceIO deviceIO;
@@ -129,7 +136,7 @@ public class InternalClient
             this.config.modelId = clientOptions.getModelId();
         }
 
-        //Codes_SRS_INTERNALCLIENT_34_067: [The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.]
+        //Codes_SRS_INTERNALCLIENT_34_067: [The constructor shall initialize the IoT hub transport for the protocol specified, creating a instance of the deviceIO.]
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
     }
 
@@ -163,17 +170,38 @@ public class InternalClient
         this.deviceIO = null;
     }
 
+    /**
+     * Starts asynchronously sending and receiving messages from an IoT hub. If
+     * the client is already open, the function shall do nothing.
+     *
+     * @throws IOException if a connection to an IoT hub cannot be established.
+     */
+    public void open() throws IOException
+    {
+        this.open(false);
+    }
+
+    /**
+     * Starts asynchronously sending and receiving messages from an IoT hub. If
+     * the client is already open, the function shall do nothing.
+     *
+     * @param withRetry if true, this open call will apply the retry policy to allow for the open call to be retried if
+     * it fails. Both the operation timeout set in {@link #setOperationTimeout(long)} and the retry policy set in
+     * {{@link #setRetryPolicy(RetryPolicy)}} will be respected while retrying to open the connection.
+     *
+     * @throws IOException if a connection to an IoT hub cannot be established.
+     */
     // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
     // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
     @SuppressWarnings("ConstantConditions")
-    public void open() throws IOException
+    public void open(boolean withRetry) throws IOException
     {
         if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN && this.config.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary())
         {
             throw new SecurityException("Your SasToken is expired");
         }
 
-        this.deviceIO.open();
+        this.deviceIO.open(withRetry);
     }
 
     public void close() throws IOException
@@ -193,7 +221,7 @@ public class InternalClient
     }
 
     /**
-     * Asynchronously sends an event message to the IoT Hub.
+     * Asynchronously sends an event message to the IoT hub.
      *
      * @param message the message to be sent.
      * @param callback the callback to be invoked when a response is received.
@@ -217,7 +245,7 @@ public class InternalClient
     }
 
     /**
-     * Asynchronously sends a batch of messages to the IoT Hub
+     * Asynchronously sends a batch of messages to the IoT hub
      * HTTPS messages will be sent in a single batch and MQTT and AMQP messages will be sent individually.
      * In case of HTTPS, This API call is an all-or-nothing single HTTPS message and the callback will be triggered only once.
      * Maximum payload size for HTTPS is 255KB
@@ -251,7 +279,7 @@ public class InternalClient
      *
      * This client will receive a callback each time a desired property is updated. That callback will either contain
      * the full desired properties set, or only the updated desired property depending on how the desired property was changed.
-     * IoT Hub supports a PUT and a PATCH on the twin. The PUT will cause this device client to receive the full desired properties set, and the PATCH
+     * IoT hub supports a PUT and a PATCH on the twin. The PUT will cause this device client to receive the full desired properties set, and the PATCH
      * will cause this device client to only receive the updated desired properties. Similarly, the version
      * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
      * have its version incremented from a PATCH call. The java service client library uses the PATCH call when updated desired properties,
@@ -268,6 +296,7 @@ public class InternalClient
     public void subscribeToDesiredProperties(Map<Property, Pair<PropertyCallBack<String, Object>, Object>> onDesiredPropertyChange) throws IOException
     {
         verifyRegisteredIfMultiplexing();
+        verifyTwinOperationsAreSupported();
 
         if (this.twin == null)
         {
@@ -295,6 +324,7 @@ public class InternalClient
     public void subscribeToTwinDesiredProperties(Map<Property, Pair<TwinPropertyCallBack, Object>> onDesiredPropertyChange) throws IOException
     {
         verifyRegisteredIfMultiplexing();
+        verifyTwinOperationsAreSupported();
 
         if (this.twin == null)
         {
@@ -322,24 +352,7 @@ public class InternalClient
      */
     public void sendReportedProperties(Set<Property> reportedProperties) throws IOException, IllegalArgumentException
     {
-        verifyRegisteredIfMultiplexing();
-
-        if (this.twin == null)
-        {
-            throw new IOException("Start twin before using it");
-        }
-
-        if (!this.deviceIO.isOpen())
-        {
-            throw new IOException("Open the client connection before using it.");
-        }
-
-        if (reportedProperties == null || reportedProperties.isEmpty())
-        {
-            throw new IllegalArgumentException("Reported properties set cannot be null or empty.");
-        }
-
-        this.twin.updateReportedProperties(reportedProperties);
+        this.sendReportedProperties(reportedProperties, null, null, null, null, null);
     }
 
     /**
@@ -349,33 +362,47 @@ public class InternalClient
      * @param version the Reported property version. Cannot be negative.
      *
      * @throws IOException if called when client is not opened or called before starting twin.
-     * @throws IllegalArgumentException if reportedProperties is null or empty.
+     * @throws IllegalArgumentException if reportedProperties is null or empty or if version is negative
      */
     public void sendReportedProperties(Set<Property> reportedProperties, int version) throws IOException, IllegalArgumentException
     {
+        if (version < 0) {
+            throw new IllegalArgumentException("Version cannot be negative.");
+        }
+        this.sendReportedProperties(reportedProperties, version, null, null, null, null);
+    }
+
+    /**
+     * Sends reported properties
+     * @param reportedPropertiesParameters Container for the reported properties parameters
+     * @throws IOException if called when client is not opened or called before starting twin.
+     * @throws IllegalArgumentException if reportedProperties is null or empty or if version specified in {#reportedPropertiesParameters} is negative
+     */
+    public void sendReportedProperties(ReportedPropertiesParameters reportedPropertiesParameters) throws IOException, IllegalArgumentException
+    {
+        this.sendReportedProperties(reportedPropertiesParameters.getReportedProperties(), reportedPropertiesParameters.getVersion(), reportedPropertiesParameters.getCorrelatingMessageCallback(), reportedPropertiesParameters.getCorrelatingMessageCallbackContext(), reportedPropertiesParameters.getReportedPropertiesCallback(), reportedPropertiesParameters.getReportedPropertiesCallbackContext());
+    }
+
+    /**
+     * Sends reported properties
+     *
+     * @param reportedProperties the Set for desired properties and their corresponding callback and context. Cannot be {@code null}.
+     * @param version the Reported property version. Cannot be negative.
+     * @param reportedPropertiesCallback the Reported property callback to be set for this message. If set to {@code null} it will fall back to {@link #sendReportedProperties(Set, int)}.
+     * @param reportedPropertiesCallbackContext the Reported property callback context to be set for this message.
+     * @param correlatingMessageCallback the correlation callback for this message.
+     * @param correlatingMessageCallbackContext the correlation callback context for this message.
+     * @throws IOException if called when client is not opened or called before starting twin.
+     * @throws IllegalArgumentException if reportedProperties is null or empty or if version is negatve
+     */
+    public void sendReportedProperties(Set<Property> reportedProperties, Integer version, CorrelatingMessageCallback correlatingMessageCallback, Object correlatingMessageCallbackContext, IotHubEventCallback reportedPropertiesCallback, Object reportedPropertiesCallbackContext) throws IOException, IllegalArgumentException
+    {
         verifyRegisteredIfMultiplexing();
+        verifyTwinOperationsAreSupported();
 
-        if (this.twin == null)
-        {
-            throw new IOException("Start twin before using it");
-        }
+        verifyReportedProperties(reportedProperties);
 
-        if (!this.deviceIO.isOpen())
-        {
-            throw new IOException("Open the client connection before using it.");
-        }
-
-        if (reportedProperties == null || reportedProperties.isEmpty())
-        {
-            throw new IllegalArgumentException("Reported properties set cannot be null or empty.");
-        }
-
-        if (version < 0)
-        {
-            throw new IllegalArgumentException("Version cannot be null.");
-        }
-
-        this.twin.updateReportedProperties(reportedProperties, version);
+        this.twin.updateReportedProperties(reportedProperties, version, correlatingMessageCallback, correlatingMessageCallbackContext, reportedPropertiesCallback, reportedPropertiesCallbackContext);
     }
 
     /**
@@ -462,6 +489,12 @@ public class InternalClient
      *	      in case of MQTT and AMQP protocols, this option specifies the interval in milliseconds
      *	      between spawning a thread that dequeues a message from the SDK's queue of received messages.
      *
+     *	    - <b>SetMaxMessagesSentPerThread</b> - this option is applicable to all protocols.
+     *	      This option specifies how many messages a given send thread should attempt to send before exiting.
+     *	      This option can be used in conjunction with "SetSendInterval" to control the how frequently and in what
+     *	      batch size messages are sent. By default, this client sends 10 messages per send thread, and spawns
+     *	      a send thread every 10 milliseconds. This gives a theoretical throughput of 1000 messages per second.
+     *
      *	    - <b>SetCertificatePath</b> - this option is applicable only
      *	      when the transport configured with this client is AMQP. This
      *	      option specifies the path to the certificate used to verify peer.
@@ -536,6 +569,11 @@ public class InternalClient
                 case SET_SEND_INTERVAL:
                 {
                     setOption_SetSendInterval(value);
+                    break;
+                }
+                case SET_MAX_MESSAGES_SENT_PER_THREAD:
+                {
+                    setOption_SetMaxMessagesSentPerThread(value);
                     break;
                 }
                 case SET_CERTIFICATE_PATH:
@@ -628,6 +666,7 @@ public class InternalClient
 
     {
         verifyRegisteredIfMultiplexing();
+        verifyTwinOperationsAreSupported();
 
         if (!this.deviceIO.isOpen())
         {
@@ -688,6 +727,7 @@ public class InternalClient
             throws IOException, IllegalArgumentException, UnsupportedOperationException
     {
         verifyRegisteredIfMultiplexing();
+        verifyTwinOperationsAreSupported();
 
         if (!this.deviceIO.isOpen())
         {
@@ -732,6 +772,7 @@ public class InternalClient
             throws IOException, IllegalArgumentException, UnsupportedOperationException
     {
         verifyRegisteredIfMultiplexing();
+        verifyTwinOperationsAreSupported();
 
         if (!this.deviceIO.isOpen())
         {
@@ -769,6 +810,7 @@ public class InternalClient
     void getTwinInternal() throws IOException
     {
         verifyRegisteredIfMultiplexing();
+        verifyTwinOperationsAreSupported();
 
         if (this.twin == null)
         {
@@ -826,6 +868,7 @@ public class InternalClient
             throws IOException
     {
         verifyRegisteredIfMultiplexing();
+        verifyMethodsAreSupported();
 
         if (!this.deviceIO.isOpen())
         {
@@ -880,6 +923,7 @@ public class InternalClient
     {
         if (value != null)
         {
+            log.info("Setting path to trusted certificate");
             this.config.getAuthenticationProvider().setPathToIotHubTrustedCert((String) value);
         }
     }
@@ -895,6 +939,7 @@ public class InternalClient
 
             if (value instanceof Integer)
             {
+                log.info("Setting HTTPS connect timeout to {} milliseconds", value);
                 this.config.setHttpsConnectTimeout((int) value);
             }
             else
@@ -915,6 +960,7 @@ public class InternalClient
 
             if (value instanceof Integer)
             {
+                log.info("Setting HTTPS read timeout to {} milliseconds", value);
                 this.config.setHttpsReadTimeout((int) value);
             }
             else
@@ -939,6 +985,7 @@ public class InternalClient
                 try
                 {
                     verifyRegisteredIfMultiplexing();
+                    log.info("Setting send period to {} milliseconds", value);
                     this.deviceIO.setSendPeriodInMilliseconds((long) value);
                 }
                 catch (IOException e)
@@ -963,6 +1010,7 @@ public class InternalClient
                 try
                 {
                     verifyRegisteredIfMultiplexing();
+                    log.info("Setting receive period to {} milliseconds", value);
                     this.deviceIO.setReceivePeriodInMilliseconds((long) value);
                 }
                 catch (IOException e)
@@ -1000,6 +1048,7 @@ public class InternalClient
                 throw new IllegalArgumentException("value is not long = " + value);
             }
 
+            log.info("Setting generated SAS token lifespans to {} seconds", validTimeInSeconds);
             this.config.getSasTokenAuthentication().setTokenValidSecs(validTimeInSeconds);
 
             if (this.deviceIO != null)
@@ -1016,7 +1065,7 @@ public class InternalClient
                         if (this.config.getSasTokenAuthentication().canRefreshToken())
                         {
                             this.deviceIO.close();
-                            this.deviceIO.open();
+                            this.deviceIO.open(false);
                         }
                     }
                     catch (IOException e)
@@ -1045,6 +1094,7 @@ public class InternalClient
 
             if (value instanceof Integer)
             {
+                log.info("Setting generated AMQP authentication session timeout to {} seconds", value);
                 this.config.setAmqpOpenAuthenticationSessionTimeout((int) value);
             }
             else
@@ -1065,12 +1115,32 @@ public class InternalClient
 
             if (value instanceof Integer)
             {
+                log.info("Setting generated AMQP device session timeout to {} seconds", value);
                 this.config.setAmqpOpenDeviceSessionsTimeout((int) value);
             }
             else
             {
                 throw new IllegalArgumentException("value is not int = " + value);
             }
+        }
+    }
+
+    void setOption_SetMaxMessagesSentPerThread(Object value)
+    {
+        if (value == null)
+        {
+            throw new IllegalArgumentException("Value cannot be null");
+        }
+
+
+        if (value instanceof Integer)
+        {
+            log.info("Setting maximum number of messages sent per send thread {} messages", value);
+            this.deviceIO.setMaxNumberOfMessagesSentPerSendThread((int) value);
+        }
+        else
+        {
+            throw new IllegalArgumentException("value is not int = " + value);
         }
     }
 
@@ -1146,5 +1216,35 @@ public class InternalClient
     public boolean isMultiplexed()
     {
         return this.isMultiplexed;
+    }
+
+    private void verifyReportedProperties(Set<Property> reportedProperties) throws IOException {
+        if (this.twin == null) {
+            throw new IOException("Start twin before using it");
+        }
+
+        if (!this.deviceIO.isOpen()) {
+            throw new IOException("Open the client connection before using it.");
+        }
+
+        if (reportedProperties == null || reportedProperties.isEmpty()) {
+            throw new IllegalArgumentException("Reported properties set cannot be null or empty.");
+        }
+    }
+
+    private void verifyTwinOperationsAreSupported()
+    {
+        if (this.config.getProtocol() == HTTPS)
+        {
+            throw new UnsupportedOperationException(TWIN_OVER_HTTP_ERROR_MESSAGE);
+        }
+    }
+
+    private void verifyMethodsAreSupported()
+    {
+        if (this.config.getProtocol() == HTTPS)
+        {
+            throw new UnsupportedOperationException(METHODS_OVER_HTTP_ERROR_MESSAGE);
+        }
     }
 }
