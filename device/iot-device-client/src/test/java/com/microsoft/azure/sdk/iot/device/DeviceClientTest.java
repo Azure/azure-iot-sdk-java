@@ -257,29 +257,6 @@ public class DeviceClientTest
         };
     }
 
-    //Tests_SRS_DEVICECLIENT_34_041: [If this object is not using a transport client, it shall invoke super.close().]
-    @Test
-    public void closeClosesTransportSuccess(final @Mocked InternalClient mockedInternalClient) throws IOException, URISyntaxException
-    {
-        // arrange
-        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;deviceId=testdevice;"
-                + "SharedAccessKey=adjkl234j52=";
-        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-        DeviceClient client = new DeviceClient(connString, protocol);
-
-        // act
-        client.close();
-
-        // assert
-        new Verifications()
-        {
-            {
-                mockedInternalClient.close();
-                times = 1;
-            }
-        };
-    }
-
     // Tests_SRS_DEVICECLIENT_02_015: [If optionName is null or not an option handled by the client, then it shall throw IllegalArgumentException.]
     @Test (expected = IllegalArgumentException.class)
     public void setOptionWithNullOptionNameThrows()

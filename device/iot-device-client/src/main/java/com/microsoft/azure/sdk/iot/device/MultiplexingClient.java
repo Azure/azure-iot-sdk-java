@@ -710,7 +710,7 @@ public class MultiplexingClient
      */
     public void setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext)
     {
-        this.deviceIO.registerMultiplexingConnectionStateCallback(callback, callbackContext);
+        this.deviceIO.setMultiplexingConnectionStateCallback(callback, callbackContext);
     }
 
     /**
