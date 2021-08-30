@@ -39,10 +39,10 @@
         <provisioning-device-client-version>2.0.0-preview-001</provisioning-device-client-version>
         <provisioning-service-client-version>2.0.0-preview-001</provisioning-service-client-version>
         <security-provider-version>2.0.0-preview-001</security-provider-version>
-        <tpm-provider-emulator-version>undefined</tpm-provider-emulator-version>
-        <tpm-provider-version>1.1.3</tpm-provider-version>
-        <dice-provider-emulator-version>undefined</dice-provider-emulator-version>
-        <dice-provider-version>undefined</dice-provider-version>
+        <tpm-provider-emulator-version>1.1.2</tpm-provider-emulator-version>
+        <tpm-provider-version>2.0.0-preview-001</tpm-provider-version>
+        <dice-provider-emulator-version>1.1.1</dice-provider-emulator-version>
+        <dice-provider-version>1.1.1</dice-provider-version>
         <x509-provider-version>2.0.0-preview-001</x509-provider-version>
     </properties>
     <build>
