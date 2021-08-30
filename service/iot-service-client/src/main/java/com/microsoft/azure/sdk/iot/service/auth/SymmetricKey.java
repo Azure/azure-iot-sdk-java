@@ -55,23 +55,9 @@ public class SymmetricKey
      * Setter for primary key
      * Validates the length of the key
      *
-     * @deprecated as of service-client version 1.15.1, please use {@link #setPrimaryKeyFinal(String)}
-     *
      * @param primaryKey Primary key part of the symmetric key
      */
-    @Deprecated
-    public void setPrimaryKey(String primaryKey)
-    {
-        this.primaryKey = primaryKey;
-    }
-
-    /**
-     * Setter for primary key
-     * Validates the length of the key
-     *
-     * @param primaryKey Primary key part of the symmetric key
-     */
-    public final void setPrimaryKeyFinal(String primaryKey)
+    public final void setPrimaryKey(String primaryKey)
     {
         this.primaryKey = primaryKey;
     }
@@ -89,23 +75,9 @@ public class SymmetricKey
      * Setter for secondary key
      * Validates the length of the key
      *
-     * @deprecated as of service-client version 1.15.1, please use {@link #setSecondaryKeyFinal(String)}
-     *
      * @param secondaryKey Secondary key part of the symmetric key
      */
-    @Deprecated
-    public void setSecondaryKey(String secondaryKey)
-    {
-        this.secondaryKey = secondaryKey;
-    }
-
-    /**
-     * Setter for secondary key
-     * Validates the length of the key
-     *
-     * @param secondaryKey Secondary key part of the symmetric key
-     */
-    public final void setSecondaryKeyFinal(String secondaryKey)
+    public final void setSecondaryKey(String secondaryKey)
     {
         this.secondaryKey = secondaryKey;
     }

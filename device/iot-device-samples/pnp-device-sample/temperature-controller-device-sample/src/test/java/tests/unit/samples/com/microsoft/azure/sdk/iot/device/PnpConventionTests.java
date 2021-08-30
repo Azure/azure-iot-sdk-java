@@ -4,7 +4,7 @@
 package tests.unit.samples.com.microsoft.azure.sdk.iot.device;
 
 import com.google.gson.Gson;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
+import com.microsoft.azure.sdk.iot.device.twin.Property;
 import com.microsoft.azure.sdk.iot.device.Message;
 import org.junit.Test;
 import samples.com.microsoft.azure.sdk.iot.device.PnpConvention;

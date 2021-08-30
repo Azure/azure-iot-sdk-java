@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Queue;
 
 @Slf4j
-public class MqttDeviceMethod extends Mqtt
+class MqttDeviceMethod extends Mqtt
 {
     private final String subscribeTopic;
     private final String responseTopic;

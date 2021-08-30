@@ -37,9 +37,9 @@ public class DeviceTwinSample
     {
         System.out.println("Starting sample...");
         System.out.println("Creating the Device Twin");
-        DeviceTwin twinClient = DeviceTwin.createFromConnectionString(iotHubConnectionString);
+        TwinClient twinClient = new TwinClient(iotHubConnectionString);
 
-        DeviceTwinDevice device = new DeviceTwinDevice(deviceId);
+        Twin device = new Twin(deviceId);
 
         try
         {
@@ -73,7 +73,7 @@ public class DeviceTwinSample
         System.out.println("Shutting down sample...");
     }
 
-    private static void getInitialState(DeviceTwin twinClient, DeviceTwinDevice device) throws IOException, IotHubException
+    private static void getInitialState(TwinClient twinClient, Twin device) throws IOException, IotHubException
     {
         System.out.println("Getting the Device twin");
         twinClient.getTwin(device);
@@ -85,7 +85,7 @@ public class DeviceTwinSample
         device.setTags(tags);
     }
 
-    private static void patchDesiredProperties(DeviceTwin twinClient, DeviceTwinDevice device) throws IOException, IotHubException
+    private static void patchDesiredProperties(TwinClient twinClient, Twin device) throws IOException, IotHubException
     {
         Set<Pair> desiredProperties = new HashSet<>();
         desiredProperties.add(new Pair("temp", new Random().nextInt(TEMPERATURE_RANGE)));
@@ -100,7 +100,7 @@ public class DeviceTwinSample
         System.out.println(device);
     }
 
-    private static void replaceDesiredProperties(DeviceTwin twinClient, DeviceTwinDevice device) throws IOException, IotHubException
+    private static void replaceDesiredProperties(TwinClient twinClient, Twin device) throws IOException, IotHubException
     {
         Set<Pair> desiredProperties = new HashSet<>();
         desiredProperties.add(new Pair("temp", new Random().nextInt(TEMPERATURE_RANGE)));
@@ -116,7 +116,7 @@ public class DeviceTwinSample
         System.out.println(device);
     }
 
-    private static void removeDesiredProperties(DeviceTwin twinClient, DeviceTwinDevice device) throws IOException, IotHubException
+    private static void removeDesiredProperties(TwinClient twinClient, Twin device) throws IOException, IotHubException
     {
         Set<Pair> desiredProperties = new HashSet<>();
         desiredProperties.add(new Pair("hum", null));
@@ -129,7 +129,7 @@ public class DeviceTwinSample
         System.out.println(device);
     }
 
-    private static void scheduleUpdateDesiredProperties(DeviceTwin twinClient, DeviceTwinDevice device) throws IOException, IotHubException, InterruptedException
+    private static void scheduleUpdateDesiredProperties(TwinClient twinClient, Twin device) throws IOException, IotHubException, InterruptedException
     {
         // new set of desired properties
         Set<Pair> desiredProperties = new HashSet<>();
@@ -162,7 +162,7 @@ public class DeviceTwinSample
         System.out.println(device);
     }
 
-    private static void cancelJob(DeviceTwin twinClient, DeviceTwinDevice device) throws IOException, IotHubException, InterruptedException
+    private static void cancelJob(TwinClient twinClient, Twin device) throws IOException, IotHubException, InterruptedException
     {
         // new set of desired properties
         Set<Pair> desiredProperties = new HashSet<>();
@@ -199,7 +199,7 @@ public class DeviceTwinSample
         System.out.println(device);
     }
 
-    private static void queryTwin(DeviceTwin twinClient) throws IOException, IotHubException
+    private static void queryTwin(TwinClient twinClient) throws IOException, IotHubException
     {
         System.out.println("Started Querying twin");
 
@@ -207,9 +207,9 @@ public class DeviceTwinSample
 
         Query twinQuery = twinClient.queryTwin(sqlQuery.getQuery(), 3);
 
-        while (twinClient.hasNextDeviceTwin(twinQuery))
+        while (twinClient.hasNextTwin(twinQuery))
         {
-            DeviceTwinDevice d = twinClient.getNextDeviceTwin(twinQuery);
+            Twin d = twinClient.getNextTwin(twinQuery);
             System.out.println(d);
         }
     }

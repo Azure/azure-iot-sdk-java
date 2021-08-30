@@ -5,11 +5,9 @@ import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingDeviceUnauthorizedException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,8 +35,8 @@ public class MultiplexingClient
     public static final long DEFAULT_SEND_PERIOD_MILLIS = 10L;
     public static final long DEFAULT_RECEIVE_PERIOD_MILLIS = 10L;
     public static final int DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD = 10;
-    static final long DEFAULT_REGISTRATION_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
-    static final long DEFAULT_UNREGISTRATION_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
+    private static final long DEFAULT_REGISTRATION_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
+    private static final long DEFAULT_UNREGISTRATION_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
     private static final String OPEN_ERROR_MESSAGE = "Failed to open the multiplexing connection";
 
     // keys are deviceIds. Helps to optimize look ups later on which device Ids are already registered.
@@ -50,8 +48,6 @@ public class MultiplexingClient
     // This lock is used to keep open/close/register/unregister operations atomic to prevent race conditions
     private final Object operationLock = new Object();
 
-    // Optional settings from MultiplexingClientOptions
-    private final SSLContext sslContext;
     private final ProxySettings proxySettings;
 
     /**
@@ -67,6 +63,7 @@ public class MultiplexingClient
     /**
      * Instantiate a new MultiplexingClient that will establish a multiplexed connection through a proxy.
      *
+     * @param hostName The host name of your IoT hub. For instance, "my-azure-iot-hub.azure-devices.net".
      * @param protocol The transport protocol that this client will build the multiplexed connection on. Must be either
      *                 {@link IotHubClientProtocol#AMQPS} or {@link IotHubClientProtocol#AMQPS_WS}.
      */
@@ -78,6 +75,7 @@ public class MultiplexingClient
     /**
      * Instantiate a new MultiplexingClient that will establish a multiplexed connection through a proxy.
      *
+     * @param hostName The host name of your IoT hub. For instance, "my-azure-iot-hub.azure-devices.net".
      * @param protocol The transport protocol that this client will build the multiplexed connection on. Must be
      * {@link IotHubClientProtocol#AMQPS_WS} since using {@link IotHubClientProtocol#AMQPS} does not support proxies.
      * @param options The optional parameters to configure this client to use.
@@ -129,7 +127,8 @@ public class MultiplexingClient
             sendMessagesPerThread = DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD;
         }
 
-        this.sslContext = options != null ? options.getSslContext() : null;
+        // Optional settings from MultiplexingClientOptions
+        SSLContext sslContext = options != null ? options.getSslContext() : null;
         this.deviceIO = new DeviceIO(hostName, protocol, sslContext, proxySettings, sendPeriod, receivePeriod);
         this.deviceIO.setMaxNumberOfMessagesSentPerSendThread(sendMessagesPerThread);
     }
@@ -219,14 +218,9 @@ public class MultiplexingClient
 
             try
             {
-                for (DeviceClient deviceClient : this.multiplexedDeviceClients.values())
-                {
-                    deviceClient.closeFileUpload();
-                }
-
                 this.deviceIO.closeWithoutWrappingException();
             }
-            catch (TransportException | IOException e)
+            catch (TransportException e)
             {
                 throw new MultiplexingClientException("Failed to close the multiplexing client", e);
             }
@@ -466,15 +460,8 @@ public class MultiplexingClient
                 devicesToRegisterMap.put(deviceClientToRegister.getConfig().getDeviceId(), deviceClientToRegister);
                 DeviceClientConfig configToAdd = deviceClientToRegister.getConfig();
 
-                // Overwrite the sslContext of the new client to match the multiplexing client
-                // settings if it was set. If it wasn't set, defer to the default client to set this ssl context
-                if (this.sslContext != null)
-                {
-                    configToAdd.getAuthenticationProvider().setSSLContext(this.sslContext);
-                }
-
                 // Overwrite the proxy settings of the new client to match the multiplexing client settings
-                configToAdd.setProxy(this.proxySettings);
+                configToAdd.setProxySettings(this.proxySettings);
 
                 if (configToAdd.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN)
                 {
@@ -510,7 +497,7 @@ public class MultiplexingClient
 
                 deviceClientToRegister.setAsMultiplexed();
                 deviceClientToRegister.setDeviceIO(this.deviceIO);
-                deviceClientToRegister.setConnectionType(IoTHubConnectionType.USE_MULTIPLEXING_CLIENT);
+                deviceClientToRegister.markAsMultiplexed();
 
                 // Set notifies us if the device client is already in the set
                 boolean deviceAlreadyRegistered = this.multiplexedDeviceClients.containsKey(deviceClientToRegister.getConfig().getDeviceId());
@@ -574,7 +561,7 @@ public class MultiplexingClient
      * {@link #close()}
      * <p>
      * Once a device client is unregistered, it may be re-registered to this or any other multiplexing client. It cannot
-     * be used in non-multiplexing scenarios or used by the deprecated {@link TransportClient}.
+     * be used in non-multiplexing scenarios.
      * <p>
      * Any subscriptions set on this device client for twin/methods/cloud to device messages will need to be set again
      * after this device is re-registered.
@@ -584,7 +571,6 @@ public class MultiplexingClient
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If the unregistration takes longer than the default timeout allows.
      * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
      */
-    @SuppressWarnings("deprecation")
     public void unregisterDeviceClient(DeviceClient deviceClient) throws InterruptedException, MultiplexingClientException
     {
         this.unregisterDeviceClient(deviceClient, DEFAULT_UNREGISTRATION_TIMEOUT_MILLISECONDS);
@@ -606,7 +592,7 @@ public class MultiplexingClient
      * {@link #close()}
      * <p>
      * Once a device client is unregistered, it may be re-registered to this or any other multiplexing client. It cannot
-     * be used in non-multiplexing scenarios or used by the deprecated {@link TransportClient}.
+     * be used in non-multiplexing scenarios.
      * <p>
      * Any subscriptions set on this device client for twin/methods/cloud to device messages will need to be set again
      * after this device is re-registered.
@@ -617,7 +603,6 @@ public class MultiplexingClient
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If the unregistration takes longer than the provided timeout allows.
      * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
      */
-    @SuppressWarnings("deprecation")
     public void unregisterDeviceClient(DeviceClient deviceClient, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
     {
         Objects.requireNonNull(deviceClient);
@@ -638,7 +623,7 @@ public class MultiplexingClient
      * {@link #close()}
      * <p>
      * Once a device client is unregistered, it may be re-registered to this or any other multiplexing client. It cannot
-     * be used in non-multiplexing scenarios or used by the deprecated {@link TransportClient}.
+     * be used in non-multiplexing scenarios.
      * <p>
      * Any subscriptions set on these device clients for twin/methods/cloud to device messages will need to be set again
      * after these devices are re-registered.
@@ -648,7 +633,6 @@ public class MultiplexingClient
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If the unregistration takes longer than the default timeout allows.
      * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
      */
-    @SuppressWarnings("deprecation")
     public void unregisterDeviceClients(Iterable<DeviceClient> deviceClients) throws InterruptedException, MultiplexingClientException
     {
         this.unregisterDeviceClients(deviceClients, DEFAULT_UNREGISTRATION_TIMEOUT_MILLISECONDS);
@@ -666,7 +650,7 @@ public class MultiplexingClient
      * {@link #close()}
      * <p>
      * Once a device client is unregistered, it may be re-registered to this or any other multiplexing client. It cannot
-     * be used in non-multiplexing scenarios or used by the deprecated {@link TransportClient}.
+     * be used in non-multiplexing scenarios.
      * <p>
      * Any subscriptions set on these device clients for twin/methods/cloud to device messages will need to be set again
      * after these devices are re-registered.
@@ -677,7 +661,6 @@ public class MultiplexingClient
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If the unregistration takes longer than the provided timeout allows.
      * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
      */
-    @SuppressWarnings("deprecation")
     public void unregisterDeviceClients(Iterable<DeviceClient> deviceClients, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
     {
         Objects.requireNonNull(deviceClients);
@@ -716,18 +699,18 @@ public class MultiplexingClient
      *
      * <p>Note that this callback will not be fired for device specific connection status changes. In order to be notified
      * when a particular device's connection status changes, you will need to register a connection status change callback
-     * on that device client instance using {@link DeviceClient#registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback, Object)}.
+     * on that device client instance using {@link DeviceClient#setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback, Object)}.
      *
-     * <p>Note that the thread used to deliver this callback should not be used to call open()/closeNow() on the client
-     * that this callback belongs to. All open()/closeNow() operations should be done on a separate thread</p>
+     * <p>Note that the thread used to deliver this callback should not be used to call open()/close() on the client
+     * that this callback belongs to. All open()/close() operations should be done on a separate thread</p>
      *
      * @param callback The callback to be fired when the connection status of the multiplexed connection changes.
      *                 Can be null to unset this listener as long as the provided callbackContext is also null.
      * @param callbackContext a context to be passed to the callback. Can be {@code null}.
      */
-    public void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext)
+    public void setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext)
     {
-        this.deviceIO.registerMultiplexingConnectionStateCallback(callback, callbackContext);
+        this.deviceIO.setMultiplexingConnectionStateCallback(callback, callbackContext);
     }
 
     /**

@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
@@ -19,7 +19,7 @@ import java.util.Queue;
 import java.util.regex.Pattern;
 
 @Slf4j
-public class MqttDeviceTwin extends Mqtt
+class MqttDeviceTwin extends Mqtt
 {
     private final String subscribeTopic;
     private final Map<String, DeviceOperations> requestMap = new HashMap<>();

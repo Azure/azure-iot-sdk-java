@@ -358,7 +358,7 @@ public class MessageTest
         msg.setOutputName(outputName);
         msg.setInputName(inputName);
         msg.setContentEncoding(contentEncoding);
-        msg.setContentTypeFinal(contentType);
+        msg.setContentType(contentType);
         msg.setCreationTimeUTC(date);
 
         //assert

@@ -10,7 +10,7 @@ package com.microsoft.azure.sdk.iot.service.transport.http;
  * message by its property names, which are prefixed with 'iothub-app-';
  * and by the explicit specification of a content-type.
  */
-public interface HttpMessage
+interface HttpMessage
 {
     /** The prefix to be added to an HTTPS application-defined property. */
     String HTTPS_APP_PROPERTY_PREFIX = "iothub-app-";

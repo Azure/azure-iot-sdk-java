@@ -153,7 +153,7 @@ public class TwinMetadata {
      * data and version metadata, or {@code null} for the other cases.
      * @throws IllegalArgumentException If no valid parameter was provide and the class will be empty, or if the DateTime is invalid.
      */
-    protected static TwinMetadata tryExtractFromMap(Object metadata) {
+    static TwinMetadata tryExtractFromMap(Object metadata) {
         /* SRS_TWIN_METADATA_21_004: [The tryExtractFromMap shall return null if the provided metadata is not a Map.] */
         if (!(metadata instanceof Map)) {
             return null;
@@ -239,7 +239,7 @@ public class TwinMetadata {
      *
      * @return The {@code JsonElement} with the content of this class.
      */
-    protected JsonElement toJsonElement() {
+    JsonElement toJsonElement() {
         /* SRS_TWIN_METADATA_21_009: [The toJsonElement shall return a JsonElement with the information in this class in a JSON format.] */
         JsonObject jsonObject = new JsonObject();
         if (this.lastUpdated != null) {

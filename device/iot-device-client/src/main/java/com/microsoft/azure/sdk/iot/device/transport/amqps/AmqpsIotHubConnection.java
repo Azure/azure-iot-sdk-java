@@ -31,10 +31,6 @@ import org.apache.qpid.proton.reactor.ReactorOptions;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -420,7 +416,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             domain.init(SslDomain.Mode.CLIENT);
             transport.ssl(domain);
         }
-        catch (IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e)
+        catch (IOException e)
         {
             this.savedException = new TransportException(e);
             log.error("Encountered an exception while setting ssl domain for the amqp connection", this.savedException);

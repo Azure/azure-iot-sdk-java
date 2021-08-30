@@ -24,7 +24,7 @@ import java.util.Map;
  * @see <a href="https://docs.microsoft.com/en-us/azure/iot-dps/">Azure IoT Hub Device Provisioning Service</a>
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
  */
-public class IndividualEnrollmentManager
+class IndividualEnrollmentManager
 {
     private final ContractApiHttp contractApiHttp;
     private static final String PATH_SEPARATOR = "/";
@@ -140,8 +140,6 @@ public class IndividualEnrollmentManager
             throw new IllegalArgumentException("individualEnrollments cannot be null or empty.");
         }
 
-        /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_014: [The BulkEnrollmentOperation shall send a Http request for the path `individualEnrollments`.] */
-        String bulkEnrollmentPath = IndividualEnrollmentManager.getEnrollmentsPath();
         /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_015: [The BulkEnrollmentOperation shall send a Http request with a body with the individualEnrollments content in JSON format.] */
         String bulkEnrollmentPayload = BulkEnrollmentOperation.toJson(bulkOperationMode, individualEnrollments);
 
@@ -151,7 +149,7 @@ public class IndividualEnrollmentManager
         HttpResponse httpResponse =
                 contractApiHttp.request(
                         HttpMethod.POST,
-                        bulkEnrollmentPath,
+                        PATH_ENROLLMENTS,
                         null,
                         bulkEnrollmentPayload);
 
@@ -332,11 +330,8 @@ public class IndividualEnrollmentManager
             throw new IllegalArgumentException("pageSize cannot be negative.");
         }
 
-        /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_040: [The createQuery shall create Query iterator with a Http path `enrollments`.] */
-        String targetPath = IndividualEnrollmentManager.getEnrollmentsPath();
-
         /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_041: [The createQuery shall create and return a new instance of the Query iterator.] */
-        return new Query(contractApiHttp, targetPath, querySpecification, pageSize);
+        return new Query(contractApiHttp, PATH_ENROLLMENTS, querySpecification, pageSize);
     }
 
     private static String getEnrollmentPath(String registrationId)
@@ -347,11 +342,5 @@ public class IndividualEnrollmentManager
     private static String getEnrollmentAttestationMechanismPath(String registrationId)
     {
         return PATH_ENROLLMENTS + PATH_SEPARATOR + registrationId + PATH_SEPARATOR + ATTESTATION_MECHANISM;
-    }
-
-    @SuppressWarnings("SameReturnValue")
-    private static String getEnrollmentsPath()
-    {
-        return PATH_ENROLLMENTS;
     }
 }

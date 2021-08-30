@@ -8,6 +8,7 @@
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.parser;
 
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
 
 /**
  * Class representing  X509RegistrationResult
@@ -29,161 +30,62 @@ public class X509RegistrationResultParser
     {
         private static final String SUBJECT_NAME = "subjectName";
         @SerializedName(SUBJECT_NAME)
+        @Getter
         private String subjectName;
 
         private static final String SHA1_THUMBPRINT = "sha1Thumbprint";
         @SerializedName(SHA1_THUMBPRINT)
+        @Getter
         private String sha1Thumbprint;
 
         private static final String SHA256_THUMBPRINT = "sha256Thumbprint";
         @SerializedName(SHA256_THUMBPRINT)
+        @Getter
         private String sha256Thumbprint;
 
         private static final String ISSUER_NAME = "issuerName";
         @SerializedName(ISSUER_NAME)
+        @Getter
         private String issuerName;
 
         private static final String NOT_BEFORE_UTC = "notBeforeUtc";
         @SerializedName(NOT_BEFORE_UTC)
+        @Getter
         private String notBeforeUtc;
 
         private static final String NOT_AFTER_UTC = "notAfterUtc";
         @SerializedName(NOT_AFTER_UTC)
+        @Getter
         private String notAfterUtc;
 
         private static final String SERIAL_NUMBER = "serialNumber";
         @SerializedName(SERIAL_NUMBER)
+        @Getter
         private String serialNumber;
 
         private static final String VERSION = "version";
         @SerializedName(VERSION)
+        @Getter
         private String version;
 
         //empty constructor for Gson
         X509CertificateInfo()
         {
         }
-
-        /**
-         * Getter for the Subject Name
-         * @return Getter for the Subject Name. Cannot be {@code null}
-         */
-        public String getSubjectName()
-        {
-            //SRS_X509RegistrationResultParser_25_001: [ This method shall return the parsed Subject name. ]
-            return subjectName;
-        }
-
-        /**
-         * Getter for the SHA1Thumbprint
-         * @return Getter for the SHA1 Thumbprint. Cannot be {@code null}
-         */
-        public String getSha1Thumbprint()
-        {
-            //SRS_X509RegistrationResultParser_25_001: [ This method shall return the parsed Subject name. ]
-            return sha1Thumbprint;
-        }
-
-        /**
-         * Getter for the Sha256Thumbprint
-         * @return Getter for the Sha256Thumbprint. Cannot be {@code null}
-         */
-        public String getSha256Thumbprint()
-        {
-            //SRS_X509RegistrationResultParser_25_003: [ This method shall return the parsed sha256Thumbprint. ]
-            return sha256Thumbprint;
-        }
-
-        /**
-         * Getter for the IssuerName
-         * @return Getter for the IssuerName. Cannot be {@code null}
-         */
-        public String getIssuerName()
-        {
-            //SRS_X509RegistrationResultParser_25_004: [ This method shall return the parsed issuerName. ]
-            return issuerName;
-        }
-
-        /**
-         * Getter for the NotBeforeUtc
-         * @return Getter for the NotBeforeUtc time. Cannot be {@code null}
-         */
-        public String getNotBeforeUtc()
-        {
-            //SRS_X509RegistrationResultParser_25_005: [ This method shall return the parsed notBeforeUtc time. ]
-            return notBeforeUtc;
-        }
-
-        /**
-         * Getter for the NotAfterUtc Time
-         * @return Getter for the NotAfterUtc Time. Cannot be {@code null}
-         */
-        public String getNotAfterUtc()
-        {
-            //SRS_X509RegistrationResultParser_25_006: [ This method shall return the parsed notAfterUtc time. ]
-            return notAfterUtc;
-        }
-
-        /**
-         * Getter for the SerialNumber
-         * @return Getter for the SerialNumber. Cannot be {@code null}
-         */
-        public String getSerialNumber()
-        {
-            //SRS_X509RegistrationResultParser_25_007: [ This method shall return the parsed serialNumber. ]
-            return serialNumber;
-        }
-
-        /**
-         * Getter for the Version
-         * @return Getter for the Version. Cannot be {@code null}
-         */
-        public String getVersion()
-        {
-            //SRS_X509RegistrationResultParser_25_008: [ This method shall return the parsed version. ]
-            return version;
-        }
     }
 
     private static final String CERTIFICATE_INFO = "certificateInfo";
     @SerializedName(CERTIFICATE_INFO)
+    @Getter
     private X509CertificateInfo certificateInfo;
 
     private static final String SIGNING_CERTIFICATE_INFO = "signingCertificateInfo";
     @SerializedName(SIGNING_CERTIFICATE_INFO)
+    @Getter
     private X509CertificateInfo signingCertificateInfo;
 
     private static final String ENROLLMENT_GROUP_ID = "enrollmentGroupId";
     @SerializedName(ENROLLMENT_GROUP_ID)
+    @Getter
     private String enrollmentGroupId;
-
-    /**
-     * Getter for the CertificateInfo Object
-     * @return The CertificateInfo in X509CertificateInfo Object
-     */
-    public X509CertificateInfo getCertificateInfo()
-    {
-        //SRS_X509RegistrationResultParser_25_009: [ This method shall return the parsed certificateInfo. ]
-        return certificateInfo;
-    }
-
-    /**
-     * Getter for the SigningCertificateInfo Object
-     * @return The SigningCertificateInfo in X509CertificateInfo Object
-     */
-    public X509CertificateInfo getSigningCertificateInfo()
-    {
-        //SRS_X509RegistrationResultParser_25_010: [ This method shall return the parsed signingCertificateInfo. ]
-        return signingCertificateInfo;
-    }
-
-    /**
-     * Getter for the Enrollment Group ID
-     * @return Getter for the Enrollment Group ID
-     */
-    public String getEnrollmentGroupId()
-    {
-        //SRS_X509RegistrationResultParser_25_011: [ This method shall return the parsed enrollmentGroupId. ]
-        return enrollmentGroupId;
-    }
 }

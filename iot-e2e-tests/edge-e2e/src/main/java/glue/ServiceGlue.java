@@ -1,6 +1,6 @@
 package glue;
 
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import io.swagger.server.api.MainApiException;
@@ -17,20 +17,13 @@ import java.util.Set;
 @SuppressWarnings("ALL")
 public class ServiceGlue
 {
-    HashMap<String, DeviceMethod> _map = new HashMap<>();
+    HashMap<String, DirectMethodsClient> _map = new HashMap<>();
     int _clientCount = 0;
 
     public void connect(String connectionString, Handler<AsyncResult<ConnectResponse>> handler)
     {
         System.out.printf("connect called%n");
-        DeviceMethod client = null;
-        try
-        {
-            client = DeviceMethod.createFromConnectionString(connectionString);
-        } catch (IOException e)
-        {
-            handler.handle(Future.failedFuture(e));
-        }
+        DirectMethodsClient client = new DirectMethodsClient(connectionString);
 
         this._clientCount++;
         String connectionId = "serviceClient_" + this._clientCount;
@@ -41,7 +34,7 @@ public class ServiceGlue
         handler.handle(Future.succeededFuture(cr));
     }
 
-    private DeviceMethod getClient(String connectionId)
+    private DirectMethodsClient getClient(String connectionId)
     {
         if (this._map.containsKey(connectionId))
         {
@@ -57,7 +50,7 @@ public class ServiceGlue
     private void _closeConnection(String connectionId)
     {
         System.out.printf("Disconnect for %s%n", connectionId);
-        DeviceMethod client = getClient(connectionId);
+        DirectMethodsClient client = getClient(connectionId);
         if (client != null)
         {
             this._map.remove(connectionId);
@@ -75,7 +68,7 @@ public class ServiceGlue
         System.out.printf("invoking method on %s with deviceId = %s moduleId = %s%n", connectionId, deviceId, moduleId);
         System.out.println(methodInvokeParameters);
 
-        DeviceMethod client = getClient(connectionId);
+        DirectMethodsClient client = getClient(connectionId);
         if (client == null)
         {
             handler.handle(Future.failedFuture(new MainApiException(500, "invalid connection id")));

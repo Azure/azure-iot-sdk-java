@@ -190,7 +190,7 @@ public class SendEventWithProxy
 
         System.out.println("Successfully created an IoT Hub client.");
 
-        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
+        client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
         client.open();
 
@@ -230,7 +230,7 @@ public class SendEventWithProxy
 
         // close the connection
         System.out.println("Closing");
-        client.closeNow();
+        client.close();
 
         if (!failedMessageListOnClose.isEmpty())
         {

@@ -13,12 +13,11 @@ import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClient;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -28,7 +27,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenTools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
-import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DeviceTwinCommon;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.TwinCommon;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -39,12 +38,12 @@ import java.security.GeneralSecurityException;
 import static junit.framework.TestCase.fail;
 
 /**
- * Test class containing all non error injection tests to be run on JVM and android pertaining to getDeviceTwin/getTwin.
+ * Test class containing all non error injection tests to be run on JVM and android pertaining to getTwinAsync/getTwinAsync.
  */
 @Slf4j
 @IotHubTest
 @RunWith(Parameterized.class)
-public class GetTwinTests extends DeviceTwinCommon
+public class GetTwinTests extends TwinCommon
 {
     public GetTwinTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
     {
@@ -89,10 +88,10 @@ public class GetTwinTests extends DeviceTwinCommon
         AzureSasCredential sasCredential = new AzureSasCredential(sasToken);
 
         this.testInstance.twinServiceClient =
-            new DeviceTwin(
+            new TwinClient(
                 iotHubConnectionStringObj.getHostName(),
                 sasCredential,
-                DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+                TwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
 
         // add first device just to make sure that the first credential update worked
         super.testGetDeviceTwin();
@@ -143,9 +142,9 @@ public class GetTwinTests extends DeviceTwinCommon
             Proxy serviceSideProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
 
             ProxyOptions proxyOptions = new ProxyOptions(serviceSideProxy);
-            DeviceTwinClientOptions options = DeviceTwinClientOptions.builder().proxyOptions(proxyOptions).build();
+            TwinClientOptions options = TwinClientOptions.builder().proxyOptions(proxyOptions).build();
 
-            testInstance.twinServiceClient = DeviceTwin.createFromConnectionString(iotHubConnectionString, options);
+            testInstance.twinServiceClient = new TwinClient(iotHubConnectionString, options);
 
             super.testGetDeviceTwin();
         }

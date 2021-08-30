@@ -65,22 +65,6 @@ public class X509ThumbprintParserTest
         assertEquals(SAMPLE_THUMBPRINT2, actualSecondaryThumbprint);
     }
 
-    //Tests_SRS_X509ThumbprintParser_34_002: [If the provided primaryThumbprint value is null, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void testSetPrimaryThumbprintNullThrows()
-    {
-        //act
-        new X509ThumbprintParser().setPrimaryThumbprint(null);
-    }
-
-    //Tests_SRS_X509ThumbprintParser_34_005: [If the provided secondaryThumbprint value is null, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void testSetSecondaryThumbprintNullThrows()
-    {
-        //act
-        new X509ThumbprintParser().setSecondaryThumbprint(null);
-    }
-
     //Tests_SRS_X509ThumbprintParser_34_001: [This method shall return the value of primaryThumbprint]
     //Tests_SRS_X509ThumbprintParser_34_003: [This method shall set the value of primaryThumbprint to the provided value.]
     //Tests_SRS_X509ThumbprintParser_34_004: [This method shall return the value of secondaryThumbprint]
@@ -96,8 +80,8 @@ public class X509ThumbprintParserTest
         parser.setSecondaryThumbprint(SAMPLE_THUMBPRINT2);
 
         //assert
-        assertEquals(SAMPLE_THUMBPRINT1, parser.getPrimaryThumbprintFinal());
-        assertEquals(SAMPLE_THUMBPRINT2, parser.getSecondaryThumbprintFinal());
+        assertEquals(SAMPLE_THUMBPRINT1, parser.getPrimaryThumbprint());
+        assertEquals(SAMPLE_THUMBPRINT2, parser.getSecondaryThumbprint());
     }
 
     //Tests_SRS_X509ThumbprintParser_34_010: [If the provided json is null or empty or cannot be parsed into an X509Thumbprint object, an IllegalArgumentException shall be thrown.]

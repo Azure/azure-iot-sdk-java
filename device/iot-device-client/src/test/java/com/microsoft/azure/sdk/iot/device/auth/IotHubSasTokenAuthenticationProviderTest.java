@@ -62,16 +62,6 @@ public class IotHubSasTokenAuthenticationProviderTest
         }
 
         @Override
-        public void setPathToIotHubTrustedCert(String pathToCertificate)
-        {
-        }
-
-        @Override
-        public void setIotHubTrustedCert(String certificate)
-        {
-        }
-
-        @Override
         public SSLContext getSSLContext() throws IOException
         {
             return null;

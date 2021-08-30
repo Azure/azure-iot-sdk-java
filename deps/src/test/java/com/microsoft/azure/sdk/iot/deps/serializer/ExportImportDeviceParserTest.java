@@ -68,11 +68,11 @@ public class ExportImportDeviceParserTest
         ExportImportDeviceParser parser = new ExportImportDeviceParser(json);
 
         //assert
-        assertNull(parser.getAuthenticationFinal().getThumbprint().getPrimaryThumbprintFinal());
-        assertNull(parser.getAuthenticationFinal().getThumbprint().getSecondaryThumbprintFinal());
-        assertNull(parser.getAuthenticationFinal().getSymmetricKey().getPrimaryKeyFinal());
-        assertNull(parser.getAuthenticationFinal().getSymmetricKey().getSecondaryKeyFinal());
-        assertEquals(AuthenticationTypeParser.CERTIFICATE_AUTHORITY, parser.getAuthenticationFinal().getType());
+        assertNull(parser.getAuthentication().getThumbprint().getPrimaryThumbprint());
+        assertNull(parser.getAuthentication().getThumbprint().getSecondaryThumbprint());
+        assertNull(parser.getAuthentication().getSymmetricKey().getPrimaryKey());
+        assertNull(parser.getAuthentication().getSymmetricKey().getSecondaryKey());
+        assertEquals(AuthenticationTypeParser.CERTIFICATE_AUTHORITY, parser.getAuthentication().getType());
     }
 
     //Tests_SRS_EXPORTIMPORTDEVICE_PARSER_34_002: [The parser shall look for the authentication of the serialized export import device and save it to the returned ExportImportDeviceParser instance]
@@ -119,9 +119,9 @@ public class ExportImportDeviceParserTest
         ExportImportDeviceParser parser = new ExportImportDeviceParser(json);
 
         //assert
-        assertEquals(expectedPrimaryThumbprint, parser.getAuthenticationFinal().getThumbprint().getPrimaryThumbprintFinal());
-        assertEquals(expectedSecondaryThumbprint, parser.getAuthenticationFinal().getThumbprint().getSecondaryThumbprintFinal());
-        assertEquals(AuthenticationTypeParser.SELF_SIGNED, parser.getAuthenticationFinal().getType());
+        assertEquals(expectedPrimaryThumbprint, parser.getAuthentication().getThumbprint().getPrimaryThumbprint());
+        assertEquals(expectedSecondaryThumbprint, parser.getAuthentication().getThumbprint().getSecondaryThumbprint());
+        assertEquals(AuthenticationTypeParser.SELF_SIGNED, parser.getAuthentication().getType());
     }
 
     //Tests_SRS_EXPORTIMPORTDEVICE_PARSER_34_002: [The parser shall look for the authentication of the serialized export import device and save it to the returned ExportImportDeviceParser instance]
@@ -168,9 +168,9 @@ public class ExportImportDeviceParserTest
         ExportImportDeviceParser parser = new ExportImportDeviceParser(json);
 
         //assert
-        assertEquals(expectedPrimaryKey, parser.getAuthenticationFinal().getSymmetricKey().getPrimaryKeyFinal());
-        assertEquals(expectedSecondaryKey, parser.getAuthenticationFinal().getSymmetricKey().getSecondaryKeyFinal());
-        assertEquals(AuthenticationTypeParser.SAS, parser.getAuthenticationFinal().getType());
+        assertEquals(expectedPrimaryKey, parser.getAuthentication().getSymmetricKey().getPrimaryKey());
+        assertEquals(expectedSecondaryKey, parser.getAuthentication().getSymmetricKey().getSecondaryKey());
+        assertEquals(AuthenticationTypeParser.SAS, parser.getAuthentication().getType());
     }
     
     @Test
@@ -216,9 +216,9 @@ public class ExportImportDeviceParserTest
         ExportImportDeviceParser parser = new ExportImportDeviceParser(json);
 
         //assert
-        assertEquals(expectedPrimaryKey, parser.getAuthenticationFinal().getSymmetricKey().getPrimaryKeyFinal());
-        assertEquals(expectedSecondaryKey, parser.getAuthenticationFinal().getSymmetricKey().getSecondaryKeyFinal());
-        assertEquals(AuthenticationTypeParser.SAS, parser.getAuthenticationFinal().getType());
+        assertEquals(expectedPrimaryKey, parser.getAuthentication().getSymmetricKey().getPrimaryKey());
+        assertEquals(expectedSecondaryKey, parser.getAuthentication().getSymmetricKey().getSecondaryKey());
+        assertEquals(AuthenticationTypeParser.SAS, parser.getAuthentication().getType());
         assertNotNull(parser.getTags());
         assertEquals("firstvalue", parser.getTags().get("test01"));
         assertEquals("secondvalue", parser.getTags().get("test02"));
@@ -232,7 +232,7 @@ public class ExportImportDeviceParserTest
         // arrange
         ExportImportDeviceParser parser = new ExportImportDeviceParser();
         parser.setAuthentication(new AuthenticationParser());
-        parser.getAuthenticationFinal().setType(AuthenticationTypeParser.CERTIFICATE_AUTHORITY);
+        parser.getAuthentication().setType(AuthenticationTypeParser.CERTIFICATE_AUTHORITY);
 
         String certificateAuthoritySignedDeviceAuthenticationJson = "\"type\":\"" + CERTIFICATE_AUTHORITY_JSON_VALUE + "\"";
 
@@ -250,8 +250,8 @@ public class ExportImportDeviceParserTest
         // arrange
         ExportImportDeviceParser parser = new ExportImportDeviceParser();
         parser.setAuthentication(new AuthenticationParser());
-        parser.getAuthenticationFinal().setType(AuthenticationTypeParser.SELF_SIGNED);
-        parser.getAuthenticationFinal().setThumbprint(new X509ThumbprintParser("", ""));
+        parser.getAuthentication().setType(AuthenticationTypeParser.SELF_SIGNED);
+        parser.getAuthentication().setThumbprint(new X509ThumbprintParser("", ""));
 
         String selfSignedDeviceAuthenticationJson = "\"type\":\"" + SELF_SIGNED_JSON_VALUE + "\"";
 
@@ -269,8 +269,8 @@ public class ExportImportDeviceParserTest
         // arrange
         ExportImportDeviceParser parser = new ExportImportDeviceParser();
         parser.setAuthentication(new AuthenticationParser());
-        parser.getAuthenticationFinal().setType(AuthenticationTypeParser.SAS);
-        parser.getAuthenticationFinal().setSymmetricKey(new SymmetricKeyParser("", ""));
+        parser.getAuthentication().setType(AuthenticationTypeParser.SAS);
+        parser.getAuthentication().setSymmetricKey(new SymmetricKeyParser("", ""));
 
         String expectedJson = "{\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"\",\"secondaryKey\":\"\"},\"type\":\"" + SAS_JSON_VALUE + "\"}}";
 
@@ -287,10 +287,10 @@ public class ExportImportDeviceParserTest
         // arrange
         ExportImportDeviceParser parser = new ExportImportDeviceParser();
         parser.setAuthentication(new AuthenticationParser());
-        parser.getAuthenticationFinal().setType(AuthenticationTypeParser.SAS);
-        parser.getAuthenticationFinal().setSymmetricKey(new SymmetricKeyParser("", ""));
+        parser.getAuthentication().setType(AuthenticationTypeParser.SAS);
+        parser.getAuthentication().setSymmetricKey(new SymmetricKeyParser("", ""));
         TwinCollection tags = new TwinCollection();
-        tags.putFinal("test01", "firstvalue"); tags.putFinal("test02", "secondvalue");
+        tags.put("test01", "firstvalue"); tags.put("test02", "secondvalue");
         parser.setTags(tags);
 
         //String expectedJson = "{\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"\",\"secondaryKey\":\"\"},\"type\":\"" + SAS_JSON_VALUE + "\"},\"tags\":{\"test01\":\"firstvalue\",\"test02\":\"secondvalue\"}}";
@@ -334,10 +334,10 @@ public class ExportImportDeviceParserTest
         parser.setImportMode(importMode);
 
         //assert
-        assertEquals(new AuthenticationParser().getType(), parser.getAuthenticationFinal().getType());
-        assertEquals(new AuthenticationParser().getSymmetricKey(), parser.getAuthenticationFinal().getSymmetricKey());
-        assertEquals(new AuthenticationParser().getThumbprint(), parser.getAuthenticationFinal().getThumbprint());
-        assertEquals(deviceId, parser.getIdFinal());
+        assertEquals(new AuthenticationParser().getType(), parser.getAuthentication().getType());
+        assertEquals(new AuthenticationParser().getSymmetricKey(), parser.getAuthentication().getSymmetricKey());
+        assertEquals(new AuthenticationParser().getThumbprint(), parser.getAuthentication().getThumbprint());
+        assertEquals(deviceId, parser.getId());
         assertEquals(eTag, parser.getETag());
         assertEquals(status, parser.getStatus());
         assertEquals(statusReason, parser.getStatusReason());
@@ -359,26 +359,10 @@ public class ExportImportDeviceParserTest
         ExportImportDeviceParser parser = new ExportImportDeviceParser(json);
 
         //assert
-        assertEquals(primaryKey, parser.getAuthenticationFinal().getSymmetricKey().getPrimaryKeyFinal());
-        assertEquals(secondaryKey, parser.getAuthenticationFinal().getSymmetricKey().getSecondaryKeyFinal());
-        assertEquals(authType, parser.getAuthenticationFinal().getType());
-        assertEquals(expectedId, parser.getIdFinal());
-    }
-
-    //Tests_SRS_EXPORTIMPORTDEVICE_PARSER_34_007: [If the provided id is null, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void idSetterCannotTakeNullArgument()
-    {
-        //act
-        new ExportImportDeviceParser().setId(null);
-    }
-
-    //Tests_SRS_EXPORTIMPORTDEVICE_PARSER_34_006: [If the provided authentication is null, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void authenticationSetterCannotTakeNullArgument()
-    {
-        //act
-        new ExportImportDeviceParser().setAuthentication(null);
+        assertEquals(primaryKey, parser.getAuthentication().getSymmetricKey().getPrimaryKey());
+        assertEquals(secondaryKey, parser.getAuthentication().getSymmetricKey().getSecondaryKey());
+        assertEquals(authType, parser.getAuthentication().getType());
+        assertEquals(expectedId, parser.getId());
     }
 
     //Tests_SRS_EXPORTIMPORTDEVICE_PARSER_34_009: [If the provided json is missing the Authentication field, or its value is empty, an IllegalArgumentException shall be thrown.]

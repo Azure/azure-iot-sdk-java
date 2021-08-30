@@ -8,13 +8,13 @@
 package com.microsoft.azure.sdk.iot.provisioning.device;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
 public class ProvisioningDeviceClientRegistrationResult
 {
+    @Getter
     protected String iothubUri;
-    protected String deviceId;
-    protected ProvisioningDeviceClientStatus provisioningDeviceClientStatus;
-    protected String payload;
 
     @Getter
     protected String registrationId;
@@ -35,14 +35,6 @@ public class ProvisioningDeviceClientRegistrationResult
     protected String lastUpdatesDateTimeUtc;
 
     /**
-     * Empty constructor to let users gather the data.
-     */
-    public ProvisioningDeviceClientRegistrationResult()
-    {
-        //SRS_ProvisioningDeviceClientRegistrationResult_25_001: [ The constructor shall instantiate empty and leave it inheritors to set appropriate values of private members. ]
-    }
-
-    /**
      * Getter for the IotHubUri.
      * @return returns IotHubUri. Can be {@code null} when registration fails.
      */
@@ -52,33 +44,12 @@ public class ProvisioningDeviceClientRegistrationResult
         return iothubUri;
     }
 
-    /**
-     * Getter for Device ID.
-     * @return Returns device ID. Can be {@code null} when registration fails.
-     */
-    public String getDeviceId()
-    {
-        //SRS_ProvisioningDeviceClientRegistrationResult_25_003: [ This method shall retrieve deviceId. ]
-        return deviceId;
-    }
+    @Getter
+    protected String deviceId;
 
-    /**
-     * Getter for the Provisioning Device Client Status
-     * @return Returns the status of Provisioning Device Client
-     */
-    public ProvisioningDeviceClientStatus getProvisioningDeviceClientStatus()
-    {
-        //SRS_ProvisioningDeviceClientRegistrationResult_25_004: [ This method shall retrieve provisioningDeviceClientStatus. ]
-        return provisioningDeviceClientStatus;
-    }
+    @Getter
+    protected ProvisioningDeviceClientStatus provisioningDeviceClientStatus;
 
-    /**
-     * Retrieves the provisioning payload results from DPS
-     * @return A string representation of the provisioning payload
-     */
-    public String getProvisioningPayload()
-    {
-        return payload;
-    }
-
+    @Getter
+    protected String provisioningPayload;
 }

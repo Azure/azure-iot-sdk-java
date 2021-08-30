@@ -29,7 +29,7 @@ import java.util.List;
  * Extension of an SSLSocket that sends an HTTP CONNECT packet to the proxy socket before sending the SSL handshake upstream.
  */
 @Slf4j
-public class ProxiedSSLSocket extends SSLSocket
+class ProxiedSSLSocket extends SSLSocket
 {
     private final SSLSocketFactory socketFactory;
 
@@ -47,7 +47,7 @@ public class ProxiedSSLSocket extends SSLSocket
     private static final String HTTP_VERSION_1_1 = HTTP + "1.1";
 
 
-    protected ProxiedSSLSocket(SSLSocketFactory socketFactory, Socket proxySocket, String proxyUsername, char[] proxyPassword)
+    ProxiedSSLSocket(SSLSocketFactory socketFactory, Socket proxySocket, String proxyUsername, char[] proxyPassword)
     {
         this.socketFactory = socketFactory;
         this.proxySocket = proxySocket;
@@ -157,9 +157,9 @@ public class ProxiedSSLSocket extends SSLSocket
     @SuppressWarnings("unused") // Interface should not change
     private interface ProxiedSSLSocketNonDelegatedFunctions
     {
-        void connect(SocketAddress socketAddress, int timeout) throws IOException;
-        void connect(SocketAddress socketAddress) throws IOException;
-        void close() throws IOException;
+        void connect(SocketAddress socketAddress, int timeout);
+        void connect(SocketAddress socketAddress);
+        void close();
     }
 
     @RequiredArgsConstructor

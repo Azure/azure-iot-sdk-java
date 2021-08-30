@@ -29,7 +29,7 @@ public class SymmetricKeyTest
         String key = "0123456789012345";
         SymmetricKey symmetricKey = new SymmetricKey();
         // Act
-        symmetricKey.setPrimaryKeyFinal(key);
+        symmetricKey.setPrimaryKey(key);
         // Assert
         assertEquals(key, Deencapsulation.getField(symmetricKey, "primaryKey"));
     }
@@ -42,7 +42,7 @@ public class SymmetricKeyTest
         String key = "0123456789012345678901234567890123456789012345678901234567890123";
         SymmetricKey symmetricKey = new SymmetricKey();
         // Act
-        symmetricKey.setPrimaryKeyFinal(key);
+        symmetricKey.setPrimaryKey(key);
         // Assert
         assertEquals(key, Deencapsulation.getField(symmetricKey, "primaryKey"));
     }
@@ -55,7 +55,7 @@ public class SymmetricKeyTest
         String key = "0123456789012345";
         SymmetricKey symmetricKey = new SymmetricKey();
         // Act
-        symmetricKey.setSecondaryKeyFinal(key);
+        symmetricKey.setSecondaryKey(key);
         // Assert
         assertEquals(key, Deencapsulation.getField(symmetricKey, "secondaryKey"));
     }
@@ -68,7 +68,7 @@ public class SymmetricKeyTest
         String key = "0123456789012345678901234567890123456789012345678901234567890123";
         SymmetricKey symmetricKey = new SymmetricKey();
         // Act
-        symmetricKey.setSecondaryKeyFinal(key);
+        symmetricKey.setSecondaryKey(key);
         // Assert
         assertEquals(key, Deencapsulation.getField(symmetricKey, "secondaryKey"));
     }

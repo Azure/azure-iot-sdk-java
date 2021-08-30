@@ -247,7 +247,7 @@ public class DeviceIOTest
         Deencapsulation.invoke(deviceIO, "close");
     }
 
-    /* Tests_SRS_DEVICE_IO_21_021: [The closeNow shall set the `state` as `CLOSE`.] */
+    /* Tests_SRS_DEVICE_IO_21_021: [The close shall set the `state` as `CLOSE`.] */
     @Test
     public void closeDoesNothingOnUnopenedClientSuccess()
     {
@@ -261,7 +261,7 @@ public class DeviceIOTest
         assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
     }
 
-    /* Tests_SRS_DEVICE_IO_21_021: [The closeNow shall set the `state` as `CLOSE`.] */
+    /* Tests_SRS_DEVICE_IO_21_021: [The close shall set the `state` as `CLOSE`.] */
     @Test
     public void closeDoesNothingOnClosedClientSuccess()
             throws IOException
@@ -279,7 +279,7 @@ public class DeviceIOTest
         assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
     }
 
-    /* Tests_SRS_DEVICE_IO_21_021: [The closeNow shall set the `state` as `CLOSE`.] */
+    /* Tests_SRS_DEVICE_IO_21_021: [The close shall set the `state` as `CLOSE`.] */
     @Test
     public void closeChangeStateToClosedSuccess()
             throws URISyntaxException, IOException
@@ -603,96 +603,6 @@ public class DeviceIOTest
         assertFalse(isOpen);
     }
 
-    /* Tests_SRS_DEVICE_IO_21_039: [The isEmpty shall return the transport queue state, true if the queue is empty, false if there is pending messages in the queue.] */
-    @Test
-    public void isEmptyTrueSuccess()
-            throws URISyntaxException, IOException
-    {
-        // arrange
-        final Object deviceIO = newDeviceIO();
-
-        // assert
-        new NonStrictExpectations()
-        {
-            {
-                mockedTransport.isEmpty();
-                result = true;
-                times = 1;
-            }
-        };
-
-        // act
-        boolean isOpen = Deencapsulation.invoke(deviceIO, "isEmpty" );
-
-        // assert
-        assertTrue(isOpen);
-    }
-
-    /* Tests_SRS_DEVICE_IO_21_039: [The isEmpty shall return the transport queue state, true if the queue is empty, false if there is pending messages in the queue.] */
-    @Test
-    public void isEmptyFalseSuccess()
-            throws URISyntaxException, IOException
-    {
-        // arrange
-        final Object deviceIO = newDeviceIO();
-
-        // assert
-        new NonStrictExpectations()
-        {
-            {
-                mockedTransport.isEmpty();
-                result = false;
-                times = 1;
-            }
-        };
-
-        // act
-        boolean isOpen = Deencapsulation.invoke(deviceIO, "isEmpty" );
-
-        // assert
-        assertFalse(isOpen);
-    }
-
-    /* Tests_SRS_DEVICE_IO_99_001: [The registerConnectionStateCallback shall register the callback with the transport.] */
-    @Test
-    public void registerConnectionStateCallbackSuccess(@Mocked final IotHubConnectionStateCallback mockedStateCB)
-    {
-        //arrange
-        final Object deviceIO = newDeviceIO();
-
-        //act
-        Deencapsulation.invoke(deviceIO, "registerConnectionStateCallback", mockedStateCB, Object.class);
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockedTransport.registerConnectionStateCallback(mockedStateCB, null);
-                times = 1;
-            }
-        };
-    }
-
-    //Tests_SRS_DEVICE_IO_34_020: [This function shall register the callback with the transport.]
-    @Test
-    public void registerConnectionStatusChangeCallbackSuccess(@Mocked final IotHubConnectionStatusChangeCallback mockedStateCB)
-    {
-        //arrange
-        final Object deviceIO = newDeviceIO();
-        final String deviceId = "someDeviceId";
-
-        //act
-        Deencapsulation.invoke(deviceIO, "registerConnectionStatusChangeCallback", mockedStateCB, Object.class, deviceId);
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockedTransport.registerConnectionStatusChangeCallback(mockedStateCB, null, deviceId);
-                times = 1;
-            }
-        };
-    }
     @Test
     public void isOpenWhenReconnecting()
             throws IOException

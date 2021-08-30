@@ -317,7 +317,7 @@ public class CustomSasTokenProviderSample
 
         System.out.println("Successfully created an IoT Hub client.");
 
-        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
+        client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
         client.open();
 
@@ -331,7 +331,7 @@ public class CustomSasTokenProviderSample
         try
         {
             Message msg = new Message(msgStr);
-            msg.setContentTypeFinal("application/json");
+            msg.setContentType("application/json");
             msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
             msg.setMessageId(java.util.UUID.randomUUID().toString());
             msg.setExpiryTime(D2C_MESSAGE_TIMEOUT);
@@ -359,7 +359,7 @@ public class CustomSasTokenProviderSample
 
         // close the connection
         System.out.println("Closing");
-        client.closeNow();
+        client.close();
 
         if (!failedMessageListOnClose.isEmpty())
         {

@@ -2,12 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 
-package com.microsoft.azure.sdk.iot.device.DeviceTwin;
+package com.microsoft.azure.sdk.iot.device.twin;
 
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.PropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.twin.Device;
+import com.microsoft.azure.sdk.iot.device.twin.Pair;
+import com.microsoft.azure.sdk.iot.device.twin.Property;
+import com.microsoft.azure.sdk.iot.device.twin.PropertyCallback;
 import mockit.Deencapsulation;
 import org.junit.Test;
 
@@ -30,7 +30,7 @@ public class DeviceTest
         Device testDev = new Device()
         {
             @Override
-            public void PropertyCall(String propertyKey, Object propertyValue, Object context)
+            public void onPropertyChanged(String propertyKey, Object propertyValue, Object context)
             {
 
             }
@@ -55,7 +55,7 @@ public class DeviceTest
         Device testDev = new Device()
         {
             @Override
-            public void PropertyCall(String propertyKey, Object propertyValue, Object context)
+            public void onPropertyChanged(String propertyKey, Object propertyValue, Object context)
             {
 
             }
@@ -82,7 +82,7 @@ public class DeviceTest
         Device testDev = new Device()
         {
             @Override
-            public void PropertyCall(String propertyKey, Object propertyValue, Object context)
+            public void onPropertyChanged(String propertyKey, Object propertyValue, Object context)
             {
 
             }
@@ -109,7 +109,7 @@ public class DeviceTest
         Device testDev = new Device()
         {
             @Override
-            public void PropertyCall(String propertyKey, Object propertyValue, Object context)
+            public void onPropertyChanged(String propertyKey, Object propertyValue, Object context)
             {
 
             }
@@ -140,7 +140,7 @@ public class DeviceTest
         Device testDev = new Device()
         {
             @Override
-            public void PropertyCall(String propertyKey, Object propertyValue, Object context)
+            public void onPropertyChanged(String propertyKey, Object propertyValue, Object context)
             {
 
             }
@@ -160,7 +160,7 @@ public class DeviceTest
         Device testDev = new Device()
         {
             @Override
-            public void PropertyCall(String propertyKey, Object propertyValue, Object context)
+            public void onPropertyChanged(String propertyKey, Object propertyValue, Object context)
             {
 
             }
@@ -170,7 +170,7 @@ public class DeviceTest
         testDev.setDesiredPropertyCallback(test, testDev, null);
 
         //act
-        HashMap<Property, Pair<PropertyCallBack<String, Object>, Object>> testDesiredMap = testDev.getDesiredProp();
+        HashMap<Property, Pair<PropertyCallback<String, Object>, Object>> testDesiredMap = testDev.getDesiredProp();
 
         //assert
         assertNotNull(testDesiredMap);
@@ -187,7 +187,7 @@ public class DeviceTest
         Device testDev = new Device()
         {
             @Override
-            public void PropertyCall(String propertyKey, Object propertyValue, Object context)
+            public void onPropertyChanged(String propertyKey, Object propertyValue, Object context)
             {
 
             }
@@ -199,7 +199,7 @@ public class DeviceTest
         testDev.setDesiredPropertyCallback(test, testDev, null);
 
         //assert
-        HashMap<Property, Pair<PropertyCallBack<String, Object>, Object>> testDesiredMap = testDev.getDesiredProp();
+        HashMap<Property, Pair<PropertyCallback<String, Object>, Object>> testDesiredMap = testDev.getDesiredProp();
         assertNotNull(testDesiredMap);
         assertEquals(testDesiredMap.get(test).getKey(), testDev);
     }
@@ -214,7 +214,7 @@ public class DeviceTest
         Device testDev = new Device()
         {
             @Override
-            public void PropertyCall(String propertyKey, Object propertyValue, Object context)
+            public void onPropertyChanged(String propertyKey, Object propertyValue, Object context)
             {
 
             }
@@ -237,7 +237,7 @@ public class DeviceTest
         Device testDev = new Device()
         {
             @Override
-            public void PropertyCall(String propertyKey, Object propertyValue, Object context)
+            public void onPropertyChanged(String propertyKey, Object propertyValue, Object context)
             {
 
             }
@@ -249,7 +249,7 @@ public class DeviceTest
         testDev.setDesiredPropertyCallback(test, null, null);
 
         //assert
-        HashMap<Property, Pair<PropertyCallBack<String, Object>, Object>> testDesiredMap = testDev.getDesiredProp();
+        HashMap<Property, Pair<PropertyCallback<String, Object>, Object>> testDesiredMap = testDev.getDesiredProp();
         assertNotNull(testDesiredMap);
         assertNull(testDesiredMap.get(test).getKey());
     }
@@ -262,7 +262,7 @@ public class DeviceTest
         Device testDev = new Device()
         {
             @Override
-            public void PropertyCall(String propertyKey, Object propertyValue, Object context)
+            public void onPropertyChanged(String propertyKey, Object propertyValue, Object context)
             {
 
             }
@@ -274,7 +274,7 @@ public class DeviceTest
         testDev.setDesiredPropertyCallback(test, null, null);
 
         //assert
-        HashMap<Property, Pair<PropertyCallBack<String, Object>, Object>> testDesiredMap = testDev.getDesiredProp();
+        HashMap<Property, Pair<PropertyCallback<String, Object>, Object>> testDesiredMap = testDev.getDesiredProp();
         assertNotNull(testDesiredMap);
         assertNull(testDesiredMap.get(test).getKey());
 
@@ -288,7 +288,7 @@ public class DeviceTest
         Device testDev = new Device()
         {
             @Override
-            public void PropertyCall(String propertyKey, Object propertyValue, Object context)
+            public void onPropertyChanged(String propertyKey, Object propertyValue, Object context)
             {
 
             }
@@ -303,7 +303,7 @@ public class DeviceTest
         testDev.clean();
 
         //assert
-        HashMap<Property, Pair<PropertyCallBack<String, Object>, Object>> testDesiredMap = testDev.getDesiredProp();
+        HashMap<Property, Pair<PropertyCallback<String, Object>, Object>> testDesiredMap = testDev.getDesiredProp();
         HashSet<Property> testRepMap = testDev.getReportedProp();
 
         assertTrue(testDesiredMap.isEmpty());

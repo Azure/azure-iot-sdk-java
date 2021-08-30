@@ -21,14 +21,7 @@ import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsCbsSessionHandler;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpsMessage;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsReceiverLinkHandler;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsSendResult;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsSessionHandler;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsTelemetryReceiverLinkHandler;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.IotHubReactor;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpConnectionThrottledException;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpSessionWindowViolationException;
 import mockit.Deencapsulation;
@@ -205,15 +198,6 @@ public class AmqpsIotHubConnectionTest {
 
     @Mocked
     CountDownLatch mockCloseLatch;
-
-    @Mocked
-    Link mockLink;
-
-    @Mocked
-    AmqpsReceiverLinkHandler mockAmqpsReceiverLinkHandler;
-
-    @Mocked
-    AmqpsTelemetryReceiverLinkHandler mockAmqpsTelemetryLinksManager;
 
     @Mocked
     AmqpsSendResult mockAmqpsSendResult;
@@ -455,7 +439,7 @@ public class AmqpsIotHubConnectionTest {
         connection.open();
     }
 
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_011: [If any exception is thrown while attempting to trigger the reactor, the function shall closeNow the connection and throw an IOException.]
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_011: [If any exception is thrown while attempting to trigger the reactor, the function shall close the connection and throw an IOException.]
     @Test (expected = IOException.class)
     public void openThrowsIfProtonReactorThrows() throws TransportException
     {
@@ -577,7 +561,7 @@ public class AmqpsIotHubConnectionTest {
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_012: [The function shall set the status of the AMQPS connection to DISCONNECTED.]
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_013: [The function shall closeNow the AmqpsIotHubConnection and the AMQP connection.]
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_013: [The function shall close the AmqpsIotHubConnection and the AMQP connection.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_34_014: [If this object's proton reactor is not null, this function shall stop the Proton reactor.]
     @Test
     public void closeClosesAllProtonVariablesAndStopsProtonReactor() throws TransportException
@@ -646,8 +630,6 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockAmqpsTelemetryLinksManager, "close");
-                times = 1;
                 mockConnection.close();
                 times = 1;
                 mockExecutorService.shutdown();

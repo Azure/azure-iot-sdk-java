@@ -6,6 +6,7 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
+import lombok.Getter;
 
 /**
  * Representation of a single Device Provisioning Service X509 Primary and Secondary CA reference.
@@ -34,12 +35,14 @@ public class X509CAReferences
     private static final String PRIMARY_TAG = "primary";
     @Expose
     @SerializedName(PRIMARY_TAG)
+    @Getter
     private String primary;
 
     // the secondary X509 CA reference
     private static final String SECONDARY_TAG = "secondary";
     @Expose
     @SerializedName(SECONDARY_TAG)
+    @Getter
     private String secondary;
 
     /**
@@ -76,62 +79,13 @@ public class X509CAReferences
     public X509CAReferences(X509CAReferences x509CAReferences)
     {
         /* SRS_X509_CAREFERENCE_21_003: [The constructor shall throw IllegalArgumentException if the provide X509CAReferences is null or if its primary certificate is null.] */
-        if((x509CAReferences == null) || (x509CAReferences.getPrimaryFinal() == null))
+        if((x509CAReferences == null) || (x509CAReferences.getPrimary() == null))
         {
             throw new IllegalArgumentException("original x509CAReferences cannot be null and its primary certificate cannot be null.");
         }
         /* SRS_X509_CAREFERENCE_21_004: [The constructor shall create a copy of the primary and secondary CA references and store it.] */
         this.primary = x509CAReferences.primary;
         this.secondary = x509CAReferences.secondary;
-    }
-
-    /**
-     * Getter for the primary.
-     *
-     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #getPrimaryFinal()}
-     *
-     * @return the {@code String} with the stored primary. It cannot be {@code null}.
-     */
-    @Deprecated
-    public String getPrimary()
-    {
-        /* SRS_X509_CAREFERENCE_21_005: [The getPrimary shall return the stored primary.] */
-        return this.primary;
-    }
-
-    /**
-     * Getter for the primary.
-     *
-     * @return the {@code String} with the stored primary. It cannot be {@code null}.
-     */
-    public final String getPrimaryFinal()
-    {
-        /* SRS_X509_CAREFERENCE_21_005: [The getPrimary shall return the stored primary.] */
-        return this.primary;
-    }
-
-    /**
-     * Getter for the secondary.
-     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #getSecondaryFinal()}
-     *
-     * @return the {@code String} with the stored secondary. It can be {@code null}.
-     */
-    @Deprecated
-    public String getSecondary()
-    {
-        /* SRS_X509_CAREFERENCE_21_006: [The getSecondary shall return the stored secondary.] */
-        return this.secondary;
-    }
-
-    /**
-     * Getter for the secondary.
-     *
-     * @return the {@code String} with the stored secondary. It can be {@code null}.
-     */
-    public final String getSecondaryFinal()
-    {
-        /* SRS_X509_CAREFERENCE_21_006: [The getSecondary shall return the stored secondary.] */
-        return this.secondary;
     }
 
     /**

@@ -11,7 +11,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientR
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientSubstatus;
 
-public class RegistrationResult extends ProvisioningDeviceClientRegistrationResult
+class RegistrationResult extends ProvisioningDeviceClientRegistrationResult
 {
     /**
      * Constructor to set iothub uri, device id and status of the service as retrieved
@@ -25,7 +25,7 @@ public class RegistrationResult extends ProvisioningDeviceClientRegistrationResu
         super();
         this.iothubUri = iothubUri;
         this.deviceId = deviceId;
-        this.payload = jsonPayload;
+        this.provisioningPayload = jsonPayload;
         this.provisioningDeviceClientStatus = dpsStatus;
     }
 

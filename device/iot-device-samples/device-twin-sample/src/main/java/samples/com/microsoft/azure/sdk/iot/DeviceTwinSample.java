@@ -4,7 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
+import com.microsoft.azure.sdk.iot.device.twin.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportPacket;
 
@@ -109,7 +109,7 @@ public class DeviceTwinSample
     }
 
 
-    protected static class DeviceTwinStatusCallBack implements IotHubEventCallback
+    protected static class DeviceTwinStatusCallback implements IotHubEventCallback
     {
         @Override
         public void execute(IotHubStatusCode status, Object context)
@@ -159,12 +159,12 @@ public class DeviceTwinSample
     }
 
     /*
-     * If you don't care about version, you can use the PropertyCallBack.
+     * If you don't care about version, you can use the PropertyCallback.
      */
-    protected static class onHomeTempChange implements TwinPropertyCallBack
+    protected static class onHomeTempChange implements TwinPropertyCallback
     {
         @Override
-        public void TwinPropertyCallBack(Property property, Object context)
+        public void onPropertyChanged(Property property, Object context)
         {
             System.out.println(
                     "onHomeTempChange change " + property.getKey() +
@@ -173,10 +173,10 @@ public class DeviceTwinSample
         }
     }
 
-    protected static class onCameraActivity implements TwinPropertyCallBack
+    protected static class onCameraActivity implements TwinPropertyCallback
     {
         @Override
-        public void TwinPropertyCallBack(Property property, Object context)
+        public void onPropertyChanged(Property property, Object context)
         {
             System.out.println(
                     "onCameraActivity change " + property.getKey() +
@@ -185,10 +185,10 @@ public class DeviceTwinSample
         }
     }
 
-    protected static class onProperty implements TwinPropertyCallBack
+    protected static class onProperty implements TwinPropertyCallback
     {
         @Override
-        public void TwinPropertyCallBack(Property property, Object context)
+        public void onPropertyChanged(Property property, Object context)
         {
             System.out.println(
                     "onProperty callback for " + (property.getIsReported()?"reported": "desired") +
@@ -302,7 +302,7 @@ public class DeviceTwinSample
         DeviceClient client = new DeviceClient(connString, protocol);
         System.out.println("Successfully created an IoT Hub client.");
 
-        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
+        client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
         try
         {
@@ -312,7 +312,7 @@ public class DeviceTwinSample
             System.out.println("Start device Twin and get remaining properties...");
             // Properties already set in the Service will shows up in the generic onProperty callback, with value and version.
             Succeed.set(false);
-            client.startDeviceTwin(new DeviceTwinStatusCallBack(), null, new onProperty(), null);
+            client.startTwinAsync(new DeviceTwinStatusCallback(), null, new onProperty(), null);
             do
             {
                 Thread.sleep(1000);
@@ -321,19 +321,19 @@ public class DeviceTwinSample
 
 
             System.out.println("Subscribe to Desired properties on device Twin...");
-            Map<Property, Pair<TwinPropertyCallBack, Object>> desiredProperties = new HashMap<Property, Pair<TwinPropertyCallBack, Object>>()
+            Map<Property, Pair<TwinPropertyCallback, Object>> desiredProperties = new HashMap<Property, Pair<TwinPropertyCallback, Object>>()
             {
                 {
-                    put(new Property("HomeTemp(F)", null), new Pair<TwinPropertyCallBack, Object>(new onHomeTempChange(), null));
-                    put(new Property("LivingRoomLights", null), new Pair<TwinPropertyCallBack, Object>(new onProperty(), null));
-                    put(new Property("BedroomRoomLights", null), new Pair<TwinPropertyCallBack, Object>(new onProperty(), null));
-                    put(new Property("HomeSecurityCamera", null), new Pair<TwinPropertyCallBack, Object>(new onCameraActivity(), null));
+                    put(new Property("HomeTemp(F)", null), new Pair<TwinPropertyCallback, Object>(new onHomeTempChange(), null));
+                    put(new Property("LivingRoomLights", null), new Pair<TwinPropertyCallback, Object>(new onProperty(), null));
+                    put(new Property("BedroomRoomLights", null), new Pair<TwinPropertyCallback, Object>(new onProperty(), null));
+                    put(new Property("HomeSecurityCamera", null), new Pair<TwinPropertyCallback, Object>(new onCameraActivity(), null));
                 }
             };
-            client.subscribeToTwinDesiredProperties(desiredProperties);
+            client.subscribeToTwinDesiredPropertiesAsync(desiredProperties);
 
             System.out.println("Get device Twin...");
-            client.getDeviceTwin(); // For each desired property in the Service, the SDK will call the appropriate callback with the value and version.
+            client.getTwinAsync(); // For each desired property in the Service, the SDK will call the appropriate callback with the value and version.
 
             System.out.println("Update reported properties...");
             Set<Property> reportProperties = new HashSet<Property>()
@@ -350,7 +350,7 @@ public class DeviceTwinSample
             params.setCorrelationCallback(new ReportedPropertiesCorrelation("SendAllParams"), sharableContext);
             params.setReportedPropertiesCallback(new ReportedPropertiesCallback("SendAllParams"), sharableContext);
 
-            client.sendReportedProperties(params);
+            client.sendReportedPropertiesAsync(params);
 
             for(int i = 0; i < MAX_EVENTS_TO_REPORT; i++)
             {
@@ -362,7 +362,7 @@ public class DeviceTwinSample
                     params.setCorrelationCallback(new ReportedPropertiesCorrelation("HomeSecurityCamera=BURGLAR (" + i + ")"), sharableContext);
                     params.setReportedPropertiesCallback(new ReportedPropertiesCallback("HomeSecurityCamera=BURGLAR (" + i + ")"), sharableContext);
 
-                    client.sendReportedProperties(params);
+                    client.sendReportedPropertiesAsync(params);
                 }
                 else
                 {
@@ -372,7 +372,7 @@ public class DeviceTwinSample
                     params.setCorrelationCallback(new ReportedPropertiesCorrelation("HomeSecurityCamera=SAFELY_WORKING (" + i + ")"), sharableContext);
                     params.setReportedPropertiesCallback(new ReportedPropertiesCallback("HomeSecurityCamera=SAFELY_WORKING (" + i + ")"), sharableContext);
 
-                    client.sendReportedProperties(params);
+                    client.sendReportedPropertiesAsync(params);
                 }
                 if(i == MAX_EVENTS_TO_REPORT-1)
                 {
@@ -381,7 +381,7 @@ public class DeviceTwinSample
                     params.setCorrelationCallback(new ReportedPropertiesCorrelation("BedroomRoomLights=null (" + i + ")"), sharableContext);
                     params.setReportedPropertiesCallback(new ReportedPropertiesCallback("BedroomRoomLights=null (" + i + ")"), sharableContext);
 
-                    client.sendReportedProperties(params);
+                    client.sendReportedPropertiesAsync(params);
                 }
                 System.out.println("Updating reported properties..");
             }
@@ -391,7 +391,7 @@ public class DeviceTwinSample
         catch (Exception e)
         {
             System.out.println("On exception, shutting down \n" + " Cause: " + e.getCause() + " \n" +  e.getMessage());
-            client.closeNow();
+            client.close();
             System.out.println("Shutting down...");
         }
 
@@ -400,7 +400,7 @@ public class DeviceTwinSample
         Scanner scanner = new Scanner(System.in);
         scanner.nextLine();
 
-        client.closeNow();
+        client.close();
 
         System.out.println("Shutting down...");
 

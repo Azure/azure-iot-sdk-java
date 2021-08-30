@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.*;
+import static com.microsoft.azure.sdk.iot.device.twin.DeviceOperations.*;
 import static org.junit.Assert.*;
 
 /**

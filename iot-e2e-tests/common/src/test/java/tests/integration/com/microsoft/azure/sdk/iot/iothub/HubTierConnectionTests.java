@@ -2,8 +2,8 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodData;
+import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
@@ -27,7 +27,6 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS_WS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
-import static junit.framework.TestCase.fail;
 import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 
 @IotHubTest
@@ -71,7 +70,7 @@ public class HubTierConnectionTests extends IntegrationTest
         String privateKey = x509CertificateGenerator.getPrivateKey();
         String x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
 
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
         String uuid = UUID.randomUUID().toString();
         String deviceId = "java-tier-connection-e2e-test".concat("-" + uuid);
         String deviceIdX509 = "java-tier-connection-e2e-test-X509".concat("-" + uuid);
@@ -79,13 +78,16 @@ public class HubTierConnectionTests extends IntegrationTest
         Device device = Device.createFromId(deviceId, null, null);
         Device deviceX509 = Device.createDevice(deviceIdX509, SELF_SIGNED);
 
-        deviceX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
+        deviceX509.setThumbprint(x509Thumbprint, x509Thumbprint);
 
         Tools.addDeviceWithRetry(registryManager, device);
         Tools.addDeviceWithRetry(registryManager, deviceX509);
 
-        hostName = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString).getHostName();
+        hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString).getHostName();
         SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCert, privateKey);
+
+        ClientOptions options = new ClientOptions();
+        options.sslContext = sslContext;
 
         return new ArrayList(Arrays.asList(
                 new Object[][]
@@ -95,7 +97,7 @@ public class HubTierConnectionTests extends IntegrationTest
                                 {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS, false},
 
                                 //x509 device client
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, sslContext), AMQPS, deviceX509, SELF_SIGNED, false},
+                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, options), AMQPS, deviceX509, SELF_SIGNED, false},
 
                                 //sas token device client, with proxy
                                 {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS, true}
@@ -106,15 +108,7 @@ public class HubTierConnectionTests extends IntegrationTest
     @BeforeClass
     public static void classSetup()
     {
-        try
-        {
-            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-            fail("Unexpected exception encountered");
-        }
+        registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
     }
 
     @BeforeClass
@@ -171,7 +165,7 @@ public class HubTierConnectionTests extends IntegrationTest
         }
     }
 
-    protected static class DeviceMethodCallback implements com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback
+    protected static class DeviceMethodCallback implements com.microsoft.azure.sdk.iot.device.twin.DeviceMethodCallback
     {
         @Override
         public DeviceMethodData call(String methodName, Object methodData, Object context)
@@ -180,7 +174,7 @@ public class HubTierConnectionTests extends IntegrationTest
         }
     }
 
-    protected static class DeviceMethodStatusCallBack implements IotHubEventCallback
+    protected static class DeviceMethodStatusCallback implements IotHubEventCallback
     {
         public void execute(IotHubStatusCode status, Object context)
         {
@@ -194,16 +188,16 @@ public class HubTierConnectionTests extends IntegrationTest
     {
         //arrange
         List<Pair<IotHubConnectionStatus, Throwable>> connectionStatusUpdates = new ArrayList<>();
-        testInstance.client.registerConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> connectionStatusUpdates.add(new Pair<>(status, throwable)), null);
+        testInstance.client.setConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> connectionStatusUpdates.add(new Pair<>(status, throwable)), null);
 
         testInstance.client.open();
 
         //act
-        testInstance.client.subscribeToDeviceMethod(new DeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
+        testInstance.client.subscribeToMethodsAsync(new DeviceMethodCallback(), null, new DeviceMethodStatusCallback(), null);
 
         //assert
         waitForDisconnect(connectionStatusUpdates, WAIT_FOR_DISCONNECT_TIMEOUT_MILLISECONDS, testInstance.client);
-        testInstance.client.closeNow();
+        testInstance.client.close();
     }
 
     public static void waitForDisconnect(List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates, long timeout, InternalClient client) throws InterruptedException

@@ -9,13 +9,12 @@ import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
 import org.apache.qpid.proton.message.impl.MessageImpl;
 import org.apache.qpid.proton.amqp.messaging.Data;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
 public class AmqpMessage
 {
-    final MessageImpl messageImpl;
+    private final MessageImpl messageImpl;
 
     public AmqpMessage()
     {
@@ -103,7 +102,7 @@ public class AmqpMessage
         this.messageImpl.decode(data, offset, length);
     }
 
-    public int encode(byte[] data, int offset) throws IOException
+    public int encode(byte[] data, int offset)
     {
         if (data == null)
         {

@@ -14,7 +14,7 @@ import java.util.Map;
 public class HttpRequest
 {
     /** The underlying HTTPS connection stream. */
-    protected final HttpConnection connection;
+    private final HttpConnection connection;
 
     /**
      * Constructor. Takes a URL as an argument and returns an HTTPS request that

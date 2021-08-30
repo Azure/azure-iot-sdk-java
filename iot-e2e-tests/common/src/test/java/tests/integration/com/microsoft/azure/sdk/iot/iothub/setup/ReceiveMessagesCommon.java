@@ -126,8 +126,8 @@ public class ReceiveMessagesCommon extends IntegrationTest
             this.publicKeyCert = x509CertificateGenerator.getPublicCertificate();
             this.privateKey = x509CertificateGenerator.getPrivateKey();
             this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
-            this.registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-            this.serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
+            this.registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+            this.serviceClient = new ServiceClient(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
         }
 
         public void setup() throws Exception
@@ -156,7 +156,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
             {
                 if (this.identity != null && this.identity.getClient() != null)
                 {
-                    this.identity.getClient().closeNow();
+                    this.identity.getClient().close();
                 }
 
                 this.serviceClient.close();

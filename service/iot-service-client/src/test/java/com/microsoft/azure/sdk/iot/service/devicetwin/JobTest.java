@@ -3,11 +3,9 @@
 
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Job;
 import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
 import mockit.*;
 import org.junit.Test;
@@ -30,7 +28,7 @@ public class JobTest
     JobResult mockedJobResult;
 
     @Mocked
-    DeviceTwinDevice mockedDeviceTwinDevice;
+    Twin mockedTwin;
     
     /* Tests_SRS_JOB_21_001: [The constructor shall throw IllegalArgumentException if the input string is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
@@ -140,7 +138,7 @@ public class JobTest
     {
         // arrange
         final String queryCondition = "validQueryCondition";
-        final DeviceTwinDevice deviceTwin = null;
+        final Twin deviceTwin = null;
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = 100;
         final String connectionString = "validConnectionString";
@@ -148,7 +146,7 @@ public class JobTest
 
         // act
         Deencapsulation.invoke(job, "scheduleUpdateTwin",
-                new Class[]{String.class, DeviceTwinDevice.class, Date.class, Long.class},
+                new Class[]{String.class, Twin.class, Date.class, Long.class},
                 queryCondition, deviceTwin, now, maxExecutionTimeInSeconds);
     }
 
@@ -158,7 +156,7 @@ public class JobTest
     {
         // arrange
         final String queryCondition = "validQueryCondition";
-        final DeviceTwinDevice deviceTwin = mockedDeviceTwinDevice;
+        final Twin deviceTwin = mockedTwin;
         final Date now = null;
         final long maxExecutionTimeInSeconds = 100;
         final String connectionString = "validConnectionString";
@@ -166,7 +164,7 @@ public class JobTest
 
         // act
         Deencapsulation.invoke(job, "scheduleUpdateTwin",
-                new Class[]{String.class, DeviceTwinDevice.class, Date.class, Long.class},
+                new Class[]{String.class, Twin.class, Date.class, Long.class},
                 queryCondition, deviceTwin, now, maxExecutionTimeInSeconds);
     }
 
@@ -176,7 +174,7 @@ public class JobTest
     {
         // arrange
         final String queryCondition = "validQueryCondition";
-        final DeviceTwinDevice deviceTwin = mockedDeviceTwinDevice;
+        final Twin deviceTwin = mockedTwin;
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = -100;
         final String connectionString = "validConnectionString";
@@ -184,7 +182,7 @@ public class JobTest
 
         // act
         Deencapsulation.invoke(job, "scheduleUpdateTwin",
-                new Class[]{String.class, DeviceTwinDevice.class, Date.class, Long.class},
+                new Class[]{String.class, Twin.class, Date.class, Long.class},
                 queryCondition, deviceTwin, now, maxExecutionTimeInSeconds);
     }
 
@@ -194,7 +192,7 @@ public class JobTest
     {
         // arrange
         final String queryCondition = "validQueryCondition";
-        final DeviceTwinDevice deviceTwin = mockedDeviceTwinDevice;
+        final Twin deviceTwin = mockedTwin;
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = 100;
         final String connectionString = "validConnectionString";
@@ -203,7 +201,7 @@ public class JobTest
         new NonStrictExpectations()
         {
             {
-                JobClient.createFromConnectionString(connectionString);
+                new JobClient(connectionString);
                 result = mockedJobClient;
                 mockedJobClient.scheduleUpdateTwin((String)any, queryCondition,deviceTwin, now, maxExecutionTimeInSeconds);
                 result = mockedJobResult;
@@ -217,7 +215,7 @@ public class JobTest
 
         // act
         Deencapsulation.invoke(job, "scheduleUpdateTwin",
-                new Class[]{String.class, DeviceTwinDevice.class, Date.class, Long.class},
+                new Class[]{String.class, Twin.class, Date.class, Long.class},
                 queryCondition, deviceTwin, now, maxExecutionTimeInSeconds);
     }
 
@@ -227,7 +225,7 @@ public class JobTest
     {
         // arrange
         final String queryCondition = "validQueryCondition";
-        final DeviceTwinDevice deviceTwin = mockedDeviceTwinDevice;
+        final Twin deviceTwin = mockedTwin;
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = 100;
         final String connectionString = "validConnectionString";
@@ -236,7 +234,7 @@ public class JobTest
         new NonStrictExpectations()
         {
             {
-                JobClient.createFromConnectionString(connectionString);
+                new JobClient(connectionString);
                 result = mockedJobClient;
                 mockedJobClient.scheduleUpdateTwin((String)any, queryCondition,deviceTwin, now, maxExecutionTimeInSeconds);
                 result = new IotHubException();
@@ -248,7 +246,7 @@ public class JobTest
 
         // act
         Deencapsulation.invoke(job, "scheduleUpdateTwin",
-                new Class[]{String.class, DeviceTwinDevice.class, Date.class, Long.class},
+                new Class[]{String.class, Twin.class, Date.class, Long.class},
                 queryCondition, deviceTwin, now, maxExecutionTimeInSeconds);
     }
 
@@ -258,7 +256,7 @@ public class JobTest
     {
         // arrange
         final String queryCondition = "validQueryCondition";
-        final DeviceTwinDevice deviceTwin = mockedDeviceTwinDevice;
+        final Twin deviceTwin = mockedTwin;
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = 100;
         final String connectionString = "validConnectionString";
@@ -267,7 +265,7 @@ public class JobTest
         new NonStrictExpectations()
         {
             {
-                JobClient.createFromConnectionString(connectionString);
+                new JobClient(connectionString);
                 result = mockedJobClient;
                 mockedJobClient.scheduleUpdateTwin((String)any, queryCondition,deviceTwin, now, maxExecutionTimeInSeconds);
                 result = mockedJobResult;
@@ -281,7 +279,7 @@ public class JobTest
 
         // act
         Deencapsulation.invoke(job, "scheduleUpdateTwin",
-                new Class[]{String.class, DeviceTwinDevice.class, Date.class, Long.class},
+                new Class[]{String.class, Twin.class, Date.class, Long.class},
                 queryCondition, deviceTwin, now, maxExecutionTimeInSeconds);
     }
 
@@ -377,7 +375,7 @@ public class JobTest
         new NonStrictExpectations()
         {
             {
-                JobClient.createFromConnectionString(connectionString);
+                new JobClient(connectionString);
                 result = mockedJobClient;
                 mockedJobClient.scheduleDeviceMethod((String)any, queryCondition, methodName, null, null, payload, now, maxExecutionTimeInSeconds);
                 result = mockedJobResult;
@@ -411,7 +409,7 @@ public class JobTest
         new NonStrictExpectations()
         {
             {
-                JobClient.createFromConnectionString(connectionString);
+                new JobClient(connectionString);
                 result = mockedJobClient;
                 mockedJobClient.scheduleDeviceMethod((String)any, queryCondition, methodName, null, null, payload, now, maxExecutionTimeInSeconds);
                 result = new IOException();
@@ -443,7 +441,7 @@ public class JobTest
         new NonStrictExpectations()
         {
             {
-                JobClient.createFromConnectionString(connectionString);
+                new JobClient(connectionString);
                 result = mockedJobClient;
                 mockedJobClient.scheduleDeviceMethod((String)any, queryCondition, methodName, null, null, payload, now, maxExecutionTimeInSeconds);
                 result = mockedJobResult;
@@ -471,7 +469,7 @@ public class JobTest
         new NonStrictExpectations()
         {
             {
-                JobClient.createFromConnectionString(connectionString);
+                new JobClient(connectionString);
                 result = mockedJobClient;
                 mockedJobClient.getJob((String)any);
                 result = mockedJobResult;
@@ -499,7 +497,7 @@ public class JobTest
         new NonStrictExpectations()
         {
             {
-                JobClient.createFromConnectionString(connectionString);
+                new JobClient(connectionString);
                 result = mockedJobClient;
                 mockedJobClient.getJob((String)any);
                 result = new IOException();
@@ -524,7 +522,7 @@ public class JobTest
         new NonStrictExpectations()
         {
             {
-                JobClient.createFromConnectionString(connectionString);
+                new JobClient(connectionString);
                 result = mockedJobClient;
                 mockedJobClient.cancelJob((String)any);
                 result = mockedJobResult;
@@ -552,7 +550,7 @@ public class JobTest
         new NonStrictExpectations()
         {
             {
-                JobClient.createFromConnectionString(connectionString);
+                new JobClient(connectionString);
                 result = mockedJobClient;
                 mockedJobClient.cancelJob((String)any);
                 result = new IOException();

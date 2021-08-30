@@ -59,10 +59,6 @@ public class IotHubTransport implements IotHubListener
     // Messages whose callbacks that are waiting to be invoked.
     private final Queue<IotHubTransportPacket> callbackPacketsQueue = new ConcurrentLinkedQueue<>();
 
-    // Connection Status callback information (deprecated)
-    private IotHubConnectionStateCallback stateCallback;
-    private Object stateCallbackContext;
-
     // Connection Status change callback information
     private final Map<String, IotHubConnectionStatusChangeCallback> connectionStatusChangeCallbacks = new ConcurrentHashMap<>();
     private final Map<String, Object> connectionStatusChangeCallbackContexts = new ConcurrentHashMap<>();
@@ -112,7 +108,8 @@ public class IotHubTransport implements IotHubListener
      * Constructor for an IotHubTransport object with default values
      *
      * @param defaultConfig the config used for opening connections, retrieving retry policy, and checking protocol
-     *
+     * @param deviceIOConnectionStatusChangeCallback the callback used to notify the DeviceIO layer when a connection status change has occurred.
+     * @param isMultiplexing true if the transport will be used for multiplexed connections. False otherwise.
      * @throws IllegalArgumentException if defaultConfig is null
      */
     public IotHubTransport(DeviceClientConfig defaultConfig, IotHubConnectionStatusChangeCallback deviceIOConnectionStatusChangeCallback, boolean isMultiplexing) throws IllegalArgumentException
@@ -719,30 +716,13 @@ public class IotHubTransport implements IotHubListener
     }
 
     /**
-     * Registers a callback to be executed whenever the connection to the IoT Hub is lost or established.
-     *
-     * @param callback the callback to be called.
-     * @param callbackContext a context to be passed to the callback. Can be
-     * {@code null} if no callback is provided.
-     */
-    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext)
-    {
-        if (callback == null)
-        {
-            throw new IllegalArgumentException("Callback cannot be null");
-        }
-
-        this.stateCallback = callback;
-        this.stateCallbackContext = callbackContext;
-    }
-
-    /**
      * Registers a callback to be executed whenever the connection status to the IoT Hub has changed.
      *
      * @param callback the callback to be called. Can be null if callbackContext is not null
      * @param callbackContext a context to be passed to the callback. Can be {@code null}.
+     * @param deviceId the Id of the device whose connection status changes will go to this callback.
      */
-    public void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext, String deviceId)
+    public void setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext, String deviceId)
     {
         if (callbackContext != null && callback == null)
         {
@@ -767,7 +747,7 @@ public class IotHubTransport implements IotHubListener
         }
     }
 
-    public void registerMultiplexingConnectionStateCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext)
+    public void setMultiplexingConnectionStateCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext)
     {
         if (callback == null && callbackContext != null)
         {
@@ -1331,7 +1311,7 @@ public class IotHubTransport implements IotHubListener
         final Queue<IotHubTransportPacket> waitingPacketsQueue;
         final Object sendThreadLock;
 
-        public MessageRetryRunnable(Queue<IotHubTransportPacket> waitingPacketsQueue, IotHubTransportPacket transportPacket, Object sendThreadLock)
+        MessageRetryRunnable(Queue<IotHubTransportPacket> waitingPacketsQueue, IotHubTransportPacket transportPacket, Object sendThreadLock)
         {
             this.waitingPacketsQueue = waitingPacketsQueue;
             this.transportPacket = transportPacket;
@@ -1519,7 +1499,6 @@ public class IotHubTransport implements IotHubListener
 
             //invoke connection status callbacks
             log.debug("Invoking connection status callbacks with new status details");
-            invokeConnectionStateCallback(newConnectionStatus, reason);
 
             if (!isMultiplexing || newConnectionStatus != IotHubConnectionStatus.CONNECTED)
             {
@@ -1562,27 +1541,7 @@ public class IotHubTransport implements IotHubListener
                 this.deviceConnectionStates.put(deviceId, newConnectionStatus);
 
                 log.debug("Invoking connection status callbacks with new status details");
-                invokeConnectionStateCallback(newConnectionStatus, reason);
                 invokeConnectionStatusChangeCallback(newConnectionStatus, reason, throwable, deviceId);
-            }
-        }
-    }
-
-    private void invokeConnectionStateCallback(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason reason)
-    {
-        if (this.stateCallback != null)
-        {
-            if (status == IotHubConnectionStatus.CONNECTED)
-            {
-                this.stateCallback.execute(IotHubConnectionState.CONNECTION_SUCCESS, this.stateCallbackContext);
-            }
-            else if (reason == IotHubConnectionStatusChangeReason.EXPIRED_SAS_TOKEN)
-            {
-                this.stateCallback.execute(IotHubConnectionState.SAS_TOKEN_EXPIRED, this.stateCallbackContext);
-            }
-            else if (status == IotHubConnectionStatus.DISCONNECTED)
-            {
-                this.stateCallback.execute(IotHubConnectionState.CONNECTION_DROP, this.stateCallbackContext);
             }
         }
     }

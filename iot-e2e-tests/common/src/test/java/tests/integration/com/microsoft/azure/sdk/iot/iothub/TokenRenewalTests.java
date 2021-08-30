@@ -71,13 +71,13 @@ public class TokenRenewalTests extends IntegrationTest
     }
 
     @BeforeClass
-    public static void setUp() throws IOException
+    public static void setUp()
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
-        iotHubHostName = com.microsoft.azure.sdk.iot.service.IotHubConnectionString.createConnectionString(iotHubConnectionString).getHostName();
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        iotHubHostName = com.microsoft.azure.sdk.iot.service.IotHubConnectionString.createIotHubConnectionString(iotHubConnectionString).getHostName();
+        registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
     }
 
     @BeforeClass
@@ -155,7 +155,7 @@ public class TokenRenewalTests extends IntegrationTest
             mqttDisconnectDidHappenSuccesses[clientIndex].setResult(false); //assume failure until DISCONNECTED_RETRYING is triggered by token expiring
             shutdownWasGracefulSuccesses[clientIndex].setResult(true); //assume success until DISCONNECTED callback without CLIENT_CLOSE
 
-            clients.get(clientIndex).registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeTokenRenewalCallbackVerifier(clients.get(clientIndex).getConfig().getProtocol(), amqpDisconnectDidNotHappenSuccesses[clientIndex], mqttDisconnectDidHappenSuccesses[clientIndex], shutdownWasGracefulSuccesses[clientIndex]), clients.get(clientIndex));
+            clients.get(clientIndex).setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeTokenRenewalCallbackVerifier(clients.get(clientIndex).getConfig().getProtocol(), amqpDisconnectDidNotHappenSuccesses[clientIndex], mqttDisconnectDidHappenSuccesses[clientIndex], shutdownWasGracefulSuccesses[clientIndex]), clients.get(clientIndex));
         }
 
         openEachClient(clients);
@@ -186,7 +186,7 @@ public class TokenRenewalTests extends IntegrationTest
         {
             try
             {
-                client.closeNow();
+                client.close();
             }
             catch (UnsupportedOperationException ex)
             {

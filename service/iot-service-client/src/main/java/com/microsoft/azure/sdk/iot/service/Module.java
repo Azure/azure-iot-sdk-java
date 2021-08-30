@@ -5,9 +5,10 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.*;
+import com.microsoft.azure.sdk.iot.deps.serializer.DeviceParser;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
+import lombok.Getter;
 
 public class Module extends BaseDevice
 {
@@ -84,7 +85,7 @@ public class Module extends BaseDevice
      * @param symmetricKey - Device key. If parameter is null, then the key will be auto generated.
      * @throws IllegalArgumentException This exception is thrown if {@code deviceId} or {@code moduleId} is {@code null} or empty.
      */
-    protected Module(String deviceId, String moduleId, SymmetricKey symmetricKey)
+    private Module(String deviceId, String moduleId, SymmetricKey symmetricKey)
             throws IllegalArgumentException
     {
         super(deviceId, symmetricKey);
@@ -131,32 +132,14 @@ public class Module extends BaseDevice
      * of ASCII 7-bit alphanumeric chars
      * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
      */
-    protected String id;
-
-    /**
-     * Getter for module name
-     *
-     * @return The module string
-     */
-    public String getId()
-    {
-        return id;
-    }
+    @Getter
+    private String id;
 
     /**
      * Specifies the module's managed by owner
      */
-    protected String managedBy;
-
-    /**
-     * Getter for module's managed by owner
-     *
-     * @return The string containing the managed by owner
-     */
-    public String getManagedBy()
-    {
-        return managedBy;
-    }
+    @Getter
+    private String managedBy;
 
     Module(DeviceParser parser) throws IllegalArgumentException
     {

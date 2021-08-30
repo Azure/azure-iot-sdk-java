@@ -1,7 +1,7 @@
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
@@ -15,11 +15,11 @@ import org.apache.qpid.proton.engine.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.*;
+import static com.microsoft.azure.sdk.iot.device.twin.DeviceOperations.*;
 import static com.microsoft.azure.sdk.iot.device.MessageType.*;
 
 @Slf4j
-public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
+class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
 {
     @Getter
     private final DeviceClientConfig deviceClientConfig;

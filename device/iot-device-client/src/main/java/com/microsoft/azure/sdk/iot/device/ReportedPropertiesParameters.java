@@ -1,11 +1,11 @@
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
+import com.microsoft.azure.sdk.iot.device.twin.Property;
 
 import java.util.Set;
 
 /**
- * Convenience class for the sendReportedProperties method in the DeviceClient
+ * Convenience class for the sendReportedPropertiesAsync method in the DeviceClient
  */
 public class ReportedPropertiesParameters {
 
@@ -40,7 +40,7 @@ public class ReportedPropertiesParameters {
     }
 
     /**
-     * Set the correlation callback for the sendReportedProperties method
+     * Set the correlation callback for the sendReportedPropertiesAsync method
      *
      * @param correlatingMessageCallback A callback that will monitor the message lifecycle. Value can be {@code null}.
      */
@@ -49,7 +49,7 @@ public class ReportedPropertiesParameters {
     }
 
     /**
-     * Set the correlation callback for the sendReportedProperties method
+     * Set the correlation callback for the sendReportedPropertiesAsync method
      *
      * @param correlatingMessageCallback A callback that will monitor the message lifecycle. Value can be {@code null}.
      * @param correlatingMessageCallbackContext The context for the callback. Value can be {@code null}.
@@ -60,7 +60,7 @@ public class ReportedPropertiesParameters {
     }
 
     /**
-     * Set the event callback for the sendReportedProperties method
+     * Set the event callback for the sendReportedPropertiesAsync method
      *
      * @param reportedPropertiesCallback A callback that will be executed once the messaage has been sent and acknowledged. Value can be {@code null}.
      */
@@ -69,7 +69,7 @@ public class ReportedPropertiesParameters {
     }
 
     /**
-     * Set the event callback for the sendReportedProperties method
+     * Set the event callback for the sendReportedPropertiesAsync method
      *
      * @param reportedPropertiesCallback A callback that will be executed once the messaage has been sent and acknowledged. Value can be {@code null}.
      * @param reportedPropertiesCallbackContext The context for the callback. Value can be {@code null}.

@@ -7,7 +7,6 @@ package com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.QueryResponseParser;
 
-import java.io.IOException;
 import java.util.Iterator;
 
 /**
@@ -20,9 +19,8 @@ public class QueryResponse implements Iterator<Object>
     /**
      * Creates an object for the query response
      * @param jsonString json response for query to parse
-     * @throws IOException If any of the input parameters are invalid
      */
-    QueryResponse(String jsonString) throws IOException
+    QueryResponse(String jsonString)
     {
         if (jsonString == null || jsonString.length() == 0)
         {

@@ -20,27 +20,27 @@ public class TwinStateTest
     private final static TwinCollection TAGS = new TwinCollection()
     {
         {
-            putFinal("tag1", "val1");
-            putFinal("tag2", "val2");
-            putFinal("tag3", "val3");
+            put("tag1", "val1");
+            put("tag2", "val2");
+            put("tag3", "val3");
         }
     };
 
     private final static TwinCollection PROPERTIES = new TwinCollection()
     {
         {
-            putFinal("prop1", "val1");
-            putFinal("prop2", "val2");
-            putFinal("prop3", "val3");
+            put("prop1", "val1");
+            put("prop2", "val2");
+            put("prop3", "val3");
         }
     };
 
     private final static TwinCollection PROPERTIES_WITH_NULL_VALUES = new TwinCollection()
     {
         {
-            putFinal("prop1", null);
-            putFinal("prop2", null);
-            putFinal("prop3", null);
+            put("prop1", null);
+            put("prop2", null);
+            put("prop3", null);
         }
     };
 
@@ -265,7 +265,7 @@ public class TwinStateTest
         assertEquals(TAGS, twinState.getTags());
         assertEquals(PROPERTIES, twinState.getDesiredProperty());
         assertEquals(PROPERTIES, twinState.getReportedProperty());
-        assertEquals(expectedConnectionState.toString(), twinState.getConnectionState());
+        assertEquals(expectedConnectionState, TwinConnectionState.valueOf(twinState.getConnectionState()));
     }
 
     /* SRS_TWIN_STATE_21_006: [The getDesiredProperty shall return a TwinCollection with the stored desired property.] */

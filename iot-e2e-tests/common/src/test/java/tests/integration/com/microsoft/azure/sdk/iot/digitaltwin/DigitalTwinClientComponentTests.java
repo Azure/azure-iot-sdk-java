@@ -4,7 +4,7 @@
 package tests.integration.com.microsoft.azure.sdk.iot.digitaltwin;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
+import com.microsoft.azure.sdk.iot.device.twin.*;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
@@ -69,7 +69,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
 
     @BeforeClass
     public static void setUpBeforeClass() throws IOException {
-        registryManager = RegistryManager.createFromConnectionString(IOTHUB_CONNECTION_STRING);
+        registryManager = new RegistryManager(IOTHUB_CONNECTION_STRING);
     }
 
     @Before
@@ -82,7 +82,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
     @After
     public void cleanUp() {
         try {
-            deviceClient.closeNow();
+            deviceClient.close();
             registryManager.removeDevice(deviceId);
         } catch (Exception ex) {
             log.error("An exception occurred while closing/ deleting the device {}: {}", deviceId, ex);
@@ -180,7 +180,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
         // IotHub event callback
         IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) -> {};
 
-        deviceClient.subscribeToDeviceMethod(deviceMethodCallback, commandName, iotHubEventCallback, commandName);
+        deviceClient.subscribeToMethodsAsync(deviceMethodCallback, commandName, iotHubEventCallback, commandName);
 
         // act
         DigitalTwinCommandResponse responseWithNoPayload = this.digitalTwinClient.invokeComponentCommand(deviceId, componentName, commandName, null);
@@ -228,7 +228,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
         // IotHub event callback
         IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) -> {};
 
-        deviceClient.subscribeToDeviceMethod(deviceMethodCallback, commandName, iotHubEventCallback, commandName);
+        deviceClient.subscribeToMethodsAsync(deviceMethodCallback, commandName, iotHubEventCallback, commandName);
 
         // act
         DigitalTwinCommandResponse responseWithNoPayload = this.digitalTwinClient.invokeCommand(deviceId, commandName, null);

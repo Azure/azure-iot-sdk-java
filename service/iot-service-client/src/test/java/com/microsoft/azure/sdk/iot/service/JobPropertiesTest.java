@@ -46,7 +46,7 @@ public class JobPropertiesTest
         assertEquals(parser.getType(), jobProperties.getType().toString());
         assertEquals(parser.getStatus(), jobProperties.getStatus().toString());
         assertEquals(parser.getProgress(), jobProperties.getProgress());
-        assertEquals(parser.getJobIdFinal(), jobProperties.getJobId());
+        assertEquals(parser.getJobId(), jobProperties.getJobId());
         assertEquals(parser.getFailureReason(), jobProperties.getFailureReason());
         assertEquals(parser.getEndTimeUtc(), jobProperties.getEndTimeUtc());
         assertEquals(parser.getStartTimeUtc(), jobProperties.getStartTimeUtc());
@@ -65,7 +65,7 @@ public class JobPropertiesTest
         jobProperties.setOutputBlobContainerUri("outputContainerUri");
         jobProperties.setProgress(0);
         jobProperties.setExcludeKeysInExport(false);
-        jobProperties.setJobIdFinal("jobId");
+        jobProperties.setJobId("jobId");
         jobProperties.setStatus(JobProperties.JobStatus.COMPLETED);
         jobProperties.setType(JobProperties.JobType.IMPORT);
 
@@ -79,17 +79,10 @@ public class JobPropertiesTest
         assertEquals(parser.getType().toUpperCase(), jobProperties.getType().toString());
         assertEquals(parser.getStatus(), jobProperties.getStatus().toString());
         assertEquals(parser.getProgress(), jobProperties.getProgress());
-        assertEquals(parser.getJobIdFinal(), jobProperties.getJobId());
+        assertEquals(parser.getJobId(), jobProperties.getJobId());
         assertEquals(parser.getFailureReason(), jobProperties.getFailureReason());
         assertEquals(parser.getEndTimeUtc(), jobProperties.getEndTimeUtc());
         assertEquals(parser.getStartTimeUtc(), jobProperties.getStartTimeUtc());
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_JOB_PROPERTIES_34_004: [If the provided jobId is null, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void cannotSetJobIdToNull()
-    {
-        new JobProperties().setJobIdFinal(null);
     }
 
     private JobPropertiesParser toJobPropertiesParser(JobProperties jobProperties)

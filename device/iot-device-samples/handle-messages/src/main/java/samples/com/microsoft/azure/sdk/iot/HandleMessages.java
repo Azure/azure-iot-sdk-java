@@ -217,7 +217,7 @@ public class HandleMessages
 
         System.out.println("Successfully set message callback.");
 
-        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
+        client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
         client.open();
 
@@ -229,7 +229,7 @@ public class HandleMessages
         Scanner scanner = new Scanner(System.in);
         scanner.nextLine();
 
-        client.closeNow();
+        client.close();
 
         System.out.println("Shutting down...");
     }

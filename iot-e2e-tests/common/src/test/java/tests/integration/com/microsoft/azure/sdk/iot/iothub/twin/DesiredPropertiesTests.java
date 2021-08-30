@@ -7,17 +7,15 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.twin;
 
 import com.google.gson.JsonParser;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertiesCallback;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.twin.Pair;
+import com.microsoft.azure.sdk.iot.device.twin.Property;
+import com.microsoft.azure.sdk.iot.device.twin.TwinPropertiesCallback;
+import com.microsoft.azure.sdk.iot.device.twin.TwinPropertyCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
-import com.microsoft.azure.sdk.iot.device.ModuleClient;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,15 +27,12 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
-import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DeviceTwinCommon;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.TwinCommon;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
@@ -47,7 +42,7 @@ import static org.junit.Assert.*;
 @Slf4j
 @IotHubTest
 @RunWith(Parameterized.class)
-public class DesiredPropertiesTests extends DeviceTwinCommon
+public class DesiredPropertiesTests extends TwinCommon
 {
     private final JsonParser jsonParser;
 
@@ -185,7 +180,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         // arrange
         testInstance.deviceUnderTest.sCDeviceForTwin.clearTwin();
         testInstance.deviceUnderTest.dCDeviceForTwin.getDesiredProp().clear();
-        Map<Property, Pair<TwinPropertyCallBack, Object>> desiredPropertiesCB = new HashMap<>();
+        Map<Property, Pair<TwinPropertyCallback, Object>> desiredPropertiesCB = new HashMap<>();
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
             PropertyState propertyState = new PropertyState();
@@ -193,11 +188,11 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
             propertyState.propertyNewVersion = -1;
             propertyState.property = new Property(PROPERTY_KEY + i, propertyValue);
             testInstance.deviceUnderTest.dCDeviceForTwin.propertyStateList[i] = propertyState;
-            desiredPropertiesCB.put(propertyState.property, new com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<>(testInstance.deviceUnderTest.dCOnProperty, propertyState));
+            desiredPropertiesCB.put(propertyState.property, new com.microsoft.azure.sdk.iot.device.twin.Pair<>(testInstance.deviceUnderTest.dCOnProperty, propertyState));
         }
 
         // act
-        testInstance.testIdentity.getClient().subscribeToTwinDesiredProperties(desiredPropertiesCB);
+        testInstance.testIdentity.getClient().subscribeToTwinDesiredPropertiesAsync(desiredPropertiesCB);
         Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
         Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
@@ -239,7 +234,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         }
 
         // act
-        testInstance.testIdentity.getClient().subscribeToDesiredProperties(testInstance.deviceUnderTest.dCDeviceForTwin.getDesiredProp());
+        testInstance.testIdentity.getClient().subscribeToDesiredPropertiesAsync(testInstance.deviceUnderTest.dCDeviceForTwin.getDesiredProp());
         Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
@@ -332,7 +327,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         TwinCollection expectedProperties;
 
         @Override
-        public void TwinPropertiesCallBack(TwinCollection actualProperties, Object context) {
+        public void onPropertiesChanged(TwinCollection actualProperties, Object context) {
             Success desiredPropertiesCallbackState = (Success) context;
             desiredPropertiesCallbackState.callbackWasFired();
 
@@ -365,7 +360,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         }
     }
 
-    // This test is for the startDeviceTwin/startTwin API that takes the TwinPropertiesCallback rather than the TwinPropertyCallback
+    // This test is for the startTwinAsync/startTwinAsync API that takes the TwinPropertiesCallback rather than the TwinPropertyCallback
     // This callback should receive the full twin update in one callback, rather than one callback per updated
     // desired property
     @Test
@@ -380,21 +375,14 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         String expectedValue2 = UUID.randomUUID().toString();
 
         TwinCollection expectedDesiredProperties = new TwinCollection();
-        expectedDesiredProperties.putFinal(expectedKey1, expectedValue1);
-        expectedDesiredProperties.putFinal(expectedKey2, expectedValue2);
+        expectedDesiredProperties.put(expectedKey1, expectedValue1);
+        expectedDesiredProperties.put(expectedKey2, expectedValue2);
         TwinPropertiesCallback twinPropertiesCallback = new TwinPropertiesCallbackImpl(expectedDesiredProperties);
 
         Success desiredPropertiesCallbackState = new Success();
 
         testInstance.testIdentity.getClient().open();
-        if (testInstance.testIdentity.getClient() instanceof DeviceClient)
-        {
-            ((DeviceClient) testInstance.testIdentity.getClient()).startDeviceTwin(new DeviceTwinStatusCallBack(), testInstance.deviceUnderTest, twinPropertiesCallback, desiredPropertiesCallbackState);
-        }
-        else
-        {
-            ((ModuleClient) testInstance.testIdentity.getClient()).startTwin(new DeviceTwinStatusCallBack(), testInstance.deviceUnderTest, twinPropertiesCallback, desiredPropertiesCallbackState);
-        }
+        testInstance.testIdentity.getClient().startTwinAsync(new DeviceTwinStatusCallback(), testInstance.deviceUnderTest, twinPropertiesCallback, desiredPropertiesCallbackState);
 
         long startTime = System.currentTimeMillis();
         while (testInstance.deviceUnderTest.deviceTwinStatus != IotHubStatusCode.OK)
@@ -407,14 +395,14 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
             }
         }
 
-        DeviceTwinDevice serviceClientTwin;
+        Twin serviceClientTwin;
         if (testInstance.clientType == ClientType.DEVICE_CLIENT)
         {
-            serviceClientTwin = new DeviceTwinDevice(testInstance.testIdentity.getClient().getConfig().getDeviceId());
+            serviceClientTwin = new Twin(testInstance.testIdentity.getClient().getConfig().getDeviceId());
         }
         else
         {
-            serviceClientTwin = new DeviceTwinDevice(testInstance.testIdentity.getClient().getConfig().getDeviceId(), testInstance.testIdentity.getClient().getConfig().getModuleId());
+            serviceClientTwin = new Twin(testInstance.testIdentity.getClient().getConfig().getDeviceId(), testInstance.testIdentity.getClient().getConfig().getModuleId());
         }
 
         Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();

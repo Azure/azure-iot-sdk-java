@@ -4,7 +4,7 @@
  */
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
 import com.microsoft.azure.sdk.iot.service.devicetwin.SqlQuery;
@@ -77,10 +77,10 @@ public class JobClientSample
     }
 
 
-    private static JobClient createJobClient() throws IOException
+    private static JobClient createJobClient()
     {
         System.out.println("Create JobClient from the connectionString...");
-        JobClient jobClient = JobClient.createFromConnectionString(iotHubConnectionString);
+        JobClient jobClient = new JobClient(iotHubConnectionString);
         System.out.println("JobClient created with success");
         System.out.println();
         return  jobClient;
@@ -143,7 +143,7 @@ public class JobClientSample
     private static JobResult scheduleUpdateTwin(JobClient jobClient) throws IOException, IotHubException
     {
         final String queryCondition = "DeviceId IN ['" + deviceId + "']";
-        DeviceTwinDevice updateTwin = new DeviceTwinDevice(deviceId);
+        Twin updateTwin = new Twin(deviceId);
         Set<Pair> tags = new HashSet<>();
         tags.add(new Pair("HomeID", UUID.randomUUID()));
         updateTwin.setTags(tags);

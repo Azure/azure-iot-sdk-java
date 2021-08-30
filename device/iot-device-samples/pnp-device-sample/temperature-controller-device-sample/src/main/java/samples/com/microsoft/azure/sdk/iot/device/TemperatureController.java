@@ -6,7 +6,7 @@ package samples.com.microsoft.azure.sdk.iot.device;
 import com.google.gson.Gson;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
+import com.microsoft.azure.sdk.iot.device.twin.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
@@ -155,20 +155,20 @@ public class TemperatureController {
 
         log.debug("Set handler for \"reboot\" command.");
         log.debug("Set handler for \"getMaxMinReport\" command.");
-        deviceClient.subscribeToDeviceMethod(new MethodCallback(), null, new MethodIotHubEventCallback(), null);
+        deviceClient.subscribeToMethodsAsync(new MethodCallback(), null, new MethodIotHubEventCallback(), null);
 
         log.debug("Set handler to receive \"targetTemperature\" updates.");
-        deviceClient.startDeviceTwin(new TwinIotHubEventCallback(), null, new GenericPropertyUpdateCallback(), null);
-        Map<Property, Pair<TwinPropertyCallBack, Object>> desiredPropertyUpdateCallback = Stream.of(
-                new AbstractMap.SimpleEntry<Property, Pair<TwinPropertyCallBack, Object>>(
+        deviceClient.startTwinAsync(new TwinIotHubEventCallback(), null, new GenericPropertyUpdateCallback(), null);
+        Map<Property, Pair<TwinPropertyCallback, Object>> desiredPropertyUpdateCallback = Stream.of(
+                new AbstractMap.SimpleEntry<Property, Pair<TwinPropertyCallback, Object>>(
                         new Property(THERMOSTAT_1, null),
                         new Pair<>(new TargetTemperatureUpdateCallback(), THERMOSTAT_1)),
-                new AbstractMap.SimpleEntry<Property, Pair<TwinPropertyCallBack, Object>>(
+                new AbstractMap.SimpleEntry<Property, Pair<TwinPropertyCallback, Object>>(
                         new Property(THERMOSTAT_2, null),
                         new Pair<>(new TargetTemperatureUpdateCallback(), THERMOSTAT_2))
         ).collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
 
-        deviceClient.subscribeToTwinDesiredProperties(desiredPropertyUpdateCallback);
+        deviceClient.subscribeToTwinDesiredPropertiesAsync(desiredPropertyUpdateCallback);
 
         updateDeviceInformation();
         sendDeviceMemory();
@@ -263,7 +263,7 @@ public class TemperatureController {
         options.setModelId(MODEL_ID);
         deviceClient = new DeviceClient(deviceConnectionString, protocol, options);
 
-        deviceClient.registerConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> {
+        deviceClient.setConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> {
             log.debug("Connection status change registered: status={}, reason={}", status, statusChangeReason);
 
             if (throwable != null) {
@@ -278,7 +278,8 @@ public class TemperatureController {
     /**
      * The callback to handle "reboot" command. This method will send a temperature update (of 0°C) over telemetry for both associated components.
      */
-    private static class MethodCallback implements DeviceMethodCallback {
+    private static class MethodCallback implements DeviceMethodCallback
+    {
         final String reboot = "reboot";
         final String getMaxMinReport1 = "thermostat1*getMaxMinReport";
         final String getMaxMinReport2 = "thermostat2*getMaxMinReport";
@@ -362,13 +363,14 @@ public class TemperatureController {
      * The desired property update callback, which receives the target temperature as a desired property update,
      * and updates the current temperature value over telemetry and reported property update.
      */
-    private static class TargetTemperatureUpdateCallback implements TwinPropertyCallBack {
+    private static class TargetTemperatureUpdateCallback implements TwinPropertyCallback
+    {
 
         final String propertyName = "targetTemperature";
 
         @SneakyThrows({IOException.class, InterruptedException.class})
         @Override
-        public void TwinPropertyCallBack(Property property, Object context) {
+        public void onPropertyChanged(Property property, Object context) {
             String componentName = (String) context;
 
             if (property.getKey().equalsIgnoreCase(componentName)) {
@@ -382,7 +384,7 @@ public class TemperatureController {
                         StatusCode.IN_PROGRESS.value,
                         property.getVersion().longValue(),
                         null);
-                deviceClient.sendReportedProperties(pendingPropertyPatch);
+                deviceClient.sendReportedPropertiesAsync(pendingPropertyPatch);
                 log.debug("Property: Update - component=\"{}\", {\"{}\": {}°C} is {}", componentName, propertyName, targetTemperature, StatusCode.IN_PROGRESS);
 
                 // Update temperature in 2 steps
@@ -399,7 +401,7 @@ public class TemperatureController {
                         StatusCode.COMPLETED.value,
                         property.getVersion().longValue(),
                         "Successfully updated target temperature.");
-                deviceClient.sendReportedProperties(completedPropertyPatch);
+                deviceClient.sendReportedPropertiesAsync(completedPropertyPatch);
                 log.debug("Property: Update - {\"{}\": {}°C} is {}", propertyName, temperature.get(componentName), StatusCode.COMPLETED);
             } else {
                 log.debug("Property: Received an unrecognized property update from service.");
@@ -423,7 +425,7 @@ public class TemperatureController {
             put("totalMemory", 1024);
         }});
 
-        deviceClient.sendReportedProperties(deviceInfoPatch);
+        deviceClient.sendReportedPropertiesAsync(deviceInfoPatch);
         log.debug("Property: Update - component = \"{}\" is {}.", componentName, StatusCode.COMPLETED);
     }
     
@@ -442,7 +444,7 @@ public class TemperatureController {
         String propertyName = "serialNumber";
         Set<Property> propertyPatch = PnpConvention.createPropertyPatch(propertyName, SERIAL_NO);
 
-        deviceClient.sendReportedProperties(propertyPatch);
+        deviceClient.sendReportedPropertiesAsync(propertyPatch);
         log.debug("Property: Update - {\"{}\": {}} is {}", propertyName, SERIAL_NO, StatusCode.COMPLETED);
     }
 
@@ -480,7 +482,7 @@ public class TemperatureController {
         double maxTemp = maxTemperature.get(componentName);
 
         Set<Property> reportedProperty = PnpConvention.createComponentPropertyPatch(propertyName, maxTemp, componentName);
-        deviceClient.sendReportedProperties(reportedProperty);
+        deviceClient.sendReportedPropertiesAsync(reportedProperty);
         log.debug("Property: Update - {\"{}\": {}°C} is {}.", propertyName, maxTemp, StatusCode.COMPLETED);
     }
 
@@ -522,10 +524,11 @@ public class TemperatureController {
     /**
      * The callback to be invoked for a property change that is not explicitly monitored by the device.
      */
-    private static class GenericPropertyUpdateCallback implements TwinPropertyCallBack {
+    private static class GenericPropertyUpdateCallback implements TwinPropertyCallback
+    {
 
         @Override
-        public void TwinPropertyCallBack(Property property, Object context) {
+        public void onPropertyChanged(Property property, Object context) {
             log.debug("Property - Received property unhandled by device, key={}, value={}", property.getKey(), property.getValue());
         }
     }

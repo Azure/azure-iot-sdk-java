@@ -50,7 +50,7 @@ public class DeviceTest
         device.setSymmetricKey(expectedSymmetricKey);
         assertEquals(expectedSymmetricKey, device.getSymmetricKey());
 
-        device.setThumbprintFinal(expectedPrimaryThumbprint, expectedSecondaryThumbprint);
+        device.setThumbprint(expectedPrimaryThumbprint, expectedSecondaryThumbprint);
         assertEquals(expectedPrimaryThumbprint, device.getPrimaryThumbprint());
         assertEquals(expectedSecondaryThumbprint, device.getSecondaryThumbprint());
 
@@ -267,7 +267,7 @@ public class DeviceTest
         assertEquals(expectedConnectionState.toString(), parser.getConnectionState());
         assertEquals(ParserUtility.getDateTimeUtc(expectedConnectionStateUpdatedTime), parser.getConnectionStateUpdatedTime());
         assertEquals(expectedDeviceId, parser.getDeviceId());
-        assertEquals("\"" + expectedETag + "\"", parser.geteTag());
+        assertEquals(expectedETag, parser.getETag());
         assertEquals(expectedGenerationId, parser.getGenerationId());
         assertEquals(ParserUtility.getDateTimeUtc(expectedLastActivityTime), parser.getLastActivityTime());
         assertEquals(expectedCapabilities, parser.getCapabilities().getIotEdge());

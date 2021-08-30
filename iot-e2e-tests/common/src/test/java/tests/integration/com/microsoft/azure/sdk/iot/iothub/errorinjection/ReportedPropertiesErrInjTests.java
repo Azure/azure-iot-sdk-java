@@ -18,7 +18,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
-import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DeviceTwinCommon;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.TwinCommon;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,7 +34,7 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
  */
 @IotHubTest
 @RunWith(Parameterized.class)
-public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
+public class ReportedPropertiesErrInjTests extends TwinCommon
 {
     public ReportedPropertiesErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
     {
@@ -215,8 +215,8 @@ public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
     public void errorInjectionSendReportedPropertiesFlow(Message errorInjectionMessage) throws Exception
     {
         // Arrange
-        List<com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates = new ArrayList<>();
-        setConnectionStatusCallBack(actualStatusUpdates);
+        List<com.microsoft.azure.sdk.iot.device.twin.Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates = new ArrayList<>();
+        setConnectionStatusCallback(actualStatusUpdates);
         sendReportedPropertiesAndVerify(1);
 
         // Act
@@ -231,7 +231,7 @@ public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
         IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS, testInstance.testIdentity.getClient());
         // add one new reported property
         testInstance.deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(1);
-        testInstance.testIdentity.getClient().sendReportedProperties(testInstance.deviceUnderTest.dCDeviceForTwin.getReportedProp());
+        testInstance.testIdentity.getClient().sendReportedPropertiesAsync(testInstance.deviceUnderTest.dCDeviceForTwin.getReportedProp());
 
         waitAndVerifyTwinStatusBecomesSuccess();
         // verify if they are received by SC

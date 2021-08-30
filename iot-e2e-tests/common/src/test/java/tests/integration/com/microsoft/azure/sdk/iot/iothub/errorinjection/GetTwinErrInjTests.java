@@ -16,7 +16,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
-import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DeviceTwinCommon;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.TwinCommon;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
  */
 @IotHubTest
 @RunWith(Parameterized.class)
-public class GetTwinErrInjTests extends DeviceTwinCommon
+public class GetTwinErrInjTests extends TwinCommon
 {
     public GetTwinErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
     {
@@ -245,8 +245,8 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
     public void errorInjectionGetDeviceTwinFlow(Message errorInjectionMessage) throws Exception
     {
         // Arrange
-        List<com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates = new ArrayList<>();
-        setConnectionStatusCallBack(actualStatusUpdates);
+        List<com.microsoft.azure.sdk.iot.device.twin.Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates = new ArrayList<>();
+        setConnectionStatusCallback(actualStatusUpdates);
         testGetDeviceTwin();
 
         // Act
@@ -266,14 +266,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
             propertyState.propertyNewVersion = -1;
         }
 
-        if (testInstance.testIdentity.getClient() instanceof DeviceClient)
-        {
-            ((DeviceClient)testInstance.testIdentity.getClient()).getDeviceTwin();
-        }
-        else
-        {
-            ((ModuleClient)testInstance.testIdentity.getClient()).getTwin();
-        }
+        testInstance.testIdentity.getClient().getTwinAsync();
 
         waitAndVerifyTwinStatusBecomesSuccess();
         waitAndVerifyDesiredPropertyCallback(PROPERTY_VALUE_UPDATE, true);

@@ -15,7 +15,7 @@ import java.io.IOException;
 
 public class IotHubX509HardwareAuthenticationProvider extends IotHubAuthenticationProvider
 {
-    protected SecurityProviderX509 securityProviderX509;
+    private SecurityProviderX509 securityProviderX509;
 
     public IotHubX509HardwareAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, SecurityProvider securityProvider)
     {
@@ -29,6 +29,7 @@ public class IotHubX509HardwareAuthenticationProvider extends IotHubAuthenticati
 
         //Codes_SRS_IOTHUBX509HARDWAREAUTHENTICATION_34_001: [This function shall save the provided security provider.]
         this.securityProviderX509 = (SecurityProviderX509) securityProvider;
+        this.iotHubSSLContext = null;
     }
 
     /**
@@ -49,33 +50,11 @@ public class IotHubX509HardwareAuthenticationProvider extends IotHubAuthenticati
             catch (SecurityProviderException e)
             {
                 //Codes_SRS_IOTHUBX509HARDWAREAUTHENTICATION_34_004: [If the security provider throws a SecurityProviderException while generating an SSLContext, this function shall throw an IOException.]
-                throw new IOException(e);
+                throw new IOException("Failed to get the SSLContext from the security provider", e);
             }
         }
 
         //Codes_SRS_IOTHUBX509HARDWAREAUTHENTICATION_34_005: [This function shall return the saved IotHubSSLContext.]
         return this.iotHubSSLContext.getSSLContext();
-    }
-
-    /**
-     * Setter for the providing trusted certificate.
-     * @param pathToCertificate path to the certificate for one way authentication.
-     */
-    @Override
-    public void setPathToIotHubTrustedCert(String pathToCertificate)
-    {
-        //Codes_SRS_IOTHUBX509HARDWAREAUTHENTICATION_34_006: [This function shall throw an UnsupportedOperationException.]
-        throw new UnsupportedOperationException("Cannot change the trusted certificate when using security provider for authentication.");
-    }
-
-    /**
-     * Setter for the user trusted certificate
-     * @param certificate valid user trusted certificate string
-     */
-    @Override
-    public void setIotHubTrustedCert(String certificate)
-    {
-        //Codes_SRS_IOTHUBX509HARDWAREAUTHENTICATION_34_007: [This function shall throw an UnsupportedOperationException.]
-        throw new UnsupportedOperationException("Cannot change the trusted certificate when using security provider for authentication.");
     }
 }

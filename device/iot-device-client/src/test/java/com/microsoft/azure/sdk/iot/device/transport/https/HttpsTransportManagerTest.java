@@ -154,7 +154,7 @@ public class HttpsTransportManagerTest
                 Deencapsulation.invoke(HttpsSingleMessage.class, "parseHttpsJsonMessage", new Class[] {Message.class}, mockTransportMsg);
                 result = mockHttpsMessage;
                 mockTransportMsg.getIotHubMethod();
-                result = IotHubMethod.POST;
+                result = HttpsMethod.POST;
                 mockTransportMsg.getUriPath();
                 result = uriPath;
                 httpsIotHubConnection.sendHttpsMessage(mockHttpsMessage, (HttpsMethod)any, (String)any, (Map) any);
@@ -215,7 +215,7 @@ public class HttpsTransportManagerTest
                 Deencapsulation.invoke(HttpsSingleMessage.class, "parseHttpsJsonMessage", new Class[] {Message.class}, mockTransportMsg);
                 result = mockHttpsMessage;
                 mockTransportMsg.getIotHubMethod();
-                result = IotHubMethod.GET;
+                result = HttpsMethod.GET;
                 mockTransportMsg.getUriPath();
                 result = uriPath;
                 httpsIotHubConnection.sendHttpsMessage(mockHttpsMessage, (HttpsMethod)any, (String)any, (Map) any);
@@ -253,7 +253,7 @@ public class HttpsTransportManagerTest
                 Deencapsulation.invoke(HttpsSingleMessage.class, "parseHttpsJsonMessage", new Class[] {Message.class}, mockTransportMsg);
                 result = mockHttpsMessage;
                 mockTransportMsg.getIotHubMethod();
-                result = IotHubMethod.POST;
+                result = HttpsMethod.POST;
                 mockTransportMsg.getUriPath();
                 result = uriPath;
                 httpsIotHubConnection.sendHttpsMessage(mockHttpsMessage, (HttpsMethod)any, (String)any, (Map) any);
@@ -317,7 +317,7 @@ public class HttpsTransportManagerTest
                 Deencapsulation.invoke(HttpsSingleMessage.class, "parseHttpsJsonMessage", new Class[] {Message.class}, mockTransportMsg);
                 result = mockHttpsMessage;
                 mockTransportMsg.getIotHubMethod();
-                result = IotHubMethod.POST;
+                result = HttpsMethod.POST;
                 mockTransportMsg.getUriPath();
                 result = uriPath;
                 httpsIotHubConnection.sendHttpsMessage(mockHttpsMessage, (HttpsMethod)any, (String)any, (Map) any);
@@ -355,7 +355,7 @@ public class HttpsTransportManagerTest
                 Deencapsulation.invoke(HttpsSingleMessage.class, "parseHttpsJsonMessage", new Class[] {Message.class}, mockTransportMsg);
                 result = mockHttpsMessage;
                 mockTransportMsg.getIotHubMethod();
-                result = IotHubMethod.POST;
+                result = HttpsMethod.POST;
                 mockTransportMsg.getUriPath();
                 result = uriPath;
                 httpsIotHubConnection.sendHttpsMessage(mockHttpsMessage, (HttpsMethod)any, (String)any, (Map) any);
@@ -448,7 +448,7 @@ public class HttpsTransportManagerTest
                 new IotHubTransportMessage(expectedMethodRequestJson);
                 result = mockedTransportMessage;
 
-                mockedTransportMessage.setIotHubMethod(IotHubMethod.POST);
+                mockedTransportMessage.setIotHubMethod(HttpsMethod.POST);
 
                 mockedTransportMessage.setUriPath("/twins/" + expectedDeviceId + "/modules/" + expectedModuleId +"/methods");
 
@@ -505,7 +505,7 @@ public class HttpsTransportManagerTest
                 new IotHubTransportMessage(expectedMethodRequestJson);
                 result = mockedTransportMessage;
 
-                mockedTransportMessage.setIotHubMethod(IotHubMethod.POST);
+                mockedTransportMessage.setIotHubMethod(HttpsMethod.POST);
 
                 mockedTransportMessage.setUriPath("/twins/" + expectedDeviceId + "/methods");
 
@@ -580,7 +580,7 @@ public class HttpsTransportManagerTest
                 new IotHubTransportMessage(expectedMethodRequestJson);
                 result = mockedTransportMessage;
 
-                mockedTransportMessage.setIotHubMethod(IotHubMethod.POST);
+                mockedTransportMessage.setIotHubMethod(HttpsMethod.POST);
 
                 mockedTransportMessage.setUriPath("/twins/" + expectedDeviceId + "/methods");
 

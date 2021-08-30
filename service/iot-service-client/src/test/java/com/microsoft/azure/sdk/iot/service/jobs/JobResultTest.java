@@ -169,7 +169,7 @@ public class JobResultTest
         final String json = "validJson";
 
         TwinCollection tags = new TwinCollection();
-        tags.putFinal("tag1", "val1");
+        tags.put("tag1", "val1");
 
         TwinState twinState = new TwinState(tags, null, null);
         twinState.setDeviceId(DEVICE_ID);
@@ -218,7 +218,7 @@ public class JobResultTest
         final Date now = new Date();
 
         TwinCollection tags = new TwinCollection();
-        tags.putFinal("tag1", "val1");
+        tags.put("tag1", "val1");
 
         TwinState twinState = new TwinState(tags, null, null);
         twinState.setDeviceId(DEVICE_ID);
@@ -256,7 +256,7 @@ public class JobResultTest
         final Date now = new Date();
 
         TwinCollection desired = new TwinCollection();
-        desired.putFinal("prop1", "val1");
+        desired.put("prop1", "val1");
 
         TwinState twinState = new TwinState(null, desired, null);
         twinState.setDeviceId(DEVICE_ID);
@@ -293,7 +293,7 @@ public class JobResultTest
         final Date now = new Date();
 
         TwinCollection tags = new TwinCollection();
-        tags.putFinal("tag1", "val1");
+        tags.put("tag1", "val1");
 
         TwinState twinState = new TwinState(tags, null, null);
         twinState.setDeviceId(DEVICE_ID);
@@ -331,7 +331,7 @@ public class JobResultTest
         final Date now = new Date();
 
         TwinCollection tags = new TwinCollection();
-        tags.putFinal("tag1", "val1");
+        tags.put("tag1", "val1");
 
         TwinState twinState = new TwinState(tags, null, null);
         twinState.setETag(ETAG);
@@ -412,7 +412,7 @@ public class JobResultTest
         assertEquals(JobType.scheduleDeviceMethod, jobResult.getJobType());
         assertEquals(JobStatus.completed, jobResult.getJobStatus());
         assertNotNull(jobResult.getCloudToDeviceMethod());
-        assertNotNull(jobResult.getOutcome());
+        assertNotNull(jobResult.getOutcomeResult());
         MethodResult methodResult = jobResult.getOutcomeResult();
         assertEquals(methodReturnStatus, (long)methodResult.getStatus());
         assertEquals(methodReturnPayload, methodResult.getPayload());
@@ -487,7 +487,7 @@ public class JobResultTest
                 "  \"updateTwin\": {\n" +
                 "    \"deviceId\": \"validDeviceId\",\n" +
                 "    \"eTag\": \"validETag\",\n" +
-                "    \"tag\": {\n" +
+                "    \"tags\": {\n" +
                 "      \"tag1\": \"val1\"\n" +
                 "    },\n" +
                 "    \"desiredProperties\": {},\n" +
@@ -507,7 +507,7 @@ public class JobResultTest
                 "}";
 
         TwinCollection tags = new TwinCollection();
-        tags.putFinal("tag1", "val1");
+        tags.put("tag1", "val1");
 
         TwinState twinState = new TwinState(tags, null, null);
         twinState.setDeviceId(DEVICE_ID);
@@ -546,7 +546,7 @@ public class JobResultTest
                         "  \"updateTwin\": {\n" +
                         "    \"deviceId\": \"validDeviceId\",\n" +
                         "    \"eTag\": \"validETag\",\n" +
-                        "    \"tag\": {\n" +
+                        "    \"tags\": {\n" +
                         "      \"tag1\": \"val1\"\n" +
                         "    },\n" +
                         "    \"desiredProperties\": {\n" +
@@ -568,9 +568,9 @@ public class JobResultTest
                         "}";
 
         TwinCollection tags = new TwinCollection();
-        tags.putFinal("tag1", "val1");
+        tags.put("tag1", "val1");
         TwinCollection desired = new TwinCollection();
-        desired.putFinal("key1", "val1");
+        desired.put("key1", "val1");
 
         TwinState twinState = new TwinState(tags, desired, null);
         twinState.setDeviceId(DEVICE_ID);

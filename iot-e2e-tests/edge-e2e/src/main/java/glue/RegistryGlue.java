@@ -1,12 +1,12 @@
 package glue;
 
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClient;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import io.swagger.server.api.MainApiException;
 import io.swagger.server.api.model.ConnectResponse;
-import io.swagger.server.api.verticle.WrappedDeviceTwinDevice;
+import io.swagger.server.api.verticle.WrappedTwin;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -21,30 +21,24 @@ import java.util.Set;
 @SuppressWarnings("ALL")
 public class RegistryGlue
 {
-    HashMap<String, DeviceTwin> _map = new HashMap<>();
+    HashMap<String, TwinClient> _map = new HashMap<>();
     int _clientCount = 0;
 
     public void connect(String connectionString, Handler<AsyncResult<ConnectResponse>> handler)
     {
         System.out.printf("Connect called%n");
-        try
-        {
-            DeviceTwin client = DeviceTwin.createFromConnectionString(connectionString);
+        TwinClient client = new TwinClient(connectionString);
 
-            this._clientCount++;
-            String connectionId = "registryClient_" + this._clientCount;
-            this._map.put(connectionId, client);
+        this._clientCount++;
+        String connectionId = "registryClient_" + this._clientCount;
+        this._map.put(connectionId, client);
 
-            ConnectResponse cr = new ConnectResponse();
-            cr.setConnectionId(connectionId);
-            handler.handle(Future.succeededFuture(cr));
-        } catch (IOException e)
-        {
-            handler.handle(Future.failedFuture(e));
-        }
+        ConnectResponse cr = new ConnectResponse();
+        cr.setConnectionId(connectionId);
+        handler.handle(Future.succeededFuture(cr));
     }
 
-    private DeviceTwin getClient(String connectionId)
+    private TwinClient getClient(String connectionId)
     {
         if (this._map.containsKey(connectionId))
         {
@@ -59,7 +53,7 @@ public class RegistryGlue
     private void _closeConnection(String connectionId)
     {
         System.out.printf("Disconnect for %s%n", connectionId);
-        DeviceTwin client = getClient(connectionId);
+        TwinClient client = getClient(connectionId);
         if (client != null)
         {
             this._map.remove(connectionId);
@@ -76,14 +70,14 @@ public class RegistryGlue
     {
         System.out.printf("getModuleTwin called for %s with deviceId = %s and moduleId = %s%n", connectionId, deviceId, moduleId);
 
-        DeviceTwin client = getClient(connectionId);
+        TwinClient client = getClient(connectionId);
         if (client == null)
         {
             handler.handle(Future.failedFuture(new MainApiException(500, "invalid connection id")));
         }
         else
         {
-            WrappedDeviceTwinDevice twin = new WrappedDeviceTwinDevice(deviceId, moduleId);
+            WrappedTwin twin = new WrappedTwin(deviceId, moduleId);
             try
             {
                 client.getTwin(twin);
@@ -100,14 +94,14 @@ public class RegistryGlue
         System.out.printf("sendModuleTwinPatch called for %s with deviceId = %s and moduleId = %s%n", connectionId, deviceId, moduleId);
         System.out.println(props.toString());
 
-        DeviceTwin client = getClient(connectionId);
+        TwinClient client = getClient(connectionId);
         if (client == null)
         {
             handler.handle(Future.failedFuture(new MainApiException(500, "invalid connection id")));
         }
         else
         {
-            DeviceTwinDevice twin = new DeviceTwinDevice(deviceId, moduleId);
+            Twin twin = new Twin(deviceId, moduleId);
             Set<Pair> newProps = new HashSet<>();
             Map<String, Object> desiredProps = ((JsonObject) props).getJsonObject("properties").getJsonObject("desired").getMap();
             for (String key : desiredProps.keySet())

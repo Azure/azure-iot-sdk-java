@@ -6,6 +6,7 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 
+import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
@@ -72,8 +73,8 @@ public class SendMessagesCommon extends IntegrationTest
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-        hostName = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString).getHostName();
+        registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString).getHostName();
 
         List inputs = new ArrayList(Arrays.asList(
                 new Object[][]
@@ -186,15 +187,7 @@ public class SendMessagesCommon extends IntegrationTest
     @BeforeClass
     public static void classSetup()
     {
-        try
-        {
-            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-            fail("Unexpected exception encountered");
-        }
+        registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
     }
 
     @BeforeClass
@@ -256,7 +249,9 @@ public class SendMessagesCommon extends IntegrationTest
 
                 if (customSSLContext != null)
                 {
-                    DeviceClient clientWithCustomSSLContext = new DeviceClient(registryManager.getDeviceConnectionString(testInstance.identity.getDevice()), protocol, customSSLContext);
+                    ClientOptions options = new ClientOptions();
+                    options.sslContext = customSSLContext;
+                    DeviceClient clientWithCustomSSLContext = new DeviceClient(registryManager.getDeviceConnectionString(testInstance.identity.getDevice()), protocol, options);
                     ((TestDeviceIdentity)this.identity).setDeviceClient(clientWithCustomSSLContext);
                 }
                 else if (useCustomSasTokenProvider)
@@ -293,7 +288,7 @@ public class SendMessagesCommon extends IntegrationTest
             {
                 if (this.identity != null && this.identity.getClient() != null)
                 {
-                    this.identity.getClient().closeNow();
+                    this.identity.getClient().close();
                 }
             }
             catch (IOException e)
@@ -405,7 +400,7 @@ public class SendMessagesCommon extends IntegrationTest
 
         public void closeConnection() throws IOException
         {
-            client.closeNow();
+            client.close();
         }
     }
 

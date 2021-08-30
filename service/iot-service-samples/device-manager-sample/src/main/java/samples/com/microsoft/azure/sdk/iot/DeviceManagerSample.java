@@ -43,9 +43,9 @@ public class DeviceManagerSample
         System.out.println("Shutting down sample...");
     }
     
-    private static void AddDevice() throws Exception
+    private static void AddDevice()
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
         Device device = Device.createFromId(SampleUtils.deviceId, null, null);
         try
@@ -63,9 +63,9 @@ public class DeviceManagerSample
         registryManager.close();
     }
     
-    private static void GetDevice() throws Exception
+    private static void GetDevice()
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
         
         Device returnDevice;
         try
@@ -85,9 +85,9 @@ public class DeviceManagerSample
         registryManager.close();
     }
     
-    private static void UpdateDevice() throws Exception
+    private static void UpdateDevice()
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
         // Create an Edge device, and set leaf-device as a child.
         Device edge = Device.createFromId(SampleUtils.edgeId, null, null);
@@ -116,9 +116,9 @@ public class DeviceManagerSample
         registryManager.close();
     }
     
-    private static void RemoveDevice() throws Exception
+    private static void RemoveDevice()
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
         
         try
         {

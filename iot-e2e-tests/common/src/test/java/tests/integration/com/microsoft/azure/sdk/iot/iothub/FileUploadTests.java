@@ -6,8 +6,6 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
 
-import com.azure.storage.blob.BlobClientBuilder;
-import com.azure.storage.blob.specialized.BlockBlobClient;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
@@ -23,9 +21,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 
 import java.io.ByteArrayInputStream;
@@ -39,13 +36,9 @@ import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK_EMPTY;
-import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
 import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static tests.integration.com.microsoft.azure.sdk.iot.iothub.FileUploadTests.STATUS.FAILURE;
@@ -91,9 +84,9 @@ public class FileUploadTests extends IntegrationTest
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
 
-        serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
+        serviceClient = new ServiceClient(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
         serviceClient.open();
 
         return Arrays.asList(
@@ -142,7 +135,7 @@ public class FileUploadTests extends IntegrationTest
         String blobName;
         InputStream fileInputStream;
         long fileLength;
-        boolean isCallBackTriggered;
+        boolean isCallbackTriggered;
         STATUS fileUploadStatus;
         STATUS fileUploadNotificationReceived;
     }
@@ -163,7 +156,7 @@ public class FileUploadTests extends IntegrationTest
             if (context instanceof FileUploadState)
             {
                 FileUploadState fileUploadState = (FileUploadState) context;
-                fileUploadState.isCallBackTriggered = true;
+                fileUploadState.isCallbackTriggered = true;
 
                 // On failure, Don't update fileUploadStatus any further
                 if ((responseStatus == OK || responseStatus == OK_EMPTY) && fileUploadState.fileUploadStatus != FAILURE)
@@ -206,7 +199,7 @@ public class FileUploadTests extends IntegrationTest
             testInstance.fileUploadState[i].fileLength = buf.length;
             testInstance.fileUploadState[i].fileUploadStatus = SUCCESS;
             testInstance.fileUploadState[i].fileUploadNotificationReceived = FAILURE;
-            testInstance.fileUploadState[i].isCallBackTriggered = false;
+            testInstance.fileUploadState[i].isCallbackTriggered = false;
 
             testInstance.messageStates[i] = new MessageState();
             testInstance.messageStates[i].messageBody = new String(buf);
@@ -260,48 +253,11 @@ public class FileUploadTests extends IntegrationTest
 
     private void tearDownDeviceClient(DeviceClient deviceClient) throws IOException
     {
-        deviceClient.closeNow();
-    }
-
-    private void verifyNotification(FileUploadNotification fileUploadNotification, FileUploadState fileUploadState, DeviceClient deviceClient) throws IOException
-    {
-        assertEquals(buildExceptionMessage("File upload notification blob size not equal to expected file length", deviceClient), (long) fileUploadNotification.getBlobSizeInBytes(), fileUploadState.fileLength);
-
-        URL u = new URL(fileUploadNotification.getBlobUri());
-        try (InputStream inputStream = u.openStream())
-        {
-            byte[] testBuf = new byte[(int)fileUploadState.fileLength];
-            inputStream.read(testBuf,  0, (int)fileUploadState.fileLength);
-            int testLen = (int)fileUploadState.fileLength;
-            byte[] actualBuf = new byte[(int)fileUploadState.fileLength];
-            fileUploadState.fileInputStream.reset();
-            int actualLen = (fileUploadState.fileLength == 0) ? (int) fileUploadState.fileLength : fileUploadState.fileInputStream.read(actualBuf, 0, (int) fileUploadState.fileLength);
-            assertEquals(buildExceptionMessage("Expected length " + testLen + " but was " + actualLen, deviceClient), testLen, actualLen);
-            assertArrayEquals(buildExceptionMessage("testBuf was different from actualBuf", deviceClient), testBuf, actualBuf);
-        }
-
-        assertTrue(buildExceptionMessage("File upload notification did not contain the expected blob name", deviceClient), fileUploadNotification.getBlobName().contains(fileUploadState.blobName));
-        fileUploadState.fileUploadNotificationReceived = SUCCESS;
+        deviceClient.close();
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    @ContinuousIntegrationTest
-    public void uploadToBlobAsyncSingleFileZeroLength() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException
-    {
-        // arrange
-        DeviceClient deviceClient = setUpDeviceClient(testInstance.protocol);
-
-        // act
-        deviceClient.uploadToBlobAsync(testInstance.fileUploadState[0].blobName, testInstance.fileUploadState[0].fileInputStream, testInstance.fileUploadState[0].fileLength, new FileUploadCallback(), testInstance.fileUploadState[0]);
-
-        // assert
-        waitForFileUploadStatusCallbackTriggered(0, deviceClient);
-        assertEquals(buildExceptionMessage("File upload status expected SUCCESS but was " + testInstance.fileUploadState[0].fileUploadStatus, deviceClient), SUCCESS, testInstance.fileUploadState[0].fileUploadStatus);
-        tearDownDeviceClient(deviceClient);
-    }
-
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void uploadToBlobAsyncSingleFileGranular() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException
+    public void getAndCompleteSasUri() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException
     {
         // arrange
         DeviceClient deviceClient = setUpDeviceClient(testInstance.protocol);
@@ -309,17 +265,14 @@ public class FileUploadTests extends IntegrationTest
         // act
         FileUploadSasUriResponse sasUriResponse = deviceClient.getFileUploadSasUri(new FileUploadSasUriRequest(testInstance.fileUploadState[0].blobName));
 
-        BlockBlobClient blockBlobClient =
-            new BlobClientBuilder()
-                .endpoint(sasUriResponse.getBlobUri().toString())
-                .buildClient()
-                .getBlockBlobClient();
-
-        blockBlobClient.upload(testInstance.fileUploadState[0].fileInputStream, testInstance.fileUploadState[0].fileLength);
         FileUploadCompletionNotification fileUploadCompletionNotification = new FileUploadCompletionNotification();
         fileUploadCompletionNotification.setCorrelationId(sasUriResponse.getCorrelationId());
         fileUploadCompletionNotification.setStatusCode(0);
-        fileUploadCompletionNotification.setSuccess(true);
+
+        // Since we don't care to need to test the Azure Storage SDK here though, we'll forgo actually uploading the file.
+        // Because of that, this value needs to be false, otherwise hub throws 400 error since the file wasn't actually uploaded.
+        fileUploadCompletionNotification.setSuccess(false);
+
         fileUploadCompletionNotification.setStatusDescription("Succeed to upload to storage.");
 
         deviceClient.completeFileUpload(fileUploadCompletionNotification);
@@ -330,79 +283,18 @@ public class FileUploadTests extends IntegrationTest
         tearDownDeviceClient(deviceClient);
     }
 
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void uploadToBlobAsyncSingleFile() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException
-    {
-        // arrange
-        DeviceClient deviceClient = setUpDeviceClient(testInstance.protocol);
-
-        // act
-        deviceClient.uploadToBlobAsync(testInstance.fileUploadState[MAX_FILES_TO_UPLOAD - 1].blobName, testInstance.fileUploadState[MAX_FILES_TO_UPLOAD - 1].fileInputStream, testInstance.fileUploadState[MAX_FILES_TO_UPLOAD - 1].fileLength, new FileUploadCallback(), testInstance.fileUploadState[MAX_FILES_TO_UPLOAD - 1]);
-
-        // assert
-        waitForFileUploadStatusCallbackTriggered(MAX_FILES_TO_UPLOAD - 1, deviceClient);
-        assertEquals(buildExceptionMessage("File upload status should be SUCCESS but was " + testInstance.fileUploadState[MAX_FILES_TO_UPLOAD - 1].fileUploadStatus, deviceClient), SUCCESS, testInstance.fileUploadState[MAX_FILES_TO_UPLOAD - 1].fileUploadStatus);
-
-        tearDownDeviceClient(deviceClient);
-    }
-
-    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    @ContinuousIntegrationTest
-    public void uploadToBlobAsyncMultipleFilesParallel() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException
-    {
-        if (testInstance.withProxy)
-        {
-            //No need to do performance test both with and without proxy
-            return;
-        }
-        
-        // arrange
-        DeviceClient deviceClient = setUpDeviceClient(testInstance.protocol);
-        ExecutorService executor = Executors.newFixedThreadPool(2);
-
-        // act
-        for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
-        {
-            final int index = i;
-            executor.submit(() ->
-            {
-                try
-                {
-                    deviceClient.uploadToBlobAsync(testInstance.fileUploadState[index].blobName, testInstance.fileUploadState[index].fileInputStream, testInstance.fileUploadState[index].fileLength, new FileUploadCallback(), testInstance.fileUploadState[index]);
-                }
-                catch (IOException e)
-                {
-                    fail(buildExceptionMessage("IOException occurred during upload: " + Tools.getStackTraceFromThrowable(e), deviceClient));
-                }
-            });
-
-            // assert
-            waitForFileUploadStatusCallbackTriggered(i, deviceClient);
-            assertEquals(buildExceptionMessage("Expected SUCCESS but file upload status " + i + " was " + testInstance.fileUploadState[i].fileUploadStatus, deviceClient), SUCCESS, testInstance.fileUploadState[i].fileUploadStatus);
-            assertEquals(buildExceptionMessage("Expected SUCCESS but message status " + i + " was " + testInstance.messageStates[i].messageStatus, deviceClient), SUCCESS, testInstance.messageStates[i].messageStatus);
-        }
-
-        executor.shutdown();
-        if (!executor.awaitTermination(10000, TimeUnit.MILLISECONDS))
-        {
-            executor.shutdownNow();
-        }
-
-        tearDownDeviceClient(deviceClient);
-    }
-
     private void waitForFileUploadStatusCallbackTriggered(int fileUploadStateIndex, DeviceClient deviceClient) throws InterruptedException
     {
-        if (!testInstance.fileUploadState[fileUploadStateIndex].isCallBackTriggered)
+        if (!testInstance.fileUploadState[fileUploadStateIndex].isCallbackTriggered)
         {
             //wait until file upload callback is triggered
             long startTime = System.currentTimeMillis();
-            while (!testInstance.fileUploadState[fileUploadStateIndex].isCallBackTriggered)
+            while (!testInstance.fileUploadState[fileUploadStateIndex].isCallbackTriggered)
             {
                 Thread.sleep(300);
                 if (System.currentTimeMillis() - startTime > MAXIMUM_TIME_TO_WAIT_FOR_CALLBACK_MILLISECONDS)
                 {
-                    assertTrue(buildExceptionMessage("File upload callback was not triggered", deviceClient), testInstance.fileUploadState[fileUploadStateIndex].isCallBackTriggered);
+                    assertTrue(buildExceptionMessage("File upload callback was not triggered", deviceClient), testInstance.fileUploadState[fileUploadStateIndex].isCallbackTriggered);
                 }
             }
         }

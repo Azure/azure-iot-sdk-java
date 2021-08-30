@@ -45,7 +45,7 @@ public class ServiceAuthenticationWithSharedAccessPolicyTokenTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         String newPolicyName = "XXX";
         String newPolicyToken = "YYY";
         ServiceAuthenticationWithSharedAccessPolicyToken auth = new ServiceAuthenticationWithSharedAccessPolicyToken(newPolicyName, newPolicyToken);

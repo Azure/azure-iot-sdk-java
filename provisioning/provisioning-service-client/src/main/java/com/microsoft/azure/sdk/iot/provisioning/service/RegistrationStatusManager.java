@@ -52,7 +52,7 @@ public class RegistrationStatusManager
      * @return The {@code RegistrationStatusManager} with the new instance of this class.
      * @throws IllegalArgumentException if the {@link ContractApiHttp} is {@code null}.
      */
-    public static RegistrationStatusManager createFromContractApiHttp(ContractApiHttp contractApiHttp)
+    static RegistrationStatusManager createFromContractApiHttp(ContractApiHttp contractApiHttp)
     {
         /* SRS_REGISTRATION_STATUS_MANAGER_21_004: [The factory shall create a new instance of this.] */
         return new RegistrationStatusManager(contractApiHttp);
@@ -69,7 +69,7 @@ public class RegistrationStatusManager
      * @throws ProvisioningServiceClientTransportException if the SDK failed to send the request to the Device Provisioning Service.
      * @throws ProvisioningServiceClientException if the Device Provisioning Service was not able to execute the bulk operation.
      */
-    public DeviceRegistrationState get(String id) throws ProvisioningServiceClientException
+    DeviceRegistrationState get(String id) throws ProvisioningServiceClientException
     {
         /* SRS_REGISTRATION_STATUS_MANAGER_21_005: [The get shall throw IllegalArgumentException if the provided id is null or empty.] */
         if(Tools.isNullOrEmpty(id))
@@ -104,7 +104,7 @@ public class RegistrationStatusManager
     /**
      * Delete registration status.
      *
-     * @see ProvisioningServiceClient#deleteDeviceRegistrationStatus(DeviceRegistrationState)
+     * @see ProvisioningServiceClient#deleteDeviceRegistrationState(DeviceRegistrationState)
      *
      * @param DeviceRegistrationState is a {@link DeviceRegistrationState} that describes the registration status
      *                                 that will be deleted. It cannot be {@code null}.
@@ -112,8 +112,7 @@ public class RegistrationStatusManager
      * @throws ProvisioningServiceClientTransportException if the SDK failed to send the request to the Device Provisioning Service.
      * @throws ProvisioningServiceClientException if the Device Provisioning Service was not able to execute the delete operation.
      */
-    @SuppressWarnings("deprecation")
-    public void delete(DeviceRegistrationState DeviceRegistrationState) throws ProvisioningServiceClientException
+    void delete(DeviceRegistrationState DeviceRegistrationState) throws ProvisioningServiceClientException
     {
         /* SRS_REGISTRATION_STATUS_MANAGER_21_011: [The delete shall throw IllegalArgumentException if the provided DeviceRegistrationState is null.] */
         if(DeviceRegistrationState == null)
@@ -144,8 +143,8 @@ public class RegistrationStatusManager
     /**
      * Delete registration status.
      *
-     * @see ProvisioningServiceClient#deleteDeviceRegistrationStatus(String)
-     * @see ProvisioningServiceClient#deleteDeviceRegistrationStatus(String, String)
+     * @see ProvisioningServiceClient#deleteDeviceRegistrationState(String)
+     * @see ProvisioningServiceClient#deleteDeviceRegistrationState(String, String)
      *
      * @param id is a {@link String} with the identification of the registration status to delete. It cannot be {@code null} or empty.
      * @param eTag is a {@link String} with the eTag of the enrollment to delete. It can be {@code null} or empty (ignored).
@@ -153,8 +152,7 @@ public class RegistrationStatusManager
      * @throws ProvisioningServiceClientTransportException if the SDK failed to send the request to the Device Provisioning Service.
      * @throws ProvisioningServiceClientException if the Device Provisioning Service was not able to execute the bulk operation.
      */
-    @SuppressWarnings("deprecation")
-    public void delete(String id, String eTag) throws ProvisioningServiceClientException
+    void delete(String id, String eTag) throws ProvisioningServiceClientException
     {
         /* SRS_REGISTRATION_STATUS_MANAGER_21_017: [The delete shall throw IllegalArgumentException if the provided id is null or empty.] */
         if(Tools.isNullOrEmpty(id))
@@ -185,8 +183,8 @@ public class RegistrationStatusManager
     /**
      * Create a new registration status query for enrollmentGroup.
      *
-     * @see ProvisioningServiceClient#createEnrollmentGroupRegistrationStatusQuery(QuerySpecification, String)
-     * @see ProvisioningServiceClient#createEnrollmentGroupRegistrationStatusQuery(QuerySpecification, String, int)
+     * @see ProvisioningServiceClient#createEnrollmentGroupRegistrationStateQuery(QuerySpecification, String)
+     * @see ProvisioningServiceClient#createEnrollmentGroupRegistrationStateQuery(QuerySpecification, String, int)
      *
      * @param querySpecification is a {@code String} with the SQL query specification. It cannot be {@code null}.
      * @param enrollmentGroupId is a {@code String} with the enrollmentGroupId of the enrollmentGroup to delete. It cannot be {@code null} or empty.
@@ -194,8 +192,7 @@ public class RegistrationStatusManager
      * @return A {@link Query} iterator.
      * @throws IllegalArgumentException if the provided parameter is not correct.
      */
-    @SuppressWarnings("deprecation")
-    public Query createEnrollmentGroupQuery(QuerySpecification querySpecification, String enrollmentGroupId, int pageSize)
+    Query createEnrollmentGroupQuery(QuerySpecification querySpecification, String enrollmentGroupId, int pageSize)
     {
         /* SRS_REGISTRATION_STATUS_MANAGER_21_023: [The createEnrollmentGroupQuery shall throw IllegalArgumentException if the provided querySpecification is null.] */
         if(querySpecification == null)

@@ -17,7 +17,7 @@ import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
-import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DeviceTwinCommon;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.TwinCommon;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -34,7 +34,7 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
  */
 @IotHubTest
 @RunWith(Parameterized.class)
-public class TwinTagsTests extends DeviceTwinCommon
+public class TwinTagsTests extends TwinCommon
 {
     public TwinTagsTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
     {

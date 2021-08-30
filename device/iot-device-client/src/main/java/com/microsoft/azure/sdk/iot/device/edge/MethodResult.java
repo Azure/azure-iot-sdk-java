@@ -22,7 +22,7 @@ public class MethodResult
     private Object payload;
 
     //empty constructor for gson
-    MethodResult()
+    private MethodResult()
     {
 
     }

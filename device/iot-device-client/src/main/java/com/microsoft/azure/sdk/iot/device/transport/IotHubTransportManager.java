@@ -18,27 +18,24 @@ public interface IotHubTransportManager
      * Establishes a communication channel with an IoT Hub. If a channel is
      * already open, the function shall do nothing.
      *
-     * @throws IOException if a communication channel cannot be established.
      */
-    void open() throws IOException;
+    void open();
 
     /**
      * Establishes a communication channel with an IoT Hub for a specific set of
      * topics. If a channel is already open, the function shall do nothing.
      *
      * @param topics is a list of topics to signed in.
-     * @throws IOException if a communication channel cannot be established.
      */
-    void open(String[] topics) throws IOException;
+    void open(String[] topics);
 
     /**
      * Closes all resources used to communicate with an IoT Hub. Once {@code close()} is
      * called, the transport is no longer usable. If the transport is already
      * closed, the function shall do nothing.
      *
-     * @throws IOException if an error occurs in closing the transport.
      */
-    void close() throws IOException;
+    void close();
 
     /**
      * Synchronously send a message to the IoT Hub. And return the response

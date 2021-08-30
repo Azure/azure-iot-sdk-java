@@ -6,9 +6,9 @@
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
+import com.microsoft.azure.sdk.iot.device.twin.Device;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodCallback;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodData;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -61,7 +61,7 @@ public class DeviceEmulator
     {
         if (this.client != null)
         {
-            this.client.closeNow();
+            this.client.close();
         }
     }
 
@@ -89,8 +89,8 @@ public class DeviceEmulator
      */
     @SuppressWarnings("SameParameterValue") // DeviceEmulator will subscribe to default callback in case the supplied callback is null
     void subscribeToDeviceMethod(
-            DeviceMethodCallback deviceMethodCallback, Object deviceMethodCallbackContext,
-            IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext)
+        DeviceMethodCallback deviceMethodCallback, Object deviceMethodCallbackContext,
+        IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext)
             throws IOException, InterruptedException
     {
         if(deviceMethodCallback == null)
@@ -105,18 +105,9 @@ public class DeviceEmulator
             deviceMethodStatusCallbackContext = deviceStatus;
         }
 
-        if (client instanceof DeviceClient)
-        {
-            ((DeviceClient)client).subscribeToDeviceMethod(
-                    deviceMethodCallback, deviceMethodCallbackContext,
-                    deviceMethodStatusCallback, deviceMethodStatusCallbackContext);
-        }
-        else if (client instanceof ModuleClient)
-        {
-            ((ModuleClient)client).subscribeToMethod(
-                    deviceMethodCallback, deviceMethodCallbackContext,
-                    deviceMethodStatusCallback, deviceMethodStatusCallbackContext);
-        }
+        client.subscribeToMethodsAsync(
+            deviceMethodCallback, deviceMethodCallbackContext,
+                deviceMethodStatusCallback, deviceMethodStatusCallbackContext);
 
         long startTime = System.currentTimeMillis();
         while (deviceStatus.statusOk == 0)
@@ -152,21 +143,21 @@ public class DeviceEmulator
     /**
      * Enable device twin on the emulated device.
      *
-     * @param deviceTwinStatusCallBack callback to twin status. If {@code null}, use the local status callback.
-     * @param deviceTwinStatusCallbackContext context for status callback. Used only if deviceTwinStatusCallBack is not {@code null}.
+     * @param deviceTwinStatusCallback callback to twin status. If {@code null}, use the local status callback.
+     * @param deviceTwinStatusCallbackContext context for status callback. Used only if deviceTwinStatusCallback is not {@code null}.
      * @param deviceTwin is the device twin including the properties callback. If {@code null}, use the local device with standard properties.
-     * @param propertyCallBackContext context for the properties callback. Used only if deviceTwin is not {@code null}.
+     * @param propertyCallbackContext context for the properties callback. Used only if deviceTwin is not {@code null}.
      * @param mustSubscribeToDesiredProperties is a boolean to define if it should or not subscribe to the desired properties.
      * @throws IOException if failed to start the Device twin.
      */
     @SuppressWarnings("SameParameterValue") // DeviceEmulator will subscribe to default callback in case the supplied callback is null
-    void subscribeToDeviceTwin(IotHubEventCallback deviceTwinStatusCallBack, Object deviceTwinStatusCallbackContext,
-                               Device deviceTwin, Object propertyCallBackContext, boolean mustSubscribeToDesiredProperties) throws IOException
+    void subscribeToDeviceTwin(IotHubEventCallback deviceTwinStatusCallback, Object deviceTwinStatusCallbackContext,
+                               Device deviceTwin, Object propertyCallbackContext, boolean mustSubscribeToDesiredProperties) throws IOException
     {
         // If user do not provide any status callback, use the local one.
-        if(deviceTwinStatusCallBack == null)
+        if(deviceTwinStatusCallback == null)
         {
-            deviceTwinStatusCallBack = new DeviceStatusCallback();
+            deviceTwinStatusCallback = new DeviceStatusCallback();
             deviceTwinStatusCallbackContext = deviceStatus;
         }
 
@@ -174,21 +165,14 @@ public class DeviceEmulator
         if(deviceTwin == null)
         {
             deviceTwin = new DeviceTwinProperty();
-            propertyCallBackContext = twinChanges;
+            propertyCallbackContext = twinChanges;
         }
 
-        if (client instanceof DeviceClient)
-        {
-            ((DeviceClient)client).startDeviceTwin(deviceTwinStatusCallBack, deviceTwinStatusCallbackContext, deviceTwin, propertyCallBackContext);
-        }
-        else if (client instanceof ModuleClient)
-        {
-            ((ModuleClient)client).startTwin(deviceTwinStatusCallBack, deviceTwinStatusCallbackContext, deviceTwin, propertyCallBackContext);
-        }
+        client.startTwinAsync(deviceTwinStatusCallback, deviceTwinStatusCallbackContext, deviceTwin, propertyCallbackContext);
 
         if(mustSubscribeToDesiredProperties)
         {
-            client.subscribeToDesiredProperties(null);
+            client.subscribeToDesiredPropertiesAsync(null);
         }
     }
 
@@ -256,7 +240,7 @@ public class DeviceEmulator
     protected static class DeviceTwinProperty extends Device
     {
         @Override
-        public synchronized void PropertyCall(String propertyKey, Object propertyValue, Object context)
+        public synchronized void onPropertyChanged(String propertyKey, Object propertyValue, Object context)
         {
             System.out.println("Device updated " + propertyKey + " to " + propertyValue.toString());
             ConcurrentMap<String, ConcurrentLinkedQueue<Object>> twinChanges = (ConcurrentMap<String, ConcurrentLinkedQueue<Object>>)context;

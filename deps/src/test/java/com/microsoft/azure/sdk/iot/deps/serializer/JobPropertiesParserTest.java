@@ -47,7 +47,7 @@ public class JobPropertiesParserTest
         // assert
         assertEquals(parser.isExcludeKeysInExport(), processedParser.isExcludeKeysInExport());
         assertEquals(parser.getFailureReason(), processedParser.getFailureReason());
-        assertEquals(parser.getJobIdFinal(), processedParser.getJobIdFinal());
+        assertEquals(parser.getJobId(), processedParser.getJobId());
         assertEquals(parser.getInputBlobContainerUri(), processedParser.getInputBlobContainerUri());
         assertEquals(parser.getOutputBlobContainerUri(), processedParser.getOutputBlobContainerUri());
         assertEquals(parser.getProgress(), processedParser.getProgress());
@@ -145,17 +145,6 @@ public class JobPropertiesParserTest
     {
         //act
         new JobPropertiesParser("}");
-    }
-
-    //Tests_SRS_JOB_PROPERTIES_PARSER_34_005: [If the provided jobId is null, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void jobIdCannotBeSetToNull()
-    {
-        //arrange
-        JobPropertiesParser parser = new JobPropertiesParser();
-
-        //act
-        parser.setJobId(null);
     }
 
     //Tests_SRS_JOB_PROPERTIES_PARSER_34_009: [If the provided json is missing the field for jobId, or if its value is null or empty, an IllegalArgumentException shall be thrown.]

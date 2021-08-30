@@ -6,15 +6,21 @@ package com.microsoft.azure.sdk.iot.deps.serializer;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
+import lombok.Setter;
 
 public class X509ThumbprintParser
 {
     private static final String PRIMARY_THUMBPRINT_SERIALIZED_NAME = "primaryThumbprint";
     @SerializedName(PRIMARY_THUMBPRINT_SERIALIZED_NAME)
+    @Getter
+    @Setter
     private String primaryThumbprint;
 
     private static final String SECONDARY_THUMBPRINT_SERIALIZED_NAME = "secondaryThumbprint";
     @SerializedName(SECONDARY_THUMBPRINT_SERIALIZED_NAME)
+    @Getter
+    @Setter
     private String secondaryThumbprint;
 
     private final transient Gson gson = new Gson();
@@ -62,8 +68,8 @@ public class X509ThumbprintParser
             throw new IllegalArgumentException("The provided json could not be parsed");
         }
 
-        this.primaryThumbprint = parser.getPrimaryThumbprintFinal();
-        this.secondaryThumbprint = parser.getSecondaryThumbprintFinal();
+        this.primaryThumbprint = parser.getPrimaryThumbprint();
+        this.secondaryThumbprint = parser.getSecondaryThumbprint();
     }
 
     /**
@@ -74,90 +80,5 @@ public class X509ThumbprintParser
     {
         //Codes_SRS_X509ThumbprintParser_34_007: [This method shall return a json representation of this.]
         return gson.toJson(this);
-    }
-
-    /**
-     * Getter for PrimaryThumbprint
-     *
-     * @deprecated as of Deps version 0.7.1, please use {@link #getPrimaryThumbprintFinal()}
-     *
-     * @return The value of PrimaryThumbprint
-     */
-    @Deprecated
-    public String getPrimaryThumbprint()
-    {
-        //Codes_SRS_X509ThumbprintParser_34_001: [This method shall return the value of primaryThumbprint.]
-        return primaryThumbprint;
-    }
-
-    /**
-     * Getter for PrimaryThumbprint
-     *
-     * @return The value of PrimaryThumbprint
-     */
-    public final String getPrimaryThumbprintFinal()
-    {
-        //Codes_SRS_X509ThumbprintParser_34_001: [This method shall return the value of primaryThumbprint.]
-        return primaryThumbprint;
-    }
-
-    /**
-     * Setter for PrimaryThumbprint
-     * @param primaryThumbprint the value to set the primary thumbprint to
-     * @throws IllegalArgumentException if primaryThumbprint is null
-     */
-    public void setPrimaryThumbprint(String primaryThumbprint) throws IllegalArgumentException
-    {
-
-        //Codes_SRS_X509ThumbprintParser_34_002: [If the provided primaryThumbprint value is null, an IllegalArgumentException shall be thrown.]
-        if (primaryThumbprint == null)
-        {
-            throw new IllegalArgumentException("Primary thumbprint cannot be null or empty");
-        }
-
-        //Codes_SRS_X509ThumbprintParser_34_003: [This method shall set the value of primaryThumbprint to the provided value.]
-        this.primaryThumbprint = primaryThumbprint;
-    }
-
-    /**
-     * Getter for SecondaryThumbprint
-     *
-     * @deprecated as of Deps version 0.7.1, please use {@link #getSecondaryThumbprintFinal()}
-     *
-     * @return The value of SecondaryThumbprint
-     */
-    @Deprecated
-    public String getSecondaryThumbprint()
-    {
-        //Codes_SRS_X509ThumbprintParser_34_004: [This method shall return the value of secondaryThumbprint.]
-        return secondaryThumbprint;
-    }
-
-    /**
-     * Getter for SecondaryThumbprint
-     *
-     * @return The value of SecondaryThumbprint
-     */
-    public final String getSecondaryThumbprintFinal()
-    {
-        //Codes_SRS_X509ThumbprintParser_34_004: [This method shall return the value of secondaryThumbprint.]
-        return secondaryThumbprint;
-    }
-
-    /**
-     * Setter for SecondaryThumbprint
-     * @param secondaryThumbprint the value to set the secondary thumbprint to
-     * @throws IllegalArgumentException if secondaryThumbprint is null
-     */
-    public void setSecondaryThumbprint(String secondaryThumbprint) throws IllegalArgumentException
-    {
-        //Codes_SRS_X509ThumbprintParser_34_005: [If the provided secondaryThumbprint value is null, an IllegalArgumentException shall be thrown.]
-        if (secondaryThumbprint == null)
-        {
-            throw new IllegalArgumentException("Secondary thumbprint cannot be null or empty");
-        }
-
-        //Codes_SRS_X509ThumbprintParser_34_006: [This method shall set the value of secondaryThumbprint to the provided value.]
-        this.secondaryThumbprint = secondaryThumbprint;
     }
 }

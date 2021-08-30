@@ -13,9 +13,9 @@ import org.apache.qpid.proton.engine.Receiver;
 
 import java.util.Map;
 
-import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_UNKNOWN;
+import static com.microsoft.azure.sdk.iot.device.twin.DeviceOperations.DEVICE_OPERATION_UNKNOWN;
 
-public final class AmqpsTelemetryReceiverLinkHandler extends AmqpsReceiverLinkHandler
+final class AmqpsTelemetryReceiverLinkHandler extends AmqpsReceiverLinkHandler
 {
     private static final String CORRELATION_ID_KEY = "com.microsoft:channel-correlation-id";
 

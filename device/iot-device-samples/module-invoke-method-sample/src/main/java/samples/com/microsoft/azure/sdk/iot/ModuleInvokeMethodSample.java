@@ -105,11 +105,11 @@ public class ModuleInvokeMethodSample
         }
         finally
         {
-            client.closeNow();
+            client.close();
         }
     }
 
-    private static MethodResult invokeMethodOnDevice(String methodName, String deviceIdToInvokeOn, ModuleClient client, MethodRequest methodRequest) throws ModuleClientException, URISyntaxException, IOException
+    private static MethodResult invokeMethodOnDevice(String methodName, String deviceIdToInvokeOn, ModuleClient client, MethodRequest methodRequest) throws ModuleClientException
     {
         System.out.println("Invoking method \"" + methodName + "\" on device \"" + deviceIdToInvokeOn + "\"");
         MethodResult result = client.invokeMethod(deviceIdToInvokeOn, methodRequest);
@@ -117,7 +117,7 @@ public class ModuleInvokeMethodSample
         return result;
     }
 
-    private static MethodResult invokeMethodOnModule(String methodName, String deviceIdToInvokeOn, String moduleIdToInvokeOn, ModuleClient client, MethodRequest methodRequest) throws ModuleClientException, URISyntaxException, IOException
+    private static MethodResult invokeMethodOnModule(String methodName, String deviceIdToInvokeOn, String moduleIdToInvokeOn, ModuleClient client, MethodRequest methodRequest) throws ModuleClientException
     {
         System.out.println("Invoking method \"" + methodName + "\" on module \"" + moduleIdToInvokeOn + "\"");
         MethodResult result = client.invokeMethod(deviceIdToInvokeOn, moduleIdToInvokeOn, methodRequest);

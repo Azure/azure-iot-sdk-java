@@ -44,9 +44,9 @@ public class ModuleManagerSample
         System.out.println("Shutting down sample...");
     }
 
-    private static void AddModule(int n) throws Exception
+    private static void AddModule(int n)
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
         String moduleId;
         if (n == 0)
@@ -75,7 +75,7 @@ public class ModuleManagerSample
 
     private static void GetModule() throws Exception
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
         Module returnModule;
         try
@@ -104,16 +104,16 @@ public class ModuleManagerSample
         registryManager.close();
     }
 
-    private static void UpdateModule() throws Exception
+    private static void UpdateModule()
     {
         String primaryKey = "[New primary key goes here]";
         String secondaryKey = "[New secondary key goes here]";
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
         Module module = Module.createFromId(SampleUtils.deviceId, SampleUtils.moduleId0, null);
-        module.getSymmetricKey().setPrimaryKeyFinal(primaryKey);
-        module.getSymmetricKey().setSecondaryKeyFinal(secondaryKey);
+        module.getSymmetricKey().setPrimaryKey(primaryKey);
+        module.getSymmetricKey().setSecondaryKey(secondaryKey);
         try
         {
             module = registryManager.updateModule(module);
@@ -130,9 +130,9 @@ public class ModuleManagerSample
         registryManager.close();
     }
 
-    private static void RemoveModule() throws Exception
+    private static void RemoveModule()
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
         try
         {

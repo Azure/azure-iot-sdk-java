@@ -30,6 +30,7 @@ public final class IotHubTransportPacket
      * @param status the status code associated with the message
      * @param startTimeMillis the milliseconds since epoch that this packet was created. Used for tracking how long a
      *                        packet has been in process for
+     * @param deviceId The Id of the device that this message will be sent by.
      * @throws IllegalArgumentException if startTimeMillis is 0 or negative
      */
     public IotHubTransportPacket(Message message,

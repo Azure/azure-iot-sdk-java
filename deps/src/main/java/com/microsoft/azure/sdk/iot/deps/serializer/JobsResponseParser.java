@@ -11,7 +11,6 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 
@@ -474,28 +473,6 @@ public class JobsResponseParser
     public MethodParser getOutcome()
     {
         return this.methodResponse;
-    }
-
-    /**
-     * Getter for update twin json
-     *
-     * @return the json of update twin. It is {@code null} if type
-     * is not scheduleUpdateTwin
-     * @deprecated As of release 0.4.0, replaced by {@link #getUpdateTwinState()}
-     */
-    @Deprecated
-    public TwinParser getUpdateTwin()
-    {
-        TwinParser twinParser = new TwinParser();
-        try
-        {
-            twinParser.updateTwin(this.updateTwin.getDesiredProperty(), this.updateTwin.getReportedProperty(), this.updateTwin.getTags());
-        }
-        catch (IOException e)
-        {
-            throw new IllegalArgumentException(e);
-        }
-        return twinParser;
     }
 
     /**

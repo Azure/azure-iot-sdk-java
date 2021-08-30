@@ -31,7 +31,7 @@ public class IotHubConnectionStringBuilderTest
         // Arrange
         String connectionString = null;
         // Act
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_001: [The function shall throw IllegalArgumentException if the input string is empty or null]
@@ -42,7 +42,7 @@ public class IotHubConnectionStringBuilderTest
         // Arrange
         String connectionString = "";
         // Act
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_002: [The function shall create a new IotHubConnectionString object deserializing the given string]
@@ -58,7 +58,7 @@ public class IotHubConnectionStringBuilderTest
         String connectionString = "HostName=" + iotHubName + "." + iotHostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         String userString = sharedAccessKeyName +  "@SAS.root." + iotHubName;
         // Act
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         // Assert
         assertEquals("Parser error: HostName mismatch!", iotHubName + "." + iotHostName, iotHubConnectionString.getHostName());
         assertEquals("Parser error: SharedAccessKeyName mismatch!", sharedAccessKeyName, iotHubConnectionString.getSharedAccessKeyName());
@@ -76,7 +76,7 @@ public class IotHubConnectionStringBuilderTest
         // Arrange
         AuthenticationMethod authenticationMethod = new ServiceAuthenticationWithSharedAccessPolicyKey("", "");
         // Act
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(null, authenticationMethod);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(null, authenticationMethod);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_003: [The function shall throw IllegalArgumentException if the input string is empty or null]
@@ -87,7 +87,7 @@ public class IotHubConnectionStringBuilderTest
         // Arrange
         AuthenticationMethod authenticationMethod = new ServiceAuthenticationWithSharedAccessPolicyKey("", "");
         // Act
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString("", authenticationMethod);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString("", authenticationMethod);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_004: [The function shall throw IllegalArgumentException if the input authenticationMethod is null]
@@ -98,7 +98,7 @@ public class IotHubConnectionStringBuilderTest
         // Arrange
         AuthenticationMethod authenticationMethod = null;
         // Act
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString("test", authenticationMethod);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString("test", authenticationMethod);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_005: [The function shall create a new IotHubConnectionString object using the given hostname and auhtenticationMethod]
@@ -108,7 +108,7 @@ public class IotHubConnectionStringBuilderTest
         // Arrange
         ServiceAuthenticationWithSharedAccessPolicyKey auth = new ServiceAuthenticationWithSharedAccessPolicyKey("myPolicy", "<key>");
         // Act
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString("hostname", auth);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString("hostname", auth);
         String connString = iotHubConnectionString.toString();
         // Assert
         assertEquals("Connection string mismatch!", "HostName=hostname;SharedAccessKeyName=myPolicy;SharedAccessKey=<key>;SharedAccessSignature=null", connString);
@@ -121,7 +121,7 @@ public class IotHubConnectionStringBuilderTest
         // Arrange
         ServiceAuthenticationWithSharedAccessPolicyToken auth = new ServiceAuthenticationWithSharedAccessPolicyToken("myPolicy", "<key>");
         // Act
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString("hostname", auth);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString("hostname", auth);
         String connString = iotHubConnectionString.toString();
         // Assert
         assertEquals("Connection string mismatch!", "HostName=hostname;SharedAccessKeyName=myPolicy;SharedAccessKey=null;SharedAccessSignature=<key>", connString);
@@ -139,7 +139,7 @@ public class IotHubConnectionStringBuilderTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + iotHubName + "." + iotHostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         // Act
         Deencapsulation.invoke(iotHubConnectionString, "parse", String.class, iotHubConnectionString);        
     }
@@ -156,7 +156,7 @@ public class IotHubConnectionStringBuilderTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + iotHubName + "." + iotHostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         // Act
         Deencapsulation.invoke(iotHubConnectionString, "parse", "" , iotHubConnectionString);   
     }
@@ -173,7 +173,7 @@ public class IotHubConnectionStringBuilderTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + iotHubName + "." + iotHostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         // Act
         Deencapsulation.invoke(iotHubConnectionString, "parse", connectionString, String.class);  
     }
@@ -192,7 +192,7 @@ public class IotHubConnectionStringBuilderTest
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         String userString = sharedAccessKeyName +  "@SAS.root." + iotHubName;
         // Act
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_008: [The function shall throw exception if tokenizing or parsing failed]
@@ -203,7 +203,7 @@ public class IotHubConnectionStringBuilderTest
         // Arrange
         String connectionString = "a=A;b=B;HostName=";
         // Act
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_008: [The function shall throw exception if tokenizing or parsing failed]
@@ -220,7 +220,7 @@ public class IotHubConnectionStringBuilderTest
         String sharedAccessSignature = "";
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey + "SharedAccessSignature=" + sharedAccessSignature;
         // Act
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_009: [The function shall tokenize and parse the given connection string and fill up the target IotHubConnectionString object with proper values]
@@ -236,7 +236,7 @@ public class IotHubConnectionStringBuilderTest
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         String userString = sharedAccessKeyName +  "@SAS.root." + iotHubName;
         // Act
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         // Assert
         assertEquals("Parser error: HostName mismatch!", hostName, iotHubConnectionString.getHostName());
         assertEquals("Parser error: SharedAccessKeyName mismatch!", sharedAccessKeyName, iotHubConnectionString.getSharedAccessKeyName());
@@ -258,7 +258,7 @@ public class IotHubConnectionStringBuilderTest
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + iotHubName + "." + iotHostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         String userString = sharedAccessKeyName +  "@SAS.root." + iotHubName;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         // Act
         Deencapsulation.invoke(iotHubConnectionString, "parse", connectionString, iotHubConnectionString);
         
@@ -290,7 +290,7 @@ public class IotHubConnectionStringBuilderTest
             }
         };
         // Act
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_011: [The function shall create new ServiceAuthenticationWithSharedAccessPolicyKey and set the authenticationMethod if the sharedAccessSignature is not defined]
@@ -312,7 +312,7 @@ public class IotHubConnectionStringBuilderTest
             }
         };
         // Act
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_012: [The function shall validate the connection string object]
@@ -326,7 +326,7 @@ public class IotHubConnectionStringBuilderTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         // Assert
         new Expectations()
         {
@@ -351,7 +351,7 @@ public class IotHubConnectionStringBuilderTest
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + iotHubName + "." + iotHostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         String userString = sharedAccessKeyName +  "@SAS.root." + iotHubName;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         // Act
         String actual = Deencapsulation.invoke(iotHubConnectionString, "parseIotHubName", iotHubConnectionString);
         // Assert
@@ -370,7 +370,7 @@ public class IotHubConnectionStringBuilderTest
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + iotHubName + "." + iotHostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         String userString = sharedAccessKeyName +  "@SAS.root." + iotHubName;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         // Act
         String actual = Deencapsulation.invoke(iotHubConnectionString, "parseIotHubName", iotHubConnectionString);
         // Assert
@@ -389,7 +389,7 @@ public class IotHubConnectionStringBuilderTest
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         String userString = sharedAccessKeyName +  "@SAS.root." + iotHubName;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         String expected = "";
         // Act
         String actual = Deencapsulation.invoke(iotHubConnectionString, "parseIotHubName", iotHubConnectionString);
@@ -410,7 +410,7 @@ public class IotHubConnectionStringBuilderTest
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         String userString = sharedAccessKeyName +  "@SAS.root." + iotHubName;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         // Act
         Deencapsulation.invoke(iotHubConnectionString, "validate", iotHubConnectionString);
     }
@@ -428,7 +428,7 @@ public class IotHubConnectionStringBuilderTest
         String sharedAccessKey = "";
         String connectionString = "HostName=" + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         String userString = sharedAccessKeyName +  "@SAS.root." + iotHubName;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         // Act
         Deencapsulation.invoke(iotHubConnectionString, "validate", iotHubConnectionString);
     }
@@ -446,7 +446,7 @@ public class IotHubConnectionStringBuilderTest
         String sharedAccessKey = "";
         String connectionString = "HostName=" + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         String userString = sharedAccessKeyName +  "@SAS.root." + iotHubName;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         // Act
         Deencapsulation.invoke(iotHubConnectionString, "validate", iotHubConnectionString);
     }
@@ -462,7 +462,7 @@ public class IotHubConnectionStringBuilderTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
 
         // Assert
         new Expectations()
@@ -490,7 +490,7 @@ public class IotHubConnectionStringBuilderTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         // Act - Assert
         
         Deencapsulation.invoke(iotHubConnectionString, "validateFormat", hostName, regex);
@@ -508,7 +508,7 @@ public class IotHubConnectionStringBuilderTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         // Act - Assert
         Deencapsulation.invoke(iotHubConnectionString, "validateFormat", "+++", "hostName", regex);
     }
@@ -525,7 +525,7 @@ public class IotHubConnectionStringBuilderTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         // Assert
         new Expectations()
         {
@@ -549,7 +549,7 @@ public class IotHubConnectionStringBuilderTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         // Act - Assert
         Deencapsulation.invoke(iotHubConnectionString, "validateFormatIfSpecified", "", regex);
     }
@@ -567,7 +567,7 @@ public class IotHubConnectionStringBuilderTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         new Expectations()
         {
             {
@@ -595,7 +595,7 @@ public class IotHubConnectionStringBuilderTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         String newPolicyName = "XXX";
         String newPolicyKey = "YYY";
         ServiceAuthenticationWithSharedAccessPolicyKey auth = new ServiceAuthenticationWithSharedAccessPolicyKey(newPolicyName, newPolicyKey);
@@ -626,7 +626,7 @@ public class IotHubConnectionStringBuilderTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         String newPolicyName = "XXX";
         String newPolicyKey = "YYY";
         ServiceAuthenticationWithSharedAccessPolicyToken auth = new ServiceAuthenticationWithSharedAccessPolicyToken(newPolicyName, newPolicyKey);

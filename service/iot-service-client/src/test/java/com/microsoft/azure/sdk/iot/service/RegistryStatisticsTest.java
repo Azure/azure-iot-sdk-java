@@ -42,36 +42,12 @@ public class RegistryStatisticsTest
         assertEquals(parser.getDisabledDeviceCount(), registryStatistics.getDisabledDeviceCount());
     }
 
-    //Tests_SRS_SERVICE_SDK_JAVA_REGISTRY_STATISTICS_34_002: [This method shall convert this into a RegistryStatisticsParser object and return it.]
-    @Test
-    public void testToRegistryStatisticsParser()
-    {
-        // arrange
-        RegistryStatisticsParser expectedParser = new RegistryStatisticsParser();
-        expectedParser.setTotalDeviceCount(10);
-        expectedParser.setEnabledDeviceCount(7);
-        expectedParser.setDisabledDeviceCount(3);
-
-        RegistryStatistics registryStatistics = Deencapsulation.newInstance(RegistryStatistics.class, new Class[] {});
-        Deencapsulation.setField(registryStatistics, "totalDeviceCount", 10);
-        Deencapsulation.setField(registryStatistics, "enabledDeviceCount", 7);
-        Deencapsulation.setField(registryStatistics, "disabledDeviceCount", 3);
-
-        // act
-        RegistryStatisticsParser actualParser = Deencapsulation.invoke(registryStatistics, "toRegistryStatisticsParser", new Class[]{});
-
-        // assert
-        assertEquals(expectedParser.getTotalDeviceCount(), actualParser.getTotalDeviceCount());
-        assertEquals(expectedParser.getEnabledDeviceCount(), actualParser.getEnabledDeviceCount());
-        assertEquals(expectedParser.getDisabledDeviceCount(), actualParser.getDisabledDeviceCount());
-    }
-
     @Test
     public void constructorSucceeds(@Mocked RegistryManager mockedRegistryManager) throws IOException, IotHubException
     {
         //arrange
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         // act
         RegistryStatistics statistics = registryManager.getStatistics();
@@ -82,7 +58,7 @@ public class RegistryStatisticsTest
     {
         //arrange
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         RegistryStatistics statistics = registryManager.getStatistics();
 
         //act

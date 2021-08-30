@@ -6,13 +6,12 @@
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp;
 
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.SaslHandler;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceSecurityException;
 
 /**
  * Implementation of a SaslHandler that is designed to handle Sasl negotiation using TPM authentication against the Device Provisioning Service
  */
-public class AmqpsProvisioningSymmetricKeySaslHandler implements SaslHandler
+class AmqpsProvisioningSymmetricKeySaslHandler implements SaslHandler
 {
     private final static String PLAIN_MECHANISM = "PLAIN";
     private final static String USERNAME_FORMAT = "%s/registrations/%s";
@@ -91,7 +90,7 @@ public class AmqpsProvisioningSymmetricKeySaslHandler implements SaslHandler
      * @param saslChallenge The bytes from the Sasl challenge received from the service
      * @return the payload of the challenge response to the given challenge
      */
-    public byte[] handleChallenge(byte[] saslChallenge) throws ProvisioningDeviceClientException
+    public byte[] handleChallenge(byte[] saslChallenge)
     {
         // Codes_SRS_AMQPSPROVISIONINGSYMMETRICKEYSASLHANDLER_34_009: [This function shall return an empty byte array.]
         return new byte[0];

@@ -15,9 +15,9 @@ import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClient;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
 import com.microsoft.azure.sdk.iot.service.devicetwin.QueryCollection;
@@ -28,12 +28,10 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenTools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
@@ -41,7 +39,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
-import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DeviceTwinCommon;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.TwinCommon;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -53,9 +51,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.HTTPS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
@@ -68,7 +63,7 @@ import static org.junit.Assert.*;
 @Slf4j
 @IotHubTest
 @RunWith(Parameterized.class)
-public class QueryTwinTests extends DeviceTwinCommon
+public class QueryTwinTests extends TwinCommon
 {
     public static final int QUERY_TIMEOUT_MILLISECONDS = 4 * 60 * 1000; // 4 minutes
 
@@ -77,7 +72,7 @@ public class QueryTwinTests extends DeviceTwinCommon
         super(protocol, authenticationType, clientType);
     }
 
-    // Override the input parameters that are defined in DeviceTwinCommon since these query tests are strictly service client tests.
+    // Override the input parameters that are defined in TwinCommon since these query tests are strictly service client tests.
     // No need to parameterize these tests on device client options.
     @Parameterized.Parameters(name = "{0}_{1}_{2}")
     public static Collection inputs()
@@ -98,7 +93,7 @@ public class QueryTwinTests extends DeviceTwinCommon
     @StandardTierHubOnlyTest
     public void testRawQueryTwinWithConnectionString() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
-        testInstance.twinServiceClient = new DeviceTwin(iotHubConnectionString);
+        testInstance.twinServiceClient = new TwinClient(iotHubConnectionString);
         testRawQueryTwin();
     }
 
@@ -111,7 +106,7 @@ public class QueryTwinTests extends DeviceTwinCommon
 
         IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
         AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
-        testInstance.twinServiceClient = new DeviceTwin(iotHubConnectionStringObj.getHostName(), sasCredential);
+        testInstance.twinServiceClient = new TwinClient(iotHubConnectionStringObj.getHostName(), sasCredential);
 
         testRawQueryTwin();
     }
@@ -126,7 +121,7 @@ public class QueryTwinTests extends DeviceTwinCommon
         IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
 
         AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
-        testInstance.twinServiceClient = new DeviceTwin(iotHubConnectionStringObj.getHostName(), sasCredential);
+        testInstance.twinServiceClient = new TwinClient(iotHubConnectionStringObj.getHostName(), sasCredential);
 
         // test that the service client can query before the shared access signature expires
         testRawQueryTwin();
@@ -214,7 +209,7 @@ public class QueryTwinTests extends DeviceTwinCommon
     @StandardTierHubOnlyTest
     public void testQueryTwinWithConnectionString() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
-        testInstance.twinServiceClient = new DeviceTwin(iotHubConnectionString);
+        testInstance.twinServiceClient = new TwinClient(iotHubConnectionString);
         testQueryTwin();
     }
 
@@ -244,9 +239,9 @@ public class QueryTwinTests extends DeviceTwinCommon
 
         for (int i = 0; i < MAX_DEVICES; i++)
         {
-            if (testInstance.twinServiceClient.hasNextDeviceTwin(twinQuery))
+            if (testInstance.twinServiceClient.hasNextTwin(twinQuery))
             {
-                DeviceTwinDevice d = testInstance.twinServiceClient.getNextDeviceTwin(twinQuery);
+                Twin d = testInstance.twinServiceClient.getNextTwin(twinQuery);
                 assertNotNull(d.getVersion());
 
                 assertEquals(TwinConnectionState.DISCONNECTED.toString(), d.getConnectionState());
@@ -258,7 +253,7 @@ public class QueryTwinTests extends DeviceTwinCommon
                 }
             }
         }
-        assertFalse(testInstance.twinServiceClient.hasNextDeviceTwin(twinQuery));
+        assertFalse(testInstance.twinServiceClient.hasNextTwin(twinQuery));
     }
 
     @Test
@@ -292,15 +287,15 @@ public class QueryTwinTests extends DeviceTwinCommon
         // avoid querying too soon, this test repeatedly queries until the continuation token is present in the return value
         // as expected or until a timeout is hit.
         String continuationToken = null;
-        Collection<DeviceTwinDevice> queriedDeviceTwinDeviceCollection = null;
+        Collection<Twin> queriedTwinCollection = null;
         long startTime = System.currentTimeMillis();
         while (continuationToken == null)
         {
             QueryCollection twinQueryCollection = testInstance.twinServiceClient.queryTwinCollection(sqlQuery.getQuery(), PAGE_SIZE);
 
             // Run a query and save the continuation token for the second page of results
-            QueryCollectionResponse<DeviceTwinDevice> queryCollectionResponse = testInstance.twinServiceClient.next(twinQueryCollection);
-            queriedDeviceTwinDeviceCollection = queryCollectionResponse.getCollection();
+            QueryCollectionResponse<Twin> queryCollectionResponse = testInstance.twinServiceClient.next(twinQueryCollection);
+            queriedTwinCollection = queryCollectionResponse.getCollection();
             continuationToken = queryCollectionResponse.getContinuationToken();
 
             if (continuationToken == null)
@@ -321,11 +316,11 @@ public class QueryTwinTests extends DeviceTwinCommon
         options.setContinuationToken(continuationToken);
         options.setPageSize(PAGE_SIZE);
         QueryCollection twinQueryToReRun = testInstance.twinServiceClient.queryTwinCollection(sqlQuery.getQuery());
-        Collection<DeviceTwinDevice> continuedDeviceTwinDeviceQuery = testInstance.twinServiceClient.next(twinQueryToReRun, options).getCollection();
+        Collection<Twin> continuedTwinQuery = testInstance.twinServiceClient.next(twinQueryToReRun, options).getCollection();
 
         // Assert
-        assertEquals((long) PAGE_SIZE, queriedDeviceTwinDeviceCollection.size());
-        assertEquals(1, continuedDeviceTwinDeviceQuery.size());
+        assertEquals((long) PAGE_SIZE, queriedTwinCollection.size());
+        assertEquals(1, continuedTwinQuery.size());
 
         // since order is not guaranteed, we cannot check that the third updated deviceTwinDevice is the third queried.
         // Instead, all we can check is that each updated device twin identity is in either the initial query or the continued query.
@@ -335,14 +330,14 @@ public class QueryTwinTests extends DeviceTwinCommon
             expectedDeviceIds.add(testInstance.devicesUnderTest[deviceTwinDeviceIndex].sCDeviceForTwin.getDeviceId());
         }
 
-        Collection<DeviceTwinDevice> allQueriedDeviceTwinDevices = new ArrayList<>(continuedDeviceTwinDeviceQuery);
-        continuedDeviceTwinDeviceQuery.addAll(queriedDeviceTwinDeviceCollection);
+        Collection<Twin> allQueriedTwins = new ArrayList<>(continuedTwinQuery);
+        continuedTwinQuery.addAll(queriedTwinCollection);
 
-        for (DeviceTwinDevice deviceTwinDevice : allQueriedDeviceTwinDevices)
+        for (Twin twin : allQueriedTwins)
         {
-            if (!expectedDeviceIds.contains(deviceTwinDevice.getDeviceId()))
+            if (!expectedDeviceIds.contains(twin.getDeviceId()))
             {
-                fail("Missing deviceTwinDevice: continuation token did not continue query where expected");
+                fail("Missing twin: continuation token did not continue query where expected");
             }
         }
     }
@@ -353,10 +348,10 @@ public class QueryTwinTests extends DeviceTwinCommon
     public void queryCollectionCanReturnEmptyQueryResults() throws IOException, IotHubException
     {
         String fullQuery = "select * from devices where deviceId='nonexistantdevice'";
-        DeviceTwin twinClient = new DeviceTwin(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        TwinClient twinClient = new TwinClient(iotHubConnectionString, TwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
         QueryCollection twinQuery = twinClient.queryTwinCollection(fullQuery);
         QueryOptions options = new QueryOptions();
-        QueryCollectionResponse<DeviceTwinDevice> response = twinClient.next(twinQuery, options);
+        QueryCollectionResponse<Twin> response = twinClient.next(twinQuery, options);
 
         assertNull(response.getContinuationToken());
         assertTrue(response.getCollection().isEmpty());

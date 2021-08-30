@@ -13,7 +13,6 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
-import com.microsoft.azure.sdk.iot.device.transport.mqtt.*;
 import mockit.*;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
@@ -72,9 +71,6 @@ public class MqttIotHubConnectionTest
 
     @Mocked
     private MqttAsyncClient mockedMqttConnection;
-
-    @Mocked
-    private IotHubConnectionStateCallback mockConnectionStateCallback;
 
     @Mocked
     private Message mockedMessage;

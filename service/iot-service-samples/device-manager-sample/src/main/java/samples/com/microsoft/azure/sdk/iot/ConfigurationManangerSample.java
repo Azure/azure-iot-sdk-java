@@ -72,9 +72,9 @@ public class ConfigurationManangerSample
         System.out.println("Shutting down sample...");
     }
 
-    private static void GetAllConfiguration() throws Exception
+    private static void GetAllConfiguration()
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
         try
         {
@@ -92,9 +92,9 @@ public class ConfigurationManangerSample
         }
     }
 
-    private static void AddConfiguration() throws Exception
+    private static void AddConfiguration()
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
         ConfigurationContent content = new ConfigurationContent();
         content.setDeviceContent(DEVICE_CONTENT_SAMPLE);
@@ -120,9 +120,9 @@ public class ConfigurationManangerSample
         registryManager.close();
     }
 
-    private static Configuration GetConfiguration() throws Exception
+    private static Configuration GetConfiguration()
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
         Configuration returnConfig = null;
         try
@@ -140,9 +140,9 @@ public class ConfigurationManangerSample
         return returnConfig;
     }
 
-    private static void UpdateConfiguration(Configuration config) throws Exception
+    private static void UpdateConfiguration(Configuration config)
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
         config.setPriority(1);
         try
@@ -158,9 +158,9 @@ public class ConfigurationManangerSample
         registryManager.close();
     }
 
-    private static void RemoveConfiguration() throws Exception
+    private static void RemoveConfiguration()
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
         try
         {

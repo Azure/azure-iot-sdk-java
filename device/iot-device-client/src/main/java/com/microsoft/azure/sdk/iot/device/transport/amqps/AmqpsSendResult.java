@@ -2,7 +2,7 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import lombok.Getter;
 
-public class AmqpsSendResult
+class AmqpsSendResult
 {
     private static final int failedDeliveryTag = -1;
 

@@ -80,8 +80,8 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
     private long receivePeriodInMilliseconds;
 
     private final IotHubTransport transport;
-    private IotHubSendTask sendTask = null;
-    private IotHubReceiveTask receiveTask = null;
+    private final IotHubSendTask sendTask;
+    private final IotHubReceiveTask receiveTask;
 
     private ScheduledExecutorService receiveTaskScheduler;
     private ScheduledExecutorService sendTaskScheduler;
@@ -103,11 +103,6 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      */
     DeviceIO(DeviceClientConfig config, long sendPeriodInMilliseconds, long receivePeriodInMilliseconds)
     {
-        this(config, sendPeriodInMilliseconds, receivePeriodInMilliseconds, false);
-    }
-
-    DeviceIO(DeviceClientConfig config, long sendPeriodInMilliseconds, long receivePeriodInMilliseconds, boolean isMultiplexing)
-    {
         if (config == null)
         {
             throw new IllegalArgumentException("Config cannot be null.");
@@ -121,12 +116,15 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
 
         this.state = IotHubConnectionStatus.DISCONNECTED;
 
-        this.transport = new IotHubTransport(config, this, isMultiplexing);
+        this.transport = new IotHubTransport(config, this, false);
 
         this.sendPeriodInMilliseconds = sendPeriodInMilliseconds;
         this.receivePeriodInMilliseconds = receivePeriodInMilliseconds;
 
         this.state = IotHubConnectionStatus.DISCONNECTED;
+
+        this.sendTask = new IotHubSendTask(this.transport);
+        this.receiveTask = new IotHubReceiveTask(this.transport);
     }
 
     DeviceIO(String hostName, IotHubClientProtocol protocol, SSLContext sslContext, ProxySettings proxySettings, long sendPeriodInMilliseconds, long receivePeriodInMilliseconds)
@@ -135,6 +133,8 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
         this.receivePeriodInMilliseconds = receivePeriodInMilliseconds;
         this.state = IotHubConnectionStatus.DISCONNECTED;
         this.transport = new IotHubTransport(hostName, protocol, sslContext, proxySettings, this);
+        this.sendTask = new IotHubSendTask(this.transport);
+        this.receiveTask = new IotHubReceiveTask(this.transport);
     }
 
     /**
@@ -212,9 +212,6 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      */
     private void startWorkerThreads()
     {
-        this.sendTask = new IotHubSendTask(this.transport);
-        this.receiveTask = new IotHubReceiveTask(this.transport);
-
         this.sendTaskScheduler = Executors.newScheduledThreadPool(1);
         this.receiveTaskScheduler = Executors.newScheduledThreadPool(1);
 
@@ -313,7 +310,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      * @throws IllegalArgumentException if the message provided is {@code null}.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
      */
-    public synchronized void sendEventAsync(Message message,
+    public void sendEventAsync(Message message,
                                IotHubEventCallback callback,
                                Object callbackContext,
                                String deviceId)
@@ -352,12 +349,11 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      * Setter for the receive period in milliseconds.
      *
      * @param newIntervalInMilliseconds is the new interval in milliseconds.
-     * @throws IOException if the task schedule exist but there is no receive task function to call.
      * @throws IllegalArgumentException if the provided interval is invalid (zero or negative).
      */
-    public void setReceivePeriodInMilliseconds(long newIntervalInMilliseconds) throws IOException
+    public void setReceivePeriodInMilliseconds(long newIntervalInMilliseconds)
     {
-        if(newIntervalInMilliseconds <= 0L)
+        if (newIntervalInMilliseconds <= 0L)
         {
             throw new IllegalArgumentException("receive interval can not be zero or negative");
         }
@@ -366,11 +362,6 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
 
         if (this.receiveTaskScheduler != null)
         {
-            if (this.receiveTask == null)
-            {
-                throw new IOException("transport receive task not set");
-            }
-
             // close the old scheduler and start a new one with the new receive period
             this.receiveTaskScheduler.shutdown();
             this.receiveTaskScheduler = Executors.newScheduledThreadPool(1);
@@ -396,12 +387,11 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      * Setter for the send period in milliseconds.
      *
      * @param newIntervalInMilliseconds is the new interval in milliseconds.
-     * @throws IOException if the task schedule exist but there is no send task function to call.
      * @throws IllegalArgumentException if the provided interval is invalid (zero or negative).
      */
-    public void setSendPeriodInMilliseconds(long newIntervalInMilliseconds) throws IOException
+    public void setSendPeriodInMilliseconds(long newIntervalInMilliseconds)
     {
-        if(newIntervalInMilliseconds <= 0L)
+        if (newIntervalInMilliseconds <= 0L)
         {
             throw new IllegalArgumentException("send interval can not be zero or negative");
         }
@@ -410,11 +400,6 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
 
         if (this.sendTaskScheduler != null)
         {
-            if (this.sendTask == null)
-            {
-                throw new IOException("transport send task not set");
-            }
-
             // close the old scheduler and start a new one with the new send period
             this.sendTaskScheduler.shutdown();
             this.sendTaskScheduler = Executors.newScheduledThreadPool(1);
@@ -448,35 +433,14 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
         return (this.state == IotHubConnectionStatus.CONNECTED || this.state == IotHubConnectionStatus.DISCONNECTED_RETRYING);
     }
 
-    /**
-     * Getter for the transport empty queue.
-     * @return a boolean true if the transport queue is empty, or false if there is messages to send.
-     */
-    public boolean isEmpty()
+    void setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback statusChangeCallback, Object callbackContext, String deviceId)
     {
-        return this.transport.isEmpty();
+        this.transport.setConnectionStatusChangeCallback(statusChangeCallback, callbackContext, deviceId);
     }
 
-    /**
-     * Registers a callback with the configured transport to be executed whenever the connection to the device is lost or established.
-     *
-     * @param callback the callback to be called.
-     * @param callbackContext a context to be passed to the callback. Can be
-     * {@code null} if no callback is provided.
-     */
-    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext)
+    void setMultiplexingConnectionStateCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext)
     {
-        this.transport.registerConnectionStateCallback(callback, callbackContext);
-    }
-
-    void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback statusChangeCallback, Object callbackContext, String deviceId)
-    {
-        this.transport.registerConnectionStatusChangeCallback(statusChangeCallback, callbackContext, deviceId);
-    }
-
-    void registerMultiplexingConnectionStateCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext)
-    {
-        this.transport.registerMultiplexingConnectionStateCallback(callback, callbackContext);
+        this.transport.setMultiplexingConnectionStateCallback(callback, callbackContext);
     }
 
     /*

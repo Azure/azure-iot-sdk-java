@@ -6,7 +6,7 @@
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
+import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import org.junit.Assert;
@@ -89,7 +89,7 @@ public class IotHubServicesCommon
         }
         finally
         {
-            client.closeNow();
+            client.close();
         }
     }
 
@@ -124,7 +124,7 @@ public class IotHubServicesCommon
         }
         finally
         {
-            client.closeNow();
+            client.close();
         }
     }
 
@@ -150,7 +150,7 @@ public class IotHubServicesCommon
         }
         finally
         {
-            client.closeNow();
+            client.close();
         }
     }
 
@@ -164,66 +164,11 @@ public class IotHubServicesCommon
                                                                          AuthenticationType authType) throws IOException, InterruptedException
     {
         final List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates = new ArrayList<>();
-        client.registerConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> actualStatusUpdates.add(new Pair<>(status, throwable)), new Object());
+        client.setConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> actualStatusUpdates.add(new Pair<>(status, throwable)), new Object());
 
         sendMessages(client, protocol, messagesToSend, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, interMessageDelay, actualStatusUpdates);
 
         Assert.assertTrue(buildExceptionMessage(protocol + ", " + authType + ": Expected connection status update to occur: " + expectedStatus, client), actualStatusUpdatesContainsStatus(actualStatusUpdates, expectedStatus));
-    }
-
-    /**
-     * Send some messages that wait for callbacks to signify that the SAS token in the client config has expired.
-     *
-     * @param client the client to send the messages from
-     * @param protocol the protocol the client is using
-     * @param numberOfMessages the number of messages to send
-     * @param breathPeriod time to sleep between checks of message callback arrival
-     * @param timeoutMilliseconds time to wait for any message to have its callback fired before the test times out
-     * @param authType the authentication type used is this test
-     */
-    public static void sendMessagesExpectingSASTokenExpiration(DeviceClient client,
-                                                               String protocol,
-                                                               int numberOfMessages,
-                                                               long breathPeriod,
-                                                               long timeoutMilliseconds,
-                                                               AuthenticationType authType)
-    {
-        for (int i = 0; i < numberOfMessages; ++i)
-        {
-            try
-            {
-                Message messageToSend = new Message("Test message expecting SAS Token Expired callback for protocol: " + protocol);
-                Success messageSent = new Success();
-                Success statusUpdated = new Success();
-
-                ConnectionStatusCallback stateCallback = new ConnectionStatusCallback(IotHubConnectionState.SAS_TOKEN_EXPIRED);
-                EventCallback messageCallback = new EventCallback(IotHubStatusCode.UNAUTHORIZED);
-
-                client.registerConnectionStateCallback(stateCallback, statusUpdated);
-                client.sendEventAsync(messageToSend, messageCallback, messageSent);
-
-                long startTime = System.currentTimeMillis();
-                while(!messageSent.wasCallbackFired() || !statusUpdated.getResult())
-                {
-                    Thread.sleep(breathPeriod);
-                    if (System.currentTimeMillis() - startTime > timeoutMilliseconds)
-                    {
-                        Assert.fail(buildExceptionMessage(protocol + ", " + authType + ": Sending message over " + protocol + " protocol failed: " +
-                                "never received connection status update for SAS_TOKEN_EXPIRED " +
-                                "or never received UNAUTHORIZED message callback", client));
-                    }
-                }
-
-                if (messageSent.getCallbackStatusCode() != IotHubStatusCode.UNAUTHORIZED)
-                {
-                    Assert.fail(buildExceptionMessage(protocol + ", " + authType + ": Send messages expecting sas token expiration failed: expected UNAUTHORIZED message callback, but got " + messageSent.getCallbackStatusCode(), client));
-                }
-            }
-            catch (Exception e)
-            {
-                Assert.fail(buildExceptionMessage(protocol + ", " + authType + ": Sending message over " + protocol + " protocol failed", client));
-            }
-        }
     }
 
     /*
@@ -293,7 +238,7 @@ public class IotHubServicesCommon
                 }
             }
 
-            client.closeNow();
+            client.close();
 
             if (messageSentExpiredCallback.getCallbackStatusCode() != IotHubStatusCode.MESSAGE_EXPIRED)
             {
@@ -302,7 +247,7 @@ public class IotHubServicesCommon
         }
         catch (Exception e)
         {
-            client.closeNow();
+            client.close();
             Assert.fail(buildExceptionMessage("Sending expired message over " + protocol + " protocol failed: Exception encountered while sending message and waiting for MESSAGE_EXPIRED callback: " + e.getMessage(), client));
         }
     }
@@ -313,7 +258,7 @@ public class IotHubServicesCommon
                                                                                   AuthenticationType authType) throws IOException, InterruptedException
     {
         final List<Pair<IotHubConnectionStatus, Throwable>> statusUpdates = new ArrayList<>();
-        client.registerConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> statusUpdates.add(new Pair<>(status, throwable)), new Object());
+        client.setConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> statusUpdates.add(new Pair<>(status, throwable)), new Object());
 
         client.open();
 
@@ -333,7 +278,7 @@ public class IotHubServicesCommon
         Assert.assertTrue(buildExceptionMessage(protocol + ", " + authType + ": Expected notification about disconnected but retrying.", client), actualStatusUpdatesContainsStatus(statusUpdates, IotHubConnectionStatus.DISCONNECTED_RETRYING));
         Assert.assertTrue(buildExceptionMessage(protocol + ", " + authType + ": Expected notification about disconnected.", client), actualStatusUpdatesContainsStatus(statusUpdates, IotHubConnectionStatus.DISCONNECTED));
 
-        client.closeNow();
+        client.close();
     }
 
     public static void sendErrorInjectionMessageAndWaitForResponse(InternalClient client, MessageAndResult messageAndResult, long RETRY_MILLISECONDS, long SEND_TIMEOUT_MILLISECONDS, IotHubClientProtocol protocol)

@@ -79,7 +79,7 @@ public class RegistryManagerTests extends IntegrationTest
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
-        hostName = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString).getHostName();
+        hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString).getHostName();
     }
 
     public RegistryManagerTests.RegistryManagerTestInstance testInstance;
@@ -295,7 +295,7 @@ public class RegistryManagerTests extends IntegrationTest
         //-Create-//
         RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
         Device deviceAdded = Device.createDevice(testInstance.deviceId, AuthenticationType.SELF_SIGNED);
-        deviceAdded.setThumbprintFinal(primaryThumbprint, secondaryThumbprint);
+        deviceAdded.setThumbprint(primaryThumbprint, secondaryThumbprint);
         Tools.addDeviceWithRetry(testInstance.registryManager, deviceAdded);
 
         //-Read-//
@@ -303,7 +303,7 @@ public class RegistryManagerTests extends IntegrationTest
 
         //-Update-//
         Device deviceUpdated = testInstance.registryManager.getDevice(testInstance.deviceId);
-        deviceUpdated.setThumbprintFinal(primaryThumbprint2, secondaryThumbprint2);
+        deviceUpdated.setThumbprint(primaryThumbprint2, secondaryThumbprint2);
         deviceUpdated = testInstance.registryManager.updateDevice(deviceUpdated);
 
         //-Delete-//
@@ -328,7 +328,7 @@ public class RegistryManagerTests extends IntegrationTest
     @ContinuousIntegrationTest
     public void getDeviceStatisticsTest() throws Exception
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        RegistryManager registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
         Tools.getStatisticsWithRetry(registryManager);
     }
 
@@ -353,7 +353,7 @@ public class RegistryManagerTests extends IntegrationTest
 
         //-Update-//
         Module moduleUpdated = testInstance.registryManager.getModule(testInstance.deviceId, testInstance.moduleId);
-        moduleUpdated.getSymmetricKey().setPrimaryKeyFinal(expectedSymmetricKey.getPrimaryKey());
+        moduleUpdated.getSymmetricKey().setPrimaryKey(expectedSymmetricKey.getPrimaryKey());
         moduleUpdated = testInstance.registryManager.updateModule(moduleUpdated);
 
         //-Delete-//
@@ -417,7 +417,7 @@ public class RegistryManagerTests extends IntegrationTest
 
         //-Create-//
         Module moduleAdded = Module.createModule(testInstance.deviceId, testInstance.moduleId, AuthenticationType.SELF_SIGNED);
-        moduleAdded.setThumbprintFinal(primaryThumbprint, secondaryThumbprint);
+        moduleAdded.setThumbprint(primaryThumbprint, secondaryThumbprint);
         Tools.addModuleWithRetry(testInstance.registryManager, moduleAdded);
 
         //-Read-//
@@ -425,7 +425,7 @@ public class RegistryManagerTests extends IntegrationTest
 
         //-Update-//
         Module moduleUpdated = testInstance.registryManager.getModule(testInstance.deviceId, testInstance.moduleId);
-        moduleUpdated.setThumbprintFinal(primaryThumbprint2, secondaryThumbprint2);
+        moduleUpdated.setThumbprint(primaryThumbprint2, secondaryThumbprint2);
         moduleUpdated = testInstance.registryManager.updateModule(moduleUpdated);
 
         //-Delete-//

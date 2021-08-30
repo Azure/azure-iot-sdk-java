@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Queue;
 
 @Slf4j
-abstract public class Mqtt implements MqttCallback
+public abstract class Mqtt implements MqttCallback
 {
     private static final int CONNECTION_TIMEOUT = 60 * 1000;
     private static final int DISCONNECTION_TIMEOUT = 60 * 1000;
@@ -513,7 +513,7 @@ abstract public class Mqtt implements MqttCallback
                         message.setContentEncoding(value);
                         break;
                     case CONTENT_TYPE:
-                        message.setContentTypeFinal(value);
+                        message.setContentType(value);
                         break;
                     default:
                         message.setProperty(key, value);

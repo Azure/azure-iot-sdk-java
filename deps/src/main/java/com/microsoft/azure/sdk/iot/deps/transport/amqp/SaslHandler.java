@@ -47,9 +47,8 @@ public interface SaslHandler
      * Based on the chosen mechanism, builds and returns the bytes to be sent in the payload for the Sasl init message
      * @param chosenMechanism the sasl mechanism that was chosen
      * @return the bytes to be used as the paylaod for the Sasl init message
-     * @throws Exception if sasl negotiation fails
      */
-    byte[] getInitPayload(String chosenMechanism) throws Exception;
+    byte[] getInitPayload(String chosenMechanism);
 
     /**
      * Handles a given challenge and returns the bytes to be sent in the payload of the Sasl response message

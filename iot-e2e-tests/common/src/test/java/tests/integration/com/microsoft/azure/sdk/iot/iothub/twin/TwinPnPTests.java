@@ -7,8 +7,8 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.service.BaseDevice;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.Module;
 import org.junit.After;
@@ -20,7 +20,6 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubT
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 
 import javax.net.ssl.SSLContext;
-import java.io.IOException;
 import java.util.*;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
@@ -41,12 +40,12 @@ public class TwinPnPTests extends IntegrationTest
     private String ModelId;
 
     @Parameterized.Parameters(name = "{0}_{1}_{2}")
-    public static Collection inputs() throws IOException
+    public static Collection inputs()
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
 
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+        registryManager = new RegistryManager(iotHubConnectionString);
 
         List inputs = new ArrayList(Arrays.asList(
                 new Object[][]
@@ -86,7 +85,7 @@ public class TwinPnPTests extends IntegrationTest
 
     public TwinPnPTests.TwinPnPTestInstance testInstance;
 
-    public TwinPnPTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
+    public TwinPnPTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType)
     {
         this.testInstance = new TwinPnPTestInstance(protocol, authenticationType, clientType);
     }
@@ -102,10 +101,10 @@ public class TwinPnPTests extends IntegrationTest
         public String privateKey;
         public String x509Thumbprint;
 
-        private final DeviceTwin twinServiceClient;
-        private DeviceTwinDevice twin;
+        private final TwinClient twinServiceClient;
+        private Twin twin;
 
-        public TwinPnPTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
+        public TwinPnPTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType)
         {
             this.protocol = protocol;
             this.authenticationType = authenticationType;
@@ -114,7 +113,7 @@ public class TwinPnPTests extends IntegrationTest
             this.privateKey = x509CertificateGenerator.getPrivateKey();
             this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
 
-            this.twinServiceClient = DeviceTwin.createFromConnectionString(iotHubConnectionString);
+            this.twinServiceClient = new TwinClient(iotHubConnectionString);
         }
 
         public void setup() throws Exception {
@@ -134,9 +133,9 @@ public class TwinPnPTests extends IntegrationTest
             Module module = Module.createFromId(deviceId, moduleId, null);
 
             Device deviceX509 = Device.createDevice(deviceX509Id, AuthenticationType.SELF_SIGNED);
-            deviceX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
+            deviceX509.setThumbprint(x509Thumbprint, x509Thumbprint);
             Module moduleX509 = Module.createModule(deviceX509Id, moduleX509Id, AuthenticationType.SELF_SIGNED);
-            moduleX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
+            moduleX509.setThumbprint(x509Thumbprint, x509Thumbprint);
             device = Tools.addDeviceWithRetry(registryManager, device);
             deviceX509 = Tools.addDeviceWithRetry(registryManager, deviceX509);
             ClientOptions clientOptions = new ClientOptions();
@@ -163,7 +162,7 @@ public class TwinPnPTests extends IntegrationTest
                     throw new Exception("Test code has not been written for this path yet");
                 }
 
-                this.twin = new DeviceTwinDevice(testInstance.identity.getDeviceId());
+                this.twin = new Twin(testInstance.identity.getDeviceId());
             }
             else if (clientType == ClientType.MODULE_CLIENT)
             {
@@ -173,7 +172,7 @@ public class TwinPnPTests extends IntegrationTest
                     module = Tools.addModuleWithRetry(registryManager, module);
                     this.client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), protocol, clientOptions);
                     this.identity = module;
-                    this.twin = new DeviceTwinDevice(deviceId, moduleId);
+                    this.twin = new Twin(deviceId, moduleId);
                 }
                 else if (authenticationType == SELF_SIGNED)
                 {
@@ -183,7 +182,7 @@ public class TwinPnPTests extends IntegrationTest
                     clientOptions.setSslContext(sslContext);
                     this.client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509, moduleX509), protocol, clientOptions);
                     this.identity = moduleX509;
-                    this.twin = new DeviceTwinDevice(deviceX509Id, moduleX509Id);
+                    this.twin = new Twin(deviceX509Id, moduleX509Id);
                 }
                 else
                 {
@@ -198,7 +197,7 @@ public class TwinPnPTests extends IntegrationTest
         {
             try
             {
-                this.client.closeNow();
+                this.client.close();
                 registryManager.removeDevice(this.identity.getDeviceId()); //removes all modules associated with this device, too
             }
             catch (Exception e)

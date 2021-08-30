@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements AmqpListener
+class ProvisioningAmqpOperations extends AmqpDeviceOperations implements AmqpListener
 {
     private static final String AMQP_ADDRESS_FMT = "/%s/registrations/%s";
     private static final String AMQP_REGISTER_DEVICE = "iotdps-register";
@@ -46,7 +46,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
      * @param hostName The Provisioning Endpoint
      * @throws ProvisioningDeviceClientException Exception thrown if parameter is not provided
      */
-    public ProvisioningAmqpOperations(String idScope, String hostName) throws ProvisioningDeviceClientException
+    ProvisioningAmqpOperations(String idScope, String hostName) throws ProvisioningDeviceClientException
     {
         // SRS_ProvisioningAmqpOperations_07_002: [The constructor shall throw ProvisioningDeviceClientException if either scopeId and hostName are null or empty.]
         if ((idScope == null) || (idScope.isEmpty()))

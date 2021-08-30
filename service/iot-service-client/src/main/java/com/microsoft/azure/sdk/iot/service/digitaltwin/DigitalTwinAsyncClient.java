@@ -37,7 +37,6 @@ import com.microsoft.rest.serializer.JacksonAdapter;
 import rx.Observable;
 import rx.schedulers.Schedulers;
 
-import java.io.IOException;
 import java.net.Proxy;
 import java.util.List;
 import java.util.Objects;
@@ -294,9 +293,9 @@ public class DigitalTwinAsyncClient {
      * @param digitalTwinId The Id of the digital twin.
      * @param commandName The command to be invoked.
      * @return A {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
-     * @throws IOException can be thrown if the provided payload cannot be deserialized to an Object.
      */
-    public Observable<DigitalTwinCommandResponse> invokeCommand(String digitalTwinId, String commandName) throws IOException {
+    public Observable<DigitalTwinCommandResponse> invokeCommand(String digitalTwinId, String commandName)
+    {
         return invokeCommandWithResponse(digitalTwinId, commandName, null, null)
                 .map(ServiceResponse::body);
     }
@@ -307,9 +306,9 @@ public class DigitalTwinAsyncClient {
      * @param commandName The command to be invoked.
      * @param payload The command payload.
      * @return A {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
-     * @throws IOException can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
-    public Observable<DigitalTwinCommandResponse> invokeCommand(String digitalTwinId, String commandName, String payload) throws IOException {
+    public Observable<DigitalTwinCommandResponse> invokeCommand(String digitalTwinId, String commandName, String payload)
+    {
         // Retrofit does not work well with null in body
         return invokeCommandWithResponse(digitalTwinId, commandName, payload, null)
                 .map(ServiceResponse::body);
@@ -322,9 +321,9 @@ public class DigitalTwinAsyncClient {
      * @param payload The command payload.
      * @param options The optional settings for this request.
      * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinInvokeRootLevelCommandHeaders} and {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
-     * @throws IOException can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
-    public Observable<ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders>> invokeCommandWithResponse(String digitalTwinId, String commandName, String payload, DigitalTwinInvokeCommandRequestOptions options) throws IOException {
+    public Observable<ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders>> invokeCommandWithResponse(String digitalTwinId, String commandName, String payload, DigitalTwinInvokeCommandRequestOptions options)
+    {
         if (options == null)
         {
             options = new DigitalTwinInvokeCommandRequestOptions();
@@ -347,9 +346,9 @@ public class DigitalTwinAsyncClient {
      * @param componentName The component name under which the command is defined.
      * @param commandName The command to be invoked.
      * @return A {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
-     * @throws IOException can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
-    public Observable<DigitalTwinCommandResponse> invokeComponentCommand(String digitalTwinId, String componentName, String commandName) throws IOException {
+    public Observable<DigitalTwinCommandResponse> invokeComponentCommand(String digitalTwinId, String componentName, String commandName)
+    {
         return invokeComponentCommandWithResponse(digitalTwinId, componentName, commandName, null, null)
                 .map(ServiceResponse::body);
     }
@@ -361,9 +360,9 @@ public class DigitalTwinAsyncClient {
      * @param commandName The command to be invoked.
      * @param payload The command payload.
      * @return A {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
-     * @throws IOException can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
-    public Observable<DigitalTwinCommandResponse> invokeComponentCommand(String digitalTwinId, String componentName, String commandName, String payload) throws IOException {
+    public Observable<DigitalTwinCommandResponse> invokeComponentCommand(String digitalTwinId, String componentName, String commandName, String payload)
+    {
         return invokeComponentCommandWithResponse(digitalTwinId, componentName, commandName, payload, null)
                 .map(ServiceResponse::body);
     }
@@ -376,9 +375,9 @@ public class DigitalTwinAsyncClient {
      * @param payload The command payload.
      * @param options The optional settings for this request.
      * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinInvokeRootLevelCommandHeaders} and {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
-     * @throws IOException can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
-    public Observable<ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders>> invokeComponentCommandWithResponse(String digitalTwinId, String componentName, String commandName, String payload, DigitalTwinInvokeCommandRequestOptions options) throws IOException {
+    public Observable<ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders>> invokeComponentCommandWithResponse(String digitalTwinId, String componentName, String commandName, String payload, DigitalTwinInvokeCommandRequestOptions options)
+    {
         if (options == null)
         {
             options = new DigitalTwinInvokeCommandRequestOptions();

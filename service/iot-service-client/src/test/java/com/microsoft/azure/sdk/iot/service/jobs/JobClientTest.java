@@ -15,17 +15,12 @@ import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceOperations;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
 import com.microsoft.azure.sdk.iot.service.devicetwin.QueryType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.SqlQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
-import com.microsoft.azure.sdk.iot.service.jobs.JobClientOptions;
-import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
-import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
-import com.microsoft.azure.sdk.iot.service.jobs.JobType;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 import mockit.Deencapsulation;
@@ -73,7 +68,7 @@ public class JobClientTest
     MethodParser mockedMethodParser;
 
     @Mocked
-    DeviceTwinDevice mockedDeviceTwinDevice;
+    Twin mockedTwin;
 
     @Mocked
     DeviceOperations mockedDeviceOperations;
@@ -98,7 +93,7 @@ public class JobClientTest
     }
 
     /* Tests_SRS_JOBCLIENT_21_002: [The constructor shall create an IotHubConnectionStringBuilder object from the given connection string.] */
-    /* Tests_SRS_JOBCLIENT_21_003: [The constructor shall create a new DeviceMethod instance and return it.] */
+    /* Tests_SRS_JOBCLIENT_21_003: [The constructor shall create a new DirectMethodsClient instance and return it.] */
     @Test
     public void constructorSucceed() throws IOException
     {
@@ -106,7 +101,7 @@ public class JobClientTest
         final String connectionString = "testString";
 
         //act
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //assert
         assertNotNull(testJobClient);
@@ -128,7 +123,7 @@ public class JobClientTest
         final String connectionString = null;
 
         //act
-        JobClient.createFromConnectionString(connectionString);
+        new JobClient(connectionString);
     }
 
     /* Tests_SRS_JOBCLIENT_21_001: [The constructor shall throw IllegalArgumentException if the input string is null or empty.] */
@@ -139,7 +134,7 @@ public class JobClientTest
         final String connectionString = "";
 
         //act
-        JobClient.createFromConnectionString(connectionString);
+        new JobClient(connectionString);
     }
 
     /* Tests_SRS_JOBCLIENT_21_001: [The constructor shall throw IllegalArgumentException if the input string is null or empty.] */
@@ -158,7 +153,7 @@ public class JobClientTest
         };
 
         //act
-        JobClient.createFromConnectionString(connectionString);
+        new JobClient(connectionString);
     }
 
     /* Tests_SRS_JOBCLIENT_21_004: [The scheduleUpdateTwin shall create a json String that represent the twin job using the JobsParser class.] */
@@ -170,7 +165,7 @@ public class JobClientTest
         final String jobId = "validJobId";
         final String deviceId = "validDeviceId";
         final String queryCondition = "validQueryCondition";
-        final DeviceTwinDevice updateTwin = mockedDeviceTwinDevice;
+        final Twin updateTwin = mockedTwin;
         final Date startTimeUtc = new Date();
         final long maxExecutionTimeInSeconds = 10;
         final String json = "validJson";
@@ -185,22 +180,22 @@ public class JobClientTest
                 IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                mockedDeviceTwinDevice.getTags();
+                mockedTwin.getTags();
                 result = testTags;
 
-                mockedDeviceTwinDevice.getDesiredProperties();
+                mockedTwin.getDesiredProperties();
                 result = null;
 
-                mockedDeviceTwinDevice.getReportedProperties();
+                mockedTwin.getReportedProperties();
                 result = null;
 
                 new TwinState((TwinCollection)any, null, null);
                 result = mockedTwinState;
 
-                mockedDeviceTwinDevice.getDeviceId();
+                mockedTwin.getDeviceId();
                 result = deviceId;
 
-                mockedDeviceTwinDevice.getETag();
+                mockedTwin.getETag();
                 result = null;
 
                 new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
@@ -220,7 +215,7 @@ public class JobClientTest
             }
         };
 
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         JobResult jobResult = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
@@ -235,7 +230,7 @@ public class JobClientTest
         final String jobId = "validJobId";
         final String deviceId = "validDeviceId";
         final String queryCondition = "validQueryCondition";
-        final DeviceTwinDevice updateTwin = mockedDeviceTwinDevice;
+        final Twin updateTwin = mockedTwin;
         final Date startTimeUtc = new Date();
         final long maxExecutionTimeInSeconds = 10;
         final String json = "validJson";
@@ -249,22 +244,22 @@ public class JobClientTest
                 IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                mockedDeviceTwinDevice.getTags();
+                mockedTwin.getTags();
                 result = testTags;
 
-                mockedDeviceTwinDevice.getDesiredProperties();
+                mockedTwin.getDesiredProperties();
                 result = null;
 
-                mockedDeviceTwinDevice.getReportedProperties();
+                mockedTwin.getReportedProperties();
                 result = null;
 
                 new TwinState((TwinCollection)any, null, null);
                 result = mockedTwinState;
 
-                mockedDeviceTwinDevice.getDeviceId();
+                mockedTwin.getDeviceId();
                 result = deviceId;
 
-                mockedDeviceTwinDevice.getETag();
+                mockedTwin.getETag();
                 result = "1234";
 
                 new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
@@ -284,7 +279,7 @@ public class JobClientTest
             }
         };
 
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         JobResult jobResult = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
@@ -299,7 +294,7 @@ public class JobClientTest
         final String jobId = "validJobId";
         final String deviceId = "validDeviceId";
         final String queryCondition = "validQueryCondition";
-        final DeviceTwinDevice updateTwin = mockedDeviceTwinDevice;
+        final Twin updateTwin = mockedTwin;
         final Date startTimeUtc = new Date();
         final long maxExecutionTimeInSeconds = 10;
         final String json = "validJson";
@@ -317,22 +312,22 @@ public class JobClientTest
                 IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                mockedDeviceTwinDevice.getTags();
+                mockedTwin.getTags();
                 result = testTags;
 
-                mockedDeviceTwinDevice.getDesiredProperties();
+                mockedTwin.getDesiredProperties();
                 result = testDesired;
 
-                mockedDeviceTwinDevice.getReportedProperties();
+                mockedTwin.getReportedProperties();
                 result = testResponse;
 
                 new TwinState((TwinCollection)any, (TwinCollection)any, (TwinCollection)any);
                 result = mockedTwinState;
 
-                mockedDeviceTwinDevice.getDeviceId();
+                mockedTwin.getDeviceId();
                 result = deviceId;
 
-                mockedDeviceTwinDevice.getETag();
+                mockedTwin.getETag();
                 result = "1234";
 
                 new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
@@ -352,7 +347,7 @@ public class JobClientTest
             }
         };
 
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         JobResult jobResult = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
@@ -366,13 +361,13 @@ public class JobClientTest
         final String connectionString = "testString";
         final String jobId = null;
         final String queryCondition = "validQueryCondition";
-        final DeviceTwinDevice updateTwin = mockedDeviceTwinDevice;
+        final Twin updateTwin = mockedTwin;
         final Date startTimeUtc = new Date();
         final long maxExecutionTimeInSeconds = 10;
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -391,13 +386,13 @@ public class JobClientTest
         final String connectionString = "testString";
         final String jobId = "";
         final String queryCondition = "validQueryCondition";
-        final DeviceTwinDevice updateTwin = mockedDeviceTwinDevice;
+        final Twin updateTwin = mockedTwin;
         final Date startTimeUtc = new Date();
         final long maxExecutionTimeInSeconds = 10;
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -417,7 +412,7 @@ public class JobClientTest
         final String jobId = "invalidJobId";
         final String deviceId = "validDeviceId";
         final String queryCondition = "validQueryCondition";
-        final DeviceTwinDevice updateTwin = mockedDeviceTwinDevice;
+        final Twin updateTwin = mockedTwin;
         final Date startTimeUtc = new Date();
         final long maxExecutionTimeInSeconds = 10;
         Set<Pair> testTags = new HashSet<>();
@@ -430,22 +425,22 @@ public class JobClientTest
                 IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                mockedDeviceTwinDevice.getTags();
+                mockedTwin.getTags();
                 result = testTags;
 
-                mockedDeviceTwinDevice.getDesiredProperties();
+                mockedTwin.getDesiredProperties();
                 result = null;
 
-                mockedDeviceTwinDevice.getReportedProperties();
+                mockedTwin.getReportedProperties();
                 result = null;
 
                 new TwinState((TwinCollection)any, null, null);
                 result = mockedTwinState;
 
-                mockedDeviceTwinDevice.getDeviceId();
+                mockedTwin.getDeviceId();
                 result = deviceId;
 
-                mockedDeviceTwinDevice.getETag();
+                mockedTwin.getETag();
                 result = null;
 
                 new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
@@ -461,7 +456,7 @@ public class JobClientTest
 
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -480,13 +475,13 @@ public class JobClientTest
         final String connectionString = "testString";
         final String jobId = "validJobId";
         final String queryCondition = "validQueryCondition";
-        final DeviceTwinDevice updateTwin = null;
+        final Twin updateTwin = null;
         final Date startTimeUtc = new Date();
         final long maxExecutionTimeInSeconds = 10;
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -505,13 +500,13 @@ public class JobClientTest
         final String connectionString = "testString";
         final String jobId = "validJobId";
         final String queryCondition = "validQueryCondition";
-        final DeviceTwinDevice updateTwin = mockedDeviceTwinDevice;
+        final Twin updateTwin = mockedTwin;
         final Date startTimeUtc = null;
         final long maxExecutionTimeInSeconds = 10;
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -530,13 +525,13 @@ public class JobClientTest
         final String connectionString = "testString";
         final String jobId = "validJobId";
         final String queryCondition = "validQueryCondition";
-        final DeviceTwinDevice updateTwin = mockedDeviceTwinDevice;
+        final Twin updateTwin = mockedTwin;
         final Date startTimeUtc = new Date();
         final long maxExecutionTimeInSeconds = -10;
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -556,7 +551,7 @@ public class JobClientTest
         final String jobId = "validJobId";
         final String deviceId = "validDeviceId";
         final String queryCondition = "validQueryCondition";
-        final DeviceTwinDevice updateTwin = mockedDeviceTwinDevice;
+        final Twin updateTwin = mockedTwin;
         final Date startTimeUtc = new Date();
         final long maxExecutionTimeInSeconds = 10;
         final String json = "validJson";
@@ -570,22 +565,22 @@ public class JobClientTest
                 IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                mockedDeviceTwinDevice.getTags();
+                mockedTwin.getTags();
                 result = testTags;
 
-                mockedDeviceTwinDevice.getDesiredProperties();
+                mockedTwin.getDesiredProperties();
                 result = null;
 
-                mockedDeviceTwinDevice.getReportedProperties();
+                mockedTwin.getReportedProperties();
                 result = null;
 
                 new TwinState((TwinCollection)any, null, null);
                 result = mockedTwinState;
 
-                mockedDeviceTwinDevice.getDeviceId();
+                mockedTwin.getDeviceId();
                 result = deviceId;
 
-                mockedDeviceTwinDevice.getETag();
+                mockedTwin.getETag();
                 result = null;
 
                 new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
@@ -605,7 +600,7 @@ public class JobClientTest
             }
         };
 
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         JobResult jobResult = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
@@ -629,7 +624,7 @@ public class JobClientTest
         final String jobId = "validJobId";
         final String deviceId = "validDeviceId";
         final String queryCondition = "validQueryCondition";
-        final DeviceTwinDevice updateTwin = mockedDeviceTwinDevice;
+        final Twin updateTwin = mockedTwin;
         final Date startTimeUtc = new Date();
         final long maxExecutionTimeInSeconds = 10;
         final String json = "validJson";
@@ -643,22 +638,22 @@ public class JobClientTest
                 IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                mockedDeviceTwinDevice.getTags();
+                mockedTwin.getTags();
                 result = testTags;
 
-                mockedDeviceTwinDevice.getDesiredProperties();
+                mockedTwin.getDesiredProperties();
                 result = null;
 
-                mockedDeviceTwinDevice.getReportedProperties();
+                mockedTwin.getReportedProperties();
                 result = null;
 
                 new TwinState((TwinCollection)any, null, null);
                 result = mockedTwinState;
 
-                mockedDeviceTwinDevice.getDeviceId();
+                mockedTwin.getDeviceId();
                 result = deviceId;
 
-                mockedDeviceTwinDevice.getETag();
+                mockedTwin.getETag();
                 result = null;
 
                 new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
@@ -678,7 +673,7 @@ public class JobClientTest
             }
         };
 
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         JobResult jobResult = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
@@ -703,7 +698,7 @@ public class JobClientTest
         final String jobId = "validJobId";
         final String deviceId = "validDeviceId";
         final String queryCondition = "validQueryCondition";
-        final DeviceTwinDevice updateTwin = mockedDeviceTwinDevice;
+        final Twin updateTwin = mockedTwin;
         final Date startTimeUtc = new Date();
         final long maxExecutionTimeInSeconds = 10;
         final String json = "validJson";
@@ -717,22 +712,22 @@ public class JobClientTest
                 IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                mockedDeviceTwinDevice.getTags();
+                mockedTwin.getTags();
                 result = testTags;
 
-                mockedDeviceTwinDevice.getDesiredProperties();
+                mockedTwin.getDesiredProperties();
                 result = null;
 
-                mockedDeviceTwinDevice.getReportedProperties();
+                mockedTwin.getReportedProperties();
                 result = null;
 
                 new TwinState((TwinCollection)any, null, null);
                 result = mockedTwinState;
 
-                mockedDeviceTwinDevice.getDeviceId();
+                mockedTwin.getDeviceId();
                 result = deviceId;
 
-                mockedDeviceTwinDevice.getETag();
+                mockedTwin.getETag();
                 result = null;
 
                 new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
@@ -749,7 +744,7 @@ public class JobClientTest
             }
         };
 
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
@@ -764,7 +759,7 @@ public class JobClientTest
         final String jobId = "validJobId";
         final String deviceId = "validDeviceId";
         final String queryCondition = "validQueryCondition";
-        final DeviceTwinDevice updateTwin = mockedDeviceTwinDevice;
+        final Twin updateTwin = mockedTwin;
         final Date startTimeUtc = new Date();
         final long maxExecutionTimeInSeconds = 10;
         final String json = "validJson";
@@ -778,22 +773,22 @@ public class JobClientTest
                 IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                mockedDeviceTwinDevice.getTags();
+                mockedTwin.getTags();
                 result = testTags;
 
-                mockedDeviceTwinDevice.getDesiredProperties();
+                mockedTwin.getDesiredProperties();
                 result = null;
 
-                mockedDeviceTwinDevice.getReportedProperties();
+                mockedTwin.getReportedProperties();
                 result = null;
 
                 new TwinState((TwinCollection)any, null, null);
                 result = mockedTwinState;
 
-                mockedDeviceTwinDevice.getDeviceId();
+                mockedTwin.getDeviceId();
                 result = deviceId;
 
-                mockedDeviceTwinDevice.getETag();
+                mockedTwin.getETag();
                 result = null;
 
                 new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
@@ -813,7 +808,7 @@ public class JobClientTest
             }
         };
 
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         JobResult jobResult = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
@@ -837,7 +832,7 @@ public class JobClientTest
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -863,7 +858,7 @@ public class JobClientTest
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -911,7 +906,7 @@ public class JobClientTest
 
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -938,7 +933,7 @@ public class JobClientTest
 
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -964,7 +959,7 @@ public class JobClientTest
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -998,7 +993,7 @@ public class JobClientTest
 
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1024,7 +1019,7 @@ public class JobClientTest
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1050,7 +1045,7 @@ public class JobClientTest
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1102,7 +1097,7 @@ public class JobClientTest
             }
         };
 
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         JobResult jobResult = testJobClient.scheduleDeviceMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
@@ -1148,7 +1143,7 @@ public class JobClientTest
             }
         };
 
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         JobResult jobResult = testJobClient.scheduleDeviceMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
@@ -1203,7 +1198,7 @@ public class JobClientTest
             }
         };
 
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         testJobClient.scheduleDeviceMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
@@ -1256,7 +1251,7 @@ public class JobClientTest
             }
         };
 
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         testJobClient.scheduleDeviceMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
@@ -1302,7 +1297,7 @@ public class JobClientTest
             }
         };
 
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         JobResult jobResult = testJobClient.scheduleDeviceMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
@@ -1322,7 +1317,7 @@ public class JobClientTest
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1343,7 +1338,7 @@ public class JobClientTest
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1374,7 +1369,7 @@ public class JobClientTest
         };
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1411,7 +1406,7 @@ public class JobClientTest
         };
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1457,7 +1452,7 @@ public class JobClientTest
         };
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1503,7 +1498,7 @@ public class JobClientTest
         };
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1527,7 +1522,7 @@ public class JobClientTest
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1548,7 +1543,7 @@ public class JobClientTest
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1579,7 +1574,7 @@ public class JobClientTest
         };
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1616,7 +1611,7 @@ public class JobClientTest
         };
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1662,7 +1657,7 @@ public class JobClientTest
         };
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1706,7 +1701,7 @@ public class JobClientTest
         };
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1743,7 +1738,7 @@ public class JobClientTest
         };
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1764,7 +1759,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         new Expectations()
         {
@@ -1793,7 +1788,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         testJobClient.queryDeviceJob(null);
@@ -1804,7 +1799,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         testJobClient.queryDeviceJob("");
@@ -1816,7 +1811,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         testJobClient.queryDeviceJob(VALID_SQL_QUERY, -1);
@@ -1827,7 +1822,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         testJobClient.queryDeviceJob(VALID_SQL_QUERY, 0);
@@ -1838,7 +1833,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         new NonStrictExpectations()
         {
@@ -1863,7 +1858,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         new Expectations()
         {
@@ -1891,7 +1886,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         new Expectations()
         {
@@ -1920,7 +1915,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         testJobClient.queryJobResponse(JOB_TYPE_DEFAULT, JOB_STATUS_DEFAULT, -1);
@@ -1931,7 +1926,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         testJobClient.queryJobResponse(JOB_TYPE_DEFAULT, JOB_STATUS_DEFAULT, 0);
@@ -1943,7 +1938,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         new NonStrictExpectations()
         {
@@ -1978,7 +1973,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         new NonStrictExpectations()
         {
@@ -1999,7 +1994,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         new NonStrictExpectations()
         {
@@ -2024,7 +2019,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         final String expectedString = "testJsonAsNext";
 
@@ -2065,7 +2060,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         new NonStrictExpectations()
         {
@@ -2086,7 +2081,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         new NonStrictExpectations()
         {
@@ -2109,7 +2104,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         new NonStrictExpectations()
         {
@@ -2135,7 +2130,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         new NonStrictExpectations()
         {

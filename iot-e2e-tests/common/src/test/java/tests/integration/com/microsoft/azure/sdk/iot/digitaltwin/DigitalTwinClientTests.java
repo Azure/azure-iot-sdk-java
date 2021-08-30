@@ -4,14 +4,13 @@
 package tests.integration.com.microsoft.azure.sdk.iot.digitaltwin;
 
 import com.azure.core.credential.AzureSasCredential;
-import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodCallback;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodData;
+import com.microsoft.azure.sdk.iot.device.twin.Pair;
+import com.microsoft.azure.sdk.iot.device.twin.Property;
+import com.microsoft.azure.sdk.iot.device.twin.TwinPropertyCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.service.Device;
@@ -39,7 +38,6 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
@@ -132,7 +130,7 @@ public class DigitalTwinClientTests extends IntegrationTest
     @After
     public void cleanUp() {
         try {
-            deviceClient.closeNow();
+            deviceClient.close();
             registryManager.removeDevice(deviceId);
         } catch (Exception ex) {
             log.error("An exception occurred while closing/ deleting the device {}: {}", deviceId, ex);
@@ -313,11 +311,11 @@ public class DigitalTwinClientTests extends IntegrationTest
         Integer newPropertyValue = 35;
 
         // Property update callback
-        TwinPropertyCallBack twinPropertyCallBack = (property, context) -> {
+        TwinPropertyCallback twinPropertyCallback = (property, context) -> {
             Set<Property> properties = new HashSet<>();
             properties.add(property);
             try {
-                deviceClient.sendReportedProperties(properties);
+                deviceClient.sendReportedPropertiesAsync(properties);
             } catch (IOException e) {
             }
         };
@@ -326,12 +324,12 @@ public class DigitalTwinClientTests extends IntegrationTest
         IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) -> {};
 
         // start device twin and setup handler for property updates in device
-        deviceClient.startDeviceTwin(iotHubEventCallback, null, twinPropertyCallBack, null);
-        Map<Property, Pair<TwinPropertyCallBack, Object>> desiredPropertyUpdateCallback =
+        deviceClient.startTwinAsync(iotHubEventCallback, null, twinPropertyCallback, null);
+        Map<Property, Pair<TwinPropertyCallback, Object>> desiredPropertyUpdateCallback =
                 Collections.singletonMap(
                         new Property(newProperty, null),
-                        new Pair<>(twinPropertyCallBack, null));
-        deviceClient.subscribeToTwinDesiredProperties(desiredPropertyUpdateCallback);
+                        new Pair<>(twinPropertyCallback, null));
+        deviceClient.subscribeToTwinDesiredPropertiesAsync(desiredPropertyUpdateCallback);
 
         DigitalTwinUpdateRequestOptions optionsWithoutEtag = new DigitalTwinUpdateRequestOptions();
         optionsWithoutEtag.setIfMatch("*");
@@ -383,7 +381,7 @@ public class DigitalTwinClientTests extends IntegrationTest
         // IotHub event callback
         IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) -> {};
 
-        deviceClient.subscribeToDeviceMethod(deviceMethodCallback, commandName, iotHubEventCallback, commandName);
+        deviceClient.subscribeToMethodsAsync(deviceMethodCallback, commandName, iotHubEventCallback, commandName);
 
         // act
         DigitalTwinCommandResponse responseWithNoPayload = this.digitalTwinClient.invokeCommand(deviceId, commandName, null);

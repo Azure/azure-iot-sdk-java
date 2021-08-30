@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.device.DeviceTwin;
+package com.microsoft.azure.sdk.iot.device.twin;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import mockit.Deencapsulation;
 import mockit.Mocked;
@@ -12,8 +11,8 @@ import mockit.NonStrictExpectations;
 import mockit.Verifications;
 import org.junit.Test;
 
-import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST;
-import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST;
+import static com.microsoft.azure.sdk.iot.device.twin.DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST;
+import static com.microsoft.azure.sdk.iot.device.twin.DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST;
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_METHODS;
 import static org.junit.Assert.*;
 
@@ -91,7 +90,7 @@ public class DeviceMethodTest
     }
 
     @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsIfCallBackNull() throws IllegalArgumentException
+    public void constructorThrowsIfCallbackNull() throws IllegalArgumentException
     {
         //act
         DeviceMethod testMethod = new DeviceMethod(mockedDeviceIO, mockedConfig, null, null);
@@ -139,7 +138,7 @@ public class DeviceMethodTest
     **Tests_SRS_DEVICEMETHOD_25_004: [**If deviceMethodCallback parameter is null then this method shall throw IllegalArgumentException**]**
      */
    @Test (expected = IllegalArgumentException.class)
-    public void subscribeToMethodsThrowsIfCallBackNull() throws IllegalArgumentException
+    public void subscribeToMethodsThrowsIfCallbackNull() throws IllegalArgumentException
     {
         //arrange
         DeviceMethod testMethod = new DeviceMethod(mockedDeviceIO, mockedConfig, mockedStatusCB, null);
@@ -360,7 +359,7 @@ public class DeviceMethodTest
     }
 
     @Test
-    public void deviceMethodResponseCallbackDoesNotHangOnUserCallBackHang() throws IllegalArgumentException
+    public void deviceMethodResponseCallbackDoesNotHangOnUserCallbackHang() throws IllegalArgumentException
     {
         //arrange
         DeviceMethod testMethod = new DeviceMethod(mockedDeviceIO, mockedConfig, mockedStatusCB, null);

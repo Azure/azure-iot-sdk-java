@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
+import lombok.Getter;
 
 /**
  * The BaseDevice class
@@ -16,8 +17,8 @@ import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
  */
 public class BaseDevice
 {
-    protected final String UTC_TIME_DEFAULT = "0001-01-01T00:00:00";
-    protected final String OFFSET_TIME_DEFAULT = "0001-01-01T00:00:00-00:00";
+    final String UTC_TIME_DEFAULT = "0001-01-01T00:00:00";
+    private final static String OFFSET_TIME_DEFAULT = "0001-01-01T00:00:00-00:00";
 
     /**
      * Create an BaseDevice instance using the given device name
@@ -26,7 +27,7 @@ public class BaseDevice
      * @param symmetricKey - Device key. If parameter is null, then the key will be auto generated.
      * @throws IllegalArgumentException if deviceId is null
      */
-    protected BaseDevice(String deviceId, SymmetricKey symmetricKey)
+    BaseDevice(String deviceId, SymmetricKey symmetricKey)
             throws IllegalArgumentException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_BASEDEVICE_12_004: [The constructor shall throw IllegalArgumentException
@@ -60,7 +61,7 @@ public class BaseDevice
      * @param deviceId Name of the device (used as device id)
      * @param authenticationType - The type of authentication used by this device.
      */
-    protected BaseDevice(String deviceId, AuthenticationType authenticationType)
+    BaseDevice(String deviceId, AuthenticationType authenticationType)
     {
         if (Tools.isNullOrEmpty(deviceId))
         {
@@ -82,39 +83,17 @@ public class BaseDevice
         this.deviceId = deviceId;
     }
 
-    // Codes_SRS_SERVICE_SDK_JAVA_BASEDEVICE_12_001: [The Device class shall have the following properties: deviceId, Etag,
-    // SymmetricKey, ConnectionState, ConnectionStateUpdatedTime, LastActivityTime, symmetricKey, thumbprint, authentication]
     /**
      * Device name
      * A case-sensitive string (up to 128 char long)
      * of ASCII 7-bit alphanumeric chars
      * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
      */
-    protected String deviceId;
+    @Getter
+    private String deviceId;
 
-    /**
-     * Getter for device name
-     *
-     * @return The deviceId string
-     */
-    public String getDeviceId()
-    {
-        return deviceId;
-    }
-
-    /**
-     * Device generation Id
-     */
-    protected String generationId;
-
-    /**
-     * Getter for GenerationId
-     * @return The generationId string
-     */
-    public String getGenerationId()
-    {
-        return generationId;
-    }
+    @Getter
+    private String generationId;
 
     /**
      * Getter for SymmetricKey object
@@ -188,34 +167,9 @@ public class BaseDevice
      * @param primaryThumbprint the primary thumbprint to set
      * @param secondaryThumbprint the secondary thumbprint to set
      *
-     * @deprecated as of service-client version 1.15.1, please use {@link #setThumbprintFinal(String, String)}
-     *
      * @throws IllegalArgumentException if primaryThumbprint or secondaryThumbprint is null or empty
      */
-    @Deprecated
-    public void setThumbprint(String primaryThumbprint, String secondaryThumbprint)
-    {
-        if (Tools.isNullOrEmpty(primaryThumbprint) || Tools.isNullOrEmpty(secondaryThumbprint))
-        {
-            throw new IllegalArgumentException("Thumbprint may not be null or empty");
-        }
-
-        if (this.authentication == null)
-        {
-            this.authentication = new AuthenticationMechanism(AuthenticationType.SELF_SIGNED);
-        }
-
-        this.authentication.setPrimaryThumbprint(primaryThumbprint);
-        this.authentication.setSecondaryThumbprint(secondaryThumbprint);
-    }
-
-    /**
-     * Setter for X509 thumbprint
-     * @param primaryThumbprint the primary thumbprint to set
-     * @param secondaryThumbprint the secondary thumbprint to set
-     * @throws IllegalArgumentException if primaryThumbprint or secondaryThumbprint is null or empty
-     */
-    public final void setThumbprintFinal(String primaryThumbprint, String secondaryThumbprint)
+    public final void setThumbprint(String primaryThumbprint, String secondaryThumbprint)
     {
         if (Tools.isNullOrEmpty(primaryThumbprint) || Tools.isNullOrEmpty(secondaryThumbprint))
         {
@@ -265,7 +219,7 @@ public class BaseDevice
      * A string representing a weak ETAG version
      * of this JSON description. This is a hash.
      */
-    protected String eTag;
+    private String eTag;
 
     /**
      * Getter for eTag
@@ -281,84 +235,31 @@ public class BaseDevice
      * Status of the device:
      * {"connected" | "disconnected"}
      */
-    protected DeviceConnectionState connectionState;
-
-    /**
-     * Getter for connection state
-     *
-     * @return The connectionState string
-     */
-    public DeviceConnectionState getConnectionState()
-    {
-        return connectionState;
-    }
+     @Getter
+     private DeviceConnectionState connectionState;
 
     /**
      * Datetime of last time the connection state was updated.
      */
-    protected String connectionStateUpdatedTime;
-
-    /**
-     * Getter for connection state updated time
-     *
-     * @return The string containing the time when the connectionState parameter was updated
-     */
-    public String getConnectionStateUpdatedTime()
-    {
-        return connectionStateUpdatedTime;
-    }
+    @Getter
+    private String connectionStateUpdatedTime;
 
     /**
      * Datetime of last time the device authenticated, received, or sent a message.
      */
-    protected String lastActivityTime;
-
-    /**
-     * Getter for last activity time
-     *
-     * @return The string containing the time when the lastActivity parameter was updated
-     */
-    public String getLastActivityTime()
-    {
-        return lastActivityTime;
-    }
+    @Getter
+    private String lastActivityTime;
 
     /**
      * Number of messages received by the device
      */
-    protected long cloudToDeviceMessageCount;
-
-    /**
-     * Getter for cloud to device message count
-     *
-     * @return The string containing the time when the cloudToDeviceMessageCount parameter was updated
-     */
-    public long getCloudToDeviceMessageCount()
-    {
-        return cloudToDeviceMessageCount;
-    }
-
-    /**
-     * Setter for force update boolean
-     * @deprecated  This method currently only validates forceUpdate parameter
-     *
-     * @param forceUpdate - Boolean controlling if the update should be forced or not
-     * @throws IllegalArgumentException if the provided argument is null
-     */
-    // Supressing this warning since this method is used by public APIs in Registry Manager
-    @Deprecated
-    public void setForceUpdate(Boolean forceUpdate) throws IllegalArgumentException
-    {
-        if (forceUpdate == null)
-        {
-            throw new IllegalArgumentException();
-        }
-    }
+    @Getter
+    private long cloudToDeviceMessageCount;
 
     /*
      * Specifies whether this device uses a key for authentication, an X509 certificate, or something else
      */
-    AuthenticationMechanism authentication;
+    private AuthenticationMechanism authentication;
 
     /**
      * Getter for the authentication type of this device
@@ -386,7 +287,7 @@ public class BaseDevice
         deviceParser.setConnectionState(this.connectionState.toString());
         deviceParser.setConnectionStateUpdatedTime(ParserUtility.getDateTimeUtc(this.connectionStateUpdatedTime));
         deviceParser.setDeviceId(this.deviceId);
-        deviceParser.seteTag(this.eTag);
+        deviceParser.setETag(this.eTag);
         deviceParser.setLastActivityTime(ParserUtility.getDateTimeUtc(this.lastActivityTime));
         deviceParser.setGenerationId(this.generationId);
 
@@ -453,7 +354,7 @@ public class BaseDevice
 
         this.cloudToDeviceMessageCount = parser.getCloudToDeviceMessageCount();
         this.deviceId = parser.getDeviceId();
-        this.eTag = parser.geteTag();
+        this.eTag = parser.getETag();
         this.generationId = parser.getGenerationId();
 
         if (parser.getConnectionStateUpdatedTime() != null)
@@ -481,10 +382,10 @@ public class BaseDevice
         else if (authenticationType == AuthenticationType.SELF_SIGNED)
         {
             if (parser.getAuthenticationParser().getThumbprint() != null
-                    && parser.getAuthenticationParser().getThumbprint().getPrimaryThumbprintFinal() != null
-                    && parser.getAuthenticationParser().getThumbprint().getSecondaryThumbprintFinal() != null)
+                    && parser.getAuthenticationParser().getThumbprint().getPrimaryThumbprint() != null
+                    && parser.getAuthenticationParser().getThumbprint().getSecondaryThumbprint() != null)
             {
-                this.setThumbprintFinal(parser.getAuthenticationParser().getThumbprint().getPrimaryThumbprintFinal(), parser.getAuthenticationParser().getThumbprint().getSecondaryThumbprintFinal());
+                this.setThumbprint(parser.getAuthenticationParser().getThumbprint().getPrimaryThumbprint(), parser.getAuthenticationParser().getThumbprint().getSecondaryThumbprint());
             }
             else
             {
@@ -495,11 +396,11 @@ public class BaseDevice
         else if (authenticationType == AuthenticationType.SAS)
         {
             if (parser.getAuthenticationParser().getSymmetricKey() != null
-                    && parser.getAuthenticationParser().getSymmetricKey().getPrimaryKeyFinal() != null
-                    && parser.getAuthenticationParser().getSymmetricKey().getSecondaryKeyFinal() != null)
+                    && parser.getAuthenticationParser().getSymmetricKey().getPrimaryKey() != null
+                    && parser.getAuthenticationParser().getSymmetricKey().getSecondaryKey() != null)
             {
-                this.getSymmetricKey().setPrimaryKeyFinal(parser.getAuthenticationParser().getSymmetricKey().getPrimaryKeyFinal());
-                this.getSymmetricKey().setSecondaryKeyFinal(parser.getAuthenticationParser().getSymmetricKey().getSecondaryKeyFinal());
+                this.getSymmetricKey().setPrimaryKey(parser.getAuthenticationParser().getSymmetricKey().getPrimaryKey());
+                this.getSymmetricKey().setSecondaryKey(parser.getAuthenticationParser().getSymmetricKey().getSecondaryKey());
             }
             else
             {

@@ -4,7 +4,8 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodCallback;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import java.util.Scanner;
@@ -38,7 +39,7 @@ public class ModuleMethodSample
         return METHOD_NOT_DEFINED;
     }
 
-    protected static class DeviceMethodStatusCallBack implements IotHubEventCallback
+    protected static class DeviceMethodStatusCallback implements IotHubEventCallback
     {
         public void execute(IotHubStatusCode status, Object context)
         {
@@ -46,12 +47,12 @@ public class ModuleMethodSample
         }
     }
 
-    protected static class SampleDeviceMethodCallback implements com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback
+    protected static class SampleDeviceMethodCallback implements DeviceMethodCallback
     {
         @Override
         public DeviceMethodData call(String methodName, Object methodData, Object context)
         {
-            DeviceMethodData deviceMethodData ;
+            DeviceMethodData deviceMethodData;
             int status = method_default(methodData);
             if ("command".equals(methodName))
             {
@@ -157,7 +158,7 @@ public class ModuleMethodSample
 
         System.out.println("Successfully created an IoT Hub client.");
 
-        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
+        client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
         try
         {
@@ -165,7 +166,7 @@ public class ModuleMethodSample
 
             System.out.println("Opened connection to IoT Hub.");
 
-            client.subscribeToMethod(new SampleDeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
+            client.subscribeToMethodsAsync(new SampleDeviceMethodCallback(), null, new DeviceMethodStatusCallback(), null);
 
             System.out.println("Subscribed to device method");
 
@@ -174,7 +175,7 @@ public class ModuleMethodSample
         catch (Exception e)
         {
             System.out.println("On exception, shutting down \n" + " Cause: " + e.getCause() + " \n" +  e.getMessage());
-            client.closeNow();
+            client.close();
             System.out.println("Shutting down...");
         }
 
@@ -182,7 +183,7 @@ public class ModuleMethodSample
 
         Scanner scanner = new Scanner(System.in);
         scanner.nextLine();
-        client.closeNow();
+        client.close();
         System.out.println("Shutting down...");
     }
 }

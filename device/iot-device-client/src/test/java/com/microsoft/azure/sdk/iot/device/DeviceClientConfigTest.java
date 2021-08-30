@@ -3,8 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
+import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.auth.*;
 import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
@@ -649,31 +648,6 @@ public class DeviceClientConfigTest
         assertEquals(expectedAuthType, actualAuthType);
     }
 
-    //Tests_SRS_DEVICECLIENTCONFIG_34_069: [If the provided connection string is null or does not use x509 auth, and IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorWithNullConnStringThrows() throws IOException
-    {
-        //act
-        new DeviceClientConfig(null, "", false, "", false);
-    }
-
-    //Tests_SRS_DEVICECLIENTCONFIG_34_069: [If the provided connection string is null or does not use x509 auth, and IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorWithWrongAuthTypeConnStringThrows() throws IOException
-    {
-        //arrange
-        new NonStrictExpectations()
-        {
-            {
-                mockIotHubConnectionString.isUsingX509();
-                result = false;
-            }
-        };
-
-        //act
-        new DeviceClientConfig(mockIotHubConnectionString, "", false, "", false);
-    }
-
     @Test
     public void constructorWithSSLContextBuildsX509SoftwareAuthenticationProvider(@Mocked final SSLContext mockSSLContext)
     {
@@ -943,7 +917,7 @@ public class DeviceClientConfigTest
     }
 
     //Tests_SRS_DEVICECLIENTCONFIG_28_002: [This function shall throw IllegalArgumentException retryPolicy is null.]
-    @Test (expected = IllegalArgumentException.class)
+    @Test (expected = NullPointerException.class)
     public void setRetryPolicyThrowsIfNull()
     {
         //arrange
@@ -1070,33 +1044,6 @@ public class DeviceClientConfigTest
         };
     }
 
-    //Tests_SRS_DEVICECLIENTCONFIG_34_042: [This function shall save a new default product info.]
-    @Test
-    public void ConstructorX509SavesNewProductInfo()
-    {
-        //arrange
-        new NonStrictExpectations()
-        {
-            {
-                mockIotHubConnectionString.isUsingX509();
-                result = true;
-            }
-        };
-
-        //act
-        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString, "", true, "", true);
-
-        //assert
-        assertNotNull(Deencapsulation.getField(config, "productInfo"));
-        new Verifications()
-        {
-            {
-                new ProductInfo();
-                times = 1;
-            }
-        };
-    }
-
     //Tests_SRS_DEVICECLIENTCONFIG_34_043: [This function shall save a new default product info.]
     @Test
     public void ConstructorSecurityProviderSavesNewProductInfo()
@@ -1162,7 +1109,7 @@ public class DeviceClientConfigTest
         DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString);
 
         //act
-        config.setProxy(mockedProxySettings);
+        config.setProxySettings(mockedProxySettings);
 
         //assert
         ProxySettings savedProxySettings = Deencapsulation.getField(config, "proxySettings");

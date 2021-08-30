@@ -4,7 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot.device;
 
 import com.google.gson.Gson;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
+import com.microsoft.azure.sdk.iot.device.twin.Property;
 import com.microsoft.azure.sdk.iot.device.Message;
 import lombok.NonNull;
 
@@ -60,7 +60,7 @@ public class PnpConvention {
     public static Message createIotHubMessageUtf8(@NonNull Map<String, Object> telemetryPairs, String componentName) {
         Message message = new Message(gson.toJson(telemetryPairs));
         message.setContentEncoding(ENCODING_UTF_8);
-        message.setContentTypeFinal(CONTENT_APPLICATION_JSON);
+        message.setContentType(CONTENT_APPLICATION_JSON);
 
         if (componentName != null) {
             message.setProperty(TELEMETRY_COMPONENT_NAME, componentName);

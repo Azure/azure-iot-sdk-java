@@ -37,7 +37,7 @@ public class ServiceClientTest
         String connectionString = null;
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Act
-        ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
+        new ServiceClient(connectionString, iotHubServiceClientProtocol);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_001: [The constructor shall throw IllegalArgumentException if the input string is empty or null]
@@ -49,7 +49,7 @@ public class ServiceClientTest
         String connectionString = "";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Act
-        ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
+        new ServiceClient(connectionString, iotHubServiceClientProtocol);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_002: [The constructor shall create IotHubConnectionString object using the IotHubConnectionStringBuilder]
@@ -68,12 +68,12 @@ public class ServiceClientTest
         new Expectations()
         {
             {
-                IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 Deencapsulation.newInstance(ServiceClient.class, iotHubConnectionString, iotHubServiceClientProtocol);
             }
         };
         // Act
-        ServiceClient iotHubServiceClient = (ServiceClient) ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
+        ServiceClient iotHubServiceClient = (ServiceClient) new ServiceClient(connectionString, iotHubServiceClientProtocol);
         // Assert
         assertNotEquals(null, iotHubServiceClient);
     }
@@ -111,7 +111,7 @@ public class ServiceClientTest
             }
         };
         // Act
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
+        ServiceClient serviceClient = new ServiceClient(connectionString, iotHubServiceClientProtocol);
         // Assert
         assertNotEquals(hostName, Deencapsulation.getField(serviceClient, "hostName"));
     }
@@ -128,9 +128,9 @@ public class ServiceClientTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + "." + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
+        ServiceClient serviceClient = new ServiceClient(connectionString, iotHubServiceClientProtocol);
         Deencapsulation.setField(serviceClient, "amqpMessageSender", null);
         // Act
         serviceClient.open();
@@ -147,9 +147,9 @@ public class ServiceClientTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + "." + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
+        ServiceClient serviceClient = new ServiceClient(connectionString, iotHubServiceClientProtocol);
         // Assert
         new Expectations()
         {
@@ -173,9 +173,9 @@ public class ServiceClientTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + "." + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
+        ServiceClient serviceClient = new ServiceClient(connectionString, iotHubServiceClientProtocol);
         Deencapsulation.setField(serviceClient, "amqpMessageSender", null);
         // Act
         serviceClient.close();
@@ -192,9 +192,9 @@ public class ServiceClientTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + "." + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
+        ServiceClient serviceClient = new ServiceClient(connectionString, iotHubServiceClientProtocol);
         // Assert
         new Expectations()
         {
@@ -222,7 +222,7 @@ public class ServiceClientTest
         String content = "HELLO";
         Message iotMessage = new Message(content);
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
+        ServiceClient serviceClient = new ServiceClient(connectionString, iotHubServiceClientProtocol);
         Deencapsulation.setField(serviceClient, "amqpMessageSender", null);
         // Act
         serviceClient.send(deviceId, iotMessage);
@@ -239,12 +239,12 @@ public class ServiceClientTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + "." + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         String deviceId = "XXX";
         String content = "HELLO";
         Message iotMessage = new Message(content);
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
+        ServiceClient serviceClient = new ServiceClient(connectionString, iotHubServiceClientProtocol);
         // Assert
         new Expectations()
         {
@@ -273,7 +273,7 @@ public class ServiceClientTest
         String content = "HELLO";
         Message iotMessage = new Message(content);
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
+        ServiceClient serviceClient = new ServiceClient(connectionString, iotHubServiceClientProtocol);
         Deencapsulation.setField(serviceClient, "amqpMessageSender", null);
         // Act
         serviceClient.send(deviceId, moduleId, iotMessage);
@@ -290,13 +290,13 @@ public class ServiceClientTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + "." + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         String deviceId = "XXX";
         String moduleId = "XXX";
         String content = "HELLO";
         Message iotMessage = new Message(content);
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
+        ServiceClient serviceClient = new ServiceClient(connectionString, iotHubServiceClientProtocol);
         // Assert
         new Expectations()
         {
@@ -319,9 +319,9 @@ public class ServiceClientTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + "." + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
+        ServiceClient serviceClient = new ServiceClient(connectionString, iotHubServiceClientProtocol);
         // Assert
         new Expectations()
         {
@@ -355,9 +355,9 @@ public class ServiceClientTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + "." + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
+        ServiceClient serviceClient = new ServiceClient(connectionString, iotHubServiceClientProtocol);
         // Act
         CompletableFuture<Void> completableFuture = serviceClient.openAsync();
         completableFuture.get();
@@ -374,9 +374,9 @@ public class ServiceClientTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + "." + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
+        ServiceClient serviceClient = new ServiceClient(connectionString, iotHubServiceClientProtocol);
         // Assert
         new Expectations()
         {
@@ -411,7 +411,7 @@ public class ServiceClientTest
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + "." + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
+        ServiceClient serviceClient = new ServiceClient(connectionString, iotHubServiceClientProtocol);
         // Act
         CompletableFuture<Void> completableFuture = serviceClient.closeAsync();
         completableFuture.get();
@@ -432,7 +432,7 @@ public class ServiceClientTest
         String content = "HELLO";
         Message iotMessage = new Message(content);
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
+        ServiceClient serviceClient = new ServiceClient(connectionString, iotHubServiceClientProtocol);
         // Assert
         new Expectations()
         {
@@ -470,7 +470,7 @@ public class ServiceClientTest
         String content = "HELLO";
         Message iotMessage = new Message(content);
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
+        ServiceClient serviceClient = new ServiceClient(connectionString, iotHubServiceClientProtocol);
         // Act
         CompletableFuture<Void> completableFuture = serviceClient.sendAsync(deviceId, iotMessage);
         completableFuture.get();
@@ -488,18 +488,18 @@ public class ServiceClientTest
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + "." + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         String deviceId = "XXX";
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
+        ServiceClient serviceClient = new ServiceClient(connectionString, iotHubServiceClientProtocol);
         // Assert
         new Expectations()
         {
             {
-                feedbackReceiver = new FeedbackReceiver(anyString, anyString, anyString, iotHubServiceClientProtocol, deviceId);
+                feedbackReceiver = new FeedbackReceiver(anyString, anyString, anyString, iotHubServiceClientProtocol, (ProxyOptions) any, (SSLContext) any);
             }
         };
         // Act
-        FeedbackReceiver feedbackReceiver = serviceClient.getFeedbackReceiver(deviceId);
+        FeedbackReceiver feedbackReceiver = serviceClient.getFeedbackReceiver();
         // Assert
         assertNotEquals(null, feedbackReceiver);
     }
@@ -516,7 +516,7 @@ public class ServiceClientTest
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + "." + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
+        ServiceClient serviceClient = new ServiceClient(connectionString, iotHubServiceClientProtocol);
         // Assert
         new Expectations()
         {

@@ -43,7 +43,7 @@ public class ServiceUpdateEnrollmentSample
 
         // *********************************** Create a Provisioning Service Client ************************************
         ProvisioningServiceClient provisioningServiceClient =
-                ProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+                new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
 
         // ************************************ Create a new individualEnrollment **************************************
         System.out.println("\nCreate a new individualEnrollment...");

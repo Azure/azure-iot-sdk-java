@@ -1,7 +1,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
+import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
 import com.microsoft.azure.sdk.iot.device.exceptions.DeviceOperationTimeoutException;
@@ -30,8 +30,8 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
 
     private interface DeviceClientNonDelegatedFunction {
         void open();
-        void closeNow();
-        void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext);
+        void close();
+        void setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext);
     }
 
     // The methods defined in the interface DeviceClientNonDelegatedFunction will be called on DeviceClientManager, and not on DeviceClient.
@@ -41,10 +41,10 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
     DeviceClientManager(DeviceClient deviceClient) {
         this.connectionStatus = ConnectionStatus.DISCONNECTED;
         this.client = deviceClient;
-        this.client.registerConnectionStatusChangeCallback(this, this);
+        this.client.setConnectionStatusChangeCallback(this, this);
     }
 
-    public void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext) {
+    public void setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext) {
         if (callback != null) {
             this.suppliedConnectionStatusChangeCallback = new Pair<>(callback, callbackContext);
         } else {
@@ -96,11 +96,11 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
         }
     }
 
-    public void closeNow() {
+    public void close() {
         synchronized (lock) {
             try {
                 log.debug("Closing the device client instance...");
-                client.closeNow();
+                client.close();
             }
             catch (IOException e) {
                 log.error("Exception thrown while closing DeviceClient instance: ", e);
@@ -141,9 +141,9 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
                         synchronized (lock) {
                             if (connectionStatus == ConnectionStatus.CONNECTED) {
                                 try {
-                                    client.closeNow();
+                                    client.close();
                                 } catch (Exception e) {
-                                    log.warn("DeviceClient closeNow failed.", e);
+                                    log.warn("DeviceClient close failed.", e);
                                 } finally {
                                     connectionStatus = ConnectionStatus.CONNECTING;
                                 }

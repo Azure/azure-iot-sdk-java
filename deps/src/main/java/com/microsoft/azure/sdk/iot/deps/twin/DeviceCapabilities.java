@@ -5,13 +5,15 @@ package com.microsoft.azure.sdk.iot.deps.twin;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
+import lombok.Setter;
 
 public class DeviceCapabilities
 {
     private static final String IOT_EDGE_NAME = "iotEdge";
     @Expose
     @SerializedName(IOT_EDGE_NAME)
-    protected Boolean iotEdge = false;
+    private Boolean iotEdge = false;
 
     /**
      * Setter for iotEdge Boolean

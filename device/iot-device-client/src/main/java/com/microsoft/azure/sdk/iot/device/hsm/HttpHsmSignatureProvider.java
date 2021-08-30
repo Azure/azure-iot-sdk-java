@@ -69,9 +69,8 @@ public class HttpHsmSignatureProvider implements SignatureProvider
      * @return the signed data
      * @throws IOException If the http client cannot reach the signing party
      * @throws TransportException If the http client cannot reach the signing party
-     * @throws URISyntaxException If the url for the signing party cannot be parsed
      */
-    public String sign(String keyName, String data, String generationId) throws IOException, TransportException, URISyntaxException, HsmException
+    public String sign(String keyName, String data, String generationId) throws IOException, TransportException, HsmException
     {
         if (data == null || data.isEmpty())
         {

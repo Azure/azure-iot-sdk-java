@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
 import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
+import lombok.Getter;
 
 import java.io.IOException;
 import java.util.Date;
@@ -20,6 +21,7 @@ import java.util.UUID;
  */
 public class Job
 {
+    @Getter
     private final String jobId;
     private final JobClient jobClient;
 
@@ -58,7 +60,7 @@ public class Job
      */
     void scheduleUpdateTwin(
         String queryCondition,
-        DeviceTwinDevice updateTwin,
+        Twin updateTwin,
         Date startTimeUtc,
         long maxExecutionTimeInSeconds)
         throws IOException, IotHubException
@@ -162,15 +164,5 @@ public class Job
     public JobResult cancel() throws IOException, IotHubException
     {
         return this.jobClient.cancelJob(jobId);
-    }
-
-    /**
-     * Getter for the JobId.
-     *
-     * @return the current jobId.
-     */
-    public String getJobId()
-    {
-        return this.jobId;
     }
 }

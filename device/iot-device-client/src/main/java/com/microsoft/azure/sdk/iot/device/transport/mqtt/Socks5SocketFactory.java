@@ -18,7 +18,7 @@ import java.net.UnknownHostException;
 
 import javax.net.SocketFactory;
 
-public class Socks5SocketFactory extends SocketFactory
+class Socks5SocketFactory extends SocketFactory
 {
     private final InetAddress mProxyHost;
     private final int mProxyPort;

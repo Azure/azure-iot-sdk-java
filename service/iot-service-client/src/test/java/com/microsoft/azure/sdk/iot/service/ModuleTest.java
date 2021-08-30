@@ -41,7 +41,7 @@ public class ModuleTest
         module.setSymmetricKey(expectedSymmetricKey);
         assertEquals(expectedSymmetricKey, module.getSymmetricKey());
 
-        module.setThumbprintFinal(expectedPrimaryThumbprint, expectedSecondaryThumbprint);
+        module.setThumbprint(expectedPrimaryThumbprint, expectedSecondaryThumbprint);
         assertEquals(expectedPrimaryThumbprint, module.getPrimaryThumbprint());
         assertEquals(expectedSecondaryThumbprint, module.getSecondaryThumbprint());
 
@@ -312,7 +312,7 @@ public class ModuleTest
         assertEquals(ParserUtility.getDateTimeUtc(expectedConnectionStateUpdatedTime), parser.getConnectionStateUpdatedTime());
         assertEquals(expectedDeviceId, parser.getDeviceId());
         assertEquals(expectedModuleId, parser.getModuleId());
-        assertEquals("\"" + expectedETag + "\"", parser.geteTag());
+        assertEquals(expectedETag, parser.getETag());
         assertEquals(expectedGenerationId, parser.getGenerationId());
         assertEquals(ParserUtility.getDateTimeUtc(expectedLastActivityTime), parser.getLastActivityTime());
         assertEquals(expectedManagedBy, parser.getManagedBy());

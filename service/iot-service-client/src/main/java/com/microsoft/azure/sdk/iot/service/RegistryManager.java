@@ -14,6 +14,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.JobPropertiesParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.RegistryStatisticsParser;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
@@ -38,7 +39,7 @@ import java.util.concurrent.Executors;
 
 /**
  * Use the RegistryManager client to manage the identity registry in IoT hubs.
- * To access twins, use the {@link com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin} client.
+ * To access twins, use the {@link TwinClient} client.
  */
 public class RegistryManager
 {
@@ -50,58 +51,6 @@ public class RegistryManager
     private IotHubConnectionString iotHubConnectionString;
 
     private final RegistryManagerOptions options;
-
-    /**
-     * Previously was the java default constructor, should not be used.
-     *
-     * @deprecated As of release 1.22.0, replaced by {@link #createFromConnectionString(String)}
-     */
-    // Suppressing warning since it is referenced by createFromConnectionString
-    @Deprecated
-    public RegistryManager()
-    {
-        // This constructor was previously a default constructor that users could use because there was no other constructor declared.
-        // However, we still prefer users use the createFromConnectionString method to build their clients.
-        options = RegistryManagerOptions.builder().build();
-
-        // we don't use hostname in this constructor, so assign it an empty value to satisfy the field being marked final
-        hostName = "";
-    }
-
-    /**
-     * Static constructor to create instance from connection string
-     *
-     * @param connectionString The iot hub connection string
-     * @return The instance of RegistryManager
-     * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
-     * are recommended to use {@link #RegistryManager(String)} instead since it does not declare this exception even
-     * though it constructs the same RegistryManager.
-     * @throws IOException This exception is never thrown.
-     */
-    @Deprecated
-    public static RegistryManager createFromConnectionString(String connectionString) throws IOException
-    {
-        return createFromConnectionString(connectionString, RegistryManagerOptions.builder().build());
-    }
-
-    /**
-     * Static constructor to create instance from connection string
-     *
-     * @param connectionString The iot hub connection string
-     * @param options The connection options to use when connecting to the service.
-     * @return The instance of RegistryManager
-     * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
-     * are recommended to use {@link #RegistryManager(String, RegistryManagerOptions)} instead since it does not declare this exception even
-     * though it constructs the same RegistryManager.
-     * @throws IOException This exception is never thrown.
-     */
-    @Deprecated
-    public static RegistryManager createFromConnectionString(
-            String connectionString,
-            RegistryManagerOptions options) throws IOException
-    {
-        return new RegistryManager(connectionString, options);
-    }
 
     /**
      * Constructor to create instance from connection string
@@ -208,16 +157,6 @@ public class RegistryManager
     }
 
     /**
-     * @deprecated as of release 1.13.0 this API is no longer supported and open is done implicitly by the respective APIs
-     * Opens this registry manager's executor service after it has been closed.
-     */
-    @SuppressWarnings("EmptyMethod") //can't remove this method without breaking users, and there is no logic that needs to be done in it.
-    @Deprecated
-    public void open()
-    {
-    }
-
-    /**
      * Gracefully close running threads, and then shutdown the underlying executor service
      */
     public void close()
@@ -263,10 +202,8 @@ public class RegistryManager
      *
      * @param device The device object to add
      * @return The future object for the requested operation
-     * @throws IOException This exception is thrown if the IO operation failed
-     * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public CompletableFuture<Device> addDeviceAsync(Device device) throws IOException, IotHubException
+    public CompletableFuture<Device> addDeviceAsync(Device device)
     {
         if (device == null)
         {
@@ -322,10 +259,8 @@ public class RegistryManager
      *
      * @param deviceId The id of requested device
      * @return The future object for the requested operation
-     * @throws IOException This exception is thrown if the IO operation failed
-     * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public CompletableFuture<Device> getDeviceAsync(String deviceId) throws IOException, IotHubException
+    public CompletableFuture<Device> getDeviceAsync(String deviceId)
     {
         if (Tools.isNullOrEmpty(deviceId))
         {
@@ -339,86 +274,6 @@ public class RegistryManager
             {
                 Device responseDevice = getDevice(deviceId);
                 future.complete(responseDevice);
-            }
-            catch (IotHubException | IOException e)
-            {
-                future.completeExceptionally(e);
-            }
-        });
-        return future;
-    }
-
-    /**
-     * Get list of devices
-     * @deprecated as of release 1.12.0. Please use
-     * {@link com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin#queryTwin(String sqlQuery, Integer pageSize)}
-     * to query for all devices.
-     *
-     * @param maxCount The requested count of devices
-     * @return The array of requested device objects
-     * @throws IOException This exception is thrown if the IO operation failed
-     * @throws IotHubException This exception is thrown if the response verification failed
-     */
-    @Deprecated
-    public ArrayList<Device> getDevices(Integer maxCount) throws IOException, IotHubException, JsonSyntaxException
-    {
-        if (maxCount < 1)
-        {
-            throw new IllegalArgumentException("maxCount cannot be less then 1");
-        }
-
-        URL url = IotHubConnectionString.getUrlDeviceList(this.hostName, maxCount);
-
-        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0]);
-
-        HttpResponse response = request.send();
-
-        IotHubExceptionManager.httpResponseVerification(response);
-
-        String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
-        try (JsonReader jsonReader = Json.createReader(new StringReader(bodyStr)))
-        {
-            ArrayList<Device> deviceList = new ArrayList<>();
-            JsonArray deviceArray = jsonReader.readArray();
-
-            for (int i = 0; i < deviceArray.size(); i++)
-            {
-                JsonObject jsonObject = deviceArray.getJsonObject(i);
-                Device iotHubDevice = new Device(new DeviceParser(jsonObject.toString()));
-                deviceList.add(iotHubDevice);
-            }
-
-            return deviceList;
-        }
-    }
-
-    /**
-     * Async wrapper for getDevices() operation
-     *
-     * @deprecated as of release 1.12.0. Please use
-     * {@link com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin#queryTwin(String sqlQuery, Integer pageSize)}
-     * to query for all devices.
-     *
-     * @param maxCount The requested count of devices
-     * @return The future object for the requested operation
-     * @throws IOException This exception is thrown if the IO operation failed
-     * @throws IotHubException This exception is thrown if the response verification failed
-     */
-    @Deprecated
-    public CompletableFuture<ArrayList<Device>> getDevicesAsync(Integer maxCount) throws IOException, IotHubException
-    {
-        if (maxCount < 1)
-        {
-            throw new IllegalArgumentException("maxCount cannot be less then 1");
-        }
-
-        final CompletableFuture<ArrayList<Device>> future = new CompletableFuture<>();
-        executor.submit(() ->
-        {
-            try
-            {
-                ArrayList<Device> response = getDevices(maxCount);
-                future.complete(response);
             }
             catch (IotHubException | IOException e)
             {
@@ -474,29 +329,6 @@ public class RegistryManager
         {
             throw new IllegalArgumentException("device cannot be null");
         }
-        return updateDevice(device, false);
-    }
-
-    /**
-     * Update device with forceUpdate input parameter
-     * @deprecated The forceUpdate argument does nothing so this method will always behave the same as {@link #updateDevice(Device)}
-     *
-     * @param device The device object containing updated data
-     * @param forceUpdate This value is not used
-     * @return The updated device object
-     * @throws IOException This exception is thrown if the IO operation failed
-     * @throws IotHubException This exception is thrown if the response verification failed
-     */
-    @Deprecated
-    public Device updateDevice(Device device, Boolean forceUpdate)
-            throws IOException, IotHubException, JsonSyntaxException
-    {
-        if (device == null)
-        {
-            throw new IllegalArgumentException("device cannot be null");
-        }
-
-        device.setForceUpdate(forceUpdate);
 
         URL url = IotHubConnectionString.getUrlDevice(this.hostName, device.getDeviceId());
         HttpRequest request = CreateRequest(url, HttpMethod.PUT, device.toDeviceParser().toJson().getBytes());
@@ -517,10 +349,8 @@ public class RegistryManager
      *
      * @param device The device object containing updated data
      * @return The future object for the requested operation
-     * @throws IOException This exception is thrown if the IO operation failed
-     * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public CompletableFuture<Device> updateDeviceAsync(Device device) throws IOException, IotHubException
+    public CompletableFuture<Device> updateDeviceAsync(Device device)
     {
         if (device == null)
         {
@@ -532,39 +362,6 @@ public class RegistryManager
             try
             {
                 Device responseDevice = updateDevice(device);
-                future.complete(responseDevice);
-            }
-            catch (IotHubException | IOException e)
-            {
-                future.completeExceptionally(e);
-            }
-        });
-        return future;
-    }
-
-    /**
-     * Async wrapper for forced updateDevice() operation
-     * @deprecated The forceUpdate argument does nothing so this method will always behave the same as {@link #updateDeviceAsync(Device)}
-     *
-     * @param device The device object containing updated data
-     * @param forceUpdate True is the update has to be forced regardless if the device state
-     * @return The future object for the requested operation
-     * @throws IOException This exception is thrown if the IO operation failed
-     * @throws IotHubException This exception is thrown if the response verification failed
-     */
-    @Deprecated
-    public CompletableFuture<Device> updateDeviceAsync(Device device, Boolean forceUpdate) throws IOException, IotHubException
-    {
-        if (device == null)
-        {
-            throw new IllegalArgumentException("device cannot be null");
-        }
-        final CompletableFuture<Device> future = new CompletableFuture<>();
-        executor.submit(() ->
-        {
-            try
-            {
-                Device responseDevice = updateDevice(device, forceUpdate);
                 future.complete(responseDevice);
             }
             catch (IotHubException | IOException e)
@@ -640,10 +437,8 @@ public class RegistryManager
      *
      * @param deviceId The device object to remove
      * @return The future object for the requested operation
-     * @throws IOException This exception is thrown if the IO operation failed
-     * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public CompletableFuture<Boolean> removeDeviceAsync(String deviceId) throws IOException, IotHubException
+    public CompletableFuture<Boolean> removeDeviceAsync(String deviceId)
     {
 
         if (Tools.isNullOrEmpty(deviceId))
@@ -692,10 +487,8 @@ public class RegistryManager
      * Async wrapper for getStatistics() operation
      *
      * @return The future object for the requested operation
-     * @throws IOException This exception is thrown if the IO operation failed
-     * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public CompletableFuture<RegistryStatistics> getStatisticsAsync() throws IOException, IotHubException
+    public CompletableFuture<RegistryStatistics> getStatisticsAsync()
     {
         final CompletableFuture<RegistryStatistics> future = new CompletableFuture<>();
         executor.submit(() ->
@@ -750,11 +543,9 @@ public class RegistryManager
      * @return The future object for the requested operation
      *
      * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
-     * @throws IOException This exception is thrown if the IO operation failed
-     * @throws IotHubException This exception is thrown if the response verification failed
      */
     public CompletableFuture<JobProperties> exportDevicesAsync(String exportBlobContainerUri, Boolean excludeKeys)
-            throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException
+            throws IllegalArgumentException, JsonSyntaxException
     {
         final CompletableFuture<JobProperties> future = new CompletableFuture<>();
         executor.submit(() ->
@@ -813,11 +604,9 @@ public class RegistryManager
      * @return The future object for the requested operation
      *
      * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
-     * @throws IOException This exception is thrown if the IO operation failed
-     * @throws IotHubException This exception is thrown if the response verification failed
      */
     public CompletableFuture<JobProperties> exportDevicesAsync(JobProperties exportDevicesParameters)
-            throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException
+            throws IllegalArgumentException, JsonSyntaxException
     {
         final CompletableFuture<JobProperties> future = new CompletableFuture<>();
         executor.submit(() ->
@@ -873,11 +662,9 @@ public class RegistryManager
      * @return The future object for the requested operation
      *
      * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
-     * @throws IOException This exception is thrown if the IO operation failed
-     * @throws IotHubException This exception is thrown if the response verification failed
      */
     public CompletableFuture<JobProperties> importDevicesAsync(String importBlobContainerUri, String outputBlobContainerUri)
-            throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException
+            throws IllegalArgumentException, JsonSyntaxException
     {
         final CompletableFuture<JobProperties> future = new CompletableFuture<>();
         executor.submit(() ->
@@ -937,11 +724,9 @@ public class RegistryManager
      * @return The future object for the requested operation
      *
      * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
-     * @throws IOException This exception is thrown if the IO operation failed
-     * @throws IotHubException This exception is thrown if the response verification failed
      */
     public CompletableFuture<JobProperties> importDevicesAsync(JobProperties importParameters)
-            throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException
+            throws IllegalArgumentException, JsonSyntaxException
     {
         final CompletableFuture<JobProperties> future = new CompletableFuture<>();
         executor.submit(() ->
@@ -993,11 +778,9 @@ public class RegistryManager
      * @return The future object for the requested operation
      *
      * @throws IllegalArgumentException This exception is thrown if the jobId parameter is null
-     * @throws IOException This exception is thrown if the IO operation failed
-     * @throws IotHubException This exception is thrown if the response verification failed
      */
     public CompletableFuture<JobProperties> getJobAsync(String jobId)
-            throws IllegalArgumentException, IOException, IotHubException
+            throws IllegalArgumentException
     {
         final CompletableFuture<JobProperties> future = new CompletableFuture<>();
         executor.submit(() ->
@@ -1133,29 +916,6 @@ public class RegistryManager
         {
             throw new IllegalArgumentException("module cannot be null");
         }
-        return updateModule(module, false);
-    }
-
-    /**
-     * Update module with forceUpdate input parameter
-     * @deprecated The forceUpdate argument does nothing so this method will always behave the same as @link #updateModule(Module)}
-     *
-     * @param module The module object containing updated data
-     * @param forceUpdate This value is not used
-     * @return The updated module object
-     * @throws IOException This exception is thrown if the IO operation failed
-     * @throws IotHubException This exception is thrown if the response verification failed
-     */
-    @Deprecated
-    public Module updateModule(Module module, Boolean forceUpdate)
-            throws IOException, IotHubException, JsonSyntaxException
-    {
-        if (module == null)
-        {
-            throw new IllegalArgumentException("module cannot be null");
-        }
-
-        module.setForceUpdate(forceUpdate);
 
         URL url = IotHubConnectionString.getUrlModule(this.hostName, module.getDeviceId(), module.getId());
 
@@ -1354,29 +1114,6 @@ public class RegistryManager
         {
             throw new IllegalArgumentException("configuration cannot be null");
         }
-        return updateConfiguration(configuration, false);
-    }
-
-    /**
-     * Update configuration with forceUpdate input parameter
-     * @deprecated the forceUpdate argument does nothing so this method will always behave the same as @link #updateConfiguration(Configuration)}
-     *
-     * @param configuration The configuration object containing updated data
-     * @param forceUpdate This value is not used
-     * @return The updated configuration object
-     * @throws IOException This exception is thrown if the IO operation failed
-     * @throws IotHubException This exception is thrown if the response verification failed
-     */
-    @Deprecated
-    public Configuration updateConfiguration(Configuration configuration, Boolean forceUpdate)
-            throws IOException, IotHubException, JsonSyntaxException
-    {
-        if (configuration == null)
-        {
-            throw new IllegalArgumentException("configuration cannot be null");
-        }
-
-        configuration.setForceUpdate(forceUpdate);
 
         URL url = IotHubConnectionString.getUrlConfiguration(this.hostName, configuration.getId());
 

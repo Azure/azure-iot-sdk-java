@@ -192,8 +192,8 @@ public class TwinCollectionTest
 
         // assert
         Helpers.assertMap(twinCollection, oldTwinCollection);
-        assertNull(twinCollection.getVersionFinal());
-        assertNull(twinCollection.getTwinMetadataFinal());
+        assertNull(twinCollection.getVersion());
+        assertNull(twinCollection.getTwinMetadata());
     }
 
     /* SRS_TWIN_COLLECTION_21_027: [The constructor shall copy the version and metadata from the provided TwinCollection.] */
@@ -274,7 +274,7 @@ public class TwinCollectionTest
         TwinCollection twinCollection = new TwinCollection();
 
         // act
-        twinCollection.putAllFinal(null);
+        twinCollection.putAll(null);
 
         // assert
     }
@@ -287,7 +287,7 @@ public class TwinCollectionTest
         TwinCollection twinCollection = new TwinCollection();
 
         // act
-        twinCollection.putAllFinal(new HashMap<String, Object>());
+        twinCollection.putAll(new HashMap<String, Object>());
 
         // assert
     }
@@ -304,18 +304,18 @@ public class TwinCollectionTest
                 put("MaxSpeed", new TwinCollection()
                 {
                     {
-                        putFinal("Value", 500.0);
-                        putFinal("NewValue", 300.0);
-                        putFinal("Inner1", new TwinCollection()
+                        put("Value", 500.0);
+                        put("NewValue", 300.0);
+                        put("Inner1", new TwinCollection()
                         {
                             {
-                                putFinal("Inner2", new TwinCollection()
+                                put("Inner2", new TwinCollection()
                                 {
                                     {
-                                        putFinal("Inner3", new TwinCollection()
+                                        put("Inner3", new TwinCollection()
                                         {
                                             {
-                                                putFinal("Inner4", "FinalInnerValue");
+                                                put("Inner4", "FinalInnerValue");
                                             }
                                         });
                                     }
@@ -329,7 +329,7 @@ public class TwinCollectionTest
         TwinCollection twinCollection = new TwinCollection();
 
         // act
-        twinCollection.putAllFinal(rawMap);
+        twinCollection.putAll(rawMap);
 
         // assert
         Helpers.assertMap(twinCollection, rawMap);
@@ -349,7 +349,7 @@ public class TwinCollectionTest
         TwinCollection twinCollection = new TwinCollection(rawMap);
 
         // act
-        String lastBrand = (String)twinCollection.putFinal(VALID_KEY_NAME, "NewNiceCar");
+        String lastBrand = (String)twinCollection.put(VALID_KEY_NAME, "NewNiceCar");
 
         // assert
         assertEquals(VALID_VALUE_NAME, lastBrand);
@@ -363,7 +363,7 @@ public class TwinCollectionTest
         TwinCollection twinCollection = new TwinCollection();
 
         // act
-        Object lastBrand = twinCollection.putFinal(VALID_KEY_NAME, "NewNiceCar");
+        Object lastBrand = twinCollection.put(VALID_KEY_NAME, "NewNiceCar");
 
         // assert
         assertNull(lastBrand);
@@ -377,7 +377,7 @@ public class TwinCollectionTest
         TwinCollection twinCollection = new TwinCollection();
 
         // act
-        twinCollection.putFinal(VALID_KEY_NAME, "NewNiceCar");
+        twinCollection.put(VALID_KEY_NAME, "NewNiceCar");
 
         // assert
         assertEquals("NewNiceCar", twinCollection.get(VALID_KEY_NAME));
@@ -396,13 +396,13 @@ public class TwinCollectionTest
                 put("Inner1", new TwinCollection()
                 {
                     {
-                        putFinal("Inner2", new TwinCollection()
+                        put("Inner2", new TwinCollection()
                         {
                             {
-                                putFinal("Inner3", new TwinCollection()
+                                put("Inner3", new TwinCollection()
                                 {
                                     {
-                                        putFinal("Inner4", "FinalInnerValue");
+                                        put("Inner4", "FinalInnerValue");
                                     }
                                 });
                             }
@@ -414,7 +414,7 @@ public class TwinCollectionTest
         TwinCollection twinCollection = new TwinCollection();
 
         // act
-        twinCollection.putFinal("MaxSpeed", rawMap);
+        twinCollection.put("MaxSpeed", rawMap);
 
         // assert
         Object inner = twinCollection.get("MaxSpeed");
@@ -434,21 +434,21 @@ public class TwinCollectionTest
                 put("MaxSpeed", new TwinCollection()
                 {
                     {
-                        putFinal("Value", 500.0);
-                        putFinal("NewValue", 300.0);
-                        putFinal("Inner1", new TwinCollection()
+                        put("Value", 500.0);
+                        put("NewValue", 300.0);
+                        put("Inner1", new TwinCollection()
                         {
                             {
-                                putFinal("Inner2", new TwinCollection()
+                                put("Inner2", new TwinCollection()
                                 {
                                     {
-                                        putFinal("Inner3", new TwinCollection()
+                                        put("Inner3", new TwinCollection()
                                         {
                                             {
-                                                putFinal("Inner4", new TwinCollection()
+                                                put("Inner4", new TwinCollection()
                                                 {
                                                     {
-                                                        putFinal("Inner5", "FinalInnerValue");
+                                                        put("Inner5", "FinalInnerValue");
                                                     }
                                                 });
                                             }
@@ -464,7 +464,7 @@ public class TwinCollectionTest
         final TwinCollection twinCollection = new TwinCollection();
 
         // act
-        twinCollection.putFinal(Deencapsulation.getField(TwinCollection.class, "METADATA_TAG").toString(), rawMap);
+        twinCollection.put(Deencapsulation.getField(TwinCollection.class, "METADATA_TAG").toString(), rawMap);
 
         // assert
         new Verifications()
@@ -484,7 +484,7 @@ public class TwinCollectionTest
         TwinCollection twinCollection = new TwinCollection();
 
         // act
-        twinCollection.putFinal(null, "NewNiceCar");
+        twinCollection.put(null, "NewNiceCar");
 
         // assert
     }
@@ -497,7 +497,7 @@ public class TwinCollectionTest
         TwinCollection twinCollection = new TwinCollection();
 
         // act
-        twinCollection.putFinal("", "NewNiceCar");
+        twinCollection.put("", "NewNiceCar");
 
         // assert
     }
@@ -510,7 +510,7 @@ public class TwinCollectionTest
         TwinCollection twinCollection = new TwinCollection();
 
         // act
-        twinCollection.putFinal(VALID_KEY_NAME, new int[]{1,2,3});
+        twinCollection.put(VALID_KEY_NAME, new int[]{1,2,3});
 
         // assert
     }
@@ -529,7 +529,7 @@ public class TwinCollectionTest
         TwinCollection twinCollection = new TwinCollection();
 
         // act
-        twinCollection.putFinal(VALID_KEY_NAME, new UserType());
+        twinCollection.put(VALID_KEY_NAME, new UserType());
 
         // assert
     }
@@ -590,24 +590,24 @@ public class TwinCollectionTest
         TwinCollection twinCollection = Deencapsulation.invoke(TwinCollection.class, "createFromRawCollection", rawMap);
 
         // act(getters) - assert
-        assertEquals(VERSION, twinCollection.getVersionFinal());
-        assertEquals(1L, (long)twinCollection.getTwinMetadataFinal().getLastUpdatedVersion());
+        assertEquals(VERSION, twinCollection.getVersion());
+        assertEquals(1L, (long)twinCollection.getTwinMetadata().getLastUpdatedVersion());
 
         assertEquals(VALID_VALUE_NAME, twinCollection.get(VALID_KEY_NAME));
-        Helpers.assertDateWithError(twinCollection.getTwinMetadataFinal(VALID_KEY_NAME).getLastUpdated(), "2017-08-09T02:07:44.238Z");
-        assertEquals(2L, (long)twinCollection.getTwinMetadataFinal(VALID_KEY_NAME).getLastUpdatedVersion());
+        Helpers.assertDateWithError(twinCollection.getTwinMetadata(VALID_KEY_NAME).getLastUpdated(), "2017-08-09T02:07:44.238Z");
+        assertEquals(2L, (long)twinCollection.getTwinMetadata(VALID_KEY_NAME).getLastUpdatedVersion());
 
-        Helpers.assertDateWithError(twinCollection.getTwinMetadataFinal("MaxSpeed").getLastUpdated(), "2017-10-21T02:07:44.238Z");
-        assertEquals(3L, (long)twinCollection.getTwinMetadataFinal("MaxSpeed").getLastUpdatedVersion());
+        Helpers.assertDateWithError(twinCollection.getTwinMetadata("MaxSpeed").getLastUpdated(), "2017-10-21T02:07:44.238Z");
+        assertEquals(3L, (long)twinCollection.getTwinMetadata("MaxSpeed").getLastUpdatedVersion());
         TwinCollection innerMaxSpeed = (TwinCollection) twinCollection.get("MaxSpeed");
 
-        assertEquals(3L, (long)innerMaxSpeed.getTwinMetadataFinal().getLastUpdatedVersion());
+        assertEquals(3L, (long)innerMaxSpeed.getTwinMetadata().getLastUpdatedVersion());
 
         assertEquals(500.0, innerMaxSpeed.get("Value"));
-        Helpers.assertDateWithError(innerMaxSpeed.getTwinMetadataFinal("Value").getLastUpdated(), "2017-11-21T02:07:44.238Z");
-        assertEquals(4L, (long)innerMaxSpeed.getTwinMetadataFinal("Value").getLastUpdatedVersion());
-        assertEquals("637570515479675333", innerMaxSpeed.getTwinMetadataFinal("Value").getLastUpdatedByDigest());
-        assertEquals("testConfig", innerMaxSpeed.getTwinMetadataFinal("Value").getLastUpdatedBy());
+        Helpers.assertDateWithError(innerMaxSpeed.getTwinMetadata("Value").getLastUpdated(), "2017-11-21T02:07:44.238Z");
+        assertEquals(4L, (long)innerMaxSpeed.getTwinMetadata("Value").getLastUpdatedVersion());
+        assertEquals("637570515479675333", innerMaxSpeed.getTwinMetadata("Value").getLastUpdatedByDigest());
+        assertEquals("testConfig", innerMaxSpeed.getTwinMetadata("Value").getLastUpdatedBy());
     }
 
     @Test
@@ -617,16 +617,16 @@ public class TwinCollectionTest
         final TwinCollection expected = new TwinCollection()
         {
             {
-                putFinal(VALID_KEY_NAME, VALID_VALUE_NAME);
-                putFinal("MaxSpeed", new TwinCollection()
+                put(VALID_KEY_NAME, VALID_VALUE_NAME);
+                put("MaxSpeed", new TwinCollection()
                 {
                     {
-                        putFinal("Value", null);
-                        putFinal("NewValue", 300.0);
-                        putFinal("Inner1", new TwinCollection()
+                        put("Value", null);
+                        put("NewValue", 300.0);
+                        put("Inner1", new TwinCollection()
                         {
                             {
-                                putFinal("Inner2", "FinalInnerValue");
+                                put("Inner2", "FinalInnerValue");
                             }
                         });
                     }
@@ -679,12 +679,12 @@ public class TwinCollectionTest
         TwinCollection twinCollection = Deencapsulation.invoke(TwinCollection.class, "createFromRawCollection", rawMap);
 
         // act(getters) - assert
-        assertEquals(VERSION, twinCollection.getVersionFinal());
-        assertNull(twinCollection.getTwinMetadataFinal());
+        assertEquals(VERSION, twinCollection.getVersion());
+        assertNull(twinCollection.getTwinMetadata());
 
         assertEquals(VALID_VALUE_NAME, twinCollection.get(VALID_KEY_NAME));
-        Helpers.assertDateWithError(twinCollection.getTwinMetadataFinal(VALID_KEY_NAME).getLastUpdated(), "2017-08-09T02:07:44.238Z");
-        assertEquals(2L, (long)twinCollection.getTwinMetadataFinal(VALID_KEY_NAME).getLastUpdatedVersion());
+        Helpers.assertDateWithError(twinCollection.getTwinMetadata(VALID_KEY_NAME).getLastUpdated(), "2017-08-09T02:07:44.238Z");
+        assertEquals(2L, (long)twinCollection.getTwinMetadata(VALID_KEY_NAME).getLastUpdatedVersion());
     }
 
     /* SRS_TWIN_COLLECTION_21_024: [The constructor shall throw IllegalArgumentException if the metadata is inconsistent with the TwinCollection.] */
@@ -753,18 +753,18 @@ public class TwinCollectionTest
                 put("MaxSpeed", new TwinCollection()
                 {
                     {
-                        putFinal("Value", 500.0);
-                        putFinal("NewValue", 300.0);
-                        putFinal("Inner1", new TwinCollection()
+                        put("Value", 500.0);
+                        put("NewValue", 300.0);
+                        put("Inner1", new TwinCollection()
                         {
                             {
-                                putFinal("Inner2", new TwinCollection()
+                                put("Inner2", new TwinCollection()
                                 {
                                     {
-                                        putFinal("Inner3", new TwinCollection()
+                                        put("Inner3", new TwinCollection()
                                         {
                                             {
-                                                putFinal("Inner4", "FinalInnerValue");
+                                                put("Inner4", "FinalInnerValue");
                                             }
                                         });
                                     }
@@ -791,16 +791,16 @@ public class TwinCollectionTest
         final TwinCollection twinCollection = new TwinCollection()
         {
             {
-                putFinal(VALID_KEY_NAME, VALID_VALUE_NAME);
-                putFinal("MaxSpeed", new TwinCollection()
+                put(VALID_KEY_NAME, VALID_VALUE_NAME);
+                put("MaxSpeed", new TwinCollection()
                 {
                     {
-                        putFinal("Value", 500.0);
-                        putFinal("NewValue", 300.0);
-                        putFinal("Inner1", new TwinCollection()
+                        put("Value", 500.0);
+                        put("NewValue", 300.0);
+                        put("Inner1", new TwinCollection()
                         {
                             {
-                                putFinal("Inner2", "FinalInnerValue");
+                                put("Inner2", "FinalInnerValue");
                             }
                         });
                     }
@@ -822,16 +822,16 @@ public class TwinCollectionTest
         final TwinCollection twinCollection = new TwinCollection()
         {
             {
-                putFinal(VALID_KEY_NAME, VALID_VALUE_NAME);
-                putFinal("MaxSpeed", new TwinCollection()
+                put(VALID_KEY_NAME, VALID_VALUE_NAME);
+                put("MaxSpeed", new TwinCollection()
                 {
                     {
-                        putFinal("Value", null);
-                        putFinal("NewValue", 300.0);
-                        putFinal("Inner1", new TwinCollection()
+                        put("Value", null);
+                        put("NewValue", 300.0);
+                        put("Inner1", new TwinCollection()
                         {
                             {
-                                putFinal("Inner2", "FinalInnerValue");
+                                put("Inner2", "FinalInnerValue");
                             }
                         });
                     }

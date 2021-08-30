@@ -36,22 +36,6 @@ public class RawTwinQuery
     }
 
     /**
-     * Static constructor to create instance from connection string
-     *
-     * @param connectionString The iot hub connection string
-     * @return The instance of RawTwinQuery
-     * @throws IOException This exception is never thrown.
-     * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
-     * are recommended to use {@link #RawTwinQuery(String)} instead
-     * since it does not declare this exception even though it constructs the same RawTwinQuery.
-     */
-    @Deprecated
-    public static RawTwinQuery createFromConnectionString(String connectionString) throws IOException
-    {
-        return new RawTwinQuery(connectionString);
-    }
-
-    /**
      * Constructor to create instance from connection string
      *
      * @param connectionString The iot hub connection string
@@ -115,7 +99,7 @@ public class RawTwinQuery
      * @throws IotHubException If IotHub did not respond successfully to the query
      * @throws IOException If any of the input parameters are incorrect
      */
-    public synchronized Query query(String sqlQuery, Integer pageSize) throws IotHubException, IOException
+    public Query query(String sqlQuery, Integer pageSize) throws IotHubException, IOException
     {
         if (sqlQuery == null || sqlQuery.length() == 0)
         {
@@ -149,7 +133,7 @@ public class RawTwinQuery
      * @throws IotHubException If IotHub did not respond successfully to the query
      * @throws IOException If any of the input parameters are incorrect
      */
-    public synchronized Query query(String sqlQuery) throws IotHubException, IOException
+    public Query query(String sqlQuery) throws IotHubException, IOException
     {
         return this.query(sqlQuery, DEFAULT_PAGE_SIZE);
     }
@@ -162,7 +146,7 @@ public class RawTwinQuery
      * @throws IotHubException If IotHub could not respond successfully to the query request
      * @throws IOException If any of the input parameters are incorrect
      */
-    public synchronized boolean hasNext(Query query) throws IotHubException, IOException
+    public boolean hasNext(Query query) throws IotHubException, IOException
     {
         if (query == null)
         {
@@ -180,7 +164,7 @@ public class RawTwinQuery
      * @throws IotHubException If IotHub could not respond successfully to the query request
      * @throws NoSuchElementException If no other element is found
      */
-    public synchronized String next(Query query) throws IOException, IotHubException, NoSuchElementException
+    public String next(Query query) throws IOException, IotHubException, NoSuchElementException
     {
         if (query == null)
         {

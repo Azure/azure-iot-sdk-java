@@ -9,9 +9,10 @@ import com.google.gson.JsonParseException;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsResponseParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsStatisticsParser;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
+import lombok.Getter;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -27,72 +28,111 @@ public class JobResult
 {
     private static final Charset DEFAULT_IOTHUB_MESSAGE_CHARSET = StandardCharsets.UTF_8;
 
-    // Job identifier
+    /**
+     * The unique identifier for this job.
+     */
+    @Getter
     private final String jobId;
 
-    // Required if jobType is updateTwin or cloudToDeviceMethod.
-    // Condition for device query to get devices to execute the job on
+    /**
+     * Condition for device query to get devices to execute the job on.
+     */
+    @Getter
     private final String queryCondition;
 
-    // Scheduled job start time in UTC.
+    /**
+     * Scheduled job start time in UTC.
+     */
+    @Getter
     private final Date createdTime;
 
-    // System generated start time in UTC.
+    /**
+     * System generated start time in UTC.
+     */
+    @Getter
     private final Date startTime;
 
-    // System generated last Updated Time in UTC.
+    /**
+     * System generated last Updated Time in UTC.
+     */
+    @Getter
     private final Date lastUpdatedDateTime;
 
-    // System generated end time in UTC.
-    // Represents the time the job stopped processing.
+    /**
+     * System generated end time in UTC. Represents the time the job stopped processing.
+     */
+    @Getter
     private final Date endTime;
 
-    // Max execution time in seconds (ttl duration)
+    /**
+     * Max execution time in seconds.
+     */
+    @Getter
     private final Long maxExecutionTimeInSeconds;
 
-    // Required.
-    // The type of job to execute.
+    /**
+     * The type of job to execute.
+     */
+    @Getter
     private final JobType jobType;
 
-    // Required.
-    // The status of job to execute.
+    /**
+     * The status of the job.
+     */
+    @Getter
     private final JobStatus jobStatus;
 
-    // Required if jobType is cloudToDeviceMethod.
-    // The method type and parameters.
-    // Ignored by the json serializer if null.
-    private String cloudToDeviceMethod = null;
+    /**
+     * The method type and parameters.
+     */
+    @Getter
+    private String cloudToDeviceMethod;
 
-    // Required if jobType is updateTwin.
-    // The Update Twin tags and desired properties.
-    // Ignored by the json serializer if null.
-    private DeviceTwinDevice updateTwin = null;
+    /**
+     * The Update Twin tags and desired properties.
+     */
+    @Getter
+    private Twin updateTwin;
 
-    // System generated failure reason.
-    // If status == failure, this represents a string containing the reason.
+    /**
+     * The reason the job failed if the job failed.
+     */
+    @Getter
     private final String failureReason;
 
-    // System generated status message.
-    // Represents a string containing a message with status about the job execution.
+    /**
+     * A string with status about the job execution.
+     */
+    @Getter
     private final String statusMessage;
 
-    // System generated statistics.
-    // Different number of devices in the job.
-    private JobStatistics jobStatistics = null;
+    /**
+     * The relevant statistics for this job.
+     */
+    @Getter
+    private JobStatistics jobStatistics;
 
-    // The deviceId related to this response.
-    // It can be null (e.g. in case of a parent orchestration).
+    /**
+     * The deviceId related to this response. It can be null (e.g. in case of a parent orchestration).
+     */
+    @Getter
     private final String deviceId;
 
-    // The jobId of the parent orchestration, if any.
+    /**
+     * The jobId of the parent orchestration, if any.
+     */
+    @Getter
     private final String parentJobId;
 
-    // The outcome of the job in query, if any.
-    private String outcome = null;
-    private MethodResult outcomeResult = null;
+    @Getter
+    private MethodResult outcomeResult;
 
-    // The error message of the job in query, if any.
-    private String error = null;
+    /**
+     * The error message of the job in query, if any.
+     */
+    @Getter
+    private String error;
+
     /**
      * CONSTRUCTOR
      *
@@ -131,8 +171,6 @@ public class JobResult
 
         if (jobsResponseParser.getOutcome() != null)
         {
-            this.outcome = jobsResponseParser.getOutcome().toJson();
-
             if (this.jobType == JobType.scheduleDeviceMethod)
             {
                 try
@@ -155,7 +193,7 @@ public class JobResult
         if(twinState != null)
         {
             this.updateTwin = twinState.getDeviceId() == null || twinState.getDeviceId().isEmpty() ?
-                new DeviceTwinDevice() : new DeviceTwinDevice(twinState.getDeviceId());
+                new Twin() : new Twin(twinState.getDeviceId());
             this.updateTwin.setETag(twinState.getETag());
             this.updateTwin.setTags(mapToSet(twinState.getTags()));
             this.updateTwin.setDesiredProperties(mapToSet(twinState.getDesiredProperty()));
@@ -169,219 +207,6 @@ public class JobResult
         }
         this.deviceId = jobsResponseParser.getDeviceId();
         this.parentJobId = jobsResponseParser.getParentJobId();
-    }
-
-    /**
-     * Getter for the Job identifier
-     *
-     * @return Job identifier
-     */
-    public String getJobId()
-    {
-        /* Codes_SRS_JOBRESULT_21_005: [The getJobId shall return the stored jobId.] */
-        return this.jobId;
-    }
-
-    /**
-     * Getter for query condition
-     *
-     * @return the condition for device query to get devices to execute the job on
-     */
-    public String getQueryCondition()
-    {
-        /* Codes_SRS_JOBRESULT_21_006: [The getQueryCondition shall return the stored queryCondition.] */
-        return this.queryCondition;
-    }
-
-    /**
-     * Getter for create time
-     *
-     * @return the scheduled job start time in UTC
-     */
-    public Date getCreatedTime()
-    {
-        /* Codes_SRS_JOBRESULT_21_007: [The getCreatedTime shall return the stored createdTime.] */
-        return this.createdTime;
-    }
-
-    /**
-     * Getter for start time UTC
-     *
-     * @return the system generated start time in UTC
-     */
-    public Date getStartTime()
-    {
-        /* Codes_SRS_JOBRESULT_21_008: [The getStartTime shall return the stored startTime.] */
-        return this.startTime;
-    }
-
-    /**
-     * Getter for the end time UTC
-     * Represents the time the job stopped processing
-     *
-     * @return the system generated end time in UTC
-     */
-    public Date getEndTime()
-    {
-        /* Codes_SRS_JOBRESULT_21_009: [The getEndTime shall return the stored endTime.] */
-        return this.endTime;
-    }
-
-    /**
-     * Getter for max execution time in seconds
-     *
-     * @return the max execution time in seconds (ttl duration)
-     */
-    public Long getMaxExecutionTimeInSeconds()
-    {
-        /* Codes_SRS_JOBRESULT_21_010: [The getMaxExecutionTimeInSeconds shall return the stored maxExecutionTimeInSeconds.] */
-        return this.maxExecutionTimeInSeconds;
-    }
-
-    /**
-     * Getter for the job type
-     *
-     * @return the type of job to execute
-     */
-    public JobType getJobType()
-    {
-        /* Codes_SRS_JOBRESULT_21_011: [The getType shall return the stored jobType.] */
-        return this.jobType;
-    }
-
-    /**
-     * Getter for the jobs status
-     *
-     * @return the status of this job
-     */
-    public JobStatus getJobStatus()
-    {
-        /* Codes_SRS_JOBRESULT_21_012: [The getJobStatus shall return the stored jobStatus.] */
-        return this.jobStatus;
-    }
-
-    /**
-     * Getter for cloud to device method json
-     *
-     * @return the json of cloud to device method. It is {@code null} if jobType
-     * is not scheduleDeviceMethod
-     */
-    public String getCloudToDeviceMethod()
-    {
-        /* Codes_SRS_JOBRESULT_21_013: [The getCloudToDeviceMethod shall return the stored cloudToDeviceMethod.] */
-        return this.cloudToDeviceMethod;
-    }
-
-    /**
-     * Getter for update twin json
-     *
-     * @return the json of update twin. It is {@code null} if jobType
-     * is not scheduleUpdateTwin
-     */
-    public DeviceTwinDevice getUpdateTwin()
-    {
-        /* Codes_SRS_JOBRESULT_21_014: [The getUpdateTwin shall return the stored updateTwin.] */
-        return this.updateTwin;
-    }
-
-    /**
-     * Getter for failure reason
-     *
-     * @return If status == failure, this represents a string containing the
-     * reason. It can be {@code null}
-     */
-    public String getFailureReason()
-    {
-        /* Codes_SRS_JOBRESULT_21_015: [The getFailureReason shall return the stored failureReason.] */
-        return this.failureReason;
-    }
-
-    /**
-     * Getter for the status message
-     *
-     * @return a string containing a message with status about the job
-     * execution. It can be {@code null}
-     */
-    public String getStatusMessage()
-    {
-        /* Codes_SRS_JOBRESULT_21_016: [The getStatusMessage shall return the stored statusMessage.] */
-        return this.statusMessage;
-    }
-
-    /**
-     * Getter for jobs statistics
-     *
-     * @return a set of counters with the jobs statistics
-     */
-    public JobStatistics getJobStatistics()
-    {
-        /* Codes_SRS_JOBRESULT_21_017: [The getJobStatistics shall return the stored jobStatistics.] */
-        return this.jobStatistics;
-    }
-
-    /**
-     * Getter for the device Id
-     *
-     * @return the deviceId related to this response. It can be {@code null}
-     * (e.g. in case of a parent orchestration)
-     */
-    public String getDeviceId()
-    {
-        /* Codes_SRS_JOBRESULT_21_018: [The getDeviceId shall return the stored deviceId.] */
-        return this.deviceId;
-    }
-
-    /**
-     * Getter for the parent jobId
-     *
-     * @return the jobId of the parent orchestration, if any. It can be {@code null}
-     */
-    public String getParentJobId()
-    {
-        /* Codes_SRS_JOBRESULT_21_019: [The getParentJobId shall return the stored parentJobId.] */
-        return this.parentJobId;
-    }
-
-    /**
-     * Getter for last updated time in UTC
-     * @return System generated last updated time in UTC
-     */
-    public Date getLastUpdatedDateTime()
-    {
-        //Codes_SRS_JOBRESULT_25_023: [The getLastUpdatedDateTime shall return the stored LastUpdatedDateTime.]
-        return lastUpdatedDateTime;
-    }
-
-    /**
-     * Outcome for the device method job
-     * @deprecated As of release 1.7.23, replaced by {@link #getOutcomeResult()}
-     * @return outcome for device method job
-     */
-    @Deprecated
-    public String getOutcome()
-    {
-        //Codes_SRS_JOBRESULT_25_021: [The getOutcomeResult shall return the stored outcome.]
-        return outcome;
-    }
-
-    /**
-     * Outcome for the device method job
-     * @return outcome for device method job
-     */
-    public MethodResult getOutcomeResult()
-    {
-        //Codes_SRS_JOBRESULT_25_021: [The getOutcomeResult shall return the stored outcome.]
-        return outcomeResult;
-    }
-
-    /**
-     * getter for the error
-     * @return returns the json formatted error as string
-     */
-    public String getError()
-    {
-        //Codes_SRS_JOBRESULT_25_022: [The getError shall return the stored error message.]
-        return error;
     }
 
     /**
@@ -411,5 +236,4 @@ public class JobResult
 
         return setPair;
     }
-
 }

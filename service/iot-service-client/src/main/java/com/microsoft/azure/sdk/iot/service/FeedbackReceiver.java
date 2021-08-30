@@ -32,38 +32,6 @@ public class FeedbackReceiver extends Receiver
     /**
      * Constructor to verify initialization parameters
      * Create instance of AmqpReceive
-     * @deprecated As of release 1.1.15, replaced by {@link #FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)}
-     * @param hostName The iot hub host name
-     * @param userName The iot hub user name
-     * @param sasToken The iot hub SAS token for the given device
-     * @param iotHubServiceClientProtocol The iot hub protocol name
-     * @param deviceId The device id (not used)
-     */
-    public @Deprecated FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, String deviceId)
-    {
-        if (Tools.isNullOrEmpty(hostName))
-        {
-            throw new IllegalArgumentException("hostName cannot be null or empty");
-        }
-        if (Tools.isNullOrEmpty(userName))
-        {
-            throw new IllegalArgumentException("userName cannot be null or empty");
-        }
-        if (Tools.isNullOrEmpty(sasToken))
-        {
-            throw new IllegalArgumentException("sasToken cannot be null or empty");
-        }
-        if (Tools.isNullOrEmpty(deviceId))
-        {
-            throw new IllegalArgumentException("deviceId cannot be null or empty");
-        }
-        
-        this.amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol);
-    }
-
-    /**
-     * Constructor to verify initialization parameters
-     * Create instance of AmqpReceive
      *
      * @param hostName The iot hub host name
      * @param userName The iot hub user name
@@ -71,9 +39,9 @@ public class FeedbackReceiver extends Receiver
      * @param iotHubServiceClientProtocol protocol to be used
      *
      */
-    public FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)
+    FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
-        this(hostName, userName, sasToken, iotHubServiceClientProtocol, (ProxyOptions) null);
+        this(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
     }
 
     /**
@@ -86,7 +54,7 @@ public class FeedbackReceiver extends Receiver
      * @param iotHubServiceClientProtocol protocol to be used
      * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
      */
-    public FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions)
+    private FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions)
     {
         this(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, null);
     }
@@ -103,7 +71,7 @@ public class FeedbackReceiver extends Receiver
      * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
      *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.
      */
-    public FeedbackReceiver(
+    FeedbackReceiver(
             String hostName,
             String userName,
             String sasToken,
@@ -228,9 +196,8 @@ public class FeedbackReceiver extends Receiver
      *
      * @return The received FeedbackBatch object
      * @throws IOException This exception is thrown if the input AmqpReceive object is null
-     * @throws InterruptedException This exception is thrown if the receive process has been interrupted
      */
-    public FeedbackBatch receive() throws IOException, InterruptedException
+    public FeedbackBatch receive() throws IOException
     {
         return receive(DEFAULT_TIMEOUT_MS);
     }
@@ -244,9 +211,8 @@ public class FeedbackReceiver extends Receiver
      * @param timeoutMs The timeout in milliseconds
      * @return The received FeedbackBatch object
      * @throws IOException This exception is thrown if the input AmqpReceive object is null
-     * @throws InterruptedException This exception is thrown if the receive process has been interrupted
      */
-    public FeedbackBatch receive(long timeoutMs) throws IOException, InterruptedException
+    public FeedbackBatch receive(long timeoutMs) throws IOException
     {
         if (this.amqpReceive == null)
         {
@@ -325,7 +291,7 @@ public class FeedbackReceiver extends Receiver
             {
                 FeedbackBatch responseFeedbackBatch = receive(timeoutMs);
                 future.complete(responseFeedbackBatch);
-            } catch (IOException | InterruptedException e)
+            } catch (IOException e)
             {
                 future.completeExceptionally(e);
             }
