@@ -21,9 +21,6 @@ public class TelemetryMessage extends Message
     PayloadCollection telemetry;
 
     @Override
-    /**
-     * {@inheritDoc}
-     */
     public byte[] getBytes()
     {
         if (getTelemetry().getConvention() != null && getTelemetry().getConvention().getPayloadSerializer() != null)
