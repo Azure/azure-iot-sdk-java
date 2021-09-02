@@ -53,18 +53,17 @@ public final class HttpsBatchMessage implements HttpsMessage
         StringBuilder batchBodyBuilder = new StringBuilder();
         batchBodyBuilder.append('[');
 
-        boolean atLeastOneMessage = false;
+        boolean isSubsequentMessage = false;
         for (HttpsSingleMessage message : messageList)
         {
-            addJsonToStringBuilder(message, batchBodyBuilder);
-            batchBodyBuilder.append(','); // comma to separate each object in the json array
-            this.numMsgs++;
-            atLeastOneMessage = true;
-        }
+            if (isSubsequentMessage)
+            {
+                batchBodyBuilder.append(','); // comma to separate each object in the json array
+            }
 
-        if (atLeastOneMessage)
-        {
-            batchBodyBuilder.deleteCharAt(batchBodyBuilder.length() - 1); // remove the final comma from the list
+            addJsonToStringBuilder(message, batchBodyBuilder);
+            this.numMsgs++;
+            isSubsequentMessage = true; // the next message, and all subsequent messages, will need a comma before them
         }
 
         batchBodyBuilder.append(']');
