@@ -13,7 +13,6 @@ import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
@@ -768,6 +767,17 @@ public final class DeviceClient extends InternalClient implements Closeable
             throws IOException, IllegalArgumentException
     {
         this.subscribeToMethodsInternal(deviceMethodCallback, deviceMethodCallbackContext, deviceMethodStatusCallback, deviceMethodStatusCallbackContext);
+    }
+
+    /**
+     * Set the global command callback handler.
+     * @param callback The callback to be used for commands.
+     * @param callbackContext An optional user context to be sent to the callback.
+     */
+    public void subscribeToCommands(DeviceMethodCallback callback, Object callbackContext)
+    {
+        // Subscribe to methods default handler internally and use the callback received internally to invoke the user supplied command callback.
+        // TODO Implement command handler
     }
 
     // Used by multiplexing clients to signal to this client what kind of multiplexing client is using this device client
