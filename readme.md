@@ -1,5 +1,15 @@
 # Microsoft Azure IoT SDKs for Java
 
+## Preview V2 clients Notice
+
+[A preview release](https://github.com/Azure/azure-iot-sdk-java/releases/tag/2021-08-30) has been published that 
+contains a preview of the new 2.X.X clients that we plan on bringing into master in the near future. This release 
+contains many breaking changes, but is substantially more future proof than the 1.X.X clients. Please try it out and 
+let us know on our [discussions page](https://github.com/Azure/azure-iot-sdk-java/discussions) if you have any concerns, 
+questions, or further changes you'd like to see!
+
+If you need any help migrating your code to try out the new 2.X.X clients, please see this [migration guide](https://github.com/Azure/azure-iot-sdk-java/blob/preview/major%20version%20upgrade%20migration%20guide.md).
+
 ## Critical Upcoming Change Notice
 
 All Azure IoT SDK users are advised to be aware of upcoming TLS certificate changes for Azure IoT hub and Device Provisioning Service 
@@ -20,6 +30,7 @@ to prepare your devices for this certificate migration.
 their devices starting June 2022.**
 
 If you have any questions, comments, or concerns about this upcoming change, please let us know on our [discussions page](https://github.com/Azure/azure-iot-sdk-java/discussions).
+
 
 ### Build status
 Due to security considerations, build logs are not publicly available.

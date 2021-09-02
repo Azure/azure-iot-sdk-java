@@ -37,6 +37,10 @@ public class DeviceRegistrationResultParser
     @SerializedName(STATUS)
     private String status;
 
+    private static final String SUBSTATUS = "substatus";
+    @SerializedName(SUBSTATUS)
+    private String substatus;
+
     private static final String ETAG = "etag";
     @SerializedName(ETAG)
     private String eTag;
@@ -118,6 +122,15 @@ public class DeviceRegistrationResultParser
     {
         //SRS_DeviceRegistrationResultParser_25_005: [ This method shall return the parsed status. ]
         return status;
+    }
+
+    /**
+     * Getter for Substatus
+     * @return Getter for Substatus
+     */
+    public String getSubstatus()
+    {
+        return substatus;
     }
 
     /**

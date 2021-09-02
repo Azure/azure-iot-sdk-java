@@ -36,6 +36,7 @@ public class MultiplexingClient
 {
     public static final long DEFAULT_SEND_PERIOD_MILLIS = 10L;
     public static final long DEFAULT_RECEIVE_PERIOD_MILLIS = 10L;
+    public static final int DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD = 10;
     static final long DEFAULT_REGISTRATION_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
     static final long DEFAULT_UNREGISTRATION_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
     private static final String OPEN_ERROR_MESSAGE = "Failed to open the multiplexing connection";
@@ -103,10 +104,11 @@ public class MultiplexingClient
         this.proxySettings = options != null ? options.getProxySettings() : null;
         long sendPeriod = options != null ? options.getSendPeriod() : DEFAULT_SEND_PERIOD_MILLIS;
         long receivePeriod = options != null ? options.getReceivePeriod() : DEFAULT_RECEIVE_PERIOD_MILLIS;
+        int sendMessagesPerThread = options != null ? options.getMaxMessagesSentPerSendThread() : DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD;
 
         if (sendPeriod < 0)
         {
-            throw new IllegalArgumentException("send period can not be negative");
+            throw new IllegalArgumentException("Send period cannot be negative");
         }
         else if (sendPeriod == 0) //default builder value for this option, signals that user didn't set a value
         {
@@ -115,15 +117,21 @@ public class MultiplexingClient
 
         if (receivePeriod < 0)
         {
-            throw new IllegalArgumentException("receive period can not be negative");
+            throw new IllegalArgumentException("Receive period cannot be negative");
         }
         else if (receivePeriod == 0) //default builder value for this option, signals that user didn't set a value
         {
             receivePeriod = DEFAULT_RECEIVE_PERIOD_MILLIS;
         }
 
+        if (sendMessagesPerThread == 0) //default builder value for this option, signals that user didn't set a value
+        {
+            sendMessagesPerThread = DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD;
+        }
+
         this.sslContext = options != null ? options.getSslContext() : null;
         this.deviceIO = new DeviceIO(hostName, protocol, sslContext, proxySettings, sendPeriod, receivePeriod);
+        this.deviceIO.setMaxNumberOfMessagesSentPerSendThread(sendMessagesPerThread);
     }
 
     /**
