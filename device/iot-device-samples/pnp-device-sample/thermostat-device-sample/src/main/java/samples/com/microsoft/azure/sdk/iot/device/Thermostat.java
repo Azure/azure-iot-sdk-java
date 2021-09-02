@@ -299,24 +299,8 @@ public class Thermostat
 
             final String propertyName = "targetTemperature";
 
-            public class IWritablePropHolder {
-                Object value;
-                private long version;
-                int code;
-                String descripton;
-                public void AckWith(int ggg);
-            }
-
-            public sealed WritPropCollection : Clien
-        {
-            Dictionary<String, IWritablePropHolder>
-
-                    internal
-        }
-
-
-            @SneakyThrows({InterruptedException.class, IOException.class})
-            public void execute(Map<String, WritablePropertyResponse> propertyCollection, Object context)
+            @SneakyThrows({InterruptedException.class})
+            public void execute(ClientPropertyCollection propertyCollection, Object context)
             {
 
                 // Each of these properties will be a WritablePropertyResponse we can simply copy the value over and ack each one
