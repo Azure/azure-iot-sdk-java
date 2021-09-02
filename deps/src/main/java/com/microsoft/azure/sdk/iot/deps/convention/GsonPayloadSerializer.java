@@ -29,32 +29,26 @@ public class GsonPayloadSerializer extends PayloadSerializer
 
     private Gson gsonSerailizer;
 
+    /**
+     * The default constructor for this class
+     */
     public GsonPayloadSerializer()
     {
         gsonSerailizer = new GsonBuilder().create();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String serializeToString(Object objectToSerialize)
     {
         return gsonSerailizer.toJson(objectToSerialize);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public <T> T deserializeToType(String stringToDeserialize, Class<T> typeOfT)
     {
         return gsonSerailizer.fromJson(stringToDeserialize, typeOfT);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public <T> T convertFromObject(Object objectToConvert, Class<T> typeOfT)
     {
@@ -69,9 +63,6 @@ public class GsonPayloadSerializer extends PayloadSerializer
         return deserializeToType(gsonSerailizer.toJson(objectToConvert), typeOfT);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public <T> T getNestedObjectValue(Object nestedObject, String propertyName, Class<T> typeOfT)
     {
@@ -80,17 +71,11 @@ public class GsonPayloadSerializer extends PayloadSerializer
         return convertFromObject(jsonObject.get(propertyName), typeOfT);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public WritablePropertyResponse createWritablePropertyResponse(Object value, int statusCode, long version, String description)
     {
         return new GsonWritablePropertyResponse(value, statusCode, version, description);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public WritablePropertyResponse createWritablePropertyResponse(Object value, int statusCode, long version)
     {
         return createWritablePropertyResponse(value, statusCode, version, null);

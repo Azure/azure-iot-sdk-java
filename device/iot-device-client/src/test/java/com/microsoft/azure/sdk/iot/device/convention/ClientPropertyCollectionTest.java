@@ -1,15 +1,11 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.convention;
 
-import com.google.gson.GsonBuilder;
 import com.microsoft.azure.sdk.iot.deps.convention.ConventionConstants;
 import com.microsoft.azure.sdk.iot.deps.convention.DefaultPayloadConvention;
 import com.microsoft.azure.sdk.iot.deps.convention.GsonWritablePropertyResponse;
 import com.microsoft.azure.sdk.iot.deps.convention.WritablePropertyResponse;
-import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.device.convention.ClientMetadata;
 import com.microsoft.azure.sdk.iot.device.convention.ClientPropertyCollection;
-import jnr.ffi.annotations.In;
 import lombok.Builder;
 import lombok.Data;
 import org.junit.Test;

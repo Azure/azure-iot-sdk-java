@@ -8,6 +8,9 @@ import lombok.*;
 @RequiredArgsConstructor
 @AllArgsConstructor
 @Builder
+/**
+ * The Gson annotated version of the WritablePropertyResponse class
+ */
 public final class GsonWritablePropertyResponse implements WritablePropertyResponse
 {
 
@@ -16,7 +19,7 @@ public final class GsonWritablePropertyResponse implements WritablePropertyRespo
      */
     @NonNull
     @SerializedName("value")
-    Object Value;
+    Object value;
 
     /**
      * The acknowledgment code, usually an HTTP Status Code e.g. 200, 400.
