@@ -7,6 +7,9 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class ProvisioningDeviceHubException extends ProvisioningDeviceClientException
 {
     public ProvisioningDeviceHubException(String message)
@@ -23,4 +26,11 @@ public class ProvisioningDeviceHubException extends ProvisioningDeviceClientExce
     {
         super(cause);
     }
+
+    /**
+     * The error code sent from the service to clarify what exception occurred.
+     */
+    @Getter
+    @Setter
+    private int errorCode;
 }
