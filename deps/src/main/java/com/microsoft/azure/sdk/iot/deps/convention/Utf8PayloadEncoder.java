@@ -17,24 +17,20 @@ public class Utf8PayloadEncoder extends PayloadEncoder
     @Getter
     private static Utf8PayloadEncoder instance = new Utf8PayloadEncoder();
 
-    /**
-     * {@inheritDoc}
-     */
-    @Getter
-    private Charset ContentEncoding = StandardCharsets.UTF_8;
+    public Utf8PayloadEncoder()
+    {
+        contentEncoding = StandardCharsets.UTF_8;
+    }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public byte[] encodeStringToByteArray(String contentPayload)
     {
-        return ContentEncoding.encode(contentPayload).array();
+        return getContentEncoding().encode(contentPayload).array();
     }
 
     @Override
     public String decodeByteArrayToString(byte[] byteArray)
     {
-        return new String(byteArray, ContentEncoding);
+        return new String(byteArray, getContentEncoding());
     }
 }
