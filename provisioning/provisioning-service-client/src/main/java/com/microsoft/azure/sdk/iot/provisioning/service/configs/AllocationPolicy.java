@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * The Device Provisioning Service enrollment level allocation policies.
  *
@@ -10,8 +12,15 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
  *     Provision devices across load-balanced IoT hubs</a>
  */
 public enum AllocationPolicy {
+    @SerializedName("hashed")
     HASHED,
+
+    @SerializedName("geoLatency")
     GEOLATENCY,
+
+    @SerializedName("static")
     STATIC,
+
+    @SerializedName("custom")
     CUSTOM
 }

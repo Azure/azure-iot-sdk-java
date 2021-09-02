@@ -30,12 +30,14 @@ import static java.util.concurrent.TimeUnit.NANOSECONDS;
 @Slf4j
 public class IotHubTransport implements IotHubListener
 {
-    private static final int MAX_MESSAGES_TO_SEND_PER_THREAD = 10;
+    private static final int DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD = 10;
 
     // For tracking the state of this layer in particular. If multiplexing, this value may be CONNECTED while a
     // device specific state is DISCONNECTED_RETRYING. If this state is DISCONNECTED_RETRYING, then the multiplexed
     // connection will be completely torn down and re-opened.
     private volatile IotHubConnectionStatus connectionStatus;
+
+    private int maxNumberOfMessagesToSendPerThread = DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD;
 
     // for multiplexing. A particular device can be disconnected retrying while the tcp connection is fine and the other
     // device sessions are open.
@@ -574,7 +576,7 @@ public class IotHubTransport implements IotHubListener
             return;
         }
 
-        int timeSlice = MAX_MESSAGES_TO_SEND_PER_THREAD;
+        int timeSlice = maxNumberOfMessagesToSendPerThread;
 
         while (this.connectionStatus == IotHubConnectionStatus.CONNECTED && timeSlice-- > 0)
         {
@@ -831,7 +833,7 @@ public class IotHubTransport implements IotHubListener
 
                     // Since the registration failed, need to remove the device from the list of multiplexed devices
                     DeviceClientConfig configThatFailedToRegister = this.deviceClientConfigs.remove(deviceId);
-                    ((AmqpsIotHubConnection) this.iotHubTransportConnection).unregisterMultiplexedDevice(configThatFailedToRegister);
+                    ((AmqpsIotHubConnection) this.iotHubTransportConnection).unregisterMultiplexedDevice(configThatFailedToRegister, false);
                 }
             }
 
@@ -854,7 +856,7 @@ public class IotHubTransport implements IotHubListener
             if (this.iotHubTransportConnection != null)
             {
                 // Safe cast since amqps and amqps_ws always use this transport connection type.
-                ((AmqpsIotHubConnection) this.iotHubTransportConnection).unregisterMultiplexedDevice(configToRegister);
+                ((AmqpsIotHubConnection) this.iotHubTransportConnection).unregisterMultiplexedDevice(configToRegister, false);
             }
             else
             {
@@ -883,6 +885,16 @@ public class IotHubTransport implements IotHubListener
                 }
             }
         }
+    }
+
+    public void setMaxNumberOfMessagesSentPerSendThread(int maxNumberOfMessagesSentPerSendThread)
+    {
+        if (maxNumberOfMessagesSentPerSendThread < 0)
+        {
+            throw new IllegalArgumentException("Maximum messages sent per thread cannot be negative");
+        }
+
+        this.maxNumberOfMessagesToSendPerThread = maxNumberOfMessagesSentPerSendThread;
     }
 
     /**
@@ -1274,7 +1286,7 @@ public class IotHubTransport implements IotHubListener
             return;
         }
 
-        ((AmqpsIotHubConnection) this.iotHubTransportConnection).unregisterMultiplexedDevice(config);
+        ((AmqpsIotHubConnection) this.iotHubTransportConnection).unregisterMultiplexedDevice(config, true);
         ((AmqpsIotHubConnection) this.iotHubTransportConnection).registerMultiplexedDevice(config);
     }
 
