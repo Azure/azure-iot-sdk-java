@@ -21,7 +21,7 @@ public abstract class PayloadSerializer
      * @return A string representing the content type to use when sending a payload.
      */
     @Getter
-    String ContentType;
+    String contentType;
 
     /**
      * Serialize the specified object to a string.
@@ -63,7 +63,7 @@ public abstract class PayloadSerializer
      * @param propertyName The name of the property to be retrieved.
      * @param typeOfT The class to attempt the conversion with. Used to safely convert numbers and complex objects.
      * @param <T> The type to convert the retrieved property to.
-     * @return {@code true} if the nested object contains an element with the specified key; otherwise, it returns {@code false}.
+     * @return A converted object.
      */
     public abstract <T> T getNestedObjectValue(Object nestedObject, String propertyName, Class<T> typeOfT);
 

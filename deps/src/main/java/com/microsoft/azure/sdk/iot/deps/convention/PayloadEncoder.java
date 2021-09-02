@@ -21,7 +21,7 @@ public abstract class PayloadEncoder
      * The {@link Charset} used for the payload.
      */
     @Getter
-    Charset ContentEncoding;
+    Charset contentEncoding;
 
     /**
      * Outputs an encoded byte array for the specified payload string.

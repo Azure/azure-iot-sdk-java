@@ -19,7 +19,7 @@ public final class DefaultPayloadConvention extends PayloadConvention
 
     public DefaultPayloadConvention()
     {
-        super.PayloadEncoder = Utf8PayloadEncoder.getInstance();
-        super.PayloadSerializer = GsonPayloadSerializer.getInstance();
+        super.payloadEncoder = Utf8PayloadEncoder.getInstance();
+        super.payloadSerializer = GsonPayloadSerializer.getInstance();
     }
 }

@@ -20,14 +20,14 @@ public abstract class PayloadConvention
      */
     @Getter
     @Setter(AccessLevel.PROTECTED)
-    PayloadSerializer PayloadSerializer;
+    PayloadSerializer payloadSerializer;
 
     /**
      * Gets the encoder used for the payload to be serialized.
      */
     @Getter
     @Setter(AccessLevel.PROTECTED)
-    PayloadEncoder PayloadEncoder;
+    PayloadEncoder payloadEncoder;
 
     /**
      * Returns the byte array for the convention-based message.
@@ -39,8 +39,8 @@ public abstract class PayloadConvention
      */
     public byte[] getObjectBytes(Object objectToSendWithConvention)
     {
-        String serializedString = PayloadSerializer.serializeToString(objectToSendWithConvention);
-        return PayloadEncoder.encodeStringToByteArray(serializedString);
+        String serializedString = getPayloadSerializer().serializeToString(objectToSendWithConvention);
+        return getPayloadEncoder().encodeStringToByteArray(serializedString);
     }
 
     /**
@@ -55,8 +55,8 @@ public abstract class PayloadConvention
      */
     public <T> T getObjectFromBytes(byte[] bytesToConvertToObject, Class<T> objectType)
     {
-        String serializedString = PayloadEncoder.decodeByteArrayToString(bytesToConvertToObject);
-        return PayloadSerializer.deserializeToType(serializedString, objectType);
+        String serializedString = getPayloadEncoder().decodeByteArrayToString(bytesToConvertToObject);
+        return getPayloadSerializer().deserializeToType(serializedString, objectType);
     }
 
     /**
@@ -69,7 +69,7 @@ public abstract class PayloadConvention
      */
     public WritablePropertyResponse createWritablePropertyResponse(Object value, int statusCode, long version, String description)
     {
-        return PayloadSerializer.createWritablePropertyResponse(value, statusCode, version, description);
+        return getPayloadSerializer().createWritablePropertyResponse(value, statusCode, version, description);
     }
 
     /**
@@ -81,7 +81,7 @@ public abstract class PayloadConvention
      */
     public WritablePropertyResponse createWritablePropertyResponse(Object value, int statusCode, long version)
     {
-        return PayloadSerializer.createWritablePropertyResponse(value, statusCode, version, null);
+        return getPayloadSerializer().createWritablePropertyResponse(value, statusCode, version, null);
     }
 
 }
