@@ -1,6 +1,12 @@
 package com.microsoft.azure.sdk.iot.deps.convention;
 
+import com.google.gson.*;
 import lombok.Getter;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A {@link com.google.gson.Gson} {@link PayloadSerializer} implementation.
@@ -16,10 +22,17 @@ public class GsonPayloadSerializer extends PayloadSerializer
      * The default instance of this class.
      */
     @Getter
-    static final GsonPayloadSerializer Instance = new GsonPayloadSerializer();
+    private static final GsonPayloadSerializer Instance = new GsonPayloadSerializer();
 
     @Getter
     String ContentType = ApplicationJson;
+
+    private Gson gsonSerailizer;
+
+    public GsonPayloadSerializer()
+    {
+        gsonSerailizer = new GsonBuilder().create();
+    }
 
     /**
      * {@inheritDoc}
@@ -27,34 +40,44 @@ public class GsonPayloadSerializer extends PayloadSerializer
     @Override
     public String serializeToString(Object objectToSerialize)
     {
-        return "";
+        return gsonSerailizer.toJson(objectToSerialize);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public <T> T deserializeToType(String stringToDeserialize)
+    public <T> T deserializeToType(String stringToDeserialize, Class<T> typeOfT)
     {
-        return (T) (new Object());
+        return gsonSerailizer.fromJson(stringToDeserialize, typeOfT);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public <T> T convertFromObject(Object objectToConvert)
+    public <T> T convertFromObject(Object objectToConvert, Class<T> typeOfT)
     {
-        return (T) (new Object());
+        if (typeOfT.isAssignableFrom(JsonElement.class))
+        {
+            return gsonSerailizer.fromJson((JsonElement) objectToConvert, typeOfT);
+        }
+        else if (typeOfT.equals(WritablePropertyResponse.class))
+        {
+            return (T)deserializeToType(gsonSerailizer.toJson(objectToConvert), GsonWritablePropertyResponse.class);
+        }
+        return deserializeToType(gsonSerailizer.toJson(objectToConvert), typeOfT);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public <T> T getNestedObjectValue(Object nestedObject, String propertyName)
+    public <T> T getNestedObjectValue(Object nestedObject, String propertyName, Class<T> typeOfT)
     {
-        return (T) (new Object());
+
+        JsonObject jsonObject = gsonSerailizer.toJsonTree(nestedObject).getAsJsonObject();
+        return convertFromObject(jsonObject.get(propertyName), typeOfT);
     }
 
     /**

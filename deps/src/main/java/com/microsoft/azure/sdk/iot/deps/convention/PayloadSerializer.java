@@ -34,9 +34,10 @@ public abstract class PayloadSerializer
      * Convert the serialized string to an object.
      * @param stringToDeserialize String to deserialize.
      * @param <T> The type you want to return.
+     * @param typeOfT The class to attempt the conversion with. Used to safely convert numbers and complex objects.
      * @return A fully deserialized type.
      */
-    public abstract <T> T deserializeToType(String stringToDeserialize);
+    public abstract <T> T deserializeToType(String stringToDeserialize, Class<T> typeOfT);
 
     /**
      * Converts the object using the serializer.
@@ -46,10 +47,11 @@ public abstract class PayloadSerializer
      *     When you implement this you need to be aware of what type your serializer will use for anonymous types.
      * </p>
      * @param objectToConvert The object to convert.
+     * @param typeOfT The class to attempt the conversion with. Used to safely convert numbers and complex objects.
      * @param <T> The type to convert to.
      * @return A converted object.
      */
-    public abstract <T> T convertFromObject(Object objectToConvert);
+    public abstract <T> T convertFromObject(Object objectToConvert, Class<T> typeOfT);
 
     /**
      * Gets a nested property from the serialized data.
@@ -59,10 +61,11 @@ public abstract class PayloadSerializer
      * </p>
      * @param nestedObject The object that might contain the nested property.
      * @param propertyName The name of the property to be retrieved.
+     * @param typeOfT The class to attempt the conversion with. Used to safely convert numbers and complex objects.
      * @param <T> The type to convert the retrieved property to.
      * @return {@code true} if the nested object contains an element with the specified key; otherwise, it returns {@code false}.
      */
-    public abstract <T> T getNestedObjectValue(Object nestedObject, String propertyName);
+    public abstract <T> T getNestedObjectValue(Object nestedObject, String propertyName, Class<T> typeOfT);
 
         /**
      * Creates the correct {@link WritablePropertyResponse} to be used with this serializer.
