@@ -37,6 +37,11 @@ public final class HttpsBatchMessage implements HttpsMessage
      */
     private static final Charset BATCH_CHARSET = StandardCharsets.UTF_8;
 
+    private static final String BASE_ENCODED_KEY = "\"base64Encoded\"";
+    private static final String BODY = "\"body\"";
+    private static final String KEY_VALUE_SEPARATOR = ":";
+    private static final String PROPERTIES = "\"properties\"";
+
     /** The current batched message body. */
     private String batchBody;
 
@@ -83,8 +88,6 @@ public final class HttpsBatchMessage implements HttpsMessage
      */
     public byte[] getBody()
     {
-        // Codes_SRS_HTTPSBATCHMESSAGE_11_006: [The function shall return the current batch message body.]
-        // Codes_SRS_HTTPSBATCHMESSAGE_11_007: [The batch message body shall be encoded using UTF-8.]
         return this.batchBody.getBytes(BATCH_CHARSET);
     }
 
@@ -95,7 +98,6 @@ public final class HttpsBatchMessage implements HttpsMessage
      */
     public String getContentType()
     {
-        // Codes_SRS_HTTPSBATCHMESSAGE_11_011: [The function shall return 'application/vnd.microsoft.iothub.json'.]
         return HTTPS_BATCH_CONTENT_TYPE;
     }
 
@@ -106,7 +108,6 @@ public final class HttpsBatchMessage implements HttpsMessage
      */
     public MessageProperty[] getProperties()
     {
-        // Codes_SRS_HTTPSBATCHMESSAGE_11_012: [The function shall return an empty array.]
         return new MessageProperty[0];
     }
 
@@ -118,7 +119,6 @@ public final class HttpsBatchMessage implements HttpsMessage
      */
     public Map<String, String> getSystemProperties()
     {
-        // Codes_SRS_HTTPSBATCHMESSAGE_21_013: [The function shall return an empty map.]
         return new HashMap<>();
     }
 
@@ -129,7 +129,6 @@ public final class HttpsBatchMessage implements HttpsMessage
      */
     public int numMessages()
     {
-        // Codes_SRS_HTTPSBATCHMESSAGE_11_010: [The function shall return the number of messages currently in the batch.]
         return this.numMsgs;
     }
 
@@ -143,10 +142,10 @@ public final class HttpsBatchMessage implements HttpsMessage
      */
     private static void addJsonToStringBuilder(HttpsSingleMessage msg, StringBuilder jsonStringBuilder)
     {
-        StringBuilder jsonMsg = new StringBuilder("{");
-        jsonMsg.append("\"body\":");
-        jsonMsg.append("\"").append(encodeBase64String(msg.getBody())).append("\",");
-        jsonMsg.append("\"base64Encoded\":");
+        StringBuilder jsonMsg = new StringBuilder('{');
+        jsonMsg.append(BODY + KEY_VALUE_SEPARATOR);
+        jsonMsg.append('\"').append(encodeBase64String(msg.getBody())).append("\",");
+        jsonMsg.append(BASE_ENCODED_KEY + KEY_VALUE_SEPARATOR);
         jsonMsg.append(true);
         MessageProperty[] properties = msg.getProperties();
         Map<String, String> allProperties = new HashMap<>(msg.getSystemProperties());
@@ -158,22 +157,22 @@ public final class HttpsBatchMessage implements HttpsMessage
         int numProperties = allProperties.size();
         if (numProperties > 0)
         {
-            jsonMsg.append(",");
-            jsonMsg.append("\"properties\":");
-            jsonMsg.append("{");
+            jsonMsg.append(',');
+            jsonMsg.append(PROPERTIES + KEY_VALUE_SEPARATOR);
+            jsonMsg.append('{');
             for (String key : allProperties.keySet())
             {
-                jsonMsg.append("\"").append(key).append("\":");
-                jsonMsg.append("\"").append(allProperties.get(key)).append("\","); //TODO
+                jsonMsg.append('\"').append(key).append("\":");
+                jsonMsg.append('\"').append(allProperties.get(key)).append("\",");
             }
 
             //remove last trailing comma
             jsonMsg.deleteCharAt(jsonMsg.length()-1);
 
-            jsonMsg.append("}");
+            jsonMsg.append('}');
         }
 
-        jsonMsg.append("}");
+        jsonMsg.append('}');
 
         jsonStringBuilder.append(jsonMsg);
     }
