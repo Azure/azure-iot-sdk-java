@@ -3,7 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.https;
 
-import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubSizeExceededException;
 
@@ -141,11 +140,10 @@ public final class HttpsBatchMessage implements HttpsMessage
      */
     private static void addJsonToStringBuilder(HttpsSingleMessage msg, StringBuilder jsonStringBuilder)
     {
-        StringBuilder jsonMsg = new StringBuilder('{');
-        jsonMsg.append(BODY + KEY_VALUE_SEPARATOR);
-        jsonMsg.append('\"').append(encodeBase64String(msg.getBody())).append("\",");
-        jsonMsg.append(BASE_ENCODED_KEY + KEY_VALUE_SEPARATOR);
-        jsonMsg.append(true);
+        jsonStringBuilder.append('{' + BODY + KEY_VALUE_SEPARATOR);
+        jsonStringBuilder.append('\"').append(encodeBase64String(msg.getBody())).append("\",");
+        jsonStringBuilder.append(BASE_ENCODED_KEY + KEY_VALUE_SEPARATOR);
+        jsonStringBuilder.append(true);
         MessageProperty[] properties = msg.getProperties();
         Map<String, String> allProperties = new HashMap<>(msg.getSystemProperties());
         for (MessageProperty p : properties)
@@ -156,23 +154,21 @@ public final class HttpsBatchMessage implements HttpsMessage
         int numProperties = allProperties.size();
         if (numProperties > 0)
         {
-            jsonMsg.append(',');
-            jsonMsg.append(PROPERTIES + KEY_VALUE_SEPARATOR);
-            jsonMsg.append('{');
+            jsonStringBuilder.append(',');
+            jsonStringBuilder.append(PROPERTIES + KEY_VALUE_SEPARATOR);
+            jsonStringBuilder.append('{');
             for (String key : allProperties.keySet())
             {
-                jsonMsg.append('\"').append(key).append("\":");
-                jsonMsg.append('\"').append(allProperties.get(key)).append("\",");
+                jsonStringBuilder.append('\"').append(key).append("\":");
+                jsonStringBuilder.append('\"').append(allProperties.get(key)).append("\",");
             }
 
             //remove last trailing comma
-            jsonMsg.deleteCharAt(jsonMsg.length()-1);
+            jsonStringBuilder.deleteCharAt(jsonStringBuilder.length()-1);
 
-            jsonMsg.append('}');
+            jsonStringBuilder.append('}');
         }
 
-        jsonMsg.append('}');
-
-        jsonStringBuilder.append(jsonMsg);
+        jsonStringBuilder.append('}');
     }
 }
