@@ -13,10 +13,7 @@ import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
@@ -152,7 +149,7 @@ public final class DeviceClientConfig
         this.productInfo = new ProductInfo();
     }
 
-    public DeviceClientConfig(String hostName, SasTokenProvider sasTokenProvider, ClientOptions clientOptions, String deviceId, String moduleId)
+    public DeviceClientConfig(String hostName, SasTokenProvider sasTokenProvider, @NonNull ClientOptions clientOptions, String deviceId, String moduleId)
     {
         SSLContext sslContext = clientOptions != null ? clientOptions.sslContext : null;
         this.authenticationProvider =
@@ -201,7 +198,6 @@ public final class DeviceClientConfig
         }
     }
 
-    @Builder
     public DeviceClientConfig(IotHubConnectionString iotHubConnectionString, SSLContext sslContext)
     {
         configSsl(iotHubConnectionString, sslContext);
@@ -213,7 +209,6 @@ public final class DeviceClientConfig
      * @param securityProvider The security provider instance to be used for authentication of this device
      * @throws IOException if the provided security provider throws an exception while authenticating
      */
-    @Builder
     DeviceClientConfig(IotHubConnectionString connectionString, SecurityProvider securityProvider) throws IOException
     {
         commonConstructorSetup(connectionString);

@@ -1276,9 +1276,9 @@ public class InternalClient
      * Sends the TelemetryMessage to IoT hub.
      * @param telemetryMessage The user supplied telemetry message.
      */
-    public void sendTelemetry(TelemetryMessage telemetryMessage)
+    public void sendTelemetryAsync(TelemetryMessage telemetryMessage)
     {
-        sendTelemetry(telemetryMessage, null, null);
+        sendTelemetryAsync(telemetryMessage, null, null);
     }
 
     /**
@@ -1287,7 +1287,7 @@ public class InternalClient
      * @param callback the callback to be invoked when a response is received. Can be {@code null}.
      * @param callbackContext a context to be passed to the callback. Can be {@code null} if no callback is provided.
      */
-    public void sendTelemetry(TelemetryMessage telemetryMessage, IotHubEventCallback callback, Object callbackContext)
+    public void sendTelemetryAsync(TelemetryMessage telemetryMessage, IotHubEventCallback callback, Object callbackContext)
     {
         if (telemetryMessage == null)
         {
@@ -1309,18 +1309,11 @@ public class InternalClient
      * @param callback The callback to be used for receiving client properties.
      * @param callbackContext An optional user context to be sent to the callback.
      */
-    public void getClientProperties(ClientPropertiesCallback callback, Object callbackContext)
+    public void getClientPropertiesAsync(ClientPropertiesCallback callback, Object callbackContext)
     {
         // In Java we don't return an object for the DeviceTwin, but instead we pass a Map<String, Object> in the form of a Device
         // this map gets populated with a number of callbacks.
-        try
-        {
-            twin.getClientProperties(callback, callbackContext);
-        }
-        catch (Throwable ex)
-        {
-            throw ex;
-        }
+        twin.getClientProperties(callback, callbackContext);
     }
 
     /**
@@ -1329,7 +1322,7 @@ public class InternalClient
      * @param callback The callback to be used for receiving client properties.
      * @param callbackContext An optional user context to be sent to the callback.
      */
-    public void updateClientProperties(ClientPropertyCollection clientProperties, IotHubEventCallback callback, Object callbackContext) throws IOException
+    public void updateClientPropertiesAsync(ClientPropertyCollection clientProperties, IotHubEventCallback callback, Object callbackContext) throws IOException
     {
         if (clientProperties == null)
         {

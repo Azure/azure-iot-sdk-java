@@ -176,9 +176,9 @@ public class Thermostat
 
             deviceClient.startDeviceTwin(new TwinIotHubEventCallback(), null, dataCollector, null);
 
-            deviceClient.subscribeToWritablePropertiesEvent(new TargetTemperatureUpdateCallback(), null);
+            deviceClient.subscribeToWritablePropertiesEvents(new TargetTemperatureUpdateCallback(), null);
 
-            deviceClient.getClientProperties(new ClientPropertiesCallback(), null);
+            deviceClient.getClientPropertiesAsync(new ClientPropertiesCallback(), null);
 
             log.debug("Set handler to receive \"getMaxMinReport\" command.");
             String methodName = "getMaxMinReport";
@@ -312,7 +312,6 @@ public class Thermostat
                         ClientPropertyCollection collection = new ClientPropertyCollection();
 
                         WritablePropertyResponse targetTemperature = propertyCollection.getValue(key, WritablePropertyResponse.class);
-                        propertyCollection
                         log.debug("Property: Received - {\"{}\": {}°C}.", propertyName, targetTemperature.getValue());
 
                         targetTemperature.setAckCode(StatusCode.IN_PROGRESS.value);
@@ -320,7 +319,7 @@ public class Thermostat
 
                         try
                         {
-                            deviceClient.updateClientProperties(collection, null, null);
+                            deviceClient.updateClientPropertiesAsync(collection, null, null);
                         }
                         catch (IOException e)
                         {
@@ -339,7 +338,7 @@ public class Thermostat
                         targetTemperature.setAckCode(StatusCode.COMPLETED.value);
                         try
                         {
-                            deviceClient.updateClientProperties(collection, null, null);
+                            deviceClient.updateClientPropertiesAsync(collection, null, null);
                         }
                         catch (IOException e)
                         {
@@ -482,7 +481,7 @@ public class Thermostat
 
             TelemetryMessage message = new TelemetryMessage();
             message.getTelemetry().put(telemetryName, temperature);
-            deviceClient.sendTelemetry(message, new MessageIotHubEventCallback(), null);
+            deviceClient.sendTelemetryAsync(message, new MessageIotHubEventCallback(), null);
 
             log.debug("Telemetry: Sent - {\"{}\": {}°C} with message Id {}.", telemetryName, temperature, message.getMessageId());
             temperatureReadings.put(new Date(), temperature);
@@ -494,7 +493,7 @@ public class Thermostat
 
             ClientPropertyCollection collection = new ClientPropertyCollection();
             collection.put(propertyName, maxTemperature);
-            deviceClient.updateClientProperties(collection, null, null);
+            deviceClient.updateClientPropertiesAsync(collection, null, null);
             log.debug("Property: Update - {\"{}\": {}°C} is {}.", propertyName, maxTemperature, StatusCode.COMPLETED);
         }
 

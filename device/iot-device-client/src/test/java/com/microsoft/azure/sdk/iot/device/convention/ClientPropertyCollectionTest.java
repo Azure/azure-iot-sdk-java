@@ -1,4 +1,4 @@
-package tests.unit.com.microsoft.azure.sdk.iot.device.convention;
+package com.microsoft.azure.sdk.iot.device.convention;
 
 import com.microsoft.azure.sdk.iot.deps.convention.ConventionConstants;
 import com.microsoft.azure.sdk.iot.deps.convention.DefaultPayloadConvention;
@@ -193,7 +193,7 @@ public class ClientPropertyCollectionTest
 
     private GsonWritablePropertyResponse defaultWritableObject()
     {
-        return GsonWritablePropertyResponse.builder().Value(WRITABLE_PROPERTY_VALUE).ackVersion(WRITABLE_PROPERTY_VERSION).ackCode(WRITABLE_PROPERTY_ACK).ackDescription(WRITABLE_PROPERTY_DESCRIPTION).build();
+        return GsonWritablePropertyResponse.builder().value(WRITABLE_PROPERTY_VALUE).ackVersion(WRITABLE_PROPERTY_VERSION).ackCode(WRITABLE_PROPERTY_ACK).ackDescription(WRITABLE_PROPERTY_DESCRIPTION).build();
     }
 
 

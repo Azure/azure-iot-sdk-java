@@ -13,7 +13,6 @@ import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
