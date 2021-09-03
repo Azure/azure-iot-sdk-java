@@ -464,6 +464,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      * @deprecated : As of release 1.1.25 this call is replaced by {@link #closeNow()}
      *
      * @throws IOException This exception is no longer thrown by this method.
+     * @throws UnsupportedOperationException if called on a device that is multiplexed.
      */
     @Deprecated
     public void close() throws IOException
@@ -506,6 +507,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      * usable. If the client is already closed, the function shall do nothing.
      *
      * @throws IOException This exception is no longer thrown by this method.
+     * @throws UnsupportedOperationException if called on a device that is multiplexed.
      */
     public void closeNow() throws IOException
     {

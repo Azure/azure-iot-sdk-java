@@ -269,7 +269,7 @@ public class DeviceIOTest
         };
 
         // act
-        Deencapsulation.invoke(deviceIO, "closeWithoutWrappingException");
+        Deencapsulation.invoke(deviceIO, "close");
 
         // assert
         assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
