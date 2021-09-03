@@ -136,10 +136,8 @@ abstract public class Mqtt implements MqttCallback
 
     /**
      * Method to disconnect to mqtt broker connection.
-     *
-     * @throws TransportException if failed to ends the mqtt connection.
      */
-    void disconnect() throws TransportException
+    void disconnect()
     {
         try
         {
@@ -154,13 +152,27 @@ abstract public class Mqtt implements MqttCallback
                 }
 
                 log.debug("Sent MQTT DISCONNECT packet was acknowledged");
-                this.mqttAsyncClient.close();
             }
         }
         catch (MqttException e)
         {
-            log.warn("Exception encountered while sending MQTT DISCONNECT packet", e);
-            throw PahoExceptionTranslator.convertToMqttException(e, "Unable to disconnect");
+            // If the SDK's disconnect message doesn't make it to the service, just clean up the local resources.
+            // The service will eventually figure out that the connection was lost since the keep-alive pings stop.
+            TransportException transportException = PahoExceptionTranslator.convertToMqttException(e, "Unable to disconnect");
+            log.warn("Exception encountered while sending MQTT DISCONNECT packet. Forcefully closing the connection.", transportException);
+        }
+        finally
+        {
+            try
+            {
+                this.mqttAsyncClient.close();
+            }
+            catch (MqttException ex)
+            {
+                // As per the documentation for mqttAsyncClient.close() this exception is only thrown if the client is already
+                // closed. No need to re-attempt anything here.
+                log.debug("Mqtt client was already closed, so ignoring the thrown exception", ex);
+            }
         }
     }
 
@@ -318,14 +330,7 @@ abstract public class Mqtt implements MqttCallback
 
         log.warn("Mqtt connection lost", throwable);
 
-        try
-        {
-            this.disconnect();
-        }
-        catch (TransportException e)
-        {
-            ex = e;
-        }
+        this.disconnect();
 
         if (this.listener != null)
         {

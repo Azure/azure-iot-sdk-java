@@ -263,16 +263,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
                 this.receiveTaskScheduler.shutdown();
             }
 
-            try
-            {
-                this.transport.close(IotHubConnectionStatusChangeReason.CLIENT_CLOSE, null);
-            }
-            catch (DeviceClientException e)
-            {
-                this.state = IotHubConnectionStatus.DISCONNECTED;
-                throw new IOException(e);
-            }
-
+            this.transport.close(IotHubConnectionStatusChangeReason.CLIENT_CLOSE, null);
             this.state = IotHubConnectionStatus.DISCONNECTED;
         }
     }

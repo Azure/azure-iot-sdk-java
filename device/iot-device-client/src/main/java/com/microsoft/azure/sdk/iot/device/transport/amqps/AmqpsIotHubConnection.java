@@ -298,7 +298,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         log.debug("Amqp connection opened successfully");
     }
 
-    public void close() throws TransportException
+    public void close()
     {
         log.debug("Shutting down amqp layer...");
         try
@@ -314,10 +314,10 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             }
             catch (InterruptedException e)
             {
-                throw new TransportException("Interrupted while closing proton reactor", e);
+                // If the SDK's disconnect message doesn't make it to the service, just clean up the local resources.
+                // The service will eventually figure out that the connection was lost since the keep-alive pings stop.
+                log.warn("Interrupted while waiting on reactor to close gracefully. Forcefully closing the reactor now.", e);
             }
-
-            log.trace("Amqp connection closed successfully");
         }
         finally
         {
@@ -326,6 +326,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             this.executorServicesCleanup();
             this.reactor.free();
             this.state = IotHubConnectionStatus.DISCONNECTED;
+            log.trace("Amqp connection closed successfully");
         }
     }
 

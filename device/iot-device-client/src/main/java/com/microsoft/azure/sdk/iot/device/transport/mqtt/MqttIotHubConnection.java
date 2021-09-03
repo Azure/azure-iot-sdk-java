@@ -295,7 +295,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
      * Closes the connection. After the connection is closed, it is no longer usable.
      * If the connection is already closed, the function shall do nothing.
      */
-    public void close() throws TransportException
+    public void close()
     {
         synchronized (this.mqttConnectionStateLock)
         {
