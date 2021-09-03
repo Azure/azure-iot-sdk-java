@@ -73,14 +73,14 @@ public final class FileUploadInProgress
      * Getter for the task cancellation.
      * 
      * @return boolean true if the Future task was cancelled or false if it is not.
-     * @throws IOException is the task is null.
      */
-    boolean isCancelled() throws IOException
+    boolean isCancelled()
     {
         /* Codes_SRS_FILEUPLOADINPROGRESS_21_007: [If the `task` is null, the isCancelled shall throws IOException.] */
         if(task == null)
         {
-            throw new IOException("future task is null");
+            // no task was set, so no file upload could have been in progress, so no file upload could have been cancelled.
+            return false;
         }
 
         /* Codes_SRS_FILEUPLOADINPROGRESS_21_006: [The isCancelled shall return the value of isCancelled on the `task`.] */

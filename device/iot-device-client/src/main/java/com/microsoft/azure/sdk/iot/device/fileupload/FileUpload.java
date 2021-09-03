@@ -119,7 +119,7 @@ public final class FileUpload
      *
      * @throws IOException if an I/O error occurs in the inputStream.
      */
-    public void closeNow() throws IOException
+    public void closeNow()
     {
         taskScheduler.shutdownNow();
 
