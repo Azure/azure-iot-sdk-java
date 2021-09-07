@@ -274,18 +274,25 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             }
             catch (TransportException e)
             {
+                // since some session handlers were created and saved locally, they must be deleted so that the next open
+                // call doesn't add new session handlers on top of a list of the same session handlers from the last attempt.
+                clearLocalState();
+
                 // clean up network resources and thread scheduler before exiting this layer. Subsequent open attempts
                 // will create a new reactor and a new executor service
-                this.reactor.free();
-                this.executorServicesCleanup();
+                closeNetworkResources();
                 throw e;
             }
             catch (InterruptedException e)
             {
+                // since some session handlers were created and saved locally, they must be deleted so that the next open
+                // call doesn't add new session handlers on top of a list of the same session handlers from the last attempt.
+                clearLocalState();
+
                 // clean up network resources and thread scheduler before exiting this layer. Subsequent open attempts
                 // will create a new reactor and a new executor service
-                this.reactor.free();
-                this.executorServicesCleanup();
+                closeNetworkResources();
+
                 TransportException interruptedTransportException = new TransportException("Interrupted while waiting for links to open for AMQP connection", e);
                 interruptedTransportException.setRetryable(true);
                 throw interruptedTransportException;
@@ -296,6 +303,18 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         this.listener.onConnectionEstablished(this.connectionId);
 
         log.debug("Amqp connection opened successfully");
+    }
+
+    private void clearLocalState()
+    {
+        this.sessionHandlers.clear();
+        this.sasTokenRenewalHandlers.clear();
+    }
+
+    private void closeNetworkResources()
+    {
+        this.reactor.free();
+        this.executorServicesCleanup();
     }
 
     public void close() throws TransportException
@@ -323,8 +342,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         {
             // always clean up the executor service, free the reactor and set the state as DISCONNECTED even when the close
             // isn't successful. Failing to free the reactor in particular leaks network resources
-            this.executorServicesCleanup();
-            this.reactor.free();
+            clearLocalState();
+            closeNetworkResources();
             this.state = IotHubConnectionStatus.DISCONNECTED;
         }
     }
@@ -952,8 +971,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         {
             if (existingAmqpsSessionHandler.getDeviceId().equals(deviceClientConfig.getDeviceId()))
             {
-                amqpsSessionHandler = existingAmqpsSessionHandler;
-                break;
+                // session handler already existed for this device. No need to create a new session handler and add it to this.sessionHandlers
+                return existingAmqpsSessionHandler;
             }
         }
 
@@ -973,6 +992,11 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         if (amqpsSessionHandler == null)
         {
             amqpsSessionHandler = new AmqpsSessionHandler(deviceClientConfig, this);
+        }
+        else
+        {
+            // Since a session is being added for the reconnecting device, it can be removed from the reconnectingDeviceSessionHandlers collection
+            this.reconnectingDeviceSessionHandlers.remove(amqpsSessionHandler);
         }
 
         this.sessionHandlers.add(amqpsSessionHandler);
