@@ -984,31 +984,6 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* Tests_SRS_ENROLLMENT_GROUP_21_042: [The setAttestation shall throw IllegalArgumentException if the attestation is not X509 signingCertificate or Symmetric Key] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setAttestationMechanismX509ThrowsOnNoSigningCertificate(
-            @Mocked final X509Attestation mockedX509Attestation,
-            @Mocked final AttestationMechanism mockedAttestationMechanism)
-    {
-        // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
-
-        new NonStrictExpectations()
-        {
-            {
-                Deencapsulation.invoke(mockedAttestationMechanism, "getAttestation");
-                result = mockedX509Attestation;
-                mockedX509Attestation.getRootCertificatesFinal();
-                result = null;
-            }
-        };
-
-        // act
-        Deencapsulation.invoke(enrollmentGroup, "setAttestation", new Class[]{AttestationMechanism.class}, mockedAttestationMechanism);
-
-        // assert
-    }
-
     /* Tests_SRS_ENROLLMENT_GROUP_21_019: [The setAttestation shall store the provided attestation.] */
     @Test
     public void setAttestationMechanismX509Succeed(
@@ -1092,29 +1067,6 @@ public class EnrollmentGroupTest
 
         // act
         enrollmentGroup.setAttestation(mockedTpmAttestation);
-
-        // assert
-    }
-
-    /* Tests_SRS_ENROLLMENT_GROUP_21_040: [The setAttestation shall throw IllegalArgumentException if the attestation is not X509 signingCertificate or Symmetric Key] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setAttestationX509ThrowsOnNoSigningCertificate(
-            @Mocked final X509Attestation mockedX509Attestation,
-            @Mocked final AttestationMechanism mockedAttestationMechanism)
-    {
-        // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
-
-        new NonStrictExpectations()
-        {
-            {
-                mockedX509Attestation.getRootCertificatesFinal();
-                result = null;
-            }
-        };
-
-        // act
-        enrollmentGroup.setAttestation(mockedX509Attestation);
 
         // assert
     }
