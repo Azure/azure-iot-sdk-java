@@ -933,6 +933,10 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         {
             reconnectionScheduled = true;
             log.warn("Amqp connection was closed, creating a thread to notify transport layer", throwable);
+
+            // preserve the session handlers through the reconnection attempts
+            this.reconnectingDeviceSessionHandlers.addAll(this.sessionHandlers);
+
             ReconnectionNotifier.notifyDisconnectAsync(throwable, this.listener, this.connectionId);
         }
     }
