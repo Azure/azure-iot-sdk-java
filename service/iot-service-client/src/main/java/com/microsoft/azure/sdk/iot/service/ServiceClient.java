@@ -369,7 +369,10 @@ public class ServiceClient
     public CompletableFuture<Void> openAsync()
     {
         final CompletableFuture<Void> future = new CompletableFuture<>();
-        executor.submit(() -> {
+
+        // executor service hasn't been initialized yet, so don't use it to run this thread
+        new Thread(() ->
+        {
             try
             {
                 open();
@@ -380,6 +383,7 @@ public class ServiceClient
                 future.completeExceptionally(e);
             }
         });
+
         return future;
     }
 
@@ -391,9 +395,14 @@ public class ServiceClient
     public CompletableFuture<Void> closeAsync()
     {
         final CompletableFuture<Void> future = new CompletableFuture<>();
-        executor.submit(() -> {
+
+        // executor service will be shut down by this thread, so don't put this logic on the executor service's thread pool
+        new Thread(() ->
+        {
             try
             {
+                // don't shutdown the executor service from within this thread since this thread is in the
+                // executor service's thread pool. Save the executor shutdown for last
                 close();
                 future.complete(null);
             }
@@ -402,6 +411,7 @@ public class ServiceClient
                 future.completeExceptionally(e);
             }
         });
+
         return future;
     }
 
