@@ -317,7 +317,10 @@ public class ServiceClient
             throw new IOException("AMQP sender is not initialized");
         }
 
-        this.executor.shutdownNow();
+        if (this.executor != null)
+        {
+            this.executor.shutdownNow();
+        }
 
         log.info("Closing service client...");
         this.amqpMessageSender.close();
