@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.deps.convention.DefaultPayloadConvention;
+import com.microsoft.azure.sdk.iot.deps.convention.PayloadConvention;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.auth.*;
 import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
@@ -11,9 +13,7 @@ import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
@@ -45,9 +45,23 @@ public final class DeviceClientConfig
     private boolean useWebsocket;
     private ProxySettings proxySettings;
 
+    /**
+     * The device ModelId to be used with Azure IoT Plug and Play devices. This value must be set with the {@link ClientOptions} configuration.
+     *
+     * @return The current value of the device ModelId.
+     */
     @Getter
     @Setter(AccessLevel.PROTECTED)
     String modelId;
+
+    /**
+     * The {@link PayloadConvention} to be used with convention based opertations such as Azure IoT Plug and Play devices. This value must be set with the {@link ClientOptions} configuration.
+     *
+     * @return The current {@link PayloadConvention} to be used for this device.
+     */
+    @Getter
+    @Setter(AccessLevel.PROTECTED)
+    private PayloadConvention payloadConvention = DefaultPayloadConvention.getInstance();
 
     // Initialize all the timeout values here instead of the constructor as the constructor is not always called.
     @Getter
@@ -72,6 +86,7 @@ public final class DeviceClientConfig
      * The callback to be invoked if a message of Device Method type received.
      */
     private MessageCallback deviceMethodsMessageCallback;
+
     /** The context to be passed in to the device method type message callback. */
     private Object deviceMethodsMessageContext;
 
@@ -79,6 +94,7 @@ public final class DeviceClientConfig
      * The callback to be invoked if a message of Device Twin type received.
      */
     private MessageCallback deviceTwinMessageCallback;
+
     /** The context to be passed in to the device twin type message callback. */
     private Object deviceTwinMessageContext;
 
@@ -86,6 +102,7 @@ public final class DeviceClientConfig
      * The callback to be invoked if a message is received.
      */
     private MessageCallback defaultDeviceTelemetryMessageCallback;
+
     /** The context to be passed in to the message callback. */
     private Object defaultDeviceTelemetryMessageContext;
 
@@ -120,21 +137,6 @@ public final class DeviceClientConfig
         configSasAuth(iotHubConnectionString);
     }
 
-    private void configSasAuth(IotHubConnectionString iotHubConnectionString) {
-        commonConstructorSetup(iotHubConnectionString);
-        assertConnectionStringIsNotX509(iotHubConnectionString);
-
-        this.authenticationProvider = new IotHubSasTokenSoftwareAuthenticationProvider(
-                iotHubConnectionString.getHostName(),
-                iotHubConnectionString.getGatewayHostName(),
-                iotHubConnectionString.getDeviceId(),
-                iotHubConnectionString.getModuleId(),
-                iotHubConnectionString.getSharedAccessKey(),
-                iotHubConnectionString.getSharedAccessToken());
-
-        log.debug("Device configured to use software based SAS authentication provider");
-    }
-
     public DeviceClientConfig(IotHubAuthenticationProvider authenticationProvider) throws IllegalArgumentException
     {
         if (!(authenticationProvider instanceof IotHubSasTokenAuthenticationProvider))
@@ -147,8 +149,7 @@ public final class DeviceClientConfig
         this.productInfo = new ProductInfo();
     }
 
-
-    public DeviceClientConfig(String hostName, SasTokenProvider sasTokenProvider, ClientOptions clientOptions, String deviceId, String moduleId)
+    public DeviceClientConfig(String hostName, SasTokenProvider sasTokenProvider, @NonNull ClientOptions clientOptions, String deviceId, String moduleId)
     {
         SSLContext sslContext = clientOptions != null ? clientOptions.sslContext : null;
         this.authenticationProvider =
@@ -156,7 +157,7 @@ public final class DeviceClientConfig
 
         this.useWebsocket = false;
         this.productInfo = new ProductInfo();
-
+        this.payloadConvention = clientOptions.getPayloadConvention();
         log.debug("Device configured to use SAS token provided authentication provider");
     }
 
@@ -200,35 +201,6 @@ public final class DeviceClientConfig
     public DeviceClientConfig(IotHubConnectionString iotHubConnectionString, SSLContext sslContext)
     {
         configSsl(iotHubConnectionString, sslContext);
-    }
-
-    private void configSsl(IotHubConnectionString iotHubConnectionString, SSLContext sslContext) {
-        commonConstructorSetup(iotHubConnectionString);
-
-        if (iotHubConnectionString.isUsingX509())
-        {
-            this.authenticationProvider = new IotHubX509SoftwareAuthenticationProvider(
-                    iotHubConnectionString.getHostName(),
-                    iotHubConnectionString.getGatewayHostName(),
-                    iotHubConnectionString.getDeviceId(),
-                    iotHubConnectionString.getModuleId(),
-                    sslContext);
-
-            log.debug("Device configured to use software based x509 authentication provider with custom SSLContext");
-        }
-        else
-        {
-            this.authenticationProvider = new IotHubSasTokenSoftwareAuthenticationProvider(
-                    iotHubConnectionString.getHostName(),
-                    iotHubConnectionString.getGatewayHostName(),
-                    iotHubConnectionString.getDeviceId(),
-                    iotHubConnectionString.getModuleId(),
-                    iotHubConnectionString.getSharedAccessKey(),
-                    iotHubConnectionString.getSharedAccessToken(),
-                    sslContext);
-
-            log.debug("Device configured to use software based SAS authentication provider with custom SSLContext");
-        }
     }
 
     /**
@@ -281,6 +253,50 @@ public final class DeviceClientConfig
         {
             //Codes_SRS_DEVICECLIENTCONFIG_34_084: [If the provided security provider is neither a SecurityProviderX509 instance nor a SecurityProviderTpm instance, this function shall throw an UnsupportedOperationException.]
             throw new UnsupportedOperationException("The provided security provider is not supported.");
+        }
+    }
+
+    private void configSasAuth(IotHubConnectionString iotHubConnectionString) {
+        commonConstructorSetup(iotHubConnectionString);
+        assertConnectionStringIsNotX509(iotHubConnectionString);
+
+        this.authenticationProvider = new IotHubSasTokenSoftwareAuthenticationProvider(
+                iotHubConnectionString.getHostName(),
+                iotHubConnectionString.getGatewayHostName(),
+                iotHubConnectionString.getDeviceId(),
+                iotHubConnectionString.getModuleId(),
+                iotHubConnectionString.getSharedAccessKey(),
+                iotHubConnectionString.getSharedAccessToken());
+
+        log.debug("Device configured to use software based SAS authentication provider");
+    }
+
+    private void configSsl(IotHubConnectionString iotHubConnectionString, SSLContext sslContext) {
+        commonConstructorSetup(iotHubConnectionString);
+
+        if (iotHubConnectionString.isUsingX509())
+        {
+            this.authenticationProvider = new IotHubX509SoftwareAuthenticationProvider(
+                    iotHubConnectionString.getHostName(),
+                    iotHubConnectionString.getGatewayHostName(),
+                    iotHubConnectionString.getDeviceId(),
+                    iotHubConnectionString.getModuleId(),
+                    sslContext);
+
+            log.debug("Device configured to use software based x509 authentication provider with custom SSLContext");
+        }
+        else
+        {
+            this.authenticationProvider = new IotHubSasTokenSoftwareAuthenticationProvider(
+                    iotHubConnectionString.getHostName(),
+                    iotHubConnectionString.getGatewayHostName(),
+                    iotHubConnectionString.getDeviceId(),
+                    iotHubConnectionString.getModuleId(),
+                    iotHubConnectionString.getSharedAccessKey(),
+                    iotHubConnectionString.getSharedAccessToken(),
+                    sslContext);
+
+            log.debug("Device configured to use software based SAS authentication provider with custom SSLContext");
         }
     }
 

@@ -7,14 +7,15 @@ import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinMetadata;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.convention.ClientProperties;
+import com.microsoft.azure.sdk.iot.device.convention.ClientPropertiesCallback;
+import com.microsoft.azure.sdk.iot.device.convention.ClientPropertyCollection;
+import com.microsoft.azure.sdk.iot.device.convention.WritablePropertiesRequestsCallback;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubMessageResult.ABANDON;
@@ -42,6 +43,9 @@ public class DeviceTwin
     private final PropertyCallBack deviceTwinGenericPropertyChangeCallback;
     private final TwinPropertyCallBack deviceTwinGenericTwinPropertyChangeCallback;
     private Object deviceTwinGenericPropertyChangeCallbackContext;
+
+    private WritablePropertiesRequestsCallback writablePropertiesRequestsCallback;
+    private Object writablePropertiesRequestsContext;
 
     // Callback for providing user all of a given desired property update message's contents, rather than providing
     // one callback per updated property.
@@ -90,6 +94,14 @@ public class DeviceTwin
                         if (iotHubStatus == IotHubStatusCode.OK)
                         {
                             TwinState twinState = TwinState.createFromPropertiesJson(new String(dtMessage.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
+
+                            if (dtMessage.getClientPropertiesCallback() != null)
+                            {
+                                ClientPropertiesCallback propCallBack = dtMessage.getClientPropertiesCallback();
+                                Object propCallBackContext = dtMessage.getClientPropertiesCallbackContext();
+                                propCallBack.execute(new ClientProperties(ClientPropertyCollection.fromMap(twinState.getReportedProperty()), ClientPropertyCollection.fromMap(twinState.getDesiredProperty())), propCallBackContext);
+                            }
+
                             if (twinState.getDesiredProperty() != null)
                             {
                                 OnDesiredPropertyChanged(twinState.getDesiredProperty());
@@ -120,8 +132,11 @@ public class DeviceTwin
                         if (twinState.getDesiredProperty() != null)
                         {
                             OnDesiredPropertyChanged(twinState.getDesiredProperty());
+                            if (writablePropertiesRequestsCallback != null)
+                            {
+                                writablePropertiesRequestsCallback.execute(new ClientPropertyCollection(dtMessage, config.getPayloadConvention(), true), writablePropertiesRequestsContext);
+                            }
                         }
-
                         break;
                     }
                     default:
@@ -400,6 +415,61 @@ public class DeviceTwin
             }
         }
 
+        checkSubscription();
+    }
+
+    public void getClientProperties(ClientPropertiesCallback clientPropertiesCallback, Object context)
+    {
+        checkSubscription();
+
+        IotHubTransportMessage getTwinRequestMessage = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_TWIN);
+        getTwinRequestMessage.setRequestId(UUID.randomUUID().toString());
+        getTwinRequestMessage.setCorrelationId(getTwinRequestMessage.getRequestId());
+        getTwinRequestMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_GET_REQUEST);
+        getTwinRequestMessage.setClientPropertiesCallback(clientPropertiesCallback);
+        getTwinRequestMessage.setClientPropertiesCallbackContext(context);
+        this.deviceIO.sendEventAsync(getTwinRequestMessage, null, null, this.config.getDeviceId());
+    }
+
+    public synchronized void updateClientProperties(ClientPropertyCollection clientPropertyCollection, Integer version, CorrelatingMessageCallback correlatingMessageCallback, Object correlatingMessageCallbackContext, IotHubEventCallback reportedPropertiesCallback, Object callbackContext) throws IOException
+    {
+        if (clientPropertyCollection == null)
+        {
+            throw new IllegalArgumentException("Reported properties cannot be null");
+        }
+
+        String serializedReportedProperties = config.getPayloadConvention().getPayloadSerializer().serializeToString(clientPropertyCollection);
+
+        if (serializedReportedProperties == null)
+        {
+            return;
+        }
+
+        IotHubTransportMessage clientPropertiesRequest = new IotHubTransportMessage(serializedReportedProperties.getBytes(), MessageType.DEVICE_TWIN);
+        clientPropertiesRequest.setCorrelatingMessageCallback(correlatingMessageCallback);
+        clientPropertiesRequest.setCorrelatingMessageCallbackContext(correlatingMessageCallbackContext);
+        clientPropertiesRequest.setConnectionDeviceId(this.config.getDeviceId());
+
+        // MQTT does not have the concept of correlationId for request/response handling but it does have a requestId
+        // To handle this we are setting the correlationId to the requestId to better handle correlation
+        // whether we use MQTT or AMQP.
+        clientPropertiesRequest.setRequestId(UUID.randomUUID().toString());
+        clientPropertiesRequest.setCorrelationId(clientPropertiesRequest.getRequestId());
+
+        if (version != null)
+        {
+            clientPropertiesRequest.setVersion(Integer.toString(version));
+        }
+
+
+        clientPropertiesRequest.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST);
+        this.deviceIO.sendEventAsync(clientPropertiesRequest, reportedPropertiesCallback, callbackContext, this.config.getDeviceId());
+    }
+
+    public void subscribeToWritablePropertyRequests(WritablePropertiesRequestsCallback writablePropertiesRequestsCallback, Object context)
+    {
+        this.writablePropertiesRequestsCallback = writablePropertiesRequestsCallback;
+        this.writablePropertiesRequestsContext = context;
         checkSubscription();
     }
 
