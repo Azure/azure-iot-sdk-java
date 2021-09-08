@@ -382,7 +382,7 @@ public class ServiceClient
             {
                 future.completeExceptionally(e);
             }
-        });
+        }).run();
 
         return future;
     }
@@ -410,7 +410,7 @@ public class ServiceClient
             {
                 future.completeExceptionally(e);
             }
-        });
+        }).run();
 
         return future;
     }
