@@ -25,7 +25,7 @@ import java.util.concurrent.Executors;
 @Slf4j
 public class ServiceClient
 {
-    private final ExecutorService executor = Executors.newFixedThreadPool(10);
+    private ExecutorService executor;
 
     private final AmqpSend amqpMessageSender;
     private final String hostName;
@@ -298,6 +298,8 @@ public class ServiceClient
             throw new IOException("AMQP sender is not initialized");
         }
 
+        this.executor = Executors.newFixedThreadPool(10);
+
         log.info("Opening service client...");
 
         this.amqpMessageSender.open();
@@ -314,6 +316,8 @@ public class ServiceClient
         {
             throw new IOException("AMQP sender is not initialized");
         }
+
+        this.executor.shutdownNow();
 
         log.info("Closing service client...");
         this.amqpMessageSender.close();
