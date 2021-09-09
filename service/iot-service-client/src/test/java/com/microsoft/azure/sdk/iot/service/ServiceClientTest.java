@@ -15,9 +15,9 @@ import org.junit.Test;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 public class ServiceClientTest
 {
@@ -195,8 +195,6 @@ public class ServiceClientTest
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
-        serviceClient.open();
-
         // Assert
         new Expectations()
         {
@@ -376,21 +374,20 @@ public class ServiceClientTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + "." + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
-        serviceClient.open();
-        // Act
-        CompletableFuture<Void> completableFuture = serviceClient.closeAsync();
-        completableFuture.get();
-
         // Assert
-        new Verifications()
+        new Expectations()
         {
             {
                 amqpSend.close();
                 serviceClient.close();
             }
         };
+        // Act
+        CompletableFuture<Void> completableFuture = serviceClient.closeAsync();
+        completableFuture.get();
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_015: [The function shall create an async wrapper around the close() function call, handle the return value or delegate exception]
@@ -436,7 +433,6 @@ public class ServiceClientTest
         Message iotMessage = new Message(content);
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
-        serviceClient.open();
         // Assert
         new Expectations()
         {
@@ -532,29 +528,5 @@ public class ServiceClientTest
         FeedbackReceiver feedbackReceiver = serviceClient.getFeedbackReceiver();
         // Assert
         assertNotEquals(null, feedbackReceiver);
-    }
-
-    // a new executor service should be created when the service client opens, and
-    // closed when the service client is closed
-    @Test
-    public void executorServiceLifespan() throws IOException
-    {
-        String iotHubName = "IOTHUBNAME";
-        String hostName = "HOSTNAME";
-        String sharedAccessKeyName = "ACCESSKEYNAME";
-        String policyName = "SharedAccessKey";
-        String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
-        String connectionString = "HostName=" + hostName + "." + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
-
-        assertNull(Deencapsulation.getField(serviceClient, "executor"));
-
-        serviceClient.open();
-        assertNotNull(Deencapsulation.getField(serviceClient, "executor"));
-
-        serviceClient.close();
-        ExecutorService executorService = Deencapsulation.getField(serviceClient, "executor");
-        assertTrue(executorService.isShutdown());
     }
 }
