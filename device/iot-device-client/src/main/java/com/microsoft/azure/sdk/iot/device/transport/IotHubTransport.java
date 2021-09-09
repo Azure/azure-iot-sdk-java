@@ -479,8 +479,6 @@ public class IotHubTransport implements IotHubListener
      *
      * @param cause the cause of why this connection is closing, to be reported over connection status change callback
      * @param reason the reason to close this connection, to be reported over connection status change callback
-     *
-     * @throws DeviceClientException if an error occurs in closing the transport.
      */
     public void close(IotHubConnectionStatusChangeReason reason, Throwable cause)
     {

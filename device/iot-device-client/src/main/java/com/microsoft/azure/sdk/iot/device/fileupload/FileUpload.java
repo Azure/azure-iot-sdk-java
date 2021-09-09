@@ -116,8 +116,6 @@ public final class FileUpload
 
     /**
      * Close the file upload cancelling all existing uploads and shutting down the thread pool.
-     *
-     * @throws IOException if an I/O error occurs in the inputStream.
      */
     public void closeNow()
     {

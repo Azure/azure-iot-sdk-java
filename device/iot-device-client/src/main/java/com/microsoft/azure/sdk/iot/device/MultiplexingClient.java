@@ -67,6 +67,7 @@ public class MultiplexingClient
     /**
      * Instantiate a new MultiplexingClient that will establish a multiplexed connection through a proxy.
      *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param protocol The transport protocol that this client will build the multiplexed connection on. Must be either
      *                 {@link IotHubClientProtocol#AMQPS} or {@link IotHubClientProtocol#AMQPS_WS}.
      */
@@ -78,6 +79,7 @@ public class MultiplexingClient
     /**
      * Instantiate a new MultiplexingClient that will establish a multiplexed connection through a proxy.
      *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param protocol The transport protocol that this client will build the multiplexed connection on. Must be
      * {@link IotHubClientProtocol#AMQPS_WS} since using {@link IotHubClientProtocol#AMQPS} does not support proxies.
      * @param options The optional parameters to configure this client to use.
