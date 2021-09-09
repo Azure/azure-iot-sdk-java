@@ -265,7 +265,9 @@ public class RegistryManager
      * @return The future object for the requested operation
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
-     * @deprecated Use the synchronous version of this API {@link #addDevice(Device)}.
+     * @deprecated Use the synchronous version of this API {@link #addDevice(Device)}. This asynchronous
+     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
+     * in order to have control over the spawned threads.
      */
     @Deprecated
     public CompletableFuture<Device> addDeviceAsync(Device device) throws IOException, IotHubException
@@ -326,7 +328,9 @@ public class RegistryManager
      * @return The future object for the requested operation
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
-     * @deprecated Use the synchronous version of this API {@link #getDevice(String)}.
+     * @deprecated Use the synchronous version of this API {@link #getDevice(String)}. This asynchronous
+     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
+     * in order to have control over the spawned threads.
      */
     @Deprecated
     public CompletableFuture<Device> getDeviceAsync(String deviceId) throws IOException, IotHubException
@@ -523,7 +527,9 @@ public class RegistryManager
      * @return The future object for the requested operation
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
-     * @deprecated Use the synchronous version of this API {@link #updateDevice(Device)}.
+     * @deprecated Use the synchronous version of this API {@link #updateDevice(Device)}. This asynchronous
+     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
+     * in order to have control over the spawned threads.
      */
     @Deprecated
     public CompletableFuture<Device> updateDeviceAsync(Device device) throws IOException, IotHubException
@@ -648,7 +654,9 @@ public class RegistryManager
      * @return The future object for the requested operation
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
-     * @deprecated Use the synchronous version of this API {@link #removeDevice(Device)}.
+     * @deprecated Use the synchronous version of this API {@link #removeDevice(Device)}. This asynchronous
+     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
+     * in order to have control over the spawned threads.
      */
     @Deprecated
     public CompletableFuture<Boolean> removeDeviceAsync(String deviceId) throws IOException, IotHubException
@@ -702,7 +710,9 @@ public class RegistryManager
      * @return The future object for the requested operation
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
-     * @deprecated Use the synchronous version of this API {@link #getStatistics()}.
+     * @deprecated Use the synchronous version of this API {@link #getStatistics()}. This asynchronous
+     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
+     * in order to have control over the spawned threads.
      */
     @Deprecated
     public CompletableFuture<RegistryStatistics> getStatisticsAsync() throws IOException, IotHubException
@@ -762,7 +772,9 @@ public class RegistryManager
      * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
-     * @deprecated Use the synchronous version of this API {@link #exportDevices(String, Boolean)}.
+     * @deprecated Use the synchronous version of this API {@link #exportDevices(String, Boolean)}. This asynchronous
+     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
+     * in order to have control over the spawned threads.
      */
     @Deprecated
     public CompletableFuture<JobProperties> exportDevicesAsync(String exportBlobContainerUri, Boolean excludeKeys)
@@ -827,7 +839,9 @@ public class RegistryManager
      * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
-     * @deprecated Use the synchronous version of this API {@link #exportDevices(JobProperties)}.
+     * @deprecated Use the synchronous version of this API {@link #exportDevices(JobProperties)}. This asynchronous
+     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
+     * in order to have control over the spawned threads.
      */
     @Deprecated
     public CompletableFuture<JobProperties> exportDevicesAsync(JobProperties exportDevicesParameters)
@@ -889,7 +903,9 @@ public class RegistryManager
      * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
-     * @deprecated Use the synchronous version of this API {@link #importDevices(String, String)}.
+     * @deprecated Use the synchronous version of this API {@link #importDevices(String, String)}. This asynchronous
+     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
+     * in order to have control over the spawned threads.
      */
     @Deprecated
     public CompletableFuture<JobProperties> importDevicesAsync(String importBlobContainerUri, String outputBlobContainerUri)
@@ -955,7 +971,9 @@ public class RegistryManager
      * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
-     * @deprecated Use the synchronous version of this API {@link #importDevices(JobProperties)}.
+     * @deprecated Use the synchronous version of this API {@link #importDevices(JobProperties)}. This asynchronous
+     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
+     * in order to have control over the spawned threads.
      */
     @Deprecated
     public CompletableFuture<JobProperties> importDevicesAsync(JobProperties importParameters)
@@ -1013,7 +1031,9 @@ public class RegistryManager
      * @throws IllegalArgumentException This exception is thrown if the jobId parameter is null
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
-     * @deprecated Use the synchronous version of this API {@link #getJob(String)}.
+     * @deprecated Use the synchronous version of this API {@link #getJob(String)}. This asynchronous
+     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
+     * in order to have control over the spawned threads.
      */
     @Deprecated
     public CompletableFuture<JobProperties> getJobAsync(String jobId)

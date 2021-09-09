@@ -358,7 +358,9 @@ public class ServiceClient
      * Provide asynchronous access to open()
      *
      * @return The future object for the requested operation
-     * @deprecated Use the synchronous version of this API {@link #open()}.
+     * @deprecated Use the synchronous version of this API {@link #open()}. This asynchronous
+     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
+     * in order to have control over the spawned threads.
      */
     @Deprecated
     public CompletableFuture<Void> openAsync()
@@ -382,7 +384,9 @@ public class ServiceClient
      * Provide asynchronous access to close()
      *
      * @return The future object for the requested operation
-     * @deprecated Use the synchronous version of this API {@link #close()}.
+     * @deprecated Use the synchronous version of this API {@link #close()}. This asynchronous
+     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
+     * in order to have control over the spawned threads.
      */
     @Deprecated
     public CompletableFuture<Void> closeAsync()
@@ -408,7 +412,9 @@ public class ServiceClient
      * @param deviceId The device identifier for the target device
      * @param message The message for the device
      * @return The future object for the requested operation
-     * @deprecated Use the synchronous version of this API {@link #send(String, Message)}.
+     * @deprecated Use the synchronous version of this API {@link #send(String, Message)}. This asynchronous
+     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
+     * in order to have control over the spawned threads.
      */
     @Deprecated
     public CompletableFuture<Void> sendAsync(String deviceId, Message message)
