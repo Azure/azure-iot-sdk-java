@@ -317,7 +317,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         this.executorServicesCleanup();
     }
 
-    public void close() throws TransportException
+    public void close()
     {
         log.debug("Shutting down amqp layer...");
         try
