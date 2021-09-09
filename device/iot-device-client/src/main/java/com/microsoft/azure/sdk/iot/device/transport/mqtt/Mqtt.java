@@ -190,6 +190,8 @@ abstract public class Mqtt implements MqttCallback
 
             byte[] payload = message.getBytes();
 
+            // Wait until either the number of in flight messages is below the limit before publishing another message
+            // Or wait until the connection is lost so the message can be requeued for later
             while (this.mqttAsyncClient.getPendingDeliveryTokens().length >= MAX_IN_FLIGHT_COUNT)
             {
                 //noinspection BusyWait
@@ -197,7 +199,7 @@ abstract public class Mqtt implements MqttCallback
 
                 if (!this.mqttAsyncClient.isConnected())
                 {
-                    TransportException transportException = new TransportException("Cannot publish when mqtt client is holding 10 tokens and is disconnected");
+                    TransportException transportException = new TransportException("Cannot publish when mqtt client is holding " + MAX_IN_FLIGHT_COUNT + " tokens and is disconnected");
                     transportException.setRetryable(true);
                     throw transportException;
                 }
