@@ -484,40 +484,43 @@ public class IotHubTransport implements IotHubListener
      */
     public void close(IotHubConnectionStatusChangeReason reason, Throwable cause) throws DeviceClientException
     {
-        if (reason == null)
+        synchronized (this.reconnectionLock)
         {
-            throw new IllegalArgumentException("reason cannot be null");
+            if (reason == null)
+            {
+                throw new IllegalArgumentException("reason cannot be null");
+            }
+
+            this.cancelPendingPackets();
+
+            this.invokeCallbacks();
+
+            if (this.taskScheduler != null)
+            {
+                this.taskScheduler.shutdown();
+            }
+
+            if (this.iotHubTransportConnection != null)
+            {
+                this.iotHubTransportConnection.close();
+            }
+
+            this.updateStatus(IotHubConnectionStatus.DISCONNECTED, reason, cause);
+
+            // Notify send thread to finish up so it doesn't survive this close
+            synchronized (this.sendThreadLock)
+            {
+                this.sendThreadLock.notifyAll();
+            }
+
+            // Notify receive thread to finish up so it doesn't survive this close
+            synchronized (this.receiveThreadLock)
+            {
+                this.receiveThreadLock.notifyAll();
+            }
+
+            log.debug("Client connection closed successfully");
         }
-
-        this.cancelPendingPackets();
-
-        this.invokeCallbacks();
-
-        if (this.taskScheduler != null)
-        {
-            this.taskScheduler.shutdown();
-        }
-
-        if (this.iotHubTransportConnection != null)
-        {
-            this.iotHubTransportConnection.close();
-        }
-
-        this.updateStatus(IotHubConnectionStatus.DISCONNECTED, reason, cause);
-
-        // Notify send thread to finish up so it doesn't survive this close
-        synchronized (this.sendThreadLock)
-        {
-            this.sendThreadLock.notifyAll();
-        }
-
-        // Notify receive thread to finish up so it doesn't survive this close
-        synchronized (this.receiveThreadLock)
-        {
-            this.receiveThreadLock.notifyAll();
-        }
-
-        log.debug("Client connection closed successfully");
     }
 
     /**
