@@ -1232,7 +1232,7 @@ public class IotHubTransport implements IotHubListener
         {
             if (this.isClosing)
             {
-                log.trace("Abandoning reconnection logic since this client has started closing. Releasing reconnectionLock");
+                log.trace("Abandoning reconnection logic since this client has started closing");
                 return;
             }
 
