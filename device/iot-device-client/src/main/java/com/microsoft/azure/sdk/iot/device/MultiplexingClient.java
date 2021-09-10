@@ -67,6 +67,7 @@ public class MultiplexingClient
     /**
      * Instantiate a new MultiplexingClient that will establish a multiplexed connection through a proxy.
      *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param protocol The transport protocol that this client will build the multiplexed connection on. Must be either
      *                 {@link IotHubClientProtocol#AMQPS} or {@link IotHubClientProtocol#AMQPS_WS}.
      */
@@ -78,6 +79,7 @@ public class MultiplexingClient
     /**
      * Instantiate a new MultiplexingClient that will establish a multiplexed connection through a proxy.
      *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param protocol The transport protocol that this client will build the multiplexed connection on. Must be
      * {@link IotHubClientProtocol#AMQPS_WS} since using {@link IotHubClientProtocol#AMQPS} does not support proxies.
      * @param options The optional parameters to configure this client to use.
@@ -209,7 +211,7 @@ public class MultiplexingClient
      * <p>
      * Once closed, this client can be re-opened. It will preserve all previously registered device clients.
      * <p>
-     * @throws MultiplexingClientException If any IO errors occur when fulfilling this request.
+     * @throws MultiplexingClientException This exception is not thrown by this method anymore.
      */
     public void close() throws MultiplexingClientException
     {
@@ -217,19 +219,12 @@ public class MultiplexingClient
         {
             log.info("Closing multiplexing client");
 
-            try
+            for (DeviceClient deviceClient : this.multiplexedDeviceClients.values())
             {
-                for (DeviceClient deviceClient : this.multiplexedDeviceClients.values())
-                {
-                    deviceClient.closeFileUpload();
-                }
+                deviceClient.closeFileUpload();
+            }
 
-                this.deviceIO.closeWithoutWrappingException();
-            }
-            catch (TransportException | IOException e)
-            {
-                throw new MultiplexingClientException("Failed to close the multiplexing client", e);
-            }
+            this.deviceIO.close();
 
             // Note that this method does not close each of the registered device client instances. This is intentional
             // as the calls to deviceClient.close() do nothing besides close the deviceIO layer, which is already closed

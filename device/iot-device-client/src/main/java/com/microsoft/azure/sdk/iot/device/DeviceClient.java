@@ -379,7 +379,7 @@ public final class DeviceClient extends InternalClient implements Closeable
         commonConstructorSetup();
     }
 
-    void closeFileUpload() throws IOException
+    void closeFileUpload()
     {
         if (this.fileUpload != null)
         {
@@ -463,7 +463,8 @@ public final class DeviceClient extends InternalClient implements Closeable
      * usable. If the client is already closed, the function shall do nothing.
      * @deprecated : As of release 1.1.25 this call is replaced by {@link #closeNow()}
      *
-     * @throws IOException if the connection to an IoT hub cannot be closed.
+     * @throws IOException This exception is no longer thrown by this method.
+     * @throws UnsupportedOperationException if called on a device that is multiplexed.
      */
     @Deprecated
     public void close() throws IOException
@@ -478,7 +479,7 @@ public final class DeviceClient extends InternalClient implements Closeable
             if (this.transportClient.getTransportClientState() == TransportClient.TransportClientState.OPENED)
             {
                 // Codes_SRS_DEVICECLIENT_12_006: [If the client has been initialized to use TransportClient and the TransportClient is already opened the function shall throw an IOException.]
-                throw new IOException("Calling closeNow() when using TransportClient is not supported. Use TransportClient.closeNow() instead.");
+                throw new UnsupportedOperationException("Calling closeNow() when using TransportClient is not supported. Use TransportClient.closeNow() instead.");
             }
             else
             {
@@ -505,7 +506,8 @@ public final class DeviceClient extends InternalClient implements Closeable
      * IoT hub. After {@code closeNow()} is called, the IoT hub client is no longer
      * usable. If the client is already closed, the function shall do nothing.
      *
-     * @throws IOException if the connection to an IoT hub cannot be closed.
+     * @throws IOException This exception is no longer thrown by this method.
+     * @throws UnsupportedOperationException if called on a device that is multiplexed.
      */
     public void closeNow() throws IOException
     {
@@ -519,7 +521,7 @@ public final class DeviceClient extends InternalClient implements Closeable
             if (this.transportClient.getTransportClientState() == TransportClient.TransportClientState.OPENED)
             {
                 // Codes_SRS_DEVICECLIENT_12_005: [If the client has been initialized to use TransportClient and the TransportClient is already opened the function shall throw an IOException.]
-                throw new IOException("Calling closeNow() when using TransportClient is not supported. Use TransportClient.closeNow() instead.");
+                throw new UnsupportedOperationException("Calling closeNow() when using TransportClient is not supported. Use TransportClient.closeNow() instead.");
             }
             else
             {

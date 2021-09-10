@@ -480,7 +480,7 @@ public class DeviceClientTest
     }
 
     // Tests_SRS_DEVICECLIENT_12_006: [If the client has been initialized to use TransportClient and the TransportClient is already opened the function shall throw an IOException.]
-    @Test (expected = IOException.class)
+    @Test (expected = UnsupportedOperationException.class)
     public void closeUseTransportClientAndCalledAfterTransportClientOpenedThrows() throws IOException, URISyntaxException
     {
         // arrange
@@ -535,7 +535,7 @@ public class DeviceClientTest
     }
 
     // Tests_SRS_DEVICECLIENT_12_005: [If the client has been initialized to use TransportClient and the TransportClient is already opened the function shall throw an IOException.]
-    @Test (expected = IOException.class)
+    @Test (expected = UnsupportedOperationException.class)
     public void closeNowUseTransportClientAndCalledAfterTransportClientOpenedThrows() throws IOException, URISyntaxException
     {
         // arrange

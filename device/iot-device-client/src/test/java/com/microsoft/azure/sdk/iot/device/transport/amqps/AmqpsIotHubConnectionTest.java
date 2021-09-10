@@ -630,9 +630,8 @@ public class AmqpsIotHubConnectionTest {
         }
     }
 
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_12_004: [The function shall TransportException throws if the waitLatch throws.]
-    @Test(expected = TransportException.class)
-    public void closeThrowsIfWaitLatchThrows() throws Exception
+    @Test
+    public void closeStillFreesReactorIfWaitLatchThrows() throws Exception
     {
         baseExpectations();
 
@@ -651,6 +650,13 @@ public class AmqpsIotHubConnectionTest {
         };
 
         connection.close();
+
+        new Verifications()
+        {
+            {
+                mockReactor.free();
+            }
+        };
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_012: [The function shall set the status of the AMQPS connection to DISCONNECTED.]
