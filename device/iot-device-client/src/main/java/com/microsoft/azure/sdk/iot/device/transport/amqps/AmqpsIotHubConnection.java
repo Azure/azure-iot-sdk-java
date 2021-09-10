@@ -636,7 +636,15 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         {
             log.trace("Device session for device {} opened, counting down the device sessions opening latch", deviceId);
             this.deviceSessionsOpenedLatches.get(deviceId).countDown();
-            this.listener.onMultiplexedDeviceSessionEstablished(this.connectionId, deviceId);
+
+            if (isMultiplexing)
+            {
+                // For non-multiplexing cases, the above logic for counting down the latch for the single device session
+                // will notify the open() thread that the reactor thread has successfully opened the device session.
+                // That will then execute the onConnectionEstablished callback on this same listener. Because of that,
+                // there is no listener callback to execute here for non-multiplexing cases.
+                this.listener.onMultiplexedDeviceSessionEstablished(this.connectionId, deviceId);
+            }
         }
         else
         {

@@ -1517,6 +1517,8 @@ public class IotHubTransport implements IotHubListener
 
             this.connectionStatus = newConnectionStatus;
 
+            this.deviceIOConnectionStatusChangeCallback.execute(newConnectionStatus, reason, throwable, null);
+
             //invoke connection status callbacks
             log.debug("Invoking connection status callbacks with new status details");
             invokeConnectionStateCallback(newConnectionStatus, reason);
@@ -1539,8 +1541,6 @@ public class IotHubTransport implements IotHubListener
             {
                 this.multiplexingStateCallback.execute(newConnectionStatus, reason, throwable, this.multiplexingStateCallbackContext);
             }
-
-            this.deviceIOConnectionStatusChangeCallback.execute(newConnectionStatus, reason, throwable, null);
         }
     }
 
