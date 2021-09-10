@@ -167,8 +167,7 @@ public class FileUploadInProgressTest
         assertFalse(result);
     }
 
-    /* Codes_SRS_FILEUPLOADINPROGRESS_21_007: [If the `task` is null, the isCancelled shall throws IOException.] */
-    @Test (expected = IOException.class)
+    @Test
     public void isCancelledThrows()
     {
         // arrange
@@ -178,7 +177,7 @@ public class FileUploadInProgressTest
                 mockIotHubEventCallback, context);
 
         // act
-        Deencapsulation.invoke(fileUploadInProgress, "isCancelled");
+        assertFalse((boolean) Deencapsulation.invoke(fileUploadInProgress, "isCancelled"));
     }
 
 }

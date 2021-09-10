@@ -204,6 +204,11 @@ public class InternalClient
         this.deviceIO.open(withRetry);
     }
 
+    /**
+     * Close the client.
+     *
+     * @throws IOException This exception is no longer thrown by this method.
+     */
     public void close() throws IOException
     {
         //noinspection StatementWithEmptyBody
@@ -215,6 +220,11 @@ public class InternalClient
         this.deviceIO.close();
     }
 
+    /**
+     * Close the client.
+     *
+     * @throws IOException This exception is no longer thrown by this method.
+     */
     public void closeNow() throws IOException
     {
         this.deviceIO.close();
