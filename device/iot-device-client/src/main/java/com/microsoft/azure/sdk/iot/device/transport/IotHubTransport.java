@@ -88,6 +88,7 @@ public class IotHubTransport implements IotHubListener
 
     private ScheduledExecutorService taskScheduler;
 
+    // state lock to prevent simultaneous close and reconnect operations. Also prevents multiple reconnect threads from executing at once
     final private Object reconnectionLock = new Object();
 
     // State lock used to communicate to the IotHubSendTask thread when a message needs to be sent or a callback needs to be invoked.
@@ -103,6 +104,9 @@ public class IotHubTransport implements IotHubListener
     private final ProxySettings proxySettings;
     private SSLContext sslContext;
     private final boolean isMultiplexing;
+
+    // Flag set when close() starts. Acts as a signal to any running reconnection logic to not try again.
+    private boolean isClosing;
 
     // Used to store the CorrelationCallbackMessage for a correlationId
     private final Map<String, CorrelatingMessageCallback> correlationCallbacks = new ConcurrentHashMap<>();
@@ -409,6 +413,8 @@ public class IotHubTransport implements IotHubListener
             throw new TransportException("Open cannot be called while transport is reconnecting");
         }
 
+        this.isClosing = false;
+
         // The default config is only null when someone creates a multiplexing client and opens it before
         // registering any devices to it. No need to check for SAS token expiry if no devices are registered yet.
         if (this.getDefaultConfig() != null)
@@ -487,39 +493,45 @@ public class IotHubTransport implements IotHubListener
             throw new IllegalArgumentException("reason cannot be null");
         }
 
-        this.cancelPendingPackets();
+        this.isClosing = true;
 
-        this.invokeCallbacks();
-
-        if (this.taskScheduler != null)
+        // Wait until no reconnection logic is taking place
+        synchronized (this.reconnectionLock)
         {
-            this.taskScheduler.shutdown();
-        }
+            this.cancelPendingPackets();
 
-        try
-        {
-            if (this.iotHubTransportConnection != null)
+            this.invokeCallbacks();
+
+            if (this.taskScheduler != null)
             {
-                this.iotHubTransportConnection.close();
-            }
-        }
-        finally
-        {
-            this.updateStatus(IotHubConnectionStatus.DISCONNECTED, reason, cause);
-
-            // Notify send thread to finish up so it doesn't survive this close
-            synchronized (this.sendThreadLock)
-            {
-                this.sendThreadLock.notifyAll();
+                this.taskScheduler.shutdown();
             }
 
-            // Notify receive thread to finish up so it doesn't survive this close
-            synchronized (this.receiveThreadLock)
+            try
             {
-                this.receiveThreadLock.notifyAll();
+                if (this.iotHubTransportConnection != null)
+                {
+                    this.iotHubTransportConnection.close();
+                }
             }
+            finally
+            {
+                this.updateStatus(IotHubConnectionStatus.DISCONNECTED, reason, cause);
 
-            log.debug("Client connection closed successfully");
+                // Notify send thread to finish up so it doesn't survive this close
+                synchronized (this.sendThreadLock)
+                {
+                    this.sendThreadLock.notifyAll();
+                }
+
+                // Notify receive thread to finish up so it doesn't survive this close
+                synchronized (this.receiveThreadLock)
+                {
+                    this.receiveThreadLock.notifyAll();
+                }
+
+                log.debug("Client connection closed successfully");
+            }
         }
     }
 
@@ -1218,6 +1230,12 @@ public class IotHubTransport implements IotHubListener
                 && transportException != null
                 && transportException.isRetryable())
         {
+            if (this.isClosing)
+            {
+                log.trace("Abandoning reconnection logic since this client has started closing. Releasing reconnectionLock");
+                return;
+            }
+
             log.trace("Attempting reconnect attempt {}", reconnectionAttempts);
             reconnectionAttempts++;
 
