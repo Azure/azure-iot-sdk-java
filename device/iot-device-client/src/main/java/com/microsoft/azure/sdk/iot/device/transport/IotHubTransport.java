@@ -493,6 +493,10 @@ public class IotHubTransport implements IotHubListener
             throw new IllegalArgumentException("reason cannot be null");
         }
 
+        // Set the flag outside of the synchronized block so that any currently
+        // running reconnection logic knows to give up when this flag is set to true.
+        // Then the rest of the close() code is in the synchronization block so that
+        // it waits for the reconnection logic to end before it starts.
         this.isClosing = true;
 
         // Wait until no reconnection logic is taking place
