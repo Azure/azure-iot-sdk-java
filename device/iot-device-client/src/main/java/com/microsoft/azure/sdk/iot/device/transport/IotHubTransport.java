@@ -479,10 +479,8 @@ public class IotHubTransport implements IotHubListener
      *
      * @param cause the cause of why this connection is closing, to be reported over connection status change callback
      * @param reason the reason to close this connection, to be reported over connection status change callback
-     *
-     * @throws DeviceClientException if an error occurs in closing the transport.
      */
-    public void close(IotHubConnectionStatusChangeReason reason, Throwable cause) throws DeviceClientException
+    public void close(IotHubConnectionStatusChangeReason reason, Throwable cause)
     {
         if (reason == null)
         {
@@ -498,26 +496,31 @@ public class IotHubTransport implements IotHubListener
             this.taskScheduler.shutdown();
         }
 
-        if (this.iotHubTransportConnection != null)
+        try
         {
-            this.iotHubTransportConnection.close();
+            if (this.iotHubTransportConnection != null)
+            {
+                this.iotHubTransportConnection.close();
+            }
         }
-
-        this.updateStatus(IotHubConnectionStatus.DISCONNECTED, reason, cause);
-
-        // Notify send thread to finish up so it doesn't survive this close
-        synchronized (this.sendThreadLock)
+        finally
         {
-            this.sendThreadLock.notifyAll();
-        }
+            this.updateStatus(IotHubConnectionStatus.DISCONNECTED, reason, cause);
 
-        // Notify receive thread to finish up so it doesn't survive this close
-        synchronized (this.receiveThreadLock)
-        {
-            this.receiveThreadLock.notifyAll();
-        }
+            // Notify send thread to finish up so it doesn't survive this close
+            synchronized (this.sendThreadLock)
+            {
+                this.sendThreadLock.notifyAll();
+            }
 
-        log.debug("Client connection closed successfully");
+            // Notify receive thread to finish up so it doesn't survive this close
+            synchronized (this.receiveThreadLock)
+            {
+                this.receiveThreadLock.notifyAll();
+            }
+
+            log.debug("Client connection closed successfully");
+        }
     }
 
     /**
@@ -1246,30 +1249,22 @@ public class IotHubTransport implements IotHubListener
 
         // reconnection may have failed, so check last retry decision, check for timeout, and check if last exception
         // was terminal
-        try
+        if (retryDecision != null && !retryDecision.shouldRetry())
         {
-            if (retryDecision != null && !retryDecision.shouldRetry())
-            {
-                log.debug("Reconnection was abandoned due to the retry policy");
-                this.close(IotHubConnectionStatusChangeReason.RETRY_EXPIRED, transportException);
-            }
-            else if (this.hasOperationTimedOut(reconnectionStartTimeMillis))
-            {
-                log.debug("Reconnection was abandoned due to the operation timeout");
-                this.close(
-                        IotHubConnectionStatusChangeReason.RETRY_EXPIRED,
-                        new DeviceOperationTimeoutException("Device operation for reconnection timed out"));
-            }
-            else if (transportException != null && !transportException.isRetryable())
-            {
-                log.error("Reconnection was abandoned due to encountering a non-retryable exception", transportException);
-                this.close(this.exceptionToStatusChangeReason(transportException), transportException);
-            }
+            log.debug("Reconnection was abandoned due to the retry policy");
+            this.close(IotHubConnectionStatusChangeReason.RETRY_EXPIRED, transportException);
         }
-        catch (DeviceClientException ex)
+        else if (this.hasOperationTimedOut(reconnectionStartTimeMillis))
         {
-            log.error("Encountered an exception while closing the client object, client instance should no longer be used as the state is unknown", ex);
-            this.updateStatus(IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.COMMUNICATION_ERROR, transportException);
+            log.debug("Reconnection was abandoned due to the operation timeout");
+            this.close(
+                    IotHubConnectionStatusChangeReason.RETRY_EXPIRED,
+                    new DeviceOperationTimeoutException("Device operation for reconnection timed out"));
+        }
+        else if (transportException != null && !transportException.isRetryable())
+        {
+            log.error("Reconnection was abandoned due to encountering a non-retryable exception", transportException);
+            this.close(this.exceptionToStatusChangeReason(transportException), transportException);
         }
     }
 
@@ -1517,6 +1512,8 @@ public class IotHubTransport implements IotHubListener
 
             this.connectionStatus = newConnectionStatus;
 
+            this.deviceIOConnectionStatusChangeCallback.execute(newConnectionStatus, reason, throwable, null);
+
             //invoke connection status callbacks
             log.debug("Invoking connection status callbacks with new status details");
             invokeConnectionStateCallback(newConnectionStatus, reason);
@@ -1539,8 +1536,6 @@ public class IotHubTransport implements IotHubListener
             {
                 this.multiplexingStateCallback.execute(newConnectionStatus, reason, throwable, this.multiplexingStateCallbackContext);
             }
-
-            this.deviceIOConnectionStatusChangeCallback.execute(newConnectionStatus, reason, throwable, null);
         }
     }
 
