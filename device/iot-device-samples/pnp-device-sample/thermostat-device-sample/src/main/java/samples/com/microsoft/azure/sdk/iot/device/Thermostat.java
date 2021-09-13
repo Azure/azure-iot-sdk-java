@@ -176,7 +176,7 @@ public class Thermostat
 
             deviceClient.startDeviceTwin(new TwinIotHubEventCallback(), null, dataCollector, null);
 
-            deviceClient.subscribeToWritablePropertiesEvents(new TargetTemperatureUpdateCallback(), null);
+            deviceClient.subscribeToWritablePropertiesEvent(new TargetTemperatureUpdateCallback(), null);
 
             deviceClient.getClientPropertiesAsync(new ClientPropertiesCallback(), null);
 
