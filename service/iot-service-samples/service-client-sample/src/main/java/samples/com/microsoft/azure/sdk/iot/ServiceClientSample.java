@@ -7,6 +7,7 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubDeviceMaximumQueueDepthExceededException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -27,7 +28,7 @@ public class ServiceClientSample
 
     private static final String connectionString = "[Connection string goes here]";
     private static final String deviceId = "[Device name goes here]";
-    
+
     /** Choose iotHubServiceClientProtocol */
     private static final IotHubServiceClientProtocol protocol = IotHubServiceClientProtocol.AMQPS;
 //  private static final IotHubServiceClientProtocol protocol = IotHubServiceClientProtocol.AMQPS_WS;
@@ -35,10 +36,10 @@ public class ServiceClientSample
     private static ServiceClient serviceClient = null;
     private static FeedbackReceiver feedbackReceiver = null;
     private static FileUploadNotificationReceiver fileUploadNotificationReceiver = null;
-    
+
     private static final int MAX_COMMANDS_TO_SEND = 5; // maximum commands to send in a loop
     private static final int RECEIVER_TIMEOUT = 10000; // Timeout in ms
- 
+
     /**
      * @param args Unused
      * @throws Exception if any exception occurs
@@ -56,14 +57,13 @@ public class ServiceClientSample
         {
             sendMultipleCommandsAndReadFromTheFeedbackReceiver();
         }
-        catch(UnsupportedEncodingException | ExecutionException | InterruptedException e)
+        catch(UnsupportedEncodingException | InterruptedException e)
         {
-           System.out.println("Exception:" + e.getMessage());
+            System.out.println("Exception:" + e.getMessage());
         }
 
         // Receive FileUploadNotification
-        CompletableFuture<FileUploadNotification> fileUploadNotificationCompletableFuture = fileUploadNotificationReceiver.receiveAsync(RECEIVER_TIMEOUT);
-        FileUploadNotification fileUploadNotification = fileUploadNotificationCompletableFuture.get();
+        FileUploadNotification fileUploadNotification = fileUploadNotificationReceiver.receive(RECEIVER_TIMEOUT);
 
         if (fileUploadNotification != null)
         {
@@ -93,74 +93,68 @@ public class ServiceClientSample
     protected static void openServiceClient() throws Exception
     {
         System.out.println("Creating ServiceClient...");
-        serviceClient = ServiceClient.createFromConnectionString(connectionString, protocol);
+        serviceClient = new ServiceClient(connectionString, protocol);
 
-        CompletableFuture<Void> future = serviceClient.openAsync();
-        future.get();
+        serviceClient.open();
         System.out.println("********* Successfully created an ServiceClient.");
     }
 
-    protected static void closeServiceClient() throws ExecutionException, InterruptedException, IOException
+    protected static void closeServiceClient() throws IOException
     {
         serviceClient.close();
 
-        CompletableFuture<Void> future = serviceClient.closeAsync();
-        future.get();
+        serviceClient.close();
         serviceClient = null;
         System.out.println("********* Successfully closed ServiceClient.");
     }
 
-    protected static void openFeedbackReceiver() throws ExecutionException, InterruptedException
+    protected static void openFeedbackReceiver() throws IOException
     {
         if (serviceClient != null)
         {
             feedbackReceiver = serviceClient.getFeedbackReceiver();
             if (feedbackReceiver != null)
             {
-                CompletableFuture<Void> future = feedbackReceiver.openAsync();
-                future.get();
+                feedbackReceiver.open();
                 System.out.println("********* Successfully opened FeedbackReceiver...");
             }
         }
     }
 
-    protected static void closeFeedbackReceiver() throws ExecutionException, InterruptedException
+    protected static void closeFeedbackReceiver() throws IOException
     {
-        CompletableFuture<Void> future = feedbackReceiver.closeAsync();
-        future.get();
+        feedbackReceiver.close();
         feedbackReceiver = null;
         System.out.println("********* Successfully closed FeedbackReceiver.");
     }
 
 
-    protected static void openFileUploadNotificationReceiver() throws ExecutionException, InterruptedException
+    protected static void openFileUploadNotificationReceiver() throws IOException
     {
         if (serviceClient != null)
         {
             fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver();
             if (fileUploadNotificationReceiver != null)
             {
-                CompletableFuture<Void> future = fileUploadNotificationReceiver.openAsync();
-                future.get();
+                fileUploadNotificationReceiver.open();
                 System.out.println("********* Successfully opened fileUploadNotificationReceiver...");
             }
         }
     }
 
-    protected static void closeFileUploadNotificationReceiver() throws ExecutionException, InterruptedException
+    protected static void closeFileUploadNotificationReceiver() throws IOException
     {
-        CompletableFuture<Void> future = fileUploadNotificationReceiver.closeAsync();
-        future.get();
+        fileUploadNotificationReceiver.close();
         fileUploadNotificationReceiver = null;
         System.out.println("********* Successfully closed fileUploadNotificationReceiver.");
     }
-    
-     protected static void sendMultipleCommandsAndReadFromTheFeedbackReceiver() throws ExecutionException, InterruptedException, UnsupportedEncodingException
-     {
+
+    protected static void sendMultipleCommandsAndReadFromTheFeedbackReceiver() throws InterruptedException, IOException, IotHubException
+    {
         List<CompletableFuture<Void>> futureList = new ArrayList<>();
         Map<String, String> propertiesToSend = new HashMap<>();
         String commandMessage = "Cloud to device message: ";
-        
+
         System.out.println("sendMultipleCommandsAndReadFromTheFeedbackReceiver: Send count is : " + MAX_COMMANDS_TO_SEND);
 
         for (int i = 0; i < MAX_COMMANDS_TO_SEND; i++)
@@ -178,41 +172,19 @@ public class ServiceClientSample
             messageToSend.setProperties(propertiesToSend);
 
             // send the message
-            CompletableFuture<Void> future = serviceClient.sendAsync(deviceId, messageToSend);
-            futureList.add(future);
-
+            serviceClient.send(deviceId, messageToSend);
         }
 
-        System.out.println("Waiting for all sends to be completed...");
-        for (CompletableFuture<Void> future : futureList)
-        {
-            try
-            {
-                future.get();
-            }
-            catch (ExecutionException e)
-            {
-                if (e.getCause() instanceof  IotHubDeviceMaximumQueueDepthExceededException)
-                {
-                    System.out.println("Maximum queue depth reached.");
-                }
-                else
-                {
-                    System.out.println("Exception: " + e.getMessage());
-                }
-            }
-        }
         System.out.println("All sends completed !");
 
         System.out.println("Waiting for the feedback...");
-        CompletableFuture<FeedbackBatch> future = feedbackReceiver.receiveAsync(); // Default timeout is 60 seconds. [DEFAULT_TIMEOUT_MS = 60000]
-        FeedbackBatch feedbackBatch = future.get(); 
+        FeedbackBatch feedbackBatch = feedbackReceiver.receive(); // Default timeout is 60 seconds. [DEFAULT_TIMEOUT_MS = 60000]
 
         if (feedbackBatch != null) // check if any feedback was received
         {
             System.out.println(" Feedback received, feedback time: " + feedbackBatch.getEnqueuedTimeUtc());
             System.out.println(" Record size: " + feedbackBatch.getRecords().size());
-            
+
             for (int i=0; i < feedbackBatch.getRecords().size(); i++)
             {
                 System.out.println(" Message Id : " + feedbackBatch.getRecords().get(i).getOriginalMessageId());

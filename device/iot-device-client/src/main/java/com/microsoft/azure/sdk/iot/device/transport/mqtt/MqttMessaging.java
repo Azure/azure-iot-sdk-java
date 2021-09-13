@@ -70,7 +70,7 @@ public class MqttMessaging extends Mqtt
         }
     }
 
-    public void stop() throws TransportException
+    public void stop()
     {
         this.disconnect();
     }

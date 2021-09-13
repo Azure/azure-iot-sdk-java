@@ -139,10 +139,8 @@ abstract public class Mqtt implements MqttCallback
 
     /**
      * Method to disconnect to mqtt broker connection.
-     *
-     * @throws TransportException if failed to ends the mqtt connection.
      */
-    void disconnect() throws TransportException
+    void disconnect()
     {
         try
         {
@@ -157,13 +155,27 @@ abstract public class Mqtt implements MqttCallback
                 }
 
                 log.debug("Sent MQTT DISCONNECT packet was acknowledged");
-                this.mqttAsyncClient.close();
             }
         }
         catch (MqttException e)
         {
-            log.warn("Exception encountered while sending MQTT DISCONNECT packet", e);
-            throw PahoExceptionTranslator.convertToMqttException(e, "Unable to disconnect");
+            // If the SDK's disconnect message doesn't make it to the service, just clean up the local resources.
+            // The service will eventually figure out that the connection was lost since the keep-alive pings stop.
+            TransportException transportException = PahoExceptionTranslator.convertToMqttException(e, "Unable to disconnect");
+            log.warn("Exception encountered while sending MQTT DISCONNECT packet. Forcefully closing the connection.", transportException);
+        }
+        finally
+        {
+            try
+            {
+                this.mqttAsyncClient.close();
+            }
+            catch (MqttException ex)
+            {
+                // As per the documentation for mqttAsyncClient.close() this exception is only thrown if the client is already
+                // closed. No need to re-attempt anything here.
+                log.debug("Mqtt client was already closed, so ignoring the thrown exception", ex);
+            }
         }
     }
 
@@ -193,6 +205,8 @@ abstract public class Mqtt implements MqttCallback
 
             byte[] payload = message.getBytes();
 
+            // Wait until either the number of in flight messages is below the limit before publishing another message
+            // Or wait until the connection is lost so the message can be requeued for later
             while (this.mqttAsyncClient.getPendingDeliveryTokens().length >= MAX_IN_FLIGHT_COUNT)
             {
                 //noinspection BusyWait
@@ -200,7 +214,7 @@ abstract public class Mqtt implements MqttCallback
 
                 if (!this.mqttAsyncClient.isConnected())
                 {
-                    TransportException transportException = new TransportException("Cannot publish when mqtt client is holding 10 tokens and is disconnected");
+                    TransportException transportException = new TransportException("Cannot publish when mqtt client is holding " + MAX_IN_FLIGHT_COUNT + " tokens and is disconnected");
                     transportException.setRetryable(true);
                     throw transportException;
                 }
@@ -321,14 +335,7 @@ abstract public class Mqtt implements MqttCallback
 
         log.warn("Mqtt connection lost", throwable);
 
-        try
-        {
-            this.disconnect();
-        }
-        catch (TransportException e)
-        {
-            ex = e;
-        }
+        this.disconnect();
 
         if (this.listener != null)
         {
