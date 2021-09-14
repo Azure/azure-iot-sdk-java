@@ -1701,7 +1701,7 @@ public class IotHubTransport implements IotHubListener
             {
                 Message message = packet.getMessage();
                 String correlationId = message.getCorrelationId();
-                if (!correlationCallbacks.containsKey(correlationId))
+                if (correlationId != null && !correlationCallbacks.containsKey(correlationId))
                 {
                     correlationCallbacks.put(correlationId, message.getCorrelatingMessageCallback());
                     if (message.getCorrelatingMessageCallbackContext() != null)
