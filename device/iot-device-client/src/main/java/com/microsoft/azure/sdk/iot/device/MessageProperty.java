@@ -31,8 +31,6 @@ public final class MessageProperty {
     public static final String IOTHUB_SECURITY_INTERFACE_ID = "iothub-interface-id";
     public static final String IOTHUB_SECURITY_INTERFACE_ID_VALUE = "urn:azureiot:Security:SecurityAgent:1";
 
-
-
     static {
         HashSet<String> reservedPropertyNames = new HashSet<>();
         reservedPropertyNames.add("iothub-enqueuedtime");
