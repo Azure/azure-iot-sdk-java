@@ -191,7 +191,7 @@ public class DeviceMethod
             IotHubTransportMessage subscribeMessage = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_METHODS);
             subscribeMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
             subscribeMessage.setConnectionDeviceId(this.config.getDeviceId());
-            this.deviceIO.sendEventAsync(subscribeMessage, deviceMethodRequestMessageCallback, null, this.config.getDeviceId());
+            this.deviceIO.sendEventAsync(subscribeMessage, new deviceMethodRequestMessageCallback(), null, this.config.getDeviceId());
         }
     }
 }
