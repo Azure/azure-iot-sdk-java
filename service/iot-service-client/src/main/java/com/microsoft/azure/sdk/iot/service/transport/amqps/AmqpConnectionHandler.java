@@ -10,9 +10,9 @@ import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.proton.transport.proxy.ProxyHandler;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyHandlerImpl;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
+import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.ErrorLoggingBaseHandlerWithCleanup;
-import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.Tools;
@@ -40,6 +40,10 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
     private static final String WEBSOCKET_SUB_PROTOCOL = "AMQPWSB10";
     private static final int AMQPS_PORT = 5671;
     private static final int AMQPS_WS_PORT = 443;
+    private static final String WEB_SOCKET_PATH = "/$iothub/websocket";
+    private static final String WEB_SOCKET_SUB_PROTOCOL = "AMQPWSB10";
+    private static final String WEB_SOCKET_QUERY = "iothub-no-client-cert=true";
+    private static final int MAX_MESSAGE_PAYLOAD_SIZE = 256 * 1024; //max IoT Hub message size is 256 kb, so amqp websocket layer should buffer at most that much space
 
     private Exception savedException;
     private boolean connectionOpenedRemotely;
@@ -184,9 +188,9 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
         {
             if (this.iotHubServiceClientProtocol == IotHubServiceClientProtocol.AMQPS_WS)
             {
-                WebSocketImpl webSocket = new WebSocketImpl();
-                webSocket.configure(this.hostName, WEBSOCKET_PATH, AMQPS_WS_PORT, WEBSOCKET_SUB_PROTOCOL, null, null);
-                ((TransportInternal)transport).addTransportLayer(webSocket);
+                WebSocketImpl webSocket = new WebSocketImpl(MAX_MESSAGE_PAYLOAD_SIZE);
+                webSocket.configure(this.hostName, WEB_SOCKET_PATH, WEB_SOCKET_QUERY, 443, WEB_SOCKET_SUB_PROTOCOL, null, null);
+                ((TransportInternal) transport).addTransportLayer(webSocket);
             }
 
             // Note that this does not mean that the connection will not be authenticated. This simply defers authentication
