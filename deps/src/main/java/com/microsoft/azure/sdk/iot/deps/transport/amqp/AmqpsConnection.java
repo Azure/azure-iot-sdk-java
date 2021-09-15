@@ -35,7 +35,7 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
     private static final String WEB_SOCKET_PATH = "/$iothub/websocket";
     private static final String WEB_SOCKET_SUB_PROTOCOL = "AMQPWSB10";
     private static final String WEB_SOCKET_QUERY = "iothub-no-client-cert=true";
-    private static final int MAX_MESSAGE_PAYLOAD_SIZE = 256 * 1024; //max IoT Hub message size is 256 kb, so amqp websocket layer should buffer at most that much space
+    private static final int MAX_MESSAGE_PAYLOAD_SIZE = 256 * 1024; //max message size is 256 kb, so amqp websocket layer should buffer at most that much space
 
     private int linkCredit;
 
