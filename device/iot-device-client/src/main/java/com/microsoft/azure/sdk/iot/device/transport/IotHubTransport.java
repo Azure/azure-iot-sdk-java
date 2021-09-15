@@ -226,7 +226,7 @@ public class IotHubTransport implements IotHubListener
             try
             {
                 String correlationId = message.getCorrelationId();
-                if (correlationId != null && correlationCallbacks.containsKey(correlationId))
+                if (!correlationId.isEmpty())
                 {
                     Object context = correlationCallbackContexts.get(correlationId);
                     correlationCallbacks.get(correlationId).onRequestAcknowledged(packet, context, e);
@@ -242,7 +242,7 @@ public class IotHubTransport implements IotHubListener
             try
             {
                 String correlationId = message.getCorrelationId();
-                if (correlationId != null && correlationCallbacks.containsKey(correlationId))
+                if (!correlationId.isEmpty())
                 {
                     Object context = correlationCallbackContexts.get(correlationId);
                     correlationCallbacks.get(correlationId).onUnknownMessageAcknowledged(message, context, e);
@@ -278,7 +278,7 @@ public class IotHubTransport implements IotHubListener
             if (message != null)
             {
                 String correlationId = message.getCorrelationId();
-                if (correlationId != null && correlationCallbacks.containsKey(correlationId))
+                if (!correlationId.isEmpty())
                 {
                     Object context = correlationCallbackContexts.get(correlationId);
                     correlationCallbacks.get(correlationId).onResponseReceived(message, context, e);
@@ -594,7 +594,7 @@ public class IotHubTransport implements IotHubListener
                     {
                         String correlationId = message.getCorrelationId();
 
-                        if (correlationId != null && correlationCallbacks.containsKey(correlationId))
+                        if (!correlationId.isEmpty())
                         {
                             Object context = correlationCallbackContexts.get(correlationId);
                             correlationCallbacks.get(correlationId).onRequestSent(message, packet, context);
@@ -1697,18 +1697,23 @@ public class IotHubTransport implements IotHubListener
     {
         try
         {
-            if (packet != null && packet.getMessage() != null && packet.getMessage().getCorrelatingMessageCallback() != null)
+            if (packet != null)
             {
                 Message message = packet.getMessage();
-                String correlationId = message.getCorrelationId();
-                if (correlationId != null && !correlationCallbacks.containsKey(correlationId))
+                if (message != null)
                 {
-                    correlationCallbacks.put(correlationId, message.getCorrelatingMessageCallback());
-                    if (message.getCorrelatingMessageCallbackContext() != null)
+                    String correlationId = message.getCorrelationId();
+                    CorrelatingMessageCallback correlationCallback = message.getCorrelatingMessageCallback();
+                    if (!correlationId.isEmpty() && correlationCallback != null)
                     {
-                        correlationCallbackContexts.put(correlationId, message.getCorrelatingMessageCallbackContext());
+                        correlationCallbacks.put(correlationId, correlationCallback);
+                        Object correlationCallbackContext = message.getCorrelatingMessageCallbackContext();
+                        if (correlationCallbackContext != null)
+                        {
+                            correlationCallbackContexts.put(correlationId, correlationCallbackContext);
+                        }
+                        correlationCallback.onRequestQueued(message, packet, correlationCallbackContext);
                     }
-                    correlationCallbacks.get(correlationId).onRequestQueued(message, packet, correlationCallbackContexts.get(correlationId));
                 }
             }
         }
