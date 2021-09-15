@@ -36,8 +36,6 @@ import java.util.Objects;
 @Slf4j
 public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup implements CbsSessionStateCallback
 {
-    private static final String WEBSOCKET_PATH = "/$iothub/websocket";
-    private static final String WEBSOCKET_SUB_PROTOCOL = "AMQPWSB10";
     private static final int AMQPS_PORT = 5671;
     private static final int AMQPS_WS_PORT = 443;
     private static final String WEB_SOCKET_PATH = "/$iothub/websocket";
@@ -189,7 +187,7 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
             if (this.iotHubServiceClientProtocol == IotHubServiceClientProtocol.AMQPS_WS)
             {
                 WebSocketImpl webSocket = new WebSocketImpl(MAX_MESSAGE_PAYLOAD_SIZE);
-                webSocket.configure(this.hostName, WEB_SOCKET_PATH, WEB_SOCKET_QUERY, 443, WEB_SOCKET_SUB_PROTOCOL, null, null);
+                webSocket.configure(this.hostName, WEB_SOCKET_PATH, WEB_SOCKET_QUERY, AMQPS_WS_PORT, WEB_SOCKET_SUB_PROTOCOL, null, null);
                 ((TransportInternal) transport).addTransportLayer(webSocket);
             }
 

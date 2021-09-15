@@ -255,7 +255,7 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
                 result = mockedProxyHandlerImpl;
                 mockedProxyImpl.configure(anyString, (Map<String, String>) any, mockedProxyHandlerImpl, transportInternal);
                 transportInternal.addTransportLayer(mockedProxyImpl);
-                new WebSocketImpl();
+                new WebSocketImpl(anyInt);
                 result = webSocket;
                 webSocket.configure(anyString, anyString, anyString, 443, anyString, null, null);
                 transportInternal.addTransportLayer(webSocket);

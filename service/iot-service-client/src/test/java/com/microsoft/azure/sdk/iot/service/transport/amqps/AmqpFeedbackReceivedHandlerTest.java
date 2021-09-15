@@ -184,7 +184,7 @@ public class AmqpFeedbackReceivedHandlerTest
                 result = connection;
                 connection.getTransport();
                 result = transportInternal;
-                new WebSocketImpl();
+                new WebSocketImpl(anyInt);
                 result = webSocket;
                 webSocket.configure(anyString, anyString, anyString, 443, anyString, null, null);
                 transportInternal.addTransportLayer(webSocket);
