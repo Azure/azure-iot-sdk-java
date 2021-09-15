@@ -7,5 +7,5 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 
 public interface DeviceCommandCallback
 {
-    DeviceMethodData call(String componentname, String methodName, Object methodData, Object context);
+    DeviceCommandData call(String componentname, String methodName, Object methodData, Object context);
 }

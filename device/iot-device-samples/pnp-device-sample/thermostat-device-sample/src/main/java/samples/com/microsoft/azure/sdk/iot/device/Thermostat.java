@@ -7,10 +7,7 @@ import com.google.gson.Gson;
 import com.microsoft.azure.sdk.iot.deps.convention.*;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
-import com.microsoft.azure.sdk.iot.device.convention.ClientProperties;
-import com.microsoft.azure.sdk.iot.device.convention.ClientPropertyCollection;
-import com.microsoft.azure.sdk.iot.device.convention.TelemetryMessage;
-import com.microsoft.azure.sdk.iot.device.convention.WritablePropertiesRequestsCallback;
+import com.microsoft.azure.sdk.iot.device.convention.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
@@ -182,7 +179,7 @@ public class Thermostat
 
             log.debug("Set handler to receive \"getMaxMinReport\" command.");
             String methodName = "getMaxMinReport";
-            deviceClient.subscribeToDeviceMethod(new GetMaxMinReportMethodCallback(), methodName, new MethodIotHubEventCallback(), methodName);
+            deviceClient.subscribeToDeviceComamnds(new GetMaxMinReportMethodCallback(), methodName, new MethodIotHubEventCallback(), methodName);
 
             new Thread(new Runnable()
             {
@@ -359,19 +356,18 @@ public class Thermostat
          * The callback to handle "getMaxMinReport" command.
          * This method will returns the max, min and average temperature from the specified time to the current time.
          */
-        private static class GetMaxMinReportMethodCallback implements DeviceMethodCallback
+        private static class GetMaxMinReportMethodCallback implements DeviceCommandCallback
         {
             final String commandName = "getMaxMinReport";
 
             @SneakyThrows
             @Override
-            public DeviceMethodData call(String methodName, Object methodData, Object context)
+            public DeviceCommandData call(String componentName, String methodName, Object methodData, Object context)
             {
-                if (methodName.equalsIgnoreCase(commandName))
+                // In this instance we will deal with the default component
+                if (componentName.isEmpty() && methodName.equalsIgnoreCase(commandName))
                 {
-
-                    String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
-                    Date since = getCommandRequestValue(jsonRequest, Date.class);
+                    Date since = (Date)methodData;
                     log.debug("Command: Received - Generating min, max, avg temperature report since {}.", since);
 
                     double runningTotal = 0;
@@ -388,37 +384,38 @@ public class Thermostat
                     if (filteredReadings.size() > 1)
                     {
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-                        double maxTemp = Collections.max(filteredReadings.values());
-                        double minTemp = Collections.min(filteredReadings.values());
-                        double avgTemp = runningTotal / filteredReadings.size();
-                        String startTime = sdf.format(Collections.min(filteredReadings.keySet()));
-                        String endTime = sdf.format(Collections.max(filteredReadings.keySet()));
+                        double maxTempToSend = Collections.max(filteredReadings.values());
+                        double minTempToSend = Collections.min(filteredReadings.values());
+                        double avgTempToSend = runningTotal / filteredReadings.size();
+                        String startTimeToSend = sdf.format(Collections.min(filteredReadings.keySet()));
+                        String endTimeToSend = sdf.format(Collections.max(filteredReadings.keySet()));
 
-                        String responsePayload = String.format(
-                                "{\"maxTemp\": %.1f, \"minTemp\": %.1f, \"avgTemp\": %.1f, \"startTime\": \"%s\", \"endTime\": \"%s\"}",
-                                maxTemp,
-                                minTemp,
-                                avgTemp,
-                                startTime,
-                                endTime);
+                        // This class will be serialized by the PayloadConvention
+                        Object responsePayload = new Object() {
+                            public double maxTemp1 = Collections.max(filteredReadings.values());
+                            public double minTemp = Collections.min(filteredReadings.values());
+                            public double avgTemp = avgTempToSend;
+                            public String startTime = sdf.format(Collections.min(filteredReadings.keySet()));
+                            public String endTime = sdf.format(Collections.max(filteredReadings.keySet()));
+                        };
 
                         log.debug("Command: MaxMinReport since {}: \"maxTemp\": {}°C, \"minTemp\": {}°C, \"avgTemp\": {}°C, \"startTime\": {}, \"endTime\": {}",
                                 since,
-                                maxTemp,
-                                minTemp,
-                                avgTemp,
-                                startTime,
-                                endTime);
+                                maxTempToSend,
+                                minTempToSend,
+                                avgTempToSend,
+                                startTimeToSend,
+                                endTimeToSend);
 
-                        return new DeviceMethodData(StatusCode.COMPLETED.value, responsePayload);
+                        return new DeviceCommandData(StatusCode.COMPLETED.value, responsePayload);
                     }
 
                     log.debug("Command: No relevant readings found since {}, cannot generate any report.", since);
-                    return new DeviceMethodData(StatusCode.NOT_FOUND.value, null);
+                    return new DeviceCommandData(StatusCode.NOT_FOUND.value, null);
                 }
 
                 log.error("Command: Unknown command {} invoked from service.", methodName);
-                return new DeviceMethodData(StatusCode.NOT_FOUND.value, null);
+                return new DeviceCommandData(StatusCode.NOT_FOUND.value, null);
             }
         }
 
@@ -495,13 +492,6 @@ public class Thermostat
             collection.put(propertyName, maxTemperature);
             deviceClient.updateClientPropertiesAsync(collection, null, null);
             log.debug("Property: Update - {\"{}\": {}°C} is {}.", propertyName, maxTemperature, StatusCode.COMPLETED);
-        }
-
-        @SuppressWarnings("SameParameterValue")
-        // For this sample, type is always Date.class, but it can be other service-allowed values as well.
-        private static <T> T getCommandRequestValue(@NonNull String jsonPayload, @NonNull Class<T> type)
-        {
-            return gson.fromJson(jsonPayload, type);
         }
     }
 }

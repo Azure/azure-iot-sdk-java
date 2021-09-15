@@ -62,7 +62,6 @@ public class Message
     /**
      * Used in message responses and feedback.
      */
-    @Getter
     @Setter
     private String correlationId;
 
@@ -319,6 +318,21 @@ public class Message
 
         // Codes_SRS_MESSAGE_11_032: [The function shall return the value associated with the message property name, where the name can be either the HTTPS or AMQPS property name.]
         return messageProperty.getValue();
+    }
+
+    /**
+     * Getter for the correlationId property
+     * @return The property value
+     */
+    public String getCorrelationId()
+    {
+        // Codes_SRS_MESSAGE_34_045: [The function shall return the message's correlation ID.]
+        if (correlationId == null)
+        {
+            return "";
+        }
+
+        return correlationId;
     }
 
     /**
