@@ -75,7 +75,7 @@ public class TwinMetadata {
      * @param lastUpdatedVersion the {@code Integer} with the version of the last update on the entity. It can be {@code null}.
      * @throws IllegalArgumentException If no valid parameter was provide and the class will be empty, or if the DateTime is invalid.
      */
-    TwinMetadata(String lastUpdated, Integer lastUpdatedVersion, String lastUpdatedBy, String lastUpdatedByDigest) {
+    protected TwinMetadata(String lastUpdated, Integer lastUpdatedVersion, String lastUpdatedBy, String lastUpdatedByDigest) {
         if (!Tools.isNullOrEmpty(lastUpdated)) {
             /* SRS_TWIN_METADATA_21_001: [The constructor shall parse the provided `lastUpdated` String to the Date and store it as the TwinMetadata lastUpdated.] */
             /* SRS_TWIN_METADATA_21_002: [The constructor shall throw IllegalArgumentException if it cannot convert the provided `lastUpdated` String to Date.] */
@@ -106,7 +106,7 @@ public class TwinMetadata {
      *
      * @param metadata the original {@code TwinMetadata} to copy.
      */
-    TwinMetadata(TwinMetadata metadata) {
+    protected TwinMetadata(TwinMetadata metadata) {
         /* SRS_TWIN_METADATA_21_010: [The constructor shall throw IllegalArgumentException if the provided metadata is null.] */
         if (metadata == null) {
             throw new IllegalArgumentException("metadata to copy cannot be null");

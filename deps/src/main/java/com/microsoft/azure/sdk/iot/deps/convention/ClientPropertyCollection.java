@@ -1,15 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.device.convention;
+package com.microsoft.azure.sdk.iot.deps.convention;
 
-import com.microsoft.azure.sdk.iot.deps.convention.ConventionConstants;
-import com.microsoft.azure.sdk.iot.deps.convention.PayloadConvention;
-import com.microsoft.azure.sdk.iot.deps.convention.ReflectionUtility;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.deps.util.Tools;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
-import com.microsoft.azure.sdk.iot.device.Message;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -45,13 +40,13 @@ public class ClientPropertyCollection extends PayloadCollection
     }
 
     /**
-     * Converts a Message to a client property collection.
+     * Converts a Message payload to a client property collection.
      */
-    public ClientPropertyCollection(Message clientPropertyMessage, PayloadConvention convention, boolean createWritablePropertyCollection)
+    public ClientPropertyCollection(byte[] clientPropertyMessage, PayloadConvention convention, boolean createWritablePropertyCollection)
     {
         super();
         Convention = convention;
-        Map<String, Object> collectionToCopy = Convention.getObjectFromBytes(clientPropertyMessage.getBytes(), ClientPropertyCollection.class);
+        Map<String, Object> collectionToCopy = Convention.getObjectFromBytes(clientPropertyMessage, ClientPropertyCollection.class);
         if (createWritablePropertyCollection)
         {
             putAllAsWritableStart(collectionToCopy);
@@ -146,21 +141,6 @@ public class ClientPropertyCollection extends PayloadCollection
         }
 
         return last;
-    }
-
-    /**
-     * Gets the entries of the ClientPropertyCollection as a set of Properties to be sent to the IoT hub service.
-     *
-     * @return A set of properties
-     */
-    public Set<Property> getCollectionAsSetOfProperty()
-    {
-        HashSet<Property> toReturn = new HashSet<>();
-        for (Map.Entry<String, Object> entry : this.entrySet())
-        {
-            toReturn.add(new Property(entry.getKey(), entry.getValue()));
-        }
-        return toReturn;
     }
 
     /**

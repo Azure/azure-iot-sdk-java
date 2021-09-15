@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.convention;
 
+import com.microsoft.azure.sdk.iot.deps.convention.PayloadCollection;
 import com.microsoft.azure.sdk.iot.deps.convention.PayloadConvention;
 import com.microsoft.azure.sdk.iot.device.Message;
 import lombok.Getter;
@@ -18,7 +19,7 @@ public class TelemetryMessage extends Message
      */
     @Getter
     @Setter
-    PayloadCollection telemetry;
+    PayloadCollection telemetry = new PayloadCollection();
 
     @Override
     public byte[] getBytes()

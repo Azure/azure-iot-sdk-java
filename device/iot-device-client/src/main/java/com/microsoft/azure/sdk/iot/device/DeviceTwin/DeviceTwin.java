@@ -9,7 +9,7 @@ import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.convention.ClientProperties;
 import com.microsoft.azure.sdk.iot.device.convention.ClientPropertiesCallback;
-import com.microsoft.azure.sdk.iot.device.convention.ClientPropertyCollection;
+import com.microsoft.azure.sdk.iot.deps.convention.ClientPropertyCollection;
 import com.microsoft.azure.sdk.iot.device.convention.WritablePropertiesRequestsCallback;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -134,7 +134,7 @@ public class DeviceTwin
                             OnDesiredPropertyChanged(twinState.getDesiredProperty());
                             if (writablePropertiesRequestsCallback != null)
                             {
-                                writablePropertiesRequestsCallback.execute(new ClientPropertyCollection(dtMessage, config.getPayloadConvention(), true), writablePropertiesRequestsContext);
+                                writablePropertiesRequestsCallback.execute(new ClientPropertyCollection(dtMessage.getBytes(), config.getPayloadConvention(), true), writablePropertiesRequestsContext);
                             }
                         }
                         break;

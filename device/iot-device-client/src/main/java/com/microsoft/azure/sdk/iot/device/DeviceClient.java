@@ -775,7 +775,7 @@ public final class DeviceClient extends InternalClient implements Closeable
 
     /**
      * Subscribes to device commands. Commands will make use of the {@link com.microsoft.azure.sdk.iot.deps.convention.PayloadSerializer}
-     * which will allow the {@paramref deviceCommandCallback} to receieve an object rather than bytes.
+     * which will allow the {@code deviceCommandCallback} to receieve an object rather than bytes.
      *
      * @param deviceCommandCallback Callback on which device commands shall be invoked. Cannot be {@code null}.
      * @param deviceCommandCallbackContext Context for device command callback. Can be {@code null}.

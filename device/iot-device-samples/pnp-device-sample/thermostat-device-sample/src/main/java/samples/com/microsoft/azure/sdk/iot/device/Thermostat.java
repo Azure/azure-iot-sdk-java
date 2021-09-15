@@ -4,6 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot.device;
 
 import com.google.gson.Gson;
+import com.google.gson.annotations.Expose;
 import com.microsoft.azure.sdk.iot.deps.convention.*;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
@@ -11,7 +12,6 @@ import com.microsoft.azure.sdk.iot.device.convention.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
-import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -42,8 +41,8 @@ public class Thermostat
     }
 
     // DTDL interface used: https://github.com/Azure/iot-plugandplay-models/blob/main/dtmi/com/example/thermostat-1.json
-    private static final String deviceConnectionString = System.getenv("IOTHUB_DEVICE_CONNECTION_STRING");
-    private static final String deviceSecurityType = System.getenv("IOTHUB_DEVICE_SECURITY_TYPE");
+    private static final String deviceConnectionString = "HostName=ghissue2163.azure-devices.net;DeviceId=pnpclient;SharedAccessKey=vvJZpP86pzWsaPYO+cY5//HpMaAcz772Mvg+44WbvpY=";//System.getenv("IOTHUB_DEVICE_CONNECTION_STRING");
+    private static final String deviceSecurityType = "connectionString"; //System.getenv("IOTHUB_DEVICE_SECURITY_TYPE");
     private static final String MODEL_ID = "dtmi:com:example:Thermostat;1";
 
     // Environmental variables for Dps
@@ -59,7 +58,6 @@ public class Thermostat
     private static final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
 
     private static final Random random = new Random();
-    private static final Gson gson = new Gson();
 
     // HashMap to hold the temperature updates sent over.
     // NOTE: Memory constrained device should leverage storage capabilities of an external service to store this information and perform computation.
@@ -102,12 +100,10 @@ public class Thermostat
         {
             for (Map.Entry<? extends String, ?> entry : responseStatus.getReportedFromClient().entrySet())
             {
-                {
                     if (entry.getKey() == "NAME")
                     {
                         Integer i = (Integer) entry.getValue();
                     }
-                }
             }
         }
 
@@ -356,18 +352,32 @@ public class Thermostat
          * The callback to handle "getMaxMinReport" command.
          * This method will returns the max, min and average temperature from the specified time to the current time.
          */
-        private static class GetMaxMinReportMethodCallback implements DeviceCommandCallback
+        private static class GetMaxMinReportMethodCallback extends DeviceCommandCallback
         {
             final String commandName = "getMaxMinReport";
 
+            private class commandRequest {
+                Date since;
+            }
+
+            private class commandResponse {
+                public Date since;
+                public double maxTemp;
+                public double minTemp;
+                public double avgTemp;
+                public String startTime;
+                public String endTime;
+            }
+
             @SneakyThrows
             @Override
-            public DeviceCommandData call(String componentName, String methodName, Object methodData, Object context)
+            public DeviceCommandData call(String componentName, String methodName)
             {
                 // In this instance we will deal with the default component
-                if (componentName.isEmpty() && methodName.equalsIgnoreCase(commandName))
+                if (componentName == null  && methodName.equalsIgnoreCase(commandName))
                 {
-                    Date since = (Date)methodData;
+                    commandRequest request = this.GetData(commandRequest.class);
+                    Date since = request.since;
                     log.debug("Command: Received - Generating min, max, avg temperature report since {}.", since);
 
                     double runningTotal = 0;
@@ -391,13 +401,13 @@ public class Thermostat
                         String endTimeToSend = sdf.format(Collections.max(filteredReadings.keySet()));
 
                         // This class will be serialized by the PayloadConvention
-                        Object responsePayload = new Object() {
-                            public double maxTemp1 = Collections.max(filteredReadings.values());
-                            public double minTemp = Collections.min(filteredReadings.values());
-                            public double avgTemp = avgTempToSend;
-                            public String startTime = sdf.format(Collections.min(filteredReadings.keySet()));
-                            public String endTime = sdf.format(Collections.max(filteredReadings.keySet()));
-                        };
+                        commandResponse responsePayload = new commandResponse();
+                        responsePayload.since = since;
+                        responsePayload.maxTemp = Collections.max(filteredReadings.values());
+                        responsePayload.minTemp = Collections.min(filteredReadings.values());
+                        responsePayload.avgTemp = avgTempToSend;
+                        responsePayload.startTime = sdf.format(Collections.min(filteredReadings.keySet()));
+                        responsePayload.endTime = sdf.format(Collections.max(filteredReadings.keySet()));
 
                         log.debug("Command: MaxMinReport since {}: \"maxTemp\": {}°C, \"minTemp\": {}°C, \"avgTemp\": {}°C, \"startTime\": {}, \"endTime\": {}",
                                 since,
@@ -478,7 +488,7 @@ public class Thermostat
 
             TelemetryMessage message = new TelemetryMessage();
             message.getTelemetry().put(telemetryName, temperature);
-            deviceClient.sendTelemetryAsync(message, new MessageIotHubEventCallback(), null);
+            deviceClient.sendTelemetryAsync(message, new MessageIotHubEventCallback(), message);
 
             log.debug("Telemetry: Sent - {\"{}\": {}°C} with message Id {}.", telemetryName, temperature, message.getMessageId());
             temperatureReadings.put(new Date(), temperature);

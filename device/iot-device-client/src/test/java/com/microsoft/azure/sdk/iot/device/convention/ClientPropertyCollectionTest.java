@@ -5,12 +5,11 @@ import com.microsoft.azure.sdk.iot.deps.convention.DefaultPayloadConvention;
 import com.microsoft.azure.sdk.iot.deps.convention.GsonWritablePropertyResponse;
 import com.microsoft.azure.sdk.iot.deps.convention.WritablePropertyResponse;
 import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.device.convention.ClientPropertyCollection;
+import com.microsoft.azure.sdk.iot.deps.convention.ClientPropertyCollection;
 import lombok.Builder;
 import lombok.Data;
 import org.junit.Test;
 
-import javax.swing.text.html.parser.Parser;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -372,7 +371,7 @@ public class ClientPropertyCollectionTest
         Message msg = new Message(FULL_RESPONSE_WITH_COMPONENT);
 
         // Test the constructor
-        ClientPropertyCollection propCollectionFromConstructor = new ClientPropertyCollection(msg, DefaultPayloadConvention.getInstance(), true);
+        ClientPropertyCollection propCollectionFromConstructor = new ClientPropertyCollection(msg.getBytes(), DefaultPayloadConvention.getInstance(), true);
         String s = "S";
         //assertPropCollectionWithGetForDefaultComponent(propCollectionFromPutAll);
     }

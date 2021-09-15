@@ -6,6 +6,7 @@ package com.microsoft.azure.sdk.iot.device.convention;
 import com.microsoft.azure.sdk.iot.deps.convention.PayloadConvention;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethod;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import lombok.AccessLevel;
@@ -77,7 +78,9 @@ public class DeviceCommand extends DeviceMethod
                             }
 
                             log.trace("Executing command invocation callback for component {} with command name {} for message {}",  componentName == null ? "default" : componentName , commandName, methodMessage);
-                            DeviceCommandData responseData = deviceCommandCallback.call(componentName, commandName, getPayloadConvention().getObjectFromBytes(methodMessage.getBytes(), Object.class), deviceMethodCallbackContext);
+                            deviceCommandCallback.setPayloadConvention(payloadConvention);
+                            deviceCommandCallback.setPayload(methodMessage.getBytes());
+                            DeviceCommandData responseData = deviceCommandCallback.call(componentName, commandName);
                             log.trace("Command invocation callback returned for component {} with command name {} for message {}", componentName == null ? "default" : componentName , commandName, methodMessage);
 
                             if (responseData != null)
@@ -147,5 +150,32 @@ public class DeviceCommand extends DeviceMethod
         super(deviceIO, config, deviceCommandStatusCallback, deviceCommandStatusCallbackContext);
         setPayloadConvention(payloadConvention);
         this.config.setDeviceMethodsMessageCallback(new deviceCommandResponseCallback(payloadConvention), null);
+    }
+
+    /**
+     * A method which subscribes to receive device method invocation for the user with the IotHub.
+     * @param deviceMethodCallback Callback where upon receiving the request the
+     *                             invoke a method shall be triggered.
+     * @param deviceMethodCallbackContext Context to be passed on when invoking the
+     *                                    callback.
+     * @throws IllegalArgumentException This exception is thrown when deviceMethodCallback is provided null.
+     */
+    public void subscribeToDeviceCommand(DeviceCommandCallback deviceMethodCallback, Object deviceMethodCallbackContext) throws IllegalArgumentException
+    {
+        if (deviceMethodCallback == null)
+        {
+            throw new IllegalArgumentException("Callback cannot be null");
+        }
+
+        this.deviceCommandCallback = deviceMethodCallback;
+        this.deviceMethodCallbackContext = deviceMethodCallbackContext;
+
+        if (!isSubscribed)
+        {
+            IotHubTransportMessage subscribeMessage = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_METHODS);
+            subscribeMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
+            subscribeMessage.setConnectionDeviceId(this.config.getDeviceId());
+            this.deviceIO.sendEventAsync(subscribeMessage, deviceMethodRequestMessageCallback, null, this.config.getDeviceId());
+        }
     }
 }
