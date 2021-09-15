@@ -229,11 +229,11 @@ public class IotHubTransport implements IotHubListener
 
             try
             {
-                String messageId = message.getCorrelationId();
-                if (messageId != null && correlationCallbacks.containsKey(messageId))
+                String correlationId = message.getCorrelationId();
+                if (!correlationId.isEmpty())
                 {
-                    Object context = correlationCallbackContexts.get(messageId);
-                    correlationCallbacks.get(messageId).onRequestAcknowledged(packet, context, e);
+                    Object context = correlationCallbackContexts.get(correlationId);
+                    correlationCallbacks.get(correlationId).onRequestAcknowledged(packet, context, e);
                 }
             }
             catch (Exception ex)
@@ -245,11 +245,11 @@ public class IotHubTransport implements IotHubListener
         {
             try
             {
-                String messageId = message.getCorrelationId();
-                if (messageId != null && correlationCallbacks.containsKey(messageId))
+                String correlationId = message.getCorrelationId();
+                if (!correlationId.isEmpty())
                 {
-                    Object context = correlationCallbackContexts.get(messageId);
-                    correlationCallbacks.get(messageId).onUnknownMessageAcknowledged(message, context, e);
+                    Object context = correlationCallbackContexts.get(correlationId);
+                    correlationCallbacks.get(correlationId).onUnknownMessageAcknowledged(message, context, e);
                 }
             }
             catch (Exception ex)
@@ -281,15 +281,11 @@ public class IotHubTransport implements IotHubListener
         {
             if (message != null)
             {
-                String messageId = message.getCorrelationId();
-                if (messageId != null && correlationCallbacks.containsKey(messageId))
+                String correlationId = message.getCorrelationId();
+                if (!correlationId.isEmpty())
                 {
-                    Object context = correlationCallbackContexts.get(messageId);
-                    correlationCallbacks.get(messageId).onResponseReceived(message, context, e);
-                }
-                else
-                {
-                    log.warn("A message was received with a null correlation id.");
+                    Object context = correlationCallbackContexts.get(correlationId);
+                    correlationCallbacks.get(correlationId).onResponseReceived(message, context, e);
                 }
             }
         }
@@ -612,12 +608,12 @@ public class IotHubTransport implements IotHubListener
 
                     try
                     {
-                        String messageId = message.getCorrelationId();
+                        String correlationId = message.getCorrelationId();
 
-                        if (messageId != null && correlationCallbacks.containsKey(messageId))
+                        if (!correlationId.isEmpty())
                         {
-                            Object context = correlationCallbackContexts.get(messageId);
-                            correlationCallbacks.get(messageId).onRequestSent(message, packet, context);
+                            Object context = correlationCallbackContexts.get(correlationId);
+                            correlationCallbacks.get(correlationId).onRequestSent(message, packet, context);
                         }
                     }
                     catch (Exception e)
@@ -1723,15 +1719,23 @@ public class IotHubTransport implements IotHubListener
     {
         try
         {
-            if (packet != null && packet.getMessage() != null && packet.getMessage().getCorrelatingMessageCallback() != null)
+            if (packet != null)
             {
                 Message message = packet.getMessage();
-                String messageId = message.getCorrelationId();
-                if (!correlationCallbacks.containsKey(messageId))
+                if (message != null)
                 {
-                    correlationCallbacks.put(messageId, message.getCorrelatingMessageCallback());
-                    correlationCallbackContexts.put(messageId, message.getCorrelatingMessageCallbackContext());
-                    correlationCallbacks.get(messageId).onRequestQueued(message, packet, correlationCallbackContexts.get(messageId));
+                    String correlationId = message.getCorrelationId();
+                    CorrelatingMessageCallback correlationCallback = message.getCorrelatingMessageCallback();
+                    if (!correlationId.isEmpty() && correlationCallback != null)
+                    {
+                        correlationCallbacks.put(correlationId, correlationCallback);
+                        Object correlationCallbackContext = message.getCorrelatingMessageCallbackContext();
+                        if (correlationCallbackContext != null)
+                        {
+                            correlationCallbackContexts.put(correlationId, correlationCallbackContext);
+                        }
+                        correlationCallback.onRequestQueued(message, packet, correlationCallbackContext);
+                    }
                 }
             }
         }
