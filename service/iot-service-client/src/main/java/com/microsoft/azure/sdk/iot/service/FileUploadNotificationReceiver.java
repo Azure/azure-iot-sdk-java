@@ -18,10 +18,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Slf4j
-public class FileUploadNotificationReceiver extends Receiver
+public class FileUploadNotificationReceiver
 {
     private final long DEFAULT_TIMEOUT_MS = 60000;
-    private final ExecutorService executor = Executors.newFixedThreadPool(3);
     private final AmqpFileUploadNotificationReceive amqpFileUploadNotificationReceive;
 
     /**
@@ -174,74 +173,4 @@ public class FileUploadNotificationReceiver extends Receiver
 
         return this.amqpFileUploadNotificationReceive.receive(timeoutMs);
     }
-
-    /**
-     * Async wrapper for open() operation
-     *
-     * @return The future object for the requested operation
-     */
-    @Override
-    public CompletableFuture<Void> openAsync()
-    {
-        final CompletableFuture<Void> future = new CompletableFuture<>();
-        executor.submit(() -> {
-            open();
-            future.complete(null);
-        });
-        return future;
-    }
-
-    /**
-     * Async wrapper for close() operation
-     *
-     * @return The future object for the requested operation
-     */
-    @Override
-    public CompletableFuture<Void> closeAsync()
-    {
-        final CompletableFuture<Void> future = new CompletableFuture<>();
-        executor.submit(() -> {
-            close();
-            future.complete(null);
-        });
-        return future;
-    }
-
-    /**
-     * Async wrapper for receive() operation with default timeout
-     *
-     * QoS for receiving file upload notifications is at least once
-     *
-     * @return The future object for the requested operation
-     */
-    @Override
-    public CompletableFuture<FileUploadNotification> receiveAsync()
-    {
-        return receiveAsync(DEFAULT_TIMEOUT_MS);
-    }
-
-    /**
-     * Async wrapper for receive() operation with specific timeout
-     *
-     * QoS for receiving file upload notifications is at least once
-     *
-     * @return The future object for the requested operation
-     */
-    @Override
-    public CompletableFuture<FileUploadNotification> receiveAsync(long timeoutMs)
-    {
-        final CompletableFuture<FileUploadNotification> future = new CompletableFuture<>();
-        executor.submit(() -> {
-            try
-            {
-                FileUploadNotification responseFileUploadNotification = receive(timeoutMs);
-                future.complete(responseFileUploadNotification);
-            } catch (IOException e)
-            {
-                future.completeExceptionally(e);
-            }
-        });
-        return future;
-    }
-
 }

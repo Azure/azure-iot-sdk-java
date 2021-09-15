@@ -25,8 +25,6 @@ import java.util.concurrent.Executors;
 @Slf4j
 public class ServiceClient
 {
-    private final ExecutorService executor = Executors.newFixedThreadPool(10);
-
     private final AmqpSend amqpMessageSender;
     private final String hostName;
     private String userName;
@@ -312,86 +310,6 @@ public class ServiceClient
         }
 
         this.amqpMessageSender.send(deviceId, moduleId, message);
-    }
-
-    /**
-     * Provide asynchronous access to open()
-     *
-     * @return The future object for the requested operation
-     * @deprecated Use the synchronous version of this API {@link #open()}. This asynchronous
-     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
-     * in order to have control over the spawned threads.
-     */
-    @Deprecated
-    public CompletableFuture<Void> openAsync()
-    {
-        final CompletableFuture<Void> future = new CompletableFuture<>();
-        executor.submit(() -> {
-            try
-            {
-                open();
-                future.complete(null);
-            }
-            catch (IOException e)
-            {
-                future.completeExceptionally(e);
-            }
-        });
-        return future;
-    }
-
-    /**
-     * Provide asynchronous access to close()
-     *
-     * @return The future object for the requested operation
-     * @deprecated Use the synchronous version of this API {@link #close()}. This asynchronous
-     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
-     * in order to have control over the spawned threads.
-     */
-    @Deprecated
-    public CompletableFuture<Void> closeAsync()
-    {
-        final CompletableFuture<Void> future = new CompletableFuture<>();
-        executor.submit(() -> {
-            try
-            {
-                close();
-                future.complete(null);
-            }
-            catch (IOException e)
-            {
-                future.completeExceptionally(e);
-            }
-        });
-        return future;
-    }
-
-    /**
-     * Provide asynchronous access to send()
-     *
-     * @param deviceId The device identifier for the target device
-     * @param message The message for the device
-     * @return The future object for the requested operation
-     * @deprecated Use the synchronous version of this API {@link #send(String, Message)}. This asynchronous
-     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
-     * in order to have control over the spawned threads.
-     */
-    @Deprecated
-    public CompletableFuture<Void> sendAsync(String deviceId, Message message)
-    {
-        final CompletableFuture<Void> future = new CompletableFuture<>();
-        executor.submit(() -> {
-            try
-            {
-                send(deviceId, message);
-                future.complete(null);
-            }
-            catch (Exception e)
-            {
-                future.completeExceptionally(e);
-            }
-        });
-        return future;
     }
 
     /**

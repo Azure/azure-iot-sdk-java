@@ -22,10 +22,9 @@ import java.util.concurrent.Executors;
  * method returns a FeedbackBatch instead of a Message.
  */
 @Slf4j
-public class FeedbackReceiver extends Receiver
+public class FeedbackReceiver
 {
     private final long DEFAULT_TIMEOUT_MS = 60000;
-    private final ExecutorService executor = Executors.newFixedThreadPool(10);
 
     private final AmqpReceive amqpReceive;
 
@@ -220,82 +219,5 @@ public class FeedbackReceiver extends Receiver
         }
 
         return this.amqpReceive.receive(timeoutMs);
-    }
-
-    /**
-     * Async wrapper for open() operation
-     *
-     * @return The future object for the requested operation
-     */
-    @Override
-    public CompletableFuture<Void> openAsync()
-    {
-        final CompletableFuture<Void> future = new CompletableFuture<>();
-        executor.submit(() -> {
-            try
-            {
-                open();
-                future.complete(null);
-            } catch (IOException e)
-            {
-                future.completeExceptionally(e);
-            }
-        });
-        return future;
-    }
-
-    /**
-     * Async wrapper for close() operation
-     *
-     * @return The future object for the requested operation
-     */
-    @Override
-    public CompletableFuture<Void> closeAsync()
-    {
-        final CompletableFuture<Void> future = new CompletableFuture<>();
-        executor.submit(() -> {
-            try
-            {
-                close();
-                future.complete(null);
-            } catch (IOException e)
-            {
-                future.completeExceptionally(e);
-            }
-        });
-        return future;
-    }
-
-    /**
-     * Async wrapper for receive() operation with default timeout
-     *
-     * @return The future object for the requested operation
-     */
-    @Override
-    public CompletableFuture<FeedbackBatch> receiveAsync()
-    {
-        return receiveAsync(DEFAULT_TIMEOUT_MS);
-    }
-
-    /**
-     * Async wrapper for receive() operation with specific timeout
-     *
-     * @return The future object for the requested operation
-     */
-    @Override
-    public CompletableFuture<FeedbackBatch> receiveAsync(long timeoutMs)
-    {
-        final CompletableFuture<FeedbackBatch> future = new CompletableFuture<>();
-        executor.submit(() -> {
-            try
-            {
-                FeedbackBatch responseFeedbackBatch = receive(timeoutMs);
-                future.complete(responseFeedbackBatch);
-            } catch (IOException e)
-            {
-                future.completeExceptionally(e);
-            }
-        });
-        return future;
     }
 }
