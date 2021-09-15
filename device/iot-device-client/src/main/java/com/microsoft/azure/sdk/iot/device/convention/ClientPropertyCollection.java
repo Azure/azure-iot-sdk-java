@@ -363,7 +363,7 @@ public class ClientPropertyCollection extends PayloadCollection
         }
         else if (ReflectionUtility.INSTANCE.canCastPrimitive(typeOfT) != null)
         {
-            // If we're here the type to cast to was a numeric  primitive
+            // If we're here the type to cast to was a numeric primitive
             // We will first convert to a number and then try to get the cast type.
             // There is boxing going on in here but there's no way around it if we want to use generics
             Number num = (Number) objectToGet;

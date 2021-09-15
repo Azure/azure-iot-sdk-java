@@ -1364,7 +1364,7 @@ public class InternalClient
     }
 
     /**
-     * Subscribes to methods
+     * Sets the global command handler.
      *
      * @param deviceCommandCallback Callback on which commands shall be invoked. Cannot be {@code null}.
      * @param deviceCommandCallbackContext Context for command callback. Can be {@code null}.

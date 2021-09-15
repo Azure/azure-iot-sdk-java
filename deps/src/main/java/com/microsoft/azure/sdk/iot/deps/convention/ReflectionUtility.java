@@ -1,8 +1,24 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 package com.microsoft.azure.sdk.iot.deps.convention;
 
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Class that allows you to check if one data type can be converted to another safely.
+ * <p>
+ *     When trying to cast from a nullable type to a primitive you should always use the to xxxValue().
+ *     This utility will help make the descision if you're unsure of the type being checked.
+ *
+ *     Example:
+ *     {@code
+ *      Integer cast = 56;
+ *      int i = cast.intValue();
+ *     }
+ * </p>
+ */
 public class ReflectionUtility
 {
     public enum TypeToReflect {
@@ -42,15 +58,20 @@ public class ReflectionUtility
         javaToPrimitiveTypeMap.put(Short.class, TypeToReflect.SHORT);
     }
 
-    public TypeToReflect canCastPrimitive(Class<?> type1)
+    /**
+     * Checks to see if you can cat the primitive type to another.
+     * @param typeToCheck
+     * @return
+     */
+    public TypeToReflect canCastPrimitive(Class<?> typeToCheck)
     {
-        if (javaToPrimitiveTypeMap.containsKey(type1))
+        if (javaToPrimitiveTypeMap.containsKey(typeToCheck))
         {
-            return javaToPrimitiveTypeMap.get(type1);
+            return javaToPrimitiveTypeMap.get(typeToCheck);
         }
-        else if (primitiveToJavaTypeMap.containsKey(type1))
+        else if (primitiveToJavaTypeMap.containsKey(typeToCheck))
         {
-            return primitiveToJavaTypeMap.get(type1);
+            return primitiveToJavaTypeMap.get(typeToCheck);
         }
         return null;
     }
