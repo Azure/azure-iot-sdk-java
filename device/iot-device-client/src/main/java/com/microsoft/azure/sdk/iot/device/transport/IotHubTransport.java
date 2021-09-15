@@ -88,6 +88,7 @@ public class IotHubTransport implements IotHubListener
 
     private ScheduledExecutorService taskScheduler;
 
+    // state lock to prevent simultaneous close and reconnect operations. Also prevents multiple reconnect threads from executing at once
     final private Object reconnectionLock = new Object();
 
     // State lock used to communicate to the IotHubSendTask thread when a message needs to be sent or a callback needs to be invoked.
@@ -103,6 +104,9 @@ public class IotHubTransport implements IotHubListener
     private final ProxySettings proxySettings;
     private SSLContext sslContext;
     private final boolean isMultiplexing;
+
+    // Flag set when close() starts. Acts as a signal to any running reconnection logic to not try again.
+    private boolean isClosing;
 
     // Used to store the CorrelationCallbackMessage for a correlationId
     private final Map<String, CorrelatingMessageCallback> correlationCallbacks = new ConcurrentHashMap<>();
@@ -225,11 +229,11 @@ public class IotHubTransport implements IotHubListener
 
             try
             {
-                String messageId = message.getCorrelationId();
-                if (messageId != null && correlationCallbacks.containsKey(messageId))
+                String correlationId = message.getCorrelationId();
+                if (!correlationId.isEmpty() && correlationCallbacks.containsKey(correlationId))
                 {
-                    Object context = correlationCallbackContexts.get(messageId);
-                    correlationCallbacks.get(messageId).onRequestAcknowledged(packet, context, e);
+                    Object context = correlationCallbackContexts.get(correlationId);
+                    correlationCallbacks.get(correlationId).onRequestAcknowledged(packet, context, e);
                 }
             }
             catch (Exception ex)
@@ -241,11 +245,11 @@ public class IotHubTransport implements IotHubListener
         {
             try
             {
-                String messageId = message.getCorrelationId();
-                if (messageId != null && correlationCallbacks.containsKey(messageId))
+                String correlationId = message.getCorrelationId();
+                if (!correlationId.isEmpty() && correlationCallbacks.containsKey(correlationId))
                 {
-                    Object context = correlationCallbackContexts.get(messageId);
-                    correlationCallbacks.get(messageId).onUnknownMessageAcknowledged(message, context, e);
+                    Object context = correlationCallbackContexts.get(correlationId);
+                    correlationCallbacks.get(correlationId).onUnknownMessageAcknowledged(message, context, e);
                 }
             }
             catch (Exception ex)
@@ -277,15 +281,11 @@ public class IotHubTransport implements IotHubListener
         {
             if (message != null)
             {
-                String messageId = message.getCorrelationId();
-                if (messageId != null && correlationCallbacks.containsKey(messageId))
+                String correlationId = message.getCorrelationId();
+                if (!correlationId.isEmpty() && correlationCallbacks.containsKey(correlationId))
                 {
-                    Object context = correlationCallbackContexts.get(messageId);
-                    correlationCallbacks.get(messageId).onResponseReceived(message, context, e);
-                }
-                else
-                {
-                    log.warn("A message was received with a null correlation id.");
+                    Object context = correlationCallbackContexts.get(correlationId);
+                    correlationCallbacks.get(correlationId).onResponseReceived(message, context, e);
                 }
             }
         }
@@ -409,6 +409,8 @@ public class IotHubTransport implements IotHubListener
             throw new TransportException("Open cannot be called while transport is reconnecting");
         }
 
+        this.isClosing = false;
+
         // The default config is only null when someone creates a multiplexing client and opens it before
         // registering any devices to it. No need to check for SAS token expiry if no devices are registered yet.
         if (this.getDefaultConfig() != null)
@@ -487,39 +489,49 @@ public class IotHubTransport implements IotHubListener
             throw new IllegalArgumentException("reason cannot be null");
         }
 
-        this.cancelPendingPackets();
+        // Set the flag outside of the synchronized block so that any currently
+        // running reconnection logic knows to give up when this flag is set to true.
+        // Then the rest of the close() code is in the synchronization block so that
+        // it waits for the reconnection logic to end before it starts.
+        this.isClosing = true;
 
-        this.invokeCallbacks();
-
-        if (this.taskScheduler != null)
+        // Wait until no reconnection logic is taking place
+        synchronized (this.reconnectionLock)
         {
-            this.taskScheduler.shutdown();
-        }
+            this.cancelPendingPackets();
 
-        try
-        {
-            if (this.iotHubTransportConnection != null)
+            this.invokeCallbacks();
+
+            if (this.taskScheduler != null)
             {
-                this.iotHubTransportConnection.close();
-            }
-        }
-        finally
-        {
-            this.updateStatus(IotHubConnectionStatus.DISCONNECTED, reason, cause);
-
-            // Notify send thread to finish up so it doesn't survive this close
-            synchronized (this.sendThreadLock)
-            {
-                this.sendThreadLock.notifyAll();
+                this.taskScheduler.shutdown();
             }
 
-            // Notify receive thread to finish up so it doesn't survive this close
-            synchronized (this.receiveThreadLock)
+            try
             {
-                this.receiveThreadLock.notifyAll();
+                if (this.iotHubTransportConnection != null)
+                {
+                    this.iotHubTransportConnection.close();
+                }
             }
+            finally
+            {
+                this.updateStatus(IotHubConnectionStatus.DISCONNECTED, reason, cause);
 
-            log.debug("Client connection closed successfully");
+                // Notify send thread to finish up so it doesn't survive this close
+                synchronized (this.sendThreadLock)
+                {
+                    this.sendThreadLock.notifyAll();
+                }
+
+                // Notify receive thread to finish up so it doesn't survive this close
+                synchronized (this.receiveThreadLock)
+                {
+                    this.receiveThreadLock.notifyAll();
+                }
+
+                log.debug("Client connection closed successfully");
+            }
         }
     }
 
@@ -596,12 +608,12 @@ public class IotHubTransport implements IotHubListener
 
                     try
                     {
-                        String messageId = message.getCorrelationId();
+                        String correlationId = message.getCorrelationId();
 
-                        if (messageId != null && correlationCallbacks.containsKey(messageId))
+                        if (!correlationId.isEmpty() && correlationCallbacks.containsKey(correlationId))
                         {
-                            Object context = correlationCallbackContexts.get(messageId);
-                            correlationCallbacks.get(messageId).onRequestSent(message, packet, context);
+                            Object context = correlationCallbackContexts.get(correlationId);
+                            correlationCallbacks.get(correlationId).onRequestSent(message, packet, context);
                         }
                     }
                     catch (Exception e)
@@ -1218,6 +1230,12 @@ public class IotHubTransport implements IotHubListener
                 && transportException != null
                 && transportException.isRetryable())
         {
+            if (this.isClosing)
+            {
+                log.trace("Abandoning reconnection logic since this client has started closing");
+                return;
+            }
+
             log.trace("Attempting reconnect attempt {}", reconnectionAttempts);
             reconnectionAttempts++;
 
@@ -1701,15 +1719,23 @@ public class IotHubTransport implements IotHubListener
     {
         try
         {
-            if (packet != null && packet.getMessage() != null && packet.getMessage().getCorrelatingMessageCallback() != null)
+            if (packet != null)
             {
                 Message message = packet.getMessage();
-                String messageId = message.getCorrelationId();
-                if (!correlationCallbacks.containsKey(messageId))
+                if (message != null)
                 {
-                    correlationCallbacks.put(messageId, message.getCorrelatingMessageCallback());
-                    correlationCallbackContexts.put(messageId, message.getCorrelatingMessageCallbackContext());
-                    correlationCallbacks.get(messageId).onRequestQueued(message, packet, correlationCallbackContexts.get(messageId));
+                    String correlationId = message.getCorrelationId();
+                    CorrelatingMessageCallback correlationCallback = message.getCorrelatingMessageCallback();
+                    if (!correlationId.isEmpty() && correlationCallback != null)
+                    {
+                        correlationCallbacks.put(correlationId, correlationCallback);
+                        Object correlationCallbackContext = message.getCorrelatingMessageCallbackContext();
+                        if (correlationCallbackContext != null)
+                        {
+                            correlationCallbackContexts.put(correlationId, correlationCallbackContext);
+                        }
+                        correlationCallback.onRequestQueued(message, packet, correlationCallbackContext);
+                    }
                 }
             }
         }
