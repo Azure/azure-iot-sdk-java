@@ -5,8 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.deps.transport.amqp;
 
+import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.deps.util.ObjectLock;
-import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
@@ -29,11 +29,13 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
     private static final int MAX_WAIT_TO_OPEN_CLOSE_CONNECTION = 60 * 1000; // 1 minute timeout
     private static final int MAX_WAIT_TO_TERMINATE_EXECUTOR = 30;
 
-    private static final String WEB_SOCKET_PATH = "/$iothub/websocket";
-    private static final String WEB_SOCKET_SUB_PROTOCOL = "AMQPWSB10";
     private static final int AMQP_PORT = 5671;
     private static final int AMQP_WEB_SOCKET_PORT = 443;
     private static final int THREAD_POOL_MAX_NUMBER = 1;
+    private static final String WEB_SOCKET_PATH = "/$iothub/websocket";
+    private static final String WEB_SOCKET_SUB_PROTOCOL = "AMQPWSB10";
+    private static final String WEB_SOCKET_QUERY = "iothub-no-client-cert=true";
+    private static final int MAX_MESSAGE_PAYLOAD_SIZE = 256 * 1024; //max message size is 256 kb, so amqp websocket layer should buffer at most that much space
 
     private int linkCredit;
 
@@ -334,9 +336,9 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
             if (this.useWebSockets)
             {
                 log.debug("Adding websocket layer");
-                WebSocketImpl webSocket = new WebSocketImpl();
-                webSocket.configure(this.hostName, WEB_SOCKET_PATH, 0, WEB_SOCKET_SUB_PROTOCOL, null, null);
-                ((TransportInternal)transport).addTransportLayer(webSocket);
+                WebSocketImpl webSocket = new WebSocketImpl(MAX_MESSAGE_PAYLOAD_SIZE);
+                webSocket.configure(this.hostName, WEB_SOCKET_PATH, WEB_SOCKET_QUERY, AMQP_WEB_SOCKET_PORT, WEB_SOCKET_SUB_PROTOCOL, null, null);
+                ((TransportInternal) transport).addTransportLayer(webSocket);
             }
 
             SslDomain domain = makeDomain();
