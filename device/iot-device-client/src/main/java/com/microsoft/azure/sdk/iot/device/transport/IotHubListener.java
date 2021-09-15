@@ -47,16 +47,18 @@ public interface IotHubListener
 
     /**
      * Callback to be fired when the multiplexed connection establishes a new device session.
-     * @param connectionId the Id of the connection that this session establishing event belongs to.
+     * @param connectionId the Id of the connection, used to identify which of possible many reconnection attempts
+     *                     this event belongs to.
      * @param deviceId the Id of the device that the session belongs to
      */
     void onMultiplexedDeviceSessionEstablished(String connectionId, String deviceId);
 
     /**
      * Callback to be fired when the multiplexed connection loses a device session.
-     * @param e the throwable that caused this device session to drop.
-     * @param connectionId the Id of the connection that this session drop event belongs to.
-     * @param deviceId the Id of the device that the session belongs to.
+     * @param e The exception that caused the connection to be lost.
+     * @param connectionId the Id of the connection, used to identify which of possible many reconnection attempts
+     *                     this event belongs to.
+     * @param deviceId the Id of the device that the session belongs to
      */
     void onMultiplexedDeviceSessionLost(Throwable e, String connectionId, String deviceId);
 

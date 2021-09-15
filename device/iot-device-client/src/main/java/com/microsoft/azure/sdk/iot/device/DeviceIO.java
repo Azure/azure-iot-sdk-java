@@ -238,10 +238,8 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      * Must be called to terminate the background thread that is sending data to
      * IoT Hub. After {@code close()} is called, the IoT Hub client is no longer
      *  usable. If the client is already closed, the function shall do nothing.
-     *
-     * @throws IOException if the connection to an IoT Hub cannot be closed.
      */
-    public void close() throws IOException
+    public void close()
     {
         synchronized (this.stateLock)
         {
@@ -260,40 +258,8 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
                 this.receiveTaskScheduler.shutdown();
             }
 
-            try
-            {
-                this.transport.close(IotHubConnectionStatusChangeReason.CLIENT_CLOSE, null);
-            }
-            catch (DeviceClientException e)
-            {
-                this.state = IotHubConnectionStatus.DISCONNECTED;
-                throw new IOException(e);
-            }
-
+            this.transport.close(IotHubConnectionStatusChangeReason.CLIENT_CLOSE, null);
             this.state = IotHubConnectionStatus.DISCONNECTED;
-        }
-    }
-
-    // Functionally the same as "close()", but without wrapping any thrown TransportException into an IOException
-    public void closeWithoutWrappingException() throws TransportException
-    {
-        try
-        {
-            close();
-        }
-        catch (IOException e)
-        {
-            // We did this silly thing in the DeviceClient to work around the fact that we can't throw TransportExceptions
-            // directly in methods like deviceClient.close() because the close API existed before the TransportException did.
-            // To get around it, we just nested the meaningful exception into an IOException. The multiplexing client doesn't
-            // have to do the same thing though, so this code un-nests the exception when possible.
-            if (e.getCause() != null && e.getCause() instanceof TransportException)
-            {
-                throw (TransportException) e.getCause();
-            }
-
-            // should never happen. Open only throws IOExceptions with an inner exception of type TransportException
-            throw new IllegalStateException("Encountered a wrapped IOException with no inner transport exception", e);
         }
     }
 

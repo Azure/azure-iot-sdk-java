@@ -441,14 +441,6 @@ public class EnrollmentGroup extends Serializable
             throw new IllegalArgumentException("attestation for EnrollmentGroup shall be X509 or SymmetricKey");
         }
 
-        if (attestation instanceof X509Attestation)
-        {
-            if (((X509Attestation)attestation).getRootCertificates() == null)
-            {
-                throw new IllegalArgumentException("X509 attestation for EnrollmentGroup does not contains a valid certificate.");
-            }
-        }
-
         this.attestation = new AttestationMechanism(attestation);
     }
 
