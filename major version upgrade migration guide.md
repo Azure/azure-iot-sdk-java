@@ -43,7 +43,8 @@ Breaking changes:
 - Removed service error code descriptions that the service would never return the error code for
 - Reduce default SAS token time to live from 1 year to 1 hour for security purposes
 - Removed unnecessary synchronization on service client APIs to allow for a single client to make multiple service APIs simultaneously
- 
+- Removed asynchronous APIs for service client APIs 
+  - These were wrappers on top of the existing sync APIs. Users are expected to write async wrappers that better fit their preferred async framework.
  
 ## Device Provisioning Service Device Client
 

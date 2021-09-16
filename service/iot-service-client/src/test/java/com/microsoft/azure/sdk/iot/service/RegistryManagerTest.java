@@ -190,7 +190,6 @@ public class RegistryManagerTest
         RegistryManager registryManager = new RegistryManager(connectionString);
 
         assertNotNull(registryManager);
-        assertNotNull(Deencapsulation.getField(registryManager, "executor"));
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_004: [The constructor shall throw IllegalArgumentException if the input device is null]
@@ -230,65 +229,8 @@ public class RegistryManagerTest
 
         RegistryManager registryManager = new RegistryManager(connectionString);
         Device returnDevice = registryManager.addDevice(device);
-        registryManager.close();
 
         commonVerifications(HttpMethod.PUT, deviceId, returnDevice);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_012: [The function shall throw IllegalArgumentException if the input device is null]
-    // Assert
-    @Test (expected = IllegalArgumentException.class)
-    public void addDeviceAsync_input_null() throws Exception
-    {
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
-
-        registryManager.addDeviceAsync(null);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_ REGISTRYMANAGER_12_013: [The function shall create an async wrapper around the addDevice() function call, handle the return value or delegate exception]
-    @Test
-    public void addDeviceAsync_future_return_ok() throws Exception
-    {
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        String deviceId = "somedevice";
-        new NonStrictExpectations()
-        {
-            {
-                device.getDeviceId();
-                result = deviceId;
-            }
-        };
-
-        commonExpectations(connectionString, deviceId);
-
-        RegistryManager registryManager = new RegistryManager(connectionString);
-        CompletableFuture<Device> completableFuture =  registryManager.addDeviceAsync(device);
-        Device returnDevice = completableFuture.get();
-
-        commonVerifications(HttpMethod.PUT, deviceId, returnDevice);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_ REGISTRYMANAGER_12_013: [The function shall create an async wrapper around the addDevice() function call, handle the return value or delegate exception]
-    // Assert
-    @Test (expected = Exception.class)
-    public void addDeviceAsync_future_throw() throws Exception
-    {
-        new MockUp<RegistryManager>()
-        {
-            @Mock
-            public Device addDevice(Device device) throws IOException, IotHubException
-            {
-                throw new IOException();
-            }
-        };
-
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = new RegistryManager(connectionString);
-
-        CompletableFuture<Device> completableFuture =  registryManager.addDeviceAsync(device);
-        completableFuture.get();
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_014: [The constructor shall throw IllegalArgumentException if the input string is null or empty]
@@ -321,55 +263,6 @@ public class RegistryManagerTest
         Device returnDevice = registryManager.getDevice(deviceId);
 
         commonVerifications(HttpMethod.GET, deviceId, returnDevice);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_021: [The constructor shall throw IllegalArgumentException if the input device is null]
-    // Assert
-    @Test (expected = IllegalArgumentException.class)
-    public void getDeviceAsync_input_null() throws Exception
-    {
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
-
-        registryManager.getDeviceAsync(null);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_022: [The function shall create an async wrapper around the addDevice() function call, handle the return value or delegate exception]
-    @Test
-    public void getDeviceAsync_future_return_ok() throws Exception
-    {
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        String deviceId = "somedevice";
-
-        commonExpectations(connectionString, deviceId);
-
-        RegistryManager registryManager = new RegistryManager(connectionString);
-        CompletableFuture<Device> completableFuture =  registryManager.getDeviceAsync(deviceId);
-        Device returnDevice = completableFuture.get();
-
-        commonVerifications(HttpMethod.GET, deviceId, returnDevice);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_022: [The function shall create an async wrapper around the addDevice() function call, handle the return value or delegate exception]
-    // Assert
-    @Test (expected = Exception.class)
-    public void getDeviceAsync_future_throw() throws Exception
-    {
-        String deviceId = "somedevice";
-        new MockUp<RegistryManager>()
-        {
-            @Mock
-            public Device getDevice(String deviceId) throws IOException, IotHubException
-            {
-                throw new IOException();
-            }
-        };
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = new RegistryManager(connectionString);
-
-        CompletableFuture<Device> completableFuture =  registryManager.getDeviceAsync(deviceId);
-        completableFuture.get();
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_21_085: [The function shall return a connectionString for the input device]
@@ -614,78 +507,6 @@ public class RegistryManagerTest
         };
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_042: [The function shall throw IllegalArgumentException if the input device is null]
-    // Assert
-    @Test (expected = IllegalArgumentException.class)
-    public void updateDeviceAsync_input_null() throws Exception
-    {
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        new Expectations()
-        {
-            {
-                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
-                result = iotHubConnectionString;
-                iotHubConnectionString.getHostName();
-                result = "aaa.bbb.ccc";
-            }
-        };
-
-        RegistryManager registryManager = new RegistryManager(connectionString);
-
-        registryManager.updateDeviceAsync(null);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_043: [The function shall create an async wrapper around the updateDevice() function call, handle the return value or delegate exception]
-    @Test
-    public void updateDeviceAsync_future_return_ok() throws Exception
-    {
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        String deviceId = "somedevice";
-
-        new NonStrictExpectations()
-        {
-            {
-                device.getDeviceId();
-                result = deviceId;
-            }
-        };
-
-        commonExpectations(connectionString, deviceId);
-
-        RegistryManager registryManager = new RegistryManager(connectionString);
-        CompletableFuture<Device> completableFuture = registryManager.updateDeviceAsync(device);
-        Device returnDevice = completableFuture.get();
-
-        commonVerifications(HttpMethod.PUT, deviceId, returnDevice);
-
-        new VerificationsInOrder()
-        {
-            {
-                mockHttpRequest.setHeaderField("If-Match", "*");
-            }
-        };
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_043: [The function shall create an async wrapper around the updateDevice() function call, handle the return value or delegate exception]
-    // Assert
-    @Test (expected = Exception.class)
-    public void updateDeviceAsync_future_throw() throws Exception
-    {
-        new MockUp<RegistryManager>()
-        {
-            @Mock
-            public Device updateDevice(Device device) throws IOException, IotHubException
-            {
-                throw new IOException();
-            }
-        };
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = new RegistryManager(connectionString);
-
-        CompletableFuture<Device> completableFuture = registryManager.updateDeviceAsync(device);
-        completableFuture.get();
-    }
-
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_081: [The function shall throw IllegalArgumentException if the input device is null]
     // Assert
     @Test (expected = IllegalArgumentException.class)
@@ -841,77 +662,6 @@ public class RegistryManagerTest
         };
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_052: [The function shall throw IllegalArgumentException if the input string is null or empty]
-    // Assert
-    @Test (expected = IllegalArgumentException.class)
-    public void removeDeviceAsync_input_null() throws Exception
-    {
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
-
-        registryManager.removeDeviceAsync(null);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_052: [The function shall throw IllegalArgumentException if the input string is null or empty]
-    // Assert
-    @Test (expected = IllegalArgumentException.class)
-    public void removeDeviceAsync_input_empty() throws Exception
-    {
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
-
-        registryManager.removeDeviceAsync("");
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_053: [The function shall create an async wrapper around the removeDevice() function call, handle the return value or delegate exception]
-    @Test
-    public void removeDeviceAsync_future_return_ok() throws Exception
-    {
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        String deviceId = "somedevice";
-
-        commonExpectations(connectionString, deviceId);
-
-        RegistryManager registryManager = new RegistryManager(connectionString);
-        CompletableFuture completableFuture = registryManager.removeDeviceAsync(deviceId);
-        completableFuture.get();
-
-        new VerificationsInOrder()
-        {
-            {
-                IotHubConnectionString.getUrlDevice(anyString, deviceId);
-                times = 1;
-                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], (Proxy) any);
-                times = 1;
-                mockHttpRequest.setReadTimeoutMillis(anyInt);
-                mockHttpRequest.setHeaderField("authorization", anyString);
-                mockHttpRequest.setHeaderField("If-Match", "*");
-            }
-        };
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_053: [The function shall create an async wrapper around the removeDevice() function call, handle the return value or delegate exception]
-    // Assert
-    @Test (expected = Exception.class)
-    public void removeDeviceAsync_future_throw() throws Exception
-    {
-        String deviceId = "somedevice";
-        new MockUp<RegistryManager>()
-        {
-            @Mock
-            public Device removeDevice(String deviceId) throws IOException, IotHubException
-            {
-                throw new IOException();
-            }
-        };
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = new RegistryManager(connectionString);
-
-        CompletableFuture completableFuture = registryManager.removeDeviceAsync(deviceId);
-    }
-
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_054: [The function shall get the URL for the device]
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_055: [The function shall create a new SAS token for the device]
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_056: [The function shall create a new HttpRequest for getting statistics a device from IotHub]
@@ -952,57 +702,6 @@ public class RegistryManagerTest
         RegistryStatistics statistics = registryManager.getStatistics();
 
         assertNotNull(statistics);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_060: [The function shall create an async wrapper around the getStatistics() function call, handle the return value or delegate exception]
-    @Test
-    public void getStatisticsAsync_future_return_ok() throws Exception
-    {
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        String deviceId = "somedevice";
-
-        commonExpectations(connectionString, deviceId);
-
-        RegistryManager registryManager = new RegistryManager(connectionString);
-
-        CompletableFuture<RegistryStatistics> completableFuture = registryManager.getStatisticsAsync();
-        RegistryStatistics statistics = completableFuture.get();
-
-        new VerificationsInOrder()
-        {
-            {
-                IotHubConnectionString.getUrlDeviceStatistics(anyString);
-                new HttpRequest(mockUrl, HttpMethod.GET, new byte[0], (Proxy) any);
-                mockHttpRequest.setReadTimeoutMillis(anyInt);
-                mockHttpRequest.setHeaderField("authorization", anyString);
-                mockHttpRequest.setHeaderField("Request-Id", "1001");
-                mockHttpRequest.setHeaderField("Accept", "application/json");
-                mockHttpRequest.setHeaderField("Content-Type", "application/json");
-                mockHttpRequest.setHeaderField("charset", "utf-8");
-                mockHttpRequest.send();
-                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
-            }
-        };
-        assertNotNull(statistics);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_060: [The function shall create an async wrapper around the getStatistics() function call, handle the return value or delegate exception]
-    // Assert
-    @Test (expected = Exception.class)
-    public void getStatisticsAsync_future_throw() throws Exception
-    {
-        new MockUp<RegistryManager>()
-        {
-            @Mock
-            public Device getStatistics() throws IOException, IotHubException
-            {
-                throw new IOException();
-            }
-        };
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = new RegistryManager(connectionString);
-
-        registryManager.getStatisticsAsync();
     }
 
     @Test
@@ -1049,29 +748,6 @@ public class RegistryManagerTest
         };
         assertNotNull(jobProperties);
     }
-
-    @Test (expected = Exception.class)
-    public void exportDevicesAsync_jobProperties_future_throw() throws Exception
-    {
-        new MockUp<RegistryManager>()
-        {
-            @Mock
-            public JobProperties exportDevices(JobProperties jobProperties)
-                    throws IllegalArgumentException, IOException, IotHubException
-            {
-                throw new IllegalArgumentException();
-            }
-        };
-
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = new RegistryManager(connectionString);
-        JobProperties exportJobProperties =
-                JobProperties.createForExportJob("blah", true, StorageAuthenticationType.IDENTITY);
-
-        CompletableFuture<JobProperties> completableFuture =  registryManager.exportDevicesAsync(exportJobProperties);
-        completableFuture.get();
-    }
-
 
     // TESTS_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_061: [The function shall throw IllegalArgumentException if any of the input parameters is null]
     @Test (expected = IllegalArgumentException.class)
@@ -1145,29 +821,6 @@ public class RegistryManagerTest
         assertNotNull(jobProperties);
     }
 
-    // TESTS_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_068: [The function shall create an async wrapper around
-    // the exportDevices() function call, handle the return value or delegate exception ]
-    @Test (expected = Exception.class)
-    public void exportDevicesAsync_future_throw() throws Exception
-    {
-        new MockUp<RegistryManager>()
-        {
-            @Mock
-            public JobProperties exportDevices(String url, Boolean excludeKeys)
-                    throws IllegalArgumentException, IOException, IotHubException
-            {
-                throw new IllegalArgumentException();
-            }
-        };
-
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
-
-        CompletableFuture<JobProperties> completableFuture =  registryManager.exportDevicesAsync("blah", true);
-        completableFuture.get();
-    }
-
     // TESTS_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_069: [The function shall throw IllegalArgumentException if any of the input parameters is null]
     @Test (expected = IllegalArgumentException.class)
     public void importDevices_blob_import_null() throws Exception
@@ -1239,28 +892,6 @@ public class RegistryManagerTest
         assertNotNull(jobProperties);
     }
 
-    // TESTS_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_076: [The function shall create an async wrapper around
-    // the importDevices() function call, handle the return value or delegate exception]
-    @Test (expected = Exception.class)
-    public void importDevicesAsync_future_throw() throws Exception
-    {
-        new MockUp<RegistryManager>()
-        {
-            @Mock
-            public JobProperties importDevices(String importBlobContainerUri, String outputBlobContainerUri)
-                    throws IllegalArgumentException, IOException, IotHubException
-            {
-                throw new IllegalArgumentException();
-            }
-        };
-
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = new RegistryManager(connectionString);
-
-        CompletableFuture<JobProperties> completableFuture =  registryManager.importDevicesAsync("importblob", "outputblob");
-        completableFuture.get();
-    }
-
     @Test
     public void importDevices_jobProperties_good_case() throws Exception
     {
@@ -1304,28 +935,6 @@ public class RegistryManagerTest
             }
         };
         assertNotNull(importJobProperties);
-    }
-
-    @Test (expected = Exception.class)
-    public void importDevicesAsync_jobProperties_future_throw() throws Exception
-    {
-        new MockUp<RegistryManager>()
-        {
-            @Mock
-            public JobProperties importDevices(JobProperties importJobProperties)
-                    throws IllegalArgumentException, IOException, IotHubException
-            {
-                throw new IllegalArgumentException();
-            }
-        };
-
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = new RegistryManager(connectionString);
-        JobProperties inputParameters =
-                JobProperties.createForImportJob("importblob", "outputblob", StorageAuthenticationType.IDENTITY);
-
-        CompletableFuture<JobProperties> completableFuture =  registryManager.importDevicesAsync(inputParameters);
-        completableFuture.get();
     }
 
     // TESTS_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_077: [The function shall throw IllegalArgumentException if the input parameter is null]
@@ -1389,50 +998,6 @@ public class RegistryManagerTest
         assertNotNull(jobProperties);
     }
 
-    // TESTS_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_084: [The function shall create an async wrapper
-    // around the getJob() function call, handle the return value or delegate exception]
-    @Test (expected = Exception.class)
-    public void getJobAsync_future_throw() throws Exception
-    {
-        new MockUp<RegistryManager>()
-        {
-            @Mock
-            public JobProperties getJob(String jobId)
-                    throws IllegalArgumentException, IOException, IotHubException
-            {
-                throw new IllegalArgumentException();
-            }
-        };
-
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = new RegistryManager(connectionString);
-
-        CompletableFuture<JobProperties> completableFuture =  registryManager.getJobAsync("someJobId");
-        completableFuture.get();
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_34_087: [The function shall tell this object's executor service to shutdown]
-    @Test
-    public void closeShutsDownExecutorService() throws IOException
-    {
-        //arrange
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        constructorExpectations(connectionString);
-
-        RegistryManager registryManager = new RegistryManager(connectionString);
-        Deencapsulation.setField(registryManager,"executor", mockExecutorService);
-
-        //act
-        registryManager.close();
-
-        new Verifications()
-        {
-            {
-                mockExecutorService.shutdownNow();
-            }
-        };
-    }
-
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_001: [The constructor shall throw IllegalArgumentException if the input module is null]
     // Assert
     @Test (expected = IllegalArgumentException.class)
@@ -1482,7 +1047,6 @@ public class RegistryManagerTest
 
         RegistryManager registryManager = new RegistryManager(connectionString);
         Module returnModule = registryManager.addModule(module);
-        registryManager.close();
 
         commonModuleVerifications(HttpMethod.PUT, deviceId, moduleId, returnModule);
     }
@@ -1881,7 +1445,6 @@ public class RegistryManagerTest
 
         RegistryManager registryManager = new RegistryManager(connectionString);
         Configuration returnConfig = registryManager.addConfiguration(config);
-        registryManager.close();
 
         commonConfigVerifications(HttpMethod.PUT, configId, returnConfig);
     }
