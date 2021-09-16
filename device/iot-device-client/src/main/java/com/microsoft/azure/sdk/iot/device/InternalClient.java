@@ -64,11 +64,6 @@ public class InternalClient
     private DeviceMethod method;
     private DeviceCommand command;
 
-
-    @Getter
-    @Setter(AccessLevel.PRIVATE)
-    private PayloadConvention payloadConvention = DefaultPayloadConvention.getInstance();
-
     @Getter
     @Setter(AccessLevel.PRIVATE)
     private PayloadConvention payloadConvention = DefaultPayloadConvention.getInstance();

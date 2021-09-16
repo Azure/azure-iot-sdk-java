@@ -3,12 +3,15 @@
 
 package com.microsoft.azure.sdk.iot.device.convention;
 
-import com.microsoft.azure.sdk.iot.deps.convention.PayloadConvention;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
-
-public abstract class DeviceCommandCallback
+/**
+ * The command callback to be executed for all commands.
+ */
+public interface DeviceCommandCallback
 {
-    abstract public DeviceCommandResponse call(DeviceCommandRequest deviceCommandRequest);
+    /**
+     * The call to be implemented.
+     * @param deviceCommandRequest A populated command request that will contain the component, command name, and payload.
+     * @return The response to the command.
+     */
+    DeviceCommandResponse call(DeviceCommandRequest deviceCommandRequest);
 }

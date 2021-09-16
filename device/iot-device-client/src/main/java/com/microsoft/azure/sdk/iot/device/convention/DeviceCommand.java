@@ -14,6 +14,9 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+/**
+ * The command callback execution class.
+ */
 public class DeviceCommand extends DeviceMethod
 {
     private DeviceCommandCallback deviceCommandCallback;

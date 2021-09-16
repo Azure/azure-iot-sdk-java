@@ -350,7 +350,7 @@ public class Thermostat
          * The callback to handle "getMaxMinReport" command.
          * This method will returns the max, min and average temperature from the specified time to the current time.
          */
-        private static class GetMaxMinReportMethodCallback extends DeviceCommandCallback
+        private static class GetMaxMinReportMethodCallback implements DeviceCommandCallback
         {
             final String commandName = "getMaxMinReport";
 
