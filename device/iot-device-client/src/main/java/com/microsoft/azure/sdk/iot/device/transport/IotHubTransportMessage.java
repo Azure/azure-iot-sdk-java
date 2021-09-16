@@ -83,20 +83,6 @@ public class IotHubTransportMessage extends Message
     private Object messageCallbackContext;
 
     /**
-     * The client properties callback.
-     */
-    @Getter
-    @Setter
-    private ClientPropertiesCallback clientPropertiesCallback;
-
-    /**
-     * The client properties callback context.
-     */
-    @Getter
-    @Setter
-    private Object clientPropertiesCallbackContext;
-
-    /**
      * Constructor with binary data and message type
      *
      * @param data        The byte array of the message.
