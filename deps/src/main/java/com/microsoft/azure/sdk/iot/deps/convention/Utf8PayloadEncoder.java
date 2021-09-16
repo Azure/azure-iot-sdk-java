@@ -25,7 +25,7 @@ public class Utf8PayloadEncoder extends PayloadEncoder
     @Override
     public byte[] encodeStringToByteArray(String contentPayload)
     {
-        return getContentEncoding().encode(contentPayload).array();
+        return contentPayload.getBytes(getContentEncoding());
     }
 
     @Override

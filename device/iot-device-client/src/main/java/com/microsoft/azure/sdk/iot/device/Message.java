@@ -3,6 +3,9 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayInputStream;
@@ -28,64 +31,131 @@ public class Message
     // ----- Data Fields -----
 
     /**
-     * [Required for two way requests] Used to correlate two-way communication.
-     * Format: A case-sensitive string (up to 128 char long) of ASCII 7-bit alphanumeric chars
-     * plus {'-', ':', '/', '\', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
-     * Non-alphanumeric characters are from URN RFC.
+     * Used to correlate two-way communication.
+     *
+     * <p>
+     *     Format: A case-sensitive string (up to 128 char long) of ASCII 7-bit alphanumeric chars
+     *     plus {'-', ':', '/', '\', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
+     *     Non-alphanumeric characters are from URN RFC.
+     * </p>
      */
+    @Getter
+    @Setter
     private String messageId;
 
     /**
-     * Destination of the message
+     * Destination of the message.
      */
     @SuppressWarnings("unused") // Used in getter, leaving for future expansion
+    @Getter
+    @Setter
     private String to;
 
     /**
-     * Expiry time in milliseconds. Optional
+     * Expiry time in milliseconds.
+     * <p>
+     *      Optional.
+     * </p>
      */
     private long expiryTime;
 
     /**
-     * Used in message responses and feedback
+     * Used in message responses and feedback.
      */
+    @Setter
     private String correlationId;
 
     /**
-     * [Required in feedback messages] Used to specify the entity creating the message.
+     * Used to specify the entity creating the message.
+     * <p>
+     *     Required in feedback messages.
+     * </p>
      */
+    @Getter
+    @Setter
     private String userId;
 
     /**
-     * [Stamped on servicebound messages by IoT Hub] The authenticated id used to send this message.
+     * The authenticated id used to send this message.
+     * <p>
+     *     Stamped on servicebound messages by IoT Hub.
+     * </p>
      */
+    @Getter
+    @Setter
     private String connectionDeviceId;
 
     /**
-     * [Optional] Used to specify the type of message exchanged between Iot Hub and Device
+     * Used to specify the type of message exchanged between Iot Hub and Device.
+     * <p>
+     *     Optional.
+     * </p>
      */
+    @Getter
+    @Setter
     private MessageType messageType;
 
     /**
-     * [Optional] Used to specify the sender device client for multiplexing scenarios
+     * Used to specify the sender device client for multiplexing scenarios.
+     * <p>
+     *     Optional.
+     * </p>
      */
+    @Getter
+    @Setter
     private IotHubConnectionString iotHubConnectionString;
 
     /**
-     * [Optional] Used to correlate the message across the send/receive lifecycle
+     * Used to correlate the message across the send/receive lifecycle.
+     * <p>
+     *     Optional.
+     * </p>
      */
+    @Getter
+    @Setter
     private CorrelatingMessageCallback correlatingMessageCallback;
 
     /**
-     * [Optional] Used to specify the sender device client for multiplexing scenarios
+     * User context to send when using the correlating message callback.
+     * <p>
+     *     Optional.
+     * </p>
      */
+    @Getter
+    @Setter
     private Object correlatingMessageCallbackContext;
 
+    /**
+     * The connection module id.
+     */
+    @Getter
+    @Setter
     private String connectionModuleId;
+
+    /**
+     * The input name of the message, used in routing for module communications.
+     * @param inputName the input channel the message was received from.
+     * @return the message's input name value.
+     */
+    @Getter
+    @Setter
     private String inputName;
+
+    /**
+     * The output channel name to send to.
+     * <p>
+     *     Used in routing for module communications.
+     * </p>
+     * @param outputName the output channel name to send to.
+     * @return the output channel name.
+     */
+    @Getter
+    @Setter
     private String outputName;
 
     @SuppressWarnings("unused") // This is not set anywhere but is used in a method
+    @Getter
+    @Setter
     private String deliveryAcknowledgement;
 
     /**
@@ -99,18 +169,47 @@ public class Message
     private byte[] body;
 
     /**
-     * Message routing options
+     * The message's content type. This value is null by default
+     * @param contentType the content type of the message. May be null if you don't want to specify a content type.
+     * @return the message's content type
      */
+    @Getter
+    @Setter
     private String contentType;
+
+    /**
+     * The content encoding of this message. Used in message routing.
+     * @param contentEncoding the content encoding of the message. May be null if you don't want to specify a content encoding.
+     * @return the message's content encoding.
+     */
+    @Getter
+    @Setter
     private String contentEncoding;
 
+    /**
+     * The message creation time in UTC.
+     */
+    @Getter
+    @Setter
     private Date creationTimeUTC;
 
     /**
      * Security Client flag
      */
-    boolean isSecurityClient;
+    @Getter
+    @Setter
+    @Accessors(prefix = "is")
+    boolean isSecurityMessage;
 
+    /**
+     * Sets the component name of the message.
+     * <p>
+     *     Optional.
+     * </p>
+     */
+    @Getter
+    @Setter
+    String componentName;
     // ----- Constructors -----
 
     /**
@@ -222,6 +321,21 @@ public class Message
     }
 
     /**
+     * Getter for the correlationId property
+     * @return The property value
+     */
+    public String getCorrelationId()
+    {
+        // Codes_SRS_MESSAGE_34_045: [The function shall return the message's correlation ID.]
+        if (correlationId == null)
+        {
+            return "";
+        }
+
+        return correlationId;
+    }
+
+    /**
      * Adds or sets user-defined properties of this Message.
      * @param name Name of the property to be set.
      * @param value Value of the property to be set.
@@ -282,7 +396,7 @@ public class Message
         this.messageId = UUID.randomUUID().toString();
         this.correlationId = UUID.randomUUID().toString();
         this.properties = new ArrayList<>();
-        this.isSecurityClient = false;
+        this.isSecurityMessage = false;
     }
 
     /**
@@ -317,57 +431,6 @@ public class Message
     }
 
     /**
-     * Getter for the messageId property
-     * @return The property value
-     */
-    public String getMessageId()
-    {
-        // Codes_SRS_MESSAGE_34_043: [The function shall return the message's message Id.]
-        return messageId;
-    }
-
-    /**
-     * Setter for the messageId property
-     * @param messageId The string containing the property value
-     */
-    public void setMessageId(String messageId)
-    {
-        // Codes_SRS_MESSAGE_34_044: [The function shall set the message's message ID to the provided value.]
-        this.messageId = messageId;
-    }
-
-    public void setUserId(String userId)
-    {
-        // Codes_SRS_MESSAGE_34_050: [The function shall set the message's user ID to the provided value.]
-        this.userId = userId;
-    }
-
-    /**
-     * Getter for the correlationId property
-     * @return The property value
-     */
-    public String getCorrelationId()
-    {
-        // Codes_SRS_MESSAGE_34_045: [The function shall return the message's correlation ID.]
-        if (correlationId == null)
-        {
-            return "";
-        }
-
-        return correlationId;
-    }
-
-    /**
-     * Setter for the correlationId property
-     * @param correlationId The string containing the property value
-     */
-    public void setCorrelationId(String correlationId)
-    {
-        // Codes_SRS_MESSAGE_34_046: [The function shall set the message's correlation ID to the provided value.]
-        this.correlationId = correlationId;
-    }
-
-    /**
      * Setter for the expiryTime property. This setter uses relative time, not absolute time.
      * @param timeOut The time out for the message, in milliseconds, from the current time.
      */
@@ -395,155 +458,6 @@ public class Message
         this.expiryTime = absoluteTimeout;
     }
 
-    /**
-     * Getter for the Message type
-     * @return the Message type value
-     */
-    public MessageType getMessageType()
-    {
-        // Codes_SRS_MESSAGE_34_049: [The function shall return the message's message type.]
-        return this.messageType;
-    }
-
-    public void setConnectionDeviceId(String connectionDeviceId)
-    {
-        // Codes_SRS_MESSAGE_34_051: [The function shall set the message's connection device id to the provided value.]
-        this.connectionDeviceId = connectionDeviceId;
-    }
-
-    public void setConnectionModuleId(String connectionModuleId)
-    {
-        // Codes_SRS_MESSAGE_34_052: [The function shall set the message's connection module id to the provided value.]
-        this.connectionModuleId = connectionModuleId;
-    }
-
-    /**
-     * Set the output channel name to send to. Used in routing for module communications
-     * @param outputName the output channel name to send to
-     */
-    public void setOutputName(String outputName)
-    {
-        // Codes_SRS_MESSAGE_34_053: [The function shall set the message's output name to the provided value.]
-        this.outputName = outputName;
-    }
-
-    /**
-     * Set the input name of the message, used in routing for module communications
-     * @param inputName the input channel the message was received from
-     */
-    public void setInputName(String inputName)
-    {
-        // Codes_SRS_MESSAGE_34_058: [The function shall set the message's input name to the provided value.]
-        this.inputName = inputName;
-    }
-
-    /**
-     * Setter for the Message type
-     * @param type The enum containing the Message type value
-     */
-    public void setMessageType(MessageType type)
-    {
-        // Codes_SRS_MESSAGE_34_048: [The function shall set the message's message type.]
-        this.messageType = type;
-    }
-
-    /**
-     * Getter for the To system property
-     * @return the To value
-     */
-    public String getTo()
-    {
-        // Codes_SRS_MESSAGE_34_041: [The function shall return the message's To value.]
-        return this.to;
-    }
-
-    public String getConnectionDeviceId()
-    {
-        // Codes_SRS_MESSAGE_34_054: [The function shall return the message's connection device id value.]
-        return connectionDeviceId;
-    }
-
-    public String getConnectionModuleId()
-    {
-        // Codes_SRS_MESSAGE_34_055: [The function shall return the message's connection module id value.]
-        return connectionModuleId;
-    }
-
-    public String getInputName()
-    {
-        // Codes_SRS_MESSAGE_34_056: [The function shall return the message's input name value.]
-        return inputName;
-    }
-
-    public String getOutputName()
-    {
-        // Codes_SRS_MESSAGE_34_057: [The function shall return the message's output name value.]
-        return outputName;
-    }
-
-    /**
-     * Getter for the delivery acknowledgement system property
-     * @return the delivery acknowledgement value
-     */
-    public String getDeliveryAcknowledgement()
-    {
-        // Codes_SRS_MESSAGE_34_039: [The function shall return the message's DeliveryAcknowledgement.]
-        return this.deliveryAcknowledgement;
-    }
-
-    /**
-     * Getter for the User ID system property
-     * @return the User ID value
-     */
-    public String getUserId ()
-    {
-        // Codes_SRS_MESSAGE_34_037: [The function shall return the message's user ID.]
-        return this.userId;
-    }
-
-    /**
-     * Getter for the iotHubConnectionString property
-     * @return the iotHubConnectionString value
-     */
-    public IotHubConnectionString getIotHubConnectionString()
-    {
-        // Codes_SRS_MESSAGE_12_001: [The function shall return the message's iotHubConnectionString object.]
-        return iotHubConnectionString;
-    }
-
-    /**
-     * Setter for the iotHubConnectionString type
-     * @param iotHubConnectionString The iotHubConnectionString value to set
-     */
-    public void setIotHubConnectionString(IotHubConnectionString iotHubConnectionString)
-    {
-        // Codes_SRS_MESSAGE_12_002: [The function shall set the message's iotHubConnectionString object to the provided value.]
-        this.iotHubConnectionString = iotHubConnectionString;
-    }
-
-    /**
-     * Return the message's content type. This value is null by default
-     * @return the message's content type
-     */
-    public String getContentType()
-    {
-        // Codes_SRS_MESSAGE_34_059: [The function shall return the message's content type.]
-        return this.contentType;
-    }
-
-    /**
-     * Set the content type of this message. Used in message routing.
-     *
-     * @deprecated as of device-client version 1.14.1, please use {@link #setContentTypeFinal(String)}
-     *
-     *  @param contentType the content type of the message. May be null if you don't want to specify a content type.
-     */
-    @Deprecated
-    public void setContentType(String contentType)
-    {
-        // Codes_SRS_MESSAGE_34_060: [The function shall save the provided content type.]
-        this.contentType = contentType;
-    }
 
     /**
      * Set the content type of this message. Used in message routing.
@@ -553,32 +467,6 @@ public class Message
     {
         // Codes_SRS_MESSAGE_34_060: [The function shall save the provided content type.]
         this.contentType = contentType;
-    }
-
-    /**
-     * Returns this message's content encoding. This value is null by default
-     * @return the message's content encoding.
-     */
-    public String getContentEncoding()
-    {
-        // Codes_SRS_MESSAGE_34_061: [The function shall return the message's content encoding.]
-        return this.contentEncoding;
-    }
-
-    /**
-     * Set the content encoding of this message. Used in message routing.
-     * @param contentEncoding the content encoding of the message. May be null if you don't want to specify a content encoding.
-     */
-    public void setContentEncoding(String contentEncoding)
-    {
-        // Codes_SRS_MESSAGE_34_062: [The function shall save the provided content encoding.]
-        this.contentEncoding = contentEncoding;
-    }
-
-    public Date getCreationTimeUTC()
-    {
-        // Codes_SRS_MESSAGE_34_063: [The function shall return the saved creationTimeUTC.]
-        return this.creationTimeUTC;
     }
 
     /**
@@ -603,22 +491,11 @@ public class Message
         return sdf.format(this.creationTimeUTC).replace("_", "T") + "Z";
     }
 
-    public final void setCreationTimeUTC(Date creationTimeUTC)
-    {
-        // Codes_SRS_MESSAGE_34_065: [The function shall save the provided creationTimeUTC.]
-        this.creationTimeUTC = creationTimeUTC;
-    }
-
     public void setAsSecurityMessage()
     {
         // Set the message as json encoding
         this.contentEncoding = SECURITY_CLIENT_JSON_ENCODING;
-        this.isSecurityClient = true;
-    }
-
-    public boolean isSecurityMessage()
-    {
-        return this.isSecurityClient;
+        this.isSecurityMessage = true;
     }
 
     @Override
@@ -637,21 +514,5 @@ public class Message
         }
 
         return s.toString();
-    }
-
-    public void setCorrelatingMessageCallback(CorrelatingMessageCallback correlatingMessageCallback) {
-        this.correlatingMessageCallback = correlatingMessageCallback;
-    }
-
-    public CorrelatingMessageCallback getCorrelatingMessageCallback() {
-        return correlatingMessageCallback;
-    }
-
-    public void setCorrelatingMessageCallbackContext(Object correlatingMessageCallbackContext) {
-        this.correlatingMessageCallbackContext = correlatingMessageCallbackContext;
-    }
-
-    public Object getCorrelatingMessageCallbackContext() {
-        return correlatingMessageCallbackContext;
     }
 }
