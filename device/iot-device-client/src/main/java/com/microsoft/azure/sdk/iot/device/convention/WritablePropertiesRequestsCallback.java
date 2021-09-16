@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.device.convention;
 
+import com.microsoft.azure.sdk.iot.deps.convention.ClientPropertyCollection;
+
 /**
  * A callback used to respond to all writable property requests. See {@link com.microsoft.azure.sdk.iot.device.InternalClient#subscribeToWritablePropertiesEvent(WritablePropertiesRequestsCallback, Object)} for more information.
  */
