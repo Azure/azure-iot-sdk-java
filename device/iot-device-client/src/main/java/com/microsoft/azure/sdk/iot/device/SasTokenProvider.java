@@ -6,7 +6,7 @@ package com.microsoft.azure.sdk.iot.device;
 /**
  * Interface for allowing users to control SAS token generation. To see an example of how SAS tokens can be generated
  * from device connection strings, see {@link com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken}.
- * See {@link <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#example">this document</a>  for more details on sas tokens.}.
+ * @see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#example">This document</a> for more details on sas tokens.
  */
 public interface SasTokenProvider
 {
