@@ -52,8 +52,6 @@ public class DeviceManagerExportSample
             }
         }
 
-        registryManager.close();
-
         System.out.println("Export job completed. Results are in " + SampleUtils.exportFileLocation);
     }
 }
