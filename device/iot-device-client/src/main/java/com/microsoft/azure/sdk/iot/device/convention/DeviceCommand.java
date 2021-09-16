@@ -6,7 +6,6 @@ package com.microsoft.azure.sdk.iot.device.convention;
 import com.microsoft.azure.sdk.iot.deps.convention.PayloadConvention;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethod;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import lombok.AccessLevel;
@@ -78,9 +77,8 @@ public class DeviceCommand extends DeviceMethod
                             }
 
                             log.trace("Executing command invocation callback for component {} with command name {} for message {}",  componentName == null ? "default" : componentName , commandName, methodMessage);
-                            deviceCommandCallback.setPayloadConvention(payloadConvention);
-                            deviceCommandCallback.setPayload(methodMessage.getBytes());
-                            DeviceCommandData responseData = deviceCommandCallback.call(componentName, commandName);
+                            DeviceCommandRequest commandRequest = new DeviceCommandRequest(componentName, commandName, methodMessage.getBytes(), payloadConvention);
+                            DeviceCommandResponse responseData = deviceCommandCallback.call(commandRequest);
                             log.trace("Command invocation callback returned for component {} with command name {} for message {}", componentName == null ? "default" : componentName , commandName, methodMessage);
 
                             if (responseData != null)

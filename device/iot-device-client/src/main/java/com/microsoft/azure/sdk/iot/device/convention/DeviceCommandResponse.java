@@ -9,7 +9,7 @@ import lombok.Data;
 /**
  * The response to a command to be sent by the client.
  */
-public class DeviceCommandData
+public class DeviceCommandResponse
 {
     private Object responseMessage;
     private int status;
@@ -19,7 +19,7 @@ public class DeviceCommandData
      * @param status A response status code.
      * @param responseMessage The response message that will be
      */
-    public DeviceCommandData(int status, Object responseMessage)
+    public DeviceCommandResponse(int status, Object responseMessage)
     {
         this.status = status;
         this.responseMessage = responseMessage;

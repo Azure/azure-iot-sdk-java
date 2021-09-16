@@ -3,8 +3,6 @@
 
 package samples.com.microsoft.azure.sdk.iot.device;
 
-import com.google.gson.Gson;
-import com.google.gson.annotations.Expose;
 import com.microsoft.azure.sdk.iot.deps.convention.*;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
@@ -371,12 +369,12 @@ public class Thermostat
 
             @SneakyThrows
             @Override
-            public DeviceCommandData call(String componentName, String methodName)
+            public DeviceCommandResponse call(DeviceCommandRequest deviceCommandRequest)
             {
                 // In this instance we will deal with the default component
-                if (componentName == null  && methodName.equalsIgnoreCase(commandName))
+                if (deviceCommandRequest.getComponentName() == null  && deviceCommandRequest.getCommandName().equalsIgnoreCase(commandName))
                 {
-                    commandRequest request = this.GetData(commandRequest.class);
+                    commandRequest request = deviceCommandRequest.GetPayloadAsObject(commandRequest.class);
                     Date since = request.since;
                     log.debug("Command: Received - Generating min, max, avg temperature report since {}.", since);
 
@@ -417,15 +415,15 @@ public class Thermostat
                                 startTimeToSend,
                                 endTimeToSend);
 
-                        return new DeviceCommandData(StatusCode.COMPLETED.value, responsePayload);
+                        return new DeviceCommandResponse(StatusCode.COMPLETED.value, responsePayload);
                     }
 
                     log.debug("Command: No relevant readings found since {}, cannot generate any report.", since);
-                    return new DeviceCommandData(StatusCode.NOT_FOUND.value, null);
+                    return new DeviceCommandResponse(StatusCode.NOT_FOUND.value, null);
                 }
 
-                log.error("Command: Unknown command {} invoked from service.", methodName);
-                return new DeviceCommandData(StatusCode.NOT_FOUND.value, null);
+                log.error("Command: Unknown command {} invoked from service.", deviceCommandRequest.getCommandName());
+                return new DeviceCommandResponse(StatusCode.NOT_FOUND.value, null);
             }
         }
 
