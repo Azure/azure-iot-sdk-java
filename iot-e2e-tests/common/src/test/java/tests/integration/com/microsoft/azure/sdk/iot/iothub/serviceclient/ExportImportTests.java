@@ -115,12 +115,6 @@ public class ExportImportTests extends IntegrationTest
         //Cleaning up the containers
         importContainer.delete();
         exportContainer.delete();
-
-        if (registryManager != null)
-        {
-            registryManager.close();
-            registryManager = null;
-        }
     }
 
     @Test (timeout = IMPORT_EXPORT_TEST_TIMEOUT_MILLISECONDS)

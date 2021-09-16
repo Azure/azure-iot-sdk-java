@@ -219,12 +219,6 @@ public class JobClientTests extends IntegrationTest
         {
             device.tearDown();
         }
-
-        if (registryManager != null)
-        {
-            registryManager.close();
-            registryManager = null;
-        }
     }
 
     @Test(timeout = TEST_TIMEOUT_MILLISECONDS)

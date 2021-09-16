@@ -148,12 +148,6 @@ public class DigitalTwinClientTests extends IntegrationTest
         return new DeviceClient(deviceConnectionString, protocol, options);
     }
 
-    @AfterClass
-    public static void cleanUpAfterClass()
-    {
-        registryManager.close();
-    }
-
     @BeforeClass
     public static void startProxy()
     {
