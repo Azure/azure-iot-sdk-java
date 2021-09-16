@@ -98,17 +98,10 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
 
     public void close() {
         synchronized (lock) {
-            try {
-                log.debug("Closing the device client instance...");
-                client.close();
-            }
-            catch (IOException e) {
-                log.error("Exception thrown while closing DeviceClient instance: ", e);
-            } finally {
-                connectionStatus = ConnectionStatus.DISCONNECTED;
-            }
+            log.debug("Closing the device client instance...");
+            client.close();
+            connectionStatus = ConnectionStatus.DISCONNECTED;
         }
-
     }
 
     @Override

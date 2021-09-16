@@ -70,11 +70,11 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
      * object.
      *
      * @param config the client configuration.
-     * @throws TransportException if this constructor fails to build the required SSLContext.
+     * @throws TransportException if the mqtt connection configuration cannot be constructed.
      */
     // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
     // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
-    public MqttIotHubConnection(DeviceClientConfig config) throws IllegalArgumentException, TransportException
+    public MqttIotHubConnection(DeviceClientConfig config) throws TransportException
     {
         if (config == null)
         {
@@ -296,7 +296,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
      * Closes the connection. After the connection is closed, it is no longer usable.
      * If the connection is already closed, the function shall do nothing.
      */
-    public void close() throws TransportException
+    public void close()
     {
         synchronized (this.mqttConnectionStateLock)
         {

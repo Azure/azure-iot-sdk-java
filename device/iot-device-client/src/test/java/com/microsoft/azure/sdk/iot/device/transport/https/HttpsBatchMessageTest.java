@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.https;
 
+import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubSizeExceededException;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsBatchMessage;
@@ -13,7 +14,9 @@ import org.junit.Test;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
@@ -36,9 +39,10 @@ public class HttpsBatchMessageTest
     // Tests_SRS_HTTPSBATCHMESSAGE_11_006: [The function shall return the current batch message body as a byte array.]
     // Tests_SRS_HTTPSBATCHMESSAGE_11_007: [The batch message body shall be encoded using UTF-8.]
     @Test
-    public void constructorInitializesEmptyArrayBody()
+    public void constructorInitializesEmptyArrayBody() throws IotHubSizeExceededException
     {
-        HttpsBatchMessage batchMsg = new HttpsBatchMessage();
+        List<HttpsSingleMessage> mockMessageList = new ArrayList<>();
+        HttpsBatchMessage batchMsg = new HttpsBatchMessage(mockMessageList);
         String testBatchBody = new String(batchMsg.getBody(), UTF8);
 
         final String expectedBatchBody = "[]";
@@ -60,8 +64,9 @@ public class HttpsBatchMessageTest
             }
         };
 
-        HttpsBatchMessage batchMsg = new HttpsBatchMessage();
-        batchMsg.addMessage(mockMsg);
+        List<HttpsSingleMessage> mockMessageList = new ArrayList<>();
+        mockMessageList.add(mockMsg);
+        HttpsBatchMessage batchMsg = new HttpsBatchMessage(mockMessageList);
         String testBatchBody =
                 new String(batchMsg.getBody(), UTF8).replaceAll("\\s", "");
 
@@ -83,8 +88,9 @@ public class HttpsBatchMessageTest
             }
         };
 
-        HttpsBatchMessage batchMsg = new HttpsBatchMessage();
-        batchMsg.addMessage(mockMsg);
+        List<HttpsSingleMessage> mockMessageList = new ArrayList<>();
+        mockMessageList.add(mockMsg);
+        HttpsBatchMessage batchMsg = new HttpsBatchMessage(mockMessageList);
         String testBatchBody =
                 new String(batchMsg.getBody(), UTF8).replaceAll("\\s", "");
 
@@ -115,8 +121,9 @@ public class HttpsBatchMessageTest
             }
         };
 
-        HttpsBatchMessage batchMsg = new HttpsBatchMessage();
-        batchMsg.addMessage(mockMsg);
+        List<HttpsSingleMessage> mockMessageList = new ArrayList<>();
+        mockMessageList.add(mockMsg);
+        HttpsBatchMessage batchMsg = new HttpsBatchMessage(mockMessageList);
         String testBatchBody =
                 new String(batchMsg.getBody(), UTF8).replaceAll("\\s", "");
 
@@ -148,8 +155,9 @@ public class HttpsBatchMessageTest
             }
         };
 
-        HttpsBatchMessage batchMsg = new HttpsBatchMessage();
-        batchMsg.addMessage(mockMsg);
+        List<HttpsSingleMessage> mockMessageList = new ArrayList<>();
+        mockMessageList.add(mockMsg);
+        HttpsBatchMessage batchMsg = new HttpsBatchMessage(mockMessageList);
         String testBatchBody =
                 new String(batchMsg.getBody(), UTF8).replaceAll("\\s", "");
 
@@ -198,8 +206,9 @@ public class HttpsBatchMessageTest
             }
         };
 
-        HttpsBatchMessage batchMsg = new HttpsBatchMessage();
-        batchMsg.addMessage(mockMsg);
+        List<HttpsSingleMessage> mockMessageList = new ArrayList<>();
+        mockMessageList.add(mockMsg);
+        HttpsBatchMessage batchMsg = new HttpsBatchMessage(mockMessageList);
         String testBatchBody =
                 new String(batchMsg.getBody(), UTF8).replaceAll("\\s", "");
 
@@ -212,40 +221,12 @@ public class HttpsBatchMessageTest
         assertThat(testBatchBody, containsString(expectedMessageIdString));
     }
 
-    // Tests_SRS_HTTPSBATCHMESSAGE_11_009: [If the function throws a IotHubSizeExceededException, the batched message shall remain as if the message was never added.]
-    @Test
-    public void addMessageRejectsOverflowingMessageAndPreservesOldBatchState(
-            @Mocked final HttpsSingleMessage mockMsg) throws IotHubSizeExceededException
-    {
-        final int msgBodySize = SERVICEBOUND_MESSAGE_MAX_SIZE_BYTES / 2 + 1;
-        final byte[] msgBodyBytes = new byte[msgBodySize];
-        new NonStrictExpectations()
-        {
-            {
-                mockMsg.getBody();
-                result = msgBodyBytes;
-            }
-        };
-
-        HttpsBatchMessage batchMsg = new HttpsBatchMessage();
-        batchMsg.addMessage(mockMsg);
-        try
-        {
-            batchMsg.addMessage(mockMsg);
-        }
-        catch (IotHubSizeExceededException e)
-        {
-            final int expectedTwoMsgBodySize = 2 * msgBodySize;
-            assertThat(batchMsg.getBody().length,
-                    is(lessThan(expectedTwoMsgBodySize)));
-        }
-    }
-
     // Tests_SRS_HTTPSBATCHMESSAGE_11_011: [The function shall return 'application/vnd.microsoft.iothub.json'.]
     @Test
-    public void getContentTypeReturnsCorrectContentType()
+    public void getContentTypeReturnsCorrectContentType() throws IotHubSizeExceededException
     {
-        HttpsBatchMessage batchMsg = new HttpsBatchMessage();
+        List<HttpsSingleMessage> mockMessageList = new ArrayList<>();
+        HttpsBatchMessage batchMsg = new HttpsBatchMessage(mockMessageList);
         String testContentType = batchMsg.getContentType();
 
         final String expectedContentType =
@@ -255,9 +236,10 @@ public class HttpsBatchMessageTest
 
     // Tests_SRS_HTTPSBATCHMESSAGE_11_012: [The function shall return an empty array.]
     @Test
-    public void getPropertiesReturnsNoProperties()
+    public void getPropertiesReturnsNoProperties() throws IotHubSizeExceededException
     {
-        HttpsBatchMessage batchMsg = new HttpsBatchMessage();
+        List<HttpsSingleMessage> mockMessageList = new ArrayList<>();
+        HttpsBatchMessage batchMsg = new HttpsBatchMessage(mockMessageList);
         MessageProperty[] testProperties = batchMsg.getProperties();
 
         MessageProperty[] expectedProperties =
@@ -267,9 +249,10 @@ public class HttpsBatchMessageTest
 
     // Codes_SRS_HTTPSBATCHMESSAGE_21_013: [The function shall return an empty map.]
     @Test
-    public void getSystemPropertiesReturnsNoProperties()
+    public void getSystemPropertiesReturnsNoProperties() throws IotHubSizeExceededException
     {
-        HttpsBatchMessage batchMsg = new HttpsBatchMessage();
+        List<HttpsSingleMessage> mockMessageList = new ArrayList<>();
+        HttpsBatchMessage batchMsg = new HttpsBatchMessage(mockMessageList);
         Map<String, String> testProperties = batchMsg.getSystemProperties();
 
         assertThat(testProperties.size(), is(0));
@@ -277,9 +260,10 @@ public class HttpsBatchMessageTest
 
     // Tests_SRS_HTTPSBATCHMESSAGE_11_010: [The function shall return the number of messages currently in the batch.]
     @Test
-    public void numMessagesInitializedCorrectly(@Mocked final HttpsSingleMessage mockMsg)
+    public void numMessagesInitializedCorrectly(@Mocked final HttpsSingleMessage mockMsg) throws IotHubSizeExceededException
     {
-        HttpsBatchMessage batchMsg = new HttpsBatchMessage();
+        List<HttpsSingleMessage> mockMessageList = new ArrayList<>();
+        HttpsBatchMessage batchMsg = new HttpsBatchMessage(mockMessageList);
         int testNumMessages = batchMsg.numMessages();
 
         final int expectedNumMessages = 0;
@@ -300,10 +284,11 @@ public class HttpsBatchMessageTest
             }
         };
 
-        HttpsBatchMessage batchMsg = new HttpsBatchMessage();
-        batchMsg.addMessage(mockMsg);
-        batchMsg.addMessage(mockMsg);
-        batchMsg.addMessage(mockMsg);
+        List<HttpsSingleMessage> mockMessageList = new ArrayList<>();
+        mockMessageList.add(mockMsg);
+        mockMessageList.add(mockMsg);
+        mockMessageList.add(mockMsg);
+        HttpsBatchMessage batchMsg = new HttpsBatchMessage(mockMessageList);
         int testNumMessages = batchMsg.numMessages();
 
         final int expectedNumMessages = 3;
@@ -332,8 +317,9 @@ public class HttpsBatchMessageTest
 
         try
         {
-            HttpsBatchMessage batchMsg = new HttpsBatchMessage();
-            batchMsg.addMessage(mockMsg);
+            List<HttpsSingleMessage> mockMessageList = new ArrayList<>();
+            mockMessageList.add(mockMsg);
+            new HttpsBatchMessage(mockMessageList);
         }
         catch (IotHubSizeExceededException e)
         {

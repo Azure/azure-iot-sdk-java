@@ -100,12 +100,6 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
         return new DeviceClient(deviceConnectionString, protocol, options);
     }
 
-    @AfterClass
-    public static void cleanUpAfterClass()
-    {
-        registryManager.close();
-    }
-
     @Test
     @StandardTierHubOnlyTest
     public void getDigitalTwin() {

@@ -207,18 +207,6 @@ public class FileUploadTests extends IntegrationTest
         }
     }
 
-    @AfterClass
-    public static void tearDown()
-    {
-        if (registryManager != null)
-        {
-            registryManager.close();
-            registryManager = null;
-        }
-
-        serviceClient = null;
-    }
-
     @BeforeClass
     public static void startProxy()
     {

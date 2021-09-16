@@ -227,11 +227,6 @@ public class ProvisioningCommon extends IntegrationTest
     @After
     public void tearDown()
     {
-        if (registryManager != null)
-        {
-            registryManager.close();
-        }
-
         registryManager = null;
 
         if (testInstance != null && testInstance.securityProvider != null && testInstance.securityProvider instanceof SecurityProviderTPMEmulator)

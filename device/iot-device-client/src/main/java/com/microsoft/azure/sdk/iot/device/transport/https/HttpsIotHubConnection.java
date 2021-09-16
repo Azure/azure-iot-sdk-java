@@ -17,7 +17,9 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -83,19 +85,19 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
 
             if (message instanceof BatchMessage)
             {
-                HttpsBatchMessage batchMessage = new HttpsBatchMessage();
-                for (Message singleMessage : ((BatchMessage)message).getNestedMessages())
+                try
                 {
-                    try
+                    List<HttpsSingleMessage> httpsMessageList = new ArrayList<>();
+                    for (Message msg : ((BatchMessage)message).getNestedMessages())
                     {
-                        batchMessage.addMessage(HttpsSingleMessage.parseHttpsMessage(singleMessage));
+                        httpsMessageList.add(HttpsSingleMessage.parseHttpsMessage(msg));
                     }
-                    catch (IotHubSizeExceededException e)
-                    {
-                        throw new TransportException("Failed to create HTTPS batch message", e);
-                    }
+                    httpsMessage = new HttpsBatchMessage(httpsMessageList);
                 }
-                httpsMessage = batchMessage;
+                catch (IotHubSizeExceededException e)
+                {
+                    throw new TransportException("Failed to create HTTPS batch message", e);
+                }
             }
             else
             {

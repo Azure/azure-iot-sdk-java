@@ -206,11 +206,6 @@ public class MultiplexingClientTests extends IntegrationTest
     @AfterClass
     public static void tearDown() throws Exception
     {
-        if (registryManager != null)
-        {
-            registryManager.close();
-        }
-
         if (serviceClient != null)
         {
             serviceClient.close();

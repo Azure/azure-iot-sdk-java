@@ -241,9 +241,9 @@ public final class DeviceClient extends InternalClient implements Closeable
      * before it can be used again. If the client is already closed,
      * the function shall do nothing.
      *
-     * @throws IOException if the connection to an IoT hub cannot be closed.
+     * @throws UnsupportedOperationException if called on a device that is multiplexed.
      */
-    public void close() throws IOException
+    public void close()
     {
         if (this.deviceClientType == DeviceClientType.USE_MULTIPLEXING_CLIENT)
         {

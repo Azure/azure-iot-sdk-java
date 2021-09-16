@@ -284,16 +284,9 @@ public class SendMessagesCommon extends IntegrationTest
 
         public void dispose()
         {
-            try
+            if (this.identity != null && this.identity.getClient() != null)
             {
-                if (this.identity != null && this.identity.getClient() != null)
-                {
-                    this.identity.getClient().close();
-                }
-            }
-            catch (IOException e)
-            {
-                log.error("Failed to close client during tear down", e);
+                this.identity.getClient().close();
             }
 
             Tools.disposeTestIdentity(this.identity, iotHubConnectionString);

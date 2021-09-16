@@ -45,6 +45,7 @@ public abstract class IotHubSasTokenWithRefreshAuthenticationProvider extends Io
      * @param sharedAccessToken the shared access token
      * @param suggestedTimeToLiveSeconds the time to live for generated tokens
      * @param timeBufferPercentage the percent of a sas token's life to live before renewing
+     * @param sslContext the SSLContext the connection will use
      */
     protected IotHubSasTokenWithRefreshAuthenticationProvider(String hostname, String gatewayHostName, String deviceId, String moduleId, String sharedAccessToken, int suggestedTimeToLiveSeconds, int timeBufferPercentage, SSLContext sslContext)
     {

@@ -69,8 +69,6 @@ public class ModuleManagerSample
         {
             iote.printStackTrace();
         }
-
-        registryManager.close();
     }
 
     private static void GetModule() throws Exception
@@ -100,8 +98,6 @@ public class ModuleManagerSample
             System.out.println("Module secondary key: " + module.getSecondaryKey());
             System.out.println("Module eTag: " + module.geteTag());
         }
-
-        registryManager.close();
     }
 
     private static void UpdateModule()
@@ -126,8 +122,6 @@ public class ModuleManagerSample
         {
             iote.printStackTrace();
         }
-
-        registryManager.close();
     }
 
     private static void RemoveModule()
@@ -145,7 +139,5 @@ public class ModuleManagerSample
         {
             iote.printStackTrace();
         }
-
-        registryManager.close();
     }
 }

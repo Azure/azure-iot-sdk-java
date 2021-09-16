@@ -220,47 +220,6 @@ public class DeviceIOTest
         };
     }
 
-    @Test (expected = IOException.class)
-    public void closeCloseTransportThrows() throws DeviceClientException, IOException
-    {
-        // arrange
-        final Object deviceIO = newDeviceIO();
-        Deencapsulation.setField(deviceIO, "state", IotHubConnectionStatus.CONNECTED);
-        try
-        {
-            openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
-        }
-        catch (IOException e)
-        {
-            // catch and ignore IOException from open
-        }
-
-        new NonStrictExpectations()
-        {
-            {
-                mockedTransport.close(IotHubConnectionStatusChangeReason.CLIENT_CLOSE, null);
-                result = new DeviceClientException();
-            }
-        };
-
-        // act
-        Deencapsulation.invoke(deviceIO, "close");
-    }
-
-    /* Tests_SRS_DEVICE_IO_21_021: [The close shall set the `state` as `CLOSE`.] */
-    @Test
-    public void closeDoesNothingOnUnopenedClientSuccess()
-    {
-        // arrange
-        final Object deviceIO = newDeviceIO();
-
-        // act
-        Deencapsulation.invoke(deviceIO, "close");
-
-        // assert
-        assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
-    }
-
     /* Tests_SRS_DEVICE_IO_21_021: [The close shall set the `state` as `CLOSE`.] */
     @Test
     public void closeDoesNothingOnClosedClientSuccess()
@@ -310,7 +269,7 @@ public class DeviceIOTest
         };
 
         // act
-        Deencapsulation.invoke(deviceIO, "closeWithoutWrappingException");
+        Deencapsulation.invoke(deviceIO, "close");
 
         // assert
         assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());

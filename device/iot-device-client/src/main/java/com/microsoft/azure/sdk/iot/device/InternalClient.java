@@ -176,18 +176,9 @@ public class InternalClient
     }
 
     /**
-     * Closes the IoT hub client by releasing any resources held by client. When
-     * close is called all the messages that were in transit or pending to be
-     * sent will be informed to the user in the callbacks and any existing
-     * connection to IotHub will be closed.
-     * Must be called to terminate the background thread that is sending data to
-     * IoT hub. After close is called, the IoT hub client must be opened again
-     * before it can be used again. If the client is already closed,
-     * the function shall do nothing.
-     *
-     * @throws IOException if the connection to an IoT hub cannot be closed.
+     * Close the client.
      */
-    public void close() throws IOException
+    public void close()
     {
         this.deviceIO.close();
     }

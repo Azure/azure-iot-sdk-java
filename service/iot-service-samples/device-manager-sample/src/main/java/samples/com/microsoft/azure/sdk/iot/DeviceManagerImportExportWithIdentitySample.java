@@ -66,8 +66,6 @@ public class DeviceManagerImportExportWithIdentitySample {
             }
             Thread.sleep(500);
         }
-
-        registryManager.close();
     }
 
     public static void ImportDevices() throws IOException, IotHubException, InterruptedException {
@@ -102,7 +100,5 @@ public class DeviceManagerImportExportWithIdentitySample {
             }
             Thread.sleep(500);
         }
-
-        registryManager.close();
     }
 }

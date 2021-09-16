@@ -82,8 +82,6 @@ public class TokenCredentialTests
         // Assert
         assertEquals(0, deviceGetBefore.getCloudToDeviceMessageCount());
         assertEquals(1, deviceGetAfter.getCloudToDeviceMessageCount());
-
-        registryManager.close();
     }
 
     @Test
