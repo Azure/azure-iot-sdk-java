@@ -75,8 +75,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.*;
 import static org.junit.Assert.assertFalse;
 
 
@@ -439,7 +438,85 @@ public class AmqpsIotHubConnectionTest {
         connection.open();
     }
 
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_011: [If any exception is thrown while attempting to trigger the reactor, the function shall close the connection and throw an IOException.]
+    @Test
+    public void openClearsLocalStateIfOpenInterrupted() throws TransportException, InterruptedException
+    {
+        // arrange
+        baseExpectations();
+        final CountDownLatch workerLinkLatch = new CountDownLatch(0);
+
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false);
+        connection.setListener(mockedIotHubListener);
+
+        new Expectations()
+        {
+            {
+                new CountDownLatch(anyInt);
+                result = workerLinkLatch;
+
+                workerLinkLatch.await(anyLong, TimeUnit.SECONDS);
+                result = new InterruptedException("test interrupted exception"); // simulates getting interrupted while opening
+            }
+        };
+
+        // act
+        try
+        {
+            connection.open();
+            fail("expected an exception to be thrown");
+        }
+        catch (TransportException e)
+        {
+            // expected exception
+        }
+
+        Queue<AmqpsSessionHandler> sessionHandlers = Deencapsulation.getField(connection, "sessionHandlers");
+        Queue<AmqpsSasTokenRenewalHandler> sasTokenRenewalHandlers = Deencapsulation.getField(connection, "sasTokenRenewalHandlers");
+
+        assertTrue(sessionHandlers.isEmpty());
+        assertTrue(sasTokenRenewalHandlers.isEmpty());
+    }
+
+    @Test
+    public void openClearsLocalStateIfWorkerLinksTimeout() throws TransportException, InterruptedException
+    {
+        // arrange
+        baseExpectations();
+        final CountDownLatch workerLinkLatch = new CountDownLatch(0);
+
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, false);
+        connection.setListener(mockedIotHubListener);
+
+        new Expectations()
+        {
+            {
+                new CountDownLatch(anyInt);
+                result = workerLinkLatch;
+
+                workerLinkLatch.await(anyLong, TimeUnit.SECONDS);
+                result = false; // simulates timing out waiting for the worker links to open
+            }
+        };
+
+        // act
+        try
+        {
+            connection.open();
+            fail("expected an exception to be thrown");
+        }
+        catch (TransportException e)
+        {
+            // expected exception
+        }
+
+        Queue<AmqpsSessionHandler> sessionHandlers = Deencapsulation.getField(connection, "sessionHandlers");
+        Queue<AmqpsSasTokenRenewalHandler> sasTokenRenewalHandlers = Deencapsulation.getField(connection, "sasTokenRenewalHandlers");
+
+        assertTrue(sessionHandlers.isEmpty());
+        assertTrue(sasTokenRenewalHandlers.isEmpty());
+    }
+
+    // Tests_SRS_AMQPSIOTHUBCONNECTION_15_011: [If any exception is thrown while attempting to trigger the reactor, the function shall closeNow the connection and throw an IOException.]
     @Test (expected = IOException.class)
     public void openThrowsIfProtonReactorThrows() throws TransportException
     {
@@ -537,9 +614,8 @@ public class AmqpsIotHubConnectionTest {
         }
     }
 
-    // Tests_SRS_AMQPSIOTHUBCONNECTION_12_004: [The function shall TransportException throws if the waitLatch throws.]
-    @Test(expected = TransportException.class)
-    public void closeThrowsIfWaitLatchThrows() throws Exception
+    @Test
+    public void closeStillFreesReactorIfWaitLatchThrows() throws Exception
     {
         baseExpectations();
 
@@ -558,6 +634,13 @@ public class AmqpsIotHubConnectionTest {
         };
 
         connection.close();
+
+        new Verifications()
+        {
+            {
+                mockReactor.free();
+            }
+        };
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_012: [The function shall set the status of the AMQPS connection to DISCONNECTED.]

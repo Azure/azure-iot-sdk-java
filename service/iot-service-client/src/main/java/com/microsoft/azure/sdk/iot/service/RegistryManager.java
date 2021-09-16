@@ -33,18 +33,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Use the RegistryManager client to manage the identity registry in IoT hubs.
- * To access twins, use the {@link TwinClient} client.
+ * To access twins, use the {@link TwinClient}.
  */
 public class RegistryManager
 {
-    private static final int EXECUTOR_THREAD_POOL_SIZE = 10;
-    private ExecutorService executor;
     private final String hostName;
     private TokenCredentialCache credentialCache;
     private AzureSasCredential azureSasCredential;
@@ -85,7 +80,6 @@ public class RegistryManager
 
         this.hostName = iotHubConnectionString.getHostName();
         this.options = options;
-        this.executor = Executors.newFixedThreadPool(EXECUTOR_THREAD_POOL_SIZE);
     }
 
     /**
@@ -117,7 +111,6 @@ public class RegistryManager
             throw new IllegalArgumentException("hostName cannot be null or empty");
         }
 
-        this.executor = Executors.newFixedThreadPool(EXECUTOR_THREAD_POOL_SIZE);
         this.options = options;
         this.credentialCache = new TokenCredentialCache(credential);
         this.hostName = hostName;
@@ -150,21 +143,9 @@ public class RegistryManager
             throw new IllegalArgumentException("hostName cannot be null or empty");
         }
 
-        this.executor = Executors.newFixedThreadPool(EXECUTOR_THREAD_POOL_SIZE);
         this.options = options;
         this.azureSasCredential = azureSasCredential;
         this.hostName = hostName;
-    }
-
-    /**
-     * Gracefully close running threads, and then shutdown the underlying executor service
-     */
-    public void close()
-    {
-        if (executor != null && !executor.isTerminated())
-        {
-            this.executor.shutdownNow();
-        }
     }
 
     /**
@@ -198,35 +179,6 @@ public class RegistryManager
     }
 
     /**
-     * Async wrapper for add() operation
-     *
-     * @param device The device object to add
-     * @return The future object for the requested operation
-     */
-    public CompletableFuture<Device> addDeviceAsync(Device device)
-    {
-        if (device == null)
-        {
-            throw new IllegalArgumentException("device cannot be null");
-        }
-
-        final CompletableFuture<Device> future = new CompletableFuture<>();
-        executor.submit(() ->
-        {
-            try
-            {
-                Device responseDevice = addDevice(device);
-                future.complete(responseDevice);
-            }
-            catch (IOException | IotHubException e)
-            {
-                future.completeExceptionally(e);
-            }
-        });
-        return future;
-    }
-
-    /**
      * Get device data by device Id from IotHub
      *
      * @param deviceId The id of requested device
@@ -252,35 +204,6 @@ public class RegistryManager
         String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
 
         return new Device(new DeviceParser(bodyStr));
-    }
-
-    /**
-     * Async wrapper for getDevice() operation
-     *
-     * @param deviceId The id of requested device
-     * @return The future object for the requested operation
-     */
-    public CompletableFuture<Device> getDeviceAsync(String deviceId)
-    {
-        if (Tools.isNullOrEmpty(deviceId))
-        {
-            throw new IllegalArgumentException("deviceId cannot be null or empty");
-        }
-
-        final CompletableFuture<Device> future = new CompletableFuture<>();
-        executor.submit(() ->
-        {
-            try
-            {
-                Device responseDevice = getDevice(deviceId);
-                future.complete(responseDevice);
-            }
-            catch (IotHubException | IOException e)
-            {
-                future.completeExceptionally(e);
-            }
-        });
-        return future;
     }
 
     /**
@@ -345,34 +268,6 @@ public class RegistryManager
     }
 
     /**
-     * Async wrapper for updateDevice() operation
-     *
-     * @param device The device object containing updated data
-     * @return The future object for the requested operation
-     */
-    public CompletableFuture<Device> updateDeviceAsync(Device device)
-    {
-        if (device == null)
-        {
-            throw new IllegalArgumentException("device cannot be null");
-        }
-        final CompletableFuture<Device> future = new CompletableFuture<>();
-        executor.submit(() ->
-        {
-            try
-            {
-                Device responseDevice = updateDevice(device);
-                future.complete(responseDevice);
-            }
-            catch (IotHubException | IOException e)
-            {
-                future.completeExceptionally(e);
-            }
-        });
-        return future;
-    }
-
-    /**
      * Remove device
      *
      * @param deviceId The device name to remove
@@ -433,36 +328,6 @@ public class RegistryManager
     }
 
     /**
-     * Async wrapper for removeDevice() operation
-     *
-     * @param deviceId The device object to remove
-     * @return The future object for the requested operation
-     */
-    public CompletableFuture<Boolean> removeDeviceAsync(String deviceId)
-    {
-
-        if (Tools.isNullOrEmpty(deviceId))
-        {
-            throw new IllegalArgumentException("deviceId cannot be null or empty");
-        }
-
-        final CompletableFuture<Boolean> future = new CompletableFuture<>();
-        executor.submit(() ->
-        {
-            try
-            {
-                removeDevice(deviceId);
-                future.complete(true);
-            }
-            catch (IotHubException | IOException e)
-            {
-                future.completeExceptionally(e);
-            }
-        });
-        return future;
-    }
-
-    /**
      * Get device statistics
      *
      * @return RegistryStatistics object containing the requested data
@@ -481,29 +346,6 @@ public class RegistryManager
 
         String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
         return new RegistryStatistics(new RegistryStatisticsParser(bodyStr));
-    }
-
-    /**
-     * Async wrapper for getStatistics() operation
-     *
-     * @return The future object for the requested operation
-     */
-    public CompletableFuture<RegistryStatistics> getStatisticsAsync()
-    {
-        final CompletableFuture<RegistryStatistics> future = new CompletableFuture<>();
-        executor.submit(() ->
-        {
-            try
-            {
-                RegistryStatistics responseDevice = getStatistics();
-                future.complete(responseDevice);
-            }
-            catch (IotHubException | IOException e)
-            {
-                future.completeExceptionally(e);
-            }
-        });
-        return future;
     }
 
     /**
@@ -537,33 +379,6 @@ public class RegistryManager
     }
 
     /**
-     * Async wrapper for exportDevices() operation
-     * @param excludeKeys if to exclude keys or not
-     * @param exportBlobContainerUri the blob storage container URI to store at.
-     * @return The future object for the requested operation
-     *
-     * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
-     */
-    public CompletableFuture<JobProperties> exportDevicesAsync(String exportBlobContainerUri, Boolean excludeKeys)
-            throws IllegalArgumentException, JsonSyntaxException
-    {
-        final CompletableFuture<JobProperties> future = new CompletableFuture<>();
-        executor.submit(() ->
-        {
-            try
-            {
-                JobProperties responseJobProperties = exportDevices(exportBlobContainerUri, excludeKeys);
-                future.complete(responseJobProperties);
-            }
-            catch (IllegalArgumentException | IotHubException | IOException e)
-            {
-                future.completeExceptionally(e);
-            }
-        });
-        return future;
-    }
-
-    /**
      * Create a bulk export job.
      *
      * @param exportDevicesParameters A JobProperties object containing input parameters for export Devices job
@@ -591,37 +406,6 @@ public class RegistryManager
         HttpResponse response = request.send();
 
         return ProcessJobResponse(response);
-    }
-
-    /**
-     * Async wrapper for exportDevices() operation
-     * @param exportDevicesParameters A JobProperties object containing input parameters for export Devices job
-     *                                This API also supports identity based storage authentication, identity authentication
-     *                                support is currently available in limited regions. If a user wishes to try it out,
-     *                                they will need to set an Environment Variable of "EnabledStorageIdentity" and set it to "1"
-     *                                otherwise default key based authentication is used for storage
-     *                                <a href="https://docs.microsoft.com/en-us/azure/iot-hub/virtual-network-support"> More details here </a>
-     * @return The future object for the requested operation
-     *
-     * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
-     */
-    public CompletableFuture<JobProperties> exportDevicesAsync(JobProperties exportDevicesParameters)
-            throws IllegalArgumentException, JsonSyntaxException
-    {
-        final CompletableFuture<JobProperties> future = new CompletableFuture<>();
-        executor.submit(() ->
-        {
-            try
-            {
-                JobProperties responseJobProperties = exportDevices(exportDevicesParameters);
-                future.complete(responseJobProperties);
-            }
-            catch (IllegalArgumentException | IotHubException | IOException e)
-            {
-                future.completeExceptionally(e);
-            }
-        });
-        return future;
     }
 
     /**
@@ -655,34 +439,6 @@ public class RegistryManager
     }
 
     /**
-     * Async wrapper for importDevices() operation
-     *
-     * @param importBlobContainerUri Uri for importBlobContainer
-     * @param outputBlobContainerUri Uri for outputBlobContainer
-     * @return The future object for the requested operation
-     *
-     * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
-     */
-    public CompletableFuture<JobProperties> importDevicesAsync(String importBlobContainerUri, String outputBlobContainerUri)
-            throws IllegalArgumentException, JsonSyntaxException
-    {
-        final CompletableFuture<JobProperties> future = new CompletableFuture<>();
-        executor.submit(() ->
-        {
-            try
-            {
-                JobProperties responseJobProperties = importDevices(importBlobContainerUri, outputBlobContainerUri);
-                future.complete(responseJobProperties);
-            }
-            catch (IllegalArgumentException | IotHubException | IOException e)
-            {
-                future.completeExceptionally(e);
-            }
-        });
-        return future;
-    }
-
-    /**
      * Create a bulk import job.
      *
      * @param importDevicesParameters A JobProperties object containing input parameters for import Devices job
@@ -713,38 +469,6 @@ public class RegistryManager
     }
 
     /**
-     * Async wrapper for importDevices() operation
-     *
-     * @param importParameters A JobProperties object containing input parameters for import Devices job
-     *                         This API also supports identity based storage authentication, identity authentication
-     *                         support is currently available in limited regions. If a user wishes to try it out,
-     *                         they will need to set an Environment Variable of "EnabledStorageIdentity" and set it to "1"
-     *                         otherwise default key based authentication is used for storage
-     *                         <a href="https://docs.microsoft.com/en-us/azure/iot-hub/virtual-network-support"> More details here </a>
-     * @return The future object for the requested operation
-     *
-     * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
-     */
-    public CompletableFuture<JobProperties> importDevicesAsync(JobProperties importParameters)
-            throws IllegalArgumentException, JsonSyntaxException
-    {
-        final CompletableFuture<JobProperties> future = new CompletableFuture<>();
-        executor.submit(() ->
-        {
-            try
-            {
-                JobProperties responseJobProperties = importDevices(importParameters);
-                future.complete(responseJobProperties);
-            }
-            catch (IllegalArgumentException | IotHubException | IOException e)
-            {
-                future.completeExceptionally(e);
-            }
-        });
-        return future;
-    }
-
-    /**
      * Get the properties of an existing job.
      *
      * @param jobId The id of the job to be retrieved.
@@ -770,32 +494,6 @@ public class RegistryManager
         HttpResponse response = request.send();
 
         return ProcessJobResponse(response);
-    }
-
-    /**
-     * Async wrapper for getJob() operation
-     * @param jobId jobID as String
-     * @return The future object for the requested operation
-     *
-     * @throws IllegalArgumentException This exception is thrown if the jobId parameter is null
-     */
-    public CompletableFuture<JobProperties> getJobAsync(String jobId)
-            throws IllegalArgumentException
-    {
-        final CompletableFuture<JobProperties> future = new CompletableFuture<>();
-        executor.submit(() ->
-        {
-            try
-            {
-                JobProperties responseJobProperties = getJob(jobId);
-                future.complete(responseJobProperties);
-            }
-            catch (IllegalArgumentException | IotHubException | IOException e)
-            {
-                future.completeExceptionally(e);
-            }
-        });
-        return future;
     }
 
     /**

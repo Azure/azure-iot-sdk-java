@@ -33,9 +33,8 @@ public interface IotHubTransportConnection
 
     /**
      * Closes the transport connection.
-     * @throws TransportException If any exceptions are encountered while closing.
      */
-    void close() throws TransportException;
+    void close();
 
     /**
      * Send a single message to the IotHub over the Transport Connection

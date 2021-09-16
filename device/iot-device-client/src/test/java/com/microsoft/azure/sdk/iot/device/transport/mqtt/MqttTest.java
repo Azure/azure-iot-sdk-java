@@ -1143,8 +1143,8 @@ public class MqttTest
     }
 
     //Tests_SRS_Mqtt_25_011: [If an MQTT connection is unable to be closed for any reason, the function shall throw a TransportException.]
-    @Test (expected = TransportException.class)
-    public void mqttDisconnectThrowsMqttExceptionHandled() throws TransportException
+    @Test
+    public void mqttDisconnectThrowsMqttExceptionHandled() throws MqttException
     {
         //arrange
         final Mqtt mockMqtt = instantiateMqtt(true);
@@ -1160,6 +1160,13 @@ public class MqttTest
 
         //act
         Deencapsulation.invoke(mockMqtt, "disconnect");
+
+        new Verifications()
+        {
+            {
+                mockMqttAsyncClient.close();
+            }
+        };
     }
 
     //Tests_SRS_Mqtt_34_044: [If an MqttException is encountered while connecting, this function shall throw the associated ProtocolException.]
