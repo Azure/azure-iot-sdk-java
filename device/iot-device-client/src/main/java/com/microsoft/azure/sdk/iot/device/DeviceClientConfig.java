@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.deps.convention.DefaultPayloadConvention;
+import com.microsoft.azure.sdk.iot.deps.convention.PayloadConvention;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.auth.*;
 import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
@@ -14,6 +16,7 @@ import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
@@ -51,9 +54,23 @@ public final class DeviceClientConfig
 
     private String deviceClientUniqueIdentifier = UUID.randomUUID().toString().substring(0,8);
 
+    /**
+     * The device ModelId to be used with Azure IoT Plug and Play devices. This value must be set with the {@link ClientOptions} configuration.
+     *
+     * @return The current value of the device ModelId.
+     */
     @Getter
     @Setter(AccessLevel.PROTECTED)
     String modelId;
+
+    /**
+     * The {@link PayloadConvention} to be used with convention based opertations such as Azure IoT Plug and Play devices. This value must be set with the {@link ClientOptions} configuration.
+     *
+     * @return The current {@link PayloadConvention} to be used for this device.
+     */
+    @Getter
+    @Setter(AccessLevel.PROTECTED)
+    private PayloadConvention payloadConvention = DefaultPayloadConvention.getInstance();
 
     // Initialize all the timeout values here instead of the constructor as the constructor is not always called.
     @Getter
@@ -82,6 +99,7 @@ public final class DeviceClientConfig
      * The callback to be invoked if a message of Device Method type received.
      */
     private MessageCallback deviceMethodsMessageCallback;
+
     /** The context to be passed in to the device method type message callback. */
     private Object deviceMethodsMessageContext;
 
@@ -89,6 +107,7 @@ public final class DeviceClientConfig
      * The callback to be invoked if a message of Device Twin type received.
      */
     private MessageCallback deviceTwinMessageCallback;
+
     /** The context to be passed in to the device twin type message callback. */
     private Object deviceTwinMessageContext;
 
@@ -96,6 +115,7 @@ public final class DeviceClientConfig
      * The callback to be invoked if a message is received.
      */
     private MessageCallback defaultDeviceTelemetryMessageCallback;
+
     /** The context to be passed in to the message callback. */
     private Object defaultDeviceTelemetryMessageContext;
 
@@ -157,8 +177,7 @@ public final class DeviceClientConfig
         this.productInfo = new ProductInfo();
     }
 
-
-    public DeviceClientConfig(String hostName, SasTokenProvider sasTokenProvider, ClientOptions clientOptions, String deviceId, String moduleId)
+    public DeviceClientConfig(String hostName, SasTokenProvider sasTokenProvider, @NonNull ClientOptions clientOptions, String deviceId, String moduleId)
     {
         SSLContext sslContext = clientOptions != null ? clientOptions.sslContext : null;
         setKeepAliveInterval(clientOptions);
@@ -167,7 +186,7 @@ public final class DeviceClientConfig
 
         this.useWebsocket = false;
         this.productInfo = new ProductInfo();
-
+        this.payloadConvention = clientOptions.getPayloadConvention();
         log.debug("Device configured to use SAS token provided authentication provider");
     }
 

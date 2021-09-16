@@ -3,8 +3,9 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.microsoft.azure.sdk.iot.deps.convention.DefaultPayloadConvention;
+import com.microsoft.azure.sdk.iot.deps.convention.PayloadConvention;
+import lombok.*;
 
 import javax.net.ssl.SSLContext;
 
@@ -13,6 +14,9 @@ import static com.microsoft.azure.sdk.iot.device.DeviceClientConfig.DEFAULT_KEEP
 /**
  * Options that allow configuration of the device client instance during initialization.
  */
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public final class ClientOptions
 {
     /**
@@ -33,6 +37,14 @@ public final class ClientOptions
     @Setter
     @Getter
     public SSLContext sslContext;
+
+    /**
+     * The convention to be used for convention based operations.
+     */
+    @Setter
+    @Getter
+    @Builder.Default
+    private PayloadConvention payloadConvention = DefaultPayloadConvention.getInstance();
 
     /**
      * Gets the keep alive interval in seconds. This value defines the

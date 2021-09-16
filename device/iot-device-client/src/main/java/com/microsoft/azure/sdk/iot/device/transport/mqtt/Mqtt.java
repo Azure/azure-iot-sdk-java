@@ -67,6 +67,9 @@ abstract public class Mqtt implements MqttCallback
     final static String MQTT_SECURITY_INTERFACE_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".ifid";
     final static String COMPONENT_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".sub";
 
+    /* Component name for convention based operations like PnP */
+    final static String MQTT_TELEMETRY_COMPONENTNAME = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".sub";
+
     private final static String IOTHUB_ACK = "iothub-ack";
 
     private final static String INPUTS_PATH_STRING = "inputs";

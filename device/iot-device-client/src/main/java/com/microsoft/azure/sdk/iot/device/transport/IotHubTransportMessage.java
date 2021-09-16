@@ -5,55 +5,110 @@ package com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.convention.ClientPropertiesCallback;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Extends Message, adding transport artifacts.
  */
 public class IotHubTransportMessage extends Message
 {
-    /// <summary>
-    /// [Required in IoTHubTransportManager] Used to specify the method invoked for the message (POST, GET).
-    /// </summary>
+    /**
+     * The method invoked for the message (POST, GET).
+     * <p>
+     *     Required in IoTHubTransportManager
+     * </p>
+     */
+    @Getter
+    @Setter
     private IotHubMethod iotHubMethod;
 
-    /// <summary>
-    /// [Required in IoTHubTransportManager] Used to specify the URI path of this message.
-    /// </summary>
+    /**
+     * The URI path of this message.
+     * <p>
+     *     Required in IoTHubTransportManager
+     * </p>
+     */
+    @Getter
+    @Setter
     private String uriPath;
 
+    /**
+     * The method name of device method operation
+     */
+    @Getter
     private String methodName;
+
+    /**
+     * The version for the message.
+     */
+    @Getter
+    @Setter
     private String version;
+
+    /**
+     * The message id.
+     */
+    @Getter
+    @Setter
     private String requestId;
+
+    /**
+     * The message status.
+     */
+    @Getter
+    @Setter
     private String status;
-    private DeviceOperations operationType;
+
+    /**
+     * The device operation type.
+     */
+    @Getter
+    @Setter
+    private DeviceOperations deviceOperationType;
+
+    /**
+     * The message callback.
+     */
+    @Getter
+    @Setter
     private MessageCallback messageCallback;
+
+    /**
+     * The message callback context.
+     */
+    @Getter
+    @Setter
     private Object messageCallbackContext;
 
     /**
      * Constructor with binary data and message type
-     * @param data The byte array of the message.
+     *
+     * @param data        The byte array of the message.
      * @param messageType The messageType of the message.
      */
     public IotHubTransportMessage(byte[] data, MessageType messageType)
     {
         /*
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_001: [**If the message body is null, the constructor shall throw an IllegalArgumentException thrown by base constructor.**]**
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_002: [**The constructor shall save the message body by calling super with the body as parameter.**]**
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_003: [**The constructor shall set the messageType to the given value by calling the super with the given value.**]**
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_015: [**The constructor shall initialize version, requestId and status to null.**]**
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_016: [**The constructor shall initialize operationType to UNKNOWN**]**
-        */
+         **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_001: [**If the message body is null, the constructor shall throw an IllegalArgumentException thrown by base constructor.**]**
+         **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_002: [**The constructor shall save the message body by calling super with the body as parameter.**]**
+         **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_003: [**The constructor shall set the messageType to the given value by calling the super with the given value.**]**
+         **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_015: [**The constructor shall initialize version, requestId and status to null.**]**
+         **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_016: [**The constructor shall initialize operationType to UNKNOWN**]**
+         */
         super(data);
         super.setMessageType(messageType);
         this.methodName = null;
         this.version = null;
         this.requestId = null;
         this.status = null;
-        this.operationType = DeviceOperations.DEVICE_OPERATION_UNKNOWN;
+        this.deviceOperationType = DeviceOperations.DEVICE_OPERATION_UNKNOWN;
     }
 
     /**
      * Constructor.
+     *
      * @param body The body of the new Message instance. It is internally serialized to a byte array using UTF-8 encoding.
      */
     public IotHubTransportMessage(String body)
@@ -65,7 +120,7 @@ public class IotHubTransportMessage extends Message
         this.version = null;
         this.requestId = null;
         this.status = null;
-        this.operationType = DeviceOperations.DEVICE_OPERATION_UNKNOWN;
+        this.deviceOperationType = DeviceOperations.DEVICE_OPERATION_UNKNOWN;
     }
 
     public IotHubTransportMessage(byte[] data, MessageType messageType, String messageId, String correlationId, MessageProperty[] messageProperties)
@@ -82,138 +137,23 @@ public class IotHubTransportMessage extends Message
         }
     }
 
-    public MessageCallback getMessageCallback()
-    {
-        return messageCallback;
-    }
-
-    public void setMessageCallback(MessageCallback messageCallback)
-    {
-        this.messageCallback = messageCallback;
-    }
-
-    public Object getMessageCallbackContext()
-    {
-        return messageCallbackContext;
-    }
-
-    public void setMessageCallbackContext(Object messageCallbackContext)
-    {
-        this.messageCallbackContext = messageCallbackContext;
-    }
-
-    /**
-     * Setter for the message version
-     * @param version The String containing the version.
-     */
-    public void setVersion(String version)
-    {
-        /*
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_004: [**The function shall set the version.**]**
-         */
-        this.version = version;
-    }
-
-    /**
-     * Getter for the message version
-     * @return the String containing the version.
-     */
-    public String getVersion()
-    {
-        /*
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_005: [**The function shall return the value of the version either set by the setter or the default (null) if unset so far.**]**
-         */
-        return  this.version;
-    }
-
-    /**
-     * Setter for the message id
-     * @param id The String containing the id.
-     */
-    public void setRequestId(String id)
-    {
-        /*
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_006: [**The function shall save the request id.**]**
-         */
-        this.requestId = id;
-    }
-
-    /**
-     * Getter for the request id
-     * @return the String containing the request id.
-     */
-    public String getRequestId()
-    {
-        /*
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_007: [**The function shall return the value of the request id either set by the setter or the default (null) if unset so far.**]**
-         */
-        return this.requestId;
-    }
-
-    /**
-     * Setter for the status
-     * @param status The String containing the status.
-     */
-    public void setStatus(String status)
-    {
-        /*
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_008: [**The function shall save the status.**]**
-         */
-        this.status = status;
-    }
-
-    /**
-     * Getter for the request status
-     * @return the String containing the request status.
-     */
-    public String getStatus()
-    {
-        /*
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_009: [**The function shall return the value of the status either set by the setter or the default (null) if unset so far.**]**
-         */
-        return this.status;
-    }
-
-    /**
-     * Setter for the device operation type
-     * @param deviceOperationType The DeviceOperations enum value.
-     */
-    public void setDeviceOperationType(DeviceOperations deviceOperationType)
-    {
-        /*
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_010: [**The function shall save the device twin operation type.**]**
-         */
-        this.operationType = deviceOperationType;
-    }
-
-    /**
-     * Getter for the device operation type
-     * @return the DeviceOperations eum value with the current operation type.
-     */
-    public DeviceOperations getDeviceOperationType()
-    {
-        /*
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_011: [**The function shall return the operation type either set by the setter or the default if unset so far.**]**
-         */
-        return this.operationType;
-    }
-
     public boolean isMessageAckNeeded(IotHubClientProtocol protocol)
     {
         if (protocol == IotHubClientProtocol.MQTT || protocol == IotHubClientProtocol.MQTT_WS)
         {
             //This is a SUBSCRIBE action in MQTT which we currently treat synchronously, so there is no message ack
             // unlike other send operations
-            return this.operationType != DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST
-                    && this.operationType != DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST
-                    && this.operationType != DeviceOperations.DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST;
+            return this.deviceOperationType != DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST
+                    && this.deviceOperationType != DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST
+                    && this.deviceOperationType != DeviceOperations.DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST;
         }
 
         return true;
     }
 
     /**
-     * Setter for the method name of device method operation
+     * The method name of device method operation
+     *
      * @param methodName The String containing the method name of device method operation.
      */
     public void setMethodName(String methodName)
@@ -221,64 +161,12 @@ public class IotHubTransportMessage extends Message
         if (methodName == null)
         {
             /*
-            **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_012: [**The function shall throw IllegalArgumentException if the methodName is null.**]**
-            **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_013: [**The function shall set the methodName.**]**
+             **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_012: [**The function shall throw IllegalArgumentException if the methodName is null.**]**
+             **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_013: [**The function shall set the methodName.**]**
              */
             throw new IllegalArgumentException("Method name cannot be null");
         }
         this.methodName = methodName;
-    }
-
-    /**
-     * Getter for the method name of device method operation
-     * @return the methodName of device method operation.
-     */
-    public String getMethodName()
-    {
-        /*
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_014: [**The function shall return the methodName either set by the setter or the default (null) if unset so far.**]**
-         */
-        return methodName;
-    }
-
-    /**
-     * Setter for the IoT Hub method
-     * @param iotHubMethod The enum containing the IoT Hub method.
-     */
-    public void setIotHubMethod(IotHubMethod iotHubMethod)
-    {
-        /* Codes_SRS_IOTHUBTRANSPORTMESSAGE_21_002: [The setIotHubMethod shall store the iotHubMethod. This function do not evaluates this parameter.] */
-        this.iotHubMethod = iotHubMethod;
-    }
-
-    /**
-     * Setter for the URI path
-     * @param uriPath The string with the URI path.
-     */
-    public void setUriPath(String uriPath)
-    {
-        /* Codes_SRS_IOTHUBTRANSPORTMESSAGE_21_003: [The setUriPath shall store the uriPath. This function do not evaluates this parameter.] */
-        this.uriPath = uriPath;
-    }
-
-    /**
-     * Getter for the IoT Hub method
-     * @return the IoT Hub method (POST, GET).
-     */
-    public IotHubMethod getIotHubMethod()
-    {
-        /* Codes_SRS_IOTHUBTRANSPORTMESSAGE_21_004: [The getIotHubMethod shall return the stored iotHubMethod.] */
-        return this.iotHubMethod;
-    }
-
-    /**
-     * Getter for the URI path
-     * @return the string with the URI path.
-     */
-    public String getUriPath()
-    {
-        /* Codes_SRS_IOTHUBTRANSPORTMESSAGE_21_005: [The getUriPath shall return the stored uriPath.] */
-        return uriPath;
     }
 
     @Override
