@@ -9,9 +9,11 @@ import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.convention.ClientProperties;
 import com.microsoft.azure.sdk.iot.device.convention.ClientPropertiesCallback;
-import com.microsoft.azure.sdk.iot.device.convention.ClientPropertyCollection;
+import com.microsoft.azure.sdk.iot.deps.convention.ClientPropertyCollection;
 import com.microsoft.azure.sdk.iot.device.convention.WritablePropertiesRequestsCallback;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -50,6 +52,21 @@ public class DeviceTwin
     // Callback for providing user all of a given desired property update message's contents, rather than providing
     // one callback per updated property.
     private final TwinPropertiesCallback deviceTwinGenericTwinPropertiesChangeCallback;
+
+    /**
+     * The client properties callback.
+     */
+    @Getter
+    @Setter
+    private ClientPropertiesCallback clientPropertiesCallback;
+
+    /**
+     * The client properties callback context.
+     */
+    @Getter
+    @Setter
+    private Object clientPropertiesCallbackContext;
+
 
     /*
         Map of callbacks to call when a particular desired property changed
@@ -95,11 +112,11 @@ public class DeviceTwin
                         {
                             TwinState twinState = TwinState.createFromPropertiesJson(new String(dtMessage.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
 
-                            if (dtMessage.getClientPropertiesCallback() != null)
+                            if (getClientPropertiesCallback() != null)
                             {
-                                ClientPropertiesCallback propCallBack = dtMessage.getClientPropertiesCallback();
-                                Object propCallBackContext = dtMessage.getClientPropertiesCallbackContext();
-                                propCallBack.execute(new ClientProperties(ClientPropertyCollection.fromMap(twinState.getReportedProperty()), ClientPropertyCollection.fromMap(twinState.getDesiredProperty())), propCallBackContext);
+                                ClientPropertiesCallback propCallBack = getClientPropertiesCallback();
+                                Object propCallBackContext = getClientPropertiesCallbackContext();
+                                propCallBack.execute(new ClientProperties(ClientPropertyCollection.fromMap(twinState.getDesiredProperty()), ClientPropertyCollection.fromMap(twinState.getReportedProperty())), propCallBackContext);
                             }
 
                             if (twinState.getDesiredProperty() != null)
@@ -134,7 +151,7 @@ public class DeviceTwin
                             OnDesiredPropertyChanged(twinState.getDesiredProperty());
                             if (writablePropertiesRequestsCallback != null)
                             {
-                                writablePropertiesRequestsCallback.execute(new ClientPropertyCollection(dtMessage, config.getPayloadConvention(), true), writablePropertiesRequestsContext);
+                                writablePropertiesRequestsCallback.execute(new ClientPropertyCollection(dtMessage.getBytes(), config.getPayloadConvention(), true), writablePropertiesRequestsContext);
                             }
                         }
                         break;
@@ -426,8 +443,8 @@ public class DeviceTwin
         getTwinRequestMessage.setRequestId(UUID.randomUUID().toString());
         getTwinRequestMessage.setCorrelationId(getTwinRequestMessage.getRequestId());
         getTwinRequestMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_GET_REQUEST);
-        getTwinRequestMessage.setClientPropertiesCallback(clientPropertiesCallback);
-        getTwinRequestMessage.setClientPropertiesCallbackContext(context);
+        setClientPropertiesCallback(clientPropertiesCallback);
+        setClientPropertiesCallbackContext(context);
         this.deviceIO.sendEventAsync(getTwinRequestMessage, null, null, this.config.getDeviceId());
     }
 
