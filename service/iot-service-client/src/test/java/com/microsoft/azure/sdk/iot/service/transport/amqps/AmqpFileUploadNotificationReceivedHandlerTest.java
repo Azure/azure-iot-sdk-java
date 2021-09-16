@@ -7,7 +7,7 @@ package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyHandlerImpl;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
-import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
+import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -255,9 +255,9 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
                 result = mockedProxyHandlerImpl;
                 mockedProxyImpl.configure(anyString, (Map<String, String>) any, mockedProxyHandlerImpl, transportInternal);
                 transportInternal.addTransportLayer(mockedProxyImpl);
-                new WebSocketImpl();
+                new WebSocketImpl(anyInt);
                 result = webSocket;
-                webSocket.configure(anyString, anyString, 443, anyString, null, null);
+                webSocket.configure(anyString, anyString, anyString, 443, anyString, null, null);
                 transportInternal.addTransportLayer(webSocket);
                 Proton.sslDomain();
                 result = sslDomain;
