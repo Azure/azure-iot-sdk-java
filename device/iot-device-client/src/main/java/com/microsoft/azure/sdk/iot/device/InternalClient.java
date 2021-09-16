@@ -176,7 +176,7 @@ public class InternalClient
     }
 
     /**
-<    * Close the client.
+     * Close the client.
      */
     public void close()
     {
