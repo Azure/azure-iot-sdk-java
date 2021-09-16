@@ -14,7 +14,10 @@ import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import lombok.AccessLevel;
 import lombok.Getter;
+<<<<<<< HEAD
+=======
 import lombok.NonNull;
+>>>>>>> jamdavi/addCommand
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -1368,6 +1371,8 @@ public class InternalClient
     {
         twin.subscribeToWritablePropertyRequests(writablePropertyUpdateCallback, callbackContext);
     }
+<<<<<<< HEAD
+=======
 
     /**
      * Sets the global command handler.
@@ -1398,4 +1403,5 @@ public class InternalClient
 
         this.command.subscribeToDeviceCommand(deviceCommandCallback, deviceCommandCallbackContext);
     }
+>>>>>>> jamdavi/addCommand
 }
