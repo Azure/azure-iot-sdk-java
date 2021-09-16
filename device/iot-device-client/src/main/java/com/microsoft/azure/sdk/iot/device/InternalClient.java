@@ -1329,8 +1329,10 @@ public class InternalClient
     /**
      * Update the client properties.
      * @param clientProperties The client properties to send.
-     * @param callback The callback to be used for receiving client properties.
+     * @param callback The callback to be used for updating client properties.
      * @param callbackContext An optional user context to be sent to the callback.
+     *
+     * @throws IOException Thrown from the underlying DeviceIO
      */
     public void updateClientPropertiesAsync(ClientPropertyCollection clientProperties, IotHubEventCallback callback, Object callbackContext) throws IOException
     {
@@ -1344,7 +1346,7 @@ public class InternalClient
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
 
-        verifyReportedProperties(clientProperties.getCollectionAsSetOfProperty());
+        verifyReportedProperties(ClientProperties.getCollectionAsSetOfProperty(clientProperties));
 
         this.twin.updateClientProperties(clientProperties, null, null,null, callback, callbackContext);
     }
