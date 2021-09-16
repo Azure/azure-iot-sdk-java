@@ -771,6 +771,17 @@ public final class DeviceClient extends InternalClient implements Closeable
         this.subscribeToMethodsInternal(deviceMethodCallback, deviceMethodCallbackContext, deviceMethodStatusCallback, deviceMethodStatusCallbackContext);
     }
 
+    /**
+     * Set the global command callback handler.
+     * @param callback The callback to be used for commands.
+     * @param callbackContext An optional user context to be sent to the callback.
+     */
+    public void subscribeToCommands(DeviceMethodCallback callback, Object callbackContext)
+    {
+        // Subscribe to methods default handler internally and use the callback received internally to invoke the user supplied command callback.
+        // TODO Implement command handler
+    }
+
     // Used by multiplexing clients to signal to this client what kind of multiplexing client is using this device client
     @SuppressWarnings("SameParameterValue") // The connection type is currently only set to "multiplexing client", but it can be set to the deprecated transport client as well.
     void setConnectionType(IoTHubConnectionType connectionType)
