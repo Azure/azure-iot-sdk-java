@@ -82,6 +82,7 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
      * @param generationId the generation id
      * @param suggestedTimeToLiveSeconds the time for the generated sas tokens to live for
      * @param timeBufferPercentage the percent of the life a sas token will live before attempting to be renewed. (100 means don't renew until end of life)
+     * @param sslContext the SSLContext to open connections with
      * @return the created IotHubSasTokenHsmAuthenticationProvider instance
      * @throws IOException If the Hsm unit cannot be reached
      * @throws TransportException If the Hsm unit cannot be reached
