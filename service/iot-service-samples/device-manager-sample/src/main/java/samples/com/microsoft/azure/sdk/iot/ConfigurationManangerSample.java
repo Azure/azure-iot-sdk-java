@@ -116,8 +116,6 @@ public class ConfigurationManangerSample
         {
             iote.printStackTrace();
         }
-
-        registryManager.close();
     }
 
     private static Configuration GetConfiguration()
@@ -134,8 +132,6 @@ public class ConfigurationManangerSample
         {
             iote.printStackTrace();
         }
-
-        registryManager.close();
 
         return returnConfig;
     }
@@ -154,8 +150,6 @@ public class ConfigurationManangerSample
         {
             iote.printStackTrace();
         }
-
-        registryManager.close();
     }
 
     private static void RemoveConfiguration()
@@ -171,8 +165,6 @@ public class ConfigurationManangerSample
         {
             iote.printStackTrace();
         }
-
-        registryManager.close();
     }
 
     private static void printConfiguration(Configuration config)

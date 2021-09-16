@@ -59,8 +59,6 @@ public class DeviceManagerSample
         {
             iote.printStackTrace();
         }
-
-        registryManager.close();
     }
     
     private static void GetDevice()
@@ -81,8 +79,6 @@ public class DeviceManagerSample
         {
             iote.printStackTrace();
         }
-
-        registryManager.close();
     }
     
     private static void UpdateDevice()
@@ -112,8 +108,6 @@ public class DeviceManagerSample
         {
             iote.printStackTrace();
         }
-
-        registryManager.close();
     }
     
     private static void RemoveDevice()
@@ -132,7 +126,5 @@ public class DeviceManagerSample
         {
             iote.printStackTrace();
         }
-
-        registryManager.close();
     }
 }

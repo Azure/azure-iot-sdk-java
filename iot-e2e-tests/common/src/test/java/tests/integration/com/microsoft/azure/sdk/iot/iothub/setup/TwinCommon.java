@@ -413,16 +413,9 @@ public class TwinCommon extends IntegrationTest
     {
         if (testInstance != null)
         {
-            try
+            if (testInstance.testIdentity != null && testInstance.testIdentity.getClient() != null)
             {
-                if (testInstance.testIdentity != null && testInstance.testIdentity.getClient() != null)
-                {
-                    testInstance.testIdentity.getClient().close();
-                }
-            }
-            catch (IOException e)
-            {
-                log.error("Failed to close test identity for device {}", testInstance.testIdentity.getDeviceId(), e);
+                testInstance.testIdentity.getClient().close();
             }
 
             Tools.disposeTestIdentity(testInstance.testIdentity, iotHubConnectionString);
@@ -431,16 +424,9 @@ public class TwinCommon extends IntegrationTest
             {
                 for (TestIdentity testIdentity : testInstance.testIdentities)
                 {
-                    try
+                    if (testIdentity != null && testIdentity.getClient() != null)
                     {
-                        if (testIdentity != null && testIdentity.getClient() != null)
-                        {
-                            testIdentity.getClient().close();
-                        }
-                    }
-                    catch (IOException e)
-                    {
-                        log.error("Failed to close test identity for device {}", testIdentity.getDeviceId(), e);
+                        testIdentity.getClient().close();
                     }
                 }
 

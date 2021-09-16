@@ -45,6 +45,8 @@ Breaking changes:
 - Removed unnecessary synchronization on service client APIs to allow for a single client to make multiple service APIs simultaneously
 - Removed asynchronous APIs for service client APIs 
   - These were wrappers on top of the existing sync APIs. Users are expected to write async wrappers that better fit their preferred async framework.
+- Removed asynchronous APIs for service client APIs 
+- Removed ```open()``` and ```close()``` APIs for registryManager since they do nothing anymore
  
 ## Device Provisioning Service Device Client
 
