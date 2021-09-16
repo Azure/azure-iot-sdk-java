@@ -252,8 +252,6 @@ public class ServiceClientTests extends IntegrationTest
         assertEquals(buildExceptionMessage("", hostName), deviceGetBefore.getDeviceId(), deviceGetAfter.getDeviceId());
         assertEquals(buildExceptionMessage("", hostName), 0, deviceGetBefore.getCloudToDeviceMessageCount());
         assertEquals(buildExceptionMessage("", hostName), 1, deviceGetAfter.getCloudToDeviceMessageCount());
-
-        registryManager.close();
     }
 
     @Test
@@ -317,7 +315,6 @@ public class ServiceClientTests extends IntegrationTest
         serviceClient.send(device.getDeviceId(), message);
 
         serviceClient.close();
-        registryManager.close();
         Tools.disposeTestIdentity(testDeviceIdentity, iotHubConnectionString);
     }
 
@@ -351,7 +348,6 @@ public class ServiceClientTests extends IntegrationTest
 
         feedbackReceiver.close();
         serviceClient.close();
-        registryManager.close();
     }
 
     @Test
@@ -384,7 +380,6 @@ public class ServiceClientTests extends IntegrationTest
 
         fileUploadNotificationReceiver.close();
         serviceClient.close();
-        registryManager.close();
     }
 
     @Test
