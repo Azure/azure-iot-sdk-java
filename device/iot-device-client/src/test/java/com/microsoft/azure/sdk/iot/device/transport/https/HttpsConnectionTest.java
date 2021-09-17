@@ -18,6 +18,7 @@ import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -1033,7 +1034,7 @@ public class HttpsConnectionTest
         };
         HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
 
-        byte[] expectedBody = "test".getBytes();
+        byte[] expectedBody = "test".getBytes(StandardCharsets.UTF_8);
         conn.writeOutput(expectedBody);
 
         //act

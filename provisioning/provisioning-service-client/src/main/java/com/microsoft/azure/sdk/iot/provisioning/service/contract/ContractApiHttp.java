@@ -144,7 +144,7 @@ public class ContractApiHttp
         URL url = getUrlForPath(path);
 
         /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_010: [The request shall create a new HttpRequest.*/
-        HttpRequest request = createRequest(url, httpMethod, headerParameters, payload.getBytes(), sasTokenString);
+        HttpRequest request = createRequest(url, httpMethod, headerParameters, payload.getBytes(StandardCharsets.UTF_8), sasTokenString);
 
         /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_014: [The request shall send the request to the Device Provisioning Service service by using the HttpRequest.send().*/
         /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_015: [If the HttpRequest failed send the message, the request shall throw ProvisioningServiceClientTransportException, threw by the callee.*/

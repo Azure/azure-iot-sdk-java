@@ -7,6 +7,8 @@ import com.microsoft.azure.sdk.iot.provisioning.service.configs.SymmetricKeyAtte
 import mockit.Deencapsulation;
 import org.junit.Test;
 
+import java.nio.charset.StandardCharsets;
+
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 import static org.junit.Assert.*;
 
@@ -15,8 +17,8 @@ public class SymmetricKeyAttestationTest
     private static final String PRIMARY_KEY_TEXT = "validPrimaryKey";
     private static final String SECONDARY_KEY_TEXT = "validSecondaryKey";
 
-    private static final String VALID_PRIMARY_KEY = encodeBase64String(PRIMARY_KEY_TEXT.getBytes());
-    private static final String VALID_SECONDARY_KEY = encodeBase64String(SECONDARY_KEY_TEXT.getBytes());
+    private static final String VALID_PRIMARY_KEY = encodeBase64String(PRIMARY_KEY_TEXT.getBytes(StandardCharsets.UTF_8));
+    private static final String VALID_SECONDARY_KEY = encodeBase64String(SECONDARY_KEY_TEXT.getBytes(StandardCharsets.UTF_8));
 
     /* SRS_SYMMETRIC_KEY_ATTESTATION_44_001: [The constructor shall store the provided primary key.] */
     /* SRS_SYMMETRIC_KEY_ATTESTATION_44_002: [The constructor shall store the provided secondary key.] */

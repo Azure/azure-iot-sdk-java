@@ -36,7 +36,7 @@ public class DeviceOperationsTest
 {
     private static final String STANDARD_HOSTNAME = "testHostName.azure.net";
     private static final String STANDARD_SHAREDACCESSKEYNAME = "testKeyName";
-    private static final String STANDARD_SHAREDACCESSKEY = encodeBase64String("1234567890ABCDEFGHIJKLMNOPQRESTUVWXYZab=".getBytes());
+    private static final String STANDARD_SHAREDACCESSKEY = encodeBase64String("1234567890ABCDEFGHIJKLMNOPQRESTUVWXYZab=".getBytes(StandardCharsets.UTF_8));
     private static final String STANDARD_CONNECTIONSTRING =
             "HostName=" + STANDARD_HOSTNAME +
                     ";SharedAccessKeyName=" + STANDARD_SHAREDACCESSKEYNAME +
@@ -480,7 +480,7 @@ public class DeviceOperationsTest
         final int status = 400;
         final byte[] body = { 1 };
         final Map<String, List<String>> headerFields = new HashMap<>();
-        final byte[] errorReason = "{\"ExceptionMessage\":\"This is the error message\"}".getBytes();
+        final byte[] errorReason = "{\"ExceptionMessage\":\"This is the error message\"}".getBytes(StandardCharsets.UTF_8);
         HttpResponse sendResponse = new HttpResponse(status, body, headerFields, errorReason);
 
         new NonStrictExpectations()
@@ -528,7 +528,7 @@ public class DeviceOperationsTest
         final int status = 200;
         final byte[] body = { 1 };
         final Map<String, List<String>> headerFields = new HashMap<>();
-        final byte[] errorReason = "succeed".getBytes();
+        final byte[] errorReason = "succeed".getBytes(StandardCharsets.UTF_8);
         HttpResponse sendResponse = new HttpResponse(status, body, headerFields, errorReason);
 
         new NonStrictExpectations()
@@ -599,7 +599,7 @@ public class DeviceOperationsTest
         final int status = 200;
         final byte[] body = { 1 };
         final Map<String, List<String>> headerFields = new HashMap<>();
-        final byte[] errorReason = "succeed".getBytes();
+        final byte[] errorReason = "succeed".getBytes(StandardCharsets.UTF_8);
         HttpResponse sendResponse = new HttpResponse(status, body, headerFields, errorReason);
 
         new NonStrictExpectations()

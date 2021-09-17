@@ -15,6 +15,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.nio.charset.StandardCharsets;
+
 import static org.junit.Assert.assertEquals;
 
 /** Unit tests for MqttMessage.
@@ -27,7 +29,7 @@ public class MqttMessageTest
 
     private final String mockedtopic = "someTopic";
 
-    private final byte[] mockedPayload = "somePayload".getBytes();
+    private final byte[] mockedPayload = "somePayload".getBytes(StandardCharsets.UTF_8);
 
     @Mocked
     private org.eclipse.paho.client.mqttv3.MqttMessage mockedMqttMessage;

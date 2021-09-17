@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -171,13 +172,13 @@ public class IotHubX509Test
                 result = mockedPublicKeyCertPath;
 
                 Files.readAllBytes(mockedPublicKeyCertPath);
-                result = someCert.getBytes();
+                result = someCert.getBytes(StandardCharsets.UTF_8);
 
                 Paths.get(someKeyPath);
                 result = mockedPrivateKeyPath;
 
                 Files.readAllBytes(mockedPrivateKeyPath);
-                result = someKey.getBytes();
+                result = someKey.getBytes(StandardCharsets.UTF_8);
             }
         };
     }

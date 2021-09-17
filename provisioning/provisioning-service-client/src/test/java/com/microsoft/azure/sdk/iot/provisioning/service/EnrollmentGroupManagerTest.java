@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.*;
 import mockit.*;
 import org.junit.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -108,7 +109,7 @@ public class EnrollmentGroupManagerTest
                 result = mockedHttpResponse;
                 times = 1;
                 mockedHttpResponse.getBody();
-                result = resultPayload.getBytes();
+                result = resultPayload.getBytes(StandardCharsets.UTF_8);
                 times = 1;
                 Deencapsulation.newInstance(EnrollmentGroup.class, resultPayload);
                 result = mockedEnrollmentGroupResponse;
@@ -159,7 +160,7 @@ public class EnrollmentGroupManagerTest
                 result = mockedHttpResponse;
                 times = 1;
                 mockedHttpResponse.getBody();
-                result = resultPayload.getBytes();
+                result = resultPayload.getBytes(StandardCharsets.UTF_8);
                 times = 1;
                 Deencapsulation.newInstance(EnrollmentGroup.class, resultPayload);
                 result = mockedEnrollmentGroupResponse;
@@ -323,7 +324,7 @@ public class EnrollmentGroupManagerTest
                 result = mockedHttpResponse;
                 times = 1;
                 mockedHttpResponse.getBody();
-                result = resultPayload.getBytes();
+                result = resultPayload.getBytes(StandardCharsets.UTF_8);
                 times = 1;
                 Deencapsulation.newInstance(EnrollmentGroup.class, resultPayload);
                 result = mockedEnrollmentGroupResponse;

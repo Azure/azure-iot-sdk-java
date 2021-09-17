@@ -21,6 +21,7 @@ import org.apache.qpid.proton.reactor.ReactorOptions;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.*;
 
 @Slf4j
@@ -420,7 +421,7 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
 
             if (length > 0)
             {
-                byte[] tag = String.valueOf(this.nextTag).getBytes();
+                byte[] tag = String.valueOf(this.nextTag).getBytes(StandardCharsets.UTF_8);
 
                 //want to avoid negative delivery tags since -1 is the designated failure value
                 if (this.nextTag == Integer.MAX_VALUE || this.nextTag < 0)

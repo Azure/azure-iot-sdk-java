@@ -22,6 +22,7 @@ import org.apache.qpid.proton.engine.*;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -161,7 +162,7 @@ public class AmqpSendHandler extends AmqpConnectionHandler
         properties.setCorrelationId(message.getCorrelationId());
         if (message.getUserId() != null)
         {
-            properties.setUserId(new Binary(message.getUserId().getBytes()));
+            properties.setUserId(new Binary(message.getUserId().getBytes(StandardCharsets.UTF_8)));
         }
         protonMessage.setProperties(properties);
 
@@ -177,7 +178,7 @@ public class AmqpSendHandler extends AmqpConnectionHandler
         }
 
         Binary binary;
-        //Messages may have no payload, so check that the message has a payload before giving message.getBytes() as the payload
+        //Messages may have no payload, so check that the message has a payload before giving message.getBytes(StandardCharsets.UTF_8) as the payload
         if (message.getBytes() != null)
         {
             binary = new Binary(message.getBytes());
@@ -221,7 +222,7 @@ public class AmqpSendHandler extends AmqpConnectionHandler
                     }
                 }
 
-                byte[] tag = String.valueOf(nextTag).getBytes();
+                byte[] tag = String.valueOf(nextTag).getBytes(StandardCharsets.UTF_8);
 
                 //want to avoid negative delivery tags since -1 is the designated failure value
                 if (this.nextTag == Integer.MAX_VALUE || this.nextTag < 0)

@@ -11,6 +11,8 @@ import com.google.gson.annotations.SerializedName;
 
 import javax.crypto.Mac;
 
+import java.nio.charset.StandardCharsets;
+
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 
 // This suppression below is addressing warnings of fields used for serialization.
@@ -43,7 +45,7 @@ public class SignRequest
     public byte[] getData()
     {
         // Codes_SRS_HTTPHSMSIGNREQUEST_34_002: [This function shall return the saved data.]
-        return data.getBytes();
+        return data.getBytes(StandardCharsets.UTF_8);
     }
 
     public void setData(byte[] data)

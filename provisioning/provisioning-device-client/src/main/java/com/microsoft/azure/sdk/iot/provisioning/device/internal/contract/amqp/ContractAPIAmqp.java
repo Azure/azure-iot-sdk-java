@@ -16,6 +16,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class ContractAPIAmqp extends ProvisioningDeviceClientContract
@@ -180,7 +181,7 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
             this.amqpSaslHandler.setSasToken(requestData.getSasToken());
         }
 
-        byte[] payload = new DeviceRegistrationParser(requestData.getRegistrationId(), requestData.getPayload()).toJson().getBytes();
+        byte[] payload = new DeviceRegistrationParser(requestData.getRegistrationId(), requestData.getPayload()).toJson().getBytes(StandardCharsets.UTF_8);
 
         // SRS_ContractAPIAmqp_07_005: [This method shall send an AMQP message with the property of iotdps-register.]
         this.provisioningAmqpOperations.sendRegisterMessage(responseCallback, callbackContext, payload);

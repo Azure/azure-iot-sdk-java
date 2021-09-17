@@ -14,6 +14,8 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.nio.charset.StandardCharsets;
+
 import static com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState.DPS_REGISTRATION_UNKNOWN;
 import static mockit.Deencapsulation.*;
 import static org.junit.Assert.assertEquals;
@@ -58,7 +60,7 @@ public class ResponseDataTest
     public void setAndGetResponseData() throws Exception
     {
         //arrange
-        byte [] testData = "testData".getBytes();
+        byte [] testData = "testData".getBytes(StandardCharsets.UTF_8);
         ResponseData testResponseData = newInstance(ResponseData.class);
 
         //act

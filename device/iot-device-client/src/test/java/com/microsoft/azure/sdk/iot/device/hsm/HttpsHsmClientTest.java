@@ -24,6 +24,7 @@ import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
+import java.nio.charset.StandardCharsets;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
@@ -127,7 +128,7 @@ public class HttpsHsmClientTest
                 mockedSignRequest.toJson();
                 result = expectedJson;
 
-                new HttpsRequest((URL) any, HttpsMethod.POST, expectedJson.getBytes(), anyString);
+                new HttpsRequest((URL) any, HttpsMethod.POST, expectedJson.getBytes(StandardCharsets.UTF_8), anyString);
                 result = mockedHttpsRequest;
 
                 mockedHttpsRequest.send();
@@ -137,7 +138,7 @@ public class HttpsHsmClientTest
                 result = 200;
 
                 mockedHttpsResponse.getBody();
-                result = expectedResponseBody.getBytes();
+                result = expectedResponseBody.getBytes(StandardCharsets.UTF_8);
             }
         };
 
@@ -184,7 +185,7 @@ public class HttpsHsmClientTest
                 mockedSignRequest.toJson();
                 result = expectedJson;
 
-                new HttpsRequest((URL) any, HttpsMethod.POST, expectedJson.getBytes(), anyString);
+                new HttpsRequest((URL) any, HttpsMethod.POST, expectedJson.getBytes(StandardCharsets.UTF_8), anyString);
                 result = mockedHttpsRequest;
 
                 mockedHttpsRequest.sendAsHttpRequest();
@@ -194,7 +195,7 @@ public class HttpsHsmClientTest
                 result = 200;
 
                 mockedHttpsResponse.getBody();
-                result = expectedResponseBody.getBytes();
+                result = expectedResponseBody.getBytes(StandardCharsets.UTF_8);
             }
         };
 
@@ -228,8 +229,8 @@ public class HttpsHsmClientTest
     {
         //arrange
         final String expectedJson = "some json";
-        final byte[] expectedMetaData = "some headers and such".getBytes();
-        final byte[] expectedBody = "http request's body".getBytes();
+        final byte[] expectedMetaData = "some headers and such".getBytes(StandardCharsets.UTF_8);
+        final byte[] expectedBody = "http request's body".getBytes(StandardCharsets.UTF_8);
         new NonStrictExpectations()
         {
             {
@@ -242,7 +243,7 @@ public class HttpsHsmClientTest
                 mockedSignRequest.toJson();
                 result = expectedJson;
 
-                new HttpsRequest((URL) any, HttpsMethod.POST, expectedJson.getBytes(), anyString);
+                new HttpsRequest((URL) any, HttpsMethod.POST, expectedJson.getBytes(StandardCharsets.UTF_8), anyString);
                 result = mockedHttpsRequest;
 
                 HttpsRequestResponseSerializer.serializeRequest(mockedHttpsRequest, anyString, anyString, anyString);
@@ -316,7 +317,7 @@ public class HttpsHsmClientTest
                 mockedSignRequest.toJson();
                 result = expectedJson;
 
-                new HttpsRequest((URL) any, HttpsMethod.POST, expectedJson.getBytes(), anyString);
+                new HttpsRequest((URL) any, HttpsMethod.POST, expectedJson.getBytes(StandardCharsets.UTF_8), anyString);
                 result = mockedHttpsRequest;
 
                 mockedHttpsRequest.send();
@@ -326,7 +327,7 @@ public class HttpsHsmClientTest
                 result = 401;
 
                 mockedHttpsResponse.getBody();
-                result = expectedResponseBody.getBytes();
+                result = expectedResponseBody.getBytes(StandardCharsets.UTF_8);
             }
         };
 
@@ -414,7 +415,7 @@ public class HttpsHsmClientTest
                 result = 200;
 
                 mockedHttpsResponse.getBody();
-                result = "some trust bundle".getBytes();
+                result = "some trust bundle".getBytes(StandardCharsets.UTF_8);
 
                 TrustBundleResponse.fromJson("some trust bundle");
                 result = mockedTrustBundleResponse;
@@ -458,7 +459,7 @@ public class HttpsHsmClientTest
                 result = expectedStatusCode;
 
                 mockedHttpsResponse.getBody();
-                result = "some trust bundle".getBytes();
+                result = "some trust bundle".getBytes(StandardCharsets.UTF_8);
 
                 ErrorResponse.fromJson("some trust bundle");
                 result = mockedErrorResponse;

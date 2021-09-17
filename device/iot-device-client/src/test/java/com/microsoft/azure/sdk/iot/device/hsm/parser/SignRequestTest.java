@@ -13,6 +13,8 @@ import org.junit.Test;
 
 import javax.crypto.Mac;
 
+import java.nio.charset.StandardCharsets;
+
 import static junit.framework.TestCase.assertEquals;
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 import static org.junit.Assert.assertArrayEquals;
@@ -32,7 +34,7 @@ public class SignRequestTest
         //arrange
         final String expectedAlgoString = "some algorithm";
         final String expectedKeyId = "some key id";
-        final byte[] expectedData = "some data".getBytes();
+        final byte[] expectedData = "some data".getBytes(StandardCharsets.UTF_8);
         final String expectedEncodedData = encodeBase64String(expectedData);
 
         new NonStrictExpectations()
@@ -52,6 +54,6 @@ public class SignRequestTest
         //assert
         assertEquals(mockedMac, Deencapsulation.getField(request, "algo"));
         assertEquals(expectedKeyId, Deencapsulation.getField(request, "keyId"));
-        assertArrayEquals(expectedEncodedData.getBytes(), request.getData());
+        assertArrayEquals(expectedEncodedData.getBytes(StandardCharsets.UTF_8), request.getData());
     }
 }

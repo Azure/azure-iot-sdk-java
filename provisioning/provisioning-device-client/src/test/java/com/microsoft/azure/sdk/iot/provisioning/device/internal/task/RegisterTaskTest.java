@@ -32,6 +32,7 @@ import org.junit.runner.RunWith;
 import javax.net.ssl.SSLContext;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState.DPS_REGISTRATION_RECEIVED;
 import static com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState.DPS_REGISTRATION_UNKNOWN;
@@ -167,7 +168,7 @@ public class RegisterTaskTest
                 mockedDpsSecurityProviderX509.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
-                result = "NonNullValue".getBytes();
+                result = "NonNullValue".getBytes(StandardCharsets.UTF_8);
                 Deencapsulation.invoke(mockedResponseData, "getContractState");
                 result = DPS_REGISTRATION_RECEIVED;
             }
@@ -362,15 +363,15 @@ public class RegisterTaskTest
                 mockedSecurityProviderTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
                 mockedSecurityProviderTpm.getEndorsementKey();
-                result = TEST_EK.getBytes();
+                result = TEST_EK.getBytes(StandardCharsets.UTF_8);
                 mockedSecurityProviderTpm.getStorageRootKey();
-                result = TEST_SRK.getBytes();
+                result = TEST_SRK.getBytes(StandardCharsets.UTF_8);
                 mockedDeviceRegistrationParser.toJson();
                 result = "testJson";
                 mockedSecurityProviderTpm.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
-                result = "NonNullValue".getBytes();
+                result = "NonNullValue".getBytes(StandardCharsets.UTF_8);
                 Deencapsulation.invoke(mockedResponseData, "getContractState");
                 result = DPS_REGISTRATION_RECEIVED;
                 mockedTpmRegistrationResultParser.getAuthenticationKey();
@@ -378,7 +379,7 @@ public class RegisterTaskTest
                 mockedUrlPathBuilder.generateSasTokenUrl(TEST_REGISTRATION_ID);
                 result = "testUrl";
                 mockedSecurityProviderTpm.signWithIdentity((byte[])any);
-                result = "testToken".getBytes();
+                result = "testToken".getBytes(StandardCharsets.UTF_8);
             }
         };
         //act
@@ -422,7 +423,7 @@ public class RegisterTaskTest
                 mockedSecurityProviderSymmetricKey.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
-                result = "NonNullValue".getBytes();
+                result = "NonNullValue".getBytes(StandardCharsets.UTF_8);
                 Deencapsulation.invoke(mockedResponseData, "getContractState");
                 result = DPS_REGISTRATION_RECEIVED;
                 mockedTpmRegistrationResultParser.getAuthenticationKey();
@@ -430,7 +431,7 @@ public class RegisterTaskTest
                 mockedUrlPathBuilder.generateSasTokenUrl(TEST_REGISTRATION_ID);
                 result = "testUrl";
                 mockedSecurityProviderSymmetricKey.HMACSignData((byte[])any, (byte[]) any);
-                result = "testToken".getBytes();
+                result = "testToken".getBytes(StandardCharsets.UTF_8);
             }
         };
         //act
@@ -511,7 +512,7 @@ public class RegisterTaskTest
                 mockedSecurityProviderTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
                 mockedSecurityProviderTpm.getEndorsementKey();
-                result = TEST_EK.getBytes();
+                result = TEST_EK.getBytes(StandardCharsets.UTF_8);
                 mockedSecurityProviderTpm.getStorageRootKey();
                 result = null;
             }
@@ -535,9 +536,9 @@ public class RegisterTaskTest
                 mockedSecurityProviderTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
                 mockedSecurityProviderTpm.getEndorsementKey();
-                result = TEST_EK.getBytes();
+                result = TEST_EK.getBytes(StandardCharsets.UTF_8);
                 mockedSecurityProviderTpm.getStorageRootKey();
-                result = TEST_SRK.getBytes();
+                result = TEST_SRK.getBytes(StandardCharsets.UTF_8);
                 mockedDeviceRegistrationParser.toJson();
                 result = "testJson";
                 mockedSecurityProviderTpm.getSSLContext();
@@ -563,9 +564,9 @@ public class RegisterTaskTest
                 mockedSecurityProviderTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
                 mockedSecurityProviderTpm.getEndorsementKey();
-                result = TEST_EK.getBytes();
+                result = TEST_EK.getBytes(StandardCharsets.UTF_8);
                 mockedSecurityProviderTpm.getStorageRootKey();
-                result = TEST_SRK.getBytes();
+                result = TEST_SRK.getBytes(StandardCharsets.UTF_8);
                 mockedDeviceRegistrationParser.toJson();
                 result = "testJson";
                 mockedSecurityProviderTpm.getSSLContext();
@@ -594,9 +595,9 @@ public class RegisterTaskTest
                 mockedSecurityProviderTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
                 mockedSecurityProviderTpm.getEndorsementKey();
-                result = TEST_EK.getBytes();
+                result = TEST_EK.getBytes(StandardCharsets.UTF_8);
                 mockedSecurityProviderTpm.getStorageRootKey();
-                result = TEST_SRK.getBytes();
+                result = TEST_SRK.getBytes(StandardCharsets.UTF_8);
                 mockedDeviceRegistrationParser.toJson();
                 result = "testJson";
                 mockedSecurityProviderTpm.getSSLContext();
@@ -622,9 +623,9 @@ public class RegisterTaskTest
                 mockedSecurityProviderTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
                 mockedSecurityProviderTpm.getEndorsementKey();
-                result = TEST_EK.getBytes();
+                result = TEST_EK.getBytes(StandardCharsets.UTF_8);
                 mockedSecurityProviderTpm.getStorageRootKey();
-                result = TEST_SRK.getBytes();
+                result = TEST_SRK.getBytes(StandardCharsets.UTF_8);
                 mockedDeviceRegistrationParser.toJson();
                 result = "testJson";
                 mockedSecurityProviderTpm.getSSLContext();
@@ -651,9 +652,9 @@ public class RegisterTaskTest
                 mockedSecurityProviderTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
                 mockedSecurityProviderTpm.getEndorsementKey();
-                result = TEST_EK.getBytes();
+                result = TEST_EK.getBytes(StandardCharsets.UTF_8);
                 mockedSecurityProviderTpm.getStorageRootKey();
-                result = TEST_SRK.getBytes();
+                result = TEST_SRK.getBytes(StandardCharsets.UTF_8);
                 mockedDeviceRegistrationParser.toJson();
                 result = "testJson";
                 mockedSecurityProviderTpm.getSSLContext();
@@ -679,9 +680,9 @@ public class RegisterTaskTest
                 mockedSecurityProviderTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
                 mockedSecurityProviderTpm.getEndorsementKey();
-                result = TEST_EK.getBytes();
+                result = TEST_EK.getBytes(StandardCharsets.UTF_8);
                 mockedSecurityProviderTpm.getStorageRootKey();
-                result = TEST_SRK.getBytes();
+                result = TEST_SRK.getBytes(StandardCharsets.UTF_8);
                 mockedDeviceRegistrationParser.toJson();
                 result = "testJson";
                 mockedSecurityProviderTpm.getSSLContext();
@@ -711,15 +712,15 @@ public class RegisterTaskTest
                 mockedSecurityProviderTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
                 mockedSecurityProviderTpm.getEndorsementKey();
-                result = TEST_EK.getBytes();
+                result = TEST_EK.getBytes(StandardCharsets.UTF_8);
                 mockedSecurityProviderTpm.getStorageRootKey();
-                result = TEST_SRK.getBytes();
+                result = TEST_SRK.getBytes(StandardCharsets.UTF_8);
                 mockedDeviceRegistrationParser.toJson();
                 result = "testJson";
                 mockedSecurityProviderTpm.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
-                result = "NonNullValue".getBytes();
+                result = "NonNullValue".getBytes(StandardCharsets.UTF_8);
                 Deencapsulation.invoke(mockedResponseData, "getContractState");
                 result = DPS_REGISTRATION_RECEIVED;
                 mockedTpmRegistrationResultParser.getAuthenticationKey();
@@ -751,15 +752,15 @@ public class RegisterTaskTest
                 mockedSecurityProviderTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
                 mockedSecurityProviderTpm.getEndorsementKey();
-                result = TEST_EK.getBytes();
+                result = TEST_EK.getBytes(StandardCharsets.UTF_8);
                 mockedSecurityProviderTpm.getStorageRootKey();
-                result = TEST_SRK.getBytes();
+                result = TEST_SRK.getBytes(StandardCharsets.UTF_8);
                 mockedDeviceRegistrationParser.toJson();
                 result = "testJson";
                 mockedSecurityProviderTpm.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
-                result = "NonNullValue".getBytes();
+                result = "NonNullValue".getBytes(StandardCharsets.UTF_8);
                 Deencapsulation.invoke(mockedResponseData, "getContractState");
                 result = DPS_REGISTRATION_RECEIVED;
                 mockedTpmRegistrationResultParser.getAuthenticationKey();
@@ -787,15 +788,15 @@ public class RegisterTaskTest
                 mockedSecurityProviderTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
                 mockedSecurityProviderTpm.getEndorsementKey();
-                result = TEST_EK.getBytes();
+                result = TEST_EK.getBytes(StandardCharsets.UTF_8);
                 mockedSecurityProviderTpm.getStorageRootKey();
-                result = TEST_SRK.getBytes();
+                result = TEST_SRK.getBytes(StandardCharsets.UTF_8);
                 mockedDeviceRegistrationParser.toJson();
                 result = "testJson";
                 mockedSecurityProviderTpm.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
-                result = "NonNullValue".getBytes();
+                result = "NonNullValue".getBytes(StandardCharsets.UTF_8);
                 Deencapsulation.invoke(mockedResponseData, "getContractState");
                 result = DPS_REGISTRATION_RECEIVED;
                 mockedTpmRegistrationResultParser.getAuthenticationKey();
@@ -822,15 +823,15 @@ public class RegisterTaskTest
                 mockedSecurityProviderTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
                 mockedSecurityProviderTpm.getEndorsementKey();
-                result = TEST_EK.getBytes();
+                result = TEST_EK.getBytes(StandardCharsets.UTF_8);
                 mockedSecurityProviderTpm.getStorageRootKey();
-                result = TEST_SRK.getBytes();
+                result = TEST_SRK.getBytes(StandardCharsets.UTF_8);
                 mockedDeviceRegistrationParser.toJson();
                 result = "testJson";
                 mockedSecurityProviderTpm.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
-                result = "NonNullValue".getBytes();
+                result = "NonNullValue".getBytes(StandardCharsets.UTF_8);
                 Deencapsulation.invoke(mockedResponseData, "getContractState");
                 result = DPS_REGISTRATION_RECEIVED;
                 mockedTpmRegistrationResultParser.getAuthenticationKey();
@@ -857,15 +858,15 @@ public class RegisterTaskTest
                 mockedSecurityProviderTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
                 mockedSecurityProviderTpm.getEndorsementKey();
-                result = TEST_EK.getBytes();
+                result = TEST_EK.getBytes(StandardCharsets.UTF_8);
                 mockedSecurityProviderTpm.getStorageRootKey();
-                result = TEST_SRK.getBytes();
+                result = TEST_SRK.getBytes(StandardCharsets.UTF_8);
                 mockedDeviceRegistrationParser.toJson();
                 result = "testJson";
                 mockedSecurityProviderTpm.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
-                result = "NonNullValue".getBytes();
+                result = "NonNullValue".getBytes(StandardCharsets.UTF_8);
                 Deencapsulation.invoke(mockedResponseData, "getContractState");
                 result = DPS_REGISTRATION_RECEIVED;
                 mockedTpmRegistrationResultParser.getAuthenticationKey();
@@ -899,7 +900,7 @@ public class RegisterTaskTest
                 mockedSecurityProviderSymmetricKey.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
-                result = "NonNullValue".getBytes();
+                result = "NonNullValue".getBytes(StandardCharsets.UTF_8);
                 Deencapsulation.invoke(mockedResponseData, "getContractState");
                 result = DPS_REGISTRATION_RECEIVED;
                 mockedTpmRegistrationResultParser.getAuthenticationKey();
@@ -929,15 +930,15 @@ public class RegisterTaskTest
                 mockedSecurityProviderTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
                 mockedSecurityProviderTpm.getEndorsementKey();
-                result = TEST_EK.getBytes();
+                result = TEST_EK.getBytes(StandardCharsets.UTF_8);
                 mockedSecurityProviderTpm.getStorageRootKey();
-                result = TEST_SRK.getBytes();
+                result = TEST_SRK.getBytes(StandardCharsets.UTF_8);
                 mockedDeviceRegistrationParser.toJson();
                 result = "testJson";
                 mockedSecurityProviderTpm.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
-                result = "NonNullValue".getBytes();
+                result = "NonNullValue".getBytes(StandardCharsets.UTF_8);
                 Deencapsulation.invoke(mockedResponseData, "getContractState");
                 result = DPS_REGISTRATION_RECEIVED;
                 mockedTpmRegistrationResultParser.getAuthenticationKey();
@@ -967,15 +968,15 @@ public class RegisterTaskTest
                 mockedSecurityProviderTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
                 mockedSecurityProviderTpm.getEndorsementKey();
-                result = TEST_EK.getBytes();
+                result = TEST_EK.getBytes(StandardCharsets.UTF_8);
                 mockedSecurityProviderTpm.getStorageRootKey();
-                result = TEST_SRK.getBytes();
+                result = TEST_SRK.getBytes(StandardCharsets.UTF_8);
                 mockedDeviceRegistrationParser.toJson();
                 result = "testJson";
                 mockedSecurityProviderTpm.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
-                result = "NonNullValue".getBytes();
+                result = "NonNullValue".getBytes(StandardCharsets.UTF_8);
                 Deencapsulation.invoke(mockedResponseData, "getContractState");
                 result = DPS_REGISTRATION_RECEIVED;
                 mockedTpmRegistrationResultParser.getAuthenticationKey();
@@ -983,7 +984,7 @@ public class RegisterTaskTest
                 mockedUrlPathBuilder.generateSasTokenUrl(TEST_REGISTRATION_ID);
                 result = "testUrl";
                 mockedSecurityProviderTpm.signWithIdentity((byte[])any);
-                result = "".getBytes();
+                result = "".getBytes(StandardCharsets.UTF_8);
             }
         };
         //act
@@ -1006,15 +1007,15 @@ public class RegisterTaskTest
                 mockedSecurityProviderTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
                 mockedSecurityProviderTpm.getEndorsementKey();
-                result = TEST_EK.getBytes();
+                result = TEST_EK.getBytes(StandardCharsets.UTF_8);
                 mockedSecurityProviderTpm.getStorageRootKey();
-                result = TEST_SRK.getBytes();
+                result = TEST_SRK.getBytes(StandardCharsets.UTF_8);
                 mockedDeviceRegistrationParser.toJson();
                 result = "testJson";
                 mockedSecurityProviderTpm.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
-                result = "NonNullValue".getBytes();
+                result = "NonNullValue".getBytes(StandardCharsets.UTF_8);
                 Deencapsulation.invoke(mockedResponseData, "getContractState");
                 result = DPS_REGISTRATION_RECEIVED;
                 mockedTpmRegistrationResultParser.getAuthenticationKey();
@@ -1022,7 +1023,7 @@ public class RegisterTaskTest
                 mockedUrlPathBuilder.generateSasTokenUrl(TEST_REGISTRATION_ID);
                 result = "testUrl";
                 mockedSecurityProviderTpm.signWithIdentity((byte[])any);
-                result = "testToken".getBytes();
+                result = "testToken".getBytes(StandardCharsets.UTF_8);
                 mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any,
                                                                                            (ResponseCallback)any, any);
                 result = new ProvisioningDeviceTransportException("test transport exception");
@@ -1047,9 +1048,9 @@ public class RegisterTaskTest
                 mockedSecurityProviderTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
                 mockedSecurityProviderTpm.getEndorsementKey();
-                result = TEST_EK.getBytes();
+                result = TEST_EK.getBytes(StandardCharsets.UTF_8);
                 mockedSecurityProviderTpm.getStorageRootKey();
-                result = TEST_SRK.getBytes();
+                result = TEST_SRK.getBytes(StandardCharsets.UTF_8);
                 mockedDeviceRegistrationParser.toJson();
                 result = "testJson";
                 mockedSecurityProviderTpm.getSSLContext();
@@ -1078,7 +1079,7 @@ public class RegisterTaskTest
                 mockedUrlPathBuilder.generateSasTokenUrl(TEST_REGISTRATION_ID);
                 result = "testUrl";
                 mockedSecurityProviderTpm.signWithIdentity((byte[])any);
-                result = "testToken".getBytes();
+                result = "testToken".getBytes(StandardCharsets.UTF_8);
                 mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any,
                                                                                            (ResponseCallback)any, any);
             }
@@ -1115,7 +1116,7 @@ public class RegisterTaskTest
                 mockedDpsSecurityProviderX509.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
-                result = "NonNullValue".getBytes();
+                result = "NonNullValue".getBytes(StandardCharsets.UTF_8);
                 Deencapsulation.invoke(mockedResponseData, "getContractState");
                 result = DPS_REGISTRATION_RECEIVED;
                 RegistrationOperationStatusParser.createFromJson("NonNullValue");
@@ -1156,15 +1157,15 @@ public class RegisterTaskTest
                 mockedSecurityProviderTpm.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
                 mockedSecurityProviderTpm.getEndorsementKey();
-                result = TEST_EK.getBytes();
+                result = TEST_EK.getBytes(StandardCharsets.UTF_8);
                 mockedSecurityProviderTpm.getStorageRootKey();
-                result = TEST_SRK.getBytes();
+                result = TEST_SRK.getBytes(StandardCharsets.UTF_8);
                 mockedDeviceRegistrationParser.toJson();
                 result = "testJson";
                 mockedSecurityProviderTpm.getSSLContext();
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
-                result = "NonNullValue".getBytes();
+                result = "NonNullValue".getBytes(StandardCharsets.UTF_8);
                 Deencapsulation.invoke(mockedResponseData, "getContractState");
                 result = DPS_REGISTRATION_RECEIVED;
                 RegistrationOperationStatusParser.createFromJson("NonNullValue");

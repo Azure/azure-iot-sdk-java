@@ -29,6 +29,7 @@ import org.junit.runner.RunWith;
 import javax.net.ssl.SSLContext;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,8 +46,8 @@ public class ContractAPIAmqpTest
     private static final String TEST_OPERATION_ID = "testOperationId";
     private static final String TEST_SAS_TOKEN = "testSasToken";
     private static final String TEST_PAYLOAD = "testPayload";
-    private static final byte[] TEST_EK = "testEK".getBytes();
-    private static final byte[] TEST_SRK = "testSRK".getBytes();
+    private static final byte[] TEST_EK = "testEK".getBytes(StandardCharsets.UTF_8);
+    private static final byte[] TEST_SRK = "testSRK".getBytes(StandardCharsets.UTF_8);
 
     @Mocked
     AmqpDeviceOperations mockedAmqpProvOperations;

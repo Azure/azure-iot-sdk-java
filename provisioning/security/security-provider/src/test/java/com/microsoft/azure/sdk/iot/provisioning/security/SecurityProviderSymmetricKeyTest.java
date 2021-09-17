@@ -20,6 +20,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -36,7 +37,7 @@ import static junit.framework.TestCase.assertEquals;
  */
 public class SecurityProviderSymmetricKeyTest
 {
-    private static final byte[] testSymKey = "symmkey".getBytes();
+    private static final byte[] testSymKey = "symmkey".getBytes(StandardCharsets.UTF_8);
     private static final String testRegId = "regId";
 
     private static final String testPrimaryKey = "12345";
@@ -142,14 +143,14 @@ public class SecurityProviderSymmetricKeyTest
         //arrange
         SecurityProviderSymmetricKey securityProviderSymmetricKey = new SecurityProviderSymmetricKey(testSymKey, testRegId);
         //act
-        securityProviderSymmetricKey.HMACSignData(TEST_SIGNATURE.getBytes(), TEST_BASE64_DECODED_KEY.getBytes());
+        securityProviderSymmetricKey.HMACSignData(TEST_SIGNATURE.getBytes(StandardCharsets.UTF_8), TEST_BASE64_DECODED_KEY.getBytes(StandardCharsets.UTF_8));
         //assert
         new Verifications()
         {
             {
                 new SecretKeySpec((byte[]) any, HMAC_SHA_256);
                 times = 1;
-                mockedMac.doFinal(TEST_SIGNATURE.getBytes());
+                mockedMac.doFinal(TEST_SIGNATURE.getBytes(StandardCharsets.UTF_8));
                 times = 1;
             }
         };
@@ -165,14 +166,14 @@ public class SecurityProviderSymmetricKeyTest
         //arrange
         SecurityProviderSymmetricKey securityProviderSymmetricKey = new SecurityProviderSymmetricKey(testSymKey, testRegId);
         //act
-        securityProviderSymmetricKey.HMACSignData(TEST_SIGNATURE.getBytes(), null);
+        securityProviderSymmetricKey.HMACSignData(TEST_SIGNATURE.getBytes(StandardCharsets.UTF_8), null);
         //assert
         new Verifications()
         {
             {
                 new SecretKeySpec((byte[]) any, HMAC_SHA_256);
                 times = 1;
-                mockedMac.doFinal(TEST_SIGNATURE.getBytes());
+                mockedMac.doFinal(TEST_SIGNATURE.getBytes(StandardCharsets.UTF_8));
                 times = 1;
             }
         };
@@ -187,14 +188,14 @@ public class SecurityProviderSymmetricKeyTest
         //arrange
         SecurityProviderSymmetricKey securityProviderSymmetricKey = new SecurityProviderSymmetricKey(testSymKey, testRegId);
         //act
-        securityProviderSymmetricKey.HMACSignData(TEST_SIGNATURE.getBytes(), "".getBytes());
+        securityProviderSymmetricKey.HMACSignData(TEST_SIGNATURE.getBytes(StandardCharsets.UTF_8), "".getBytes(StandardCharsets.UTF_8));
         //assert
         new Verifications()
         {
             {
                 new SecretKeySpec((byte[]) any, HMAC_SHA_256);
                 times = 1;
-                mockedMac.doFinal(TEST_SIGNATURE.getBytes());
+                mockedMac.doFinal(TEST_SIGNATURE.getBytes(StandardCharsets.UTF_8));
                 times = 1;
             }
         };
@@ -209,14 +210,14 @@ public class SecurityProviderSymmetricKeyTest
         //arrange
         SecurityProviderSymmetricKey securityProviderSymmetricKey = new SecurityProviderSymmetricKey(testSymKey, testRegId);
         //act
-        securityProviderSymmetricKey.HMACSignData(null, TEST_BASE64_DECODED_KEY.getBytes());
+        securityProviderSymmetricKey.HMACSignData(null, TEST_BASE64_DECODED_KEY.getBytes(StandardCharsets.UTF_8));
         //assert
         new Verifications()
         {
             {
                 new SecretKeySpec((byte[]) any, HMAC_SHA_256);
                 times = 1;
-                mockedMac.doFinal(TEST_SIGNATURE.getBytes());
+                mockedMac.doFinal(TEST_SIGNATURE.getBytes(StandardCharsets.UTF_8));
                 times = 1;
             }
         };
@@ -231,14 +232,14 @@ public class SecurityProviderSymmetricKeyTest
         //arrange
         SecurityProviderSymmetricKey securityProviderSymmetricKey = new SecurityProviderSymmetricKey(testSymKey, testRegId);
         //act
-        securityProviderSymmetricKey.HMACSignData("".getBytes(), TEST_BASE64_DECODED_KEY.getBytes());
+        securityProviderSymmetricKey.HMACSignData("".getBytes(StandardCharsets.UTF_8), TEST_BASE64_DECODED_KEY.getBytes(StandardCharsets.UTF_8));
         //assert
         new Verifications()
         {
             {
                 new SecretKeySpec((byte[]) any, HMAC_SHA_256);
                 times = 1;
-                mockedMac.doFinal(TEST_SIGNATURE.getBytes());
+                mockedMac.doFinal(TEST_SIGNATURE.getBytes(StandardCharsets.UTF_8));
                 times = 1;
             }
         };
@@ -260,14 +261,14 @@ public class SecurityProviderSymmetricKeyTest
         //arrange
         SecurityProviderSymmetricKey securityProviderSymmetricKey = new SecurityProviderSymmetricKey(testSymKey, testRegId);
         //act
-        securityProviderSymmetricKey.HMACSignData(TEST_SIGNATURE.getBytes(), TEST_BASE64_DECODED_KEY.getBytes());
+        securityProviderSymmetricKey.HMACSignData(TEST_SIGNATURE.getBytes(StandardCharsets.UTF_8), TEST_BASE64_DECODED_KEY.getBytes(StandardCharsets.UTF_8));
         //assert
         new Verifications()
         {
             {
                 new SecretKeySpec((byte[]) any, HMAC_SHA_256);
                 times = 1;
-                mockedMac.doFinal(TEST_SIGNATURE.getBytes());
+                mockedMac.doFinal(TEST_SIGNATURE.getBytes(StandardCharsets.UTF_8));
                 times = 0;
             }
         };

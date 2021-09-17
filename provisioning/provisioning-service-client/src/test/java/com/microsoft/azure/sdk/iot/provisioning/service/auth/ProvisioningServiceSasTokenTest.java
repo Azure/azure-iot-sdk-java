@@ -52,7 +52,7 @@ public class ProvisioningServiceSasTokenTest
         String hostName = "HOSTNAME." + deviceProvisioningServiceName;
         String sharedAccessKeyName = "ACCESSKEYNAME";
         String policyName = "SharedAccessKey";
-        String sharedAccessKey = encodeBase64String("key".getBytes());
+        String sharedAccessKey = encodeBase64String("key".getBytes(StandardCharsets.UTF_8));
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
 
         ProvisioningConnectionString provisioningConnectionString = ProvisioningConnectionStringBuilder.createConnectionString(connectionString);
@@ -91,7 +91,7 @@ public class ProvisioningServiceSasTokenTest
         String hostName = "HOSTNAME." + deviceProvisioningServiceName;
         String sharedAccessKeyName = "ACCESSKEYNAME";
         String policyName = "SharedAccessKey";
-        String sharedAccessKey = encodeBase64String("key".getBytes());
+        String sharedAccessKey = encodeBase64String("key".getBytes(StandardCharsets.UTF_8));
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         ProvisioningConnectionString provisioningConnectionString = ProvisioningConnectionStringBuilder.createConnectionString(connectionString);
 
@@ -114,7 +114,7 @@ public class ProvisioningServiceSasTokenTest
         String hostName = "HOSTNAME." + deviceProvisioningServiceName;
         String sharedAccessKeyName = "ACCESSKEYNAME";
         String policyName = "SharedAccessKey";
-        String sharedAccessKey = encodeBase64String("key".getBytes());
+        String sharedAccessKey = encodeBase64String("key".getBytes(StandardCharsets.UTF_8));
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
 
         // Act

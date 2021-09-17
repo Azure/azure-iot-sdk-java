@@ -35,6 +35,7 @@ import com.microsoft.azure.sdk.iot.service.jobs.JobClientOptions;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 /**
@@ -150,7 +151,7 @@ public class RoleBasedAuthenticationSample
                 options);
 
         String cloudToDeviceMessagePayload = "This is a message sent by an RBAC authenticated service client!";
-        Message cloudToDeviceMessage = new Message(cloudToDeviceMessagePayload.getBytes());
+        Message cloudToDeviceMessage = new Message(cloudToDeviceMessagePayload.getBytes(StandardCharsets.UTF_8));
         try
         {
             System.out.println("Sending cloud to device message to the new device");

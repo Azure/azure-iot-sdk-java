@@ -73,7 +73,7 @@ public class HttpsHsmClient
         // <base url>/modules/<url encoded name>/genid/<url encoded gen id>/sign?api-version=<url encoded api version>.]
         String uri = baseUrl != null ? baseUrl.replaceFirst("/*$", "") : "";
 
-        byte[] body = signRequest.toJson().getBytes();
+        byte[] body = signRequest.toJson().getBytes(StandardCharsets.UTF_8);
 
         String pathBuilder = "/modules/" + URLEncoder.encode(moduleName, StandardCharsets.UTF_8.name()) +
                 "/genid/" + URLEncoder.encode(generationId, StandardCharsets.UTF_8.name()) +
