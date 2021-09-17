@@ -12,7 +12,19 @@ import lombok.Setter;
 import java.util.*;
 
 /**
- *
+ * The client property collection that is aware of the {@link PayloadConvention}.
+ * <p>
+ *     The client property collection is similar to the TwinCollection. It is backed by a Map and you can access properties
+ *     by name. But, where it is different is we allow strong typing from the serializer and it is natively component
+ *     aware.
+ * </p>
+ * <p>
+ *     For example in the following code snippet we can see there is a complex object defined in the payload. This object
+ *     is also part of a component. To get this complex object you can do the following:
+ * {@code
+ *  propCollection.getValueForComponent("myComponent","myComponentPropety", complexObject.class)
+ * }
+ * </p>
  */
 public class ClientPropertyCollection extends PayloadCollection
 {

@@ -14,6 +14,7 @@ import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -61,6 +62,7 @@ public class InternalClient
 
     private DeviceTwin twin;
     private DeviceMethod method;
+    private DeviceCommand command;
 
     @Getter
     @Setter(AccessLevel.PRIVATE)
@@ -1365,5 +1367,35 @@ public class InternalClient
     public void subscribeToWritablePropertiesEvent(WritablePropertiesRequestsCallback writablePropertyUpdateCallback, Object callbackContext) throws IOException
     {
         twin.subscribeToWritablePropertyRequests(writablePropertyUpdateCallback, callbackContext);
+    }
+
+    /**
+     * Sets the global command handler.
+     *
+     * @param deviceCommandCallback Callback on which commands shall be invoked. Cannot be {@code null}.
+     * @param deviceCommandCallbackContext Context for command callback. Can be {@code null}.
+     * @param deviceCommandStatusCallback Callback for providing IotHub status for command. Cannot be {@code null}.
+     * @param deviceCommandStatusCallbackContext Context for command status callback. Can be {@code null}.
+     *
+     * @throws IOException if called when client is not opened.
+     */
+    void subscribeToCommandsInternal(@NonNull DeviceCommandCallback deviceCommandCallback, Object deviceCommandCallbackContext,
+                                     @NonNull IotHubEventCallback deviceCommandStatusCallback, Object deviceCommandStatusCallbackContext)
+            throws IOException
+    {
+        verifyRegisteredIfMultiplexing();
+        verifyMethodsAreSupported();
+
+        if (!this.deviceIO.isOpen())
+        {
+            throw new IOException("Open the client connection before using it.");
+        }
+
+        if (this.command == null)
+        {
+            this.command = new DeviceCommand(this.deviceIO, this.config, deviceCommandStatusCallback, deviceCommandStatusCallbackContext, getPayloadConvention());
+        }
+
+        this.command.subscribeToDeviceCommand(deviceCommandCallback, deviceCommandCallbackContext);
     }
 }

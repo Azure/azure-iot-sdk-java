@@ -7,6 +7,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotificat
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
+import com.microsoft.azure.sdk.iot.device.convention.DeviceCommandCallback;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUploadTask;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
@@ -14,6 +15,7 @@ import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import lombok.NonNull;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.extern.slf4j.Slf4j;
 
@@ -779,14 +781,21 @@ public final class DeviceClient extends InternalClient implements Closeable
     }
 
     /**
-     * Set the global command callback handler.
-     * @param callback The callback to be used for commands.
-     * @param callbackContext An optional user context to be sent to the callback.
+     * Subscribes to device commands. Commands will make use of the {@link com.microsoft.azure.sdk.iot.deps.convention.PayloadSerializer}
+     * which will allow the {@code deviceCommandCallback} to receieve an object rather than bytes.
+     *
+     * @param deviceCommandCallback Callback on which device commands shall be invoked. Cannot be {@code null}.
+     * @param deviceCommandCallbackContext Context for device command callback. Can be {@code null}.
+     * @param deviceCommandCallbackStatusCallback Callback for providing IotHub status for device commands. Cannot be {@code null}.
+     * @param deviceCommandCallbackStatusCallbackContext Context for device command status callback. Can be {@code null}.
+     *
+     * @throws IOException if called when client is not opened.
      */
-    public void subscribeToCommands(DeviceMethodCallback callback, Object callbackContext)
+    public void subscribeToDeviceComamnds(@NonNull DeviceCommandCallback deviceCommandCallback, Object deviceCommandCallbackContext,
+                                          @NonNull IotHubEventCallback deviceCommandCallbackStatusCallback, Object deviceCommandCallbackStatusCallbackContext)
+            throws IOException
     {
-        // Subscribe to methods default handler internally and use the callback received internally to invoke the user supplied command callback.
-        // TODO Implement command handler
+        this.subscribeToCommandsInternal(deviceCommandCallback, deviceCommandCallbackContext, deviceCommandCallbackStatusCallback, deviceCommandCallbackStatusCallbackContext);
     }
 
     // Used by multiplexing clients to signal to this client what kind of multiplexing client is using this device client
