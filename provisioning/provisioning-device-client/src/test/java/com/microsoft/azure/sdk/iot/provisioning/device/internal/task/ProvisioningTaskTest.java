@@ -25,6 +25,7 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.*;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.*;
@@ -1470,7 +1471,7 @@ public class ProvisioningTaskTest
                 mockedDeviceRegistrationResultParser.getTpm();
                 result = mockedTpm;
                 mockedTpm.getAuthenticationKey();
-                result = encodeBase64String("some auth key".getBytes());
+                result = encodeBase64String("some auth key".getBytes(StandardCharsets.UTF_8));
                 mockedProvisioningDeviceClientConfig.getSecurityProvider();
                 result = mockedSecurityProviderTpm;
             }

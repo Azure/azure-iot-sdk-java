@@ -28,6 +28,7 @@ import org.junit.runner.RunWith;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
@@ -45,8 +46,8 @@ public class ContractAPIHttpTest
     private static final String TEST_REGISTRATION_ID = "testRegistrationId";
     private static final String TEST_OPERATION_ID = "testOperationId";
     private static final String TEST_SAS_TOKEN = "testSasToken";
-    private static final byte[] TEST_EK = "testEK".getBytes();
-    private static final byte[] TEST_SRK = "testSRK".getBytes();
+    private static final byte[] TEST_EK = "testEK".getBytes(StandardCharsets.UTF_8);
+    private static final byte[] TEST_SRK = "testSRK".getBytes(StandardCharsets.UTF_8);
 
     @Mocked
     DeviceRegistrationParser mockedDeviceRegistrationParser;
@@ -228,7 +229,7 @@ public class ContractAPIHttpTest
     public void requestNonceWithDPSTPMSucceeds() throws IOException, ProvisioningDeviceClientException
     {
         //arrange
-        final byte[] expectedPayload = "testByte".getBytes();
+        final byte[] expectedPayload = "testByte".getBytes(StandardCharsets.UTF_8);
         ContractAPIHttp contractAPIHttp = createContractClass();
         prepareRequestExpectations();
         new NonStrictExpectations()
@@ -251,7 +252,7 @@ public class ContractAPIHttpTest
                 TpmRegistrationResultParser.createFromJson(new String(mockedHttpResponse.getBody()));
                 result = mockedTpmRegistrationResultParser;
                 mockedTpmRegistrationResultParser.getAuthenticationKey();
-                result = encodeBase64String("some auth key".getBytes());
+                result = encodeBase64String("some auth key".getBytes(StandardCharsets.UTF_8));
                 new DeviceRegistrationParser(anyString, anyString, anyString, anyString);
                 result = mockedDeviceRegistrationParser;
                 mockedDeviceRegistrationParser.toJson();
@@ -286,7 +287,7 @@ public class ContractAPIHttpTest
     public void requestNonceWithDPSTPMThrowsOnNullRegistrationId() throws ProvisioningDeviceClientException
     {
         //arrange
-        final byte[] expectedPayload = "testByte".getBytes();
+        final byte[] expectedPayload = "testByte".getBytes(StandardCharsets.UTF_8);
         ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
@@ -309,7 +310,7 @@ public class ContractAPIHttpTest
     public void requestNonceWithDPSTPMThrowsOnEmptyRegistrationId() throws ProvisioningDeviceClientException
     {
         //arrange
-        final byte[] expectedPayload = "testByte".getBytes();
+        final byte[] expectedPayload = "testByte".getBytes(StandardCharsets.UTF_8);
         ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
@@ -332,7 +333,7 @@ public class ContractAPIHttpTest
     public void requestNonceWithDPSTPMThrowsOnNullEk() throws ProvisioningDeviceClientException
     {
         //arrange
-        final byte[] expectedPayload = "testByte".getBytes();
+        final byte[] expectedPayload = "testByte".getBytes(StandardCharsets.UTF_8);
         ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
@@ -355,7 +356,7 @@ public class ContractAPIHttpTest
     public void requestNonceWithDPSTPMThrowsOnNullSRk() throws ProvisioningDeviceClientException
     {
         //arrange
-        final byte[] expectedPayload = "testByte".getBytes();
+        final byte[] expectedPayload = "testByte".getBytes(StandardCharsets.UTF_8);
         ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
@@ -378,7 +379,7 @@ public class ContractAPIHttpTest
     public void requestNonceWithDPSTPMThrowsOnNullSSLContext() throws ProvisioningDeviceClientException
     {
         //arrange
-        final byte[] expectedPayload = "testByte".getBytes();
+        final byte[] expectedPayload = "testByte".getBytes(StandardCharsets.UTF_8);
         ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
@@ -401,7 +402,7 @@ public class ContractAPIHttpTest
     public void requestNonceWithDPSTPMThrowsOnNullResponseCallback() throws ProvisioningDeviceClientException
     {
         //arrange
-        final byte[] expectedPayload = "testByte".getBytes();
+        final byte[] expectedPayload = "testByte".getBytes(StandardCharsets.UTF_8);
         ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
@@ -424,7 +425,7 @@ public class ContractAPIHttpTest
     @Test (expected = ProvisioningDeviceClientException.class)
     public void requestNonceWithDPSTPMThrowsHubExceptionWithStatusOtherThan404Throws() throws IOException, ProvisioningDeviceClientException
     {
-        final byte[] expectedPayload = "testByte".getBytes();
+        final byte[] expectedPayload = "testByte".getBytes(StandardCharsets.UTF_8);
         ContractAPIHttp contractAPIHttp = createContractClass();
         prepareRequestExpectations();
 
@@ -473,7 +474,7 @@ public class ContractAPIHttpTest
     @Test (expected = ProvisioningDeviceTransportException.class)
     public void requestNonceWithDPSTPMThrowsHubExceptionWithStatusLessThan300Throws() throws IOException, ProvisioningDeviceClientException
     {
-        final byte[] expectedPayload = "testByte".getBytes();
+        final byte[] expectedPayload = "testByte".getBytes(StandardCharsets.UTF_8);
         ContractAPIHttp contractAPIHttp = createContractClass();
         prepareRequestExpectations();
         new NonStrictExpectations()
@@ -520,7 +521,7 @@ public class ContractAPIHttpTest
     @Test (expected = ProvisioningDeviceTransportException.class)
     public void requestNonceWithDPSTPMThrowsTransportExceptionIfAnyOfTheTransportCallsFails() throws IOException, ProvisioningDeviceClientException
     {
-        final byte[] expectedPayload = "testByte".getBytes();
+        final byte[] expectedPayload = "testByte".getBytes(StandardCharsets.UTF_8);
         ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
@@ -564,7 +565,7 @@ public class ContractAPIHttpTest
     public void authenticateWithDPSWithOutAuthSucceeds(@Mocked DeviceRegistrationParser mockedDeviceRegistrationParser) throws IOException, ProvisioningDeviceClientException
     {
         //arrange
-        final byte[] expectedPayload = "testByte".getBytes();
+        final byte[] expectedPayload = "testByte".getBytes(StandardCharsets.UTF_8);
         ContractAPIHttp contractAPIHttp = createContractClass();
         prepareRequestExpectations();
         new NonStrictExpectations()
@@ -616,7 +617,7 @@ public class ContractAPIHttpTest
     public void authenticateWithDPSForTPMSucceeds() throws IOException, ProvisioningDeviceClientException
     {
         //arrange
-        final byte[] expectedPayload = "testByte".getBytes();
+        final byte[] expectedPayload = "testByte".getBytes(StandardCharsets.UTF_8);
         ContractAPIHttp contractAPIHttp = createContractClass();
         prepareRequestExpectations();
         new NonStrictExpectations()
@@ -669,7 +670,7 @@ public class ContractAPIHttpTest
     public void authenticateWithDPSThrowsOnSendFailure() throws IOException, ProvisioningDeviceClientException
     {
         //arrange
-        final byte[] expectedPayload = "testByte".getBytes();
+        final byte[] expectedPayload = "testByte".getBytes(StandardCharsets.UTF_8);
         ContractAPIHttp contractAPIHttp = createContractClass();
         prepareRequestExpectations();
         new NonStrictExpectations()
@@ -720,7 +721,7 @@ public class ContractAPIHttpTest
     public void authenticateWithDPSWithAuthSucceeds() throws IOException, ProvisioningDeviceClientException
     {
         //arrange
-        final byte[] expectedPayload = "testByte".getBytes();
+        final byte[] expectedPayload = "testByte".getBytes(StandardCharsets.UTF_8);
         ContractAPIHttp contractAPIHttp = createContractClass();
         prepareRequestExpectations();
         new NonStrictExpectations()
@@ -773,7 +774,7 @@ public class ContractAPIHttpTest
     public void authenticateWithDPSWithAuthAndRetryAfterSucceeds() throws IOException, ProvisioningDeviceClientException
     {
         //arrange
-        final byte[] expectedPayload = "testByte".getBytes();
+        final byte[] expectedPayload = "testByte".getBytes(StandardCharsets.UTF_8);
         ContractAPIHttp contractAPIHttp = createContractClass();
         prepareRequestExpectations();
         new NonStrictExpectations()
@@ -833,7 +834,7 @@ public class ContractAPIHttpTest
     public void authenticateWithDPSThrowsOnNullRegistrationId() throws ProvisioningDeviceClientException
     {
         //arrange
-        final byte[] expectedPayload = "testByte".getBytes();
+        final byte[] expectedPayload = "testByte".getBytes(StandardCharsets.UTF_8);
         ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
@@ -855,7 +856,7 @@ public class ContractAPIHttpTest
     public void authenticateWithDPSThrowsOnEmptyRegistrationId() throws ProvisioningDeviceClientException
     {
         //arrange
-        final byte[] expectedPayload = "testByte".getBytes();
+        final byte[] expectedPayload = "testByte".getBytes(StandardCharsets.UTF_8);
         ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
@@ -876,7 +877,7 @@ public class ContractAPIHttpTest
     public void authenticateWithDPSThrowsOnNullSSLContext() throws ProvisioningDeviceClientException
     {
         //arrange
-        final byte[] expectedPayload = "testByte".getBytes();
+        final byte[] expectedPayload = "testByte".getBytes(StandardCharsets.UTF_8);
         ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
@@ -897,7 +898,7 @@ public class ContractAPIHttpTest
     public void authenticateWithDPSThrowsOnNullResponseCallback() throws ProvisioningDeviceClientException
     {
         //arrange
-        final byte[] expectedPayload = "testByte".getBytes();
+        final byte[] expectedPayload = "testByte".getBytes(StandardCharsets.UTF_8);
         ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
@@ -918,7 +919,7 @@ public class ContractAPIHttpTest
     @Test (expected = ProvisioningDeviceTransportException.class)
     public void authenticateWithDPSThrowsTransportExceptionIfAnyOfTheTransportCallsFails() throws ProvisioningDeviceClientException
     {
-        final byte[] expectedPayload = "testByte".getBytes();
+        final byte[] expectedPayload = "testByte".getBytes(StandardCharsets.UTF_8);
         ContractAPIHttp contractAPIHttp = createContractClass();
         new NonStrictExpectations()
         {
@@ -1278,7 +1279,7 @@ public class ContractAPIHttpTest
     public void prepareRequestThrowsOnNullUrl() throws Exception
     {
         //arrange
-        final byte[] expectedPayload = "TestBytes".getBytes();
+        final byte[] expectedPayload = "TestBytes".getBytes(StandardCharsets.UTF_8);
         final String expectedUserAgentValue = "TestUserAgent";
         ContractAPIHttp contractAPIHttp = createContractClass();
 
@@ -1291,7 +1292,7 @@ public class ContractAPIHttpTest
     public void prepareRequestThrowsOnNullMethod() throws Exception
     {
         //arrange
-        final byte[] expectedPayload = "TestBytes".getBytes();
+        final byte[] expectedPayload = "TestBytes".getBytes(StandardCharsets.UTF_8);
         final String expectedUserAgentValue = "TestUserAgent";
         ContractAPIHttp contractAPIHttp = createContractClass();
 
@@ -1317,7 +1318,7 @@ public class ContractAPIHttpTest
     public void prepareRequestThrowsOnInvalidTimeout() throws Exception
     {
         //arrange
-        final byte[] expectedPayload = "TestBytes".getBytes();
+        final byte[] expectedPayload = "TestBytes".getBytes(StandardCharsets.UTF_8);
         final String expectedUserAgentValue = "TestUserAgent";
         ContractAPIHttp contractAPIHttp = createContractClass();
 

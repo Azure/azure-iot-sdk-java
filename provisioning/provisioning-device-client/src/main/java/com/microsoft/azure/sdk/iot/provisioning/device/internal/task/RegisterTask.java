@@ -166,7 +166,7 @@ public class RegisterTask implements Callable<RegistrationOperationStatusParser>
         if (securityProvider instanceof SecurityProviderTpm)
         {
             SecurityProviderTpm securityClientTpm = (SecurityProviderTpm) securityProvider;
-            token = securityClientTpm.signWithIdentity(value.getBytes());
+            token = securityClientTpm.signWithIdentity(value.getBytes(StandardCharsets.UTF_8));
         }
         else if (securityProvider instanceof SecurityProviderSymmetricKey)
         {

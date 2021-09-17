@@ -13,6 +13,7 @@ import javax.net.ssl.SSLContext;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -148,7 +149,7 @@ public abstract class SecurityProvider
         //SRS_SecurityClient_25_002: [ This method shall retrieve the default CertificateFactory instance. ]
         CertificateFactory certFactory = CertificateFactory.getInstance(DEFAULT_CERT_INSTANCE);
         Collection<? extends Certificate> trustedCert;
-        try (InputStream certStreamArray = new ByteArrayInputStream(DEFAULT_TRUSTED_CERT.getBytes()))
+        try (InputStream certStreamArray = new ByteArrayInputStream(DEFAULT_TRUSTED_CERT.getBytes(StandardCharsets.UTF_8)))
         {
             trustedCert =  certFactory.generateCertificates(certStreamArray);
         }

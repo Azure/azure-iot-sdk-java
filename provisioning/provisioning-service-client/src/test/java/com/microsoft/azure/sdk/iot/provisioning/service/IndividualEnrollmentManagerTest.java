@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.*;
 import mockit.*;
 import org.junit.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -110,7 +111,7 @@ public class IndividualEnrollmentManagerTest
                 result = mockedHttpResponse;
                 times = 1;
                 mockedHttpResponse.getBody();
-                result = resultPayload.getBytes();
+                result = resultPayload.getBytes(StandardCharsets.UTF_8);
                 times = 1;
                 Deencapsulation.newInstance(IndividualEnrollment.class, resultPayload);
                 result = mockedIndividualEnrollmentResponse;
@@ -159,7 +160,7 @@ public class IndividualEnrollmentManagerTest
                 result = mockedHttpResponse;
                 times = 1;
                 mockedHttpResponse.getBody();
-                result = resultPayload.getBytes();
+                result = resultPayload.getBytes(StandardCharsets.UTF_8);
                 Deencapsulation.newInstance(IndividualEnrollment.class, resultPayload);
                 result = mockedIndividualEnrollmentResponse;
             }
@@ -344,7 +345,7 @@ public class IndividualEnrollmentManagerTest
                 result = mockedHttpResponse;
                 times = 1;
                 mockedHttpResponse.getBody();
-                result = resultPayload.getBytes();
+                result = resultPayload.getBytes(StandardCharsets.UTF_8);
                 times = 1;
                 Deencapsulation.newInstance(BulkEnrollmentOperationResult.class, resultPayload);
                 result = mockedBulkEnrollmentOperationResult;
@@ -504,7 +505,7 @@ public class IndividualEnrollmentManagerTest
                 result = mockedHttpResponse;
                 times = 1;
                 mockedHttpResponse.getBody();
-                result = resultPayload.getBytes();
+                result = resultPayload.getBytes(StandardCharsets.UTF_8);
                 times = 1;
                 Deencapsulation.newInstance(IndividualEnrollment.class, resultPayload);
                 result = mockedIndividualEnrollmentResponse;

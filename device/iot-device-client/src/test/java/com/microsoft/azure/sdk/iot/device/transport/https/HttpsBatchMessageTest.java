@@ -60,7 +60,7 @@ public class HttpsBatchMessageTest
         {
             {
                 mockMsg.getBody();
-                result = msgBody.getBytes();
+                result = msgBody.getBytes(StandardCharsets.UTF_8);
             }
         };
 
@@ -70,7 +70,7 @@ public class HttpsBatchMessageTest
         String testBatchBody =
                 new String(batchMsg.getBody(), UTF8).replaceAll("\\s", "");
 
-        final String expectedMsgBody = encodeBase64String(msgBody.getBytes());
+        final String expectedMsgBody = encodeBase64String(msgBody.getBytes(StandardCharsets.UTF_8));
         assertThat(testBatchBody, containsString(expectedMsgBody));
     }
 
@@ -84,7 +84,7 @@ public class HttpsBatchMessageTest
         {
             {
                 mockMsg.getBody();
-                result = msgBody.getBytes();
+                result = msgBody.getBytes(StandardCharsets.UTF_8);
             }
         };
 
@@ -145,7 +145,7 @@ public class HttpsBatchMessageTest
         {
             {
                 mockMsg.getBody();
-                result = msgBody.getBytes();
+                result = msgBody.getBytes(StandardCharsets.UTF_8);
                 mockMsg.getProperties();
                 result = properties;
                 mockProperty.getName();
@@ -280,7 +280,7 @@ public class HttpsBatchMessageTest
         {
             {
                 mockMsg.getBody();
-                result = msgBody.getBytes();
+                result = msgBody.getBytes(StandardCharsets.UTF_8);
             }
         };
 

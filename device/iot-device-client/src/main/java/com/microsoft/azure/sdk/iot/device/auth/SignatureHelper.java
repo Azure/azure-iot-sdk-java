@@ -56,7 +56,7 @@ public final class SignatureHelper
     public static byte[] decodeDeviceKeyBase64(String deviceKey)
     {
         // Codes_SRS_SIGNATUREHELPER_11_003: [The function shall decode the device key using Base64.]
-        return decodeBase64(deviceKey.getBytes());
+        return decodeBase64(deviceKey.getBytes(StandardCharsets.UTF_8));
     }
 
     /**

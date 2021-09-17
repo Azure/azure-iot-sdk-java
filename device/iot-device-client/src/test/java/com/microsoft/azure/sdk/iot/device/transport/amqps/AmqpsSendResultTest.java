@@ -8,6 +8,8 @@ import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsSendResult;
 import mockit.Deencapsulation;
 import org.junit.Test;
 
+import java.nio.charset.StandardCharsets;
+
 import static org.junit.Assert.*;
 
 /**
@@ -21,7 +23,7 @@ public class AmqpsSendResultTest
     public void constructorInitializesAllMembersUnsuccessfulDelivery()
     {
         //arrange
-        byte[] expectedDeliveryTag = "-1".getBytes();
+        byte[] expectedDeliveryTag = "-1".getBytes(StandardCharsets.UTF_8);
 
         //act
         AmqpsSendResult amqpsSendResult = Deencapsulation.newInstance(AmqpsSendResult.class);
@@ -37,7 +39,7 @@ public class AmqpsSendResultTest
     public void constructorInitializesAllMembersSuccessfulDelivery() {
         //arrange
         int expectedDeliveryTag = 56;
-        byte[] deliveryTag = String.valueOf(expectedDeliveryTag).getBytes();
+        byte[] deliveryTag = String.valueOf(expectedDeliveryTag).getBytes(StandardCharsets.UTF_8);
 
         //act
         AmqpsSendResult amqpsSendResult = Deencapsulation.newInstance(AmqpsSendResult.class, (Object) deliveryTag);
@@ -53,7 +55,7 @@ public class AmqpsSendResultTest
     public void getDeliveryTagWorks()
     {
         //arrange
-        byte[] deliveryTag = String.valueOf(24).getBytes();
+        byte[] deliveryTag = String.valueOf(24).getBytes(StandardCharsets.UTF_8);
         int deliveryTagInt = Integer.parseInt(new String(deliveryTag));
         AmqpsSendResult amqpsSendResult = Deencapsulation.newInstance(AmqpsSendResult.class, (Object) deliveryTag);
 

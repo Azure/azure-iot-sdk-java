@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.*;
 import mockit.*;
 import org.junit.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -210,7 +211,7 @@ public class QueryTest
                 mockedContractApiHttp.request(HttpMethod.POST, queryPath, (Map)any, querySpecificationJson);
                 result = mockedHttpResponse;
                 mockedHttpResponse.getBody();
-                result = "result".getBytes();
+                result = "result".getBytes(StandardCharsets.UTF_8);
                 mockedHttpResponse.getHeaderFields();
                 result = headersResult;
             }
@@ -250,7 +251,7 @@ public class QueryTest
                 mockedContractApiHttp.request(HttpMethod.POST, queryPath, (Map)any, querySpecificationJson);
                 result = mockedHttpResponse;
                 mockedHttpResponse.getBody();
-                result = "result".getBytes();
+                result = "result".getBytes(StandardCharsets.UTF_8);
                 mockedHttpResponse.getHeaderFields();
                 result = headersResult;
             }
@@ -304,7 +305,7 @@ public class QueryTest
                 times = 1;
                 result = mockedHttpResponse;
                 mockedHttpResponse.getBody();
-                result = "result".getBytes();
+                result = "result".getBytes(StandardCharsets.UTF_8);
                 mockedHttpResponse.getHeaderFields();
                 result = headersResult;
                 times = 1;
@@ -347,7 +348,7 @@ public class QueryTest
                 times = 1;
                 result = mockedHttpResponse;
                 mockedHttpResponse.getBody();
-                result = "result".getBytes();
+                result = "result".getBytes(StandardCharsets.UTF_8);
                 mockedHttpResponse.getHeaderFields();
                 result = headersResult;
                 times = 1;
@@ -423,7 +424,7 @@ public class QueryTest
                 mockedContractApiHttp.request(HttpMethod.POST, queryPath, headersSend, querySpecificationJson);
                 result = mockedHttpResponse;
                 mockedHttpResponse.getBody();
-                result = bodyResult.getBytes();
+                result = bodyResult.getBytes(StandardCharsets.UTF_8);
                 mockedHttpResponse.getHeaderFields();
                 result = headersResult;
                 Deencapsulation.newInstance(QueryResult.class, type, bodyResult, continuationToken);
@@ -470,7 +471,7 @@ public class QueryTest
                 mockedContractApiHttp.request(HttpMethod.POST, queryPath, headersSend, querySpecificationJson);
                 result = mockedHttpResponse;
                 mockedHttpResponse.getBody();
-                result = bodyResult.getBytes();
+                result = bodyResult.getBytes(StandardCharsets.UTF_8);
                 mockedHttpResponse.getHeaderFields();
                 result = headersResult;
                 Deencapsulation.newInstance(QueryResult.class, new Class[]{String.class, String.class, String.class}, null, bodyResult, continuationToken);
@@ -518,7 +519,7 @@ public class QueryTest
                 mockedContractApiHttp.request(HttpMethod.POST, queryPath, headersSend, querySpecificationJson);
                 result = mockedHttpResponse;
                 mockedHttpResponse.getBody();
-                result = bodyResult.getBytes();
+                result = bodyResult.getBytes(StandardCharsets.UTF_8);
                 mockedHttpResponse.getHeaderFields();
                 result = headersResult;
                 Deencapsulation.newInstance(QueryResult.class, new Class[]{String.class, String.class, String.class}, type, bodyResult, null);
@@ -597,7 +598,7 @@ public class QueryTest
                 mockedContractApiHttp.request(HttpMethod.POST, queryPath, headersSend, querySpecificationJson);
                 result = mockedHttpResponse;
                 mockedHttpResponse.getBody();
-                result = bodyResult.getBytes();
+                result = bodyResult.getBytes(StandardCharsets.UTF_8);
                 mockedHttpResponse.getHeaderFields();
                 result = headersResult;
                 Deencapsulation.newInstance(QueryResult.class, new Class[]{String.class, String.class, String.class}, type, bodyResult, null);

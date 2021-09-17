@@ -20,6 +20,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.net.Proxy;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 import static junit.framework.TestCase.assertEquals;
@@ -393,7 +394,7 @@ public class QueryCollectionTest
         //arrange
         String expectedQueryString = "some query";
         String expectedQueryStringJson = "some query json";
-        byte[] expectedQueryStringBytes = expectedQueryStringJson.getBytes();
+        byte[] expectedQueryStringBytes = expectedQueryStringJson.getBytes(StandardCharsets.UTF_8);
         QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class}, expectedQueryString, expectedPageSize, QueryType.RAW, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout);
 
         new NonStrictExpectations()
@@ -408,7 +409,7 @@ public class QueryCollectionTest
                 mockQueryRequestParser.toJson();
                 result = expectedQueryStringJson;
 
-                expectedQueryStringJson.getBytes();
+                expectedQueryStringJson.getBytes(StandardCharsets.UTF_8);
                 result = expectedQueryStringBytes;
 
                 DeviceOperations.request((IotHubConnectionString) any, (URL) any, (HttpMethod) any, expectedQueryStringBytes, null, anyLong);
@@ -431,7 +432,7 @@ public class QueryCollectionTest
         //arrange
         String expectedQueryString = "some query";
         String expectedQueryStringJson = "some query json";
-        byte[] expectedQueryStringBytes = expectedQueryStringJson.getBytes();
+        byte[] expectedQueryStringBytes = expectedQueryStringJson.getBytes(StandardCharsets.UTF_8);
         QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class}, expectedQueryString, expectedPageSize, QueryType.RAW, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout);
 
         new NonStrictExpectations()
@@ -446,7 +447,7 @@ public class QueryCollectionTest
                 mockQueryRequestParser.toJson();
                 result = expectedQueryStringJson;
 
-                expectedQueryStringJson.getBytes();
+                expectedQueryStringJson.getBytes(StandardCharsets.UTF_8);
                 result = expectedQueryStringBytes;
 
                 DeviceOperations.request((IotHubConnectionString) any, (URL) any, (HttpMethod) any, expectedQueryStringBytes, null, anyLong);

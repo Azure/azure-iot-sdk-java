@@ -25,6 +25,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -125,7 +126,7 @@ public class FileUploadTaskTest
                 mockResponseMessage.getStatus();
                 result = IotHubStatusCode.OK;
                 mockResponseMessage.getBytes();
-                result = responseJson.getBytes();
+                result = responseJson.getBytes(StandardCharsets.UTF_8);
                 new FileUploadSasUriResponse(responseJson);
                 result = mockFileUploadSasUriResponse;
             }
@@ -652,7 +653,7 @@ public class FileUploadTaskTest
                 mockResponseMessage.getStatus();
                 result = IotHubStatusCode.OK;
                 mockResponseMessage.getBytes();
-                result = VALID_RESPONSE_JSON.getBytes();
+                result = VALID_RESPONSE_JSON.getBytes(StandardCharsets.UTF_8);
                 new FileUploadSasUriResponse(VALID_RESPONSE_JSON);
                 result = new IllegalArgumentException();
             }

@@ -19,6 +19,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -465,7 +466,7 @@ public class HttpsTransportManagerTest
                 result = IotHubStatusCode.OK_EMPTY;
 
                 mockResponseMessage.getBytes();
-                result = expectedResponseBody.getBytes();
+                result = expectedResponseBody.getBytes(StandardCharsets.UTF_8);
 
                 new MethodResult(expectedResponseBody);
             }
@@ -522,7 +523,7 @@ public class HttpsTransportManagerTest
                 result = IotHubStatusCode.OK_EMPTY;
 
                 mockResponseMessage.getBytes();
-                result = expectedResponseBody.getBytes();
+                result = expectedResponseBody.getBytes(StandardCharsets.UTF_8);
 
                 new MethodResult(expectedResponseBody);
             }
@@ -597,7 +598,7 @@ public class HttpsTransportManagerTest
                 result = IotHubStatusCode.HUB_OR_DEVICE_ID_NOT_FOUND;
 
                 mockResponseMessage.getBytes();
-                result = expectedResponseBody.getBytes();
+                result = expectedResponseBody.getBytes(StandardCharsets.UTF_8);
             }
         };
 

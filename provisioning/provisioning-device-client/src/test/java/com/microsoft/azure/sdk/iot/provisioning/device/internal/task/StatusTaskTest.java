@@ -31,6 +31,7 @@ import org.junit.runner.RunWith;
 import javax.net.ssl.SSLContext;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState.DPS_REGISTRATION_RECEIVED;
 import static junit.framework.TestCase.assertEquals;
@@ -158,7 +159,7 @@ public class StatusTaskTest
                 Deencapsulation.invoke(mockedAuthorization, "getSslContext");
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
-                result = "NonNullValue".getBytes();
+                result = "NonNullValue".getBytes(StandardCharsets.UTF_8);
                 Deencapsulation.invoke(mockedResponseData, "getContractState");
                 result = DPS_REGISTRATION_RECEIVED;
                 RegistrationOperationStatusParser.createFromJson(anyString);
@@ -339,7 +340,7 @@ public class StatusTaskTest
                 Deencapsulation.invoke(mockedAuthorization, "getSslContext");
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
-                result = "NonNullValue".getBytes();
+                result = "NonNullValue".getBytes(StandardCharsets.UTF_8);
                 Deencapsulation.invoke(mockedResponseData, "getContractState");
                 result = DPS_REGISTRATION_RECEIVED;
                 RegistrationOperationStatusParser.createFromJson(anyString);
@@ -370,7 +371,7 @@ public class StatusTaskTest
                 Deencapsulation.invoke(mockedAuthorization, "getSslContext");
                 result = mockedSslContext;
                 Deencapsulation.invoke(mockedResponseData, "getResponseData");
-                result = "NonNullValue".getBytes();
+                result = "NonNullValue".getBytes(StandardCharsets.UTF_8);
                 Deencapsulation.invoke(mockedResponseData, "getContractState");
                 result = DPS_REGISTRATION_RECEIVED;
                 RegistrationOperationStatusParser.createFromJson(anyString);

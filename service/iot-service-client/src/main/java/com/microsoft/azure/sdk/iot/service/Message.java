@@ -145,7 +145,7 @@ public class Message
         this();
         if (stream != null)
         {
-            this.body = stream.toString().getBytes();
+            this.body = stream.toString().getBytes(StandardCharsets.UTF_8);
         }
     }
 

@@ -40,6 +40,7 @@ import java.net.SocketTimeoutException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -742,7 +743,7 @@ public class Tools
 
         String sasTokenString = new IotHubServiceSasToken(iotHubConnectionString).toString();
 
-        HttpRequest request = new HttpRequest(url, HttpMethod.POST, jsonPayload.getBytes());
+        HttpRequest request = new HttpRequest(url, HttpMethod.POST, jsonPayload.getBytes(StandardCharsets.UTF_8));
         request.setReadTimeoutMillis(IntegrationTest.HTTP_READ_TIMEOUT);
         request.setHeaderField("authorization", sasTokenString);
         request.setHeaderField("Accept", "application/json");

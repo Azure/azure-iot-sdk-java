@@ -108,7 +108,7 @@ public class SSLContextBuilder
             throw new GeneralSecurityException("Public key certificate cannot be null or empty");
         }
 
-        InputStream pemInputStream = new ByteArrayInputStream(pemString.getBytes());
+        InputStream pemInputStream = new ByteArrayInputStream(pemString.getBytes(StandardCharsets.UTF_8));
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
         Collection<X509Certificate> collection = new ArrayList<>();
         X509Certificate x509Cert;
@@ -155,7 +155,7 @@ public class SSLContextBuilder
 
         CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
 
-        try (InputStream inputStream = new ByteArrayInputStream(DEFAULT_CERT.getBytes()))
+        try (InputStream inputStream = new ByteArrayInputStream(DEFAULT_CERT.getBytes(StandardCharsets.UTF_8)))
         {
             Collection<? extends Certificate> certificates = certificateFactory.generateCertificates(inputStream);
 

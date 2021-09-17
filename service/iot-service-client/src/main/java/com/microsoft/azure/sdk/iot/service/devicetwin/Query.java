@@ -18,6 +18,7 @@ import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 import java.io.IOException;
 import java.net.Proxy;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -183,7 +184,7 @@ public class Query
         if (isSqlQuery)
         {
             QueryRequestParser requestParser = new QueryRequestParser(this.query);
-            payload = requestParser.toJson().getBytes();
+            payload = requestParser.toJson().getBytes(StandardCharsets.UTF_8);
         }
         else
         {
@@ -281,7 +282,7 @@ public class Query
         if (isSqlQuery)
         {
             QueryRequestParser requestParser = new QueryRequestParser(this.query);
-            payload = requestParser.toJson().getBytes();
+            payload = requestParser.toJson().getBytes(StandardCharsets.UTF_8);
         }
         else
         {
@@ -381,7 +382,7 @@ public class Query
         if (isSqlQuery)
         {
             QueryRequestParser requestParser = new QueryRequestParser(this.query);
-            payload = requestParser.toJson().getBytes();
+            payload = requestParser.toJson().getBytes(StandardCharsets.UTF_8);
         }
         else
         {
