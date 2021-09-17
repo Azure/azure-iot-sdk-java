@@ -9,18 +9,21 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public final class DeviceMethod
+public class DeviceMethod
 {
     private DeviceMethodCallback deviceMethodCallback;
-    private Object deviceMethodCallbackContext;
-    private final IotHubEventCallback deviceMethodStatusCallback;
-    private final Object deviceMethodStatusCallbackContext;
-    private final ObjectLock DEVICE_METHOD_LOCK = new ObjectLock();
+    protected Object deviceMethodCallbackContext;
+    protected final IotHubEventCallback deviceMethodStatusCallback;
+    protected final Object deviceMethodStatusCallbackContext;
+    protected final ObjectLock DEVICE_METHOD_LOCK = new ObjectLock();
 
-    private boolean isSubscribed = false;
+    protected boolean isSubscribed = false;
 
-    private final DeviceIO deviceIO;
-    private final DeviceClientConfig config;
+    protected final DeviceIO deviceIO;
+    protected final DeviceClientConfig config;
+
+    protected MessageCallback deviceMethodResponseCallback = new deviceMethodResponseCallback();
+    protected IotHubEventCallback deviceMethodRequestMessageCallback = new deviceMethodRequestMessageCallback();
 
     private final class deviceMethodResponseCallback implements MessageCallback
     {
