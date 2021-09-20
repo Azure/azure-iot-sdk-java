@@ -9,6 +9,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.nio.charset.StandardCharsets;
+
 public class MethodResult
 {
     private static final String STATUS_KEY_NAME = "status";
@@ -56,7 +58,7 @@ public class MethodResult
         }
         else if (this.payload instanceof byte[])
         {
-            return new String((byte[]) this.payload);
+            return new String((byte[]) this.payload, StandardCharsets.UTF_8);
         }
         else
         {

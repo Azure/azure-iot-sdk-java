@@ -32,7 +32,7 @@ public class AmqpsSendResultTest
 
         //assert
         assertFalse(actualIsDeliverySuccessful);
-        assertEquals(new String(expectedDeliveryTag), String.valueOf(actualDeliveryTag));
+        assertEquals(new String(expectedDeliveryTag, StandardCharsets.UTF_8), String.valueOf(actualDeliveryTag));
     }
 
     @Test
@@ -56,7 +56,7 @@ public class AmqpsSendResultTest
     {
         //arrange
         byte[] deliveryTag = String.valueOf(24).getBytes(StandardCharsets.UTF_8);
-        int deliveryTagInt = Integer.parseInt(new String(deliveryTag));
+        int deliveryTagInt = Integer.parseInt(new String(deliveryTag, StandardCharsets.UTF_8));
         AmqpsSendResult amqpsSendResult = Deencapsulation.newInstance(AmqpsSendResult.class, (Object) deliveryTag);
 
         //act

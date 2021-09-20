@@ -198,8 +198,8 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
         {
             //SRS_ContractAPIHttp_25_004: [This method shall retrieve the Url by calling 'generateRegisterUrl' on an object for UrlPathBuilder.]
             String url = new UrlPathBuilder(this.hostName, this.idScope, ProvisioningDeviceClientTransportProtocol.HTTPS).generateRegisterUrl(requestData.getRegistrationId());
-            String base64EncodedEk = new String(encodeBase64(requestData.getEndorsementKey()));
-            String base64EncodedSrk = new String(encodeBase64(requestData.getStorageRootKey()));
+            String base64EncodedEk = new String(encodeBase64(requestData.getEndorsementKey()), StandardCharsets.UTF_8);
+            String base64EncodedSrk = new String(encodeBase64(requestData.getStorageRootKey()), StandardCharsets.UTF_8);
             //SRS_ContractAPIHttp_25_025: [ This method shall build the required Json input using parser. ]
             byte[] payload = new DeviceRegistrationParser(requestData.getRegistrationId(), requestData.getPayload(), base64EncodedEk, base64EncodedSrk).toJson().getBytes(StandardCharsets.UTF_8);
             //SRS_ContractAPIHttp_25_005: [This method shall prepare the PUT request by setting following headers on a HttpRequest 1. User-Agent : User Agent String for the SDK 2. Accept : "application/json" 3. Content-Type: "application/json; charset=utf-8".]
@@ -281,8 +281,8 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
             if (requestData.getEndorsementKey() != null && requestData.getStorageRootKey() != null)
             {
                 //SRS_ContractAPIHttp_25_027: [ This method shall base 64 encoded endorsement key, storage root key. ]
-                String base64EncodedEk = new String(encodeBase64(requestData.getEndorsementKey()));
-                String base64EncodedSrk = new String(encodeBase64(requestData.getStorageRootKey()));
+                String base64EncodedEk = new String(encodeBase64(requestData.getEndorsementKey()), StandardCharsets.UTF_8);
+                String base64EncodedSrk = new String(encodeBase64(requestData.getStorageRootKey()), StandardCharsets.UTF_8);
                 payload = new DeviceRegistrationParser(requestData.getRegistrationId(), requestData.getPayload(), base64EncodedEk, base64EncodedSrk).toJson().getBytes(StandardCharsets.UTF_8);
             }
             else

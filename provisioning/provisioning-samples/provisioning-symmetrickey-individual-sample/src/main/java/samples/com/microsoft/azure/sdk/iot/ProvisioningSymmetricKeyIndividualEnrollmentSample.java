@@ -85,7 +85,7 @@ public class ProvisioningSymmetricKeyIndividualEnrollmentSample
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
         SecurityProviderSymmetricKey securityClientSymmetricKey;
-        Scanner scanner = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
         DeviceClient deviceClient = null;
 
         securityClientSymmetricKey = new SecurityProviderSymmetricKey(SYMMETRIC_KEY.getBytes(StandardCharsets.UTF_8), REGISTRATION_ID);

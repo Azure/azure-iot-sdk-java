@@ -10,6 +10,8 @@ import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import org.junit.Test;
 
+import java.nio.charset.StandardCharsets;
+
 import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_UNKNOWN;
 import static org.junit.Assert.*;
 
@@ -78,7 +80,7 @@ public class IotHubTransportMessageTest
         IotHubTransportMessage iotHubTransportMessage = new IotHubTransportMessage(body);
 
         // assert
-        assertEquals(body, new String(iotHubTransportMessage.getBytes()));
+        assertEquals(body, new String(iotHubTransportMessage.getBytes(), StandardCharsets.UTF_8));
     }
 
     /*

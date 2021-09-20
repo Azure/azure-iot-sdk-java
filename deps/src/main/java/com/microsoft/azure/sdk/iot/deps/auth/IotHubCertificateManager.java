@@ -4,6 +4,7 @@
 package com.microsoft.azure.sdk.iot.deps.auth;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -119,7 +120,7 @@ public class IotHubCertificateManager
         certificateFactory = CertificateFactory.getInstance("X.509");
 
         //Codes_SRS_IOTHUBCERTIFICATEMANAGER_34_002: [**This function shall generate the default certificates.**]**
-        try (InputStream inputStream = new ByteArrayInputStream(DEFAULT_CERT.getBytes()))
+        try (InputStream inputStream = new ByteArrayInputStream(DEFAULT_CERT.getBytes(StandardCharsets.UTF_8)))
         {
             certificates = certificateFactory.generateCertificates(inputStream);
         }
@@ -179,7 +180,7 @@ public class IotHubCertificateManager
 
         //Codes_SRS_IOTHUBCERTIFICATEMANAGER_34_005: [**This function shall read the certificates from the provided
         // string and save them into a certificate collection.**]**
-        try (InputStream inputStream = new ByteArrayInputStream(cert.getBytes()))
+        try (InputStream inputStream = new ByteArrayInputStream(cert.getBytes(StandardCharsets.UTF_8)))
         {
             certificates = certificateFactory.generateCertificates(inputStream);
         }

@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -264,7 +265,7 @@ public final class DeviceClientConfig
                     connectionString.getGatewayHostName(),
                     connectionString.getDeviceId(),
                     connectionString.getModuleId(),
-                    new String(((SecurityProviderSymmetricKey) securityProvider).getSymmetricKey()),
+                    new String(((SecurityProviderSymmetricKey) securityProvider).getSymmetricKey(), StandardCharsets.UTF_8),
                     null);
         }
         else if (securityProvider instanceof SecurityProviderX509)

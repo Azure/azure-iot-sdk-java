@@ -14,6 +14,7 @@ import java.io.IOException;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import org.apache.commons.codec.binary.Base32;
 
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.CertificateException;
 
@@ -42,7 +43,7 @@ public abstract class SecurityProviderTpm extends SecurityProvider
             Base32 base32 = new Base32();
             byte[] base32Encoded = base32.encode(hash);
 
-            String registrationId = new String(base32Encoded).toLowerCase();
+            String registrationId = new String(base32Encoded, StandardCharsets.UTF_8).toLowerCase();
             if (registrationId.contains(EQUALS))
             {
                 registrationId = registrationId.replace(EQUALS, "").toLowerCase();

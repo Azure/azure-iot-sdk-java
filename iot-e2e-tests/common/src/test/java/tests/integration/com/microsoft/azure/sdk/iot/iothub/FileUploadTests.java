@@ -35,6 +35,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -209,7 +210,7 @@ public class FileUploadTests extends IntegrationTest
             testInstance.fileUploadState[i].isCallBackTriggered = false;
 
             testInstance.messageStates[i] = new MessageState();
-            testInstance.messageStates[i].messageBody = new String(buf);
+            testInstance.messageStates[i].messageBody = new String(buf, StandardCharsets.UTF_8);
             testInstance.messageStates[i].messageStatus = SUCCESS;
         }
     }

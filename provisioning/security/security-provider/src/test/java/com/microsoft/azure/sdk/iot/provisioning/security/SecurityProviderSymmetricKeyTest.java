@@ -84,8 +84,8 @@ public class SecurityProviderSymmetricKeyTest
         SecurityProviderSymmetricKey securityProviderSymmetricKey = new SecurityProviderSymmetricKey(testPrimaryKey, testSecondaryKey, testRegId);
 
         //assert
-        assertEquals(testPrimaryKey, new String(securityProviderSymmetricKey.getSymmetricKey()));
-        assertEquals(testSecondaryKey, new String(securityProviderSymmetricKey.getSecondaryKey()));
+        assertEquals(testPrimaryKey, new String(securityProviderSymmetricKey.getSymmetricKey(), StandardCharsets.UTF_8));
+        assertEquals(testSecondaryKey, new String(securityProviderSymmetricKey.getSecondaryKey(), StandardCharsets.UTF_8));
         assertEquals(testRegId, securityProviderSymmetricKey.getRegistrationId());
     }
 
