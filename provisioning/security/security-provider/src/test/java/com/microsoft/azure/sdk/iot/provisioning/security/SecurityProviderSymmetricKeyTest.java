@@ -138,8 +138,12 @@ public class SecurityProviderSymmetricKeyTest
     public void testSignData() throws SecurityProviderException
     {
         final String TEST_SIGNATURE = "testSignature";
-        final String TEST_BASE64_DECODED_KEY = "base64DecodedKey";
+
+        // Semmle flags this as sensitive call, but it is a false positive since it is for test purposes
+        final String TEST_BASE64_DECODED_KEY = "base64DecodedKey"; //lgtm
+
         final String HMAC_SHA_256 = "HmacSHA256";
+
         //arrange
         SecurityProviderSymmetricKey securityProviderSymmetricKey = new SecurityProviderSymmetricKey(testSymKey, testRegId);
         //act
@@ -249,7 +253,10 @@ public class SecurityProviderSymmetricKeyTest
     public void testSignDataThrowsSecurityProviderExceptionOnInvalidKey() throws SecurityProviderException, InvalidKeyException
     {
         final String TEST_SIGNATURE = "testSignature";
-        final String TEST_BASE64_DECODED_KEY = "InvalidKey";
+
+        // Semmle flags this as sensitive call, but it is a false positive since it is for test purposes
+        final String TEST_BASE64_DECODED_KEY = "InvalidKey"; // lgtm
+
         final String HMAC_SHA_256 = "HmacSHA256";
         new Expectations()
         {

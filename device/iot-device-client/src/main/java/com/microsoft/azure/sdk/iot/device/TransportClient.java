@@ -2,6 +2,7 @@ package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -35,8 +36,10 @@ public class TransportClient
     }
 
     @SuppressWarnings("CanBeFinal") // Public member can be changed
+    @SuppressFBWarnings("MS_SHOULD_BE_FINAL") // Marking this as final would be a breaking change
     public static long SEND_PERIOD_MILLIS = 10L;
     @SuppressWarnings("CanBeFinal") // Public member can be changed
+    @SuppressFBWarnings("MS_SHOULD_BE_FINAL") // Marking this as final would be a breaking change
     public static long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
 
     private final IotHubClientProtocol iotHubClientProtocol;

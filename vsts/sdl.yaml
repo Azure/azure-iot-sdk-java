@@ -10,7 +10,7 @@ phases:
 
   condition: succeeded()
   queue:
-    name: cloud-hosted-sdl-java
+    name: Hosted VS2017
     timeoutInMinutes: 60
   steps:
   - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
@@ -34,26 +34,42 @@ phases:
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-vulnerabilityassessment.VulnerabilityAssessment@0
     displayName: 'Vulnerability Assessment'
 
-  - task: fortifyvsts.hpe-security-fortify-vsts.build-task-fortify-sca.FortifySCA@1
-    displayName: Fortify
+    ## Spotbugs doesn't have a false positive list, but instead recommends annotating the lines of code in question
+    ## with annotations like @SuppressFBWarnings("MS_SHOULD_BE_FINAL")
+  - powershell: ./vsts/spotbugs.ps1
+    displayName: 'Run Spotbugs'
+
+    ## Semmle doesn't have a false positive list, but instead recommends marking the lines of code in question
+    ## with "// lgtm"
+    ## https://help.semmle.com/lgtm-enterprise/user/help/alert-suppression.html#suppresswarnings-annotation
+  - task: Semmle@1
+    #Only run this step if it isn't a pull request. Semmle only needs to run nightly
+    condition: ne(variables['Build.Reason'], 'PullRequest')
+    env:
+      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
     inputs:
-      applicationType: java
-      buildClasspath: '$(Build.SourcesDirectory)'
-      buildSourceVersion: 1.8
-      buildSourcePath: '$(Build.SourcesDirectory)'
-      buildAnalyzerParams: '-exclude "$(Build.SourcesDirectory)\**\test\**\*" -exclude "$(Build.SourcesDirectory)\**\*sample*\**\*" -exclude "$(Build.SourcesDirectory)\edge-e2e\**\*" -exclude "$(Build.SourcesDirectory)\iot-e2e-tests\**\*" -exclude "$(Build.SourcesDirectory)\provisioning\provisioning-tools\**\*"'
-      fortifyBuildId: 12345
-      scaVerbose: true
-      scaDebug: true
-      additionalScanParams: '-filter "$(Build.SourcesDirectory)\vsts\fortify\filter.txt"'
+      toolVersion: 'Latest'
+      sourceCodeDirectory: '$(Build.SourcesDirectory)'
+      language: 'java'
+      buildCommandsString: 'mvn clean install -DskipTests -T 2C'
+     querySuite: 'Recommended'
+      timeout: '1800'
+      ram: '16384'
+      addProjectDirToScanningExclusionList: true
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@1
     displayName: PoliCheck
     inputs:
       targetType: F
-
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-antimalware.AntiMalware@3
-    displayName: 'AntiMalware Scanner'
+   
+  - task: AntiMalware@4
+    inputs:
+      InputType: 'Basic'
+      ScanType: 'CustomScan'
+      FileDirPath: '$(Build.StagingDirectory)'
+      TreatSignatureUpdateFailureAs: 'Warning'
+      SignatureFreshness: 'UpToDate'
+      TreatStaleSignatureAs: 'Error'
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
     displayName: 'Publish Security Analysis Logs'
@@ -62,7 +78,7 @@ phases:
     displayName: 'Post Analysis'
     inputs:
       CredScan: true
-      FortifySCA: true
+      Semmle: true
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-uploadtotsa.TSAUpload@1
     displayName: 'TSA upload'
