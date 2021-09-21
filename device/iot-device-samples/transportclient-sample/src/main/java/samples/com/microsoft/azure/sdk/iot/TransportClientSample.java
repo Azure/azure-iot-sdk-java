@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.PropertyCallBack;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -427,7 +428,7 @@ public class TransportClientSample
 
         System.out.println("In receive mode. Waiting for receiving C2D messages. Press ENTER to closeNow");
 
-        Scanner scanner = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
         scanner.nextLine();
 
         // closeNow the connection

@@ -10,6 +10,7 @@ import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -35,7 +36,7 @@ import java.util.Date;
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
  */
 @SuppressWarnings("unused") // A number of private fields are unused but may be filled in by serialization
-public class DeviceRegistrationState
+public class DeviceRegistrationState implements Serializable
 {
     // the registration identifier
     private static final String REGISTRATION_ID_TAG = "registrationId";

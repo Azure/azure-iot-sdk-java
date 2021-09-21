@@ -81,7 +81,7 @@ public class HttpsHsmClient
         HttpsResponse response = sendRequestBasedOnScheme(HttpsMethod.POST, body, uri, pathBuilder, API_VERSION_QUERY_STRING_PREFIX + apiVersion);
 
         int responseCode = response.getStatus();
-        String responseBody = new String(response.getBody());
+        String responseBody = new String(response.getBody(), StandardCharsets.UTF_8);
         if (responseCode >= 200 && responseCode < 300)
         {
             // Codes_SRS_HSMHTTPCLIENT_34_004: [If the response from the http call is 200, this function shall return the SignResponse built from the response body json.]
@@ -128,7 +128,7 @@ public class HttpsHsmClient
                 , API_VERSION_QUERY_STRING_PREFIX + apiVersion);
 
         int statusCode = response.getStatus();
-        String body = response.getBody() != null ? new String(response.getBody()) : "";
+        String body = response.getBody() != null ? new String(response.getBody(), StandardCharsets.UTF_8) : "";
         if (statusCode >= 200 && statusCode < 300)
         {
             // Codes_SRS_HSMHTTPCLIENT_34_010: [If the response from the http request is 200, this function shall return the trust bundle response.]

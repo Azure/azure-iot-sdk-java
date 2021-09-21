@@ -19,6 +19,7 @@ import org.junit.Test;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -905,7 +906,7 @@ public class DeviceClientConfigTest
         new Verifications()
         {
             {
-                new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, null, expectedDeviceId, expectedModuleId, new String(mockSecurityProviderSymKey.getSymmetricKey()), null);
+                new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, null, expectedDeviceId, expectedModuleId, new String(mockSecurityProviderSymKey.getSymmetricKey(), StandardCharsets.UTF_8), null);
                 times = 1;
             }
         };

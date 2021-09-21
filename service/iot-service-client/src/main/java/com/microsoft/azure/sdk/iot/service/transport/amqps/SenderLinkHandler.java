@@ -178,8 +178,9 @@ public abstract class SenderLinkHandler extends BaseHandler
                 throw new IOException(String.format("Failed to advance the senderLink after sending a message on %s sender link with link correlation id %s, retrying to send the message", getLinkInstanceType(), this.linkCorrelationId));
             }
 
-            log.trace("Message was sent over {} sender link with delivery tag {} and hash {}", getLinkInstanceType(), new String(deliveryTag), delivery.hashCode());
-            return Integer.parseInt(new String(deliveryTag));
+            String deliveryTagString = new String(deliveryTag, StandardCharsets.UTF_8);
+            log.trace("Message was sent over {} sender link with delivery tag {} and hash {}", getLinkInstanceType(), deliveryTagString, delivery.hashCode());
+            return Integer.parseInt(deliveryTagString);
         }
         catch (Exception e)
         {

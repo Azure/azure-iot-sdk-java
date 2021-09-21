@@ -7,6 +7,8 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 
+import java.io.Serializable;
+
 /**
  * Representation of a single Device Provisioning Service X509 Certificate with its info.
  *
@@ -59,7 +61,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
  *
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
  */
-public class X509CertificateWithInfo
+public class X509CertificateWithInfo implements Serializable
 {
     // the X509 certificate
     private static final String CERTIFICATE_TAG = "certificate";

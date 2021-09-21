@@ -72,7 +72,7 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
         //Safe to cast here because this callback will only ever fire for acknowledgements received on this sender link
         Delivery delivery = event.getDelivery();
 
-        int deliveryTag = Integer.parseInt(new String(event.getDelivery().getTag()));
+        int deliveryTag = Integer.parseInt(new String(event.getDelivery().getTag(), StandardCharsets.UTF_8));
 
         Message acknowledgedIotHubMessage = this.inProgressMessages.remove(deliveryTag);
         if (acknowledgedIotHubMessage == null)
@@ -206,7 +206,7 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
                 throw new ProtocolException(String.format("Failed to advance the senderLink after sending a message on %s sender link with link correlation id %s, retrying to send the message", getLinkInstanceType(), this.linkCorrelationId));
             }
 
-            log.trace("Message was sent over {} sender link with delivery tag {} and hash {}", getLinkInstanceType(), new String(deliveryTag), delivery.hashCode());
+            log.trace("Message was sent over {} sender link with delivery tag {} and hash {}", getLinkInstanceType(), new String(deliveryTag, StandardCharsets.UTF_8), delivery.hashCode());
             return new AmqpsSendResult(deliveryTag);
         }
         catch (Exception e)

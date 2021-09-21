@@ -151,7 +151,7 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
             }
 
             byte[] base64Signature = encodeBase64(token);
-            String base64UrlEncodedSignature = URLEncoder.encode(new String(base64Signature), ENCODING_FORMAT_NAME);
+            String base64UrlEncodedSignature = URLEncoder.encode(new String(base64Signature, StandardCharsets.UTF_8), ENCODING_FORMAT_NAME);
             return String.format(SASTOKEN_FORMAT, encodedTokenScope, base64UrlEncodedSignature, expiryTimeUTC);
         }
         catch (UnsupportedEncodingException | SecurityProviderException e)

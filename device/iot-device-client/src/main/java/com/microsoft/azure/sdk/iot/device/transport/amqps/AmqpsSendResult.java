@@ -2,6 +2,8 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import lombok.Getter;
 
+import java.nio.charset.StandardCharsets;
+
 public class AmqpsSendResult
 {
     private static final int failedDeliveryTag = -1;
@@ -24,6 +26,6 @@ public class AmqpsSendResult
     AmqpsSendResult(byte[] deliveryTag)
     {
         this.deliverySuccessful = true;
-        this.deliveryTag = Integer.parseInt(new String(deliveryTag));
+        this.deliveryTag = Integer.parseInt(new String(deliveryTag, StandardCharsets.UTF_8));
     }
 }

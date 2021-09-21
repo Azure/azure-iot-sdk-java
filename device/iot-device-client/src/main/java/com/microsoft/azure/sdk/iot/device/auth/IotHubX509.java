@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.device.auth;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -100,6 +101,6 @@ public class IotHubX509
      */
     private String readFromFile(String path) throws IOException
     {
-        return new String(Files.readAllBytes(Paths.get(path)));
+        return new String(Files.readAllBytes(Paths.get(path)), StandardCharsets.UTF_8);
     }
 }
