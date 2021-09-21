@@ -229,7 +229,7 @@ public class Query
             throw new IotHubException("Query response does not match query request");
         }
 
-        this.queryResponse = new QueryResponse(new String(httpResponse.getBody()));
+        this.queryResponse = new QueryResponse(new String(httpResponse.getBody(), StandardCharsets.UTF_8));
         return this.queryResponse;
     }
 
@@ -327,7 +327,7 @@ public class Query
             throw new IotHubException("Query response does not match query request");
         }
 
-        this.queryResponse = new QueryResponse(new String(httpResponse.getBody()));
+        this.queryResponse = new QueryResponse(new String(httpResponse.getBody(), StandardCharsets.UTF_8));
         return this.queryResponse;
     }
 
@@ -441,7 +441,7 @@ public class Query
             throw new IotHubException("Query response does not match query request");
         }
 
-        this.queryResponse = new QueryResponse(new String(httpResponse.getBody()));
+        this.queryResponse = new QueryResponse(new String(httpResponse.getBody(), StandardCharsets.UTF_8));
         return this.queryResponse;
     }
 

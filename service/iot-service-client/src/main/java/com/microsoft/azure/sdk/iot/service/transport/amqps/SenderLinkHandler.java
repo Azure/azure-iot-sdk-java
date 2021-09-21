@@ -179,7 +179,7 @@ public abstract class SenderLinkHandler extends BaseHandler
             }
 
             log.trace("Message was sent over {} sender link with delivery tag {} and hash {}", getLinkInstanceType(), new String(deliveryTag), delivery.hashCode());
-            return Integer.parseInt(new String(deliveryTag));
+            return Integer.parseInt(new String(deliveryTag, StandardCharsets.UTF_8));
         }
         catch (Exception e)
         {

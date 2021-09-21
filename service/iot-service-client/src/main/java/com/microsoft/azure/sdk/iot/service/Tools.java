@@ -102,7 +102,7 @@ public class Tools
     {
         String retVal;
         // Codes_SRS_SERVICE_SDK_JAVA_TOOLS_12_010: [The function shall return empty string if any of the input is null]
-        if ((jsonObject == null) || (jsonObject == JsonObject.NULL) || (key == null) || (key.length() == 0))
+        if (jsonObject == null || jsonObject.equals(JsonObject.NULL) || key == null || key.length() == 0)
         {
             retVal = "";
         }
@@ -168,7 +168,7 @@ public class Tools
         long retVal;
         JsonNumber jsonNumber;
         // Codes_SRS_SERVICE_SDK_JAVA_TOOLS_12_018: [The function shall return zero if any of the input is null]
-        if ((jsonObject == null) || (jsonObject == JsonObject.NULL) || (key == null) || (key.length() == 0))
+        if (jsonObject == null || jsonObject.equals(JsonObject.NULL) || key == null || key.length() == 0)
         {
             retVal = 0;
         }
