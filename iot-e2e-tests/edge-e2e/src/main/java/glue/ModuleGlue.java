@@ -20,6 +20,7 @@ import io.vertx.core.json.JsonObject;
 
 import java.io.IOException;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 
@@ -516,7 +517,7 @@ public class ModuleGlue
                 String methodDataString;
                 try
                 {
-                    methodDataString = Json.mapper.readValue(new String((byte[]) methodData), String.class);
+                    methodDataString = Json.mapper.readValue(new String((byte[]) methodData, StandardCharsets.UTF_8), String.class);
                 } catch (IOException e)
                 {
                     this._handler.handle(Future.failedFuture(e));

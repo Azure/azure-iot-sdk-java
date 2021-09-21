@@ -102,7 +102,7 @@ public class Tools
     {
         String retVal;
         // Codes_SRS_SERVICE_SDK_JAVA_TOOLS_12_010: [The function shall return empty string if any of the input is null]
-        if (jsonObject == null || jsonObject.equals(JsonObject.NULL) || key == null || key.length() == 0)
+        if (jsonObject == null || key == null || key.length() == 0)
         {
             retVal = "";
         }
@@ -151,48 +151,6 @@ public class Tools
             if (retVal.endsWith("\""))
             {
                 retVal = retVal.substring(0, retVal.length()-1);
-            }
-        }
-        return retVal;
-    }
-
-    /**
-     * Helper function to get numeric value from a JsonObject
-     *
-     * @param jsonObject The JsonObject object to get the value from
-     * @param key The name of the key
-     * @return The numeric value
-     */
-    public static long getNumberValueFromJsonObject(JsonObject jsonObject, String key)
-    {
-        long retVal;
-        JsonNumber jsonNumber;
-        // Codes_SRS_SERVICE_SDK_JAVA_TOOLS_12_018: [The function shall return zero if any of the input is null]
-        if (jsonObject == null || jsonObject.equals(JsonObject.NULL) || key == null || key.length() == 0)
-        {
-            retVal = 0;
-        }
-        else
-        {
-            // Codes_SRS_SERVICE_SDK_JAVA_TOOLS_12_019: [The function shall get the JsonValue of the key and return zero if it is null]
-            JsonValue jsonValue = jsonObject.get(key);
-            if (jsonValue != JsonValue.NULL)
-            {
-                // Codes_SRS_SERVICE_SDK_JAVA_TOOLS_12_020: [The function shall get the JsonNumber from the JsonValue and return zero if it is null]
-                jsonNumber = jsonObject.getJsonNumber(key);
-                if (jsonNumber != null)
-                {
-                    // Codes_SRS_SERVICE_SDK_JAVA_TOOLS_12_021: [The function shall return the long value from the JsonNumber if the JsonNumber is not null]
-                    retVal = jsonNumber.longValue();
-                }
-                else
-                {
-                    retVal = 0;
-                }
-            }
-            else
-            {
-                retVal = 0;
             }
         }
         return retVal;

@@ -8,7 +8,7 @@ import io.vertx.core.Handler;
 @SuppressWarnings("ALL")
 public class RegistryApiImpl implements RegistryApi
 {
-    public static RegistryGlue _registryGlue = new RegistryGlue();
+    public static final RegistryGlue _registryGlue = new RegistryGlue();
 
     @Override
     public void registryConnectPut(String connectionString, Handler<AsyncResult<ConnectResponse>> handler)

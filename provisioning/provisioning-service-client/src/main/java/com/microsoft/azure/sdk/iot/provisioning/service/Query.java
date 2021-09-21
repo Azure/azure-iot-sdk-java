@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.configs.QuerySpecificati
 import com.microsoft.azure.sdk.iot.provisioning.service.contract.ContractApiHttp;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -194,7 +195,7 @@ public class Query implements Iterator<QueryResult>
             throw new IllegalArgumentException("Http response for next cannot contains a null body");
         }
 
-        String bodyStr = new String(body);
+        String bodyStr = new String(body, StandardCharsets.UTF_8);
         Map<String, String> headers = httpResponse.getHeaderFields();
         String type = headers.get(ITEM_TYPE_KEY);
         this.continuationToken = headers.get(CONTINUATION_TOKEN_KEY);
