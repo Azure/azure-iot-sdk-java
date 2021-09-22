@@ -871,8 +871,22 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         while (message != null && messagesAttemptedToBeProcessed < MAX_MESSAGES_TO_SEND_PER_CALLBACK)
         {
             messagesAttemptedToBeProcessed++;
-            boolean lastSendSucceeded = sendQueuedMessage(message);
 
+            AmqpsSessionHandler existingSessionHandler = null;
+            for (AmqpsSessionHandler sessionHandler : this.sessionHandlers)
+            {
+                if (sessionHandler.getDeviceClientConfig().getDeviceId().equals(message.getConnectionDeviceId())) {
+                    existingSessionHandler = sessionHandler;
+                    break;
+                }
+            }
+
+            if(existingSessionHandler == null) {
+                log.trace("Amqp message failed to send, because no session handler exists for the client. Not adding it back to the queue ({})", message);
+                continue;
+            }
+
+            boolean lastSendSucceeded = existingSessionHandler.sendMessage(message);
             if (!lastSendSucceeded)
             {
                 //message failed to send, likely due to lack of link credit available. Re-queue and try again later
@@ -889,25 +903,6 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             //message was polled out of list, but loop exited from processing too many messages before it could process this message, so re-queue it for later
             messagesToSend.add(message);
         }
-    }
-
-    private boolean sendQueuedMessage(Message message)
-    {
-        boolean sendSucceeded = false;
-
-        log.trace("Sending message over amqp ({})", message);
-
-        for (AmqpsSessionHandler sessionHandler : this.sessionHandlers)
-        {
-            sendSucceeded = sessionHandler.sendMessage(message);
-
-            if (sendSucceeded)
-            {
-                break;
-            }
-        }
-
-        return sendSucceeded;
     }
 
     private Reactor createReactor() throws TransportException
