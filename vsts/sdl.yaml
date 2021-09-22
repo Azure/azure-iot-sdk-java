@@ -52,7 +52,7 @@ phases:
       sourceCodeDirectory: '$(Build.SourcesDirectory)'
       language: 'java'
       buildCommandsString: 'mvn clean install -DskipTests -T 2C'
-     querySuite: 'Recommended'
+      querySuite: 'Recommended'
       timeout: '1800'
       ram: '16384'
       addProjectDirToScanningExclusionList: true
