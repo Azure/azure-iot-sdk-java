@@ -35,6 +35,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -81,8 +82,12 @@ public class FileUploadTests extends IntegrationTest
     protected static HttpProxyServer proxyServer;
     protected static String testProxyHostname = "127.0.0.1";
     protected static int testProxyPort = 8897;
-    protected static final String testProxyUser = "proxyUsername";
-    protected static final char[] testProxyPass = "1234".toCharArray();
+
+    // Semmle flags this as a security issue, but this is a test username so the warning can be suppressed
+    protected static final String testProxyUser = "proxyUsername"; // lgtm
+
+    // Semmle flags this as a security issue, but this is a test password so the warning can be suppressed
+    protected static final char[] testProxyPass = "1234".toCharArray(); // lgtm
 
     @Parameterized.Parameters(name = "{0}_{1}_{2}")
     public static Collection inputs() throws Exception
@@ -209,7 +214,7 @@ public class FileUploadTests extends IntegrationTest
             testInstance.fileUploadState[i].isCallBackTriggered = false;
 
             testInstance.messageStates[i] = new MessageState();
-            testInstance.messageStates[i].messageBody = new String(buf);
+            testInstance.messageStates[i].messageBody = new String(buf, StandardCharsets.UTF_8);
             testInstance.messageStates[i].messageStatus = SUCCESS;
         }
     }

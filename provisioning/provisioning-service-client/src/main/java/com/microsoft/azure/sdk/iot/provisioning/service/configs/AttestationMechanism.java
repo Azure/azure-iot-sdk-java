@@ -10,6 +10,8 @@ import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 
+import java.io.Serializable;
+
 /**
  * Representation of a single Device Provisioning Service Attestation mechanism in the IndividualEnrollment and EnrollmentGroup.
  *
@@ -18,7 +20,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningS
  *
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
  */
-public final class AttestationMechanism
+public final class AttestationMechanism implements Serializable
 {
     // The AttestationMechanismType that identifies if the attestation is TPM (TpmAttestation), X509 (X509Attestation) or Symmetric Keys (SymmetricKeysAttestation).
     private static final String ATTESTATION_TYPE_TAG = "type";

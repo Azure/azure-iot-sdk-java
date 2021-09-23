@@ -179,7 +179,7 @@ public class ConfigurationParserTest
         //assert
         assertEquals(id, parser.getId());
         assertEquals(schemaVersion, parser.getSchemaVersion());
-        assertEquals("123", parser.getLabels().get(new String("xyz")));
+        assertEquals("123", parser.getLabels().get("xyz"));
         assertNotNull(parser.getContent());
         assertEquals("condition", parser.getTargetCondition());
         assertEquals(ParserUtility.getDateTimeUtc(timeDate), parser.getCreatedTimeUtc());

@@ -6,7 +6,9 @@ package com.microsoft.azure.sdk.iot.deps.twin;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class DeviceCapabilities
+import java.io.Serializable;
+
+public class DeviceCapabilities implements Serializable
 {
     private static final String IOT_EDGE_NAME = "iotEdge";
     @Expose

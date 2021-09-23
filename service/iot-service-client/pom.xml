@@ -39,8 +39,12 @@
             <artifactId>client-runtime</artifactId>
             <version>${ms-rest-client-version}</version>
         </dependency>
-
-
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>annotations</artifactId>
+            <version>3.0.1</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>

@@ -48,8 +48,13 @@ public class TokenRenewalTests extends IntegrationTest
     private static String iotHubHostName;
     protected static String testProxyHostname = "127.0.0.1";
     protected static int testProxyPort = 8898;
-    protected static final String testProxyUser = "proxyUsername";
-    protected static final char[] testProxyPass = "1234".toCharArray();
+
+    // Semmle flags this as a security issue, but this is a test username so the warning can be suppressed
+    protected static final String testProxyUser = "proxyUsername"; // lgtm
+
+    // Semmle flags this as a security issue, but this is a test password so the warning can be suppressed
+    protected static final char[] testProxyPass = "1234".toCharArray(); // lgtm
+
 
     final long SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL = 30;
     final long EXPIRED_SAS_TOKEN_GRACE_PERIOD_SECONDS = 600; //service extends 10 minute grace period after a token has expired

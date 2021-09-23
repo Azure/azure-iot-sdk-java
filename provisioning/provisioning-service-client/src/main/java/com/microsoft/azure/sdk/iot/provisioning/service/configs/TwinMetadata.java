@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 
@@ -46,7 +47,7 @@ import java.util.Map;
  * @see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-device-twins">Understand and use device twins in IoT Hub</a>
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iothub/devicetwinapi">Device Twin Api</a>
  */
-public class TwinMetadata
+public class TwinMetadata implements Serializable
 {
     // the entity last updated date and time in the TwinCollection
     static final String LAST_UPDATE_TAG = "$lastUpdated";

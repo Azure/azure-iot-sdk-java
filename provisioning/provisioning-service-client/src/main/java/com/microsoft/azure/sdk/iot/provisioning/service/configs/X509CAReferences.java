@@ -7,6 +7,8 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 
+import java.io.Serializable;
+
 /**
  * Representation of a single Device Provisioning Service X509 Primary and Secondary CA reference.
  *
@@ -28,7 +30,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
  *
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
  */
-public class X509CAReferences
+public class X509CAReferences implements Serializable
 {
     // the primary X509 CA reference [mandatory]
     private static final String PRIMARY_TAG = "primary";

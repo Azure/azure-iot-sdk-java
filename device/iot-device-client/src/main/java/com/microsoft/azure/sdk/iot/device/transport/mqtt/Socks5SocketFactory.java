@@ -233,7 +233,7 @@ public class Socks5SocketFactory extends SocketFactory
                     case ATYP_DOMAINNAME:
                         h = new byte[di.readUnsignedByte()];
                         di.readFully(h);
-                        mHost = new String(h);
+                        mHost = new String(h, StandardCharsets.UTF_8);
                         break;
                     default:
                         throw new IOException();

@@ -121,7 +121,7 @@ public class RegisterTask implements Callable<RegistrationOperationStatusParser>
 
             if (dpsRegistrationData.getResponseData() != null && dpsRegistrationData.getContractState() == DPS_REGISTRATION_RECEIVED)
             {
-                String jsonBody = new String(dpsRegistrationData.getResponseData());
+                String jsonBody = new String(dpsRegistrationData.getResponseData(), StandardCharsets.UTF_8);
                 try
                 {
                     return RegistrationOperationStatusParser.createFromJson(jsonBody);
@@ -179,7 +179,7 @@ public class RegisterTask implements Callable<RegistrationOperationStatusParser>
             throw new ProvisioningDeviceSecurityException("Security client could not sign data successfully");
         }
         byte[] base64Signature = encodeBase64(token);
-        String base64UrlEncodedSignature = URLEncoder.encode(new String(base64Signature), StandardCharsets.UTF_8.displayName());
+        String base64UrlEncodedSignature = URLEncoder.encode(new String(base64Signature, StandardCharsets.UTF_8), StandardCharsets.UTF_8.displayName());
 
         //SRS_RegisterTask_25_015: [ If the provided security client is for Key then, this method shall build the SasToken of the format SharedAccessSignature sr=<tokenScope>&sig=<signature>&se=<expiryTime>&skn= and save it to authorization]
         return String.format(SASTOKEN_FORMAT, tokenScope, base64UrlEncodedSignature, expiryTimeUTC);
@@ -208,7 +208,7 @@ public class RegisterTask implements Callable<RegistrationOperationStatusParser>
             {
                 this.authorization.setSasToken(sasToken);
 
-                String jsonBody = new String(responseDataForSasTokenAuth.getResponseData());
+                String jsonBody = new String(responseDataForSasTokenAuth.getResponseData(), StandardCharsets.UTF_8);
                 try
                 {
                     return RegistrationOperationStatusParser.createFromJson(jsonBody);

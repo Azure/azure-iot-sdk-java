@@ -68,7 +68,10 @@ public class ProvisioningServiceSasTokenTest
                 URLEncoder.encode(hostName.toLowerCase(),String.valueOf(StandardCharsets.UTF_8));
                 System.currentTimeMillis();
                 decodeBase64(sharedAccessKey.getBytes(charset));
-                byte[] body = { 1 };
+
+                // Semmle flags this as sensitive call, but it is a false positive since it is for test purposes
+                byte[] body = { 1 }; // lgtm
+
                 secretKeySpec = new SecretKeySpec(body, cryptoProvider);
                 Mac.getInstance(cryptoProvider);
             }

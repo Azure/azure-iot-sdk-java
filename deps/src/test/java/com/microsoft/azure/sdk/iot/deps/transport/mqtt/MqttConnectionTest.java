@@ -27,8 +27,13 @@ public class MqttConnectionTest
 {
     private static final String TEST_HOST_NAME = "testHostName";
     private static final String TEST_CLIENT_ID = "testClientId";
-    private static final String TEST_USERNAME = "testUserName";
-    private static final String TEST_PASSWORD = "testPassword";
+
+    // Semmle flags this as a security issue, but this is a test username so the warning can be suppressed
+    private static final String TEST_USERNAME = "testUserName"; // lgtm
+
+    // Semmle flags this as a security issue, but this is a test password so the warning can be suppressed
+    private static final String TEST_PASSWORD = "testPassword"; // lgtm
+
     private static final String WEB_SOCKET_URI_NAME = "wss://testHostName:443";
     private static final String SOCKET_URI_NAME = "ssl://testHostName:8883";
     private static final String TEST_TOPIC = "testTopic";
