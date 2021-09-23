@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.service.auth;
 
 import com.microsoft.azure.sdk.iot.service.Tools;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Authentication mechanism, used to store the device symmetric key.
@@ -200,6 +201,7 @@ public class AuthenticationMechanism
         this.type = type;
     }
 
+    @SuppressFBWarnings("HE_EQUALS_USE_HASHCODE") // Can't integrate hashcode into this function without breaking changes
     @Override
     public boolean equals(Object other)
     {

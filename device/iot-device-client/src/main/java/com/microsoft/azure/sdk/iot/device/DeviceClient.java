@@ -13,6 +13,7 @@ import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
@@ -88,6 +89,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
+    @SuppressFBWarnings("MS_SHOULD_BE_FINAL") // Marking this as final would be a breaking change
     public static long SEND_PERIOD_MILLIS = 10L;
 
     /**
@@ -99,12 +101,15 @@ public final class DeviceClient extends InternalClient implements Closeable
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
+    @SuppressFBWarnings("MS_SHOULD_BE_FINAL") // Marking this as final would be a breaking change
     public static long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
+    @SuppressFBWarnings("MS_SHOULD_BE_FINAL") // Marking this as final would be a breaking change
     public static long RECEIVE_PERIOD_MILLIS_MQTT = 10L;
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
+    @SuppressFBWarnings("MS_SHOULD_BE_FINAL") // Marking this as final would be a breaking change
     public static long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
 
     private IoTHubConnectionType ioTHubConnectionType = IoTHubConnectionType.UNKNOWN;
