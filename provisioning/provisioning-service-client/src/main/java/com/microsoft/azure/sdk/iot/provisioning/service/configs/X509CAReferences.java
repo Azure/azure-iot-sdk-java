@@ -13,7 +13,7 @@ import java.io.Serializable;
  * Representation of a single Device Provisioning Service X509 Primary and Secondary CA reference.
  *
  * <p> this class creates a representation of an X509 CA references. It can receive primary and secondary
- *     CA references, but only the primary is mandatory.
+ *     CA references.
  *
  * <p> Users must provide the CA reference as a {@code String}. This class will encapsulate both in a
  *     single {@link X509Attestation}.
@@ -32,7 +32,7 @@ import java.io.Serializable;
  */
 public class X509CAReferences implements Serializable
 {
-    // the primary X509 CA reference [mandatory]
+    // the primary X509 CA reference
     private static final String PRIMARY_TAG = "primary";
     @Expose
     @SerializedName(PRIMARY_TAG)
@@ -53,11 +53,9 @@ public class X509CAReferences implements Serializable
      *
      * @param primary the {@code String} with the primary CA reference.
      * @param secondary the {@code String} with the secondary CA reference.
-     * @throws IllegalArgumentException if the primary CA reference is {@code null} or empty.
      */
     X509CAReferences(String primary, String secondary)
     {
-        /* SRS_X509_CAREFERENCE_21_002: [The constructor shall store the primary and secondary CA references.] */
         this.primary = primary;
         this.secondary = secondary;
     }
@@ -68,11 +66,9 @@ public class X509CAReferences implements Serializable
      * <p> Creates a new instance of the {@code X509CAReferences} copping the content of the provided one.
      *
      * @param x509CAReferences the original {@code X509CAReferences} to copy.
-     * @throws IllegalArgumentException if the provided X509CAReferences is null or if its primary CA reference is null.
      */
     public X509CAReferences(X509CAReferences x509CAReferences)
     {
-        /* SRS_X509_CAREFERENCE_21_004: [The constructor shall create a copy of the primary and secondary CA references and store it.] */
         this.primary = x509CAReferences.primary;
         this.secondary = x509CAReferences.secondary;
     }
@@ -87,7 +83,6 @@ public class X509CAReferences implements Serializable
     @Deprecated
     public String getPrimary()
     {
-        /* SRS_X509_CAREFERENCE_21_005: [The getPrimary shall return the stored primary.] */
         return this.primary;
     }
 
@@ -98,7 +93,6 @@ public class X509CAReferences implements Serializable
      */
     public final String getPrimaryFinal()
     {
-        /* SRS_X509_CAREFERENCE_21_005: [The getPrimary shall return the stored primary.] */
         return this.primary;
     }
 
@@ -111,7 +105,6 @@ public class X509CAReferences implements Serializable
     @Deprecated
     public String getSecondary()
     {
-        /* SRS_X509_CAREFERENCE_21_006: [The getSecondary shall return the stored secondary.] */
         return this.secondary;
     }
 
@@ -122,7 +115,6 @@ public class X509CAReferences implements Serializable
      */
     public final String getSecondaryFinal()
     {
-        /* SRS_X509_CAREFERENCE_21_006: [The getSecondary shall return the stored secondary.] */
         return this.secondary;
     }
 
@@ -136,6 +128,5 @@ public class X509CAReferences implements Serializable
     @SuppressWarnings("unused")
     X509CAReferences()
     {
-        /* SRS_X509_CAREFERENCE_21_007: [The X509CAReferences shall provide an empty constructor to make GSON happy.] */
     }
 }
