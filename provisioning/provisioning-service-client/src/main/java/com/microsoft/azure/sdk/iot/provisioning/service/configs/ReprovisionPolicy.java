@@ -6,12 +6,14 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
 /**
  * Settings for IoT Hub Device Reprovisioning
  *
  * @see <a href="https://docs.microsoft.com/en-us/azure/iot-dps/concepts-device-reprovision">IoT Hub Device reprovisioning concepts</a>
  */
-public class ReprovisionPolicy
+public class ReprovisionPolicy implements Serializable
 {
     // the flag for updating hub assignment
     private static final String UPDATE_HUB_ASSIGNMENT_TAG = "updateHubAssignment";

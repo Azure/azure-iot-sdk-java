@@ -20,6 +20,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.net.Proxy;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 import static junit.framework.TestCase.assertEquals;

@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Closeable;

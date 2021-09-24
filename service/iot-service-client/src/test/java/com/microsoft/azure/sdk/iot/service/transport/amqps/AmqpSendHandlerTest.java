@@ -42,6 +42,7 @@ import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.BufferOverflowException;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -199,7 +200,7 @@ public class AmqpSendHandlerTest
                 new Properties();
                 result = properties;
                 message.setProperties(properties);
-                binary = new Binary(content.getBytes());
+                binary = new Binary(content.getBytes(StandardCharsets.UTF_8));
                 section = new Data(binary);
                 message.setApplicationProperties((ApplicationProperties) any);
                 message.setBody(section);
@@ -253,7 +254,7 @@ public class AmqpSendHandlerTest
                 new Properties();
                 result = properties;
                 message.setProperties(properties);
-                binary = new Binary(content.getBytes());
+                binary = new Binary(content.getBytes(StandardCharsets.UTF_8));
                 section = new Data(binary);
                 message.setApplicationProperties((ApplicationProperties) any);
                 message.setBody(section);

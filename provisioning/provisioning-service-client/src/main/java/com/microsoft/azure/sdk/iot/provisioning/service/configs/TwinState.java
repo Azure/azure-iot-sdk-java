@@ -9,6 +9,8 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 
+import java.io.Serializable;
+
 /**
  * Representation of a single Twin initial state for the Device Provisioning Service.
  *
@@ -73,7 +75,7 @@ import lombok.Getter;
  * @see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-device-twins">Understand and use device twins in IoT Hub</a>
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iothub/devicetwinapi">Device Twin Api</a>
  */
-public class TwinState
+public class TwinState implements Serializable
 {
     // the twin tags
     private static final String TAGS_TAG = "tags";

@@ -19,6 +19,7 @@ import org.junit.Test;
 
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -178,7 +179,7 @@ public class JobResultTest
         JobsResponseParserExpectations(json, twinState, null, new Date(), null, "scheduleUpdateTwin");
 
         //act
-        JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
+        JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes(StandardCharsets.UTF_8));
 
         //assert
         new Verifications()
@@ -206,7 +207,7 @@ public class JobResultTest
         };
 
         //act
-        JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
+        JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes(StandardCharsets.UTF_8));
     }
 
     /* Tests_SRS_JOBRESULT_21_004: [The constructor shall locally store all results information in the provided body.] */
@@ -227,7 +228,7 @@ public class JobResultTest
         JobsResponseParserExpectations(json, twinState, null, now, null, "scheduleUpdateTwin");
 
         //act
-        JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
+        JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes(StandardCharsets.UTF_8));
 
         //assert
         assertEquals(JOB_ID, Deencapsulation.getField(jobResult, "jobId"));
@@ -265,7 +266,7 @@ public class JobResultTest
         JobsResponseParserExpectations(json, twinState, null, now, null, "scheduleUpdateTwin");
 
         //act
-        JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
+        JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes(StandardCharsets.UTF_8));
 
         //assert
         assertNotNull(Deencapsulation.getField(jobResult, "updateTwin"));
@@ -302,7 +303,7 @@ public class JobResultTest
         JobsResponseParserExpectations(json, twinState, null, now, null, "scheduleUpdateTwin");
 
         //act
-        JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
+        JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes(StandardCharsets.UTF_8));
 
         //assert
         assertEquals(JOB_ID, jobResult.getJobId());
@@ -339,7 +340,7 @@ public class JobResultTest
         jobsResponseParserWithNullDeviceIdExpectations(json, twinState, null, now, null, "scheduleUpdateTwin");
 
         //act
-        JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
+        JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes(StandardCharsets.UTF_8));
 
         //assert
         assertEquals(JOB_ID, jobResult.getJobId());
@@ -405,7 +406,7 @@ public class JobResultTest
         };
 
         //act
-        JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
+        JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes(StandardCharsets.UTF_8));
 
         //assert
         assertEquals(JOB_ID, jobResult.getJobId());
@@ -458,7 +459,7 @@ public class JobResultTest
         };
 
         //act
-        JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
+        JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes(StandardCharsets.UTF_8));
 
         //assert
         assertNull(jobResult.getOutcomeResult());
@@ -514,7 +515,7 @@ public class JobResultTest
         twinState.setETag(ETAG);
 
         JobsResponseParserExpectations(json, twinState, null, now, null, "scheduleUpdateTwin");
-        JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
+        JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes(StandardCharsets.UTF_8));
 
         //act
         String prettyPrint = jobResult.toString();
@@ -577,7 +578,7 @@ public class JobResultTest
         twinState.setETag(ETAG);
 
         JobsResponseParserExpectations(json, twinState, null, now, null, "unknown");
-        JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes());
+        JobResult jobResult = Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, json.getBytes(StandardCharsets.UTF_8));
 
         //act
         String prettyPrint = jobResult.toString();

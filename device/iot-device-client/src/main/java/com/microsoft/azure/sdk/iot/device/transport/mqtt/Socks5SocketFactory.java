@@ -15,6 +15,7 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 
 import javax.net.SocketFactory;
 
@@ -78,7 +79,7 @@ class Socks5SocketFactory extends SocketFactory
 
         byte[] getConnectCmd()
         {
-            final byte[] host = mTarget.getHostName().getBytes();
+            final byte[] host = mTarget.getHostName().getBytes(StandardCharsets.UTF_8);
             final byte[] data = new byte[7 + host.length];
             data[0] = (byte) 5;
             data[1] = (byte) CMD_CONNECT;
@@ -232,7 +233,7 @@ class Socks5SocketFactory extends SocketFactory
                     case ATYP_DOMAINNAME:
                         h = new byte[di.readUnsignedByte()];
                         di.readFully(h);
-                        mHost = new String(h);
+                        mHost = new String(h, StandardCharsets.UTF_8);
                         break;
                     default:
                         throw new IOException();

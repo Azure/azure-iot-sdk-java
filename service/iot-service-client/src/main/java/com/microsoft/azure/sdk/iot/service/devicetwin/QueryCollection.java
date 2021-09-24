@@ -207,7 +207,7 @@ public class QueryCollection
         if (isSqlQuery)
         {
             QueryRequestParser requestParser = new QueryRequestParser(this.query);
-            payload = requestParser.toJson().getBytes();
+            payload = requestParser.toJson().getBytes(StandardCharsets.UTF_8);
         }
         else
         {

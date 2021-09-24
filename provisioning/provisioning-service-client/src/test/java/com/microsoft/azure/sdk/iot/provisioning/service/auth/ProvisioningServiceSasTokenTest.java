@@ -52,7 +52,7 @@ public class ProvisioningServiceSasTokenTest
         String hostName = "HOSTNAME." + deviceProvisioningServiceName;
         String sharedAccessKeyName = "ACCESSKEYNAME";
         String policyName = "SharedAccessKey";
-        String sharedAccessKey = encodeBase64String("key".getBytes());
+        String sharedAccessKey = encodeBase64String("key".getBytes(StandardCharsets.UTF_8));
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
 
         ProvisioningConnectionString provisioningConnectionString = ProvisioningConnectionStringBuilder.createConnectionString(connectionString);
@@ -68,7 +68,10 @@ public class ProvisioningServiceSasTokenTest
                 URLEncoder.encode(hostName.toLowerCase(),String.valueOf(StandardCharsets.UTF_8));
                 System.currentTimeMillis();
                 decodeBase64(sharedAccessKey.getBytes(charset));
-                byte[] body = { 1 };
+
+                // Semmle flags this as sensitive call, but it is a false positive since it is for test purposes
+                byte[] body = { 1 }; // lgtm
+
                 secretKeySpec = new SecretKeySpec(body, cryptoProvider);
                 Mac.getInstance(cryptoProvider);
             }
@@ -91,7 +94,7 @@ public class ProvisioningServiceSasTokenTest
         String hostName = "HOSTNAME." + deviceProvisioningServiceName;
         String sharedAccessKeyName = "ACCESSKEYNAME";
         String policyName = "SharedAccessKey";
-        String sharedAccessKey = encodeBase64String("key".getBytes());
+        String sharedAccessKey = encodeBase64String("key".getBytes(StandardCharsets.UTF_8));
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         ProvisioningConnectionString provisioningConnectionString = ProvisioningConnectionStringBuilder.createConnectionString(connectionString);
 
@@ -114,7 +117,7 @@ public class ProvisioningServiceSasTokenTest
         String hostName = "HOSTNAME." + deviceProvisioningServiceName;
         String sharedAccessKeyName = "ACCESSKEYNAME";
         String policyName = "SharedAccessKey";
-        String sharedAccessKey = encodeBase64String("key".getBytes());
+        String sharedAccessKey = encodeBase64String("key".getBytes(StandardCharsets.UTF_8));
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
 
         // Act

@@ -18,6 +18,7 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -478,11 +479,11 @@ public class HttpsRequestTest
     public void gettersWork(@Mocked final HttpsConnection mockConn) throws TransportException, MalformedURLException {
         //arrange
         final URL mockUrl = new URL("https://www.microsoft.com");
-        HttpsRequest request = new HttpsRequest(mockUrl, HttpsMethod.POST, "some body".getBytes(), "some user agent string");
+        HttpsRequest request = new HttpsRequest(mockUrl, HttpsMethod.POST, "some body".getBytes(StandardCharsets.UTF_8), "some user agent string");
 
         final String expectedRequestHeaders = "User-Agent: some user agent string\r\nHost: www.microsoft.com\r\n";
         final String expectedMethod = "POST";
-        final byte[] expectedBody = "some body".getBytes();
+        final byte[] expectedBody = "some body".getBytes(StandardCharsets.UTF_8);
         new NonStrictExpectations()
         {
             {
@@ -512,7 +513,7 @@ public class HttpsRequestTest
     public void sendAsHttpRequestWorks(@Mocked final HttpsConnection mockConn) throws TransportException, MalformedURLException {
         //arrange
         final URL mockUrl = new URL("http://www.microsoft.com");
-        HttpsRequest request = new HttpsRequest(mockUrl, HttpsMethod.GET, "some body".getBytes(), "some user agent string");
+        HttpsRequest request = new HttpsRequest(mockUrl, HttpsMethod.GET, "some body".getBytes(StandardCharsets.UTF_8), "some user agent string");
 
         final String expectedRequestHeaders = "User-Agent: some user agent string\r\nHost: www.microsoft.com\r\n";
         final String expectedMethod = "GET";

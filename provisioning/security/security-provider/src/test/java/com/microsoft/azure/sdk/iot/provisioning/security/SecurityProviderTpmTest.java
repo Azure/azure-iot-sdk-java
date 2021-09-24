@@ -22,6 +22,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -39,10 +40,10 @@ import static org.junit.Assert.*;
  */
 public class SecurityProviderTpmTest
 {
-    private static final byte[] ENROLLMENT_KEY = "testEk".getBytes();
-    private static final byte[] STORAGE_ROOT_KEY = "testSRK".getBytes();
-    private static final byte[] TEST_SIGN_DATA = "testSignData".getBytes();
-    private static final byte[] TEST_ACTIVATION = "testActivation".getBytes();
+    private static final byte[] ENROLLMENT_KEY = "testEk".getBytes(StandardCharsets.UTF_8);
+    private static final byte[] STORAGE_ROOT_KEY = "testSRK".getBytes(StandardCharsets.UTF_8);
+    private static final byte[] TEST_SIGN_DATA = "testSignData".getBytes(StandardCharsets.UTF_8);
+    private static final byte[] TEST_ACTIVATION = "testActivation".getBytes(StandardCharsets.UTF_8);
 
     @Mocked
     MessageDigest mockedMessageDigest;

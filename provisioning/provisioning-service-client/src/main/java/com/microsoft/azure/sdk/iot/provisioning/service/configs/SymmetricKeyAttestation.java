@@ -9,6 +9,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 /**
  * Representation of a single Device Provisioning Service Symmetric Key Attestation.
  *
@@ -18,7 +20,7 @@ import lombok.Setter;
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
  * @see <a href="https://docs.microsoft.com/en-us/azure/iot-dps/concepts-symmetric-key-attestation">Symmetric Key Attestation</a>
  */
-public class SymmetricKeyAttestation extends Attestation
+public class SymmetricKeyAttestation extends Attestation implements Serializable
 {
     // the primary key for attestation [mandatory]
     private static final String PRIMARY_KEY_TAG = "primaryKey";

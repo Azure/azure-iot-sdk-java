@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.service.digitaltwin.helpers;
 
+import java.nio.charset.StandardCharsets;
+
 public final class Base64 {
     private static final byte BYTE_START_UPPERCASE = 'A';
     private static final byte BYTE_END_UPPERCASE = 'Z';
@@ -244,7 +246,7 @@ public final class Base64 {
         }
 
         /* Codes_SRS_BASE64_21_008: [The encodeBase64StringLocal shall encoded the provided `dataValues` in a string using the Base64 format define in the RFC2045.] */
-        return new String(encodeBase64Internal(dataValues));
+        return new String(encodeBase64Internal(dataValues), StandardCharsets.UTF_8);
     }
 
     private static byte[] encodeBase64Internal(byte[] dataValues) throws IllegalArgumentException {

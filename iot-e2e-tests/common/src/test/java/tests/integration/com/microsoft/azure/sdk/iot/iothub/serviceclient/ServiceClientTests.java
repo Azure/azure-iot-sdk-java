@@ -45,6 +45,7 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -234,7 +235,7 @@ public class ServiceClientTests extends IntegrationTest
         Message message;
         if (withPayload)
         {
-            message = new Message(content.getBytes());
+            message = new Message(content.getBytes(StandardCharsets.UTF_8));
         }
         else
         {
@@ -282,7 +283,7 @@ public class ServiceClientTests extends IntegrationTest
         serviceClient = new ServiceClient(iotHubConnectionStringObj.getHostName(), sasCredential, testInstance.protocol);
         serviceClient.open();
 
-        Message message = new Message(content.getBytes());
+        Message message = new Message(content.getBytes(StandardCharsets.UTF_8));
         serviceClient.send(device.getDeviceId(), message);
 
         // deliberately expire the SAS token to provoke a 401 to ensure that the registry manager is using the shared

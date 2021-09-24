@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningS
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientServiceException;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientTransportException;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -112,7 +113,7 @@ class IndividualEnrollmentManager
         }
 
         /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_011: [The createOrUpdate shall return an IndividualEnrollment object created from the body of the response for the Http request .] */
-        return new IndividualEnrollment(new String(body));
+        return new IndividualEnrollment(new String(body, StandardCharsets.UTF_8));
     }
 
     /**
@@ -161,7 +162,7 @@ class IndividualEnrollmentManager
         }
 
         /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_019: [The BulkEnrollmentOperation shall return a BulkEnrollmentOperationResult object created from the body of the response for the Http request .] */
-        return new BulkEnrollmentOperationResult(new String(body));
+        return new BulkEnrollmentOperationResult(new String(body, StandardCharsets.UTF_8));
     }
 
     /**
@@ -204,7 +205,7 @@ class IndividualEnrollmentManager
         }
 
         /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_025: [The get shall return an IndividualEnrollment object created from the body of the response for the Http request .] */
-        return new IndividualEnrollment(new String(body));
+        return new IndividualEnrollment(new String(body, StandardCharsets.UTF_8));
     }
 
     AttestationMechanism getAttestationMechanism(String registrationId) throws ProvisioningServiceClientException
@@ -224,7 +225,7 @@ class IndividualEnrollmentManager
             throw new ProvisioningServiceClientServiceException("Unexpected empty body received from service");
         }
 
-        return new AttestationMechanism(new String(body));
+        return new AttestationMechanism(new String(body, StandardCharsets.UTF_8));
     }
 
     /**

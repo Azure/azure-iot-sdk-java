@@ -12,6 +12,7 @@ import mockit.*;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -392,7 +393,7 @@ public class DeviceTwinTest
                 mockedConfig.getDeviceId();
                 result = expectedDeviceId;
 
-                new IotHubTransportMessage(json.getBytes(), MessageType.DEVICE_TWIN);
+                new IotHubTransportMessage(json.getBytes(StandardCharsets.UTF_8), MessageType.DEVICE_TWIN);
                 result = mockedDeviceTwinMessage;
             }
         };
@@ -472,7 +473,7 @@ public class DeviceTwinTest
         new NonStrictExpectations()
         {
             {
-                new IotHubTransportMessage(json.getBytes(), MessageType.DEVICE_TWIN);
+                new IotHubTransportMessage(json.getBytes(StandardCharsets.UTF_8), MessageType.DEVICE_TWIN);
                 result = mockedDeviceTwinMessage;
             }
         };
@@ -521,7 +522,7 @@ public class DeviceTwinTest
         new NonStrictExpectations()
         {
             {
-                new IotHubTransportMessage(json.getBytes(), MessageType.DEVICE_TWIN);
+                new IotHubTransportMessage(json.getBytes(StandardCharsets.UTF_8), MessageType.DEVICE_TWIN);
                 result = mockedDeviceTwinMessage;
             }
         };
@@ -873,7 +874,7 @@ public class DeviceTwinTest
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
         MessageCallback deviceTwinResponseMessageCallback = Deencapsulation.newInnerInstance("deviceTwinResponseMessageCallback", testTwin);
 
-        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(), MessageType.DEVICE_TWIN);
+        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(StandardCharsets.UTF_8), MessageType.DEVICE_TWIN);
         testMessage.setStatus(String.valueOf(200));
         testMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
 
@@ -908,7 +909,7 @@ public class DeviceTwinTest
                 mockedStatusCB, null, mockedGenericTwinPropertyCB, null);
         MessageCallback deviceTwinResponseMessageCallback = Deencapsulation.newInnerInstance("deviceTwinResponseMessageCallback", testTwin);
 
-        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(), MessageType.DEVICE_TWIN);
+        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(StandardCharsets.UTF_8), MessageType.DEVICE_TWIN);
         testMessage.setStatus(String.valueOf(200));
         testMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
 
@@ -949,7 +950,7 @@ public class DeviceTwinTest
         desiredMap.put(new Property(prop1, null), new Pair<>(mockedDesiredCB, null));
         testTwin.subscribeDesiredPropertiesNotification(desiredMap);
 
-        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(), MessageType.DEVICE_TWIN);
+        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(StandardCharsets.UTF_8), MessageType.DEVICE_TWIN);
         testMessage.setStatus(String.valueOf(200));
         testMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
 
@@ -984,7 +985,7 @@ public class DeviceTwinTest
         desiredMap.put(new Property(prop1, null), new Pair<>(mockedDesiredCB, null));
         testTwin.subscribeDesiredPropertiesTwinPropertyNotification(desiredMap);
 
-        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(), MessageType.DEVICE_TWIN);
+        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(StandardCharsets.UTF_8), MessageType.DEVICE_TWIN);
         testMessage.setStatus(String.valueOf(200));
         testMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
 
@@ -1016,7 +1017,7 @@ public class DeviceTwinTest
         MessageCallback deviceTwinResponseMessageCallback =
                 Deencapsulation.newInnerInstance("deviceTwinResponseMessageCallback", testTwin);
 
-        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(), MessageType.DEVICE_TWIN);
+        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(StandardCharsets.UTF_8), MessageType.DEVICE_TWIN);
         testMessage.setStatus(String.valueOf(200));
         testMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_GET_RESPONSE);
 
@@ -1060,7 +1061,7 @@ public class DeviceTwinTest
         MessageCallback deviceTwinResponseMessageCallback =
                 Deencapsulation.newInnerInstance("deviceTwinResponseMessageCallback", testTwin);
 
-        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(), MessageType.DEVICE_TWIN);
+        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(StandardCharsets.UTF_8), MessageType.DEVICE_TWIN);
         testMessage.setStatus(String.valueOf(200));
         testMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_GET_RESPONSE);
 
@@ -1111,7 +1112,7 @@ public class DeviceTwinTest
         MessageCallback deviceTwinResponseMessageCallback =
                 Deencapsulation.newInnerInstance("deviceTwinResponseMessageCallback", testTwin);
 
-        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(), MessageType.DEVICE_TWIN);
+        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(StandardCharsets.UTF_8), MessageType.DEVICE_TWIN);
         testMessage.setStatus(String.valueOf(200));
         testMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_GET_RESPONSE);
 
@@ -1196,7 +1197,7 @@ public class DeviceTwinTest
         MessageCallback deviceTwinResponseMessageCallback =
                 Deencapsulation.newInnerInstance("deviceTwinResponseMessageCallback", testTwin);
 
-        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(), MessageType.DEVICE_TWIN);
+        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(StandardCharsets.UTF_8), MessageType.DEVICE_TWIN);
         testMessage.setStatus(String.valueOf(200));
         testMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_GET_RESPONSE);
 
@@ -1242,7 +1243,7 @@ public class DeviceTwinTest
         desiredMap.put(new Property(prop1, null), new Pair<>((PropertyCallback<String, Object>) null, null));
         testTwin.subscribeDesiredPropertiesNotification(desiredMap);
 
-        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(), MessageType.DEVICE_TWIN);
+        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(StandardCharsets.UTF_8), MessageType.DEVICE_TWIN);
         testMessage.setStatus(String.valueOf(200));
         testMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
 
@@ -1275,7 +1276,7 @@ public class DeviceTwinTest
         desiredMap.put(new Property(prop1, null), new Pair<>((TwinPropertyCallback) null, null));
         testTwin.subscribeDesiredPropertiesTwinPropertyNotification(desiredMap);
 
-        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(), MessageType.DEVICE_TWIN);
+        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(StandardCharsets.UTF_8), MessageType.DEVICE_TWIN);
         testMessage.setStatus(String.valueOf(200));
         testMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
 
@@ -1304,7 +1305,7 @@ public class DeviceTwinTest
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
         MessageCallback deviceTwinResponseMessageCallback = Deencapsulation.newInnerInstance("deviceTwinResponseMessageCallback", testTwin);
 
-        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(), MessageType.DEVICE_TWIN);
+        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(StandardCharsets.UTF_8), MessageType.DEVICE_TWIN);
         testMessage.setStatus(String.valueOf(200));
         testMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
 
@@ -1333,7 +1334,7 @@ public class DeviceTwinTest
                 mockedStatusCB, null, mockedGenericTwinPropertyCB, null);
         MessageCallback deviceTwinResponseMessageCallback = Deencapsulation.newInnerInstance("deviceTwinResponseMessageCallback", testTwin);
 
-        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(), MessageType.DEVICE_TWIN);
+        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(StandardCharsets.UTF_8), MessageType.DEVICE_TWIN);
         testMessage.setStatus(String.valueOf(200));
         testMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
 
@@ -1362,7 +1363,7 @@ public class DeviceTwinTest
                 mockedStatusCB, null, (TwinPropertyCallback)null, null);
         MessageCallback deviceTwinResponseMessageCallback = Deencapsulation.newInnerInstance("deviceTwinResponseMessageCallback", testTwin);
 
-        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(), MessageType.DEVICE_TWIN);
+        final IotHubTransportMessage testMessage = new IotHubTransportMessage(json.getBytes(StandardCharsets.UTF_8), MessageType.DEVICE_TWIN);
         testMessage.setStatus(String.valueOf(200));
         testMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
 

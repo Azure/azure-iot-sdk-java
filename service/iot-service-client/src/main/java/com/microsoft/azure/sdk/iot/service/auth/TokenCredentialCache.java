@@ -6,6 +6,7 @@ package com.microsoft.azure.sdk.iot.service.auth;
 import com.azure.core.credential.AccessToken;
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.credential.TokenRequestContext;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -21,6 +22,7 @@ public class TokenCredentialCache
     private final TokenCredential tokenCredential;
     private AccessToken accessToken;
 
+    @SuppressFBWarnings("MS_MUTABLE_ARRAY") // Can't change this to an immutable list without a breaking change
     public static final String[] IOTHUB_PUBLIC_SCOPE = new String[]{"https://iothubs.azure.net/.default"};
     private static final String BEARER_TOKEN_PREFIX = "Bearer ";
 

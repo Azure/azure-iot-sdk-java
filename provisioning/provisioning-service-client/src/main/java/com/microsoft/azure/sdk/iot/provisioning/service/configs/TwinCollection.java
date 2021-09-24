@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -96,7 +97,7 @@ import java.util.Map;
  */
 // Unchecked casts of Maps to Map<String, Object> are safe as long as service is returning valid twin json payloads. Since all json keys are Strings, all maps must be Map<String, Object>
 @SuppressWarnings("unchecked")
-public class TwinCollection extends HashMap<String, Object>
+public class TwinCollection extends HashMap<String, Object> implements Serializable
 {
     // the Twin collection version
     private static final String VERSION_TAG = "$version";

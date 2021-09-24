@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 
 import javax.net.ssl.SSLContext;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
 import static mockit.Deencapsulation.invoke;
@@ -30,8 +31,8 @@ import static org.junit.Assert.assertTrue;
 @RunWith(JMockit.class)
 public class RequestDataTest
 {
-    private static final byte[] TEST_EK = "testEk".getBytes();
-    private static final byte[] TEST_SRK = "testSRk".getBytes();
+    private static final byte[] TEST_EK = "testEk".getBytes(StandardCharsets.UTF_8);
+    private static final byte[] TEST_SRK = "testSRk".getBytes(StandardCharsets.UTF_8);
     private static final String TEST_REG = "testReg";
     private static final String TEST_OP = "testOp";
     private static final String TEST_SASTOKEN = "testSasToken";

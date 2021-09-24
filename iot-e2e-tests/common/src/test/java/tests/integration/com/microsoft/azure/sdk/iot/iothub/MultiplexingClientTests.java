@@ -112,8 +112,13 @@ public class MultiplexingClientTests extends IntegrationTest
     protected static HttpProxyServer proxyServer;
     protected static String testProxyHostname = "127.0.0.1";
     protected static int testProxyPort = 8849;
-    protected static final String testProxyUser = "proxyUsername";
-    protected static final char[] testProxyPass = "1234".toCharArray();
+
+    // Semmle flags this as a security issue, but this is a test username so the warning can be suppressed
+    protected static final String testProxyUser = "proxyUsername"; // lgtm
+
+    // Semmle flags this as a security issue, but this is a test password so the warning can be suppressed
+    protected static final char[] testProxyPass = "1234".toCharArray(); // lgtm
+
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection inputs() throws Exception

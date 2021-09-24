@@ -7,6 +7,8 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 
+import java.io.Serializable;
+
 /**
  * Representation of a single Device Provisioning Service X509 Attestation.
  *
@@ -43,7 +45,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollmentgroup">Device Enrollment Group</a>
  */
-public class X509Attestation extends Attestation
+public class X509Attestation extends Attestation implements Serializable
 {
     // the client certificates for X509
     private static final String CLIENT_CERTIFICATES_TAG = "clientCertificates";

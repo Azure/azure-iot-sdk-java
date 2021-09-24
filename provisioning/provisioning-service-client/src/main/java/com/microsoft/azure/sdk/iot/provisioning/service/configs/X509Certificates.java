@@ -8,6 +8,8 @@ import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 import lombok.Getter;
 
+import java.io.Serializable;
+
 /**
  * Representation of a single Device Provisioning Service X509 Primary and Secondary Certificate.
  *
@@ -89,7 +91,7 @@ import lombok.Getter;
  *
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
  */
-public class X509Certificates
+public class X509Certificates implements Serializable
 {
     // the primary X509 certificate [mandatory]
     private static final String PRIMARY_TAG = "primary";

@@ -8,7 +8,9 @@ import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.Setter;
 
-public class CustomAllocationDefinition
+import java.io.Serializable;
+
+public class CustomAllocationDefinition implements Serializable
 {
     // the webhook url for allocation requests
     private static final String WEBHOOK_URL_TAG = "webhookUrl";

@@ -41,7 +41,7 @@ public class JobClient
 {
     private final static Integer DEFAULT_PAGE_SIZE = 100;
 
-    private final static byte[] EMPTY_JSON = "{}".getBytes();
+    private final static byte[] EMPTY_JSON = "{}".getBytes(StandardCharsets.UTF_8);
 
     private String hostName;
     private TokenCredentialCache credentialCache;
@@ -542,7 +542,7 @@ public class JobClient
         if (nextObject instanceof String)
         {
             String deviceJobJson = (String) nextObject;
-            return new JobResult(deviceJobJson.getBytes());
+            return new JobResult(deviceJobJson.getBytes(StandardCharsets.UTF_8));
         }
         else
         {

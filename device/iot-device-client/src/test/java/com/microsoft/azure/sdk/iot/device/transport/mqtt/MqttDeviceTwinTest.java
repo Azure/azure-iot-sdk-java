@@ -17,6 +17,7 @@ import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.junit.Test;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
@@ -475,7 +476,7 @@ public class MqttDeviceTwinTest
     @Test
     public void receiveParsesResponseTopicForGetTwinSucceeds() throws TransportException
     {
-        final byte[] actualPayload = "GetTwinResponseDataContainingDesiredAndReportedPropertiesDocument".getBytes();
+        final byte[] actualPayload = "GetTwinResponseDataContainingDesiredAndReportedPropertiesDocument".getBytes(StandardCharsets.UTF_8);
         final String expectedTopic = "$iothub/twin/res/" + "200" + "/?$rid=" + mockReqId;
         IotHubTransportMessage receivedMessage = null;
 
@@ -508,7 +509,7 @@ public class MqttDeviceTwinTest
     @Test
     public void receiveParsesResponseTopicForUpdateReportedPropertiesSucceeds() throws TransportException
     {
-        final byte[] actualPayload = "".getBytes();
+        final byte[] actualPayload = "".getBytes(StandardCharsets.UTF_8);
         /*
             The following does not work
             final byte[] actualPayload = null;
@@ -548,7 +549,7 @@ public class MqttDeviceTwinTest
     @Test
     public void receiveParsesPatchTopicForDesiredPropertiesNotificationSucceeds() throws TransportException
     {
-        final byte[] actualPayload = "UpdateDesiredPropertiesNotificationData".getBytes();
+        final byte[] actualPayload = "UpdateDesiredPropertiesNotificationData".getBytes(StandardCharsets.UTF_8);
         final String expectedTopic = "$iothub/twin/PATCH/properties/desired/" + "?$version=" + mockVersion;
         IotHubTransportMessage receivedMessage = null;
 
@@ -580,7 +581,7 @@ public class MqttDeviceTwinTest
     @Test (expected = TransportException.class)
     public void receiveParsesResponseTopicMandatoryStatusNotFoundException() throws TransportException
     {
-        final byte[] actualPayload = "GetTwinResponseDataContainingDesiredAndReportedPropertiesDocument".getBytes();
+        final byte[] actualPayload = "GetTwinResponseDataContainingDesiredAndReportedPropertiesDocument".getBytes(StandardCharsets.UTF_8);
         final String expectedTopic = "$iothub/twin/res/" + "?$rid=" + mockReqId;
         IotHubTransportMessage receivedMessage = null;
 
@@ -607,7 +608,7 @@ public class MqttDeviceTwinTest
     @Test (expected = TransportException.class)
     public void receiveParsesResponseTopicInvalidStatusThrowsException() throws TransportException
     {
-        final byte[] actualPayload = "GetTwinResponseDataContainingDesiredAndReportedPropertiesDocument".getBytes();
+        final byte[] actualPayload = "GetTwinResponseDataContainingDesiredAndReportedPropertiesDocument".getBytes(StandardCharsets.UTF_8);
         final String expectedTopic = "$iothub/twin/res/" + "abc/" + "?$rid=" + mockReqId;
         IotHubTransportMessage receivedMessage = null;
         try
@@ -635,7 +636,7 @@ public class MqttDeviceTwinTest
     @Test
     public void receiveSetsReqIdOnResTopic() throws TransportException
     {
-        final byte[] actualPayload = "GetTwinResponseDataContainingDesiredAndReportedPropertiesDocument".getBytes();
+        final byte[] actualPayload = "GetTwinResponseDataContainingDesiredAndReportedPropertiesDocument".getBytes(StandardCharsets.UTF_8);
         final String expectedTopic = "$iothub/twin/res/" + "200" + "/?$rid=" + mockReqId;
         IotHubTransportMessage receivedMessage = null;
         try
@@ -671,7 +672,7 @@ public class MqttDeviceTwinTest
     @Test
     public void receiveDoesNotSetReqIdOnResTopicIfNotFound() throws TransportException
     {
-        final byte[] actualPayload = "GetTwinResponseDataContainingDesiredAndReportedPropertiesDocument".getBytes();
+        final byte[] actualPayload = "GetTwinResponseDataContainingDesiredAndReportedPropertiesDocument".getBytes(StandardCharsets.UTF_8);
         final String expectedTopic = "$iothub/twin/res/" + "200";
         IotHubTransportMessage receivedMessage = null;
         try
@@ -708,7 +709,7 @@ public class MqttDeviceTwinTest
     @Test
     public void receiveSetsVersionOnResTopic() throws TransportException
     {
-        final byte[] actualPayload = "GetTwinResponseDataContainingDesiredAndReportedPropertiesDocument".getBytes();
+        final byte[] actualPayload = "GetTwinResponseDataContainingDesiredAndReportedPropertiesDocument".getBytes(StandardCharsets.UTF_8);
         final String expectedTopic = "$iothub/twin/res/" + "201" + "/?$rid=" + mockReqId + "&$version=" + mockVersion;
         IotHubTransportMessage receivedMessage = null;
         try
@@ -746,7 +747,7 @@ public class MqttDeviceTwinTest
     @Test
     public void receiveDoesNotSetVersionOnResTopicIfNotFound() throws TransportException
     {
-        final byte[] actualPayload = "GetTwinResponseDataContainingDesiredAndReportedPropertiesDocument".getBytes();
+        final byte[] actualPayload = "GetTwinResponseDataContainingDesiredAndReportedPropertiesDocument".getBytes(StandardCharsets.UTF_8);
         final String expectedTopic = "$iothub/twin/res/" + "201" + "/?$rid=" + mockReqId;
         IotHubTransportMessage receivedMessage = null;
         try
@@ -781,7 +782,7 @@ public class MqttDeviceTwinTest
     @Test
     public void receiveSetsDataForGetTwinResp() throws TransportException
     {
-        final byte[] actualPayload = "GetTwinResponseDataContainingDesiredAndReportedPropertiesDocument".getBytes();
+        final byte[] actualPayload = "GetTwinResponseDataContainingDesiredAndReportedPropertiesDocument".getBytes(StandardCharsets.UTF_8);
         final String expectedTopic = "$iothub/twin/res/" + "200" + "/?$rid=" + mockReqId;
         IotHubTransportMessage receivedMessage = null;
         try
@@ -826,7 +827,7 @@ public class MqttDeviceTwinTest
     @Test
     public void receiveDoesNotSetDataForUpdateReportedPropResp() throws TransportException
     {
-        final byte[] actualPayload = "".getBytes();
+        final byte[] actualPayload = "".getBytes(StandardCharsets.UTF_8);
         /*
             The following does not work
             final byte[] actualPayload = null;
@@ -871,7 +872,7 @@ public class MqttDeviceTwinTest
     @Test
     public void receiveSetsDataForDesiredPropNotifResp() throws TransportException
     {
-        final byte[] actualPayload = "NotificationResponseDataContainingDesiredPropertiesDocument".getBytes();
+        final byte[] actualPayload = "NotificationResponseDataContainingDesiredPropertiesDocument".getBytes(StandardCharsets.UTF_8);
         final String expectedTopic = "$iothub/twin/PATCH/properties/desired/";
         IotHubTransportMessage receivedMessage = null;
         try
@@ -911,7 +912,7 @@ public class MqttDeviceTwinTest
     @Test
     public void receiveDoesNotSetVersionForDesiredPropNotifRespIfNotFound() throws TransportException
     {
-        final byte[] actualPayload = "NotificationResponseDataContainingDesiredPropertiesDocument".getBytes();
+        final byte[] actualPayload = "NotificationResponseDataContainingDesiredPropertiesDocument".getBytes(StandardCharsets.UTF_8);
         final String expectedTopic = "$iothub/twin/PATCH/properties/desired/";
         IotHubTransportMessage receivedMessage = null;
         try
@@ -950,7 +951,7 @@ public class MqttDeviceTwinTest
     @Test
     public void receiveSetVersionForDesiredPropNotifRespIfFound() throws TransportException
     {
-        final byte[] actualPayload = "NotificationResponseDataContainingDesiredPropertiesDocument".getBytes();
+        final byte[] actualPayload = "NotificationResponseDataContainingDesiredPropertiesDocument".getBytes(StandardCharsets.UTF_8);
         final String expectedTopic = "$iothub/twin/PATCH/properties/desired/" + "?$version=" + mockVersion ;
         IotHubTransportMessage receivedMessage = null;
         try
@@ -990,7 +991,7 @@ public class MqttDeviceTwinTest
     @Test (expected = TransportException.class)
     public void receiveThrowsTransportExceptionOnAnythingOtherThenPatchDesiredProp() throws TransportException
     {
-        final byte[] actualPayload = "NotificationResponseDataContainingDesiredPropertiesDocument".getBytes();
+        final byte[] actualPayload = "NotificationResponseDataContainingDesiredPropertiesDocument".getBytes(StandardCharsets.UTF_8);
         final String expectedTopic = "$iothub/twin/PATCH/properties/" + "?$version=" + mockVersion ;
         IotHubTransportMessage receivedMessage = null;
         try
@@ -1018,7 +1019,7 @@ public class MqttDeviceTwinTest
     @Test (expected = TransportException.class)
     public void receiveThrowsTransportExceptionOnAnythingOtherThenPatchOrResTopic() throws TransportException
     {
-        final byte[] actualPayload = "NotificationResponseDataContainingDesiredPropertiesDocument".getBytes();
+        final byte[] actualPayload = "NotificationResponseDataContainingDesiredPropertiesDocument".getBytes(StandardCharsets.UTF_8);
         final String expectedTopic = "$iothub/twin/NOTPATCH_NOTRES/properties/" + "?$version=" + mockVersion ;
         IotHubTransportMessage receivedMessage = null;
         try

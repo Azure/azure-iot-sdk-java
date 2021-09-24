@@ -22,6 +22,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -90,14 +91,14 @@ public class HttpsRequestResponseSerializerTest
                 result = "Connection: close\r\n" + "Content-Type: application/json\r\n";
 
                 mockedHttpsRequest.getBody();
-                result = "11111".getBytes();
+                result = "11111".getBytes(StandardCharsets.UTF_8);
             }
         };
 
         uriExpectations();
 
         String expected = "POST /modules/testModule/sign?api-version=2018-06-28 HTTP/1.1\r\nHost: localhost:8081\r\nConnection: close\r\nContent-Type: application/json\r\nContent-Length: 5\r\n\r\n";
-        byte[] body = "11111".getBytes();
+        byte[] body = "11111".getBytes(StandardCharsets.UTF_8);
         HttpsRequest request = new HttpsRequest(new URL("https://localhost:8081/modules/testModule/sign?api-version=2018-06-28"), HttpsMethod.GET, body, null);
         request.setHeaderField("content-type", "application/json");
         request.setHeaderField("content-length", "5");
@@ -131,14 +132,14 @@ public class HttpsRequestResponseSerializerTest
                 result = "Connection: close\r\n" + "Content-Type: application/json\r\n";
 
                 mockedHttpsRequest.getBody();
-                result = "11111".getBytes();
+                result = "11111".getBytes(StandardCharsets.UTF_8);
             }
         };
 
         uriExpectations();
 
         String expected = "POST /modules/testModule/sign HTTP/1.1\r\nHost: localhost:8081\r\nConnection: close\r\nContent-Type: application/json\r\nContent-Length: 5\r\n\r\n";
-        byte[] body = "11111".getBytes();
+        byte[] body = "11111".getBytes(StandardCharsets.UTF_8);
         HttpsRequest request = new HttpsRequest(new URL("https://localhost:8081/modules/testModule/sign"), HttpsMethod.GET, body, null);
         request.setHeaderField("content-type", "application/json");
         request.setHeaderField("content-length", "5");
@@ -195,8 +196,8 @@ public class HttpsRequestResponseSerializerTest
     public void deserializeSuccess() throws IOException
     {
         //arrange
-        final byte[] expectedBody = ("test").getBytes();
-        final byte[] expectedBodyWithNewLine = ("test\r\n").getBytes();
+        final byte[] expectedBody = ("test").getBytes(StandardCharsets.UTF_8);
+        final byte[] expectedBodyWithNewLine = ("test\r\n").getBytes(StandardCharsets.UTF_8);
 
         final Map<String, List<String>> expectedHeaders = new HashMap<>();
         List<String> values1 = new ArrayList<>();
@@ -216,7 +217,7 @@ public class HttpsRequestResponseSerializerTest
         new Expectations()
         {
             {
-                new HttpsResponse(203, expectedBody, expectedHeaders, "OK".getBytes());
+                new HttpsResponse(203, expectedBody, expectedHeaders, "OK".getBytes(StandardCharsets.UTF_8));
                 result = mockedHttpsResponse;
 
                 mockedHttpsResponse.getStatus();
@@ -243,7 +244,7 @@ public class HttpsRequestResponseSerializerTest
     public void deserializeThrowsIfTooManyHttpHeadersReceived() throws IOException
     {
         //arrange
-        final byte[] expectedBodyWithNewLine = ("test\r\n").getBytes();
+        final byte[] expectedBodyWithNewLine = ("test\r\n").getBytes(StandardCharsets.UTF_8);
 
         long MAX_HEADER_COUNT = Deencapsulation.getField(HttpsRequestResponseSerializer.class, "MAXIMUM_HEADER_COUNT");
 
@@ -322,8 +323,8 @@ public class HttpsRequestResponseSerializerTest
     public void deserializeThrowsForHeaderWithoutSeparators() throws IOException
     {
         //arrange
-        final byte[] expectedBody = ("test").getBytes();
-        final byte[] expectedBodyWithNewLine = ("test\r\n").getBytes();
+        final byte[] expectedBody = ("test").getBytes(StandardCharsets.UTF_8);
+        final byte[] expectedBodyWithNewLine = ("test\r\n").getBytes(StandardCharsets.UTF_8);
 
         final Map<String, List<String>> expectedHeaders = new HashMap<>();
         List<String> values1 = new ArrayList<>();

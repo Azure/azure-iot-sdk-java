@@ -24,6 +24,7 @@ import org.junit.runner.RunWith;
 import java.io.IOException;
 import java.net.Proxy;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -722,7 +723,7 @@ public class RegistryManagerTest
                 result = mockHttpResponse;
                 IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
                 mockHttpResponse.getBody();
-                result = jobPropertiesJson.getBytes();
+                result = jobPropertiesJson.getBytes(StandardCharsets.UTF_8);
             }
         };
 
@@ -796,7 +797,7 @@ public class RegistryManagerTest
                 result = mockHttpResponse;
                 IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
                 mockHttpResponse.getBody();
-                result = jobPropertiesJson.getBytes();
+                result = jobPropertiesJson.getBytes(StandardCharsets.UTF_8);
             }
         };
 
@@ -867,7 +868,7 @@ public class RegistryManagerTest
                 result = mockHttpResponse;
                 IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
                 mockHttpResponse.getBody();
-                result = jobPropertiesJson.getBytes();
+                result = jobPropertiesJson.getBytes(StandardCharsets.UTF_8);
             }
         };
 
@@ -910,7 +911,7 @@ public class RegistryManagerTest
                 result = mockHttpResponse;
                 IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
                 mockHttpResponse.getBody();
-                result = jobPropertiesJson.getBytes();
+                result = jobPropertiesJson.getBytes(StandardCharsets.UTF_8);
             }
         };
 
@@ -973,7 +974,7 @@ public class RegistryManagerTest
                 result = mockHttpResponse;
                 IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
                 mockHttpResponse.getBody();
-                result = jobPropertiesJson.getBytes();
+                result = jobPropertiesJson.getBytes(StandardCharsets.UTF_8);
             }
         };
 
@@ -1774,7 +1775,7 @@ public class RegistryManagerTest
                 IotHubConnectionString.getUrlApplyConfigurationContent(anyString, expectedDeviceId);
                 times = 1;
 
-                new HttpRequest(mockUrl, HttpMethod.POST, expectedJson.getBytes(), (Proxy) any);
+                new HttpRequest(mockUrl, HttpMethod.POST, expectedJson.getBytes(StandardCharsets.UTF_8), (Proxy) any);
                 times = 1;
 
                 mockHttpRequest.send();
@@ -1853,7 +1854,7 @@ public class RegistryManagerTest
                 result = mockHttpResponse;
                 IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
                 mockHttpResponse.getBody();
-                result = deviceJson.getBytes();
+                result = deviceJson.getBytes(StandardCharsets.UTF_8);
                 Deencapsulation.invoke(device, "toDeviceParser");
                 result = new DeviceParser();
             }
@@ -1895,7 +1896,7 @@ public class RegistryManagerTest
                 result = mockHttpResponse;
                 IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
                 mockHttpResponse.getBody();
-                result = devicesJson.getBytes();
+                result = devicesJson.getBytes(StandardCharsets.UTF_8);
             }
         };
     }
@@ -1936,7 +1937,7 @@ public class RegistryManagerTest
                 result = mockHttpResponse;
                 IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
                 mockHttpResponse.getBody();
-                result = moduleJson.getBytes();
+                result = moduleJson.getBytes(StandardCharsets.UTF_8);
                 Deencapsulation.invoke(module, "toDeviceParser");
                 result = new DeviceParser();
             }
@@ -1978,7 +1979,7 @@ public class RegistryManagerTest
                 result = mockHttpResponse;
                 IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
                 mockHttpResponse.getBody();
-                result = modulesJson.getBytes();
+                result = modulesJson.getBytes(StandardCharsets.UTF_8);
             }
         };
     }
@@ -2019,7 +2020,7 @@ public class RegistryManagerTest
                 result = mockHttpResponse;
                 IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
                 mockHttpResponse.getBody();
-                result = configJson.getBytes();
+                result = configJson.getBytes(StandardCharsets.UTF_8);
                 Deencapsulation.invoke(config, "toConfigurationParser");
                 result = new ConfigurationParser();
             }
@@ -2061,7 +2062,7 @@ public class RegistryManagerTest
                 result = mockHttpResponse;
                 IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
                 mockHttpResponse.getBody();
-                result = configsJson.getBytes();
+                result = configsJson.getBytes(StandardCharsets.UTF_8);
             }
         };
     }

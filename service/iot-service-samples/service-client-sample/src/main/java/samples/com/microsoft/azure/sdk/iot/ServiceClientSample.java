@@ -151,7 +151,6 @@ public class ServiceClientSample
 
     protected static void sendMultipleCommandsAndReadFromTheFeedbackReceiver() throws InterruptedException, IOException, IotHubException
     {
-        List<CompletableFuture<Void>> futureList = new ArrayList<>();
         Map<String, String> propertiesToSend = new HashMap<>();
         String commandMessage = "Cloud to device message: ";
 

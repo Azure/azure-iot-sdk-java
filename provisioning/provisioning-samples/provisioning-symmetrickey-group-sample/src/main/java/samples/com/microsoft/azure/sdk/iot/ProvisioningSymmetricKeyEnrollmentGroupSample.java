@@ -88,7 +88,7 @@ public class ProvisioningSymmetricKeyEnrollmentGroupSample
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
         SecurityProviderSymmetricKey securityClientSymmetricKey;
-        Scanner scanner = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
         DeviceClient deviceClient = null;
 
         // For the sake of security, you shouldn't save keys into String variables as that places them in heap memory. For the sake

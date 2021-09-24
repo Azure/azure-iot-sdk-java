@@ -52,7 +52,7 @@ public class IotHubServiceSasTokenTest
         String hostName = "HOSTNAME." + iotHubName;
         String sharedAccessKeyName = "ACCESSKEYNAME";
         String policyName = "SharedAccessKey";
-        String sharedAccessKey = encodeBase64String("1234567890abcdefghijklmnopqrstvwxyz=".getBytes());
+        String sharedAccessKey = encodeBase64String("1234567890abcdefghijklmnopqrstvwxyz=".getBytes(StandardCharsets.UTF_8));
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
 
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
@@ -67,7 +67,10 @@ public class IotHubServiceSasTokenTest
             {
                 URLEncoder.encode(hostName.toLowerCase(),String.valueOf(StandardCharsets.UTF_8));
                 System.currentTimeMillis();
-                byte[] body = { 1 };
+
+                // Semmle flags this as sensitive call, but it is a false positive since it is for test purposes
+                byte[] body = { 1 }; // lgtm
+
                 secretKeySpec = new SecretKeySpec(body, cryptoProvider);
                 Mac.getInstance(cryptoProvider);
             }
@@ -90,7 +93,7 @@ public class IotHubServiceSasTokenTest
         String hostName = "HOSTNAME." + iotHubName;
         String sharedAccessKeyName = "ACCESSKEYNAME";
         String policyName = "SharedAccessKey";
-        String sharedAccessKey = encodeBase64String("1234567890abcdefghijklmnopqrstvwxyz=".getBytes());
+        String sharedAccessKey = encodeBase64String("1234567890abcdefghijklmnopqrstvwxyz=".getBytes(StandardCharsets.UTF_8));
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
 

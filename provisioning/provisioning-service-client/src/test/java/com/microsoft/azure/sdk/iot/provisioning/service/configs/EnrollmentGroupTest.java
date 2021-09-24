@@ -11,6 +11,7 @@ import mockit.*;
 import org.junit.Test;
 import com.microsoft.azure.sdk.iot.provisioning.service.Helpers;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -31,8 +32,8 @@ public class EnrollmentGroupTest
     private static final String VALID_PARSED_ETAG = "\"00000000-0000-0000-0000-00000000000\"";
     private static final String PRIMARY_KEY_TEXT = "validPrimaryKey";
     private static final String SECONDARY_KEY_TEXT = "validSecondaryKey";
-    private static final String VALID_PRIMARY_KEY = encodeBase64String(PRIMARY_KEY_TEXT.getBytes());
-    private static final String VALID_SECONDARY_KEY = encodeBase64String(SECONDARY_KEY_TEXT.getBytes());
+    private static final String VALID_PRIMARY_KEY = encodeBase64String(PRIMARY_KEY_TEXT.getBytes(StandardCharsets.UTF_8));
+    private static final String VALID_SECONDARY_KEY = encodeBase64String(SECONDARY_KEY_TEXT.getBytes(StandardCharsets.UTF_8));
 
     //PEM encoded representation of the public key certificate
     private static final String PUBLIC_KEY_CERTIFICATE_STRING =

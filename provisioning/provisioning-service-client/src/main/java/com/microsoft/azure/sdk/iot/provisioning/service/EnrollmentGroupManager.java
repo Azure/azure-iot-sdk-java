@@ -13,6 +13,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningS
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientServiceException;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientTransportException;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -111,7 +112,7 @@ class EnrollmentGroupManager
             throw new ProvisioningServiceClientServiceException("Http response for createOrUpdate cannot contains a null body");
         }
         /* SRS_ENROLLMENT_GROUP_MANAGER_21_011: [The createOrUpdate shall return an EnrollmentGroup object created from the body of the response for the Http request .] */
-        return new EnrollmentGroup(new String(body));
+        return new EnrollmentGroup(new String(body, StandardCharsets.UTF_8));
     }
 
     /**
@@ -153,7 +154,7 @@ class EnrollmentGroupManager
             throw new ProvisioningServiceClientServiceException("Http response for get cannot contains a null body");
         }
         /* SRS_ENROLLMENT_GROUP_MANAGER_21_025: [The get shall return an EnrollmentGroup object created from the body of the response for the Http request .] */
-        return new EnrollmentGroup(new String(body));
+        return new EnrollmentGroup(new String(body, StandardCharsets.UTF_8));
     }
 
     AttestationMechanism getAttestationMechanism(String enrollmentGroupId) throws ProvisioningServiceClientException
@@ -174,7 +175,7 @@ class EnrollmentGroupManager
             throw new ProvisioningServiceClientServiceException("Unexpected empty body received from service");
         }
 
-        return new AttestationMechanism(new String(body));
+        return new AttestationMechanism(new String(body, StandardCharsets.UTF_8));
     }
 
     /**

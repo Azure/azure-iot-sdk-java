@@ -17,6 +17,8 @@ import tss.TpmFactory;
 import tss.TpmHelpers;
 import tss.tpm.*;
 
+import java.nio.charset.StandardCharsets;
+
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -339,7 +341,7 @@ public class SecurityProviderTPMHsmTest
     public void activateIdentityKeySucceeds() throws Exception
     {
         //arrange
-        final byte[] testKey = "testKey".getBytes();
+        final byte[] testKey = "testKey".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -358,7 +360,7 @@ public class SecurityProviderTPMHsmTest
 
                 mockedTpm._withSessions((TPM_HANDLE)any, mockedStartAuthSessionResponse.handle);
                 mockedTpm.ActivateCredential((TPM_HANDLE)any, (TPM_HANDLE)any, (TPMS_ID_OBJECT)any, (byte[])any);
-                result = "innerWrapKey".getBytes();
+                result = "innerWrapKey".getBytes(StandardCharsets.UTF_8);
 
                 mockedTpm.Import((TPM_HANDLE )any, (byte[] )any, (TPMT_PUBLIC )any, (TPM2B_PRIVATE )any, (byte[])any,
                                  (TPMT_SYM_DEF_OBJECT)any);
@@ -380,7 +382,7 @@ public class SecurityProviderTPMHsmTest
 
                 mockedTpm.FlushContext((TPM_HANDLE) any);
 
-                Deencapsulation.setField(mockedTpm2BData, "buffer", "len<10".getBytes());
+                Deencapsulation.setField(mockedTpm2BData, "buffer", "len<10".getBytes(StandardCharsets.UTF_8));
 
                 TpmHelpers.getTpmProperty(mockedTpm, TPM_PT.INPUT_BUFFER);
                 result = 10;
@@ -407,7 +409,7 @@ public class SecurityProviderTPMHsmTest
     public void activateIdentityKeyThrowsOnNullIdKeyPub() throws Exception
     {
         //arrange
-        final byte[] testKey = "testKey".getBytes();
+        final byte[] testKey = "testKey".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -428,7 +430,7 @@ public class SecurityProviderTPMHsmTest
     public void activateIdentityKeyThrowsOnStartAuthSessionFail() throws Exception
     {
         //arrange
-        final byte[] testKey = "testKey".getBytes();
+        final byte[] testKey = "testKey".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -455,7 +457,7 @@ public class SecurityProviderTPMHsmTest
     public void activateIdentityKeyThrowsOnInnerWrapKeyNull() throws Exception
     {
         //arrange
-        final byte[] testKey = "testKey".getBytes();
+        final byte[] testKey = "testKey".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -488,7 +490,7 @@ public class SecurityProviderTPMHsmTest
     public void activateIdentityKeyThrowsOnIdKeyPrivateNull() throws Exception
     {
         //arrange
-        final byte[] testKey = "testKey".getBytes();
+        final byte[] testKey = "testKey".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -507,7 +509,7 @@ public class SecurityProviderTPMHsmTest
 
                 mockedTpm._withSessions((TPM_HANDLE)any, mockedStartAuthSessionResponse.handle);
                 mockedTpm.ActivateCredential((TPM_HANDLE)any, (TPM_HANDLE)any, (TPMS_ID_OBJECT)any, (byte[])any);
-                result = "innerWrapKey".getBytes();
+                result = "innerWrapKey".getBytes(StandardCharsets.UTF_8);
 
                 mockedTpm.Import((TPM_HANDLE )any, (byte[] )any, (TPMT_PUBLIC )any, (TPM2B_PRIVATE )any, (byte[])any,
                                  (TPMT_SYM_DEF_OBJECT)any);
@@ -525,7 +527,7 @@ public class SecurityProviderTPMHsmTest
     public void activateIdentityKeyThrowsOnHIdKeyNull() throws Exception
     {
         //arrange
-        final byte[] testKey = "testKey".getBytes();
+        final byte[] testKey = "testKey".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -544,7 +546,7 @@ public class SecurityProviderTPMHsmTest
 
                 mockedTpm._withSessions((TPM_HANDLE)any, mockedStartAuthSessionResponse.handle);
                 mockedTpm.ActivateCredential((TPM_HANDLE)any, (TPM_HANDLE)any, (TPMS_ID_OBJECT)any, (byte[])any);
-                result = "innerWrapKey".getBytes();
+                result = "innerWrapKey".getBytes(StandardCharsets.UTF_8);
 
                 mockedTpm.Import((TPM_HANDLE )any, (byte[] )any, (TPMT_PUBLIC )any, (TPM2B_PRIVATE )any, (byte[])any,
                                  (TPMT_SYM_DEF_OBJECT)any);
@@ -564,7 +566,7 @@ public class SecurityProviderTPMHsmTest
     public void activateIdentityKeyThrowsOnInvalidLengthOfEncUriData() throws Exception
     {
         //arrange
-        final byte[] testKey = "testKey".getBytes();
+        final byte[] testKey = "testKey".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -583,7 +585,7 @@ public class SecurityProviderTPMHsmTest
 
                 mockedTpm._withSessions((TPM_HANDLE)any, mockedStartAuthSessionResponse.handle);
                 mockedTpm.ActivateCredential((TPM_HANDLE)any, (TPM_HANDLE)any, (TPMS_ID_OBJECT)any, (byte[])any);
-                result = "innerWrapKey".getBytes();
+                result = "innerWrapKey".getBytes(StandardCharsets.UTF_8);
 
                 mockedTpm.Import((TPM_HANDLE )any, (byte[] )any, (TPMT_PUBLIC )any, (TPM2B_PRIVATE )any, (byte[])any,
                                  (TPMT_SYM_DEF_OBJECT)any);
@@ -605,7 +607,7 @@ public class SecurityProviderTPMHsmTest
 
                 mockedTpm.FlushContext((TPM_HANDLE) any);
 
-                Deencapsulation.setField(mockedTpm2BData, "buffer", "lenGreaterThan10".getBytes());
+                Deencapsulation.setField(mockedTpm2BData, "buffer", "lenGreaterThan10".getBytes(StandardCharsets.UTF_8));
 
                 TpmHelpers.getTpmProperty(mockedTpm, TPM_PT.INPUT_BUFFER);
                 result = 10;
@@ -621,7 +623,7 @@ public class SecurityProviderTPMHsmTest
     public void activateIdentityKeyThrowsOnCreateResponseNull() throws Exception
     {
         //arrange
-        final byte[] testKey = "testKey".getBytes();
+        final byte[] testKey = "testKey".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -640,7 +642,7 @@ public class SecurityProviderTPMHsmTest
 
                 mockedTpm._withSessions((TPM_HANDLE)any, mockedStartAuthSessionResponse.handle);
                 mockedTpm.ActivateCredential((TPM_HANDLE)any, (TPM_HANDLE)any, (TPMS_ID_OBJECT)any, (byte[])any);
-                result = "innerWrapKey".getBytes();
+                result = "innerWrapKey".getBytes(StandardCharsets.UTF_8);
 
                 mockedTpm.Import((TPM_HANDLE )any, (byte[] )any, (TPMT_PUBLIC )any, (TPM2B_PRIVATE )any, (byte[])any,
                                  (TPMT_SYM_DEF_OBJECT)any);
@@ -662,7 +664,7 @@ public class SecurityProviderTPMHsmTest
 
                 mockedTpm.FlushContext((TPM_HANDLE) any);
 
-                Deencapsulation.setField(mockedTpm2BData, "buffer", "len<10".getBytes());
+                Deencapsulation.setField(mockedTpm2BData, "buffer", "len<10".getBytes(StandardCharsets.UTF_8));
 
                 TpmHelpers.getTpmProperty(mockedTpm, TPM_PT.INPUT_BUFFER);
                 result = 10;
@@ -681,7 +683,7 @@ public class SecurityProviderTPMHsmTest
     public void activateIdentityKeyThrowsOnHSymKeyNull() throws Exception
     {
         //arrange
-        final byte[] testKey = "testKey".getBytes();
+        final byte[] testKey = "testKey".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -700,7 +702,7 @@ public class SecurityProviderTPMHsmTest
 
                 mockedTpm._withSessions((TPM_HANDLE) any, mockedStartAuthSessionResponse.handle);
                 mockedTpm.ActivateCredential((TPM_HANDLE) any, (TPM_HANDLE) any, (TPMS_ID_OBJECT) any, (byte[]) any);
-                result = "innerWrapKey".getBytes();
+                result = "innerWrapKey".getBytes(StandardCharsets.UTF_8);
 
                 mockedTpm.Import((TPM_HANDLE) any, (byte[]) any, (TPMT_PUBLIC) any, (TPM2B_PRIVATE) any, (byte[]) any,
                                  (TPMT_SYM_DEF_OBJECT) any);
@@ -731,7 +733,7 @@ public class SecurityProviderTPMHsmTest
 
                 mockedTpm.FlushContext((TPM_HANDLE) any);
 
-                Deencapsulation.setField(mockedTpm2BData, "buffer", "len<10".getBytes());
+                Deencapsulation.setField(mockedTpm2BData, "buffer", "len<10".getBytes(StandardCharsets.UTF_8));
 
                 TpmHelpers.getTpmProperty(mockedTpm, TPM_PT.INPUT_BUFFER);
                 result = 10;
@@ -759,7 +761,7 @@ public class SecurityProviderTPMHsmTest
     public void activateIdentityKeyThrowsOnEncryptDecryptResponseNull() throws Exception
     {
         //arrange
-        final byte[] testKey = "testKey".getBytes();
+        final byte[] testKey = "testKey".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -778,7 +780,7 @@ public class SecurityProviderTPMHsmTest
 
                 mockedTpm._withSessions((TPM_HANDLE)any, mockedStartAuthSessionResponse.handle);
                 mockedTpm.ActivateCredential((TPM_HANDLE)any, (TPM_HANDLE)any, (TPMS_ID_OBJECT)any, (byte[])any);
-                result = "innerWrapKey".getBytes();
+                result = "innerWrapKey".getBytes(StandardCharsets.UTF_8);
 
                 mockedTpm.Import((TPM_HANDLE )any, (byte[] )any, (TPMT_PUBLIC )any, (TPM2B_PRIVATE )any, (byte[])any,
                                  (TPMT_SYM_DEF_OBJECT)any);
@@ -800,7 +802,7 @@ public class SecurityProviderTPMHsmTest
 
                 mockedTpm.FlushContext((TPM_HANDLE) any);
 
-                Deencapsulation.setField(mockedTpm2BData, "buffer", "len<10".getBytes());
+                Deencapsulation.setField(mockedTpm2BData, "buffer", "len<10".getBytes(StandardCharsets.UTF_8));
 
                 TpmHelpers.getTpmProperty(mockedTpm, TPM_PT.INPUT_BUFFER);
                 result = 10;
@@ -829,7 +831,7 @@ public class SecurityProviderTPMHsmTest
                                          @Mocked TPMS_KEYEDHASH_PARMS mockedTpmsKeyedhashParms) throws Exception
     {
         //arrange
-        final byte[] deviceIdData = "deviceIdData".getBytes();
+        final byte[] deviceIdData = "deviceIdData".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -866,7 +868,7 @@ public class SecurityProviderTPMHsmTest
     public void signWithIdentityThrowsOnNullIdKeyPub() throws Exception
     {
         //arrange
-        final byte[] deviceIdData = "deviceIdData".getBytes();
+        final byte[] deviceIdData = "deviceIdData".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -903,7 +905,7 @@ public class SecurityProviderTPMHsmTest
                                                    @Mocked TPMS_KEYEDHASH_PARMS mockedTpmsKeyedhashParms) throws Exception
     {
         //arrange
-        final byte[] deviceIdData = "less<10".getBytes();
+        final byte[] deviceIdData = "less<10".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -938,7 +940,7 @@ public class SecurityProviderTPMHsmTest
                                                    @Mocked TPMS_KEYEDHASH_PARMS mockedTpmsKeyedhashParms) throws Exception
     {
         //arrange
-        final byte[] deviceIdData = "deviceIdData".getBytes();
+        final byte[] deviceIdData = "deviceIdData".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();

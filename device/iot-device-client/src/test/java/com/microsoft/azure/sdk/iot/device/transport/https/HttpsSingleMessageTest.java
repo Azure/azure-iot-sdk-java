@@ -13,6 +13,7 @@ import mockit.NonStrictExpectations;
 import mockit.Verifications;
 import org.junit.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -732,7 +733,7 @@ public class HttpsSingleMessageTest
         {
             {
                 httpsResponse.getBody();
-                result = "body".getBytes();
+                result = "body".getBytes(StandardCharsets.UTF_8);
 
                 httpsResponse.getHeaderFields();
                 result = headerFields;

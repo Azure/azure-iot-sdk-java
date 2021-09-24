@@ -8,7 +8,9 @@ import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.Setter;
 
-public class DeviceCapabilities
+import java.io.Serializable;
+
+public class DeviceCapabilities implements Serializable
 {
     private static final String IOT_EDGE_NAME = "iotEdge";
     @Expose

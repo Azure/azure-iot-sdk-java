@@ -14,6 +14,7 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.Base64;
@@ -66,8 +67,8 @@ public class SecurityProviderSymmetricKey extends SecurityProvider
             throw new IllegalArgumentException("Registration ID cannot be null");
         }
 
-        this.primaryKey = primaryKey.getBytes();
-        this.secondaryKey = secondaryKey.getBytes();
+        this.primaryKey = primaryKey.getBytes(StandardCharsets.UTF_8);
+        this.secondaryKey = secondaryKey.getBytes(StandardCharsets.UTF_8);
         this.registrationId = registrationId;
     }
 
@@ -150,6 +151,6 @@ public class SecurityProviderSymmetricKey extends SecurityProvider
         SecretKeySpec secretKey = new SecretKeySpec(masterKeyBytes, HMAC_SHA_256);
         Mac hMacSha256 = Mac.getInstance(HMAC_SHA_256);
         hMacSha256.init(secretKey);
-        return Base64.getEncoder().encode(hMacSha256.doFinal(deviceId.getBytes()));
+        return Base64.getEncoder().encode(hMacSha256.doFinal(deviceId.getBytes(StandardCharsets.UTF_8)));
     }
 }

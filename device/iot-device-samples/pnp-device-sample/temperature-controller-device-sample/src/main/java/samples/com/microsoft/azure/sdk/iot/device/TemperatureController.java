@@ -213,7 +213,7 @@ public class TemperatureController {
     }
 
     private static void initializeAndProvisionDevice() throws ProvisioningDeviceClientException, IOException, URISyntaxException, InterruptedException {
-        SecurityProviderSymmetricKey securityClientSymmetricKey = new SecurityProviderSymmetricKey(deviceSymmetricKey.getBytes(), registrationId);
+        SecurityProviderSymmetricKey securityClientSymmetricKey = new SecurityProviderSymmetricKey(deviceSymmetricKey.getBytes(StandardCharsets.UTF_8), registrationId);
         ProvisioningDeviceClient provisioningDeviceClient;
         ProvisioningStatus provisioningStatus = new ProvisioningStatus();
 

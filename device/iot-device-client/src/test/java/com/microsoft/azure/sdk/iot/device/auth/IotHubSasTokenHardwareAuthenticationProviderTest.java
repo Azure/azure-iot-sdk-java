@@ -57,7 +57,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
     {
         //arrange
         final String someToken = "someToken";
-        final byte[] tokenBytes = someToken.getBytes();
+        final byte[] tokenBytes = someToken.getBytes(StandardCharsets.UTF_8);
         new Expectations()
         {
             {
@@ -106,7 +106,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
     {
         //arrange
         final String someToken = "someToken";
-        final byte[] tokenBytes= someToken.getBytes();
+        final byte[] tokenBytes= someToken.getBytes(StandardCharsets.UTF_8);
         new NonStrictExpectations()
         {
             {
@@ -137,7 +137,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
     {
         //arrange
         final String someToken = "someToken";
-        final byte[] tokenBytes= someToken.getBytes();
+        final byte[] tokenBytes= someToken.getBytes(StandardCharsets.UTF_8);
 
         //assert
         new Expectations()
@@ -170,7 +170,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
     {
         //arrange
         final String someToken = "someToken";
-        final byte[] tokenBytes= someToken.getBytes();
+        final byte[] tokenBytes= someToken.getBytes(StandardCharsets.UTF_8);
 
         //assert
         new Expectations()
@@ -202,7 +202,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
     {
         //arrange
         final String someToken = "someToken";
-        final byte[] tokenBytes= someToken.getBytes();
+        final byte[] tokenBytes= someToken.getBytes(StandardCharsets.UTF_8);
 
         //assert
         new Expectations()
@@ -254,7 +254,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
                 result = "some token scope";
 
                 mockSecurityProviderTpm.signWithIdentity((byte[]) any);
-                result = "some token".getBytes();
+                result = "some token".getBytes(StandardCharsets.UTF_8);
             }
         };
 
@@ -285,7 +285,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
                 result = "some token scope";
 
                 mockSecurityProviderTpm.signWithIdentity((byte[]) any);
-                result = "some token".getBytes();
+                result = "some token".getBytes(StandardCharsets.UTF_8);
             }
         };
     }
@@ -296,7 +296,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
     {
         //arrange
         final String someToken = "someToken";
-        final byte[] tokenBytes= someToken.getBytes();
+        final byte[] tokenBytes= someToken.getBytes(StandardCharsets.UTF_8);
         new NonStrictExpectations()
         {
             {
@@ -438,7 +438,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
     {
         //arrange
         final String someToken = "someToken";
-        final byte[] tokenBytes= someToken.getBytes();
+        final byte[] tokenBytes= someToken.getBytes(StandardCharsets.UTF_8);
         new NonStrictExpectations()
         {
             {
@@ -477,7 +477,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
     {
         //arrange
         final String someToken = "someToken";
-        final byte[] tokenBytes= someToken.getBytes();
+        final byte[] tokenBytes= someToken.getBytes(StandardCharsets.UTF_8);
         new NonStrictExpectations()
         {
             {

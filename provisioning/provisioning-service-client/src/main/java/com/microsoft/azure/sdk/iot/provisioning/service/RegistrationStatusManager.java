@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.configs.QuerySpecificati
 import com.microsoft.azure.sdk.iot.provisioning.service.contract.ContractApiHttp;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.*;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -98,7 +99,7 @@ public class RegistrationStatusManager
         }
 
         /* SRS_REGISTRATION_STATUS_MANAGER_21_010: [The get shall return a DeviceRegistrationState object created from the body of the response for the Http request .] */
-        return new DeviceRegistrationState(new String(body));
+        return new DeviceRegistrationState(new String(body, StandardCharsets.UTF_8));
     }
 
     /**

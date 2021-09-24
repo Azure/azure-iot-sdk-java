@@ -11,6 +11,7 @@ import mockit.integration.junit4.JMockit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -264,7 +265,7 @@ public class IotHubExceptionManagerTest
         final int status = 301;
         final byte[] body = { 1 };
         final Map<String, List<String>> headerFields = new HashMap<>();
-        final byte[] errorReason = "{\"ExceptionMessage\":\"This is the error message\"}".getBytes();
+        final byte[] errorReason = "{\"ExceptionMessage\":\"This is the error message\"}".getBytes(StandardCharsets.UTF_8);
         HttpResponse response = new HttpResponse(status, body, headerFields, errorReason);
         // Act
         try
@@ -293,7 +294,7 @@ public class IotHubExceptionManagerTest
         final int status = 400;
         final byte[] body = { 1 };
         final Map<String, List<String>> headerFields = new HashMap<>();
-        final byte[] errorReason = "{\"ExceptionMessage\":\"This is the error message\"}".getBytes();
+        final byte[] errorReason = "{\"ExceptionMessage\":\"This is the error message\"}".getBytes(StandardCharsets.UTF_8);
         HttpResponse response = new HttpResponse(status, body, headerFields, errorReason);
         // Act
         try
@@ -317,7 +318,7 @@ public class IotHubExceptionManagerTest
         final int status = 400;
         final byte[] body = { 1 };
         final Map<String, List<String>> headerFields = new HashMap<>();
-        final byte[] errorReason = "{\"ExceptionMessage\":null}".getBytes();
+        final byte[] errorReason = "{\"ExceptionMessage\":null}".getBytes(StandardCharsets.UTF_8);
         HttpResponse response = new HttpResponse(status, body, headerFields, errorReason);
         // Act
         try
@@ -341,7 +342,7 @@ public class IotHubExceptionManagerTest
         final int status = 400;
         final byte[] body = { 1 };
         final Map<String, List<String>> headerFields = new HashMap<>();
-        final byte[] errorReason = "{\"ExceptionMessage\":}".getBytes();
+        final byte[] errorReason = "{\"ExceptionMessage\":}".getBytes(StandardCharsets.UTF_8);
         HttpResponse response = new HttpResponse(status, body, headerFields, errorReason);
         // Act
         try
@@ -365,7 +366,7 @@ public class IotHubExceptionManagerTest
         final int status = 400;
         final byte[] body = { 1 };
         final Map<String, List<String>> headerFields = new HashMap<>();
-        final byte[] errorReason = "{\"Message\":\"ErrorCode:IotHubUnauthorizedAccess;Unauthorized\",\"ExceptionMessage\":\"Tracking ID:(tracking id)-TimeStamp:12/14/2016 03:15:17\"}".getBytes();
+        final byte[] errorReason = "{\"Message\":\"ErrorCode:IotHubUnauthorizedAccess;Unauthorized\",\"ExceptionMessage\":\"Tracking ID:(tracking id)-TimeStamp:12/14/2016 03:15:17\"}".getBytes(StandardCharsets.UTF_8);
         HttpResponse response = new HttpResponse(status, body, headerFields, errorReason);
         // Act
         try
@@ -389,7 +390,7 @@ public class IotHubExceptionManagerTest
         final int status = 400;
         final byte[] body = { 1 };
         final Map<String, List<String>> headerFields = new HashMap<>();
-        final byte[] errorReason = "{\"Message\":\"ErrorCode:ArgumentInvalid;Error: BadRequest {\\\"Message\\\":\\\"ErrorCode:ArgumentInvalid;Missing or invalid etag for job type ScheduleUpdateTwin. ScheduleUpdateTwin job type is a force update, which only accepts '*' as the Etag.\\\",\\\"ExceptionMessage\\\":\\\"Tracking ID:1234-TimeStamp:06/26/2017 20:56:33\\\"}\",\"ExceptionMessage\":\"Tracking ID:5678-G:10-TimeStamp:06/26/2017 20:56:33\"}".getBytes();
+        final byte[] errorReason = "{\"Message\":\"ErrorCode:ArgumentInvalid;Error: BadRequest {\\\"Message\\\":\\\"ErrorCode:ArgumentInvalid;Missing or invalid etag for job type ScheduleUpdateTwin. ScheduleUpdateTwin job type is a force update, which only accepts '*' as the Etag.\\\",\\\"ExceptionMessage\\\":\\\"Tracking ID:1234-TimeStamp:06/26/2017 20:56:33\\\"}\",\"ExceptionMessage\":\"Tracking ID:5678-G:10-TimeStamp:06/26/2017 20:56:33\"}".getBytes(StandardCharsets.UTF_8);
         HttpResponse response = new HttpResponse(status, body, headerFields, errorReason);
         // Act
         try

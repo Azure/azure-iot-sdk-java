@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import static com.microsoft.azure.sdk.iot.device.twin.DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST;
 import static com.microsoft.azure.sdk.iot.device.twin.DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST;
+import java.nio.charset.StandardCharsets;
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_METHODS;
 import static org.junit.Assert.*;
 
@@ -247,7 +248,7 @@ public class DeviceMethodTest
         DeviceMethod testMethod = new DeviceMethod(mockedDeviceIO, mockedConfig, mockedStatusCB, null);
         testMethod.subscribeToDeviceMethod(mockedDeviceMethodCB, null);
 
-        byte[] testPayload = "TestPayload".getBytes();
+        byte[] testPayload = "TestPayload".getBytes(StandardCharsets.UTF_8);
         IotHubTransportMessage testMessage = new IotHubTransportMessage(testPayload, MessageType.DEVICE_TWIN);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
 
@@ -286,7 +287,7 @@ public class DeviceMethodTest
         DeviceMethod testMethod = new DeviceMethod(mockedDeviceIO, mockedConfig, mockedStatusCB, null);
         testMethod.subscribeToDeviceMethod(mockedDeviceMethodCB, null);
 
-        byte[] testPayload = "TestPayload".getBytes();
+        byte[] testPayload = "TestPayload".getBytes(StandardCharsets.UTF_8);
         IotHubTransportMessage testMessage = new IotHubTransportMessage(testPayload, DEVICE_METHODS);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
 
@@ -327,7 +328,7 @@ public class DeviceMethodTest
         DeviceMethod testMethod = new DeviceMethod(mockedDeviceIO, mockedConfig, mockedStatusCB, null);
         testMethod.subscribeToDeviceMethod(mockedDeviceMethodCB, null);
 
-        byte[] testPayload = "TestPayload".getBytes();
+        byte[] testPayload = "TestPayload".getBytes(StandardCharsets.UTF_8);
         IotHubTransportMessage testMessage = new IotHubTransportMessage(testPayload, DEVICE_METHODS);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
 
@@ -365,7 +366,7 @@ public class DeviceMethodTest
         DeviceMethod testMethod = new DeviceMethod(mockedDeviceIO, mockedConfig, mockedStatusCB, null);
         testMethod.subscribeToDeviceMethod(mockedDeviceMethodCB, null);
 
-        byte[] testPayload = "TestPayload".getBytes();
+        byte[] testPayload = "TestPayload".getBytes(StandardCharsets.UTF_8);
         IotHubTransportMessage testMessage = new IotHubTransportMessage(testPayload, DEVICE_METHODS);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
 

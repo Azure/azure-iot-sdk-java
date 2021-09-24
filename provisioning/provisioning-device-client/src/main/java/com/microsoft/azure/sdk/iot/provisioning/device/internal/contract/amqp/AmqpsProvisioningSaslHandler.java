@@ -12,6 +12,8 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.Provi
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * Implementation of a SaslHandler that is designed to handle Sasl negotiation using TPM authentication against the Device Provisioning Service
  */
@@ -332,7 +334,7 @@ class AmqpsProvisioningSaslHandler implements SaslHandler
         }
 
         this.challengeState = ChallengeState.WAITING_FOR_FINAL_OUTCOME;
-        return prependByteArrayWithControlByte(INIT_SEGMENT_CONTROL_BYTE, sasToken.getBytes());
+        return prependByteArrayWithControlByte(INIT_SEGMENT_CONTROL_BYTE, sasToken.getBytes(StandardCharsets.UTF_8));
     }
 
     private byte[] buildNonceFromThirdChallenge(byte[] challengeData)
@@ -345,7 +347,7 @@ class AmqpsProvisioningSaslHandler implements SaslHandler
 
     private static byte[] buildSaslInitPayload(String idScope, String registrationId, byte[] endorsementKey)
     {
-        byte[] bytes = concatBytesWithNullDelimiter(idScope.getBytes(), registrationId.getBytes(), endorsementKey);
+        byte[] bytes = concatBytesWithNullDelimiter(idScope.getBytes(StandardCharsets.UTF_8), registrationId.getBytes(StandardCharsets.UTF_8), endorsementKey);
         return prependByteArrayWithControlByte(INIT_SEGMENT_CONTROL_BYTE, bytes);
     }
 

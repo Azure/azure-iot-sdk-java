@@ -31,6 +31,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -70,7 +71,7 @@ public class TokenCredentialTests
         ServiceClient serviceClient = buildServiceClientWithTokenCredential(IotHubServiceClientProtocol.AMQPS);
         serviceClient.open();
 
-        Message message = new Message("some message".getBytes());
+        Message message = new Message("some message".getBytes(StandardCharsets.UTF_8));
 
         serviceClient.send(device.getDeviceId(), message);
 

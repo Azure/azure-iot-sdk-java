@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -346,7 +347,7 @@ public class DeviceTwin
             return;
         }
 
-        IotHubTransportMessage updateReportedPropertiesRequest = new IotHubTransportMessage(serializedReportedProperties.getBytes(), MessageType.DEVICE_TWIN);
+        IotHubTransportMessage updateReportedPropertiesRequest = new IotHubTransportMessage(serializedReportedProperties.getBytes(StandardCharsets.UTF_8), MessageType.DEVICE_TWIN);
         updateReportedPropertiesRequest.setCorrelatingMessageCallback(correlatingMessageCallback);
         updateReportedPropertiesRequest.setCorrelatingMessageCallbackContext(correlatingMessageCallbackContext);
         updateReportedPropertiesRequest.setConnectionDeviceId(this.config.getDeviceId());

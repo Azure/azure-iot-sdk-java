@@ -122,7 +122,7 @@ public class SSLContextBuilder
             throw new IllegalArgumentException("Public key certificate cannot be null or empty");
         }
 
-        try (InputStream pemInputStream = new ByteArrayInputStream(pemString.getBytes()))
+        try (InputStream pemInputStream = new ByteArrayInputStream(pemString.getBytes(StandardCharsets.UTF_8)))
         {
             CertificateFactory cf = CertificateFactory.getInstance(CERTIFICATE_TYPE);
             Collection<X509Certificate> collection = new ArrayList<>();

@@ -19,6 +19,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,7 +51,7 @@ public class ContractApiHttpTest
     private final String VALID_PATH = "a/b";
     private final Map<String, String> VALID_HEADER = new HashMap<>();
     private final String VALID_PAYLOAD = "{}";
-    private final byte[] VALID_BODY = VALID_PAYLOAD.getBytes();
+    private final byte[] VALID_BODY = VALID_PAYLOAD.getBytes(StandardCharsets.UTF_8);
     private final int VALID_SUCCESS_STATUS = 200;
     private final String VALID_SUCCESS_MESSAGE = "success";
     private final String VALID_SASTOKEN = "validSas";
@@ -69,14 +70,14 @@ public class ContractApiHttpTest
                 result = VALID_HOST_NAME;
                 new URL((String)any);
                 result = mockedURL;
-                new HttpRequest(mockedURL, HttpMethod.PUT, VALID_PAYLOAD.getBytes());
+                new HttpRequest(mockedURL, HttpMethod.PUT, VALID_PAYLOAD.getBytes(StandardCharsets.UTF_8));
                 result = mockedHttpRequest;
                 mockedHttpRequest.send();
                 result = mockedHttpResponse;
                 mockedHttpResponse.getStatus();
                 result = VALID_SUCCESS_STATUS;
                 mockedHttpResponse.getErrorReason();
-                result = VALID_SUCCESS_MESSAGE.getBytes();
+                result = VALID_SUCCESS_MESSAGE.getBytes(StandardCharsets.UTF_8);
                 mockedHttpResponse.getBody();
                 result = VALID_BODY;
                 mockedHttpResponse.getHeaderFields();
@@ -155,14 +156,14 @@ public class ContractApiHttpTest
                 result = VALID_HOST_NAME;
                 new URL((String)any);
                 result = mockedURL;
-                new HttpRequest(mockedURL, HttpMethod.PUT, VALID_PAYLOAD.getBytes());
+                new HttpRequest(mockedURL, HttpMethod.PUT, VALID_PAYLOAD.getBytes(StandardCharsets.UTF_8));
                 result = mockedHttpRequest;
                 mockedHttpRequest.send();
                 result = mockedHttpResponse;
                 mockedHttpResponse.getStatus();
                 result = VALID_SUCCESS_STATUS;
                 mockedHttpResponse.getErrorReason();
-                result = VALID_SUCCESS_MESSAGE.getBytes();
+                result = VALID_SUCCESS_MESSAGE.getBytes(StandardCharsets.UTF_8);
                 mockedHttpResponse.getBody();
                 result = VALID_BODY;
                 mockedHttpResponse.getHeaderFields();
@@ -342,14 +343,14 @@ public class ContractApiHttpTest
                 result = VALID_HOST_NAME;
                 new URL((String)any);
                 result = mockedURL;
-                new HttpRequest(mockedURL, HttpMethod.PUT, VALID_PAYLOAD.getBytes());
+                new HttpRequest(mockedURL, HttpMethod.PUT, VALID_PAYLOAD.getBytes(StandardCharsets.UTF_8));
                 result = mockedHttpRequest;
                 mockedHttpRequest.send();
                 result = mockedHttpResponse;
                 mockedHttpResponse.getStatus();
                 result = VALID_SUCCESS_STATUS;
                 mockedHttpResponse.getErrorReason();
-                result = VALID_SUCCESS_MESSAGE.getBytes();
+                result = VALID_SUCCESS_MESSAGE.getBytes(StandardCharsets.UTF_8);
                 mockedHttpResponse.getBody();
                 result = VALID_BODY;
                 mockedHttpResponse.getHeaderFields();
@@ -384,7 +385,7 @@ public class ContractApiHttpTest
                 result = VALID_HOST_NAME;
                 new URL((String)any);
                 result = mockedURL;
-                new HttpRequest(mockedURL, HttpMethod.PUT, VALID_PAYLOAD.getBytes());
+                new HttpRequest(mockedURL, HttpMethod.PUT, VALID_PAYLOAD.getBytes(StandardCharsets.UTF_8));
                 result = new IOException();
             }
         };
@@ -515,7 +516,7 @@ public class ContractApiHttpTest
                 result = VALID_HOST_NAME;
                 new URL((String)any);
                 result = mockedURL;
-                new HttpRequest(mockedURL, HttpMethod.PUT, VALID_PAYLOAD.getBytes());
+                new HttpRequest(mockedURL, HttpMethod.PUT, VALID_PAYLOAD.getBytes(StandardCharsets.UTF_8));
                 result = mockedHttpRequest;
                 mockedHttpRequest.send();
                 result = new ProvisioningServiceClientException();
@@ -551,14 +552,14 @@ public class ContractApiHttpTest
                 result = VALID_HOST_NAME;
                 new URL((String)any);
                 result = mockedURL;
-                new HttpRequest(mockedURL, HttpMethod.PUT, VALID_PAYLOAD.getBytes());
+                new HttpRequest(mockedURL, HttpMethod.PUT, VALID_PAYLOAD.getBytes(StandardCharsets.UTF_8));
                 result = mockedHttpRequest;
                 mockedHttpRequest.send();
                 result = mockedHttpResponse;
                 mockedHttpResponse.getStatus();
                 result = 401;
                 mockedHttpResponse.getErrorReason();
-                result = VALID_SUCCESS_MESSAGE.getBytes();
+                result = VALID_SUCCESS_MESSAGE.getBytes(StandardCharsets.UTF_8);
             }
         };
 

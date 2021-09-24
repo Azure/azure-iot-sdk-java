@@ -17,6 +17,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.Provi
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 
 import javax.net.ssl.SSLContext;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 
 class StatusTask implements Callable<RegistrationOperationStatusParser>
@@ -115,7 +116,7 @@ class StatusTask implements Callable<RegistrationOperationStatusParser>
             }
             if (responseData.getResponseData() != null && responseData.getContractState() == ContractState.DPS_REGISTRATION_RECEIVED)
             {
-                String jsonBody = new String(responseData.getResponseData());
+                String jsonBody = new String(responseData.getResponseData(), StandardCharsets.UTF_8);
                 try
                 {
                     return RegistrationOperationStatusParser.createFromJson(jsonBody);

@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -38,7 +39,7 @@ import java.util.Date;
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollmentgroup">Device Enrollment Group</a>
  */
-public class X509CertificateInfo
+public class X509CertificateInfo implements Serializable
 {
     // the subject name of the X509 certificate
     private static final String SUBJECT_NAME_TAG = "subjectName";
