@@ -6,7 +6,6 @@
 package com.microsoft.azure.sdk.iot.service.auth;
 
 import com.microsoft.azure.sdk.iot.service.Tools;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Authentication mechanism, used to store the device symmetric key.
@@ -199,35 +198,5 @@ public class AuthenticationMechanism
 
         //Codes_SRS_AUTHENTICATION_MECHANISM_34_011: [This function shall set this object's authentication type to the provided value.]
         this.type = type;
-    }
-
-    @SuppressFBWarnings("HE_EQUALS_USE_HASHCODE") // Can't integrate hashcode into this function without breaking changes
-    @Override
-    public boolean equals(Object other)
-    {
-        if (other instanceof AuthenticationMechanism)
-        {
-            AuthenticationMechanism otherAuthentication = (AuthenticationMechanism) other;
-            if (this.type != otherAuthentication.type)
-            {
-                return false;
-            }
-
-            if (this.type == AuthenticationType.CERTIFICATE_AUTHORITY)
-            {
-                //ignore the thumbprint and symmetric key properties
-                return true;
-            }
-            else if (this.type == AuthenticationType.SAS)
-            {
-                return Tools.areEqual(this.symmetricKey, otherAuthentication.symmetricKey);
-            }
-            else if (this.type == AuthenticationType.SELF_SIGNED)
-            {
-                return Tools.areEqual(this.thumbprint, otherAuthentication.thumbprint);
-            }
-        }
-
-        return false;
     }
 }
