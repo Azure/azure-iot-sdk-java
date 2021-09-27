@@ -11,6 +11,7 @@ import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -96,7 +97,7 @@ public class IotHubSSLContext
             throw new IllegalArgumentException("The provided certificate string cannot be null or empty");
         }
 
-        try (InputStream inputStream = new ByteArrayInputStream(trustedCertificates.getBytes()))
+        try (InputStream inputStream = new ByteArrayInputStream(trustedCertificates.getBytes(StandardCharsets.UTF_8)))
         {
             return getSSLContextFromStream(inputStream);
         }
