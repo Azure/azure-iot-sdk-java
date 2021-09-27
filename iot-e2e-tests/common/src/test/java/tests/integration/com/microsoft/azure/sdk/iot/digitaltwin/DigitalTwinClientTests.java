@@ -72,8 +72,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
-import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
+import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -104,6 +103,8 @@ public class DigitalTwinClientTests extends IntegrationTest
         return (List) new ArrayList(Arrays.asList(new Object[][]{
                 {MQTT},
                 {MQTT_WS},
+                {AMQPS},
+                {AMQPS_WS},
         }));
     }
 

@@ -28,6 +28,7 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
 {
     static final String VERSION_IDENTIFIER_KEY = "com.microsoft:client-version";
     private static final String API_VERSION_KEY = "com.microsoft:api-version";
+    private static final String PNP_MODEL_ID_KEY = "com.microsoft:model-id";
     final Map<Integer, Message> inProgressMessages = new ConcurrentHashMap<>();
     final Map<Symbol, Object> amqpProperties;
     final String linkCorrelationId;
@@ -36,10 +37,16 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
     private long nextTag = 0;
     private final AmqpsLinkStateCallback amqpsLinkStateCallback;
 
-    AmqpsSenderLinkHandler(Sender sender, AmqpsLinkStateCallback amqpsLinkStateCallback, String linkCorrelationId)
+    AmqpsSenderLinkHandler(Sender sender, AmqpsLinkStateCallback amqpsLinkStateCallback, String linkCorrelationId, String modelId)
     {
         this.amqpProperties = new HashMap<>();
         this.amqpProperties.put(Symbol.getSymbol(API_VERSION_KEY), TransportUtils.IOTHUB_API_VERSION);
+
+        if (modelId != null && !modelId.isEmpty())
+        {
+            this.amqpProperties.put(Symbol.getSymbol(PNP_MODEL_ID_KEY), modelId);
+        }
+
         this.linkCorrelationId = linkCorrelationId;
         this.senderLink = sender;
         this.amqpsLinkStateCallback = amqpsLinkStateCallback;
