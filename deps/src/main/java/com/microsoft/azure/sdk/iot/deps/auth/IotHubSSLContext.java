@@ -29,8 +29,9 @@ import java.util.UUID;
  */
 public class IotHubSSLContext
 {
-    private SSLContext sslContext;
-    private static final String SSL_CONTEXT_PROTOCOL = "TLS";
+    private final SSLContext sslContext;
+    private static final String SSL_CONTEXT_PROTOCOL = "TLSv1.2";
+
     private static final String CERTIFICATE_TYPE = "X.509";
 
     private static final String TRUSTED_IOT_HUB_CERT_PREFIX = "trustedIotHubCert-";

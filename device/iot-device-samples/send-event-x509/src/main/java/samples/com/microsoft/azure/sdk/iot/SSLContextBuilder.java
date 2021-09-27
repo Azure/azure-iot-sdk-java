@@ -31,7 +31,7 @@ import java.util.UUID;
  */
 public class SSLContextBuilder
 {
-    private static final String SSL_CONTEXT_INSTANCE = "TLS";
+    private static final String SSL_CONTEXT_INSTANCE = "TLSv1.2";
     private static final String CERTIFICATE_TYPE = "X.509";
     private static final String PRIVATE_KEY_ALGORITHM = "RSA";
 

@@ -75,7 +75,7 @@ public class IotHubSSLContextTest
         new Expectations()
         {
             {
-                SSLContext.getInstance("TLS");
+                SSLContext.getInstance("TLSv1.2");
                 result = mockSSLContext;
 
                 mockSSLContext.init(null, null, (SecureRandom) any);
@@ -91,7 +91,7 @@ public class IotHubSSLContextTest
         new Expectations()
         {
             {
-                SSLContext.getInstance("TLS");
+                SSLContext.getInstance("TLSv1.2");
                 times = 0;
             }
         };

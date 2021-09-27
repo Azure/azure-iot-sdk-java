@@ -155,7 +155,7 @@ public class SecurityProviderTpmTest
         new Expectations()
         {
             {
-                SSLContext.getInstance("TLS");
+                SSLContext.getInstance("TLSv1.2");
                 result = mockedSslContext;
 
                 mockedSslContext.init(null, null, (SecureRandom) any);

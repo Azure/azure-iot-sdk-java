@@ -16,7 +16,7 @@ import java.security.SecureRandom;
 
 public abstract class SecurityProvider
 {
-    static final String SSL_CONTEXT_PROTOCOL = "TLS";
+    static final String SSL_CONTEXT_PROTOCOL = "TLSv1.2";
 
     /**
      * Unique id required for registration
