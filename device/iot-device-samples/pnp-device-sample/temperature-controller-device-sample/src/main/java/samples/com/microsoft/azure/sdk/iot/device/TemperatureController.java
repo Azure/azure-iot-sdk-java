@@ -3,14 +3,14 @@
 
 package samples.com.microsoft.azure.sdk.iot.device;
 
-import com.google.gson.Gson;
-import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
+import com.microsoft.azure.sdk.iot.deps.convention.ClientPropertyCollection;
+import com.microsoft.azure.sdk.iot.deps.convention.WritablePropertyResponse;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
+import com.microsoft.azure.sdk.iot.device.convention.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
-import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,12 +18,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.Map.Entry;
 
@@ -66,7 +64,6 @@ public class TemperatureController {
     private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 1000; // in milli seconds
 
     private static final Random random = new Random();
-    private static final Gson gson = new Gson();
     private static DeviceClient deviceClient;
 
     // HashMap to hold the temperature updates sent over each "Thermostat" component.
@@ -155,20 +152,11 @@ public class TemperatureController {
 
         log.debug("Set handler for \"reboot\" command.");
         log.debug("Set handler for \"getMaxMinReport\" command.");
-        deviceClient.subscribeToDeviceMethod(new MethodCallback(), null, new MethodIotHubEventCallback(), null);
+        deviceClient.subscribeToDeviceComamnds(new CommandsCallback(), null, new CommandIotHubEventCallback(), null);
 
         log.debug("Set handler to receive \"targetTemperature\" updates.");
         deviceClient.startDeviceTwin(new TwinIotHubEventCallback(), null, new GenericPropertyUpdateCallback(), null);
-        Map<Property, Pair<TwinPropertyCallBack, Object>> desiredPropertyUpdateCallback = Stream.of(
-                new AbstractMap.SimpleEntry<Property, Pair<TwinPropertyCallBack, Object>>(
-                        new Property(THERMOSTAT_1, null),
-                        new Pair<>(new TargetTemperatureUpdateCallback(), THERMOSTAT_1)),
-                new AbstractMap.SimpleEntry<Property, Pair<TwinPropertyCallBack, Object>>(
-                        new Property(THERMOSTAT_2, null),
-                        new Pair<>(new TargetTemperatureUpdateCallback(), THERMOSTAT_2))
-        ).collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
-
-        deviceClient.subscribeToTwinDesiredProperties(desiredPropertyUpdateCallback);
+        deviceClient.subscribeToWritablePropertiesEvent(new TargetTemperatureUpdateCallback(), null);
 
         updateDeviceInformation();
         sendDeviceMemory();
@@ -278,21 +266,97 @@ public class TemperatureController {
     /**
      * The callback to handle "reboot" command. This method will send a temperature update (of 0°C) over telemetry for both associated components.
      */
-    private static class MethodCallback implements DeviceMethodCallback {
+    private static class CommandsCallback implements DeviceCommandCallback
+    {
+        static class RebootPayload
+        {
+            int delay;
+        }
+
+        static class GetMinMaxPayload
+        {
+            Date since;
+        }
+
+        static class GetMinMaxResponse
+        {
+            public Date since;
+            public double maxTemp;
+            public double minTemp;
+            public double avgTemp;
+            public String startTime;
+            public String endTime;
+        }
+
         final String reboot = "reboot";
-        final String getMaxMinReport1 = "thermostat1*getMaxMinReport";
-        final String getMaxMinReport2 = "thermostat2*getMaxMinReport";
+        final String thermostat1 = "thermostat1";
+        final String thermostat2 = "thermostat2";
+        final String getMaxMinReport = "getMaxMinReport";
 
         @SneakyThrows(InterruptedException.class)
         @Override
-        public DeviceMethodData call(String methodName, Object methodData, Object context) {
-            String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
+        public DeviceCommandResponse call(DeviceCommandRequest request) {
 
-            switch (methodName) {
+            switch (request.getComponentName()) {
+                case thermostat1:
+                case thermostat2:
+                    switch (request.getCommandName()){
+                        case getMaxMinReport:
+                            if (temperatureReadings.containsKey(request.getComponentName())) {
+                                GetMinMaxPayload getMinMaxPayload = request.GetPayloadAsObject(GetMinMaxPayload.class);
+                                log.debug("Command: Received - component=\"{}\", generating min, max, avg temperature report since {}", request.getComponentName(), getMinMaxPayload);
+
+                                Map<Date, Double> allReadings = temperatureReadings.get(request.getComponentName());
+                                Map<Date, Double> filteredReadings = allReadings.entrySet().stream()
+                                        .filter(map -> map.getKey().after(getMinMaxPayload.since))
+                                        .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+
+                                if (!filteredReadings.isEmpty()) {
+
+                                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+                                    double maxTempToSend = Collections.max(filteredReadings.values());
+                                    double minTempToSend = Collections.min(filteredReadings.values());
+                                    double avgTempToSend = filteredReadings.values().stream().mapToDouble(Double::doubleValue).average().orElse(Double.NaN);
+                                    String startTimeToSend = sdf.format(Collections.min(filteredReadings.keySet()));
+                                    String endTimeToSend = sdf.format(Collections.max(filteredReadings.keySet()));
+
+                                    // This class will be serialized by the PayloadConvention
+                                    GetMinMaxResponse responsePayload = new GetMinMaxResponse();
+                                    responsePayload.since = getMinMaxPayload.since;
+                                    responsePayload.maxTemp = Collections.max(filteredReadings.values());
+                                    responsePayload.minTemp = Collections.min(filteredReadings.values());
+                                    responsePayload.avgTemp = avgTempToSend;
+                                    responsePayload.startTime = sdf.format(Collections.min(filteredReadings.keySet()));
+                                    responsePayload.endTime = sdf.format(Collections.max(filteredReadings.keySet()));
+
+                                    log.debug("Command: MaxMinReport since {}: \"maxTemp\": {}°C, \"minTemp\": {}°C, \"avgTemp\": {}°C, \"startTime\": {}, \"endTime\": {}",
+                                            getMinMaxPayload.since,
+                                            maxTempToSend,
+                                            minTempToSend,
+                                            avgTempToSend,
+                                            startTimeToSend,
+                                            endTimeToSend);
+
+                                    return new DeviceCommandResponse(StatusCode.COMPLETED.value, responsePayload);
+                                }
+
+                                log.debug("Command: component=\"{}\", no relevant readings found since {}, cannot generate any report.", request.getComponentName(), getMinMaxPayload);
+                                return new DeviceCommandResponse(StatusCode.NOT_FOUND.value, null);
+                            }
+
+                            log.debug("Command: component=\"{}\", no temperature readings sent yet, cannot generate any report.", request.getComponentName());
+                            return new DeviceCommandResponse(StatusCode.NOT_FOUND.value, null);
+                    }
+
+                    break;
+            }
+
+            // Handle reboot command from the default component
+            switch (request.getCommandName()) {
                 case reboot:
-                    int delay = getCommandRequestValue(jsonRequest, Integer.class);
-                    log.debug("Command: Received - Rebooting thermostat (resetting temperature reading to 0°C after {} seconds).", delay);
-                    Thread.sleep(delay * 1000L);
+                    RebootPayload rebootPayload = request.GetPayloadAsObject(RebootPayload.class);
+                    log.debug("Command: Received - Rebooting thermostat (resetting temperature reading to 0°C after {} seconds).", rebootPayload);
+                    Thread.sleep(rebootPayload.delay * 1000L);
 
                     temperature.put(THERMOSTAT_1, 0.0d);
                     temperature.put(THERMOSTAT_2, 0.0d);
@@ -301,59 +365,10 @@ public class TemperatureController {
                     maxTemperature.put(THERMOSTAT_2, 0.0d);
 
                     temperatureReadings.clear();
-                    return new DeviceMethodData(StatusCode.COMPLETED.value, null);
-
-                case getMaxMinReport1:
-                case getMaxMinReport2:
-                    String[] words = methodName.split("\\*");
-                    String componentName = words[0];
-
-                    if (temperatureReadings.containsKey(componentName)) {
-                        Date since = getCommandRequestValue(jsonRequest, Date.class);
-                        log.debug("Command: Received - component=\"{}\", generating min, max, avg temperature report since {}", componentName, since);
-
-                        Map<Date, Double> allReadings = temperatureReadings.get(componentName);
-                        Map<Date, Double> filteredReadings = allReadings.entrySet().stream()
-                                .filter(map -> map.getKey().after(since))
-                                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-
-                        if (!filteredReadings.isEmpty()) {
-                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-                            double maxTemp = Collections.max(filteredReadings.values());
-                            double minTemp = Collections.min(filteredReadings.values());
-                            double avgTemp = filteredReadings.values().stream().mapToDouble(Double::doubleValue).average().orElse(Double.NaN);
-                            String startTime =  sdf.format(Collections.min(filteredReadings.keySet()));
-                            String endTime =  sdf.format(Collections.max(filteredReadings.keySet()));
-
-                            String responsePayload = String.format(
-                                    "{\"maxTemp\": %.1f, \"minTemp\": %.1f, \"avgTemp\": %.1f, \"startTime\": \"%s\", \"endTime\": \"%s\"}",
-                                    maxTemp,
-                                    minTemp,
-                                    avgTemp,
-                                    startTime,
-                                    endTime);
-
-                            log.debug("Command: MaxMinReport since {}: \"maxTemp\": {}°C, \"minTemp\": {}°C, \"avgTemp\": {}°C, \"startTime\": {}, \"endTime\": {}",
-                                    since,
-                                    maxTemp,
-                                    minTemp,
-                                    avgTemp,
-                                    startTime,
-                                    endTime);
-
-                            return new DeviceMethodData(StatusCode.COMPLETED.value, responsePayload);
-                        }
-
-                        log.debug("Command: component=\"{}\", no relevant readings found since {}, cannot generate any report.", componentName, since);
-                        return new DeviceMethodData(StatusCode.NOT_FOUND.value, null);
-                    }
-
-                    log.debug("Command: component=\"{}\", no temperature readings sent yet, cannot generate any report.", componentName);
-                    return new DeviceMethodData(StatusCode.NOT_FOUND.value, null);
-
+                    return new DeviceCommandResponse(StatusCode.COMPLETED.value, null);
                 default:
-                    log.debug("Command: command=\"{}\" is not implemented, no action taken.", methodName);
-                    return new DeviceMethodData(StatusCode.NOT_FOUND.value, null);
+                    log.debug("Command: command=\"{}\" is not implemented, no action taken.", request.getCommandName());
+                    return new DeviceCommandResponse(StatusCode.NOT_FOUND.value, null);
             }
         }
     }
@@ -362,56 +377,65 @@ public class TemperatureController {
      * The desired property update callback, which receives the target temperature as a desired property update,
      * and updates the current temperature value over telemetry and reported property update.
      */
-    private static class TargetTemperatureUpdateCallback implements TwinPropertyCallBack {
-
+    private static class TargetTemperatureUpdateCallback implements WritablePropertiesRequestsCallback
+    {
         final String propertyName = "targetTemperature";
+        final List<String> thermostatList = new ArrayList<String>() {{ add("thermostat1"); add("thermostat2"); }};
 
-        @SneakyThrows({IOException.class, InterruptedException.class})
-        @Override
-        public void TwinPropertyCallBack(Property property, Object context) {
-            String componentName = (String) context;
+        @SneakyThrows({InterruptedException.class})
+        public void execute(ClientPropertyCollection propertyCollection, Object context)
+        {
+            for (String componentName : thermostatList)
+            {
 
-            if (property.getKey().equalsIgnoreCase(componentName)) {
-                double targetTemperature = (double) ((TwinCollection) property.getValue()).get(propertyName);
-                log.debug("Property: Received - component=\"{}\", {\"{}\": {}°C}.", componentName, propertyName, targetTemperature);
+                WritablePropertyResponse targetTemperature = propertyCollection.getValueForComponent(componentName, propertyName, WritablePropertyResponse.class);
 
-                Set<Property> pendingPropertyPatch = PnpConvention.createComponentWritablePropertyResponse(
-                        propertyName,
-                        targetTemperature,
-                        componentName,
-                        StatusCode.IN_PROGRESS.value,
-                        property.getVersion().longValue(),
-                        null);
-                deviceClient.sendReportedProperties(pendingPropertyPatch);
-                log.debug("Property: Update - component=\"{}\", {\"{}\": {}°C} is {}", componentName, propertyName, targetTemperature, StatusCode.IN_PROGRESS);
+                log.debug("Property: Received - component=\"{}\", {\"{}\": {}°C}.", componentName, propertyName, targetTemperature.getValue());
+
+                ClientPropertyCollection collection = new ClientPropertyCollection();
+                targetTemperature.setAckCode(StatusCode.IN_PROGRESS.value);
+                collection.putComponentProperty(componentName, propertyName, targetTemperature);
+
+                try
+                {
+                    deviceClient.updateClientPropertiesAsync(collection, null, null);
+                }
+                catch (IOException e)
+                {
+                    throw new RuntimeException("IOException when sending reported property update: ", e);
+                }
+                log.debug("Property: Update - {\"{}\": {}°C} is {}", propertyName, targetTemperature.getValue(), StatusCode.IN_PROGRESS);
 
                 // Update temperature in 2 steps
-                double step = (targetTemperature - temperature.get(componentName)) / 2;
-                for (int i = 1; i <=2; i++) {
+                double step = ((Double) targetTemperature.getValue() - temperature.get(componentName)) / 2;
+                for (int i = 1; i <= 2; i++)
+                {
                     temperature.put(componentName, BigDecimal.valueOf(temperature.get(componentName) + step).setScale(1, RoundingMode.HALF_UP).doubleValue());
                     Thread.sleep(5 * 1000);
                 }
 
-                Set<Property> completedPropertyPatch = PnpConvention.createComponentWritablePropertyResponse(
-                        propertyName,
-                        temperature.get(componentName),
-                        componentName,
-                        StatusCode.COMPLETED.value,
-                        property.getVersion().longValue(),
-                        "Successfully updated target temperature.");
-                deviceClient.sendReportedProperties(completedPropertyPatch);
-                log.debug("Property: Update - {\"{}\": {}°C} is {}", propertyName, temperature.get(componentName), StatusCode.COMPLETED);
-            } else {
-                log.debug("Property: Received an unrecognized property update from service.");
+                targetTemperature.setAckCode(StatusCode.COMPLETED.value);
+                try
+                {
+                    deviceClient.updateClientPropertiesAsync(collection, null, null);
+                }
+                catch (IOException e)
+                {
+                    throw new RuntimeException("IOException when sending reported property update: ", e);
+                }
+
+                log.debug("Property: Update - {\"{}\": {}°C} is {}", propertyName, temperature, StatusCode.COMPLETED);
             }
-        }
+    }
+
     }
 
     // Report the property updates on "deviceInformation" component.
     private static void updateDeviceInformation() throws IOException {
         String componentName = "deviceInformation";
 
-        Set<Property> deviceInfoPatch = PnpConvention.createComponentPropertyPatch(componentName, new HashMap<String, Object>()
+        ClientPropertyCollection propertyPatch = new ClientPropertyCollection();
+        propertyPatch.put(componentName, new HashMap<String, Object>()
         {{
             put("manufacturer", "element15");
             put("model", "ModelIDxcdvmk");
@@ -423,7 +447,8 @@ public class TemperatureController {
             put("totalMemory", 1024);
         }});
 
-        deviceClient.sendReportedProperties(deviceInfoPatch);
+        deviceClient.updateClientPropertiesAsync(propertyPatch, null, null);
+
         log.debug("Property: Update - component = \"{}\" is {}.", componentName, StatusCode.COMPLETED);
     }
     
@@ -433,16 +458,19 @@ public class TemperatureController {
         // TODO: Environment.WorkingSet equivalent in Java
         double workingSet = 1024;
 
-        Message message = PnpConvention.createIotHubMessageUtf8(telemetryName, workingSet);
-        deviceClient.sendEventAsync(message, new MessageIotHubEventCallback(), message);
+        TelemetryMessage message = new TelemetryMessage();
+        message.getTelemetry().put(telemetryName, workingSet);
+        deviceClient.sendTelemetryAsync(message, new MessageIotHubEventCallback(), message);
         log.debug("Telemetry: Sent - {\"{}\": {}KiB }", telemetryName, workingSet);
     }
 
     private static void sendDeviceSerialNumber() throws IOException {
         String propertyName = "serialNumber";
-        Set<Property> propertyPatch = PnpConvention.createPropertyPatch(propertyName, SERIAL_NO);
 
-        deviceClient.sendReportedProperties(propertyPatch);
+        ClientPropertyCollection propertyPatch = new ClientPropertyCollection();
+        propertyPatch.put(propertyName, SERIAL_NO);
+
+        deviceClient.updateClientPropertiesAsync(propertyPatch, null, null);
         log.debug("Property: Update - {\"{}\": {}} is {}", propertyName, SERIAL_NO, StatusCode.COMPLETED);
     }
 
@@ -460,8 +488,11 @@ public class TemperatureController {
         String telemetryName = "temperature";
         double currentTemperature = temperature.get(componentName);
 
-        Message message = PnpConvention.createIotHubMessageUtf8(telemetryName, currentTemperature, componentName);
-        deviceClient.sendEventAsync(message, new MessageIotHubEventCallback(), message);
+        TelemetryMessage message = new TelemetryMessage();
+        message.setComponentName(componentName);
+        message.getTelemetry().put(telemetryName, currentTemperature);
+        deviceClient.sendTelemetryAsync(message, new MessageIotHubEventCallback(), message);
+
         log.debug("Telemetry: Sent - {\"{}\": {}°C} with message Id {}.", telemetryName, currentTemperature, message.getMessageId());
 
         // Add the current temperature entry to the list of temperature readings.
@@ -479,8 +510,10 @@ public class TemperatureController {
         String propertyName = "maxTempSinceLastReboot";
         double maxTemp = maxTemperature.get(componentName);
 
-        Set<Property> reportedProperty = PnpConvention.createComponentPropertyPatch(propertyName, maxTemp, componentName);
-        deviceClient.sendReportedProperties(reportedProperty);
+        ClientPropertyCollection propertyPatch = new ClientPropertyCollection();
+        propertyPatch.putComponentProperty(componentName, propertyName,maxTemp);
+
+        deviceClient.updateClientPropertiesAsync(propertyPatch, null, null);
         log.debug("Property: Update - {\"{}\": {}°C} is {}.", propertyName, maxTemp, StatusCode.COMPLETED);
     }
 
@@ -498,7 +531,7 @@ public class TemperatureController {
     /**
      * The callback to be invoked in response to command invocation from IoT Hub.
      */
-    private static class MethodIotHubEventCallback implements IotHubEventCallback {
+    private static class CommandIotHubEventCallback implements IotHubEventCallback {
 
         @Override
         public void execute(IotHubStatusCode responseStatus, Object callbackContext) {
@@ -528,9 +561,5 @@ public class TemperatureController {
         public void TwinPropertyCallBack(Property property, Object context) {
             log.debug("Property - Received property unhandled by device, key={}, value={}", property.getKey(), property.getValue());
         }
-    }
-
-    private static <T> T getCommandRequestValue(@NonNull String jsonPayload, @NonNull Class<T> type) {
-        return gson.fromJson(jsonPayload, type);
     }
 }
