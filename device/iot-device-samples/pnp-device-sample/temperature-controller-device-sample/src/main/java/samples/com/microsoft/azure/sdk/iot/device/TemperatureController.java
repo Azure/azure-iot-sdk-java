@@ -59,7 +59,7 @@ public class TemperatureController {
     private static final String deviceSymmetricKey = System.getenv("IOTHUB_DEVICE_DPS_DEVICE_KEY");
     private static final String registrationId = System.getenv("IOTHUB_DEVICE_DPS_DEVICE_ID");
 
-    // Plug and play features are available over either MQTT or MQTT_WS.
+    // Plug and play features are available over MQTT, MQTT_WS, AMQPS, and AMQPS_WS.
     private static final ProvisioningDeviceClientTransportProtocol provisioningProtocol = ProvisioningDeviceClientTransportProtocol.MQTT;
     private static final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
 
