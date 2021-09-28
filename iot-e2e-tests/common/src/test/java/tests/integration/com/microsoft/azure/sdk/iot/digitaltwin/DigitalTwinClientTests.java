@@ -204,29 +204,27 @@ public class DigitalTwinClientTests extends IntegrationTest
         multiplexedDeviceClients.add(createDeviceClient(protocol, E2ETestConstants.THERMOSTAT_MODEL_ID));
         multiplexedDeviceClients.add(createDeviceClient(protocol, E2ETestConstants.TEMPERATURE_CONTROLLER_MODEL_ID));
 
+        // register the devices before the multiplexing client has been opened
         multiplexingClient.registerDeviceClients(multiplexedDeviceClients);
 
         multiplexingClient.open();
 
         // act
         String thermostatDeviceId = multiplexedDeviceClients.get(0).getConfig().getDeviceId();
-        BasicDigitalTwin response = digitalTwinClient.getDigitalTwin(thermostatDeviceId, BasicDigitalTwin.class);
-        ServiceResponseWithHeaders<BasicDigitalTwin, DigitalTwinGetHeaders> responseWithHeaders =
+        BasicDigitalTwin thermostatResponse = digitalTwinClient.getDigitalTwin(thermostatDeviceId, BasicDigitalTwin.class);
+        ServiceResponseWithHeaders<BasicDigitalTwin, DigitalTwinGetHeaders> thermostatResponseWithHeaders =
             digitalTwinClient.getDigitalTwinWithResponse(thermostatDeviceId, BasicDigitalTwin.class);
 
-        // assert
-        assertEquals(response.getMetadata().getModelId(), E2ETestConstants.THERMOSTAT_MODEL_ID);
-        assertEquals(responseWithHeaders.body().getMetadata().getModelId(), E2ETestConstants.THERMOSTAT_MODEL_ID);
-
-        // act
         String temperatureControllerDeviceId = multiplexedDeviceClients.get(1).getConfig().getDeviceId();
-        response = digitalTwinClient.getDigitalTwin(temperatureControllerDeviceId, BasicDigitalTwin.class);
-        responseWithHeaders =
+        BasicDigitalTwin temperatureControllerResponse = digitalTwinClient.getDigitalTwin(temperatureControllerDeviceId, BasicDigitalTwin.class);
+        ServiceResponseWithHeaders<BasicDigitalTwin, DigitalTwinGetHeaders> temperatureControllerResponseWithHeaders =
             digitalTwinClient.getDigitalTwinWithResponse(temperatureControllerDeviceId, BasicDigitalTwin.class);
 
         // assert
-        assertEquals(response.getMetadata().getModelId(), E2ETestConstants.TEMPERATURE_CONTROLLER_MODEL_ID);
-        assertEquals(responseWithHeaders.body().getMetadata().getModelId(), E2ETestConstants.TEMPERATURE_CONTROLLER_MODEL_ID);
+        assertEquals(thermostatResponse.getMetadata().getModelId(), E2ETestConstants.THERMOSTAT_MODEL_ID);
+        assertEquals(thermostatResponseWithHeaders.body().getMetadata().getModelId(), E2ETestConstants.THERMOSTAT_MODEL_ID);
+        assertEquals(temperatureControllerResponse.getMetadata().getModelId(), E2ETestConstants.TEMPERATURE_CONTROLLER_MODEL_ID);
+        assertEquals(temperatureControllerResponseWithHeaders.body().getMetadata().getModelId(), E2ETestConstants.TEMPERATURE_CONTROLLER_MODEL_ID);
     }
 
     // Open a multiplexed connection with no devices, then register two devices, each with a different model Id.
@@ -245,27 +243,25 @@ public class DigitalTwinClientTests extends IntegrationTest
 
         multiplexingClient.open();
 
+        // register the devices after the multiplexing client has been opened
         multiplexingClient.registerDeviceClients(multiplexedDeviceClients);
 
         // act
         String thermostatDeviceId = multiplexedDeviceClients.get(0).getConfig().getDeviceId();
-        BasicDigitalTwin response = digitalTwinClient.getDigitalTwin(thermostatDeviceId, BasicDigitalTwin.class);
-        ServiceResponseWithHeaders<BasicDigitalTwin, DigitalTwinGetHeaders> responseWithHeaders =
+        BasicDigitalTwin thermostatResponse = digitalTwinClient.getDigitalTwin(thermostatDeviceId, BasicDigitalTwin.class);
+        ServiceResponseWithHeaders<BasicDigitalTwin, DigitalTwinGetHeaders> thermostatResponseWithHeaders =
             digitalTwinClient.getDigitalTwinWithResponse(thermostatDeviceId, BasicDigitalTwin.class);
 
-        // assert
-        assertEquals(response.getMetadata().getModelId(), E2ETestConstants.THERMOSTAT_MODEL_ID);
-        assertEquals(responseWithHeaders.body().getMetadata().getModelId(), E2ETestConstants.THERMOSTAT_MODEL_ID);
-
-        // act
         String temperatureControllerDeviceId = multiplexedDeviceClients.get(1).getConfig().getDeviceId();
-        response = digitalTwinClient.getDigitalTwin(temperatureControllerDeviceId, BasicDigitalTwin.class);
-        responseWithHeaders =
+        BasicDigitalTwin temperatureControllerResponse = digitalTwinClient.getDigitalTwin(temperatureControllerDeviceId, BasicDigitalTwin.class);
+        ServiceResponseWithHeaders<BasicDigitalTwin, DigitalTwinGetHeaders> temperatureControllerResponseWithHeaders =
             digitalTwinClient.getDigitalTwinWithResponse(temperatureControllerDeviceId, BasicDigitalTwin.class);
 
         // assert
-        assertEquals(response.getMetadata().getModelId(), E2ETestConstants.TEMPERATURE_CONTROLLER_MODEL_ID);
-        assertEquals(responseWithHeaders.body().getMetadata().getModelId(), E2ETestConstants.TEMPERATURE_CONTROLLER_MODEL_ID);
+        assertEquals(thermostatResponse.getMetadata().getModelId(), E2ETestConstants.THERMOSTAT_MODEL_ID);
+        assertEquals(thermostatResponseWithHeaders.body().getMetadata().getModelId(), E2ETestConstants.THERMOSTAT_MODEL_ID);
+        assertEquals(temperatureControllerResponse.getMetadata().getModelId(), E2ETestConstants.TEMPERATURE_CONTROLLER_MODEL_ID);
+        assertEquals(temperatureControllerResponseWithHeaders.body().getMetadata().getModelId(), E2ETestConstants.TEMPERATURE_CONTROLLER_MODEL_ID);
     }
 
     @Test
