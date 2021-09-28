@@ -285,6 +285,11 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
             userProperties.put(MessageProperty.IOTHUB_SECURITY_INTERFACE_ID, MessageProperty.IOTHUB_SECURITY_INTERFACE_ID_VALUE);
         }
 
+        if (message.getComponentName() != null)
+        {
+            userProperties.put(MessageProperty.COMPONENT_ID, message.getComponentName());
+        }
+
         ApplicationProperties applicationProperties = new ApplicationProperties(userProperties);
         outgoingMessage.setApplicationProperties(applicationProperties);
 

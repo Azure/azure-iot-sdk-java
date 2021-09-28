@@ -65,6 +65,7 @@ abstract public class Mqtt implements MqttCallback
     final static String CONTENT_ENCODING = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".ce";
     final static String CREATION_TIME_UTC = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".ctime";
     final static String MQTT_SECURITY_INTERFACE_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".ifid";
+    final static String COMPONENT_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".cid";
 
     private final static String IOTHUB_ACK = "iothub-ack";
 
@@ -328,29 +329,20 @@ abstract public class Mqtt implements MqttCallback
     @Override
     public void connectionLost(Throwable throwable)
     {
-        TransportException ex = null;
-
         log.warn("Mqtt connection lost", throwable);
 
         this.disconnect();
 
         if (this.listener != null)
         {
-            if (ex == null)
+            if (throwable instanceof MqttException)
             {
-                if (throwable instanceof MqttException)
-                {
-                    throwable = PahoExceptionTranslator.convertToMqttException((MqttException) throwable, "Mqtt connection lost");
-                    log.trace("Mqtt connection loss interpreted into transport exception", throwable);
-                }
-                else
-                {
-                    throwable = new TransportException(throwable);
-                }
+                throwable = PahoExceptionTranslator.convertToMqttException((MqttException) throwable, "Mqtt connection lost");
+                log.trace("Mqtt connection loss interpreted into transport exception", throwable);
             }
             else
             {
-                throwable = ex;
+                throwable = new TransportException(throwable);
             }
 
             ReconnectionNotifier.notifyDisconnectAsync(throwable, this.listener, this.connectionId);

@@ -108,6 +108,11 @@ public class MqttMessaging extends Mqtt
             separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, MQTT_SECURITY_INTERFACE_ID, MessageProperty.IOTHUB_SECURITY_INTERFACE_ID_VALUE, false);
         }
 
+        if (message.getComponentName() != null)
+        {
+            separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, COMPONENT_ID, message.getComponentName(), false);
+        }
+
         for (MessageProperty property : message.getProperties())
         {
             separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, property.getName(), property.getValue(), true);
