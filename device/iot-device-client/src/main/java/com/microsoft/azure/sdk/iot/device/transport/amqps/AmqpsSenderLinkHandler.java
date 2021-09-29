@@ -289,7 +289,7 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
             messageAnnotationsMap.put(Symbol.valueOf(MessageProperty.IOTHUB_SECURITY_INTERFACE_ID), MessageProperty.IOTHUB_SECURITY_INTERFACE_ID_VALUE);
         }
 
-        if (message.getComponentName() != null)
+        if (message.getComponentName() != null && !message.getComponentName().isEmpty())
         {
             messageAnnotationsMap.put(Symbol.valueOf(MessageProperty.COMPONENT_ID), message.getComponentName());
         }
