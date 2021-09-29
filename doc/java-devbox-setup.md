@@ -119,7 +119,7 @@ _This is the recommended method of including the Azure IoT SDKs in your project,
 	</dependency>
 ```
 ### Build Azure IoT device and service SDKs for Java from the source code
-* Get a copy of the **Azure IoT SDK for Java** from GitHub (current repo). You should fetch a copy of the source from the **master** branch of the GitHub repository: <https://github.com/Azure/azure-iot-sdk-java>
+* Get a copy of the **Azure IoT SDK for Java** from GitHub (current repo). You should fetch a copy of the source from the **main** branch of the GitHub repository: <https://github.com/Azure/azure-iot-sdk-java>
 ```
 	git clone https://github.com/Azure/azure-iot-sdk-java.git
 ```

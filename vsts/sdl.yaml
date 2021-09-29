@@ -86,7 +86,7 @@ phases:
       tsaVersion: TsaV2
       codebase: NewOrUpdate
       tsaEnvironment: PROD
-      codeBaseName: 'Azure-Iot-SDK-Java-Master'
+      codeBaseName: 'Azure-Iot-SDK-Java-Main'
       notificationAlias: 'aziotdndmgdsdk@microsoft.com'
       codeBaseAdmins: 'REDMOND\timtay;REDMOND\jamdavi;REDMOND\azabbasi'
       instanceUrlForTsaV2: MSAZURE

@@ -446,7 +446,7 @@ public class InternalClient
 
     /**
      * Sets the given retry policy on the underlying transport
-     * <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-client/devdoc/requirement_docs/com/microsoft/azure/iothub/retryPolicy.md">
+     * <a href="https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-client/devdoc/requirement_docs/com/microsoft/azure/iothub/retryPolicy.md">
      *     See more details about the default retry policy and about using custom retry policies here</a>
      * @param retryPolicy the new interval in milliseconds
      */
