@@ -170,7 +170,7 @@ public class Thermostat {
                                 System.out.println("Invoked Command " + commandName + " failed: " + error);
                             }
                             else {
-                                System.out.println("Ensure the device sample is running for this sample to succeed - https://github.com/Azure/azure-iot-sdk-java/tree/mamainster/device/iot-device-samples/pnp-device-sample/thermostat-device-sample.");
+                                System.out.println("Ensure the device sample is running for this sample to succeed - https://github.com/Azure/azure-iot-sdk-java/tree/main/device/iot-device-samples/pnp-device-sample/thermostat-device-sample.");
                             }
                             latch.countDown();
                         });
