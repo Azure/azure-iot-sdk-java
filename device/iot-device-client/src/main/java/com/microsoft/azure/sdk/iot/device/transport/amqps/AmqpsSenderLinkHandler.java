@@ -280,18 +280,22 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
             userProperties.put(MessageProperty.IOTHUB_CREATION_TIME_UTC, message.getCreationTimeUTCString());
         }
 
+        ApplicationProperties applicationProperties = new ApplicationProperties(userProperties);
+        outgoingMessage.setApplicationProperties(applicationProperties);
+
+        Map<Symbol, Object> messageAnnotationsMap = new HashMap<>();
         if (message.isSecurityMessage())
         {
-            userProperties.put(MessageProperty.IOTHUB_SECURITY_INTERFACE_ID, MessageProperty.IOTHUB_SECURITY_INTERFACE_ID_VALUE);
+            messageAnnotationsMap.put(Symbol.valueOf(MessageProperty.IOTHUB_SECURITY_INTERFACE_ID), MessageProperty.IOTHUB_SECURITY_INTERFACE_ID_VALUE);
         }
 
         if (message.getComponentName() != null)
         {
-            userProperties.put(MessageProperty.COMPONENT_ID, message.getComponentName());
+            messageAnnotationsMap.put(Symbol.valueOf(MessageProperty.COMPONENT_ID), message.getComponentName());
         }
 
-        ApplicationProperties applicationProperties = new ApplicationProperties(userProperties);
-        outgoingMessage.setApplicationProperties(applicationProperties);
+        MessageAnnotations messageAnnotations = new MessageAnnotations(messageAnnotationsMap);
+        outgoingMessage.setMessageAnnotations(messageAnnotations);
 
         Binary binary = new Binary(message.getBytes());
         Section section = new Data(binary);
