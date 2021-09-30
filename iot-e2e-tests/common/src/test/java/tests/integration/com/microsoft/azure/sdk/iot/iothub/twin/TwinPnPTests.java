@@ -54,12 +54,16 @@ public class TwinPnPTests extends IntegrationTest
                                 //sas token device client, no proxy
                                 {MQTT, SAS, ClientType.DEVICE_CLIENT},
                                 {MQTT_WS, SAS, ClientType.DEVICE_CLIENT},
+                                {AMQPS, SAS, ClientType.DEVICE_CLIENT},
+                                {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT},
 
                                 //x509 device client, no proxy
                                 {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT},
+                                {AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT},
 
                                 //sas token device client, with proxy
                                 {MQTT_WS, SAS, ClientType.DEVICE_CLIENT},
+                                {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT},
                         }
         ));
 
@@ -71,12 +75,16 @@ public class TwinPnPTests extends IntegrationTest
                             //sas token module client, no proxy
                             {MQTT, SAS, ClientType.MODULE_CLIENT},
                             {MQTT_WS, SAS, ClientType.MODULE_CLIENT},
+                            {AMQPS, SAS, ClientType.MODULE_CLIENT},
+                            {AMQPS_WS, SAS, ClientType.MODULE_CLIENT},
 
                             //x509 module client, no proxy
                             {MQTT, SELF_SIGNED, ClientType.MODULE_CLIENT},
+                            {AMQPS, SELF_SIGNED, ClientType.MODULE_CLIENT},
 
                             //sas token module client, with proxy
                             {MQTT_WS, SAS, ClientType.MODULE_CLIENT},
+                            {AMQPS_WS, SAS, ClientType.MODULE_CLIENT},
                     }
             ));
         }

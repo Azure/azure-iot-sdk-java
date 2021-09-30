@@ -16,7 +16,7 @@ public final class ClientOptions
     /**
      * The Digital Twin Model Id associated with the device and module identity.
      * Non plug and play users should not set this value
-     * This feature is currently supported only over MQTT
+     * This feature is currently supported only over MQTT, MQTT_WS, AMQPS, and AMQPS_WS.
      */
     @Setter
     @Getter
