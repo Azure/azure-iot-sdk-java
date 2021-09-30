@@ -82,12 +82,12 @@ The device client has a specific method to change the retry policy, called `publ
 ## Built-in retry policy objects
 
 The SDK comes with 2 built-in `RetryPolicy` classes:
-- The [ExponentialBackoffWithJitter](https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-client/src/main/java/com/microsoft/azure/sdk/iot/device/transport/ExponentialBackoffWithJitter.java) class that implements the default retry policy discussed in the previous paragraph.
-- The [NoRetry](https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-client/src/main/java/com/microsoft/azure/sdk/iot/device/transport/NoRetry.java) class that simply disables the retry logic and doesn't take any parameters.
+- The [ExponentialBackoffWithJitter](https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-client/src/main/java/com/microsoft/azure/sdk/iot/device/transport/ExponentialBackoffWithJitter.java) class that implements the default retry policy discussed in the previous paragraph.
+- The [NoRetry](https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-client/src/main/java/com/microsoft/azure/sdk/iot/device/transport/NoRetry.java) class that simply disables the retry logic and doesn't take any parameters.
 
 ## Creating a custom retry policy
 
-The [RetryPolicy](https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-client/src/main/java/com/microsoft/azure/sdk/iot/device/transport/RetryPolicy.java) interface is public and it is possible for the SDK user to implement it and inject it in the SDK:
+The [RetryPolicy](https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-client/src/main/java/com/microsoft/azure/sdk/iot/device/transport/RetryPolicy.java) interface is public and it is possible for the SDK user to implement it and inject it in the SDK:
 
 ```java
 public interface RetryPolicy

@@ -25,7 +25,7 @@ Please follow the instructions and template below to save us time requesting add
 4. Include enough information for us to address the bug:
    -  A detailed description.
    -  A [Minimal Complete Reproducible Example](https://stackoverflow.com/help/mcve). This is code we can cut and paste into a readily available sample and run, or a link to a project you've written that we can compile to reproduce the bug. 
-   -  Console logs (https://github.com/Azure/azure-iot-sdk-java/blob/master/logging.md).
+   -  Console logs (https://github.com/Azure/azure-iot-sdk-java/blob/main/logging.md).
 
 5. Delete these instructions before submitting the bug.
 
