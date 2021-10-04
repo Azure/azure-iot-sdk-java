@@ -33,7 +33,7 @@ public final class AmqpsMethodsSenderLinkHandler extends AmqpsSenderLinkHandler
 
     AmqpsMethodsSenderLinkHandler(Sender sender, AmqpsLinkStateCallback amqpsLinkStateCallback, DeviceClientConfig deviceClientConfig, String linkCorrelationId)
     {
-        super(sender, amqpsLinkStateCallback, linkCorrelationId);
+        super(sender, amqpsLinkStateCallback, linkCorrelationId, deviceClientConfig.getModelId());
 
         this.senderLinkAddress = getAddress(deviceClientConfig);
 

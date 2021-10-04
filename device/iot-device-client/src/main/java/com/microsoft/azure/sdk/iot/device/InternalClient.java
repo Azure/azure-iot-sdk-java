@@ -420,6 +420,11 @@ public class InternalClient
      * with a status and a reason why the device's status changed. When the callback is fired, the provided context will
      * be provided alongside the status and reason.
      *
+     * This connection status callback is not triggered by any upstream connection change events. For example, if
+     * if the connection status callback is set for a module on an IoT Edge device and that IoT Edge device
+     * loses connection to the cloud, this connection status callback won't execute since the connection
+     * between the module and the IoT Edge device hasn't changed.
+     *
      * <p>Note that the thread used to deliver this callback should not be used to call open()/closeNow() on the client
      * that this callback belongs to. All open()/closeNow() operations should be done on a separate thread</p>
      *
@@ -441,7 +446,7 @@ public class InternalClient
 
     /**
      * Sets the given retry policy on the underlying transport
-     * <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-client/devdoc/requirement_docs/com/microsoft/azure/iothub/retryPolicy.md">
+     * <a href="https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-client/devdoc/requirement_docs/com/microsoft/azure/iothub/retryPolicy.md">
      *     See more details about the default retry policy and about using custom retry policies here</a>
      * @param retryPolicy the new interval in milliseconds
      */

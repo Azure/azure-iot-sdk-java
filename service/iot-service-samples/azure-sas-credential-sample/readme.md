@@ -129,4 +129,4 @@ this scoping can be seen [here][scoping-overview].
 
 [sas-overview]: https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#security-token-structure
 [scoping-overview]: https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#use-security-tokens-from-service-components
-[azure-sas-credential]: https://github.com/Azure/azure-sdk-for-java/blob/master/sdk/core/azure-core/src/main/java/com/azure/core/credential/AzureSasCredential.java
+[azure-sas-credential]: https://github.com/Azure/azure-sdk-for-java/blob/main/sdk/core/azure-core/src/main/java/com/azure/core/credential/AzureSasCredential.java

@@ -6,10 +6,10 @@ This being said, the more you do, the quicker it'll go through our gated build!
 --> 
 
 # Checklist
-- [ ] I have read the [contribution guidelines] (https://github.com/Azure/azure-iot-sdk-java/blob/master/.github/CONTRIBUTING.md).
+- [ ] I have read the [contribution guidelines] (https://github.com/Azure/azure-iot-sdk-java/blob/main/.github/CONTRIBUTING.md).
 - [ ] I added or modified the existing tests to cover the change (we do not allow our test coverage to go down).
 - I submitted this PR against the correct branch: 
-  - [ ] This pull-request is submitted against the `master` branch. 
+  - [ ] This pull-request is submitted against the `main` branch. 
 
 # Reference/Link to the issue solved with this PR (if any)
 

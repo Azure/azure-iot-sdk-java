@@ -67,7 +67,10 @@ public class IotHubServiceSasTokenTest
             {
                 URLEncoder.encode(hostName.toLowerCase(),String.valueOf(StandardCharsets.UTF_8));
                 System.currentTimeMillis();
-                byte[] body = { 1 };
+
+                // Semmle flags this as sensitive call, but it is a false positive since it is for test purposes
+                byte[] body = { 1 }; // lgtm
+
                 secretKeySpec = new SecretKeySpec(body, cryptoProvider);
                 Mac.getInstance(cryptoProvider);
             }

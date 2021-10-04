@@ -28,8 +28,8 @@ create, that implementation can be used to construct every service client. This 
 ClientSecretCredential instance and using it when constructing multiple service client instances.
 
 [rbac-overview]: https://docs.microsoft.com/en-us/azure/role-based-access-control/overview
-[token-credential]: https://github.com/Azure/azure-sdk-for-java/blob/master/sdk/core/azure-core/src/main/java/com/azure/core/credential/TokenCredential.java
-[default-azure-credential]: https://github.com/Azure/azure-sdk-for-java/blob/master/sdk/identity/azure-identity/src/main/java/com/azure/identity/DefaultAzureCredential.java
-[client-secret-credential]: https://github.com/Azure/azure-sdk-for-java/blob/master/sdk/identity/azure-identity/src/main/java/com/azure/identity/ClientSecretCredential.java
-[interactive-browser-credential]: https://github.com/Azure/azure-sdk-for-java/blob/master/sdk/identity/azure-identity/src/main/java/com/azure/identity/InteractiveBrowserCredential.java
+[token-credential]: https://github.com/Azure/azure-sdk-for-java/blob/main/sdk/core/azure-core/src/main/java/com/azure/core/credential/TokenCredential.java
+[default-azure-credential]: https://github.com/Azure/azure-sdk-for-java/blob/main/sdk/identity/azure-identity/src/main/java/com/azure/identity/DefaultAzureCredential.java
+[client-secret-credential]: https://github.com/Azure/azure-sdk-for-java/blob/main/sdk/identity/azure-identity/src/main/java/com/azure/identity/ClientSecretCredential.java
+[interactive-browser-credential]: https://github.com/Azure/azure-sdk-for-java/blob/main/sdk/identity/azure-identity/src/main/java/com/azure/identity/InteractiveBrowserCredential.java
 [rbac-ms-doc]: https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-dev-guide-azure-ad-rbac

@@ -431,6 +431,41 @@ public class MqttMessagingTest
         };
     }
 
+    @Test
+    public void sendShallIncludeComponentNameInPublishTopic(@Mocked final Mqtt mockMqtt) throws TransportException
+    {
+        //arrange
+        final byte[] messageBody = {0x61, 0x62, 0x63};
+        final MessageProperty[] messageProperties = new MessageProperty[]{};
+        final String componentName = "test-component-name";
+        final String publishTopicWithCorrelationId = String.format("devices/%s/messages/events/$.sub=%s", CLIENT_ID, componentName);
+        new NonStrictExpectations()
+        {
+            {
+                mockedMessage.getBytes();
+                result = messageBody;
+                mockedMessage.getProperties();
+                result = messageProperties;
+                mockedMessage.getComponentName();
+                result = componentName;
+            }
+        };
+
+        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+
+        //act
+        testMqttMessaging.send(mockedMessage);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockMqtt, "publish", publishTopicWithCorrelationId, mockedMessage);
+                times = 1;
+            }
+        };
+    }
+
     //Tests_SRS_MqttMessaging_34_030: [If the message has a UserId, this method shall append that userId to publishTopic before publishing using the key name `$.uid`.]
     @Test
     public void sendShallIncludeUserIdInPublishTopic(@Mocked final Mqtt mockMqtt) throws TransportException
