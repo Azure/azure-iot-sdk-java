@@ -881,7 +881,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 }
             }
 
-            if(existingSessionHandler == null) {
+            if (existingSessionHandler == null) {
                 log.trace("Amqp message failed to send, because no session handler exists for the client. Not adding it back to the queue ({})", message);
                 continue;
             }
