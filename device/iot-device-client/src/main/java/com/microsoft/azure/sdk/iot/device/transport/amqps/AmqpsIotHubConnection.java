@@ -90,8 +90,13 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     // Proton-j primitives and wrappers for the device and authentication sessions
     private Connection connection;
     private Reactor reactor;
-    private final Queue<AmqpsSessionHandler> reconnectingDeviceSessionHandlers = new ConcurrentLinkedQueue<>();
-    private final Queue<AmqpsSessionHandler> sessionHandlers = new ConcurrentLinkedQueue<>();
+
+    // keys are device Ids, values are the session handlers associated with that device id
+    private final Map<String, AmqpsSessionHandler> reconnectingDeviceSessionHandlers = new ConcurrentHashMap<>();
+
+    // keys are device Ids, values are the session handlers associated with that device id
+    private final Map<String, AmqpsSessionHandler> sessionHandlers = new ConcurrentHashMap<>();
+
     private final Queue<AmqpsSasTokenRenewalHandler> sasTokenRenewalHandlers = new ConcurrentLinkedQueue<>();
     private AmqpsCbsSessionHandler amqpsCbsSessionHandler;
 
@@ -479,7 +484,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             sasTokenRenewalHandlers.clear();
 
             // Open a device session per device, and create a sas token renewal handler for each device session
-            for (AmqpsSessionHandler amqpsSessionHandler : this.sessionHandlers)
+            for (AmqpsSessionHandler amqpsSessionHandler : this.sessionHandlers.values())
             {
                 amqpsSessionHandler.setSession(connection.session());
                 sasTokenRenewalHandlers.add(new AmqpsSasTokenRenewalHandler(amqpsCbsSessionHandler, amqpsSessionHandler));
@@ -488,7 +493,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         else
         {
             // should only be one session since x509 doesn't support multiplexing, so just get the first in the list
-            AmqpsSessionHandler amqpsSessionHandler = this.sessionHandlers.peek();
+            AmqpsSessionHandler amqpsSessionHandler = this.sessionHandlers.values().iterator().next();
             amqpsSessionHandler.setSession(connection.session());
         }
     }
@@ -503,7 +508,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     public void onConnectionLocalClose(Event event)
     {
         log.debug("Amqp connection closed locally, shutting down all active sessions...");
-        for (AmqpsSessionHandler amqpSessionHandler : sessionHandlers)
+        for (AmqpsSessionHandler amqpSessionHandler : sessionHandlers.values())
         {
             amqpSessionHandler.closeSession();
         }
@@ -611,13 +616,10 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             return false;
         }
 
-        //Check each session handler to see who is responsible for sending this acknowledgement
-        for (AmqpsSessionHandler sessionHandler : sessionHandlers)
+        AmqpsSessionHandler sessionHandler = sessionHandlers.get(message.getConnectionDeviceId());
+        if (sessionHandler != null && sessionHandler.acknowledgeReceivedMessage(message, ackType))
         {
-            if (sessionHandler.acknowledgeReceivedMessage(message, ackType))
-            {
-                return true;
-            }
+            return true;
         }
 
         log.warn("No sessions could acknowledge the message ({})", message);
@@ -878,19 +880,13 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             // was unregistered by the user and the message should report that it failed to send before the device session was unregistered.
             if (sendResult == SendResult.WRONG_DEVICE)
             {
-                boolean sessionIsReconnecting = false;
-                for (AmqpsSessionHandler reconnectingSessionHandler : this.reconnectingDeviceSessionHandlers)
+                AmqpsSessionHandler reconnectingDeviceSessionHandler = this.reconnectingDeviceSessionHandlers.get(message.getConnectionDeviceId());
+                if (reconnectingDeviceSessionHandler != null)
                 {
-                    if (reconnectingSessionHandler.getDeviceId().equals(message.getConnectionDeviceId()))
-                    {
-                        log.trace("Amqp message failed to send because its AMQP session is currently reconnecting. Adding it back to messages to send queue ({})", message);
-                        messagesToSend.add(message);
-                        sessionIsReconnecting = true;
-                        break;
-                    }
+                    log.trace("Amqp message failed to send because its AMQP session is currently reconnecting. Adding it back to messages to send queue ({})", message);
+                    messagesToSend.add(message);
                 }
-
-                if (!sessionIsReconnecting)
+                else
                 {
                     TransportException transportException = new TransportException("Message failed to send because it belonged to a device that was unregistered from the AMQP connetion");
                     transportException.setRetryable(false);
@@ -928,24 +924,17 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
     private SendResult sendQueuedMessage(Message message)
     {
-        // By default, assume no session handlers are present and that this message is tied to a device that isn't registered
-        SendResult sendResult = SendResult.WRONG_DEVICE;
-
         log.trace("Sending message over amqp ({})", message);
 
-        for (AmqpsSessionHandler sessionHandler : this.sessionHandlers)
-        {
-            sendResult = sessionHandler.sendMessage(message);
+        AmqpsSessionHandler sessionHandler = this.sessionHandlers.get(message.getConnectionDeviceId());
 
-            if (sendResult != SendResult.WRONG_DEVICE)
-            {
-                // all other send results came from the device session the message was supposed
-                // to be sent through, so the send result is terminal.
-                break;
-            }
+        if (sessionHandler == null)
+        {
+            // no active session handler for the device that is sending this telemetry
+            return SendResult.WRONG_DEVICE;
         }
 
-        return sendResult;
+        return sessionHandler.sendMessage(message);
     }
 
     private Reactor createReactor() throws TransportException
@@ -982,7 +971,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             log.warn("Amqp connection was closed, creating a thread to notify transport layer", throwable);
 
             // preserve the session handlers through the reconnection attempts
-            this.reconnectingDeviceSessionHandlers.addAll(this.sessionHandlers);
+            this.reconnectingDeviceSessionHandlers.putAll(this.sessionHandlers);
 
             ReconnectionNotifier.notifyDisconnectAsync(throwable, this.listener, this.connectionId);
         }
@@ -1016,27 +1005,19 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
     private AmqpsSessionHandler addSessionHandler(DeviceClientConfig deviceClientConfig)
     {
+        String deviceId = deviceClientConfig.getDeviceId();
+
         // Check if the device session still exists from a previous connection
-        AmqpsSessionHandler amqpsSessionHandler = null;
-        for (AmqpsSessionHandler existingAmqpsSessionHandler : this.sessionHandlers)
+        AmqpsSessionHandler amqpsSessionHandler = this.sessionHandlers.get(deviceId);
+        if (amqpsSessionHandler != null)
         {
-            if (existingAmqpsSessionHandler.getDeviceId().equals(deviceClientConfig.getDeviceId()))
-            {
-                // session handler already existed for this device. No need to create a new session handler and add it to this.sessionHandlers
-                return existingAmqpsSessionHandler;
-            }
+            // session handler already existed for this device. No need to create a new session handler and add it to this.sessionHandlers
+            return amqpsSessionHandler;
         }
 
         // If the device session was temporarily unregistered during reconnection, reuse the cached session handler
         // since it holds the subscription information needed to fully reconnect all links that were open prior to reconnection.
-        for (AmqpsSessionHandler cachedDeviceSessionHandler : this.reconnectingDeviceSessionHandlers)
-        {
-            if (cachedDeviceSessionHandler.getDeviceId().equals(deviceClientConfig.getDeviceId()))
-            {
-                amqpsSessionHandler = cachedDeviceSessionHandler;
-                break;
-            }
-        }
+        amqpsSessionHandler = this.reconnectingDeviceSessionHandlers.get(deviceId);
 
         // If the device session did not exist in the previous connection, or if there was no previous connection,
         // create a new session
@@ -1050,7 +1031,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             this.reconnectingDeviceSessionHandlers.remove(amqpsSessionHandler);
         }
 
-        this.sessionHandlers.add(amqpsSessionHandler);
+        this.sessionHandlers.put(deviceId, amqpsSessionHandler);
 
         return amqpsSessionHandler;
     }
@@ -1102,38 +1083,32 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         Set<DeviceClientConfig> configsUnregisteredSuccessfully = new HashSet<>();
         while (configToUnregister != null)
         {
+            String deviceId = configToUnregister.getDeviceId();
+
             // Check if the device session still exists from a previous connection
-            AmqpsSessionHandler amqpsSessionHandler = null;
-            for (AmqpsSessionHandler existingAmqpsSessionHandler : this.sessionHandlers)
-            {
-                if (existingAmqpsSessionHandler.getDeviceId().equals(configToUnregister.getDeviceId()))
-                {
-                    amqpsSessionHandler = existingAmqpsSessionHandler;
-                    break;
-                }
-            }
+            AmqpsSessionHandler amqpsSessionHandler = this.sessionHandlers.get(deviceId);
 
             // If a device session doesn't currently exist for this device identity
             if (amqpsSessionHandler == null)
             {
-                log.warn("Attempted to remove device session for device {} from multiplexed connection, but device was not currently registered.", configToUnregister.getDeviceId());
+                log.warn("Attempted to remove device session for device {} from multiplexed connection, but device was not currently registered.", deviceId);
             }
             else
             {
-                log.trace("Removing session handler for device {}", amqpsSessionHandler.getDeviceId());
-                this.sessionHandlers.remove(amqpsSessionHandler);
+                log.trace("Removing session handler for device {}", deviceId);
+                this.sessionHandlers.remove(deviceId);
 
                 // if the client being unregistered is doing so for reconnection purposes
                 boolean isSessionReconnecting = this.multiplexingClientsToUnregister.get(configToUnregister);
                 if (isSessionReconnecting)
                 {
                     // save the session handler for later since it has state for what subscriptions the device had before this reconnection
-                    this.reconnectingDeviceSessionHandlers.add(amqpsSessionHandler);
+                    this.reconnectingDeviceSessionHandlers.put(deviceId, amqpsSessionHandler);
                 }
                 else
                 {
                     // remove the cached session handler since the device is being unregistered manually if it is cached
-                    this.reconnectingDeviceSessionHandlers.remove(amqpsSessionHandler);
+                    this.reconnectingDeviceSessionHandlers.remove(deviceId);
                 }
 
                 // Need to find the sas token renewal handler that is tied to this device
@@ -1190,7 +1165,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
 
         this.deviceSessionsOpenedLatches = new ConcurrentHashMap<>();
-        for (AmqpsSessionHandler sessionHandler : sessionHandlers)
+        for (AmqpsSessionHandler sessionHandler : sessionHandlers.values())
         {
             String deviceId = sessionHandler.getDeviceId();
             log.trace("Initializing device session latch for device {}", deviceId);
