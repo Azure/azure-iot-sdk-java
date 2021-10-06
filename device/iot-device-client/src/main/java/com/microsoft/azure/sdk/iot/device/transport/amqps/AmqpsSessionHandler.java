@@ -340,7 +340,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
 
     SendResult sendMessage(Message message)
     {
-        if (this.deviceClientConfig.getDeviceId().equals(message.getConnectionDeviceId()))
+        if (!this.deviceClientConfig.getDeviceId().equals(message.getConnectionDeviceId()))
         {
             return SendResult.WRONG_DEVICE;
         }
@@ -359,13 +359,14 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
         if (message instanceof IotHubTransportMessage)
         {
             IotHubTransportMessage transportMessage = (IotHubTransportMessage) message;
-            DeviceOperations subscriptionType = ((IotHubTransportMessage) message).getDeviceOperationType();
+            DeviceOperations subscriptionType = transportMessage.getDeviceOperationType();
 
             if (subscriptionType == DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST)
             {
                 return handleMethodSubscriptionRequest(transportMessage);
             }
-            else if (subscriptionType == DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
+
+            if (subscriptionType == DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
             {
                 return handleTwinSubscriptionRequest(transportMessage);
             }
