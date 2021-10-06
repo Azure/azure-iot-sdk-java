@@ -348,8 +348,10 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
         MessageType messageType = message.getMessageType();
         if (messageType == null)
         {
-            // Twin and method messages have a message type assigned to them, but telemetry messages don't necessarily have
-            // this type assigned. By default, assume any messages with an unassigned type are telemetry messages
+            // Twin and method messages have a message type assigned to them when they are constructed by this SDK
+            // (users can't construct twin/method messages directly), but telemetry messages don't necessarily have this
+            // type assigned since users may create telemetry messages. By default, assume any messages with an
+            // unassigned type are telemetry messages.
             message.setMessageType(DEVICE_TELEMETRY);
         }
 
