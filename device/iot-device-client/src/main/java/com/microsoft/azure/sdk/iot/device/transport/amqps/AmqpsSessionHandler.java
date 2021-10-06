@@ -379,11 +379,10 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
                     return SendResult.DUPLICATE_SUBSCRIPTION_MESSAGE;
                 }
             }
-            else //noinspection StatementWithEmptyBody
-                if (subscriptionType == DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
-            {
-                //TODO: can add logic here to tear down twin links if the user wants to unsubscribe to desired properties
-            }
+            //else if (subscriptionType == DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
+            //{
+            //    //TODO: can add logic here to tear down twin links if the user wants to unsubscribe to desired properties
+            //}
             else if (subscriptionType == DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
             {
                 if (this.twinSenderLinkOpened && this.twinReceiverLinkOpened)
