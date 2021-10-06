@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.service.auth;
 
 import com.microsoft.azure.sdk.iot.service.Tools;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import javax.crypto.KeyGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -110,6 +111,7 @@ public class SymmetricKey
         this.secondaryKey = secondaryKey;
     }
 
+    @SuppressFBWarnings("HE_EQUALS_USE_HASHCODE") // Can't integrate hashcode into this function without breaking changes
     @Override
     public boolean equals(Object other)
     {

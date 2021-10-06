@@ -28,6 +28,7 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
 {
     static final String VERSION_IDENTIFIER_KEY = "com.microsoft:client-version";
     private static final String API_VERSION_KEY = "com.microsoft:api-version";
+    private static final String PNP_MODEL_ID_KEY = "com.microsoft:model-id";
     final Map<Integer, Message> inProgressMessages = new ConcurrentHashMap<>();
     final Map<Symbol, Object> amqpProperties;
     final String linkCorrelationId;
@@ -36,10 +37,16 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
     private long nextTag = 0;
     private final AmqpsLinkStateCallback amqpsLinkStateCallback;
 
-    AmqpsSenderLinkHandler(Sender sender, AmqpsLinkStateCallback amqpsLinkStateCallback, String linkCorrelationId)
+    AmqpsSenderLinkHandler(Sender sender, AmqpsLinkStateCallback amqpsLinkStateCallback, String linkCorrelationId, String modelId)
     {
         this.amqpProperties = new HashMap<>();
         this.amqpProperties.put(Symbol.getSymbol(API_VERSION_KEY), TransportUtils.IOTHUB_API_VERSION);
+
+        if (modelId != null && !modelId.isEmpty())
+        {
+            this.amqpProperties.put(Symbol.getSymbol(PNP_MODEL_ID_KEY), modelId);
+        }
+
         this.linkCorrelationId = linkCorrelationId;
         this.senderLink = sender;
         this.amqpsLinkStateCallback = amqpsLinkStateCallback;
@@ -273,13 +280,22 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
             userProperties.put(MessageProperty.IOTHUB_CREATION_TIME_UTC, message.getCreationTimeUTCString());
         }
 
-        if (message.isSecurityMessage())
-        {
-            userProperties.put(MessageProperty.IOTHUB_SECURITY_INTERFACE_ID, MessageProperty.IOTHUB_SECURITY_INTERFACE_ID_VALUE);
-        }
-
         ApplicationProperties applicationProperties = new ApplicationProperties(userProperties);
         outgoingMessage.setApplicationProperties(applicationProperties);
+
+        Map<Symbol, Object> messageAnnotationsMap = new HashMap<>();
+        if (message.isSecurityMessage())
+        {
+            messageAnnotationsMap.put(Symbol.valueOf(MessageProperty.IOTHUB_SECURITY_INTERFACE_ID), MessageProperty.IOTHUB_SECURITY_INTERFACE_ID_VALUE);
+        }
+
+        if (message.getComponentName() != null && !message.getComponentName().isEmpty())
+        {
+            messageAnnotationsMap.put(Symbol.valueOf(MessageProperty.COMPONENT_ID), message.getComponentName());
+        }
+
+        MessageAnnotations messageAnnotations = new MessageAnnotations(messageAnnotationsMap);
+        outgoingMessage.setMessageAnnotations(messageAnnotations);
 
         Binary binary = new Binary(message.getBytes());
         Section section = new Data(binary);

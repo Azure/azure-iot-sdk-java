@@ -154,7 +154,7 @@ public class TemperatureController {
         {
             if(ex.response().code() == 404)
             {
-                System.out.println("Ensure the device sample is running for this sample to succeed - https://github.com/Azure/azure-iot-sdk-java/tree/master/device/iot-device-samples/pnp-device-sample/temperature-controller-device-sample.");
+                System.out.println("Ensure the device sample is running for this sample to succeed - https://github.com/Azure/azure-iot-sdk-java/tree/main/device/iot-device-samples/pnp-device-sample/temperature-controller-device-sample.");
             }
             else
             {
@@ -182,7 +182,7 @@ public class TemperatureController {
         {
             if(ex.response().code() == 404)
             {
-                System.out.println("Ensure the device sample is running for this sample to succeed - https://github.com/Azure/azure-iot-sdk-java/tree/master/device/iot-device-samples/pnp-device-sample/temperature-controller-device-sample.");
+                System.out.println("Ensure the device sample is running for this sample to succeed - https://github.com/Azure/azure-iot-sdk-java/tree/main/device/iot-device-samples/pnp-device-sample/temperature-controller-device-sample.");
             }
             else
             {

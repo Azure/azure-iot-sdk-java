@@ -28,7 +28,7 @@ final class AmqpsTelemetrySenderLinkHandler extends AmqpsSenderLinkHandler
 
     AmqpsTelemetrySenderLinkHandler(Sender sender, AmqpsLinkStateCallback amqpsLinkStateCallback, DeviceClientConfig deviceClientConfig, String linkCorrelationId)
     {
-        super(sender, amqpsLinkStateCallback, linkCorrelationId);
+        super(sender, amqpsLinkStateCallback, linkCorrelationId, deviceClientConfig.getModelId());
 
         this.senderLinkAddress = getAddress(deviceClientConfig);
 

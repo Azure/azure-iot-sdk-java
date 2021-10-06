@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayInputStream;
@@ -110,6 +112,16 @@ public class Message
      * Security Client flag
      */
     boolean isSecurityClient;
+
+    /**
+     * The DTDL component name from where the telemetry message has originated. This field is only relevant
+     * for Plug and Play certified devices.
+     *
+     * @see <a href="https://docs.microsoft.com/en-us/azure/iot-develop/overview-iot-plug-and-play">What is IoT Plug and Play?</a>
+     */
+    @Getter
+    @Setter
+    String componentName;
 
     // ----- Constructors -----
 

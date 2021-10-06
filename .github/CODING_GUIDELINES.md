@@ -287,7 +287,7 @@ If the commit reverts a previous commit, it should begin with revert:, followed 
 
 **Rebase and Squash**
 
-* Its mandatory to squash all your commits per scope (i.e package). It is also important to rebase your commits on master.
+* Its mandatory to squash all your commits per scope (i.e package). It is also important to rebase your commits on main.
 * Optionally you can split your commits on the basis of the package you are providing code to.
 
 **Type**
