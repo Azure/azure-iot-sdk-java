@@ -871,14 +871,49 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         while (message != null && messagesAttemptedToBeProcessed < MAX_MESSAGES_TO_SEND_PER_CALLBACK)
         {
             messagesAttemptedToBeProcessed++;
-            boolean lastSendSucceeded = sendQueuedMessage(message);
+            SendResult sendResult = sendQueuedMessage(message);
 
-            if (!lastSendSucceeded)
+            // If no active device sessions are responsible for sending messages for the device that the message belongs to,
+            // then either the device session is reconnecting and the message should be requeued, or the device session
+            // was unregistered by the user and the message should report that it failed to send before the device session was unregistered.
+            if (sendResult == SendResult.WRONG_DEVICE)
             {
-                //message failed to send, likely due to lack of link credit available. Re-queue and try again later
-                log.trace("Amqp message failed to send, adding it back to messages to send queue ({})", message);
+                boolean sessionIsReconnecting = false;
+                for (AmqpsSessionHandler reconnectingSessionHandler : this.reconnectingDeviceSessionHandlers)
+                {
+                    if (reconnectingSessionHandler.getDeviceId().equals(message.getConnectionDeviceId()))
+                    {
+                        log.trace("Amqp message failed to send because its AMQP session is currently reconnecting. Adding it back to messages to send queue ({})", message);
+                        messagesToSend.add(message);
+                        sessionIsReconnecting = true;
+                        break;
+                    }
+                }
+
+                if (!sessionIsReconnecting)
+                {
+                    TransportException transportException = new TransportException("Message failed to send because it belonged to a device that was unregistered from the AMQP connetion");
+                    transportException.setRetryable(false);
+                    this.listener.onMessageSent(message, message.getConnectionDeviceId(), transportException);
+                }
+            }
+            else if (sendResult == SendResult.DUPLICATE_SUBSCRIPTION_MESSAGE)
+            {
+                // No need to send a twin/method subscription message if you are already subscribed or if the subscription is in progress
+                log.trace("Attempted to send subscription message while the subscription was already in progress. Discarding the message ({})", message);
+            }
+            else if (sendResult == SendResult.SUBSCRIPTION_IN_PROGRESS)
+            {
+                // Proton-j doesn't handle the scenario of sending twin/method messages on links that haven't been opened remotely yet, so hold
+                // off on sending them until the subscription has finished.
+                log.trace("Attempted to send twin/method message while the twin/method subscription was in progress. Adding it back to messages to send queue to try again after the subscription has finished ({})", message);
                 messagesToSend.add(message);
-                return;
+            }
+            else if (sendResult == SendResult.UNKNOWN_FAILURE)
+            {
+                // Shouldn't happen
+                log.trace("Unknown failure occurred while attempting to send. Adding it back to messages to send queue ({})", message);
+                messagesToSend.add(message);
             }
 
             message = messagesToSend.poll();
@@ -891,23 +926,25 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
     }
 
-    private boolean sendQueuedMessage(Message message)
+    private SendResult sendQueuedMessage(Message message)
     {
-        boolean sendSucceeded = false;
+        SendResult sendResult = SendResult.UNKNOWN_FAILURE;
 
         log.trace("Sending message over amqp ({})", message);
 
         for (AmqpsSessionHandler sessionHandler : this.sessionHandlers)
         {
-            sendSucceeded = sessionHandler.sendMessage(message);
+            sendResult = sessionHandler.sendMessage(message);
 
-            if (sendSucceeded)
+            if (sendResult != SendResult.WRONG_DEVICE)
             {
+                // all other send results came from the device session the message was supposed
+                // to be sent through, and were either successful or unsuccessful.
                 break;
             }
         }
 
-        return sendSucceeded;
+        return sendResult;
     }
 
     private Reactor createReactor() throws TransportException

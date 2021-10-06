@@ -338,110 +338,112 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
         }
     }
 
-    boolean sendMessage(Message message)
+    SendResult sendMessage(Message message)
     {
         if (this.deviceClientConfig.getDeviceId().equals(message.getConnectionDeviceId()))
         {
-            if (message.getMessageType() == null)
+            return SendResult.WRONG_DEVICE;
+        }
+
+        if (message.getMessageType() == null)
+        {
+            message.setMessageType(DEVICE_TELEMETRY);
+        }
+
+        MessageType messageType = message.getMessageType();
+
+        //Check if the message being sent is a subscription change message. If so, open the corresponding links.
+        if (message instanceof IotHubTransportMessage)
+        {
+            IotHubTransportMessage transportMessage = (IotHubTransportMessage) message;
+            DeviceOperations subscriptionType = ((IotHubTransportMessage) message).getDeviceOperationType();
+
+            if (subscriptionType == DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST)
             {
-                message.setMessageType(DEVICE_TELEMETRY);
-            }
-
-            MessageType messageType = message.getMessageType();
-
-            //Check if the message being sent is a subscription change message. If so, open the corresponding links.
-            if (message instanceof IotHubTransportMessage)
-            {
-                IotHubTransportMessage transportMessage = (IotHubTransportMessage) message;
-                DeviceOperations subscriptionType = ((IotHubTransportMessage) message).getDeviceOperationType();
-
-                if (subscriptionType == DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST)
+                if (this.methodsSenderLinkOpened && this.methodsReceiverLinkOpened)
                 {
-                    if (this.methodsSenderLinkOpened && this.methodsReceiverLinkOpened)
-                    {
-                        // No need to do anything. Method links are already opened
-                        this.amqpsSessionStateCallback.onMessageAcknowledged(message, Accepted.getInstance(), this.getDeviceId());
-                        return true;
-                    }
-
-                    if (this.explicitInProgressMethodsSubscriptionMessage == null)
-                    {
-                        createMethodLinks();
-                        this.explicitInProgressMethodsSubscriptionMessage = transportMessage;
-                        return true; //connection layer doesn't care about this delivery tag
-                    }
-                    else
-                    {
-                        log.debug("Rejecting methods subscription message because that subscription is already in progress");
-                        return false;
-                    }
+                    // No need to do anything. Method links are already opened
+                    this.amqpsSessionStateCallback.onMessageAcknowledged(message, Accepted.getInstance(), this.getDeviceId());
+                    return SendResult.SUCCESS;
                 }
-                else //noinspection StatementWithEmptyBody
-                    if (subscriptionType == DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
-                {
-                    //TODO: can add logic here to tear down twin links if the user wants to unsubscribe to desired properties
-                }
-                else if (subscriptionType == DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
-                {
-                    if (this.twinSenderLinkOpened && this.twinReceiverLinkOpened)
-                    {
-                        // No need to do anything. Twin links are already opened and desired properties subscription is automatically
-                        // sent once the twin links are opened.
-                        this.amqpsSessionStateCallback.onMessageAcknowledged(message, Accepted.getInstance(), this.getDeviceId());
-                        return true;
-                    }
 
-                    if (this.explicitInProgressTwinSubscriptionMessage == null)
-                    {
-                        createTwinLinks();
-                        this.explicitInProgressTwinSubscriptionMessage = transportMessage;
-                        return true;
-                    }
-                    else
-                    {
-                        log.debug("Rejecting twin subscription message because that subscription is already in progress");
-                        return false;
-                    }
+                if (this.explicitInProgressMethodsSubscriptionMessage == null)
+                {
+                    createMethodLinks();
+                    this.explicitInProgressMethodsSubscriptionMessage = transportMessage;
+                    return SendResult.SUCCESS; //connection layer doesn't care about this delivery tag
+                }
+                else
+                {
+                    log.debug("Rejecting methods subscription message because that subscription is already in progress");
+                    return SendResult.DUPLICATE_SUBSCRIPTION_MESSAGE;
                 }
             }
-
-            for (AmqpsSenderLinkHandler senderLinkHandler : this.senderLinkHandlers)
+            else //noinspection StatementWithEmptyBody
+                if (subscriptionType == DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
             {
-                if (senderLinkHandler instanceof AmqpsTelemetrySenderLinkHandler && messageType == DEVICE_TELEMETRY
-                        || senderLinkHandler instanceof AmqpsTwinSenderLinkHandler && messageType == DEVICE_TWIN
-                        || senderLinkHandler instanceof AmqpsMethodsSenderLinkHandler && messageType == DEVICE_METHODS)
+                //TODO: can add logic here to tear down twin links if the user wants to unsubscribe to desired properties
+            }
+            else if (subscriptionType == DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
+            {
+                if (this.twinSenderLinkOpened && this.twinReceiverLinkOpened)
                 {
-                    if (messageType == DEVICE_TWIN)
-                    {
-                        if (explicitInProgressTwinSubscriptionMessage != null)
-                        {
-                            // Don't send any twin messages while a twin subscription is in progress. Wait until the subscription
-                            // has been acknowledged by the service before sending it.
-                            return false;
-                        }
+                    // No need to do anything. Twin links are already opened and desired properties subscription is automatically
+                    // sent once the twin links are opened.
+                    this.amqpsSessionStateCallback.onMessageAcknowledged(message, Accepted.getInstance(), this.getDeviceId());
+                    return SendResult.SUCCESS;
+                }
 
-                        for (SubscriptionType subscriptionType : this.implicitInProgressSubscriptionMessages.values())
-                        {
-                            if (subscriptionType == SubscriptionType.DESIRED_PROPERTIES_SUBSCRIPTION)
-                            {
-                                // Don't send any twin messages while a twin subscription is in progress. Wait until the subscription
-                                // has been acknowledged by the service before sending it.
-                                return false;
-                            }
-                        }
-                    }
-
-                    AmqpsSendResult amqpsSendResult = senderLinkHandler.sendMessageAndGetDeliveryTag(message);
-
-                    if (amqpsSendResult.isDeliverySuccessful())
-                    {
-                        return true; // since this is a loop, can't just return amqpsSendResult.isDeliverySuccessful
-                    }
+                if (this.explicitInProgressTwinSubscriptionMessage == null)
+                {
+                    createTwinLinks();
+                    this.explicitInProgressTwinSubscriptionMessage = transportMessage;
+                    return SendResult.SUCCESS;
+                }
+                else
+                {
+                    log.debug("Rejecting twin subscription message because that subscription is already in progress");
+                    return SendResult.DUPLICATE_SUBSCRIPTION_MESSAGE;
                 }
             }
         }
 
-        return false;
+        for (AmqpsSenderLinkHandler senderLinkHandler : this.senderLinkHandlers)
+        {
+            if (senderLinkHandler instanceof AmqpsTelemetrySenderLinkHandler && messageType == DEVICE_TELEMETRY
+                    || senderLinkHandler instanceof AmqpsTwinSenderLinkHandler && messageType == DEVICE_TWIN
+                    || senderLinkHandler instanceof AmqpsMethodsSenderLinkHandler && messageType == DEVICE_METHODS)
+            {
+                if (messageType == DEVICE_TWIN)
+                {
+                    if (explicitInProgressTwinSubscriptionMessage != null)
+                    {
+                        // Don't send any twin messages while a twin subscription is in progress. Wait until the subscription
+                        // has been acknowledged by the service before sending it.
+                        return SendResult.SUBSCRIPTION_IN_PROGRESS;
+                    }
+
+                    for (SubscriptionType subscriptionType : this.implicitInProgressSubscriptionMessages.values())
+                    {
+                        if (subscriptionType == SubscriptionType.DESIRED_PROPERTIES_SUBSCRIPTION)
+                        {
+                            // Don't send any twin messages while a twin subscription is in progress. Wait until the subscription
+                            // has been acknowledged by the service before sending it.
+                            return SendResult.SUBSCRIPTION_IN_PROGRESS;
+                        }
+                    }
+                }
+
+                AmqpsSendResult amqpsSendResult = senderLinkHandler.sendMessageAndGetDeliveryTag(message);
+
+                if (amqpsSendResult.isDeliverySuccessful())
+                {
+                    return SendResult.SUCCESS; // since this is a loop, can't just return amqpsSendResult.isDeliverySuccessful
+                }
+            }
+        }
+
+        return SendResult.UNKNOWN_FAILURE;
     }
 
     private void closeLinks()
