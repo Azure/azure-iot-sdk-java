@@ -687,9 +687,8 @@ public class TwinCollectionTest
         assertEquals(2L, (long)twinCollection.getTwinMetadataFinal(VALID_KEY_NAME).getLastUpdatedVersion());
     }
 
-    /* SRS_TWIN_COLLECTION_21_024: [The constructor shall throw IllegalArgumentException if the metadata is inconsistent with the TwinCollection.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorInconsistentMetadataFailed()
+    @Test
+    public void invalidMetadataWillNotBeAddedToCollection()
     {
         // arrange
         final String inconsistentJson =
@@ -739,6 +738,7 @@ public class TwinCollectionTest
         Deencapsulation.invoke(TwinCollection.class, "createFromRawCollection", rawMap);
 
         // assert
+        assertFalse(((Map<?,?>)rawMap.get("$metadata")).containsKey("WrongEntity"));
     }
 
     /* SRS_TWIN_COLLECTION_21_015: [The constructor shall throw IllegalArgumentException if the Twin collection contains more than 5 levels.] */
