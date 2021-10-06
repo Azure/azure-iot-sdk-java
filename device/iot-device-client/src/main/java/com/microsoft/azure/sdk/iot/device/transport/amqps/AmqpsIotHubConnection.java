@@ -928,7 +928,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
     private SendResult sendQueuedMessage(Message message)
     {
-        SendResult sendResult = SendResult.UNKNOWN_FAILURE;
+        // By default, assume no session handlers are present and that this message is tied to a device that isn't registered
+        SendResult sendResult = SendResult.WRONG_DEVICE;
 
         log.trace("Sending message over amqp ({})", message);
 
@@ -939,7 +940,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             if (sendResult != SendResult.WRONG_DEVICE)
             {
                 // all other send results came from the device session the message was supposed
-                // to be sent through, and were either successful or unsuccessful.
+                // to be sent through, so the send result is terminal.
                 break;
             }
         }
