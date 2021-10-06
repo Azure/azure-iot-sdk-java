@@ -360,24 +360,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
 
             if (subscriptionType == DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST)
             {
-                if (this.methodsSenderLinkOpened && this.methodsReceiverLinkOpened)
-                {
-                    // No need to do anything. Method links are already opened
-                    this.amqpsSessionStateCallback.onMessageAcknowledged(message, Accepted.getInstance(), this.getDeviceId());
-                    return SendResult.SUCCESS;
-                }
-
-                if (this.explicitInProgressMethodsSubscriptionMessage == null)
-                {
-                    createMethodLinks();
-                    this.explicitInProgressMethodsSubscriptionMessage = transportMessage;
-                    return SendResult.SUCCESS; //connection layer doesn't care about this delivery tag
-                }
-                else
-                {
-                    log.debug("Rejecting methods subscription message because that subscription is already in progress");
-                    return SendResult.DUPLICATE_SUBSCRIPTION_MESSAGE;
-                }
+                return handleMethodSubscriptionRequest(transportMessage);
             }
             //else if (subscriptionType == DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
             //{
@@ -385,25 +368,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
             //}
             else if (subscriptionType == DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
             {
-                if (this.twinSenderLinkOpened && this.twinReceiverLinkOpened)
-                {
-                    // No need to do anything. Twin links are already opened and desired properties subscription is automatically
-                    // sent once the twin links are opened.
-                    this.amqpsSessionStateCallback.onMessageAcknowledged(message, Accepted.getInstance(), this.getDeviceId());
-                    return SendResult.SUCCESS;
-                }
-
-                if (this.explicitInProgressTwinSubscriptionMessage == null)
-                {
-                    createTwinLinks();
-                    this.explicitInProgressTwinSubscriptionMessage = transportMessage;
-                    return SendResult.SUCCESS;
-                }
-                else
-                {
-                    log.debug("Rejecting twin subscription message because that subscription is already in progress");
-                    return SendResult.DUPLICATE_SUBSCRIPTION_MESSAGE;
-                }
+                return handleTwinSubscriptionRequest(transportMessage);
             }
         }
 
@@ -443,6 +408,51 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
         }
 
         return SendResult.UNKNOWN_FAILURE;
+    }
+
+    private SendResult handleTwinSubscriptionRequest(IotHubTransportMessage transportMessage)
+    {
+        if (this.twinSenderLinkOpened && this.twinReceiverLinkOpened)
+        {
+            // No need to do anything. Twin links are already opened and desired properties subscription is automatically
+            // sent once the twin links are opened.
+            this.amqpsSessionStateCallback.onMessageAcknowledged(transportMessage, Accepted.getInstance(), this.getDeviceId());
+            return SendResult.SUCCESS;
+        }
+
+        if (this.explicitInProgressTwinSubscriptionMessage == null)
+        {
+            createTwinLinks();
+            this.explicitInProgressTwinSubscriptionMessage = transportMessage;
+            return SendResult.SUCCESS;
+        }
+        else
+        {
+            log.debug("Rejecting twin subscription message because that subscription is already in progress");
+            return SendResult.DUPLICATE_SUBSCRIPTION_MESSAGE;
+        }
+    }
+
+    private SendResult handleMethodSubscriptionRequest(IotHubTransportMessage transportMessage)
+    {
+        if (this.methodsSenderLinkOpened && this.methodsReceiverLinkOpened)
+        {
+            // No need to do anything. Method links are already opened
+            this.amqpsSessionStateCallback.onMessageAcknowledged(transportMessage, Accepted.getInstance(), this.getDeviceId());
+            return SendResult.SUCCESS;
+        }
+
+        if (this.explicitInProgressMethodsSubscriptionMessage == null)
+        {
+            createMethodLinks();
+            this.explicitInProgressMethodsSubscriptionMessage = transportMessage;
+            return SendResult.SUCCESS;
+        }
+        else
+        {
+            log.debug("Rejecting methods subscription message because that subscription is already in progress");
+            return SendResult.DUPLICATE_SUBSCRIPTION_MESSAGE;
+        }
     }
 
     private void closeLinks()
