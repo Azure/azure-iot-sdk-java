@@ -345,12 +345,13 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
             return SendResult.WRONG_DEVICE;
         }
 
-        if (message.getMessageType() == null)
+        MessageType messageType = message.getMessageType();
+        if (messageType == null)
         {
+            // Twin and method messages have a message type assigned to them, but telemetry messages don't necessarily have
+            // this type assigned. By default, assume any messages with an unassigned type are telemetry messages
             message.setMessageType(DEVICE_TELEMETRY);
         }
-
-        MessageType messageType = message.getMessageType();
 
         //Check if the message being sent is a subscription change message. If so, open the corresponding links.
         if (message instanceof IotHubTransportMessage)
@@ -362,10 +363,6 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
             {
                 return handleMethodSubscriptionRequest(transportMessage);
             }
-            //else if (subscriptionType == DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
-            //{
-            //    //TODO: can add logic here to tear down twin links if the user wants to unsubscribe to desired properties
-            //}
             else if (subscriptionType == DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
             {
                 return handleTwinSubscriptionRequest(transportMessage);
