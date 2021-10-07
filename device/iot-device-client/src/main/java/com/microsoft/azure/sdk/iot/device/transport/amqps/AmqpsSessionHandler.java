@@ -361,7 +361,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
             messageType = DEVICE_TELEMETRY;
         }
 
-        //Check if the message being sent is a subscription change message. If so, open the corresponding links.
+        // Check if the message being sent is a subscription change message. If so, open the corresponding links.
         if (message instanceof IotHubTransportMessage)
         {
             IotHubTransportMessage transportMessage = (IotHubTransportMessage) message;
