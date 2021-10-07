@@ -53,7 +53,7 @@ public class ReactorRunner implements Callable<Object>
 
             // Notify the AMQP connection layer so it can tear down the reactor's resources that would usually
             // get cleaned up in a graceful close of the reactor
-            this.reactorRunnerStateCallback.onReactorClosedUnexpected();
+            this.reactorRunnerStateCallback.onReactorClosedUnexpectedly();
 
             this.listener.onConnectionLost(transportException, connectionId);
         }

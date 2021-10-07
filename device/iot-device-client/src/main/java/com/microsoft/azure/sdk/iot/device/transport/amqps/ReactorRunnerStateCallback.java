@@ -5,5 +5,5 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 interface ReactorRunnerStateCallback
 {
-    void onReactorClosedUnexpected();
+    void onReactorClosedUnexpectedly();
 }

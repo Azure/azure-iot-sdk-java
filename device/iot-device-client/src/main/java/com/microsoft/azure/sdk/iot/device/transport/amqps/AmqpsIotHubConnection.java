@@ -1244,7 +1244,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     }
 
     @Override
-    public void onReactorClosedUnexpected()
+    public void onReactorClosedUnexpectedly()
     {
         // The reactor thread that executes the onConnectionLocalOpen type events has crashed unexpectedly. These latches
         // are normally closed on the onReactorFinal callback, but that callback will never happen since the thread that
