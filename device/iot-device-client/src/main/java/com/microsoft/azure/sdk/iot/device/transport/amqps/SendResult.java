@@ -11,6 +11,11 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 enum SendResult
 {
     /**
+     * Default case.
+     */
+    UNKNOWN_FAILURE,
+
+    /**
      * The message was sent successfully.
      */
     SUCCESS,
@@ -36,10 +41,5 @@ enum SendResult
      * are always opened along with the session, and our API design makes it so twin/method links are always opened
      * before any twin/method messages can be sent.
      */
-    LINKS_NOT_OPEN,
-
-    /**
-     * Default case.
-     */
-    UNKNOWN_FAILURE
+    LINKS_NOT_OPEN
 }

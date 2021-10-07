@@ -314,6 +314,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     {
         this.sessionHandlers.clear();
         this.sasTokenRenewalHandlers.clear();
+        this.reconnectingDeviceSessionHandlers.clear();
     }
 
     private void closeNetworkResources()

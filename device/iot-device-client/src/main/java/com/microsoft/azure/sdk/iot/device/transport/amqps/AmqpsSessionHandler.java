@@ -410,8 +410,10 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
                     // session loses connectivity temporarily, and the session handler sends out subscription messages
                     // to the service to re-establish all subscritptions that were active prior to the disconnection.
                     //
-                    // Don't send any twin messages while a twin subscription is in progress. Wait until the subscription
-                    // has been acknowledged by the service before sending it.
+                    // Don't send any twin messages while a twin subscription is in progress. Reject this message until
+                    // the subscription has been acknowledged by the service. The connection layer will requeue this message
+                    // and it will have another chance to send when the timer task that checks for outgoing queued messages
+                    // executes again.
                     return SendResult.SUBSCRIPTION_IN_PROGRESS;
                 }
             }
@@ -443,11 +445,9 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
             this.explicitInProgressTwinSubscriptionMessage = transportMessage;
             return SendResult.SUCCESS;
         }
-        else
-        {
-            log.debug("Rejecting twin subscription message because that subscription is already in progress");
-            return SendResult.DUPLICATE_SUBSCRIPTION_MESSAGE;
-        }
+
+        log.debug("Rejecting twin subscription message because that subscription is already in progress");
+        return SendResult.DUPLICATE_SUBSCRIPTION_MESSAGE;
     }
 
     private SendResult handleMethodSubscriptionRequest(IotHubTransportMessage transportMessage)
@@ -465,11 +465,9 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
             this.explicitInProgressMethodsSubscriptionMessage = transportMessage;
             return SendResult.SUCCESS;
         }
-        else
-        {
-            log.debug("Rejecting methods subscription message because that subscription is already in progress");
-            return SendResult.DUPLICATE_SUBSCRIPTION_MESSAGE;
-        }
+
+        log.debug("Rejecting methods subscription message because that subscription is already in progress");
+        return SendResult.DUPLICATE_SUBSCRIPTION_MESSAGE;
     }
 
     private void closeLinks()
