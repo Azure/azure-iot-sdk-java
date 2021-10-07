@@ -38,8 +38,10 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
     private final AmqpsSessionStateCallback amqpsSessionStateCallback;
 
     //Should not carry over state between reconnects
+    //Maps from the type of message (twin/method/telemetry) to the appropriate sender/receiver link handler
     private final Map<MessageType, AmqpsSenderLinkHandler> senderLinkHandlers = new ConcurrentHashMap<>();
     private final Map<MessageType, AmqpsReceiverLinkHandler> receiverLinkHandlers = new ConcurrentHashMap<>();
+
     private Session session;
     private boolean alreadyCreatedTelemetryLinks;
     private boolean alreadyCreatedTwinLinks;
@@ -294,6 +296,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
     @Override
     public void onMessageReceived(IotHubTransportMessage message)
     {
+        message.setConnectionDeviceId(this.getDeviceId());
         this.amqpsSessionStateCallback.onMessageReceived(message);
     }
 
@@ -355,7 +358,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
             // (users can't construct twin/method messages directly), but telemetry messages don't necessarily have this
             // type assigned since users may create telemetry messages. By default, assume any messages with an
             // unassigned type are telemetry messages.
-            message.setMessageType(DEVICE_TELEMETRY);
+            messageType = DEVICE_TELEMETRY;
         }
 
         //Check if the message being sent is a subscription change message. If so, open the corresponding links.
