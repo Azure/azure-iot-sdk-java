@@ -1170,7 +1170,7 @@ public class AmqpsIotHubConnectionTest {
                 result = deviceId;
             }
         };
-        
+
         //act
         boolean result = connection.sendMessageResult(mockedTransportMessage, IotHubMessageResult.ABANDON);
 

@@ -905,6 +905,12 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 log.trace("Attempted to send twin/method message while the twin/method subscription was in progress. Adding it back to messages to send queue to try again after the subscription has finished ({})", message);
                 messagesToSend.add(message);
             }
+            else if (sendResult == SendResult.LINKS_NOT_OPEN)
+            {
+                // Shouldn't happen
+                log.trace("Failed to send a message because its AMQP links were not open yet. Adding it back to messages to send queue ({})", message);
+                messagesToSend.add(message);
+            }
             else if (sendResult == SendResult.UNKNOWN_FAILURE)
             {
                 // Shouldn't happen

@@ -31,6 +31,14 @@ enum SendResult
     SUBSCRIPTION_IN_PROGRESS,
 
     /**
+     * The session attempted to send the message, but it didn't have the required links open. For instance, if a twin
+     * message is sent when the twin sender link isn't open yet. This should never happen though, because telemetry links
+     * are always opened along with the session, and our API design makes it so twin/method links are always opened
+     * before any twin/method messages can be sent.
+     */
+    LINKS_NOT_OPEN,
+
+    /**
      * Default case.
      */
     UNKNOWN_FAILURE
