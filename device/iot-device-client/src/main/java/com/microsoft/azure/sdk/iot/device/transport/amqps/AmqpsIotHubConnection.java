@@ -44,7 +44,7 @@ import java.util.concurrent.*;
  * object may be reused after it has been closed.
  */
 @Slf4j
-public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTransportConnection, AmqpsSessionStateCallback
+public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTransportConnection, AmqpsSessionStateCallback, ReactorRunnerStateCallback
 {
     // Timeouts
     private static final int MAX_WAIT_TO_CLOSE_CONNECTION = 20 * 1000; // 20 second timeout
@@ -1185,7 +1185,12 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
 
         this.reactor = createReactor();
-        ReactorRunner reactorRunner = new ReactorRunner(new IotHubReactor(this.reactor), this.listener, this.connectionId);
+        ReactorRunner reactorRunner = new ReactorRunner(
+            this.reactor,
+            this.listener,
+            this.connectionId,
+            this);
+
         executorService.submit(reactorRunner);
     }
 
@@ -1238,44 +1243,15 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
     }
 
-    private static class ReactorRunner implements Callable<Object>
+    @Override
+    public void onReactorClosedUnexpectedly()
     {
-        private static final String THREAD_NAME = "azure-iot-sdk-ReactorRunner";
-        private final IotHubReactor iotHubReactor;
-        private final IotHubListener listener;
-        private final String connectionId;
-
-        ReactorRunner(IotHubReactor iotHubReactor, IotHubListener listener, String connectionId)
-        {
-            this.listener = listener;
-            this.iotHubReactor = iotHubReactor;
-            this.connectionId = connectionId;
-        }
-
-        @Override
-        public Object call()
-        {
-            try
-            {
-                Thread.currentThread().setName(THREAD_NAME);
-                iotHubReactor.run();
-            }
-            catch (HandlerException e)
-            {
-                TransportException transportException = new TransportException(e);
-
-                // unclassified exceptions are treated as retryable in ProtonJExceptionParser, so they should be treated
-                // the same way here. Exceptions caught here tend to be transient issues.
-                transportException.setRetryable(true);
-
-                this.listener.onConnectionLost(transportException, connectionId);
-            }
-            finally
-            {
-                iotHubReactor.free();
-            }
-
-            return null;
-        }
+        // The reactor thread that executes the onConnectionLocalOpen type events has crashed unexpectedly. These latches
+        // are normally closed on the onReactorFinal callback, but that callback will never happen since the thread that
+        // would call it has crashed. Release these latches so that the cleanup logic can progress without waiting on these
+        // latches
+        releaseLatch(authenticationSessionOpenedLatch);
+        releaseDeviceSessionLatches();
+        releaseLatch(closeReactorLatch);
     }
 }
