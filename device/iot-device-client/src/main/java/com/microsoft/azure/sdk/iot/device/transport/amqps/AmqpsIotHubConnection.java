@@ -875,7 +875,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             messagesAttemptedToBeProcessed++;
             SendResult sendResult = sendQueuedMessage(message);
 
-            // If no active device sessions are responsible for sending messages for the device that the message belongs to,
+            // If no active device sessions are responsible for sending messages for the device that the transport message belongs to,
             // then either the device session is reconnecting and the message should be requeued, or the device session
             // was unregistered by the user and the message should report that it failed to send before the device session was unregistered.
             if (sendResult == SendResult.WRONG_DEVICE)
