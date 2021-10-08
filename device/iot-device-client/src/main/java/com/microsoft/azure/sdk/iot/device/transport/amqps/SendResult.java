@@ -27,7 +27,7 @@ enum SendResult
     WRONG_DEVICE,
 
     /**
-     * The message was a twin/method subscription message and the device session has already sent that subscription message.
+     * The message was a twin/method subscription message and the device session has already requested to be subscribed to that topic.
      */
     DUPLICATE_SUBSCRIPTION_MESSAGE,
 
