@@ -24,6 +24,9 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
     @Getter
     private final DeviceClientConfig deviceClientConfig;
 
+    // "Explicit" vs "Implicit" here refers to actions that the user initiated ("Explicit"ly calling startTwin)
+    // vs actions the SDK initiated ("Implicit"ly opening twin links after reconnecting because they were open previously)
+
     //Subscriptions that are initiated by the SDK, not the user of the SDK. State should not carry over between connections.
     private final Map<Integer, SubscriptionType> implicitInProgressSubscriptionMessages = new ConcurrentHashMap<>();
 
@@ -440,6 +443,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
             return SendResult.SUCCESS;
         }
 
+        // If this session hasn't already started subscribing to twins
         if (this.explicitInProgressTwinSubscriptionMessage == null)
         {
             // Don't ack the subscription message here. Once the twin links have finished opening both locally and remotely,
@@ -463,6 +467,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
             return SendResult.SUCCESS;
         }
 
+        // If this session hasn't already started subscribing to methods
         if (this.explicitInProgressMethodsSubscriptionMessage == null)
         {
             // Don't ack the subscription message here. Once the method links have finished opening both locally and remotely,

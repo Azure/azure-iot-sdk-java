@@ -41,7 +41,7 @@ import java.util.concurrent.*;
 /**
  * An AMQPS IotHub connection between a device and an IoTHub or Edgehub. This class is responsible for reacting to connection level and
  * reactor level events. It is also responsible for creating sessions and handlers for those sessions. An instance of this
- * object may be reused after it has been closed.
+ * object may be reused after it has been closed. This class is used for both single-plexed and multiplexed connections.
  */
 @Slf4j
 public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTransportConnection, AmqpsSessionStateCallback, ReactorRunnerStateCallback
@@ -907,14 +907,14 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             }
             else if (sendResult == SendResult.LINKS_NOT_OPEN)
             {
-                // Shouldn't happen
-                log.trace("Failed to send a message because its AMQP links were not open yet. Adding it back to messages to send queue ({})", message);
+                // Shouldn't happen. If it does, it signals that we have a bug in this SDK.
+                log.warn("Failed to send a message because its AMQP links were not open yet. Adding it back to messages to send queue ({})", message);
                 messagesToSend.add(message);
             }
             else if (sendResult == SendResult.UNKNOWN_FAILURE)
             {
-                // Shouldn't happen
-                log.trace("Unknown failure occurred while attempting to send. Adding it back to messages to send queue ({})", message);
+                // Shouldn't happen. If it does, it signals that we have a bug in this SDK.
+                log.warn("Unknown failure occurred while attempting to send. Adding it back to messages to send queue ({})", message);
                 messagesToSend.add(message);
             }
 
