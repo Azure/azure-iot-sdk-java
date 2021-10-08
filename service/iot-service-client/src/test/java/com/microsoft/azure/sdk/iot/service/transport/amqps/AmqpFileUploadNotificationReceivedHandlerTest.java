@@ -92,7 +92,11 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
         {
             {
                 handshaker = new Handshaker();
+
+                // We purposefully extend only 1 link credit to the service so that the service only sends,
+                // at most, one message. A flowcontroller here would extend 1024 link credit which we don't want.
                 flowcontroller = new FlowController();
+                times = 0;
             }
         };
         // Act
