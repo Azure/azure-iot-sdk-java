@@ -188,8 +188,12 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
      */
     public synchronized FeedbackBatch receive(long timeoutMs) throws IOException, InterruptedException
     {
+        // This value is set in the reactor thread once we receive the file upload notification from the service over AMQP.
+        // It's important to set this to null since receive may be called multiple times in a row. Otherwise, a single
+        // notification could be returned to the user multiple times if nothing overwrote a previous value.
         feedbackBatch = null;
-        if  (isOpen)
+        
+        if (isOpen)
         {
             // instantiating the amqp handler each receive call because each receive call opens a new AMQP connection
             initializeHandler();
@@ -206,6 +210,7 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
         {
             throw new IOException("receive handler is not initialized. call open before receive");
         }
+
         return feedbackBatch;
     }
 
