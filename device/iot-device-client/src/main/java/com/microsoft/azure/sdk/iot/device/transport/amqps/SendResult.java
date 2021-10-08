@@ -21,7 +21,8 @@ enum SendResult
     SUCCESS,
 
     /**
-     * The message belonged to a different device session.
+     * A multiplexed device sends messages only on it's session's links. This error occurs if the connection attempts
+     * to send a message over a different device's session.
      */
     WRONG_DEVICE,
 

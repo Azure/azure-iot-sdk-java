@@ -323,21 +323,21 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
 
     void openLinks()
     {
-        //Note that this method should only be called from a reactor thread such as during a callback of onSessionRemoteOpen.
+        // Note that this method should only be called from a reactor thread such as during a callback of onSessionRemoteOpen.
         // Just like sending and receiving messages, opening links is only safe on a reactor thread.
         if (!alreadyCreatedTelemetryLinks)
         {
-            createTelemetryLinks();
+            createTelemetryLinksAsync();
         }
 
         if (subscribeToTwinOnReconnection && !alreadyCreatedTwinLinks)
         {
-            createTwinLinks();
+            createTwinLinksAsync();
         }
 
         if (subscribeToMethodsOnReconnection && !alreadyCreatedMethodLinks)
         {
-            createMethodLinks();
+            createMethodLinksAsync();
         }
     }
 
@@ -433,15 +433,18 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
     {
         if (this.twinSenderLinkOpened && this.twinReceiverLinkOpened)
         {
-            // No need to do anything. Twin links are already opened and desired properties subscription is automatically
-            // sent once the twin links are opened.
+            // No need to do anything besides ack the message. Twin links are already opened and desired properties
+            // subscription is automatically sent once the twin links are opened, so there is no need to send
+            // this message over the wire.
             this.amqpsSessionStateCallback.onMessageAcknowledged(transportMessage, Accepted.getInstance(), this.getDeviceId());
             return SendResult.SUCCESS;
         }
 
         if (this.explicitInProgressTwinSubscriptionMessage == null)
         {
-            createTwinLinks();
+            // Don't ack the subscription message here. Once the twin links have finished opening both locally and remotely,
+            // it will be ack'd.
+            createTwinLinksAsync();
             this.explicitInProgressTwinSubscriptionMessage = transportMessage;
             return SendResult.SUCCESS;
         }
@@ -454,14 +457,17 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
     {
         if (this.methodsSenderLinkOpened && this.methodsReceiverLinkOpened)
         {
-            // No need to do anything. Method links are already opened
+            // No need to do anything besides ack the message. Method links are already opened so there is no need to send
+            // this message over the wire.
             this.amqpsSessionStateCallback.onMessageAcknowledged(transportMessage, Accepted.getInstance(), this.getDeviceId());
             return SendResult.SUCCESS;
         }
 
         if (this.explicitInProgressMethodsSubscriptionMessage == null)
         {
-            createMethodLinks();
+            // Don't ack the subscription message here. Once the method links have finished opening both locally and remotely,
+            // it will be ack'd.
+            createMethodLinksAsync();
             this.explicitInProgressMethodsSubscriptionMessage = transportMessage;
             return SendResult.SUCCESS;
         }
@@ -483,7 +489,9 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
         }
     }
 
-    private void createTelemetryLinks()
+    // This opens the telemetry links locally, but the service still needs to open them remotely as well. The
+    // "onLinkOpened()" event will execute when that happens.
+    private void createTelemetryLinksAsync()
     {
         String telemetryLinkCorrelationId = UUID.randomUUID().toString();
 
@@ -495,7 +503,9 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
         this.alreadyCreatedTelemetryLinks = true;
     }
 
-    private void createMethodLinks()
+    // This opens the methods links locally, but the service still needs to open them remotely as well. The
+    // "onLinkOpened()" event will execute when that happens.
+    private void createMethodLinksAsync()
     {
         String methodsLinkCorrelationId = UUID.randomUUID().toString();
 
@@ -509,7 +519,9 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
         this.alreadyCreatedMethodLinks = true;
     }
 
-    private void createTwinLinks()
+    // This opens the twin links locally, but the service still needs to open them remotely as well. The
+    // "onLinkOpened()" event will execute when that happens.
+    private void createTwinLinksAsync()
     {
         String twinLinkCorrelationId = UUID.randomUUID().toString();
 

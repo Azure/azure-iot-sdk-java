@@ -314,7 +314,6 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     {
         this.sessionHandlers.clear();
         this.sasTokenRenewalHandlers.clear();
-        this.reconnectingDeviceSessionHandlers.clear();
     }
 
     private void closeNetworkResources()
@@ -1024,18 +1023,16 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
         // If the device session was temporarily unregistered during reconnection, reuse the cached session handler
         // since it holds the subscription information needed to fully reconnect all links that were open prior to reconnection.
-        amqpsSessionHandler = this.reconnectingDeviceSessionHandlers.get(deviceId);
-
-        // If the device session did not exist in the previous connection, or if there was no previous connection,
-        // create a new session
-        if (amqpsSessionHandler == null)
+        if (this.reconnectingDeviceSessionHandlers.containsKey(deviceId))
         {
-            amqpsSessionHandler = new AmqpsSessionHandler(deviceClientConfig, this);
+            // Since a session is being added for the reconnecting device, it can be removed from the reconnectingDeviceSessionHandlers collection
+            amqpsSessionHandler = this.reconnectingDeviceSessionHandlers.remove(deviceId);
         }
         else
         {
-            // Since a session is being added for the reconnecting device, it can be removed from the reconnectingDeviceSessionHandlers collection
-            this.reconnectingDeviceSessionHandlers.remove(amqpsSessionHandler);
+            // If the device session did not exist in the previous connection, or if there was no previous connection,
+            // create a new session
+            amqpsSessionHandler = new AmqpsSessionHandler(deviceClientConfig, this);
         }
 
         this.sessionHandlers.put(deviceId, amqpsSessionHandler);
