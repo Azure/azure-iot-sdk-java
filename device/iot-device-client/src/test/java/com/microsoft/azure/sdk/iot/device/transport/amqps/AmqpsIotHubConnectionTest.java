@@ -21,14 +21,7 @@ import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsCbsSessionHandler;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpsMessage;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsReceiverLinkHandler;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsSendResult;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsSessionHandler;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsTelemetryReceiverLinkHandler;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.IotHubReactor;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpConnectionThrottledException;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpSessionWindowViolationException;
 import mockit.Deencapsulation;
@@ -126,7 +119,7 @@ public class AmqpsIotHubConnectionTest {
     protected Proton mockProton;
 
     @Mocked
-    protected IotHubReactor mockIotHubReactor;
+    protected ReactorRunner mockReactorRunner;
 
     @Mocked
     protected Reactor mockReactor;
@@ -545,7 +538,7 @@ public class AmqpsIotHubConnectionTest {
         new NonStrictExpectations()
         {
             {
-                new IotHubReactor((Reactor) any);
+                new ReactorRunner((Reactor) any, (IotHubListener) any, anyString, (ReactorRunnerStateCallback) any);
                 result = new IOException();
             }
         };
@@ -591,7 +584,7 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                new IotHubReactor((Reactor)any);
+                new ReactorRunner((Reactor) any, (IotHubListener) any, anyString, (ReactorRunnerStateCallback) any);
                 times = 1;
             }
         };
