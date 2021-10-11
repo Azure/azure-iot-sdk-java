@@ -8,9 +8,11 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.service.*;
+import com.microsoft.azure.sdk.iot.service.Message;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.runners.Parameterized;
@@ -86,9 +88,6 @@ public class ReceiveMessagesCommon extends IntegrationTest
 
     protected final static String SET_MINIMUM_POLLING_INTERVAL = "SetMinimumPollingInterval";
     protected final static Long ONE_SECOND_POLLING_INTERVAL = 1000L;
-
-    // variables used in E2E test for sending back to back messages using C2D sendAsync method
-    protected static final int MAX_COMMANDS_TO_SEND = 5; // maximum commands to be sent in a loop
 
     protected static int MESSAGE_SIZE_IN_BYTES = 1000;
     protected static int LARGE_MESSAGE_SIZE_IN_BYTES = 65000; // Max C2D message size is 65535
@@ -186,9 +185,9 @@ public class ReceiveMessagesCommon extends IntegrationTest
 
     public static class MessageCallbackForBackToBackC2DMessages implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
-        private final List messageIdListStoredOnReceive;
+        private final List<String> messageIdListStoredOnReceive;
 
-        public MessageCallbackForBackToBackC2DMessages(List messageIdListStoredOnReceive)
+        public MessageCallbackForBackToBackC2DMessages(List<String> messageIdListStoredOnReceive)
         {
             this.messageIdListStoredOnReceive = messageIdListStoredOnReceive;
         }
@@ -202,13 +201,32 @@ public class ReceiveMessagesCommon extends IntegrationTest
 
     public static class MessageCallback implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
+        private final Message expectedMessage;
+
+        public MessageCallback()
+        {
+            this.expectedMessage = null;
+        }
+
+        public MessageCallback(Message expectedMessage)
+        {
+            this.expectedMessage = expectedMessage;
+        }
+
         public IotHubMessageResult execute(com.microsoft.azure.sdk.iot.device.Message msg, Object context)
         {
-            Boolean resultValue = true;
+            boolean resultValue = true;
             HashMap<String, String> messageProperties = (HashMap<String, String>) ReceiveMessagesTests.messageProperties;
             Success messageReceived = (Success)context;
             if (!hasExpectedProperties(msg, messageProperties) || !hasExpectedSystemProperties(msg))
             {
+                log.warn("Unexpected properties in the received message");
+                resultValue = false;
+            }
+
+            if (this.expectedMessage != null && !ArrayUtils.isEquals(this.expectedMessage.getBytes(), msg.getBytes()))
+            {
+                log.warn("Unexpected payload in the received message");
                 resultValue = false;
             }
 
@@ -220,16 +238,37 @@ public class ReceiveMessagesCommon extends IntegrationTest
 
     public static class MessageCallbackMqtt implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
+        private final Message expectedMessage;
+
+        public MessageCallbackMqtt()
+        {
+            this.expectedMessage = null;
+        }
+
+        public MessageCallbackMqtt(Message expectedMessage)
+        {
+            this.expectedMessage = expectedMessage;
+        }
+
         public IotHubMessageResult execute(com.microsoft.azure.sdk.iot.device.Message msg, Object context)
         {
             HashMap<String, String> messageProperties = (HashMap<String, String>) ReceiveMessagesTests.messageProperties;
             Success messageReceived = (Success)context;
-            if (hasExpectedProperties(msg, messageProperties) && hasExpectedSystemProperties(msg))
+            boolean resultValue = true;
+            if (!hasExpectedProperties(msg, messageProperties) || !hasExpectedSystemProperties(msg))
             {
-                messageReceived.setResult(true);
+                log.warn("Unexpected properties in the received message");
+                resultValue = false;
+            }
+
+            if (this.expectedMessage != null && !ArrayUtils.isEquals(this.expectedMessage.getBytes(), msg.getBytes()))
+            {
+                log.warn("Unexpected payload in the received message");
+                resultValue = false;
             }
 
             messageReceived.callbackWasFired();
+            messageReceived.setResult(resultValue);
 
             return IotHubMessageResult.COMPLETE;
         }
@@ -258,7 +297,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
         return msg.getMessageId() != null && msg.getMessageId().equals(expectedMessageId);//all system properties are as expected
     }
 
-    protected void sendMessageToDevice(String deviceId, int messageSize) throws IotHubException, IOException
+    protected Message createCloudToDeviceMessage(int messageSize) throws IotHubException, IOException
     {
         byte[] payload = new byte[messageSize];
         new Random().nextBytes(payload);
@@ -266,18 +305,17 @@ public class ReceiveMessagesCommon extends IntegrationTest
         serviceMessage.setCorrelationId(expectedCorrelationId);
         serviceMessage.setMessageId(expectedMessageId);
         serviceMessage.setProperties(messageProperties);
-        testInstance.serviceClient.send(deviceId, serviceMessage);
+        return serviceMessage;
+    }
+
+    protected void sendMessageToDevice(String deviceId, int messageSize) throws IotHubException, IOException
+    {
+        testInstance.serviceClient.send(deviceId, createCloudToDeviceMessage(messageSize));
     }
 
     protected void sendMessageToModule(String deviceId, String moduleId, int messageSize) throws IotHubException, IOException
     {
-        byte[] payload = new byte[messageSize];
-        new Random().nextBytes(payload);
-        com.microsoft.azure.sdk.iot.service.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.Message(payload);
-        serviceMessage.setCorrelationId(expectedCorrelationId);
-        serviceMessage.setMessageId(expectedMessageId);
-        serviceMessage.setProperties(messageProperties);
-        testInstance.serviceClient.send(deviceId, moduleId, serviceMessage);
+        testInstance.serviceClient.send(deviceId, moduleId, createCloudToDeviceMessage(messageSize));
     }
 
     protected void waitForMessageToBeReceived(Success messageReceived, String protocolName)
@@ -303,29 +341,6 @@ public class ReceiveMessagesCommon extends IntegrationTest
         catch (InterruptedException e)
         {
             Assert.fail(buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Receiving message over " + protocolName + " protocol failed. Unexpected interrupted exception occurred", testInstance.identity.getClient()));
-        }
-    }
-
-    protected void waitForBackToBackC2DMessagesToBeReceived(List messageIdListStoredOnReceive)
-    {
-        try
-        {
-            long startTime = System.currentTimeMillis();
-
-            // check if all messages are received.
-            while (messageIdListStoredOnReceive.size() != MAX_COMMANDS_TO_SEND)
-            {
-                Thread.sleep(100);
-
-                if (System.currentTimeMillis() - startTime > RECEIVE_TIMEOUT_MILLISECONDS)
-                {
-                    Assert.fail(buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Receiving messages timed out.", testInstance.identity.getClient()));
-                }
-            }
-        }
-        catch (InterruptedException e)
-        {
-            Assert.fail(buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Receiving message failed. Unexpected interrupted exception occurred.", testInstance.identity.getClient()));
         }
     }
 }

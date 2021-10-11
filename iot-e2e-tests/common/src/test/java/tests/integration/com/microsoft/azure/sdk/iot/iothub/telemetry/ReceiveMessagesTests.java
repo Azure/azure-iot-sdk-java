@@ -9,6 +9,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.telemetry;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.ModuleClient;
+import com.microsoft.azure.sdk.iot.service.Message;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,6 +51,9 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
         receiveMessage(MESSAGE_SIZE_IN_BYTES);
     }
 
+    // Test out receiving a near-maximum sized cloud to device message both for testing the sending of it from the
+    // service client, but also to test how MQTT/HTTPS/AMQPS handle it on the receiving side. AMQP in particular
+    // has some "partial delivery" scenarios that are worth having an e2e test around.
     @Test
     @ContinuousIntegrationTest
     @StandardTierHubOnlyTest
@@ -67,11 +71,13 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
 
         testInstance.identity.getClient().open();
 
-        com.microsoft.azure.sdk.iot.device.MessageCallback callback = new MessageCallback();
+        Message serviceMessage = createCloudToDeviceMessage(messageSize);
+
+        com.microsoft.azure.sdk.iot.device.MessageCallback callback = new MessageCallback(serviceMessage);
 
         if (testInstance.protocol == MQTT || testInstance.protocol == MQTT_WS)
         {
-            callback = new MessageCallbackMqtt();
+            callback = new MessageCallbackMqtt(serviceMessage);
         }
 
         Success messageReceived = new Success();
@@ -87,11 +93,11 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
 
         if (testInstance.identity.getClient() instanceof DeviceClient)
         {
-            sendMessageToDevice(testInstance.identity.getDeviceId(), messageSize);
+            testInstance.serviceClient.send(testInstance.identity.getDeviceId(), serviceMessage);
         }
         else if (testInstance.identity.getClient() instanceof ModuleClient)
         {
-            sendMessageToModule(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), messageSize);
+            testInstance.serviceClient.send(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), serviceMessage);
         }
 
         waitForMessageToBeReceived(messageReceived, testInstance.protocol.toString());
