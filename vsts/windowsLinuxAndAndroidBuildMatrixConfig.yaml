@@ -86,6 +86,11 @@ jobs:
     displayName: Linux
     condition: succeeded()
     steps:
+      - task: CmdLine@2
+        displayName: 'Print Linux version'
+        inputs:
+          script: 'cat /etc/*release'
+
       - powershell: ./vsts/echo_versions.ps1
         displayName: 'Echo Versions'
         env:
