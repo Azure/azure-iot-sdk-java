@@ -238,11 +238,11 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
 
             if (testInstance.identity.getClient() instanceof DeviceClient)
             {
-                sendMessageToDevice(testInstance.identity.getDeviceId(), testInstance.protocol.toString());
+                sendMessageToDevice(testInstance.identity.getDeviceId(), MESSAGE_SIZE_IN_BYTES);
             }
             else if (testInstance.identity.getClient() instanceof ModuleClient)
             {
-                sendMessageToModule(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), testInstance.protocol.toString());
+                sendMessageToModule(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), MESSAGE_SIZE_IN_BYTES);
             }
 
             waitForMessageToBeReceived(messageReceived, testInstance.protocol.toString());

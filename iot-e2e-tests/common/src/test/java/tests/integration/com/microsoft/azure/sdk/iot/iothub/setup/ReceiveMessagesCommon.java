@@ -90,6 +90,9 @@ public class ReceiveMessagesCommon extends IntegrationTest
     // variables used in E2E test for sending back to back messages using C2D sendAsync method
     protected static final int MAX_COMMANDS_TO_SEND = 5; // maximum commands to be sent in a loop
 
+    protected static int MESSAGE_SIZE_IN_BYTES = 1000;
+    protected static int LARGE_MESSAGE_SIZE_IN_BYTES = 65000; // Max C2D message size is 65535
+
     protected static String iotHubConnectionString = "";
 
     // How much to wait until receiving a message from the server, in milliseconds
@@ -255,20 +258,22 @@ public class ReceiveMessagesCommon extends IntegrationTest
         return msg.getMessageId() != null && msg.getMessageId().equals(expectedMessageId);//all system properties are as expected
     }
 
-    protected void sendMessageToDevice(String deviceId, String protocolName) throws IotHubException, IOException
+    protected void sendMessageToDevice(String deviceId, int messageSize) throws IotHubException, IOException
     {
-        String messageString = "Java service e2e test message to be received over " + protocolName + " protocol";
-        com.microsoft.azure.sdk.iot.service.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.Message(messageString);
+        byte[] payload = new byte[messageSize];
+        new Random().nextBytes(payload);
+        com.microsoft.azure.sdk.iot.service.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.Message(payload);
         serviceMessage.setCorrelationId(expectedCorrelationId);
         serviceMessage.setMessageId(expectedMessageId);
         serviceMessage.setProperties(messageProperties);
         testInstance.serviceClient.send(deviceId, serviceMessage);
     }
 
-    protected void sendMessageToModule(String deviceId, String moduleId, String protocolName) throws IotHubException, IOException
+    protected void sendMessageToModule(String deviceId, String moduleId, int messageSize) throws IotHubException, IOException
     {
-        String messageString = "Java service e2e test message to be received over " + protocolName + " protocol";
-        com.microsoft.azure.sdk.iot.service.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.Message(messageString);
+        byte[] payload = new byte[messageSize];
+        new Random().nextBytes(payload);
+        com.microsoft.azure.sdk.iot.service.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.Message(payload);
         serviceMessage.setCorrelationId(expectedCorrelationId);
         serviceMessage.setMessageId(expectedMessageId);
         serviceMessage.setProperties(messageProperties);

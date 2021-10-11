@@ -80,6 +80,15 @@ public abstract class AmqpsReceiverLinkHandler extends BaseHandler
         // Safe to cast as receiver here since this event only fires when a message is ready to be received over this receiver link
         Receiver receiverLink = (Receiver) event.getLink();
         AmqpsMessage amqpsMessage = this.getMessageFromReceiverLink(receiverLink);
+
+        if (amqpsMessage == null)
+        {
+            // This happens if the delivery was a partial delivery and a full message can't be formed just yet.
+            // onDelivery will be called by the reactor again with another chunk of the partial delivery, and will
+            // continue to be called until it is fully formed.
+            return;
+        }
+
         IotHubTransportMessage iotHubMessage = this.protonMessageToIoTHubMessage(amqpsMessage);
         this.receivedMessagesMap.put(iotHubMessage, amqpsMessage);
         this.amqpsLinkStateCallback.onMessageReceived(iotHubMessage);
