@@ -52,12 +52,6 @@
             <version>0.23</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.qpid</groupId>
-            <artifactId>proton-j</artifactId>
-            <version>0.30.0</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>${iot-deps-artifact-id}</artifactId>
             <version>${iot-deps-version}</version>

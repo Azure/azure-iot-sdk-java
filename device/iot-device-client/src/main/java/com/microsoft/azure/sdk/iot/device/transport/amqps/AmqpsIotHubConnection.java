@@ -52,7 +52,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     // Web socket constants
     private static final String WEB_SOCKET_PATH = "/$iothub/websocket";
     private static final String WEB_SOCKET_SUB_PROTOCOL = "AMQPWSB10";
-    private static final String WEB_SOCKET_QUERY = "iothub-no-client-cert=true";
+    private static final String SAS_WEB_SOCKET_QUERY = "iothub-no-client-cert=true";
     private static final int MAX_MESSAGE_PAYLOAD_SIZE = 256 * 1024; //max IoT Hub message size is 256 kb, so amqp websocket layer should buffer at most that much space
     private static final int MAX_FRAME_SIZE = 4 * 1024;
     private static final int WEB_SOCKET_PORT = 443;
@@ -840,7 +840,13 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     {
         log.debug("Adding websocket layer to amqp transport");
         WebSocketImpl webSocket = new WebSocketImpl(MAX_MESSAGE_PAYLOAD_SIZE);
-        webSocket.configure(this.hostName, WEB_SOCKET_PATH, WEB_SOCKET_QUERY, WEB_SOCKET_PORT, WEB_SOCKET_SUB_PROTOCOL, null, null);
+        String query = SAS_WEB_SOCKET_QUERY;
+        if (this.authenticationType == DeviceClientConfig.AuthType.X509_CERTIFICATE)
+        {
+            query = "";
+        }
+
+        webSocket.configure(this.hostName, WEB_SOCKET_PATH, query, WEB_SOCKET_PORT, WEB_SOCKET_SUB_PROTOCOL, null, null);
         ((TransportInternal) transport).addTransportLayer(webSocket);
     }
 

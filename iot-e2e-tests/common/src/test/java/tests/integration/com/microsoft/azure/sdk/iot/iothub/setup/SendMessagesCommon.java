@@ -88,14 +88,18 @@ public class SendMessagesCommon extends IntegrationTest
                                 //x509 device client, no proxy
                                 {HTTPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false},
                                 {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT, false},
+                                {MQTT_WS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false},
                                 {AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false},
+                                {AMQPS_WS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false},
 
                                 //sas token device client, with proxy
                                 {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, true},
                                 {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT, true},
 
                                 //x509 device client, with proxy
-                                {HTTPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, true}
+                                {HTTPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, true},
+                                {MQTT_WS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false},
+                                {AMQPS_WS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false}
                         }
         ));
 
@@ -113,10 +117,16 @@ public class SendMessagesCommon extends IntegrationTest
                                     //x509 module client, no proxy
                                     {MQTT, SELF_SIGNED, ClientType.MODULE_CLIENT, false},
                                     {AMQPS, SELF_SIGNED, ClientType.MODULE_CLIENT, false},
+                                    {MQTT_WS, SELF_SIGNED, ClientType.MODULE_CLIENT, false},
+                                    {AMQPS_WS, SELF_SIGNED, ClientType.MODULE_CLIENT, false},
 
                                     //sas token module client, with proxy
                                     {MQTT_WS, SAS, ClientType.MODULE_CLIENT, true},
-                                    {AMQPS_WS, SAS, ClientType.MODULE_CLIENT, true}
+                                    {AMQPS_WS, SAS, ClientType.MODULE_CLIENT, true},
+
+                                    //x509 module client, with proxy
+                                    {MQTT_WS, SELF_SIGNED, ClientType.MODULE_CLIENT, true},
+                                    {AMQPS_WS, SELF_SIGNED, ClientType.MODULE_CLIENT, true}
                             }
             ));
         }
