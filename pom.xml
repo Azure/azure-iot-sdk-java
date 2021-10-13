@@ -33,9 +33,9 @@
         <dice-provider-artifact-id>dice-provider</dice-provider-artifact-id>
         <x509-provider-artifact-id>x509-provider</x509-provider-artifact-id>
 
-        <iot-device-client-version>1.33.0</iot-device-client-version>
-        <iot-service-client-version>1.33.1</iot-service-client-version>
-        <iot-deps-version>0.15.0</iot-deps-version>
+        <iot-device-client-version>1.33.1</iot-device-client-version>
+        <iot-service-client-version>1.33.2</iot-service-client-version>
+        <iot-deps-version>0.15.1</iot-deps-version>
         <provisioning-device-client-version>1.11.0</provisioning-device-client-version>
         <provisioning-service-client-version>1.9.2</provisioning-service-client-version>
         <security-provider-version>1.5.0</security-provider-version>
