@@ -236,6 +236,19 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
         this.state = IotHubConnectionStatus.CONNECTED;
     }
 
+    private void stopWorkerThreads()
+    {
+        if (this.sendTaskScheduler != null)
+        {
+            this.sendTaskScheduler.shutdown();
+        }
+
+        if (this.receiveTaskScheduler != null)
+        {
+            this.receiveTaskScheduler.shutdown();
+        }
+    }
+
     /**
      * Completes all current outstanding requests and closes the IoT Hub client.
      * Must be called to terminate the background thread that is sending data to
@@ -249,16 +262,6 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
             if (state == IotHubConnectionStatus.DISCONNECTED)
             {
                 return;
-            }
-
-            if (this.sendTaskScheduler != null)
-            {
-                this.sendTaskScheduler.shutdown();
-            }
-
-            if (this.receiveTaskScheduler != null)
-            {
-                this.receiveTaskScheduler.shutdown();
             }
 
             this.transport.close(IotHubConnectionStatusChangeReason.CLIENT_CLOSE, null);
@@ -452,28 +455,17 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
     @Override
     public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
     {
-        synchronized (this.stateLock)
+        if (status == IotHubConnectionStatus.DISCONNECTED || status == IotHubConnectionStatus.DISCONNECTED_RETRYING)
         {
-            if (status == IotHubConnectionStatus.DISCONNECTED || status == IotHubConnectionStatus.DISCONNECTED_RETRYING)
-            {
-                // No need to keep spawning send/receive tasks during reconnection or when the client is closed
-                if (this.sendTaskScheduler != null)
-                {
-                    this.sendTaskScheduler.shutdown();
-                }
-
-                if (this.receiveTaskScheduler != null)
-                {
-                    this.receiveTaskScheduler.shutdown();
-                }
-            }
-            else if (status == IotHubConnectionStatus.CONNECTED)
-            {
-                // Restart the task scheduler so that send/receive tasks start spawning again
-                this.startWorkerThreads();
-            }
-
-            this.state = status;
+            // No need to keep spawning send/receive tasks during reconnection or when the client is closed
+            this.stopWorkerThreads();
         }
+        else if (status == IotHubConnectionStatus.CONNECTED)
+        {
+            // Restart the task scheduler so that send/receive tasks start spawning again
+            this.startWorkerThreads();
+        }
+
+        this.state = status;
     }
 }
