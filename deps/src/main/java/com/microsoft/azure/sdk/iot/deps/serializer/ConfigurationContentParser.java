@@ -6,6 +6,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,11 +17,22 @@ public class ConfigurationContentParser
     private static final String MODULES_CONTENT_NAME = "modulesContent";
     @Expose(serialize = false)
     @SerializedName(MODULES_CONTENT_NAME)
+    @Getter
+    @Setter
     private Map<String, Map<String, Object>> modulesContent;
+
+    private static final String MODULE_CONTENT_NAME = "moduleContent";
+    @Expose(serialize = false)
+    @SerializedName(MODULE_CONTENT_NAME)
+    @Getter
+    @Setter
+    private Map<String, Object> moduleContent;
 
     private static final String DEVICE_CONTENT_NAME = "deviceContent";
     @Expose(serialize = false)
     @SerializedName(DEVICE_CONTENT_NAME)
+    @Getter
+    @Setter
     private Map<String, Object> deviceContent;
 
     private final transient static Gson gson = new Gson();
@@ -58,6 +71,7 @@ public class ConfigurationContentParser
         }
 
         this.modulesContent = configurationContentParser.modulesContent;
+        this.moduleContent = configurationContentParser.moduleContent;
         this.deviceContent = configurationContentParser.deviceContent;
     }
 
@@ -66,54 +80,12 @@ public class ConfigurationContentParser
         return gson.toJson(this);
     }
 
-    /**
-     * Getter for modulesContent
-     *
-     * @return The value of modulesContent
-     */
-    public Map<String, Map<String, Object>> getModulesContent()
-    {
-        //Codes_SRS_CONFIGURATION_METRICS_PARSER_28_005: [This method shall return the value of this object's modulesContent.]
-        return modulesContent;
-    }
-
-    /**
-     * Setter for modulesContent
-     * @param modulesContent the value to set results to
-     */
-    public void setModulesContent(Map<String, Map<String, Object>> modulesContent)
-    {
-        //Codes_SRS_CONFIGURATION_METRICS_PARSER_28_006: [This method shall set the value of results to the provided value.]
-        this.modulesContent = modulesContent;
-    }
-
-    /**
-     * Getter for deviceContent
-     *
-     * @return The value of queries
-     */
-    public Map<String, Object> getDeviceContent()
-    {
-        //Codes_SRS_CONFIGURATION_METRICS_PARSER_28_007: [This method shall return the value of this object's deviceContent.]
-        return deviceContent;
-    }
-
-    /**
-     * Setter for deviceContent
-     * @param deviceContent the value to set deviceContent to
-     */
-    public void setDeviceContent(Map<String, Object> deviceContent)
-    {
-        //Codes_SRS_CONFIGURATION_METRICS_PARSER_28_008: [This method shall set the value of queries to the provided value.]
-        this.deviceContent = deviceContent;
-    }
-
     public JsonElement toJsonElement()
     {
         JsonObject contentJson = new JsonObject();
 
         /* Codes_SRS_CONFIGURATION_METRICS_PARSER_28_009: [If the modulesContent is null, the toJsonElement shall not include the `modulesContent` in the final JSON.] */
-        if(this.modulesContent != null)
+        if (this.modulesContent != null)
         {
             Map<String, Object> map = new HashMap<>();
             for (Map.Entry<String, Map<String, Object>> entry: this.modulesContent.entrySet())
@@ -124,9 +96,14 @@ public class ConfigurationContentParser
         }
 
         /* Codes_SRS_CONFIGURATION_METRICS_PARSER_28_010: [If the deviceContent is null, the toJsonElement shall not include the `deviceContent` in the final JSON.]*/
-        if(this.deviceContent != null)
+        if (this.deviceContent != null)
         {
             contentJson.add(DEVICE_CONTENT_NAME, ParserUtility.mapToJsonElement(this.deviceContent));
+        }
+
+        if (this.moduleContent != null)
+        {
+            contentJson.add(MODULE_CONTENT_NAME, ParserUtility.mapToJsonElement(this.moduleContent));
         }
 
         return contentJson;
