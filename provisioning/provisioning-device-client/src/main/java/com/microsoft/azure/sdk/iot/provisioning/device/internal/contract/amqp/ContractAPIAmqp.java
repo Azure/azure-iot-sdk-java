@@ -249,4 +249,16 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
             throw new ProvisioningDeviceConnectionException("Closing amqp failed", ex);
         }
     }
+
+    @Override
+    public String getConnectionId()
+    {
+        return this.provisioningAmqpOperations.getConnectionId();
+    }
+
+    @Override
+    public String getHostName()
+    {
+        return this.provisioningAmqpOperations.getHostName();
+    }
 }

@@ -338,7 +338,15 @@ public class RegisterTask implements Callable<RegistrationOperationStatusParser>
     @Override
     public RegistrationOperationStatusParser call() throws Exception
     {
-        Thread.currentThread().setName(THREAD_NAME);
+        String threadName = this.provisioningDeviceClientContract.getHostName()
+                + "-"
+                + this.provisioningDeviceClientConfig.getUniqueIdentifier()
+                + "-Cxn"
+                + this.provisioningDeviceClientContract.getConnectionId()
+                + "-"
+                + THREAD_NAME;
+
+        Thread.currentThread().setName(threadName);
         return this.authenticateWithDPS();
     }
 

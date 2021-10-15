@@ -22,6 +22,7 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 import java.util.concurrent.*;
 
 @Slf4j
@@ -65,6 +66,17 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
 
     private final SSLContext sslContext;
 
+    // This field is used to uniquely identifying a connection.
+    private final String connectionId;
+
+    public String getConnectionId() {
+        return this.connectionId;
+    }
+
+    public String getHostName() {
+        return this.hostName;
+    }
+
     /**
      * Constructor for the Amqp library
      * @param hostName Name of the AMQP Endpoint
@@ -82,6 +94,7 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
             throw new IllegalArgumentException("The hostname cannot be null or empty.");
         }
 
+        this.connectionId = UUID.randomUUID().toString();
         this.linkCredit = -1;
         this.nextTag = 0;
 
@@ -202,7 +215,10 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
 
         log.debug("Starting amqp reactor thread...");
         AmqpReactor amqpReactor = new AmqpReactor(this.reactor);
-        ReactorRunner reactorRunner = new ReactorRunner(amqpReactor);
+
+        String reactorRunnerPrefix = this.hostName + "-Cxn" + this.connectionId;
+
+        ReactorRunner reactorRunner = new ReactorRunner(amqpReactor, reactorRunnerPrefix, "AmqpOpenAsync");
         executorService.submit(reactorRunner);
     }
 
@@ -527,17 +543,22 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
     {
         private final static String THREAD_NAME = "azure-iot-sdk-ReactorRunner";
         private final AmqpReactor amqpReactor;
+        private final String threadPostFix;
+        private final String threadPreFix;
 
-        ReactorRunner(AmqpReactor reactor)
+        ReactorRunner(AmqpReactor reactor, String threadPrefix, String threadPostFix)
         {
             this.amqpReactor = reactor;
+            this.threadPostFix = threadPostFix;
+            this.threadPreFix = threadPrefix;
         }
 
         @Override
         public Object call()
         {
-            Thread.currentThread().setName(THREAD_NAME);
-            log.trace("Amqp reactor thread {} has started", THREAD_NAME);
+            String threadName = threadPreFix + "-" + THREAD_NAME + "-" + this.threadPostFix;
+            Thread.currentThread().setName(threadName);
+            log.trace("Amqp reactor thread {} has started", threadName);
 
             try
             {
@@ -549,7 +570,7 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
                 throw e;
             }
 
-            log.trace("Amqp reactor thread {} has finished", THREAD_NAME);
+            log.trace("Amqp reactor thread {} has finished", threadName);
 
             return null;
         }

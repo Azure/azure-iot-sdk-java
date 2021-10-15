@@ -200,7 +200,7 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
 
             log.info("Receiving on feedback receiver for up to {} milliseconds", timeoutMs);
 
-            new ReactorRunner(this.amqpReceiveHandler, "AmqpFeedbackReceiver").run(timeoutMs);
+            new ReactorRunner(this.amqpReceiveHandler, this.hostName, "AmqpFeedbackReceiver").run(timeoutMs);
 
             log.trace("Feedback receiver reactor finished running, verifying that the connection opened correctly");
             this.amqpReceiveHandler.verifyConnectionWasOpened();

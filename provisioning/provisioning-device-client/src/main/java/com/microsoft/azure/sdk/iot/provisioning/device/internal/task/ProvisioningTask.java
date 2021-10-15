@@ -142,8 +142,13 @@ public class ProvisioningTask implements Callable<Object>
                                                                                       ProvisioningDeviceClientException
     {
         Thread.sleep(provisioningDeviceClientContract.getRetryValue());
-        StatusTask statusTask = new StatusTask(securityProvider, provisioningDeviceClientContract, operationId,
-                                               this.authorization);
+        StatusTask statusTask = new StatusTask(
+                securityProvider,
+                provisioningDeviceClientContract,
+                provisioningDeviceClientConfig,
+                operationId,
+                this.authorization);
+
         FutureTask<RegistrationOperationStatusParser> futureStatusTask = new FutureTask<>(statusTask);
         executor.submit(futureStatusTask);
         RegistrationOperationStatusParser statusRegistrationOperationStatusParser =  futureStatusTask.get(MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE, TimeUnit.MILLISECONDS);
@@ -276,7 +281,15 @@ public class ProvisioningTask implements Callable<Object>
     @Override
     public Object call() throws Exception
     {
-        Thread.currentThread().setName(THREAD_NAME);
+        String threadName = this.provisioningDeviceClientContract.getHostName()
+                + "-"
+                + this.provisioningDeviceClientConfig.getUniqueIdentifier()
+                + "-Cxn"
+                + this.provisioningDeviceClientContract.getConnectionId()
+                + "-"
+                + THREAD_NAME;
+
+        Thread.currentThread().setName(threadName);
 
         try
         {

@@ -42,6 +42,16 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
 
     private Throwable lostConnection = null;
 
+    @Override
+    public String getConnectionId() {
+        return this.mqttConnection.getConnectionId();
+    }
+
+    @Override
+    public String getHostName() {
+        return this.mqttConnection.getHostName();
+    }
+
     /**
      * This constructor creates an instance of Mqtt class and initializes member variables
      * @param provisioningDeviceClientConfig Config used for provisioning Cannot be {@code null}.

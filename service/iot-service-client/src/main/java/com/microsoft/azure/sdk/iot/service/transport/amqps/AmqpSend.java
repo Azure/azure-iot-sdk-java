@@ -227,7 +227,7 @@ public class AmqpSend
                 log.info("Sending cloud to device module message");
             }
 
-            new ReactorRunner(amqpSendHandler, "AmqpSend").run();
+            new ReactorRunner(amqpSendHandler, this.hostName,"AmqpSend").run();
 
             log.trace("Amqp send reactor stopped, checking that the connection opened, and that the message was sent");
 

@@ -83,6 +83,8 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
     private IotHubSendTask sendTask = null;
     private IotHubReceiveTask receiveTask = null;
 
+    private DeviceClientConfig config = null;
+
     private ScheduledExecutorService receiveTaskScheduler;
     private ScheduledExecutorService sendTaskScheduler;
     private IotHubConnectionStatus state;
@@ -113,8 +115,10 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
             throw new IllegalArgumentException("Config cannot be null.");
         }
 
-        IotHubClientProtocol protocol = config.getProtocol();
-        config.setUseWebsocket(protocol == IotHubClientProtocol.AMQPS_WS || protocol == MQTT_WS);
+        this.config = config;
+
+        IotHubClientProtocol protocol = this.config.getProtocol();
+        this.config.setUseWebsocket(protocol == IotHubClientProtocol.AMQPS_WS || protocol == MQTT_WS);
 
         this.sendPeriodInMilliseconds = sendPeriodInMilliseconds;
         this.receivePeriodInMilliseconds = receivePeriodInMilliseconds;
