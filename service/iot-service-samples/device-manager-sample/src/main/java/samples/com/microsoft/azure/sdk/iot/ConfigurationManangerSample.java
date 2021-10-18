@@ -245,6 +245,18 @@ public class ConfigurationManangerSample
             }
         }
 
+        Map<String, Object> moduleContent = config.getContent().getModuleContent();
+        System.out.println("  Content.ModuleContent: ");
+        if (dc != null)
+        {
+            for (Map.Entry<String, Object> entry : moduleContent.entrySet())
+            {
+                String key = entry.getKey();
+                Object val = entry.getValue();
+                System.out.println("    " + key + " : " + val.toString());
+            }
+        }
+
         Map<String, Map<String, Object>> mc = config.getContent().getModulesContent();
         System.out.println("  Content.ModuleContent: ");
         if (mc != null)
