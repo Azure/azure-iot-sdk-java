@@ -356,17 +356,12 @@ public class TwinCollection extends HashMap<String, Object> {
             } else if (key.equals(TwinMetadata.LAST_UPDATED_BY_DIGEST)) {
                 lastUpdatedByDigest = (String) entry.getValue();
             } else {
-                Object valueInCollection = twinCollection.get(key);
-                if (valueInCollection == null) {
-                    // If the property (key) exists in metadata but not in twinCollection metadata is inconsistent.
-                    throw new IllegalArgumentException("Twin metadata is inconsistent for property: " + key);
-                }
-
                 TwinMetadata twinMetadata = TwinMetadata.tryExtractFromMap(entry.getValue());
                 if (twinMetadata != null) {
                     twinCollection.metadataMap.put(key, twinMetadata);
                 }
 
+                Object valueInCollection = twinCollection.get(key);
                 if (valueInCollection instanceof TwinCollection) {
                     TwinCollection.addMetadata((TwinCollection) valueInCollection, (Map<? extends String, Object>) entry.getValue());
                 }

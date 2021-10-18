@@ -34,8 +34,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
-import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
+import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -64,6 +63,8 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
         return asList(new Object[][] {
                 {MQTT},
                 {MQTT_WS},
+                {AMQPS},
+                {AMQPS_WS},
         });
     }
 

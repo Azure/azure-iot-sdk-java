@@ -53,7 +53,7 @@ final class AmqpsTwinSenderLinkHandler extends AmqpsSenderLinkHandler
 
     AmqpsTwinSenderLinkHandler(Sender sender, AmqpsLinkStateCallback amqpsLinkStateCallback, DeviceClientConfig deviceClientConfig, String linkCorrelationId, Map<String, DeviceOperations> twinOperationCorrelationMap)
     {
-        super(sender, amqpsLinkStateCallback, linkCorrelationId);
+        super(sender, amqpsLinkStateCallback, linkCorrelationId, deviceClientConfig.getModelId());
 
         this.senderLinkAddress = getAddress(deviceClientConfig);
 

@@ -182,6 +182,11 @@ class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHandler
             Source source = new Source();
             source.setAddress(FILENOTIFICATION_ENDPOINT);
             fileUploadNotificationReceiverLink.setSource(source);
+
+            // We only want to receive, at most, one file upload notification since each receive call the user makes can
+            // only return either a single file upload notification or null (no file upload notification received).
+            // Extend only a single link credit to the service so that the service can't send more than one message.
+            fileUploadNotificationReceiverLink.flow(1);
         }
     }
 }

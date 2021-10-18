@@ -21,6 +21,13 @@ public class ConfigurationContentParser
     @Setter
     private Map<String, Map<String, Object>> modulesContent;
 
+    private static final String MODULE_CONTENT_NAME = "moduleContent";
+    @Expose(serialize = false)
+    @SerializedName(MODULE_CONTENT_NAME)
+    @Getter
+    @Setter
+    private Map<String, Object> moduleContent;
+
     private static final String DEVICE_CONTENT_NAME = "deviceContent";
     @Expose(serialize = false)
     @SerializedName(DEVICE_CONTENT_NAME)
@@ -64,6 +71,7 @@ public class ConfigurationContentParser
         }
 
         this.modulesContent = configurationContentParser.modulesContent;
+        this.moduleContent = configurationContentParser.moduleContent;
         this.deviceContent = configurationContentParser.deviceContent;
     }
 
@@ -77,7 +85,7 @@ public class ConfigurationContentParser
         JsonObject contentJson = new JsonObject();
 
         /* Codes_SRS_CONFIGURATION_METRICS_PARSER_28_009: [If the modulesContent is null, the toJsonElement shall not include the `modulesContent` in the final JSON.] */
-        if(this.modulesContent != null)
+        if (this.modulesContent != null)
         {
             Map<String, Object> map = new HashMap<>();
             for (Map.Entry<String, Map<String, Object>> entry: this.modulesContent.entrySet())
@@ -88,9 +96,14 @@ public class ConfigurationContentParser
         }
 
         /* Codes_SRS_CONFIGURATION_METRICS_PARSER_28_010: [If the deviceContent is null, the toJsonElement shall not include the `deviceContent` in the final JSON.]*/
-        if(this.deviceContent != null)
+        if (this.deviceContent != null)
         {
             contentJson.add(DEVICE_CONTENT_NAME, ParserUtility.mapToJsonElement(this.deviceContent));
+        }
+
+        if (this.moduleContent != null)
+        {
+            contentJson.add(MODULE_CONTENT_NAME, ParserUtility.mapToJsonElement(this.moduleContent));
         }
 
         return contentJson;

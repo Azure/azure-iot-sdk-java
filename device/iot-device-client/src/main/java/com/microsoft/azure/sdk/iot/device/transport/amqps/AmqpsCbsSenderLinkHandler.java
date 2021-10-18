@@ -46,7 +46,9 @@ final class AmqpsCbsSenderLinkHandler extends AmqpsSenderLinkHandler
 
     AmqpsCbsSenderLinkHandler(Sender sender, AmqpsLinkStateCallback amqpsLinkStateCallback)
     {
-        super(sender, amqpsLinkStateCallback, UUID.randomUUID().toString());
+        // Passing in null for modelId here since the CBS link will never have a PnP model associated
+        // with it since it does not represent a single PnP device.
+        super(sender, amqpsLinkStateCallback, UUID.randomUUID().toString(), null);
 
         this.senderLinkAddress = SENDER_LINK_ENDPOINT_PATH;
     }

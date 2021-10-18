@@ -216,6 +216,11 @@ class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
             Source source = new Source();
             source.setAddress(ENDPOINT);
             feedbackReceiverLink.setSource(source);
+
+            // We only want to receive, at most, one feedback message since each receive call the user makes can only return
+            // either a single feedback message or null (no feedback message received). Extend only a single link credit
+            // to the service so that the service can't send more than one message.
+            feedbackReceiverLink.flow(1);
         }
     }
 }

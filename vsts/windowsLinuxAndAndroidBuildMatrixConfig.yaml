@@ -4,7 +4,7 @@ trigger:
   batch: true
   branches:
     include:
-      - master
+      - main
   paths:
     exclude:
       - doc/*
@@ -82,10 +82,16 @@ jobs:
   - job: Linux
     timeoutInMinutes: 180
     pool:
-      name: Hosted Ubuntu 1604
+      # If this is changed, don't forget to update supported_platforms.md in the root directory. That document outlines what OS we test on and should stay up to date.
+      vmImage: 'ubuntu-18.04'
     displayName: Linux
     condition: succeeded()
     steps:
+      - task: CmdLine@2
+        displayName: 'Print Linux version'
+        inputs:
+          script: 'cat /etc/*release'
+
       - powershell: ./vsts/echo_versions.ps1
         displayName: 'Echo Versions'
         env:

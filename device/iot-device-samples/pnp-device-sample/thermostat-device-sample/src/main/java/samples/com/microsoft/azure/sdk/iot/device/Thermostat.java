@@ -51,7 +51,7 @@ public class Thermostat {
     private static final ProvisioningDeviceClientTransportProtocol provisioningProtocol = ProvisioningDeviceClientTransportProtocol.MQTT;
     private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 1000; // in milli seconds
 
-    // Plug and play features are available over either MQTT or MQTT_WS.
+    // Plug and play features are available over MQTT, MQTT_WS, AMQPS, and AMQPS_WS.
     private static final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
 
     private static final Random random = new Random();

@@ -11,7 +11,7 @@ All the artifacts that you need to execute this sample are ready to be built and
 ## References
 
 [Provisioning service client - documentation](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.provisioningserviceclient?view=azure-java-stable)
-[Provisioning service client - source code](https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-service-client)
+[Provisioning service client - source code](https://github.com/Azure/azure-iot-sdk-java/tree/main/provisioning/provisioning-service-client)
 
 ## How to run the samples on Linux or Windows
 
@@ -36,7 +36,7 @@ Note that the samples for Windows and Linux use Maven.
         
     2. For **TPM** attestation:
         1. From the device that you have, you must copy the registrationId and the endorsementKey. If you don't have 
-            a physical device with TPM, you can use the [tpm-simulator](https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-tools/tpm-simulator).
+            a physical device with TPM, you can use the [tpm-simulator](https://github.com/Azure/azure-iot-sdk-java/tree/main/provisioning/provisioning-tools/tpm-simulator).
         2. Fill the `REGISTRATION_ID` and the `TPM_ENDORSEMENT_KEY` with the device information.
             ```java
             private static final String REGISTRATION_ID = "[RegistrationId]";
@@ -61,7 +61,7 @@ Note that the samples for Windows and Linux use Maven.
 
     3. For **X509** attestation:
         1. From the device that you have, you must copy the registrationId and the client certificate. If you don't have 
-            a physical device with X509, you can use the [provisioning X509 cert generator](https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-tools/provisioning-x509-cert-generator).
+            a physical device with X509, you can use the [provisioning X509 cert generator](https://github.com/Azure/azure-iot-sdk-java/tree/main/provisioning/provisioning-tools/provisioning-x509-cert-generator).
             Answer `Y` to provide your common name, the Client Cert commonName is your registrationId.
         2. Fill the `REGISTRATION_ID` with the device commonName, and replace the `TPM_ENDORSEMENT_KEY` by the
             `PUBLIC_KEY_CERTIFICATE_STRING` that contains your client certificate. Be careful to do **not** change your
@@ -232,7 +232,7 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-enrollme
     ```
 13. For **TPM** attestation:
     1. From the device that you have, you must copy the registrationId and the endorsementKey. If you don't have 
-        a physical device with TPM, you can use the [tpm-simulator](https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-tools/tpm-simulator).
+        a physical device with TPM, you can use the [tpm-simulator](https://github.com/Azure/azure-iot-sdk-java/tree/main/provisioning/provisioning-tools/tpm-simulator).
     2. Add the follow class-level variable to the **App**, and fill the `REGISTRATION_ID` with the registrationId and 
         the `TPM_ENDORSEMENT_KEY` with the endorsementKey that you copied from the hardware or emulator.
         ```java
@@ -241,7 +241,7 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-enrollme
         ```
 14. For **X509** attestation:
     1. From the device that you have, you must copy the registrationId and the client certificate. If you don't have 
-        a physical device with X509, you can use the [provisioning X509 cert generator](https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-tools/provisioning-x509-cert-generator).
+        a physical device with X509, you can use the [provisioning X509 cert generator](https://github.com/Azure/azure-iot-sdk-java/tree/main/provisioning/provisioning-tools/provisioning-x509-cert-generator).
         Answer `Y` to provide your common name, the Client Cert commonName is your registrationId.
     2. Add the follow class-level variable to the **App**, and fill the `REGISTRATION_ID` with the registrationId and 
         the `PUBLIC_KEY_CERTIFICATE_STRING` with the client certificate that you copied from the hardware or emulator.

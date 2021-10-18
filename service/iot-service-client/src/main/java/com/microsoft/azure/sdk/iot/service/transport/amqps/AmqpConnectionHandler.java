@@ -146,10 +146,6 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         // Enables proton-j to automatically mirror the local state of the client with the remote state. For instance,
         // if the service closes a session, this handshaker will automatically close the session locally as well.
         add(new Handshaker());
-
-        // Enables proton-j to automatically give link credit back to the service on all the client side receiver links
-        // after successfully processing a message.
-        add(new FlowController());
     }
 
     @Override

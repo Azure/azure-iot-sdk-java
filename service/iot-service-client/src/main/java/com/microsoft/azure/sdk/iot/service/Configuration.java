@@ -155,6 +155,7 @@ public class Configuration
             ConfigurationContentParser parser = new ConfigurationContentParser();
             parser.setDeviceContent(this.content.getDeviceContent());
             parser.setModulesContent(this.content.getModulesContent());
+            parser.setModuleContent(this.content.getModuleContent());
             configurationParser.setContent(parser);
         }
 
