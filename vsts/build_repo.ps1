@@ -12,4 +12,4 @@ else
     Write-Host "Pull request build detected"
 }
 
-mvn -D"maven.test.skip=true" install -T 2C
+mvn -pl :provisioning-device-client,:provisioning-service-client,:iot-deps,:iot-service-client,:iot-device-client -D"maven.test.skip=true" -D"maven.javadoc.skip=true" install -T 2C
