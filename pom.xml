@@ -44,6 +44,7 @@
         <dice-provider-emulator-version>1.1.1</dice-provider-emulator-version>
         <dice-provider-version>1.1.1</dice-provider-version>
         <x509-provider-version>1.1.6</x509-provider-version>
+        <slf4j-version>1.7.32</slf4j-version>
     </properties>
     <reporting>
         <plugins>
