@@ -12,4 +12,4 @@ else
     Write-Host "Pull request build detected"
 }
 
-mvn -Dmaven.test.skip=true install -T 2C
+mvn -D"maven.test.skip=true" install -T 2C
