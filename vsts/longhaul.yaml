@@ -1,0 +1,105 @@
+name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+
+schedules:
+  - cron: 0 18 * * Fri # Starts new run once every Friday at 6 pm
+    displayName: Weekly longhaul test # friendly name given to a specific schedule
+    branches:
+      include:
+        - main
+        - preview # which branches the schedule applies to
+
+    always: true # whether to always run the pipeline or only if there have been source code changes since the last successful scheduled run. The default is false.
+
+jobs:
+  ### Windows ###
+  - job: Windows
+    timeoutInMinutes: 0
+    pool:
+      name: Windows19LonghaulPool
+    displayName: Windows
+    condition: succeeded()
+    steps:
+      - powershell: ./vsts/echo_versions.ps1
+        displayName: 'Echo Versions'
+        env:
+          COMMIT_FROM: $(COMMIT_FROM)
+        condition: always()
+
+      - powershell: ./vsts/run_longhaul.ps1
+        displayName: 'Build and Test'
+        env:
+          IOTHUB_CONNECTION_STRING: $(WINDOWS-IOTHUB-CONNECTION-STRING)
+          RUN_LONGHAUL_TESTS: 'true'
+        condition: always()
+
+      - task: CopyFiles@2
+        displayName: 'Copy Test Logs to Artifact Staging Directory'
+        inputs:
+          SourceFolder: '$(Build.SourcesDirectory)/iot-e2e-tests/longhaul/src/logs'
+          Contents: |
+            **/*.txt
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/TestRunLogs'
+        continueOnError: true
+        condition: always()
+
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Artifact Staging Directory'
+        continueOnError: true
+        condition: always()
+
+      - task: PublishTestResults@2
+        displayName: 'Publish Test Results'
+        inputs:
+          mergeTestResults: true
+          testRunTitle: "Windows Longhaul Results"
+        continueOnError: true
+        condition: always()
+
+  ### Windows ###
+  - job: Linux
+    timeoutInMinutes: 0
+    pool:
+      name: ubuntu18LonghaulPool
+    displayName: Linux
+    condition: succeeded()
+    steps:
+      - powershell: ./vsts/echo_versions.ps1
+        displayName: 'Echo Versions'
+        env:
+          COMMIT_FROM: $(COMMIT_FROM)
+        condition: always()
+
+      - task: CmdLine@2
+        displayName: 'Print Linux version'
+        inputs:
+          script: 'cat /etc/*release'
+
+      - powershell: ./vsts/run_longhaul.ps1
+        displayName: 'Build and Test'
+        env:
+          IOTHUB_CONNECTION_STRING: $(LINUX-IOTHUB-CONNECTION-STRING)
+          RUN_LONGHAUL_TESTS: 'true'
+        condition: always()
+
+      - task: CopyFiles@2
+        displayName: 'Copy Test Logs to Artifact Staging Directory'
+        inputs:
+          SourceFolder: '$(Build.SourcesDirectory)/iot-e2e-tests/longhaul/src/logs'
+          Contents: |
+            **/*.txt
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/TestRunLogs'
+        continueOnError: true
+        condition: always()
+
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Artifact Staging Directory'
+        continueOnError: true
+        condition: always()
+
+      - task: PublishTestResults@2
+        displayName: 'Publish Test Results'
+        inputs:
+          mergeTestResults: true
+          testRunTitle: "Windows Longhaul Results"
+        continueOnError: true
+        condition: always()

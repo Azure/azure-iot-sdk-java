@@ -38,7 +38,7 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
     @Delegate(excludes = DeviceClientNonDelegatedFunction.class)
     private final DeviceClient client;
 
-    DeviceClientManager(DeviceClient deviceClient) {
+    public DeviceClientManager(DeviceClient deviceClient) {
         this.connectionStatus = ConnectionStatus.DISCONNECTED;
         this.client = deviceClient;
         this.client.registerConnectionStatusChangeCallback(this, this);
