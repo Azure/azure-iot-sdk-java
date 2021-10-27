@@ -12,4 +12,4 @@ else
     Write-Host "Pull request build detected"
 }
 
-mvn -pl :provisioning-device-client,:provisioning-service-client,:iot-deps,:iot-service-client,:iot-device-client -D"maven.test.skip=true" -D"maven.javadoc.skip=true" install -T 2C
+mvn -DRUN_PROVISIONING_TESTS="$Env:runProvisioningTests" -DRUN_DIGITAL_TESTS="$Env:runDigitalTwinTests" -DRUN_IOTHUB_TESTS="$Env:runIotHubTests" -DIS_PULL_REQUEST="$isPullRequestBuild" install -T 2C
