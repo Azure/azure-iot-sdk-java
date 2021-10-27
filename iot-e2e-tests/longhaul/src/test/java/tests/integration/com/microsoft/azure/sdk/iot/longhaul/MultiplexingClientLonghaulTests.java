@@ -191,10 +191,4 @@ public class MultiplexingClientLonghaulTests extends LonghaulTests
             fail("One or more tested functionalities failed during the test. See logs for more details.");
         }
     }
-
-    @Override
-    public String getTestClassName()
-    {
-        return MultiplexingClientLonghaulTests.class.getSimpleName();
-    }
 }

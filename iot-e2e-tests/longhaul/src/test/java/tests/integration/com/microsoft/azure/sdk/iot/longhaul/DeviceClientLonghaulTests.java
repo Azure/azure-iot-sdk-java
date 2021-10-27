@@ -190,10 +190,4 @@ public class DeviceClientLonghaulTests extends LonghaulTests
             fail("One or more tested functionalities failed during the test. See logs for more details.");
         }
     }
-
-    @Override
-    public String getTestClassName()
-    {
-        return DeviceClientLonghaulTests.class.getSimpleName();
-    }
 }

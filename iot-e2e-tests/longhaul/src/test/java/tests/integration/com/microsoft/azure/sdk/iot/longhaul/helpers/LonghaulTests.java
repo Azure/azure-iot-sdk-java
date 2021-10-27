@@ -61,6 +61,4 @@ public abstract class LonghaulTests
 
     @Rule
     public TestName testName = new TestName();
-
-    public abstract String getTestClassName();
 }
