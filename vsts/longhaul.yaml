@@ -32,21 +32,6 @@ jobs:
           RUN_LONGHAUL_TESTS: 'true'
         condition: always()
 
-      - task: CopyFiles@2
-        displayName: 'Copy Test Logs to Artifact Staging Directory'
-        inputs:
-          SourceFolder: '$(Build.SourcesDirectory)/iot-e2e-tests/longhaul/src/logs'
-          Contents: |
-            **/*.txt
-          TargetFolder: '$(Build.ArtifactStagingDirectory)/TestRunLogs'
-        continueOnError: true
-        condition: always()
-
-      - task: PublishBuildArtifacts@1
-        displayName: 'Publish Artifact Staging Directory'
-        continueOnError: true
-        condition: always()
-
       - task: PublishTestResults@2
         displayName: 'Publish Test Results'
         inputs:
@@ -79,21 +64,6 @@ jobs:
         env:
           IOTHUB_CONNECTION_STRING: $(LINUX-IOTHUB-CONNECTION-STRING)
           RUN_LONGHAUL_TESTS: 'true'
-        condition: always()
-
-      - task: CopyFiles@2
-        displayName: 'Copy Test Logs to Artifact Staging Directory'
-        inputs:
-          SourceFolder: '$(Build.SourcesDirectory)/iot-e2e-tests/longhaul/src/logs'
-          Contents: |
-            **/*.txt
-          TargetFolder: '$(Build.ArtifactStagingDirectory)/TestRunLogs'
-        continueOnError: true
-        condition: always()
-
-      - task: PublishBuildArtifacts@1
-        displayName: 'Publish Artifact Staging Directory'
-        continueOnError: true
         condition: always()
 
       - task: PublishTestResults@2
