@@ -63,35 +63,4 @@ public abstract class LonghaulTests
     public TestName testName = new TestName();
 
     public abstract String getTestClassName();
-
-    @Before
-    public void setupLogger()
-    {
-        try
-        {
-            // Setup logging settings dynamically rather than in log4j.properties file so that we can write logs for each
-            // test to a custom log file rather than just write to system.out
-            // This is also necessary because Azure Devops does not publish the test logs for a test that succeeded,
-            // and we will definitely want those logs. So we log to files, and then publish those files to Azure Devops as
-            // build artifacts.
-            PatternLayout layout = new PatternLayout();
-            layout.setConversionPattern("%d %p (%t) [%c] - %m%n");
-            String testSpecificLogFile = "./src/logs/" + getTestClassName() + "/" + this.testName.getMethodName() + ".txt";
-            FileAppender appender = new FileAppender(layout, testSpecificLogFile,false);
-            org.apache.log4j.Logger rootLogger = org.apache.log4j.Logger.getRootLogger();
-            rootLogger.addAppender(appender);
-            rootLogger.setLevel(Level.TRACE);
-        }
-        catch (IOException e)
-        {
-            // shouldn't happen
-            throw new RuntimeException("Failed to create log files for the test, aborting test run", e);
-        }
-    }
-
-    @After
-    public void intentionallyFail()
-    {
-        throw new RuntimeException("Test passed, but maven surefire only gives us logs if the test fails");
-    }
 }
