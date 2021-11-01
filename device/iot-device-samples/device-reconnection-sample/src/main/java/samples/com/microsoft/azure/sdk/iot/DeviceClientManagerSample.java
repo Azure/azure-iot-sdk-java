@@ -16,13 +16,19 @@ import java.util.List;
 @Slf4j
 public class DeviceClientManagerSample {
 
-    private static int _NUM_REQUESTS = 3;
-    private static int _SLEEP_DURATION_IN_SECONDS = 10;
-    private static int _TIMEOUT_IN_MINUTES = 1;
-    private static String _CMD_LINE = "Expected 1 or 2 arguments but received: %d.\n"
-        + "The program should be called with the following args: \n"
-        + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key> or HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>;GatewayHostName=<gateway> \n"
-        + "2. (optional, default = mqtt) [mqtt | https | amqps | amqps_ws | mqtt_ws]\n";
+    private static final String DEVICE_CONNECTION_STRING = System.getenv("IOTHUB_DEVICE_CONNECTION_STRING");
+    private static int NUM_REQUESTS = 3;
+    private static int SLEEP_DURATION_IN_SECONDS = 10;
+    private static int TIMEOUT_IN_MINUTES = 1;
+    private static String CMD_ARG = "Expect arguments but received: %d\n";
+    private static String CMD_HELP = "Usage:\n"
+        + "The program should be called with the following args:\n"
+        + "1. [Device connection string]: (Required, default to environment variable \"IOTHUB_DEVICE_CONNECTION_STRING\")\n"
+        + "2. [Transport protocol]: (default to \"mqtt\") Protocol choice [mqtt | https | amqps | amqps_ws | mqtt_ws]\n"
+        + "3. [Number of requests]: (default to \"3\")\n"
+        + "4. [Sleep duration in seconds]: (default to \"10\")\n"
+        + "5. [Timeout in minutes]: (default to \"1\")\n"
+        + "\n";
     // Can be configured to use any protocol from HTTPS, AMQPS, MQTT, AMQPS_WS, MQTT_WS. Note: HTTPS does not support status callback, device methods and device twins.
 
     final static List<String> failedMessageListOnClose = new ArrayList<>(); // List of messages that failed on close
@@ -35,38 +41,62 @@ public class DeviceClientManagerSample {
             throws URISyntaxException, IOException {
 
         System.out.println("Starting...");
-        System.out.println("Beginning setup.");
         
-        if (args.length < 1 || args.length > 2)
+        String argDeviceConnectionString = (args.length >= 1) ? args[0] : DEVICE_CONNECTION_STRING;
+        
+        if (argDeviceConnectionString == null && (args.length < 1 || args.length >=5) )
         {
-            System.out.format(_CMD_LINE, args.length);
+            System.out.format("[Error] " + CMD_ARG + "\n" + CMD_HELP, args.length);
             return;
         }
 
-        String argDeviceConnectionString = args[0];
+        System.out.println("Setup parameters...");
+        System.out.format("Setup parameter: Connection String from %s\n", (args.length >= 1) ? "command line" : "environment variable (\"IOTHUB_DEVICE_CONNECTION_STRING\")");
 
         IotHubClientProtocol argProtocol;
-        String strProtocol = (args.length >1)?args[1]:"mqtt";
-
-        if (strProtocol.equals("https"))
-            argProtocol = IotHubClientProtocol.HTTPS;
-        else if (strProtocol.equals("amqps"))
-            argProtocol = IotHubClientProtocol.AMQPS;
-        else if (strProtocol.equals("amqps_ws"))
-            argProtocol = IotHubClientProtocol.AMQPS_WS;
-        else if (strProtocol.equals("mqtt_ws"))
-            argProtocol = IotHubClientProtocol.MQTT_WS;
+        if (args.length >= 2)
+        {
+            switch (args[1].toLowerCase())
+            {
+                case "https":
+                    argProtocol = IotHubClientProtocol.HTTPS;
+                    break;
+                case "amqps":
+                    argProtocol = IotHubClientProtocol.AMQPS;
+                    break;
+                case "amqps_ws":
+                    argProtocol = IotHubClientProtocol.AMQPS_WS;
+                    break;
+                case "mqtt":
+                    argProtocol = IotHubClientProtocol.MQTT;
+                    break;
+                case "mqtt_ws":
+                    argProtocol = IotHubClientProtocol.MQTT_WS;
+                    break;
+                default:
+                    throw new IllegalArgumentException("[ERROR] Do not support protocol: [" + args[1] + "]");
+            }
+        }
         else
-            argProtocol = IotHubClientProtocol.MQTT;        
-        
-        System.out.println("Successfully read input parameters.");
-        System.out.format("Using communication protocol %s.\n", argProtocol.name());
-        
+        {
+            argProtocol = IotHubClientProtocol.MQTT;
+            System.out.format("[DEFULT] Did not specify protocol. Default transport protocol to [%s]\n", argProtocol.name());
+            System.out.format(CMD_HELP, args.length);
+        }
+        System.out.format("Setup parameter: Protocol = [%s]\n", argProtocol.name());
+
+        int argNumRequest = (args.length > 2) ? Integer.parseInt(args[2]) : NUM_REQUESTS;
+        System.out.format("Setup parameter: Requests = [%d]\n", argNumRequest);
+        int argSleepDuration = (args.length > 3) ? Integer.parseInt(args[3]) : SLEEP_DURATION_IN_SECONDS;
+        System.out.format("Setup parameter: Sleep Duration = [%d]\n", argSleepDuration);
+        int argTimeout = (args.length > 4) ? Integer.parseInt(args[4]) : TIMEOUT_IN_MINUTES;
+        System.out.format("Setup parameter: Timeout = [%d]\n", argTimeout);
+
         DeviceClient client = new DeviceClient(argDeviceConnectionString, argProtocol);
         System.out.println("Successfully created an IoT Hub client.");
 
         deviceClientManager = new DeviceClientManager(client);
-        deviceClientManager.setOperationTimeout(_TIMEOUT_IN_MINUTES);
+        deviceClientManager.setOperationTimeout(argTimeout);
 
         deviceClientManager.open();
         System.out.println("Opened connection to IoT Hub.");
@@ -75,7 +105,7 @@ public class DeviceClientManagerSample {
         deviceClientManager.setMessageCallback(new SampleMessageReceiveCallback(), new Object());
 
         System.out.println("Start sending telemetry ...");
-        startSendingTelemetry();
+        startSendingTelemetry(argNumRequest, argSleepDuration);
 
         // close the connection
         System.out.println("Closing");
@@ -89,9 +119,9 @@ public class DeviceClientManagerSample {
         System.out.println("Shutting down...");
     }
 
-    private static void startSendingTelemetry() {
+    private static void startSendingTelemetry(int numRequest, int sleepTime) {
         log.debug("Sending the following event messages:");
-        for (int i = 0; i < _NUM_REQUESTS; ++i) {
+        for (int i = 0; i < numRequest; ++i) {
             Message msg = composeMessage(i);
             SampleMessageSendCallback callback = new SampleMessageSendCallback();
             try {
@@ -101,8 +131,8 @@ public class DeviceClientManagerSample {
                 log.error("Exception thrown while sending telemetry: ", e);
             }
             try {
-                log.debug("Sleeping for {} secs before sending next message.", _SLEEP_DURATION_IN_SECONDS);
-                Thread.sleep(_SLEEP_DURATION_IN_SECONDS * 1000);
+                log.debug("Sleeping for {} secs before sending next message.", sleepTime);
+                Thread.sleep(sleepTime * 1000);
             } catch (InterruptedException e) {
                 log.error("Exception thrown while sleeping: ", e);
             }
