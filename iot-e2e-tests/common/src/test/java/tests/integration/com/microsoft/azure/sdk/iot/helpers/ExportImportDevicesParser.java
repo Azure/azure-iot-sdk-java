@@ -6,7 +6,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.deps.serializer.ExportImportDeviceParser;
+import com.microsoft.azure.sdk.iot.service.serializer.ExportImportDeviceParser;
 
 import java.util.ArrayList;
 

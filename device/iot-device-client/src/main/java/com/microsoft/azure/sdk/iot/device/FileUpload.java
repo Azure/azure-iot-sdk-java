@@ -3,10 +3,10 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
+import com.microsoft.azure.sdk.iot.device.serializer.FileUploadCompletionNotification;
+import com.microsoft.azure.sdk.iot.device.serializer.FileUploadSasUriRequest;
+import com.microsoft.azure.sdk.iot.device.serializer.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;

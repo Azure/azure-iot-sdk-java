@@ -38,15 +38,20 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>${iot-deps-artifact-id}</artifactId>
-            <version>${iot-deps-version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.json</artifactId>
             <version>1.0.4</version>
             <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.1</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.14</version>
         </dependency>
         <!-- test dependencies -->
         <dependency>

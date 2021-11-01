@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
-import com.microsoft.azure.sdk.iot.service.exceptions.*;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;

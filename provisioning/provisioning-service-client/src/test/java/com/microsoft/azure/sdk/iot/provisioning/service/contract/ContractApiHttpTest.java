@@ -3,17 +3,19 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service.contract;
 
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpRequest;
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
 import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningConnectionString;
 import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningSasToken;
-import com.microsoft.azure.sdk.iot.provisioning.service.contract.SDKUtils;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientExceptionManager;
-import com.microsoft.azure.sdk.iot.provisioning.service.contract.ContractApiHttp;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientTransportException;
-import mockit.*;
+import com.microsoft.azure.sdk.iot.provisioning.service.transport.HttpMethod;
+import com.microsoft.azure.sdk.iot.provisioning.service.transport.HttpRequest;
+import com.microsoft.azure.sdk.iot.provisioning.service.transport.HttpResponse;
+import mockit.Deencapsulation;
+import mockit.Expectations;
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
+import mockit.Verifications;
 import org.junit.Test;
 
 import java.io.IOException;

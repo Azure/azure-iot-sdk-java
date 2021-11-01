@@ -148,61 +148,6 @@ public class X509ThumbprintTest
         assertNotNull(Deencapsulation.getField(thumbprint, "secondaryThumbprint"));
     }
 
-    @Test
-    public void equalsWorks()
-    {
-        // Arrange
-        X509Thumbprint s1 = createTestThumbprintWithInvalidThumbprintValues(null, null);
-        X509Thumbprint s2 = createTestThumbprintWithInvalidThumbprintValues("", null);
-        X509Thumbprint s3 = createTestThumbprintWithInvalidThumbprintValues(null, "");
-        X509Thumbprint s4 = createTestThumbprintWithInvalidThumbprintValues("", "");
-        X509Thumbprint s5 = createTestThumbprintWithInvalidThumbprintValues("", "secondaryThumbprint");
-        X509Thumbprint s6 = createTestThumbprintWithInvalidThumbprintValues("primaryThumbprint", "secondaryThumbprint2");
-        X509Thumbprint s7 = createTestThumbprintWithInvalidThumbprintValues("primaryThumbprint2", "secondaryThumbprint");
-        X509Thumbprint s8 = createTestThumbprintWithInvalidThumbprintValues("primaryThumbprint", "secondaryThumbprint");
-        X509Thumbprint s9 = createTestThumbprintWithInvalidThumbprintValues("primaryThumbprint", "secondaryThumbprint");
-
-        // Assert
-        assertNotEquals(s1, s2);
-        assertNotEquals(s1, s3);
-        assertNotEquals(s1, s4);
-        assertNotEquals(s1, s5);
-        assertNotEquals(s1, s6);
-        assertNotEquals(s1, s7);
-        assertNotEquals(s1, s8);
-
-        assertNotEquals(s2, s3);
-        assertNotEquals(s2, s4);
-        assertNotEquals(s2, s5);
-        assertNotEquals(s2, s6);
-        assertNotEquals(s2, s7);
-        assertNotEquals(s2, s8);
-
-        assertNotEquals(s3, s4);
-        assertNotEquals(s3, s5);
-        assertNotEquals(s3, s6);
-        assertNotEquals(s3, s7);
-        assertNotEquals(s3, s8);
-
-        assertNotEquals(s4, s5);
-        assertNotEquals(s4, s6);
-        assertNotEquals(s4, s7);
-        assertNotEquals(s4, s8);
-
-        assertNotEquals(s5, s6);
-        assertNotEquals(s5, s7);
-        assertNotEquals(s5, s8);
-
-        assertNotEquals(s6, s7);
-        assertNotEquals(s6, s8);
-
-        assertNotEquals(s7, s8);
-
-        assertEquals(s8, s9);
-
-        assertNotEquals(s1, "not a thumbprint object");
-    }
-
     /**
      * Creates a thumbprint using the constructor X509Thumbprint(String primaryThumbprint, String secondaryThumbprint)
      * @param primaryThumbprint the primary thumbprint value to set
@@ -212,20 +157,5 @@ public class X509ThumbprintTest
     private X509Thumbprint createTestThumbprint(String primaryThumbprint, String secondaryThumbprint)
     {
         return Deencapsulation.newInstance(X509Thumbprint.class, new Class[] { String.class, String.class }, primaryThumbprint, secondaryThumbprint);
-    }
-
-    /**
-     * Creates a thumbprint using the empty constructor for X509Thumbprint and then sets the primary and secondary thumbprints using reflection.
-     * This avoids some checks in the constructor and allows for creating thumbprints in illegal states.
-     * @param primaryThumbprint the primary thumbprint value to set
-     * @param secondaryThumbprint the secondary thumbprint value to set
-     * @return the created thumbprint object
-     */
-    private X509Thumbprint createTestThumbprintWithInvalidThumbprintValues(String primaryThumbprint, String secondaryThumbprint)
-    {
-        X509Thumbprint thumbprint = Deencapsulation.newInstance(X509Thumbprint.class, new Class[] { String.class, String.class }, expectedPrimaryThumbprint, expectedSecondaryThumbprint);
-        Deencapsulation.setField(thumbprint, "primaryThumbprint", primaryThumbprint);
-        Deencapsulation.setField(thumbprint, "secondaryThumbprint", secondaryThumbprint);
-        return thumbprint;
     }
 }

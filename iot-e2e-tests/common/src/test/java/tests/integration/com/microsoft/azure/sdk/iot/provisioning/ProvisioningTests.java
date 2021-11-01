@@ -6,7 +6,6 @@
 package tests.integration.com.microsoft.azure.sdk.iot.provisioning;
 
 
-import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
 import com.microsoft.azure.sdk.iot.device.twin.PropertyCallback;

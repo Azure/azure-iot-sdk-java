@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.service.jobs;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.JobsStatisticsParser;
+import com.microsoft.azure.sdk.iot.service.serializer.JobsStatisticsParser;
 import lombok.Getter;
 
 /**

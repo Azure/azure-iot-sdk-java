@@ -3,9 +3,9 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
+import com.microsoft.azure.sdk.iot.device.serializer.FileUploadCompletionNotification;
+import com.microsoft.azure.sdk.iot.device.serializer.FileUploadSasUriRequest;
+import com.microsoft.azure.sdk.iot.device.serializer.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;

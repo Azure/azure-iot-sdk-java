@@ -5,10 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
-import com.microsoft.azure.sdk.iot.deps.twin.ConfigurationInfo;
-import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
-import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
-import com.microsoft.azure.sdk.iot.deps.util.Tools;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -92,10 +88,11 @@ public class Twin
     {
         this();
 
-        if (Tools.isNullOrEmpty(deviceId))
+        if (deviceId == null || deviceId.isEmpty())
         {
             throw new IllegalArgumentException("deviceId cannot be null or empty.");
         }
+
         this.deviceId = deviceId;
     }
 
@@ -110,12 +107,12 @@ public class Twin
     {
         this();
 
-        if (Tools.isNullOrEmpty(deviceId))
+        if (deviceId == null || deviceId.isEmpty())
         {
             throw new IllegalArgumentException("deviceId cannot be null or empty.");
         }
 
-        if (Tools.isNullOrEmpty(moduleId))
+        if (moduleId == null || moduleId.isEmpty())
         {
             throw new IllegalArgumentException("moduleId cannot be null or empty.");
         }

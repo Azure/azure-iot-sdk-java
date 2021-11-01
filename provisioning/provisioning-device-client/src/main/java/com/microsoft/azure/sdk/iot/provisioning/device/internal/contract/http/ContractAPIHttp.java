@@ -7,9 +7,6 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.http;
 
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpRequest;
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.*;
@@ -21,6 +18,9 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.TpmRegist
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.transport.http.HttpMethod;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.transport.http.HttpRequest;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.transport.http.HttpResponse;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;

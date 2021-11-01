@@ -5,7 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.RegistryStatisticsParser;
+import com.microsoft.azure.sdk.iot.service.serializer.RegistryStatisticsParser;
 import lombok.Getter;
 
 public class RegistryStatistics

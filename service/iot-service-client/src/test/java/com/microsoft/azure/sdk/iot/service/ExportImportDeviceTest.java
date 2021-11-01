@@ -3,14 +3,11 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.*;
-import com.microsoft.azure.sdk.iot.service.DeviceStatus;
-import com.microsoft.azure.sdk.iot.service.ExportImportDevice;
-import com.microsoft.azure.sdk.iot.service.ImportMode;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
 import com.microsoft.azure.sdk.iot.service.auth.X509Thumbprint;
+import com.microsoft.azure.sdk.iot.service.serializer.AuthenticationTypeParser;
+import com.microsoft.azure.sdk.iot.service.serializer.ExportImportDeviceParser;
 import mockit.Deencapsulation;
 import org.junit.Test;
 
@@ -69,24 +66,6 @@ public class ExportImportDeviceTest
         assertNotNull(device.getAuthentication());
         assertNotNull(device.getAuthentication().getSymmetricKey());
         assertEquals(AuthenticationType.SAS, device.getAuthentication().getAuthenticationType());
-    }
-
-    @Test
-    public void equalsWorks()
-    {
-        //arrange
-        ExportImportDevice device1 = createTestDevice(new AuthenticationMechanism(AuthenticationType.CERTIFICATE_AUTHORITY), ImportMode.Create, DeviceStatus.Disabled);
-        ExportImportDevice device2 = createTestDevice(new AuthenticationMechanism(AuthenticationType.CERTIFICATE_AUTHORITY), ImportMode.Create, DeviceStatus.Disabled);
-        ExportImportDevice device3 = createTestDevice(new AuthenticationMechanism(AuthenticationType.CERTIFICATE_AUTHORITY), ImportMode.CreateOrUpdate, DeviceStatus.Disabled);
-        ExportImportDevice device4 = createTestDevice(new AuthenticationMechanism(AuthenticationType.CERTIFICATE_AUTHORITY), ImportMode.Create, DeviceStatus.Enabled);
-        ExportImportDevice device5 = createTestDevice(new AuthenticationMechanism(AuthenticationType.SELF_SIGNED), ImportMode.Create, DeviceStatus.Enabled);
-
-        //assert
-        assertEquals(device1, device2);
-        assertNotEquals(device1, device3);
-        assertNotEquals(device1, device4);
-        assertNotEquals(device1, device5);
-        assertNotEquals(device1, 1);
     }
 
     //Tests_SRS_SERVICE_SDK_JAVA_IMPORT_EXPORT_DEVICE_34_054: [This method shall convert this into an ExportImportDeviceParser object and return it.]

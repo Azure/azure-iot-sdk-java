@@ -5,8 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.device.auth;
 
-import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
-
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.Objects;

@@ -72,7 +72,11 @@ Breaking changes:
   - Users of the X509 SecurityProvider are expected to pass in the parsed certificates and keys as Java security primitives rather than as strings
     - See [this sample](./provisioning/provisioning-samples/provisioning-X509-sample) for a demonstration on how to create these Java security primitives from strings
   
-  
+## IoT Deps package changes
+Breaking changes:
+- The IoT Deps package has been removed, and all of its classes have been moved to the packages that had a dependency on them.
+  - For example, the ```FileUploadSasUriRequest``` class that previously lived in package ```com.microsoft.azure.sdk.iot.deps.serializer``` now lives in package ```com.microsoft.azure.sdk.iot.device.serializer```
+
 ## Frequently Asked Questions
 
 Question:

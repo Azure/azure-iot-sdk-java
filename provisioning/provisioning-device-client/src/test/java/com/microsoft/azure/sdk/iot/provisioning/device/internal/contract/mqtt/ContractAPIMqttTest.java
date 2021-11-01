@@ -7,18 +7,17 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.mqtt;
 
-import com.microsoft.azure.sdk.iot.deps.transport.mqtt.MqttConnection;
-import com.microsoft.azure.sdk.iot.deps.transport.mqtt.MqttMessage;
-import com.microsoft.azure.sdk.iot.deps.transport.mqtt.MqttQos;
-import com.microsoft.azure.sdk.iot.deps.util.ObjectLock;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.mqtt.ContractAPIMqtt;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceConnectionException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.DeviceRegistrationParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.transport.ObjectLock;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.transport.mqtt.MqttConnection;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.transport.mqtt.MqttMessage;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.transport.mqtt.MqttQos;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.qpid.proton.Proton;
@@ -66,16 +65,13 @@ public class ContractAPIMqttTest
     MessageImpl mockedMessage;
 
     @Mocked
-    ObjectLock mockedObjectLock;
-
-    @Mocked
     Map<String, Object> mockedHashMap;
 
     @Mocked
     MqttMessage mockedMqttMessage;
 
     @Mocked
-    Object mockSendLock;
+    ObjectLock mockedObjectLock;
 
     @Mocked
     ProvisioningDeviceClientConfig mockedProvisioningDeviceClientConfig;
@@ -101,27 +97,6 @@ public class ContractAPIMqttTest
             }
         };
         return new ContractAPIMqtt(mockedProvisioningDeviceClientConfig);
-    }
-
-    private void prepareSendMessage(String operationId) throws IOException
-    {
-        new NonStrictExpectations()
-        {
-            {
-                Proton.message();
-                result = mockedMessage;
-                new HashMap<>();
-                result = mockedHashMap;
-                mockedHashMap.put((String)any, (String)any);
-
-                if (operationId != null)
-                {
-                    mockedHashMap.put((String)any, (String)any);
-                }
-                new ApplicationProperties(mockedHashMap);
-                mockedMessage.setApplicationProperties((ApplicationProperties)any);
-            }
-        };
     }
 
     private void openContractAPI(ContractAPIMqtt ContractAPIMqtt) throws ProvisioningDeviceClientException

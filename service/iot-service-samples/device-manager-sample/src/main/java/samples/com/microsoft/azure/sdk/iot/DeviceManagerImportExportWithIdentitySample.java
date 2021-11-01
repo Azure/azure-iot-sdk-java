@@ -5,11 +5,12 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.ManagedIdentity;
-import com.microsoft.azure.sdk.iot.deps.serializer.StorageAuthenticationType;
 import com.microsoft.azure.sdk.iot.service.JobProperties;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.serializer.ManagedIdentity;
+import com.microsoft.azure.sdk.iot.service.serializer.StorageAuthenticationType;
+
 import java.io.IOException;
 
 /* A sample to illustrate how to perform import and export jobs using managed identity to access the storage account.

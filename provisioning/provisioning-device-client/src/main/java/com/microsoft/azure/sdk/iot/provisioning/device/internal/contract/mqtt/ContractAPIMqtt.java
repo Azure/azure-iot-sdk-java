@@ -3,7 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.mqtt;
 
-import com.microsoft.azure.sdk.iot.deps.util.ObjectLock;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.SDKUtils;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
@@ -11,9 +10,12 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.DeviceRegistrationParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
-import com.microsoft.azure.sdk.iot.deps.transport.mqtt.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.transport.mqtt.MqttConnection;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.transport.mqtt.MqttListener;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.transport.mqtt.MqttMessage;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.transport.mqtt.MqttQos;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -37,7 +39,7 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
     private int packetId;
     private final boolean useWebSockets;
 
-    private final ObjectLock receiveLock = new ObjectLock();
+    private final Object receiveLock = new Object();
     private final Queue<MqttMessage> receivedMessages = new LinkedBlockingQueue<>();
 
     private Throwable lostConnection = null;
@@ -81,7 +83,7 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
             // SRS_ProvisioningAmqpOperations_07_011: [This method shall wait for the response of this message for MAX_WAIT_TO_SEND_MSG and call the responseCallback with the reply.]
             synchronized (this.receiveLock)
             {
-                this.receiveLock.waitLock(MAX_WAIT_TO_SEND_MSG);
+                this.receiveLock.wait(MAX_WAIT_TO_SEND_MSG);
             }
             if (this.receivedMessages.size() > 0)
             {
@@ -353,7 +355,7 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
         synchronized (this.receiveLock)
         {
             // SRS_ProvisioningAmqpOperations_07_014: [This method shall then Notify the receiveLock.]
-            this.receiveLock.notifyLock();
+            this.receiveLock.notify();
         }
     }
 

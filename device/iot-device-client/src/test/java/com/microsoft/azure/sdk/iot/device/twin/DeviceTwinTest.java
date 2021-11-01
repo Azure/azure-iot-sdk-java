@@ -3,10 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.device.twin;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
-import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
-import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import mockit.*;
 import org.junit.Test;
@@ -1141,7 +1139,7 @@ public class DeviceTwinTest
 
     @Test
     public void getDeviceTwinResponseWithPropertiesWithMetadataCallsTwinPropertyCallback(
-            @Mocked final Property mockedProperty, @Mocked final ParserUtility mockedParserUtility, @Mocked final Date mockedData)
+        @Mocked final Property mockedProperty, @Mocked final ParserUtility mockedParserUtility, @Mocked final Date mockedData)
     {
         // arrange
         final String reportedProp1 = "ReportedProp1";

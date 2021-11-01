@@ -5,21 +5,25 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.*;
-import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
-import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.DeviceConnectionState;
-import com.microsoft.azure.sdk.iot.service.DeviceStatus;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
-import mockit.*;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceCapabilities;
+import com.microsoft.azure.sdk.iot.service.serializer.AuthenticationParser;
+import com.microsoft.azure.sdk.iot.service.serializer.AuthenticationTypeParser;
+import com.microsoft.azure.sdk.iot.service.serializer.DeviceParser;
+import com.microsoft.azure.sdk.iot.service.serializer.ParserUtility;
+import com.microsoft.azure.sdk.iot.service.serializer.SymmetricKeyParser;
+import com.microsoft.azure.sdk.iot.service.serializer.X509ThumbprintParser;
+import mockit.Deencapsulation;
+import mockit.Expectations;
 import org.junit.Test;
 
 import java.security.NoSuchAlgorithmException;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNull;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Code coverage:

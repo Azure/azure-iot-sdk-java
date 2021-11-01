@@ -5,7 +5,6 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.provisioning.setup;
 
-import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;

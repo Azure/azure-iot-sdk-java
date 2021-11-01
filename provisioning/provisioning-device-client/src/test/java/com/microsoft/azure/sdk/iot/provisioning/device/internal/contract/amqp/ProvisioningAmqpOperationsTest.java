@@ -7,16 +7,16 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp;
 
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpListener;
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpMessage;
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpsConnection;
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.SaslHandler;
-import com.microsoft.azure.sdk.iot.deps.util.ObjectLock;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.transport.ObjectLock;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.transport.amqp.AmqpListener;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.transport.amqp.AmqpMessage;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.transport.amqp.AmqpsConnection;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.transport.amqp.SaslHandler;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp.ProvisioningAmqpOperations;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceConnectionException;
 import mockit.Deencapsulation;
+import mockit.Mock;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
@@ -65,7 +65,7 @@ public class ProvisioningAmqpOperationsTest
     private Binary mockedBinaryData;
 
     @Mocked
-    private final ObjectLock mockedObjectLock = new ObjectLock();
+    private ObjectLock mockedObjectLock;
 
     @Mocked
     private SaslHandler mockedSaslHandler;

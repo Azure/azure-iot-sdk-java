@@ -5,12 +5,6 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
-import com.azure.core.credential.TokenCredential;
-import com.microsoft.azure.sdk.iot.deps.serializer.AuthenticationParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.AuthenticationTypeParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.ExportImportDeviceParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.SymmetricKeyParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.X509ThumbprintParser;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
@@ -26,6 +20,11 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
+import com.microsoft.azure.sdk.iot.service.serializer.AuthenticationParser;
+import com.microsoft.azure.sdk.iot.service.serializer.AuthenticationTypeParser;
+import com.microsoft.azure.sdk.iot.service.serializer.ExportImportDeviceParser;
+import com.microsoft.azure.sdk.iot.service.serializer.SymmetricKeyParser;
+import com.microsoft.azure.sdk.iot.service.serializer.X509ThumbprintParser;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;

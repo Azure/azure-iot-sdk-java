@@ -5,7 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service.exceptions;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.ErrorMessageParser;
+
+import com.microsoft.azure.sdk.iot.provisioning.service.contract.ErrorMessageParser;
 
 /**
  * Provide static function to verify the Device Provisioning Service results and throw appropriate exception.

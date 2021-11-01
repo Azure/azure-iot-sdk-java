@@ -3,8 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service;
 
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.AttestationMechanism;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.EnrollmentGroup;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.QuerySpecification;
@@ -12,6 +10,8 @@ import com.microsoft.azure.sdk.iot.provisioning.service.contract.ContractApiHttp
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientServiceException;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientTransportException;
+import com.microsoft.azure.sdk.iot.provisioning.service.transport.HttpMethod;
+import com.microsoft.azure.sdk.iot.provisioning.service.transport.HttpResponse;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;

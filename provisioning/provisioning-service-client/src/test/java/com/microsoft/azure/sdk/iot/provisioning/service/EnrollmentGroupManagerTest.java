@@ -3,20 +3,27 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service;
 
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
-import com.microsoft.azure.sdk.iot.provisioning.service.*;
-import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
+import com.microsoft.azure.sdk.iot.provisioning.service.configs.EnrollmentGroup;
+import com.microsoft.azure.sdk.iot.provisioning.service.configs.QuerySpecification;
 import com.microsoft.azure.sdk.iot.provisioning.service.contract.ContractApiHttp;
-import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.*;
-import mockit.*;
+import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientBadFormatException;
+import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
+import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientInternalServerErrorException;
+import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientServiceException;
+import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientTransportException;
+import com.microsoft.azure.sdk.iot.provisioning.service.transport.HttpMethod;
+import com.microsoft.azure.sdk.iot.provisioning.service.transport.HttpResponse;
+import mockit.Deencapsulation;
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
+import mockit.StrictExpectations;
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Unit tests for EnrollmentGroup Manager.

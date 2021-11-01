@@ -5,11 +5,14 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.*;
-import com.microsoft.azure.sdk.iot.service.Module;
-import com.microsoft.azure.sdk.iot.service.DeviceConnectionState;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
+import com.microsoft.azure.sdk.iot.service.serializer.AuthenticationParser;
+import com.microsoft.azure.sdk.iot.service.serializer.AuthenticationTypeParser;
+import com.microsoft.azure.sdk.iot.service.serializer.DeviceParser;
+import com.microsoft.azure.sdk.iot.service.serializer.ParserUtility;
+import com.microsoft.azure.sdk.iot.service.serializer.SymmetricKeyParser;
+import com.microsoft.azure.sdk.iot.service.serializer.X509ThumbprintParser;
 import mockit.*;
 import org.junit.Test;
 

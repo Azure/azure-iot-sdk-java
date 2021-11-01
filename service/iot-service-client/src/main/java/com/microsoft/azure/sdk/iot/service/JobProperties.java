@@ -5,9 +5,9 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.JobPropertiesParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.ManagedIdentity;
-import com.microsoft.azure.sdk.iot.deps.serializer.StorageAuthenticationType;
+import com.microsoft.azure.sdk.iot.service.serializer.JobPropertiesParser;
+import com.microsoft.azure.sdk.iot.service.serializer.ManagedIdentity;
+import com.microsoft.azure.sdk.iot.service.serializer.StorageAuthenticationType;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;

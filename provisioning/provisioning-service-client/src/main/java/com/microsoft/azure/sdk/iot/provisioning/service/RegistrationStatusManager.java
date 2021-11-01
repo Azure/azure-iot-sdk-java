@@ -3,12 +3,12 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service;
 
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.DeviceRegistrationState;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.QuerySpecification;
 import com.microsoft.azure.sdk.iot.provisioning.service.contract.ContractApiHttp;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.*;
+import com.microsoft.azure.sdk.iot.provisioning.service.transport.HttpMethod;
+import com.microsoft.azure.sdk.iot.provisioning.service.transport.HttpResponse;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;

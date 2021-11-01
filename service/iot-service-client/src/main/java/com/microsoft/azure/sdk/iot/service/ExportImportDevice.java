@@ -5,10 +5,14 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.*;
-import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinCollection;
+import com.microsoft.azure.sdk.iot.service.serializer.AuthenticationParser;
+import com.microsoft.azure.sdk.iot.service.serializer.AuthenticationTypeParser;
+import com.microsoft.azure.sdk.iot.service.serializer.ExportImportDeviceParser;
+import com.microsoft.azure.sdk.iot.service.serializer.SymmetricKeyParser;
+import com.microsoft.azure.sdk.iot.service.serializer.X509ThumbprintParser;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
