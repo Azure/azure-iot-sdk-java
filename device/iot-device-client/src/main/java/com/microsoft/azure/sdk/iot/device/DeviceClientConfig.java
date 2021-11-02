@@ -479,8 +479,8 @@ public final class DeviceClientConfig
         String identifierPrefix = getDeviceId();
         if (identifierPrefix == null || identifierPrefix.isEmpty())
         {
-            identifierPrefix = getModelId();
-            if(identifierPrefix == null || identifierPrefix.isEmpty())
+            identifierPrefix = getModuleId();
+            if (identifierPrefix == null || identifierPrefix.isEmpty())
             {
                 // If there is no device Id or module Id, set the identifier prefix to be
                 identifierPrefix = UUID.randomUUID().toString().substring(0, 8);
