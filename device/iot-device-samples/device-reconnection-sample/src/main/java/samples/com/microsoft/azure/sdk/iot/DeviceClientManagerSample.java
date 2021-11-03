@@ -12,6 +12,8 @@ import java.io.*;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.*;
+
 
 @Slf4j
 public class DeviceClientManagerSample {
@@ -20,8 +22,7 @@ public class DeviceClientManagerSample {
     private static int NUM_REQUESTS = 3;
     private static int SLEEP_DURATION_IN_SECONDS = 10;
     private static int TIMEOUT_IN_MINUTES = 1;
-    private static String CMD_ARG = "Expect arguments but received: %d\n";
-    private static String CMD_HELP = "Usage:\n"
+    private static String CMD_HELP = "\nUsage:\n"
         + "The program should be called with the following args:\n"
         + "1. [Device connection string]: (Required, default to environment variable \"IOTHUB_DEVICE_CONNECTION_STRING\")\n"
         + "2. [Transport protocol]: (default to \"mqtt\") Protocol choice [mqtt | https | amqps | amqps_ws | mqtt_ws]\n"
@@ -40,18 +41,18 @@ public class DeviceClientManagerSample {
     public static void main(String[] args)
             throws URISyntaxException, IOException {
 
-        System.out.println("Starting...");
+        log.info("Starting...");
         
         String argDeviceConnectionString = (args.length >= 1) ? args[0] : DEVICE_CONNECTION_STRING;
         
         if (argDeviceConnectionString == null && (args.length < 1 || args.length >=5) )
         {
-            System.out.format("[Error] " + CMD_ARG + "\n" + CMD_HELP, args.length);
+            log.error("Expect arguments but received: {}\n" + CMD_HELP, args.length);
             return;
         }
 
-        System.out.println("Setup parameters...");
-        System.out.format("Setup parameter: Connection String from %s\n", (args.length >= 1) ? "command line" : "environment variable (\"IOTHUB_DEVICE_CONNECTION_STRING\")");
+        log.info("Setup parameters...");
+        log.debug("Setup parameter: Connection String from {}", (args.length >= 1) ? "command line" : "environment variable (\"IOTHUB_DEVICE_CONNECTION_STRING\")");
 
         IotHubClientProtocol argProtocol;
         if (args.length >= 2)
@@ -80,43 +81,43 @@ public class DeviceClientManagerSample {
         else
         {
             argProtocol = IotHubClientProtocol.MQTT;
-            System.out.format("[DEFULT] Did not specify protocol. Default transport protocol to [%s]\n", argProtocol.name());
-            System.out.format(CMD_HELP, args.length);
+            log.debug("Setup parameter: Did not specify protocol. Default transport protocol to [{}]", argProtocol.name());
+            log.debug(CMD_HELP);
         }
-        System.out.format("Setup parameter: Protocol = [%s]\n", argProtocol.name());
+        log.debug("Setup parameter: Protocol = [{}]", argProtocol.name());
 
         int argNumRequest = (args.length > 2) ? Integer.parseInt(args[2]) : NUM_REQUESTS;
-        System.out.format("Setup parameter: Requests = [%d]\n", argNumRequest);
+        log.debug("Setup parameter: Requests = [{}]", argNumRequest);
         int argSleepDuration = (args.length > 3) ? Integer.parseInt(args[3]) : SLEEP_DURATION_IN_SECONDS;
-        System.out.format("Setup parameter: Sleep Duration = [%d]\n", argSleepDuration);
+        log.debug("Setup parameter: Sleep Duration = [{}]", argSleepDuration);
         int argTimeout = (args.length > 4) ? Integer.parseInt(args[4]) : TIMEOUT_IN_MINUTES;
-        System.out.format("Setup parameter: Timeout = [%d]\n", argTimeout);
+        log.debug("Setup parameter: Timeout = [{}]", argTimeout);
 
         DeviceClient client = new DeviceClient(argDeviceConnectionString, argProtocol);
-        System.out.println("Successfully created an IoT Hub client.");
+        log.info("Successfully created an IoT Hub client.");
 
         deviceClientManager = new DeviceClientManager(client);
         deviceClientManager.setOperationTimeout(argTimeout);
 
         deviceClientManager.open();
-        System.out.println("Opened connection to IoT Hub.");
+        log.info("Opened connection to IoT Hub.");
 
-        System.out.println("Setting C2D message handler...");
+        log.debug("Setting C2D message handler...");
         deviceClientManager.setMessageCallback(new SampleMessageReceiveCallback(), new Object());
 
-        System.out.println("Start sending telemetry ...");
+        log.debug("Start sending telemetry ...");
         startSendingTelemetry(argNumRequest, argSleepDuration);
 
         // close the connection
-        System.out.println("Closing");
+        log.info("Closing");
         deviceClientManager.closeNow();
 
         if (! failedMessageListOnClose.isEmpty()) {
-            System.out.println("List of messages that were cancelled on close:");
-            System.out.println(failedMessageListOnClose.toString());
+            log.error("List of messages that were cancelled on close:");
+            log.error(failedMessageListOnClose.toString());
         }
 
-        System.out.println("Shutting down...");
+        log.info("Shutting down...");
     }
 
     private static void startSendingTelemetry(int numRequest, int sleepTime) {
@@ -132,7 +133,7 @@ public class DeviceClientManagerSample {
             }
             try {
                 log.debug("Sleeping for {} secs before sending next message.", sleepTime);
-                Thread.sleep(sleepTime * 1000);
+                TimeUnit.SECONDS.sleep(sleepTime);
             } catch (InterruptedException e) {
                 log.error("Exception thrown while sleeping: ", e);
             }
