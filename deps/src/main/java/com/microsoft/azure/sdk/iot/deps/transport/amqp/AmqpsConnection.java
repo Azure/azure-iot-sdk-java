@@ -218,7 +218,7 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
 
         String reactorRunnerPrefix = this.hostName + "-Cxn" + this.connectionId;
 
-        ReactorRunner reactorRunner = new ReactorRunner(amqpReactor, reactorRunnerPrefix, "AmqpOpenAsync");
+        ReactorRunner reactorRunner = new ReactorRunner(amqpReactor, reactorRunnerPrefix, "ConnectionOwner");
         executorService.submit(reactorRunner);
     }
 
