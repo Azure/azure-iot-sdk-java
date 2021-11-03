@@ -66,7 +66,7 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
 
     private final SSLContext sslContext;
 
-    // This field is used to uniquely identifying a connection.
+    // This field is used to uniquely identify a connection.
     private final String connectionId;
 
     public String getConnectionId() {
