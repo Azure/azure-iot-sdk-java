@@ -643,7 +643,7 @@ public class IotHubTransport implements IotHubListener
         }
 
         // If this is a multithread transport layer, we will use its unique identifier.
-        return this.hostName + "-" + "Multiplexed" + this.transportUniqueIdentifier;
+        return this.hostName + "-Multiplexed-" + this.transportUniqueIdentifier;
     }
 
     private void checkForExpiredMessages()
