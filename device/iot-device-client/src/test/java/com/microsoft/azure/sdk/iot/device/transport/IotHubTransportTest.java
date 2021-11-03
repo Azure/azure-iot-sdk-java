@@ -1049,7 +1049,7 @@ public class IotHubTransportTest
             {
                 mockedConfig.getProtocol();
                 result = IotHubClientProtocol.AMQPS;
-                new AmqpsIotHubConnection(mockedConfig,anyString, false);
+                new AmqpsIotHubConnection(mockedConfig, anyString, false);
                 result = mockedAmqpsIotHubConnection;
             }
         };
