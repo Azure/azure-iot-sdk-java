@@ -1211,7 +1211,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         this.reactor = createReactor();
 
         String runnerUniqueIdentifier = this.isMultiplexing
-                ? "Multiplexed" + this.transportUniqueIdentifier
+                ? "Multiplexed" + "-" + this.transportUniqueIdentifier
                 : this.deviceClientConfig.getDeviceClientUniqueIdentifier();
 
         String reactorRunnerPrefix = this.hostName + "-" + runnerUniqueIdentifier + "-" + "Cnx" + this.connectionId;
@@ -1220,7 +1220,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             this.listener,
             this.connectionId,
             reactorRunnerPrefix,
-            "OpenAsync",
+            "ConnectionOwner",
             this);
 
         executorService.submit(reactorRunner);

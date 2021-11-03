@@ -86,9 +86,6 @@ public class IotHubTransport implements IotHubListener
     // Keys are deviceIds. Helps with getting configs based on deviceIds
     private final Map<String, DeviceClientConfig> deviceClientConfigs = new ConcurrentHashMap<>();
 
-    // Is only set when it's not a multiplexing client.
-    private DeviceClientConfig deviceClientConfig = null;
-
     private String transportUniqueIdentifier = UUID.randomUUID().toString().substring(0, 8);
 
     private ScheduledExecutorService taskScheduler;
@@ -130,8 +127,6 @@ public class IotHubTransport implements IotHubListener
         {
             throw new IllegalArgumentException("Config cannot be null");
         }
-
-        this.deviceClientConfig = defaultConfig;
 
         this.protocol = defaultConfig.getProtocol();
         this.hostName = defaultConfig.getIotHubHostname();
@@ -643,8 +638,8 @@ public class IotHubTransport implements IotHubListener
 
     String getDeviceClientUniqueIdentifier() {
         // If it's not a multithreaded transport layer, we will use the device configuration to get the device unique identifier.
-        if (this.deviceClientConfig != null) {
-            return this.hostName + "-" + this.deviceClientConfig.getDeviceClientUniqueIdentifier();
+        if (!this.isMultiplexing) {
+            return this.hostName + "-" + this.getDefaultConfig().getDeviceClientUniqueIdentifier();
         }
 
         // If this is a multithread transport layer, we will use its unique identifier.

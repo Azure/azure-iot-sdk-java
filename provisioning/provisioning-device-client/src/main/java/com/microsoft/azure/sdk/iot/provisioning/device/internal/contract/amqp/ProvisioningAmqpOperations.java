@@ -338,10 +338,18 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
     }
 
     public String getConnectionId() {
-        return this.amqpConnection.getConnectionId();
+        if (this.amqpConnection != null) {
+            return this.amqpConnection.getConnectionId();
+        }
+
+        return null;
     }
 
     public String getHostName() {
-        return this.amqpConnection.getHostName();
+        if (this.amqpConnection != null) {
+            return this.amqpConnection.getHostName();
+        }
+
+        return null;
     }
 }

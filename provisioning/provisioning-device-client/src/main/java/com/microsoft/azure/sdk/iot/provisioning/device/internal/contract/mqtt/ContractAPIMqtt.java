@@ -44,12 +44,16 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
 
     @Override
     public String getConnectionId() {
-        return this.mqttConnection.getConnectionId();
+        if (this.mqttConnection != null) {
+            return this.mqttConnection.getConnectionId();
+        }
+
+        return null;
     }
 
     @Override
     public String getHostName() {
-        return this.mqttConnection.getHostName();
+        return this.hostname;
     }
 
     /**

@@ -338,11 +338,17 @@ public class RegisterTask implements Callable<RegistrationOperationStatusParser>
     @Override
     public RegistrationOperationStatusParser call() throws Exception
     {
+        String connectionId = this.provisioningDeviceClientConfig.getUniqueIdentifier();
+        if (connectionId == null) {
+            // For Symetric Key authentication, connection is not open as of spinning off this thread;
+            connectionId = "PendingConnectionId";
+        }
+
         String threadName = this.provisioningDeviceClientContract.getHostName()
                 + "-"
                 + this.provisioningDeviceClientConfig.getUniqueIdentifier()
                 + "-Cxn"
-                + this.provisioningDeviceClientContract.getConnectionId()
+                + connectionId
                 + "-"
                 + THREAD_NAME;
 
