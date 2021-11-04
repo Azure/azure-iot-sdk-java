@@ -36,7 +36,8 @@ public final class IotHubSendTask implements Runnable
 
     public void run()
     {
-        Thread.currentThread().setName(THREAD_NAME);
+        String threadName = this.transport.getDeviceClientUniqueIdentifier() + "-" + "Cxn" + transport.getTransportConnectionId() + "-" + THREAD_NAME;
+        Thread.currentThread().setName(threadName);
 
         try
         {

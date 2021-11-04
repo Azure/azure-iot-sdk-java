@@ -336,4 +336,20 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
             this.receiveLock.notifyLock();
         }
     }
+
+    public String getConnectionId() {
+        if (this.amqpConnection != null) {
+            return this.amqpConnection.getConnectionId();
+        }
+
+        return null;
+    }
+
+    public String getHostName() {
+        if (this.amqpConnection != null) {
+            return this.amqpConnection.getHostName();
+        }
+
+        return null;
+    }
 }
