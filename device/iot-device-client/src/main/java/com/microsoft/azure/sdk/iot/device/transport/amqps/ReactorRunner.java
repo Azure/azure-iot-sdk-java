@@ -17,13 +17,23 @@ public class ReactorRunner implements Callable<Object>
     private final IotHubListener listener;
     private final String connectionId;
     private final ReactorRunnerStateCallback reactorRunnerStateCallback;
+    private final String threadPostfix;
+    private final String threadPrefix;
 
-    ReactorRunner(Reactor reactor, IotHubListener listener, String connectionId, ReactorRunnerStateCallback reactorRunnerStateCallback)
+    ReactorRunner(
+            Reactor reactor,
+            IotHubListener listener,
+            String connectionId,
+            String threadPrefix,
+            String threadPostfix,
+            ReactorRunnerStateCallback reactorRunnerStateCallback)
     {
         this.listener = listener;
         this.reactor = reactor;
         this.connectionId = connectionId;
         this.reactorRunnerStateCallback = reactorRunnerStateCallback;
+        this.threadPrefix = threadPrefix;
+        this.threadPostfix = threadPostfix;
     }
 
     @Override
@@ -31,7 +41,8 @@ public class ReactorRunner implements Callable<Object>
     {
         try
         {
-            Thread.currentThread().setName(THREAD_NAME);
+            String threadName = this.threadPrefix + "-" + THREAD_NAME + "-" + this.threadPostfix;
+            Thread.currentThread().setName(threadName);
             this.reactor.setTimeout(10);
             this.reactor.start();
 

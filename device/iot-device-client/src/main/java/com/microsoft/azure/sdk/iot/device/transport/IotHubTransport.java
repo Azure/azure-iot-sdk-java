@@ -86,6 +86,8 @@ public class IotHubTransport implements IotHubListener
     // Keys are deviceIds. Helps with getting configs based on deviceIds
     private final Map<String, DeviceClientConfig> deviceClientConfigs = new ConcurrentHashMap<>();
 
+    private String transportUniqueIdentifier = UUID.randomUUID().toString().substring(0, 8);
+
     private ScheduledExecutorService taskScheduler;
 
     // state lock to prevent simultaneous close and reconnect operations. Also prevents multiple reconnect threads from executing at once
@@ -140,12 +142,12 @@ public class IotHubTransport implements IotHubListener
     }
 
     public IotHubTransport(
-        String hostName,
-        IotHubClientProtocol protocol,
-        SSLContext sslContext,
-        ProxySettings proxySettings,
-        IotHubConnectionStatusChangeCallback deviceIOConnectionStatusChangeCallback,
-        int keepAliveInterval) throws IllegalArgumentException
+            String hostName,
+            IotHubClientProtocol protocol,
+            SSLContext sslContext,
+            ProxySettings proxySettings,
+            IotHubConnectionStatusChangeCallback deviceIOConnectionStatusChangeCallback,
+            int keepAliveInterval) throws IllegalArgumentException
     {
         this.protocol = protocol;
         this.hostName = hostName;
@@ -634,6 +636,20 @@ public class IotHubTransport implements IotHubListener
         }
     }
 
+    String getTransportConnectionId() {
+        return this.iotHubTransportConnection.getConnectionId();
+    }
+
+    String getDeviceClientUniqueIdentifier() {
+        // If it's not a multithreaded transport layer, we will use the device configuration to get the device unique identifier.
+        if (!this.isMultiplexing) {
+            return this.hostName + "-" + this.getDefaultConfig().getDeviceClientUniqueIdentifier();
+        }
+
+        // If this is a multithread transport layer, we will use its unique identifier.
+        return this.hostName + "-Multiplexed-" + this.transportUniqueIdentifier;
+    }
+
     private void checkForExpiredMessages()
     {
         //Check waiting packets, remove any that have expired.
@@ -1102,6 +1118,7 @@ public class IotHubTransport implements IotHubListener
                         // registering any devices to it
                         this.iotHubTransportConnection = new AmqpsIotHubConnection(
                                 this.hostName,
+                                this.transportUniqueIdentifier,
                                 this.protocol == IotHubClientProtocol.AMQPS_WS,
                                 this.sslContext,
                                 this.proxySettings,
@@ -1114,7 +1131,7 @@ public class IotHubTransport implements IotHubListener
                     }
                     else
                     {
-                        this.iotHubTransportConnection = new AmqpsIotHubConnection(this.getDefaultConfig());
+                        this.iotHubTransportConnection = new AmqpsIotHubConnection(this.getDefaultConfig(), this.transportUniqueIdentifier);
                     }
 
                     break;
