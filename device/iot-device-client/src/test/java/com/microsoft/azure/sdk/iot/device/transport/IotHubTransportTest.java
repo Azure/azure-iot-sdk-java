@@ -523,7 +523,7 @@ public class IotHubTransportTest
         //arrange
         new MockUp<IotHubTransport>()
         {
-            @Mock boolean isSasTokenExpired()
+            @Mock boolean isAuthenticationProviderExpired()
             {
                 return true;
             }
@@ -2445,7 +2445,7 @@ public class IotHubTransportTest
                 methodsCalled.append("addToCallbackQueue");
             }
 
-            @Mock boolean isSasTokenExpired()
+            @Mock boolean isAuthenticationProviderExpired()
             {
                 return true;
             }
@@ -2944,7 +2944,7 @@ public class IotHubTransportTest
         //arrange
         new MockUp<IotHubTransport>()
         {
-            @Mock boolean isSasTokenExpired()
+            @Mock boolean isAuthenticationProviderExpired()
             {
                 return true;
             }
