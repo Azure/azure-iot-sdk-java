@@ -2690,7 +2690,7 @@ public class IotHubTransportTest
             {
                 mockedConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockedConfig.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary();
+                mockedConfig.getSasTokenAuthentication().isSasTokenExpired();
                 result = true;
             }
         };
