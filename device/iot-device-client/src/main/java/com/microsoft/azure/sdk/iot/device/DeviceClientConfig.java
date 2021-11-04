@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Configuration settings for an IoT Hub client. Validates all user-defined
@@ -45,6 +46,8 @@ public final class DeviceClientConfig
 
     private boolean useWebsocket;
     private ProxySettings proxySettings;
+
+    private String deviceClientUniqueIdentifier = UUID.randomUUID().toString().substring(0,8);
 
     @Getter
     @Setter(AccessLevel.PROTECTED)
@@ -468,6 +471,23 @@ public final class DeviceClientConfig
     {
         // Codes_SRS_DEVICECLIENTCONFIG_34_050: [This function return the saved moduleId.]
         return this.authenticationProvider.getModuleId();
+    }
+
+    public String getDeviceClientUniqueIdentifier()
+    {
+        // Use device Id if present, use module Id if no device Id is present, use a unique Identifier if neither was set.
+        String identifierPrefix = getDeviceId();
+        if (identifierPrefix == null || identifierPrefix.isEmpty())
+        {
+            identifierPrefix = getModuleId();
+            if (identifierPrefix == null || identifierPrefix.isEmpty())
+            {
+                // If there is no device Id or module Id, set the identifier prefix to be
+                identifierPrefix = UUID.randomUUID().toString().substring(0, 8);
+            }
+        }
+
+        return identifierPrefix + "-" + this.deviceClientUniqueIdentifier;
     }
 
     /**

@@ -81,6 +81,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     private final Map<String, Boolean> reconnectionsScheduled = new ConcurrentHashMap<>();
     private ExecutorService executorService;
     private final ProxySettings proxySettings;
+    private final String transportUniqueIdentifier;
 
     // State latches are used for asynchronous open and close operations
     private CountDownLatch authenticationSessionOpenedLatch; // tracks if the authentication session has opened yet or not
@@ -107,9 +108,12 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     // keys are the configs of the clients to unregister, values are the flag that determines if the session should be cached locally for re-use upon reconnection
     private final Map<DeviceClientConfig, Boolean> multiplexingClientsToUnregister;
 
+    // Only set when the connection is for single device and not the multiplexing client.
+    private DeviceClientConfig deviceClientConfig = null;
+
     private final boolean isMultiplexing;
 
-    public AmqpsIotHubConnection(DeviceClientConfig config, boolean isMultiplexing)
+    public AmqpsIotHubConnection(DeviceClientConfig config, String transportUniqueIdentifier, boolean isMultiplexing)
     {
         // This allows us to create thread safe sets despite there being no such type default in Java 7 or 8
         this.deviceClientConfigs = Collections.newSetFromMap(new ConcurrentHashMap<DeviceClientConfig, Boolean>());
@@ -118,6 +122,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
         this.deviceClientConfigs.add(config);
 
+        this.deviceClientConfig = config;
+        this.transportUniqueIdentifier = transportUniqueIdentifier;
         this.isWebsocketConnection = config.isUseWebsocket();
         this.authenticationType = config.getAuthenticationType();
         this.proxySettings = config.getProxySettings();
@@ -142,7 +148,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         log.trace("AmqpsIotHubConnection object is created successfully and will use port {}", this.isWebsocketConnection ? WEB_SOCKET_PORT : AMQP_PORT);
     }
 
-    public AmqpsIotHubConnection(String hostName, boolean isWebsocketConnection, SSLContext sslContext, ProxySettings proxySettings)
+    public AmqpsIotHubConnection(String hostName, String transportUniqueIdentifier, boolean isWebsocketConnection, SSLContext sslContext, ProxySettings proxySettings)
     {
         // This allows us to create thread safe sets despite there being no such type default in Java 7 or 8
         this.deviceClientConfigs = Collections.newSetFromMap(new ConcurrentHashMap<DeviceClientConfig, Boolean>());
@@ -155,6 +161,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         this.authenticationType = DeviceClientConfig.AuthType.SAS_TOKEN;
 
         this.hostName = hostName;
+        this.transportUniqueIdentifier = transportUniqueIdentifier;
         this.proxySettings = proxySettings;
         this.sslContext = sslContext;
 
@@ -1202,10 +1209,18 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
 
         this.reactor = createReactor();
+
+        String runnerUniqueIdentifier = this.isMultiplexing
+                ? "Multiplexed-" + this.transportUniqueIdentifier
+                : this.deviceClientConfig.getDeviceClientUniqueIdentifier();
+
+        String reactorRunnerPrefix = this.hostName + "-" + runnerUniqueIdentifier + "-" + "Cnx" + this.connectionId;
         ReactorRunner reactorRunner = new ReactorRunner(
             this.reactor,
             this.listener,
             this.connectionId,
+            reactorRunnerPrefix,
+            "ConnectionOwner",
             this);
 
         executorService.submit(reactorRunner);
