@@ -1045,12 +1045,7 @@ public class IotHubTransport implements IotHubListener
         if (e instanceof TransportException)
         {
             TransportException transportException = (TransportException) e;
-            if (transportException.isRetryable())
-            {
-                log.debug("Mapping throwable to NO_NETWORK because it was a retryable exception", e);
-                return IotHubConnectionStatusChangeReason.NO_NETWORK;
-            }
-            else if (isSasTokenExpired())
+            if (isSasTokenExpired())
             {
                 log.debug("Mapping throwable to EXPIRED_SAS_TOKEN because it was a non-retryable exception and the saved sas token has expired", e);
                 return IotHubConnectionStatusChangeReason.EXPIRED_SAS_TOKEN;
@@ -1059,6 +1054,11 @@ public class IotHubTransport implements IotHubListener
             {
                 log.debug("Mapping throwable to BAD_CREDENTIAL because it was a non-retryable exception authorization exception but the saved sas token has not expired yet", e);
                 return IotHubConnectionStatusChangeReason.BAD_CREDENTIAL;
+            }
+            else if (transportException.isRetryable())
+            {
+                log.debug("Mapping throwable to NO_NETWORK because it was a retryable exception", e);
+                return IotHubConnectionStatusChangeReason.NO_NETWORK;
             }
         }
 
