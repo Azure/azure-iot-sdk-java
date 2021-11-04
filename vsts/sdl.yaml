@@ -10,7 +10,7 @@ phases:
 
   condition: succeeded()
   queue:
-    name: Hosted VS2017
+    vmImage: windows-latest
     timeoutInMinutes: 60
   steps:
   - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
@@ -69,7 +69,7 @@ phases:
       FileDirPath: '$(Build.StagingDirectory)'
       TreatSignatureUpdateFailureAs: 'Warning'
       SignatureFreshness: 'UpToDate'
-      TreatStaleSignatureAs: 'Error'
+      TreatStaleSignatureAs: 'Warning'
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
     displayName: 'Publish Security Analysis Logs'
