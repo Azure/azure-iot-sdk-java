@@ -1665,7 +1665,7 @@ public class IotHubTransport implements IotHubListener
         }
 
         return this.getDefaultConfig().getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN
-                && this.getDefaultConfig().getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary();
+                && this.getDefaultConfig().getSasTokenAuthentication().isSasTokenExpired();
     }
 
     /**
