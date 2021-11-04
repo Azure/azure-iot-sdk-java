@@ -102,6 +102,7 @@ public class IotHubTransport implements IotHubListener
     private final IotHubClientProtocol protocol;
     private final String hostName;
     private final ProxySettings proxySettings;
+    private final int keepAliveInterval;
     private SSLContext sslContext;
     private final boolean isMultiplexing;
 
@@ -135,9 +136,16 @@ public class IotHubTransport implements IotHubListener
         this.isMultiplexing = isMultiplexing;
 
         this.deviceIOConnectionStatusChangeCallback = deviceIOConnectionStatusChangeCallback;
+        this.keepAliveInterval = defaultConfig.getKeepAliveInterval();
     }
 
-    public IotHubTransport(String hostName, IotHubClientProtocol protocol, SSLContext sslContext, ProxySettings proxySettings, IotHubConnectionStatusChangeCallback deviceIOConnectionStatusChangeCallback) throws IllegalArgumentException
+    public IotHubTransport(
+        String hostName,
+        IotHubClientProtocol protocol,
+        SSLContext sslContext,
+        ProxySettings proxySettings,
+        IotHubConnectionStatusChangeCallback deviceIOConnectionStatusChangeCallback,
+        int keepAliveInterval) throws IllegalArgumentException
     {
         this.protocol = protocol;
         this.hostName = hostName;
@@ -146,6 +154,7 @@ public class IotHubTransport implements IotHubListener
         this.connectionStatus = IotHubConnectionStatus.DISCONNECTED;
         this.deviceIOConnectionStatusChangeCallback = deviceIOConnectionStatusChangeCallback;
         this.isMultiplexing = true;
+        this.keepAliveInterval = keepAliveInterval;
     }
 
     public Object getSendThreadLock()
@@ -1095,7 +1104,8 @@ public class IotHubTransport implements IotHubListener
                                 this.hostName,
                                 this.protocol == IotHubClientProtocol.AMQPS_WS,
                                 this.sslContext,
-                                this.proxySettings);
+                                this.proxySettings,
+                                this.keepAliveInterval);
 
                         for (DeviceClientConfig config : this.deviceClientConfigs.values())
                         {
@@ -1104,7 +1114,7 @@ public class IotHubTransport implements IotHubListener
                     }
                     else
                     {
-                        this.iotHubTransportConnection = new AmqpsIotHubConnection(this.getDefaultConfig(), false);
+                        this.iotHubTransportConnection = new AmqpsIotHubConnection(this.getDefaultConfig());
                     }
 
                     break;

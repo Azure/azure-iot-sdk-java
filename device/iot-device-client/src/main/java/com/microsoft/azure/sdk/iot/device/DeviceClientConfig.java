@@ -32,6 +32,8 @@ public final class DeviceClientConfig
     private static final int DEFAULT_HTTPS_READ_TIMEOUT_MILLIS = 240000;
     private static final int DEFAULT_HTTPS_CONNECT_TIMEOUT_MILLIS = 0; //no connect timeout
 
+    public static final int DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS = 230;
+
     // authentication session timeout is public because a multiplexed connection needs this default if no devices
     // were registered prior to opening the connection. No device sessions would be opened in that case though, so
     // the default device session timeout can stay private.
@@ -66,6 +68,10 @@ public final class DeviceClientConfig
     @Getter
     @Setter
     private int amqpOpenDeviceSessionsTimeout = DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS;
+
+    @Getter
+    @Setter
+    private int keepAliveInterval = DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
 
     private IotHubAuthenticationProvider authenticationProvider;
 
@@ -152,6 +158,8 @@ public final class DeviceClientConfig
     public DeviceClientConfig(String hostName, SasTokenProvider sasTokenProvider, ClientOptions clientOptions, String deviceId, String moduleId)
     {
         SSLContext sslContext = clientOptions != null ? clientOptions.sslContext : null;
+        this.keepAliveInterval =
+            clientOptions != null && clientOptions.getKeepAliveInterval() != 0 ? clientOptions.getKeepAliveInterval() : DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
         this.authenticationProvider =
                 new IotHubSasTokenProvidedAuthenticationProvider(hostName, deviceId, moduleId, sasTokenProvider, sslContext);
 
@@ -196,6 +204,8 @@ public final class DeviceClientConfig
         {
             configSasAuth(iotHubConnectionString);
         }
+
+        this.keepAliveInterval = clientOptions != null && clientOptions.getKeepAliveInterval() != 0 ? clientOptions.getKeepAliveInterval() : DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
     }
 
     public DeviceClientConfig(IotHubConnectionString iotHubConnectionString, SSLContext sslContext)

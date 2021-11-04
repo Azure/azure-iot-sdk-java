@@ -54,4 +54,37 @@ public class MultiplexingClientOptions
     @Getter
     @Setter
     private int maxMessagesSentPerSendThread;
+
+    /**
+     * Gets the keep alive interval in seconds. This value defines the
+     * maximum time interval between messages sent or received. It enables the
+     * client to detect if the server is no longer available, without having to wait
+     * for the TCP/IP timeout. The client will ensure that at least one message
+     * travels across the network within each keep alive period. In the absence of a
+     * data-related message during the time period, the client sends a very small
+     * "ping" message, which the server will acknowledge. The default value is 230 seconds.
+     */
+    @Getter
+    public int keepAliveInterval;
+
+    /**
+     * Sets the keep alive interval in seconds. This value defines the
+     * maximum time interval between messages sent or received. It enables the
+     * client to detect if the server is no longer available, without having to wait
+     * for the TCP/IP timeout. The client will ensure that at least one message
+     * travels across the network within each keep alive period. In the absence of a
+     * data-related message during the time period, the client sends a very small
+     * "ping" message, which the server will acknowledge. The default value is 230 seconds.
+     *
+     * @param keepAliveInterval the number of seconds that the keep alive interval will be. Must be greater than 0.
+     */
+    public void setKeepAliveInterval(int keepAliveInterval)
+    {
+        if (keepAliveInterval <= 0)
+        {
+            throw new IllegalArgumentException("Keep alive interval must be greater than 0 seconds");
+        }
+
+        this.keepAliveInterval = keepAliveInterval;
+    }
 }
