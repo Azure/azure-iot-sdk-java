@@ -9,7 +9,7 @@ phases:
   displayName: SDL Tasks
 
   condition: succeeded()
-  queue:
+  pool:
     vmImage: windows-latest
     timeoutInMinutes: 60
   steps:
