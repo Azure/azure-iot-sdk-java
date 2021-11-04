@@ -21,6 +21,7 @@ jobs:
     inputs:
       debugMode: false
       suppressionsFile: vsts/CredScanSuppressions.json
+      toolMajorVersion: V2
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-autoapplicability.AutoApplicability@1
     displayName: AutoApplicability
