@@ -422,7 +422,7 @@ public class IotHubTransport implements IotHubListener
         // registering any devices to it. No need to check for SAS token expiry if no devices are registered yet.
         if (this.getDefaultConfig() != null)
         {
-            if (this.isSasTokenExpired())
+            if (this.isAuthenticationProviderExpired())
             {
                 throw new SecurityException("Your sas token has expired");
             }
@@ -1520,7 +1520,7 @@ public class IotHubTransport implements IotHubListener
             return false;
         }
 
-        if (isSasTokenExpired())
+        if (isAuthenticationProviderExpired())
         {
             log.debug("Creating a callback for the message with expired sas token with UNAUTHORIZED status");
             packet.setStatus(IotHubStatusCode.UNAUTHORIZED);
@@ -1657,6 +1657,21 @@ public class IotHubTransport implements IotHubListener
     // check SAS token expiry when using SAS based auth, and there is always a SAS token authentication provider
     // when using SAS based auth.
     @SuppressWarnings("ConstantConditions")
+    private boolean isAuthenticationProviderExpired()
+    {
+        if (this.getDefaultConfig() == null)
+        {
+            return false;
+        }
+
+        return this.getDefaultConfig().getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN
+                && this.getDefaultConfig().getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary();
+    }
+
+    // warning is about how getSasTokenAuthentication() may return null. In this case, it never will since we only
+    // check SAS token expiry when using SAS based auth, and there is always a SAS token authentication provider
+    // when using SAS based auth.
+    @SuppressWarnings("ConstantConditions")
     private boolean isSasTokenExpired()
     {
         if (this.getDefaultConfig() == null)
@@ -1665,7 +1680,7 @@ public class IotHubTransport implements IotHubListener
         }
 
         return this.getDefaultConfig().getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN
-                && this.getDefaultConfig().getSasTokenAuthentication().isSasTokenExpired();
+            && this.getDefaultConfig().getSasTokenAuthentication().isSasTokenExpired();
     }
 
     /**
@@ -1832,7 +1847,7 @@ public class IotHubTransport implements IotHubListener
      */
     private void checkForUnauthorizedException(TransportException transportException)
     {
-        if (!this.isSasTokenExpired() && (transportException instanceof MqttUnauthorizedException
+        if (!this.isAuthenticationProviderExpired() && (transportException instanceof MqttUnauthorizedException
                 || transportException instanceof UnauthorizedException
                 || transportException instanceof AmqpUnauthorizedAccessException))
         {
