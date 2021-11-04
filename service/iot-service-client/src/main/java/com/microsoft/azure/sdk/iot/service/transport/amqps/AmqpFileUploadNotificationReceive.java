@@ -201,7 +201,7 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
 
             log.info("Receiving on file upload notification receiver for up to {} milliseconds", timeoutMs);
 
-            new ReactorRunner(amqpReceiveHandler, "AmqpFileUploadNotificationReceiver").run(timeoutMs);
+            new ReactorRunner(amqpReceiveHandler, this.hostName, "AmqpFileUploadNotificationReceiver").run(timeoutMs);
 
             log.trace("Amqp receive reactor stopped, checking that the connection was opened");
             this.amqpReceiveHandler.verifyConnectionWasOpened();
