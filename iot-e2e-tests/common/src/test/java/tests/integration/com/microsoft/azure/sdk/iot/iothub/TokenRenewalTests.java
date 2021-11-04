@@ -156,7 +156,8 @@ public class TokenRenewalTests extends IntegrationTest
             amqpDisconnectDidNotHappenSuccesses[clientIndex] = new Success();
             mqttDisconnectDidHappenSuccesses[clientIndex] = new Success();
             shutdownWasGracefulSuccesses[clientIndex] = new Success();
-
+            mqttDisconnectHadTokenExpiredReasonSuccesses[clientIndex] = new Success();
+            
             amqpDisconnectDidNotHappenSuccesses[clientIndex].setResult(true); //assume success until unexpected DISCONNECTED_RETRYING
             mqttDisconnectDidHappenSuccesses[clientIndex].setResult(false); //assume failure until DISCONNECTED_RETRYING is triggered by token expiring
             shutdownWasGracefulSuccesses[clientIndex].setResult(true); //assume success until DISCONNECTED callback without CLIENT_CLOSE
