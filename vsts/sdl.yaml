@@ -2,10 +2,10 @@ name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Re
 resources:
 - repo: self
   clean: true
-phases:
 
+jobs:
 ### SDL Tasks ###
-- phase: SDL
+- job: SDL
   displayName: SDL Tasks
 
   condition: succeeded()
