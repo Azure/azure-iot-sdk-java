@@ -70,7 +70,7 @@ jobs:
       FileDirPath: '$(Build.StagingDirectory)'
       TreatSignatureUpdateFailureAs: 'Warning'
       SignatureFreshness: 'UpToDate'
-      TreatStaleSignatureAs: 'Warning'
+      TreatStaleSignatureAs: 'Error'
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
     displayName: 'Publish Security Analysis Logs'
