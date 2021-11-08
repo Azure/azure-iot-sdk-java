@@ -523,7 +523,7 @@ public class IotHubTransportTest
         //arrange
         new MockUp<IotHubTransport>()
         {
-            @Mock boolean isSasTokenExpired()
+            @Mock boolean isAuthenticationProviderExpired()
             {
                 return true;
             }
@@ -780,14 +780,6 @@ public class IotHubTransportTest
             }
         };
         final IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
-
-        new Expectations()
-        {
-            {
-                mockedTransportException.isRetryable();
-                result = false;
-            }
-        };
 
         //act
         IotHubConnectionStatusChangeReason reason = Deencapsulation.invoke(transport, "exceptionToStatusChangeReason", new Class[] {Throwable.class}, mockedTransportException);
@@ -2453,7 +2445,7 @@ public class IotHubTransportTest
                 methodsCalled.append("addToCallbackQueue");
             }
 
-            @Mock boolean isSasTokenExpired()
+            @Mock boolean isAuthenticationProviderExpired()
             {
                 return true;
             }
@@ -2698,7 +2690,7 @@ public class IotHubTransportTest
             {
                 mockedConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockedConfig.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary();
+                mockedConfig.getSasTokenAuthentication().isSasTokenExpired();
                 result = true;
             }
         };
@@ -2952,7 +2944,7 @@ public class IotHubTransportTest
         //arrange
         new MockUp<IotHubTransport>()
         {
-            @Mock boolean isSasTokenExpired()
+            @Mock boolean isAuthenticationProviderExpired()
             {
                 return true;
             }

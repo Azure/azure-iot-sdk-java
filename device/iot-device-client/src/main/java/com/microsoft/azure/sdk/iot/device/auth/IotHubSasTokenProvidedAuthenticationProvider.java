@@ -74,4 +74,9 @@ public class IotHubSasTokenProvidedAuthenticationProvider extends IotHubSasToken
         double timeBufferMultiplier = this.timeBufferPercentage / 100.0; //Convert 85 to .85, for example. Percentage multipliers are in decimal
         return (int) (tokenValidSeconds * 1000 * timeBufferMultiplier);
     }
+
+    public boolean isSasTokenExpired()
+    {
+        return (lastSasToken != null && IotHubSasToken.isExpired(new String(lastSasToken)));
+    }
 }
