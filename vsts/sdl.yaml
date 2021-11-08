@@ -2,15 +2,15 @@ name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Re
 resources:
 - repo: self
   clean: true
-phases:
 
+jobs:
 ### SDL Tasks ###
-- phase: SDL
+- job: SDL
   displayName: SDL Tasks
 
   condition: succeeded()
-  queue:
-    name: Hosted VS2017
+  pool:
+    vmImage: windows-latest
     timeoutInMinutes: 60
   steps:
   - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
@@ -21,6 +21,7 @@ phases:
     inputs:
       debugMode: false
       suppressionsFile: vsts/CredScanSuppressions.json
+      toolMajorVersion: V2
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-autoapplicability.AutoApplicability@1
     displayName: AutoApplicability
@@ -100,3 +101,4 @@ phases:
       uploadPREfast: false
       uploadRoslyn: false
       uploadTSLint: false
+      FortifySCA: false
