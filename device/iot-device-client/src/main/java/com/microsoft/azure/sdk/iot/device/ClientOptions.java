@@ -8,6 +8,8 @@ import lombok.Setter;
 
 import javax.net.ssl.SSLContext;
 
+import static com.microsoft.azure.sdk.iot.device.DeviceClientConfig.DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
+
 /**
  * Options that allow configuration of the device client instance during initialization.
  */
@@ -47,7 +49,7 @@ public final class ClientOptions
      * </p>
      */
     @Getter
-    public int keepAliveInterval;
+    public int keepAliveInterval = DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
 
     /**
      * Sets the keep alive interval in seconds. This value defines the

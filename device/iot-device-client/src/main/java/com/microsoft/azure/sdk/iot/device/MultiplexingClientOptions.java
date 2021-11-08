@@ -9,6 +9,8 @@ import lombok.Setter;
 
 import javax.net.ssl.SSLContext;
 
+import static com.microsoft.azure.sdk.iot.device.DeviceClientConfig.DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
+
 /**
  * The optional settings for creating a {@link MultiplexingClient}. If set, these values will supersede any device client
  * level settings on these parameters.
@@ -65,7 +67,8 @@ public class MultiplexingClientOptions
      * "ping" message, which the server will acknowledge. The default value is 230 seconds.
      */
     @Getter
-    public int keepAliveInterval;
+    @Builder.Default
+    public int keepAliveInterval = DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
 
     /**
      * Sets the keep alive interval in seconds. This value defines the
