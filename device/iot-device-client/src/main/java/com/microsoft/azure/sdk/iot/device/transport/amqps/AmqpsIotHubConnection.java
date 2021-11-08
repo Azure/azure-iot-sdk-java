@@ -66,7 +66,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     private static final int MAX_MESSAGES_TO_SEND_PER_CALLBACK = 1000; //Max number of queued messages to send per periodic sending task
 
     // States of outgoing messages, incoming messages, and outgoing subscriptions
-    private final Queue<Message> messagesToSend = new ConcurrentLinkedQueue<>();
+    private final Deque<Message> messagesToSend = new ConcurrentLinkedDeque<>();
     private String connectionId;
     private IotHubConnectionStatus state;
     private final String hostName;
@@ -595,7 +595,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         // all message sending must be done from the proton-j thread that is exposed to this SDK through callbacks
         // such as onLinkFlow(), or onTimerTask()
         log.trace("Adding message to amqp message queue to be sent later ({})", message);
-        messagesToSend.add(message);
+        messagesToSend.addLast(message);
         return IotHubStatusCode.OK;
     }
 
@@ -876,7 +876,9 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     private void sendQueuedMessages()
     {
         int messagesAttemptedToBeProcessed = 0;
-        Message message = messagesToSend.poll();
+        Message message = messagesToSend.pollFirst();
+        LinkedList<Message> unsendMessages = new LinkedList<>();
+
         while (message != null && messagesAttemptedToBeProcessed < MAX_MESSAGES_TO_SEND_PER_CALLBACK)
         {
             messagesAttemptedToBeProcessed++;
@@ -891,7 +893,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 if (reconnectingDeviceSessionHandler != null)
                 {
                     log.trace("Amqp message failed to send because its AMQP session is currently reconnecting. Adding it back to messages to send queue ({})", message);
-                    messagesToSend.add(message);
+                    unsendMessages.addFirst(message);
                 }
                 else
                 {
@@ -910,28 +912,32 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 // Proton-j doesn't handle the scenario of sending twin/method messages on links that haven't been opened remotely yet, so hold
                 // off on sending them until the subscription has finished.
                 log.trace("Attempted to send twin/method message while the twin/method subscription was in progress. Adding it back to messages to send queue to try again after the subscription has finished ({})", message);
-                messagesToSend.add(message);
+                unsendMessages.addFirst(message);
             }
             else if (sendResult == SendResult.LINKS_NOT_OPEN)
             {
                 // Shouldn't happen. If it does, it signals that we have a bug in this SDK.
                 log.warn("Failed to send a message because its AMQP links were not open yet. Adding it back to messages to send queue ({})", message);
-                messagesToSend.add(message);
+                unsendMessages.addFirst(message);
             }
             else if (sendResult == SendResult.UNKNOWN_FAILURE)
             {
                 // Shouldn't happen. If it does, it signals that we have a bug in this SDK.
                 log.warn("Unknown failure occurred while attempting to send. Adding it back to messages to send queue ({})", message);
-                messagesToSend.add(message);
+                unsendMessages.addFirst(message);
             }
 
-            message = messagesToSend.poll();
+            message = messagesToSend.pollFirst();
         }
 
         if (message != null)
         {
             //message was polled out of list, but loop exited from processing too many messages before it could process this message, so re-queue it for later
-            messagesToSend.add(message);
+            unsendMessages.addFirst(message);
+        }
+
+        for(Message m: unsendMessages) {
+            messagesToSend.addFirst(m);
         }
     }
 
