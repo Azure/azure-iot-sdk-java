@@ -129,12 +129,19 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
         this.state = IotHubConnectionStatus.DISCONNECTED;
     }
 
-    DeviceIO(String hostName, IotHubClientProtocol protocol, SSLContext sslContext, ProxySettings proxySettings, long sendPeriodInMilliseconds, long receivePeriodInMilliseconds)
+    DeviceIO(
+        String hostName,
+        IotHubClientProtocol protocol,
+        SSLContext sslContext,
+        ProxySettings proxySettings,
+        long sendPeriodInMilliseconds,
+        long receivePeriodInMilliseconds,
+        int keepAliveInterval)
     {
         this.sendPeriodInMilliseconds = sendPeriodInMilliseconds;
         this.receivePeriodInMilliseconds = receivePeriodInMilliseconds;
         this.state = IotHubConnectionStatus.DISCONNECTED;
-        this.transport = new IotHubTransport(hostName, protocol, sslContext, proxySettings, this);
+        this.transport = new IotHubTransport(hostName, protocol, sslContext, proxySettings, this, keepAliveInterval);
     }
 
     /**

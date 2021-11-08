@@ -1041,7 +1041,7 @@ public class IotHubTransportTest
             {
                 mockedConfig.getProtocol();
                 result = IotHubClientProtocol.AMQPS;
-                new AmqpsIotHubConnection(mockedConfig, anyString, false);
+                new AmqpsIotHubConnection(mockedConfig, anyString);
                 result = mockedAmqpsIotHubConnection;
             }
         };
@@ -1082,7 +1082,7 @@ public class IotHubTransportTest
             {
                 mockedConfig.getProtocol();
                 result = IotHubClientProtocol.AMQPS_WS;
-                new AmqpsIotHubConnection(mockedConfig, anyString, false);
+                new AmqpsIotHubConnection(mockedConfig, anyString);
                 result = mockedAmqpsIotHubConnection;
             }
         };

@@ -113,7 +113,9 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
     private final boolean isMultiplexing;
 
-    public AmqpsIotHubConnection(DeviceClientConfig config, String transportUniqueIdentifier, boolean isMultiplexing)
+    private final int keepAliveInterval;
+
+    public AmqpsIotHubConnection(DeviceClientConfig config, String transportUniqueIdentifier)
     {
         // This allows us to create thread safe sets despite there being no such type default in Java 7 or 8
         this.deviceClientConfigs = Collections.newSetFromMap(new ConcurrentHashMap<DeviceClientConfig, Boolean>());
@@ -142,13 +144,15 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
         add(new Handshaker());
 
-        this.isMultiplexing = isMultiplexing;
+        this.isMultiplexing = false;
+
+        this.keepAliveInterval = config.getKeepAliveInterval();
 
         this.state = IotHubConnectionStatus.DISCONNECTED;
         log.trace("AmqpsIotHubConnection object is created successfully and will use port {}", this.isWebsocketConnection ? WEB_SOCKET_PORT : AMQP_PORT);
     }
 
-    public AmqpsIotHubConnection(String hostName, String transportUniqueIdentifier, boolean isWebsocketConnection, SSLContext sslContext, ProxySettings proxySettings)
+    public AmqpsIotHubConnection(String hostName, String transportUniqueIdentifier, boolean isWebsocketConnection, SSLContext sslContext, ProxySettings proxySettings, int keepAliveInterval)
     {
         // This allows us to create thread safe sets despite there being no such type default in Java 7 or 8
         this.deviceClientConfigs = Collections.newSetFromMap(new ConcurrentHashMap<DeviceClientConfig, Boolean>());
@@ -171,6 +175,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
         this.state = IotHubConnectionStatus.DISCONNECTED;
         log.trace("AmqpsIotHubConnection object is created successfully and will use port {}", this.isWebsocketConnection ? WEB_SOCKET_PORT : AMQP_PORT);
+
+        this.keepAliveInterval = keepAliveInterval;
     }
 
     public void registerMultiplexedDevice(DeviceClientConfig config)
@@ -412,6 +418,9 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     public void onConnectionBound(Event event)
     {
         Transport transport = event.getTransport();
+
+        // Convert from seconds to milliseconds since this proton-j API only accepts keep alive in milliseconds
+        transport.setIdleTimeout(keepAliveInterval * 1000);
 
         if (this.isWebsocketConnection)
         {
