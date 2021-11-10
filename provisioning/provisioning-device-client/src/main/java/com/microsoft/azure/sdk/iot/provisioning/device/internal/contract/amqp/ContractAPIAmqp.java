@@ -25,6 +25,7 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
     private final boolean useWebSockets;
 
     private final String idScope;
+    private final String hostName;
     private SaslHandler amqpSaslHandler;
 
     private void processRetryAfterValue(Map<String, Object> appProperties)
@@ -64,7 +65,9 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
             throw new ProvisioningDeviceClientException("The hostName cannot be null or empty.");
         }
 
-        this.useWebSockets = provisioningDeviceClientConfig.isUsingWebSocket();
+        this.hostName = hostName;
+
+        this.useWebSockets = provisioningDeviceClientConfig.getUseWebSockets();
 
         // SRS_ContractAPIAmqp_07_001: [The constructor shall save the scope id and hostname.]
         provisioningAmqpOperations = new ProvisioningAmqpOperations(this.idScope, hostName);
@@ -248,5 +251,21 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
         {
             throw new ProvisioningDeviceConnectionException("Closing amqp failed", ex);
         }
+    }
+
+    @Override
+    public String getConnectionId()
+    {
+        if (this.provisioningAmqpOperations != null) {
+            return this.provisioningAmqpOperations.getConnectionId();
+        }
+
+        return null;
+    }
+
+    @Override
+    public String getHostName()
+    {
+        return this.hostName;
     }
 }

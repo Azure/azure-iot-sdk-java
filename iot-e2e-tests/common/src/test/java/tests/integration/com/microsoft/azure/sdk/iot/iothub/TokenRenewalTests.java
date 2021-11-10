@@ -150,17 +150,28 @@ public class TokenRenewalTests extends IntegrationTest
         Success[] amqpDisconnectDidNotHappenSuccesses = new Success[clients.size()];
         Success[] mqttDisconnectDidHappenSuccesses = new Success[clients.size()];
         Success[] shutdownWasGracefulSuccesses = new Success[clients.size()];
+        Success[] mqttDisconnectHadTokenExpiredReasonSuccesses = new Success[clients.size()];
         for (int clientIndex = 0; clientIndex < clients.size(); clientIndex++)
         {
             amqpDisconnectDidNotHappenSuccesses[clientIndex] = new Success();
             mqttDisconnectDidHappenSuccesses[clientIndex] = new Success();
             shutdownWasGracefulSuccesses[clientIndex] = new Success();
-
+            mqttDisconnectHadTokenExpiredReasonSuccesses[clientIndex] = new Success();
+            
             amqpDisconnectDidNotHappenSuccesses[clientIndex].setResult(true); //assume success until unexpected DISCONNECTED_RETRYING
             mqttDisconnectDidHappenSuccesses[clientIndex].setResult(false); //assume failure until DISCONNECTED_RETRYING is triggered by token expiring
             shutdownWasGracefulSuccesses[clientIndex].setResult(true); //assume success until DISCONNECTED callback without CLIENT_CLOSE
 
-            clients.get(clientIndex).setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeTokenRenewalCallbackVerifier(clients.get(clientIndex).getConfig().getProtocol(), amqpDisconnectDidNotHappenSuccesses[clientIndex], mqttDisconnectDidHappenSuccesses[clientIndex], shutdownWasGracefulSuccesses[clientIndex]), clients.get(clientIndex));
+            mqttDisconnectHadTokenExpiredReasonSuccesses[clientIndex].setResult(false); //assume failure until first disconnected_retrying executes with reason EXPIRED_SAS_TOKEN
+
+            clients.get(clientIndex).setConnectionStatusChangeCallback(
+                new IotHubConnectionStatusChangeTokenRenewalCallbackVerifier(
+                    clients.get(clientIndex).getConfig().getProtocol(),
+                    amqpDisconnectDidNotHappenSuccesses[clientIndex],
+                    mqttDisconnectDidHappenSuccesses[clientIndex],
+                    shutdownWasGracefulSuccesses[clientIndex],
+                    mqttDisconnectHadTokenExpiredReasonSuccesses[clientIndex]),
+                clients.get(clientIndex));
         }
 
         openEachClient(clients);
@@ -182,7 +193,7 @@ public class TokenRenewalTests extends IntegrationTest
 
         testIdentities.clear();
 
-        verifyClientsConnectivityBehavedCorrectly(clients, amqpDisconnectDidNotHappenSuccesses, mqttDisconnectDidHappenSuccesses, shutdownWasGracefulSuccesses);
+        verifyClientsConnectivityBehavedCorrectly(clients, amqpDisconnectDidNotHappenSuccesses, mqttDisconnectDidHappenSuccesses, shutdownWasGracefulSuccesses, mqttDisconnectHadTokenExpiredReasonSuccesses);
     }
 
     private void closeClients(List<InternalClient> clients) throws IOException
@@ -201,7 +212,12 @@ public class TokenRenewalTests extends IntegrationTest
         }
     }
 
-    private void verifyClientsConnectivityBehavedCorrectly(List<InternalClient> clients, Success[] amqpDisconnectDidNotHappenSuccesses, Success[] mqttDisconnectDidHappenSuccesses, Success[] shutdownWasGracefulSuccesses)
+    private void verifyClientsConnectivityBehavedCorrectly(
+        List<InternalClient> clients,
+        Success[] amqpDisconnectDidNotHappenSuccesses,
+        Success[] mqttDisconnectDidHappenSuccesses,
+        Success[] shutdownWasGracefulSuccesses,
+        Success[] mqttDisconnectHadTokenExpiredReasonSuccesses)
     {
         for (int clientIndex = 0; clientIndex < clients.size(); clientIndex++)
         {
@@ -212,6 +228,7 @@ public class TokenRenewalTests extends IntegrationTest
             {
                 assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessage("MQTT connection was never lost, token renewal was not tested", client), mqttDisconnectDidHappenSuccesses[clientIndex].result);
                 assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessage("Connection was lost during test, or shutdown was not graceful", client), shutdownWasGracefulSuccesses[clientIndex].result);
+                assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessage("MQTT connection was lost, but for an unexpected reason", client), mqttDisconnectHadTokenExpiredReasonSuccesses[clientIndex].result);
             }
             else if (protocol == AMQPS || protocol == AMQPS_WS)
             {
@@ -304,13 +321,15 @@ public class TokenRenewalTests extends IntegrationTest
         Success amqpDisconnectDidNotHappen;
         Success mqttDisconnectDidHappen;
         Success shutdownWasGraceful;
+        Success mqttDisconnectHadTokenExpiredReason;
 
-        public IotHubConnectionStatusChangeTokenRenewalCallbackVerifier(IotHubClientProtocol protocol, Success amqpDisconnectDidNotHappen, Success mqttDisconnectDidHappen, Success shutdownWasGraceful)
+        public IotHubConnectionStatusChangeTokenRenewalCallbackVerifier(IotHubClientProtocol protocol, Success amqpDisconnectDidNotHappen, Success mqttDisconnectDidHappen, Success shutdownWasGraceful, Success mqttDisconnectHadTokenExpiredReason)
         {
             this.protocol = protocol;
             this.mqttDisconnectDidHappen = mqttDisconnectDidHappen;
             this.amqpDisconnectDidNotHappen = amqpDisconnectDidNotHappen;
             this.shutdownWasGraceful = shutdownWasGraceful;
+            this.mqttDisconnectHadTokenExpiredReason = mqttDisconnectHadTokenExpiredReason;
         }
 
         @Override
@@ -344,6 +363,12 @@ public class TokenRenewalTests extends IntegrationTest
                 if (protocol == AMQPS || protocol == AMQPS_WS)
                 {
                     amqpDisconnectDidNotHappen.setResult(false);
+                }
+
+                if (protocol == MQTT || protocol == MQTT_WS)
+                {
+                    boolean reasonIsSasTokenExpired = statusChangeReason == IotHubConnectionStatusChangeReason.EXPIRED_SAS_TOKEN;
+                    mqttDisconnectHadTokenExpiredReason.setResult(reasonIsSasTokenExpired);
                 }
             }
         }

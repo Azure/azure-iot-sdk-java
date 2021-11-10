@@ -102,6 +102,12 @@ public abstract class IotHubSasTokenAuthenticationProvider extends IotHubAuthent
         return (this.sasToken != null && this.sasToken.isExpired());
     }
 
+    public boolean isSasTokenExpired()
+    {
+        //similar to isAuthenticationProviderRenewalNecessary, but this won't be overriden by most classes that inherit from this class
+        return (this.sasToken != null && this.sasToken.isExpired());
+    }
+
     /**
      * Returns true if the saved token should be refreshed
      *

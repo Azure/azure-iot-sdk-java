@@ -3,7 +3,15 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
+import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
+import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
+import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
+import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.MessageCallback;
 import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
 import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
@@ -15,12 +23,26 @@ import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpUnautho
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.MqttUnauthorizedException;
-import mockit.*;
+import mockit.Deencapsulation;
+import mockit.Expectations;
+import mockit.Mock;
+import mockit.MockUp;
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
+import mockit.Verifications;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason.*;
 import static com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus.*;
@@ -524,7 +546,7 @@ public class IotHubTransportTest
         //arrange
         new MockUp<IotHubTransport>()
         {
-            @Mock boolean isSasTokenExpired()
+            @Mock boolean isAuthenticationProviderExpired()
             {
                 return true;
             }
@@ -781,14 +803,6 @@ public class IotHubTransportTest
             }
         };
         final IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
-
-        new Expectations()
-        {
-            {
-                mockedTransportException.isRetryable();
-                result = false;
-            }
-        };
 
         //act
         IotHubConnectionStatusChangeReason reason = Deencapsulation.invoke(transport, "exceptionToStatusChangeReason", new Class[] {Throwable.class}, mockedTransportException);
@@ -1050,7 +1064,7 @@ public class IotHubTransportTest
             {
                 mockedConfig.getProtocol();
                 result = IotHubClientProtocol.AMQPS;
-                new AmqpsIotHubConnection(mockedConfig, false);
+                new AmqpsIotHubConnection(mockedConfig, anyString);
                 result = mockedAmqpsIotHubConnection;
             }
         };
@@ -1091,7 +1105,7 @@ public class IotHubTransportTest
             {
                 mockedConfig.getProtocol();
                 result = IotHubClientProtocol.AMQPS_WS;
-                new AmqpsIotHubConnection(mockedConfig, false);
+                new AmqpsIotHubConnection(mockedConfig, anyString);
                 result = mockedAmqpsIotHubConnection;
             }
         };
@@ -2413,7 +2427,7 @@ public class IotHubTransportTest
                 methodsCalled.append("addToCallbackQueue");
             }
 
-            @Mock boolean isSasTokenExpired()
+            @Mock boolean isAuthenticationProviderExpired()
             {
                 return true;
             }
@@ -2658,7 +2672,7 @@ public class IotHubTransportTest
             {
                 mockedConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockedConfig.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary();
+                mockedConfig.getSasTokenAuthentication().isSasTokenExpired();
                 result = true;
             }
         };
@@ -2912,7 +2926,7 @@ public class IotHubTransportTest
         //arrange
         new MockUp<IotHubTransport>()
         {
-            @Mock boolean isSasTokenExpired()
+            @Mock boolean isAuthenticationProviderExpired()
             {
                 return true;
             }

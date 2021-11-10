@@ -82,6 +82,8 @@ public class IotHubTransport implements IotHubListener
     // Keys are deviceIds. Helps with getting configs based on deviceIds
     private final Map<String, DeviceClientConfig> deviceClientConfigs = new ConcurrentHashMap<>();
 
+    private String transportUniqueIdentifier = UUID.randomUUID().toString().substring(0, 8);
+
     private ScheduledExecutorService taskScheduler;
 
     // state lock to prevent simultaneous close and reconnect operations. Also prevents multiple reconnect threads from executing at once
@@ -98,6 +100,7 @@ public class IotHubTransport implements IotHubListener
     private final IotHubClientProtocol protocol;
     private final String hostName;
     private final ProxySettings proxySettings;
+    private final int keepAliveInterval;
     private SSLContext sslContext;
     private final boolean isMultiplexing;
 
@@ -132,9 +135,16 @@ public class IotHubTransport implements IotHubListener
         this.isMultiplexing = isMultiplexing;
 
         this.deviceIOConnectionStatusChangeCallback = deviceIOConnectionStatusChangeCallback;
+        this.keepAliveInterval = defaultConfig.getKeepAliveInterval();
     }
 
-    public IotHubTransport(String hostName, IotHubClientProtocol protocol, SSLContext sslContext, ProxySettings proxySettings, IotHubConnectionStatusChangeCallback deviceIOConnectionStatusChangeCallback) throws IllegalArgumentException
+    public IotHubTransport(
+            String hostName,
+            IotHubClientProtocol protocol,
+            SSLContext sslContext,
+            ProxySettings proxySettings,
+            IotHubConnectionStatusChangeCallback deviceIOConnectionStatusChangeCallback,
+            int keepAliveInterval) throws IllegalArgumentException
     {
         this.protocol = protocol;
         this.hostName = hostName;
@@ -143,6 +153,7 @@ public class IotHubTransport implements IotHubListener
         this.connectionStatus = IotHubConnectionStatus.DISCONNECTED;
         this.deviceIOConnectionStatusChangeCallback = deviceIOConnectionStatusChangeCallback;
         this.isMultiplexing = true;
+        this.keepAliveInterval = keepAliveInterval;
     }
 
     public Object getSendThreadLock()
@@ -412,7 +423,7 @@ public class IotHubTransport implements IotHubListener
         // registering any devices to it. No need to check for SAS token expiry if no devices are registered yet.
         if (this.getDefaultConfig() != null)
         {
-            if (this.isSasTokenExpired())
+            if (this.isAuthenticationProviderExpired())
             {
                 throw new SecurityException("Your sas token has expired");
             }
@@ -620,6 +631,20 @@ public class IotHubTransport implements IotHubListener
                 }
             }
         }
+    }
+
+    String getTransportConnectionId() {
+        return this.iotHubTransportConnection.getConnectionId();
+    }
+
+    String getDeviceClientUniqueIdentifier() {
+        // If it's not a multithreaded transport layer, we will use the device configuration to get the device unique identifier.
+        if (!this.isMultiplexing) {
+            return this.hostName + "-" + this.getDefaultConfig().getDeviceClientUniqueIdentifier();
+        }
+
+        // If this is a multithread transport layer, we will use its unique identifier.
+        return this.hostName + "-Multiplexed-" + this.transportUniqueIdentifier;
     }
 
     private void checkForExpiredMessages()
@@ -1025,12 +1050,7 @@ public class IotHubTransport implements IotHubListener
         if (e instanceof TransportException)
         {
             TransportException transportException = (TransportException) e;
-            if (transportException.isRetryable())
-            {
-                log.debug("Mapping throwable to NO_NETWORK because it was a retryable exception", e);
-                return IotHubConnectionStatusChangeReason.NO_NETWORK;
-            }
-            else if (isSasTokenExpired())
+            if (isSasTokenExpired())
             {
                 log.debug("Mapping throwable to EXPIRED_SAS_TOKEN because it was a non-retryable exception and the saved sas token has expired", e);
                 return IotHubConnectionStatusChangeReason.EXPIRED_SAS_TOKEN;
@@ -1039,6 +1059,11 @@ public class IotHubTransport implements IotHubListener
             {
                 log.debug("Mapping throwable to BAD_CREDENTIAL because it was a non-retryable exception authorization exception but the saved sas token has not expired yet", e);
                 return IotHubConnectionStatusChangeReason.BAD_CREDENTIAL;
+            }
+            else if (transportException.isRetryable())
+            {
+                log.debug("Mapping throwable to NO_NETWORK because it was a retryable exception", e);
+                return IotHubConnectionStatusChangeReason.NO_NETWORK;
             }
         }
 
@@ -1073,9 +1098,11 @@ public class IotHubTransport implements IotHubListener
                         // registering any devices to it
                         this.iotHubTransportConnection = new AmqpsIotHubConnection(
                                 this.hostName,
+                                this.transportUniqueIdentifier,
                                 this.protocol == IotHubClientProtocol.AMQPS_WS,
                                 this.sslContext,
-                                this.proxySettings);
+                                this.proxySettings,
+                                this.keepAliveInterval);
 
                         for (DeviceClientConfig config : this.deviceClientConfigs.values())
                         {
@@ -1084,7 +1111,7 @@ public class IotHubTransport implements IotHubListener
                     }
                     else
                     {
-                        this.iotHubTransportConnection = new AmqpsIotHubConnection(this.getDefaultConfig(), false);
+                        this.iotHubTransportConnection = new AmqpsIotHubConnection(this.getDefaultConfig(), this.transportUniqueIdentifier);
                     }
 
                     break;
@@ -1478,7 +1505,7 @@ public class IotHubTransport implements IotHubListener
             return false;
         }
 
-        if (isSasTokenExpired())
+        if (isAuthenticationProviderExpired())
         {
             log.debug("Creating a callback for the message with expired sas token with UNAUTHORIZED status");
             packet.setStatus(IotHubStatusCode.UNAUTHORIZED);
@@ -1594,7 +1621,7 @@ public class IotHubTransport implements IotHubListener
     // check SAS token expiry when using SAS based auth, and there is always a SAS token authentication provider
     // when using SAS based auth.
     @SuppressWarnings("ConstantConditions")
-    private boolean isSasTokenExpired()
+    private boolean isAuthenticationProviderExpired()
     {
         if (this.getDefaultConfig() == null)
         {
@@ -1603,6 +1630,21 @@ public class IotHubTransport implements IotHubListener
 
         return this.getDefaultConfig().getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN
                 && this.getDefaultConfig().getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary();
+    }
+
+    // warning is about how getSasTokenAuthentication() may return null. In this case, it never will since we only
+    // check SAS token expiry when using SAS based auth, and there is always a SAS token authentication provider
+    // when using SAS based auth.
+    @SuppressWarnings("ConstantConditions")
+    private boolean isSasTokenExpired()
+    {
+        if (this.getDefaultConfig() == null)
+        {
+            return false;
+        }
+
+        return this.getDefaultConfig().getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN
+            && this.getDefaultConfig().getSasTokenAuthentication().isSasTokenExpired();
     }
 
     /**
@@ -1769,7 +1811,7 @@ public class IotHubTransport implements IotHubListener
      */
     private void checkForUnauthorizedException(TransportException transportException)
     {
-        if (!this.isSasTokenExpired() && (transportException instanceof MqttUnauthorizedException
+        if (!this.isAuthenticationProviderExpired() && (transportException instanceof MqttUnauthorizedException
                 || transportException instanceof UnauthorizedException
                 || transportException instanceof AmqpUnauthorizedAccessException))
         {

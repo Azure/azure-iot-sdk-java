@@ -15,6 +15,7 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.util.UUID;
 
 import static com.microsoft.azure.sdk.iot.deps.transport.mqtt.MqttMessage.retrieveQosValue;
 
@@ -33,6 +34,8 @@ public class MqttConnection implements MqttCallback
     private static final int SUBSCRIBE_REQUEST_MAX_WAIT_TIME_MILLISECONDS = 60 * 1000; // 1 minute
 
     private final MqttListener mqttListener;
+    private final String connectionId;
+    private final String hostName;
 
     /**
      * Constructor to create MqttAsync Client with Paho
@@ -71,11 +74,13 @@ public class MqttConnection implements MqttCallback
             {
                 serverUri = String.format(SSL_URL_FORMAT, hostname);
             }
+            this.hostName = hostname;
             this.mqttListener = listener;
             this.mqttAsyncClient = new MqttAsyncClient(serverUri, clientId, new MemoryPersistence());
             this.connectionOptions = new MqttConnectOptions();
             this.mqttAsyncClient.setCallback(this);
             this.updateConnectionOptions(userName, password, sslContext);
+            this.connectionId = UUID.randomUUID().toString();
         }
         catch (MqttException e)
         {
@@ -283,5 +288,13 @@ public class MqttConnection implements MqttCallback
     public synchronized void connectionLost(Throwable throwable)
     {
         this.mqttListener.connectionLost(throwable);
+    }
+
+    public String getConnectionId() {
+        return this.connectionId;
+    }
+
+    public String getHostName() {
+        return this.hostName;
     }
 }

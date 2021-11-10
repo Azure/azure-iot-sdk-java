@@ -439,6 +439,7 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
             // No need to do anything besides ack the message. Twin links are already opened and desired properties
             // subscription is automatically sent once the twin links are opened, so there is no need to send
             // this message over the wire.
+            log.trace("Automatically acknowledging the twin subscription request because the twin links are already open");
             this.amqpsSessionStateCallback.onMessageAcknowledged(transportMessage, Accepted.getInstance(), this.getDeviceId());
             return SendResult.SUCCESS;
         }
@@ -448,6 +449,7 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
         {
             // Don't ack the subscription message here. Once the twin links have finished opening both locally and remotely,
             // it will be ack'd.
+            log.trace("Creating the twin links to handle the twin subscription message");
             createTwinLinksAsync();
             this.explicitInProgressTwinSubscriptionMessage = transportMessage;
             return SendResult.SUCCESS;
@@ -463,6 +465,7 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
         {
             // No need to do anything besides ack the message. Method links are already opened so there is no need to send
             // this message over the wire.
+            log.trace("Automatically acknowledging the direct method subscription request because the direct method links are already open");
             this.amqpsSessionStateCallback.onMessageAcknowledged(transportMessage, Accepted.getInstance(), this.getDeviceId());
             return SendResult.SUCCESS;
         }
@@ -472,6 +475,7 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
         {
             // Don't ack the subscription message here. Once the method links have finished opening both locally and remotely,
             // it will be ack'd.
+            log.trace("Creating the direct method links to handle the direct method subscription message");
             createMethodLinksAsync();
             this.explicitInProgressMethodsSubscriptionMessage = transportMessage;
             return SendResult.SUCCESS;
@@ -512,6 +516,7 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
     // "onLinkOpened()" event will execute when that happens.
     private void createMethodLinksAsync()
     {
+        log.debug("Creating direct method links");
         String methodsLinkCorrelationId = UUID.randomUUID().toString();
 
         Sender sender = session.sender(AmqpsMethodsSenderLinkHandler.getTag(deviceClientConfig, methodsLinkCorrelationId));
@@ -528,6 +533,7 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
     // "onLinkOpened()" event will execute when that happens.
     private void createTwinLinksAsync()
     {
+        log.debug("Creating twin links");
         String twinLinkCorrelationId = UUID.randomUUID().toString();
 
         //Twin sender and receiver links need to correlate operation request messages to operation response messages.

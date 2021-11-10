@@ -60,7 +60,17 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
     }
 
     @Override
-    public void close()
+    public String getConnectionId() {
+        return "HTTP";
+    }
+
+    @Override
+    public String getHostName() {
+        return this.hostName;
+    }
+
+    @Override
+    public void close() throws ProvisioningDeviceConnectionException
     {
         // dummy call for Http
     }

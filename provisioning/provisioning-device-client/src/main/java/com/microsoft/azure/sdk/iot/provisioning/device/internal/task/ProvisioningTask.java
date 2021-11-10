@@ -142,8 +142,13 @@ public class ProvisioningTask implements Callable<Object>
                                                                                       ProvisioningDeviceClientException
     {
         Thread.sleep(provisioningDeviceClientContract.getRetryValue());
-        StatusTask statusTask = new StatusTask(securityProvider, provisioningDeviceClientContract, operationId,
-                                               this.authorization);
+        StatusTask statusTask = new StatusTask(
+                securityProvider,
+                provisioningDeviceClientContract,
+                provisioningDeviceClientConfig,
+                operationId,
+                this.authorization);
+
         FutureTask<RegistrationOperationStatusParser> futureStatusTask = new FutureTask<>(statusTask);
         executor.submit(futureStatusTask);
         RegistrationOperationStatusParser statusRegistrationOperationStatusParser =  futureStatusTask.get(MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE, TimeUnit.MILLISECONDS);
@@ -276,7 +281,16 @@ public class ProvisioningTask implements Callable<Object>
     @Override
     public Object call() throws Exception
     {
-        Thread.currentThread().setName(THREAD_NAME);
+        // The thread doesn't have any opened connections associated to it yet.
+        String threadName = this.provisioningDeviceClientContract.getHostName()
+                + "-"
+                + this.provisioningDeviceClientConfig.getUniqueIdentifier()
+                + "-Cxn"
+                + "PendingConnectionId"
+                + "-"
+                + THREAD_NAME;
+
+        Thread.currentThread().setName(threadName);
 
         try
         {
@@ -301,6 +315,23 @@ public class ProvisioningTask implements Callable<Object>
                 Register-State	B, C, D, E	    C, D, E	    terminal	terminal	terminal
                 Status-State	B, C, D, E	    C, D, E	    terminal	terminal	terminal
              */
+
+            String connectionId = this.provisioningDeviceClientConfig.getUniqueIdentifier();
+            if (connectionId == null) {
+                // For Symetric Key authentication, connection is not open until the registration is invoked.
+                connectionId = "PendingConnectionId";
+            }
+
+            threadName = this.provisioningDeviceClientContract.getHostName()
+                    + "-"
+                    + this.provisioningDeviceClientConfig.getUniqueIdentifier()
+                    + "-Cxn"
+                    + connectionId
+                    + "-"
+                    + THREAD_NAME;
+
+            Thread.currentThread().setName(threadName);
+
             log.info("Connection to device provisioning service opened successfully, sending initial device registration message");
             RegistrationOperationStatusParser registrationOperationStatusParser = this.invokeRegister();
 

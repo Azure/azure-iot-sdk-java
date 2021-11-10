@@ -32,6 +32,7 @@ import org.apache.qpid.proton.reactor.Reactor;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.Objects;
+import java.util.UUID;
 
 @Slf4j
 abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup implements CbsSessionStateCallback
@@ -47,6 +48,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
     private boolean connectionOpenedRemotely;
     private boolean sessionOpenedRemotely;
     private boolean linkOpenedRemotely;
+    private String connectionId;
 
     private final String hostName;
     @SuppressWarnings("unused") // Leaving for future use
@@ -231,6 +233,8 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
     {
         super.onConnectionRemoteOpen(event);
         this.connection = event.getConnection();
+        this.connectionId = UUID.randomUUID().toString();
+
         this.connectionOpenedRemotely = true;
 
         // Once the connection opens, get that connection and make it create a new session that will serve as the CBS
@@ -249,6 +253,10 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         {
             new CbsSessionHandler(cbsSession, this, this.sasToken);
         }
+    }
+
+    protected String getConnectionId() {
+        return this.connectionId;
     }
 
     /**

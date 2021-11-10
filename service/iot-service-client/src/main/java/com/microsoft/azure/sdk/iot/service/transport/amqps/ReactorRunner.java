@@ -16,16 +16,16 @@ import java.io.IOException;
 @Slf4j
 class ReactorRunner
 {
-    private final static String THREAD_NAME_PREFIX = "azure-iot-sdk-ReactorRunner-";
+    private final static String THREAD_NAME = "azure-iot-sdk-ReactorRunner";
     private final String threadName;
     private final Reactor reactor;
     private static final int REACTOR_TIMEOUT = 3141; // reactor timeout in milliseconds
     private static final int CLOSE_REACTOR_GRACEFULLY_TIMEOUT = 10 * 1000;
 
-    public ReactorRunner(BaseHandler baseHandler, String threadNamePostfix) throws IOException
+    public ReactorRunner(BaseHandler baseHandler, String threadNamePrefix, String threadNamePostfix) throws IOException
     {
         this.reactor = Proton.reactor(baseHandler);
-        this.threadName = THREAD_NAME_PREFIX + threadNamePostfix;
+        this.threadName = threadNamePrefix + "-" + THREAD_NAME + "-" + threadNamePostfix;
     }
 
     public void run(long timeoutMs)

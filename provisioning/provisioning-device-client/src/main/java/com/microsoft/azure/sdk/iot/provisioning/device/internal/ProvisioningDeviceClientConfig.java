@@ -13,6 +13,8 @@ import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 public final class ProvisioningDeviceClientConfig
 {
     @Getter
@@ -36,6 +38,8 @@ public final class ProvisioningDeviceClientConfig
     private boolean usingWebSocket = false;
 
     @Getter
+    private final String provisioningDeviceClientUniqueIdentifier = UUID.randomUUID().toString().substring(0, 8);
+
     private ProvisioningDeviceClientRegistrationCallback registrationCallback;
 
     @Getter
@@ -54,5 +58,9 @@ public final class ProvisioningDeviceClientConfig
     {
         this.registrationCallback = registrationCallback;
         this.registrationCallbackContext = registrationCallbackContext;
+    }
+
+    public String getUniqueIdentifier() {
+        return this.provisioningDeviceClientUniqueIdentifier;
     }
 }
