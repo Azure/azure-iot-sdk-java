@@ -267,6 +267,7 @@ public class IotHubTransport implements IotHubListener
             {
                 log.warn("Exception thrown while calling the onUnknownMessageAcknowledged callback in onMessageSent", ex);
             }
+
             log.warn("A message was acknowledged by IoT Hub, but this client has no record of sending it ({})", message);
         }
     }
@@ -1418,7 +1419,7 @@ public class IotHubTransport implements IotHubListener
                 RetryDecision retryDecision = config.getRetryPolicy().getRetryDecision(packet.getCurrentRetryAttempt(), transportException);
                 if (retryDecision.shouldRetry())
                 {
-                    this.taskScheduler.schedule(new MessageRetryRunnable(this.waitingPacketsQueue, packet, this), retryDecision.getDuration(), MILLISECONDS);
+                    this.taskScheduler.schedule(new MessageRetryRunnable(this.waitingPacketsQueue, packet, this.sendThreadLock), retryDecision.getDuration(), MILLISECONDS);
                     return;
                 }
                 else

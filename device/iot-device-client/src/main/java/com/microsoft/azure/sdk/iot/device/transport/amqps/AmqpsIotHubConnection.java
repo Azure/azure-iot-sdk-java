@@ -335,6 +335,19 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         this.executorServicesCleanup();
     }
 
+    private void reportUnsentMessages()
+    {
+        for (Message unsentMessage : this.messagesToSend)
+        {
+            TransportException transportException = new TransportException("AMQP message failed to send because the connection was closed before it could be sent.");
+            transportException.setRetryable(true);
+            log.trace("Notifying transport layer that message {} failed to send because the connection was closed before it could be sent.", unsentMessage);
+            this.listener.onMessageSent(unsentMessage, unsentMessage.getConnectionDeviceId(), transportException);
+        }
+
+        this.messagesToSend.clear();
+    }
+
     public void close()
     {
         log.debug("Shutting down amqp layer...");
@@ -360,6 +373,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         {
             // always clean up the executor service, free the reactor and set the state as DISCONNECTED even when the close
             // isn't successful. Failing to free the reactor in particular leaks network resources
+            reportUnsentMessages();
             clearLocalState();
             closeNetworkResources();
             this.state = IotHubConnectionStatus.DISCONNECTED;
@@ -885,9 +899,9 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     private void sendQueuedMessages()
     {
         int messagesAttemptedToBeProcessed = 0;
-        Message message = messagesToSend.poll();
-        while (message != null && messagesAttemptedToBeProcessed < MAX_MESSAGES_TO_SEND_PER_CALLBACK)
+        while (messagesToSend.peek() != null && messagesAttemptedToBeProcessed < MAX_MESSAGES_TO_SEND_PER_CALLBACK)
         {
+            Message message = messagesToSend.poll();
             messagesAttemptedToBeProcessed++;
             SendResult sendResult = sendQueuedMessage(message);
 
@@ -899,13 +913,16 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 AmqpsSessionHandler reconnectingDeviceSessionHandler = this.reconnectingDeviceSessionHandlers.get(message.getConnectionDeviceId());
                 if (reconnectingDeviceSessionHandler != null)
                 {
-                    log.trace("Amqp message failed to send because its AMQP session is currently reconnecting. Adding it back to messages to send queue ({})", message);
-                    messagesToSend.add(message);
+                    TransportException transportException = new TransportException("Amqp message failed to send because its AMQP session is currently reconnecting " + message);
+                    transportException.setRetryable(true);
+                    log.debug("Notifying transport layer that amqp message failed to send.", transportException);
+                    this.listener.onMessageSent(message, message.getConnectionDeviceId(), transportException);
                 }
                 else
                 {
-                    TransportException transportException = new TransportException("Message failed to send because it belonged to a device that was unregistered from the AMQP connetion");
+                    TransportException transportException = new TransportException("Amqp message failed to send because it belonged to a device that was unregistered from the AMQP connetion");
                     transportException.setRetryable(false);
+                    log.debug("Notifying transport layer that amqp message failed to send.", transportException);
                     this.listener.onMessageSent(message, message.getConnectionDeviceId(), transportException);
                 }
             }
@@ -918,29 +935,27 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             {
                 // Proton-j doesn't handle the scenario of sending twin/method messages on links that haven't been opened remotely yet, so hold
                 // off on sending them until the subscription has finished.
-                log.trace("Attempted to send twin/method message while the twin/method subscription was in progress. Adding it back to messages to send queue to try again after the subscription has finished ({})", message);
-                messagesToSend.add(message);
+                TransportException transportException = new TransportException("Amqp message failed to send because it is a twin/method message that can't be sent while the twin/method subscription is in progress. " + message);
+                transportException.setRetryable(true);
+                log.debug("Notifying transport layer that amqp message failed to send.", transportException);
+                this.listener.onMessageSent(message, message.getConnectionDeviceId(), transportException);
             }
             else if (sendResult == SendResult.LINKS_NOT_OPEN)
             {
                 // Shouldn't happen. If it does, it signals that we have a bug in this SDK.
-                log.warn("Failed to send a message because its AMQP links were not open yet. Adding it back to messages to send queue ({})", message);
-                messagesToSend.add(message);
+                TransportException transportException = new TransportException("Amqp message failed to send because its AMQP links were not open yet. " + message);
+                transportException.setRetryable(true);
+                log.debug("Notifying transport layer that amqp message failed to send.", transportException);
+                this.listener.onMessageSent(message, message.getConnectionDeviceId(), transportException);
             }
             else if (sendResult == SendResult.UNKNOWN_FAILURE)
             {
                 // Shouldn't happen. If it does, it signals that we have a bug in this SDK.
-                log.warn("Unknown failure occurred while attempting to send. Adding it back to messages to send queue ({})", message);
-                messagesToSend.add(message);
+                TransportException transportException = new TransportException("Amqp message failed to send for unknown reasons. " + message);
+                transportException.setRetryable(true);
+                log.debug("Notifying transport layer that amqp message failed to send.", transportException);
+                this.listener.onMessageSent(message, message.getConnectionDeviceId(), transportException);
             }
-
-            message = messagesToSend.poll();
-        }
-
-        if (message != null)
-        {
-            //message was polled out of list, but loop exited from processing too many messages before it could process this message, so re-queue it for later
-            messagesToSend.add(message);
         }
     }
 
