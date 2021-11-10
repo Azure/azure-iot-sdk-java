@@ -62,6 +62,9 @@ public abstract class IntegrationTest
     @Rule
     public MultiplexingClientTestRule multiplexingClientTestRule = new MultiplexingClientTestRule();
 
+    @Rule
+    public ErrInjTestRule errInjTestRule = new ErrInjTestRule();
+
     int E2E_TEST_TIMEOUT_MILLISECONDS = 5 * 60 * 1000;
 
     // Each test must finish in under 5 minutes. Only the token renewal test should last longer,
@@ -74,6 +77,7 @@ public abstract class IntegrationTest
 
     //By default, run all tests. Even if env vars aren't set
     public static boolean runIotHubTests = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue("RUN_IOTHUB_TESTS", "true"));
+    public static boolean runErrInjTests = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue("RUN_ERRINJ_TESTS", "true"));
     public static boolean runProvisioningTests = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue("RUN_PROVISIONING_TESTS", "true"));
     public static boolean runDigitalTwinTests = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue("RUN_DIGITAL_TESTS", "true"));
 

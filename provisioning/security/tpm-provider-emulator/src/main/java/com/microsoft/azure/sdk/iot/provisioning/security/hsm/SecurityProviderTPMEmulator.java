@@ -338,12 +338,14 @@ public class SecurityProviderTPMEmulator extends SecurityProviderTpm
     public byte[] activateIdentityKey(byte[] key) throws SecurityProviderException
     {
 
-        TPM2B_ID_OBJECT         credBlob = TPM2B_ID_OBJECT.fromTpm(key);
-        TPM2B_ENCRYPTED_SECRET  encSecret = TPM2B_ENCRYPTED_SECRET.fromTpm(key);
-        TPM2B_PRIVATE           idKeyDupBlob = TPM2B_PRIVATE.fromTpm(key);
-        TPM2B_ENCRYPTED_SECRET  encWrapKey = TPM2B_ENCRYPTED_SECRET.fromTpm(key);
-        idKeyPub = TPM2B_PUBLIC.fromTpm(key);
-        TPM2B_DATA				encUriData = TPM2B_DATA.fromTpm(key);
+        TpmBuffer actBlob = new TpmBuffer(Arrays.copyOfRange(key, 0, key.length));
+
+        TPM2B_ID_OBJECT         credBlob = TPM2B_ID_OBJECT.fromTpm(actBlob);
+        TPM2B_ENCRYPTED_SECRET  encSecret = TPM2B_ENCRYPTED_SECRET.fromTpm(actBlob);
+        TPM2B_PRIVATE           idKeyDupBlob = TPM2B_PRIVATE.fromTpm(actBlob);
+        TPM2B_ENCRYPTED_SECRET  encWrapKey = TPM2B_ENCRYPTED_SECRET.fromTpm(actBlob);
+        idKeyPub = TPM2B_PUBLIC.fromTpm(actBlob);
+        TPM2B_DATA				encUriData = TPM2B_DATA.fromTpm(actBlob);
 
         if (idKeyPub == null)
         {

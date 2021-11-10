@@ -8,7 +8,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>iot-e2e-common</artifactId>
-    <name>IoT Hub Java SDK common</name>
+    <name>IoT Hub Java E2E Common Tests</name>
     <version>0.26.0</version>
     <description>Test suite fot the Microsoft Azure IoT Device SDK for Java</description>
     <developers>

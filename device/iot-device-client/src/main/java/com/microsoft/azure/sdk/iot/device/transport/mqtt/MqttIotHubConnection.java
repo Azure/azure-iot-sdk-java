@@ -43,7 +43,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private static final String SSL_PREFIX = "ssl://";
     private static final String SSL_PORT_SUFFIX = ":8883";
 
-    private static final int KEEP_ALIVE_INTERVAL = 230;
     private static final int MQTT_VERSION = 4;
     private static final boolean SET_CLEAN_SESSION = false;
 
@@ -180,7 +179,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         }
 
         MqttConnectOptions connectOptions = new MqttConnectOptions();
-        connectOptions.setKeepAliveInterval(KEEP_ALIVE_INTERVAL);
+        connectOptions.setKeepAliveInterval(config.getKeepAliveInterval());
         connectOptions.setCleanSession(SET_CLEAN_SESSION);
         connectOptions.setMqttVersion(MQTT_VERSION);
         connectOptions.setUserName(iotHubUserName);

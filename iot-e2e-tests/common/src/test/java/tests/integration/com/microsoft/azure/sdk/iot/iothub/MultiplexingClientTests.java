@@ -58,10 +58,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.Success;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestDeviceIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.MultiplexingClientTest;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.*;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -1104,6 +1101,7 @@ public class MultiplexingClientTests extends IntegrationTest
     // Fault every device session, wait for it to recover, test sending from it, and verify that no other device sessions were dropped
     // other than the deliberately dropped session.
     @Test
+    @ErrInjTest
     public void multiplexedConnectionRecoversFromDeviceSessionDropsSequential() throws Exception
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
@@ -1161,6 +1159,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
     // Fault every device session basically at once, make sure that the clients all recover
     @Test
+    @ErrInjTest
     public void multiplexedConnectionRecoversFromDeviceSessionDropsParallel() throws Exception
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
@@ -1210,6 +1209,7 @@ public class MultiplexingClientTests extends IntegrationTest
     // Open a multiplexed connection, send a fault injection message to drop the TCP connection, and ensure that the multiplexed
     // connection recovers
     @Test
+    @ErrInjTest
     public void multiplexedConnectionRecoversFromTcpConnectionDrop() throws Exception
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
@@ -1802,6 +1802,7 @@ public class MultiplexingClientTests extends IntegrationTest
     // after it finishes reconnection
     @StandardTierHubOnlyTest
     @ContinuousIntegrationTest
+    @ErrInjTest
     @Test
     public void multiplexedSessionsRecoverSubscriptionsFromDeviceSessionDrops() throws Exception
     {

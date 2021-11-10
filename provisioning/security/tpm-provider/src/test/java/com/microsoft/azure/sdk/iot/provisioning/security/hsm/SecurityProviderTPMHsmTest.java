@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderTPM
 import mockit.*;
 import org.junit.Test;
 import tss.Tpm;
+import tss.TpmBuffer;
 import tss.TpmFactory;
 import tss.TpmHelpers;
 import tss.tpm.*;
@@ -347,9 +348,9 @@ public class SecurityProviderTPMHsmTest
         new NonStrictExpectations()
         {
             {
-                TPM2B_PUBLIC.fromTpm((byte[]) any);
+                TPM2B_PUBLIC.fromTpm((TpmBuffer) any);
                 result = mockedTpm2BPublic;
-                TPM2B_DATA.fromTpm((byte[]) any);
+                TPM2B_DATA.fromTpm((TpmBuffer) any);
                 result = mockedTpm2BData;
                 mockedTpm.StartAuthSession((TPM_HANDLE)any, (TPM_HANDLE)any, (byte[]) any, (byte[])any, (TPM_SE)any, (TPMT_SYM_DEF)any
                         , (TPM_ALG_ID)any);
@@ -415,7 +416,7 @@ public class SecurityProviderTPMHsmTest
         new NonStrictExpectations()
         {
             {
-                TPM2B_PUBLIC.fromTpm((byte[]) any);
+                TPM2B_PUBLIC.fromTpm((TpmBuffer) any);
                 result = null;
             }
         };
@@ -436,9 +437,9 @@ public class SecurityProviderTPMHsmTest
         new NonStrictExpectations()
         {
             {
-                TPM2B_PUBLIC.fromTpm((byte[]) any);
+                TPM2B_PUBLIC.fromTpm((TpmBuffer) any);
                 result = mockedTpm2BPublic;
-                TPM2B_DATA.fromTpm((byte[]) any);
+                TPM2B_DATA.fromTpm((TpmBuffer) any);
                 result = mockedTpm2BData;
                 mockedTpm.StartAuthSession((TPM_HANDLE)any, (TPM_HANDLE)any, (byte[]) any, (byte[])any, (TPM_SE)any, (TPMT_SYM_DEF)any
                         , (TPM_ALG_ID)any);
@@ -463,9 +464,9 @@ public class SecurityProviderTPMHsmTest
         new NonStrictExpectations()
         {
             {
-                TPM2B_PUBLIC.fromTpm((byte[]) any);
+                TPM2B_PUBLIC.fromTpm((TpmBuffer) any);
                 result = mockedTpm2BPublic;
-                TPM2B_DATA.fromTpm((byte[]) any);
+                TPM2B_DATA.fromTpm((TpmBuffer) any);
                 result = mockedTpm2BData;
                 mockedTpm.StartAuthSession((TPM_HANDLE)any, (TPM_HANDLE)any, (byte[]) any, (byte[])any, (TPM_SE)any, (TPMT_SYM_DEF)any
                         , (TPM_ALG_ID)any);
@@ -496,9 +497,9 @@ public class SecurityProviderTPMHsmTest
         new NonStrictExpectations()
         {
             {
-                TPM2B_PUBLIC.fromTpm((byte[]) any);
+                TPM2B_PUBLIC.fromTpm((TpmBuffer) any);
                 result = mockedTpm2BPublic;
-                TPM2B_DATA.fromTpm((byte[]) any);
+                TPM2B_DATA.fromTpm((TpmBuffer) any);
                 result = mockedTpm2BData;
                 mockedTpm.StartAuthSession((TPM_HANDLE)any, (TPM_HANDLE)any, (byte[]) any, (byte[])any, (TPM_SE)any, (TPMT_SYM_DEF)any
                         , (TPM_ALG_ID)any);
@@ -533,9 +534,9 @@ public class SecurityProviderTPMHsmTest
         new NonStrictExpectations()
         {
             {
-                TPM2B_PUBLIC.fromTpm((byte[]) any);
+                TPM2B_PUBLIC.fromTpm((TpmBuffer) any);
                 result = mockedTpm2BPublic;
-                TPM2B_DATA.fromTpm((byte[]) any);
+                TPM2B_DATA.fromTpm((TpmBuffer) any);
                 result = mockedTpm2BData;
                 mockedTpm.StartAuthSession((TPM_HANDLE)any, (TPM_HANDLE)any, (byte[]) any, (byte[])any, (TPM_SE)any, (TPMT_SYM_DEF)any
                         , (TPM_ALG_ID)any);
@@ -572,9 +573,9 @@ public class SecurityProviderTPMHsmTest
         new NonStrictExpectations()
         {
             {
-                TPM2B_PUBLIC.fromTpm((byte[]) any);
+                TPM2B_PUBLIC.fromTpm((TpmBuffer) any);
                 result = mockedTpm2BPublic;
-                TPM2B_DATA.fromTpm((byte[]) any);
+                TPM2B_DATA.fromTpm((TpmBuffer) any);
                 result = mockedTpm2BData;
                 mockedTpm.StartAuthSession((TPM_HANDLE)any, (TPM_HANDLE)any, (byte[]) any, (byte[])any, (TPM_SE)any, (TPMT_SYM_DEF)any
                         , (TPM_ALG_ID)any);
@@ -629,9 +630,9 @@ public class SecurityProviderTPMHsmTest
         new NonStrictExpectations()
         {
             {
-                TPM2B_PUBLIC.fromTpm((byte[]) any);
+                TPM2B_PUBLIC.fromTpm((TpmBuffer) any);
                 result = mockedTpm2BPublic;
-                TPM2B_DATA.fromTpm((byte[]) any);
+                TPM2B_DATA.fromTpm((TpmBuffer) any);
                 result = mockedTpm2BData;
                 mockedTpm.StartAuthSession((TPM_HANDLE)any, (TPM_HANDLE)any, (byte[]) any, (byte[])any, (TPM_SE)any, (TPMT_SYM_DEF)any
                         , (TPM_ALG_ID)any);
@@ -689,9 +690,9 @@ public class SecurityProviderTPMHsmTest
         new NonStrictExpectations()
         {
             {
-                TPM2B_PUBLIC.fromTpm((byte[]) any);
+                TPM2B_PUBLIC.fromTpm((TpmBuffer) any);
                 result = mockedTpm2BPublic;
-                TPM2B_DATA.fromTpm((byte[]) any);
+                TPM2B_DATA.fromTpm((TpmBuffer) any);
                 result = mockedTpm2BData;
                 mockedTpm.StartAuthSession((TPM_HANDLE) any, (TPM_HANDLE) any, (byte[]) any, (byte[]) any, (TPM_SE) any, (TPMT_SYM_DEF) any
                         , (TPM_ALG_ID) any);
@@ -767,9 +768,9 @@ public class SecurityProviderTPMHsmTest
         new NonStrictExpectations()
         {
             {
-                TPM2B_PUBLIC.fromTpm((byte[]) any);
+                TPM2B_PUBLIC.fromTpm((TpmBuffer) any);
                 result = mockedTpm2BPublic;
-                TPM2B_DATA.fromTpm((byte[]) any);
+                TPM2B_DATA.fromTpm((TpmBuffer) any);
                 result = mockedTpm2BData;
                 mockedTpm.StartAuthSession((TPM_HANDLE)any, (TPM_HANDLE)any, (byte[]) any, (byte[])any, (TPM_SE)any, (TPMT_SYM_DEF)any
                         , (TPM_ALG_ID)any);
