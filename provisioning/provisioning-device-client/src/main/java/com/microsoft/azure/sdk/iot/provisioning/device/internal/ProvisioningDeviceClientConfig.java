@@ -40,6 +40,7 @@ public final class ProvisioningDeviceClientConfig
     @Getter
     private final String provisioningDeviceClientUniqueIdentifier = UUID.randomUUID().toString().substring(0, 8);
 
+    @Getter
     private ProvisioningDeviceClientRegistrationCallback registrationCallback;
 
     @Getter

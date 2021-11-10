@@ -67,7 +67,7 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
 
         this.hostName = hostName;
 
-        this.useWebSockets = provisioningDeviceClientConfig.getUseWebSockets();
+        this.useWebSockets = provisioningDeviceClientConfig.isUsingWebSocket();
 
         // SRS_ContractAPIAmqp_07_001: [The constructor shall save the scope id and hostname.]
         provisioningAmqpOperations = new ProvisioningAmqpOperations(this.idScope, hostName);
