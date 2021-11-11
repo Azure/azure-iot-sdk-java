@@ -337,7 +337,6 @@ public class SecurityProviderTPMEmulator extends SecurityProviderTpm
     @Override
     public byte[] activateIdentityKey(byte[] key) throws SecurityProviderException
     {
-
         TpmBuffer actBlob = new TpmBuffer(Arrays.copyOfRange(key, 0, key.length));
 
         TPM2B_ID_OBJECT         credBlob = TPM2B_ID_OBJECT.fromTpm(actBlob);
