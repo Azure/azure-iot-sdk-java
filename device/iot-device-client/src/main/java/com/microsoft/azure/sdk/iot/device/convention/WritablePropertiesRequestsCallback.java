@@ -15,5 +15,5 @@ public interface WritablePropertiesRequestsCallback
      * @param writablePropertiesRequestsCollection A collection of properties to be updated.
      * @param context User supplied context.
      */
-    void execute(ClientPropertyCollection writablePropertiesRequestsCollection, Object context);
+    void onWritablePropertyCallbackReceived(ClientPropertyCollection writablePropertiesRequestsCollection, Object context);
 }

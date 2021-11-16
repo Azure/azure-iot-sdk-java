@@ -38,7 +38,7 @@ public class DeviceTwinSample
 
             if (message != null)
             {
-                System.out.println("CORRELATIONCALLBACK["+ messageId+ "] onRequestQueued (" + _message + ") CorrelationId: " + message.getCorrelationId());
+                System.out.println("==========CORRELATIONCALLBACK["+ messageId+ "] onRequestQueued (" + _message + ") CorrelationId: " + message.getCorrelationId());
             }
             if (callbackContext instanceof ReportedPropertiesContext) {
 
@@ -53,7 +53,7 @@ public class DeviceTwinSample
 
             if (message != null)
             {
-                System.out.println("CORRELATIONCALLBACK["+messageId+"] onRequestSent (" + _message + ") CorrelationId: " + message.getCorrelationId());
+                System.out.println("==========CORRELATIONCALLBACK["+messageId+"] onRequestSent (" + _message + ") CorrelationId: " + message.getCorrelationId());
             }
         }
 
@@ -64,10 +64,10 @@ public class DeviceTwinSample
 
             if (message != null)
             {
-                System.out.println("CORRELATIONCALLBACK["+messageId+"] onRequestAcknowledged (" + _message + ") CorrelationId: " + message.getCorrelationId());
+                System.out.println("==========CORRELATIONCALLBACK["+messageId+"] onRequestAcknowledged (" + _message + ") CorrelationId: " + message.getCorrelationId());
             }
             if (e != null) {
-                System.out.println("CORRELATIONCALLBACK["+messageId+"] onRequestAcknowledged (" + _message + ") ERROR: " + e.getMessage());
+                System.out.println("==========CORRELATIONCALLBACK["+messageId+"] onRequestAcknowledged (" + _message + ") ERROR: " + e.getMessage());
             }
         }
 
@@ -77,10 +77,10 @@ public class DeviceTwinSample
 
             if (message != null)
             {
-                System.out.println("CORRELATIONCALLBACK["+messageId+"] onResponseAcknowledged (" + _message + ") CorrelationId: " + message.getCorrelationId());
+                System.out.println("==========CORRELATIONCALLBACK["+messageId+"] onResponseAcknowledged (" + _message + ") CorrelationId: " + message.getCorrelationId());
             }
             if (e != null) {
-                System.out.println("CORRELATIONCALLBACK["+messageId+"] onResponseAcknowledged (" + _message + ") ERROR: " + e.getMessage());
+                System.out.println("==========CORRELATIONCALLBACK["+messageId+"] onResponseAcknowledged (" + _message + ") ERROR: " + e.getMessage());
             }
         }
 
@@ -90,7 +90,7 @@ public class DeviceTwinSample
 
             if (message != null)
             {
-                System.out.println("CORRELATIONCALLBACK["+messageId+"] onResponseReceived (" + _message + ") CorrelationId: " + message.getCorrelationId());
+                System.out.println("==========CORRELATIONCALLBACK["+messageId+"] onResponseReceived (" + _message + ") CorrelationId: " + message.getCorrelationId());
             }
         }
 
@@ -100,10 +100,10 @@ public class DeviceTwinSample
 
             if (message != null)
             {
-                System.out.println("CORRELATIONCALLBACK["+messageId+"] onUnknownMessageAcknowledged (" + _message + ") CorrelationId: " + message.getCorrelationId());
+                System.out.println("==========CORRELATIONCALLBACK["+messageId+"] onUnknownMessageAcknowledged (" + _message + ") CorrelationId: " + message.getCorrelationId());
             }
             if (e != null) {
-                System.out.println("CORRELATIONCALLBACK["+messageId+"] onUnknownMessageAcknowledged (" + _message + ") ERROR: " + e.getMessage());
+                System.out.println("==========CORRELATIONCALLBACK["+messageId+"] onUnknownMessageAcknowledged (" + _message + ") ERROR: " + e.getMessage());
             }
         }
     }
@@ -115,10 +115,10 @@ public class DeviceTwinSample
         public void execute(IotHubStatusCode status, Object context)
         {
             if (context == null) {
-                System.out.println("DEVICETWINCALLBACK context null");
+                System.out.println("==========DEVICETWINCALLBACK context null");
             }
             Succeed.set((status == IotHubStatusCode.OK) || (status == IotHubStatusCode.OK_EMPTY));
-            System.out.println("DEVICETWINCALLBACK IoT Hub responded to device twin operation with status " + status.name());
+            System.out.println("==========DEVICETWINCALLBACK IoT Hub responded to device twin operation with status " + status.name());
         }
     }
 
@@ -148,11 +148,11 @@ public class DeviceTwinSample
             {
                 ReportedPropertiesContext myContext = (ReportedPropertiesContext)context;
                 String messageId = myContext.getcorrelationId();
-                System.out.println("REPORTEDPROPERTYCALLBACK["+messageId+"] Executing reported properties callback for " + _message);
-                System.out.println("REPORTEDPROPERTYCALLBACK["+messageId+"] Found ReportedPropertiesContext with message " + myContext.getMessageOfContext());
-                System.out.println("REPORTEDPROPERTYCALLBACK["+messageId+"] Found ReportedPropertiesContext with correlationId " + myContext.getcorrelationId());
-                System.out.println("REPORTEDPROPERTYCALLBACK["+messageId+"] This context was set by ReportedPropertiesCallback " + status.name());
-                System.out.println("REPORTEDPROPERTYCALLBACK["+messageId+"] IoT Hub responded to device twin reported properties with status " + status.name());
+                System.out.println("==========REPORTEDPROPERTYCALLBACK["+messageId+"] Executing reported properties callback for " + _message);
+                System.out.println("==========REPORTEDPROPERTYCALLBACK["+messageId+"] Found ReportedPropertiesContext with message " + myContext.getMessageOfContext());
+                System.out.println("==========REPORTEDPROPERTYCALLBACK["+messageId+"] Found ReportedPropertiesContext with correlationId " + myContext.getcorrelationId());
+                System.out.println("==========REPORTEDPROPERTYCALLBACK["+messageId+"] This context was set by ReportedPropertiesCallback " + status.name());
+                System.out.println("==========REPORTEDPROPERTYCALLBACK["+messageId+"] IoT Hub responded to device twin reported properties with status " + status.name());
             }
 
         }
@@ -161,30 +161,18 @@ public class DeviceTwinSample
     /*
      * If you don't care about version, you can use the PropertyCallBack.
      */
-    protected static class onHomeTempChange implements TwinPropertyCallBack
+    protected static class provaCallback implements TwinPropertyCallBack
     {
         @Override
         public void TwinPropertyCallBack(Property property, Object context)
         {
             System.out.println(
-                    "onHomeTempChange change " + property.getKey() +
+                    "provaCallback change " + property.getKey() +
                             " to " + property.getValue() +
                             ", Properties version:" + property.getVersion());
         }
     }
-
-    protected static class onCameraActivity implements TwinPropertyCallBack
-    {
-        @Override
-        public void TwinPropertyCallBack(Property property, Object context)
-        {
-            System.out.println(
-                    "onCameraActivity change " + property.getKey() +
-                            " to " + property.getValue() +
-                            ", Properties version:" + property.getVersion());
-        }
-    }
-
+   
     protected static class onProperty implements TwinPropertyCallBack
     {
         @Override
@@ -204,9 +192,9 @@ public class DeviceTwinSample
         public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
         {
             System.out.println();
-            System.out.println("CONNECTION STATUS UPDATE: " + status);
-            System.out.println("CONNECTION STATUS REASON: " + statusChangeReason);
-            System.out.println("CONNECTION STATUS THROWABLE: " + (throwable == null ? "null" : throwable.getMessage()));
+            System.out.println("==========CONNECTION STATUS UPDATE: " + status);
+            System.out.println("==========CONNECTION STATUS REASON: " + statusChangeReason);
+            System.out.println("==========CONNECTION STATUS THROWABLE: " + (throwable == null ? "null" : throwable.getMessage()));
             System.out.println();
 
             if (throwable != null)
@@ -216,18 +204,18 @@ public class DeviceTwinSample
 
             if (status == IotHubConnectionStatus.DISCONNECTED)
             {
-                System.out.println("The connection was lost, and is not being re-established." +
+                System.out.println("==========The connection was lost, and is not being re-established." +
                         " Look at provided exception for how to resolve this issue." +
                         " Cannot send messages until this issue is resolved, and you manually re-open the device client");
             }
             else if (status == IotHubConnectionStatus.DISCONNECTED_RETRYING)
             {
-                System.out.println("The connection was lost, but is being re-established." +
+                System.out.println("==========The connection was lost, but is being re-established." +
                         " Can still send messages, but they won't be sent until the connection is re-established");
             }
             else if (status == IotHubConnectionStatus.CONNECTED)
             {
-                System.out.println("The connection was successfully established. Can send messages.");
+                System.out.println("==========The connection was successfully established. Can send messages.");
             }
         }
     }
@@ -242,8 +230,8 @@ public class DeviceTwinSample
     public static void main(String[] args)
             throws IOException, URISyntaxException
     {
-        System.out.println("Starting...");
-        System.out.println("Beginning setup.");
+        System.out.println("==========Starting...");
+        System.out.println("==========Beginning setup.");
 
 
         if (args.length < 1)
@@ -295,21 +283,21 @@ public class DeviceTwinSample
             }
         }
 
-        System.out.println("Successfully read input parameters.");
+        System.out.println("==========Successfully read input parameters.");
         System.out.format("Using communication protocol %s.\n",
                 protocol.name());
 
         DeviceClient client = new DeviceClient(connString, protocol);
-        System.out.println("Successfully created an IoT Hub client.");
+        System.out.println("==========Successfully created an IoT Hub client.");
 
         client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
         try
         {
-            System.out.println("Open connection to IoT Hub.");
+            System.out.println("==========Open connection to IoT Hub.");
             client.open();
 
-            System.out.println("Start device Twin and get remaining properties...");
+            System.out.println("==========Start device Twin and get remaining properties...");
             // Properties already set in the Service will shows up in the generic onProperty callback, with value and version.
             Succeed.set(false);
             client.startDeviceTwin(new DeviceTwinStatusCallBack(), null, new onProperty(), null);
@@ -320,28 +308,25 @@ public class DeviceTwinSample
             while(!Succeed.get());
 
 
-            System.out.println("Subscribe to Desired properties on device Twin...");
+            System.out.println("==========Subscribe to Desired properties on device Twin...");
             Map<Property, Pair<TwinPropertyCallBack, Object>> desiredProperties = new HashMap<Property, Pair<TwinPropertyCallBack, Object>>()
             {
                 {
-                    put(new Property("HomeTemp(F)", null), new Pair<TwinPropertyCallBack, Object>(new onHomeTempChange(), null));
-                    put(new Property("LivingRoomLights", null), new Pair<TwinPropertyCallBack, Object>(new onProperty(), null));
-                    put(new Property("BedroomRoomLights", null), new Pair<TwinPropertyCallBack, Object>(new onProperty(), null));
-                    put(new Property("HomeSecurityCamera", null), new Pair<TwinPropertyCallBack, Object>(new onCameraActivity(), null));
+                    put(new Property("prova", null), new Pair<TwinPropertyCallBack, Object>(new provaCallback(), null));
+                    put(new Property("version", null), new Pair<TwinPropertyCallBack, Object>(new onProperty(), null));
                 }
             };
             client.subscribeToTwinDesiredProperties(desiredProperties);
 
-            System.out.println("Get device Twin...");
+            System.out.println("==========Get device Twin...");
             client.getDeviceTwin(); // For each desired property in the Service, the SDK will call the appropriate callback with the value and version.
 
-            System.out.println("Update reported properties...");
+            System.out.println("==========Update reported properties...");
             Set<Property> reportProperties = new HashSet<Property>()
             {
                 {
-                    add(new Property("HomeTemp(F)", 70));
-                    add(new Property("LivingRoomLights", LIGHTS.ON));
-                    add(new Property("BedroomRoomLights", LIGHTS.OFF));
+                    add(new Property("prova", 1));
+                    add(new Property("version", 1));
                 }
             };
 
@@ -352,57 +337,23 @@ public class DeviceTwinSample
 
             client.sendReportedProperties(params);
 
-            for(int i = 0; i < MAX_EVENTS_TO_REPORT; i++)
-            {
-
-                if (Math.random() % MAX_EVENTS_TO_REPORT == 3)
-                {
-                    sharableContext = new ReportedPropertiesContext("HomeSecurityCamera=BURGLAR Reported Properties Context Message (" + i + ")");
-                    params = new ReportedPropertiesParameters(new HashSet<Property>() {{ add(new Property("HomeSecurityCamera", CAMERA.DETECTED_BURGLAR)); }});
-                    params.setCorrelationCallback(new ReportedPropertiesCorrelation("HomeSecurityCamera=BURGLAR (" + i + ")"), sharableContext);
-                    params.setReportedPropertiesCallback(new ReportedPropertiesCallback("HomeSecurityCamera=BURGLAR (" + i + ")"), sharableContext);
-
-                    client.sendReportedProperties(params);
-                }
-                else
-                {
-
-                    sharableContext = new ReportedPropertiesContext("HomeSecurityCamera=SAFELY_WORKING Reported Properties Context Message (" + i + ")");
-                    params = new ReportedPropertiesParameters(new HashSet<Property>() {{ add(new Property("HomeSecurityCamera", CAMERA.SAFELY_WORKING)); }});
-                    params.setCorrelationCallback(new ReportedPropertiesCorrelation("HomeSecurityCamera=SAFELY_WORKING (" + i + ")"), sharableContext);
-                    params.setReportedPropertiesCallback(new ReportedPropertiesCallback("HomeSecurityCamera=SAFELY_WORKING (" + i + ")"), sharableContext);
-
-                    client.sendReportedProperties(params);
-                }
-                if(i == MAX_EVENTS_TO_REPORT-1)
-                {
-                    sharableContext = new ReportedPropertiesContext("BedroomRoomLights=null Reported Properties Context Message (" + i + ")");
-                    params = new ReportedPropertiesParameters(new HashSet<Property>() {{ add(new Property("BedroomRoomLights", null)); }});
-                    params.setCorrelationCallback(new ReportedPropertiesCorrelation("BedroomRoomLights=null (" + i + ")"), sharableContext);
-                    params.setReportedPropertiesCallback(new ReportedPropertiesCallback("BedroomRoomLights=null (" + i + ")"), sharableContext);
-
-                    client.sendReportedProperties(params);
-                }
-                System.out.println("Updating reported properties..");
-            }
-
-            System.out.println("Waiting for Desired properties");
+            System.out.println("==========Waiting for Desired properties");
         }
         catch (Exception e)
         {
-            System.out.println("On exception, shutting down \n" + " Cause: " + e.getCause() + " \n" +  e.getMessage());
+            System.out.println("==========On exception, shutting down \n" + " Cause: " + e.getCause() + " \n" +  e.getMessage());
             client.closeNow();
-            System.out.println("Shutting down...");
+            System.out.println("==========Shutting down...");
         }
 
-        System.out.println("Press any key to exit...");
+        System.out.println("==========Press any key to exit...");
 
         Scanner scanner = new Scanner(System.in);
         scanner.nextLine();
 
         client.closeNow();
 
-        System.out.println("Shutting down...");
+        System.out.println("==========Shutting down...");
 
     }
 }

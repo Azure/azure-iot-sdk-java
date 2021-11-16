@@ -151,7 +151,7 @@ public class DeviceTwin
                             OnDesiredPropertyChanged(twinState.getDesiredProperty());
                             if (writablePropertiesRequestsCallback != null)
                             {
-                                writablePropertiesRequestsCallback.execute(new ClientPropertyCollection(dtMessage.getBytes(), config.getPayloadConvention(), true), writablePropertiesRequestsContext);
+                                writablePropertiesRequestsCallback.onWritablePropertyCallbackReceived(new ClientPropertyCollection(dtMessage.getBytes(), config.getPayloadConvention(), true), writablePropertiesRequestsContext);
                             }
                         }
                         break;

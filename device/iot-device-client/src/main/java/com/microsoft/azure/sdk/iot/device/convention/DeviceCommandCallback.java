@@ -13,5 +13,5 @@ public interface DeviceCommandCallback
      * @param deviceCommandRequest A populated command request that will contain the component, command name, and payload.
      * @return The response to the command.
      */
-    DeviceCommandResponse call(DeviceCommandRequest deviceCommandRequest);
+    DeviceCommandResponse onDeviceCommandReceived(DeviceCommandRequest deviceCommandRequest);
 }

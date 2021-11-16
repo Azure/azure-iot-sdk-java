@@ -81,7 +81,7 @@ public class DeviceCommand extends DeviceMethod
 
                             log.trace("Executing command invocation callback for component {} with command name {} for message {}",  componentName == null ? "default" : componentName , commandName, methodMessage);
                             DeviceCommandRequest commandRequest = new DeviceCommandRequest(componentName, commandName, methodMessage.getBytes(), payloadConvention);
-                            DeviceCommandResponse responseData = deviceCommandCallback.call(commandRequest);
+                            DeviceCommandResponse responseData = deviceCommandCallback.onDeviceCommandReceived(commandRequest);
                             log.trace("Command invocation callback returned for component {} with command name {} for message {}", componentName == null ? "default" : componentName , commandName, methodMessage);
 
                             if (responseData != null)
