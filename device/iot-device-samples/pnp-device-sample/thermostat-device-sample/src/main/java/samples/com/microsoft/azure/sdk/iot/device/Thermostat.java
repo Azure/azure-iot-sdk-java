@@ -291,7 +291,7 @@ public class Thermostat
             final String propertyName = "targetTemperature";
 
             @SneakyThrows({InterruptedException.class})
-            public void execute(ClientPropertyCollection propertyCollection, Object context)
+            public void onWritablePropertyCallbackReceived(ClientPropertyCollection propertyCollection, Object context)
             {
 
                 // Each of these properties will be a WritablePropertyResponse we can simply copy the value over and ack each one
@@ -369,7 +369,7 @@ public class Thermostat
 
             @SneakyThrows
             @Override
-            public DeviceCommandResponse call(DeviceCommandRequest deviceCommandRequest)
+            public DeviceCommandResponse onDeviceCommandReceived(DeviceCommandRequest deviceCommandRequest)
             {
                 // In this instance we will deal with the default component
                 if (deviceCommandRequest.getComponentName() == null  && deviceCommandRequest.getCommandName().equalsIgnoreCase(commandName))

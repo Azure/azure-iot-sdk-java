@@ -1290,6 +1290,57 @@ public class InternalClient
     }
 
     /**
+     * Retreieve the client properties.
+     * @param callback The callback to be used for receiving client properties.
+     * @param callbackContext An optional user context to be sent to the callback.
+     */
+    public void getClientPropertiesAsync(ClientPropertiesCallback callback, Object callbackContext)
+    {
+        // In Java we don't return an object for the DeviceTwin, but instead we pass a Map<String, Object> in the form of a Device
+        // this map gets populated with a number of callbacks.
+        twin.getClientProperties(callback, callbackContext);
+    }
+
+    /**
+     * Update the client properties.
+     * @param clientProperties The client properties to send.
+     * @param callback The callback to be used for updating client properties.
+     * @param callbackContext An optional user context to be sent to the callback.
+     *
+     * TODO ADD THE CLIENT PROPERTIES RESPONSE
+     * @throws IOException Thrown from the underlying DeviceIO
+     */
+    public void updateClientPropertiesAsync(ClientPropertyCollection clientProperties, IotHubEventCallback callback, Object callbackContext) throws IOException
+    {
+        if (clientProperties == null)
+        {
+            throw new IllegalArgumentException("clientProperties property cannot be null");
+        }
+
+        clientProperties.setConvention(getPayloadConvention());
+
+        verifyRegisteredIfMultiplexing();
+        verifyTwinOperationsAreSupported();
+
+        verifyReportedProperties(ClientProperties.getCollectionAsSetOfProperty(clientProperties));
+
+        this.twin.updateClientProperties(clientProperties, null, null,null, callback, callbackContext);
+    }
+
+    /**
+     * Set the global writable properties callback handler.
+     *
+     * TODO ADD SYNC ON SUBSCRIPTION
+     * @param writablePropertyUpdateCallback The callback to be used for writable properties.
+     * @param callbackContext An optional user context to be sent to the callback.
+     * @throws IOException if called when client is not opened or called before starting twin.
+     */
+    public void subscribeToWritablePropertiesEvent(WritablePropertiesRequestsCallback writablePropertyUpdateCallback, Object callbackContext) throws IOException
+    {
+        twin.subscribeToWritablePropertyRequests(writablePropertyUpdateCallback, callbackContext);
+    }
+
+    /**
      * Sends the TelemetryMessage to IoT hub.
      * @param telemetryMessage The user supplied telemetry message.
      */
@@ -1319,54 +1370,6 @@ public class InternalClient
         }
 
         sendEventAsync(telemetryMessage, callback, callbackContext);
-    }
-
-    /**
-     * Retreieve the client properties.
-     * @param callback The callback to be used for receiving client properties.
-     * @param callbackContext An optional user context to be sent to the callback.
-     */
-    public void getClientPropertiesAsync(ClientPropertiesCallback callback, Object callbackContext)
-    {
-        // In Java we don't return an object for the DeviceTwin, but instead we pass a Map<String, Object> in the form of a Device
-        // this map gets populated with a number of callbacks.
-        twin.getClientProperties(callback, callbackContext);
-    }
-
-    /**
-     * Update the client properties.
-     * @param clientProperties The client properties to send.
-     * @param callback The callback to be used for updating client properties.
-     * @param callbackContext An optional user context to be sent to the callback.
-     *
-     * @throws IOException Thrown from the underlying DeviceIO
-     */
-    public void updateClientPropertiesAsync(ClientPropertyCollection clientProperties, IotHubEventCallback callback, Object callbackContext) throws IOException
-    {
-        if (clientProperties == null)
-        {
-            throw new IllegalArgumentException("clientProperties property cannot be null");
-        }
-
-        clientProperties.setConvention(getPayloadConvention());
-
-        verifyRegisteredIfMultiplexing();
-        verifyTwinOperationsAreSupported();
-
-        verifyReportedProperties(ClientProperties.getCollectionAsSetOfProperty(clientProperties));
-
-        this.twin.updateClientProperties(clientProperties, null, null,null, callback, callbackContext);
-    }
-
-    /**
-     * Set the global writable properties callback handler.
-     * @param writablePropertyUpdateCallback The callback to be used for writable properties.
-     * @param callbackContext An optional user context to be sent to the callback.
-     * @throws IOException if called when client is not opened or called before starting twin.
-     */
-    public void subscribeToWritablePropertiesEvent(WritablePropertiesRequestsCallback writablePropertyUpdateCallback, Object callbackContext) throws IOException
-    {
-        twin.subscribeToWritablePropertyRequests(writablePropertyUpdateCallback, callbackContext);
     }
 
     /**

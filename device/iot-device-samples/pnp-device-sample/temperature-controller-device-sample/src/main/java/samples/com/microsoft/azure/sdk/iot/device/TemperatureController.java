@@ -295,7 +295,7 @@ public class TemperatureController {
 
         @SneakyThrows(InterruptedException.class)
         @Override
-        public DeviceCommandResponse call(DeviceCommandRequest request) {
+        public DeviceCommandResponse onDeviceCommandReceived(DeviceCommandRequest request) {
 
             switch (request.getComponentName()) {
                 case thermostat1:
@@ -383,7 +383,7 @@ public class TemperatureController {
         final List<String> thermostatList = new ArrayList<String>() {{ add("thermostat1"); add("thermostat2"); }};
 
         @SneakyThrows({InterruptedException.class})
-        public void execute(ClientPropertyCollection propertyCollection, Object context)
+        public void onWritablePropertyCallbackReceived(ClientPropertyCollection propertyCollection, Object context)
         {
             for (String componentName : thermostatList)
             {

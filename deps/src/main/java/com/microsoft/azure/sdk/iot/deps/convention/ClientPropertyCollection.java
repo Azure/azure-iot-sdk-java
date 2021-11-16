@@ -71,7 +71,7 @@ public class ClientPropertyCollection extends PayloadCollection
 
     /**
      * Constructor that is used to convert a {@link Map} to a ClientPropertyCollection
-     *
+     * TODO ADD NOTE ABOUT RAW MAP AND THE PROBLEMS THAT ARISE
      * @param map The map you wish to convert.
      */
     public ClientPropertyCollection(Map<? extends String, Object> map)
