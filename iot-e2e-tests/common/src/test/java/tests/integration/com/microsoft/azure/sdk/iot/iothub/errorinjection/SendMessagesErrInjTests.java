@@ -34,6 +34,7 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
  * Test class containing all error injection tests to be run on JVM and android pertaining to sending messages to the cloud.
  */
 @ErrInjTest
+@IotHubTest
 @RunWith(Parameterized.class)
 public class SendMessagesErrInjTests extends SendMessagesCommon
 {

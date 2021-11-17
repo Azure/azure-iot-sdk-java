@@ -32,6 +32,7 @@ import static org.junit.Assert.assertTrue;
  * Test class containing all error injection tests to be run on JVM and android pertaining to receiving messages.
  */
 @ErrInjTest
+@IotHubTest
 @RunWith(Parameterized.class)
 public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
 {

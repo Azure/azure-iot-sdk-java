@@ -33,6 +33,7 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
  * Test class containing all error injection tests to be run on JVM and android pertaining to ReportedProperties.
  */
 @ErrInjTest
+@IotHubTest
 @RunWith(Parameterized.class)
 public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
 {

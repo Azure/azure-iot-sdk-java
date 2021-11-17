@@ -15,6 +15,7 @@ import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ErrInjTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DeviceTwinCommon;
 
@@ -30,6 +31,7 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
  * Test class containing all error injection tests to be run on JVM and android pertaining to GetDeviceTwin/GetTwin.
  */
 @ErrInjTest
+@IotHubTest
 @RunWith(Parameterized.class)
 public class GetTwinErrInjTests extends DeviceTwinCommon
 {
