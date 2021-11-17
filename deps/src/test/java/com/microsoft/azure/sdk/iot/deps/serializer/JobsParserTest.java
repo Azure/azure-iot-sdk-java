@@ -59,7 +59,7 @@ public class JobsParserTest
         // Assert
         assertEquals(jobId, Deencapsulation.getField(jobsParser, "jobId"));
         assertEquals(queryCondition, Deencapsulation.getField(jobsParser, "queryCondition"));
-        assertEquals(maxExecutionTimeInSeconds, Deencapsulation.getField(jobsParser, "maxExecutionTimeInSeconds"));
+        assertEquals(maxExecutionTimeInSeconds, (long) Deencapsulation.getField(jobsParser, "maxExecutionTimeInSeconds"));
     }
 
     /* Tests_SRS_JOBSPARSER_21_001: [The constructor shall evaluate and store the commons parameters using the internal function commonFields.] */
@@ -281,7 +281,7 @@ public class JobsParserTest
         // Assert
         assertEquals(jobId, Deencapsulation.getField(jobsParser, "jobId"));
         assertEquals(queryCondition, Deencapsulation.getField(jobsParser, "queryCondition"));
-        assertEquals(maxExecutionTimeInSeconds, Deencapsulation.getField(jobsParser, "maxExecutionTimeInSeconds"));
+        assertEquals(maxExecutionTimeInSeconds, (long) Deencapsulation.getField(jobsParser, "maxExecutionTimeInSeconds"));
     }
 
     /* Tests_SRS_JOBSPARSER_21_007: [The constructor shall evaluate and store the commons parameters using the internal function commonFields.] */

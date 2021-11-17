@@ -147,12 +147,12 @@ public class JobPropertiesParser
     {
         if (this.startTimeUtc != null)
         {
-            this.startTimeUtcString = ParserUtility.getDateStringFromDate(this.startTimeUtc);
+            this.startTimeUtcString = ParserUtility.getUTCDateStringFromDate(this.startTimeUtc);
         }
 
         if (this.endTimeUtc != null)
         {
-            this.endTimeUtcString = ParserUtility.getDateStringFromDate(this.endTimeUtc);
+            this.endTimeUtcString = ParserUtility.getUTCDateStringFromDate(this.endTimeUtc);
         }
 
         return gson.toJson(this);
@@ -344,7 +344,7 @@ public class JobPropertiesParser
         }
         else
         {
-            this.startTimeUtcString = ParserUtility.getDateStringFromDate(startTimeUtc);
+            this.startTimeUtcString = ParserUtility.getUTCDateStringFromDate(startTimeUtc);
         }
     }
 
@@ -364,7 +364,7 @@ public class JobPropertiesParser
         }
         else
         {
-            this.endTimeUtcString = ParserUtility.getDateStringFromDate(endTimeUtc);
+            this.endTimeUtcString = ParserUtility.getUTCDateStringFromDate(endTimeUtc);
         }
     }
 

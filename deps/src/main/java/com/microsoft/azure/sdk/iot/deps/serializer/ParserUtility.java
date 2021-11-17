@@ -13,6 +13,9 @@ import com.google.gson.JsonPrimitive;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,7 +33,10 @@ public class ParserUtility
 {
     private static final String DATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss";
     private static final String OFFSETFORMAT = "yyyy-MM-dd'T'HH:mm:ssXXX";
-    private static final String TIMEZONE = "UTC";
+
+    final static DateTimeFormatter UTC_DATETIME_FORMATTER = DateTimeFormatter.ofPattern(DATEFORMAT);
+
+    private static final String TIMEZONE_UTC = "UTC";
     private static final String SELECT = "select";
     private static final String FROM = "from";
 
@@ -260,7 +266,7 @@ public class ParserUtility
         /* Codes_SRS_PARSER_UTILITY_21_020: [The getDateTimeUtc shall parse the provide string using `UTC` timezone.] */
         /* Codes_SRS_PARSER_UTILITY_21_021: [The getDateTimeUtc shall parse the provide string using the data format `yyyy-MM-dd'T'HH:mm:ss`.] */
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
-        dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
+        dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE_UTC));
 
         /* Codes_SRS_PARSER_UTILITY_21_022: [If the provide string is null, empty or contains an invalid data format, the getDateTimeUtc shall throw IllegalArgumentException.] */
         if((dataTime == null) || dataTime.isEmpty())
@@ -319,7 +325,7 @@ public class ParserUtility
         /* Codes_SRS_PARSER_UTILITY_21_023: [The stringToDateTimeOffset shall parse the provide string using `UTC` timezone.] */
         /* Codes_SRS_PARSER_UTILITY_21_024: [The stringToDateTimeOffset shall parse the provide string using the data format `2016-06-01T21:22:41+00:00`.] */
         SimpleDateFormat dateFormat = new SimpleDateFormat(OFFSETFORMAT);
-        dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
+        dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE_UTC));
 
         /* Codes_SRS_PARSER_UTILITY_21_025: [If the provide string is null, empty or contains an invalid data format, the stringToDateTimeOffset shall throw IllegalArgumentException.] */
         if((dateTime == null) || dateTime.isEmpty())
@@ -358,7 +364,7 @@ public class ParserUtility
 
         /* Codes_SRS_PARSER_UTILITY_21_054: [The dateTimeUtcToString shall serialize the provide Date using `UTC` timezone.] */
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
-        dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
+        dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE_UTC));
         StringBuilder dateStr = new StringBuilder();
         dateStr.append(dateFormat.format(date));
         dateStr.append(".");
@@ -378,16 +384,16 @@ public class ParserUtility
      * @throws IllegalArgumentException if the provided date is null
      * @return the date represented as a string
      */
-    public static String getDateStringFromDate(Date date) throws IllegalArgumentException
+    public static String getUTCDateStringFromDate(Date date) throws IllegalArgumentException
     {
         if (date == null)
         {
-            //Codes_SRS_PARSER_UTILITY_21_042: [If the provided date is null, an IllegalArgumentException shall be thrown.]
             throw new IllegalArgumentException("The provided date cannot be null");
         }
 
-        //Codes_SRS_PARSER_UTILITY_34_043: [The provided date shall be converted into this format: "yyyy-MM-dd'T'HH:mm:ss".]
-        return new SimpleDateFormat(DATEFORMAT).format(date);
+        OffsetDateTime offsetDateTime = date.toInstant().atOffset(ZoneOffset.UTC);
+
+        return offsetDateTime.format(UTC_DATETIME_FORMATTER);
     }
 
     /**

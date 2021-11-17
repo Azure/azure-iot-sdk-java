@@ -108,17 +108,17 @@ public class DeviceParser
     {
         if (this.statusUpdatedTime != null)
         {
-            this.statusUpdatedTimeString = ParserUtility.getDateStringFromDate(this.statusUpdatedTime);
+            this.statusUpdatedTimeString = ParserUtility.getUTCDateStringFromDate(this.statusUpdatedTime);
         }
 
         if (this.connectionStateUpdatedTime != null)
         {
-            this.connectionStateUpdatedTimeString = ParserUtility.getDateStringFromDate(this.connectionStateUpdatedTime);
+            this.connectionStateUpdatedTimeString = ParserUtility.getUTCDateStringFromDate(this.connectionStateUpdatedTime);
         }
 
         if (this.lastActivityTime != null)
         {
-            this.lastActivityTimeString = ParserUtility.getDateStringFromDate(this.lastActivityTime);
+            this.lastActivityTimeString = ParserUtility.getUTCDateStringFromDate(this.lastActivityTime);
         }
 
         return gson.toJson(this);
@@ -384,7 +384,7 @@ public class DeviceParser
         }
         else
         {
-            this.statusUpdatedTimeString = ParserUtility.getDateStringFromDate(statusUpdatedTime);
+            this.statusUpdatedTimeString = ParserUtility.getUTCDateStringFromDate(statusUpdatedTime);
         }
     }
 
@@ -433,7 +433,7 @@ public class DeviceParser
         }
         else
         {
-            this.connectionStateUpdatedTimeString = ParserUtility.getDateStringFromDate(connectionStateUpdatedTime);
+            this.connectionStateUpdatedTimeString = ParserUtility.getUTCDateStringFromDate(connectionStateUpdatedTime);
         }
     }
 
@@ -462,7 +462,7 @@ public class DeviceParser
         }
         else
         {
-            this.lastActivityTimeString = ParserUtility.getDateStringFromDate(lastActivityTime);
+            this.lastActivityTimeString = ParserUtility.getUTCDateStringFromDate(lastActivityTime);
         }
     }
 
