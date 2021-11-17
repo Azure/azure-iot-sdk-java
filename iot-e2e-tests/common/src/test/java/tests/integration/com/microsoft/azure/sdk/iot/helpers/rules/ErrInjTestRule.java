@@ -31,7 +31,7 @@ public class ErrInjTestRule implements TestRule
             ErrInjTest classAnnotation = description.getTestClass().getAnnotation(ErrInjTest.class);
             if (annotation != null || classAnnotation != null)
             {
-                Assume.assumeTrue("Test is ignored", IntegrationTest.runErrInjTests);
+                Assume.assumeTrue("Test is ignored because it is an error injection test and the RUN_ERRINJ_TESTS environment variable is set to false", IntegrationTest.runErrInjTests);
             }
 
             base.evaluate();
