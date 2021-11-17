@@ -375,12 +375,12 @@ public class Configuration
 
         if (parser.getCreatedTimeUtc() != null)
         {
-            this.createdTimeUtc = ParserUtility.getDateStringFromDate(parser.getCreatedTimeUtc());
+            this.createdTimeUtc = ParserUtility.getUTCDateStringFromDate(parser.getCreatedTimeUtc());
         }
 
         if (parser.getLastUpdatedTimeUtc() != null)
         {
-            this.lastUpdatedTimeUtc = ParserUtility.getDateStringFromDate(parser.getLastUpdatedTimeUtc());
+            this.lastUpdatedTimeUtc = ParserUtility.getUTCDateStringFromDate(parser.getLastUpdatedTimeUtc());
         }
 
         if (parser.getSystemMetrics() != null)

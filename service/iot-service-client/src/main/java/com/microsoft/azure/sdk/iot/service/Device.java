@@ -264,7 +264,7 @@ public class Device extends BaseDevice
 
         if (parser.getStatusUpdatedTime() != null)
         {
-            this.statusUpdatedTime = ParserUtility.getDateStringFromDate(parser.getStatusUpdatedTime());
+            this.statusUpdatedTime = ParserUtility.getUTCDateStringFromDate(parser.getStatusUpdatedTime());
         }
 
         if (parser.getStatus() != null)
