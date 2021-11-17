@@ -683,16 +683,20 @@ public class ParserUtilityTest
         ParserUtility.getUTCDateStringFromDate(null);
     }
 
+    // Test that the two helper functions we use to parse strings to dates, and to write dates as strings don't distort
+    // any date strings we receive from the service.
     @Test
     public void getSimpleDateStringFromDateWithTimezone()
     {
+        // arrange
         String originalDateString = "2021-11-17T05:23:04.3511935Z";
 
         Date parsedDate = ParserUtility.getDateTimeUtc(originalDateString);
 
-        //act
+        // act
         String actualString = ParserUtility.getUTCDateStringFromDate(parsedDate);
 
+        // assert
         // the parsed string truncates the milliseconds, so check for "contains" instead of "equals"
         assertTrue(originalDateString.contains(actualString));
     }
