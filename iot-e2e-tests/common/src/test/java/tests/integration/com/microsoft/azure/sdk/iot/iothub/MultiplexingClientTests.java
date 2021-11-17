@@ -1102,7 +1102,7 @@ public class MultiplexingClientTests extends IntegrationTest
     // other than the deliberately dropped session.
     @Test
     @ErrInjTest
-@IotHubTest
+    @IotHubTest
     public void multiplexedConnectionRecoversFromDeviceSessionDropsSequential() throws Exception
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
@@ -1161,7 +1161,7 @@ public class MultiplexingClientTests extends IntegrationTest
     // Fault every device session basically at once, make sure that the clients all recover
     @Test
     @ErrInjTest
-@IotHubTest
+    @IotHubTest
     public void multiplexedConnectionRecoversFromDeviceSessionDropsParallel() throws Exception
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
@@ -1212,7 +1212,7 @@ public class MultiplexingClientTests extends IntegrationTest
     // connection recovers
     @Test
     @ErrInjTest
-@IotHubTest
+    @IotHubTest
     public void multiplexedConnectionRecoversFromTcpConnectionDrop() throws Exception
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
@@ -1806,7 +1806,7 @@ public class MultiplexingClientTests extends IntegrationTest
     @StandardTierHubOnlyTest
     @ContinuousIntegrationTest
     @ErrInjTest
-@IotHubTest
+    @IotHubTest
     @Test
     public void multiplexedSessionsRecoverSubscriptionsFromDeviceSessionDrops() throws Exception
     {
