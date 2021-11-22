@@ -59,6 +59,12 @@ public final class IotHubReceiveTask implements Runnable
             this.transport.handleMessage();
 
         }
+        catch (InterruptedException e)
+        {
+            // Typically happens if a disconnection event occurs and the DeviceIO layer cancels the send/receive threads
+            // while the reconnection takes place.
+            log.trace("Interrupted while waiting for work. Thread is now ending.");
+        }
         catch (Throwable e)
         {
             log.warn("Receive task thread encountered exception while processing received messages", e);
