@@ -42,49 +42,49 @@ public class SampleParameters {
                 Option.builder("h")
                     .longOpt("help")
                     .hasArg(false)
-                    .desc("Print this message")
+                    .desc("Prints this message")
                     .build()
             )
             .addOption(
-                Option.builder("c")
-                    .longOpt("connection")
+                Option.builder("p")
+                    .longOpt("primaryConnectionString")
                     .hasArg()
-                    .desc("Device connection string (Primary), required argument unless setup with environment variable \"IOTHUB_DEVICE_CONNECTION_STRING\"")
+                    .desc("Primary device connection string; required argument unless setup with environment variable \"IOTHUB_DEVICE_CONNECTION_STRING\"")
                     .build()
             )
             .addOption(
-                Option.builder("d")
-                    .longOpt("connection2")
+                Option.builder("s")
+                    .longOpt("secondaryConnectionString")
                     .hasArg()
-                    .desc("Device connection string (Secondary), optional")
+                    .desc("Secondary device connection string (optional)")
                     .build()
             )
             .addOption(
                 Option.builder("t")
-                    .longOpt("transport")
+                    .longOpt("transportType")
                     .hasArg()
-                    .desc("Protocol choice [mqtt | https | amqps| amqps_ws | mqtt_ws], optinal, default to \"mqtt\"")
+                    .desc("Transport protocol [mqtt | https | amqps| amqps_ws | mqtt_ws] (optional); defaults to \"mqtt\"")
                     .build()
             )
             .addOption(
                 Option.builder("r")
                     .longOpt("requests")
                     .hasArg()
-                    .desc("Number of requests, optional, default to \"3\"")
+                    .desc("Number of requests (optional); defaults to \"3\"")
                     .build()
             )
             .addOption(
-                Option.builder("s")
-                    .longOpt("sleep")
+                Option.builder("d")
+                    .longOpt("sleepDuration")
                     .hasArg()
-                    .desc("Sleep duration between requests (in seconds), optional, default to \"10\"")
+                    .desc("Sleep duration between requests in seconds (optional); defaults to \"10\"")
                     .build()
             )
             .addOption(
                 Option.builder("o")
                     .longOpt("timeout")
                     .hasArg()
-                    .desc("Timeout for each requests (in minutes), optional, default to \"1\"")
+                    .desc("Timeout for each request in minutes (optional); defaults to \"1\"")
                     .build()
             );
 
@@ -119,11 +119,10 @@ public class SampleParameters {
                 System.exit(0);
             }
 
-            
-            //Connection String, required unless there is evnvironment variable
-            if (cmd.hasOption("c"))
+            //Connection String, required unless there is environment variable
+            if (cmd.hasOption("p"))
             {
-                connections[0] = cmd.getOptionValue("c");
+                connections[0] = cmd.getOptionValue("p");
                 if (connections[0] == null || connections[0].trim().isEmpty())
                 {
                     formatter.printHelp(cmdLine, "\nError: Connection is empty\n\n", options, _FOOTER, true);
@@ -141,9 +140,9 @@ public class SampleParameters {
             }
 
             //Connection String (secondary), optional
-            if (cmd.hasOption("d"))
+            if (cmd.hasOption("s"))
             {
-                connections[1] = cmd.getOptionValue("d");
+                connections[1] = cmd.getOptionValue("s");
             }
 
         } catch (ParseException e) {
@@ -187,7 +186,7 @@ public class SampleParameters {
      */
     public String getSleepDuration()
     {
-        return cmd.getOptionValue("s", _SLEEP_DURATION_IN_SECONDS);
+        return cmd.getOptionValue("d", _SLEEP_DURATION_IN_SECONDS);
     }
 
     /**
@@ -196,7 +195,7 @@ public class SampleParameters {
      */
     public String getTimeout()
     {
-        return cmd.getOptionValue("t", _TIMEOUT_IN_MINUTES);
+        return cmd.getOptionValue("o", _TIMEOUT_IN_MINUTES);
     }
 
 }
