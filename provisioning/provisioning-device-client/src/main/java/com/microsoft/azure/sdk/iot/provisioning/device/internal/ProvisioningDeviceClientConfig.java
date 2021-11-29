@@ -11,6 +11,8 @@ import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientR
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 
+import java.util.UUID;
+
 public final class ProvisioningDeviceClientConfig
 {
     private String provisioningServiceGlobalEndpoint;
@@ -18,6 +20,8 @@ public final class ProvisioningDeviceClientConfig
     private ProvisioningDeviceClientTransportProtocol protocol;
     private SecurityProvider securityProvider;
     private boolean useWebSockets = false;
+
+    private final String provisioningDeviceClientUniqueIdentifier = UUID.randomUUID().toString().substring(0, 8);
 
     private ProvisioningDeviceClientRegistrationCallback registrationCallback;
     private Object registrationCallbackContext;
@@ -169,5 +173,9 @@ public final class ProvisioningDeviceClientConfig
     public String getPayload()
     {
         return this.jsonPayload;
+    }
+
+    public String getUniqueIdentifier() {
+        return this.provisioningDeviceClientUniqueIdentifier;
     }
 }

@@ -36,7 +36,8 @@ public final class IotHubSendTask implements Runnable
 
     public void run()
     {
-        Thread.currentThread().setName(THREAD_NAME);
+        String threadName = this.transport.getDeviceClientUniqueIdentifier() + "-" + "Cxn" + transport.getTransportConnectionId() + "-" + THREAD_NAME;
+        Thread.currentThread().setName(threadName);
 
         try
         {
@@ -52,6 +53,12 @@ public final class IotHubSendTask implements Runnable
 
             this.transport.sendMessages();
             this.transport.invokeCallbacks();
+        }
+        catch (InterruptedException e)
+        {
+            // Typically happens if a disconnection event occurs and the DeviceIO layer cancels the send/receive threads
+            // while the reconnection takes place.
+            log.trace("Interrupted while waiting for work. Thread is now ending.");
         }
         catch (Throwable e)
         {

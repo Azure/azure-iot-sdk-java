@@ -76,6 +76,8 @@ public abstract class ProvisioningDeviceClientContract
     public abstract void authenticateWithProvisioningService(RequestData requestData, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException;
     public abstract void getRegistrationStatus(RequestData requestData, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException;
     public abstract void close() throws ProvisioningDeviceConnectionException;
+    public abstract String getConnectionId();
+    public abstract String getHostName();
 
     /**
      * Method to get the DPS retry after value

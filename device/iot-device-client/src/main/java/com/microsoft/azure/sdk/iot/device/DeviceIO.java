@@ -129,12 +129,19 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
         this.state = IotHubConnectionStatus.DISCONNECTED;
     }
 
-    DeviceIO(String hostName, IotHubClientProtocol protocol, SSLContext sslContext, ProxySettings proxySettings, long sendPeriodInMilliseconds, long receivePeriodInMilliseconds)
+    DeviceIO(
+        String hostName,
+        IotHubClientProtocol protocol,
+        SSLContext sslContext,
+        ProxySettings proxySettings,
+        long sendPeriodInMilliseconds,
+        long receivePeriodInMilliseconds,
+        int keepAliveInterval)
     {
         this.sendPeriodInMilliseconds = sendPeriodInMilliseconds;
         this.receivePeriodInMilliseconds = receivePeriodInMilliseconds;
         this.state = IotHubConnectionStatus.DISCONNECTED;
-        this.transport = new IotHubTransport(hostName, protocol, sslContext, proxySettings, this);
+        this.transport = new IotHubTransport(hostName, protocol, sslContext, proxySettings, this, keepAliveInterval);
     }
 
     /**
@@ -212,6 +219,11 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      */
     private void startWorkerThreads()
     {
+        // while startWorkerThreads should never be called when threads are already active, it doesn't hurt to double
+        // check that any previous thread pools have been shut down.
+        stopWorkerThreads();
+
+        log.info("Starting worker threads");
         this.sendTask = new IotHubSendTask(this.transport);
         this.receiveTask = new IotHubReceiveTask(this.transport);
 
@@ -240,12 +252,16 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
     {
         if (this.sendTaskScheduler != null)
         {
-            this.sendTaskScheduler.shutdown();
+            log.trace("Shutting down sendTaskScheduler");
+            this.sendTaskScheduler.shutdownNow();
+            this.sendTaskScheduler = null;
         }
 
         if (this.receiveTaskScheduler != null)
         {
-            this.receiveTaskScheduler.shutdown();
+            log.trace("Shutting down receiveTaskScheduler");
+            this.receiveTaskScheduler.shutdownNow();
+            this.receiveTaskScheduler = null;
         }
     }
 
@@ -455,6 +471,14 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
     @Override
     public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
     {
+        log.trace("DeviceIO notified of status {} with reason {}", status, statusChangeReason);
+
+        if (status == this.state)
+        {
+            // no change in status, so no need to start/stop worker threads.
+            return;
+        }
+
         if (status == IotHubConnectionStatus.DISCONNECTED || status == IotHubConnectionStatus.DISCONNECTED_RETRYING)
         {
             // No need to keep spawning send/receive tasks during reconnection or when the client is closed

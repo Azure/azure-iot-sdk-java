@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Configuration settings for an IoT Hub client. Validates all user-defined
@@ -31,6 +32,8 @@ public final class DeviceClientConfig
 {
     private static final int DEFAULT_HTTPS_READ_TIMEOUT_MILLIS = 240000;
     private static final int DEFAULT_HTTPS_CONNECT_TIMEOUT_MILLIS = 0; //no connect timeout
+
+    public static final int DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS = 230;
 
     // authentication session timeout is public because a multiplexed connection needs this default if no devices
     // were registered prior to opening the connection. No device sessions would be opened in that case though, so
@@ -45,6 +48,8 @@ public final class DeviceClientConfig
 
     private boolean useWebsocket;
     private ProxySettings proxySettings;
+
+    private String deviceClientUniqueIdentifier = UUID.randomUUID().toString().substring(0,8);
 
     @Getter
     @Setter(AccessLevel.PROTECTED)
@@ -66,6 +71,10 @@ public final class DeviceClientConfig
     @Getter
     @Setter
     private int amqpOpenDeviceSessionsTimeout = DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS;
+
+    @Getter
+    @Setter
+    private int keepAliveInterval = DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
 
     private IotHubAuthenticationProvider authenticationProvider;
 
@@ -152,6 +161,8 @@ public final class DeviceClientConfig
     public DeviceClientConfig(String hostName, SasTokenProvider sasTokenProvider, ClientOptions clientOptions, String deviceId, String moduleId)
     {
         SSLContext sslContext = clientOptions != null ? clientOptions.sslContext : null;
+        this.keepAliveInterval =
+            clientOptions != null && clientOptions.getKeepAliveInterval() != 0 ? clientOptions.getKeepAliveInterval() : DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
         this.authenticationProvider =
                 new IotHubSasTokenProvidedAuthenticationProvider(hostName, deviceId, moduleId, sasTokenProvider, sslContext);
 
@@ -196,6 +207,8 @@ public final class DeviceClientConfig
         {
             configSasAuth(iotHubConnectionString);
         }
+
+        this.keepAliveInterval = clientOptions != null && clientOptions.getKeepAliveInterval() != 0 ? clientOptions.getKeepAliveInterval() : DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
     }
 
     public DeviceClientConfig(IotHubConnectionString iotHubConnectionString, SSLContext sslContext)
@@ -468,6 +481,23 @@ public final class DeviceClientConfig
     {
         // Codes_SRS_DEVICECLIENTCONFIG_34_050: [This function return the saved moduleId.]
         return this.authenticationProvider.getModuleId();
+    }
+
+    public String getDeviceClientUniqueIdentifier()
+    {
+        // Use device Id if present, use module Id if no device Id is present, use a unique Identifier if neither was set.
+        String identifierPrefix = getDeviceId();
+        if (identifierPrefix == null || identifierPrefix.isEmpty())
+        {
+            identifierPrefix = getModuleId();
+            if (identifierPrefix == null || identifierPrefix.isEmpty())
+            {
+                // If there is no device Id or module Id, set the identifier prefix to be
+                identifierPrefix = UUID.randomUUID().toString().substring(0, 8);
+            }
+        }
+
+        return identifierPrefix + "-" + this.deviceClientUniqueIdentifier;
     }
 
     /**
