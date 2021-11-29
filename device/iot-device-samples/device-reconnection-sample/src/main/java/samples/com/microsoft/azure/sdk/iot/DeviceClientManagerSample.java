@@ -36,6 +36,7 @@ public class DeviceClientManagerSample {
 
         IotHubClientProtocol argProtocol;
         String protocol = params.getTransport().toLowerCase();
+
         switch (protocol)
         {
             case "https":
@@ -54,7 +55,7 @@ public class DeviceClientManagerSample {
                 argProtocol = IotHubClientProtocol.MQTT_WS;
                 break;
             default:
-                throw new IllegalArgumentException("[ERROR] Do not support protocol: [" + protocol + "]");
+                throw new IllegalArgumentException("Unsupported protocol: [" + protocol + "]");
         }
         log.debug("Setup parameter: Protocol = [{}]", protocol);
 

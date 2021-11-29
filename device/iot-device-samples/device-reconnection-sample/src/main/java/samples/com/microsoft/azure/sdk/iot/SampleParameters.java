@@ -2,8 +2,6 @@
 // Licensed under the MIT License.
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.azure.core.http.policy.HttpLogDetailLevel;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -18,14 +16,14 @@ import java.io.*;
 
 public class SampleParameters {
 
-    private static final String _DEVICE_CONNECTION_STRING = System.getenv("IOTHUB_DEVICE_CONNECTION_STRING");
-    private static final String _TRANSPORT = "mqtt";
-    private static final String _NUM_REQUESTS = "3";
-    private static final String _SLEEP_DURATION_IN_SECONDS = "10";
-    private static final String _TIMEOUT_IN_MINUTES = "1";
+    private static final String DEVICE_CONNECTION_STRING = System.getenv("IOTHUB_DEVICE_CONNECTION_STRING");
+    private static final String TRANSPORT = "mqtt";
+    private static final String NUM_REQUESTS = "3";
+    private static final String SLEEP_DURATION_IN_SECONDS = "10";
+    private static final String TIMEOUT_IN_MINUTES = "1";
 
-    private static final String _FOOTER = "\nFor more info, please refer to https://github.com/Azure/azure-iot-sdks";
-    private static final String _APPEXE = "java -jar ";
+    private static final String FOOTER = "\nFor more info, please refer to https://github.com/Azure/azure-iot-sdks";
+    private static final String APPEXE = "java -jar ";
 
     private static CommandLine cmd = null;
     private static String[] connections = new String[2];
@@ -53,15 +51,8 @@ public class SampleParameters {
                     .build()
             )
             .addOption(
-                Option.builder("s")
-                    .longOpt("secondaryConnectionString")
-                    .hasArg()
-                    .desc("Secondary device connection string (optional)")
-                    .build()
-            )
-            .addOption(
                 Option.builder("t")
-                    .longOpt("transportType")
+                    .longOpt("transportProtocol")
                     .hasArg()
                     .desc("Transport protocol [mqtt | https | amqps| amqps_ws | mqtt_ws] (optional); defaults to \"mqtt\"")
                     .build()
@@ -89,7 +80,7 @@ public class SampleParameters {
             );
 
         //Get command line string
-        String cmdLine = _APPEXE;
+        String cmdLine = APPEXE;
         try {
             String jarPath = Options.class
                 .getProtectionDomain()
@@ -115,7 +106,7 @@ public class SampleParameters {
             //Help option
             if (cmd.hasOption("h"))
             {
-                formatter.printHelp(cmdLine, "\nHelp:\n\n", options, _FOOTER, true);
+                formatter.printHelp(cmdLine, "\nHelp:\n\n", options, FOOTER, true);
                 System.exit(0);
             }
 
@@ -125,16 +116,16 @@ public class SampleParameters {
                 connections[0] = cmd.getOptionValue("p");
                 if (connections[0] == null || connections[0].trim().isEmpty())
                 {
-                    formatter.printHelp(cmdLine, "\nError: Connection is empty\n\n", options, _FOOTER, true);
+                    formatter.printHelp(cmdLine, "\nError: Connection is empty\n\n", options, FOOTER, true);
                     System.exit(0);
                 }
             }
             else
             {
-                connections[0] = _DEVICE_CONNECTION_STRING;
+                connections[0] = DEVICE_CONNECTION_STRING;
                 if (connections[0] == null || connections[0].trim().isEmpty())
                 {
-                    formatter.printHelp(cmdLine, "\nError: Connection is required as argument or as environment variable\n\n", options, _FOOTER, true);
+                    formatter.printHelp(cmdLine, "\nError: Connection is required as argument or as environment variable\n\n", options, FOOTER, true);
                     System.exit(0);
                 }
             }
@@ -147,7 +138,7 @@ public class SampleParameters {
 
         } catch (ParseException e) {
             //wrong parameters
-            formatter.printHelp(cmdLine, "\nError: "+e.getMessage()+"\n\n", options, _FOOTER, true);
+            formatter.printHelp(cmdLine, "\nError: "+e.getMessage()+"\n\n", options, FOOTER, true);
 
             System.exit(0);
         }
@@ -168,7 +159,7 @@ public class SampleParameters {
      */
        public String getTransport()
     {
-        return cmd.getOptionValue("t", _TRANSPORT);
+        return cmd.getOptionValue("t", TRANSPORT);
     }
 
     /**
@@ -177,7 +168,7 @@ public class SampleParameters {
      */
     public String getNumRequests()
     {
-        return cmd.getOptionValue("r", _NUM_REQUESTS);
+        return cmd.getOptionValue("r", NUM_REQUESTS);
     }
 
     /**
@@ -186,7 +177,7 @@ public class SampleParameters {
      */
     public String getSleepDuration()
     {
-        return cmd.getOptionValue("d", _SLEEP_DURATION_IN_SECONDS);
+        return cmd.getOptionValue("d", SLEEP_DURATION_IN_SECONDS);
     }
 
     /**
@@ -195,7 +186,7 @@ public class SampleParameters {
      */
     public String getTimeout()
     {
-        return cmd.getOptionValue("o", _TIMEOUT_IN_MINUTES);
+        return cmd.getOptionValue("o", TIMEOUT_IN_MINUTES);
     }
 
 }
