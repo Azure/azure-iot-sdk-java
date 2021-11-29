@@ -18,20 +18,6 @@ import java.util.concurrent.*;
 @Slf4j
 public class DeviceClientManagerSample {
 
-    private static final String DEVICE_CONNECTION_STRING = System.getenv("IOTHUB_DEVICE_CONNECTION_STRING");
-    private static int NUM_REQUESTS = 3;
-    private static int SLEEP_DURATION_IN_SECONDS = 10;
-    private static int TIMEOUT_IN_MINUTES = 1;
-    private static String CMD_HELP = "\nUsage:\n"
-        + "The program should be called with the following args:\n"
-        + "1. [Device connection string]: (Required, default to environment variable \"IOTHUB_DEVICE_CONNECTION_STRING\")\n"
-        + "2. [Transport protocol]: (default to \"mqtt\") Protocol choice [mqtt | https | amqps | amqps_ws | mqtt_ws]\n"
-        + "3. [Number of requests]: (default to \"3\")\n"
-        + "4. [Sleep duration in seconds]: (default to \"10\")\n"
-        + "5. [Timeout in minutes]: (default to \"1\")\n"
-        + "\n";
-    // Can be configured to use any protocol from HTTPS, AMQPS, MQTT, AMQPS_WS, MQTT_WS. Note: HTTPS does not support status callback, device methods and device twins.
-
     final static List<String> failedMessageListOnClose = new ArrayList<>(); // List of messages that failed on close
     private static DeviceClientManager deviceClientManager;
 
@@ -41,56 +27,43 @@ public class DeviceClientManagerSample {
     public static void main(String[] args)
             throws URISyntaxException, IOException {
 
-        log.info("Starting...");
-        
-        String argDeviceConnectionString = (args.length >= 1) ? args[0] : DEVICE_CONNECTION_STRING;
-        
-        if (argDeviceConnectionString == null && (args.length < 1 || args.length >=5) )
-        {
-            log.error("Expect arguments but received: {}\n" + CMD_HELP, args.length);
-            return;
-        }
+        SampleParameters params = new SampleParameters(args);
 
+        log.info("Starting...");
         log.info("Setup parameters...");
-        log.debug("Setup parameter: Connection String from {}", (args.length >= 1) ? "command line" : "environment variable (\"IOTHUB_DEVICE_CONNECTION_STRING\")");
+
+        String argDeviceConnectionString = (params.getConnectionStrings())[0];
 
         IotHubClientProtocol argProtocol;
-        if (args.length >= 2)
-        {
-            switch (args[1].toLowerCase())
-            {
-                case "https":
-                    argProtocol = IotHubClientProtocol.HTTPS;
-                    break;
-                case "amqps":
-                    argProtocol = IotHubClientProtocol.AMQPS;
-                    break;
-                case "amqps_ws":
-                    argProtocol = IotHubClientProtocol.AMQPS_WS;
-                    break;
-                case "mqtt":
-                    argProtocol = IotHubClientProtocol.MQTT;
-                    break;
-                case "mqtt_ws":
-                    argProtocol = IotHubClientProtocol.MQTT_WS;
-                    break;
-                default:
-                    throw new IllegalArgumentException("[ERROR] Do not support protocol: [" + args[1] + "]");
-            }
-        }
-        else
-        {
-            argProtocol = IotHubClientProtocol.MQTT;
-            log.debug("Setup parameter: Did not specify protocol. Default transport protocol to [{}]", argProtocol.name());
-            log.debug(CMD_HELP);
-        }
-        log.debug("Setup parameter: Protocol = [{}]", argProtocol.name());
+        String protocol = params.getTransport().toLowerCase();
 
-        int argNumRequest = (args.length > 2) ? Integer.parseInt(args[2]) : NUM_REQUESTS;
+        switch (protocol)
+        {
+            case "https":
+                argProtocol = IotHubClientProtocol.HTTPS;
+                break;
+            case "amqps":
+                argProtocol = IotHubClientProtocol.AMQPS;
+                break;
+            case "amqps_ws":
+                argProtocol = IotHubClientProtocol.AMQPS_WS;
+                break;
+            case "mqtt":
+                argProtocol = IotHubClientProtocol.MQTT;
+                break;
+            case "mqtt_ws":
+                argProtocol = IotHubClientProtocol.MQTT_WS;
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported protocol: [" + protocol + "]");
+        }
+        log.debug("Setup parameter: Protocol = [{}]", protocol);
+
+        int argNumRequest = Integer.parseInt(params.getNumRequests());
         log.debug("Setup parameter: Requests = [{}]", argNumRequest);
-        int argSleepDuration = (args.length > 3) ? Integer.parseInt(args[3]) : SLEEP_DURATION_IN_SECONDS;
+        int argSleepDuration = Integer.parseInt(params.getSleepDuration());
         log.debug("Setup parameter: Sleep Duration = [{}]", argSleepDuration);
-        int argTimeout = (args.length > 4) ? Integer.parseInt(args[4]) : TIMEOUT_IN_MINUTES;
+        int argTimeout = Integer.parseInt(params.getTimeout());
         log.debug("Setup parameter: Timeout = [{}]", argTimeout);
 
         DeviceClient client = new DeviceClient(argDeviceConnectionString, argProtocol);
