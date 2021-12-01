@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
@@ -576,5 +577,89 @@ public class DeviceIOTest
 
         // assert
         assertTrue(isOpen);
+    }
+
+    @Test
+    public void receiverThreadPoolsIsClosedOnDisconnection() throws IOException
+    {
+        // arrange
+        final DeviceIO deviceIO = newDeviceIO();
+        Deencapsulation.setField(deviceIO, "state", IotHubConnectionStatus.CONNECTED);
+        Deencapsulation.setField(deviceIO, "receiveTaskScheduler", mockScheduler);
+
+        // act
+        Deencapsulation.invoke(deviceIO, "execute", IotHubConnectionStatus.DISCONNECTED_RETRYING, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
+
+        // assert
+        new Verifications()
+        {
+            {
+                mockScheduler.shutdownNow();
+            }
+        };
+    }
+
+    @Test
+    public void senderThreadPoolsIsClosedOnDisconnection() throws IOException
+    {
+        // arrange
+        final DeviceIO deviceIO = newDeviceIO();
+        Deencapsulation.setField(deviceIO, "state", IotHubConnectionStatus.CONNECTED);
+        Deencapsulation.setField(deviceIO, "sendTaskScheduler", mockScheduler);
+
+        // act
+        Deencapsulation.invoke(deviceIO, "execute", IotHubConnectionStatus.DISCONNECTED_RETRYING, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
+
+        // assert
+        new Verifications()
+        {
+            {
+                mockScheduler.shutdownNow();
+            }
+        };
+    }
+
+    @Test
+    public void receiverThreadPoolsIsClosedBeforeOpeningIfAlreadyOpen() throws IOException
+    {
+        // arrange
+        final DeviceIO deviceIO = newDeviceIO();
+        Deencapsulation.setField(deviceIO, "state", IotHubConnectionStatus.DISCONNECTED);
+        Deencapsulation.setField(deviceIO, "receiveTaskScheduler", mockScheduler);
+
+        // act
+        Deencapsulation.invoke(deviceIO, "execute", IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
+
+        // assert
+        new Verifications()
+        {
+            {
+                mockScheduler.shutdownNow();
+
+                mockScheduler.scheduleWithFixedDelay((Runnable) any, anyLong, anyLong, (TimeUnit) any);
+            }
+        };
+    }
+
+    @Test
+    public void senderThreadPoolsIsClosedBeforeOpeningIfAlreadyOpen() throws IOException
+    {
+        // arrange
+        final DeviceIO deviceIO = newDeviceIO();
+        Deencapsulation.setField(deviceIO, "state", IotHubConnectionStatus.DISCONNECTED);
+        Deencapsulation.setField(deviceIO, "sendTaskScheduler", mockScheduler);
+
+        // act
+        Deencapsulation.invoke(deviceIO, "execute", IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
+
+        // assert
+        new Verifications()
+        {
+            {
+                mockScheduler.shutdownNow();
+
+                mockScheduler.scheduleWithFixedDelay((Runnable) any, anyLong, anyLong, (TimeUnit) any);
+            }
+        };
     }
 }

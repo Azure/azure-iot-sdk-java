@@ -27,6 +27,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -383,6 +384,7 @@ public class ServiceClientTests extends IntegrationTest
         serviceClient.close();
     }
 
+    @Ignore // The IoT Hub instance we use for this test is currently offline, so this test cannot be run
     @Test
     @ContinuousIntegrationTest
     public void serviceClientValidatesRemoteCertificateWhenSendingTelemetry() throws IOException
@@ -409,6 +411,7 @@ public class ServiceClientTests extends IntegrationTest
         assertTrue(buildExceptionMessage("Expected an exception due to service presenting invalid certificate", hostName), expectedExceptionWasCaught);
     }
 
+    @Ignore // The IoT Hub instance we use for this test is currently offline, so this test cannot be run
     @Test
     @ContinuousIntegrationTest
     public void serviceClientValidatesRemoteCertificateWhenGettingFeedbackReceiver() throws IOException
@@ -436,6 +439,7 @@ public class ServiceClientTests extends IntegrationTest
         assertTrue(buildExceptionMessage("Expected an exception due to service presenting invalid certificate", hostName), expectedExceptionWasCaught);
     }
 
+    @Ignore // The IoT Hub instance we use for this test is currently offline, so this test cannot be run
     @Test
     @ContinuousIntegrationTest
     public void serviceClientValidatesRemoteCertificateWhenGettingFileUploadFeedbackReceiver() throws IOException
