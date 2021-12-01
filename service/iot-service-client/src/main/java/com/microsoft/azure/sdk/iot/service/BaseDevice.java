@@ -359,12 +359,12 @@ public class BaseDevice
 
         if (parser.getConnectionStateUpdatedTime() != null)
         {
-            this.connectionStateUpdatedTime = ParserUtility.getDateStringFromDate(parser.getConnectionStateUpdatedTime());
+            this.connectionStateUpdatedTime = ParserUtility.getUTCDateStringFromDate(parser.getConnectionStateUpdatedTime());
         }
 
         if (parser.getLastActivityTime() != null)
         {
-            this.lastActivityTime = ParserUtility.getDateStringFromDate(parser.getLastActivityTime());
+            this.lastActivityTime = ParserUtility.getUTCDateStringFromDate(parser.getLastActivityTime());
         }
 
         if (parser.getConnectionState() != null)

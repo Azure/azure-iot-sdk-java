@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.deps.serializer;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.*;
 import mockit.Deencapsulation;
 import mockit.integration.junit4.JMockit;
 import org.junit.Before;
@@ -142,7 +141,7 @@ public class DeviceParserTest
         String connectionState = "Disconnected";
         String connectionStateUpdatedTime = validDateString;
         String managedBy = "someentity";
-        String lastActivityTime = ParserUtility.getDateStringFromDate(new Date());
+        String lastActivityTime = ParserUtility.getUTCDateStringFromDate(new Date());
         int cloudToDeviceMessageCount = 20;
         String scope = "securityscope";
 

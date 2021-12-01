@@ -47,7 +47,8 @@ Breaking changes:
   - These were wrappers on top of the existing sync APIs. Users are expected to write async wrappers that better fit their preferred async framework.
 - Removed asynchronous APIs for service client APIs 
 - Removed ```open()``` and ```close()``` APIs for registryManager since they do nothing anymore
- 
+- Fixed a bug where dates retrieved by the client were converted to local time zone rather than keeping them in UTC time.  
+
 ## Device Provisioning Service Device Client
 
 No notable changes, but the security providers that are used in conjunction with this client have changed. See [this section](#security-provider-clients) for more details.

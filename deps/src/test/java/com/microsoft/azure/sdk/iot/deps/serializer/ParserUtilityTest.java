@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for serializer utility helpers
@@ -679,23 +680,24 @@ public class ParserUtilityTest
     public void getSimpleDateStringFromDateGivenNullDateThrows()
     {
         //act
-        ParserUtility.getDateStringFromDate(null);
+        ParserUtility.getUTCDateStringFromDate(null);
     }
 
-    //Tests_SRS_PARSER_UTILITY_34_043: [The provided date shall be converted into this format: "yyyy-MM-dd'T'HH:mm:ss".]
+    // Test that the two helper functions we use to parse strings to dates, and to write dates as strings don't distort
+    // any date strings we receive from the service.
     @Test
-    public void getSimpleDateStringFromDateSuccess()
+    public void getSimpleDateStringFromDateWithTimezone()
     {
-        //arrange
-        //A time that is comfortably after the UNIX epoch to avoid issues where other timezones take this time back before that epoch where dates cannot be parsed
-        Date date = new Date(200000000);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        String expectedString = dateFormat.format(date);
+        // arrange
+        String originalDateString = "2021-11-17T05:23:04.3511935Z";
 
-        //act
-        String actualString = ParserUtility.getDateStringFromDate(date);
+        Date parsedDate = ParserUtility.getDateTimeUtc(originalDateString);
 
-        //assert
-        assertEquals(expectedString, actualString);
+        // act
+        String actualString = ParserUtility.getUTCDateStringFromDate(parsedDate);
+
+        // assert
+        // the parsed string truncates the milliseconds, so check for "contains" instead of "equals"
+        assertTrue(originalDateString.contains(actualString));
     }
 }

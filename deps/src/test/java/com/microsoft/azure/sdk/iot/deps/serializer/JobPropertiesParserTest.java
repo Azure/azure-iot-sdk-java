@@ -3,9 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.deps.serializer;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.JobPropertiesParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
-import com.microsoft.azure.sdk.iot.deps.serializer.StorageAuthenticationType;
 import mockit.Deencapsulation;
 import org.junit.Test;
 
@@ -58,8 +55,8 @@ public class JobPropertiesParserTest
 
         String startTimeUtc = Deencapsulation.getField(processedParser, "startTimeUtcString");
         String endTimeUtc = Deencapsulation.getField(processedParser, "startTimeUtcString");
-        assertEquals(ParserUtility.getDateStringFromDate(parser.getStartTimeUtc()), startTimeUtc);
-        assertEquals(ParserUtility.getDateStringFromDate(parser.getEndTimeUtc()), endTimeUtc);
+        assertEquals(ParserUtility.getUTCDateStringFromDate(parser.getStartTimeUtc()), startTimeUtc);
+        assertEquals(ParserUtility.getUTCDateStringFromDate(parser.getEndTimeUtc()), endTimeUtc);
     }
 
     //Tests_SRS_JOB_PROPERTIES_PARSER_34_010: [This method shall set the value of this object's JobId equal to the provided value.]

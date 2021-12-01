@@ -190,7 +190,7 @@ public class ConfigurationParser
         }
         else
         {
-            this.createdTimeUtcString = ParserUtility.getDateStringFromDate(createdTimeUtc);
+            this.createdTimeUtcString = ParserUtility.getUTCDateStringFromDate(createdTimeUtc);
         }
     }
 
@@ -221,7 +221,7 @@ public class ConfigurationParser
         }
         else
         {
-            this.lastUpdatedTimeUtcString = ParserUtility.getDateStringFromDate(lastUpdatedTimeUtc);
+            this.lastUpdatedTimeUtcString = ParserUtility.getUTCDateStringFromDate(lastUpdatedTimeUtc);
         }
     }
 
@@ -234,12 +234,12 @@ public class ConfigurationParser
     {
         if (this.createdTimeUtc != null)
         {
-            this.createdTimeUtcString = ParserUtility.getDateStringFromDate(this.createdTimeUtc);
+            this.createdTimeUtcString = ParserUtility.getUTCDateStringFromDate(this.createdTimeUtc);
         }
 
         if (this.lastUpdatedTimeUtc != null)
         {
-            this.lastUpdatedTimeUtcString = ParserUtility.getDateStringFromDate(this.lastUpdatedTimeUtc);
+            this.lastUpdatedTimeUtcString = ParserUtility.getUTCDateStringFromDate(this.lastUpdatedTimeUtc);
         }
 
         //Codes_SRS_CONFIGURATION_PARSER_28_006: [This method shall return a json representation of this.]

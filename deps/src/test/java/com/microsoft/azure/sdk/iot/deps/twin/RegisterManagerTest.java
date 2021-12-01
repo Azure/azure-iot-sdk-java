@@ -111,7 +111,7 @@ public class RegisterManagerTest
         assertEquals("validDeviceId", Deencapsulation.getField(result, "deviceId"));
         assertEquals("validModuleId", Deencapsulation.getField(result, "moduleId"));
         assertEquals("validGenerationId", Deencapsulation.getField(result, "generationId"));
-        assertEquals(3, Deencapsulation.getField(result, "version"));
+        assertEquals(3, (int) Deencapsulation.getField(result, "version"));
         assertEquals("xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", Deencapsulation.getField(result, "eTag"));
         assertEquals("ENABLED", Deencapsulation.getField(result, "status").toString());
         assertEquals("validStatusReason", Deencapsulation.getField(result, "statusReason"));
