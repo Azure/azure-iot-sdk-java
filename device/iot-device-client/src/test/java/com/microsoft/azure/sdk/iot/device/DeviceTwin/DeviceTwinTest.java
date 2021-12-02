@@ -6,10 +6,18 @@ package com.microsoft.azure.sdk.iot.device.DeviceTwin;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
-import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
+import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
+import com.microsoft.azure.sdk.iot.device.DeviceIO;
+import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.MessageCallback;
+import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
-import mockit.*;
+import mockit.Deencapsulation;
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
+import mockit.Verifications;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -142,14 +150,14 @@ public class DeviceTwinTest
             {
                 mockedDeviceTwinMessage.setRequestId(anyString);
                 times = 1;
-                mockedDeviceTwinMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_GET_REQUEST);
-                times = 1;
                 mockedDeviceTwinMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST);
                 times = 1;
                 mockedDeviceIO.sendEventAsync(mockedDeviceTwinMessage, (IotHubEventCallback)any , null, null);
-                times = 2;
+                times = 1;
             }
         };
+
+        assertNotNull(Deencapsulation.getField(testTwin, "getTwinMessageToSendOnTwinSubscribed"));
     }
 
     /*
@@ -177,15 +185,14 @@ public class DeviceTwinTest
             {
                 mockedDeviceTwinMessage.setRequestId(anyString);
                 times = 1;
-                mockedDeviceTwinMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_GET_REQUEST);
-                times = 1;
                 mockedDeviceTwinMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST);
                 times = 1;
                 mockedDeviceIO.sendEventAsync(mockedDeviceTwinMessage, (IotHubEventCallback)any , null, null);
-                times = 2;
+                times = 1;
             }
         };
 
+        assertNotNull(Deencapsulation.getField(testTwin, "getTwinMessageToSendOnTwinSubscribed"));
     }
 
     /*
@@ -213,15 +220,14 @@ public class DeviceTwinTest
             {
                 mockedDeviceTwinMessage.setRequestId(anyString);
                 times = 1;
-                mockedDeviceTwinMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_GET_REQUEST);
-                times = 1;
                 mockedDeviceTwinMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST);
                 times = 1;
                 mockedDeviceIO.sendEventAsync(mockedDeviceTwinMessage, (IotHubEventCallback)any , null, null);
-                times = 2;
+                times = 1;
             }
         };
 
+        assertNotNull(Deencapsulation.getField(testTwin, "getTwinMessageToSendOnTwinSubscribed"));
     }
 
     @Test
@@ -1372,5 +1378,29 @@ public class DeviceTwinTest
         deviceTwinResponseMessageCallback.execute(testMessage, null);
 
         // assert
+    }
+
+    @Test
+    public void getDeviceTwinRequestCompleteTriggersGetTwin()
+    {
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
+            mockedStatusCB, null, mockedGenericPropertyCB, null);
+
+        final IotHubTransportMessage getTwinMessage = new IotHubTransportMessage("asdf".getBytes(StandardCharsets.UTF_8), MessageType.DEVICE_TWIN);
+        Deencapsulation.setField(testTwin, "getTwinMessageToSendOnTwinSubscribed", getTwinMessage);
+
+        IotHubEventCallback deviceTwinRequestMessageCallback = Deencapsulation.newInnerInstance("deviceTwinRequestMessageCallback", testTwin);
+
+        deviceTwinRequestMessageCallback.execute(IotHubStatusCode.OK, null);
+
+        new Verifications()
+        {
+            {
+                mockedDeviceIO.sendEventAsync(getTwinMessage, (IotHubEventCallback) any, null, anyString);
+                times = 1;
+            }
+        };
+
+        assertNull(Deencapsulation.getField(testTwin, "getTwinMessageToSendOnTwinSubscribed"));
     }
 }

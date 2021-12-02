@@ -24,9 +24,10 @@ import static com.microsoft.azure.sdk.iot.device.IotHubMessageResult.COMPLETE;
 @Slf4j
 public class DeviceTwin
 {
-    private DeviceIO deviceIO = null;
-    private DeviceClientConfig config = null;
+    private final DeviceIO deviceIO;
+    private final DeviceClientConfig config;
     private boolean isSubscribed = false;
+    private IotHubTransportMessage getTwinMessageToSendOnTwinSubscribed;
 
     private final Object DEVICE_TWIN_LOCK = new Object();
 
@@ -40,13 +41,13 @@ public class DeviceTwin
         Callbacks to respond to its user on desired property changes
      */
     @SuppressWarnings("rawtypes")
-    private final PropertyCallBack deviceTwinGenericPropertyChangeCallback;
-    private final TwinPropertyCallBack deviceTwinGenericTwinPropertyChangeCallback;
+    private PropertyCallBack deviceTwinGenericPropertyChangeCallback;
+    private TwinPropertyCallBack deviceTwinGenericTwinPropertyChangeCallback;
     private Object deviceTwinGenericPropertyChangeCallbackContext;
 
     // Callback for providing user all of a given desired property update message's contents, rather than providing
     // one callback per updated property.
-    private final TwinPropertiesCallback deviceTwinGenericTwinPropertiesChangeCallback;
+    private TwinPropertiesCallback deviceTwinGenericTwinPropertiesChangeCallback;
 
     /*
         Map of callbacks to call when a particular desired property changed
@@ -248,6 +249,18 @@ public class DeviceTwin
                 {
                     deviceTwinStatusCallback.execute(responseStatus, deviceTwinStatusCallbackContext);
                 }
+                else
+                {
+                    isSubscribed = true;
+
+                    // When starting twin, we first open the twin links and subscribe to desired properties. Only once
+                    // that is done do we send the first getTwin request message to get the current twin state.
+                    if (getTwinMessageToSendOnTwinSubscribed != null)
+                    {
+                        deviceIO.sendEventAsync(getTwinMessageToSendOnTwinSubscribed, new deviceTwinRequestMessageCallback(), null, config.getDeviceId());
+                        getTwinMessageToSendOnTwinSubscribed = null;
+                    }
+                }
             }
         }
     }
@@ -256,7 +269,7 @@ public class DeviceTwin
                       IotHubEventCallback deviceTwinCallback, Object deviceTwinCallbackContext,
                       PropertyCallBack<Type1, Type2> genericPropertyCallback, Object genericPropertyCallbackContext)
     {
-        deviceTwinInternal(client, config, deviceTwinCallback, deviceTwinCallbackContext, genericPropertyCallbackContext);
+        this(client, config, deviceTwinCallback, deviceTwinCallbackContext, genericPropertyCallbackContext);
 
         this.deviceTwinGenericPropertyChangeCallback = genericPropertyCallback;
         this.deviceTwinGenericTwinPropertyChangeCallback = null;
@@ -267,7 +280,7 @@ public class DeviceTwin
                       IotHubEventCallback deviceTwinCallback, Object deviceTwinCallbackContext,
                       TwinPropertyCallBack genericPropertyCallback, Object genericPropertyCallbackContext)
     {
-        deviceTwinInternal(client, config, deviceTwinCallback, deviceTwinCallbackContext, genericPropertyCallbackContext);
+        this(client, config, deviceTwinCallback, deviceTwinCallbackContext, genericPropertyCallbackContext);
 
         this.deviceTwinGenericTwinPropertyChangeCallback = genericPropertyCallback;
         this.deviceTwinGenericPropertyChangeCallback = null;
@@ -278,14 +291,14 @@ public class DeviceTwin
                       IotHubEventCallback deviceTwinCallback, Object deviceTwinCallbackContext,
                       TwinPropertiesCallback genericPropertiesCallback, Object genericPropertyCallbackContext)
     {
-        deviceTwinInternal(client, config, deviceTwinCallback, deviceTwinCallbackContext, genericPropertyCallbackContext);
+        this(client, config, deviceTwinCallback, deviceTwinCallbackContext, genericPropertyCallbackContext);
 
         this.deviceTwinGenericTwinPropertiesChangeCallback = genericPropertiesCallback;
         this.deviceTwinGenericTwinPropertyChangeCallback = null;
         this.deviceTwinGenericPropertyChangeCallback = null;
     }
 
-    private void deviceTwinInternal(DeviceIO client, DeviceClientConfig config,
+    private DeviceTwin(DeviceIO client, DeviceClientConfig config,
                       IotHubEventCallback deviceTwinCallback, Object deviceTwinCallbackContext,
                       Object genericPropertyCallbackContext)
     {
@@ -304,13 +317,22 @@ public class DeviceTwin
 
     public void getDeviceTwin()
     {
-        checkSubscription();
-
         IotHubTransportMessage getTwinRequestMessage = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_TWIN);
         getTwinRequestMessage.setRequestId(UUID.randomUUID().toString());
         getTwinRequestMessage.setCorrelationId(getTwinRequestMessage.getRequestId());
         getTwinRequestMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_GET_REQUEST);
-        this.deviceIO.sendEventAsync(getTwinRequestMessage, new deviceTwinRequestMessageCallback(), null, this.config.getDeviceId());
+
+        if (!isSubscribed)
+        {
+            // Create a getTwin request message, but don't send it until the twin subscription has finished.
+            getTwinMessageToSendOnTwinSubscribed = getTwinRequestMessage;
+
+            subscribeToDesiredPropertiesAsync();
+        }
+        else
+        {
+            this.deviceIO.sendEventAsync(getTwinRequestMessage, new deviceTwinRequestMessageCallback(), null, this.config.getDeviceId());
+        }
     }
 
     public synchronized void updateReportedProperties(Set<Property> reportedProperties) throws IOException
@@ -383,7 +405,10 @@ public class DeviceTwin
             }
         }
 
-        checkSubscription();
+        if (!isSubscribed)
+        {
+            subscribeToDesiredPropertiesAsync();
+        }
     }
 
     public void subscribeDesiredPropertiesTwinPropertyNotification(Map<Property, Pair<TwinPropertyCallBack, Object>> onDesiredPropertyChange)
@@ -401,17 +426,17 @@ public class DeviceTwin
             }
         }
 
-        checkSubscription();
-    }
-
-    private void checkSubscription()
-    {
         if (!isSubscribed)
         {
-            IotHubTransportMessage desiredPropertiesNotificationRequest = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_TWIN);
-            desiredPropertiesNotificationRequest.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST);
-            this.deviceIO.sendEventAsync(desiredPropertiesNotificationRequest, new deviceTwinRequestMessageCallback(), null, this.config.getDeviceId());
+            subscribeToDesiredPropertiesAsync();
         }
+    }
+
+    private void subscribeToDesiredPropertiesAsync()
+    {
+        IotHubTransportMessage desiredPropertiesNotificationRequest = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_TWIN);
+        desiredPropertiesNotificationRequest.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST);
+        this.deviceIO.sendEventAsync(desiredPropertiesNotificationRequest, new deviceTwinRequestMessageCallback(), null, this.config.getDeviceId());
     }
 
     private boolean reportPropertyCallback(Property property)
