@@ -21,6 +21,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.hsm.HsmException;
 import com.microsoft.azure.sdk.iot.device.hsm.HttpHsmSignatureProvider;
 import com.microsoft.azure.sdk.iot.device.hsm.IotHubSasTokenHsmAuthenticationProvider;
+import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import lombok.extern.slf4j.Slf4j;
 
@@ -85,6 +86,7 @@ public class ModuleClient extends InternalClient
         //Codes_SRS_MODULECLIENT_34_007: [If the provided protocol is not MQTT, AMQPS, MQTT_WS, or AMQPS_WS, this function shall throw an UnsupportedOperationException.]
         //Codes_SRS_MODULECLIENT_34_004: [If the provided connection string does not contain a module id, this function shall throw an IllegalArgumentException.]
         commonConstructorVerifications(protocol, this.config);
+        commonConstructorSetup();
     }
 
     /**
@@ -109,6 +111,7 @@ public class ModuleClient extends InternalClient
     {
         super(new IotHubConnectionString(connectionString), protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), clientOptions);
         commonConstructorVerifications(protocol, this.config);
+        commonConstructorSetup();
     }
 
     /**
@@ -149,6 +152,7 @@ public class ModuleClient extends InternalClient
         //Codes_SRS_MODULECLIENT_34_008: [If the provided protocol is not MQTT, AMQPS, MQTT_WS, or AMQPS_WS, this function shall throw an UnsupportedOperationException.]
         //Codes_SRS_MODULECLIENT_34_009: [If the provided connection string does not contain a module id, this function shall throw an IllegalArgumentException.]
         commonConstructorVerifications(protocol, this.getConfig());
+        commonConstructorSetup();
     }
 
     /**
@@ -174,6 +178,7 @@ public class ModuleClient extends InternalClient
     {
         super(new IotHubConnectionString(connectionString), protocol, sslContext, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
         commonConstructorVerifications(protocol, this.getConfig());
+        commonConstructorSetup();
     }
 
     /**
@@ -208,6 +213,7 @@ public class ModuleClient extends InternalClient
     {
         super(hostName, deviceId, moduleId, sasTokenProvider, protocol, clientOptions, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
         commonConstructorVerifications(protocol, this.getConfig());
+        commonConstructorSetup();
     }
 
     /**
@@ -372,6 +378,8 @@ public class ModuleClient extends InternalClient
     private ModuleClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis) throws IOException, TransportException
     {
         super(iotHubAuthenticationProvider, protocol, sendPeriodMillis, receivePeriodMillis);
+
+        commonConstructorSetup();
     }
 
     /**
@@ -677,5 +685,10 @@ public class ModuleClient extends InternalClient
         {
             throw new IllegalArgumentException("Connection string must contain field for ModuleId");
         }
+    }
+
+    private static void commonConstructorSetup()
+    {
+        log.debug("Initialized a ModuleClient instance using SDK version {}", TransportUtils.CLIENT_VERSION);
     }
 }
