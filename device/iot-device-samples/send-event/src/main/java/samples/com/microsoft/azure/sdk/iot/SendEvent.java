@@ -80,85 +80,49 @@ public class SendEvent
     public static void main(String[] args)
             throws IOException, URISyntaxException
     {
+
+        InputParameters params = new InputParameters(args);
+
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
 
-        if (args.length <= 1 || args.length >= 5)
-        {
-            System.out.format(
-                    "Expected 2 or 3 arguments but received: %d.\n"
-                            + "The program should be called with the following args: \n"
-                            + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key> or HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>;GatewayHostName=<gateway> \n"
-                            + "2. [number of requests to send]\n"
-                            + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n"
-                            + "4. (optional) path to certificate to enable one-way authentication over ssl \n",
-                    args.length);
-            return;
-        }
-
-        String connString = args[0];
+        String connString = params.getConnectionString();
         int numRequests;
-        String pathToCertificate = null;
+        String pathToCertificate;
         try
         {
-            numRequests = Integer.parseInt(args[1]);
+            numRequests = Integer.parseInt(params.getNumberOfRequests());
         }
         catch (NumberFormatException e)
         {
             System.out.format(
                     "Could not parse the number of requests to send. "
-                            + "Expected an int but received:\n%s.\n", args[1]);
+                            + "Expected an int but received:[" + params.getNumberOfRequests() + "]");
             return;
         }
-        IotHubClientProtocol protocol;
-        if (args.length == 2)
-        {
-            protocol = IotHubClientProtocol.MQTT;
-        }
-        else
-        {
-            String protocolStr = args[2];
-            if (protocolStr.equals("https"))
-            {
-                protocol = IotHubClientProtocol.HTTPS;
-            }
-            else if (protocolStr.equals("amqps"))
-            {
-                protocol = IotHubClientProtocol.AMQPS;
-            }
-            else if (protocolStr.equals("mqtt"))
-            {
-                protocol = IotHubClientProtocol.MQTT;
-            }
-            else if (protocolStr.equals("amqps_ws"))
-            {
-                protocol = IotHubClientProtocol.AMQPS_WS;
-            }
-            else if (protocolStr.equals("mqtt_ws"))
-            {
-                protocol = IotHubClientProtocol.MQTT_WS;
-            }
-            else
-            {
-                System.out.format(
-                        "Expected argument 2 to be one of 'mqtt', 'https', 'amqps' or 'amqps_ws' but received %s\n"
-                                + "The program should be called with the following args: \n"
-                                + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
-                                + "2. [number of requests to send]\n"
-                                + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n"
-                                + "4. (optional) path to certificate to enable one-way authentication over ssl for amqps \n",
-                        protocolStr);
-                return;
-            }
 
-            if (args.length == 3)
-            {
-                pathToCertificate = null;
-            }
-            else
-            {
-                pathToCertificate = args[3];
-            }
+
+        IotHubClientProtocol protocol;
+        String protocolArg = params.getProtocol().toLowerCase();
+        switch (protocolArg)
+        {
+            case "https":
+                protocol = IotHubClientProtocol.HTTPS;
+                break;
+            case "amqps":
+                protocol = IotHubClientProtocol.AMQPS;
+                break;
+            case "amqps_ws":
+                protocol = IotHubClientProtocol.AMQPS_WS;
+                break;
+            case "mqtt":
+                protocol = IotHubClientProtocol.MQTT;
+                break;
+            case "mqtt_ws":
+                protocol = IotHubClientProtocol.MQTT_WS;
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported protocol: [" + protocolArg + "]");
         }
 
 
@@ -166,6 +130,8 @@ public class SendEvent
         System.out.format("Using communication protocol %s.\n", protocol.name());
 
         DeviceClient client = new DeviceClient(connString, protocol);
+
+        pathToCertificate = params.getPathCert();
         if (pathToCertificate != null )
         {
             client.setOption("SetCertificatePath", pathToCertificate );
