@@ -6,11 +6,13 @@ package com.microsoft.azure.sdk.iot.provisioning.service;
 import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningConnectionString;
 import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.provisioning.service.contract.ContractApiHttp;
+import com.microsoft.azure.sdk.iot.provisioning.service.contract.SDKUtils;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientExceptionManager;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientNotFoundException;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientTransportException;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collection;
 
@@ -73,6 +75,7 @@ import java.util.Collection;
  * @see <a href="https://docs.microsoft.com/en-us/azure/iot-dps">Azure IoT Hub Device Provisioning Service</a>
  * @see <a href="https://docs.microsoft.com/en-us/azure/iot-dps/about-iot-dps">Provisioning devices with Azure IoT Hub Device Provisioning Service</a>
  */
+@Slf4j
 public final class ProvisioningServiceClient
 {
 
@@ -124,6 +127,8 @@ public final class ProvisioningServiceClient
         this.enrollmentGroupManager = EnrollmentGroupManager.createFromContractApiHttp(contractApiHttp);
         /* SRS_PROVISIONING_SERVICE_CLIENT_21_007: [The constructor shall create a new instance of the RegistrationStatusManager.] */
         this.registrationStatusManager = RegistrationStatusManager.createFromContractApiHttp(contractApiHttp);
+
+        log.debug("Initialized a ProvisioningServiceClient instance using SDK version {}", SDKUtils.getServiceApiVersion());
     }
 
     /**
