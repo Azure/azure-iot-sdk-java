@@ -21,8 +21,10 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
 import com.microsoft.azure.sdk.iot.service.devicetwin.QueryType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -37,6 +39,7 @@ import java.util.Set;
 /**
  * Use the JobClient to schedule and cancel jobs for a group of devices using IoT hub.
  */
+@Slf4j
 public class JobClient
 {
     private final static Integer DEFAULT_PAGE_SIZE = 100;
@@ -94,6 +97,7 @@ public class JobClient
         this.iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         this.hostName = this.iotHubConnectionString.getHostName();
         this.options = options;
+        commonConstructorSetup();
     }
 
     /**
@@ -129,6 +133,7 @@ public class JobClient
         this.hostName = hostName;
         this.credentialCache = new TokenCredentialCache(credential);
         this.options = options;
+        commonConstructorSetup();
     }
 
     /**
@@ -162,6 +167,12 @@ public class JobClient
         this.hostName = hostName;
         this.azureSasCredential = azureSasCredential;
         this.options = options;
+        commonConstructorSetup();
+    }
+
+    private static void commonConstructorSetup()
+    {
+        log.debug("Initialized a JobClient instance using SDK version {}", TransportUtils.serviceVersion);
     }
 
     /**
