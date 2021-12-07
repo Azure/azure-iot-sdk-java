@@ -13,6 +13,12 @@ jobs:
     vmImage: windows-latest
     timeoutInMinutes: 60
   steps:
+  - task: Maven@3
+    inputs:
+      mavenPomFile: 'pom.xml' 
+      goals: 'install' # Need to install this to the local repo as the CG task doesn't build the project
+      options: '-D"maven.test.skip=true" -D"maven.javadoc.skip=true"' # Don't run the unit tests or doc gen to save some time
+    
   - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
     displayName: 'Component Detection'
 

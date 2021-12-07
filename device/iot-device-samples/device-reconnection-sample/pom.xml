@@ -17,7 +17,6 @@
     </parent>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <slf4j-version>1.7.25</slf4j-version>
         <lombok-version>1.18.8</lombok-version>
         <maven-jar-plugin-version>3.1.0</maven-jar-plugin-version>
     </properties>
