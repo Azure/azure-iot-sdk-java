@@ -178,6 +178,6 @@ public class SendEvent
             System.out.println("List of messages that were cancelled on close:" + failedMessageListOnClose.toString());
         }
 
-        System.out.println("Shutting down...\n");
+        System.out.println("Shutting down...");
     }
 }
