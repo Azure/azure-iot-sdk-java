@@ -1,5 +1,6 @@
 package samples.com.microsoft.azure.sdk.iot;
 
+import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import org.apache.commons.cli.*;
 
 import java.net.URISyntaxException;
@@ -18,8 +19,8 @@ public class InputParameters
      * Setup parameters from command line arguments
      * @param args array from main()
      */
-    public InputParameters(String[] args){
-
+    public InputParameters(String[] args)
+    {
         // create option for cli input
         Options options = new Options()
                 .addOption(
@@ -59,7 +60,8 @@ public class InputParameters
                 );
 
         String cmdLine = APPEXE;
-        try {
+        try
+        {
             String jarPath = Options.class
                     .getProtectionDomain()
                     .getCodeSource()
@@ -68,8 +70,10 @@ public class InputParameters
                     .getPath();
             String jarName = jarPath.substring(jarPath.lastIndexOf("/") + 1);
             cmdLine += jarName;
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
+        }
+        catch (URISyntaxException e)
+        {
+            System.out.println("Could not create URI object: " + e.getMessage());
             cmdLine += "<sample.jar>";
         }
 
@@ -77,33 +81,41 @@ public class InputParameters
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
 
-        try {
+        try
+        {
             // parse the command line arguments
             cmd = parser.parse(options, args);
 
             // -h option
-            if(cmd.hasOption("h")){
+            if (cmd.hasOption("h"))
+            {
                 formatter.printHelp(cmdLine, "\nHelp:\n\n", options, FOOTER, true);
                 System.exit(0);
             }
 
             // -c and -r option
-            if(!cmd.hasOption("c") || !cmd.hasOption("r")){
+            if (!cmd.hasOption("c") || !cmd.hasOption("r"))
+            {
                 formatter.printHelp(cmdLine, "\nError: ConnectionString and NumberOfRequests are required as arguments\n\nHelp:\n", options, FOOTER, true);
                 System.exit(0);
-            }else{
-                if(cmd.getOptionValue("c") == null || cmd.getOptionValue("c").trim().isEmpty()){
+            }
+            else
+            {
+                if (cmd.getOptionValue("c") == null || cmd.getOptionValue("c").trim().isEmpty())
+                {
                     formatter.printHelp(cmdLine, "\nError: ConnectionString is empty\n\nHelp:\n", options, FOOTER, true);
                     System.exit(0);
                 }
 
-                if(cmd.getOptionValue("r") == null || cmd.getOptionValue("r").trim().isEmpty()){
+                if (cmd.getOptionValue("r") == null || cmd.getOptionValue("r").trim().isEmpty())
+                {
                     formatter.printHelp(cmdLine, "\nError: NumberOfRequests is empty\n\nHelp:\n", options, FOOTER, true);
                     System.exit(0);
                 }
             }
-
-        } catch (ParseException e) {
+        }
+        catch (ParseException e)
+        {
             //wrong parameters
             formatter.printHelp(cmdLine, "\nError: "+e.getMessage()+"\n\nHelp:\n", options, FOOTER, true);
             System.exit(0);
@@ -111,29 +123,63 @@ public class InputParameters
     }
 
     /**
-     * get connection string argument from command line
+     * Get connection string argument from command line.
      * @return string value
      */
-    public String getConnectionString() { return cmd.getOptionValue("c"); }
+    public String getConnectionString()
+    {
+        return cmd.getOptionValue("c");
+    }
 
 
     /**
-     * get number of requests argument from command line
+     * Get number of requests argument from command line.
      * @return string value
      */
-    public String getNumberOfRequests() { return cmd.getOptionValue("r"); }
+    public String getNumberOfRequests()
+    {
+        return cmd.getOptionValue("r");
+    }
 
 
     /**
-     * get protocol argument from command line
-     * @return string value
+     * Get protocol argument from command line.
+     * @return enum value
      */
-    public String getProtocol() { return cmd.getOptionValue("p", PROTOCOL); }
+    public IotHubClientProtocol getProtocol()
+    {
+        IotHubClientProtocol protocol;
+        String protocolArg = cmd.getOptionValue("p", PROTOCOL).toLowerCase();
+        switch(protocolArg)
+        {
+            case "https":
+                protocol = IotHubClientProtocol.HTTPS;
+                break;
+            case "amqps":
+                protocol = IotHubClientProtocol.AMQPS;
+                break;
+            case "amqps_ws":
+                protocol = IotHubClientProtocol.AMQPS_WS;
+                break;
+            case "mqtt":
+                protocol = IotHubClientProtocol.MQTT;
+                break;
+            case "mqtt_ws":
+                protocol = IotHubClientProtocol.MQTT_WS;
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported protocol: [" + protocolArg + "]");
+        }
+        return protocol;
+    }
 
 
     /**
-     * get path to certificate argument from command line
+     * Get path to certificate argument from command line.
      * @return string value
      */
-    public String getPathCert() { return cmd.getOptionValue("pc", PATH_CERT); }
+    public String getPathCert()
+    {
+        return cmd.getOptionValue("pc", PATH_CERT);
+    }
 }

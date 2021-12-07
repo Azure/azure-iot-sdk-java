@@ -80,7 +80,6 @@ public class SendEvent
     public static void main(String[] args)
             throws IOException, URISyntaxException
     {
-
         InputParameters params = new InputParameters(args);
 
         System.out.println("Starting...");
@@ -97,34 +96,12 @@ public class SendEvent
         {
             System.out.format(
                     "Could not parse the number of requests to send. "
-                            + "Expected an int but received:[" + params.getNumberOfRequests() + "]");
+                            + "Expected an int but received: [" + params.getNumberOfRequests() + "]");
             return;
         }
 
 
-        IotHubClientProtocol protocol;
-        String protocolArg = params.getProtocol().toLowerCase();
-        switch (protocolArg)
-        {
-            case "https":
-                protocol = IotHubClientProtocol.HTTPS;
-                break;
-            case "amqps":
-                protocol = IotHubClientProtocol.AMQPS;
-                break;
-            case "amqps_ws":
-                protocol = IotHubClientProtocol.AMQPS_WS;
-                break;
-            case "mqtt":
-                protocol = IotHubClientProtocol.MQTT;
-                break;
-            case "mqtt_ws":
-                protocol = IotHubClientProtocol.MQTT_WS;
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported protocol: [" + protocolArg + "]");
-        }
-
+        IotHubClientProtocol protocol = params.getProtocol();
 
         System.out.println("Successfully read input parameters.");
         System.out.format("Using communication protocol %s.\n", protocol.name());
@@ -174,7 +151,6 @@ public class SendEvent
                 EventCallback callback = new EventCallback();
                 client.sendEventAsync(msg, callback, msg);
             }
-
             catch (Exception e)
             {
                 e.printStackTrace(); // Trace the exception
@@ -188,7 +164,6 @@ public class SendEvent
         {
             Thread.sleep(D2C_MESSAGE_TIMEOUT);
         }
-
         catch (InterruptedException e)
         {
             e.printStackTrace();
@@ -203,6 +178,6 @@ public class SendEvent
             System.out.println("List of messages that were cancelled on close:" + failedMessageListOnClose.toString());
         }
 
-        System.out.println("Shutting down...");
+        System.out.println("Shutting down...\n");
     }
 }
