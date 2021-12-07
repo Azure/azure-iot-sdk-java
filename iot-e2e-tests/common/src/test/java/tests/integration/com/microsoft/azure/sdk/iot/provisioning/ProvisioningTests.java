@@ -27,6 +27,7 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -63,6 +64,7 @@ public class ProvisioningTests extends ProvisioningCommon
         super(protocol, attestationType);
     }
 
+    @Ignore // The DPS instance we use for this test is currently offline, so this test cannot be run
     @Test
     @ContinuousIntegrationTest
     public void individualEnrollmentWithInvalidRemoteServerCertificateFails() throws Exception
@@ -99,6 +101,7 @@ public class ProvisioningTests extends ProvisioningCommon
         registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, jsonPayload, expectedHubToProvisionTo);
     }
 
+    @Ignore // The DPS instance we use for this test is currently offline, so this test cannot be run
     @Test
     @ContinuousIntegrationTest
     public void groupEnrollmentWithInvalidRemoteServerCertificateFails() throws Exception

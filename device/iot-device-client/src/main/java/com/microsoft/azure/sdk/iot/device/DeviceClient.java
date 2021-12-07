@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUploadTask;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
+import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
@@ -401,6 +402,7 @@ public final class DeviceClient extends InternalClient implements Closeable
     {
         this.ioTHubConnectionType = IoTHubConnectionType.SINGLE_CLIENT;
         this.transportClient = null;
+        log.debug("Initialized a DeviceClient instance using SDK version {}", TransportUtils.CLIENT_VERSION);
     }
 
     private void commonConstructorVerifications() throws UnsupportedOperationException
