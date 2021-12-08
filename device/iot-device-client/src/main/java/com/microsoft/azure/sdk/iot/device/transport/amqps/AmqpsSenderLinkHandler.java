@@ -53,9 +53,6 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
 
         //All events that happen to this sender link will be handled in this class (onLinkRemoteOpen, for instance)
         BaseHandler.setHandler(sender, this);
-
-        //This flow controller handles all link credit handling on our behalf
-        add(new FlowController());
     }
 
     protected abstract String getLinkInstanceType();
@@ -199,7 +196,6 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
         {
             log.trace("Sending {} bytes over the amqp {} sender link with link correlation id {}", length, getLinkInstanceType(), this.linkCorrelationId);
             int bytesSent = this.senderLink.send(msgData, 0, length);
-            log.trace("{} bytes sent over the amqp {} sender link with link correlation id {}", bytesSent, getLinkInstanceType(), this.linkCorrelationId);
 
             if (bytesSent != length)
             {
@@ -214,6 +210,7 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
             }
 
             log.trace("Message was sent over {} sender link with delivery tag {} and hash {}", getLinkInstanceType(), new String(deliveryTag, StandardCharsets.UTF_8), delivery.hashCode());
+            log.trace("Current link credit on {} sender link with link correlation id {} is {}", this.getLinkInstanceType(), this.linkCorrelationId, senderLink.getCredit());
             return new AmqpsSendResult(deliveryTag);
         }
         catch (Exception e)

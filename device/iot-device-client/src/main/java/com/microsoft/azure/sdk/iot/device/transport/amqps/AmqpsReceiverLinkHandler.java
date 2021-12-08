@@ -58,7 +58,7 @@ public abstract class AmqpsReceiverLinkHandler extends BaseHandler
         BaseHandler.setHandler(receiver, this);
 
         //This flow controller handles all link credit handling on our behalf
-        add(new FlowController());
+        add(new LoggingFlowController(this.linkCorrelationId));
     }
 
     @Override
@@ -92,6 +92,8 @@ public abstract class AmqpsReceiverLinkHandler extends BaseHandler
         IotHubTransportMessage iotHubMessage = this.protonMessageToIoTHubMessage(amqpsMessage);
         this.receivedMessagesMap.put(iotHubMessage, amqpsMessage);
         this.amqpsLinkStateCallback.onMessageReceived(iotHubMessage);
+
+        log.trace("Current link credit on {} receiver link with link correlation id {} is {}", this.getLinkInstanceType(), this.linkCorrelationId, receiverLink.getCredit());
     }
 
     @Override
