@@ -11,7 +11,7 @@ public class InputParameters
     private static final String PATH_CERT = null;
 
     private static final String FOOTER = "\nFor more info, please refer to https://github.com/Azure/azure-iot-sdks";
-    private static final String APPEXE = "java -jar ";
+    private static final String APPEXE = "java -jar target/send-event-{version}-with-deps.jar";
 
     private static CommandLine cmd = null;
 
@@ -59,24 +59,6 @@ public class InputParameters
                                 .build()
                 );
 
-        String cmdLine = APPEXE;
-        try
-        {
-            String jarPath = Options.class
-                    .getProtectionDomain()
-                    .getCodeSource()
-                    .getLocation()
-                    .toURI()
-                    .getPath();
-            String jarName = jarPath.substring(jarPath.lastIndexOf("/") + 1);
-            cmdLine += jarName;
-        }
-        catch (URISyntaxException e)
-        {
-            System.out.println("Could not create URI object: " + e.getMessage());
-            cmdLine += "<sample.jar>";
-        }
-
         // parse command line
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
@@ -89,27 +71,27 @@ public class InputParameters
             // -h option
             if (cmd.hasOption("h"))
             {
-                formatter.printHelp(cmdLine, "\nHelp:\n\n", options, FOOTER, true);
+                formatter.printHelp(APPEXE, "\nHelp:\n\n", options, FOOTER, true);
                 System.exit(0);
             }
 
             // -c and -r option
             if (!cmd.hasOption("c") || !cmd.hasOption("r"))
             {
-                formatter.printHelp(cmdLine, "\nError: ConnectionString and NumberOfRequests are required as arguments\n\nHelp:\n", options, FOOTER, true);
+                formatter.printHelp(APPEXE, "\nError: ConnectionString and NumberOfRequests are required as arguments\n\nHelp:\n", options, FOOTER, true);
                 System.exit(0);
             }
             else
             {
                 if (cmd.getOptionValue("c") == null || cmd.getOptionValue("c").trim().isEmpty())
                 {
-                    formatter.printHelp(cmdLine, "\nError: ConnectionString is empty\n\nHelp:\n", options, FOOTER, true);
+                    formatter.printHelp(APPEXE, "\nError: ConnectionString is empty\n\nHelp:\n", options, FOOTER, true);
                     System.exit(0);
                 }
 
                 if (cmd.getOptionValue("r") == null || cmd.getOptionValue("r").trim().isEmpty())
                 {
-                    formatter.printHelp(cmdLine, "\nError: NumberOfRequests is empty\n\nHelp:\n", options, FOOTER, true);
+                    formatter.printHelp(APPEXE, "\nError: NumberOfRequests is empty\n\nHelp:\n", options, FOOTER, true);
                     System.exit(0);
                 }
             }
@@ -117,7 +99,7 @@ public class InputParameters
         catch (ParseException e)
         {
             //wrong parameters
-            formatter.printHelp(cmdLine, "\nError: "+e.getMessage()+"\n\nHelp:\n", options, FOOTER, true);
+            formatter.printHelp(APPEXE, "\nError: "+e.getMessage()+"\n\nHelp:\n", options, FOOTER, true);
             System.exit(0);
         }
     }
