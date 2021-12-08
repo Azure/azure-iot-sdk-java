@@ -966,7 +966,7 @@ public class IotHubTransport implements IotHubListener
 
     /**
      * If the provided received message has a saved callback, this function shall execute that callback and send the ack
-     * provided by the callback to the service
+     * returned by the callback to the service
      *
      * @param receivedMessage the message to acknowledge
      *
@@ -992,8 +992,7 @@ public class IotHubTransport implements IotHubListener
                 // We want to log this exception and bubble up to the transport
                 log.warn("Exception thrown while calling the message callback for received message {} in acknowledgeReceivedMessage. " +
                         "This exception is preventing the completion of message delivery and can result in messages being" +
-                        "stuck in IoT hub until they expire. This can prevent the client from receiving futher messages.", receivedMessage);
-                log.warn("Exception: {} ", ex);
+                        "stuck in IoT hub until they expire. This can prevent the client from receiving futher messages.", receivedMessage, ex);
                 throw ex;
             }
 

@@ -16,7 +16,7 @@ public enum IotHubMessageResult
     /**
      * Instructs IoT hub to complete the message.
      * <p>
-     *      This will remove it from the IoT hub messaging queue and set the message to the Completed state
+     *      This will remove it from the IoT hub messaging queue and set the message to the Completed state.
      * </p>
      */
     COMPLETE,
