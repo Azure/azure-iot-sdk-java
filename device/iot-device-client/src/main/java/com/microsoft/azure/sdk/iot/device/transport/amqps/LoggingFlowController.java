@@ -29,8 +29,13 @@ public class LoggingFlowController extends BaseHandler
     private void topup(Receiver link)
     {
         int delta = WINDOW - link.getCredit();
-        log.trace("Flowing {} credit(s) back to service on receiver link with correlation id {}", delta, this.linkCorrelationId);
-        link.flow(delta);
+
+        // if delta is zero, then there is no credit to replenish, so no need to send a flow message to the service
+        if (delta > 0)
+        {
+            log.trace("Flowing {} credit(s) back to service on receiver link with address {} and correlation id {}", delta, link.getSource().getAddress(), this.linkCorrelationId);
+            link.flow(delta);
+        }
     }
 
     @Override
