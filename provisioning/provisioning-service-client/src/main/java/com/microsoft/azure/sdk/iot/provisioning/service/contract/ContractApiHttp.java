@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service.contract;
 
+import com.azure.core.credential.AzureSasCredential;
+import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
@@ -13,12 +15,14 @@ import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningSasToke
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientExceptionManager;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientTransportException;
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * This client handles the Device Provisioning Service HTTP communication.
@@ -76,7 +80,9 @@ public class ContractApiHttp
     private static final String HEADER_FIELD_VALUE_CONTENT_TYPE = "application/json";
     private static final String HEADER_FIELD_VALUE_CHARSET = "utf-8";
 
-    private final ProvisioningConnectionString provisioningConnectionString;
+    private ProvisioningConnectionString provisioningConnectionString;
+    private TokenCredentialCache credentialCache;
+    private AzureSasCredential azureSasCredential;
 
     /**
      * PRIVATE CONSTRUCTOR
@@ -112,6 +118,30 @@ public class ContractApiHttp
     }
 
     /**
+     * Create a new instance of the ContractApiHttp with a custom {@link TokenCredential} to allow for finer grain control
+     * of authentication tokens used in the underlying connection.
+     *
+     * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
+     *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
+     */
+    public ContractApiHttp(TokenCredential credential)
+    {
+        Objects.requireNonNull(credential, "credential cannot be null");
+        this.credentialCache = new TokenCredentialCache(credential);
+    }
+
+    /**
+     * Create a new instance of the ContractApiHttp with the specifed {@link AzureSasCredential}.
+     *
+     * @param azureSasCredential The SAS token provider that will be used for authentication.
+     */
+    public ContractApiHttp(AzureSasCredential azureSasCredential)
+    {
+        Objects.requireNonNull(azureSasCredential, "credential cannot be null");
+        this.azureSasCredential = azureSasCredential;
+    }
+
+    /**
      * This function sends a raw information to the Device Provisioning Service service using http protocol.
      * <p>
      *    The purpose of this function is be the base communication between the controllers and the
@@ -136,15 +166,11 @@ public class ContractApiHttp
             String payload)
             throws ProvisioningServiceClientException
     {
-        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_005: [The request shall create a SAS token based on the connection string.*/
-        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_006: [If the request get problem to create the SAS token, it shall throw IllegalArgumentException.*/
-        String sasTokenString = new ProvisioningSasToken(this.provisioningConnectionString).toString();
-
         /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_007: [The request shall create a HTTP URL based on the Device Registration path.*/
         URL url = getUrlForPath(path);
 
         /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_010: [The request shall create a new HttpRequest.*/
-        HttpRequest request = createRequest(url, httpMethod, headerParameters, payload.getBytes(StandardCharsets.UTF_8), sasTokenString);
+        HttpRequest request = createRequest(url, httpMethod, headerParameters, payload.getBytes(StandardCharsets.UTF_8));
 
         /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_014: [The request shall send the request to the Device Provisioning Service service by using the HttpRequest.send().*/
         /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_015: [If the HttpRequest failed send the message, the request shall throw ProvisioningServiceClientTransportException, threw by the callee.*/
@@ -164,7 +190,7 @@ public class ContractApiHttp
         return httpResponse;
     }
 
-    private HttpRequest createRequest(URL url, HttpMethod method, Map<String, String> headerParameters, byte[] payload, String sasToken) throws ProvisioningServiceClientTransportException
+    private HttpRequest createRequest(URL url, HttpMethod method, Map<String, String> headerParameters, byte[] payload) throws ProvisioningServiceClientTransportException
     {
         /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_011: [If the request get problem creating the HttpRequest, it shall throw ProvisioningServiceClientTransportException.*/
         HttpRequest request;
@@ -178,7 +204,7 @@ public class ContractApiHttp
         }
         /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_012: [The request shall fill the http header with the standard parameters.] */
         request.setReadTimeoutMillis(DEFAULT_HTTP_TIMEOUT_MS);
-        request.setHeaderField(HEADER_FIELD_NAME_AUTHORIZATION, sasToken);
+        request.setHeaderField(HEADER_FIELD_NAME_AUTHORIZATION, getAuthenticationToken());
         request.setHeaderField(HEADER_FIELD_NAME_USER_AGENT, SDKUtils.getUserAgentString());
         request.setHeaderField(HEADER_FIELD_NAME_REQUEST_ID, HEADER_FIELD_VALUE_REQUEST_ID);
         request.setHeaderField(HEADER_FIELD_NAME_ACCEPT, HEADER_FIELD_VALUE_ACCEPT);
@@ -224,5 +250,22 @@ public class ContractApiHttp
             throw new IllegalArgumentException(e);
         }
         return url;
+    }
+
+    private String getAuthenticationToken()
+    {
+        // Three different constructor types for this class, and each type provides either a TokenCredential implementation,
+        // an AzureSasCredential instance, or just the connection string. The sas token can be retrieved from the non-null
+        // one of the three options.
+        if (this.credentialCache != null)
+        {
+            return this.credentialCache.getTokenString();
+        }
+        else if (this.azureSasCredential != null)
+        {
+            return this.azureSasCredential.getSignature();
+        }
+
+        return new ProvisioningSasToken(provisioningConnectionString).toString();
     }
 }

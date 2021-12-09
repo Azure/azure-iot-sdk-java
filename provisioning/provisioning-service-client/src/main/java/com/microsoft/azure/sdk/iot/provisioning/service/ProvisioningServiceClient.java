@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service;
 
+import com.azure.core.credential.AzureSasCredential;
+import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningConnectionString;
 import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.provisioning.service.contract.ContractApiHttp;
@@ -15,6 +17,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningS
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * Device Provisioning Service Client.
@@ -100,6 +103,46 @@ public final class ProvisioningServiceClient
     {
         /* SRS_PROVISIONING_SERVICE_CLIENT_21_001: [The createFromConnectionString shall create a new instance of this class using the provided connectionString.] */
         return new ProvisioningServiceClient(connectionString);
+    }
+
+    /**
+     * Create a {@link ProvisioningServiceClient} instance with a custom {@link TokenCredential} to allow for finer grain control
+     * of authentication tokens used in the underlying connection.
+     *
+     * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
+     *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
+     */
+    public ProvisioningServiceClient(TokenCredential credential)
+    {
+        Objects.requireNonNull(credential, "credential cannot be null");
+
+        ContractApiHttp contractApiHttp = new ContractApiHttp(credential);
+
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_005: [The constructor shall create a new instance of the IndividualEnrollmentManger.] */
+        this.individualEnrollmentManager = IndividualEnrollmentManager.createFromContractApiHttp(contractApiHttp);
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_006: [The constructor shall create a new instance of the EnrollmentGroupManager.] */
+        this.enrollmentGroupManager = EnrollmentGroupManager.createFromContractApiHttp(contractApiHttp);
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_007: [The constructor shall create a new instance of the RegistrationStatusManager.] */
+        this.registrationStatusManager = RegistrationStatusManager.createFromContractApiHttp(contractApiHttp);
+    }
+
+    /**
+     * Create a {@link ProvisioningServiceClient} instance with the specifed {@link AzureSasCredential}.
+     *
+     * @param azureSasCredential The SAS token provider that will be used for authentication.
+     */
+    public ProvisioningServiceClient(AzureSasCredential azureSasCredential)
+    {
+        Objects.requireNonNull(azureSasCredential, "credential cannot be null");
+
+        ContractApiHttp contractApiHttp = new ContractApiHttp(azureSasCredential);
+
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_005: [The constructor shall create a new instance of the IndividualEnrollmentManger.] */
+        this.individualEnrollmentManager = IndividualEnrollmentManager.createFromContractApiHttp(contractApiHttp);
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_006: [The constructor shall create a new instance of the EnrollmentGroupManager.] */
+        this.enrollmentGroupManager = EnrollmentGroupManager.createFromContractApiHttp(contractApiHttp);
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_007: [The constructor shall create a new instance of the RegistrationStatusManager.] */
+        this.registrationStatusManager = RegistrationStatusManager.createFromContractApiHttp(contractApiHttp);
     }
 
     /**
