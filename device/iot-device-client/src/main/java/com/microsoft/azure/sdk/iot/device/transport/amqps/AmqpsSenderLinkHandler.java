@@ -165,6 +165,12 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
         }
     }
 
+    @Override
+    public void onLinkFlow(Event event)
+    {
+        log.trace("Link flow received on {} sender link with address {} and link correlation id {}. Current link credit is now {}.", getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId, event.getSender().getCredit());
+    }
+
     void close()
     {
         if (this.senderLink.getLocalState() != EndpointState.CLOSED)
@@ -218,7 +224,7 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
         Delivery delivery = this.senderLink.delivery(deliveryTag);
         try
         {
-            log.trace("Sending {} bytes over the amqp {} sender link with address {} and link correlation id {}", length, getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId);
+            log.trace("Sending {} bytes over the amqp {} sender link with address {} and link correlation id {} with link credit", length, getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId, this.senderLink.getCredit());
             int bytesSent = this.senderLink.send(msgData, 0, length);
 
             if (bytesSent != length)
