@@ -83,6 +83,7 @@ public class ContractApiHttp
     private ProvisioningConnectionString provisioningConnectionString;
     private TokenCredentialCache credentialCache;
     private AzureSasCredential azureSasCredential;
+    private String hostName;
 
     /**
      * PRIVATE CONSTRUCTOR
@@ -100,6 +101,7 @@ public class ContractApiHttp
         }
         /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_001: [The constructor shall store the provided connection string.] */
         this.provisioningConnectionString = provisioningConnectionString;
+        this.hostName = provisioningConnectionString.getHostName();
     }
 
     /**
@@ -124,9 +126,17 @@ public class ContractApiHttp
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
      */
-    public ContractApiHttp(TokenCredential credential)
+    public ContractApiHttp(String hostName, TokenCredential credential)
     {
         Objects.requireNonNull(credential, "credential cannot be null");
+
+        if (hostName == null)
+        {
+            /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_002: [The constructor shall throw IllegalArgumentException if the connection string is null.] */
+            throw new IllegalArgumentException("hostName cannot be null");
+        }
+
+        this.hostName = hostName;
         this.credentialCache = new TokenCredentialCache(credential);
     }
 
@@ -135,9 +145,17 @@ public class ContractApiHttp
      *
      * @param azureSasCredential The SAS token provider that will be used for authentication.
      */
-    public ContractApiHttp(AzureSasCredential azureSasCredential)
+    public ContractApiHttp(String hostName, AzureSasCredential azureSasCredential)
     {
         Objects.requireNonNull(azureSasCredential, "credential cannot be null");
+
+        if (hostName == null)
+        {
+            /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_002: [The constructor shall throw IllegalArgumentException if the connection string is null.] */
+            throw new IllegalArgumentException("hostName cannot be null");
+        }
+
+        this.hostName = hostName;
         this.azureSasCredential = azureSasCredential;
     }
 
@@ -233,7 +251,7 @@ public class ContractApiHttp
         }
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(URL_HTTPS);
-        stringBuilder.append(provisioningConnectionString.getHostName());
+        stringBuilder.append(hostName);
         stringBuilder.append(URL_SEPARATOR_0);
         stringBuilder.append(path);
         stringBuilder.append(URL_SEPARATOR_1);
