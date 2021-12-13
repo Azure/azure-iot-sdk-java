@@ -41,11 +41,6 @@
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.github.jnr/jnr-unixsocket -->
         <dependency>
-            <groupId>com.github.jnr</groupId>
-            <artifactId>jnr-unixsocket</artifactId>
-            <version>0.23</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.qpid</groupId>
             <artifactId>proton-j</artifactId>
             <version>0.30.0</version>

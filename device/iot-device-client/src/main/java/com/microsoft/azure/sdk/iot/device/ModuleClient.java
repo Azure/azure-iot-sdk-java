@@ -18,6 +18,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.hsm.HsmException;
 import com.microsoft.azure.sdk.iot.device.hsm.HttpHsmSignatureProvider;
 import com.microsoft.azure.sdk.iot.device.hsm.IotHubSasTokenHsmAuthenticationProvider;
+import com.microsoft.azure.sdk.iot.device.hsm.UnixDomainSocketChannel;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import lombok.extern.slf4j.Slf4j;
 
@@ -142,12 +143,14 @@ public class ModuleClient extends InternalClient
 
     /**
      * Create a module client instance from your environment variables
+     * @param unixDomainSocketChannel the implementation of the {@link UnixDomainSocketChannel} interface that will be used if any
+     * unixsocket communication is required. May be null if no unixsocket communication is required.
      * @return the created module client instance
      * @throws ModuleClientException if the module client cannot be created
      */
-    public static ModuleClient createFromEnvironment() throws ModuleClientException
+    public static ModuleClient createFromEnvironment(UnixDomainSocketChannel unixDomainSocketChannel) throws ModuleClientException
     {
-        return createFromEnvironment(IotHubClientProtocol.AMQPS);
+        return createFromEnvironment(unixDomainSocketChannel, IotHubClientProtocol.AMQPS);
     }
 
     /**
@@ -156,19 +159,21 @@ public class ModuleClient extends InternalClient
      * @return the created module client instance
      * @throws ModuleClientException if the module client cannot be created
      */
-    public static ModuleClient createFromEnvironment(IotHubClientProtocol protocol) throws ModuleClientException
+    public static ModuleClient createFromEnvironment(UnixDomainSocketChannel unixDomainSocketChannel, IotHubClientProtocol protocol) throws ModuleClientException
     {
-        return createFromEnvironment(protocol, null);
+        return createFromEnvironment(unixDomainSocketChannel, protocol, null);
     }
 
     /**
      * Create a module client instance from your environment variables
+     * @param unixDomainSocketChannel the implementation of the {@link UnixDomainSocketChannel} interface that will be used if any
+     * unixsocket communication is required. May be null if no unixsocket communication is required.
      * @param protocol the protocol the module client instance will use
      * @param clientOptions The options that allow configuration of the module client instance during initialization
      * @return the created module client instance
      * @throws ModuleClientException if the module client cannot be created
      */
-    public static ModuleClient createFromEnvironment(IotHubClientProtocol protocol, ClientOptions clientOptions) throws ModuleClientException
+    public static ModuleClient createFromEnvironment(UnixDomainSocketChannel unixDomainSocketChannel, IotHubClientProtocol protocol, ClientOptions clientOptions) throws ModuleClientException
     {
         log.info("Creating module client from environment with protocol {}...", protocol);
         Map<String, String> envVariables = System.getenv();
@@ -282,7 +287,7 @@ public class ModuleClient extends InternalClient
             SignatureProvider signatureProvider;
             try
             {
-                signatureProvider = new HttpHsmSignatureProvider(edgedUri, DEFAULT_API_VERSION);
+                signatureProvider = new HttpHsmSignatureProvider(edgedUri, DEFAULT_API_VERSION, unixDomainSocketChannel);
             }
             catch (NoSuchAlgorithmException | URISyntaxException e)
             {
@@ -295,7 +300,7 @@ public class ModuleClient extends InternalClient
                 if (gatewayHostname != null && !gatewayHostname.isEmpty())
                 {
                     TrustBundleProvider trustBundleProvider = new HttpsHsmTrustBundleProvider();
-                    String trustCertificates = trustBundleProvider.getTrustBundleCerts(edgedUri, DEFAULT_API_VERSION);
+                    String trustCertificates = trustBundleProvider.getTrustBundleCerts(edgedUri, DEFAULT_API_VERSION, unixDomainSocketChannel);
                     sslContext = IotHubSSLContext.getSSLContextFromString(trustCertificates);
                 }
                 else

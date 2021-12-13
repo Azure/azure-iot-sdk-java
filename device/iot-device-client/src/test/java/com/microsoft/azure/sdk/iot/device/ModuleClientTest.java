@@ -6,7 +6,6 @@
 package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
-import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.edge.HttpsHsmTrustBundleProvider;
 import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
@@ -16,6 +15,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.hsm.HsmException;
 import com.microsoft.azure.sdk.iot.device.hsm.HttpHsmSignatureProvider;
 import com.microsoft.azure.sdk.iot.device.hsm.IotHubSasTokenHsmAuthenticationProvider;
+import com.microsoft.azure.sdk.iot.device.hsm.UnixDomainSocketChannel;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import mockit.*;
 import org.junit.Test;
@@ -85,6 +85,9 @@ public class ModuleClientTest
 
     @Mocked
     IotHubSSLContext mockIotHubSSLContext;
+
+    @Mocked
+    UnixDomainSocketChannel mockedUnixDomainSocketChannel;
 
     private void baseExpectations() throws URISyntaxException
     {
@@ -174,7 +177,7 @@ public class ModuleClientTest
         };
 
         // act
-        ModuleClient.createFromEnvironment(protocol, clientOptions);
+        ModuleClient.createFromEnvironment(mockedUnixDomainSocketChannel, protocol, clientOptions);
     }
 
     //Tests_SRS_MODULECLIENT_34_006: [This function shall invoke the super constructor.]
@@ -410,7 +413,7 @@ public class ModuleClientTest
         };
 
         //act
-        ModuleClient.createFromEnvironment(protocol);
+        ModuleClient.createFromEnvironment(mockedUnixDomainSocketChannel, protocol);
     }
 
     //Tests_SRS_MODULECLIENT_34_014: [This function shall check for environment variables for edgedUri, deviceId, moduleId,
@@ -448,7 +451,7 @@ public class ModuleClientTest
         };
 
         //act
-        ModuleClient.createFromEnvironment(protocol);
+        ModuleClient.createFromEnvironment(mockedUnixDomainSocketChannel, protocol);
     }
 
     //Tests_SRS_MODULECLIENT_34_014: [This function shall check for environment variables for edgedUri, deviceId, moduleId,
@@ -486,7 +489,7 @@ public class ModuleClientTest
         };
 
         //act
-        ModuleClient.createFromEnvironment(protocol);
+        ModuleClient.createFromEnvironment(mockedUnixDomainSocketChannel, protocol);
     }
 
     //Tests_SRS_MODULECLIENT_34_014: [This function shall check for environment variables for edgedUri, deviceId, moduleId,
@@ -524,7 +527,7 @@ public class ModuleClientTest
         };
 
         //act
-        ModuleClient.createFromEnvironment(protocol);
+        ModuleClient.createFromEnvironment(mockedUnixDomainSocketChannel, protocol);
     }
 
     //Tests_SRS_MODULECLIENT_34_030: [If the auth scheme environment variable is not "SasToken", this function shall throw a moduleClientException.]
@@ -558,7 +561,7 @@ public class ModuleClientTest
         };
 
         //act
-        ModuleClient.createFromEnvironment(protocol);
+        ModuleClient.createFromEnvironment(mockedUnixDomainSocketChannel, protocol);
     }
 
     //Tests_SRS_MODULECLIENT_34_017: [This function shall create an authentication provider using the created
@@ -597,7 +600,7 @@ public class ModuleClientTest
                 System.getenv();
                 result = mockedSystemVariables;
 
-                new HttpHsmSignatureProvider(expectedIotEdgedUri, expectedApiVersion);
+                new HttpHsmSignatureProvider(expectedIotEdgedUri, expectedApiVersion, mockedUnixDomainSocketChannel);
                 result = mockedHttpHsmSignatureProvider;
 
                 IotHubSasTokenHsmAuthenticationProvider.create(mockedHttpHsmSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, expectedGenerationId, anyInt, anyInt, (SSLContext) any);
@@ -606,7 +609,7 @@ public class ModuleClientTest
                 new HttpsHsmTrustBundleProvider();
                 result = mockedHttpsHsmTrustBundleProvider;
 
-                mockedHttpsHsmTrustBundleProvider.getTrustBundleCerts(expectedIotEdgedUri, expectedApiVersion);
+                mockedHttpsHsmTrustBundleProvider.getTrustBundleCerts(expectedIotEdgedUri, expectedApiVersion, mockedUnixDomainSocketChannel);
                 result = expectedTrustedCerts;
 
                 Deencapsulation.newInstance(ModuleClient.class,
@@ -616,7 +619,7 @@ public class ModuleClientTest
         };
 
         //act
-        ModuleClient.createFromEnvironment(protocol);
+        ModuleClient.createFromEnvironment(mockedUnixDomainSocketChannel, protocol);
     }
 
     //Tests_SRS_MODULECLIENT_34_014: [This function shall check for environment variables for edgedUri, deviceId, moduleId,
@@ -654,7 +657,7 @@ public class ModuleClientTest
         };
 
         //act
-        ModuleClient.createFromEnvironment(protocol);
+        ModuleClient.createFromEnvironment(mockedUnixDomainSocketChannel, protocol);
     }
 
     //Tests_SRS_MODULECLIENT_34_014: [This function shall check for environment variables for edgedUri, deviceId, moduleId,
@@ -691,7 +694,7 @@ public class ModuleClientTest
         };
 
         //act
-        ModuleClient.createFromEnvironment(protocol);
+        ModuleClient.createFromEnvironment(mockedUnixDomainSocketChannel, protocol);
     }
 
 
@@ -729,7 +732,7 @@ public class ModuleClientTest
         };
 
         //act
-        ModuleClient.createFromEnvironment(protocol);
+        ModuleClient.createFromEnvironment(mockedUnixDomainSocketChannel, protocol);
 
         //assert
         new Verifications()
@@ -770,7 +773,7 @@ public class ModuleClientTest
         };
 
         //act
-        ModuleClient.createFromEnvironment(protocol);
+        ModuleClient.createFromEnvironment(mockedUnixDomainSocketChannel, protocol);
     }
 
     //Tests_SRS_MODULECLIENT_34_033: [This function shall create an HttpsTransportManager and use it to invoke the method on the device.]

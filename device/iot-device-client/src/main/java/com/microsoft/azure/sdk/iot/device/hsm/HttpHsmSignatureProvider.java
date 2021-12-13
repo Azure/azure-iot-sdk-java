@@ -35,10 +35,12 @@ public class HttpHsmSignatureProvider implements SignatureProvider
      * Constructor for an HttpHsmSignatureProvider but using the non-default api version
      * @param providerUri the uri for the signing provider
      * @param apiVersion the api version to call
+     * @param unixDomainSocketChannel the implementation of the {@link UnixDomainSocketChannel} interface that will be used if any
+     * unixsocket communication is required. May be null if no unixsocket communication is required.
      * @throws URISyntaxException if the provided uri cannot be parsed
      * @throws NoSuchAlgorithmException if the default sign request algorithm cannot be used
      */
-    public HttpHsmSignatureProvider(String providerUri, String apiVersion) throws URISyntaxException, NoSuchAlgorithmException
+    public HttpHsmSignatureProvider(String providerUri, String apiVersion, UnixDomainSocketChannel unixDomainSocketChannel) throws URISyntaxException, NoSuchAlgorithmException
     {
         if (providerUri == null || providerUri.isEmpty())
         {
@@ -55,7 +57,7 @@ public class HttpHsmSignatureProvider implements SignatureProvider
         log.trace("Creating HttpHsmSignatureProvider with providerUri {}", providerUri);
 
         // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_002: [This constructor shall create a new HttpsHsmClient with the provided providerUri.]
-        this.httpClient = new HttpsHsmClient(providerUri);
+        this.httpClient = new HttpsHsmClient(providerUri, unixDomainSocketChannel);
 
         // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_003: [This constructor shall save the provided api version.]
         this.apiVersion = apiVersion;

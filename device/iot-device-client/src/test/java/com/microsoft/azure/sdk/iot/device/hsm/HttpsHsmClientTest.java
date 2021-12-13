@@ -6,7 +6,6 @@
 package com.microsoft.azure.sdk.iot.device.hsm;
 
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.hsm.*;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.ErrorResponse;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignRequest;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignResponse;
@@ -15,14 +14,11 @@ import com.microsoft.azure.sdk.iot.device.transport.https.HttpsConnection;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsRequest;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
-import jnr.unixsocket.UnixSocketAddress;
-import jnr.unixsocket.UnixSocketChannel;
 import mockit.*;
 import org.junit.Test;
 
 import java.io.*;
 import java.net.*;
-import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.charset.StandardCharsets;
 
@@ -57,10 +53,7 @@ public class HttpsHsmClientTest
     HttpsRequestResponseSerializer mockedHttpsRequestResponseSerializer;
 
     @Mocked
-    UnixSocketAddress mockedUnixSocketAddress;
-
-    @Mocked
-    UnixSocketChannel mockedUnixSocketChannel;
+    UnixDomainSocketChannel mockedUnixDomainSocketChannel;
 
     @Mocked
     Channels mockedChannels;
@@ -99,7 +92,7 @@ public class HttpsHsmClientTest
                 result = expectedSchemeHttps;
             }
         };
-        HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl);
+        HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl, mockedUnixDomainSocketChannel);
 
         //assert
         assertEquals(expectedBaseUrl, Deencapsulation.getField(client, "baseUrl"));
@@ -142,7 +135,7 @@ public class HttpsHsmClientTest
             }
         };
 
-        HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl);
+        HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl, mockedUnixDomainSocketChannel);
 
         //act
         client.sign(expectedApiVersion, expectedName, mockedSignRequest, expectedGenId);
@@ -199,7 +192,7 @@ public class HttpsHsmClientTest
             }
         };
 
-        HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl);
+        HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl, mockedUnixDomainSocketChannel);
 
         //act
         client.sign(expectedApiVersion, expectedName, mockedSignRequest, expectedGenId);
@@ -252,17 +245,12 @@ public class HttpsHsmClientTest
                 mockedHttpsRequest.getBody();
                 result = expectedBody;
 
-                new UnixSocketAddress(anyString);
-                result = mockedUnixSocketAddress;
+                mockedUnixDomainSocketChannel.setAddress(anyString);
 
-                UnixSocketChannel.open(mockedUnixSocketAddress);
-                result = mockedUnixSocketChannel;
+                mockedUnixDomainSocketChannel.open();
 
-                mockedUnixSocketChannel.read((ByteBuffer) any);
+                mockedUnixDomainSocketChannel.read((byte[]) any);
                 result = -1;
-
-                Channels.newOutputStream(mockedUnixSocketChannel);
-                result = mockedOutputStream;
 
                 HttpsRequestResponseSerializer.deserializeResponse((BufferedReader) any);
                 result = mockedHttpsResponse;
@@ -272,7 +260,7 @@ public class HttpsHsmClientTest
             }
         };
 
-        HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl);
+        HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl, mockedUnixDomainSocketChannel);
         Deencapsulation.setField(client, "scheme", expectedSchemeUnix);
 
         //act
@@ -288,7 +276,7 @@ public class HttpsHsmClientTest
                 HttpsRequestResponseSerializer.deserializeResponse((BufferedReader) any);
                 times = 1;
 
-                mockedUnixSocketChannel.write((ByteBuffer) any);
+                mockedUnixDomainSocketChannel.write((byte[]) any);
                 times = 1;
 
                 mockedHttpsRequest.send();
@@ -331,7 +319,7 @@ public class HttpsHsmClientTest
             }
         };
 
-        HttpsHsmClient client = new HttpsHsmClient(expectedUrl);
+        HttpsHsmClient client = new HttpsHsmClient(expectedUrl, mockedUnixDomainSocketChannel);
 
         boolean transportExceptionThrown = false;
 
@@ -375,7 +363,7 @@ public class HttpsHsmClientTest
                 result = expectedSchemeHttps;
             }
         };
-        HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl);
+        HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl, mockedUnixDomainSocketChannel);
 
         //act
         client.getTrustBundle(null);
@@ -422,7 +410,7 @@ public class HttpsHsmClientTest
             }
         };
 
-        HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl);
+        HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl, mockedUnixDomainSocketChannel);
 
         //act
         client.getTrustBundle(expectedApiVersion);
@@ -469,7 +457,7 @@ public class HttpsHsmClientTest
             }
         };
 
-        HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl);
+        HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl, mockedUnixDomainSocketChannel);
 
         boolean correctExceptionEncountered = false;
 
