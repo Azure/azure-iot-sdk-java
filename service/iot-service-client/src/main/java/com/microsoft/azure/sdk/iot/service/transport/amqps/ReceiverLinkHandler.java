@@ -59,20 +59,21 @@ public abstract class ReceiverLinkHandler extends BaseHandler
     @Override
     public void onLinkRemoteOpen(Event event)
     {
-        log.debug("{} receiver link with link correlation id {} was successfully opened", getLinkInstanceType(), this.linkCorrelationId);
+        log.debug("{} receiver link with address {} and link correlation id {} was successfully opened", getLinkInstanceType(), this.receiverLinkAddress, this.linkCorrelationId);
         this.linkStateCallback.onReceiverLinkRemoteOpen();
     }
 
     @Override
     public void onLinkLocalOpen(Event event)
     {
-        log.trace("{} receiver link with link correlation id {} opened locally", getLinkInstanceType(), this.linkCorrelationId);
+        log.trace("{} receiver link with address {} and link correlation id {} opened locally", getLinkInstanceType(), this.receiverLinkAddress, this.linkCorrelationId);
     }
 
     protected AmqpsMessage getMessageFromReceiverLink()
     {
         Delivery delivery = receiverLink.current();
-        if (delivery.isReadable() && !delivery.isPartial()) {
+        if (delivery.isReadable() && !delivery.isPartial())
+        {
             int size = delivery.pending();
             byte[] buffer = new byte[size];
             int read = receiverLink.recv(buffer, 0, buffer.length);
@@ -83,6 +84,16 @@ public abstract class ReceiverLinkHandler extends BaseHandler
             message.setDelivery(delivery);
 
             return message;
+        }
+
+        if (delivery.isPartial())
+        {
+            log.trace("Partial delivery received on {} receiver link with address {} and link correlation id {}.", getLinkInstanceType(), this.receiverLinkAddress, this.linkCorrelationId);
+        }
+        else
+        {
+            // not partial, but not readable either
+            log.warn("Unreadable delivery received on {} receiver link with address {} and link correlation id {}.", getLinkInstanceType(), this.receiverLinkAddress, this.linkCorrelationId);
         }
 
         return null;
@@ -103,7 +114,7 @@ public abstract class ReceiverLinkHandler extends BaseHandler
         link.setReceiverSettleMode(ReceiverSettleMode.FIRST);
         link.setProperties(this.amqpProperties);
         link.open();
-        log.trace("Opening {} receiver link with correlation id {}", this.getLinkInstanceType(), this.linkCorrelationId);
+        log.trace("Opening {} receiver link with address {} and correlation id {}", this.getLinkInstanceType(), this.receiverLinkAddress, this.linkCorrelationId);
     }
 
     @Override
@@ -112,12 +123,12 @@ public abstract class ReceiverLinkHandler extends BaseHandler
         Link link = event.getLink();
         if (link.getLocalState() == EndpointState.ACTIVE)
         {
-            log.debug("{} receiver link with link correlation id {} was closed remotely unexpectedly", getLinkInstanceType(), this.linkCorrelationId);
+            log.debug("{} receiver link with address {} and link correlation id {} was closed remotely unexpectedly", getLinkInstanceType(), this.receiverLinkAddress, this.linkCorrelationId);
             link.close();
         }
         else
         {
-            log.trace("Closing amqp session now that this {} receiver link with link correlation id {} has closed remotely and locally", getLinkInstanceType(), linkCorrelationId);
+            log.trace("Closing amqp session now that {} receiver link with address {} and link correlation id {} has closed remotely and locally", getLinkInstanceType(), this.receiverLinkAddress, linkCorrelationId);
             event.getSession().close();
         }
     }
@@ -128,12 +139,12 @@ public abstract class ReceiverLinkHandler extends BaseHandler
         Link link = event.getLink();
         if (link.getRemoteState() == EndpointState.CLOSED)
         {
-            log.trace("Closing amqp session now that this {} receiver link with link correlation id {} has closed remotely and locally", getLinkInstanceType(), linkCorrelationId);
+            log.trace("Closing amqp session now that {} receiver link with address {} and link correlation id {} has closed remotely and locally", getLinkInstanceType(), this.receiverLinkAddress, linkCorrelationId);
             event.getSession().close();
         }
         else
         {
-            log.trace("{} receiver link with correlation id {} was closed locally", this.getLinkInstanceType(), this.linkCorrelationId);
+            log.trace("{} receiver link with address {} and correlation id {} was closed locally", this.getLinkInstanceType(), this.receiverLinkAddress, this.linkCorrelationId);
         }
     }
 
@@ -141,7 +152,7 @@ public abstract class ReceiverLinkHandler extends BaseHandler
     {
         if (this.receiverLink.getLocalState() != EndpointState.CLOSED)
         {
-            log.debug("Closing {} receiver link with link correlation id {}", getLinkInstanceType(), this.linkCorrelationId);
+            log.debug("Closing {} receiver link with address {} and link correlation id {}", getLinkInstanceType(), this.receiverLinkAddress, this.linkCorrelationId);
             this.receiverLink.close();
         }
     }
