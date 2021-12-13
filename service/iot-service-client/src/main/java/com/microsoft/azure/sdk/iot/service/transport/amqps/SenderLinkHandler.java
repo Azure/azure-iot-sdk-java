@@ -58,14 +58,14 @@ public abstract class SenderLinkHandler extends BaseHandler
     @Override
     public void onLinkRemoteOpen(Event event)
     {
-        log.debug("{} sender link with address {} and link correlation id {} was successfully opened", getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId);
+        log.debug("{} sender link with link correlation id {} was successfully opened", getLinkInstanceType(), this.linkCorrelationId);
         this.linkStateCallback.onSenderLinkRemoteOpen();
     }
 
     @Override
     public void onLinkLocalOpen(Event event)
     {
-        log.trace("{} sender link with link address {} and correlation id {} opened locally", getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId);
+        log.trace("{} sender link with link correlation id {} opened locally", getLinkInstanceType(), this.linkCorrelationId);
     }
 
     @Override
@@ -83,7 +83,7 @@ public abstract class SenderLinkHandler extends BaseHandler
         link.setSenderSettleMode(SenderSettleMode.UNSETTLED);
         link.setProperties(this.amqpProperties);
         link.open();
-        log.trace("Opening {} sender link with address {} and link correlation id {}", this.getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId);
+        log.trace("Opening {} sender link with correlation id {}", this.getLinkInstanceType(), this.linkCorrelationId);
     }
 
     @Override
@@ -92,12 +92,12 @@ public abstract class SenderLinkHandler extends BaseHandler
         Link link = event.getLink();
         if (link.getLocalState() == EndpointState.ACTIVE)
         {
-            log.debug("{} sender link with address {} and link correlation id {} was closed remotely unexpectedly", getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId);
+            log.debug("{} sender link with link correlation id {} was closed remotely unexpectedly", getLinkInstanceType(), this.linkCorrelationId);
             link.close();
         }
         else
         {
-            log.trace("Closing amqp session now that this {} sender link with address {} and link correlation id {} has closed remotely and locally", getLinkInstanceType(), this.senderLinkAddress, linkCorrelationId);
+            log.trace("Closing amqp session now that this {} sender link with link correlation id {} has closed remotely and locally", getLinkInstanceType(), linkCorrelationId);
             event.getSession().close();
         }
     }
@@ -108,12 +108,12 @@ public abstract class SenderLinkHandler extends BaseHandler
         Link link = event.getLink();
         if (link.getRemoteState() == EndpointState.CLOSED)
         {
-            log.trace("Closing amqp session now that this {} sender link with address {} and link correlation id {} has closed remotely and locally", getLinkInstanceType(), this.senderLinkAddress, linkCorrelationId);
+            log.trace("Closing amqp session now that this {} sender link with link correlation id {} has closed remotely and locally", getLinkInstanceType(), linkCorrelationId);
             event.getSession().close();
         }
         else
         {
-            log.trace("{} sender link with address {} and link correlation id {} was closed locally", this.getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId);
+            log.trace("{} sender link with correlation id {} was closed locally", this.getLinkInstanceType(), this.linkCorrelationId);
         }
     }
 
@@ -121,7 +121,7 @@ public abstract class SenderLinkHandler extends BaseHandler
     {
         if (this.senderLink.getLocalState() != EndpointState.CLOSED)
         {
-            log.debug("Closing {} sender link with address {} and link correlation id {}", getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId);
+            log.debug("Closing {} sender link with link correlation id {}", getLinkInstanceType(), this.linkCorrelationId);
             this.senderLink.close();
         }
     }
@@ -179,12 +179,12 @@ public abstract class SenderLinkHandler extends BaseHandler
             }
 
             String deliveryTagString = new String(deliveryTag, StandardCharsets.UTF_8);
-            log.trace("Message was sent over {} sender link with address {} and link correlation id {} with delivery tag {}", getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId, deliveryTagString);
+            log.trace("Message was sent over {} sender link with delivery tag {} and hash {}", getLinkInstanceType(), deliveryTagString, delivery.hashCode());
             return Integer.parseInt(deliveryTagString);
         }
         catch (Exception e)
         {
-            log.warn("Encountered a problem while sending a message on {} sender link with address {} and link correlation id {}", getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId, e);
+            log.warn("Encountered a problem while sending a message on {} sender link with link correlation id {}", getLinkInstanceType(), this.linkCorrelationId, e);
             this.senderLink.advance();
             delivery.free();
             return -1;
