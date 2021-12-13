@@ -244,8 +244,6 @@ public class ContractApiHttpTest
         new NonStrictExpectations()
         {
             {
-                new ProvisioningSasToken(mockedProvisioningConnectionString);
-                result = mockedProvisioningSasToken;
                 mockedProvisioningSasToken.toString();
                 result = VALID_SASTOKEN;
                 mockedProvisioningConnectionString.getHostName();
@@ -274,8 +272,6 @@ public class ContractApiHttpTest
         new NonStrictExpectations()
         {
             {
-                new ProvisioningSasToken(mockedProvisioningConnectionString);
-                result = mockedProvisioningSasToken;
                 mockedProvisioningSasToken.toString();
                 result = VALID_SASTOKEN;
                 mockedProvisioningConnectionString.getHostName();
@@ -304,8 +300,6 @@ public class ContractApiHttpTest
         new NonStrictExpectations()
         {
             {
-                new ProvisioningSasToken(mockedProvisioningConnectionString);
-                result = mockedProvisioningSasToken;
                 mockedProvisioningSasToken.toString();
                 result = VALID_SASTOKEN;
                 mockedProvisioningConnectionString.getHostName();
@@ -377,8 +371,6 @@ public class ContractApiHttpTest
         new NonStrictExpectations()
         {
             {
-                new ProvisioningSasToken(mockedProvisioningConnectionString);
-                result = mockedProvisioningSasToken;
                 mockedProvisioningSasToken.toString();
                 result = VALID_SASTOKEN;
                 mockedProvisioningConnectionString.getHostName();
