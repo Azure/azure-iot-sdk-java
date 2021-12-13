@@ -130,7 +130,7 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
         link.setSenderSettleMode(SenderSettleMode.UNSETTLED);
         link.setProperties(this.amqpProperties);
         link.open();
-        log.trace("Opening {} sender link with address {} and correlation id {}", this.getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId);
+        log.trace("Opening {} sender link with address {} and link correlation id {}", this.getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId);
     }
 
     @Override
@@ -161,7 +161,7 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
         }
         else
         {
-            log.trace("{} sender link with address {} and correlation id {} was closed locally", this.getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId);
+            log.trace("{} sender link with address {} and link correlation id {} was closed locally", this.getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId);
         }
     }
 
@@ -233,7 +233,7 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
                 throw new ProtocolException(String.format("Failed to advance the senderLink after sending a message on %s sender link with link correlation id %s, retrying to send the message", getLinkInstanceType(), this.linkCorrelationId));
             }
 
-            log.trace("Message was sent over {} sender link with address {} and with delivery tag {}", getLinkInstanceType(), this.senderLinkAddress, new String(deliveryTag, StandardCharsets.UTF_8));
+            log.trace("Message was sent over {} sender link with address {} and link correlation id {} with delivery tag {}", getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId, new String(deliveryTag, StandardCharsets.UTF_8));
             log.trace("Current link credit on {} sender link with address {} and link correlation id {} is {}", this.getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId, senderLink.getCredit());
             return new AmqpsSendResult(deliveryTag);
         }
