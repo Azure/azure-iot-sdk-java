@@ -31,7 +31,7 @@
     </scm>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <ms-rest-client-version>1.7.14</ms-rest-client-version>
+        <ms-rest-client-version>1.7.9</ms-rest-client-version>
     </properties>
     <dependencies>
         <dependency>
@@ -82,17 +82,17 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.25</version>
+            <version>${slf4j-version}</version>
         </dependency>
         <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-core</artifactId>
-            <version>1.21.0</version>
+            <version>${azure-core-version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.8</version>
+            <version>${lombok-version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
