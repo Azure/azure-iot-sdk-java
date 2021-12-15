@@ -7,7 +7,7 @@ package com.microsoft.azure.sdk.iot.device;
  * A return value from a message callback that instructs an IoT hub to complete, abandon, or reject the message. These
  * states are only valid for AMQP messages.
  * <p>
- *     See <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-messages-c2d#the-cloud-to-device-message-life-cycle"/>The cloud-to-device message life cycle</a>
+ *     See <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-messages-c2d#the-cloud-to-device-message-life-cycle">The cloud-to-device message life cycle</a>
  *     for more details on the states and what it means for message delivery and retry.
  * </p>
  */
