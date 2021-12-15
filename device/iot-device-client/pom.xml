@@ -65,7 +65,7 @@
         <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-storage-blob</artifactId>
-            <version>12.14.1</version>
+            <version>${azure-storage-blob-version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
