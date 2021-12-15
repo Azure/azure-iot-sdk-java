@@ -13,14 +13,21 @@ package com.microsoft.azure.sdk.iot.device;
 public interface MessageCallback
 {
     /**
-     * Executes the callback. The callback should return a response that
-     * instructs an IoT Hub to complete, abandon, or reject the message.
+     * Executes the callback. The callback should return a response that instructs an IoT Hub to
+     * {@link IotHubMessageResult#COMPLETE}, {@link IotHubMessageResult#ABANDON}, or {@link IotHubMessageResult#REJECT}
+     * the message.
+     *
+     * <p>
+     *     If this callback throws an exception it will not complete the message and can cause the messages to build
+     *     up on the IoT hub until they expire. This can prevent further message delivery until all messages are
+     *     expired or completed from IoT hub.
+     * </p>
      *
      * @param message the message.
      * @param callbackContext a custom context given by the developer.
      *
-     * @return whether the IoT Hub should complete, abandon, or reject the
-     * message.
+     * @return whether the IoT Hub should {@link IotHubMessageResult#COMPLETE}, {@link IotHubMessageResult#ABANDON},
+     * or {@link IotHubMessageResult#REJECT} the message.
      */
     IotHubMessageResult execute(Message message, Object callbackContext);
 }
