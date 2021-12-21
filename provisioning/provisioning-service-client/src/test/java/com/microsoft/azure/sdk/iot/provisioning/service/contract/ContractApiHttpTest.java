@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service.contract;
 
+import com.azure.core.credential.AzureSasCredential;
+import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
@@ -13,6 +15,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningS
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientExceptionManager;
 import com.microsoft.azure.sdk.iot.provisioning.service.contract.ContractApiHttp;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientTransportException;
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import mockit.*;
 import org.junit.Test;
 
@@ -40,6 +43,15 @@ public class ContractApiHttpTest
     ProvisioningConnectionString mockedProvisioningConnectionString;
 
     @Mocked
+    TokenCredential mockedTokenCredential;
+
+    @Mocked
+    TokenCredentialCache mockedTokenCredentialCache;
+
+    @Mocked
+    AzureSasCredential mockedAzureSasCredential;
+
+    @Mocked
     HttpRequest mockedHttpRequest;
 
     @Mocked
@@ -55,6 +67,8 @@ public class ContractApiHttpTest
     private final int VALID_SUCCESS_STATUS = 200;
     private final String VALID_SUCCESS_MESSAGE = "success";
     private final String VALID_SASTOKEN = "validSas";
+    private final String VALID_TOKENCREDENTIAL_STRING = "validTokenCredential";
+    private final String VALID_AZURE_SASTOKEN = "validAzureSas";
     private final String VALID_HOST_NAME = "testProvisioningHostName.azure.net";
 
     private void requestNonStrictExpectations() throws IOException, ProvisioningServiceClientException
@@ -137,6 +151,34 @@ public class ContractApiHttpTest
         ContractApiHttp contractApiHttp = ContractApiHttp.createFromConnectionString(provisioningConnectionString);
 
         // assert
+        assertNotNull(contractApiHttp);
+    }
+
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_005: [The TokenCredential constructor shall create a new ContractApiHttp instance.] */
+    @Test
+    public void tokenCredentialConstructorSucceeded()
+    {
+        //arrange
+        final TokenCredential credential = mockedTokenCredential;
+
+        //act
+        ContractApiHttp contractApiHttp = new ContractApiHttp(VALID_HOST_NAME, credential);
+
+        //assert
+        assertNotNull(contractApiHttp);
+    }
+
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_006: [The AzureSasCredential constructor shall create a new ContractApiHttp instance.] */
+    @Test
+    public void azureSasCredentialConstructorSucceeded()
+    {
+        //arrange
+        final AzureSasCredential azureSasCredential = mockedAzureSasCredential;
+
+        //act
+        ContractApiHttp contractApiHttp = new ContractApiHttp(VALID_HOST_NAME, azureSasCredential);
+
+        //assert
         assertNotNull(contractApiHttp);
     }
 
@@ -396,7 +438,7 @@ public class ContractApiHttpTest
 
     /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_012: [The request shall fill the http header with the standard parameters.] */
     @Test
-    public void requestCreateHttpHeader() throws ProvisioningServiceClientException, IOException
+    public void requestCreateHttpHeaderFromConnectionString() throws ProvisioningServiceClientException, IOException
     {
         // arrange
         ContractApiHttp contractApiHttp = ContractApiHttp.createFromConnectionString(mockedProvisioningConnectionString);
@@ -427,6 +469,54 @@ public class ContractApiHttpTest
                 times = 1;
             }
         };
+    }
+
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_015: [The request shall obtain authorization header from the TokenCredential argument */
+    @Test
+    public void requestPullsAuthorizationFromTokenCredential() throws ProvisioningServiceClientException
+    {
+        //arrange
+        new Expectations()
+        {
+            {
+                new TokenCredentialCache(mockedTokenCredential);
+                result = mockedTokenCredentialCache;
+                mockedTokenCredentialCache.getTokenString();
+                result = VALID_TOKENCREDENTIAL_STRING;
+            }
+        };
+        ContractApiHttp contractApiHttp = new ContractApiHttp(VALID_HOST_NAME, mockedTokenCredential);
+
+        //act
+        contractApiHttp.request(HttpMethod.PUT,
+                VALID_PATH,
+                VALID_HEADER,
+                VALID_PAYLOAD);
+
+        //assert
+    }
+
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_015: [The request shall obtain authorization header from the AzureSasCredential argument */
+    @Test
+    public void requestPullsAuthorizationFromAzureSasCredential() throws ProvisioningServiceClientException
+    {
+        //arrange
+        new Expectations()
+        {
+            {
+                mockedAzureSasCredential.getSignature();
+                result = VALID_AZURE_SASTOKEN;
+            }
+        };
+        ContractApiHttp contractApiHttp = new ContractApiHttp(VALID_HOST_NAME, mockedAzureSasCredential);
+
+        //act
+        contractApiHttp.request(HttpMethod.PUT,
+                VALID_PATH,
+                VALID_HEADER,
+                VALID_PAYLOAD);
+
+        //assert
     }
 
     /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_013: [The request shall add the headerParameters to the http header, if provided.] */

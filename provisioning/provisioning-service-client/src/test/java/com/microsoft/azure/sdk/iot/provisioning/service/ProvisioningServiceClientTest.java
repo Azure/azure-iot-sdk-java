@@ -3,7 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service;
 
-import com.microsoft.azure.sdk.iot.provisioning.service.*;
+import com.azure.core.credential.AzureSasCredential;
+import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningConnectionString;
 import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
@@ -29,6 +30,12 @@ public class ProvisioningServiceClientTest
     private ProvisioningConnectionString mockedProvisioningConnectionString;
 
     @Mocked
+    private TokenCredential mockedTokenCredential;
+
+    @Mocked
+    private AzureSasCredential mockedAzureSasCredential;
+
+    @Mocked
     private ContractApiHttp mockedContractApiHttp;
 
     @Mocked
@@ -43,7 +50,7 @@ public class ProvisioningServiceClientTest
     @Mocked
     private RegistrationStatusManager mockedRegistrationStatusManager;
 
-    private ProvisioningServiceClient createClient()
+    private ProvisioningServiceClient createClientFromConnectionString()
     {
         new NonStrictExpectations()
         {
@@ -65,6 +72,46 @@ public class ProvisioningServiceClientTest
     }
 
     private static final String PROVISIONING_CONNECTION_STRING = "HostName=valid-host-name.azure-devices-provisioning.net;SharedAccessKeyName=valid-key-name;SharedAccessKey=0000000000000000000000000000000000000000000=";
+
+    private ProvisioningServiceClient createClientFromTokenCredential()
+    {
+        new NonStrictExpectations()
+        {
+            {
+                new ContractApiHttp(VALID_HOST_NAME, mockedTokenCredential);
+                result = mockedContractApiHttp;
+                Deencapsulation.invoke(IndividualEnrollmentManager.class, "createFromContractApiHttp", mockedContractApiHttp);
+                result = mockedIndividualEnrollmentManager;
+                Deencapsulation.invoke(EnrollmentGroupManager.class, "createFromContractApiHttp", mockedContractApiHttp);
+                result = mockedEnrollmentGroupManager;
+                Deencapsulation.invoke(RegistrationStatusManager.class, "createFromContractApiHttp", mockedContractApiHttp);
+                result = mockedRegistrationStatusManager;
+            }
+        };
+
+        return new ProvisioningServiceClient(VALID_HOST_NAME, mockedTokenCredential);
+    }
+
+    private ProvisioningServiceClient createClientFromAzureSasCredential()
+    {
+        new NonStrictExpectations()
+        {
+            {
+                new ContractApiHttp(VALID_HOST_NAME, mockedAzureSasCredential);
+                result = mockedContractApiHttp;
+                Deencapsulation.invoke(IndividualEnrollmentManager.class, "createFromContractApiHttp", mockedContractApiHttp);
+                result = mockedIndividualEnrollmentManager;
+                Deencapsulation.invoke(EnrollmentGroupManager.class, "createFromContractApiHttp", mockedContractApiHttp);
+                result = mockedEnrollmentGroupManager;
+                Deencapsulation.invoke(RegistrationStatusManager.class, "createFromContractApiHttp", mockedContractApiHttp);
+                result = mockedRegistrationStatusManager;
+            }
+        };
+
+        return new ProvisioningServiceClient(VALID_HOST_NAME, mockedAzureSasCredential);
+    }
+
+    private static final String VALID_HOST_NAME = "testProvisioningHostName.azure.net";
 
     /* SRS_PROVISIONING_SERVICE_CLIENT_21_001: [The createFromConnectionString shall create a new instance of this class using the provided connectionString.] */
     /* SRS_PROVISIONING_SERVICE_CLIENT_21_004: [The constructor shall create a new instance of the contractApiHttp class using the provided connectionString.] */
@@ -260,6 +307,56 @@ public class ProvisioningServiceClientTest
         assertNotNull(provisioningServiceClient);
     }
 
+    @Test
+    public void tokenCredentialConstructorSucceed()
+    {
+        //arrange
+        new NonStrictExpectations()
+        {
+            {
+                new ContractApiHttp(VALID_HOST_NAME, mockedTokenCredential);
+                result = mockedContractApiHttp;
+                Deencapsulation.invoke(IndividualEnrollmentManager.class, "createFromContractApiHttp", mockedContractApiHttp);
+                result = mockedIndividualEnrollmentManager;
+                Deencapsulation.invoke(EnrollmentGroupManager.class, "createFromContractApiHttp", mockedContractApiHttp);
+                result = mockedEnrollmentGroupManager;
+                Deencapsulation.invoke(RegistrationStatusManager.class, "createFromContractApiHttp", mockedContractApiHttp);
+                result = mockedRegistrationStatusManager;
+            }
+        };
+
+        //act
+        ProvisioningServiceClient provisioningServiceClient = new ProvisioningServiceClient(VALID_HOST_NAME, mockedTokenCredential);
+
+        //assert
+        assertNotNull(provisioningServiceClient);
+    }
+
+    @Test
+    public void azureSasCredentialConstructorSucceed()
+    {
+        //arrange
+        new NonStrictExpectations()
+        {
+            {
+                new ContractApiHttp(VALID_HOST_NAME, mockedAzureSasCredential);
+                result = mockedContractApiHttp;
+                Deencapsulation.invoke(IndividualEnrollmentManager.class, "createFromContractApiHttp", mockedContractApiHttp);
+                result = mockedIndividualEnrollmentManager;
+                Deencapsulation.invoke(EnrollmentGroupManager.class, "createFromContractApiHttp", mockedContractApiHttp);
+                result = mockedEnrollmentGroupManager;
+                Deencapsulation.invoke(RegistrationStatusManager.class, "createFromContractApiHttp", mockedContractApiHttp);
+                result = mockedRegistrationStatusManager;
+            }
+        };
+
+        //act
+        ProvisioningServiceClient provisioningServiceClient = new ProvisioningServiceClient(VALID_HOST_NAME, mockedAzureSasCredential);
+
+        //assert
+        assertNotNull(provisioningServiceClient);
+    }
+
     /* SRS_PROVISIONING_SERVICE_CLIENT_21_008: [The createOrUpdateIndividualEnrollment shall create a new Provisioning enrollment by calling the createOrUpdate in the individualEnrollmentManager.] */
     @Test
     public void createOrUpdateIndividualEnrollmentSucceed(
@@ -267,7 +364,7 @@ public class ProvisioningServiceClientTest
             throws ProvisioningServiceClientException
     {
         // arrange
-        ProvisioningServiceClient provisioningServiceClient = createClient();
+        ProvisioningServiceClient provisioningServiceClient = createClientFromConnectionString();
         new NonStrictExpectations()
         {
             {
@@ -284,6 +381,52 @@ public class ProvisioningServiceClientTest
         assertNotNull(result);
     }
 
+    @Test
+    public void createOrUpdateIndividualEnrollmentTokenCredentialSucceed(
+            @Mocked final IndividualEnrollment mockedIndividualEnrollment)
+            throws ProvisioningServiceClientException
+    {
+        //arrange
+        ProvisioningServiceClient provisioningServiceClient = createClientFromTokenCredential();
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.invoke(mockedIndividualEnrollmentManager, "createOrUpdate", mockedIndividualEnrollment);
+                result = mockedIndividualEnrollment;
+                times = 1;
+            }
+        };
+
+        //act
+        IndividualEnrollment result = provisioningServiceClient.createOrUpdateIndividualEnrollment(mockedIndividualEnrollment);
+
+        //assert
+        assertNotNull(result);
+    }
+
+    @Test
+    public void createOrUpdateIndividualEnrollmentAzureSasCredentialSucceed(
+            @Mocked final IndividualEnrollment mockedIndividualEnrollment)
+            throws ProvisioningServiceClientException
+    {
+        //arrange
+        ProvisioningServiceClient provisioningServiceClient = createClientFromAzureSasCredential();
+        new NonStrictExpectations()
+        {
+            {
+                Deencapsulation.invoke(mockedIndividualEnrollmentManager, "createOrUpdate", mockedIndividualEnrollment);
+                result = mockedIndividualEnrollment;
+                times = 1;
+            }
+        };
+
+        //act
+        IndividualEnrollment result = provisioningServiceClient.createOrUpdateIndividualEnrollment(mockedIndividualEnrollment);
+
+        //assert
+        assertNotNull(result);
+    }
+
     /* SRS_PROVISIONING_SERVICE_CLIENT_21_009: [The runBulkEnrollmentOperation shall do a Provisioning operation over individualEnrollment by calling the bulkOperation in the individualEnrollmentManager.] */
     @Test
     public void runBulkEnrollmentOperationSucceed(
@@ -294,7 +437,7 @@ public class ProvisioningServiceClientTest
         // arrange
         final List<IndividualEnrollment> individualEnrollments = new LinkedList<>();
         individualEnrollments.add(mockedIndividualEnrollment);
-        ProvisioningServiceClient provisioningServiceClient = createClient();
+        ProvisioningServiceClient provisioningServiceClient = createClientFromConnectionString();
         new NonStrictExpectations()
         {
             {
@@ -319,7 +462,7 @@ public class ProvisioningServiceClientTest
     {
         // arrange
         final String registrationId = "valid-registration-id";
-        ProvisioningServiceClient provisioningServiceClient = createClient();
+        ProvisioningServiceClient provisioningServiceClient = createClientFromConnectionString();
         new NonStrictExpectations()
         {
             {
@@ -343,7 +486,7 @@ public class ProvisioningServiceClientTest
             throws ProvisioningServiceClientException
     {
         // arrange
-        ProvisioningServiceClient provisioningServiceClient = createClient();
+        ProvisioningServiceClient provisioningServiceClient = createClientFromConnectionString();
         new NonStrictExpectations()
         {
             {
@@ -365,7 +508,7 @@ public class ProvisioningServiceClientTest
     {
         // arrange
         final String registrationId = "valid-registration-id";
-        ProvisioningServiceClient provisioningServiceClient = createClient();
+        ProvisioningServiceClient provisioningServiceClient = createClientFromConnectionString();
         new NonStrictExpectations()
         {
             {
@@ -388,7 +531,7 @@ public class ProvisioningServiceClientTest
         // arrange
         final String registrationId = "valid-registration-id";
         final String eTag = "valid-eTag";
-        ProvisioningServiceClient provisioningServiceClient = createClient();
+        ProvisioningServiceClient provisioningServiceClient = createClientFromConnectionString();
         new NonStrictExpectations()
         {
             {
@@ -410,7 +553,7 @@ public class ProvisioningServiceClientTest
             throws ProvisioningServiceClientException
     {
         // arrange
-        ProvisioningServiceClient provisioningServiceClient = createClient();
+        ProvisioningServiceClient provisioningServiceClient = createClientFromConnectionString();
         new NonStrictExpectations()
         {
             {
@@ -433,7 +576,7 @@ public class ProvisioningServiceClientTest
             throws ProvisioningServiceClientException
     {
         // arrange
-        ProvisioningServiceClient provisioningServiceClient = createClient();
+        ProvisioningServiceClient provisioningServiceClient = createClientFromConnectionString();
         new NonStrictExpectations()
         {
             {
@@ -456,7 +599,7 @@ public class ProvisioningServiceClientTest
             throws ProvisioningServiceClientException
     {
         // arrange
-        ProvisioningServiceClient provisioningServiceClient = createClient();
+        ProvisioningServiceClient provisioningServiceClient = createClientFromConnectionString();
         new NonStrictExpectations()
         {
             {
@@ -481,7 +624,7 @@ public class ProvisioningServiceClientTest
     {
         // arrange
         final String enrollmentGroupId = "valid-enrollmentGroupId";
-        ProvisioningServiceClient provisioningServiceClient = createClient();
+        ProvisioningServiceClient provisioningServiceClient = createClientFromConnectionString();
         new NonStrictExpectations()
         {
             {
@@ -505,7 +648,7 @@ public class ProvisioningServiceClientTest
             throws ProvisioningServiceClientException
     {
         // arrange
-        ProvisioningServiceClient provisioningServiceClient = createClient();
+        ProvisioningServiceClient provisioningServiceClient = createClientFromConnectionString();
         new NonStrictExpectations()
         {
             {
@@ -527,7 +670,7 @@ public class ProvisioningServiceClientTest
     {
         // arrange
         final String enrollmentGroupId = "valid-enrollmentGroupId";
-        ProvisioningServiceClient provisioningServiceClient = createClient();
+        ProvisioningServiceClient provisioningServiceClient = createClientFromConnectionString();
         new NonStrictExpectations()
         {
             {
@@ -550,7 +693,7 @@ public class ProvisioningServiceClientTest
         // arrange
         final String enrollmentGroupId = "valid-enrollmentGroupId";
         final String eTag = "valid-eTag";
-        ProvisioningServiceClient provisioningServiceClient = createClient();
+        ProvisioningServiceClient provisioningServiceClient = createClientFromConnectionString();
         new NonStrictExpectations()
         {
             {
@@ -572,7 +715,7 @@ public class ProvisioningServiceClientTest
             throws ProvisioningServiceClientException
     {
         // arrange
-        ProvisioningServiceClient provisioningServiceClient = createClient();
+        ProvisioningServiceClient provisioningServiceClient = createClientFromConnectionString();
         new NonStrictExpectations()
         {
             {
@@ -595,7 +738,7 @@ public class ProvisioningServiceClientTest
             throws ProvisioningServiceClientException
     {
         // arrange
-        ProvisioningServiceClient provisioningServiceClient = createClient();
+        ProvisioningServiceClient provisioningServiceClient = createClientFromConnectionString();
         new NonStrictExpectations()
         {
             {
@@ -619,7 +762,7 @@ public class ProvisioningServiceClientTest
     {
         // arrange
         final String id = "valid-id";
-        ProvisioningServiceClient provisioningServiceClient = createClient();
+        ProvisioningServiceClient provisioningServiceClient = createClientFromConnectionString();
         new NonStrictExpectations()
         {
             {
@@ -643,7 +786,7 @@ public class ProvisioningServiceClientTest
             throws ProvisioningServiceClientException
     {
         // arrange
-        ProvisioningServiceClient provisioningServiceClient = createClient();
+        ProvisioningServiceClient provisioningServiceClient = createClientFromConnectionString();
         new NonStrictExpectations()
         {
             {
@@ -665,7 +808,7 @@ public class ProvisioningServiceClientTest
     {
         // arrange
         final String id = "valid-id";
-        ProvisioningServiceClient provisioningServiceClient = createClient();
+        ProvisioningServiceClient provisioningServiceClient = createClientFromConnectionString();
         new NonStrictExpectations()
         {
             {
@@ -688,7 +831,7 @@ public class ProvisioningServiceClientTest
         // arrange
         final String id = "valid-id";
         final String eTag = "valid-eTag";
-        ProvisioningServiceClient provisioningServiceClient = createClient();
+        ProvisioningServiceClient provisioningServiceClient = createClientFromConnectionString();
         new NonStrictExpectations()
         {
             {
@@ -711,7 +854,7 @@ public class ProvisioningServiceClientTest
     {
         // arrange
         final String enrollmentGroupId = "valid-enrollmentGroupId";
-        ProvisioningServiceClient provisioningServiceClient = createClient();
+        ProvisioningServiceClient provisioningServiceClient = createClientFromConnectionString();
         new NonStrictExpectations()
         {
             {
@@ -735,7 +878,7 @@ public class ProvisioningServiceClientTest
     {
         // arrange
         final String enrollmentGroupId = "valid-enrollmentGroupId";
-        ProvisioningServiceClient provisioningServiceClient = createClient();
+        ProvisioningServiceClient provisioningServiceClient = createClientFromConnectionString();
         new NonStrictExpectations()
         {
             {
