@@ -16,6 +16,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningS
 import com.microsoft.azure.sdk.iot.provisioning.service.contract.ContractApiHttp;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientTransportException;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
+import jdk.nashorn.internal.parser.Token;
 import mockit.*;
 import org.junit.Test;
 
@@ -168,6 +169,42 @@ public class ContractApiHttpTest
         assertNotNull(contractApiHttp);
     }
 
+    @Test (expected = IllegalArgumentException.class)
+    public void tokenCredentialConstructorThrowsOnNullHostName()
+    {
+        //arrange
+        final TokenCredential credential = mockedTokenCredential;
+
+        //act
+        new ContractApiHttp(null, credential);
+
+        //assert
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void tokenCredentialConstructorThrowsOnEmptyHostName()
+    {
+        //arrange
+        final TokenCredential credential = mockedTokenCredential;
+
+        //act
+        new ContractApiHttp("", credential);
+
+        //assert
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void tokenCredentialConstructorThrowsOnNullCredential()
+    {
+        //arrange
+        final TokenCredential credential = null;
+
+        //act
+        new ContractApiHttp(VALID_HOST_NAME, credential);
+
+        //assert
+    }
+
     /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_006: [The AzureSasCredential constructor shall create a new ContractApiHttp instance.] */
     @Test
     public void azureSasCredentialConstructorSucceeded()
@@ -180,6 +217,42 @@ public class ContractApiHttpTest
 
         //assert
         assertNotNull(contractApiHttp);
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void azureSasCredentialConstructorThrowsOnNullHostName()
+    {
+        //arrange
+        final AzureSasCredential azureSasCredential = mockedAzureSasCredential;
+
+        //act
+        new ContractApiHttp(null, azureSasCredential);
+
+        //assert
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void azureSasCredentialConstructorThrowsOnEmptyHostName()
+    {
+        //arrange
+        final AzureSasCredential azureSasCredential = mockedAzureSasCredential;
+
+        //act
+        new ContractApiHttp("", azureSasCredential);
+
+        //assert
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void azureSasCredentialConstructorThrowsOnNullCredential()
+    {
+        //arrange
+        final AzureSasCredential azureSasCredential = null;
+
+        //act
+        new ContractApiHttp(VALID_HOST_NAME, azureSasCredential);
+
+        //assert
     }
 
     /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_005: [The request shall create a SAS token based on the connection string.*/

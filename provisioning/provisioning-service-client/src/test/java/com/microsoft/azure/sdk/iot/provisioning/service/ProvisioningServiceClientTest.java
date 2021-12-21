@@ -15,6 +15,7 @@ import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import org.junit.Test;
 
+import java.awt.geom.NoninvertibleTransformException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -294,6 +295,42 @@ public class ProvisioningServiceClientTest
         assertNotNull(provisioningServiceClient);
     }
 
+    @Test (expected = IllegalArgumentException.class)
+    public void tokenCredentialConstructorThrowsOnNullHostName()
+    {
+        //arrange
+        TokenCredential credential = mockedTokenCredential;
+
+        //act
+        new ProvisioningServiceClient(null, credential);
+
+        //assert
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void tokenCredentialConstructorThrowsOnEmptyHostName()
+    {
+        //arrange
+        TokenCredential credential = mockedTokenCredential;
+
+        //act
+        new ProvisioningServiceClient("", credential);
+
+        //assert
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void tokenCredentialConstructorThrowsOnNullCredential()
+    {
+        //arrange
+        TokenCredential credential = null;
+
+        //act
+        new ProvisioningServiceClient(VALID_HOST_NAME, credential);
+
+        //assert
+    }
+
     @Test
     public void azureSasCredentialConstructorSucceed()
     {
@@ -317,6 +354,42 @@ public class ProvisioningServiceClientTest
 
         //assert
         assertNotNull(provisioningServiceClient);
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void azureSasCredentialConstructorThrowsOnNullHostName()
+    {
+        //arrange
+        AzureSasCredential azureSasCredential = mockedAzureSasCredential;
+
+        //act
+        new ProvisioningServiceClient(null, azureSasCredential);
+
+        //assert
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void azureSasCredentialConstructorThrowsOnEmptyHostName()
+    {
+        //arrange
+        AzureSasCredential azureSasCredential = mockedAzureSasCredential;
+
+        //act
+        new ProvisioningServiceClient("", azureSasCredential);
+
+        //assert
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void azureSasCredentialConstructorThrowsOnNullCredential()
+    {
+        //arrange
+        AzureSasCredential azureSasCredential = null;
+
+        //act
+        new ProvisioningServiceClient(VALID_HOST_NAME, azureSasCredential);
+
+        //assert
     }
 
     /* SRS_PROVISIONING_SERVICE_CLIENT_21_008: [The createOrUpdateIndividualEnrollment shall create a new Provisioning enrollment by calling the createOrUpdate in the individualEnrollmentManager.] */

@@ -114,7 +114,15 @@ public final class ProvisioningServiceClient
      */
     public ProvisioningServiceClient(String hostName, TokenCredential credential)
     {
-        Objects.requireNonNull(credential, "credential cannot be null");
+        if (Tools.isNullOrEmpty(hostName))
+        {
+            throw new IllegalArgumentException("hostName cannot be null or empty");
+        }
+
+        if (credential == null)
+        {
+            throw new IllegalArgumentException("credential cannot be null");
+        }
 
         ContractApiHttp contractApiHttp = new ContractApiHttp(hostName, credential);
 
@@ -133,7 +141,15 @@ public final class ProvisioningServiceClient
      */
     public ProvisioningServiceClient(String hostName, AzureSasCredential azureSasCredential)
     {
-        Objects.requireNonNull(azureSasCredential, "credential cannot be null");
+        if (Tools.isNullOrEmpty(hostName))
+        {
+            throw new IllegalArgumentException("hostName cannot be null or empty");
+        }
+
+        if (azureSasCredential == null)
+        {
+            throw new IllegalArgumentException("credential cannot be null");
+        }
 
         ContractApiHttp contractApiHttp = new ContractApiHttp(hostName, azureSasCredential);
 

@@ -128,12 +128,16 @@ public class ContractApiHttp
      */
     public ContractApiHttp(String hostName, TokenCredential credential)
     {
-        Objects.requireNonNull(credential, "credential cannot be null");
-
-        if (hostName == null)
+        if (Tools.isNullOrEmpty(hostName))
         {
-            /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_002: [The constructor shall throw IllegalArgumentException if the connection string is null.] */
-            throw new IllegalArgumentException("hostName cannot be null");
+            /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_002: [The constructor shall throw IllegalArgumentException if the host name is null or empty.] */
+            throw new IllegalArgumentException("hostName cannot be null or empty");
+        }
+
+        if (credential == null)
+        {
+            /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_00: [The constructor shall throw IllegalArgumentException if the TokenCredential is null.] */
+            throw new IllegalArgumentException("credential cannot be null");
         }
 
         this.hostName = hostName;
@@ -147,12 +151,16 @@ public class ContractApiHttp
      */
     public ContractApiHttp(String hostName, AzureSasCredential azureSasCredential)
     {
-        Objects.requireNonNull(azureSasCredential, "credential cannot be null");
-
-        if (hostName == null)
+        if (Tools.isNullOrEmpty(hostName))
         {
-            /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_002: [The constructor shall throw IllegalArgumentException if the connection string is null.] */
-            throw new IllegalArgumentException("hostName cannot be null");
+            /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_00: [The constructor shall throw IllegalArgumentException if the host name is null or empty.] */
+            throw new IllegalArgumentException("hostName cannot be null or empty");
+        }
+
+        if (azureSasCredential == null)
+        {
+            /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_00: [The constructor shall throw IllegalArgumentException if the AzureSasCredential is null.] */
+            throw new IllegalArgumentException("azureSasCredential cannot be null");
         }
 
         this.hostName = hostName;
