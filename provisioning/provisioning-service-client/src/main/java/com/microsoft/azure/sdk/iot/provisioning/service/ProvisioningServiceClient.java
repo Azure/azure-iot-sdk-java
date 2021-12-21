@@ -126,11 +126,11 @@ public final class ProvisioningServiceClient
 
         ContractApiHttp contractApiHttp = new ContractApiHttp(hostName, credential);
 
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_005: [The constructor shall create a new instance of the IndividualEnrollmentManger.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_012: [The constructor shall create a new instance of the IndividualEnrollmentManger.] */
         this.individualEnrollmentManager = IndividualEnrollmentManager.createFromContractApiHttp(contractApiHttp);
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_006: [The constructor shall create a new instance of the EnrollmentGroupManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_013: [The constructor shall create a new instance of the EnrollmentGroupManager.] */
         this.enrollmentGroupManager = EnrollmentGroupManager.createFromContractApiHttp(contractApiHttp);
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_007: [The constructor shall create a new instance of the RegistrationStatusManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_014: [The constructor shall create a new instance of the RegistrationStatusManager.] */
         this.registrationStatusManager = RegistrationStatusManager.createFromContractApiHttp(contractApiHttp);
     }
 
@@ -153,11 +153,11 @@ public final class ProvisioningServiceClient
 
         ContractApiHttp contractApiHttp = new ContractApiHttp(hostName, azureSasCredential);
 
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_005: [The constructor shall create a new instance of the IndividualEnrollmentManger.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_012: [The constructor shall create a new instance of the IndividualEnrollmentManger.] */
         this.individualEnrollmentManager = IndividualEnrollmentManager.createFromContractApiHttp(contractApiHttp);
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_006: [The constructor shall create a new instance of the EnrollmentGroupManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_013: [The constructor shall create a new instance of the EnrollmentGroupManager.] */
         this.enrollmentGroupManager = EnrollmentGroupManager.createFromContractApiHttp(contractApiHttp);
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_007: [The constructor shall create a new instance of the RegistrationStatusManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_014: [The constructor shall create a new instance of the RegistrationStatusManager.] */
         this.registrationStatusManager = RegistrationStatusManager.createFromContractApiHttp(contractApiHttp);
     }
 
@@ -169,22 +169,22 @@ public final class ProvisioningServiceClient
      */
     private ProvisioningServiceClient(String connectionString)
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_002: [The constructor shall throw IllegalArgumentException if the provided connectionString is null or empty.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_004: [The constructor shall throw IllegalArgumentException if the provided connectionString is null or empty.] */
         if(Tools.isNullOrEmpty(connectionString))
         {
             throw new IllegalArgumentException("connectionString cannot be null or empty");
         }
 
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_003: [The constructor shall throw IllegalArgumentException if the ProvisioningConnectionString or one of the inner Managers failed to create a new instance.] */
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_004: [The constructor shall create a new instance of the ContractApiHttp class using the provided connectionString.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_005: [The constructor shall throw IllegalArgumentException if the ProvisioningConnectionString or one of the inner Managers failed to create a new instance.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_009: [The constructor shall create a new instance of the ContractApiHttp class using the provided connectionString.] */
         ProvisioningConnectionString provisioningConnectionString = ProvisioningConnectionStringBuilder.createConnectionString(connectionString);
         ContractApiHttp contractApiHttp = ContractApiHttp.createFromConnectionString(provisioningConnectionString);
 
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_005: [The constructor shall create a new instance of the IndividualEnrollmentManger.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_012: [The constructor shall create a new instance of the IndividualEnrollmentManger.] */
         this.individualEnrollmentManager = IndividualEnrollmentManager.createFromContractApiHttp(contractApiHttp);
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_006: [The constructor shall create a new instance of the EnrollmentGroupManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_013: [The constructor shall create a new instance of the EnrollmentGroupManager.] */
         this.enrollmentGroupManager = EnrollmentGroupManager.createFromContractApiHttp(contractApiHttp);
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_007: [The constructor shall create a new instance of the RegistrationStatusManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_014: [The constructor shall create a new instance of the RegistrationStatusManager.] */
         this.registrationStatusManager = RegistrationStatusManager.createFromContractApiHttp(contractApiHttp);
 
         log.debug("Initialized a ProvisioningServiceClient instance using SDK version {}", SDKUtils.getServiceApiVersion());
@@ -284,7 +284,7 @@ public final class ProvisioningServiceClient
      */
     public IndividualEnrollment createOrUpdateIndividualEnrollment(IndividualEnrollment individualEnrollment) throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_008: [The createOrUpdateIndividualEnrollment shall create a new Provisioning individualEnrollment by calling the createOrUpdate in the individualEnrollmentManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_015: [The createOrUpdateIndividualEnrollment shall create a new Provisioning individualEnrollment by calling the createOrUpdate in the individualEnrollmentManager.] */
         return individualEnrollmentManager.createOrUpdate(individualEnrollment);
     }
 
@@ -369,7 +369,7 @@ public final class ProvisioningServiceClient
             BulkOperationMode bulkOperationMode, Collection<IndividualEnrollment> individualEnrollments)
             throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_009: [The runBulkEnrollmentOperation shall do a Provisioning operation over individualEnrollment by calling the bulkOperation in the individualEnrollmentManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_016: [The runBulkEnrollmentOperation shall do a Provisioning operation over individualEnrollment by calling the bulkOperation in the individualEnrollmentManager.] */
         return individualEnrollmentManager.bulkOperation(bulkOperationMode, individualEnrollments);
     }
 
@@ -416,7 +416,7 @@ public final class ProvisioningServiceClient
      */
     public IndividualEnrollment getIndividualEnrollment(String registrationId) throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_010: [The getIndividualEnrollment shall retrieve the individualEnrollment information for the provided registrationId by calling the get in the individualEnrollmentManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_017: [The getIndividualEnrollment shall retrieve the individualEnrollment information for the provided registrationId by calling the get in the individualEnrollmentManager.] */
         return individualEnrollmentManager.get(registrationId);
     }
 
@@ -479,7 +479,7 @@ public final class ProvisioningServiceClient
      */
     public void deleteIndividualEnrollment(IndividualEnrollment individualEnrollment) throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_011: [The deleteIndividualEnrollment shall delete the individualEnrollment for the provided individualEnrollment by calling the delete in the individualEnrollmentManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_018: [The deleteIndividualEnrollment shall delete the individualEnrollment for the provided individualEnrollment by calling the delete in the individualEnrollmentManager.] */
         individualEnrollmentManager.delete(individualEnrollment);
     }
 
@@ -526,7 +526,7 @@ public final class ProvisioningServiceClient
      */
     public void deleteIndividualEnrollment(String registrationId) throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_012: [The deleteIndividualEnrollment shall delete the individualEnrollment for the provided registrationId by calling the delete in the individualEnrollmentManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_019: [The deleteIndividualEnrollment shall delete the individualEnrollment for the provided registrationId by calling the delete in the individualEnrollmentManager.] */
         individualEnrollmentManager.delete(registrationId, null);
     }
 
@@ -577,7 +577,7 @@ public final class ProvisioningServiceClient
      */
     public void deleteIndividualEnrollment(String registrationId, String eTag) throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_013: [The deleteIndividualEnrollment shall delete the individualEnrollment for the provided registrationId and etag by calling the delete in the individualEnrollmentManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_020: [The deleteIndividualEnrollment shall delete the individualEnrollment for the provided registrationId and etag by calling the delete in the individualEnrollmentManager.] */
         individualEnrollmentManager.delete(registrationId, eTag);
     }
 
@@ -596,7 +596,7 @@ public final class ProvisioningServiceClient
      */
     public Query createIndividualEnrollmentQuery(QuerySpecification querySpecification)
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_014: [The createIndividualEnrollmentQuery shall create a new individual enrolment query by calling the createQuery in the individualEnrollmentManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_021: [The createIndividualEnrollmentQuery shall create a new individual enrolment query by calling the createQuery in the individualEnrollmentManager.] */
         return individualEnrollmentManager.createQuery(querySpecification, 0);
     }
 
@@ -620,7 +620,7 @@ public final class ProvisioningServiceClient
      */
     public Query createIndividualEnrollmentQuery(QuerySpecification querySpecification, int pageSize)
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_015: [The createIndividualEnrollmentQuery shall create a new individual enrolment query by calling the createQuery in the individualEnrollmentManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_022: [The createIndividualEnrollmentQuery shall create a new individual enrolment query by calling the createQuery in the individualEnrollmentManager.] */
         return individualEnrollmentManager.createQuery(querySpecification, pageSize);
     }
 
@@ -695,7 +695,7 @@ public final class ProvisioningServiceClient
      */
     public EnrollmentGroup createOrUpdateEnrollmentGroup(EnrollmentGroup enrollmentGroup) throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_016: [The createOrUpdateEnrollmentGroup shall create a new Provisioning enrollmentGroup by calling the createOrUpdate in the enrollmentGroupManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_023: [The createOrUpdateEnrollmentGroup shall create a new Provisioning enrollmentGroup by calling the createOrUpdate in the enrollmentGroupManager.] */
         return enrollmentGroupManager.createOrUpdate(enrollmentGroup);
     }
 
@@ -741,7 +741,7 @@ public final class ProvisioningServiceClient
      */
     public EnrollmentGroup getEnrollmentGroup(String enrollmentGroupId) throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_017: [The getEnrollmentGroup shall retrieve the enrollmentGroup information for the provided enrollmentGroupId by calling the get in the enrollmentGroupManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_024: [The getEnrollmentGroup shall retrieve the enrollmentGroup information for the provided enrollmentGroupId by calling the get in the enrollmentGroupManager.] */
         return enrollmentGroupManager.get(enrollmentGroupId);
     }
 
@@ -803,7 +803,7 @@ public final class ProvisioningServiceClient
      */
     public void deleteEnrollmentGroup(EnrollmentGroup enrollmentGroup) throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_018: [The deleteEnrollmentGroup shall delete the enrollmentGroup for the provided enrollmentGroup by calling the delete in the enrollmentGroupManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_025: [The deleteEnrollmentGroup shall delete the enrollmentGroup for the provided enrollmentGroup by calling the delete in the enrollmentGroupManager.] */
         enrollmentGroupManager.delete(enrollmentGroup);
     }
 
@@ -849,7 +849,7 @@ public final class ProvisioningServiceClient
      */
     public void deleteEnrollmentGroup(String enrollmentGroupId) throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_019: [The deleteEnrollmentGroup shall delete the enrollmentGroup for the provided enrollmentGroupId by calling the delete in the enrollmentGroupManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_026: [The deleteEnrollmentGroup shall delete the enrollmentGroup for the provided enrollmentGroupId by calling the delete in the enrollmentGroupManager.] */
         enrollmentGroupManager.delete(enrollmentGroupId, null);
     }
 
@@ -899,7 +899,7 @@ public final class ProvisioningServiceClient
      */
     public void deleteEnrollmentGroup(String enrollmentGroupId, String eTag) throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_020: [The deleteEnrollmentGroup shall delete the enrollmentGroup for the provided enrollmentGroupId and eTag by calling the delete in the enrollmentGroupManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_027: [The deleteEnrollmentGroup shall delete the enrollmentGroup for the provided enrollmentGroupId and eTag by calling the delete in the enrollmentGroupManager.] */
         enrollmentGroupManager.delete(enrollmentGroupId, eTag);
     }
 
@@ -918,7 +918,7 @@ public final class ProvisioningServiceClient
      */
     public Query createEnrollmentGroupQuery(QuerySpecification querySpecification)
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_021: [The createEnrollmentGroupQuery shall create a new enrolmentGroup query by calling the createQuery in the enrollmentGroupManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_028: [The createEnrollmentGroupQuery shall create a new enrolmentGroup query by calling the createQuery in the enrollmentGroupManager.] */
         return enrollmentGroupManager.createQuery(querySpecification, 0);
     }
 
@@ -942,7 +942,7 @@ public final class ProvisioningServiceClient
      */
     public Query createEnrollmentGroupQuery(QuerySpecification querySpecification, int pageSize)
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_022: [The createEnrollmentGroupQuery shall create a new enrolmentGroup query by calling the createQuery in the enrollmentGroupManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_029: [The createEnrollmentGroupQuery shall create a new enrolmentGroup query by calling the createQuery in the enrollmentGroupManager.] */
         return enrollmentGroupManager.createQuery(querySpecification, pageSize);
     }
 
@@ -988,7 +988,7 @@ public final class ProvisioningServiceClient
      */
     public DeviceRegistrationState getDeviceRegistrationState(String id) throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_023: [The getDeviceRegistrationState shall retrieve the deviceRegistrationState information for the provided id by calling the get in the registrationStatusManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_030: [The getDeviceRegistrationState shall retrieve the deviceRegistrationState information for the provided id by calling the get in the registrationStatusManager.] */
         return registrationStatusManager.get(id);
     }
 
@@ -1036,7 +1036,7 @@ public final class ProvisioningServiceClient
      */
     public void deleteDeviceRegistrationState(DeviceRegistrationState deviceRegistrationState) throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_024: [The deleteDeviceRegistrationState shall delete the deviceRegistrationState for the provided DeviceRegistrationState by calling the delete in the registrationStatusManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_031: [The deleteDeviceRegistrationState shall delete the deviceRegistrationState for the provided DeviceRegistrationState by calling the delete in the registrationStatusManager.] */
         registrationStatusManager.delete(deviceRegistrationState);
     }
 
@@ -1049,7 +1049,7 @@ public final class ProvisioningServiceClient
     @Deprecated
     public void deleteDeviceRegistrationStatus(DeviceRegistrationState deviceRegistrationState) throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_024: [The deleteDeviceRegistrationStatus shall delete the deviceRegistrationState for the provided DeviceRegistrationState by calling the delete in the registrationStatusManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_031: [The deleteDeviceRegistrationStatus shall delete the deviceRegistrationState for the provided DeviceRegistrationState by calling the delete in the registrationStatusManager.] */
         registrationStatusManager.delete(deviceRegistrationState);
     }
 
@@ -1093,7 +1093,7 @@ public final class ProvisioningServiceClient
      */
     public void deleteDeviceRegistrationState(String id) throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_025: [The deleteDeviceRegistrationState shall delete the deviceRegistrationState for the provided id by calling the delete in the registrationStatusManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_032: [The deleteDeviceRegistrationState shall delete the deviceRegistrationState for the provided id by calling the delete in the registrationStatusManager.] */
         registrationStatusManager.delete(id, null);
     }
 
@@ -1106,7 +1106,7 @@ public final class ProvisioningServiceClient
     @Deprecated
     public void deleteDeviceRegistrationStatus(String id) throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_025: [The deleteDeviceRegistrationStatus shall delete the deviceRegistrationState for the provided id by calling the delete in the registrationStatusManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_032: [The deleteDeviceRegistrationStatus shall delete the deviceRegistrationState for the provided id by calling the delete in the registrationStatusManager.] */
         registrationStatusManager.delete(id, null);
     }
 
@@ -1154,7 +1154,7 @@ public final class ProvisioningServiceClient
      */
     public void deleteDeviceRegistrationState(String id, String eTag) throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_026: [The deleteDeviceRegistrationState shall delete the deviceRegistrationState for the provided id and eTag by calling the delete in the registrationStatusManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_033: [The deleteDeviceRegistrationState shall delete the deviceRegistrationState for the provided id and eTag by calling the delete in the registrationStatusManager.] */
         registrationStatusManager.delete(id, eTag);
     }
 
@@ -1169,7 +1169,7 @@ public final class ProvisioningServiceClient
     @Deprecated
     public void deleteDeviceRegistrationStatus(String id, String eTag) throws ProvisioningServiceClientException
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_026: [The deleteDeviceRegistrationStatus shall delete the deviceRegistrationState for the provided id and eTag by calling the delete in the registrationStatusManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_033: [The deleteDeviceRegistrationStatus shall delete the deviceRegistrationState for the provided id and eTag by calling the delete in the registrationStatusManager.] */
         registrationStatusManager.delete(id, eTag);
     }
 
@@ -1188,7 +1188,7 @@ public final class ProvisioningServiceClient
      */
     public Query createEnrollmentGroupRegistrationStateQuery(QuerySpecification querySpecification, String enrollmentGroupId)
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_027: [The createEnrollmentGroupRegistrationStateQuery shall create a new deviceRegistrationState query by calling the createQuery in the registrationStatusManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_034: [The createEnrollmentGroupRegistrationStateQuery shall create a new deviceRegistrationState query by calling the createQuery in the registrationStatusManager.] */
         return registrationStatusManager.createEnrollmentGroupQuery(querySpecification, enrollmentGroupId,0);
     }
 
@@ -1201,7 +1201,7 @@ public final class ProvisioningServiceClient
     @Deprecated
     public Query createEnrollmentGroupRegistrationStatusQuery(QuerySpecification querySpecification, String enrollmentGroupId)
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_027: [The createEnrollmentGroupRegistrationStatusQuery shall create a new deviceRegistrationState query by calling the createQuery in the registrationStatusManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_034: [The createEnrollmentGroupRegistrationStatusQuery shall create a new deviceRegistrationState query by calling the createQuery in the registrationStatusManager.] */
         return registrationStatusManager.createEnrollmentGroupQuery(querySpecification, enrollmentGroupId,0);
     }
 
@@ -1226,7 +1226,7 @@ public final class ProvisioningServiceClient
      */
     public Query createEnrollmentGroupRegistrationStateQuery(QuerySpecification querySpecification, String enrollmentGroupId, int pageSize)
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_028: [The createEnrollmentGroupRegistrationStateQuery shall create a new deviceRegistrationState query by calling the createQuery in the registrationStatusManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_035: [The createEnrollmentGroupRegistrationStateQuery shall create a new deviceRegistrationState query by calling the createQuery in the registrationStatusManager.] */
         return registrationStatusManager.createEnrollmentGroupQuery(querySpecification, enrollmentGroupId, pageSize);
     }
 
@@ -1241,7 +1241,7 @@ public final class ProvisioningServiceClient
     @Deprecated
     public Query createEnrollmentGroupRegistrationStatusQuery(QuerySpecification querySpecification, String enrollmentGroupId, int pageSize)
     {
-        /* SRS_PROVISIONING_SERVICE_CLIENT_21_028: [The createEnrollmentGroupRegistrationStatusQuery shall create a new deviceRegistrationState query by calling the createQuery in the registrationStatusManager.] */
+        /* SRS_PROVISIONING_SERVICE_CLIENT_21_035: [The createEnrollmentGroupRegistrationStatusQuery shall create a new deviceRegistrationState query by calling the createQuery in the registrationStatusManager.] */
         return registrationStatusManager.createEnrollmentGroupQuery(querySpecification, enrollmentGroupId, pageSize);
     }
 }
