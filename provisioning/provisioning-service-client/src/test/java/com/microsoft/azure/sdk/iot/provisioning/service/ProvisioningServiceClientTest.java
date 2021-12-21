@@ -73,44 +73,6 @@ public class ProvisioningServiceClientTest
 
     private static final String PROVISIONING_CONNECTION_STRING = "HostName=valid-host-name.azure-devices-provisioning.net;SharedAccessKeyName=valid-key-name;SharedAccessKey=0000000000000000000000000000000000000000000=";
 
-    private ProvisioningServiceClient createClientFromTokenCredential()
-    {
-        new NonStrictExpectations()
-        {
-            {
-                new ContractApiHttp(VALID_HOST_NAME, mockedTokenCredential);
-                result = mockedContractApiHttp;
-                Deencapsulation.invoke(IndividualEnrollmentManager.class, "createFromContractApiHttp", mockedContractApiHttp);
-                result = mockedIndividualEnrollmentManager;
-                Deencapsulation.invoke(EnrollmentGroupManager.class, "createFromContractApiHttp", mockedContractApiHttp);
-                result = mockedEnrollmentGroupManager;
-                Deencapsulation.invoke(RegistrationStatusManager.class, "createFromContractApiHttp", mockedContractApiHttp);
-                result = mockedRegistrationStatusManager;
-            }
-        };
-
-        return new ProvisioningServiceClient(VALID_HOST_NAME, mockedTokenCredential);
-    }
-
-    private ProvisioningServiceClient createClientFromAzureSasCredential()
-    {
-        new NonStrictExpectations()
-        {
-            {
-                new ContractApiHttp(VALID_HOST_NAME, mockedAzureSasCredential);
-                result = mockedContractApiHttp;
-                Deencapsulation.invoke(IndividualEnrollmentManager.class, "createFromContractApiHttp", mockedContractApiHttp);
-                result = mockedIndividualEnrollmentManager;
-                Deencapsulation.invoke(EnrollmentGroupManager.class, "createFromContractApiHttp", mockedContractApiHttp);
-                result = mockedEnrollmentGroupManager;
-                Deencapsulation.invoke(RegistrationStatusManager.class, "createFromContractApiHttp", mockedContractApiHttp);
-                result = mockedRegistrationStatusManager;
-            }
-        };
-
-        return new ProvisioningServiceClient(VALID_HOST_NAME, mockedAzureSasCredential);
-    }
-
     private static final String VALID_HOST_NAME = "testProvisioningHostName.azure.net";
 
     /* SRS_PROVISIONING_SERVICE_CLIENT_21_001: [The createFromConnectionString shall create a new instance of this class using the provided connectionString.] */
@@ -378,52 +340,6 @@ public class ProvisioningServiceClientTest
         IndividualEnrollment result = provisioningServiceClient.createOrUpdateIndividualEnrollment(mockedIndividualEnrollment);
 
         // assert
-        assertNotNull(result);
-    }
-
-    @Test
-    public void createOrUpdateIndividualEnrollmentTokenCredentialSucceed(
-            @Mocked final IndividualEnrollment mockedIndividualEnrollment)
-            throws ProvisioningServiceClientException
-    {
-        //arrange
-        ProvisioningServiceClient provisioningServiceClient = createClientFromTokenCredential();
-        new NonStrictExpectations()
-        {
-            {
-                Deencapsulation.invoke(mockedIndividualEnrollmentManager, "createOrUpdate", mockedIndividualEnrollment);
-                result = mockedIndividualEnrollment;
-                times = 1;
-            }
-        };
-
-        //act
-        IndividualEnrollment result = provisioningServiceClient.createOrUpdateIndividualEnrollment(mockedIndividualEnrollment);
-
-        //assert
-        assertNotNull(result);
-    }
-
-    @Test
-    public void createOrUpdateIndividualEnrollmentAzureSasCredentialSucceed(
-            @Mocked final IndividualEnrollment mockedIndividualEnrollment)
-            throws ProvisioningServiceClientException
-    {
-        //arrange
-        ProvisioningServiceClient provisioningServiceClient = createClientFromAzureSasCredential();
-        new NonStrictExpectations()
-        {
-            {
-                Deencapsulation.invoke(mockedIndividualEnrollmentManager, "createOrUpdate", mockedIndividualEnrollment);
-                result = mockedIndividualEnrollment;
-                times = 1;
-            }
-        };
-
-        //act
-        IndividualEnrollment result = provisioningServiceClient.createOrUpdateIndividualEnrollment(mockedIndividualEnrollment);
-
-        //assert
         assertNotNull(result);
     }
 
