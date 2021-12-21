@@ -130,13 +130,13 @@ public class ContractApiHttp
     {
         if (Tools.isNullOrEmpty(hostName))
         {
-            /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_002: [The constructor shall throw IllegalArgumentException if the host name is null or empty.] */
+            /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_007: [The constructor shall throw IllegalArgumentException if the provided hostName is null or empty.] */
             throw new IllegalArgumentException("hostName cannot be null or empty");
         }
 
         if (credential == null)
         {
-            /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_00: [The constructor shall throw IllegalArgumentException if the TokenCredential is null.] */
+            /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_008: [The constructor shall throw IllegalArgumentException if the provided TokenCredential is null.] */
             throw new IllegalArgumentException("credential cannot be null");
         }
 
@@ -153,13 +153,13 @@ public class ContractApiHttp
     {
         if (Tools.isNullOrEmpty(hostName))
         {
-            /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_00: [The constructor shall throw IllegalArgumentException if the host name is null or empty.] */
+            /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_007: [The constructor shall throw IllegalArgumentException if the provided hostName is null or empty.] */
             throw new IllegalArgumentException("hostName cannot be null or empty");
         }
 
         if (azureSasCredential == null)
         {
-            /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_00: [The constructor shall throw IllegalArgumentException if the AzureSasCredential is null.] */
+            /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_009: [The constructor shall throw IllegalArgumentException if the provided AzureSasCredential is null.] */
             throw new IllegalArgumentException("azureSasCredential cannot be null");
         }
 
@@ -192,14 +192,14 @@ public class ContractApiHttp
             String payload)
             throws ProvisioningServiceClientException
     {
-        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_007: [The request shall create a HTTP URL based on the Device Registration path.*/
+        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_012: [The request shall create a HTTP URL based on the Device Registration path.*/
         URL url = getUrlForPath(path);
 
-        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_010: [The request shall create a new HttpRequest.*/
+        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_015: [The request shall create a new HttpRequest.*/
         HttpRequest request = createRequest(url, httpMethod, headerParameters, payload.getBytes(StandardCharsets.UTF_8));
 
-        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_014: [The request shall send the request to the Device Provisioning Service service by using the HttpRequest.send().*/
-        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_015: [If the HttpRequest failed send the message, the request shall throw ProvisioningServiceClientTransportException, threw by the callee.*/
+        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_021: [The request shall send the request to the Device Provisioning Service by using the HttpRequest.send().*/
+        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_022: [If the HttpRequest failed send the message, the request shall throw ProvisioningServiceClientTransportException, threw by the callee.*/
         HttpResponse httpResponse;
         try
         {
@@ -210,7 +210,7 @@ public class ContractApiHttp
             throw new ProvisioningServiceClientTransportException(e);
         }
 
-        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_016: [If the Device Provisioning Service service respond to the HttpRequest with any error code, the request shall throw the appropriated ProvisioningServiceClientException, by calling ProvisioningServiceClientExceptionManager.responseVerification().*/
+        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_023: [If the Device Provisioning Service respond to the HttpRequest with any error code, the request shall throw the appropriated ProvisioningServiceClientException, by calling ProvisioningServiceClientExceptionManager.responseVerification().*/
         ProvisioningServiceClientExceptionManager.httpResponseVerification(httpResponse.getStatus(), new String(httpResponse.getErrorReason(), StandardCharsets.UTF_8));
 
         return httpResponse;
@@ -218,7 +218,7 @@ public class ContractApiHttp
 
     private HttpRequest createRequest(URL url, HttpMethod method, Map<String, String> headerParameters, byte[] payload) throws ProvisioningServiceClientTransportException
     {
-        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_011: [If the request get problem creating the HttpRequest, it shall throw ProvisioningServiceClientTransportException.*/
+        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_016: [If the request get problem creating the HttpRequest, it shall throw ProvisioningServiceClientTransportException.*/
         HttpRequest request;
         try
         {
@@ -228,7 +228,7 @@ public class ContractApiHttp
         {
             throw new ProvisioningServiceClientTransportException(e);
         }
-        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_012: [The request shall fill the http header with the standard parameters.] */
+        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_017: [The request shall fill the http header with the standard parameters.] */
         request.setReadTimeoutMillis(DEFAULT_HTTP_TIMEOUT_MS);
         request.setHeaderField(HEADER_FIELD_NAME_AUTHORIZATION, getAuthenticationToken());
         request.setHeaderField(HEADER_FIELD_NAME_USER_AGENT, SDKUtils.getUserAgentString());
@@ -238,7 +238,7 @@ public class ContractApiHttp
         request.setHeaderField(HEADER_FIELD_NAME_CHARSET, HEADER_FIELD_VALUE_CHARSET);
         request.setHeaderField(HEADER_FIELD_NAME_CONTENT_LENGTH, payload != null ? String.valueOf(payload.length) : "0");
 
-        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_013: [The request shall add the headerParameters to the http header, if provided.] */
+        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_020: [The request shall add the headerParameters to the http header, if provided.] */
         if(headerParameters != null)
         {
             for (Map.Entry<String, String> entry: headerParameters.entrySet())
@@ -254,7 +254,7 @@ public class ContractApiHttp
     {
         if(Tools.isNullOrEmpty(path))
         {
-            /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_008: [If the provided path is null or empty, the request shall throw IllegalArgumentException.*/
+            /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_013: [If the provided path is null or empty, the request shall throw IllegalArgumentException.*/
             throw new IllegalArgumentException("path cannot be null or empty");
         }
         StringBuilder stringBuilder = new StringBuilder();
@@ -265,7 +265,7 @@ public class ContractApiHttp
         stringBuilder.append(URL_SEPARATOR_1);
         stringBuilder.append(URL_API_VERSION);
         stringBuilder.append(SDKUtils.getServiceApiVersion());
-        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_009: [If the provided path contains not valid characters, the request shall throw IllegalArgumentException.*/
+        /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_014: [If the provided path contains not valid characters, the request shall throw IllegalArgumentException.*/
         URL url;
         try
         {
@@ -285,10 +285,12 @@ public class ContractApiHttp
         // one of the three options.
         if (this.credentialCache != null)
         {
+            /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_018: [The request shall extract the authorization header from the provided TokenCredential.] */
             return this.credentialCache.getTokenString();
         }
         else if (this.azureSasCredential != null)
         {
+            /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_019: [The request shall extract the authorization header from the provided AzureSasCredential.] */
             return this.azureSasCredential.getSignature();
         }
 

@@ -169,6 +169,7 @@ public class ContractApiHttpTest
         assertNotNull(contractApiHttp);
     }
 
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_007: [The constructor shall throw IllegalArgumentException if the provided hostName is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void tokenCredentialConstructorThrowsOnNullHostName()
     {
@@ -181,6 +182,7 @@ public class ContractApiHttpTest
         //assert
     }
 
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_007: [The constructor shall throw IllegalArgumentException if the provided hostName is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void tokenCredentialConstructorThrowsOnEmptyHostName()
     {
@@ -193,6 +195,7 @@ public class ContractApiHttpTest
         //assert
     }
 
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_008: [The constructor shall throw IllegalArgumentException if the provided TokenCredential is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void tokenCredentialConstructorThrowsOnNullCredential()
     {
@@ -219,6 +222,7 @@ public class ContractApiHttpTest
         assertNotNull(contractApiHttp);
     }
 
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_007: [The constructor shall throw IllegalArgumentException if the provided hostName is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void azureSasCredentialConstructorThrowsOnNullHostName()
     {
@@ -231,6 +235,7 @@ public class ContractApiHttpTest
         //assert
     }
 
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_007: [The constructor shall throw IllegalArgumentException if the provided hostName is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void azureSasCredentialConstructorThrowsOnEmptyHostName()
     {
@@ -243,6 +248,7 @@ public class ContractApiHttpTest
         //assert
     }
 
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_009: [The constructor shall throw IllegalArgumentException if the provided AzureSasCredential is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void azureSasCredentialConstructorThrowsOnNullCredential()
     {
@@ -255,7 +261,7 @@ public class ContractApiHttpTest
         //assert
     }
 
-    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_005: [The request shall create a SAS token based on the connection string.*/
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_010: [The request shall create a SAS token based on the connection string.*/
     @Test
     public void requestCreatesSasToken() throws ProvisioningServiceClientException, IOException
     {
@@ -298,7 +304,7 @@ public class ContractApiHttpTest
                 VALID_PAYLOAD);
     }
 
-    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_006: [If the request get problem to create the SAS token, it shall throw IllegalArgumentException.*/
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_011: [If the request get problem to create the SAS token, it shall throw IllegalArgumentException.*/
     @Test (expected = IllegalArgumentException.class)
     public void requestThrowsOnSasToken() throws ProvisioningServiceClientException, IOException
     {
@@ -324,7 +330,7 @@ public class ContractApiHttpTest
         // assert
     }
 
-    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_007: [The request shall create a HTTP URL based on the Device Registration path.*/
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_012: [The request shall create a HTTP URL based on the Device Registration path.*/
     @Test
     public void requestCreatesURL() throws ProvisioningServiceClientException, IOException
     {
@@ -350,7 +356,7 @@ public class ContractApiHttpTest
         };
     }
 
-    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_008: [If the provided path is null or empty, the request shall throw IllegalArgumentException.*/
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_013: [If the provided path is null or empty, the request shall throw IllegalArgumentException.*/
     @Test (expected = IllegalArgumentException.class)
     public void requestThrowsOnNullPath() throws ProvisioningServiceClientException, IOException
     {
@@ -378,7 +384,7 @@ public class ContractApiHttpTest
         // assert
     }
 
-    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_009: [If the provided path contains not valid characters, the request shall throw IllegalArgumentException.*/
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_014: [If the provided path contains not valid characters, the request shall throw IllegalArgumentException.*/
     @Test (expected = IllegalArgumentException.class)
     public void requestThrowsOnEmptyPath() throws ProvisioningServiceClientException, IOException
     {
@@ -406,7 +412,7 @@ public class ContractApiHttpTest
         // assert
     }
 
-    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_009: [If the provided path contains not valid characters, the request shall throw IllegalArgumentException.*/
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_014: [If the provided path contains not valid characters, the request shall throw IllegalArgumentException.*/
     @Test (expected = IllegalArgumentException.class)
     public void requestThrowsOnWrongPath() throws ProvisioningServiceClientException, IOException
     {
@@ -436,7 +442,7 @@ public class ContractApiHttpTest
         // assert
     }
 
-    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_010: [The request shall create a new HttpRequest.*/
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_015: [The request shall create a new HttpRequest.*/
     @Test
     public void requestCreatesHttpRequest() throws ProvisioningServiceClientException, IOException
     {
@@ -478,7 +484,7 @@ public class ContractApiHttpTest
                 VALID_PAYLOAD);
     }
 
-    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_011: [If the request get problem creating the HttpRequest, it shall throw ProvisioningServiceClientTransportException.*/
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_016: [If the request get problem creating the HttpRequest, it shall throw ProvisioningServiceClientTransportException.*/
     @Test (expected = ProvisioningServiceClientTransportException.class)
     public void requestThrowsOnHttpRequestFailed() throws ProvisioningServiceClientException, IOException
     {
@@ -509,7 +515,7 @@ public class ContractApiHttpTest
         // assert
     }
 
-    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_012: [The request shall fill the http header with the standard parameters.] */
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_017: [The request shall fill the http header with the standard parameters.] */
     @Test
     public void requestCreateHttpHeaderFromConnectionString() throws ProvisioningServiceClientException, IOException
     {
@@ -544,7 +550,7 @@ public class ContractApiHttpTest
         };
     }
 
-    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_015: [The request shall obtain authorization header from the TokenCredential argument */
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_018: [The request shall extract the authorization header from the provided TokenCredential.] */
     @Test
     public void requestPullsAuthorizationFromTokenCredential() throws ProvisioningServiceClientException
     {
@@ -569,7 +575,7 @@ public class ContractApiHttpTest
         //assert
     }
 
-    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_015: [The request shall obtain authorization header from the AzureSasCredential argument */
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_019: [The request shall extract the authorization header from the provided AzureSasCredential.] */
     @Test
     public void requestPullsAuthorizationFromAzureSasCredential() throws ProvisioningServiceClientException
     {
@@ -592,7 +598,7 @@ public class ContractApiHttpTest
         //assert
     }
 
-    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_013: [The request shall add the headerParameters to the http header, if provided.] */
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_020: [The request shall add the headerParameters to the http header, if provided.] */
     @Test
     public void requestAddHttpHeader() throws ProvisioningServiceClientException, IOException
     {
@@ -629,7 +635,7 @@ public class ContractApiHttpTest
         };
     }
 
-    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_014: [The request shall send the request to the Device Provisioning Service by using the HttpRequest.send().*/
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_021: [The request shall send the request to the Device Provisioning Service by using the HttpRequest.send().*/
     @Test
     public void requestSendsHttpRequest() throws ProvisioningServiceClientException, IOException
     {
@@ -654,7 +660,7 @@ public class ContractApiHttpTest
         };
     }
 
-    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_015: [If the HttpRequest failed send the message, the request shall throw ProvisioningServiceClientTransportException, threw by the callee.*/
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_022: [If the HttpRequest failed send the message, the request shall throw ProvisioningServiceClientTransportException, threw by the callee.*/
     @Test (expected = ProvisioningServiceClientException.class)
     public void requestThrowsOnSendHttpRequestFailed() throws ProvisioningServiceClientException, IOException
     {
@@ -690,7 +696,7 @@ public class ContractApiHttpTest
         // assert
     }
 
-    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_016: [If the Device Provisioning Service respond to the HttpRequest with any error code, the request shall throw the appropriated ProvisioningServiceClientException, by calling ProvisioningServiceClientExceptionManager.responseVerification().*/
+    /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_023: [If the Device Provisioning Service respond to the HttpRequest with any error code, the request shall throw the appropriated ProvisioningServiceClientException, by calling ProvisioningServiceClientExceptionManager.responseVerification().*/
     @Test (expected = ProvisioningServiceClientException.class)
     public void requestThrowsOnDeviceProvisioningServiceError() throws ProvisioningServiceClientException, IOException
     {
