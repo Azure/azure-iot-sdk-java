@@ -115,6 +115,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
     private final int keepAliveInterval;
 
+    private final Map<IotHubTransportMessage, IotHubMessageResult> queuedAcknowledgements = new ConcurrentHashMap<>();
+
     public AmqpsIotHubConnection(DeviceClientConfig config, String transportUniqueIdentifier)
     {
         // This allows us to create thread safe sets despite there being no such type default in Java 7 or 8
@@ -584,6 +586,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     public void onTimerTask(Event event)
     {
         sendQueuedMessages();
+        sendQueuedAcknowledgements();
 
         checkForNewlyUnregisteredMultiplexedClientsToStop();
         checkForNewlyRegisteredMultiplexedClientsToStart();
@@ -611,35 +614,50 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     @Override
     public boolean sendMessageResult(IotHubTransportMessage message, IotHubMessageResult result)
     {
-        DeliveryState ackType;
+        // don't send acknowledgements from outside the proton reactor thread. Queue them locally so that the reactor
+        // thread can pick them up and send them later
+        queuedAcknowledgements.put(message, result);
+        return true;
+    }
 
-        // Complete/Abandon/Reject is an IoTHub concept. For AMQP, they map to Accepted/Released/Rejected.
-        if (result == IotHubMessageResult.ABANDON)
+    private void sendQueuedAcknowledgements()
+    {
+        while (!queuedAcknowledgements.isEmpty())
         {
-            ackType = Released.getInstance();
-        }
-        else if (result == IotHubMessageResult.REJECT)
-        {
-            ackType = new Rejected();
-        }
-        else if (result == IotHubMessageResult.COMPLETE)
-        {
-            ackType = Accepted.getInstance();
-        }
-        else
-        {
-            log.warn("Invalid IoT Hub message result {}", result.name());
-            return false;
-        }
+            IotHubTransportMessage queuedAcknowledgement = queuedAcknowledgements.keySet().iterator().next();
+            IotHubMessageResult result = queuedAcknowledgements.get(queuedAcknowledgement);
 
-        AmqpsSessionHandler sessionHandler = sessionHandlers.get(message.getConnectionDeviceId());
-        if (sessionHandler != null && sessionHandler.acknowledgeReceivedMessage(message, ackType))
-        {
-            return true;
-        }
+            queuedAcknowledgements.remove(queuedAcknowledgement);
 
-        log.warn("No sessions could acknowledge the message ({})", message);
-        return false;
+            DeliveryState ackType;
+
+            // Complete/Abandon/Reject is an IoTHub concept. For AMQP, they map to Accepted/Released/Rejected.
+            if (result == IotHubMessageResult.ABANDON)
+            {
+                ackType = Released.getInstance();
+            }
+            else if (result == IotHubMessageResult.REJECT)
+            {
+                ackType = new Rejected();
+            }
+            else if (result == IotHubMessageResult.COMPLETE)
+            {
+                ackType = Accepted.getInstance();
+            }
+            else
+            {
+                log.warn("Invalid IoT Hub message result {}", result.name());
+                continue;
+            }
+
+            AmqpsSessionHandler sessionHandler = sessionHandlers.get(queuedAcknowledgement.getConnectionDeviceId());
+            if (sessionHandler != null && sessionHandler.acknowledgeReceivedMessage(queuedAcknowledgement, ackType))
+            {
+                continue;
+            }
+
+            log.warn("No sessions could acknowledge the message ({})", queuedAcknowledgement);
+        }
     }
 
     @Override
