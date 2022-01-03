@@ -71,24 +71,6 @@ public class ExportImportDeviceTest
         assertEquals(AuthenticationType.SAS, device.getAuthentication().getAuthenticationType());
     }
 
-    @Test
-    public void equalsWorks()
-    {
-        //arrange
-        ExportImportDevice device1 = createTestDevice(new AuthenticationMechanism(AuthenticationType.CERTIFICATE_AUTHORITY), ImportMode.Create, DeviceStatus.Disabled);
-        ExportImportDevice device2 = createTestDevice(new AuthenticationMechanism(AuthenticationType.CERTIFICATE_AUTHORITY), ImportMode.Create, DeviceStatus.Disabled);
-        ExportImportDevice device3 = createTestDevice(new AuthenticationMechanism(AuthenticationType.CERTIFICATE_AUTHORITY), ImportMode.CreateOrUpdate, DeviceStatus.Disabled);
-        ExportImportDevice device4 = createTestDevice(new AuthenticationMechanism(AuthenticationType.CERTIFICATE_AUTHORITY), ImportMode.Create, DeviceStatus.Enabled);
-        ExportImportDevice device5 = createTestDevice(new AuthenticationMechanism(AuthenticationType.SELF_SIGNED), ImportMode.Create, DeviceStatus.Enabled);
-
-        //assert
-        assertEquals(device1, device2);
-        assertNotEquals(device1, device3);
-        assertNotEquals(device1, device4);
-        assertNotEquals(device1, device5);
-        assertNotEquals(device1, 1);
-    }
-
     //Tests_SRS_SERVICE_SDK_JAVA_IMPORT_EXPORT_DEVICE_34_054: [This method shall convert this into an ExportImportDeviceParser object and return it.]
     @Test
     public void conversionToExportImportDeviceParser()

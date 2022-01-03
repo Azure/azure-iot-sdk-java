@@ -94,6 +94,6 @@ public class ProvisioningTPMTests
         }
 
         assertTrue("Registration completed, but not successfully", registrationCompletedSuccessfully.get());
-        provisioningDeviceClient.closeNow();
+        provisioningDeviceClient.close();
     }
 }

@@ -146,7 +146,7 @@ public class TwinClient
 
     private static void commonConstructorSetup()
     {
-        log.debug("Initialized a DeviceTwin client instance using SDK version {}", TransportUtils.serviceVersion);
+        log.debug("Initialized a TwinClient instance using SDK version {}", TransportUtils.serviceVersion);
     }
 
     /**
