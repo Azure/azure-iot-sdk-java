@@ -7,6 +7,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotificat
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
+import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import lombok.extern.slf4j.Slf4j;
@@ -91,6 +92,7 @@ public final class DeviceClient extends InternalClient implements Closeable
     {
         super(new IotHubConnectionString(connString), protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), clientOptions);
         commonConstructorVerifications();
+        commonConstructorSetup();
     }
 
     /**
@@ -121,6 +123,7 @@ public final class DeviceClient extends InternalClient implements Closeable
     {
         super(hostName, deviceId, null, sasTokenProvider, protocol, clientOptions, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
         commonConstructorVerifications();
+        commonConstructorSetup();
     }
 
     /**
@@ -188,6 +191,12 @@ public final class DeviceClient extends InternalClient implements Closeable
     private DeviceClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol, ClientOptions clientOptions) throws URISyntaxException, IOException
     {
         super(uri, deviceId, securityProvider, protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), clientOptions);
+        commonConstructorSetup();
+    }
+
+    private void commonConstructorSetup()
+    {
+        log.debug("Initialized a DeviceClient instance using SDK version {}", TransportUtils.CLIENT_VERSION);
     }
 
     private void commonConstructorVerifications() throws UnsupportedOperationException

@@ -9,6 +9,7 @@ import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSend;
 import lombok.extern.slf4j.Slf4j;
 
@@ -81,6 +82,8 @@ public class ServiceClient
                         iotHubServiceClientProtocol,
                         options.getProxyOptions(),
                         options.getSslContext());
+
+        commonConstructorSetup();
     }
 
     /**
@@ -148,6 +151,8 @@ public class ServiceClient
                         this.iotHubServiceClientProtocol,
                         options.getProxyOptions(),
                         options.getSslContext());
+
+        commonConstructorSetup();
     }
 
     /**
@@ -196,6 +201,8 @@ public class ServiceClient
                         iotHubServiceClientProtocol,
                         options.getProxyOptions(),
                         options.getSslContext());
+
+        commonConstructorSetup();
     }
 
     /**
@@ -243,6 +250,13 @@ public class ServiceClient
                 this.iotHubServiceClientProtocol,
                 options.getProxyOptions(),
                 options.getSslContext());
+
+        commonConstructorSetup();
+    }
+
+    private static void commonConstructorSetup()
+    {
+        log.debug("Initialized a ServiceClient instance using SDK version {}", TransportUtils.serviceVersion);
     }
 
     /**

@@ -48,6 +48,11 @@
             <version>1.0.4</version>
             <type>jar</type>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.25</version>
+        </dependency>
         <!-- test dependencies -->
         <dependency>
             <groupId>org.jmockit</groupId>
