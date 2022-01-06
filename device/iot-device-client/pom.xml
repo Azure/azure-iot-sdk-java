@@ -39,7 +39,6 @@
             <version>1.18.8</version>
             <scope>provided</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.github.jnr/jnr-unixsocket -->
         <dependency>
             <groupId>org.apache.qpid</groupId>
             <artifactId>proton-j</artifactId>
