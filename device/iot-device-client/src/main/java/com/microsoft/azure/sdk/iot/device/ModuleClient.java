@@ -150,6 +150,10 @@ public class ModuleClient extends InternalClient
      * @param unixDomainSocketChannel the implementation of the {@link UnixDomainSocketChannel} interface that will be used if any
      * unix domain socket communication is required. May be null if no unix domain socket communication is required. If
      * this argument is null and unix domain socket communication is required, this method will through an {@link IllegalArgumentException}.
+     * To check if unix domain socket communication is required for your Edge runtime, check its "IOTEDGE_WORKLOADURI"
+     * environment variable. If it is not present, or its value is prefixed with "HTTP" or "HTTPS", then no unix domain
+     * socket communication is required, and this argument can be set to null. If its value is present and is prefixed
+     * with "unix", then unix domain socket communication will be required, and this argument must not be null.
      * @return the created module client instance
      * @throws ModuleClientException if the module client cannot be created
      */
@@ -163,6 +167,10 @@ public class ModuleClient extends InternalClient
      * @param unixDomainSocketChannel the implementation of the {@link UnixDomainSocketChannel} interface that will be used if any
      * unix domain socket communication is required. May be null if no unix domain socket communication is required. If
      * this argument is null and unix domain socket communication is required, this method will through an {@link IllegalArgumentException}.
+     * To check if unix domain socket communication is required for your Edge runtime, check its "IOTEDGE_WORKLOADURI"
+     * environment variable. If it is not present, or its value is prefixed with "HTTP" or "HTTPS", then no unix domain
+     * socket communication is required, and this argument can be set to null. If its value is present and is prefixed
+     * with "unix", then unix domain socket communication will be required, and this argument must not be null.
      * @param protocol the protocol the module client instance will use
      * @return the created module client instance
      * @throws ModuleClientException if the module client cannot be created
@@ -177,6 +185,10 @@ public class ModuleClient extends InternalClient
      * @param unixDomainSocketChannel the implementation of the {@link UnixDomainSocketChannel} interface that will be used if any
      * unix domain socket communication is required. May be null if no unix domain socket communication is required. If
      * this argument is null and unix domain socket communication is required, this method will through an {@link IllegalArgumentException}.
+     * To check if unix domain socket communication is required for your Edge runtime, check its "IOTEDGE_WORKLOADURI"
+     * environment variable. If it is not present, or its value is prefixed with "HTTP" or "HTTPS", then no unix domain
+     * socket communication is required, and this argument can be set to null. If its value is present and is prefixed
+     * with "unix", then unix domain socket communication will be required, and this argument must not be null.
      * @param protocol the protocol the module client instance will use
      * @param clientOptions The options that allow configuration of the module client instance during initialization
      * @return the created module client instance
