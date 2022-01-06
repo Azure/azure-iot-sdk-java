@@ -36,7 +36,7 @@ public class HttpHsmSignatureProvider implements SignatureProvider
      * @param providerUri the uri for the signing provider
      * @param apiVersion the api version to call
      * @param unixDomainSocketChannel the implementation of the {@link UnixDomainSocketChannel} interface that will be used if any
-     * unixsocket communication is required. May be null if no unixsocket communication is required.
+     * unix domain socket communication is required. May be null if no unix domain socket communication is required.
      * @throws URISyntaxException if the provided uri cannot be parsed
      * @throws NoSuchAlgorithmException if the default sign request algorithm cannot be used
      */

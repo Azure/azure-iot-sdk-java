@@ -7,6 +7,7 @@ import com.microsoft.azure.sdk.iot.device.ModuleClient;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.hsm.UnixDomainSocketChannel;
 import jnr.unixsocket.UnixSocketAddress;
+import jnr.unixsocket.UnixSocketChannel;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -14,7 +15,7 @@ import java.nio.ByteBuffer;
 
 
 /**
- * Sample code that demonstrates how to implement the UnixDomainSocketChannel interface using JNR Unixsocket.
+ * Sample code that demonstrates how to implement the {@link UnixDomainSocketChannel} interface using JNR Unixsocket.
  *
  * Read more about JNR Unixsocket here: https://github.com/jnr/jnr-unixsocket
  */
@@ -23,18 +24,13 @@ public class UnixDomainSocketSample
     public static class UnixDomainSocketChannelImpl implements UnixDomainSocketChannel
     {
         UnixSocketAddress unixSocketAddress;
-        jnr.unixsocket.UnixSocketChannel channel;
+        UnixSocketChannel channel;
 
         @Override
-        public void setAddress(String address)
+        public void open(String address) throws IOException
         {
             this.unixSocketAddress = new UnixSocketAddress(address);
-        }
-
-        @Override
-        public void open() throws IOException
-        {
-            this.channel = jnr.unixsocket.UnixSocketChannel.open(this.unixSocketAddress);
+            this.channel = UnixSocketChannel.open(this.unixSocketAddress);
         }
 
         @Override
@@ -66,6 +62,9 @@ public class UnixDomainSocketSample
 
         ModuleClient moduleClient = ModuleClient.createFromEnvironment(unixDomainSocketChannel);
         moduleClient.open();
+
+        // perform module operations. See other samples for examples of what this looks like
+
         moduleClient.close();
     }
 }

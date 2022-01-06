@@ -25,7 +25,8 @@ public class HttpsHsmTrustBundleProvider implements TrustBundleProvider
      * @param providerUri the provider uri of the HSM to communicate with
      * @param apiVersion the api version to use
      * @param unixDomainSocketChannel the implementation of the {@link UnixDomainSocketChannel} interface that will be used if any
-     * unixsocket communication is required. May be null if no unixsocket communication is required.
+     * unix domain socket communication is required. May be null if no unix domain socket communication is required. If
+     * this argument is null and unix domain socket communication is required, this method will through an {@link IllegalArgumentException}.
      * @return the raw string containing all of the certificates to be trusted. May be one certificate or many certificates
      * @throws URISyntaxException if the providerUri cannot be parsed as a uri
      * @throws TransportException if the hsm cannot be reacheed

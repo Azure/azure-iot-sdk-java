@@ -245,9 +245,7 @@ public class HttpsHsmClientTest
                 mockedHttpsRequest.getBody();
                 result = expectedBody;
 
-                mockedUnixDomainSocketChannel.setAddress(anyString);
-
-                mockedUnixDomainSocketChannel.open();
+                mockedUnixDomainSocketChannel.open(anyString);
 
                 mockedUnixDomainSocketChannel.read((byte[]) any);
                 result = -1;

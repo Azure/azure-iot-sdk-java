@@ -38,6 +38,8 @@ public class HttpsHsmClient
     /**
      * Client object for sending sign requests to an HSM unit
      * @param baseUrl The base url of the HSM
+     * @param unixDomainSocketChannel the implementation of the {@link UnixDomainSocketChannel} interface that will be used if any
+     * unix domain socket communication is required. May be null if no unix domain socket communication is required.
      * @throws URISyntaxException if the provided base url cannot be converted to a URI
      */
     public HttpsHsmClient(String baseUrl, UnixDomainSocketChannel unixDomainSocketChannel) throws URISyntaxException
@@ -52,7 +54,7 @@ public class HttpsHsmClient
         this.baseUrl = baseUrl;
         this.scheme = new URI(baseUrl).getScheme();
 
-        // unixDomainSocketChannel is allowed to be null since the module may not need to do unix socket communication during setup depending on the Edge environment.
+        // unixDomainSocketChannel is allowed to be null since the module may not need to do unix domain socket communication during setup depending on the Edge environment.
         this.unixDomainSocketChannel = unixDomainSocketChannel;
     }
 
@@ -211,7 +213,7 @@ public class HttpsHsmClient
         {
             if (this.unixDomainSocketChannel == null)
             {
-                throw new IllegalArgumentException("Must provide an implementation of the UnixDomainSocketChannel interface since setup requires communicating over unix domain sockets.");
+                throw new IllegalArgumentException("Must provide an implementation of the UnixDomainSocketChannel interface since this edge runtime setup requires communicating over unix domain sockets.");
             }
             else
             {
@@ -236,19 +238,18 @@ public class HttpsHsmClient
      * Send an HTTP request over a unix domain socket
      * @param httpsRequest the request to send
      * @return the response from the HSM unit
-     * @throws IOException If the unix socket cannot be reached
+     * @throws IOException If the unix domain socket cannot be reached
      */
     private HttpsResponse sendHttpRequestUsingUnixSocket(HttpsRequest httpsRequest, String httpRequestPath, String httpRequestQueryString, String unixSocketAddress) throws IOException
     {
-        log.debug("Sending data over unix socket...");
+        log.debug("Sending data over unix domain socket");
 
         HttpsResponse response;
         try
         {
             //write to socket
             byte[] requestBytes = HttpsRequestResponseSerializer.serializeRequest(httpsRequest, httpRequestPath, httpRequestQueryString, unixSocketAddress);
-            unixDomainSocketChannel.setAddress(unixSocketAddress);
-            unixDomainSocketChannel.open();
+            unixDomainSocketChannel.open(unixSocketAddress);
 
             if (httpsRequest.getBody() != null)
             {
@@ -270,7 +271,7 @@ public class HttpsHsmClient
         }
         finally
         {
-            log.trace("Closing unix socket channel...");
+            log.trace("Closing unix domain socket");
             unixDomainSocketChannel.close();
         }
 
@@ -279,7 +280,7 @@ public class HttpsHsmClient
 
     private String readResponseFromChannel(UnixDomainSocketChannel channel) throws IOException
     {
-        log.debug("Reading response from unix socket channel...");
+        log.debug("Reading response from unix domain socket");
 
         byte[] buf = new byte[10];
         StringBuilder response = new StringBuilder();
