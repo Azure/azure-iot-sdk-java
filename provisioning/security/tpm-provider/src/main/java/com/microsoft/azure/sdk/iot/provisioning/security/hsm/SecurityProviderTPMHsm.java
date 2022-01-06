@@ -14,10 +14,12 @@ import tss.*;
 import tss.tpm.*;
 
 import java.util.Arrays;
+import java.util.Random;
 
 @Slf4j
 public class SecurityProviderTPMHsm extends SecurityProviderTpm
 {
+    private static Random rand;
     private static final String REGEX_FOR_VALID_REGISTRATION_ID = "^[a-z0-9-]{1,128}$";
     private static final TPM_HANDLE SRK_PERSISTENT_HANDLE = TPM_HANDLE.persistent(0x00000001);
     private static final TPM_HANDLE EK_PERSISTENT_HANDLE = TPM_HANDLE.persistent(0x00010001);
@@ -205,7 +207,7 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
     @Override
     public byte[] activateIdentityKey(byte[] key) throws SecurityProviderException
     {
-        InByteBuf actBlob = new InByteBuf(Arrays.copyOfRange(key, 0, key.length));
+        TpmBuffer actBlob = new TpmBuffer(Arrays.copyOfRange(key, 0, key.length));
 
         TPM2B_ID_OBJECT         credBlob = TPM2B_ID_OBJECT.fromTpm(actBlob);
         TPM2B_ENCRYPTED_SECRET  encSecret = TPM2B_ENCRYPTED_SECRET.fromTpm(actBlob);
@@ -225,7 +227,7 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
         //
         //SRS_SecurityProviderTPMHsm_25_009: [ This method shall start Authorization session with TPM. ]
         StartAuthSessionResponse sasResp = tpm.StartAuthSession(TPM_HANDLE.NULL, TPM_HANDLE.NULL,
-                                                                Helpers.getRandom(20), new byte[0], TPM_SE.POLICY,
+                                                                getRandom(20), new byte[0], TPM_SE.POLICY,
                                                                 new TPMT_SYM_DEF(TPM_ALG_ID.NULL, 0, TPM_ALG_ID.NULL), TPM_ALG_ID.SHA256);
 
         if (sasResp == null)
@@ -311,7 +313,7 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
                 // TPMU_PUBLIC_PARMS    parameters
                 new TPMS_SYMCIPHER_PARMS(symDef),
                 // TPMU_PUBLIC_ID       unique
-                new TPM2B_DIGEST_Symcipher());
+                new TPM2B_DIGEST_SYMCIPHER());
 
         // URI data are encrypted with the same symmetric key used as the inner protector of the new Device ID key duplication blob.
         TPMS_SENSITIVE_CREATE sensCreate = new TPMS_SENSITIVE_CREATE (new byte[0], innerWrapKey);
@@ -398,5 +400,20 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
     {
         //SRS_SecurityProviderTPMHsm_25_033: [ This method shall return the TPM2B_PUBLIC form of SRK. ]
         return (new TPM2B_PUBLIC(srkPublic)).toTpm();
+    }
+
+    /**
+     * Random number generator
+     * @param numBytes Size of the array to generate
+     * @return An array of random bytes
+     */
+    private byte[] getRandom(int numBytes)
+    {
+        if (rand==null)
+            rand = new Random();
+
+        byte[] res = new byte[numBytes];
+        rand.nextBytes(res);
+        return res;
     }
 }

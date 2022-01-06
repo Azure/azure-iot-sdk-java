@@ -82,7 +82,7 @@ public class IotHubTransport implements IotHubListener
     // Keys are deviceIds. Helps with getting configs based on deviceIds
     private final Map<String, DeviceClientConfig> deviceClientConfigs = new ConcurrentHashMap<>();
 
-    private String transportUniqueIdentifier = UUID.randomUUID().toString().substring(0, 8);
+    private final String transportUniqueIdentifier = UUID.randomUUID().toString().substring(0, 8);
 
     private ScheduledExecutorService taskScheduler;
 
@@ -115,8 +115,9 @@ public class IotHubTransport implements IotHubListener
      * Constructor for an IotHubTransport object with default values
      *
      * @param defaultConfig the config used for opening connections, retrieving retry policy, and checking protocol
-     * @param deviceIOConnectionStatusChangeCallback the callback used to notify the DeviceIO layer when a connection status change has occurred.
-     * @param isMultiplexing true if the transport will be used for multiplexed connections. False otherwise.
+     * @param deviceIOConnectionStatusChangeCallback the connection status callback used to notify the DeviceIO
+     * layer when connection events happen.
+     * @param isMultiplexing true if this connection will multiplex. False otherwise.
      * @throws IllegalArgumentException if defaultConfig is null
      */
     public IotHubTransport(DeviceClientConfig defaultConfig, IotHubConnectionStatusChangeCallback deviceIOConnectionStatusChangeCallback, boolean isMultiplexing) throws IllegalArgumentException
@@ -760,7 +761,7 @@ public class IotHubTransport implements IotHubListener
      *
      * @param callback the callback to be called. Can be null if callbackContext is not null
      * @param callbackContext a context to be passed to the callback. Can be {@code null}.
-     * @param deviceId the Id of the device whose connection status changes will go to this callback.
+     * @param deviceId the device that the connection status events being subscribed to are for.
      */
     public void setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext, String deviceId)
     {
@@ -946,7 +947,7 @@ public class IotHubTransport implements IotHubListener
 
     /**
      * If the provided received message has a saved callback, this function shall execute that callback and send the ack
-     * to the service
+     * returned by the callback to the service
      *
      * @param receivedMessage the message to acknowledge
      *
@@ -959,8 +960,22 @@ public class IotHubTransport implements IotHubListener
 
         if (messageCallback != null)
         {
-            log.debug("Executing callback for received message ({})", receivedMessage);
-            IotHubMessageResult result = messageCallback.execute(receivedMessage, messageCallbackContext);
+            // If a message callback throws an exception here the acknowledge will never be sent and this message will
+            // live in Iot hub until it expires.
+            IotHubMessageResult result = IotHubMessageResult.COMPLETE;
+            try
+            {
+                log.debug("Executing callback for received message ({})", receivedMessage);
+                result = messageCallback.execute(receivedMessage, messageCallbackContext);
+            }
+            catch (Throwable ex)
+            {
+                // We want to log this exception and bubble up to the transport
+                log.warn("Exception thrown while calling the message callback for received message {} in acknowledgeReceivedMessage. " +
+                        "This exception is preventing the completion of message delivery and can result in messages being" +
+                        "stuck in IoT hub until they expire. This can prevent the client from receiving futher messages.", receivedMessage, ex);
+                throw ex;
+            }
 
             try
             {
@@ -1398,7 +1413,7 @@ public class IotHubTransport implements IotHubListener
                 RetryDecision retryDecision = config.getRetryPolicy().getRetryDecision(packet.getCurrentRetryAttempt(), transportException);
                 if (retryDecision.shouldRetry())
                 {
-                    this.taskScheduler.schedule(new MessageRetryRunnable(this.waitingPacketsQueue, packet, this), retryDecision.getDuration(), MILLISECONDS);
+                    this.taskScheduler.schedule(new MessageRetryRunnable(this.waitingPacketsQueue, packet, this.sendThreadLock), retryDecision.getDuration(), MILLISECONDS);
                     return;
                 }
                 else

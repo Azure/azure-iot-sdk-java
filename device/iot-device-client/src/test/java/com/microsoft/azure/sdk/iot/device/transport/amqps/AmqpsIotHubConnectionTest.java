@@ -1103,7 +1103,7 @@ public class AmqpsIotHubConnectionTest {
 
     // Tests_SRS_AMQPSTRANSPORT_34_072: [If the provided message is not saved in the saved map of messages to acknowledge, this function shall return false.]
     @Test
-    public void sendMessageResultReturnsFalseIfNoAssociatedAmqpsMessage() throws TransportException
+    public void sendMessageDoesNotAckIfNoAssociatedAmqpsMessage() throws TransportException
     {
         //arrange
         baseExpectations();
@@ -1119,10 +1119,10 @@ public class AmqpsIotHubConnectionTest {
         };
 
         //act
-        boolean result = connection.sendMessageResult(mockedTransportMessage, IotHubMessageResult.ABANDON);
+        connection.sendMessageResult(mockedTransportMessage, IotHubMessageResult.ABANDON);
+        Deencapsulation.invoke(connection, "sendQueuedAcknowledgements");
 
         //assert
-        assertFalse(result);
         new Verifications()
         {
             {
@@ -1138,7 +1138,7 @@ public class AmqpsIotHubConnectionTest {
 
     // Tests_SRS_AMQPSTRANSPORT_34_073: [If this object is not CONNECTED, this function shall return false.]
     @Test
-    public void sendMessageResultReturnsFalseIfNotConnected() throws TransportException
+    public void sendMessageResultDoesNotAckIfNotConnected() throws TransportException
     {
         //arrange
         baseExpectations();
@@ -1154,10 +1154,10 @@ public class AmqpsIotHubConnectionTest {
         };
 
         //act
-        boolean result = connection.sendMessageResult(mockedTransportMessage, IotHubMessageResult.ABANDON);
+        connection.sendMessageResult(mockedTransportMessage, IotHubMessageResult.ABANDON);
+        Deencapsulation.invoke(connection, "sendQueuedAcknowledgements");
 
         //assert
-        assertFalse(result);
         new Verifications()
         {
             {

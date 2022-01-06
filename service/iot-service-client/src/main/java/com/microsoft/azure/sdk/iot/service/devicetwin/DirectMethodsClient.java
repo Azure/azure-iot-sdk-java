@@ -13,8 +13,10 @@ import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.Proxy;
@@ -26,6 +28,7 @@ import java.util.Objects;
 /**
  * The client to directly invoke direct methods on devices and modules in IoT hub.
  */
+@Slf4j
 public class DirectMethodsClient
 {
     private Integer requestId = 0;
@@ -63,6 +66,7 @@ public class DirectMethodsClient
         this.hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString).getHostName();
         this.options = options;
         this.iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
+        commonConstructorSetup();
     }
 
     /**
@@ -97,6 +101,8 @@ public class DirectMethodsClient
         this.options = options;
         this.credentialCache = new TokenCredentialCache(credential);
         this.hostName = hostName;
+        commonConstructorSetup();
+
     }
 
     /**
@@ -129,6 +135,12 @@ public class DirectMethodsClient
         this.options = options;
         this.azureSasCredential = azureSasCredential;
         this.hostName = hostName;
+        commonConstructorSetup();
+    }
+
+    private static void commonConstructorSetup()
+    {
+        log.debug("Initialized a DirectMethodsClient instance using SDK version {}", TransportUtils.serviceVersion);
     }
 
     /**

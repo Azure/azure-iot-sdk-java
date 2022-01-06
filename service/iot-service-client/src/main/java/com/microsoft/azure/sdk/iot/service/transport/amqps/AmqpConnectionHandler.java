@@ -144,6 +144,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         this.connectionOpenedRemotely = false;
         this.sessionOpenedRemotely = false;
         this.linkOpenedRemotely = false;
+        this.connectionId = UUID.randomUUID().toString();
 
         // Enables proton-j to automatically mirror the local state of the client with the remote state. For instance,
         // if the service closes a session, this handshaker will automatically close the session locally as well.
@@ -233,7 +234,6 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
     {
         super.onConnectionRemoteOpen(event);
         this.connection = event.getConnection();
-        this.connectionId = UUID.randomUUID().toString();
 
         this.connectionOpenedRemotely = true;
 

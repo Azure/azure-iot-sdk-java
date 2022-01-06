@@ -6,11 +6,11 @@ package com.microsoft.azure.sdk.iot.provisioning.service.contract;
 /**
  * Contains the SDK name and version information.
  */
-class SDKUtils
+public class SDKUtils
 {
     private static final String SERVICE_API_VERSION = "2019-03-31";
     private static final String PROVISIONING_SERVICE_CLIENT = "com.microsoft.azure.sdk.iot.provisioning.service.provisioning-service-client/";
-    private static final String PROVISIONING_SERVICE_CLIENT_VERSION = "1.9.2";
+    private static final String PROVISIONING_SERVICE_CLIENT_VERSION = "1.9.3";
 
     private static final String JAVA_RUNTIME = System.getProperty("java.version");
     private static final String OPERATING_SYSTEM = System.getProperty("java.runtime.name").toLowerCase().contains("android") ? "Android" : System.getProperty("os.name");
@@ -21,7 +21,7 @@ class SDKUtils
      *
      * @return A {@code String} with the rest API version.
      */
-    static String getServiceApiVersion()
+    public static String getServiceApiVersion()
     {
         /* SRS_SDK_UTILS_21_001: [The getServiceApiVersion shall return a string with the rest API version.] */
         return SERVICE_API_VERSION;

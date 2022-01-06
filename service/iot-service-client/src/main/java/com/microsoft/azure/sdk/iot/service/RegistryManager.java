@@ -17,9 +17,11 @@ import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
+import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -38,6 +40,7 @@ import java.util.Objects;
  * Use the RegistryManager client to manage the identity registry in IoT hubs.
  * To access twins, use the {@link TwinClient}.
  */
+@Slf4j
 public class RegistryManager
 {
     private final String hostName;
@@ -80,6 +83,7 @@ public class RegistryManager
 
         this.hostName = iotHubConnectionString.getHostName();
         this.options = options;
+        commonConstructorSetup();
     }
 
     /**
@@ -114,6 +118,7 @@ public class RegistryManager
         this.options = options;
         this.credentialCache = new TokenCredentialCache(credential);
         this.hostName = hostName;
+        commonConstructorSetup();
     }
 
     /**
@@ -146,6 +151,12 @@ public class RegistryManager
         this.options = options;
         this.azureSasCredential = azureSasCredential;
         this.hostName = hostName;
+        commonConstructorSetup();
+    }
+
+    private static void commonConstructorSetup()
+    {
+        log.debug("Initialized a RegistryManager instance client using SDK version {}", TransportUtils.serviceVersion);
     }
 
     /**
