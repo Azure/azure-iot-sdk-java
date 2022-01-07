@@ -4,7 +4,6 @@
 package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.JsonSyntaxException;
-import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import mockit.Deencapsulation;
 import org.junit.Test;
 import com.microsoft.azure.sdk.iot.provisioning.service.Helpers;

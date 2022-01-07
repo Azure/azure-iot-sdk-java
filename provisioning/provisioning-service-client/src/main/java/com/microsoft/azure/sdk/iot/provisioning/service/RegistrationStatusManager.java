@@ -3,8 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service;
 
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
+import com.microsoft.azure.sdk.iot.provisioning.service.transport.https.HttpMethod;
+import com.microsoft.azure.sdk.iot.provisioning.service.transport.https.HttpResponse;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.DeviceRegistrationState;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.QuerySpecification;
 import com.microsoft.azure.sdk.iot.provisioning.service.contract.ContractApiHttp;

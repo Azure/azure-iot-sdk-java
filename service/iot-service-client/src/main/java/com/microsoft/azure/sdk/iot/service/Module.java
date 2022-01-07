@@ -5,7 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.DeviceParser;
+import com.microsoft.azure.sdk.iot.service.serializers.DeviceParser;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
 import lombok.Getter;

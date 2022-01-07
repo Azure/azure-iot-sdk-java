@@ -7,7 +7,7 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.identity.ClientSecretCredentialBuilder;
-import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
+import com.microsoft.azure.sdk.iot.service.serializers.ErrorCodeDescription;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.FeedbackBatch;
 import com.microsoft.azure.sdk.iot.service.FeedbackReceiver;

@@ -1,8 +1,8 @@
 package com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.*;
-import com.microsoft.azure.sdk.iot.service.Configuration;
-import com.microsoft.azure.sdk.iot.service.ConfigurationMetrics;
+import com.microsoft.azure.sdk.iot.service.serializers.ConfigurationMetricsParser;
+import com.microsoft.azure.sdk.iot.service.serializers.ConfigurationParser;
+import com.microsoft.azure.sdk.iot.service.serializers.ParserUtility;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import org.junit.Assert;

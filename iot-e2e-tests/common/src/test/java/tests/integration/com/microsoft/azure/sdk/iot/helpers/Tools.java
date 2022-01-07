@@ -5,12 +5,11 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
-import com.azure.core.credential.TokenCredential;
-import com.microsoft.azure.sdk.iot.deps.serializer.AuthenticationParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.AuthenticationTypeParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.ExportImportDeviceParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.SymmetricKeyParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.X509ThumbprintParser;
+import com.microsoft.azure.sdk.iot.service.serializers.AuthenticationParser;
+import com.microsoft.azure.sdk.iot.service.serializers.AuthenticationTypeParser;
+import com.microsoft.azure.sdk.iot.service.serializers.ExportImportDeviceParser;
+import com.microsoft.azure.sdk.iot.service.serializers.SymmetricKeyParser;
+import com.microsoft.azure.sdk.iot.service.serializers.X509ThumbprintParser;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
@@ -48,9 +47,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
-import static tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants.*;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;

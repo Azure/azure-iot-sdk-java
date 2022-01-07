@@ -5,11 +5,10 @@
 
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
-import com.microsoft.azure.sdk.iot.deps.serializer.QueryRequestParser;
+import com.microsoft.azure.sdk.iot.service.serializers.ParserUtility;
+import com.microsoft.azure.sdk.iot.service.serializers.QueryRequestParser;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
-import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
@@ -20,7 +19,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.net.Proxy;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 import static junit.framework.TestCase.assertEquals;

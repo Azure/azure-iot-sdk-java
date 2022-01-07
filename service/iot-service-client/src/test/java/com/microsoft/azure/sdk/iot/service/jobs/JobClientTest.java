@@ -6,10 +6,10 @@
 package com.microsoft.azure.sdk.iot.service.jobs;
 
 import com.azure.core.credential.AzureSasCredential;
-import com.microsoft.azure.sdk.iot.deps.serializer.JobsParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
-import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
-import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
+import com.microsoft.azure.sdk.iot.service.serializers.JobsParser;
+import com.microsoft.azure.sdk.iot.service.serializers.MethodParser;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinCollection;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinState;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;

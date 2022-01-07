@@ -7,7 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 
 import com.azure.core.credential.AzureSasCredential;
-import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.service.Configuration;
 import com.microsoft.azure.sdk.iot.service.ConfigurationContent;
 import com.microsoft.azure.sdk.iot.service.Device;

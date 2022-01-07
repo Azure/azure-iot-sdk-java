@@ -5,8 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.QueryResponseParser;
-import com.microsoft.azure.sdk.iot.service.devicetwin.QueryCollectionResponse;
+import com.microsoft.azure.sdk.iot.service.serializers.QueryResponseParser;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;

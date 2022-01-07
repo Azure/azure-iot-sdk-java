@@ -5,7 +5,6 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 import lombok.Getter;
 

@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
+import com.microsoft.azure.sdk.iot.service.serializers.MethodParser;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;

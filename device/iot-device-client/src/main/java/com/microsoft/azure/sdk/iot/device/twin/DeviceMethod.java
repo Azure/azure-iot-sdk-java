@@ -3,7 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.device.twin;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import lombok.extern.slf4j.Slf4j;

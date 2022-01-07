@@ -5,10 +5,10 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationContentParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationMetricsParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
+import com.microsoft.azure.sdk.iot.service.serializers.ConfigurationContentParser;
+import com.microsoft.azure.sdk.iot.service.serializers.ConfigurationMetricsParser;
+import com.microsoft.azure.sdk.iot.service.serializers.ConfigurationParser;
+import com.microsoft.azure.sdk.iot.service.serializers.ParserUtility;
 import lombok.Getter;
 import lombok.Setter;
 

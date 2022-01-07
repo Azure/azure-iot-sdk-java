@@ -3,14 +3,11 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.*;
-import com.microsoft.azure.sdk.iot.service.DeviceStatus;
-import com.microsoft.azure.sdk.iot.service.ExportImportDevice;
-import com.microsoft.azure.sdk.iot.service.ImportMode;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
 import com.microsoft.azure.sdk.iot.service.auth.X509Thumbprint;
+import com.microsoft.azure.sdk.iot.service.serializers.AuthenticationTypeParser;
+import com.microsoft.azure.sdk.iot.service.serializers.ExportImportDeviceParser;
 import mockit.Deencapsulation;
 import org.junit.Test;
 

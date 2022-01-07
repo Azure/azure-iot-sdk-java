@@ -7,13 +7,12 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.mqtt;
 
-import com.microsoft.azure.sdk.iot.deps.transport.mqtt.MqttConnection;
-import com.microsoft.azure.sdk.iot.deps.transport.mqtt.MqttMessage;
-import com.microsoft.azure.sdk.iot.deps.transport.mqtt.MqttQos;
-import com.microsoft.azure.sdk.iot.deps.util.ObjectLock;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.mqtt.MqttConnection;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.mqtt.MqttMessage;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.mqtt.MqttQos;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.ObjectLock;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.mqtt.ContractAPIMqtt;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceConnectionException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.DeviceRegistrationParser;

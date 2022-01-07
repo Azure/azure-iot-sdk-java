@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.device.edge;
 
-import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
 import mockit.Deencapsulation;
 import org.junit.Test;
 
@@ -57,8 +56,8 @@ public class MethodRequestTest
         MethodRequest request = new MethodRequest(expectedMethodName, expectedPayload, expectedResponseTimeout, expectedConnectionTimeout);
 
         //assert
-        assertEquals(expectedResponseTimeout, Deencapsulation.getField(request, "responseTimeoutInSeconds"));
-        assertEquals(expectedConnectionTimeout, Deencapsulation.getField(request, "connectionTimeoutInSeconds"));
+        assertEquals(expectedResponseTimeout, (int) Deencapsulation.getField(request, "responseTimeoutInSeconds"));
+        assertEquals(expectedConnectionTimeout, (int) Deencapsulation.getField(request, "connectionTimeoutInSeconds"));
         assertEquals(expectedMethodName, Deencapsulation.getField(request, "methodName"));
         assertEquals(expectedPayload, Deencapsulation.getField(request, "payload"));
 
