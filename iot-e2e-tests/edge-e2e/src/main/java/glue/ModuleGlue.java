@@ -1,6 +1,7 @@
 package glue;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.hsm.UnixDomainSocketChannel;
 import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodCallback;
 import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
@@ -17,6 +18,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
+import samples.com.microsoft.azure.sdk.iot.UnixDomainSocketSample;
 
 import java.io.IOException;
 import java.net.*;
@@ -104,7 +106,8 @@ public class ModuleGlue
 
         try
         {
-            ModuleClient client = ModuleClient.createFromEnvironment(protocol);
+            UnixDomainSocketChannel unixDomainSocketChannel = new UnixDomainSocketSample.UnixDomainSocketChannelImpl();
+            ModuleClient client = ModuleClient.createFromEnvironment(unixDomainSocketChannel, protocol);
             client.open();
 
             this._clientCount++;

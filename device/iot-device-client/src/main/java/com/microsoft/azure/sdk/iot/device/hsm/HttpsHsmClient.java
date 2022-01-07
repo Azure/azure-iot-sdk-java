@@ -13,8 +13,6 @@ import com.microsoft.azure.sdk.iot.device.hsm.parser.TrustBundleResponse;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsRequest;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
-import jnr.unixsocket.UnixSocketAddress;
-import jnr.unixsocket.UnixSocketChannel;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
@@ -22,7 +20,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.*;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 @Slf4j
@@ -30,6 +27,7 @@ public class HttpsHsmClient
 {
     private final String baseUrl;
     private final String scheme;
+    private final UnixDomainSocketChannel unixDomainSocketChannel;
 
     private static final String HTTPS_SCHEME = "https";
     private static final String HTTP_SCHEME = "http";
@@ -40,9 +38,11 @@ public class HttpsHsmClient
     /**
      * Client object for sending sign requests to an HSM unit
      * @param baseUrl The base url of the HSM
+     * @param unixDomainSocketChannel the implementation of the {@link UnixDomainSocketChannel} interface that will be used if any
+     * unix domain socket communication is required. May be null if no unix domain socket communication is required.
      * @throws URISyntaxException if the provided base url cannot be converted to a URI
      */
-    public HttpsHsmClient(String baseUrl) throws URISyntaxException
+    public HttpsHsmClient(String baseUrl, UnixDomainSocketChannel unixDomainSocketChannel) throws URISyntaxException
     {
         if (baseUrl == null || baseUrl.isEmpty())
         {
@@ -53,6 +53,9 @@ public class HttpsHsmClient
 
         this.baseUrl = baseUrl;
         this.scheme = new URI(baseUrl).getScheme();
+
+        // unixDomainSocketChannel is allowed to be null since the module may not need to do unix domain socket communication during setup depending on the Edge environment.
+        this.unixDomainSocketChannel = unixDomainSocketChannel;
     }
 
     /**
@@ -208,6 +211,15 @@ public class HttpsHsmClient
         }
         else if (this.scheme.equalsIgnoreCase(UNIX_SCHEME))
         {
+            if (this.unixDomainSocketChannel == null)
+            {
+                throw new IllegalArgumentException("Must provide an implementation of the UnixDomainSocketChannel interface since this edge runtime setup requires communicating over unix domain sockets.");
+            }
+            else
+            {
+                log.trace("User provided UnixDomainSocketChannel will be used for setup.");
+            }
+
             String unixAddressPrefix = UNIX_SCHEME + "://";
             String localUnixSocketPath = baseUri.substring(baseUri.indexOf(unixAddressPrefix) + unixAddressPrefix.length());
 
@@ -226,20 +238,18 @@ public class HttpsHsmClient
      * Send an HTTP request over a unix domain socket
      * @param httpsRequest the request to send
      * @return the response from the HSM unit
-     * @throws IOException If the unix socket cannot be reached
+     * @throws IOException If the unix domain socket cannot be reached
      */
     private HttpsResponse sendHttpRequestUsingUnixSocket(HttpsRequest httpsRequest, String httpRequestPath, String httpRequestQueryString, String unixSocketAddress) throws IOException
     {
-        log.debug("Sending data over unix socket...");
+        log.debug("Sending data over unix domain socket");
 
-        UnixSocketChannel channel = null;
         HttpsResponse response;
         try
         {
             //write to socket
             byte[] requestBytes = HttpsRequestResponseSerializer.serializeRequest(httpsRequest, httpRequestPath, httpRequestQueryString, unixSocketAddress);
-            UnixSocketAddress address = new UnixSocketAddress(unixSocketAddress);
-            channel = UnixSocketChannel.open(address);
+            unixDomainSocketChannel.open(unixSocketAddress);
 
             if (httpsRequest.getBody() != null)
             {
@@ -248,56 +258,43 @@ public class HttpsHsmClient
                 outputStream.write(requestBytes);
                 outputStream.write(httpsRequest.getBody());
 
-                channel.write(ByteBuffer.wrap(outputStream.toByteArray()));
+                unixDomainSocketChannel.write(outputStream.toByteArray());
             }
             else
             {
-                channel.write(ByteBuffer.wrap(requestBytes));
+                unixDomainSocketChannel.write(requestBytes);
             }
 
             //read response
-            String responseString = readResponseFromChannel(channel);
+            String responseString = readResponseFromChannel(unixDomainSocketChannel);
             response = HttpsRequestResponseSerializer.deserializeResponse(new BufferedReader(new StringReader(responseString)));
         }
         finally
         {
-            if (channel != null)
-            {
-                log.trace("Closing unix socket channel...");
-                channel.close();
-            }
+            log.trace("Closing unix domain socket");
+            unixDomainSocketChannel.close();
         }
 
         return response;
     }
 
-    private String readResponseFromChannel(UnixSocketChannel channel) throws IOException
+    private String readResponseFromChannel(UnixDomainSocketChannel channel) throws IOException
     {
-        log.debug("Reading response from unix socket channel...");
+        log.debug("Reading response from unix domain socket");
 
-        ByteBuffer buf = ByteBuffer.allocateDirect(10);
+        byte[] buf = new byte[10];
         StringBuilder response = new StringBuilder();
         int numRead = 0;
         while (numRead >= 0)
         {
-            // read() places read bytes at the buffer's position so the
-            // position should always be properly set before calling read()
-            // This method sets the position to 0
-            buf.rewind();
-
             // Read bytes from the channel
             numRead = channel.read(buf);
 
-            // The read() method also moves the position so in order to
-            // read the new bytes, the buffer's position must be
-            // set back to 0
-            buf.rewind();
-
             // Read bytes from ByteBuffer; see also
             // e159 Getting Bytes from a ByteBuffer
-            for (int i=0; i<numRead; i++)
+            for (int i = 0; i < numRead; i++)
             {
-                response.append(new String(new byte[]{buf.get()}, StandardCharsets.US_ASCII));
+                response.append(new String(buf, StandardCharsets.US_ASCII));
             }
         }
 

@@ -79,7 +79,7 @@ public class ModuleInvokeMethodSample
         String deviceIdToInvokeOn = args[3];
         String moduleIdToInvokeOn = args.length > 4 ? args[4] : null;
 
-        ModuleClient client = ModuleClient.createFromEnvironment(protocol);
+        ModuleClient client = ModuleClient.createFromEnvironment(new UnixDomainSocketSample.UnixDomainSocketChannelImpl(), protocol);
         client.open();
 
         MethodRequest methodRequest = new MethodRequest(methodName, methodPayload);

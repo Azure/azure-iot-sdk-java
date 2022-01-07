@@ -7,22 +7,14 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.samples.device</groupId>
-    <artifactId>module-invoke-method-sample</artifactId>
-    <name>Invoke Method Using Module Sample</name>
+    <artifactId>unix-domain-socket-sample</artifactId>
+    <name>Unix Domain Socket Sample</name>
     <developers>
         <developer>
             <id>microsoft</id>
             <name>Microsoft</name>
         </developer>
     </developers>
-    <dependencies>
-        <dependency>
-            <groupId>com.microsoft.azure.sdk.iot.samples.device</groupId>
-            <artifactId>unix-domain-socket-sample</artifactId>
-            <version>1.18.0</version>
-            <scope>compile</scope>
-        </dependency>
-    </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -36,7 +28,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>samples.com.microsoft.azure.sdk.iot.ModuleInvokeMethodSample</mainClass>
+                            <mainClass>samples.com.microsoft.azure.sdk.iot.UnixDomainSocketSample</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
