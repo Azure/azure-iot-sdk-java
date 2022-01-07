@@ -62,6 +62,12 @@
             <artifactId>${iot-service-client-artifact-id}</artifactId>
             <version>${iot-service-client-version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot.samples.device</groupId>
+            <artifactId>unix-domain-socket-sample</artifactId>
+            <version>1.18.0</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
