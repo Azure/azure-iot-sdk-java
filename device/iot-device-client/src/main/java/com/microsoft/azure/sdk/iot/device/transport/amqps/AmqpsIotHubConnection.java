@@ -571,15 +571,27 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
         //Sometimes the remote errorCondition object is not null, but all of its fields are null. In this case, check the local error condition
         //for the error details.
+        boolean isALocalErrorCondition = false;
         if (errorCondition == null || (errorCondition.getCondition() == null && errorCondition.getDescription() == null && errorCondition.getInfo() == null))
         {
             errorCondition = event.getTransport().getCondition();
+            isALocalErrorCondition = true;
         }
 
         this.savedException = AmqpsExceptionTranslator.convertFromAmqpException(errorCondition);
 
-        log.error("Amqp transport error occurred, closing the amqps connection", this.savedException);
-        event.getConnection().close();
+        // In the event that we get a local error and the connection is already in the closed state we need to manually call
+        // onConnectionLocalClose. Proton will not queue the CONNECTION_LOCAL_CLOSE event since the Endpoint status is CLOSED
+        if (event.getConnection().getLocalState() == EndpointState.CLOSED && isALocalErrorCondition)
+        {
+            log.error("Amqp transport error occurred, calling onConnectionLocalClose", this.savedException);
+            onConnectionLocalClose(event);
+        }
+        else
+        {
+            log.error("Amqp transport error occurred, closing the AMQPS connection", this.savedException);
+            event.getConnection().close();
+        }
     }
 
     @Override
