@@ -75,11 +75,6 @@ public class ProvisioningServiceClientTest
 
     private static final String VALID_HOST_NAME = "testProvisioningHostName.azure.net";
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_001: [The createFromConnectionString shall create a new instance of this class using the provided connectionString.] */
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_009: [The constructor shall create a new instance of the contractApiHttp class using the provided connectionString.] */
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_012: [The constructor shall create a new instance of the IndividualEnrollmentManger.] */
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_013: [The constructor shall create a new instance of the EnrollmentGroupManager.] */
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_014: [The constructor shall create a new instance of the RegistrationStatusManager.] */
     @Test
     public void factorySucceed()
     {
@@ -112,7 +107,6 @@ public class ProvisioningServiceClientTest
         assertNotNull(provisioningServiceClient);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_004: [The constructor shall throw IllegalArgumentException if the provided connectionString is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void factoryThrowsOnConnectionStringNull()
     {
@@ -123,7 +117,6 @@ public class ProvisioningServiceClientTest
         // assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_004: [The constructor shall throw IllegalArgumentException if the provided connectionString is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void factoryThrowsOnConnectionStringEmpty()
     {
@@ -134,7 +127,6 @@ public class ProvisioningServiceClientTest
         // assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_005: [The constructor shall throw IllegalArgumentException if the ProvisioningConnectionString or one of the inner Managers failed to create a new instance.] */
     @Test (expected = IllegalArgumentException.class)
     public void factoryThrowsOnProvisioningConnectionStringFail()
     {
@@ -155,7 +147,6 @@ public class ProvisioningServiceClientTest
         assertNotNull(provisioningServiceClient);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_005: [The constructor shall throw IllegalArgumentException if the ProvisioningConnectionString or one of the inner Managers failed to create a new instance.] */
     @Test (expected = IllegalArgumentException.class)
     public void factoryThrowsOnContractApiHttpFail()
     {
@@ -179,7 +170,6 @@ public class ProvisioningServiceClientTest
         assertNotNull(provisioningServiceClient);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_005: [The constructor shall throw IllegalArgumentException if the ProvisioningConnectionString or one of the inner Managers failed to create a new instance.] */
     @Test (expected = IllegalArgumentException.class)
     public void factoryThrowsOnIndividualEnrollmentManagerFail()
     {
@@ -206,7 +196,6 @@ public class ProvisioningServiceClientTest
         assertNotNull(provisioningServiceClient);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_005: [The constructor shall throw IllegalArgumentException if the ProvisioningConnectionString or one of the inner Managers failed to create a new instance.] */
     @Test (expected = IllegalArgumentException.class)
     public void factoryThrowsOnEnrollmentGroupManagerFail()
     {
@@ -236,7 +225,6 @@ public class ProvisioningServiceClientTest
         assertNotNull(provisioningServiceClient);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_005: [The constructor shall throw IllegalArgumentException if the ProvisioningConnectionString or one of the inner Managers failed to create a new instance.] */
     @Test (expected = IllegalArgumentException.class)
     public void factoryThrowsOnRegistrationStatusManagerFail()
     {
@@ -269,11 +257,6 @@ public class ProvisioningServiceClientTest
         assertNotNull(provisioningServiceClient);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_002: [The TokenCredential constructor shall create a new instance of this class using the provided hostName and credential.] */
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_010: [The constructor shall create a new instance of the contractApiHttp class using the provided credential.] */
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_012: [The constructor shall create a new instance of the IndividualEnrollmentManger.] */
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_013: [The constructor shall create a new instance of the EnrollmentGroupManager.] */
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_014: [The constructor shall create a new instance of the RegistrationStatusManager.] */
     @Test
     public void tokenCredentialConstructorSucceed()
     {
@@ -299,7 +282,6 @@ public class ProvisioningServiceClientTest
         assertNotNull(provisioningServiceClient);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_006: [The constructor shall throw IllegalArgumentException if the provided hostName is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void tokenCredentialConstructorThrowsOnNullHostName()
     {
@@ -312,7 +294,6 @@ public class ProvisioningServiceClientTest
         //assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_006: [The constructor shall throw IllegalArgumentException if the provided hostName is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void tokenCredentialConstructorThrowsOnEmptyHostName()
     {
@@ -325,7 +306,6 @@ public class ProvisioningServiceClientTest
         //assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_007: [The constructor shall throw IllegalArgumentException if the provided credential is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void tokenCredentialConstructorThrowsOnNullCredential()
     {
@@ -338,11 +318,6 @@ public class ProvisioningServiceClientTest
         //assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_003: [The AzureSasCredential constructor shall create a new instance of this class using the provided hostName and azureSasCredential.] */
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_011: [The constructor shall create a new instance of the contractApiHttp class using the provided azureSasCredential.] */
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_012: [The constructor shall create a new instance of the IndividualEnrollmentManger.] */
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_013: [The constructor shall create a new instance of the EnrollmentGroupManager.] */
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_014: [The constructor shall create a new instance of the RegistrationStatusManager.] */
     @Test
     public void azureSasCredentialConstructorSucceed()
     {
@@ -368,7 +343,6 @@ public class ProvisioningServiceClientTest
         assertNotNull(provisioningServiceClient);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_006: [The constructor shall throw IllegalArgumentException if the provided hostName is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void azureSasCredentialConstructorThrowsOnNullHostName()
     {
@@ -381,7 +355,6 @@ public class ProvisioningServiceClientTest
         //assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_006: [The constructor shall throw IllegalArgumentException if the provided hostName is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void azureSasCredentialConstructorThrowsOnEmptyHostName()
     {
@@ -394,7 +367,6 @@ public class ProvisioningServiceClientTest
         //assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_009: [The constructor shall create a new instance of the contractApiHttp class using the provided connectionString.] */
     @Test (expected = IllegalArgumentException.class)
     public void azureSasCredentialConstructorThrowsOnNullCredential()
     {
@@ -407,7 +379,6 @@ public class ProvisioningServiceClientTest
         //assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_015: [The createOrUpdateIndividualEnrollment shall create a new Provisioning enrollment by calling the createOrUpdate in the individualEnrollmentManager.] */
     @Test
     public void createOrUpdateIndividualEnrollmentSucceed(
             @Mocked final IndividualEnrollment mockedIndividualEnrollment)
@@ -431,7 +402,6 @@ public class ProvisioningServiceClientTest
         assertNotNull(result);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_016: [The runBulkEnrollmentOperation shall do a Provisioning operation over individualEnrollment by calling the bulkOperation in the individualEnrollmentManager.] */
     @Test
     public void runBulkEnrollmentOperationSucceed(
             @Mocked final IndividualEnrollment mockedIndividualEnrollment,
@@ -458,7 +428,6 @@ public class ProvisioningServiceClientTest
         assertNotNull(result);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_017: [The getIndividualEnrollment shall retrieve the individualEnrollment information for the provided registrationId by calling the get in the individualEnrollmentManager.] */
     @Test
     public void getIndividualEnrollmentSucceed(
             @Mocked final IndividualEnrollment mockedIndividualEnrollment)
@@ -483,7 +452,6 @@ public class ProvisioningServiceClientTest
         assertNotNull(result);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_018: [The deleteIndividualEnrollment shall delete the individualEnrollment for the provided enrollment by calling the delete in the individualEnrollmentManager.] */
     @Test
     public void deleteIndividualEnrollmentWithEnrollmentSucceed(
             @Mocked final IndividualEnrollment mockedIndividualEnrollment)
@@ -505,7 +473,6 @@ public class ProvisioningServiceClientTest
         // assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_019: [The deleteIndividualEnrollment shall delete the individualEnrollment for the provided registrationId by calling the delete in the individualEnrollmentManager.] */
     @Test
     public void deleteIndividualEnrollmentWithRegistrationIdSucceed()
             throws ProvisioningServiceClientException
@@ -527,7 +494,6 @@ public class ProvisioningServiceClientTest
         // assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_020: [The deleteIndividualEnrollment shall delete the individualEnrollment for the provided registrationId and etag by calling the delete in the individualEnrollmentManager.] */
     @Test
     public void deleteIndividualEnrollmentWithRegistrationIdAndEtagSucceed()
             throws ProvisioningServiceClientException
@@ -550,7 +516,6 @@ public class ProvisioningServiceClientTest
         // assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_021: [The createIndividualEnrollmentQuery shall create a new individual enrolment query by calling the createQuery in the individualEnrollmentManager.] */
     @Test
     public void createIndividualEnrollmentQuerySucceed(
             @Mocked final QuerySpecification mockedQuerySpecification)
@@ -573,7 +538,6 @@ public class ProvisioningServiceClientTest
         assertNotNull(query);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_022: [The createIndividualEnrollmentQuery shall create a new individual enrolment query by calling the createQuery in the individualEnrollmentManager.] */
     @Test
     public void createIndividualEnrollmentQueryWithPageSizeSucceed(
             @Mocked final QuerySpecification mockedQuerySpecification)
@@ -596,7 +560,6 @@ public class ProvisioningServiceClientTest
         assertNotNull(query);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_023: [The createOrUpdateEnrollmentGroup shall create a new Provisioning enrollmentGroup by calling the createOrUpdate in the enrollmentGroupManager.] */
     @Test
     public void createOrUpdateEnrollmentGroupSucceed(
             @Mocked final EnrollmentGroup mockedEnrollmentGroup)
@@ -620,7 +583,6 @@ public class ProvisioningServiceClientTest
         assertNotNull(result);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_024: [The getEnrollmentGroup shall retrieve the enrollmentGroup information for the provided enrollmentGroupId by calling the get in the enrollmentGroupManager.] */
     @Test
     public void getEnrollmentGroupSucceed(
             @Mocked final EnrollmentGroup mockedEnrollmentGroup)
@@ -645,7 +607,6 @@ public class ProvisioningServiceClientTest
         assertNotNull(result);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_025: [The deleteEnrollmentGroup shall delete the enrollmentGroup for the provided enrollmentGroup by calling the delete in the enrollmentGroupManager.] */
     @Test
     public void deleteEnrollmentGroupWithEnrollmentGroupSucceed(
             @Mocked final EnrollmentGroup mockedEnrollmentGroup)
@@ -667,7 +628,6 @@ public class ProvisioningServiceClientTest
         // assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_026: [The deleteEnrollmentGroup shall delete the enrollmentGroup for the provided enrollmentGroupId by calling the delete in the enrollmentGroupManager.] */
     @Test
     public void deleteEnrollmentGroupWithEnrollmentGroupIdSucceed()
             throws ProvisioningServiceClientException
@@ -689,7 +649,6 @@ public class ProvisioningServiceClientTest
         // assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_027: [The deleteEnrollmentGroup shall delete the enrollmentGroup for the provided enrollmentGroupId and eTag by calling the delete in the enrollmentGroupManager.] */
     @Test
     public void deleteEnrollmentGroupWithEnrollmentGroupIdAndEtagSucceed()
             throws ProvisioningServiceClientException
@@ -712,7 +671,6 @@ public class ProvisioningServiceClientTest
         // assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_028: [The createEnrollmentGroupQuery shall create a new enrolmentGroup query by calling the createQuery in the enrollmentGroupManager.] */
     @Test
     public void createEnrollmentGroupQuerySucceed(
             @Mocked final QuerySpecification mockedQuerySpecification)
@@ -735,7 +693,6 @@ public class ProvisioningServiceClientTest
         assertNotNull(query);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_029: [The createEnrollmentGroupQuery shall create a new enrolmentGroup query by calling the createQuery in the enrollmentGroupManager.] */
     @Test
     public void createEnrollmentGroupQueryWithPageSizeSucceed(
             @Mocked final QuerySpecification mockedQuerySpecification)
@@ -758,7 +715,6 @@ public class ProvisioningServiceClientTest
         assertNotNull(query);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_030: [The getDeviceRegistrationState shall retrieve the deviceRegistrationState information for the provided id by calling the get in the registrationStatusManager.] */
     @Test
     public void getDeviceRegistrationStateSucceed(
             @Mocked final DeviceRegistrationState mockedDeviceRegistrationState)
@@ -783,7 +739,6 @@ public class ProvisioningServiceClientTest
         assertNotNull(result);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_031: [The deleteDeviceRegistrationState shall delete the deviceRegistrationState for the provided DeviceRegistrationState by calling the delete in the registrationStatusManager.] */
     @Test
     public void deleteDeviceRegistrationStateWithDeviceRegistrationStateSucceed(
             @Mocked final DeviceRegistrationState mockedDeviceRegistrationState)
@@ -805,7 +760,6 @@ public class ProvisioningServiceClientTest
         // assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_032: [The deleteDeviceRegistrationState shall delete the deviceRegistrationState for the provided id by calling the delete in the registrationStatusManager.] */
     @Test
     public void deleteDeviceRegistrationStateWithIdSucceed()
             throws ProvisioningServiceClientException
@@ -827,7 +781,6 @@ public class ProvisioningServiceClientTest
         // assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_033: [The deleteDeviceRegistrationState shall delete the deviceRegistrationState for the provided id and eTag by calling the delete in the registrationStatusManager.] */
     @Test
     public void deleteDeviceRegistrationStateWithIdAndEtagSucceed()
             throws ProvisioningServiceClientException
@@ -850,7 +803,6 @@ public class ProvisioningServiceClientTest
         // assert
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_034: [The createEnrollmentGroupRegistrationStateQuery shall create a new deviceRegistrationState query by calling the createQuery in the registrationStatusManager.] */
     @Test
     public void createRegistrationStateQuerySucceed(
             @Mocked final QuerySpecification mockedQuerySpecification)
@@ -874,7 +826,6 @@ public class ProvisioningServiceClientTest
         assertNotNull(query);
     }
 
-    /* SRS_PROVISIONING_SERVICE_CLIENT_21_035: [The createEnrollmentGroupRegistrationStateQuery shall create a new deviceRegistrationState query by calling the createQuery in the registrationStatusManager.] */
     @Test
     public void createRegistrationStateQueryWithPageSizeSucceed(
             @Mocked final QuerySpecification mockedQuerySpecification)
