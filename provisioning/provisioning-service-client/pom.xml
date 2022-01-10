@@ -83,12 +83,6 @@
             <artifactId>azure-core</artifactId>
             <version>1.21.0</version>
         </dependency>
-        <dependency>
-            <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>iot-service-client</artifactId>
-            <version>1.33.2</version>
-            <scope>compile</scope>
-        </dependency>
     </dependencies>
     <build>
         <plugins>

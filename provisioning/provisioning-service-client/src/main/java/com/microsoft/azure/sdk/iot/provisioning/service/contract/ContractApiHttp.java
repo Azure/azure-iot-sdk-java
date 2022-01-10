@@ -15,14 +15,13 @@ import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningSasToke
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientExceptionManager;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientTransportException;
-import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
+import com.microsoft.azure.sdk.iot.provisioning.service.auth.TokenCredentialCache;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * This client handles the Device Provisioning Service HTTP communication.
