@@ -102,7 +102,7 @@ import java.util.Map;
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iothub/devicetwinapi">Device Twin Api</a>
  */
 @SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
-public class TwinState extends RegisterManager
+public class TwinState
 {
     // the twin tags
     private static final String TAGS_TAG = "tags";
@@ -115,26 +115,6 @@ public class TwinState extends RegisterManager
     @Expose(serialize = false)
     @SerializedName(PROPERTIES_TAG)
     private TwinProperties properties;
-
-    // the twin configurations
-    private static final String CONFIGURATION_TAG = "configurations";
-    @Expose(serialize = false)
-    @SerializedName(CONFIGURATION_TAG)
-    @Getter
-    @Setter
-    private Map<String, ConfigurationInfo> configurations;
-
-    private static final String DEVICE_SCOPE = "deviceScope";
-    @SerializedName(DEVICE_SCOPE)
-    @Getter
-    @Setter
-    private String deviceScope;
-
-    private static final String PARENT_SCOPES = "parentScopes";
-    @SerializedName(PARENT_SCOPES)
-    @Getter
-    @Setter
-    private final List<String> parentScopes = new ArrayList<>();
 
     /**
      * CONSTRUCTOR
@@ -383,15 +363,6 @@ public class TwinState extends RegisterManager
         TwinProperties result = gson.fromJson(json, TwinProperties.class);
 
         return new TwinState(null, result.getDesired(), result.getReported());
-    }
-
-    /**
-     * Get the connection state
-     * @return the connection state
-     */
-    public String getConnectionState()
-    {
-        return this.connectionState.toString();
     }
 
     /**
