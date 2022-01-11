@@ -58,13 +58,13 @@ public class Helpers
      */
     public static <k,v> void assertMap(Map<k, v> actual, Map<k, v> expected, String message)
     {
-        if(expected == null)
+        if (expected == null)
         {
             assertNull((message==null?"Expected null map, received " + actual : message), actual);
         }
         else
         {
-            if(message == null)
+            if (message == null)
             {
                 assertEquals(expected.size(), actual.size());
             }
@@ -78,9 +78,9 @@ public class Helpers
                 k key = (k)entry.getKey();
                 v actualValue = actual.get(key);
                 v expectedValue = expected.get(key);
-                if(expectedValue == null)
+                if (expectedValue == null)
                 {
-                    if(message == null)
+                    if (message == null)
                     {
                         assertNull(actualValue);
                     }
@@ -89,9 +89,9 @@ public class Helpers
                         assertNull(message, actualValue);
                     }
                 }
-                else if(actualValue == null)
+                else if (actualValue == null)
                 {
-                    if(message == null)
+                    if (message == null)
                     {
                         fail("Expected key:" + key + " does not exist in Actual Map");
                     }
@@ -101,15 +101,15 @@ public class Helpers
                         fail(message);
                     }
                 }
-                else if(expectedValue instanceof Map)
+                else if (expectedValue instanceof Map)
                 {
-                    if(actualValue instanceof Map)
+                    if (actualValue instanceof Map)
                     {
                         assertMap((Map<k, v>)actualValue, (Map<k, v>)expectedValue, message);
                     }
                     else
                     {
-                        if(message == null)
+                        if (message == null)
                         {
                             fail("Map " + key + " contains invalid Object");
                         }
@@ -120,16 +120,16 @@ public class Helpers
                         }
                     }
                 }
-                else if(expectedValue instanceof ArrayList)
+                else if (expectedValue instanceof ArrayList)
                 {
-                    if(actualValue instanceof ArrayList)
+                    if (actualValue instanceof ArrayList)
                     {
                         assertArray((ArrayList)actualValue, (ArrayList)expectedValue, message);
                     }
                 }
-                else if(!actualValue.equals(expectedValue))
+                else if (!actualValue.equals(expectedValue))
                 {
-                    if(message == null)
+                    if (message == null)
                     {
                         assertEquals("Map failed on " + key + ": <" + actualValue + "> != <" + expectedValue + ">", actualValue.toString(), expectedValue.toString());
                     }
@@ -145,7 +145,7 @@ public class Helpers
 
     public static void assertArray(ArrayList actualArray, ArrayList expectedArray,  String message)
     {
-        if(expectedArray == null)
+        if (expectedArray == null)
         {
             assertNull((message==null?"Expected null map, received " + actualArray : message), actualArray);
         }
@@ -169,7 +169,7 @@ public class Helpers
 
     public static void assertArrayContainsElement(ArrayList actualArray, Object expectedElement, String message)
     {
-        if(expectedElement == null)
+        if (expectedElement == null)
         {
             assertNull((message==null?"Expected null map, received " + actualArray : message), actualArray);
         }
@@ -177,7 +177,7 @@ public class Helpers
         {
             for (Object actualElement:actualArray)
             {
-                if(actualElement.equals(expectedElement))
+                if (actualElement.equals(expectedElement))
                 {
                     return;
                 }
@@ -205,7 +205,7 @@ public class Helpers
     {
         Gson gson = new GsonBuilder().create();
 
-        if(expectedJson == null)
+        if (expectedJson == null)
         {
             assertNull(actualJson);
         }
@@ -214,7 +214,7 @@ public class Helpers
             Object actual = gson.fromJson(actualJson, Object.class);
             Object expected = gson.fromJson(expectedJson, Object.class);
 
-            if(actual instanceof Map)
+            if (actual instanceof Map)
             {
                 assertMap((Map<String, Object>) actual, (Map<String, Object>)expected, "\r\nExpected :" + expectedJson + "\r\nActual   :" + actualJson);
             }
@@ -325,7 +325,7 @@ public class Helpers
         assertNotNull(expected);
         assertNotNull(test);
         assertEquals(expected.size(), test.size());
-        for(Object o : expected)
+        for (Object o : expected)
         {
             assertTrue(test.contains(o));
         }
@@ -337,7 +337,7 @@ public class Helpers
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT_NO_MS);
         dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
 
-        if((dataTime == null) || dataTime.isEmpty() || (dataTime.charAt(dataTime.length()-1) != 'Z'))
+        if ((dataTime == null) || dataTime.isEmpty() || (dataTime.charAt(dataTime.length()-1) != 'Z'))
         {
             throw new ParseException("date is null, empty, or invalid", 0);
         }
@@ -346,14 +346,14 @@ public class Helpers
         {
             String[] splitDateTime = dataTime.split(MILLISECONDS_REGEX);
             int milliseconds;
-            if(splitDateTime.length > EXPECTED_PARTS_IN_DATE)
+            if (splitDateTime.length > EXPECTED_PARTS_IN_DATE)
             {
                 throw new ParseException("invalid time", 0);
             }
-            else if((splitDateTime.length == EXPECTED_PARTS_IN_DATE) && !splitDateTime[MILLISECONDS_IN_DATE].isEmpty())
+            else if ((splitDateTime.length == EXPECTED_PARTS_IN_DATE) && !splitDateTime[MILLISECONDS_IN_DATE].isEmpty())
             {
                 int millisecondsLength = splitDateTime[MILLISECONDS_IN_DATE].length();
-                if(millisecondsLength > MAX_MILLISECONDS_LENGTH_IN_DATE)
+                if (millisecondsLength > MAX_MILLISECONDS_LENGTH_IN_DATE)
                 {
                     millisecondsLength = MAX_MILLISECONDS_LENGTH_IN_DATE;
                 }

@@ -33,7 +33,7 @@ class AmqpReactor
         this.reactor.start();
 
         //noinspection StatementWithEmptyBody
-        while(this.reactor.process())
+        while (this.reactor.process())
         {
             // The empty while loop is to ensure that reactor thread runs as long as it has messages to process
         }

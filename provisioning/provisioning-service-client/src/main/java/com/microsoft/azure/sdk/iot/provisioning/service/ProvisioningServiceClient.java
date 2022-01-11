@@ -118,7 +118,7 @@ public final class ProvisioningServiceClient
      */
     public ProvisioningServiceClient(String connectionString)
     {
-        if(Tools.isNullOrEmpty(connectionString))
+        if (Tools.isNullOrEmpty(connectionString))
         {
             throw new IllegalArgumentException("connectionString cannot be null or empty");
         }

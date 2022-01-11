@@ -51,7 +51,7 @@ public class JobStatistics
     JobStatistics(JobsStatisticsParser jobsStatisticsParser) throws IllegalArgumentException
     {
         /* Codes_SRS_JOBSTATISTICS_21_001: [The constructor shall throw IllegalArgumentException if the input jobsStatisticsParser is null.] */
-        if(jobsStatisticsParser == null)
+        if (jobsStatisticsParser == null)
         {
             throw new IllegalArgumentException("null jobsStatisticsParser");
         }

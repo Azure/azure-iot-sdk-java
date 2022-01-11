@@ -43,7 +43,7 @@ public class HttpsTransportManager implements IotHubTransportManager
      */
     public HttpsTransportManager(DeviceClientConfig config) throws IllegalArgumentException
     {
-        if(config == null)
+        if (config == null)
         {
             //Codes_SRS_HTTPSTRANSPORTMANAGER_21_002: [If the provided `config` is null, the constructor shall throws IllegalArgumentException.]
             throw new IllegalArgumentException("config is null");
@@ -114,7 +114,7 @@ public class HttpsTransportManager implements IotHubTransportManager
     {
         HttpsMessage httpsMessage = HttpsSingleMessage.parseHttpsJsonMessage(message);
 
-        if((message.getIotHubMethod() == null) || (message.getUriPath() == null))
+        if ((message.getIotHubMethod() == null) || (message.getUriPath() == null))
         {
             throw new IllegalArgumentException("method or path is null");
         }

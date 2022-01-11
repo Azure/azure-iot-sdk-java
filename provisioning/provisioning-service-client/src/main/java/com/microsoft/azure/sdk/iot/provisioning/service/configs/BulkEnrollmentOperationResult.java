@@ -72,7 +72,7 @@ public class BulkEnrollmentOperationResult
     public BulkEnrollmentOperationResult(String json)
     {
         /* SRS_BULK_OPERATION_RESULT_21_001: [The constructor shall throw IllegalArgumentException if the JSON is null or empty.] */
-        if(Tools.isNullOrEmpty(json))
+        if (Tools.isNullOrEmpty(json))
         {
             throw new IllegalArgumentException("JSON with result is null or empty");
         }

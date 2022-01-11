@@ -115,13 +115,13 @@ public class MethodParser
         /* Codes_SRS_METHODPARSER_21_004: [If the `name` is null, empty, contains more than 128 chars, or illegal char (`$`, `.`, space), the constructor shall throw IllegalArgumentException.] */
         validateKey(name);
 
-        if(responseTimeout != null)
+        if (responseTimeout != null)
         {
             /* Codes_SRS_METHODPARSER_21_005: [If the responseTimeout is a negative number, the constructor shall throw IllegalArgumentException.] */
             validateTimeout(responseTimeout);
         }
 
-        if(connectTimeout != null)
+        if (connectTimeout != null)
         {
             /* Codes_SRS_METHODPARSER_21_033: [If the connectTimeout is a negative number, the constructor shall throw IllegalArgumentException.] */
             validateTimeout(connectTimeout);
@@ -167,7 +167,7 @@ public class MethodParser
     public synchronized void fromJson(String json) throws IllegalArgumentException
     {
 
-        if((json == null) || json.isEmpty())
+        if ((json == null) || json.isEmpty())
         {
             /* Codes_SRS_METHODPARSER_21_008: [If the provided json is null, empty, or not valid, the fromJson shall throws IllegalArgumentException.] */
             throw new IllegalArgumentException("Invalid json.");
@@ -454,17 +454,17 @@ public class MethodParser
     private void validateKey(String key) throws IllegalArgumentException
     {
         /* Codes_SRS_METHODPARSER_21_004: [If the `name` is null, empty, contains more than 128 chars, or illegal char (`$`, `.`, space), the constructor shall throw IllegalArgumentException.] */
-        if((key == null) || (key.isEmpty()))
+        if ((key == null) || (key.isEmpty()))
         {
             throw new IllegalArgumentException("Key cannot be null or empty");
         }
 
-        if(key.length()>128)
+        if (key.length()>128)
         {
             throw new IllegalArgumentException("Key cannot be longer than 128 characters");
         }
 
-        if(key.contains("$") || key.contains(".") ||key.contains(" "))
+        if (key.contains("$") || key.contains(".") ||key.contains(" "))
         {
             throw new IllegalArgumentException("Key cannot contain '$', '.', or space");
         }
@@ -480,7 +480,7 @@ public class MethodParser
     {
         /* Codes_SRS_METHODPARSER_21_005: [If the responseTimeout is a negative number, the constructor shall throw IllegalArgumentException.] */
         /* Codes_SRS_METHODPARSER_21_033: [If the connectTimeout is a negative number, the constructor shall throw IllegalArgumentException.] */
-        if(timeout<0)
+        if (timeout<0)
         {
             throw new IllegalArgumentException("Negative timeout");
         }

@@ -160,7 +160,7 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
      */
     public void open() throws IOException
     {
-        if(!this.isOpen)
+        if (!this.isOpen)
         {
             try
             {
@@ -433,7 +433,7 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
                 {
                     msgData = new byte[msgData.length * 2];
                 }
-            } while(!encodingComplete);
+            } while (!encodingComplete);
 
             if (length > 0)
             {

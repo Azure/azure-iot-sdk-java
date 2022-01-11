@@ -293,7 +293,7 @@ public class IotHubConnectionString
         }
 
         /* Codes_SRS_IOTHUB_CONNECTIONSTRING_21_008: [A valid connectionString shall not contain both `sharedAccessToken` and `sharedAccessKey` at the same time.] */
-        if((sharedAccessKey != null) && (sharedAccessToken != null))
+        if ((sharedAccessKey != null) && (sharedAccessToken != null))
         {
             throw new IllegalArgumentException("Either of device key or Shared Access Signature should be provided, but not both.");
         }

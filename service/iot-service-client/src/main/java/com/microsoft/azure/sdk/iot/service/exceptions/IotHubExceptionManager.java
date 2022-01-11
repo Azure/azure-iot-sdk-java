@@ -119,7 +119,7 @@ public class IotHubExceptionManager
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_011: [The function shall throw IotHubException if the Http response status none of them above and greater than 300 copying the error Http reason to the exception]
         else if (responseStatus > 300)
         {
-            if(errorMessage.isEmpty())
+            if (errorMessage.isEmpty())
             {
                 throw new IotHubException("Unknown error reason");
             }

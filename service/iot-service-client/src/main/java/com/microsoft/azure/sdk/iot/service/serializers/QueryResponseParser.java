@@ -31,7 +31,7 @@ public class QueryResponseParser
         gson = new GsonBuilder().disableHtmlEscaping().create();
 
         //Codes_SRS_QUERY_RESPONSE_PARSER_25_003: [If the provided json is null, empty, or not valid, the constructor shall throws IllegalArgumentException.]
-        if((json == null) || json.isEmpty())
+        if ((json == null) || json.isEmpty())
         {
             throw new IllegalArgumentException("parameter is null or empty");
         }

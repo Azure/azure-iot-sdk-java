@@ -208,7 +208,7 @@ public class TwinState
     public TwinCollection getDesiredProperty()
     {
         /* SRS_TWIN_STATE_21_006: [The getDesiredProperty shall return a TwinCollection with the stored desired property.] */
-        if(this.properties == null)
+        if (this.properties == null)
         {
             return null;
         }
@@ -223,7 +223,7 @@ public class TwinState
     public TwinCollection getReportedProperty()
     {
         /* SRS_TWIN_STATE_21_007: [The getReportedProperty shall return a TwinCollection with the stored reported property.] */
-        if(this.properties == null)
+        if (this.properties == null)
         {
             return null;
         }
@@ -243,13 +243,13 @@ public class TwinState
         JsonObject jsonObject = gson.toJsonTree(this).getAsJsonObject();
 
         /* SRS_TWIN_STATE_21_009: [If the tags is null, the JSON shall not include the `tags`.] */
-        if(this.tags != null)
+        if (this.tags != null)
         {
             jsonObject.add(TAGS_TAG, this.tags.toJsonElementWithMetadata());
         }
 
         /* SRS_TWIN_STATE_21_010: [If the properties is null, the JSON shall not include the `properties`.] */
-        if(this.properties != null)
+        if (this.properties != null)
         {
             jsonObject.add(PROPERTIES_TAG, this.properties.toJsonElementWithMetadata());
         }
@@ -268,7 +268,7 @@ public class TwinState
     public static TwinState createFromTwinJson(String json)
     {
         /* SRS_TWIN_STATE_21_011: [The factory shall throw IllegalArgumentException if the JSON is null or empty.] */
-        if(Tools.isNullOrEmpty(json))
+        if (Tools.isNullOrEmpty(json))
         {
             throw new IllegalArgumentException("JSON with result is null or empty");
         }
@@ -285,7 +285,7 @@ public class TwinState
          * TwinCollection format. This constructor will do that.
          */
         result.tags = new TwinCollection(result.getTags());
-        if(result.properties != null)
+        if (result.properties != null)
         {
             result.properties = new TwinProperties(result.properties.getDesired(), result.properties.getReported());
         }
@@ -304,7 +304,7 @@ public class TwinState
     public static TwinState createFromDesiredPropertyJson(String json)
     {
         /* SRS_TWIN_STATE_21_014: [The factory shall throw IllegalArgumentException if the JSON is null or empty.] */
-        if(Tools.isNullOrEmpty(json))
+        if (Tools.isNullOrEmpty(json))
         {
             throw new IllegalArgumentException("JSON with result is null or empty");
         }
@@ -328,7 +328,7 @@ public class TwinState
     public static TwinState createFromReportedPropertyJson(String json)
     {
         /* SRS_TWIN_STATE_21_017: [The factory shall throw IllegalArgumentException if the JSON is null or empty.] */
-        if(Tools.isNullOrEmpty(json))
+        if (Tools.isNullOrEmpty(json))
         {
             throw new IllegalArgumentException("JSON with result is null or empty");
         }
@@ -352,7 +352,7 @@ public class TwinState
     public static TwinState createFromPropertiesJson(String json)
     {
         /* SRS_TWIN_STATE_21_020: [The factory shall throw IllegalArgumentException if the JSON is null or empty.] */
-        if(Tools.isNullOrEmpty(json))
+        if (Tools.isNullOrEmpty(json))
         {
             throw new IllegalArgumentException("JSON with result is null or empty");
         }

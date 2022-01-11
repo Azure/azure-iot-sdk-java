@@ -38,7 +38,7 @@ public class TpmRegistrationResultParser
      */
     static public TpmRegistrationResultParser createFromJson(String json) throws IllegalArgumentException
     {
-        if((json == null) || json.isEmpty())
+        if ((json == null) || json.isEmpty())
         {
             //SRS_TpmRegistrationResultParser_25_002: [ The constructor shall throw IllegalArgumentException if the provided Json is null or empty. ]
             throw new IllegalArgumentException("JSON is null or empty");

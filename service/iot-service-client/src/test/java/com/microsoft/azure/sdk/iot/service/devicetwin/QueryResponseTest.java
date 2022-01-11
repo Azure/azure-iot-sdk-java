@@ -30,7 +30,7 @@ public class QueryResponseTest
 
     private void assertEqualsIterator(Iterator test, Iterator actual)
     {
-        while(test.hasNext())
+        while (test.hasNext())
         {
             assertTrue(actual.hasNext());
             assertEquals(test.next(), actual.next());

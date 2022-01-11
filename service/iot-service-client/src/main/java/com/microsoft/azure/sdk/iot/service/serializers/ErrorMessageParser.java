@@ -31,7 +31,7 @@ public class ErrorMessageParser
     public static String bestErrorMessage(String fullErrorMessage)
     {
         /* Codes_SRS_ERROR_MESSAGE_PARSER_21_008: [If the fullErrorMessage is null or empty, the bestErrorMessage shall return an empty String.] */
-        if((fullErrorMessage == null) || fullErrorMessage.isEmpty())
+        if ((fullErrorMessage == null) || fullErrorMessage.isEmpty())
         {
             return "";
         }
@@ -53,11 +53,11 @@ public class ErrorMessageParser
         }
 
         /* Codes_SRS_ERROR_MESSAGE_PARSER_21_003: [If the fullErrorMessage contains inner Messages, the bestErrorMessage shall parse the inner message.] */
-        while((subMessage != null) && (subMessage.message != null))
+        while ((subMessage != null) && (subMessage.message != null))
         {
             rootMessage = subMessage.message;
             /* Codes_SRS_ERROR_MESSAGE_PARSER_21_007: [If the inner message do not have rootException, the bestErrorMessage shall use the parent rootException.] */
-            if(subMessage.exception != null)
+            if (subMessage.exception != null)
             {
                 rootException = subMessage.exception;
             }
@@ -74,7 +74,7 @@ public class ErrorMessageParser
 
         /* Codes_SRS_ERROR_MESSAGE_PARSER_21_005: [The bestErrorMessage shall return a String with the rootMessage and rootException.] */
         /* Codes_SRS_ERROR_MESSAGE_PARSER_21_006: [If the fullErrorMessage do not have rootException, the bestErrorMessage shall return only the rootMessage.] */
-        if(rootException != null)
+        if (rootException != null)
         {
             rootMessage = rootMessage + " " + rootException;
         }
@@ -90,7 +90,7 @@ public class ErrorMessageParser
     public static int bestErrorCode(String fullErrorMessage)
     {
         String errorCodeJsonKey = "errorCode";
-        if((fullErrorMessage == null) || fullErrorMessage.isEmpty())
+        if ((fullErrorMessage == null) || fullErrorMessage.isEmpty())
         {
             return getDefaultErrorCode();
         }

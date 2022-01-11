@@ -117,7 +117,7 @@ public class X509CertificateInfo implements Serializable
     public X509CertificateInfo(X509CertificateInfo x509CertificateInfo)
     {
         /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
-        if(x509CertificateInfo == null)
+        if (x509CertificateInfo == null)
         {
             throw new IllegalArgumentException("x509CertificateInfo cannot be null");
         }
@@ -134,7 +134,7 @@ public class X509CertificateInfo implements Serializable
 
     private void setNotBeforeUtcString(String notBeforeUtcString)
     {
-        if(Tools.isNullOrEmpty(notBeforeUtcString))
+        if (Tools.isNullOrEmpty(notBeforeUtcString))
         {
             throw new IllegalArgumentException("notBeforeUtcString on X509 info cannot be null or empty");
         }
@@ -145,7 +145,7 @@ public class X509CertificateInfo implements Serializable
 
     private void setNotAfterUtcString(String notAfterUtcString)
     {
-        if(Tools.isNullOrEmpty(notAfterUtcString))
+        if (Tools.isNullOrEmpty(notAfterUtcString))
         {
             throw new IllegalArgumentException("notAfterUtcString on X509 info cannot be null or empty");
         }

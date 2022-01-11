@@ -57,13 +57,13 @@ public class ParserUtility
     public static void validateStringUTF8(String str) throws IllegalArgumentException
     {
         /* Codes_SRS_PARSER_UTILITY_21_002: [The validateStringUTF8 shall throw IllegalArgumentException if the provided string is null or empty.] */
-        if((str == null) || str.isEmpty())
+        if ((str == null) || str.isEmpty())
         {
             throw new IllegalArgumentException("parameter is null or empty");
         }
 
         /* Codes_SRS_PARSER_UTILITY_21_003: [The validateStringUTF8 shall throw IllegalArgumentException if the provided string contains at least one not UTF-8 character.] */
-        if(str.getBytes(StandardCharsets.UTF_8).length != str.length())
+        if (str.getBytes(StandardCharsets.UTF_8).length != str.length())
         {
             throw new IllegalArgumentException("parameter contains non UTF-8 character");
         }
@@ -120,7 +120,7 @@ public class ParserUtility
         }
 
         /* Codes_SRS_PARSER_UTILITY_21_007: [The validateBlobName shall throw IllegalArgumentException if the provided blob name contains more than 1024 characters.] */
-        if(blobName.length() > 1024)
+        if (blobName.length() > 1024)
         {
             throw new IllegalArgumentException("The provided blob name exceed maximum size of 1024 characters");
         }
@@ -144,7 +144,7 @@ public class ParserUtility
     {
         /* Codes_SRS_PARSER_UTILITY_21_009: [The validateObject shall do nothing if the object is valid.] */
         /* Codes_SRS_PARSER_UTILITY_21_010: [The validateObject shall throw IllegalArgumentException if the provided object is null.] */
-        if(val == null)
+        if (val == null)
         {
             throw new IllegalArgumentException("parameter is null");
         }
@@ -161,7 +161,7 @@ public class ParserUtility
     public static void validateMap(Map<String, Object> map) throws IllegalArgumentException
     {
         /* Codes_SRS_PARSER_UTILITY_21_048: [The validateMap shall do nothing if the map is null.] */
-        if(map != null)
+        if (map != null)
         {
             /* Codes_SRS_PARSER_UTILITY_21_047: [The validateMap shall do nothing if the map is a valid Map.] */
             validateMapInternal(map);
@@ -170,7 +170,7 @@ public class ParserUtility
 
     private static void validateMapInternal(Map<String, Object> map) throws IllegalArgumentException
     {
-        for(Map.Entry<String, Object> entry : map.entrySet())
+        for (Map.Entry<String, Object> entry : map.entrySet())
         {
             Object value = entry.getValue();
 
@@ -210,7 +210,7 @@ public class ParserUtility
         }
 
         /* Codes_SRS_PARSER_UTILITY_21_028: [The validateId shall throw IllegalArgumentException if the provided string contains more than 128 characters.] */
-        if(id.length() > 128)
+        if (id.length() > 128)
         {
             throw new IllegalArgumentException("The provided ID is bigger than 128 characters");
         }
@@ -219,7 +219,7 @@ public class ParserUtility
         byte[] chars = id.getBytes(StandardCharsets.UTF_8);
         for (byte c:chars)
         {
-            if(!(((c>='A') && (c<='Z')) || ((c>='a') && (c<='z')) || ((c>='0') && (c<='9')) ||
+            if (!(((c>='A') && (c<='Z')) || ((c>='a') && (c<='z')) || ((c>='0') && (c<='9')) ||
                     (c=='-') || (c==':') || (c=='.') || (c=='+') || (c=='%') || (c=='_') || (c=='#') || (c=='*') || (c=='?') ||
                     (c=='!') || (c=='(') || (c==')') || (c==',') || (c=='=') || (c=='@') || (c==';') || (c=='$') || (c=='\'')))
             {
@@ -269,7 +269,7 @@ public class ParserUtility
         dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE_UTC));
 
         /* Codes_SRS_PARSER_UTILITY_21_022: [If the provide string is null, empty or contains an invalid data format, the getDateTimeUtc shall throw IllegalArgumentException.] */
-        if((dataTime == null) || dataTime.isEmpty())
+        if ((dataTime == null) || dataTime.isEmpty())
         {
             throw new IllegalArgumentException("date is null, empty, or invalid");
         }
@@ -279,14 +279,14 @@ public class ParserUtility
             /* Codes_SRS_PARSER_UTILITY_21_040: [If the provide string contains more than 3 digits for milliseconds, the getDateTimeUtc shall reduce the milliseconds to 3 digits.] */
             String[] splitDateTime = dataTime.split(MILLISECONDS_REGEX);
             int milliseconds;
-            if(splitDateTime.length > EXPECTED_PARTS_IN_DATE)
+            if (splitDateTime.length > EXPECTED_PARTS_IN_DATE)
             {
                 throw new IllegalArgumentException("invalid time:" + dataTime);
             }
-            else if((splitDateTime.length == EXPECTED_PARTS_IN_DATE) && !splitDateTime[MILLISECONDS_IN_DATE].isEmpty())
+            else if ((splitDateTime.length == EXPECTED_PARTS_IN_DATE) && !splitDateTime[MILLISECONDS_IN_DATE].isEmpty())
             {
                 int millisecondsLength = splitDateTime[MILLISECONDS_IN_DATE].length();
-                if(millisecondsLength > MAX_MILLISECONDS_LENGTH_IN_DATE)
+                if (millisecondsLength > MAX_MILLISECONDS_LENGTH_IN_DATE)
                 {
                     millisecondsLength = MAX_MILLISECONDS_LENGTH_IN_DATE;
                 }
@@ -328,7 +328,7 @@ public class ParserUtility
         dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE_UTC));
 
         /* Codes_SRS_PARSER_UTILITY_21_025: [If the provide string is null, empty or contains an invalid data format, the stringToDateTimeOffset shall throw IllegalArgumentException.] */
-        if((dateTime == null) || dateTime.isEmpty())
+        if ((dateTime == null) || dateTime.isEmpty())
         {
             throw new IllegalArgumentException("date is null or empty");
         }
@@ -357,7 +357,7 @@ public class ParserUtility
     public static String dateTimeUtcToString(Date date) throws IllegalArgumentException
     {
         /* Codes_SRS_PARSER_UTILITY_21_053: [The dateTimeUtcToString shall throws IllegalArgumentException if the provided Date is null.] */
-        if(date == null)
+        if (date == null)
         {
             throw new IllegalArgumentException("date cannot be null");
         }
@@ -412,7 +412,7 @@ public class ParserUtility
         /* Codes_SRS_PARSER_UTILITY_21_038: [If the map is empty, the mapToJsonElement shall return a empty JsonElement.] */
         JsonObject json = new JsonObject();
 
-        if(map == null)
+        if (map == null)
         {
             /* Codes_SRS_PARSER_UTILITY_21_039: [If the map is null, the mapToJsonElement shall throw IllegalArgumentException.] */
             throw new IllegalArgumentException("null map to parse");
@@ -424,7 +424,7 @@ public class ParserUtility
             {
                 json.addProperty(entry.getKey(), (String)null);
             }
-            else if(entry.getValue() instanceof Map)
+            else if (entry.getValue() instanceof Map)
             {
                 /* Codes_SRS_PARSER_UTILITY_21_037: [If the value is a map, the mapToJsonElement shall include it as a submap in the JsonElement.] */
                 json.add(entry.getKey(), mapToJsonElement((Map<String, Object>) entry.getValue()));

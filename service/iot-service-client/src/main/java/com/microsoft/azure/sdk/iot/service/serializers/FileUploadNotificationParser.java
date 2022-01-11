@@ -91,11 +91,11 @@ public class FileUploadNotificationParser
         ParserUtility.validateStringUTF8(fileUploadNotificationParser.lastUpdatedTime);
 
         /* Codes_SRS_FILE_UPLOAD_NOTIFICATION_21_012: [If the provided json do not the keys `blobSizeInBytes`, the constructor shall assume the default value 0 for the blob size.] */
-        if(fileUploadNotificationParser.blobSizeInBytes == null)
+        if (fileUploadNotificationParser.blobSizeInBytes == null)
         {
             fileUploadNotificationParser.blobSizeInBytes = 0L;
         }
-        else if(fileUploadNotificationParser.blobSizeInBytes < 0)
+        else if (fileUploadNotificationParser.blobSizeInBytes < 0)
         {
             throw new IllegalArgumentException("negative size");
         }

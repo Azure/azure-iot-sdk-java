@@ -78,7 +78,7 @@ public class QueryResponseParserTest
         JsonObject[] jsonItems = gson.fromJson(jsonArrayString, JsonObject[].class);
         List<String> list = new LinkedList<>();
 
-        for(JsonObject json : jsonItems)
+        for (JsonObject json : jsonItems)
         {
             list.add(gson.toJson(json));
         }

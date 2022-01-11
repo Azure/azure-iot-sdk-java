@@ -182,7 +182,7 @@ public class JobsParser
         }
 
         /* Codes_SRS_JOBSPARSER_21_017: [If the maxExecutionTimeInSeconds is negative, the validateCommonFields shall throws IllegalArgumentException.] */
-        if(maxExecutionTimeInSeconds < 0)
+        if (maxExecutionTimeInSeconds < 0)
         {
             throw new IllegalArgumentException("Negative max execution time in seconds");
         }

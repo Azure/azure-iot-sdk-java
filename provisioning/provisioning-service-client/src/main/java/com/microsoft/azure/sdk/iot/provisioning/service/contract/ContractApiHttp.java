@@ -187,7 +187,7 @@ public class ContractApiHttp
         request.setHeaderField(HEADER_FIELD_NAME_CONTENT_LENGTH, payload != null ? String.valueOf(payload.length) : "0");
 
         /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_013: [The request shall add the headerParameters to the http header, if provided.] */
-        if(headerParameters != null)
+        if (headerParameters != null)
         {
             for (Map.Entry<String, String> entry: headerParameters.entrySet())
             {
@@ -200,7 +200,7 @@ public class ContractApiHttp
 
     private URL getUrlForPath(String path)
     {
-        if(Tools.isNullOrEmpty(path))
+        if (Tools.isNullOrEmpty(path))
         {
             /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_008: [If the provided path is null or empty, the request shall throw IllegalArgumentException.*/
             throw new IllegalArgumentException("path cannot be null or empty");

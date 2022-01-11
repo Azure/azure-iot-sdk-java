@@ -107,7 +107,7 @@ public class TwinClientTest
     private void assertEqualSetAndMap(Set<Pair> pairSet, Map<String, String> map)
     {
         assertEquals(pairSet.size(), map.size());
-        for(Pair p : pairSet)
+        for (Pair p : pairSet)
         {
             String val = map.get(p.getKey());
             assertNotNull(val);

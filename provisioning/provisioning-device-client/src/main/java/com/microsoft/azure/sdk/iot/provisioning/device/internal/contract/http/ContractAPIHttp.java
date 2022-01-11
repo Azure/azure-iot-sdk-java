@@ -281,7 +281,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
             //SRS_ContractAPIHttp_25_012: [This method shall retrieve the Url by calling 'generateRegisterUrl' on an object for UrlPathBuilder.]
             String url = new UrlPathBuilder(this.hostName, this.idScope, ProvisioningDeviceClientTransportProtocol.HTTPS).generateRegisterUrl(requestData.getRegistrationId());
             Map<String, String> headersMap = null;
-            if(requestData.getSasToken() != null)
+            if (requestData.getSasToken() != null)
             {
                 headersMap = new HashMap<>();
                 headersMap.put(AUTHORIZATION, requestData.getSasToken());

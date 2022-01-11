@@ -38,7 +38,7 @@ public class JobQueryResponseError
      */
     public JobQueryResponseError fromJson(String json) throws IOException
     {
-        if((json == null) || json.isEmpty())
+        if ((json == null) || json.isEmpty())
         {
             //Codes_SRSJOB_QUERY_RESPONSE_ERROR_25_007: [If the input json is null or empty then this method shall throw IllegalArgumentException.]
             throw new IllegalArgumentException("Json is null or empty");
