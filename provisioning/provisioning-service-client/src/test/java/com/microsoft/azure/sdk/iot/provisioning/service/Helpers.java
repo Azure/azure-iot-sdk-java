@@ -365,7 +365,7 @@ public class Helpers
             {
                 milliseconds = NO_MILLISECONDS_IN_DATE;
             }
-            
+
             dateTimeUtc =  new Date(dateFormat.parse(splitDateTime[DATE_AND_TIME_IN_DATE]).getTime() + milliseconds);
         }
         catch (ParseException e)

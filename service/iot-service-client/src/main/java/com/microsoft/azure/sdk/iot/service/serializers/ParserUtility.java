@@ -167,62 +167,6 @@ public class ParserUtility
     }
 
     /**
-     * Validate if a provided ID is valid using the follow criteria.
-     * A case-sensitive string (up to 128 char long)
-     * of ASCII 7-bit alphanumeric chars
-     * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
-     *
-     * @param id is the ID to test
-     * @throws IllegalArgumentException if the ID do not fits the criteria
-     */
-    public static void validateId(String id) throws IllegalArgumentException
-    {
-        try
-        {
-            validateStringUTF8(id);
-        }
-        catch (IllegalArgumentException e)
-        {
-            throw new IllegalArgumentException("The provided ID is not valid");
-        }
-
-        if (id.length() > 128)
-        {
-            throw new IllegalArgumentException("The provided ID is bigger than 128 characters");
-        }
-
-        byte[] chars = id.getBytes(StandardCharsets.UTF_8);
-        for (byte c:chars)
-        {
-            if (!(((c>='A') && (c<='Z')) || ((c>='a') && (c<='z')) || ((c>='0') && (c<='9')) ||
-                    (c=='-') || (c==':') || (c=='.') || (c=='+') || (c=='%') || (c=='_') || (c=='#') || (c=='*') || (c=='?') ||
-                    (c=='!') || (c=='(') || (c==')') || (c==',') || (c=='=') || (c=='@') || (c==';') || (c=='$') || (c=='\'')))
-            {
-                throw new IllegalArgumentException("The provided ID is not valid");
-            }
-        }
-    }
-
-    /**
-     * Validate if a provided host name is valid using the follow criteria.
-     * A case-sensitive string (up to 128 char long)
-     *   of ASCII 7-bit alphanumeric chars
-     *   + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
-     * Contains at least one separator '.'
-     *
-     * @param hostName is the host name to test
-     * @throws IllegalArgumentException if the provided host name do not fits the criteria
-     */
-    public static void validateHostName(String hostName) throws IllegalArgumentException
-    {
-        validateId(hostName);
-        if (hostName.split(Pattern.quote(".")).length < 2)
-        {
-            throw new IllegalArgumentException("hostName is incomplete");
-        }
-    }
-
-    /**
      * Helper to convert the provided string in a UTC Date.
      * Expected format:
      *      "2016-06-01T21:22:43.7996883Z"
