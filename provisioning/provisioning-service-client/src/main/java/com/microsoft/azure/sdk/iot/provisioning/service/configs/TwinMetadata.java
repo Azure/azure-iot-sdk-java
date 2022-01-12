@@ -99,7 +99,7 @@ public class TwinMetadata implements Serializable
      *     contains a valid metadata, this method contains the label <b>try</b>, which means that
      *     it can return a valid TwinMetadata or {@code null}.
      *
-     * <p> For instance, for the follow Map, this method will create a TwinMetadata with
+     * <p> For instance, for the following Map, this method will create a TwinMetadata with
      *     {@code lastUpdated = 2015-09-21T02:07:44.238Z} and {@code lastUpdatedVersion = 3}
      * <pre>
      * {@code

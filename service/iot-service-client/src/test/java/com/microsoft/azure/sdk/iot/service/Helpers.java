@@ -411,7 +411,6 @@ public class Helpers
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
         dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
         return dateFormat.format(date);
-
     }
 
     /**

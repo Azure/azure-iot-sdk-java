@@ -49,7 +49,6 @@ class HttpConnection
      */
     public HttpConnection(URL url, HttpMethod method) throws IOException
     {
-        // Codes_SRS_HTTPCONNECTION_25_004: [If the URI given does not use the HTTPS protocol, the constructor shall throw an IllegalArgumentException.]
         String protocol = url.getProtocol();
         if (!protocol.equalsIgnoreCase("HTTPS"))
         {
@@ -60,10 +59,7 @@ class HttpConnection
             throw new IllegalArgumentException(errMsg);
         }
 
-        // Codes_SRS_HTTPCONNECTION_25_001: [The constructor shall open a connection to the given URL.]
-        // Coses_SRS_HTTPCONNECTION_25_002: [The constructor shall throw an IOException if the connection was unable to be opened.]
         this.connection = (HttpsURLConnection) url.openConnection();
-        // Codes_SRS_HTTPCONNECTION_25_003: [The constructor shall set the HTTPS method to the given method.]
 
         if (method == HttpMethod.PATCH)
         {
@@ -94,14 +90,12 @@ class HttpConnection
      */
     public void connect() throws IOException
     {
-        // Codes_SRS_HTTPCONNECTION_25_006: [The function shall stream the request body, if present, through the connection.]
         if (this.body.length > 0)
         {
             this.connection.setDoOutput(true);
             this.connection.getOutputStream().write(this.body);
         }
-        // Codes_SRS_HTTPCONNECTION_25_005: [The function shall send a request to the URL given in the constructor.]
-        // Codes_SRS_HTTPCONNECTION_25_007: [The function shall throw an IOException if the connection could not be established, or the server responded with a bad status code.]
+
         this.connection.connect();
     }
 
@@ -117,7 +111,6 @@ class HttpConnection
      */
     public void setRequestMethod(HttpMethod method)
     {
-        // Codes_SRS_HTTPCONNECTION_25_009: [The function shall throw an IllegalArgumentException if the request currently has a non-empty body and the new method is not a POST or a PUT.]
         if (method != HttpMethod.POST && method != HttpMethod.PUT)
         {
             if (this.body.length > 0)
@@ -128,7 +121,6 @@ class HttpConnection
             }
         }
 
-        // Codes_SRS_HTTPCONNECTION_25_008: [The function shall set the request method.]
         try
         {
             this.connection.setRequestMethod(method.name());
@@ -147,10 +139,8 @@ class HttpConnection
      */
     public void setRequestHeader(String field, String value)
     {
-        // Codes_SRS_HTTPCONNECTION_25_010: [The function shall set the given request header field.]
         this.connection.setRequestProperty(field, value);
     }
-
 
     /**
      * Sets the read timeout in milliseconds. The read timeout is the number of
@@ -161,7 +151,6 @@ class HttpConnection
      */
     public void setReadTimeoutMillis(int timeout)
     {
-        // Codes_SRS_HTTPCONNECTION_25_011: [The function shall set the read timeout to the given value.]
         this.connection.setReadTimeout(timeout);
     }
 
@@ -177,7 +166,6 @@ class HttpConnection
      */
     public void writeOutput(byte[] body)
     {
-        // Codes_SRS_HTTPCONNECTION_25_013: [The function shall throw an IllegalArgumentException if the request does not currently use method POST or PUT and the body is non-empty.]
         HttpMethod method = HttpMethod.valueOf(
                 this.connection.getRequestMethod());
         if (method != HttpMethod.POST && method != HttpMethod.PUT)
@@ -191,7 +179,6 @@ class HttpConnection
         }
         else
         {
-            // Codes_SRS_HTTPCONNECTION_25_012: [The function shall save the body to be sent with the request.]
             this.body = Arrays.copyOf(body, body.length);
         }
     }
@@ -206,13 +193,9 @@ class HttpConnection
      */
     public byte[] readInput() throws IOException
     {
-        // Codes_SRS_HTTPCONNECTION_25_014: [The function shall read from the input stream (response stream) and return the response.]
-        // Codes_SRS_HTTPCONNECTION_25_015: [The function shall throw an IOException if the input stream could not be accessed.]
-
         byte[] input;
         try (InputStream inputStream = this.connection.getInputStream())
         {
-            // Codes_SRS_HTTPCONNECTION_25_016: [The function shall close the input stream after it has been completely read.]
             input = readInputStream(inputStream);
         }
 
@@ -232,11 +215,6 @@ class HttpConnection
         byte[] error = new byte[0];
         try (InputStream errorStream = this.connection.getErrorStream())
         {
-            // Codes_SRS_HTTPCONNECTION_25_017: [The function shall read from the error stream and return the response.]
-            // Codes_SRS_HTTPCONNECTION_25_018: [The function shall throw an IOException if the error stream could not be accessed.]
-
-            // Codes_SRS_HTTPCONNECTION_25_019: [The function shall close the error stream after it has been completely read.]
-
             // if there is no error reason, getErrorStream() returns null.
             if (errorStream != null)
             {
@@ -256,8 +234,6 @@ class HttpConnection
      */
     public int getResponseStatus() throws IOException
     {
-        // Codes_SRS_HTTPCONNECTION_25_020: [The function shall return the response status code.]
-        // Codes_SRS_HTTPCONNECTION_25_021: [The function shall throw an IOException if no response was received.]
         return this.connection.getResponseCode();
     }
 
@@ -271,8 +247,6 @@ class HttpConnection
      */
     public Map<String, List<String>> getResponseHeaders()
     {
-        // Codes_SRS_HTTPCONNECTION_25_022: [The function shall return a mapping of header field names to the values associated with the header field name.]
-        // Codes_SRS_HTTPCONNECTION_25_023: [The function shall throw an IOException if no response was received.]
         return this.connection.getHeaderFields();
     }
 
@@ -311,10 +285,9 @@ class HttpConnection
     {
         if (sslContext == null)
         {
-            //Codes_SRS_HTTPSCONNECTION_25_025: [The function shall throw IllegalArgumentException if the context is null value.**]**
             throw new IllegalArgumentException("SSL context cannot be null");
         }
-        //Codes_SRS_HTTPSCONNECTION_25_024: [**The function shall set the the SSL context with the given value.**]**
+
         this.connection.setSSLSocketFactory(sslContext.getSocketFactory());
     }
 
