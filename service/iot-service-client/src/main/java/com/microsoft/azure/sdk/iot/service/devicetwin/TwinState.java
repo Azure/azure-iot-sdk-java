@@ -133,7 +133,6 @@ public class TwinState extends RegisterManager
     private static final String PARENT_SCOPES = "parentScopes";
     @SerializedName(PARENT_SCOPES)
     @Getter
-    @Setter
     private final List<String> parentScopes = new ArrayList<>();
 
     /**

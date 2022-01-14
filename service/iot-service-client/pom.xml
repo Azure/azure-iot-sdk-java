@@ -31,35 +31,28 @@
     </scm>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <ms-rest-client-version>1.7.9</ms-rest-client-version>
     </properties>
     <dependencies>
         <dependency>
             <groupId>com.microsoft.rest</groupId>
             <artifactId>client-runtime</artifactId>
-            <version>${ms-rest-client-version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.qpid</groupId>
             <artifactId>proton-j</artifactId>
-            <version>${proton-j-version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure</groupId>
             <artifactId>qpid-proton-j-extensions</artifactId>
-            <version>${proton-j-extensions-version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>annotations</artifactId>
-            <version>3.0.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>${gson-version}</version>
         </dependency>
         <dependency>
             <groupId>org.jmockit</groupId>
@@ -82,29 +75,23 @@
         <dependency>
             <groupId>org.apache.qpid</groupId>
             <artifactId>proton-j</artifactId>
-            <version>0.30.0</version>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>${slf4j-version}</version>
         </dependency>
         <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-core</artifactId>
-            <version>${azure-core-version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>${lombok-version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.14</version>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>

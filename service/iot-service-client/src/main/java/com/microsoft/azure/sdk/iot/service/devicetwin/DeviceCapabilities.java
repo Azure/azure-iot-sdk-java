@@ -5,8 +5,6 @@ package com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.io.Serializable;
 

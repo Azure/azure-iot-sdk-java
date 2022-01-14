@@ -11,7 +11,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import java.net.URISyntaxException;
-import java.io.*;
 
 
 public class SampleParameters {

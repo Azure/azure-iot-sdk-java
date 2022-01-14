@@ -57,33 +57,26 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>${slf4j-version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.qpid</groupId>
             <artifactId>proton-j</artifactId>
-            <version>${proton-j-version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure</groupId>
             <artifactId>qpid-proton-j-extensions</artifactId>
-            <version>${proton-j-extensions-version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.paho</groupId>
             <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-            <version>${paho-version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>${gson-version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>${lombok-version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

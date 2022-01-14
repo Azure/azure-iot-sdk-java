@@ -11,12 +11,8 @@ import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProv
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.security.cert.CertificateException;
 import java.util.Base64;
 
 public class SecurityProviderSymmetricKey extends SecurityProvider

@@ -5,7 +5,6 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;

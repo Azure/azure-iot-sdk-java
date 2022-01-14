@@ -69,7 +69,6 @@ public class MethodParser
 
     private static final String PAYLOAD_TAG = "payload";
     @SerializedName(PAYLOAD_TAG)
-    @Getter
     @Setter
     private Object payload;
 

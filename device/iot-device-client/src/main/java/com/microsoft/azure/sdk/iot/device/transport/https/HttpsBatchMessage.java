@@ -135,8 +135,6 @@ final class HttpsBatchMessage implements HttpsMessage
      * format.
      *
      * @param msg the message to be converted to a corresponding JSON object.
-     *
-     * @return the JSON string representation of the message.
      */
     private static void addJsonToStringBuilder(HttpsSingleMessage msg, StringBuilder jsonStringBuilder)
     {
