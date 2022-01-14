@@ -246,14 +246,6 @@ public class ParserUtilityTest
         Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.service.serializers.ParserUtility"),"validateHostName", new Class[]{String.class} , "hostName");
     }
 
-    /* Tests_SRS_PARSER_UTILITY_21_045: [The validateHostName shall do nothing if the string is a valid host name.] */
-    @Test
-    public void validateHostNameSucceeded() throws ClassNotFoundException
-    {
-        // act
-        Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.service.serializers.ParserUtility"),"validateHostName", new Class[]{String.class} , "hostName.azure-devices.net");
-    }
-
     /* Tests_SRS_PARSER_UTILITY_21_048: [The validateMap shall do nothing if the map is null.] */
     @Test
     public void validateMapNullMapSucceed() throws ClassNotFoundException
@@ -469,14 +461,6 @@ public class ParserUtilityTest
     }
 
 
-    /* Tests_SRS_PARSER_UTILITY_21_030: [The validateId shall do nothing if the string is a valid ID.] */
-    @Test
-    public void validateIdMetadataSucceed() throws ClassNotFoundException
-    {
-        // act
-        Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.service.serializers.ParserUtility"),"validateId", "$test-key");
-    }
-
     /* Tests_SRS_PARSER_UTILITY_21_026: [The validateId shall throw IllegalArgumentException if the provided string is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void validateIdNullKeyThrows() throws ClassNotFoundException
@@ -502,20 +486,6 @@ public class ParserUtilityTest
     }
 
     /* Tests_SRS_PARSER_UTILITY_21_028: [The validateId shall throw IllegalArgumentException if the provided string contains more than 128 characters.] */
-    @Test
-    public void validateIdEdgeSizeSucceed() throws ClassNotFoundException
-    {
-        // arrange
-        String id = "1234567890123456789012345678901234567890" +
-                "1234567890123456789012345678901234567890" +
-                "1234567890123456789012345678901234567890" +
-                "12345678";
-
-        // act
-        Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.service.serializers.ParserUtility"),"validateId", id);
-    }
-
-    /* Tests_SRS_PARSER_UTILITY_21_028: [The validateId shall throw IllegalArgumentException if the provided string contains more than 128 characters.] */
     @Test (expected = IllegalArgumentException.class)
     public void validateIdInvalidBigKeyThrows() throws ClassNotFoundException
     {
@@ -535,17 +505,6 @@ public class ParserUtilityTest
     {
         // act
         Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.service.serializers.ParserUtility"),"validateId", "test&key");
-    }
-
-    /* Tests_SRS_PARSER_UTILITY_21_029: [The validateId shall throw IllegalArgumentException if the provided string contains an illegal character.] */
-    @Test
-    public void validateIdValidSpecialCharsSucceed() throws ClassNotFoundException
-    {
-        // arrange
-        String id = "-:.+%_#*?!(),=@;$\'";
-
-        // act
-        Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.service.serializers.ParserUtility"),"validateId", id);
     }
 
     /* Tests_SRS_PARSER_UTILITY_21_035: [The mapToJsonElement shall serialize the provided map into a JsonElement.] */

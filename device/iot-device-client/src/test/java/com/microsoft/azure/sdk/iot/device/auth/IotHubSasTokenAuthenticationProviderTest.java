@@ -185,7 +185,7 @@ public class IotHubSasTokenAuthenticationProviderTest
 
         //assert
         assertEquals(expectedTokenValidSecs, (long) Deencapsulation.getField(authenticationProvider, "tokenValidSecs"));
-        assertEquals(expectedTimeBufferPercentage, (long) Deencapsulation.getField(authenticationProvider, "timeBufferPercentage"));
+        assertEquals(expectedTimeBufferPercentage, (int) Deencapsulation.getField(authenticationProvider, "timeBufferPercentage"));
     }
 
     //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_016: [If the provided tokenValidSecs is less than 1, this function shall throw an IllegalArgumentException.]
