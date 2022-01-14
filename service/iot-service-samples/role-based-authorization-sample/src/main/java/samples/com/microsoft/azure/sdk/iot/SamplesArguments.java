@@ -4,6 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.cli.*;
 
 @Slf4j
 public class SamplesArguments
