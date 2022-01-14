@@ -53,7 +53,7 @@ public final class DeviceClientConfig
     @Setter(AccessLevel.PACKAGE)
     private ProxySettings proxySettings;
 
-    private String deviceClientUniqueIdentifier = UUID.randomUUID().toString().substring(0,8);
+    private final String deviceClientUniqueIdentifier = UUID.randomUUID().toString().substring(0,8);
 
     @Getter
     @Setter(AccessLevel.PACKAGE)

@@ -17,7 +17,7 @@ import java.util.Objects;
 @Slf4j
 public class FileUploadNotificationReceiver
 {
-    private final long DEFAULT_TIMEOUT_MS = 60000;
+    private static final long DEFAULT_TIMEOUT_MS = 60000;
     private final AmqpFileUploadNotificationReceive amqpFileUploadNotificationReceive;
 
     /**

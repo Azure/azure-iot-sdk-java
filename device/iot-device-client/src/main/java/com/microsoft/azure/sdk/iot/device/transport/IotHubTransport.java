@@ -962,7 +962,7 @@ public class IotHubTransport implements IotHubListener
         {
             // If a message callback throws an exception here the acknowledge will never be sent and this message will
             // live in Iot hub until it expires.
-            IotHubMessageResult result = IotHubMessageResult.COMPLETE;
+            IotHubMessageResult result;
             try
             {
                 log.debug("Executing callback for received message ({})", receivedMessage);

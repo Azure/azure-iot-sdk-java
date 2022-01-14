@@ -21,7 +21,7 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
     private static final String TOKEN_SCOPE_FORMAT = "%s/devices/%s";
     private static final String SASTOKEN_FORMAT = "SharedAccessSignature sr=%s&sig=%s&se=%s";
 
-    private SecurityProviderTpm securityProvider;
+    private final SecurityProviderTpm securityProvider;
 
     /**
      * Creates a Sas Token based authentication object that uses the provided security provider to produce sas tokens.

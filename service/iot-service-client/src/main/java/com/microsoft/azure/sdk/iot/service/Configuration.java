@@ -16,7 +16,7 @@ import java.util.HashMap;
 
 public class Configuration
 {
-    private final String UTC_TIME_DEFAULT = "0001-01-01T00:00:00";
+    private static final String UTC_TIME_DEFAULT = "0001-01-01T00:00:00";
 
     /**
      * Create a Configuration instance using the given configuration name
@@ -67,7 +67,7 @@ public class Configuration
      * Specifies the schemaVersion
      */
     @Getter
-    private String schemaVersion;
+    private final String schemaVersion;
 
     /**
      * Specifies the labels map of the configuration

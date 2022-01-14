@@ -42,7 +42,7 @@ final class HttpsBatchMessage implements HttpsMessage
     private static final String PROPERTIES = "\"properties\"";
 
     /** The current batched message body. */
-    private String batchBody;
+    private final String batchBody;
 
     /** The current number of messages in the batch. */
     private int numMsgs;

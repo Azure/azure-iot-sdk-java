@@ -4,7 +4,6 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.cli.*;
 
 @Slf4j
 public class SamplesArguments
@@ -14,10 +13,10 @@ public class SamplesArguments
     private final String CLIENT_ID = "clientId";
     private final String CLIENT_SECRET = "clientSecret";
 
-    private String iotHubHostName;
-    private String tenantId;
-    private String clientId;
-    private String clientSecret;
+    private final String iotHubHostName;
+    private final String tenantId;
+    private final String clientId;
+    private final String clientSecret;
 
     public SamplesArguments(String[] args)
     {

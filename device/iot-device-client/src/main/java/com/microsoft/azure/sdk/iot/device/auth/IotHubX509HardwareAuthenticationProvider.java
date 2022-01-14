@@ -14,7 +14,7 @@ import java.io.IOException;
 
 public class IotHubX509HardwareAuthenticationProvider extends IotHubAuthenticationProvider
 {
-    private SecurityProviderX509 securityProviderX509;
+    private final SecurityProviderX509 securityProviderX509;
 
     public IotHubX509HardwareAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, SecurityProvider securityProvider)
     {

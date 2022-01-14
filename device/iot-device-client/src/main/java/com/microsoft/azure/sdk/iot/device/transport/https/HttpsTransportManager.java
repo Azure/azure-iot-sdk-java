@@ -25,7 +25,7 @@ import java.util.Map;
  */
 public class HttpsTransportManager implements IotHubTransportManager
 {
-    private DeviceClientConfig config;
+    private final DeviceClientConfig config;
     private HttpsIotHubConnection httpsIotHubConnection;
 
     private static final String MODULE_ID = "x-ms-edge-moduleId";
@@ -91,14 +91,14 @@ public class HttpsTransportManager implements IotHubTransportManager
         // devices/<deviceid>/modules/<moduleid>/files otherwise, and then send it.]
         String uri = new IotHubUri("", this.config.getDeviceId(), PATH_FILES_STRING, this.config.getModuleId()).toStringWithoutApiVersion();
         message.setUriPath(uri);
-        return this.send(message, new HashMap<String, String>());
+        return this.send(message, new HashMap<>());
     }
 
     public ResponseMessage sendFileUploadNotification(IotHubTransportMessage message) throws IOException
     {
         String uri = new IotHubUri("", this.config.getDeviceId(), PATH_NOTIFICATIONS_STRING, this.config.getModuleId()).toStringWithoutApiVersion();
         message.setUriPath(uri);
-        return this.send(message, new HashMap<String, String>());
+        return this.send(message, new HashMap<>());
     }
 
     /**

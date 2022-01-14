@@ -133,13 +133,13 @@ public class Module extends BaseDevice
      * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
      */
     @Getter
-    private String id;
+    private final String id;
 
     /**
      * Specifies the module's managed by owner
      */
     @Getter
-    private String managedBy;
+    private final String managedBy;
 
     Module(DeviceParser parser) throws IllegalArgumentException
     {

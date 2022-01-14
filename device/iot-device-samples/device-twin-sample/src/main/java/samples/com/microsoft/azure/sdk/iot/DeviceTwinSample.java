@@ -125,7 +125,7 @@ public class DeviceTwinSample
 
     protected static class ReportedPropertiesContext
     {
-        private boolean calledFromEvent = false;
+        private final boolean calledFromEvent = false;
         private String _correlationId = "";
         private String _message = "";
 
