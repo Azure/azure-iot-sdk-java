@@ -29,12 +29,6 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-        </dependency>
-    </dependencies>
     <scm>
         <connection>scm:git:git@github.com:Azure/azure-iot-sdk-java.git</connection>
         <developerConnection>scm:git:git@github.com:Azure/azure-iot-sdk-java.git</developerConnection>

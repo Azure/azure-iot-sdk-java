@@ -90,10 +90,6 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
@@ -186,7 +182,6 @@
                                     <exclude>com.microsoft.azure.sdk.iot.e2e:iot-edge-e2e-wrapper</exclude>
                                     <exclude>junit:junit</exclude>
                                     <exclude>org.apache.commons:commons-lang3</exclude>
-                                    <exclude>org.apache.log4j:log4j-slf4j-impl</exclude>
                                 </excludes>
                             </artifactSet>
                         </configuration>
