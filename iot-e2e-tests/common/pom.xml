@@ -179,7 +179,6 @@
                                 <excludes>
                                     <!--Android testing will use this jar, but android testing doesn't want these dependencies. It will import
                                     android compatible versions of these libraries instead-->
-                                    <exclude>com.microsoft.azure.sdk.iot.e2e:iot-edge-e2e-wrapper</exclude>
                                     <exclude>junit:junit</exclude>
                                     <exclude>org.apache.commons:commons-lang3</exclude>
                                 </excludes>
