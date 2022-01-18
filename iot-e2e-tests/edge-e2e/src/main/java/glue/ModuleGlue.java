@@ -80,23 +80,6 @@ public class ModuleGlue
             return null;
         };
 
-        try
-        {
-            /*
-            This line of code used to be run in older versions of the SDK, and it caused bugs when this library builds
-            a module client from environment through the edgelet in conjunction with any other library that called this API.
-            This API can only be called once per JVM process, so we had to remove the call to this API from our SDK to maintain
-            compatibility with other libraries that call this API. We call this API in this test now so that we guarantee
-            that our module client code works even when this API is used beforehand to avoid regression
-             */
-            URL.setURLStreamHandlerFactory(fac);
-
-        }
-        catch (Error e)
-        {
-            //this function only throws if the factory has already been set, so we can ignore this error
-        }
-
         IotHubClientProtocol protocol = this.transportFromString(transportType);
         if (protocol == null)
         {

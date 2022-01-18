@@ -90,8 +90,8 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -183,9 +183,10 @@
                                 <excludes>
                                     <!--Android testing will use this jar, but android testing doesn't want these dependencies. It will import
                                     android compatible versions of these libraries instead-->
+                                    <exclude>com.microsoft.azure.sdk.iot.e2e:iot-edge-e2e-wrapper</exclude>
                                     <exclude>junit:junit</exclude>
                                     <exclude>org.apache.commons:commons-lang3</exclude>
-                                    <exclude>org.slf4j:slf4j-log4j12</exclude>
+                                    <exclude>org.apache.log4j:log4j-slf4j-impl</exclude>
                                 </excludes>
                             </artifactSet>
                         </configuration>
