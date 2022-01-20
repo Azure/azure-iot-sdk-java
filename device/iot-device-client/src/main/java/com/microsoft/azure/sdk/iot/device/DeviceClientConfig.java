@@ -161,8 +161,7 @@ public final class DeviceClientConfig
     public DeviceClientConfig(String hostName, SasTokenProvider sasTokenProvider, ClientOptions clientOptions, String deviceId, String moduleId)
     {
         SSLContext sslContext = clientOptions != null ? clientOptions.sslContext : null;
-        this.keepAliveInterval =
-            clientOptions != null && clientOptions.getKeepAliveInterval() != 0 ? clientOptions.getKeepAliveInterval() : DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
+        setKeepAliveInterval(clientOptions);
         this.authenticationProvider =
                 new IotHubSasTokenProvidedAuthenticationProvider(hostName, deviceId, moduleId, sasTokenProvider, sslContext);
 
@@ -208,6 +207,11 @@ public final class DeviceClientConfig
             configSasAuth(iotHubConnectionString);
         }
 
+        setKeepAliveInterval(clientOptions);
+    }
+
+    private void setKeepAliveInterval(ClientOptions clientOptions)
+    {
         this.keepAliveInterval = clientOptions != null && clientOptions.getKeepAliveInterval() != 0 ? clientOptions.getKeepAliveInterval() : DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
     }
 
@@ -296,6 +300,12 @@ public final class DeviceClientConfig
             //Codes_SRS_DEVICECLIENTCONFIG_34_084: [If the provided security provider is neither a SecurityProviderX509 instance nor a SecurityProviderTpm instance, this function shall throw an UnsupportedOperationException.]
             throw new UnsupportedOperationException("The provided security provider is not supported.");
         }
+    }
+
+    DeviceClientConfig(IotHubConnectionString connectionString, SecurityProvider securityProvider, ClientOptions clientOptions) throws IOException
+    {
+        this(connectionString, securityProvider);
+        setKeepAliveInterval(clientOptions);
     }
 
     private void commonConstructorSetup(IotHubConnectionString iotHubConnectionString)
