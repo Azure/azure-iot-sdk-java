@@ -302,8 +302,17 @@ public final class DeviceClientConfig
         }
     }
 
+    /**
+     * Constructor for a device client config that retrieves the authentication method from a security provider instance and sets the keep alive interval
+     * @param connectionString The connection string for the iot hub to connect with
+     * @param securityProvider The security provider instance to be used for authentication of this device
+     * @param clientOptions The client options that will be used to set the keep alive
+     * @throws IOException if the provided security provider throws an exception while authenticating
+     */
     DeviceClientConfig(IotHubConnectionString connectionString, SecurityProvider securityProvider, ClientOptions clientOptions) throws IOException
     {
+        // When setting the ClientConfig and a SecurityProvider, the SecurityProvider is responsible for setting the sslContext
+        // we do not need to set the context in this method.
         this(connectionString, securityProvider);
         setKeepAliveInterval(clientOptions);
     }
