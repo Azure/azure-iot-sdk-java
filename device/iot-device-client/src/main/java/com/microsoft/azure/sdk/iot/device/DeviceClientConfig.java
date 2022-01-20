@@ -311,7 +311,7 @@ public final class DeviceClientConfig
      */
     DeviceClientConfig(IotHubConnectionString connectionString, SecurityProvider securityProvider, ClientOptions clientOptions) throws IOException
     {
-        // When setting the ClientConfig and a SecurityProvider, the SecurityProvider is responsible for setting the sslContext
+        // When setting the ClientOptions and a SecurityProvider, the SecurityProvider is responsible for setting the sslContext
         // we do not need to set the context in this method.
         this(connectionString, securityProvider);
         setKeepAliveInterval(clientOptions);
