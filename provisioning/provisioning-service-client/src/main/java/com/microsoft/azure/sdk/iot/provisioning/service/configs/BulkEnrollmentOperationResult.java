@@ -7,7 +7,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
 
@@ -73,7 +72,7 @@ public class BulkEnrollmentOperationResult
     public BulkEnrollmentOperationResult(String json)
     {
         /* SRS_BULK_OPERATION_RESULT_21_001: [The constructor shall throw IllegalArgumentException if the JSON is null or empty.] */
-        if(Tools.isNullOrEmpty(json))
+        if (Tools.isNullOrEmpty(json))
         {
             throw new IllegalArgumentException("JSON with result is null or empty");
         }
@@ -85,12 +84,6 @@ public class BulkEnrollmentOperationResult
 
         /* SRS_BULK_OPERATION_RESULT_21_004: [The constructor shall throw IllegalArgumentException if the JSON do not contains isSuccessful.] */
         ParserUtility.validateObject(result.isSuccessful);
-
-        /* SRS_BULK_OPERATION_RESULT_21_005: [The constructor shall throw IllegalArgumentException if the JSON contains invalid error.] */
-        for (BulkEnrollmentOperationError error:result.errors)
-        {
-            error.validateError();
-        }
 
         /* SRS_BULK_OPERATION_RESULT_21_006: [The constructor shall store the provided isSuccessful.] */
         this.isSuccessful = result.isSuccessful;

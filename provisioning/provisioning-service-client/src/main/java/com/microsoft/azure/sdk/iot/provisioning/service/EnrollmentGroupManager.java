@@ -3,8 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service;
 
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
+import com.microsoft.azure.sdk.iot.provisioning.service.transport.https.HttpMethod;
+import com.microsoft.azure.sdk.iot.provisioning.service.transport.https.HttpResponse;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.AttestationMechanism;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.EnrollmentGroup;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.QuerySpecification;
@@ -43,7 +43,7 @@ class EnrollmentGroupManager
     private EnrollmentGroupManager(ContractApiHttp contractApiHttp)
     {
         /* SRS_ENROLLMENT_GROUP_MANAGER_21_001: [The constructor shall throw IllegalArgumentException if the provided ContractApiHttp is null.] */
-        if(contractApiHttp == null)
+        if (contractApiHttp == null)
         {
             throw new IllegalArgumentException("ContractApiHttp cannot be null");
         }
@@ -77,7 +77,7 @@ class EnrollmentGroupManager
     EnrollmentGroup createOrUpdate(EnrollmentGroup enrollmentGroup) throws ProvisioningServiceClientException
     {
         /* SRS_ENROLLMENT_GROUP_MANAGER_21_005: [The createOrUpdate shall throw IllegalArgumentException if the provided enrollmentGroup is null.] */
-        if(enrollmentGroup == null)
+        if (enrollmentGroup == null)
         {
             throw new IllegalArgumentException("enrollmentGroup cannot be null.");
         }
@@ -90,7 +90,7 @@ class EnrollmentGroupManager
 
         /* SRS_ENROLLMENT_GROUP_MANAGER_21_045: [If the enrollmentGroup contains eTag, the createOrUpdate shall send a Http request with `If-Match` the eTag in the header.] */
         Map<String, String> headerParameters = new HashMap<>();
-        if(!Tools.isNullOrEmpty(enrollmentGroup.getEtag()))
+        if (!Tools.isNullOrEmpty(enrollmentGroup.getEtag()))
         {
             headerParameters.put(CONDITION_KEY, enrollmentGroup.getEtag());
         }
@@ -107,7 +107,7 @@ class EnrollmentGroupManager
 
         /* SRS_ENROLLMENT_GROUP_MANAGER_21_042: [The createOrUpdate shall throw ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */
         byte[] body = httpResponse.getBody();
-        if(body == null)
+        if (body == null)
         {
             throw new ProvisioningServiceClientServiceException("Http response for createOrUpdate cannot contains a null body");
         }
@@ -129,7 +129,7 @@ class EnrollmentGroupManager
     EnrollmentGroup get(String enrollmentGroupId) throws ProvisioningServiceClientException
     {
         /* SRS_ENROLLMENT_GROUP_MANAGER_21_020: [The get shall throw IllegalArgumentException if the provided enrollmentGroupId is null or empty.] */
-        if(Tools.isNullOrEmpty(enrollmentGroupId))
+        if (Tools.isNullOrEmpty(enrollmentGroupId))
         {
             throw new IllegalArgumentException("enrollmentGroupId cannot be null or empty.");
         }
@@ -149,7 +149,7 @@ class EnrollmentGroupManager
 
         /* SRS_ENROLLMENT_GROUP_MANAGER_21_043: [The get shall throw ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */
         byte[] body = httpResponse.getBody();
-        if(body == null)
+        if (body == null)
         {
             throw new ProvisioningServiceClientServiceException("Http response for get cannot contains a null body");
         }
@@ -159,7 +159,7 @@ class EnrollmentGroupManager
 
     AttestationMechanism getAttestationMechanism(String enrollmentGroupId) throws ProvisioningServiceClientException
     {
-        if(Tools.isNullOrEmpty(enrollmentGroupId))
+        if (Tools.isNullOrEmpty(enrollmentGroupId))
         {
             throw new IllegalArgumentException("enrollmentGroupId cannot be null or empty.");
         }
@@ -191,7 +191,7 @@ class EnrollmentGroupManager
     void delete(EnrollmentGroup enrollmentGroup) throws ProvisioningServiceClientException
     {
         /* SRS_ENROLLMENT_GROUP_MANAGER_21_026: [The delete shall throw IllegalArgumentException if the provided enrollmentGroup is null.] */
-        if(enrollmentGroup == null)
+        if (enrollmentGroup == null)
         {
             throw new IllegalArgumentException("enrollmentGroup cannot be null.");
         }
@@ -201,7 +201,7 @@ class EnrollmentGroupManager
 
         /* SRS_ENROLLMENT_GROUP_MANAGER_21_028: [If the enrollmentGroup contains eTag, the delete shall send a Http request with `If-Match` the eTag in the header.] */
         Map<String, String> headerParameters = new HashMap<>();
-        if(!Tools.isNullOrEmpty(enrollmentGroup.getEtag()))
+        if (!Tools.isNullOrEmpty(enrollmentGroup.getEtag()))
         {
             headerParameters.put(CONDITION_KEY, enrollmentGroup.getEtag());
         }
@@ -231,7 +231,7 @@ class EnrollmentGroupManager
     void delete(String enrollmentGroupId, String eTag) throws ProvisioningServiceClientException
     {
         /* SRS_ENROLLMENT_GROUP_MANAGER_21_032: [The delete shall throw IllegalArgumentException if the provided enrollmentGroupId is null or empty.] */
-        if(Tools.isNullOrEmpty(enrollmentGroupId))
+        if (Tools.isNullOrEmpty(enrollmentGroupId))
         {
             throw new IllegalArgumentException("enrollmentGroupId cannot be null.");
         }
@@ -241,7 +241,7 @@ class EnrollmentGroupManager
 
         /* SRS_ENROLLMENT_GROUP_MANAGER_21_034: [If the eTag is not null or empty, the delete shall send a Http request with `If-Match` the eTag in the header.] */
         Map<String, String> headerParameters = new HashMap<>();
-        if(!Tools.isNullOrEmpty(eTag))
+        if (!Tools.isNullOrEmpty(eTag))
         {
             headerParameters.put(CONDITION_KEY, eTag);
         }
@@ -270,13 +270,13 @@ class EnrollmentGroupManager
     Query createQuery(QuerySpecification querySpecification, int pageSize)
     {
         /* SRS_ENROLLMENT_GROUP_MANAGER_21_038: [The createQuery shall throw IllegalArgumentException if the provided querySpecification is null.] */
-        if(querySpecification == null)
+        if (querySpecification == null)
         {
             throw new IllegalArgumentException("querySpecification cannot be null.");
         }
 
         /* SRS_ENROLLMENT_GROUP_MANAGER_21_039: [The createQuery shall throw IllegalArgumentException if the provided pageSize is negative.] */
-        if(pageSize < 0)
+        if (pageSize < 0)
         {
             throw new IllegalArgumentException("pageSize cannot be negative.");
         }

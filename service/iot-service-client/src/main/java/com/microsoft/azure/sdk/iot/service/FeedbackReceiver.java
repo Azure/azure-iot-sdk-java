@@ -13,9 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * FeedbackReceiver is a specialized receiver whose ReceiveAsync
@@ -24,7 +21,7 @@ import java.util.concurrent.Executors;
 @Slf4j
 public class FeedbackReceiver
 {
-    private final long DEFAULT_TIMEOUT_MS = 60000;
+    private static final long DEFAULT_TIMEOUT_MS = 60000;
 
     private final AmqpReceive amqpReceive;
 

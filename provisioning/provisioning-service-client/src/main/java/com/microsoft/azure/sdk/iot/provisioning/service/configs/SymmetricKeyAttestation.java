@@ -71,7 +71,7 @@ public class SymmetricKeyAttestation extends Attestation implements Serializable
     {
         /* SRS_SYMMETRIC_KEY_ATTESTATION_44_003: [The service will generate symmetric keys if the symmetricKeyAttestation supplied is null or empty.] */
         /* SRS_SYMMETRIC_KEY_ATTESTATION_44_004: [The constructor shall store the primaryKey and secondaryKey provided in the symmetricKey.] */
-        if(symmetricKeyAttestation == null)
+        if (symmetricKeyAttestation == null)
         {
             this.setPrimaryKey(EMPTY_STRING);
             this.setSecondaryKey(EMPTY_STRING);

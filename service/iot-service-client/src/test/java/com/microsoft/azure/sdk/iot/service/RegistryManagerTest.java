@@ -5,11 +5,10 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationContentParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.DeviceParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.StorageAuthenticationType;
-import com.microsoft.azure.sdk.iot.service.*;
+import com.microsoft.azure.sdk.iot.service.serializers.ConfigurationContentParser;
+import com.microsoft.azure.sdk.iot.service.serializers.ConfigurationParser;
+import com.microsoft.azure.sdk.iot.service.serializers.DeviceParser;
+import com.microsoft.azure.sdk.iot.service.serializers.StorageAuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
@@ -27,7 +26,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
 import static junit.framework.TestCase.assertNotNull;

@@ -6,7 +6,7 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
 
-import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodData;

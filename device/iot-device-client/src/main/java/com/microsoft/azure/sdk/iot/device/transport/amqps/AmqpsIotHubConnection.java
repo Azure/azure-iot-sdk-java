@@ -10,7 +10,7 @@ import com.microsoft.azure.proton.transport.proxy.ProxyHandler;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyHandlerImpl;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
 import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
-import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingDeviceUnauthorizedException;
 import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
@@ -116,8 +116,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     public AmqpsIotHubConnection(DeviceClientConfig config, String transportUniqueIdentifier)
     {
         // This allows us to create thread safe sets despite there being no such type default in Java 7 or 8
-        this.deviceClientConfigs = Collections.newSetFromMap(new ConcurrentHashMap<DeviceClientConfig, Boolean>());
-        this.multiplexingClientsToRegister = Collections.newSetFromMap(new ConcurrentHashMap<DeviceClientConfig, Boolean>());
+        this.deviceClientConfigs = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        this.multiplexingClientsToRegister = Collections.newSetFromMap(new ConcurrentHashMap<>());
         this.multiplexingClientsToUnregister = new ConcurrentHashMap<>();
 
         this.deviceClientConfigs.add(config);
@@ -153,8 +153,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     public AmqpsIotHubConnection(String hostName, String transportUniqueIdentifier, boolean isWebsocketConnection, SSLContext sslContext, ProxySettings proxySettings, int keepAliveInterval)
     {
         // This allows us to create thread safe sets despite there being no such type default in Java 7 or 8
-        this.deviceClientConfigs = Collections.newSetFromMap(new ConcurrentHashMap<DeviceClientConfig, Boolean>());
-        this.multiplexingClientsToRegister = Collections.newSetFromMap(new ConcurrentHashMap<DeviceClientConfig, Boolean>());
+        this.deviceClientConfigs = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        this.multiplexingClientsToRegister = Collections.newSetFromMap(new ConcurrentHashMap<>());
         this.multiplexingClientsToUnregister = new ConcurrentHashMap<>();
 
         this.isWebsocketConnection = isWebsocketConnection;
@@ -474,7 +474,6 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
     // The warning is for how sessionHandlers.peek() may return null, but for x509 cases, this code only executes
     // if one session handler is present in the list, so it is a false positive
-    @SuppressWarnings("ConstantConditions")
     @Override
     public void onConnectionLocalOpen(Event event)
     {

@@ -124,11 +124,11 @@ public class TwinState implements Serializable
     public TwinState(TwinCollection tags, TwinCollection desiredProperty)
     {
         /* SRS_TWIN_STATE_21_001: [The constructor shall store the provided tags and desiredProperty.] */
-        if(tags != null)
+        if (tags != null)
         {
             this.tags = TwinCollection.createFromRawCollection(tags);
         }
-        if(desiredProperty != null)
+        if (desiredProperty != null)
         {
             this.properties = new TwinProperties(desiredProperty);
         }
@@ -153,13 +153,13 @@ public class TwinState implements Serializable
         JsonObject twinJson = new JsonObject();
 
         /* SRS_TWIN_STATE_21_003: [If the tags is null, the toJsonElement shall not include the `tags` in the final JSON.] */
-        if(this.tags != null)
+        if (this.tags != null)
         {
             twinJson.add(TAGS_TAG, this.tags.toJsonElement());
         }
 
         /* SRS_TWIN_STATE_21_004: [If the property is null, the toJsonElement shall not include the `properties` in the final JSON.] */
-        if(this.properties != null)
+        if (this.properties != null)
         {
             twinJson.add(DESIRED_PROPERTIES_TAG, this.properties.toJsonElement());
         }
@@ -175,7 +175,7 @@ public class TwinState implements Serializable
     public TwinCollection getDesiredProperty()
     {
         /* SRS_TWIN_STATE_21_006: [The getDesiredProperty shall return a TwinCollection with the stored desired property.] */
-        if(this.properties == null)
+        if (this.properties == null)
         {
             return null;
         }
@@ -194,13 +194,13 @@ public class TwinState implements Serializable
         JsonObject twinJson = new JsonObject();
 
         /* SRS_TWIN_STATE_21_008: [If the tags is null, the JSON shall not include the `tags`.] */
-        if(this.tags != null)
+        if (this.tags != null)
         {
             twinJson.add(TAGS_TAG, this.tags.toJsonElementWithMetadata());
         }
 
         /* SRS_TWIN_STATE_21_009: [If the properties is null, the JSON shall not include the `properties`.] */
-        if(this.properties != null)
+        if (this.properties != null)
         {
             twinJson.add(DESIRED_PROPERTIES_TAG, this.properties.toJsonElementWithMetadata());
         }

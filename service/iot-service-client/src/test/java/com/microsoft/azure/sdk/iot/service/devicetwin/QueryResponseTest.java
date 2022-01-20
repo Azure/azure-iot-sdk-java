@@ -5,8 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.QueryResponseParser;
-import com.microsoft.azure.sdk.iot.service.devicetwin.QueryResponse;
+import com.microsoft.azure.sdk.iot.service.serializers.QueryResponseParser;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -31,7 +30,7 @@ public class QueryResponseTest
 
     private void assertEqualsIterator(Iterator test, Iterator actual)
     {
-        while(test.hasNext())
+        while (test.hasNext())
         {
             assertTrue(actual.hasNext());
             assertEquals(test.next(), actual.next());

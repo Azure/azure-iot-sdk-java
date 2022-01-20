@@ -5,7 +5,6 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 import lombok.Getter;
 
@@ -73,7 +72,7 @@ public class TwinMetadata implements Serializable
      */
     TwinMetadata(String lastUpdated, Integer lastUpdatedVersion)
     {
-        if(!Tools.isNullOrEmpty(lastUpdated))
+        if (!Tools.isNullOrEmpty(lastUpdated))
         {
             /* SRS_TWIN_METADATA_21_001: [The constructor shall parse the provided `lastUpdated` String to the Date and store it as the TwinMetadata lastUpdated.] */
             /* SRS_TWIN_METADATA_21_002: [The constructor shall throw IllegalArgumentException if it cannot convert the provided `lastUpdated` String to Date.] */
@@ -83,7 +82,7 @@ public class TwinMetadata implements Serializable
         /* SRS_TWIN_METADATA_21_003: [The constructor shall store the provided lastUpdatedVersion as is.] */
         this.lastUpdatedVersion = lastUpdatedVersion;
 
-        if((this.lastUpdatedVersion == null) && (this.lastUpdated == null))
+        if ((this.lastUpdatedVersion == null) && (this.lastUpdated == null))
         {
             throw new IllegalArgumentException("no valid data to create a TwinMetadata.");
         }
@@ -100,7 +99,7 @@ public class TwinMetadata implements Serializable
      *     contains a valid metadata, this method contains the label <b>try</b>, which means that
      *     it can return a valid TwinMetadata or {@code null}.
      *
-     * <p> For instance, for the follow Map, this method will create a TwinMetadata with
+     * <p> For instance, for the following Map, this method will create a TwinMetadata with
      *     {@code lastUpdated = 2015-09-21T02:07:44.238Z} and {@code lastUpdatedVersion = 3}
      * <pre>
      * {@code
@@ -126,7 +125,7 @@ public class TwinMetadata implements Serializable
     static TwinMetadata tryExtractFromMap(Object metadata)
     {
         /* SRS_TWIN_METADATA_21_004: [The tryExtractFromMap shall return null if the provided metadata is not a Map.] */
-        if(!(metadata instanceof Map))
+        if (!(metadata instanceof Map))
         {
             return null;
         }
@@ -135,23 +134,23 @@ public class TwinMetadata implements Serializable
         /* SRS_TWIN_METADATA_21_006: [The tryExtractFromMap shall throw IllegalArgumentException if it cannot convert the provided `lastUpdated` String to Date or the version in a Number.] */
         String lastUpdated = null;
         Integer lastUpdatedVersion = null;
-        for(Map.Entry<? extends String, Object> entry: ((Map<? extends String, Object>)metadata).entrySet())
+        for (Map.Entry<? extends String, Object> entry: ((Map<? extends String, Object>)metadata).entrySet())
         {
             String key = entry.getKey();
-            if(key.equals(LAST_UPDATE_TAG))
+            if (key.equals(LAST_UPDATE_TAG))
             {
                 lastUpdated = (String)entry.getValue();
             }
-            else if(key.equals(LAST_UPDATE_VERSION_TAG))
+            else if (key.equals(LAST_UPDATE_VERSION_TAG))
             {
-                if(!(entry.getValue() instanceof Number))
+                if (!(entry.getValue() instanceof Number))
                 {
                     throw new IllegalArgumentException("Version in the metadata shall be a number");
                 }
                 lastUpdatedVersion = ((Number)entry.getValue()).intValue();
             }
         }
-        if((lastUpdatedVersion != null) || !Tools.isNullOrEmpty(lastUpdated))
+        if ((lastUpdatedVersion != null) || !Tools.isNullOrEmpty(lastUpdated))
         {
             return new TwinMetadata(lastUpdated, lastUpdatedVersion);
         }
@@ -175,11 +174,11 @@ public class TwinMetadata implements Serializable
     {
         /* SRS_TWIN_METADATA_21_009: [The toJsonElement shall return a JsonElement with the information in this class in a JSON format.] */
         JsonObject jsonObject = new JsonObject();
-        if(this.lastUpdated != null)
+        if (this.lastUpdated != null)
         {
             jsonObject.addProperty(LAST_UPDATE_TAG, ParserUtility.dateTimeUtcToString(this.lastUpdated));
         }
-        if(this.lastUpdatedVersion != null)
+        if (this.lastUpdatedVersion != null)
         {
             jsonObject.addProperty(LAST_UPDATE_VERSION_TAG, this.lastUpdatedVersion);
         }

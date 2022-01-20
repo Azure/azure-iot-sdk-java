@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service;
 
-import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;

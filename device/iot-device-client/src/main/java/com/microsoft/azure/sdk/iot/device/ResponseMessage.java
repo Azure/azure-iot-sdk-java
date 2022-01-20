@@ -22,7 +22,7 @@ public final class ResponseMessage extends Message
         /* Codes_SRS_RESPONSEMESSAGE_21_002: [If the message body is null, the constructor shall throw an IllegalArgumentException thrown by base constructor.] */
         super(body);
 
-        if(status == null)
+        if (status == null)
         {
             /* Codes_SRS_RESPONSEMESSAGE_21_004: [If the message status is null, the constructor shall throw an IllegalArgumentException.] */
             throw new IllegalArgumentException("Null status");

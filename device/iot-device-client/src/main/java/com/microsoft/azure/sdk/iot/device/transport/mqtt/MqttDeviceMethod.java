@@ -81,7 +81,7 @@ class MqttDeviceMethod extends Mqtt
             throw new IllegalArgumentException("Message cannot be null");
         }
 
-        if(!isStarted)
+        if (!isStarted)
         {
             throwMethodsTransportException("Start device method before using send");
         }

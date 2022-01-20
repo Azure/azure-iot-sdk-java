@@ -6,9 +6,9 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
 
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
+import com.microsoft.azure.sdk.iot.device.FileUploadCompletionNotification;
+import com.microsoft.azure.sdk.iot.device.FileUploadSasUriRequest;
+import com.microsoft.azure.sdk.iot.device.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
@@ -31,7 +31,6 @@ import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;

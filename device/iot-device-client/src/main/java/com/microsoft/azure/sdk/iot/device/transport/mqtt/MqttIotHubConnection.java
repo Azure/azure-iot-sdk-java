@@ -136,7 +136,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
 
         String serviceParams;
         String modelId = this.config.getModelId();
-        if(modelId == null || modelId.isEmpty())
+        if (modelId == null || modelId.isEmpty())
         {
             serviceParams = TransportUtils.IOTHUB_API_VERSION;
         }

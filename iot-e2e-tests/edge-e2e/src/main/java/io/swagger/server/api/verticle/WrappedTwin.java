@@ -1,6 +1,6 @@
 package io.swagger.server.api.verticle;
 
-import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinCollection;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
 import io.vertx.core.json.JsonObject;
 

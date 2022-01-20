@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.service.jobs;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.JobsStatisticsParser;
+import com.microsoft.azure.sdk.iot.service.serializers.JobsStatisticsParser;
 import lombok.Getter;
 
 /**
@@ -51,7 +51,7 @@ public class JobStatistics
     JobStatistics(JobsStatisticsParser jobsStatisticsParser) throws IllegalArgumentException
     {
         /* Codes_SRS_JOBSTATISTICS_21_001: [The constructor shall throw IllegalArgumentException if the input jobsStatisticsParser is null.] */
-        if(jobsStatisticsParser == null)
+        if (jobsStatisticsParser == null)
         {
             throw new IllegalArgumentException("null jobsStatisticsParser");
         }

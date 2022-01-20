@@ -5,7 +5,6 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
 import lombok.Getter;
 
@@ -77,11 +76,7 @@ public class BulkEnrollmentOperationError
      */
     void validateError()
     {
-        /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_004: [The validateError shall throw IllegalArgumentException if the registrationId is null, empty or not a valid id.] */
-        ParserUtility.validateId(this.registrationId);
-        /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_005: [The validateError shall throw IllegalArgumentException if the errorCode is null.] */
         ParserUtility.validateObject(this.errorCode);
-        /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_006: [The validateError shall do nothing if all parameters in the class are correct.] */
     }
 
     /**
@@ -93,6 +88,5 @@ public class BulkEnrollmentOperationError
      */
     BulkEnrollmentOperationError()
     {
-        /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_007: [The BulkEnrollmentOperationResult shall provide an empty constructor to make GSON happy.] */
     }
 }

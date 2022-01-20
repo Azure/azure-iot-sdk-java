@@ -115,8 +115,8 @@ public class DeviceIOTest
 
         // assert
         assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
-        assertEquals(SEND_PERIOD_MILLIS, Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
-        assertEquals(RECEIVE_PERIOD_MILLIS_AMQPS, Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
+        assertEquals(SEND_PERIOD_MILLIS, (long) Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
+        assertEquals(RECEIVE_PERIOD_MILLIS_AMQPS, (long) Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
     }
     
     /* Tests_SRS_DEVICE_IO_21_003: [The constructor shall initialize the IoT Hub transport that uses the `protocol` specified.] */
@@ -135,8 +135,8 @@ public class DeviceIOTest
 
         // assert
         assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
-        assertEquals(SEND_PERIOD_MILLIS, Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
-        assertEquals(RECEIVE_PERIOD_MILLIS_MQTT, Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
+        assertEquals(SEND_PERIOD_MILLIS, (long) Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
+        assertEquals(RECEIVE_PERIOD_MILLIS_MQTT, (long) Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
     }
 
     /* Tests_SRS_DEVICE_IO_21_003: [The constructor shall initialize the IoT Hub transport that uses the `protocol` specified.] */
@@ -150,8 +150,8 @@ public class DeviceIOTest
 
         // assert
         assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
-        assertEquals(SEND_PERIOD_MILLIS, Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
-        assertEquals(RECEIVE_PERIOD_MILLIS_HTTPS, Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
+        assertEquals(SEND_PERIOD_MILLIS, (long) Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
+        assertEquals(RECEIVE_PERIOD_MILLIS_HTTPS, (long) Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
     }
 
     /* Tests_SRS_DEVICE_IO_21_012: [The open shall open the transport to communicate with an IoT Hub.] */
@@ -389,7 +389,7 @@ public class DeviceIOTest
         long receivePeriodInMilliseconds = Deencapsulation.invoke(deviceIO, "getReceivePeriodInMilliseconds") ;
 
         // assert
-        assertEquals(RECEIVE_PERIOD_MILLIS_AMQPS, Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
+        assertEquals(RECEIVE_PERIOD_MILLIS_AMQPS, (long) Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
         assertEquals(RECEIVE_PERIOD_MILLIS_AMQPS, receivePeriodInMilliseconds);
     }
 
@@ -400,13 +400,13 @@ public class DeviceIOTest
     {
         // arrange
         final Object deviceIO = newDeviceIO();
-        assertEquals(RECEIVE_PERIOD_MILLIS_AMQPS, Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
+        assertEquals(RECEIVE_PERIOD_MILLIS_AMQPS, (long) Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
 
         // act
         Deencapsulation.invoke(deviceIO, "setReceivePeriodInMilliseconds",  20L);
 
         // assert
-        assertEquals(20L, Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
+        assertEquals(20L, (long) Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
     }
 
      /* Tests_SRS_DEVICE_IO_21_028: [If the task scheduler already exists, the setReceivePeriodInMilliseconds shall change the `scheduleAtFixedRate` for the receiveTask to the new value.] */
@@ -419,13 +419,13 @@ public class DeviceIOTest
         final long lastInterval = 4321L;
         final Object deviceIO = newDeviceIO();
         Deencapsulation.invoke(deviceIO, "setReceivePeriodInMilliseconds",  lastInterval);
-        assertEquals(lastInterval, Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
+        assertEquals(lastInterval, (long) Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
 
         // act
         Deencapsulation.invoke(deviceIO, "setReceivePeriodInMilliseconds",  interval);
 
         // assert
-        assertEquals(interval, Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
+        assertEquals(interval, (long) Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
     }
 
     /* Tests_SRS_DEVICE_IO_21_030: [If the the provided interval is zero or negative, the setReceivePeriodInMilliseconds shall throw IllegalArgumentException.] */
@@ -466,7 +466,7 @@ public class DeviceIOTest
         long sendPeriodInMilliseconds = Deencapsulation.invoke(deviceIO, "getSendPeriodInMilliseconds" );
 
         // assert
-        assertEquals(SEND_PERIOD_MILLIS, Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
+        assertEquals(SEND_PERIOD_MILLIS, (long) Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
         assertEquals(SEND_PERIOD_MILLIS, sendPeriodInMilliseconds);
     }
 
@@ -477,13 +477,13 @@ public class DeviceIOTest
     {
         // arrange
         final Object deviceIO = newDeviceIO();
-        assertEquals(SEND_PERIOD_MILLIS, Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
+        assertEquals(SEND_PERIOD_MILLIS, (long) Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
 
         // act
         Deencapsulation.invoke(deviceIO, "setSendPeriodInMilliseconds",  20L);
 
         // assert
-        assertEquals(20L, Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
+        assertEquals(20L, (long) Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
     }
 
     /* Tests_SRS_DEVICE_IO_21_034: [If the task scheduler already exists, the setSendPeriodInMilliseconds shall change the `scheduleAtFixedRate` for the sendTask to the new value.] */
@@ -498,13 +498,13 @@ public class DeviceIOTest
         Deencapsulation.invoke(deviceIO, "setSendPeriodInMilliseconds",  lastInterval);
 
         Deencapsulation.invoke(deviceIO, "open", false);
-        assertEquals(lastInterval, Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
+        assertEquals(lastInterval, (long) Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
 
         // act
         Deencapsulation.invoke(deviceIO, "setSendPeriodInMilliseconds",  interval);
 
         // assert
-        assertEquals(interval, Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
+        assertEquals(interval, (long) Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
     }
 
     /* Tests_SRS_DEVICE_IO_21_036: [If the the provided interval is zero or negative, the setSendPeriodInMilliseconds shall throw IllegalArgumentException.] */

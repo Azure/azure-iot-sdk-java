@@ -3,8 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service;
 
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
+import com.microsoft.azure.sdk.iot.provisioning.service.transport.https.HttpMethod;
+import com.microsoft.azure.sdk.iot.provisioning.service.transport.https.HttpResponse;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
 import com.microsoft.azure.sdk.iot.provisioning.service.contract.ContractApiHttp;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
@@ -42,7 +42,7 @@ class IndividualEnrollmentManager
     private IndividualEnrollmentManager(ContractApiHttp contractApiHttp)
     {
         /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_001: [The constructor shall throw IllegalArgumentException if the provided ProvisioningConnectionString is null.] */
-        if(contractApiHttp == null)
+        if (contractApiHttp == null)
         {
             throw new IllegalArgumentException("ContractApiHttp cannot be null");
         }
@@ -77,7 +77,7 @@ class IndividualEnrollmentManager
     IndividualEnrollment createOrUpdate(IndividualEnrollment individualEnrollment) throws ProvisioningServiceClientException
     {
         /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_005: [The createOrUpdate shall throw IllegalArgumentException if the provided individualEnrollment is null.] */
-        if(individualEnrollment == null)
+        if (individualEnrollment == null)
         {
             throw new IllegalArgumentException("individualEnrollment cannot be null.");
         }
@@ -90,7 +90,7 @@ class IndividualEnrollmentManager
 
         /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_045: [If the individualEnrollment contains eTag, the createOrUpdate shall send a Http request with `If-Match` the eTag in the header.] */
         Map<String, String> headerParameters = new HashMap<>();
-        if(!Tools.isNullOrEmpty(individualEnrollment.getEtag()))
+        if (!Tools.isNullOrEmpty(individualEnrollment.getEtag()))
         {
             headerParameters.put(CONDITION_KEY, individualEnrollment.getEtag());
         }
@@ -107,7 +107,7 @@ class IndividualEnrollmentManager
 
         /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_042: [The createOrUpdate shall throw ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */
         byte[] body = httpResponse.getBody();
-        if(body == null)
+        if (body == null)
         {
             throw new ProvisioningServiceClientServiceException("Http response for createOrUpdate cannot contains a null body");
         }
@@ -131,12 +131,12 @@ class IndividualEnrollmentManager
     BulkEnrollmentOperationResult bulkOperation(BulkOperationMode bulkOperationMode, Collection<IndividualEnrollment> individualEnrollments) throws ProvisioningServiceClientException
     {
         /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_012: [The BulkEnrollmentOperation shall throw IllegalArgumentException if the provided bulkOperationMode is null.] */
-        if(bulkOperationMode == null)
+        if (bulkOperationMode == null)
         {
             throw new IllegalArgumentException("bulkOperationMode cannot be null.");
         }
         /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_013: [The BulkEnrollmentOperation shall throw IllegalArgumentException if the provided individualEnrollments is null or empty.] */
-        if((individualEnrollments == null) || individualEnrollments.isEmpty())
+        if ((individualEnrollments == null) || individualEnrollments.isEmpty())
         {
             throw new IllegalArgumentException("individualEnrollments cannot be null or empty.");
         }
@@ -156,7 +156,7 @@ class IndividualEnrollmentManager
 
         /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_043: [The BulkEnrollmentOperation shall throw ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */
         byte[] body = httpResponse.getBody();
-        if(body == null)
+        if (body == null)
         {
             throw new ProvisioningServiceClientServiceException("Http response for BulkEnrollmentOperation cannot contains a null body");
         }
@@ -179,7 +179,7 @@ class IndividualEnrollmentManager
     IndividualEnrollment get(String registrationId) throws ProvisioningServiceClientException
     {
         /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_020: [The get shall throw IllegalArgumentException if the provided registrationId is null or empty.] */
-        if(Tools.isNullOrEmpty(registrationId))
+        if (Tools.isNullOrEmpty(registrationId))
         {
             throw new IllegalArgumentException("registrationId cannot be null or empty.");
         }
@@ -199,7 +199,7 @@ class IndividualEnrollmentManager
 
         /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_044: [The get shall throw ProvisioningServiceClientServiceException if the heepResponse contains a null body.] */
         byte[] body = httpResponse.getBody();
-        if(body == null)
+        if (body == null)
         {
             throw new ProvisioningServiceClientServiceException("Http response for get cannot contains a null body");
         }
@@ -210,7 +210,7 @@ class IndividualEnrollmentManager
 
     AttestationMechanism getAttestationMechanism(String registrationId) throws ProvisioningServiceClientException
     {
-        if(Tools.isNullOrEmpty(registrationId))
+        if (Tools.isNullOrEmpty(registrationId))
         {
             throw new IllegalArgumentException("registrationId cannot be null or empty.");
         }
@@ -241,7 +241,7 @@ class IndividualEnrollmentManager
     void delete(IndividualEnrollment individualEnrollment) throws ProvisioningServiceClientException
     {
         /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_026: [The delete shall throw IllegalArgumentException if the provided individualEnrollment is null.] */
-        if(individualEnrollment == null)
+        if (individualEnrollment == null)
         {
             throw new IllegalArgumentException("individualEnrollment cannot be null.");
         }
@@ -251,7 +251,7 @@ class IndividualEnrollmentManager
 
         /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_028: [If the individualEnrollment contains eTag, the delete shall send a Http request with `If-Match` the eTag in the header.] */
         Map<String, String> headerParameters = new HashMap<>();
-        if(!Tools.isNullOrEmpty(individualEnrollment.getEtag()))
+        if (!Tools.isNullOrEmpty(individualEnrollment.getEtag()))
         {
             headerParameters.put(CONDITION_KEY, individualEnrollment.getEtag());
         }
@@ -281,7 +281,7 @@ class IndividualEnrollmentManager
     void delete(String registrationId, String eTag) throws ProvisioningServiceClientException
     {
         /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_032: [The delete shall throw IllegalArgumentException if the provided registrationId is null or empty.] */
-        if(Tools.isNullOrEmpty(registrationId))
+        if (Tools.isNullOrEmpty(registrationId))
         {
             throw new IllegalArgumentException("registrationId cannot be null.");
         }
@@ -291,7 +291,7 @@ class IndividualEnrollmentManager
 
         /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_034: [If the eTag is not null or empty, the delete shall send a Http request with `If-Match` the eTag in the header.] */
         Map<String, String> headerParameters = new HashMap<>();
-        if(!Tools.isNullOrEmpty(eTag))
+        if (!Tools.isNullOrEmpty(eTag))
         {
             headerParameters.put(CONDITION_KEY, eTag);
         }
@@ -320,13 +320,13 @@ class IndividualEnrollmentManager
     Query createQuery(QuerySpecification querySpecification, int pageSize)
     {
         /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_038: [The createQuery shall throw IllegalArgumentException if the provided querySpecification is null.] */
-        if(querySpecification == null)
+        if (querySpecification == null)
         {
             throw new IllegalArgumentException("querySpecification cannot be null.");
         }
 
         /* SRS_INDIVIDUAL_ENROLLMENT_MANAGER_21_039: [The createQuery shall throw IllegalArgumentException if the provided pageSize is negative.] */
-        if(pageSize < 0)
+        if (pageSize < 0)
         {
             throw new IllegalArgumentException("pageSize cannot be negative.");
         }

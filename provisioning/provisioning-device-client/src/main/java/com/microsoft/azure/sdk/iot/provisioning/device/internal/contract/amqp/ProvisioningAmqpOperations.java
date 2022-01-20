@@ -1,6 +1,5 @@
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp;
 
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.SDKUtils;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
@@ -8,7 +7,12 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.Provi
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceTransportException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
-import com.microsoft.azure.sdk.iot.deps.util.ObjectLock;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.ObjectLock;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.amqp.AmqpDeviceOperations;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.amqp.AmqpListener;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.amqp.AmqpMessage;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.amqp.AmqpsConnection;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.amqp.SaslHandler;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;

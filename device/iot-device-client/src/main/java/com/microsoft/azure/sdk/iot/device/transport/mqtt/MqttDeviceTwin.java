@@ -174,7 +174,7 @@ class MqttDeviceTwin extends Mqtt
             throw new IllegalArgumentException("Message cannot be null");
         }
 
-        if(!this.isStarted)
+        if (!this.isStarted)
         {
             throw new IllegalStateException("Start device twin before using it");
         }

@@ -5,16 +5,14 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobClientBuilder;
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
+import com.microsoft.azure.sdk.iot.device.FileUploadCompletionNotification;
+import com.microsoft.azure.sdk.iot.device.FileUploadSasUriRequest;
+import com.microsoft.azure.sdk.iot.device.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

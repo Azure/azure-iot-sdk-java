@@ -19,7 +19,6 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>1.7.25</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.samples.device</groupId>

@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.device.auth;
 
-import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
@@ -15,7 +14,7 @@ import java.io.IOException;
 
 public class IotHubX509HardwareAuthenticationProvider extends IotHubAuthenticationProvider
 {
-    private SecurityProviderX509 securityProviderX509;
+    private final SecurityProviderX509 securityProviderX509;
 
     public IotHubX509HardwareAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, SecurityProvider securityProvider)
     {

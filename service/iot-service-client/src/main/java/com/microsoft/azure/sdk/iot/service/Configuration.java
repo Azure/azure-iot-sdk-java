@@ -5,10 +5,10 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationContentParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationMetricsParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
+import com.microsoft.azure.sdk.iot.service.serializers.ConfigurationContentParser;
+import com.microsoft.azure.sdk.iot.service.serializers.ConfigurationMetricsParser;
+import com.microsoft.azure.sdk.iot.service.serializers.ConfigurationParser;
+import com.microsoft.azure.sdk.iot.service.serializers.ParserUtility;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,7 +16,7 @@ import java.util.HashMap;
 
 public class Configuration
 {
-    private final String UTC_TIME_DEFAULT = "0001-01-01T00:00:00";
+    private static final String UTC_TIME_DEFAULT = "0001-01-01T00:00:00";
 
     /**
      * Create a Configuration instance using the given configuration name
@@ -67,7 +67,7 @@ public class Configuration
      * Specifies the schemaVersion
      */
     @Getter
-    private String schemaVersion;
+    private final String schemaVersion;
 
     /**
      * Specifies the labels map of the configuration

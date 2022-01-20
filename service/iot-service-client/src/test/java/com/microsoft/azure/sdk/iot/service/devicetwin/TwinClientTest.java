@@ -5,11 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
-import com.microsoft.azure.sdk.iot.deps.twin.ConfigurationInfo;
-import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
-import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
-import com.microsoft.azure.sdk.iot.deps.twin.TwinConnectionState;
-import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
@@ -112,7 +107,7 @@ public class TwinClientTest
     private void assertEqualSetAndMap(Set<Pair> pairSet, Map<String, String> map)
     {
         assertEquals(pairSet.size(), map.size());
-        for(Pair p : pairSet)
+        for (Pair p : pairSet)
         {
             String val = map.get(p.getKey());
             assertNotNull(val);

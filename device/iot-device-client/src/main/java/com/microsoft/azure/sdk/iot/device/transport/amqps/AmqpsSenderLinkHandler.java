@@ -224,7 +224,7 @@ abstract class AmqpsSenderLinkHandler extends BaseHandler
         Delivery delivery = this.senderLink.delivery(deliveryTag);
         try
         {
-            log.trace("Sending {} bytes over the amqp {} sender link with address {} and link correlation id {} with link credit", length, getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId, this.senderLink.getCredit());
+            log.trace("Sending {} bytes over the amqp {} sender link with address {} and link correlation id {} with link credit {}", length, getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId, this.senderLink.getCredit());
             int bytesSent = this.senderLink.send(msgData, 0, length);
 
             if (bytesSent != length)
