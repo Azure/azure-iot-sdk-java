@@ -73,6 +73,10 @@ Breaking changes:
   - Users of the X509 SecurityProvider are expected to pass in the parsed certificates and keys as Java security primitives rather than as strings
     - See [this sample](./provisioning/provisioning-samples/provisioning-X509-sample) for a demonstration on how to create these Java security primitives from strings
   
+## Deps
+
+Breaking changes:
+- The deps package has been removed from the v2 SDK and its classes have been copied to the respective client libraries that used them
   
 ## Frequently Asked Questions
 
