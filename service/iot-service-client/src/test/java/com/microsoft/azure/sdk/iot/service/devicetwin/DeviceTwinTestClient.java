@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
-import com.microsoft.azure.sdk.iot.deps.twin.*;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -354,7 +353,7 @@ public class DeviceTwinTestClient
 
         //assert
         assertEquals(testTags.size(), actualTags.size());
-        for(Pair test : actualTags)
+        for (Pair test : actualTags)
         {
             assertEquals("testTag", test.getKey());
             assertEquals("tagObject", test.getValue());
@@ -451,7 +450,7 @@ public class DeviceTwinTestClient
 
         //assert
         assertEquals(testDesProp.size(), actualDesProp.size());
-        for(Pair test : actualDesProp)
+        for (Pair test : actualDesProp)
         {
             assertEquals("testDes", test.getKey());
             assertEquals("desObject", test.getValue());
@@ -493,7 +492,7 @@ public class DeviceTwinTestClient
 
         //assert
         assertEquals(repMap.size(), actualRepProp.size());
-        for(Pair test : actualRepProp)
+        for (Pair test : actualRepProp)
         {
             assertEquals("testRep", test.getKey());
             assertEquals("repObject", test.getValue());
@@ -597,7 +596,7 @@ public class DeviceTwinTestClient
         //assert
         Set<Pair> actualTags = testDevice.getTags();
         assertEquals(testTags.size(), actualTags.size());
-        for(Pair test : actualTags)
+        for (Pair test : actualTags)
         {
             assertEquals("testTag", test.getKey());
             assertEquals("tagObject", test.getValue());
@@ -636,7 +635,7 @@ public class DeviceTwinTestClient
         //assert
         Set<Pair> actualDesProp = testDevice.getDesiredProperties();
         assertEquals(testDesProp.size(), actualDesProp.size());
-        for(Pair test : actualDesProp)
+        for (Pair test : actualDesProp)
         {
             assertEquals("testDes", test.getKey());
             assertEquals("desObject", test.getValue());
@@ -730,7 +729,7 @@ public class DeviceTwinTestClient
         //assert
         Set<Pair> actualRepProp = testDevice.getReportedProperties();
         assertEquals(testRepProp.size(), actualRepProp.size());
-        for(Pair test : actualRepProp)
+        for (Pair test : actualRepProp)
         {
             assertEquals("testRep", test.getKey());
             assertEquals("repObject", test.getValue());
@@ -792,7 +791,7 @@ public class DeviceTwinTestClient
         //assert
         assertEquals(testTags.size(), actualTags.size());
 
-        for(Map.Entry<String, Object> test : actualTags.entrySet())
+        for (Map.Entry<String, Object> test : actualTags.entrySet())
         {
             assertEquals("testTag", test.getKey());
             assertEquals("tagObject", test.getValue());
@@ -817,7 +816,7 @@ public class DeviceTwinTestClient
         TwinCollection actualTags = Deencapsulation.invoke(testDevice, "getTagsMap");
         assertEquals(testTags.size(), actualTags.size());
 
-        for(Map.Entry<String, Object> test : actualTags.entrySet())
+        for (Map.Entry<String, Object> test : actualTags.entrySet())
         {
             assertEquals("testTag", test.getKey());
             assertEquals("tagObject", test.getValue());
@@ -861,7 +860,7 @@ public class DeviceTwinTestClient
         //assert
         assertEquals(testRep.size(), actualTags.size());
 
-        for(Map.Entry<String, Object> test : actualTags.entrySet())
+        for (Map.Entry<String, Object> test : actualTags.entrySet())
         {
             assertEquals("testRep", test.getKey());
             assertEquals("repObject", test.getValue());
@@ -887,7 +886,7 @@ public class DeviceTwinTestClient
 
         assertEquals(testRep.size(), actualTags.size());
 
-        for(Map.Entry<String, Object> test : actualTags.entrySet())
+        for (Map.Entry<String, Object> test : actualTags.entrySet())
         {
             assertEquals("testRep", test.getKey());
             assertEquals("repObject", test.getValue());
@@ -913,7 +912,7 @@ public class DeviceTwinTestClient
         //assert
         assertEquals(1, actual.size());
 
-        for(Map.Entry<String, ConfigurationInfo> test : actual.entrySet())
+        for (Map.Entry<String, ConfigurationInfo> test : actual.entrySet())
         {
             assertEquals("abc", test.getKey());
             assertEquals(test.getValue(), info);
@@ -975,7 +974,7 @@ public class DeviceTwinTestClient
         //assert
         assertEquals(testRep.size(), actualTags.size());
 
-        for(Map.Entry<String, Object> test : actualTags.entrySet())
+        for (Map.Entry<String, Object> test : actualTags.entrySet())
         {
             assertEquals("testRep", test.getKey());
             assertEquals("repObject", test.getValue());
@@ -1001,7 +1000,7 @@ public class DeviceTwinTestClient
 
         assertEquals(testRep.size(), actualTags.size());
 
-        for(Map.Entry<String, Object> test : actualTags.entrySet())
+        for (Map.Entry<String, Object> test : actualTags.entrySet())
         {
             assertEquals("testRep", test.getKey());
             assertEquals("repObject", test.getValue());

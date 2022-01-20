@@ -19,7 +19,7 @@ logs from must be specified in the properties file. Specified packages will incl
 of any subpackages, but do not include the logs of their dependencies. As an example, adding the package 
 ```com.microsoft.azure.sdk.iot.service``` will collect logs from classes like ```com.microsoft.azure.sdk.iot.service.ServiceClient```, 
 and will collect logs for classes like ```com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSendHandler``` but will not
-collect logs from a class of its dependency, such as ```com.microsoft.azure.sdk.iot.deps.transport.amqp.ErrorLoggingBaseHandler```
+collect logs from a class of its dependency, such as ```com.microsoft.azure.sdk.iot.provisioning.device.transport.amqp.ErrorLoggingBaseHandler```
 
 Adding these packages to your log4j.properties file should be sufficient to capture all logs that this SDK generates:
 ```

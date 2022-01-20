@@ -5,8 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
-import com.microsoft.azure.sdk.iot.deps.serializer.ErrorMessageParser;
+import com.microsoft.azure.sdk.iot.service.serializers.ErrorCodeDescription;
+import com.microsoft.azure.sdk.iot.service.serializers.ErrorMessageParser;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 
 import java.nio.charset.StandardCharsets;
@@ -119,7 +119,7 @@ public class IotHubExceptionManager
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_011: [The function shall throw IotHubException if the Http response status none of them above and greater than 300 copying the error Http reason to the exception]
         else if (responseStatus > 300)
         {
-            if(errorMessage.isEmpty())
+            if (errorMessage.isEmpty())
             {
                 throw new IotHubException("Unknown error reason");
             }

@@ -5,7 +5,6 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -91,7 +90,7 @@ public class TpmAttestation extends Attestation implements Serializable
     public TpmAttestation(TpmAttestation tpm)
     {
         /* SRS_TPM_ATTESTATION_21_006: [The constructor shall throw IllegalArgumentException if the provided tpm is null.] */
-        if(tpm == null)
+        if (tpm == null)
         {
             throw new IllegalArgumentException("Tpm cannot be null");
         }

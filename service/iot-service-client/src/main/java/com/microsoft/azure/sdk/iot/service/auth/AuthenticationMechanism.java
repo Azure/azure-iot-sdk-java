@@ -5,8 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service.auth;
 
-import com.microsoft.azure.sdk.iot.service.Tools;
-
 /**
  * Authentication mechanism, used to store the device symmetric key.
  */

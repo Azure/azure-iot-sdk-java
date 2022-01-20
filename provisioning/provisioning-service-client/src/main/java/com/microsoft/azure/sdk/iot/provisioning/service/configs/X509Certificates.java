@@ -138,7 +138,7 @@ public class X509Certificates implements Serializable
     X509Certificates(String primary, String secondary)
     {
         /* SRS_X509_CERTIFICATES_21_001: [The constructor shall throw IllegalArgumentException if the primary certificate is null or empty.] */
-        if(Tools.isNullOrEmpty(primary))
+        if (Tools.isNullOrEmpty(primary))
         {
             throw new IllegalArgumentException("primary certificate cannot be null or empty");
         }
@@ -146,7 +146,7 @@ public class X509Certificates implements Serializable
         this.primary = new X509CertificateWithInfo(primary);
 
         /* SRS_X509_CERTIFICATES_21_003: [If the secondary certificate is not null or empty, the constructor shall create a new instance of the X509CertificateWithInfo using the provided secondary certificate, and store it as the secondary Certificate.] */
-        if(!Tools.isNullOrEmpty(secondary))
+        if (!Tools.isNullOrEmpty(secondary))
         {
             this.secondary = new X509CertificateWithInfo(secondary);
         }

@@ -38,10 +38,10 @@ public class ExponentialBackoffWithJitterTest
                 10, 2 * 1000, 2 * 1000, 2 * 1000, false);
 
         // assert
-        assertEquals(10, Deencapsulation.getField(exp, "retryCount"));
-        assertEquals(2 * 1000L, Deencapsulation.getField(exp, "minBackoff"));
-        assertEquals(2 * 1000L, Deencapsulation.getField(exp, "maxBackoff"));
-        assertEquals(2 * 1000L, Deencapsulation.getField(exp, "deltaBackoff"));
+        assertEquals(10, (int) Deencapsulation.getField(exp, "retryCount"));
+        assertEquals(2 * 1000L, (long) Deencapsulation.getField(exp, "minBackoff"));
+        assertEquals(2 * 1000L, (long)Deencapsulation.getField(exp, "maxBackoff"));
+        assertEquals(2 * 1000L, (long)Deencapsulation.getField(exp, "deltaBackoff"));
         assertFalse((boolean)Deencapsulation.getField(exp, "firstFastRetry"));
     }
 
@@ -53,10 +53,10 @@ public class ExponentialBackoffWithJitterTest
         final RetryPolicy exp = new ExponentialBackoffWithJitter();
 
         // assert
-        assertEquals(Integer.MAX_VALUE, Deencapsulation.getField(exp, "retryCount"));
-        assertEquals(100L, Deencapsulation.getField(exp, "minBackoff"));
-        assertEquals(10 * 1000L, Deencapsulation.getField(exp, "maxBackoff"));
-        assertEquals(100L, Deencapsulation.getField(exp, "deltaBackoff"));
+        assertEquals(Integer.MAX_VALUE, (int) Deencapsulation.getField(exp, "retryCount"));
+        assertEquals(100L, (long) Deencapsulation.getField(exp, "minBackoff"));
+        assertEquals(10 * 1000L, (long) Deencapsulation.getField(exp, "maxBackoff"));
+        assertEquals(100L, (long) Deencapsulation.getField(exp, "deltaBackoff"));
         assertTrue((boolean)Deencapsulation.getField(exp, "firstFastRetry"));
     }
 

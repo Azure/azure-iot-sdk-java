@@ -21,6 +21,9 @@ jobs:
     
   - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
     displayName: 'Component Detection'
+    inputs:
+      alertWarningLevel: High
+      failOnAlert: true
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@2
     displayName: CredScan

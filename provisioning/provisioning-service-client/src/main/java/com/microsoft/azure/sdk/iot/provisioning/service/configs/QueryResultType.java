@@ -48,13 +48,13 @@ public enum QueryResultType
 
     static QueryResultType fromString(String result)
     {
-        if(Tools.isNullOrEmpty(result))
+        if (Tools.isNullOrEmpty(result))
         {
             throw new IllegalArgumentException("type cannot be null or empty.");
         }
 
         Field[] fields = QueryResultType.class.getFields();
-        for(Field field: fields)
+        for (Field field: fields)
         {
             if (field.getAnnotation(SerializedName.class).value().equalsIgnoreCase(result))
             {

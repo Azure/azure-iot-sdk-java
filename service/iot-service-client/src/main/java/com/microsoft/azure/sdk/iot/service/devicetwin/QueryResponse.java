@@ -5,7 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.QueryResponseParser;
+import com.microsoft.azure.sdk.iot.service.serializers.QueryResponseParser;
 
 import java.util.Iterator;
 

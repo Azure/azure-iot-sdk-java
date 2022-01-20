@@ -32,8 +32,7 @@ public class AmqpSend
     private String sasToken;
     private TokenCredential credential;
     private AzureSasCredential sasTokenProvider;
-    private AmqpSendHandler amqpSendHandler;
-    private IotHubServiceClientProtocol iotHubServiceClientProtocol;
+    private final IotHubServiceClientProtocol iotHubServiceClientProtocol;
     private final ProxyOptions proxyOptions;
     private final SSLContext sslContext;
 
@@ -168,6 +167,7 @@ public class AmqpSend
     {
         synchronized(this)
         {
+            AmqpSendHandler amqpSendHandler;
             if (this.credential != null)
             {
                 amqpSendHandler =
@@ -211,7 +211,7 @@ public class AmqpSend
                 log.info("Sending cloud to device module message");
             }
 
-            String reactorRunnerPrefix = this.hostName + "-" + "Cxn" + this.amqpSendHandler.getConnectionId();
+            String reactorRunnerPrefix = this.hostName + "-" + "Cxn" + amqpSendHandler.getConnectionId();
             new ReactorRunner(amqpSendHandler, reactorRunnerPrefix,"AmqpSend").run();
 
             log.trace("Amqp send reactor stopped, checking that the connection opened, and that the message was sent");

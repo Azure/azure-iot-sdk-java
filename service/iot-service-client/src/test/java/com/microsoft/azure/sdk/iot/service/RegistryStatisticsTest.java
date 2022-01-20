@@ -3,9 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.RegistryStatisticsParser;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.RegistryStatistics;
+import com.microsoft.azure.sdk.iot.service.serializers.RegistryStatisticsParser;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import mockit.Deencapsulation;
 import mockit.Mocked;

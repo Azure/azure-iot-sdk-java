@@ -93,7 +93,7 @@ public class QueryResult
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
 
         /* SRS_QUERY_RESULT_21_002: [The constructor shall throw IllegalArgumentException if the provided body is null or empty and the type is not `unknown`.] */
-        if((queryResultType != QueryResultType.UNKNOWN) && Tools.isNullOrEmpty(body))
+        if ((queryResultType != QueryResultType.UNKNOWN) && Tools.isNullOrEmpty(body))
         {
             throw new IllegalArgumentException("body cannot be null or empty");
         }
@@ -114,7 +114,7 @@ public class QueryResult
                 this.items = gson.fromJson(body, DeviceRegistrationState[].class);
                 break;
             default:
-                if(body == null)
+                if (body == null)
                 {
                     /* SRS_QUERY_RESULT_21_007: [If the type is `unknown`, and the body is null, the constructor shall set `items` as null.] */
                     this.items = null;

@@ -5,7 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
+import com.microsoft.azure.sdk.iot.service.serializers.ErrorCodeDescription;
 
 /**
  * 409 Conflict

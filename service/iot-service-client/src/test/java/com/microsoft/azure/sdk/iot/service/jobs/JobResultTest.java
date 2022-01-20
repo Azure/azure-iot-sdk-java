@@ -4,16 +4,12 @@
 package com.microsoft.azure.sdk.iot.service.jobs;
 
 import com.google.gson.JsonParseException;
-import com.microsoft.azure.sdk.iot.deps.serializer.JobsResponseParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.JobsStatisticsParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
-import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
-import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
+import com.microsoft.azure.sdk.iot.service.serializers.JobsResponseParser;
+import com.microsoft.azure.sdk.iot.service.serializers.JobsStatisticsParser;
+import com.microsoft.azure.sdk.iot.service.serializers.MethodParser;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinState;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinCollection;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
-import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
-import com.microsoft.azure.sdk.iot.service.jobs.JobStatistics;
-import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
-import com.microsoft.azure.sdk.iot.service.jobs.JobType;
 import mockit.*;
 import org.junit.Test;
 

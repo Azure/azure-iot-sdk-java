@@ -1,6 +1,6 @@
 package com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationContentParser;
+import com.microsoft.azure.sdk.iot.service.serializers.ConfigurationContentParser;
 import lombok.Getter;
 import lombok.Setter;
 

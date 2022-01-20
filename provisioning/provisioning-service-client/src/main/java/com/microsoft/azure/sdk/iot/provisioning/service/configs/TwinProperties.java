@@ -91,7 +91,7 @@ public class TwinProperties implements Serializable
     TwinProperties(TwinCollection desired)
     {
         /* SRS_TWIN_PROPERTIES_21_001: [The constructor shall throw IllegalArgumentException if the provided desired property is null.] */
-        if(desired == null)
+        if (desired == null)
         {
             throw new IllegalArgumentException("Desired property cannot be null.");
         }
@@ -119,7 +119,7 @@ public class TwinProperties implements Serializable
         JsonObject twinJson = new JsonObject();
 
         /* SRS_TWIN_PROPERTIES_21_004: [If the desired property is null, the toJsonElement shall not include the `desired` in the final JSON.] */
-        if(this.desired != null)
+        if (this.desired != null)
         {
             twinJson.add(DESIRED_PROPERTIES_TAG, this.desired.toJsonElement());
         }
@@ -149,7 +149,7 @@ public class TwinProperties implements Serializable
         JsonObject twinJson = new JsonObject();
 
         /* SRS_TWIN_PROPERTIES_21_006: [If the desired property is null, the toJsonElementWithMetadata shall not include the `desired` in the final JSON.] */
-        if(this.desired != null)
+        if (this.desired != null)
         {
             twinJson.add(DESIRED_PROPERTIES_TAG, this.desired.toJsonElementWithMetadata());
         }

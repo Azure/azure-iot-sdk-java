@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.device.auth;
 
-import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
@@ -22,7 +21,7 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
     private static final String TOKEN_SCOPE_FORMAT = "%s/devices/%s";
     private static final String SASTOKEN_FORMAT = "SharedAccessSignature sr=%s&sig=%s&se=%s";
 
-    private SecurityProviderTpm securityProvider;
+    private final SecurityProviderTpm securityProvider;
 
     /**
      * Creates a Sas Token based authentication object that uses the provided security provider to produce sas tokens.

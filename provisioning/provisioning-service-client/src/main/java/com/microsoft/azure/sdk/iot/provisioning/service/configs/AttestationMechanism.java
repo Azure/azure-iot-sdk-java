@@ -59,12 +59,12 @@ public final class AttestationMechanism implements Serializable
     public AttestationMechanism(Attestation attestation)
     {
         /* SRS_ATTESTATION_MECHANISM_21_001: [The constructor shall throw IllegalArgumentException if the provided attestation is null or invalid.] */
-        if(attestation == null)
+        if (attestation == null)
         {
             throw new IllegalArgumentException("Attestation cannot be null");
         }
 
-        if(attestation instanceof TpmAttestation)
+        if (attestation instanceof TpmAttestation)
         {
             /* SRS_ATTESTATION_MECHANISM_21_002: [If the provided attestation is instance of TpmAttestation, the constructor shall store the provided tpm keys.] */
             this.tpm = (TpmAttestation)attestation;
@@ -75,7 +75,7 @@ public final class AttestationMechanism implements Serializable
             /* SRS_ATTESTATION_MECHANISM_21_003: [If the provided attestation is instance of TpmAttestation, the constructor shall set the attestation type as TPM.] */
             this.type = AttestationMechanismType.TPM;
         }
-        else if(attestation instanceof X509Attestation)
+        else if (attestation instanceof X509Attestation)
         {
             /* SRS_ATTESTATION_MECHANISM_21_006: [If the provided attestation is instance of X509Attestation, the constructor shall store the provided x509 certificates.] */
             this.x509 = (X509Attestation)attestation;
@@ -86,7 +86,7 @@ public final class AttestationMechanism implements Serializable
             /* SRS_ATTESTATION_MECHANISM_21_007: [If the provided attestation is instance of X509Attestation, the constructor shall set the attestation type as X509.] */
             this.type = AttestationMechanismType.X509;
         }
-        else if(attestation instanceof SymmetricKeyAttestation)
+        else if (attestation instanceof SymmetricKeyAttestation)
         {
             /* SRS_ATTESTATION_MECHANISM_44_016: [If the provided attestation is instance of SymmetricKeyAttestation, the constructor shall store the provided symmetric keys.] */
             this.symmetricKey = (SymmetricKeyAttestation)attestation;

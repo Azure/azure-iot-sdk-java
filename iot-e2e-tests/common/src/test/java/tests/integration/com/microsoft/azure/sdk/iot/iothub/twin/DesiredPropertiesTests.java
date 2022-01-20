@@ -6,7 +6,7 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.twin;
 
 import com.google.gson.JsonParser;
-import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinCollection;
 import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
 import com.microsoft.azure.sdk.iot.device.twin.TwinPropertiesCallback;
@@ -327,7 +327,7 @@ public class DesiredPropertiesTests extends TwinCommon
         TwinCollection expectedProperties;
 
         @Override
-        public void onPropertiesChanged(TwinCollection actualProperties, Object context) {
+        public void onPropertiesChanged(com.microsoft.azure.sdk.iot.device.twin.TwinCollection actualProperties, Object context) {
             Success desiredPropertiesCallbackState = (Success) context;
             desiredPropertiesCallbackState.callbackWasFired();
 

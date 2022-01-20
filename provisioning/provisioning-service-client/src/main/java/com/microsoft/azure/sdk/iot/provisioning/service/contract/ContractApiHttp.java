@@ -3,9 +3,9 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service.contract;
 
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpRequest;
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
+import com.microsoft.azure.sdk.iot.provisioning.service.transport.https.HttpMethod;
+import com.microsoft.azure.sdk.iot.provisioning.service.transport.https.HttpRequest;
+import com.microsoft.azure.sdk.iot.provisioning.service.transport.https.HttpResponse;
 import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
 import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningConnectionString;
@@ -184,10 +184,10 @@ public class ContractApiHttp
         request.setHeaderField(HEADER_FIELD_NAME_ACCEPT, HEADER_FIELD_VALUE_ACCEPT);
         request.setHeaderField(HEADER_FIELD_NAME_CONTENT_TYPE, HEADER_FIELD_VALUE_CONTENT_TYPE);
         request.setHeaderField(HEADER_FIELD_NAME_CHARSET, HEADER_FIELD_VALUE_CHARSET);
-        request.setHeaderField(HEADER_FIELD_NAME_CONTENT_LENGTH, payload != null ? String.valueOf(payload.length) : "0");
+        request.setHeaderField(HEADER_FIELD_NAME_CONTENT_LENGTH, String.valueOf(payload.length));
 
         /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_013: [The request shall add the headerParameters to the http header, if provided.] */
-        if(headerParameters != null)
+        if (headerParameters != null)
         {
             for (Map.Entry<String, String> entry: headerParameters.entrySet())
             {
@@ -200,7 +200,7 @@ public class ContractApiHttp
 
     private URL getUrlForPath(String path)
     {
-        if(Tools.isNullOrEmpty(path))
+        if (Tools.isNullOrEmpty(path))
         {
             /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_008: [If the provided path is null or empty, the request shall throw IllegalArgumentException.*/
             throw new IllegalArgumentException("path cannot be null or empty");

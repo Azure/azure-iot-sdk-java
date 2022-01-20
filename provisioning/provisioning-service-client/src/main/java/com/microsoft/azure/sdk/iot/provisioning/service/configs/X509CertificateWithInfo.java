@@ -109,7 +109,7 @@ public class X509CertificateWithInfo implements Serializable
     X509CertificateWithInfo(String certificate)
     {
         /* SRS_X509_CERTIFICATE_WITH_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided certificate is null or empty.] */
-        if(Tools.isNullOrEmpty(certificate))
+        if (Tools.isNullOrEmpty(certificate))
         {
             throw new IllegalArgumentException("certificate cannot be null or empty.");
         }
@@ -129,7 +129,7 @@ public class X509CertificateWithInfo implements Serializable
     public X509CertificateWithInfo(X509CertificateWithInfo x509CertificateWithInfo)
     {
         /* SRS_X509_CERTIFICATE_WITH_INFO_21_003: [The constructor shall throw IllegalArgumentException if the provided x509CertificateWithInfo is null.] */
-        if(x509CertificateWithInfo == null)
+        if (x509CertificateWithInfo == null)
         {
             throw new IllegalArgumentException("x509CertificateWithInfo cannot be null");
         }
@@ -137,7 +137,7 @@ public class X509CertificateWithInfo implements Serializable
         this.certificate = x509CertificateWithInfo.certificate;
 
         /* SRS_X509_CERTIFICATE_WITH_INFO_21_005: [If the provide x509CertificateWithInfo contains `info`, the constructor shall create a new instance of the X509CertificateInfo with the provided `info`.] */
-        if(x509CertificateWithInfo.info != null)
+        if (x509CertificateWithInfo.info != null)
         {
             this.info = new X509CertificateInfo(x509CertificateWithInfo.info);
         }

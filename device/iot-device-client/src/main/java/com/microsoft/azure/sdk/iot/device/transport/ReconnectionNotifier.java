@@ -15,13 +15,7 @@ public final class ReconnectionNotifier
     public static void notifyDisconnectAsync(final Throwable connectionLossCause, final IotHubListener listener, final String connectionId)
     {
         new Thread(
-                new Runnable()
-                {
-                    @Override public void run()
-                    {
-                        listener.onConnectionLost(connectionLossCause,connectionId);
-                    }
-                },
+            () -> listener.onConnectionLost(connectionLossCause,connectionId),
                 RECONNECTION_THREAD_NAME + ":" + connectionId
         ).start();
     }
@@ -29,13 +23,7 @@ public final class ReconnectionNotifier
     public static void notifyDeviceDisconnectAsync(final Throwable connectionLossCause, final IotHubListener listener, final String connectionId, final String deviceId)
     {
         new Thread(
-                new Runnable()
-                {
-                    @Override public void run()
-                    {
-                        listener.onMultiplexedDeviceSessionLost(connectionLossCause,connectionId, deviceId);
-                    }
-                },
+            () -> listener.onMultiplexedDeviceSessionLost(connectionLossCause,connectionId, deviceId),
                 DEVICE_SESSION_RECONNECTION_THREAD_NAME + ":" + connectionId
         ).start();
     }

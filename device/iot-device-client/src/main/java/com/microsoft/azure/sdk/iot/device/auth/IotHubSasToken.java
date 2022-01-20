@@ -84,7 +84,7 @@ public final class IotHubSasToken
             this.signature = sig.toString();
         }
         // Codes_SRS_IOTHUBSASTOKEN_25_007: [**If device key is not provided in config then the SASToken from config shall be used.**]**
-        else if(sharedAccessToken != null)
+        else if (sharedAccessToken != null)
         {
             this.sasToken = sharedAccessToken;
             this.expiryTime = getExpiryTimeFromToken(this.sasToken);
@@ -152,7 +152,7 @@ public final class IotHubSasToken
         // Codes_SRS_IOTHUBSASTOKEN_25_009: [**If SAS Token was provided by config it should be returned as string **]**
         if (this.sasToken != null)
         {
-            if(isSasFormat())
+            if (isSasFormat())
             {
                 return this.sasToken;
             }
@@ -161,7 +161,7 @@ public final class IotHubSasToken
                 throw new IllegalArgumentException("SasToken format is invalid");
             }
         }
-        else if(this.signature != null && this.expiryTime != 0L && this.scope!= null)
+        else if (this.signature != null && this.expiryTime != 0L && this.scope!= null)
         {
             //Codes_SRS_IOTHUBSASTOKEN_25_010: [**If SAS Token was not provided by config it should be built and returned as string **]**
             return buildSasToken();
@@ -187,7 +187,7 @@ public final class IotHubSasToken
 
         if (this.sasToken != null)
         {
-            if(this.sasToken.startsWith("SharedAccessSignature"))
+            if (this.sasToken.startsWith("SharedAccessSignature"))
             {
                 Map<String, String> fieldValues = extractFieldValues(this.sasToken);
                 return fieldValues.containsKey(ExpiryTimeFieldKey)

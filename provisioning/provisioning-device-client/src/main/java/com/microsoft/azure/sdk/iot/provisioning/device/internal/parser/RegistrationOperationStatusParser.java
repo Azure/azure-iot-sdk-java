@@ -50,7 +50,7 @@ public class RegistrationOperationStatusParser
      */
     public static RegistrationOperationStatusParser createFromJson(String json) throws IllegalArgumentException
     {
-        if((json == null) || json.isEmpty())
+        if ((json == null) || json.isEmpty())
         {
             //SRS_RegistrationOperationStatusParser_25_001: [ This method shall throw IllegalArgumentException if provided Json is null or empty. ]
             throw new IllegalArgumentException("JSON cannot be null or empty");

@@ -3,8 +3,6 @@ package samples.com.microsoft.azure.sdk.iot;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import org.apache.commons.cli.*;
 
-import java.net.URISyntaxException;
-
 public class InputParameters
 {
     private static final String PROTOCOL = "mqtt";

@@ -6,9 +6,9 @@ package com.microsoft.azure.sdk.iot.service.jobs;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
-import com.microsoft.azure.sdk.iot.deps.serializer.JobsResponseParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.JobsStatisticsParser;
-import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
+import com.microsoft.azure.sdk.iot.service.serializers.JobsResponseParser;
+import com.microsoft.azure.sdk.iot.service.serializers.JobsStatisticsParser;
+import com.microsoft.azure.sdk.iot.service.devicetwin.TwinState;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
@@ -143,7 +143,7 @@ public class JobResult
     JobResult(byte[] body) throws JsonParseException, IllegalArgumentException
     {
         /* Codes_SRS_JOBRESULT_21_001: [The constructor shall throw IllegalArgumentException if the input body is null.] */
-        if(body == null)
+        if (body == null)
         {
             throw new IllegalArgumentException("null body");
         }
@@ -164,7 +164,7 @@ public class JobResult
         this.jobType = JobType.valueOf(jobsResponseParser.getType());
         this.jobStatus = JobStatus.valueOf(jobsResponseParser.getJobsStatus());
 
-        if(jobsResponseParser.getCloudToDeviceMethod() != null)
+        if (jobsResponseParser.getCloudToDeviceMethod() != null)
         {
             this.cloudToDeviceMethod = jobsResponseParser.getCloudToDeviceMethod().toJson();
         }
@@ -190,7 +190,7 @@ public class JobResult
         }
 
         TwinState twinState = jobsResponseParser.getUpdateTwinState();
-        if(twinState != null)
+        if (twinState != null)
         {
             this.updateTwin = twinState.getDeviceId() == null || twinState.getDeviceId().isEmpty() ?
                 new Twin() : new Twin(twinState.getDeviceId());
@@ -201,7 +201,7 @@ public class JobResult
         this.failureReason = jobsResponseParser.getFailureReason();
         this.statusMessage = jobsResponseParser.getStatusMessage();
         JobsStatisticsParser jobsStatisticsParser = jobsResponseParser.getJobStatistics();
-        if(jobsStatisticsParser != null)
+        if (jobsStatisticsParser != null)
         {
             this.jobStatistics = new JobStatistics(jobsStatisticsParser);
         }
