@@ -162,7 +162,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             host = this.config.getIotHubHostname();
         }
 
-        if (this.config.isUseWebsocket())
+        if (this.config.isUsingWebsocket())
         {
             if (this.webSocketQueryString == null)
             {

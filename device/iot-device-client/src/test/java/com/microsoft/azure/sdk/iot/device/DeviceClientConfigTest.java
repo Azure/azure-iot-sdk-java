@@ -576,7 +576,7 @@ public class DeviceClientConfigTest
 
         DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString);
         config.setUseWebsocket(true);
-        assertTrue(config.isUseWebsocket());
+        assertTrue(config.isUsingWebsocket());
     }
 
     //Tests_SRS_DEVICECLIENTCONFIG_25_037: [The function shall return the true if websocket is enabled, false otherwise.]
@@ -597,7 +597,7 @@ public class DeviceClientConfigTest
 
         DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString);
         config.setUseWebsocket(true);
-        assertTrue(config.isUseWebsocket());
+        assertTrue(config.isUsingWebsocket());
     }
 
     // Tests_SRS_DEVICECLIENTCONFIG_11_013: [The function shall return 180s.]

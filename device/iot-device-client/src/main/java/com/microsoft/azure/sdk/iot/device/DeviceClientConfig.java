@@ -333,7 +333,7 @@ public final class DeviceClientConfig
      * Getter for Websocket
      * @return true if set, false otherwise
      */
-    public boolean isUseWebsocket()
+    public boolean isUsingWebsocket()
     {
         //Codes_SRS_DEVICECLIENTCONFIG_25_037: [The function shall return the true if websocket is enabled, false otherwise.]
         return this.useWebsocket;

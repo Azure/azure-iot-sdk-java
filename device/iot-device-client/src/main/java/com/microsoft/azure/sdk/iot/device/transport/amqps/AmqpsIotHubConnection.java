@@ -124,7 +124,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
         this.deviceClientConfig = config;
         this.transportUniqueIdentifier = transportUniqueIdentifier;
-        this.isWebsocketConnection = config.isUseWebsocket();
+        this.isWebsocketConnection = config.isUsingWebsocket();
         this.authenticationType = config.getAuthenticationType();
         this.proxySettings = config.getProxySettings();
 

@@ -236,7 +236,7 @@ public class MqttIotHubConnectionTest
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockConfig.getSasTokenAuthentication().getSasToken();
                 result = expectedSasToken;
-                mockConfig.isUseWebsocket();
+                mockConfig.isUsingWebsocket();
                 result = false;
             }
         };
@@ -272,7 +272,7 @@ public class MqttIotHubConnectionTest
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockConfig.getSasTokenAuthentication().getSasToken();
                 result = expectedSasToken;
-                mockConfig.isUseWebsocket();
+                mockConfig.isUsingWebsocket();
                 result = false;
                 mockConfig.getModelId();
                 result = modelId;
@@ -315,7 +315,7 @@ public class MqttIotHubConnectionTest
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockConfig.getSasTokenAuthentication().getSasToken();
                 result = expectedToken;
-                mockConfig.isUseWebsocket();
+                mockConfig.isUsingWebsocket();
                 result = true;
                 mockConfig.getProxySettings();
                 result = null;
@@ -353,7 +353,7 @@ public class MqttIotHubConnectionTest
             {
                 mockConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
-                mockConfig.isUseWebsocket();
+                mockConfig.isUsingWebsocket();
                 result = true;
                 mockConfig.getProxySettings();
                 result = null;
@@ -682,7 +682,7 @@ public class MqttIotHubConnectionTest
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockConfig.getSasTokenAuthentication().getSasToken();
                 result = expectedSasToken;
-                mockConfig.isUseWebsocket();
+                mockConfig.isUsingWebsocket();
                 result = false;
             }
         };
@@ -718,7 +718,7 @@ public class MqttIotHubConnectionTest
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 mockConfig.getSasTokenAuthentication().getSasToken();
                 result = expectedSasToken;
-                mockConfig.isUseWebsocket();
+                mockConfig.isUsingWebsocket();
                 result = false;
             }
         };

@@ -257,7 +257,7 @@ public class AmqpsIotHubConnectionTest {
         new NonStrictExpectations()
         {
             {
-                mockConfig.isUseWebsocket();
+                mockConfig.isUsingWebsocket();
                 result = false;
             }
         };
@@ -319,7 +319,7 @@ public class AmqpsIotHubConnectionTest {
                 result = deviceId;
                 mockConfig.getIotHubName();
                 result = hubName;
-                mockConfig.isUseWebsocket();
+                mockConfig.isUsingWebsocket();
                 result = true;
             }
         };
@@ -348,7 +348,7 @@ public class AmqpsIotHubConnectionTest {
                 result = deviceId;
                 mockConfig.getIotHubName();
                 result = hubName;
-                mockConfig.isUseWebsocket();
+                mockConfig.isUsingWebsocket();
                 result = false;
             }
         };
@@ -778,7 +778,7 @@ public class AmqpsIotHubConnectionTest {
         new NonStrictExpectations()
         {
             {
-                mockConfig.isUseWebsocket();
+                mockConfig.isUsingWebsocket();
                 result = true;
                 mockConfig.getProxySettings();
                 result = mockProxySettings;
@@ -860,7 +860,7 @@ public class AmqpsIotHubConnectionTest {
         new NonStrictExpectations()
         {
             {
-                mockConfig.isUseWebsocket();
+                mockConfig.isUsingWebsocket();
                 result = true;
                 mockEvent.getReactor();
                 result = mockReactor;
@@ -893,7 +893,7 @@ public class AmqpsIotHubConnectionTest {
         new NonStrictExpectations()
         {
             {
-                mockConfig.isUseWebsocket();
+                mockConfig.isUsingWebsocket();
                 result = true;
                 mockCloseLatch.getCount();
                 result = 1;
@@ -939,7 +939,7 @@ public class AmqpsIotHubConnectionTest {
         new NonStrictExpectations()
         {
             {
-                mockConfig.isUseWebsocket();
+                mockConfig.isUsingWebsocket();
                 result = true;
                 mockCloseLatch.getCount();
                 result = 1;
@@ -1012,7 +1012,7 @@ public class AmqpsIotHubConnectionTest {
         new Expectations()
         {
             {
-                mockConfig.isUseWebsocket();
+                mockConfig.isUsingWebsocket();
                 result = true;
                 mockEvent.getTransport();
                 result = mockTransportInternal;
@@ -1277,7 +1277,7 @@ public class AmqpsIotHubConnectionTest {
                 result = hubName;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.isUseWebsocket();
+                mockConfig.isUsingWebsocket();
                 result = false;
             }
         };
