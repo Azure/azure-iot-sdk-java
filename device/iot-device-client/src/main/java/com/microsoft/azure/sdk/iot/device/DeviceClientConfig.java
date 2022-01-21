@@ -77,7 +77,7 @@ public final class DeviceClientConfig
     private int amqpOpenDeviceSessionsTimeout = DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS;
 
     @Getter
-    @Setter
+    @Setter(AccessLevel.PACKAGE)
     private int keepAliveInterval = DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
 
     private IotHubAuthenticationProvider authenticationProvider;
