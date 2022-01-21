@@ -2,6 +2,7 @@ package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
+import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import mockit.Deencapsulation;
 import mockit.Expectations;
@@ -22,7 +23,7 @@ public class FileUploadTest
     IotHubTransportMessage mockIotHubTransportMessage;
 
     @Mocked
-    ResponseMessage mockResponseMessage;
+    HttpsResponse mockResponseMessage;
 
     @Mocked
     FileUploadSasUriResponse mockFileUploadSasUriResponse;
@@ -67,7 +68,7 @@ public class FileUploadTest
                 mockHttpsTransportManager.getFileUploadSasUri(mockIotHubTransportMessage);
                 result = mockResponseMessage;
 
-                mockResponseMessage.getBytes();
+                mockResponseMessage.getBody();
                 result = mockResponsePayload;
 
                 new FileUploadSasUriResponse(mockResponsePayloadString);
@@ -103,7 +104,7 @@ public class FileUploadTest
                 mockHttpsTransportManager.sendFileUploadNotification(mockIotHubTransportMessage);
                 result = mockResponseMessage;
 
-                mockResponseMessage.getBytes();
+                mockResponseMessage.getBody();
                 result = mockResponsePayload;
             }
         };

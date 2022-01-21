@@ -74,7 +74,7 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
  * The task scheduler for sending and receiving messages for the Device Client
  */
 @Slf4j
-public final class DeviceIO implements IotHubConnectionStatusChangeCallback
+final class DeviceIO implements IotHubConnectionStatusChangeCallback
 {
     private long sendPeriodInMilliseconds;
     private long receivePeriodInMilliseconds;

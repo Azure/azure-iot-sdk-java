@@ -8,7 +8,6 @@ import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
 import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportManager;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 
 import java.io.IOException;
@@ -23,7 +22,7 @@ import java.util.Map;
 /**
  * Implementation of the transport manager for https.
  */
-public class HttpsTransportManager implements IotHubTransportManager
+public class HttpsTransportManager
 {
     private final DeviceClientConfig config;
     private HttpsIotHubConnection httpsIotHubConnection;
@@ -84,7 +83,7 @@ public class HttpsTransportManager implements IotHubTransportManager
         this.httpsIotHubConnection = null;
     }
 
-    public ResponseMessage getFileUploadSasUri(IotHubTransportMessage message) throws IOException
+    public HttpsResponse getFileUploadSasUri(IotHubTransportMessage message) throws IOException
     {
         //Codes_SRS_HTTPSTRANSPORTMANAGER_34_028 [This function shall set the uri path of the provided message to the
         // format devices/<deviceid>/modules/<moduleid>/files if a moduleId is present or
@@ -94,7 +93,7 @@ public class HttpsTransportManager implements IotHubTransportManager
         return this.send(message, new HashMap<>());
     }
 
-    public ResponseMessage sendFileUploadNotification(IotHubTransportMessage message) throws IOException
+    public HttpsResponse sendFileUploadNotification(IotHubTransportMessage message) throws IOException
     {
         String uri = new IotHubUri("", this.config.getDeviceId(), PATH_NOTIFICATIONS_STRING, this.config.getModuleId()).toStringWithoutApiVersion();
         message.setUriPath(uri);
@@ -110,7 +109,7 @@ public class HttpsTransportManager implements IotHubTransportManager
      * @throws IOException if the IotHub communication failed.
      * @throws IllegalArgumentException if the provided message is null, or invalid.
      */
-    public ResponseMessage send(IotHubTransportMessage message, Map<String, String> additionalHeaders) throws IOException, IllegalArgumentException
+    public HttpsResponse send(IotHubTransportMessage message, Map<String, String> additionalHeaders) throws IOException, IllegalArgumentException
     {
         HttpsMessage httpsMessage = HttpsSingleMessage.parseHttpsJsonMessage(message);
 
@@ -227,16 +226,16 @@ public class HttpsTransportManager implements IotHubTransportManager
         additionalHeaders.put(MODULE_ID, this.config.getDeviceId() + "/" + this.config.getModuleId());
 
         //Codes_SRS_HTTPSTRANSPORTMANAGER_34_025 [This function shall send the built message.]
-        ResponseMessage responseMessage = this.send(message, additionalHeaders);
+        HttpsResponse responseMessage = this.send(message, additionalHeaders);
 
-        if (responseMessage.getStatus() != IotHubStatusCode.OK && responseMessage.getStatus() != IotHubStatusCode.OK_EMPTY)
+        if (responseMessage.getStatus() != 200 && responseMessage.getStatus() != 204)
         {
             //Codes_SRS_HTTPSTRANSPORTMANAGER_34_026 [If the http response contains an error code, this function shall throw the associated exception.]
-            throw IotHubStatusCode.getConnectionStatusException(responseMessage.getStatus(), new String(responseMessage.getBytes(), StandardCharsets.UTF_8));
+            throw IotHubStatusCode.getConnectionStatusException(IotHubStatusCode.getIotHubStatusCode(responseMessage.getStatus()), new String(responseMessage.getBody(), StandardCharsets.UTF_8));
         }
 
         //Codes_SRS_HTTPSTRANSPORTMANAGER_34_027 [If the http response doesn't contain an error code, this function return a method result with the response message body as the method result body.]
-        String resultJson = new String(responseMessage.getBytes(), StandardCharsets.UTF_8);
+        String resultJson = new String(responseMessage.getBody(), StandardCharsets.UTF_8);
         return new MethodResult(resultJson);
     }
 

@@ -4,10 +4,8 @@
 package com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
-import com.microsoft.azure.sdk.iot.device.IotHubResponseCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportPacket;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import org.junit.Test;
@@ -33,8 +31,6 @@ public class IotHubTransportPacketTest
     Message mockMsg;
     @Mocked
     IotHubEventCallback mockCallback;
-    @Mocked
-    IotHubResponseCallback mockResponseCallback;
 
     // Tests_SRS_IOTHUBTRANSPORTPACKET_11_001: [The constructor shall save the message, callback, status, startTimeMillis, and callback context.]
     // Tests_SRS_IOTHUBTRANSPORTPACKET_11_002: [The function shall return the message given in the constructor.]

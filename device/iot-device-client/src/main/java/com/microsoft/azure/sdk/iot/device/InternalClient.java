@@ -592,8 +592,7 @@ public class InternalClient
         if (this.twin == null)
         {
             twin = new DeviceTwin(
-                    this.deviceIO,
-                    this.config,
+                    this,
                     twinStatusCallback,
                     twinStatusCallbackContext,
                     genericPropertyCallback,
@@ -649,7 +648,7 @@ public class InternalClient
         }
         if (this.twin == null)
         {
-            twin = new DeviceTwin(this.deviceIO, this.config, twinStatusCallback, twinStatusCallbackContext,
+            twin = new DeviceTwin(this, twinStatusCallback, twinStatusCallbackContext,
                     genericPropertyCallback, genericPropertyCallbackContext);
             twin.getDeviceTwin();
         }
@@ -703,8 +702,7 @@ public class InternalClient
         if (this.twin == null)
         {
             twin = new DeviceTwin(
-                    this.deviceIO,
-                    this.config,
+                    this,
                     twinStatusCallback,
                     twinStatusCallbackContext,
                     genericPropertiesCallback,
@@ -772,7 +770,7 @@ public class InternalClient
 
         if (this.method == null)
         {
-            this.method = new DeviceMethod(this.deviceIO, this.config, methodStatusCallback, methodStatusCallbackContext);
+            this.method = new DeviceMethod(this, methodStatusCallback, methodStatusCallbackContext);
         }
 
         this.method.subscribeToDeviceMethod(methodCallback, methodCallbackContext);

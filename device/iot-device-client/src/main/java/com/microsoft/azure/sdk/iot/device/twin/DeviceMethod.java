@@ -20,7 +20,7 @@ public final class DeviceMethod
 
     private boolean isSubscribed = false;
 
-    private final DeviceIO deviceIO;
+    private final InternalClient client;
     private final DeviceClientConfig config;
 
     private final class deviceMethodResponseCallback implements MessageCallback
@@ -92,7 +92,7 @@ public final class DeviceMethod
                                 responseMessage.setStatus(String.valueOf(responseData.getStatus()));
                                 responseMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_SEND_RESPONSE);
 
-                                deviceIO.sendEventAsync(responseMessage, new deviceMethodRequestMessageCallback(), null, nestedConfig.getDeviceId());
+                                client.sendEventAsync(responseMessage, new deviceMethodRequestMessageCallback(), null);
                                 result = IotHubMessageResult.COMPLETE;
                             }
                             else
@@ -143,15 +143,14 @@ public final class DeviceMethod
      * between the user and IotHub.
      * @param deviceMethodStatusCallback Callback to provide status for device method state with IotHub. Cannot be {@code null}.
      * @param deviceMethodStatusCallbackContext Context to be passed when device method status is invoked. Can be {@code null}
-     * @param deviceIO  Device client  object for this connection instance for the device. Cannot be {@code null}
-     * @param config  Device client  configuration Cannot be {@code null}
+     * @param client  Device client  object for this connection instance for the device. Cannot be {@code null}
      * @throws  IllegalArgumentException This exception is thrown if either deviceIO or config or deviceMethodStatusCallback are null
      */
-    public DeviceMethod(DeviceIO deviceIO, DeviceClientConfig config, IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext) throws IllegalArgumentException
+    public DeviceMethod(InternalClient client, IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext) throws IllegalArgumentException
     {
-        if (deviceIO == null || config == null)
+        if (client == null)
         {
-            throw new IllegalArgumentException("Client or config cannot be null");
+            throw new IllegalArgumentException("Client cannot be null");
         }
 
         if (deviceMethodStatusCallback == null)
@@ -159,8 +158,8 @@ public final class DeviceMethod
             throw new IllegalArgumentException("Status call back cannot be null");
         }
 
-        this.deviceIO = deviceIO;
-        this.config = config;
+        this.client = client;
+        this.config = client.getConfig();
         this.deviceMethodStatusCallback = deviceMethodStatusCallback;
         this.deviceMethodStatusCallbackContext = deviceMethodStatusCallbackContext;
         this.config.setDeviceMethodsMessageCallback(new deviceMethodResponseCallback(), null);
@@ -189,7 +188,7 @@ public final class DeviceMethod
             IotHubTransportMessage subscribeMessage = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_METHODS);
             subscribeMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
             subscribeMessage.setConnectionDeviceId(this.config.getDeviceId());
-            this.deviceIO.sendEventAsync(subscribeMessage, new deviceMethodRequestMessageCallback(), null, this.config.getDeviceId());
+            this.client.sendEventAsync(subscribeMessage, new deviceMethodRequestMessageCallback(), null);
         }
     }
 }

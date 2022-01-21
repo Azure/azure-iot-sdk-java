@@ -1589,7 +1589,7 @@ public class InternalClientTest
                 mockDeviceIO.isOpen();
                 result = true;
 
-                new DeviceTwin(mockDeviceIO, mockConfig, mockedIotHubEventCallback, any, mockedTwinPropertyCallback, any);
+                new DeviceTwin(client, mockedIotHubEventCallback, any, mockedTwinPropertyCallback, any);
                 result = mockedDeviceTwin;
             }
         };

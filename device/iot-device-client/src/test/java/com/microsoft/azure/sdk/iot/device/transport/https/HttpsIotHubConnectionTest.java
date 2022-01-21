@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -51,7 +52,7 @@ public class HttpsIotHubConnectionTest
     @Mocked
     ProtocolException mockedProtocolConnectionStatusException;
     @Mocked
-    ResponseMessage mockResponseMessage;
+    HttpsResponse mockResponseMessage;
     @Mocked
     IotHubTransportMessage mockedTransportMessage;
     @Mocked
@@ -870,21 +871,21 @@ public class HttpsIotHubConnectionTest
                 result = statusVal;
                 IotHubStatusCode.getIotHubStatusCode(statusVal);
                 result = mockStatus;
-                new ResponseMessage(body, mockStatus);
+                new HttpsResponse(anyInt, body, (Map<String, List<String>>) any, (byte[]) any);
                 result = mockResponseMessage;
                 mockResponseMessage.getStatus();
                 result = mockStatus;
-                mockResponseMessage.getBytes();
+                mockResponseMessage.getBody();
                 result = body;
             }
         };
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
 
-        ResponseMessage testResponse = conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath, new HashMap<String, String>());
+        HttpsResponse testResponse = conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath, new HashMap<String, String>());
 
         assertEquals(mockStatus, testResponse.getStatus());
-        assertEquals(body, testResponse.getBytes());
+        assertEquals(body, testResponse.getBody());
     }
 
     // Tests_SRS_HTTPSIOTHUBCONNECTION_11_013: [The function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/devicebound?api-version=2016-02-03'.]
