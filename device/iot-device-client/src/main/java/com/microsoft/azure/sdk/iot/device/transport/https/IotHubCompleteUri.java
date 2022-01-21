@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.device.net;
+package com.microsoft.azure.sdk.iot.device.transport.https;
 
 /**
  * A URI for a device to instruct an IoT Hub to mark a message as being
  * completed.
  */
-public final class IotHubCompleteUri
+final class IotHubCompleteUri
 {
     /**
      * The path to be appended to an IoT Hub URI. The %s will be replaced by the

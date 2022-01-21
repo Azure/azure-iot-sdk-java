@@ -53,7 +53,6 @@ public class DeviceTwinTest
         // assert
         assertEquals(mockedGenericPropertyCB, Deencapsulation.getField(testTwin, "deviceTwinGenericPropertyChangeCallback"));
         assertEquals(mockedStatusCB, Deencapsulation.getField(testTwin, "deviceTwinStatusCallback"));
-        assertEquals(mockedInternalClient, Deencapsulation.getField(testTwin, "deviceIO"));
         assertEquals(mockedConfig, Deencapsulation.getField(testTwin, "config"));
     }
 
@@ -67,7 +66,6 @@ public class DeviceTwinTest
         // assert
         assertEquals(mockedGenericTwinPropertyCB, Deencapsulation.getField(testTwin, "deviceTwinGenericTwinPropertyChangeCallback"));
         assertEquals(mockedStatusCB, Deencapsulation.getField(testTwin, "deviceTwinStatusCallback"));
-        assertEquals(mockedInternalClient, Deencapsulation.getField(testTwin, "deviceIO"));
         assertEquals(mockedConfig, Deencapsulation.getField(testTwin, "config"));
     }
 

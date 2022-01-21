@@ -463,7 +463,7 @@ public class HttpsTransportManagerTest
                 result = mockResponseMessage;
 
                 mockResponseMessage.getStatus();
-                result = IotHubStatusCode.OK_EMPTY;
+                result = 200;
 
                 mockResponseMessage.getBody();
                 result = expectedResponseBody.getBytes(StandardCharsets.UTF_8);
@@ -520,7 +520,7 @@ public class HttpsTransportManagerTest
                 result = mockResponseMessage;
 
                 mockResponseMessage.getStatus();
-                result = IotHubStatusCode.OK_EMPTY;
+                result = 204;
 
                 mockResponseMessage.getBody();
                 result = expectedResponseBody.getBytes(StandardCharsets.UTF_8);
@@ -595,7 +595,7 @@ public class HttpsTransportManagerTest
                 result = mockResponseMessage;
 
                 mockResponseMessage.getStatus();
-                result = IotHubStatusCode.HUB_OR_DEVICE_ID_NOT_FOUND;
+                result = 404;
 
                 mockResponseMessage.getBody();
                 result = expectedResponseBody.getBytes(StandardCharsets.UTF_8);

@@ -8,7 +8,7 @@ import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvi
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
 import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
+import com.microsoft.azure.sdk.iot.device.transport.https.IotHubUri;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;

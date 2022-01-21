@@ -7,7 +7,6 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
 import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 
 import java.io.IOException;

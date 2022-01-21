@@ -73,6 +73,9 @@ public class FileUploadTest
 
                 new FileUploadSasUriResponse(mockResponsePayloadString);
                 result = mockFileUploadSasUriResponse;
+
+                mockResponseMessage.getStatus();
+                result = 200;
             }
         };
 
@@ -106,6 +109,9 @@ public class FileUploadTest
 
                 mockResponseMessage.getBody();
                 result = mockResponsePayload;
+
+                mockResponseMessage.getStatus();
+                result = 200;
             }
         };
 

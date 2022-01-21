@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.device.net;
+package com.microsoft.azure.sdk.iot.device.transport.https;
 
-import com.microsoft.azure.sdk.iot.device.net.IotHubEventUri;
-import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
+import com.microsoft.azure.sdk.iot.device.transport.https.IotHubMessageUri;
+import com.microsoft.azure.sdk.iot.device.transport.https.IotHubUri;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
@@ -15,14 +15,14 @@ import java.net.URISyntaxException;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-/** Unit tests for IotHubEventUri. */
-public class IotHubEventUriTest
+/** Unit tests for IotHubMessageUri. */
+public class IotHubMessageUriTest
 {
-    protected static String EVENT_PATH = "/messages/events";
+    protected static String MESSAGE_PATH = "/messages/devicebound";
 
     @Mocked IotHubUri mockIotHubUri;
 
-    // Tests_SRS_IOTHUBEVENTURI_11_001: [The constructor returns a URI with the format "[iotHubHostname]/devices/[deviceId]/messages/events?api-version=2016-02-03".]
+    // Tests_SRS_IOTHUBMESSAGEURI_11_001: [The constructor returns a URI with the format "[iotHubHostname]/devices/[deviceId]/messages/devicebound?api-version=2016-02-03".]
     @Test
     public void constructorConstructsIotHubUriCorrectly()
             throws URISyntaxException
@@ -30,17 +30,17 @@ public class IotHubEventUriTest
         final String iotHubHostname = "test.iothub";
         final String deviceId = "test-deviceid";
 
-        new IotHubEventUri(iotHubHostname, deviceId, "");
+        new IotHubMessageUri(iotHubHostname, deviceId, "");
 
         new Verifications()
         {
             {
-                new IotHubUri(iotHubHostname, deviceId, EVENT_PATH, "");
+                new IotHubUri(iotHubHostname, deviceId, MESSAGE_PATH, "");
             }
         };
     }
 
-    // Tests_SRS_IOTHUBEVENTURI_11_002: [The string representation of the IoT Hub event URI shall be constructed with the format '[iotHubHostname]/devices/[deviceId]/messages/events?api-version=2016-02-03 '.]
+    // Tests_SRS_IOTHUBMESSAGEURI_11_002: [The string representation of the IoT Hub event URI shall be constructed with the format "[iotHubHostname]/devices/[deviceId]/messages/devicebound?api-version=2016-02-03".]
     @Test
     public void toStringIsCorrect() throws URISyntaxException
     {
@@ -54,15 +54,15 @@ public class IotHubEventUriTest
                 result = uriStr;
             }
         };
-        IotHubEventUri eventUri =
-                new IotHubEventUri(iotHubHostname, deviceId, "");
+        IotHubMessageUri messageUri =
+                new IotHubMessageUri(iotHubHostname, deviceId, "");
 
-        String testUriStr = eventUri.toString();
+        String testUriStr = messageUri.toString();
 
         assertThat(testUriStr, is(uriStr));
     }
 
-    // Tests_SRS_IOTHUBEVENTURI_11_003: [The function shall return the hostname given in the constructor.]
+    // Tests_SRS_IOTHUBMESSAGEURI_11_003: [The function shall return the hostname given in the constructor.] 
     @Test
     public void getHostnameIsCorrect() throws URISyntaxException
     {
@@ -76,15 +76,15 @@ public class IotHubEventUriTest
                 result = hostname;
             }
         };
-        IotHubEventUri eventUri =
-                new IotHubEventUri(iotHubHostname, deviceId, "");
+        IotHubMessageUri messageUri =
+                new IotHubMessageUri(iotHubHostname, deviceId, "");
 
-        String testHostname = eventUri.getHostname();
+        String testHostname = messageUri.getHostname();
 
         assertThat(testHostname, is(hostname));
     }
 
-    // Tests_SRS_IOTHUBEVENTURI_11_004: [The function shall return a URI with the format '/devices/[deviceId]/messages/events'.]
+    // Tests_SRS_IOTHUBMESSAGEURI_11_004: [The function shall return a URI with the format '/devices/[deviceId]/messages/devicebound.]
     @Test
     public void getPathIsCorrect() throws URISyntaxException
     {
@@ -98,10 +98,10 @@ public class IotHubEventUriTest
                 result = path;
             }
         };
-        IotHubEventUri eventUri =
-                new IotHubEventUri(iotHubHostname, deviceId, "");
+        IotHubMessageUri messageUri =
+                new IotHubMessageUri(iotHubHostname, deviceId, "");
 
-        String testPath = eventUri.getPath();
+        String testPath = messageUri.getPath();
 
         assertThat(testPath, is(path));
     }

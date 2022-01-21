@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.auth;
 
-import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
+import com.microsoft.azure.sdk.iot.device.transport.https.IotHubUri;
 
 import java.util.HashMap;
 import java.util.Map;
