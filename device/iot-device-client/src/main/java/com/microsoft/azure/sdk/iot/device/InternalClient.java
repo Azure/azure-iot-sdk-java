@@ -130,7 +130,7 @@ public class InternalClient
         IotHubConnectionString connectionString = new IotHubConnectionString(uri, deviceId, null, null);
 
         //Codes_SRS_INTERNALCLIENT_34_066: [The provided security provider will be saved in config.]
-        this.config = new DeviceClientConfig(connectionString, securityProvider);
+        this.config = new DeviceClientConfig(connectionString, securityProvider, clientOptions);
         this.config.setProtocol(protocol);
         if (clientOptions != null) {
             this.config.modelId = clientOptions.getModelId();

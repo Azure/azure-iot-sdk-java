@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
@@ -165,12 +164,43 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityProvider.class}, mockIotHubConnectionString, mockSecurityProvider);
+                Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityProvider.class, ClientOptions.class}, mockIotHubConnectionString, mockSecurityProvider, null);
                 times = 1;
 
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
                         new Class[] {DeviceClientConfig.class, long.class, long.class},
                         any, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_HTTPS);
+                times = 1;
+            }
+        };
+    }
+
+    //Tests_SRS_INTERNALCLIENT_34_065: [The provided uri and device id will be used to create an iotHubConnectionString that will be saved in config.]
+    //Tests_SRS_INTERNALCLIENT_34_066: [The provided security provider will be saved in config.]
+    //Tests_SRS_INTERNALCLIENT_34_067: [The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.]
+    @Test
+    public void createFromSecurityProviderWithClientOptionsUsesUriAndDeviceIdAndSavesSecurityProviderAndCreatesDeviceIO() throws URISyntaxException, SecurityProviderException, IOException
+    {
+        //arrange
+        final String expectedUri = "some uri";
+        final String expectedDeviceId = "some device id";
+        final IotHubClientProtocol expectedProtocol = IotHubClientProtocol.HTTPS;
+        new StrictExpectations()
+        {
+            {
+                new IotHubConnectionString(expectedUri, expectedDeviceId, null, null);
+                result = mockIotHubConnectionString;
+            }
+        };
+
+        final ClientOptions clientOptions = new ClientOptions();
+        //act
+        final DeviceClient dc = DeviceClient.createFromSecurityProvider(expectedUri, expectedDeviceId, mockSecurityProvider, expectedProtocol, clientOptions);
+
+        new Verifications()
+        {
+            {
+                Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityProvider.class, ClientOptions.class}, mockIotHubConnectionString, mockSecurityProvider, clientOptions);
                 times = 1;
             }
         };
