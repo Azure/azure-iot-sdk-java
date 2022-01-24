@@ -5,7 +5,6 @@ package com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
-import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
@@ -111,7 +110,7 @@ public class Job
         long maxExecutionTimeInSeconds)
         throws IOException, IotHubException
     {
-        if (Tools.isNullOrEmpty(methodName))
+        if (methodName == null || methodName.isEmpty())
         {
             throw new IllegalArgumentException("method name cannot be null or empty");
         }

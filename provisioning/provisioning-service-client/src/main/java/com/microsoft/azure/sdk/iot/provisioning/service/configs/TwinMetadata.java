@@ -5,7 +5,6 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 import lombok.Getter;
 
 import java.io.Serializable;
@@ -72,7 +71,7 @@ public class TwinMetadata implements Serializable
      */
     TwinMetadata(String lastUpdated, Integer lastUpdatedVersion)
     {
-        if (!Tools.isNullOrEmpty(lastUpdated))
+        if (!(lastUpdated == null || lastUpdated.isEmpty()))
         {
             /* SRS_TWIN_METADATA_21_001: [The constructor shall parse the provided `lastUpdated` String to the Date and store it as the TwinMetadata lastUpdated.] */
             /* SRS_TWIN_METADATA_21_002: [The constructor shall throw IllegalArgumentException if it cannot convert the provided `lastUpdated` String to Date.] */
@@ -150,7 +149,7 @@ public class TwinMetadata implements Serializable
                 lastUpdatedVersion = ((Number)entry.getValue()).intValue();
             }
         }
-        if ((lastUpdatedVersion != null) || !Tools.isNullOrEmpty(lastUpdated))
+        if ((lastUpdatedVersion != null) || !(lastUpdated == null || lastUpdated.isEmpty()))
         {
             return new TwinMetadata(lastUpdated, lastUpdatedVersion);
         }

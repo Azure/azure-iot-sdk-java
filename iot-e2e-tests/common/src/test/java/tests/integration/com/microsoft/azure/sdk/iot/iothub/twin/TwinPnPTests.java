@@ -3,24 +3,38 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.twin;
 
-import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.ClientOptions;
+import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.InternalClient;
+import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.ModuleClient;
 import com.microsoft.azure.sdk.iot.service.BaseDevice;
+import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.service.Module;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClient;
-import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.Module;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceConnectionString;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.SSLContextBuilder;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 
 import javax.net.ssl.SSLContext;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
@@ -146,23 +160,22 @@ public class TwinPnPTests extends IntegrationTest
             moduleX509.setThumbprint(x509Thumbprint, x509Thumbprint);
             device = Tools.addDeviceWithRetry(registryManager, device);
             deviceX509 = Tools.addDeviceWithRetry(registryManager, deviceX509);
-            ClientOptions clientOptions = new ClientOptions();
-            clientOptions.setModelId(ModelId);
+            ClientOptions.ClientOptionsBuilder clientOptionsBuilder = ClientOptions.builder().modelId(ModelId);
 
             if (clientType == ClientType.DEVICE_CLIENT)
             {
                 if (authenticationType == SAS)
                 {
                     //sas device client
-                    this.client = new DeviceClient(registryManager.getDeviceConnectionString(device), protocol, clientOptions);
+                    this.client = new DeviceClient(registryManager.getDeviceConnectionString(device), protocol, clientOptionsBuilder.build());
                     this.identity = device;
                 }
                 else if (authenticationType == SELF_SIGNED)
                 {
                     //x509 device client
                     SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCert, privateKey);
-                    clientOptions.setSslContext(sslContext);
-                    this.client = new DeviceClient(registryManager.getDeviceConnectionString(deviceX509), protocol, clientOptions);
+                    clientOptionsBuilder.sslContext(sslContext);
+                    this.client = new DeviceClient(registryManager.getDeviceConnectionString(deviceX509), protocol, clientOptionsBuilder.build());
                     this.identity = deviceX509;
                 }
                 else
@@ -178,7 +191,7 @@ public class TwinPnPTests extends IntegrationTest
                 {
                     //sas module client
                     module = Tools.addModuleWithRetry(registryManager, module);
-                    this.client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), protocol, clientOptions);
+                    this.client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), protocol, clientOptionsBuilder.build());
                     this.identity = module;
                     this.twin = new Twin(deviceId, moduleId);
                 }
@@ -187,8 +200,8 @@ public class TwinPnPTests extends IntegrationTest
                     //x509 module client
                     moduleX509 = Tools.addModuleWithRetry(registryManager, moduleX509);
                     SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCert, privateKey);
-                    clientOptions.setSslContext(sslContext);
-                    this.client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509, moduleX509), protocol, clientOptions);
+                    clientOptionsBuilder.sslContext(sslContext);
+                    this.client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509, moduleX509), protocol, clientOptionsBuilder.build());
                     this.identity = moduleX509;
                     this.twin = new Twin(deviceX509Id, moduleX509Id);
                 }

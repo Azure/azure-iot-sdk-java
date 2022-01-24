@@ -169,7 +169,7 @@ public final class DeviceClientConfig
 
     DeviceClientConfig(String hostName, SasTokenProvider sasTokenProvider, ClientOptions clientOptions, String deviceId, String moduleId)
     {
-        SSLContext sslContext = clientOptions != null ? clientOptions.sslContext : null;
+        SSLContext sslContext = clientOptions != null ? clientOptions.getSslContext() : null;
         this.keepAliveInterval =
             clientOptions != null && clientOptions.getKeepAliveInterval() != 0 ? clientOptions.getKeepAliveInterval() : DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
         this.authenticationProvider =
@@ -183,9 +183,9 @@ public final class DeviceClientConfig
 
     DeviceClientConfig(IotHubConnectionString iotHubConnectionString, ClientOptions clientOptions)
     {
-        if (clientOptions != null && clientOptions.sslContext != null)
+        if (clientOptions != null && clientOptions.getSslContext() != null)
         {
-            configSsl(iotHubConnectionString, clientOptions.sslContext);
+            configSsl(iotHubConnectionString, clientOptions.getSslContext());
         }
         else
         {

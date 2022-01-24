@@ -6,7 +6,6 @@ package com.microsoft.azure.sdk.iot.provisioning.service.contract;
 import com.microsoft.azure.sdk.iot.provisioning.service.transport.https.HttpMethod;
 import com.microsoft.azure.sdk.iot.provisioning.service.transport.https.HttpRequest;
 import com.microsoft.azure.sdk.iot.provisioning.service.transport.https.HttpResponse;
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
 import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningConnectionString;
 import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningSasToken;
@@ -200,11 +199,11 @@ public class ContractApiHttp
 
     private URL getUrlForPath(String path)
     {
-        if (Tools.isNullOrEmpty(path))
+        if (path == null || path.isEmpty())
         {
-            /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_008: [If the provided path is null or empty, the request shall throw IllegalArgumentException.*/
             throw new IllegalArgumentException("path cannot be null or empty");
         }
+
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(URL_HTTPS);
         stringBuilder.append(provisioningConnectionString.getHostName());

@@ -90,8 +90,7 @@ public class HubTierConnectionTests extends IntegrationTest
         hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString).getHostName();
         SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCert, privateKey);
 
-        ClientOptions options = new ClientOptions();
-        options.sslContext = sslContext;
+        ClientOptions options = ClientOptions.builder().sslContext(sslContext).build();
 
         return new ArrayList(Arrays.asList(
                 new Object[][]

@@ -13,7 +13,6 @@ import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
 import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
-import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.extern.slf4j.Slf4j;
@@ -68,12 +67,12 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         ProxyOptions proxyOptions,
         SSLContext sslContext)
     {
-        if (Tools.isNullOrEmpty(hostName))
+        if (hostName == null || hostName.isEmpty())
         {
             throw new IllegalArgumentException("hostName can not be null or empty");
         }
 
-        if (Tools.isNullOrEmpty(sasToken))
+        if (sasToken == null || sasToken.isEmpty())
         {
             throw new IllegalArgumentException("sasToken can not be null or empty");
         }
@@ -95,7 +94,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         ProxyOptions proxyOptions,
         SSLContext sslContext)
     {
-        if (Tools.isNullOrEmpty(hostName))
+        if (hostName == null || hostName.isEmpty())
         {
             throw new IllegalArgumentException("hostName can not be null or empty");
         }
@@ -116,7 +115,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         ProxyOptions proxyOptions,
         SSLContext sslContext)
     {
-        if (Tools.isNullOrEmpty(hostName))
+        if (hostName == null || hostName.isEmpty())
         {
             throw new IllegalArgumentException("hostName can not be null or empty");
         }

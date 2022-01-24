@@ -206,9 +206,7 @@ public class TokenCredentialTests
 
     private DeviceClient createDeviceClient(IotHubClientProtocol protocol, RegistryManager registryManager) throws IOException, IotHubException, URISyntaxException
     {
-        ClientOptions options = new ClientOptions();
-        options.setModelId(THERMOSTAT_MODEL_ID);
-
+        ClientOptions options = ClientOptions.builder().modelId(THERMOSTAT_MODEL_ID).build();
         String deviceId = "some-device-" + UUID.randomUUID();
         Device device = Device.createDevice(deviceId, AuthenticationType.SAS);
         Device registeredDevice = registryManager.addDevice(device);

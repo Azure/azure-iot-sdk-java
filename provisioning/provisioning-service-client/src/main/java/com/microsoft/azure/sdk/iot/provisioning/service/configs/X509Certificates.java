@@ -5,7 +5,6 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 import lombok.Getter;
 
 import java.io.Serializable;
@@ -138,7 +137,7 @@ public class X509Certificates implements Serializable
     X509Certificates(String primary, String secondary)
     {
         /* SRS_X509_CERTIFICATES_21_001: [The constructor shall throw IllegalArgumentException if the primary certificate is null or empty.] */
-        if (Tools.isNullOrEmpty(primary))
+        if (primary == null || primary.isEmpty())
         {
             throw new IllegalArgumentException("primary certificate cannot be null or empty");
         }
@@ -146,7 +145,7 @@ public class X509Certificates implements Serializable
         this.primary = new X509CertificateWithInfo(primary);
 
         /* SRS_X509_CERTIFICATES_21_003: [If the secondary certificate is not null or empty, the constructor shall create a new instance of the X509CertificateWithInfo using the provided secondary certificate, and store it as the secondary Certificate.] */
-        if (!Tools.isNullOrEmpty(secondary))
+        if (!(secondary == null || secondary.isEmpty()))
         {
             this.secondary = new X509CertificateWithInfo(secondary);
         }

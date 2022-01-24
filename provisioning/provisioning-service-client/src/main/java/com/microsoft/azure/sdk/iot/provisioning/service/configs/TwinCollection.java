@@ -5,7 +5,6 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -320,7 +319,7 @@ public class TwinCollection extends HashMap<String, Object> implements Serializa
                 }
             }
         }
-        if ((lastUpdatedVersion != null) || !Tools.isNullOrEmpty(lastUpdated))
+        if ((lastUpdatedVersion != null) || !(lastUpdated == null || lastUpdated.isEmpty()))
         {
             twinCollection.twinMetadata = new TwinMetadata(lastUpdated, lastUpdatedVersion);
         }

@@ -232,15 +232,10 @@ public class ModuleClient extends InternalClient
                 sslContext = new IotHubSSLContext().getSSLContext();
             }
 
-            if (clientOptions == null)
+            if (clientOptions == null || clientOptions.getSslContext() == null)
             {
-                clientOptions = new ClientOptions();
-            }
-
-            // only override the SSLContext if the user didn't set it
-            if (clientOptions.sslContext == null)
-            {
-                clientOptions.sslContext = sslContext;
+                // only override the SSLContext if the user didn't set it
+                clientOptions = ClientOptions.builder().sslContext(sslContext).build();
             }
             else
             {

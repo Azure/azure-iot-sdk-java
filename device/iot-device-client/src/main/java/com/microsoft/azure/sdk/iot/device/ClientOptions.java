@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,6 +14,7 @@ import static com.microsoft.azure.sdk.iot.device.DeviceClientConfig.DEFAULT_KEEP
 /**
  * Options that allow configuration of the device client instance during initialization.
  */
+@Builder
 public final class ClientOptions
 {
     /**
@@ -20,9 +22,8 @@ public final class ClientOptions
      * Non plug and play users should not set this value
      * This feature is currently supported only over MQTT, MQTT_WS, AMQPS, and AMQPS_WS.
      */
-    @Setter
     @Getter
-    public String ModelId;
+    private final String modelId;
 
     /**
      * The ssl context that will be used during authentication. If the provided connection string does not contain
@@ -30,9 +31,8 @@ public final class ClientOptions
      *  does contain SAS based credentials, the sslContext will still be used during SSL negotiation. By default, this SDK will
      *  create an SSLContext instance for you that trusts the IoT Hub public certificates.
      */
-    @Setter
     @Getter
-    public SSLContext sslContext;
+    private final SSLContext sslContext;
 
     /**
      * Gets the keep alive interval in seconds. This value defines the
@@ -49,7 +49,8 @@ public final class ClientOptions
      * </p>
      */
     @Getter
-    public int keepAliveInterval = DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
+    @Builder.Default
+    private int keepAliveInterval = DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
 
     /**
      * Sets the keep alive interval in seconds. This value defines the

@@ -5,7 +5,6 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -134,7 +133,7 @@ public class X509CertificateInfo implements Serializable
 
     private void setNotBeforeUtcString(String notBeforeUtcString)
     {
-        if (Tools.isNullOrEmpty(notBeforeUtcString))
+        if (notBeforeUtcString == null || notBeforeUtcString.isEmpty())
         {
             throw new IllegalArgumentException("notBeforeUtcString on X509 info cannot be null or empty");
         }
@@ -145,7 +144,7 @@ public class X509CertificateInfo implements Serializable
 
     private void setNotAfterUtcString(String notAfterUtcString)
     {
-        if (Tools.isNullOrEmpty(notAfterUtcString))
+        if (notAfterUtcString == null || notAfterUtcString.isEmpty())
         {
             throw new IllegalArgumentException("notAfterUtcString on X509 info cannot be null or empty");
         }

@@ -4,7 +4,6 @@
 package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.*;
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 import lombok.Getter;
 
 /**
@@ -93,7 +92,7 @@ public class QueryResult
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
 
         /* SRS_QUERY_RESULT_21_002: [The constructor shall throw IllegalArgumentException if the provided body is null or empty and the type is not `unknown`.] */
-        if ((queryResultType != QueryResultType.UNKNOWN) && Tools.isNullOrEmpty(body))
+        if ((queryResultType != QueryResultType.UNKNOWN) && (body == null || body.isEmpty()))
         {
             throw new IllegalArgumentException("body cannot be null or empty");
         }

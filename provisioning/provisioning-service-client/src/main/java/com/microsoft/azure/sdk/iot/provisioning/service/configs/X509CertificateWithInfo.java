@@ -5,7 +5,6 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 import lombok.Getter;
 
 import java.io.Serializable;
@@ -109,7 +108,7 @@ public class X509CertificateWithInfo implements Serializable
     X509CertificateWithInfo(String certificate)
     {
         /* SRS_X509_CERTIFICATE_WITH_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided certificate is null or empty.] */
-        if (Tools.isNullOrEmpty(certificate))
+        if (certificate == null || certificate.isEmpty())
         {
             throw new IllegalArgumentException("certificate cannot be null or empty.");
         }

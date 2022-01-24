@@ -10,7 +10,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 import lombok.Getter;
 import lombok.Setter;
@@ -295,7 +294,7 @@ public class IndividualEnrollment extends Serializable
      */
     public IndividualEnrollment(String json)
     {
-        if (Tools.isNullOrEmpty(json))
+        if (json == null || json.isEmpty())
         {
             throw new IllegalArgumentException("JSON with result is null or empty");
         }

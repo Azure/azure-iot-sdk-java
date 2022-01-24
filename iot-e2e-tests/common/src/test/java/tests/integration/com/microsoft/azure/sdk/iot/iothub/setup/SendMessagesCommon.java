@@ -254,8 +254,7 @@ public class SendMessagesCommon extends IntegrationTest
 
                 if (customSSLContext != null)
                 {
-                    ClientOptions options = new ClientOptions();
-                    options.sslContext = customSSLContext;
+                    ClientOptions options = ClientOptions.builder().sslContext(customSSLContext).build();
                     DeviceClient clientWithCustomSSLContext = new DeviceClient(registryManager.getDeviceConnectionString(testInstance.identity.getDevice()), protocol, options);
                     ((TestDeviceIdentity)this.identity).setDeviceClient(clientWithCustomSSLContext);
                 }

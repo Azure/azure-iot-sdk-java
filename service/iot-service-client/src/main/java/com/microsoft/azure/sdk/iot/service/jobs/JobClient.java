@@ -12,7 +12,6 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.TwinState;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
-import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceOperations;
@@ -71,7 +70,7 @@ public class JobClient
     private JobClient(String connectionString, JobClientOptions options)
     {
         Objects.requireNonNull(options);
-        if (Tools.isNullOrEmpty(connectionString))
+        if (connectionString == null || connectionString.isEmpty())
         {
             throw new IllegalArgumentException("connection string cannot be null or empty");
         }
@@ -107,7 +106,7 @@ public class JobClient
         Objects.requireNonNull(credential);
         Objects.requireNonNull(options);
 
-        if (Tools.isNullOrEmpty(hostName))
+        if (hostName == null || hostName.isEmpty())
         {
             throw new IllegalArgumentException("hostName cannot be null or empty");
         }
@@ -141,7 +140,7 @@ public class JobClient
         Objects.requireNonNull(azureSasCredential);
         Objects.requireNonNull(options);
 
-        if (Tools.isNullOrEmpty(hostName))
+        if (hostName == null || hostName.isEmpty())
         {
             throw new IllegalArgumentException("hostName cannot be null or empty");
         }
@@ -180,7 +179,7 @@ public class JobClient
     {
         URL url;
 
-        if (Tools.isNullOrEmpty(jobId))
+        if (jobId == null || jobId.isEmpty())
         {
             throw new IllegalArgumentException("jobId cannot be null or empty");
         }
@@ -263,12 +262,12 @@ public class JobClient
     {
         URL url;
 
-        if (Tools.isNullOrEmpty(jobId))
+        if (jobId == null || jobId.isEmpty())
         {
             throw new IllegalArgumentException("jobId cannot be null or empty");
         }
 
-        if (Tools.isNullOrEmpty(methodName))
+        if (methodName == null || methodName.isEmpty())
         {
             throw new IllegalArgumentException("method name cannot be null or empty");
         }
@@ -338,7 +337,7 @@ public class JobClient
     {
         URL url;
 
-        if (Tools.isNullOrEmpty(jobId))
+        if (jobId == null || jobId.isEmpty())
         {
             throw new IllegalArgumentException("jobId cannot be null or empty");
         }
@@ -380,7 +379,7 @@ public class JobClient
         throws IllegalArgumentException, IOException, IotHubException
     {
         URL url;
-        if (Tools.isNullOrEmpty(jobId))
+        if (jobId == null || jobId.isEmpty())
         {
             throw new IllegalArgumentException("jobId cannot be null or empty");
         }

@@ -154,8 +154,7 @@ public class ModuleClientTest
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
         final String expectedEdgeHubConnectionString = null;
         final String expectedIotHubConnectionString = "testConnectionString";
-        final ClientOptions clientOptions = new ClientOptions();
-        clientOptions.setModelId("testModelId");
+        final ClientOptions clientOptions = ClientOptions.builder().modelId("testModelId").build();
 
         final Map<String, String> mockedSystemVariables = new HashMap<>();
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "EdgehubConnectionstringVariableName").toString(), expectedEdgeHubConnectionString);

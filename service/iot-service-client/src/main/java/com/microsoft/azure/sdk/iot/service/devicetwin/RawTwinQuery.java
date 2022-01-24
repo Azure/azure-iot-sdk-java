@@ -9,7 +9,6 @@ import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
@@ -42,7 +41,7 @@ public class RawTwinQuery
      */
     public RawTwinQuery(String connectionString)
     {
-        if (Tools.isNullOrEmpty(connectionString))
+        if (connectionString == null || connectionString.isEmpty())
         {
             throw new IllegalArgumentException("Connection string cannot be null or empty");
         }
@@ -60,7 +59,7 @@ public class RawTwinQuery
      */
     public RawTwinQuery(String hostName, TokenCredential credential)
     {
-        if (Tools.isNullOrEmpty(hostName))
+        if (hostName == null || hostName.isEmpty())
         {
             throw new IllegalArgumentException("hostName cannot be null or empty");
         }
@@ -80,7 +79,7 @@ public class RawTwinQuery
      */
     public RawTwinQuery(String hostName, AzureSasCredential azureSasCredential)
     {
-        if (Tools.isNullOrEmpty(hostName))
+        if (hostName == null || hostName.isEmpty())
         {
             throw new IllegalArgumentException("hostName cannot be null or empty");
         }

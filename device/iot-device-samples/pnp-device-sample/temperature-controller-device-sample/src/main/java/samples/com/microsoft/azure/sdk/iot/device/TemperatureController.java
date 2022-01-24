@@ -237,8 +237,7 @@ public class TemperatureController {
             Thread.sleep(MAX_TIME_TO_WAIT_FOR_REGISTRATION);
         }
 
-        ClientOptions options = new ClientOptions();
-        options.setModelId(MODEL_ID);
+        ClientOptions options = ClientOptions.builder().modelId(MODEL_ID).build();
 
         if (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED) {
             System.out.println("IotHUb Uri : " + provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri());
@@ -258,8 +257,7 @@ public class TemperatureController {
      * This method also sets a connection status change callback, that will get triggered any time the device's connection status changes.
      */
     private static void initializeDeviceClient() throws URISyntaxException, IOException {
-        ClientOptions options = new ClientOptions();
-        options.setModelId(MODEL_ID);
+        ClientOptions options = ClientOptions.builder().modelId(MODEL_ID).build();
         deviceClient = new DeviceClient(deviceConnectionString, protocol, options);
 
         deviceClient.setConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> {

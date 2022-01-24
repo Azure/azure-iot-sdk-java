@@ -91,8 +91,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
     }
 
     private DeviceClient createDeviceClient(IotHubClientProtocol protocol) throws IOException, IotHubException, URISyntaxException {
-        ClientOptions options = new ClientOptions();
-        options.setModelId(E2ETestConstants.TEMPERATURE_CONTROLLER_MODEL_ID);
+        ClientOptions options = ClientOptions.builder().modelId(E2ETestConstants.TEMPERATURE_CONTROLLER_MODEL_ID).build();
 
         this.deviceId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         Device device = Device.createDevice(deviceId, AuthenticationType.SAS);

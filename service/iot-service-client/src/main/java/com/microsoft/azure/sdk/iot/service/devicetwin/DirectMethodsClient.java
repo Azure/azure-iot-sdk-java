@@ -9,7 +9,6 @@ import com.microsoft.azure.sdk.iot.service.serializers.MethodParser;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
-import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -58,7 +57,7 @@ public class DirectMethodsClient
     public DirectMethodsClient(String connectionString, DirectMethodsClientOptions options)
     {
         Objects.requireNonNull(options);
-        if (Tools.isNullOrEmpty(connectionString))
+        if (connectionString == null || connectionString.isEmpty())
         {
             throw new IllegalArgumentException("Connection string cannot be null or empty");
         }
@@ -93,7 +92,7 @@ public class DirectMethodsClient
     {
         Objects.requireNonNull(credential, "TokenCredential cannot be null");
         Objects.requireNonNull(options, "options cannot be null");
-        if (Tools.isNullOrEmpty(hostName))
+        if (hostName == null || hostName.isEmpty())
         {
             throw new IllegalArgumentException("hostName cannot be null or empty");
         }
@@ -127,7 +126,7 @@ public class DirectMethodsClient
     {
         Objects.requireNonNull(azureSasCredential, "azureSasCredential cannot be null");
         Objects.requireNonNull(options, "options cannot be null");
-        if (Tools.isNullOrEmpty(hostName))
+        if (hostName == null || hostName.isEmpty())
         {
             throw new IllegalArgumentException("hostName cannot be null or empty");
         }
@@ -162,12 +161,12 @@ public class DirectMethodsClient
         Long connectTimeoutInSeconds,
         Object payload) throws IotHubException, IOException
     {
-        if (Tools.isNullOrEmpty(deviceId))
+        if (deviceId == null || deviceId.isEmpty())
         {
             throw new IllegalArgumentException("deviceId is empty or null.");
         }
 
-        if (Tools.isNullOrEmpty(methodName))
+        if (methodName == null || methodName.isEmpty())
         {
             throw new IllegalArgumentException("methodName is empty or null.");
         }
@@ -197,17 +196,17 @@ public class DirectMethodsClient
         Long connectTimeoutInSeconds,
         Object payload) throws IotHubException, IOException
     {
-        if (Tools.isNullOrEmpty(deviceId))
+        if (deviceId == null || deviceId.isEmpty())
         {
             throw new IllegalArgumentException("deviceId is empty or null.");
         }
 
-        if (Tools.isNullOrEmpty(moduleId))
+        if (moduleId == null || moduleId.isEmpty())
         {
             throw new IllegalArgumentException("moduleId is empty or null.");
         }
 
-        if (Tools.isNullOrEmpty(methodName))
+        if (methodName == null || methodName.isEmpty())
         {
             throw new IllegalArgumentException("methodName is empty or null.");
         }
@@ -285,7 +284,7 @@ public class DirectMethodsClient
         Date startTimeUtc,
         long maxExecutionTimeInSeconds) throws IOException, IotHubException
     {
-        if (Tools.isNullOrEmpty(methodName))
+        if (methodName == null || methodName.isEmpty())
         {
             throw new IllegalArgumentException("null updateTwin");
         }

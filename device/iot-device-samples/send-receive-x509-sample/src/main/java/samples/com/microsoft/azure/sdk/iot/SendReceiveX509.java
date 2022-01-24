@@ -223,8 +223,7 @@ public class SendReceiveX509
         System.out.format("Using communication protocol %s.\n", protocol.name());
 
         SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCertificateString, privateKeyString);
-        ClientOptions clientOptions = new ClientOptions();
-        clientOptions.setSslContext(sslContext);
+        ClientOptions clientOptions = ClientOptions.builder().sslContext(sslContext).build();
         DeviceClient client = new DeviceClient(connString, protocol, clientOptions);
 
         System.out.println("Successfully created an IoT Hub client.");

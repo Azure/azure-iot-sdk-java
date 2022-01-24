@@ -7,7 +7,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 import lombok.Getter;
 
 import java.io.Serializable;
@@ -117,7 +116,7 @@ public class DeviceRegistrationState implements Serializable
      */
     public DeviceRegistrationState(String json)
     {
-        if (Tools.isNullOrEmpty(json))
+        if (json == null || json.isEmpty())
         {
             throw new IllegalArgumentException("JSON with result is null or empty");
         }

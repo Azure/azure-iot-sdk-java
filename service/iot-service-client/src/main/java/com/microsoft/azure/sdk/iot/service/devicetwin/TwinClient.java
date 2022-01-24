@@ -10,7 +10,6 @@ import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
-import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -64,7 +63,7 @@ public class TwinClient
      */
     public TwinClient(String connectionString, TwinClientOptions options)
     {
-        if (Tools.isNullOrEmpty(connectionString))
+        if (connectionString == null || connectionString.isEmpty())
         {
             throw new IllegalArgumentException("connectionString cannot be null or empty.");
         }
@@ -99,7 +98,7 @@ public class TwinClient
     {
         Objects.requireNonNull(credential, "TokenCredential cannot be null");
         Objects.requireNonNull(options, "options cannot be null");
-        if (Tools.isNullOrEmpty(hostName))
+        if (hostName == null || hostName.isEmpty())
         {
             throw new IllegalArgumentException("hostName cannot be null or empty");
         }
@@ -132,7 +131,7 @@ public class TwinClient
     {
         Objects.requireNonNull(azureSasCredential, "azureSasCredential cannot be null");
         Objects.requireNonNull(options, "options cannot be null");
-        if (Tools.isNullOrEmpty(hostName))
+        if (hostName == null || hostName.isEmpty())
         {
             throw new IllegalArgumentException("hostName cannot be null or empty");
         }

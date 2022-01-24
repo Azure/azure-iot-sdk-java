@@ -5,7 +5,6 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 
 import java.io.Serializable;
 
@@ -146,7 +145,7 @@ public class X509Attestation extends Attestation implements Serializable
     public static X509Attestation createFromClientCertificates(String primary, String secondary)
     {
         /* SRS_X509_ATTESTATION_21_009: [The factory shall throw IllegalArgumentException if the primary certificate is null or empty.] */
-        if (Tools.isNullOrEmpty(primary))
+        if (primary == null || primary.isEmpty())
         {
             throw new IllegalArgumentException("primary certificate cannot be null or empty");
         }
@@ -186,7 +185,7 @@ public class X509Attestation extends Attestation implements Serializable
     public static X509Attestation createFromRootCertificates(String primary, String secondary)
     {
         /* SRS_X509_ATTESTATION_21_013: [The factory shall throw IllegalArgumentException if the primary certificate is null or empty.] */
-        if (Tools.isNullOrEmpty(primary))
+        if (primary == null || primary.isEmpty())
         {
             throw new IllegalArgumentException("primary certificate cannot be null or empty");
         }
@@ -226,7 +225,7 @@ public class X509Attestation extends Attestation implements Serializable
     public static X509Attestation createFromCAReferences(String primary, String secondary)
     {
         /* SRS_X509_ATTESTATION_21_026: [The factory shall throw IllegalArgumentException if the primary CA reference is null or empty.] */
-        if (Tools.isNullOrEmpty(primary))
+        if (primary == null || primary.isEmpty())
         {
             throw new IllegalArgumentException("primary CA reference cannot be null or empty");
         }

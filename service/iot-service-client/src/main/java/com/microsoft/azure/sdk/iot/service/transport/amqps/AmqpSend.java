@@ -10,7 +10,6 @@ import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.Message;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
-import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -71,11 +70,11 @@ public class AmqpSend
             ProxyOptions proxyOptions,
             SSLContext sslContext)
     {
-        if (Tools.isNullOrEmpty(hostName))
+        if (hostName == null || hostName.isEmpty())
         {
             throw new IllegalArgumentException("hostName can not be null or empty");
         }
-        if (Tools.isNullOrEmpty(sasToken))
+        if (sasToken == null || sasToken.isEmpty())
         {
             throw new IllegalArgumentException("sasToken can not be null or empty");
         }
@@ -100,7 +99,7 @@ public class AmqpSend
             ProxyOptions proxyOptions,
             SSLContext sslContext)
     {
-        if (Tools.isNullOrEmpty(hostName))
+        if (hostName == null || hostName.isEmpty())
         {
             throw new IllegalArgumentException("hostName can not be null or empty");
         }
@@ -122,7 +121,7 @@ public class AmqpSend
             ProxyOptions proxyOptions,
             SSLContext sslContext)
     {
-        if (Tools.isNullOrEmpty(hostName))
+        if (hostName == null || hostName.isEmpty())
         {
             throw new IllegalArgumentException("hostName can not be null or empty");
         }

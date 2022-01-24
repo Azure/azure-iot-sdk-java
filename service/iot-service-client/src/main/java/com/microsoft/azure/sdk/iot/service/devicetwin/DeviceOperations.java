@@ -4,7 +4,6 @@
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
@@ -79,7 +78,7 @@ public class DeviceOperations
         }
 
         String sasTokenString = new IotHubServiceSasToken(iotHubConnectionString).toString();
-        if (Tools.isNullOrEmpty(sasTokenString))
+        if (sasTokenString == null || sasTokenString.isEmpty())
         {
             throw new IllegalArgumentException("Illegal sasToken null or empty");
         }
@@ -97,7 +96,7 @@ public class DeviceOperations
         request.setReadTimeoutMillis(readTimeout);
         request.setConnectTimeoutMillis(connectTimeout);
 
-        if (!Tools.isNullOrEmpty(requestId))
+        if (!(requestId == null || requestId.isEmpty()))
         {
             request.setHeaderField(REQUEST_ID, requestId);
         }
@@ -178,7 +177,7 @@ public class DeviceOperations
         request.setReadTimeoutMillis(readTimeout);
         request.setConnectTimeoutMillis(connectTimeout);
 
-        if (!Tools.isNullOrEmpty(requestId))
+        if (!(requestId == null || requestId.isEmpty()))
         {
             request.setHeaderField(REQUEST_ID, requestId);
         }
