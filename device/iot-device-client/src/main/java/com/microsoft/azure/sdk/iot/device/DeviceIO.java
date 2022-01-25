@@ -269,7 +269,7 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
      * IoT Hub. After {@code close()} is called, the IoT Hub client is no longer
      *  usable. If the client is already closed, the function shall do nothing.
      */
-    public void close()
+    void close()
     {
         synchronized (this.stateLock)
         {
@@ -296,7 +296,7 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
      * @throws IllegalArgumentException if the message provided is {@code null}.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
      */
-    public void sendEventAsync(Message message,
+    void sendEventAsync(Message message,
                                IotHubEventCallback callback,
                                Object callbackContext,
                                String deviceId)
@@ -322,22 +322,12 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
     }
 
     /**
-     * Getter for the receive period in milliseconds.
-     *
-     * @return a long with the number of milliseconds between receives.
-     */
-    public long getReceivePeriodInMilliseconds()
-    {
-        return this.receivePeriodInMilliseconds;
-    }
-
-    /**
      * Setter for the receive period in milliseconds.
      *
      * @param newIntervalInMilliseconds is the new interval in milliseconds.
      * @throws IllegalArgumentException if the provided interval is invalid (zero or negative).
      */
-    public void setReceivePeriodInMilliseconds(long newIntervalInMilliseconds)
+    void setReceivePeriodInMilliseconds(long newIntervalInMilliseconds)
     {
         if (newIntervalInMilliseconds <= 0L)
         {
@@ -360,22 +350,12 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
     }
 
     /**
-     * Getter for the send period in milliseconds.
-     *
-     * @return a long with the number of milliseconds between sends.
-     */
-    public long getSendPeriodInMilliseconds()
-    {
-        return this.sendPeriodInMilliseconds;
-    }
-
-    /**
      * Setter for the send period in milliseconds.
      *
      * @param newIntervalInMilliseconds is the new interval in milliseconds.
      * @throws IllegalArgumentException if the provided interval is invalid (zero or negative).
      */
-    public void setSendPeriodInMilliseconds(long newIntervalInMilliseconds)
+    void setSendPeriodInMilliseconds(long newIntervalInMilliseconds)
     {
         if (newIntervalInMilliseconds <= 0L)
         {
@@ -402,7 +382,7 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
      *
      * @return a protocol for transport.
      */
-    public IotHubClientProtocol getProtocol()
+    IotHubClientProtocol getProtocol()
     {
         return this.transport.getProtocol();
     }
@@ -412,7 +392,7 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
      *
      * @return a boolean true if the connection is open or reconnecting, and false otherwise.
      */
-    public boolean isOpen()
+    boolean isOpen()
     {
         // Although the method is called "isOpen", it has always returned true even when the client is in a reconnecting state.
         // This allows users to still queue messages as they will be sent after the reconnection completes.
