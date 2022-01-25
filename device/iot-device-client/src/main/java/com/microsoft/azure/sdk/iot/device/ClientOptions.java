@@ -17,6 +17,9 @@ import static com.microsoft.azure.sdk.iot.device.DeviceClientConfig.DEFAULT_KEEP
 @Builder
 public final class ClientOptions
 {
+    private static final int DEFAULT_HTTPS_CONNECT_TIMEOUT_SECONDS = 0;
+    private static final int DEFAULT_HTTPS_READ_TIMEOUT_SECONDS = 4 * 60;
+
     /**
      * The Digital Twin Model Id associated with the device and module identity.
      * Non plug and play users should not set this value
@@ -77,4 +80,74 @@ public final class ClientOptions
 
         this.keepAliveInterval = keepAliveInterval;
     }
+
+    /**
+     * this option is applicable for HTTPS.
+     * This option specifies the connect timeout in milliseconds per https request
+     * made by this client. By default, this value is 0 (no connect timeout).
+     */
+    @Getter
+    @Builder.Default
+    private final int httpsReadTimeout = DEFAULT_HTTPS_READ_TIMEOUT_SECONDS;
+
+    /**
+     * this option is applicable for HTTPS.
+     * This option specifies the read timeout in milliseconds per https request
+     * made by this client. By default, this value is 4 minutes.
+     */
+    @Getter
+    @Builder.Default
+    private final int httpsConnectTimeout = DEFAULT_HTTPS_CONNECT_TIMEOUT_SECONDS;
+
+    /**
+     * this option is applicable for HTTP/ AMQP/MQTT. This option specifies the interval in seconds after which
+     * SASToken expires. If the transport is already open then setting this
+     * option will restart the transport with the updated expiry time, and
+     * will use that expiry time length for all subsequently generated sas tokens.
+     */
+    @Getter
+    private final long sasTokenExpiryTime;
+
+    /**
+     * this option is applicable for AMQP with SAS token authentication.
+     * This option specifies the timeout in seconds to wait to open the authentication session.
+     * By default, this value is 20 seconds.
+     */
+    @Getter
+    private final int amqpAuthenticationSessionTimeout;
+
+    /**
+     * this option is applicable for AMQP.
+     * This option specifies the timeout in seconds to open the device sessions.
+     * By default, this value is 60 seconds.
+     */
+    @Getter
+    private final int amqpDeviceSessionTimeout;
+
+    /**
+     * this option is applicable to all protocols.
+     * This option specifies how many messages a given send thread should attempt to send before exiting.
+     * This option can be used in conjunction with "SetSendInterval" to control the how frequently and in what
+     * batch size messages are sent. By default, this client sends 10 messages per send thread, and spawns
+     * a send thread every 10 milliseconds. This gives a theoretical throughput of 1000 messages per second.
+     */
+    @Getter
+    private final int messagesSentPerThread;
+
+    /**
+     * this option is applicable to all protocols.
+     * This value sets the period (in milliseconds) that this SDK spawns threads to send queued messages.
+     * Even if no message is queued, this thread will be spawned
+     */
+    @Getter
+    private final int sendInterval;
+
+    /**
+     * this option is applicable to all protocols
+     * in case of HTTPS protocol, this option acts the same as {@code SetMinimumPollingInterval}
+     * in case of MQTT and AMQP protocols, this option specifies the interval in milliseconds
+     * between spawning a thread that dequeues a message from the SDK's queue of received messages.
+     */
+    @Getter
+    private final int receiveInterval;
 }

@@ -29,19 +29,6 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 @Slf4j
 public class InternalClient
 {
-    // SET_MINIMUM_POLLING_INTERVAL is used for setting the interval for https message polling.
-    private static final String SET_MINIMUM_POLLING_INTERVAL = "SetMinimumPollingInterval";
-    // SET_RECEIVE_INTERVAL is used for setting the interval for handling MQTT and AMQP messages.
-    private static final String SET_RECEIVE_INTERVAL = "SetReceiveInterval";
-    private static final String SET_SEND_INTERVAL = "SetSendInterval";
-    private static final String SET_MAX_MESSAGES_SENT_PER_THREAD = "SetMaxMessagesSentPerThread";
-    private static final String SET_SAS_TOKEN_EXPIRY_TIME = "SetSASTokenExpiryTime";
-    private static final String SET_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT = "SetAmqpOpenAuthenticationSessionTimeout";
-    private static final String SET_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT = "SetAmqpOpenDeviceSessionsTimeout";
-
-    private static final String SET_HTTPS_CONNECT_TIMEOUT = "SetHttpsConnectTimeout";
-    private static final String SET_HTTPS_READ_TIMEOUT = "SetHttpsReadTimeout";
-
     private static final String TWIN_OVER_HTTP_ERROR_MESSAGE =
         "Twin operations are only supported over MQTT, MQTT_WS, AMQPS, and AMQPS_WS";
 
@@ -426,128 +413,6 @@ public class InternalClient
     }
 
     /**
-     * Sets a runtime option identified by parameter {@code optionName}
-     * to {@code value}.
-     *
-     * The options that can be set via this API are:
-     *	    - <b>SetMinimumPollingInterval</b> - this option is applicable only
-     *	      when the transport configured with this client is HTTP. This
-     *	      option specifies the interval in milliseconds between calls to
-     *	      the service checking for availability of new messages. The value
-     *	      is expected to be of type {@code long}.
-     *
-     *	    - <b>SetSendInterval</b> - this option is applicable to all protocols.
-     *	      This value sets the period (in milliseconds) that this SDK spawns threads to send queued messages.
-     *	      Even if no message is queued, this thread will be spawned.
-     *
-     *	    - <b>SetReceiveInterval</b> - this option is applicable to all protocols
-     *	      in case of HTTPS protocol, this option acts the same as {@code SetMinimumPollingInterval}
-     *	      in case of MQTT and AMQP protocols, this option specifies the interval in milliseconds
-     *	      between spawning a thread that dequeues a message from the SDK's queue of received messages.
-     *
-     *	    - <b>SetMaxMessagesSentPerThread</b> - this option is applicable to all protocols.
-     *	      This option specifies how many messages a given send thread should attempt to send before exiting.
-     *	      This option can be used in conjunction with "SetSendInterval" to control the how frequently and in what
-     *	      batch size messages are sent. By default, this client sends 10 messages per send thread, and spawns
-     *	      a send thread every 10 milliseconds. This gives a theoretical throughput of 1000 messages per second.
-     *
-     *      - <b>SetSASTokenExpiryTime</b> - this option is applicable for HTTP/
-     *         AMQP/MQTT. This option specifies the interval in seconds after which
-     *         SASToken expires. If the transport is already open then setting this
-     *         option will restart the transport with the updated expiry time, and
-     *         will use that expiry time length for all subsequently generated sas tokens.
-     *         The value is expected to be of type {@code long}.
-     *
-     *      - <b>SetHttpsReadTimeout</b> - this option is applicable for HTTPS.
-     *         This option specifies the read timeout in milliseconds per https request
-     *         made by this client. By default, this value is 4 minutes.
-     *         The value is expected to be of type {@code int}.
-     *
-     *      - <b>SetHttpsConnectTimeout</b> - this option is applicable for HTTPS.
-     *         This option specifies the connect timeout in milliseconds per https request
-     *         made by this client. By default, this value is 0 (no connect timeout).
-     *         The value is expected to be of type {@code int}.
-     *
-     *      - <b>SetAmqpOpenAuthenticationSessionTimeout</b> - this option is applicable for AMQP with SAS token authentication.
-     *         This option specifies the timeout in seconds to wait to open the authentication session.
-     *         By default, this value is 20 seconds.
-     *         The value is expected to be of type {@code int}.
-     *
-     *      - <b>SetAmqpOpenDeviceSessionsTimeout</b> - this option is applicable for AMQP.
-     *         This option specifies the timeout in seconds to open the device sessions.
-     *         By default, this value is 60 seconds.
-     *         The value is expected to be of type {@code int}.
-     *
-     * @param optionName the option name to modify
-     * @param value an object of the appropriate type for the option's value
-     * @throws IllegalArgumentException if the provided optionName is null
-     */
-    // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
-    // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
-    public void setOption(String optionName, Object value)
-    {
-        if (optionName == null)
-        {
-            throw new IllegalArgumentException("optionName is null");
-        }
-        else if (value == null)
-        {
-            throw new IllegalArgumentException("value is null");
-        }
-        else
-        {
-            switch (optionName)
-            {
-                case SET_MINIMUM_POLLING_INTERVAL:
-                case SET_RECEIVE_INTERVAL:
-                {
-                    setOption_SetMinimumPollingInterval(value);
-                    break;
-                }
-                case SET_SEND_INTERVAL:
-                {
-                    setOption_SetSendInterval(value);
-                    break;
-                }
-                case SET_MAX_MESSAGES_SENT_PER_THREAD:
-                {
-                    setOption_SetMaxMessagesSentPerThread(value);
-                    break;
-                }
-                case SET_SAS_TOKEN_EXPIRY_TIME:
-                {
-                    setOption_SetSASTokenExpiryTime(value);
-                    break;
-                }
-                case SET_HTTPS_CONNECT_TIMEOUT:
-                {
-                    setOption_SetHttpsConnectTimeout(value);
-                    break;
-                }
-                case SET_HTTPS_READ_TIMEOUT:
-                {
-                    setOption_SetHttpsReadTimeout(value);
-                    break;
-                }
-                case SET_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT:
-                {
-                    setOption_SetAmqpOpenAuthenticationSessionTimeout(value);
-                    return;
-                }
-                case SET_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT:
-                {
-                    setOption_SetAmqpOpenDeviceSessionsTimeout(value);
-                    return;
-                }
-                default:
-                {
-                    throw new IllegalArgumentException("optionName is unknown = " + optionName);
-                }
-            }
-        }
-    }
-
-    /**
      * Starts the twin for this client. This client will receive a callback with the current state of the full twin, including
      * reported properties and desired properties. After that callback is received, this client will receive a callback
      * each time a desired property is updated. That callback will either contain the full desired properties set, or
@@ -888,95 +753,49 @@ public class InternalClient
         this.isMultiplexed = true;
     }
 
-    private void setOption_SetHttpsConnectTimeout(Object value)
+    private void setHttpsConnectTimeout(int value)
     {
         if (this.config.getProtocol() != HTTPS)
         {
             throw new UnsupportedOperationException("Cannot set the https connect timeout when using protocol " + this.config.getProtocol());
         }
 
-        if (value instanceof Integer)
-        {
-            log.info("Setting HTTPS connect timeout to {} milliseconds", value);
-            this.config.setHttpsConnectTimeout((int) value);
-        }
-        else
-        {
-            throw new IllegalArgumentException("value is not int = " + value);
-        }
+        log.info("Setting HTTPS connect timeout to {} seconds", value);
+        this.config.setHttpsConnectTimeout(value);
     }
 
-    private void setOption_SetHttpsReadTimeout(Object value)
+    private void setHttpsReadTimeout(int value)
     {
         if (this.config.getProtocol() != HTTPS)
         {
             throw new UnsupportedOperationException("Cannot set the https read timeout when using protocol " + this.config.getProtocol());
         }
 
-        if (value instanceof Integer)
-        {
-            log.info("Setting HTTPS read timeout to {} milliseconds", value);
-            this.config.setHttpsReadTimeout((int) value);
-        }
-        else
-        {
-            throw new IllegalArgumentException("value is not int = " + value);
-        }
+        log.info("Setting HTTPS read timeout to {} seconds", value);
+        this.config.setHttpsReadTimeout(value);
     }
 
-    private void setOption_SetSendInterval(Object value)
+    private void setSendInterval(long value)
     {
-        if (value instanceof Long)
-        {
-            verifyRegisteredIfMultiplexing();
-            log.info("Setting send period to {} milliseconds", value);
-            this.deviceIO.setSendPeriodInMilliseconds((long) value);
-        }
-        else
-        {
-            throw new IllegalArgumentException("value is not long = " + value);
-        }
-    }
-
-    private void setOption_SetMinimumPollingInterval(Object value)
-    {
-        if (value instanceof Long)
-        {
-            verifyRegisteredIfMultiplexing();
-            log.info("Setting receive period to {} milliseconds", value);
-            this.deviceIO.setReceivePeriodInMilliseconds((long) value);
-        }
-        else
-        {
-            throw new IllegalArgumentException("value is not long = " + value);
-        }
+        verifyRegisteredIfMultiplexing();
+        log.info("Setting send period to {} milliseconds", value);
+        this.deviceIO.setSendPeriodInMilliseconds(value);
     }
 
     // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
     // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
-    private void setOption_SetSASTokenExpiryTime(Object value)
+    private void setSASTokenExpiryTime(long value)
     {
         if (this.config.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN || this.config.getSasTokenAuthentication() == null)
         {
             throw new IllegalStateException("Cannot set sas token validity time when not using sas token authentication");
         }
 
-        long validTimeInSeconds;
-
-        if (value instanceof Long)
-        {
-            validTimeInSeconds = (long) value;
-        }
-        else
-        {
-            throw new IllegalArgumentException("value is not long = " + value);
-        }
-
-        log.info("Setting generated SAS token lifespans to {} seconds", validTimeInSeconds);
-        this.config.getSasTokenAuthentication().setTokenValidSecs(validTimeInSeconds);
+        log.info("Setting generated SAS token lifespans to {} seconds", value);
+        this.config.getSasTokenAuthentication().setTokenValidSecs(value);
     }
 
-    private void setOption_SetAmqpOpenAuthenticationSessionTimeout(Object value)
+    private void setAmqpOpenAuthenticationSessionTimeout(int value)
     {
         if (this.config.getProtocol() != AMQPS && this.config.getProtocol() != AMQPS_WS)
         {
@@ -988,46 +807,25 @@ public class InternalClient
             throw new UnsupportedOperationException("Cannot set the open authentication session timeout when using authentication type " + this.config.getAuthenticationType());
         }
 
-        if (value instanceof Integer)
-        {
-            log.info("Setting generated AMQP authentication session timeout to {} seconds", value);
-            this.config.setAmqpOpenAuthenticationSessionTimeout((int) value);
-        }
-        else
-        {
-            throw new IllegalArgumentException("value is not int = " + value);
-        }
+        log.info("Setting generated AMQP authentication session timeout to {} seconds", value);
+        this.config.setAmqpOpenAuthenticationSessionTimeout(value);
     }
 
-    private void setOption_SetAmqpOpenDeviceSessionsTimeout(Object value)
+    private void setAmqpOpenDeviceSessionsTimeout(int value)
     {
         if (this.config.getProtocol() != AMQPS && this.config.getProtocol() != AMQPS_WS)
         {
             throw new UnsupportedOperationException("Cannot set the open device session timeout when using protocol " + this.config.getProtocol());
         }
 
-        if (value instanceof Integer)
-        {
-            log.info("Setting generated AMQP device session timeout to {} seconds", value);
-            this.config.setAmqpOpenDeviceSessionsTimeout((int) value);
-        }
-        else
-        {
-            throw new IllegalArgumentException("value is not int = " + value);
-        }
+        log.info("Setting generated AMQP device session timeout to {} seconds", value);
+        this.config.setAmqpOpenDeviceSessionsTimeout(value);
     }
 
-    private void setOption_SetMaxMessagesSentPerThread(Object value)
+    private void setMaxMessagesSentPerThread(int value)
     {
-        if (value instanceof Integer)
-        {
-            log.info("Setting maximum number of messages sent per send thread {} messages", value);
-            this.deviceIO.setMaxNumberOfMessagesSentPerSendThread((int) value);
-        }
-        else
-        {
-            throw new IllegalArgumentException("value is not int = " + value);
-        }
+        log.info("Setting maximum number of messages sent per send thread {} messages", value);
+        this.deviceIO.setMaxNumberOfMessagesSentPerSendThread(value);
     }
 
     private void commonConstructorVerification(IotHubConnectionString connectionString, IotHubClientProtocol protocol)
