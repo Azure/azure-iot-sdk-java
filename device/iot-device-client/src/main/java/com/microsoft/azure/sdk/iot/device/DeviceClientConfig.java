@@ -170,8 +170,7 @@ public final class DeviceClientConfig
     DeviceClientConfig(String hostName, SasTokenProvider sasTokenProvider, ClientOptions clientOptions, String deviceId, String moduleId)
     {
         SSLContext sslContext = clientOptions != null ? clientOptions.getSslContext() : null;
-        this.keepAliveInterval =
-            clientOptions != null && clientOptions.getKeepAliveInterval() != 0 ? clientOptions.getKeepAliveInterval() : DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
+        setKeepAliveInterval(clientOptions);
         this.authenticationProvider =
                 new IotHubSasTokenProvidedAuthenticationProvider(hostName, deviceId, moduleId, sasTokenProvider, sslContext);
 
@@ -192,6 +191,11 @@ public final class DeviceClientConfig
             configSasAuth(iotHubConnectionString);
         }
 
+        setKeepAliveInterval(clientOptions);
+    }
+
+    private void setKeepAliveInterval(ClientOptions clientOptions)
+    {
         this.keepAliveInterval = clientOptions != null && clientOptions.getKeepAliveInterval() != 0 ? clientOptions.getKeepAliveInterval() : DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
     }
 
@@ -280,6 +284,21 @@ public final class DeviceClientConfig
             //Codes_SRS_DEVICECLIENTCONFIG_34_084: [If the provided security provider is neither a SecurityProviderX509 instance nor a SecurityProviderTpm instance, this function shall throw an UnsupportedOperationException.]
             throw new UnsupportedOperationException("The provided security provider is not supported.");
         }
+    }
+
+    /**
+     * Constructor for a device client config that retrieves the authentication method from a security provider instance and sets the keep alive interval
+     * @param connectionString The connection string for the iot hub to connect with
+     * @param securityProvider The security provider instance to be used for authentication of this device
+     * @param clientOptions The client options that will be used to set the keep alive
+     * @throws IOException if the provided security provider throws an exception while authenticating
+     */
+    DeviceClientConfig(IotHubConnectionString connectionString, SecurityProvider securityProvider, ClientOptions clientOptions) throws IOException
+    {
+        // When setting the ClientOptions and a SecurityProvider, the SecurityProvider is responsible for setting the sslContext
+        // we do not need to set the context in this constructor.
+        this(connectionString, securityProvider);
+        setKeepAliveInterval(clientOptions);
     }
 
     private void commonConstructorSetup(IotHubConnectionString iotHubConnectionString)

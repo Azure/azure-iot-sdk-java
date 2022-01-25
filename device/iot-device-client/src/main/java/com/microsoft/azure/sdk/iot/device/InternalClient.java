@@ -90,7 +90,7 @@ public class InternalClient
 
         IotHubConnectionString connectionString = new IotHubConnectionString(uri, deviceId, null, null);
 
-        this.config = new DeviceClientConfig(connectionString, securityProvider);
+        this.config = new DeviceClientConfig(connectionString, securityProvider, clientOptions);
         this.config.setProtocol(protocol);
         if (clientOptions != null) {
             this.config.modelId = clientOptions.getModelId();
