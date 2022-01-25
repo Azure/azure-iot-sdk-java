@@ -9,7 +9,6 @@ import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
@@ -32,7 +31,7 @@ import java.net.URISyntaxException;
  * The client supports HTTPS 1.1 and AMQPS 1.0 transports.
  */
 @Slf4j
-public final class DeviceClient extends InternalClient implements Closeable
+public final class DeviceClient extends InternalClient
 {
     private static final long SEND_PERIOD_MILLIS = 10L;
 
