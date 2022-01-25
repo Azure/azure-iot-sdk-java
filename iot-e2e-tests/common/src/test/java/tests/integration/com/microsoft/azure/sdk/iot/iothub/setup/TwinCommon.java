@@ -318,11 +318,6 @@ public class TwinCommon extends IntegrationTest
         // set up twin on DeviceClient
         deviceState.dCDeviceForTwin = new DeviceExtension();
 
-        if ((this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS) && this.testInstance.authenticationType == SAS)
-        {
-            client.setOption("SetAmqpOpenAuthenticationSessionTimeout", AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS);
-            client.setOption("SetAmqpOpenDeviceSessionsTimeout", AMQP_DEVICE_SESSION_TIMEOUT_SECONDS);
-        }
         if (openDeviceClient)
         {
             client.open();

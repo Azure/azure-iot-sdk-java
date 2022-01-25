@@ -158,11 +158,6 @@ public class SendBatchEvents
 
         System.out.println("Successfully created an IoT Hub client.");
 
-        // Set your token expiry time limit here
-        long time = 2400;
-        client.setOption("SetSASTokenExpiryTime", time);
-        System.out.println("Updated token expiry time to " + time);
-
         client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
         client.open();

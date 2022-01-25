@@ -52,7 +52,7 @@ import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest.HTTP_READ_TIMEOUT;
+import static tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest.*;
 
 @Slf4j
 public class Tools
@@ -189,18 +189,19 @@ public class Tools
      * @param protocol The device side protocol for the client to use.
      * @param authenticationType The device side authentication type for the client to use.
      * @param needCleanTwin True if the returned device identity needs to not have any pre-existing desired or reported properties, false otherwise.
+     * @param sasTokenTimeToLiveSeconds The time to live to assign SAS tokens created by this client.
      * @return A {@link TestDeviceIdentity} that was either recycled from a previous test when possible, or was just created for this test.
      * @throws URISyntaxException If the connection string cannot be parsed.
      * @throws IOException If the registry addition of a device fails.
      * @throws IotHubException If the registry addition of a device fails.
      * @throws GeneralSecurityException If creating the x509 certificates for an x509 device fails.
      */
-    public static TestDeviceIdentity getTestDevice(String iotHubConnectionString, IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean needCleanTwin) throws URISyntaxException, IOException, IotHubException, GeneralSecurityException
+    public static TestDeviceIdentity getTestDevice(String iotHubConnectionString, IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean needCleanTwin, int sasTokenTimeToLiveSeconds) throws URISyntaxException, IOException, IotHubException, GeneralSecurityException
     {
         TestDeviceIdentity testDeviceIdentity;
         if (authenticationType == AuthenticationType.SAS)
         {
-            testDeviceIdentity = getSasTestDevice(iotHubConnectionString, protocol, needCleanTwin);
+            testDeviceIdentity = getSasTestDevice(iotHubConnectionString, protocol, needCleanTwin, sasTokenTimeToLiveSeconds);
         }
         else
         {
@@ -217,7 +218,33 @@ public class Tools
         return testDeviceIdentity;
     }
 
-    private static TestDeviceIdentity getSasTestDevice(String iotHubConnectionString, IotHubClientProtocol protocol, boolean needCleanTwin) throws URISyntaxException, IOException, IotHubException, GeneralSecurityException
+    /**
+     * Return a device identity and client that can be used for a test. If a recycled identity is available to use, this method will prioritize using
+     * that instead of creating a new identity. When creating a new identity, this method will create a batch of identities. One from the batch will
+     * be returned, and the rest will be cached and available to the next caller of this method. This method will also prioritize
+     * returning cached identities with twin changes over cached identities with no twin changes, but needCleanTwin can be used
+     * to never return a cached identity with twin changes.
+     *
+     * For instance, a test method that just wants to send telemetry from a device identity should set needCleanTwin to false
+     * so that it can use any available device identity. Conversely, a test method that involves setting reported or desired properties
+     * should set needCleanTwin to true to avoid previous twin state interfering with the upcoming test.
+     *
+     * @param iotHubConnectionString The connection string for the IoT Hub where the identity will be registered to.
+     * @param protocol The device side protocol for the client to use.
+     * @param authenticationType The device side authentication type for the client to use.
+     * @param needCleanTwin True if the returned device identity needs to not have any pre-existing desired or reported properties, false otherwise.
+     * @return A {@link TestDeviceIdentity} that was either recycled from a previous test when possible, or was just created for this test.
+     * @throws URISyntaxException If the connection string cannot be parsed.
+     * @throws IOException If the registry addition of a device fails.
+     * @throws IotHubException If the registry addition of a device fails.
+     * @throws GeneralSecurityException If creating the x509 certificates for an x509 device fails.
+     */
+    public static TestDeviceIdentity getTestDevice(String iotHubConnectionString, IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean needCleanTwin) throws URISyntaxException, IOException, IotHubException, GeneralSecurityException
+    {
+        return getTestDevice(iotHubConnectionString, protocol, authenticationType, needCleanTwin, 60 * 60);
+    }
+
+    private static TestDeviceIdentity getSasTestDevice(String iotHubConnectionString, IotHubClientProtocol protocol, boolean needCleanTwin, int sasTokenTimeToLiveSeconds) throws URISyntaxException, IOException, IotHubException, GeneralSecurityException
     {
         // Don't want multiple methods calling this simultaneously and each thinking that they need to create
         // 100 devices. Forcing them to enter this block one at a time means that the first caller creates the 100 devices,
@@ -255,7 +282,13 @@ public class Tools
                 testDeviceIdentity = testSasDeviceQueue.remove();
             }
 
-            testDeviceIdentity.setDeviceClient(new DeviceClient(getRegistyManager(iotHubConnectionString).getDeviceConnectionString(testDeviceIdentity.getDevice()), protocol));
+            ClientOptions clientOptions = ClientOptions.builder()
+                .amqpAuthenticationSessionTimeout(AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS)
+                .amqpDeviceSessionTimeout(AMQP_DEVICE_SESSION_TIMEOUT_SECONDS)
+                .sasTokenExpiryTime(sasTokenTimeToLiveSeconds)
+                .build();
+
+            testDeviceIdentity.setDeviceClient(new DeviceClient(getRegistyManager(iotHubConnectionString).getDeviceConnectionString(testDeviceIdentity.getDevice()), protocol, clientOptions));
             return testDeviceIdentity;
         }
     }
@@ -300,7 +333,11 @@ public class Tools
             }
 
             SSLContext sslContext = SSLContextBuilder.buildSSLContext(IntegrationTest.x509CertificateGenerator.getPublicCertificate(), IntegrationTest.x509CertificateGenerator.getPrivateKey());
-            ClientOptions clientOptions = ClientOptions.builder().sslContext(sslContext).build();
+            ClientOptions clientOptions = ClientOptions.builder()
+                .sslContext(sslContext)
+                .amqpAuthenticationSessionTimeout(AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS)
+                .amqpDeviceSessionTimeout(AMQP_DEVICE_SESSION_TIMEOUT_SECONDS)
+                .build();
             DeviceClient client = new DeviceClient(getRegistyManager(iotHubConnectionString).getDeviceConnectionString(testDeviceIdentity.getDevice()), protocol, clientOptions);
             testDeviceIdentity.setDeviceClient(client);
             return testDeviceIdentity;
@@ -389,7 +426,11 @@ public class Tools
                 testModuleIdentity = testSasModuleQueue.remove();
             }
 
-            ModuleClient moduleClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, testModuleIdentity.device, testModuleIdentity.module), protocol);
+            ClientOptions clientOptions = ClientOptions.builder()
+                .amqpAuthenticationSessionTimeout(AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS)
+                .amqpDeviceSessionTimeout(AMQP_DEVICE_SESSION_TIMEOUT_SECONDS)
+                .build();
+            ModuleClient moduleClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, testModuleIdentity.device, testModuleIdentity.module), protocol, clientOptions);
             testModuleIdentity.setModuleClient(moduleClient);
             return testModuleIdentity;
         }
@@ -438,7 +479,12 @@ public class Tools
             }
 
             SSLContext sslContext = SSLContextBuilder.buildSSLContext(IntegrationTest.x509CertificateGenerator.getPublicCertificate(), IntegrationTest.x509CertificateGenerator.getPrivateKey());
-            ClientOptions clientOptions = ClientOptions.builder().sslContext(sslContext).build();
+            ClientOptions clientOptions = ClientOptions.builder()
+                .sslContext(sslContext)
+                .amqpAuthenticationSessionTimeout(AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS)
+                .amqpDeviceSessionTimeout(AMQP_DEVICE_SESSION_TIMEOUT_SECONDS)
+                .build();
+
             ModuleClient moduleClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, testModuleIdentity.device, testModuleIdentity.module), protocol, clientOptions);
             testModuleIdentity.setModuleClient(moduleClient);
             return testModuleIdentity;

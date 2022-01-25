@@ -170,7 +170,7 @@ public final class DeviceClientConfig
     DeviceClientConfig(String hostName, SasTokenProvider sasTokenProvider, ClientOptions clientOptions, String deviceId, String moduleId)
     {
         SSLContext sslContext = clientOptions != null ? clientOptions.getSslContext() : null;
-        setKeepAliveInterval(clientOptions);
+        setClientOptionValues(clientOptions);
         this.authenticationProvider =
                 new IotHubSasTokenProvidedAuthenticationProvider(hostName, deviceId, moduleId, sasTokenProvider, sslContext);
 
@@ -191,12 +191,52 @@ public final class DeviceClientConfig
             configSasAuth(iotHubConnectionString);
         }
 
-        setKeepAliveInterval(clientOptions);
+        setClientOptionValues(clientOptions);
     }
 
-    private void setKeepAliveInterval(ClientOptions clientOptions)
+    private void setClientOptionValues(ClientOptions clientOptions)
     {
+        this.modelId = clientOptions != null && clientOptions.getModelId() != null ? clientOptions.getModelId() : null;
         this.keepAliveInterval = clientOptions != null && clientOptions.getKeepAliveInterval() != 0 ? clientOptions.getKeepAliveInterval() : DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
+        this.httpsReadTimeout = clientOptions != null && clientOptions.getHttpsReadTimeout() != 0 ? clientOptions.getHttpsReadTimeout() : DEFAULT_HTTPS_READ_TIMEOUT_MILLIS;
+        this.httpsConnectTimeout = clientOptions != null && clientOptions.getHttpsConnectTimeout() != 0 ? clientOptions.getHttpsConnectTimeout() : DEFAULT_HTTPS_CONNECT_TIMEOUT_MILLIS;
+        this.amqpOpenAuthenticationSessionTimeout = clientOptions != null && clientOptions.getAmqpAuthenticationSessionTimeout() != 0 ? clientOptions.getAmqpAuthenticationSessionTimeout() : DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT_IN_SECONDS;
+        this.amqpOpenDeviceSessionsTimeout = clientOptions != null && clientOptions.getAmqpDeviceSessionTimeout() != 0 ? clientOptions.getAmqpDeviceSessionTimeout() : DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS;
+
+        if (getAuthenticationType() == AuthType.SAS_TOKEN && clientOptions != null)
+        {
+            if (clientOptions.getSasTokenExpiryTime() <= 0)
+            {
+                throw new IllegalArgumentException("ClientOption sasTokenExpiryTime must be greater than 0");
+            }
+
+            this.getSasTokenAuthentication().setTokenValidSecs(clientOptions.getSasTokenExpiryTime());
+        }
+
+        if (this.keepAliveInterval <= 0)
+        {
+            throw new IllegalArgumentException("ClientOption keepAliveInterval must be greater than 0");
+        }
+
+        if (this.httpsReadTimeout < 0)
+        {
+            throw new IllegalArgumentException("ClientOption httpsReadTimeout must be greater than or equal to 0");
+        }
+
+        if (this.httpsConnectTimeout <= 0)
+        {
+            throw new IllegalArgumentException("ClientOption httpsConnectTimeout must be greater than or equal to 0");
+        }
+
+        if (this.amqpOpenAuthenticationSessionTimeout <= 0)
+        {
+            throw new IllegalArgumentException("ClientOption amqpAuthenticationSessionTimeout must be greater than 0");
+        }
+
+        if (this.amqpOpenDeviceSessionsTimeout <= 0)
+        {
+            throw new IllegalArgumentException("ClientOption amqpDeviceSessionTimeout must be greater than 0");
+        }
     }
 
     DeviceClientConfig(IotHubConnectionString iotHubConnectionString, SSLContext sslContext)
@@ -245,7 +285,6 @@ public final class DeviceClientConfig
 
         if (securityProvider == null)
         {
-            //Codes_SRS_DEVICECLIENTCONFIG_34_080: [If the provided connectionString or security provider is null, an IllegalArgumentException shall be thrown.]
             throw new IllegalArgumentException("security provider cannot be null");
         }
 
@@ -260,7 +299,6 @@ public final class DeviceClientConfig
         }
         else if (securityProvider instanceof SecurityProviderSymmetricKey)
         {
-            //Codes_SRS_DEVICECLIENTCONFIG_34_083: [If the provided security provider is a SecurityProviderTpm instance, this function shall set its auth type to SAS and create its IotHubSasTokenAuthenticationProvider instance using the security provider.]
             this.authenticationProvider = new IotHubSasTokenSoftwareAuthenticationProvider(
                     connectionString.getHostName(),
                     connectionString.getGatewayHostName(),
@@ -271,7 +309,6 @@ public final class DeviceClientConfig
         }
         else if (securityProvider instanceof SecurityProviderX509)
         {
-            //Codes_SRS_DEVICECLIENTCONFIG_34_082: [If the provided security provider is a SecurityProviderX509 instance, this function shall set its auth type to X509 and create its IotHubX509AuthenticationProvider instance using the security provider's ssl context.]
             this.authenticationProvider = new IotHubX509HardwareAuthenticationProvider(
                     connectionString.getHostName(),
                     connectionString.getGatewayHostName(),
@@ -281,7 +318,6 @@ public final class DeviceClientConfig
         }
         else
         {
-            //Codes_SRS_DEVICECLIENTCONFIG_34_084: [If the provided security provider is neither a SecurityProviderX509 instance nor a SecurityProviderTpm instance, this function shall throw an UnsupportedOperationException.]
             throw new UnsupportedOperationException("The provided security provider is not supported.");
         }
     }
@@ -298,7 +334,7 @@ public final class DeviceClientConfig
         // When setting the ClientOptions and a SecurityProvider, the SecurityProvider is responsible for setting the sslContext
         // we do not need to set the context in this constructor.
         this(connectionString, securityProvider);
-        setKeepAliveInterval(clientOptions);
+        setClientOptionValues(clientOptions);
     }
 
     private void commonConstructorSetup(IotHubConnectionString iotHubConnectionString)
@@ -334,17 +370,14 @@ public final class DeviceClientConfig
     {
         if (this.authenticationProvider instanceof IotHubSasTokenAuthenticationProvider)
         {
-            // Codes_SRS_DEVICECLIENTCONFIG_34_055: [If the saved authentication provider uses sas tokens, this function return the saved authentication provider.]
             return (IotHubSasTokenAuthenticationProvider) this.authenticationProvider;
         }
 
-        // Codes_SRS_DEVICECLIENTCONFIG_34_056: [If the saved authentication provider doesn't use sas tokens, this function return null.]
         return null;
     }
 
     public IotHubAuthenticationProvider getAuthenticationProvider()
     {
-        // Codes_SRS_DEVICECLIENTCONFIG_34_049: [This function return the saved authentication provider.]
         return this.authenticationProvider;
     }
 
@@ -354,7 +387,6 @@ public final class DeviceClientConfig
      */
     public boolean isUsingWebsocket()
     {
-        //Codes_SRS_DEVICECLIENTCONFIG_25_037: [The function shall return the true if websocket is enabled, false otherwise.]
         return this.useWebsocket;
     }
 
@@ -364,7 +396,6 @@ public final class DeviceClientConfig
      */
     void setUseWebsocket(boolean useWebsocket)
     {
-        //Codes_SRS_DEVICECLIENTCONFIG_25_038: [The function shall save useWebsocket.]
         this.useWebsocket = useWebsocket;
     }
 
@@ -375,7 +406,6 @@ public final class DeviceClientConfig
      */
     void setMessageCallback(MessageCallback callback, Object context)
     {
-        // Codes_SRS_DEVICECLIENTCONFIG_11_006: [The function shall set the message callback, with its associated context.]
         this.defaultDeviceTelemetryMessageCallback = callback;
         this.defaultDeviceTelemetryMessageContext = context;
     }
@@ -384,13 +414,10 @@ public final class DeviceClientConfig
     {
         if (this.inputChannelMessageCallbacks.containsKey(inputName) && callback == null)
         {
-            // Codes_SRS_DEVICECLIENTCONFIG_34_058: [If the provided inputName is already saved in the message callbacks map, and the provided callback is null, this function
-            // shall remove the inputName from the message callbacks map.]
             this.inputChannelMessageCallbacks.remove(inputName);
         }
         else
         {
-            // Codes_SRS_DEVICECLIENTCONFIG_34_044: [The function shall map the provided inputName to the callback and context in the saved inputChannelMessageCallbacks map.]
             this.inputChannelMessageCallbacks.put(inputName, new Pair<>(callback, context));
         }
     }
@@ -401,7 +428,6 @@ public final class DeviceClientConfig
      */
     public String getIotHubHostname()
     {
-        // Codes_SRS_DEVICECLIENTCONFIG_11_002: [The function shall return the IoT Hub hostname given in the constructor.]
         return this.authenticationProvider.getHostname();
     }
 
@@ -411,7 +437,6 @@ public final class DeviceClientConfig
      */
     public String getIotHubName()
     {
-        // Codes_SRS_DEVICECLIENTCONFIG_11_007: [The function shall return the IoT Hub name given in the constructor, where the IoT Hub name is embedded in the IoT Hub hostname as follows: [IoT Hub name].[valid HTML chars]+.]
         return IotHubConnectionString.parseHubName(this.authenticationProvider.getHostname());
     }
 
@@ -421,7 +446,6 @@ public final class DeviceClientConfig
      */
     public String getGatewayHostname() 
     {
-        // Codes_SRS_DEVICECLIENTCONFIG_34_057: [The function shall return the gateway hostname, or null if this connection string does not contain a gateway hostname.]
         return this.authenticationProvider.getGatewayHostname();
     }
 
@@ -432,13 +456,11 @@ public final class DeviceClientConfig
      */
     public String getDeviceId()
     {
-        // Codes_SRS_DEVICECLIENTCONFIG_11_003: [The function shall return the device ID given in the constructor.]
         return this.authenticationProvider.getDeviceId();
     }
 
     public String getModuleId()
     {
-        // Codes_SRS_DEVICECLIENTCONFIG_34_050: [This function return the saved moduleId.]
         return this.authenticationProvider.getModuleId();
     }
 
@@ -470,14 +492,10 @@ public final class DeviceClientConfig
     {
         if (inputName == null || !this.inputChannelMessageCallbacks.containsKey(inputName))
         {
-            // Codes_SRS_DEVICECLIENTCONFIG_34_010: [If the inputName is null, or the message callbacks map does not
-            // contain the provided inputName, this function shall return the default message callback.]
             return this.defaultDeviceTelemetryMessageCallback;
         }
         else
         {
-            // Codes_SRS_DEVICECLIENTCONFIG_34_045: [If the message callbacks map contains the provided inputName, this function
-            // shall return the callback associated with that inputName.]
             return this.inputChannelMessageCallbacks.get(inputName).getKey();
         }
     }
@@ -493,14 +511,10 @@ public final class DeviceClientConfig
     {
         if (inputName == null || !this.inputChannelMessageCallbacks.containsKey(inputName))
         {
-            // Codes_SRS_DEVICECLIENTCONFIG_34_011: [If the inputName is null, or the message callbacks map does not
-            // contain the provided inputName, this function shall return the default message callback context.]
             return this.defaultDeviceTelemetryMessageContext;
         }
         else
         {
-            // Codes_SRS_DEVICECLIENTCONFIG_34_046: [If the message callbacks map contains the provided inputName, this function
-            // shall return the context associated with that inputName.]
             return this.inputChannelMessageCallbacks.get(inputName).getValue();
         }
     }
@@ -513,14 +527,7 @@ public final class DeviceClientConfig
      */
     public void setDeviceMethodsMessageCallback(MessageCallback callback, Object context)
     {
-        /*
-        Codes_SRS_DEVICECLIENTCONFIG_25_023: [**The function shall set the DeviceMethod message callback.**] **
-         */
         this.deviceMethodsMessageCallback = callback;
-
-        /*
-        Codes_SRS_DEVICECLIENTCONFIG_25_022: [**The function shall return the current DeviceMethod message context.**] **
-         */
         this.deviceMethodsMessageContext = context;
     }
 
@@ -531,9 +538,6 @@ public final class DeviceClientConfig
      */
     public MessageCallback getDeviceMethodsMessageCallback()
     {
-        /*
-        Codes_SRS_DEVICECLIENTCONFIG_25_021: [**The function shall return the current DeviceMethod message callback.**] **
-         */
         return this.deviceMethodsMessageCallback;
     }
 
@@ -544,9 +548,6 @@ public final class DeviceClientConfig
      */
     public Object getDeviceMethodsMessageContext()
     {
-        /*
-        Codes_SRS_DEVICECLIENTCONFIG_25_022: [**The function shall return the current DeviceMethod message context.**] **
-         */
         return this.deviceMethodsMessageContext;
     }
 
@@ -558,13 +559,7 @@ public final class DeviceClientConfig
      */
     public void setDeviceTwinMessageCallback(MessageCallback callback, Object context)
     {
-        /*
-        Codes_SRS_DEVICECLIENTCONFIG_25_023: [**The function shall set the DeviceTwin message callback.**] **
-         */
         this.deviceTwinMessageCallback = callback;
-        /*
-        Codes_SRS_DEVICECLIENTCONFIG_25_024: [**The function shall set the DeviceTwin message context.**] **
-         */
         this.deviceTwinMessageContext = context;
     }
 
@@ -575,9 +570,6 @@ public final class DeviceClientConfig
      */
     public MessageCallback getDeviceTwinMessageCallback()
     {
-        /*
-        Codes_SRS_DEVICECLIENTCONFIG_25_025: [**The function shall return the current DeviceTwin message callback.**] **
-         */
         return this.deviceTwinMessageCallback;
     }
 
@@ -588,9 +580,6 @@ public final class DeviceClientConfig
      */
     public Object getDeviceTwinMessageContext()
     {
-        /*
-        Codes_SRS_DEVICECLIENTCONFIG_25_026: [**The function shall return the current DeviceTwin message context.**] **
-         */
         return this.deviceTwinMessageContext;
     }
 
@@ -602,7 +591,6 @@ public final class DeviceClientConfig
      */
     public int getMessageLockTimeoutSecs()
     {
-        // Codes_SRS_DEVICECLIENTCONFIG_11_013: [The function shall return 180s.]
         return DEFAULT_MESSAGE_LOCK_TIMEOUT_SECS;
     }
 
@@ -615,12 +603,10 @@ public final class DeviceClientConfig
     {
         if (this.authenticationProvider instanceof IotHubSasTokenAuthenticationProvider)
         {
-            // Codes_SRS_DEVICECLIENTCONFIG_34_051: [If the saved authentication provider uses sas tokens, this function return AuthType.SAS_TOKEN.]
             return AuthType.SAS_TOKEN;
         }
         else
         {
-            // Codes_SRS_DEVICECLIENTCONFIG_34_052: [If the saved authentication provider uses x509, this function return AuthType.X509_CERTIFICATE.]
             return AuthType.X509_CERTIFICATE;
         }
     }
@@ -634,11 +620,9 @@ public final class DeviceClientConfig
     {
         if (timeout < 1)
         {
-            //Codes_SRS_DEVICECLIENTCONFIG_34_030: [If the provided timeout is 0 or negative, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("Operation timeout cannot be 0 or negative");
         }
 
-        //Codes_SRS_DEVICECLIENTCONFIG_34_031: [This function shall save the provided operation timeout.]
         this.operationTimeout = timeout;
     }
 

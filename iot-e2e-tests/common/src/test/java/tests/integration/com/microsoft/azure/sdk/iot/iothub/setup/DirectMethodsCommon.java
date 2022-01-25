@@ -166,12 +166,6 @@ public class DirectMethodsCommon extends IntegrationTest
                 this.identity = Tools.getTestModule(iotHubConnectionString, this.protocol, this.authenticationType, false);
                 this.deviceTestManager = new DeviceTestManager(((TestModuleIdentity) this.identity).getModuleClient());
             }
-
-            if ((this.protocol == AMQPS || this.protocol == AMQPS_WS) && this.authenticationType == SAS)
-            {
-                this.deviceTestManager.client.setOption("SetAmqpOpenAuthenticationSessionTimeout", AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS);
-                this.deviceTestManager.client.setOption("SetAmqpOpenDeviceSessionsTimeout", AMQP_DEVICE_SESSION_TIMEOUT_SECONDS);
-            }
         }
 
         public void dispose()

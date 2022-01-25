@@ -50,13 +50,11 @@ public class InternalClient
     {
         commonConstructorVerification(iotHubConnectionString, protocol);
 
+        this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
+
         this.config = new DeviceClientConfig(iotHubConnectionString, clientOptions);
         this.config.setProtocol(protocol);
-        if (clientOptions != null) {
-            this.config.modelId = clientOptions.getModelId();
-        }
-
-        this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
+        setClientOptionValues(clientOptions);
     }
 
     InternalClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis)
@@ -92,9 +90,7 @@ public class InternalClient
 
         this.config = new DeviceClientConfig(connectionString, securityProvider, clientOptions);
         this.config.setProtocol(protocol);
-        if (clientOptions != null) {
-            this.config.modelId = clientOptions.getModelId();
-        }
+        setClientOptionValues(clientOptions);
 
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
     }
@@ -113,12 +109,34 @@ public class InternalClient
 
         this.config = new DeviceClientConfig(hostName, sasTokenProvider, clientOptions, deviceId, moduleId);
         this.config.setProtocol(protocol);
-        if (clientOptions != null)
-        {
-            this.config.modelId = clientOptions.getModelId();
-        }
+        setClientOptionValues(clientOptions);
 
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
+    }
+
+    private void setClientOptionValues(ClientOptions clientOptions)
+    {
+        if (clientOptions != null)
+        {
+            if (clientOptions.getMessagesSentPerThread() <= 0)
+            {
+                throw new IllegalArgumentException("ClientOption messagesSentPerThread must be greater than 0");
+            }
+
+            if (clientOptions.getSendInterval() <= 0)
+            {
+                throw new IllegalArgumentException("ClientOption sendInterval must be greater than 0");
+            }
+
+            if (clientOptions.getReceiveInterval() <= 0)
+            {
+                throw new IllegalArgumentException("ClientOption receiveInterval must be greater than 0");
+            }
+
+            this.deviceIO.setMaxNumberOfMessagesSentPerSendThread(clientOptions.getMessagesSentPerThread());
+            this.deviceIO.setSendPeriodInMilliseconds(clientOptions.getSendInterval());
+            this.deviceIO.setReceivePeriodInMilliseconds(clientOptions.getReceiveInterval());
+        }
     }
 
     //for mocking purposes only
@@ -751,81 +769,6 @@ public class InternalClient
     void setAsMultiplexed()
     {
         this.isMultiplexed = true;
-    }
-
-    private void setHttpsConnectTimeout(int value)
-    {
-        if (this.config.getProtocol() != HTTPS)
-        {
-            throw new UnsupportedOperationException("Cannot set the https connect timeout when using protocol " + this.config.getProtocol());
-        }
-
-        log.info("Setting HTTPS connect timeout to {} seconds", value);
-        this.config.setHttpsConnectTimeout(value);
-    }
-
-    private void setHttpsReadTimeout(int value)
-    {
-        if (this.config.getProtocol() != HTTPS)
-        {
-            throw new UnsupportedOperationException("Cannot set the https read timeout when using protocol " + this.config.getProtocol());
-        }
-
-        log.info("Setting HTTPS read timeout to {} seconds", value);
-        this.config.setHttpsReadTimeout(value);
-    }
-
-    private void setSendInterval(long value)
-    {
-        verifyRegisteredIfMultiplexing();
-        log.info("Setting send period to {} milliseconds", value);
-        this.deviceIO.setSendPeriodInMilliseconds(value);
-    }
-
-    // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
-    // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
-    private void setSASTokenExpiryTime(long value)
-    {
-        if (this.config.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN || this.config.getSasTokenAuthentication() == null)
-        {
-            throw new IllegalStateException("Cannot set sas token validity time when not using sas token authentication");
-        }
-
-        log.info("Setting generated SAS token lifespans to {} seconds", value);
-        this.config.getSasTokenAuthentication().setTokenValidSecs(value);
-    }
-
-    private void setAmqpOpenAuthenticationSessionTimeout(int value)
-    {
-        if (this.config.getProtocol() != AMQPS && this.config.getProtocol() != AMQPS_WS)
-        {
-            throw new UnsupportedOperationException("Cannot set the open authentication session timeout when using protocol " + this.config.getProtocol());
-        }
-
-        if (this.config.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN)
-        {
-            throw new UnsupportedOperationException("Cannot set the open authentication session timeout when using authentication type " + this.config.getAuthenticationType());
-        }
-
-        log.info("Setting generated AMQP authentication session timeout to {} seconds", value);
-        this.config.setAmqpOpenAuthenticationSessionTimeout(value);
-    }
-
-    private void setAmqpOpenDeviceSessionsTimeout(int value)
-    {
-        if (this.config.getProtocol() != AMQPS && this.config.getProtocol() != AMQPS_WS)
-        {
-            throw new UnsupportedOperationException("Cannot set the open device session timeout when using protocol " + this.config.getProtocol());
-        }
-
-        log.info("Setting generated AMQP device session timeout to {} seconds", value);
-        this.config.setAmqpOpenDeviceSessionsTimeout(value);
-    }
-
-    private void setMaxMessagesSentPerThread(int value)
-    {
-        log.info("Setting maximum number of messages sent per send thread {} messages", value);
-        this.deviceIO.setMaxNumberOfMessagesSentPerSendThread(value);
     }
 
     private void commonConstructorVerification(IotHubConnectionString connectionString, IotHubClientProtocol protocol)

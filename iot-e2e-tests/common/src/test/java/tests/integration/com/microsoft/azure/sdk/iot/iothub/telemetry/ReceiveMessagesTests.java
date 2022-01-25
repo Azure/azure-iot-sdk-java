@@ -64,11 +64,6 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
 
     public void receiveMessage(int messageSize) throws Exception
     {
-        if (testInstance.protocol == HTTPS)
-        {
-            testInstance.identity.getClient().setOption(SET_MINIMUM_POLLING_INTERVAL, ONE_SECOND_POLLING_INTERVAL);
-        }
-
         testInstance.identity.getClient().open();
 
         Message serviceMessage = createCloudToDeviceMessage(messageSize);

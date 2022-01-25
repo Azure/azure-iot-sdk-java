@@ -75,7 +75,6 @@ public class SendEvent
      * args[0] = IoT Hub or Edge Hub connection string
      * args[1] = number of messages to send
      * args[2] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws')
-     * args[3] = path to certificate to enable one-way authentication over ssl. (Not necessary when connecting directly to Iot Hub, but required if connecting to an Edge device using a non public root CA certificate).
      */
     public static void main(String[] args)
         throws IOException, URISyntaxException
@@ -87,7 +86,6 @@ public class SendEvent
 
         String connString = params.getConnectionString();
         int numRequests;
-        String pathToCertificate;
         try
         {
             numRequests = Integer.parseInt(params.getNumberOfRequests());
@@ -108,18 +106,7 @@ public class SendEvent
 
         DeviceClient client = new DeviceClient(connString, protocol);
 
-        pathToCertificate = params.getPathCert();
-        if (pathToCertificate != null )
-        {
-            client.setOption("SetCertificatePath", pathToCertificate );
-        }
-
         System.out.println("Successfully created an IoT Hub client.");
-
-        // Set your token expiry time limit here
-        long time = 2400;
-        client.setOption("SetSASTokenExpiryTime", time);
-        System.out.println("Updated token expiry time to " + time);
 
         client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 

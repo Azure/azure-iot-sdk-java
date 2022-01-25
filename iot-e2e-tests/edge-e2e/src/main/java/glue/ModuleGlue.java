@@ -1,6 +1,7 @@
 package glue;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.hsm.UnixDomainSocketChannel;
 import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodCallback;
 import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodData;
@@ -23,6 +24,10 @@ import samples.com.microsoft.azure.sdk.iot.UnixDomainSocketSample;
 import java.io.IOException;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.*;
 
 
@@ -131,13 +136,14 @@ public class ModuleGlue
 
         try
         {
-            ModuleClient client = new ModuleClient(connectionString, protocol);
-
             String cert = caCertificate.getCert();
+            ClientOptions.ClientOptionsBuilder clientOptionsBuilder = ClientOptions.builder();
             if (cert != null && !cert.isEmpty())
             {
-                client.setOption("SetCertificateAuthority", cert);
+                clientOptionsBuilder.sslContext(IotHubSSLContext.getSSLContextFromFile(cert));
             }
+
+            ModuleClient client = new ModuleClient(connectionString, protocol, clientOptionsBuilder.build());
 
             client.open();
 
@@ -149,7 +155,7 @@ public class ModuleGlue
             cr.setConnectionId(connectionId);
             handler.handle(Future.succeededFuture(cr));
         }
-        catch (URISyntaxException | IOException e)
+        catch (URISyntaxException | IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException e)
         {
             handler.handle(Future.failedFuture(e));
         }

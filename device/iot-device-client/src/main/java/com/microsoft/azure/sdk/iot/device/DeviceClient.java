@@ -37,7 +37,7 @@ public final class DeviceClient extends InternalClient
 
     private static final long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
     private static final long RECEIVE_PERIOD_MILLIS_MQTT = 10L;
-    private static final long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
+    private static final long RECEIVE_PERIOD_MILLIS_HTTPS = 1000;
 
     private DeviceClientType deviceClientType = DeviceClientType.SINGLE_CLIENT;
 

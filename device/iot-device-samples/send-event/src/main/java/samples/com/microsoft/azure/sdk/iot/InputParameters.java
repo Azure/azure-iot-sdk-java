@@ -48,13 +48,6 @@ public class InputParameters
                                 .hasArg()
                                 .desc("Protocol [mqtt | https | amqps | amqps_ws | mqtt_ws] (optional; defaults to \"mqtt\")")
                                 .build()
-                )
-                .addOption(
-                        Option.builder("pc")
-                                .longOpt("pathToCertificate")
-                                .hasArg()
-                                .desc("Path to certificate to enable one-way authentication over ssl (not necessary when connecting directly to Iot Hub, but required if connecting to an Edge device using a non public root CA certificate)")
-                                .build()
                 );
 
         // parse command line

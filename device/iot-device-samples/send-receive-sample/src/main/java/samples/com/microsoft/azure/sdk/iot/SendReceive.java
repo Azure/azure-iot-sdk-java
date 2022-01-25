@@ -266,10 +266,6 @@ public class SendReceive
 
         System.out.println("Successfully set message callback.");
 
-        // Set your token expiry time limit here
-        long time = 2400;
-        client.setOption("SetSASTokenExpiryTime", time);
-
         client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
         client.open();
@@ -279,8 +275,6 @@ public class SendReceive
         System.out.println("Beginning to receive messages...");
 
         System.out.println("Sending the following event messages: ");
-
-        System.out.println("Updated token expiry time to " + time);
 
         String deviceId = "MyJavaDevice";
         double temperature;

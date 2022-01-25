@@ -56,7 +56,7 @@ public class TokenRenewalTests extends IntegrationTest
     protected static final char[] testProxyPass = "1234".toCharArray(); // lgtm
 
 
-    final long SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL = 30;
+    final int SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL = 30;
     final long EXPIRED_SAS_TOKEN_GRACE_PERIOD_SECONDS = 600; //service extends 10 minute grace period after a token has expired
     final long EXTRA_BUFFER_TO_ENSURE_TOKEN_EXPIRED_SECONDS = 120; //wait time beyond the expected grace period, just in case
 
@@ -130,22 +130,6 @@ public class TokenRenewalTests extends IntegrationTest
 
         clients.addAll(amqpMultiplexedClients);
         clients.addAll(amqpwsMultiplexedClients);
-
-        // Multiplexed clients have this sas token expiry set already
-        for (InternalClient client : clients)
-        {
-            try
-            {
-                //set it so a newly generated sas token only lasts for a small amount of time
-                client.setOption("SetSASTokenExpiryTime", SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL);
-            }
-            catch (UnsupportedOperationException e)
-            {
-                // This will throw for clients with custom sas token providers since you cannot configure this value at the SDK
-                // level when the user controls all aspects of SAS token generation.
-                log.debug("Ignoring UnsupportedOperationException because it was expected");
-            }
-        }
 
         Success[] amqpDisconnectDidNotHappenSuccesses = new Success[clients.size()];
         Success[] mqttDisconnectDidHappenSuccesses = new Success[clients.size()];
@@ -265,7 +249,7 @@ public class TokenRenewalTests extends IntegrationTest
             String deviceId = "token-renewal-test-device-with-custom-sas-token-provider-" + protocol + "-" + uuid.toString();
             com.microsoft.azure.sdk.iot.service.Device device = com.microsoft.azure.sdk.iot.service.Device.createFromId(deviceId, DeviceStatus.Enabled, null);
             device = registryManager.addDevice(device);
-            SasTokenProvider sasTokenProvider = new SasTokenProviderImpl(registryManager.getDeviceConnectionString(device), (int) (SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL));
+            SasTokenProvider sasTokenProvider = new SasTokenProviderImpl(registryManager.getDeviceConnectionString(device), SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL);
             clients.add(new DeviceClient(iotHubHostName, deviceId, sasTokenProvider, protocol));
         }
 
@@ -389,7 +373,7 @@ public class TokenRenewalTests extends IntegrationTest
 
     private InternalClient createDeviceClient(IotHubClientProtocol protocol) throws URISyntaxException, IOException, IotHubException, GeneralSecurityException
     {
-        TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SAS, false);
+        TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SAS, false, SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL);
         com.microsoft.azure.sdk.iot.service.Device device = testDeviceIdentity.getDevice();
         testIdentities.add(testDeviceIdentity);
         return new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), protocol);

@@ -143,12 +143,6 @@ public class ReceiveMessagesCommon extends IntegrationTest
                 this.identity = Tools.getTestModule(iotHubConnectionString, this.protocol, this.authenticationType, false);
             }
 
-            if ((this.protocol == AMQPS || this.protocol == AMQPS_WS) && this.authenticationType == SAS)
-            {
-                this.identity.getClient().setOption("SetAmqpOpenAuthenticationSessionTimeout", AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS);
-                this.identity.getClient().setOption("SetAmqpOpenDeviceSessionsTimeout", AMQP_DEVICE_SESSION_TIMEOUT_SECONDS);
-            }
-
             testInstance.serviceClient.open();
         }
 

@@ -28,6 +28,7 @@ Breaking changes:
 - Device/ModuleClient method "registerConnectionStatusChangeCallback" has been renamed to "setConnectionStatusChangeCallback".
 - Several callback interfaces and methods have been renamed to fix the spelling of callback from "CallBack" to "Callback".
 - ```ModuleClient.createFromEnvironment(...)``` APIs now require a unix domain socket implementation to be provided, rather than the SDK providing one. A sample [here](./device/iot-device-samples/unix-domain-socket-sample) demonstrates one such implementation that can be provided.
+- All ```setOption(...)``` options such as setting SAS token expiry, HTTPS read timeout, etc, have been converted to options in the ```ClientOptions``` constructor argument.
 
 ## IoT hub Service Client
  
