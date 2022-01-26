@@ -282,7 +282,7 @@ public class IotHubTransport implements IotHubListener
         }
         else if (message != null)
         {
-            log.info("Message was received from IotHub ({})", message);
+            log.debug("Message was received from IotHub ({})", message);
             this.addToReceivedMessagesQueue(message);
         }
         else
@@ -1055,7 +1055,7 @@ public class IotHubTransport implements IotHubListener
 
         if (transportMessage != null)
         {
-            log.info("Message was received from IotHub ({})", transportMessage);
+            log.debug("Message was received from IotHub ({})", transportMessage);
             this.addToReceivedMessagesQueue(transportMessage);
 
             try
@@ -1488,7 +1488,7 @@ public class IotHubTransport implements IotHubListener
                 }
             }
 
-            log.info("Sending message ({})", message);
+            log.debug("Sending message ({})", message);
             IotHubStatusCode statusCode = this.iotHubTransportConnection.sendMessage(message);
             log.trace("Sent message ({}) to protocol level, returned status code was {}", message, statusCode);
 
