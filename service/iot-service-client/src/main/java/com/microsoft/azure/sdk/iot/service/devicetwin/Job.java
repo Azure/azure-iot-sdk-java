@@ -18,7 +18,7 @@ import java.util.UUID;
 /**
  * Representation of a single Job scheduled on the Iothub.
  */
-public class Job
+class Job
 {
     @Getter
     private final String jobId;

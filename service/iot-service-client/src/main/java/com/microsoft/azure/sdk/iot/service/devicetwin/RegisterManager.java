@@ -14,7 +14,7 @@ import lombok.Setter;
  * This class is part of the Twin. It contains the Device identity management.
  */
 @SuppressWarnings({"unused", "CanBeFinal"}) // This class is the base for TwinState and should be preserved
-public class RegisterManager
+class RegisterManager
 {
     /**
      * Device name

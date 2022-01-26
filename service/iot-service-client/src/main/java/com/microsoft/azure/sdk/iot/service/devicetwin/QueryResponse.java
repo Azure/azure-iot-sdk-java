@@ -12,7 +12,7 @@ import java.util.Iterator;
 /**
  * Response for the Query
  */
-public class QueryResponse implements Iterator<Object>
+class QueryResponse implements Iterator<Object>
 {
     private final Iterator<?> responseElementsIterator;
 
