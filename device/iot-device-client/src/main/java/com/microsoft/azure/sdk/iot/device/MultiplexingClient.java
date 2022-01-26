@@ -34,9 +34,9 @@ import static com.microsoft.azure.sdk.iot.device.DeviceClientConfig.DEFAULT_KEEP
 @Slf4j
 public class MultiplexingClient
 {
-    public static final long DEFAULT_SEND_PERIOD_MILLIS = 10L;
-    public static final long DEFAULT_RECEIVE_PERIOD_MILLIS = 10L;
-    public static final int DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD = 10;
+    static final long DEFAULT_SEND_PERIOD_MILLIS = 10L;
+    static final long DEFAULT_RECEIVE_PERIOD_MILLIS = 10L;
+    static final int DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD = 10;
     private static final long DEFAULT_REGISTRATION_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
     private static final long DEFAULT_UNREGISTRATION_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
     private static final String OPEN_ERROR_MESSAGE = "Failed to open the multiplexing connection";
@@ -279,7 +279,8 @@ public class MultiplexingClient
      * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
      * @param deviceClient The device client to associate with this multiplexing client.
      */
-    public void registerDeviceClient(DeviceClient deviceClient) throws InterruptedException, MultiplexingClientException {
+    public void registerDeviceClient(DeviceClient deviceClient) throws InterruptedException, MultiplexingClientException
+    {
         this.registerDeviceClient(deviceClient, DEFAULT_REGISTRATION_TIMEOUT_MILLISECONDS);
     }
 
@@ -332,7 +333,8 @@ public class MultiplexingClient
      * @param deviceClient The device client to associate with this multiplexing client.
      * @param timeoutMilliseconds How long (in milliseconds) to let this operation wait for all registrations to complete. If this threshold is passed, a {@link com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException} is thrown.
      */
-    public void registerDeviceClient(DeviceClient deviceClient, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException {
+    public void registerDeviceClient(DeviceClient deviceClient, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
+    {
         Objects.requireNonNull(deviceClient);
         List<DeviceClient> clientList = new ArrayList<>();
         clientList.add(deviceClient);
