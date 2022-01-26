@@ -300,6 +300,8 @@ public class MultiplexingClientOptions
 }
 ```
 
+</details>
+
 <details>
   <summary>ServiceClient and Options</summary>
 
