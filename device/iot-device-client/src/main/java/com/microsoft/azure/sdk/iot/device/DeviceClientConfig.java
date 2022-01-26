@@ -229,7 +229,7 @@ public final class DeviceClientConfig
             throw new IllegalArgumentException("ClientOption httpsReadTimeout must be greater than or equal to 0");
         }
 
-        if (this.httpsConnectTimeout <= 0)
+        if (this.httpsConnectTimeout < 0)
         {
             throw new IllegalArgumentException("ClientOption httpsConnectTimeout must be greater than or equal to 0");
         }
