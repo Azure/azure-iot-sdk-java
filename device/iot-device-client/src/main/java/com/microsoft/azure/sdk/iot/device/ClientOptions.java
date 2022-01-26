@@ -42,7 +42,6 @@ public final class ClientOptions
 
     /**
      * The proxy settings for this client to connect through. If null then no proxy will be used.
-     * @param proxySettings the settings to be used when connecting to iothub through a proxy. If null, no proxy will be used.
      */
     @Getter
     private final ProxySettings proxySettings;

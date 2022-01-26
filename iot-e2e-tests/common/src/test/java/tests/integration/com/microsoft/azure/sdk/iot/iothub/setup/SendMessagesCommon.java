@@ -125,15 +125,6 @@ public class SendMessagesCommon extends IntegrationTest
         return inputs;
     }
 
-    //How much sequential connections each device will open and close in the multithreaded test.
-    protected static final Integer NUM_CONNECTIONS_PER_DEVICE = 5;
-
-    //How much devices the multithreaded test will create in parallel.
-    protected static final Integer MAX_DEVICE_PARALLEL = 3;
-
-    //How many keys each message will cary.
-    protected static final Integer NUM_KEYS_PER_MESSAGE = 3;
-
     protected static final Integer NUM_SMALL_MESSAGES = 50;
 
     // Max IoT Hub message size is 256 kb, but that includes headers, not just payload

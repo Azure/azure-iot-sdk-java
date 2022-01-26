@@ -218,7 +218,7 @@ public final class DeviceClientConfig
             }
         }
 
-        if (getAuthenticationType() == AuthType.SAS_TOKEN && clientOptions != null)
+        if (this.getSasTokenAuthentication() != null && clientOptions != null)
         {
             if (clientOptions.getSasTokenExpiryTime() <= 0)
             {

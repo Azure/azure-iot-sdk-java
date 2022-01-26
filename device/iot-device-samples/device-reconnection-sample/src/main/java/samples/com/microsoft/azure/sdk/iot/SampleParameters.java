@@ -29,7 +29,7 @@ public class SampleParameters {
 
     /**
      * Setup parameters from command line arguments
-     * @param string array from main()
+     * @param args string array from main()
      */
     public SampleParameters(String[] args) {
 

@@ -638,9 +638,11 @@ public class IotHubTransport implements IotHubListener
         return this.iotHubTransportConnection.getConnectionId();
     }
 
-    String getDeviceClientUniqueIdentifier() {
+    String getDeviceClientUniqueIdentifier()
+    {
         // If it's not a multithreaded transport layer, we will use the device configuration to get the device unique identifier.
-        if (!this.isMultiplexing) {
+        if (!this.isMultiplexing && this.getDefaultConfig() != null)
+        {
             return this.hostName + "-" + this.getDefaultConfig().getDeviceClientUniqueIdentifier();
         }
 
