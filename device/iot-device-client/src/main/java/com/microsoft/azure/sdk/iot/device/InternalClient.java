@@ -49,16 +49,14 @@ public class InternalClient
     InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, ClientOptions clientOptions)
     {
         commonConstructorVerification(iotHubConnectionString, protocol);
-        this.config = new DeviceClientConfig(iotHubConnectionString, clientOptions);
-        this.config.setProtocol(protocol);
+        this.config = new DeviceClientConfig(iotHubConnectionString, protocol, clientOptions);
         this.deviceIO = new DeviceIO(this.config);
         setClientOptionValues(clientOptions);
     }
 
     InternalClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol)
     {
-        this.config = new DeviceClientConfig(iotHubAuthenticationProvider);
-        this.config.setProtocol(protocol);
+        this.config = new DeviceClientConfig(iotHubAuthenticationProvider, protocol);
         this.deviceIO = new DeviceIO(this.config);
     }
 
@@ -86,8 +84,7 @@ public class InternalClient
 
         IotHubConnectionString connectionString = new IotHubConnectionString(uri, deviceId, null, null);
 
-        this.config = new DeviceClientConfig(connectionString, securityProvider, clientOptions);
-        this.config.setProtocol(protocol);
+        this.config = new DeviceClientConfig(connectionString, securityProvider, protocol, clientOptions);
         this.deviceIO = new DeviceIO(this.config);
         setClientOptionValues(clientOptions);
     }
@@ -104,8 +101,7 @@ public class InternalClient
             throw new IllegalArgumentException("Protocol cannot be null.");
         }
 
-        this.config = new DeviceClientConfig(hostName, sasTokenProvider, clientOptions, deviceId, moduleId);
-        this.config.setProtocol(protocol);
+        this.config = new DeviceClientConfig(hostName, sasTokenProvider, protocol, clientOptions, deviceId, moduleId);
         this.deviceIO = new DeviceIO(this.config);
         setClientOptionValues(clientOptions);
     }

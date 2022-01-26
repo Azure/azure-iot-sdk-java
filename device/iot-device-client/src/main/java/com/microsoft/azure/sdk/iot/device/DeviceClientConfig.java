@@ -117,7 +117,7 @@ public final class DeviceClientConfig
     private long operationTimeout = DEFAULT_OPERATION_TIMEOUT;
 
     @Getter
-    private IotHubClientProtocol protocol;
+    private final IotHubClientProtocol protocol;
 
     @NonNull
     @Getter
@@ -134,8 +134,9 @@ public final class DeviceClientConfig
      * @throws IllegalArgumentException if the IoT Hub hostname does not contain
      * a valid IoT Hub name as its prefix.
      */
-    DeviceClientConfig(IotHubConnectionString iotHubConnectionString) throws IllegalArgumentException
+    DeviceClientConfig(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol) throws IllegalArgumentException
     {
+        this.protocol = protocol;
         configSasAuth(iotHubConnectionString);
     }
 
@@ -154,21 +155,23 @@ public final class DeviceClientConfig
         log.debug("Device configured to use software based SAS authentication provider");
     }
 
-    DeviceClientConfig(IotHubAuthenticationProvider authenticationProvider) throws IllegalArgumentException
+    DeviceClientConfig(IotHubAuthenticationProvider authenticationProvider, IotHubClientProtocol protocol) throws IllegalArgumentException
     {
         if (!(authenticationProvider instanceof IotHubSasTokenAuthenticationProvider))
         {
             throw new UnsupportedOperationException("This constructor only support sas token authentication currently");
         }
 
+        this.protocol = protocol;
         this.authenticationProvider = authenticationProvider;
         this.useWebsocket = false;
         this.productInfo = new ProductInfo();
     }
 
-    DeviceClientConfig(String hostName, SasTokenProvider sasTokenProvider, ClientOptions clientOptions, String deviceId, String moduleId)
+    DeviceClientConfig(String hostName, SasTokenProvider sasTokenProvider, IotHubClientProtocol protocol, ClientOptions clientOptions, String deviceId, String moduleId)
     {
         SSLContext sslContext = clientOptions != null ? clientOptions.getSslContext() : null;
+        this.protocol = protocol;
         setClientOptionValues(clientOptions);
         this.authenticationProvider =
                 new IotHubSasTokenProvidedAuthenticationProvider(hostName, deviceId, moduleId, sasTokenProvider, sslContext);
@@ -179,8 +182,10 @@ public final class DeviceClientConfig
         log.debug("Device configured to use SAS token provided authentication provider");
     }
 
-    DeviceClientConfig(IotHubConnectionString iotHubConnectionString, ClientOptions clientOptions)
+    DeviceClientConfig(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, ClientOptions clientOptions)
     {
+        this.protocol = protocol;
+
         if (clientOptions != null && clientOptions.getSslContext() != null)
         {
             configSsl(iotHubConnectionString, clientOptions.getSslContext());
@@ -203,10 +208,14 @@ public final class DeviceClientConfig
         this.amqpOpenDeviceSessionsTimeout = clientOptions != null && clientOptions.getAmqpDeviceSessionTimeout() != 0 ? clientOptions.getAmqpDeviceSessionTimeout() : DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS;
         this.proxySettings = clientOptions != null && clientOptions.getProxySettings() != null ? clientOptions.getProxySettings() : null;
 
-        IotHubClientProtocol protocol = this.getProtocol();
-        if (protocol != HTTPS && protocol != AMQPS_WS && protocol != MQTT_WS && proxySettings != null)
+        if (proxySettings != null)
         {
-            throw new IllegalArgumentException("Use of proxies is unsupported unless using HTTPS, MQTT_WS or AMQPS_WS");
+            IotHubClientProtocol protocol = this.getProtocol();
+
+            if (protocol != HTTPS && protocol != AMQPS_WS && protocol != MQTT_WS)
+            {
+                throw new IllegalArgumentException("Use of proxies is unsupported unless using HTTPS, MQTT_WS or AMQPS_WS");
+            }
         }
 
         if (getAuthenticationType() == AuthType.SAS_TOKEN && clientOptions != null)
@@ -245,8 +254,9 @@ public final class DeviceClientConfig
         }
     }
 
-    DeviceClientConfig(IotHubConnectionString iotHubConnectionString, SSLContext sslContext)
+    DeviceClientConfig(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, SSLContext sslContext)
     {
+        this.protocol = protocol;
         configSsl(iotHubConnectionString, sslContext);
     }
 
@@ -285,9 +295,11 @@ public final class DeviceClientConfig
      * @param securityProvider The security provider instance to be used for authentication of this device
      * @throws IOException if the provided security provider throws an exception while authenticating
      */
-    DeviceClientConfig(IotHubConnectionString connectionString, SecurityProvider securityProvider) throws IOException
+    DeviceClientConfig(IotHubConnectionString connectionString, SecurityProvider securityProvider, IotHubClientProtocol protocol) throws IOException
     {
         commonConstructorSetup(connectionString);
+
+        this.protocol = protocol;
 
         if (securityProvider == null)
         {
@@ -335,11 +347,11 @@ public final class DeviceClientConfig
      * @param clientOptions The client options that will be used to set the keep alive
      * @throws IOException if the provided security provider throws an exception while authenticating
      */
-    DeviceClientConfig(IotHubConnectionString connectionString, SecurityProvider securityProvider, ClientOptions clientOptions) throws IOException
+    DeviceClientConfig(IotHubConnectionString connectionString, SecurityProvider securityProvider, IotHubClientProtocol protocol, ClientOptions clientOptions) throws IOException
     {
         // When setting the ClientOptions and a SecurityProvider, the SecurityProvider is responsible for setting the sslContext
         // we do not need to set the context in this constructor.
-        this(connectionString, securityProvider);
+        this(connectionString, securityProvider, protocol);
         setClientOptionValues(clientOptions);
     }
 
@@ -360,11 +372,6 @@ public final class DeviceClientConfig
         {
             throw new IllegalArgumentException("Cannot use this constructor for x509 connection strings. Use constructor that takes public key certificate and private key or takes an SSLContext instance instead");
         }
-    }
-
-    void setProtocol(IotHubClientProtocol protocol)
-    {
-        this.protocol = protocol;
     }
 
     /**
@@ -643,5 +650,6 @@ public final class DeviceClientConfig
         this.defaultDeviceTelemetryMessageContext = null;
         this.deviceTwinMessageContext = null;
         this.useWebsocket = false;
+        this.protocol = AMQPS;
     }
 }

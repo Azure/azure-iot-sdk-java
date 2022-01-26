@@ -76,8 +76,11 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
 @Slf4j
 final class DeviceIO implements IotHubConnectionStatusChangeCallback
 {
-    private long sendPeriodInMilliseconds;
-    private long receivePeriodInMilliseconds;
+    private static final int SEND_PERIOD_MILLIS = 10;
+    private static final int RECEIVE_PERIOD_MILLIS = 10;
+
+    private long sendPeriodInMilliseconds = SEND_PERIOD_MILLIS;
+    private long receivePeriodInMilliseconds = RECEIVE_PERIOD_MILLIS;
 
     private final IotHubTransport transport;
     private final IotHubSendTask sendTask;

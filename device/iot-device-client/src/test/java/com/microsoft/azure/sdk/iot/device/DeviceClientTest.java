@@ -85,7 +85,7 @@ public class DeviceClientTest
                 DeviceClientType deviceClientType = Deencapsulation.getField(client, "deviceClientType");
                 assertEquals(SINGLE_CLIENT, deviceClientType);
 
-                new DeviceClientConfig(mockIotHubConnectionString, options);
+                new DeviceClientConfig(mockIotHubConnectionString, protocol, options);
             }
         };
     }
@@ -145,7 +145,7 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class}, (IotHubConnectionString) any);
+                Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class}, (IotHubConnectionString) any, (IotHubClientProtocol) any);
                 times = 0;
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
                         new Class[] {DeviceClientConfig.class},

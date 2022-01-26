@@ -105,7 +105,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityProvider.class, ClientOptions.class}, mockIotHubConnectionString, mockSecurityProvider, null);
+                Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityProvider.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, mockSecurityProvider, (IotHubClientProtocol) any, null);
                 times = 1;
 
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
@@ -141,7 +141,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityProvider.class, ClientOptions.class}, mockIotHubConnectionString, mockSecurityProvider, clientOptions);
+                Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityProvider.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, mockSecurityProvider, (IotHubClientProtocol) any, clientOptions);
                 times = 1;
             }
         };
