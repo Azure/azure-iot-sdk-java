@@ -117,7 +117,7 @@ public final class ClientOptions
      */
     @Getter
     @Builder.Default
-    private final int messagesSentPerThread = DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD;
+    private final int messagesSentPerSendInterval = DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD;
 
     /**
      * This option is applicable to all protocols. This option sets the interval (in milliseconds)

@@ -102,9 +102,9 @@ public class MultiplexingClient
         this.hostName = hostName;
         this.protocol = protocol;
         this.proxySettings = options != null ? options.getProxySettings() : null;
-        long sendPeriod = options != null ? options.getSendPeriod() : DEFAULT_SEND_PERIOD_MILLIS;
-        long receivePeriod = options != null ? options.getReceivePeriod() : DEFAULT_RECEIVE_PERIOD_MILLIS;
-        int sendMessagesPerThread = options != null ? options.getMaxMessagesSentPerSendThread() : DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD;
+        long sendPeriod = options != null ? options.getSendInterval() : DEFAULT_SEND_PERIOD_MILLIS;
+        long receivePeriod = options != null ? options.getReceiveInterval() : DEFAULT_RECEIVE_PERIOD_MILLIS;
+        int sendMessagesPerThread = options != null ? options.getMaxMessagesSentPerSendInterval() : DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD;
         int keepAliveInterval = options != null ? options.getKeepAliveInterval() : DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
 
         if (sendPeriod < 0)

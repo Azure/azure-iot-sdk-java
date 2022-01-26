@@ -110,9 +110,9 @@ public class InternalClient
     {
         if (clientOptions != null)
         {
-            if (clientOptions.getMessagesSentPerThread() <= 0)
+            if (clientOptions.getMessagesSentPerSendInterval() <= 0)
             {
-                throw new IllegalArgumentException("ClientOption messagesSentPerThread must be greater than 0");
+                throw new IllegalArgumentException("ClientOption messagesSentPerSendInterval must be greater than 0");
             }
 
             if (clientOptions.getSendInterval() <= 0)
@@ -137,7 +137,7 @@ public class InternalClient
                 verifyRegisteredIfMultiplexing();
             }
 
-            this.deviceIO.setMaxNumberOfMessagesSentPerSendThread(clientOptions.getMessagesSentPerThread());
+            this.deviceIO.setMaxNumberOfMessagesSentPerSendThread(clientOptions.getMessagesSentPerSendInterval());
             this.deviceIO.setSendPeriodInMilliseconds(clientOptions.getSendInterval());
             this.deviceIO.setReceivePeriodInMilliseconds(clientOptions.getReceiveInterval());
         }

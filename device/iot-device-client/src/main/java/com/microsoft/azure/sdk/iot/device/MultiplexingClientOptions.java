@@ -37,7 +37,7 @@ public class MultiplexingClientOptions
      */
     @Getter
     @Builder.Default
-    private final long sendPeriod = DEFAULT_SEND_PERIOD_MILLIS;
+    private final long sendInterval = DEFAULT_SEND_PERIOD_MILLIS;
 
     /**
      * The period, in seconds, for how often a thread will spawn to handle queued incoming messages. For instance, if this
@@ -45,16 +45,16 @@ public class MultiplexingClientOptions
      */
     @Getter
     @Builder.Default
-    private final long receivePeriod = DEFAULT_RECEIVE_PERIOD_MILLIS;
+    private final long receiveInterval = DEFAULT_RECEIVE_PERIOD_MILLIS;
 
     /**
      * This option specifies how many messages a given send thread should attempt to send before exiting.
-     * This option can be used in conjunction with the "sendPeriod" option to control the how frequently and in what
+     * This option can be used in conjunction with the "sendInterval" option to control the how frequently and in what
      * batch size messages are sent. If unset, this will default to {@link MultiplexingClient#DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD}.
      */
     @Getter
     @Builder.Default
-    private final int maxMessagesSentPerSendThread = DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD;
+    private final int maxMessagesSentPerSendInterval = DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD;
 
     /**
      * Gets the keep alive interval in seconds. This value defines the
