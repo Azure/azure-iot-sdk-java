@@ -1,7 +1,11 @@
 package tests.integration.com.microsoft.azure.sdk.iot.provisioning;
 
+import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
+import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningConnectionString;
+import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningSasToken;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 import org.junit.Before;
@@ -9,6 +13,7 @@ import org.junit.Test;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509CertificateGenerator;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import static junit.framework.TestCase.assertNotNull;
@@ -133,6 +138,34 @@ public class ProvisioningServiceClientTests
         capabilities.setIotEdge(true);
         enrollment.setCapabilities(capabilities);
         IndividualEnrollment returnedEnrollment = provisioningServiceClient.createOrUpdateIndividualEnrollment(enrollment);
+
+        assertEquals(enrollment.getRegistrationId(), returnedEnrollment.getRegistrationId());
+        assertEquals(enrollment.getReprovisionPolicy().getMigrateDeviceData(), returnedEnrollment.getReprovisionPolicy().getMigrateDeviceData());
+        assertEquals(enrollment.getReprovisionPolicy().getUpdateHubAssignment(), returnedEnrollment.getReprovisionPolicy().getUpdateHubAssignment());
+        assertEquals(enrollment.getCapabilities().isIotEdge(), returnedEnrollment.getCapabilities().isIotEdge());
+        assertEquals(enrollment.getAttestation().getClass(), returnedEnrollment.getAttestation().getClass());
+        assertEquals(enrollment.getAllocationPolicy(), returnedEnrollment.getAllocationPolicy());
+    }
+
+    @Test
+    public void createIndividualEnrollmentFromAzureSasCredentialSucceeds() throws ProvisioningServiceClientException
+    {
+        ProvisioningConnectionString connectionString = ProvisioningConnectionStringBuilder.createConnectionString(provisioningServiceConnectionString);
+        AzureSasCredential azureSasCredential = new AzureSasCredential(new ProvisioningSasToken(connectionString).toString());
+        ProvisioningServiceClient provisioningServiceClient1 = new ProvisioningServiceClient(connectionString.getHostName(), azureSasCredential);
+
+        String registrationId = testPrefix + UUID.randomUUID();
+        Attestation attestation = new SymmetricKeyAttestation("", "");
+        IndividualEnrollment enrollment = new IndividualEnrollment(registrationId, attestation);
+        enrollment.setAllocationPolicy(AllocationPolicy.GEOLATENCY);
+        ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
+        reprovisionPolicy.setUpdateHubAssignment(true);
+        reprovisionPolicy.setMigrateDeviceData(true);
+        enrollment.setReprovisionPolicy(reprovisionPolicy);
+        DeviceCapabilities capabilities = new DeviceCapabilities();
+        capabilities.setIotEdge(true);
+        enrollment.setCapabilities(capabilities);
+        IndividualEnrollment returnedEnrollment = provisioningServiceClient1.createOrUpdateIndividualEnrollment(enrollment);
 
         assertEquals(enrollment.getRegistrationId(), returnedEnrollment.getRegistrationId());
         assertEquals(enrollment.getReprovisionPolicy().getMigrateDeviceData(), returnedEnrollment.getReprovisionPolicy().getMigrateDeviceData());
