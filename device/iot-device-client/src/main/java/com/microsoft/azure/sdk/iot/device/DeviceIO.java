@@ -95,13 +95,11 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
      * Constructor that takes a connection string as an argument.
      *
      * @param config the connection configuration.
-     * @param sendPeriodInMilliseconds the period of time that iot hub will try to send messages in milliseconds.
-     * @param receivePeriodInMilliseconds the period of time that iot hub will try to receive messages in milliseconds.
      *
      * @throws IllegalArgumentException if any of {@code config} or
      * {@code protocol} are {@code null}.
      */
-    DeviceIO(DeviceClientConfig config, long sendPeriodInMilliseconds, long receivePeriodInMilliseconds)
+    DeviceIO(DeviceClientConfig config)
     {
         if (config == null)
         {
@@ -111,15 +109,9 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
         IotHubClientProtocol protocol = config.getProtocol();
         config.setUseWebsocket(protocol == IotHubClientProtocol.AMQPS_WS || protocol == MQTT_WS);
 
-        this.sendPeriodInMilliseconds = sendPeriodInMilliseconds;
-        this.receivePeriodInMilliseconds = receivePeriodInMilliseconds;
-
         this.state = IotHubConnectionStatus.DISCONNECTED;
 
         this.transport = new IotHubTransport(config, this, false);
-
-        this.sendPeriodInMilliseconds = sendPeriodInMilliseconds;
-        this.receivePeriodInMilliseconds = receivePeriodInMilliseconds;
 
         this.state = IotHubConnectionStatus.DISCONNECTED;
 
@@ -132,12 +124,8 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
         IotHubClientProtocol protocol,
         SSLContext sslContext,
         ProxySettings proxySettings,
-        long sendPeriodInMilliseconds,
-        long receivePeriodInMilliseconds,
         int keepAliveInterval)
     {
-        this.sendPeriodInMilliseconds = sendPeriodInMilliseconds;
-        this.receivePeriodInMilliseconds = receivePeriodInMilliseconds;
         this.state = IotHubConnectionStatus.DISCONNECTED;
         this.transport = new IotHubTransport(hostName, protocol, sslContext, proxySettings, this, keepAliveInterval);
         this.sendTask = new IotHubSendTask(this.transport);

@@ -45,9 +45,6 @@ public class ModuleClientTest
     DeviceClientConfig mockedDeviceClientConfig;
 
     @Mocked
-    ClientOptions mockedClientOptions;
-
-    @Mocked
     IotHubConnectionString mockedIotHubConnectionString;
 
     @Mocked
@@ -169,9 +166,6 @@ public class ModuleClientTest
 
                 mockedDeviceClientConfig.getModuleId();
                 result = "someModuleId";
-
-                mockedClientOptions.getModelId();
-                result = "testModelId";
             }
         };
 
@@ -208,7 +202,7 @@ public class ModuleClientTest
     }
 
     @Test
-    public void constructorWithModelIdSuccess(@Mocked final ClientOptions mockedClientOptions) throws URISyntaxException, ModuleClientException {
+    public void constructorWithModelIdSuccess() throws URISyntaxException, ModuleClientException {
         // arrange
         final String connString =
                 "TestConnectionString";
@@ -226,7 +220,7 @@ public class ModuleClientTest
         };
 
         // act
-        new ModuleClient(connString, protocol, mockedClientOptions);
+        new ModuleClient(connString, protocol, null);
     }
 
     //Tests_SRS_MODULECLIENT_34_001: [If the provided outputName is null or empty, this function shall throw an IllegalArgumentException.]
@@ -612,8 +606,8 @@ public class ModuleClientTest
                 result = expectedTrustedCerts;
 
                 Deencapsulation.newInstance(ModuleClient.class,
-                        new Class[] {IotHubAuthenticationProvider.class, IotHubClientProtocol.class, long.class},
-                        mockedModuleAuthenticationWithHsm, (IotHubClientProtocol) any, anyLong);
+                        new Class[] {IotHubAuthenticationProvider.class, IotHubClientProtocol.class},
+                        mockedModuleAuthenticationWithHsm, (IotHubClientProtocol) any);
             }
         };
 

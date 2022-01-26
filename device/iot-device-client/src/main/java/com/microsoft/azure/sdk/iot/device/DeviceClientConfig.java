@@ -36,11 +36,8 @@ public final class DeviceClientConfig
 
     public static final int DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS = 230;
 
-    // authentication session timeout is public because a multiplexed connection needs this default if no devices
-    // were registered prior to opening the connection. No device sessions would be opened in that case though, so
-    // the default device session timeout can stay private.
     public static final int DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT_IN_SECONDS = 20;
-    private static final int DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS = 60;
+    public static final int DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS = 60;
 
     /** The default value for messageLockTimeoutSecs. */
     private static final int DEFAULT_MESSAGE_LOCK_TIMEOUT_SECS = 180;

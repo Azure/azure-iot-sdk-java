@@ -19,6 +19,9 @@ public final class ClientOptions
     private static final int DEFAULT_HTTPS_CONNECT_TIMEOUT_MILLISECONDS = 0;
     private static final int DEFAULT_HTTPS_READ_TIMEOUT_MILLISECONDS = 4 * 60 * 1000; // 4 minutes
     private static final long DEFAULT_SAS_TOKEN_EXPIRY_TIME_SECONDS = 60 * 60; // 1 hour
+    private static final int DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD = 10;
+    private static final int SEND_PERIOD_MILLIS = 10;
+    private static final int RECEIVE_PERIOD_MILLIS = 10;
 
     /**
      * The Digital Twin Model Id associated with the device and module identity.
@@ -112,7 +115,8 @@ public final class ClientOptions
      * By default, this value is 20 seconds.
      */
     @Getter
-    private final int amqpAuthenticationSessionTimeout;
+    @Builder.Default
+    private final int amqpAuthenticationSessionTimeout = DeviceClientConfig.DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT_IN_SECONDS;
 
     /**
      * This option is applicable for AMQP.
@@ -120,7 +124,8 @@ public final class ClientOptions
      * By default, this value is 60 seconds.
      */
     @Getter
-    private final int amqpDeviceSessionTimeout;
+    @Builder.Default
+    private final int amqpDeviceSessionTimeout = DeviceClientConfig.DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS;
 
     /**
      * This option is applicable to all protocols.
@@ -130,19 +135,25 @@ public final class ClientOptions
      * a send thread every 10 milliseconds. This gives a theoretical throughput of 1000 messages per second.
      */
     @Getter
-    private final int messagesSentPerThread;
+    @Builder.Default
+    private final int messagesSentPerThread = DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD;
 
     /**
      * This option is applicable to all protocols. This option sets the interval (in milliseconds)
-     * that this SDK awakens the send thread to send queued messages.
+     * that this SDK awakens the send thread to send queued messages. The default value is 10 milliseconds.
      */
     @Getter
-    private final int sendInterval;
+    @Builder.Default
+    private final int sendInterval = SEND_PERIOD_MILLIS;
 
     /**
      * This option is applicable to all protocols. This option specifies the interval (in milliseconds)
-     * between waking a thread that dequeues a message from the SDK's queue of received messages.
+     * between waking a thread that dequeues a message from the SDK's queue of received messages. The default value is
+     * 10 milliseconds. For clients using HTTP, this option also controls how frequently polling messages are sent to check
+     * for new cloud to device messages. Setting this option to a higher value will make the client send less frequent poll
+     * requests.
      */
     @Getter
-    private final int receiveInterval;
+    @Builder.Default
+    private final int receiveInterval = RECEIVE_PERIOD_MILLIS;
 }

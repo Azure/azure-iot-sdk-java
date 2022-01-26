@@ -132,8 +132,10 @@ public class MultiplexingClient
 
         // Optional settings from MultiplexingClientOptions
         SSLContext sslContext = options != null ? options.getSslContext() : null;
-        this.deviceIO = new DeviceIO(hostName, protocol, sslContext, proxySettings, sendPeriod, receivePeriod, keepAliveInterval);
+        this.deviceIO = new DeviceIO(hostName, protocol, sslContext, proxySettings, keepAliveInterval);
         this.deviceIO.setMaxNumberOfMessagesSentPerSendThread(sendMessagesPerThread);
+        this.deviceIO.setSendPeriodInMilliseconds(sendPeriod);
+        this.deviceIO.setReceivePeriodInMilliseconds(receivePeriod);
     }
 
     /**

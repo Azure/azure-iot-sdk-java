@@ -41,12 +41,6 @@ public class ModuleClient extends InternalClient
 {
     private static final String DEFAULT_API_VERSION = "2018-06-28";
 
-    private static final long SEND_PERIOD_MILLIS = 10;
-
-    private static final long RECEIVE_PERIOD_MILLIS_AMQPS = 10;
-    private static final long RECEIVE_PERIOD_MILLIS_MQTT = 10;
-    private static final long RECEIVE_PERIOD_MILLIS_HTTPS = 25 * 60 * 1000; /*25 minutes*/
-
     private static final int DEFAULT_SAS_TOKEN_TIME_TO_LIVE_SECONDS = 60 * 60; //1 hour
     private static final int DEFAULT_SAS_TOKEN_BUFFER_PERCENTAGE = 85; //Token will go 85% of its life before renewing
 
@@ -80,7 +74,7 @@ public class ModuleClient extends InternalClient
      */
     public ModuleClient(String connectionString, IotHubClientProtocol protocol) throws IllegalArgumentException, UnsupportedOperationException, URISyntaxException
     {
-        super(new IotHubConnectionString(connectionString), protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), null);
+        super(new IotHubConnectionString(connectionString), protocol, null);
 
         commonConstructorVerifications(protocol, this.config);
         commonConstructorSetup();
@@ -105,7 +99,7 @@ public class ModuleClient extends InternalClient
      */
     public ModuleClient(String connectionString, IotHubClientProtocol protocol, ClientOptions clientOptions) throws IllegalArgumentException, UnsupportedOperationException, URISyntaxException
     {
-        super(new IotHubConnectionString(connectionString), protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), clientOptions);
+        super(new IotHubConnectionString(connectionString), protocol, clientOptions);
         commonConstructorVerifications(protocol, this.config);
         commonConstructorSetup();
     }
@@ -140,7 +134,7 @@ public class ModuleClient extends InternalClient
      */
     private ModuleClient(String hostName, String deviceId, String moduleId, SasTokenProvider sasTokenProvider, IotHubClientProtocol protocol, ClientOptions clientOptions)
     {
-        super(hostName, deviceId, moduleId, sasTokenProvider, protocol, clientOptions, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
+        super(hostName, deviceId, moduleId, sasTokenProvider, protocol, clientOptions);
         commonConstructorVerifications(protocol, this.getConfig());
         commonConstructorSetup();
     }
@@ -337,10 +331,7 @@ public class ModuleClient extends InternalClient
                             DEFAULT_SAS_TOKEN_BUFFER_PERCENTAGE,
                             sslContext);
 
-                return new ModuleClient(
-                    iotHubAuthenticationProvider,
-                    protocol,
-                    getReceivePeriod(protocol));
+                return new ModuleClient(iotHubAuthenticationProvider, protocol);
             }
             catch (IOException | TransportException | HsmException | URISyntaxException | CertificateException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e)
             {
@@ -349,9 +340,9 @@ public class ModuleClient extends InternalClient
         }
     }
 
-    private ModuleClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol, long receivePeriodMillis)
+    private ModuleClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol)
     {
-        super(iotHubAuthenticationProvider, protocol, SEND_PERIOD_MILLIS, receivePeriodMillis);
+        super(iotHubAuthenticationProvider, protocol);
         commonConstructorSetup();
     }
 
@@ -486,25 +477,6 @@ public class ModuleClient extends InternalClient
 
         this.config.setMessageCallback(inputName, callback, context);
         return this;
-    }
-
-    private static long getReceivePeriod(IotHubClientProtocol protocol)
-    {
-        switch (protocol)
-        {
-            case HTTPS:
-                return RECEIVE_PERIOD_MILLIS_HTTPS;
-            case AMQPS:
-            case AMQPS_WS:
-                return RECEIVE_PERIOD_MILLIS_AMQPS;
-            case MQTT:
-            case MQTT_WS:
-                return RECEIVE_PERIOD_MILLIS_MQTT;
-            default:
-                // should never happen.
-                throw new IllegalStateException(
-                        "Invalid client protocol specified.");
-        }
     }
 
     private static void commonConstructorVerifications(IotHubClientProtocol protocol, DeviceClientConfig config)

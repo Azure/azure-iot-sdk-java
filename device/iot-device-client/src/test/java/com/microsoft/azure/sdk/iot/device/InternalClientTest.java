@@ -30,8 +30,6 @@ import static org.junit.Assert.*;
  */
 public class InternalClientTest
 {
-    private static final long SEND_PERIOD = 10;
-    private static final long RECEIVE_PERIOD = 10;
     private static final Object NULL_OBJECT = null;
 
     @Mocked
@@ -70,10 +68,6 @@ public class InternalClientTest
     @Mocked
     ProxySettings mockProxySettings;
 
-    private static final long SEND_PERIOD_MILLIS = 10L;
-    private static final long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
-    private static final long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
-
     /* Tests_SRS_INTERNALCLIENT_21_004: [If the connection string is null or empty, the function shall throw an IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorNullConnectionStringThrows() throws URISyntaxException, IOException
@@ -83,31 +77,7 @@ public class InternalClientTest
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
 
         // act
-        Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
-    }
-
-    // Tests_SRS_INTERNALCLIENT_34_078: [If the connection string or protocol is null, this function shall throw an IllegalArgumentException.]
-    @Test (expected = IllegalArgumentException.class)
-    public void x509ConstructorNullConnectionStringThrows() throws URISyntaxException, IOException
-    {
-        //arrange
-        final String mockIotHubConnectionString = null;
-        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-
-        // act
-        Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, String.class, boolean.class, String.class, boolean.class, long.class, long.class}, mockIotHubConnectionString, protocol, "any cert", false, "any key", false, SEND_PERIOD, RECEIVE_PERIOD);
-    }
-
-    // Tests_SRS_INTERNALCLIENT_34_078: [If the connection string or protocol is null, this function shall throw an IllegalArgumentException.]
-    @Test (expected = IllegalArgumentException.class)
-    public void x509ConstructorNullProtocolThrows() throws URISyntaxException, IOException
-    {
-        //arrange
-        final String mockIotHubConnectionString = "some connection string";
-        final IotHubClientProtocol protocol = null;
-
-        // act
-        Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, String.class, boolean.class, String.class, boolean.class, long.class, long.class}, mockIotHubConnectionString, protocol, "any cert", false, "any key", false, SEND_PERIOD, RECEIVE_PERIOD);
+        Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class}, mockIotHubConnectionString, protocol);
     }
 
     //Tests_SRS_INTERNALCLIENT_34_065: [The provided uri and device id will be used to create an iotHubConnectionString that will be saved in config.]
@@ -139,8 +109,8 @@ public class InternalClientTest
                 times = 1;
 
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                        new Class[] {DeviceClientConfig.class, long.class, long.class},
-                        any, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_HTTPS);
+                        new Class[] {DeviceClientConfig.class},
+                        any);
                 times = 1;
             }
         };
@@ -187,7 +157,7 @@ public class InternalClientTest
         final IotHubClientProtocol expectedProtocol = IotHubClientProtocol.HTTPS;
 
         //act
-        Deencapsulation.newInstance(InternalClient.class, new Class[] {String.class, String.class, SecurityProvider.class, IotHubClientProtocol.class, long.class, long.class}, expectedUri, expectedDeviceId, null, expectedProtocol, 1, 1);
+        Deencapsulation.newInstance(InternalClient.class, new Class[] {String.class, String.class, SecurityProvider.class, IotHubClientProtocol.class}, expectedUri, expectedDeviceId, null, expectedProtocol, 1, 1);
     }
 
     //Tests_SRS_INTERNALCLIENT_34_074: [If the provided uri is null, this function shall throw an IllegalArgumentException.]
@@ -200,7 +170,7 @@ public class InternalClientTest
         final IotHubClientProtocol expectedProtocol = IotHubClientProtocol.HTTPS;
 
         //act
-        Deencapsulation.newInstance(InternalClient.class, new Class[] {String.class, String.class, SecurityProvider.class, IotHubClientProtocol.class, long.class, long.class}, null, expectedDeviceId, mockSecurityProvider, expectedProtocol, 1, 1);
+        Deencapsulation.newInstance(InternalClient.class, new Class[] {String.class, String.class, SecurityProvider.class, IotHubClientProtocol.class}, null, expectedDeviceId, mockSecurityProvider, expectedProtocol, 1, 1);
     }
 
     //Tests_SRS_INTERNALCLIENT_34_075: [If the provided deviceId is null, this function shall throw an IllegalArgumentException.]
@@ -213,7 +183,7 @@ public class InternalClientTest
         final IotHubClientProtocol expectedProtocol = IotHubClientProtocol.HTTPS;
 
         //act
-        Deencapsulation.newInstance(InternalClient.class, new Class[] {String.class, String.class, SecurityProvider.class, IotHubClientProtocol.class, long.class, long.class}, expectedUri, null, mockSecurityProvider, expectedProtocol, 1, 1);
+        Deencapsulation.newInstance(InternalClient.class, new Class[] {String.class, String.class, SecurityProvider.class, IotHubClientProtocol.class}, expectedUri, null, mockSecurityProvider, expectedProtocol, 1, 1);
     }
 
     //Tests_SRS_INTERNALCLIENT_34_072: [If the provided protocol is null, this function shall throw an IllegalArgumentException.]
@@ -225,7 +195,7 @@ public class InternalClientTest
         final String expectedDeviceId = "some device id";
 
         //act
-        Deencapsulation.newInstance(InternalClient.class, new Class[] {String.class, String.class, SecurityProvider.class, IotHubClientProtocol.class, long.class, long.class}, expectedUri, expectedDeviceId, mockSecurityProvider, null, 1, 1);
+        Deencapsulation.newInstance(InternalClient.class, new Class[] {String.class, String.class, SecurityProvider.class, IotHubClientProtocol.class}, expectedUri, expectedDeviceId, mockSecurityProvider, null, 1, 1);
     }
     
     /* Tests_SRS_INTERNALCLIENT_21_005: [If protocol is null, the function shall throw an IllegalArgumentException.] */
@@ -236,7 +206,7 @@ public class InternalClientTest
         final IotHubClientProtocol protocol = null;
 
         // act
-        Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
+        Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class}, mockIotHubConnectionString, protocol);
     }
 
     /* Tests_SRS_INTERNALCLIENT_21_002: [The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.] */
@@ -247,7 +217,7 @@ public class InternalClientTest
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
 
         // act
-        Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
+        Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class}, mockIotHubConnectionString, protocol);
 
         // assert
         new Verifications()
@@ -255,11 +225,11 @@ public class InternalClientTest
             {
                 Deencapsulation.newInstance(IotHubConnectionString.class, mockIotHubConnectionString);
                 times = 1;
-                Deencapsulation.newInstance(DeviceClientConfig.class, (IotHubConnectionString)any, DeviceClientConfig.AuthType.SAS_TOKEN);
+                Deencapsulation.newInstance(DeviceClientConfig.class, any, DeviceClientConfig.AuthType.SAS_TOKEN);
                 times = 1;
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                        new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
-                        (DeviceClientConfig)any, protocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
+                        new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class},
+                        any, protocol);
                 times = 1;
             }
         };
@@ -273,17 +243,17 @@ public class InternalClientTest
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
 
         // act
-        Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
+        Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class}, mockIotHubConnectionString, protocol);
 
         // assert
         new Verifications()
         {
             {
-                Deencapsulation.newInstance(DeviceClientConfig.class, (IotHubConnectionString)any, DeviceClientConfig.AuthType.SAS_TOKEN);
+                Deencapsulation.newInstance(DeviceClientConfig.class, any, DeviceClientConfig.AuthType.SAS_TOKEN);
                 times = 1;
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                        new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
-                        (DeviceClientConfig)any, protocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
+                        new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class},
+                        any, protocol);
                 times = 0;
             }
         };
@@ -295,7 +265,7 @@ public class InternalClientTest
     {
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
 
         // act
         Deencapsulation.invoke(client, "open", false);
@@ -305,8 +275,8 @@ public class InternalClientTest
         {
             {
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                        new Class[] {DeviceClientConfig.class, long.class, long.class},
-                        any, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
+                        new Class[] {DeviceClientConfig.class},
+                        any);
                 times = 1;
 
                 Deencapsulation.invoke(mockDeviceIO, "open", false);
@@ -321,7 +291,7 @@ public class InternalClientTest
     {
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.invoke(client, "open");
 
         // act
@@ -350,7 +320,7 @@ public class InternalClientTest
                 result = new IOException();
             }
         };
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.invoke(client, "open");
 
         // act
@@ -383,7 +353,7 @@ public class InternalClientTest
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
         final Map<String, Object> context = new HashMap<>();
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.setField(client, "config", mockConfig);
         Deencapsulation.invoke(client, "open");
 
@@ -410,7 +380,7 @@ public class InternalClientTest
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
         final Map<String, Object> context = new HashMap<>();
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.setField(client, "config", mockConfig);
         Deencapsulation.invoke(client, "open");
         final String expectedDeviceId = "some device";
@@ -453,7 +423,7 @@ public class InternalClientTest
                 result = new IllegalStateException();
             }
         };
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.setField(client, "config", mockConfig);
         Deencapsulation.invoke(client, "open");
 
@@ -487,7 +457,7 @@ public class InternalClientTest
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
         final Map<String, Object> context = new HashMap<>();
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
 
         // act
         Deencapsulation.invoke(client, "setMessageCallbackInternal", mockCallback, context);
@@ -510,7 +480,7 @@ public class InternalClientTest
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
         final Map<String, Object> context = new HashMap<>();
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class}, mockIotHubConnectionString, protocol);
 
         // act
         Deencapsulation.invoke(client, "setMessageCallback", new Class[] {MessageCallback.class, Object.class}, null, context);
@@ -535,7 +505,7 @@ public class InternalClientTest
             }
         };
 
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.invoke(client, "open");
 
         //act
@@ -570,7 +540,7 @@ public class InternalClientTest
             }
         };
 
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class}, mockIotHubConnectionString, protocol);
         Deencapsulation.invoke(client, "open");
 
         //act
@@ -606,7 +576,7 @@ public class InternalClientTest
             }
         };
 
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class}, mockIotHubConnectionString, protocol);
         Deencapsulation.invoke(client, "open");
 
         //act
@@ -634,7 +604,7 @@ public class InternalClientTest
             }
         };
 
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.invoke(client, "open");
         Deencapsulation.invoke(client, "startTwinAsync", new Class[] {IotHubEventCallback.class, Object.class, PropertyCallback.class, Object.class}, mockedStatusCB, NULL_OBJECT, mockedPropertyCB, NULL_OBJECT);
 
@@ -677,7 +647,7 @@ public class InternalClientTest
             }
         };
 
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
 
         //act
         Deencapsulation.invoke(client, "startTwinAsync", new Class[] {IotHubEventCallback.class, Object.class, PropertyCallback.class, Object.class}, mockedStatusCB, NULL_OBJECT, mockedPropertyCB, NULL_OBJECT);
@@ -703,7 +673,7 @@ public class InternalClientTest
                 result = true;
             }
         };
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.invoke(client, "open");
         Deencapsulation.invoke(client, "startTwinAsync", new Class[] {IotHubEventCallback.class, Object.class, PropertyCallback.class, Object.class}, mockedStatusCB, NULL_OBJECT, mockedPropertyCB, NULL_OBJECT);
 
@@ -737,7 +707,7 @@ public class InternalClientTest
                 result = true;
             }
         };
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.invoke(client, "open");
         Deencapsulation.invoke(client, "startTwinAsync", new Class[] {IotHubEventCallback.class, Object.class, PropertyCallback.class, Object.class}, mockedStatusCB, NULL_OBJECT, mockedPropertyCB, NULL_OBJECT);
 
@@ -774,7 +744,7 @@ public class InternalClientTest
                 returns(true,false);
             }
         };
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.invoke(client, "open");
         Deencapsulation.invoke(client, "startTwinAsync", new Class[] {IotHubEventCallback.class, Object.class, PropertyCallback.class, Object.class}, mockedStatusCB, NULL_OBJECT, mockedPropertyCB, NULL_OBJECT);
 
@@ -815,7 +785,7 @@ public class InternalClientTest
                 result = true;
             }
         };
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.invoke(client, "open");
 
         //act
@@ -857,7 +827,7 @@ public class InternalClientTest
                 result = true;
             }
         };
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.invoke(client, "open");
         Deencapsulation.invoke(client, "startTwinAsync", new Class[] {IotHubEventCallback.class, Object.class, PropertyCallback.class, Object.class}, mockedStatusCB, NULL_OBJECT, mockedPropertyCB, NULL_OBJECT);
 
@@ -890,7 +860,7 @@ public class InternalClientTest
                 result = true;
             }
         };
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.invoke(client, "open");
         Deencapsulation.invoke(client, "startTwinAsync", new Class[] {IotHubEventCallback.class, Object.class, PropertyCallback.class, Object.class}, mockedStatusCB, NULL_OBJECT, mockedPropertyCB, NULL_OBJECT);
 
@@ -924,7 +894,7 @@ public class InternalClientTest
                 result = true;
             }
         };
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.invoke(client, "open");
 
         //act
@@ -961,7 +931,7 @@ public class InternalClientTest
                 result = true;
             }
         };
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.invoke(client, "open");
 
         //act
@@ -1001,7 +971,7 @@ public class InternalClientTest
                 result = false;
             }
         };
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.setField(client, "twin", mockedDeviceTwin);
         Deencapsulation.setField(client, "deviceIO", mockDeviceIO);
 
@@ -1039,7 +1009,7 @@ public class InternalClientTest
                 result = false;
             }
         };
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.setField(client, "twin", mockedDeviceTwin);
         Deencapsulation.setField(client, "deviceIO", mockDeviceIO);
 
@@ -1081,7 +1051,7 @@ public class InternalClientTest
                 result = true;
             }
         };
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.invoke(client, "open");
         Deencapsulation.invoke(client, "startTwinAsync", new Class[] {IotHubEventCallback.class, Object.class, PropertyCallback.class, Object.class}, mockedStatusCB, NULL_OBJECT, mockedPropertyCB, NULL_OBJECT);
 
@@ -1120,7 +1090,7 @@ public class InternalClientTest
                 result = true;
             }
         };
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.invoke(client, "open");
         Deencapsulation.invoke(client, "startTwinAsync", new Class[] {IotHubEventCallback.class, Object.class, PropertyCallback.class, Object.class}, mockedStatusCB, NULL_OBJECT, mockedPropertyCB, NULL_OBJECT);
 
@@ -1163,7 +1133,7 @@ public class InternalClientTest
                 result = true;
             }
         };
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.invoke(client, "open");
         Deencapsulation.invoke(client, "startTwinAsync", new Class[] {IotHubEventCallback.class, Object.class, PropertyCallback.class, Object.class}, mockedStatusCB, NULL_OBJECT, mockedPropertyCB, NULL_OBJECT);
 
@@ -1205,7 +1175,7 @@ public class InternalClientTest
                 result = true;
             }
         };
-        final InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        final InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.invoke(client, "open");
 
         //act
@@ -1241,7 +1211,7 @@ public class InternalClientTest
                 result = false;
             }
         };
-        final InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        final InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
 
         //act
         Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {DeviceMethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, mockedDeviceMethodCB, null, mockedStatusCB, null);
@@ -1264,7 +1234,7 @@ public class InternalClientTest
                 result = true;
             }
         };
-        final InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
+        final InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class}, mockIotHubConnectionString, protocol);
         Deencapsulation.invoke(client, "open");
 
         //act
@@ -1285,7 +1255,7 @@ public class InternalClientTest
                 result = true;
             }
         };
-        final InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
+        final InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class}, mockIotHubConnectionString, protocol);
         Deencapsulation.invoke(client, "open");
 
         //act
@@ -1309,7 +1279,7 @@ public class InternalClientTest
                 result = true;
             }
         };
-        final InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        final InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.invoke(client, "open");
         Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {DeviceMethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, mockedDeviceMethodCB, NULL_OBJECT, mockedStatusCB, NULL_OBJECT);
 
@@ -1331,7 +1301,7 @@ public class InternalClientTest
     public void tokenExpiresAfterDeviceClientInitializedBeforeOpen() throws SecurityException, URISyntaxException, IOException
     {
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         new NonStrictExpectations()
         {
             {
@@ -1356,7 +1326,7 @@ public class InternalClientTest
         
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
 
-        final InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
+        final InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class}, mockIotHubConnectionString, protocol);
 
         //act
         Deencapsulation.invoke(client, "registerConnectionStateCallback", null, null);
@@ -1381,7 +1351,7 @@ public class InternalClientTest
         //arrange
         
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.setField(client, "config", mockConfig);
 
         //act
@@ -1404,7 +1374,7 @@ public class InternalClientTest
         //arrange
         
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         final long expectedTimeout = 1034;
         Deencapsulation.setField(client, "config", mockConfig);
 
@@ -1428,7 +1398,7 @@ public class InternalClientTest
         //arrange
         
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
 
         new StrictExpectations()
         {
@@ -1469,7 +1439,7 @@ public class InternalClientTest
                 result = true;
             }
         };
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         client.open();
         Deencapsulation.invoke(client, "startTwinAsync", new Class[] {IotHubEventCallback.class, Object.class, PropertyCallback.class, Object.class}, mockedStatusCB, null, mockedPropertyCB, null);
         mockDevice.setDesiredPropertyCallback(new Property("Desired", null), null, null);
@@ -1492,7 +1462,7 @@ public class InternalClientTest
     public void getDeviceTwinThrowsIfNotStartedYet() throws URISyntaxException, IOException
     {
         //arrange
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, IotHubClientProtocol.AMQPS, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, IotHubClientProtocol.AMQPS, null);
 
         //act
         Deencapsulation.invoke(client, "getTwinAsync");
@@ -1503,7 +1473,7 @@ public class InternalClientTest
     public void getDeviceTwinThrowsIfNotOpen(@Mocked DeviceTwin mockedDeviceTwin) throws URISyntaxException, IOException
     {
         //arrange
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, IotHubClientProtocol.AMQPS, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, IotHubClientProtocol.AMQPS, null);
 
         Deencapsulation.setField(client, "twin", mockedDeviceTwin);
         Deencapsulation.setField(client, "deviceIO", mockDeviceIO);
@@ -1525,7 +1495,7 @@ public class InternalClientTest
     public void getDeviceTwinSuccess(final @Mocked DeviceTwin mockedDeviceTwin) throws URISyntaxException, IOException
     {
         //arrange
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, IotHubClientProtocol.AMQPS, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, IotHubClientProtocol.AMQPS, null);
 
         Deencapsulation.setField(client, "twin", mockedDeviceTwin);
         Deencapsulation.setField(client, "deviceIO", mockDeviceIO);
@@ -1557,7 +1527,7 @@ public class InternalClientTest
     {
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
 
         // act
         Deencapsulation.invoke(client, "startTwinAsync", mockedIotHubEventCallback, new Object(), mockedTwinPropertyCallback, new Object());
@@ -1569,7 +1539,7 @@ public class InternalClientTest
     {
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class}, mockIotHubConnectionString, protocol);
         Deencapsulation.setField(client, "deviceIO", mockDeviceIO);
         new NonStrictExpectations()
         {
@@ -1589,7 +1559,7 @@ public class InternalClientTest
     {
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.setField(client, "deviceIO", mockDeviceIO);
         Deencapsulation.setField(client, "twin", mockedDeviceTwin);
         new NonStrictExpectations()
@@ -1610,7 +1580,7 @@ public class InternalClientTest
     {
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.setField(client, "deviceIO", mockDeviceIO);
         Deencapsulation.setField(client, "config", mockConfig);
         Deencapsulation.setField(client, "twin", null);
@@ -1645,7 +1615,7 @@ public class InternalClientTest
     {
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.setField(client, "twin", null);
 
         Map<Property, Pair<TwinPropertyCallback, Object>> onDesiredPropertyChange = new HashMap<>();
@@ -1660,7 +1630,7 @@ public class InternalClientTest
     {
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.setField(client, "deviceIO", mockDeviceIO);
         Deencapsulation.setField(client, "twin", mockedDeviceTwin);
         new NonStrictExpectations()
@@ -1683,7 +1653,7 @@ public class InternalClientTest
     {
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.setField(client, "deviceIO", mockDeviceIO);
         Deencapsulation.setField(client, "twin", mockedDeviceTwin);
         new NonStrictExpectations()
@@ -1706,107 +1676,6 @@ public class InternalClientTest
             {
                 mockedDeviceTwin.subscribeDesiredPropertiesTwinPropertyNotification(onDesiredPropertyChange);
                 times = 1;
-            }
-        };
-    }
-
-    @Test (expected = IllegalStateException.class)
-    public void setProxyThrowsIfClientAlreadyOpen()
-    {
-        //arrange
-        new Expectations()
-        {
-            {
-                new DeviceClientConfig(mockIotHubConnectionString, (ClientOptions) null);
-                result = mockConfig;
-
-                Deencapsulation.newInstance(DeviceIO.class, mockConfig, SEND_PERIOD, RECEIVE_PERIOD);
-                result = mockDeviceIO;
-
-                mockDeviceIO.isOpen();
-                result = true;
-            }
-
-        };
-
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, IotHubClientProtocol.MQTT_WS, SEND_PERIOD, RECEIVE_PERIOD, null);
-
-        // act
-        client.setProxySettings(mockProxySettings);
-    }
-
-    @Test (expected = IllegalArgumentException.class)
-    public void setProxyThrowsIfClientIsUsingMQTT()
-    {
-        setProxyThrowsIfClientUsingUnsupportedProtocol(IotHubClientProtocol.MQTT);
-    }
-
-    @Test (expected = IllegalArgumentException.class)
-    public void setProxyThrowsIfClientIsUsingAMQPS()
-    {
-        setProxyThrowsIfClientUsingUnsupportedProtocol(IotHubClientProtocol.AMQPS);
-    }
-
-    private void setProxyThrowsIfClientUsingUnsupportedProtocol(final IotHubClientProtocol protocol)
-    {
-        //arrange
-        new Expectations()
-        {
-            {
-                new DeviceClientConfig(mockIotHubConnectionString, (ClientOptions) null);
-                result = mockConfig;
-
-                Deencapsulation.newInstance(DeviceIO.class, mockConfig, SEND_PERIOD, RECEIVE_PERIOD);
-                result = mockDeviceIO;
-
-                mockDeviceIO.isOpen();
-                result = false;
-
-                mockDeviceIO.getProtocol();
-                result = protocol;
-
-                mockDeviceIO.isOpen();
-                result = false;
-            }
-        };
-
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
-
-        // act
-        client.setProxySettings(mockProxySettings);
-    }
-
-    @Test
-    public void setProxySavesHostnameAndPortToConfig()
-    {
-        //arrange
-        new Expectations()
-        {
-            {
-                new DeviceClientConfig(mockIotHubConnectionString, (ClientOptions) null);
-                result = mockConfig;
-
-                Deencapsulation.newInstance(DeviceIO.class, mockConfig, SEND_PERIOD, RECEIVE_PERIOD);
-                result = mockDeviceIO;
-
-                mockDeviceIO.getProtocol();
-                result = IotHubClientProtocol.HTTPS;
-
-                mockDeviceIO.isOpen();
-                result = false;
-            }
-        };
-
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, IotHubClientProtocol.HTTPS, SEND_PERIOD, RECEIVE_PERIOD, null);
-
-        // act
-        client.setProxySettings(mockProxySettings);
-
-        // assert
-        new Verifications()
-        {
-            {
-                mockConfig.setProxySettings(mockProxySettings);
             }
         };
     }

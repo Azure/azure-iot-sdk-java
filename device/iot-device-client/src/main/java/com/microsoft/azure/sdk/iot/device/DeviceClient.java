@@ -33,12 +33,6 @@ import java.net.URISyntaxException;
 @Slf4j
 public final class DeviceClient extends InternalClient
 {
-    private static final long SEND_PERIOD_MILLIS = 10L;
-
-    private static final long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
-    private static final long RECEIVE_PERIOD_MILLIS_MQTT = 10L;
-    private static final long RECEIVE_PERIOD_MILLIS_HTTPS = 1000;
-
     private DeviceClientType deviceClientType = DeviceClientType.SINGLE_CLIENT;
 
     private FileUpload fileUpload;
@@ -86,7 +80,7 @@ public final class DeviceClient extends InternalClient
      */
     public DeviceClient(String connString, IotHubClientProtocol protocol, ClientOptions clientOptions) throws URISyntaxException, IllegalArgumentException
     {
-        super(new IotHubConnectionString(connString), protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), clientOptions);
+        super(new IotHubConnectionString(connString), protocol, clientOptions);
         commonConstructorVerifications();
         commonConstructorSetup();
     }
@@ -117,7 +111,7 @@ public final class DeviceClient extends InternalClient
      */
     public DeviceClient(String hostName, String deviceId, SasTokenProvider sasTokenProvider, IotHubClientProtocol protocol, ClientOptions clientOptions)
     {
-        super(hostName, deviceId, null, sasTokenProvider, protocol, clientOptions, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
+        super(hostName, deviceId, null, sasTokenProvider, protocol, clientOptions);
         commonConstructorVerifications();
         commonConstructorSetup();
     }
@@ -186,7 +180,7 @@ public final class DeviceClient extends InternalClient
      */
     private DeviceClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol, ClientOptions clientOptions) throws URISyntaxException, IOException
     {
-        super(uri, deviceId, securityProvider, protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), clientOptions);
+        super(uri, deviceId, securityProvider, protocol, clientOptions);
         commonConstructorSetup();
     }
 
@@ -302,25 +296,6 @@ public final class DeviceClient extends InternalClient
     void markAsMultiplexed()
     {
         this.deviceClientType = DeviceClientType.USE_MULTIPLEXING_CLIENT;
-    }
-
-    private static long getReceivePeriod(IotHubClientProtocol protocol)
-    {
-        switch (protocol)
-        {
-            case HTTPS:
-                return RECEIVE_PERIOD_MILLIS_HTTPS;
-            case AMQPS:
-            case AMQPS_WS:
-                return RECEIVE_PERIOD_MILLIS_AMQPS;
-            case MQTT:
-            case MQTT_WS:
-                return RECEIVE_PERIOD_MILLIS_MQTT;
-            default:
-                // should never happen.
-                throw new IllegalStateException(
-                        "Invalid client protocol specified.");
-        }
     }
 
     @SuppressWarnings("unused")

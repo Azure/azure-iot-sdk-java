@@ -34,9 +34,6 @@ public class DeviceClientTest
     IotHubConnectionString mockIotHubConnectionString;
 
     @Mocked
-    ClientOptions mockClientOptions;
-
-    @Mocked
     DeviceIO mockDeviceIO;
 
     @Mocked
@@ -59,10 +56,9 @@ public class DeviceClientTest
 
     private static final long SEND_PERIOD_MILLIS = 10L;
     private static final long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
-    private static final long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
 
     @Test
-    public void constructorWithClientOptionsSuccess(@Mocked final ClientOptions mockedClientOptions) throws URISyntaxException
+    public void constructorWithClientOptionsSuccess() throws URISyntaxException
     {
         // arrange
         final String connString =
@@ -77,8 +73,10 @@ public class DeviceClientTest
             }
         };
 
+        ClientOptions options = ClientOptions.builder().build();
+
         // act
-        final DeviceClient client = new DeviceClient(connString, protocol, mockedClientOptions);
+        final DeviceClient client = new DeviceClient(connString, protocol, options);
 
         // assert
         new Verifications()
@@ -87,7 +85,7 @@ public class DeviceClientTest
                 DeviceClientType deviceClientType = Deencapsulation.getField(client, "deviceClientType");
                 assertEquals(SINGLE_CLIENT, deviceClientType);
 
-                new DeviceClientConfig(mockIotHubConnectionString, mockedClientOptions);
+                new DeviceClientConfig(mockIotHubConnectionString, options);
             }
         };
     }
@@ -150,8 +148,8 @@ public class DeviceClientTest
                 Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class}, (IotHubConnectionString) any);
                 times = 0;
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                        new Class[] {DeviceClientConfig.class, long.class, long.class},
-                        any, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
+                        new Class[] {DeviceClientConfig.class},
+                        any);
                 times = 0;
             }
         };

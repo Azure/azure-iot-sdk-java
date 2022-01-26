@@ -46,25 +46,25 @@ public class InternalClient
     private DeviceTwin twin;
     private DeviceMethod method;
 
-    InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis, ClientOptions clientOptions)
+    InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, ClientOptions clientOptions)
     {
         commonConstructorVerification(iotHubConnectionString, protocol);
 
-        this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
+        this.deviceIO = new DeviceIO(this.config);
 
         this.config = new DeviceClientConfig(iotHubConnectionString, clientOptions);
         this.config.setProtocol(protocol);
         setClientOptionValues(clientOptions);
     }
 
-    InternalClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis)
+    InternalClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol)
     {
         this.config = new DeviceClientConfig(iotHubAuthenticationProvider);
         this.config.setProtocol(protocol);
-        this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
+        this.deviceIO = new DeviceIO(this.config);
     }
 
-    InternalClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis, ClientOptions clientOptions) throws URISyntaxException, IOException
+    InternalClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol, ClientOptions clientOptions) throws URISyntaxException, IOException
     {
         if (protocol == null)
         {
@@ -90,12 +90,11 @@ public class InternalClient
 
         this.config = new DeviceClientConfig(connectionString, securityProvider, clientOptions);
         this.config.setProtocol(protocol);
+        this.deviceIO = new DeviceIO(this.config);
         setClientOptionValues(clientOptions);
-
-        this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
     }
 
-    InternalClient(String hostName, String deviceId, String moduleId, SasTokenProvider sasTokenProvider, IotHubClientProtocol protocol, ClientOptions clientOptions, long sendPeriodMillis, long receivePeriodMillis)
+    InternalClient(String hostName, String deviceId, String moduleId, SasTokenProvider sasTokenProvider, IotHubClientProtocol protocol, ClientOptions clientOptions)
     {
         if (hostName == null)
         {
@@ -109,9 +108,8 @@ public class InternalClient
 
         this.config = new DeviceClientConfig(hostName, sasTokenProvider, clientOptions, deviceId, moduleId);
         this.config.setProtocol(protocol);
+        this.deviceIO = new DeviceIO(this.config);
         setClientOptionValues(clientOptions);
-
-        this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
     }
 
     private void setClientOptionValues(ClientOptions clientOptions)

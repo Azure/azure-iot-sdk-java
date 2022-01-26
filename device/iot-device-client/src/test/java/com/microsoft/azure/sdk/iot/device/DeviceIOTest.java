@@ -59,7 +59,6 @@ public class DeviceIOTest
 
     private final static long SEND_PERIOD_MILLIS = 10L;
     private final static long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
-    private final static long RECEIVE_PERIOD_MILLIS_MQTT = 10L;
     private final static long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
 
     private DeviceIO newDeviceIO()
@@ -73,8 +72,8 @@ public class DeviceIOTest
         };
 
         final DeviceIO deviceIO = Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                new Class[] {DeviceClientConfig.class, long.class, long.class},
-                mockConfig, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
+                new Class[] {DeviceClientConfig.class},
+                mockConfig);
 
         assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
 
@@ -110,13 +109,11 @@ public class DeviceIOTest
 
         // act
         Object deviceIO = Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                new Class[] {DeviceClientConfig.class, long.class, long.class},
-                mockConfig, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
+                new Class[] {DeviceClientConfig.class},
+                mockConfig);
 
         // assert
         assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
-        assertEquals(SEND_PERIOD_MILLIS, (long) Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
-        assertEquals(RECEIVE_PERIOD_MILLIS_AMQPS, (long) Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
     }
     
     /* Tests_SRS_DEVICE_IO_21_003: [The constructor shall initialize the IoT Hub transport that uses the `protocol` specified.] */
@@ -129,14 +126,12 @@ public class DeviceIOTest
 
         // act
         Object deviceIO = Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                new Class[] {DeviceClientConfig.class, long.class, long.class},
-                mockConfig, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_MQTT);
+                new Class[] {DeviceClientConfig.class},
+                mockConfig);
 
 
         // assert
         assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
-        assertEquals(SEND_PERIOD_MILLIS, (long) Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
-        assertEquals(RECEIVE_PERIOD_MILLIS_MQTT, (long) Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
     }
 
     /* Tests_SRS_DEVICE_IO_21_003: [The constructor shall initialize the IoT Hub transport that uses the `protocol` specified.] */
@@ -145,13 +140,11 @@ public class DeviceIOTest
     {
         // arrange
         DeviceIO deviceIO = Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                new Class[] {DeviceClientConfig.class, long.class, long.class},
-                mockConfig, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_HTTPS);
+                new Class[] {DeviceClientConfig.class},
+                mockConfig);
 
         // assert
         assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
-        assertEquals(SEND_PERIOD_MILLIS, (long) Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
-        assertEquals(RECEIVE_PERIOD_MILLIS_HTTPS, (long) Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
     }
 
     /* Tests_SRS_DEVICE_IO_21_012: [The open shall open the transport to communicate with an IoT Hub.] */
@@ -377,22 +370,6 @@ public class DeviceIOTest
         assertEquals(protocol, deviceIO.getProtocol());
     }
 
-    /* Tests_SRS_DEVICE_IO_21_026: [The getReceivePeriodInMilliseconds shall return the programed receive period in milliseconds.] */
-    @Test
-    public void getReceivePeriodInMillisecondsSuccess()
-    {
-        // arrange
-        Deencapsulation.setField(mockConfig, "protocol", IotHubClientProtocol.AMQPS );
-        final Object deviceIO = newDeviceIO();
-
-        // act
-        long receivePeriodInMilliseconds = Deencapsulation.invoke(deviceIO, "getReceivePeriodInMilliseconds") ;
-
-        // assert
-        assertEquals(RECEIVE_PERIOD_MILLIS_AMQPS, (long) Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
-        assertEquals(RECEIVE_PERIOD_MILLIS_AMQPS, receivePeriodInMilliseconds);
-    }
-
     /* Tests_SRS_DEVICE_IO_21_027: [The setReceivePeriodInMilliseconds shall store the new receive period in milliseconds.] */
     @Test
     public void setReceivePeriodInMillisecondsSuccess()
@@ -400,7 +377,6 @@ public class DeviceIOTest
     {
         // arrange
         final Object deviceIO = newDeviceIO();
-        assertEquals(RECEIVE_PERIOD_MILLIS_AMQPS, (long) Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
 
         // act
         Deencapsulation.invoke(deviceIO, "setReceivePeriodInMilliseconds",  20L);
@@ -454,22 +430,6 @@ public class DeviceIOTest
         Deencapsulation.invoke(deviceIO, "setReceivePeriodInMilliseconds",  -10L);
     }
 
-    /* Tests_SRS_DEVICE_IO_21_032: [The getSendPeriodInMilliseconds shall return the programed send period in milliseconds.] */
-    @Test
-    public void getSendPeriodInMillisecondsSuccess()
-            throws URISyntaxException, IOException
-    {
-        // arrange
-        final Object deviceIO = newDeviceIO();
-
-        // act
-        long sendPeriodInMilliseconds = Deencapsulation.invoke(deviceIO, "getSendPeriodInMilliseconds" );
-
-        // assert
-        assertEquals(SEND_PERIOD_MILLIS, (long) Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
-        assertEquals(SEND_PERIOD_MILLIS, sendPeriodInMilliseconds);
-    }
-
     /* Tests_SRS_DEVICE_IO_21_033: [The setSendPeriodInMilliseconds shall store the new send period in milliseconds.] */
     @Test
     public void setSendPeriodInMillisecondsSuccess()
@@ -477,7 +437,6 @@ public class DeviceIOTest
     {
         // arrange
         final Object deviceIO = newDeviceIO();
-        assertEquals(SEND_PERIOD_MILLIS, (long) Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
 
         // act
         Deencapsulation.invoke(deviceIO, "setSendPeriodInMilliseconds",  20L);

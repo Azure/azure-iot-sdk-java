@@ -74,11 +74,12 @@ public class SendEvent
      * @param args
      * args[0] = IoT Hub or Edge Hub connection string
      * args[1] = number of messages to send
-     * args[2] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws')
+     * args[2] = protocol (optional, one of 'mqtt' or 'amqps' or 'httpsnt' or 'amqps_ws')
      */
     public static void main(String[] args)
         throws IOException, URISyntaxException
     {
+        ClientOptions options = ClientOptions.builder().build();
         InputParameters params = new InputParameters(args);
 
         System.out.println("Starting...");
