@@ -292,6 +292,17 @@ public final class DeviceClient extends InternalClient
         this.fileUpload.sendNotification(notification);
     }
 
+    /**
+     * Returns if this client is or ever was registered to a {@link MultiplexingClient} instance. Device clients that were
+     * cannot be used in non-multiplexed connections. Device clients that aren't registered to any multiplexing client
+     * will still return true.
+     * @return true if this client is or ever was registered to a {@link MultiplexingClient} instance, false otherwise.
+     */
+    public boolean isMultiplexed()
+    {
+        return this.isMultiplexed;
+    }
+
     // Used by multiplexing clients to signal to this client what kind of multiplexing client is using this device client
     void markAsMultiplexed()
     {

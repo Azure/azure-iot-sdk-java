@@ -663,17 +663,6 @@ public class InternalClient
         this.method.subscribeToDeviceMethod(methodCallback, methodCallbackContext);
     }
 
-    /**
-     * Returns if this client is or ever was registered to a {@link MultiplexingClient} instance. Device clients that were
-     * cannot be used in non-multiplexed connections. Device clients that aren't registered to any multiplexing client
-     * will still return true.
-     * @return true if this client is or ever was registered to a {@link MultiplexingClient} instance, false otherwise.
-     */
-    public boolean isMultiplexed()
-    {
-        return this.isMultiplexed;
-    }
-
     // only used by the MultiplexingClient class to signal to this client that it needs to re-register twin
     // callbacks
     void markTwinAsUnsubscribed()
