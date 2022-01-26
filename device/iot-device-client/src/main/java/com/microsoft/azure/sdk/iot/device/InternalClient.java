@@ -49,11 +49,9 @@ public class InternalClient
     InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, ClientOptions clientOptions)
     {
         commonConstructorVerification(iotHubConnectionString, protocol);
-
-        this.deviceIO = new DeviceIO(this.config);
-
         this.config = new DeviceClientConfig(iotHubConnectionString, clientOptions);
         this.config.setProtocol(protocol);
+        this.deviceIO = new DeviceIO(this.config);
         setClientOptionValues(clientOptions);
     }
 
