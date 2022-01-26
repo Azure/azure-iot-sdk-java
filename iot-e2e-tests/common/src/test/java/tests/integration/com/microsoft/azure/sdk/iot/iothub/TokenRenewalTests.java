@@ -383,9 +383,9 @@ public class TokenRenewalTests extends IntegrationTest
             ClientOptions.builder()
                 .sasTokenExpiryTime(SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL)
                 .proxySettings(proxySettings);
-        TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SAS, false, optionsBuilder);
+        TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SAS, false);
         com.microsoft.azure.sdk.iot.service.Device device = testDeviceIdentity.getDevice();
         testIdentities.add(testDeviceIdentity);
-        return new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), protocol);
+        return new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), protocol, optionsBuilder.build());
     }
 }
