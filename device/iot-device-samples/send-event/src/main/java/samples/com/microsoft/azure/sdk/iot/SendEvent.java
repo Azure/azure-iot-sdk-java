@@ -79,7 +79,6 @@ public class SendEvent
     public static void main(String[] args)
         throws IOException, URISyntaxException
     {
-        ClientOptions options = ClientOptions.builder().build();
         InputParameters params = new InputParameters(args);
 
         System.out.println("Starting...");
