@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
+
 /**
  * Configuration settings for an IoT Hub client. Validates all user-defined
  * settings.
@@ -199,6 +201,13 @@ public final class DeviceClientConfig
         this.httpsConnectTimeout = clientOptions != null && clientOptions.getHttpsConnectTimeout() != 0 ? clientOptions.getHttpsConnectTimeout() : DEFAULT_HTTPS_CONNECT_TIMEOUT_MILLIS;
         this.amqpOpenAuthenticationSessionTimeout = clientOptions != null && clientOptions.getAmqpAuthenticationSessionTimeout() != 0 ? clientOptions.getAmqpAuthenticationSessionTimeout() : DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT_IN_SECONDS;
         this.amqpOpenDeviceSessionsTimeout = clientOptions != null && clientOptions.getAmqpDeviceSessionTimeout() != 0 ? clientOptions.getAmqpDeviceSessionTimeout() : DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS;
+        this.proxySettings = clientOptions != null && clientOptions.getProxySettings() != null ? clientOptions.getProxySettings() : null;
+
+        IotHubClientProtocol protocol = this.getProtocol();
+        if (protocol != HTTPS && protocol != AMQPS_WS && protocol != MQTT_WS && proxySettings != null)
+        {
+            throw new IllegalArgumentException("Use of proxies is unsupported unless using HTTPS, MQTT_WS or AMQPS_WS");
+        }
 
         if (getAuthenticationType() == AuthType.SAS_TOKEN && clientOptions != null)
         {

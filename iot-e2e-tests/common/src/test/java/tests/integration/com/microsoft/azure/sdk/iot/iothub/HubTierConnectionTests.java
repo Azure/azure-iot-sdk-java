@@ -92,6 +92,9 @@ public class HubTierConnectionTests extends IntegrationTest
 
         ClientOptions options = ClientOptions.builder().sslContext(sslContext).build();
 
+        Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
+        ClientOptions optionsWithProxy = ClientOptions.builder().proxySettings((new ProxySettings(testProxy, testProxyUser, testProxyPass))).build();
+
         return new ArrayList(Arrays.asList(
                 new Object[][]
                         {
@@ -103,7 +106,7 @@ public class HubTierConnectionTests extends IntegrationTest
                                 {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, options), AMQPS, deviceX509, SELF_SIGNED, false},
 
                                 //sas token device client, with proxy
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS, true}
+                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS, options), AMQPS_WS, device, SAS, true}
                         }
         ));
     }
@@ -132,11 +135,7 @@ public class HubTierConnectionTests extends IntegrationTest
     @Before
     public void SetProxyIfApplicable()
     {
-        if (testInstance.useHttpProxy)
-        {
-            Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-            testInstance.client.setProxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass));
-        }
+
     }
 
     public static class HubTierConnectionTestInstance

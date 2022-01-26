@@ -41,6 +41,13 @@ public final class ClientOptions
     private final SSLContext sslContext;
 
     /**
+     * The proxy settings for this client to connect through. If null then no proxy will be used.
+     * @param proxySettings the settings to be used when connecting to iothub through a proxy. If null, no proxy will be used.
+     */
+    @Getter
+    private final ProxySettings proxySettings;
+
+    /**
      * This value defines the maximum time interval between messages sent or received. It enables the
      * client to detect if the server is no longer available, without having to wait
      * for the TCP/IP timeout. The client will ensure that at least one message

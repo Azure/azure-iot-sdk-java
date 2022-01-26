@@ -189,23 +189,23 @@ public class Tools
      * @param protocol The device side protocol for the client to use.
      * @param authenticationType The device side authentication type for the client to use.
      * @param needCleanTwin True if the returned device identity needs to not have any pre-existing desired or reported properties, false otherwise.
-     * @param sasTokenTimeToLiveSeconds The time to live to assign SAS tokens created by this client.
+     * @param optionsBuilder The options that this client will use.
      * @return A {@link TestDeviceIdentity} that was either recycled from a previous test when possible, or was just created for this test.
      * @throws URISyntaxException If the connection string cannot be parsed.
      * @throws IOException If the registry addition of a device fails.
      * @throws IotHubException If the registry addition of a device fails.
      * @throws GeneralSecurityException If creating the x509 certificates for an x509 device fails.
      */
-    public static TestDeviceIdentity getTestDevice(String iotHubConnectionString, IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean needCleanTwin, int sasTokenTimeToLiveSeconds) throws URISyntaxException, IOException, IotHubException, GeneralSecurityException
+    public static TestDeviceIdentity getTestDevice(String iotHubConnectionString, IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean needCleanTwin, ClientOptions.ClientOptionsBuilder optionsBuilder) throws URISyntaxException, IOException, IotHubException, GeneralSecurityException
     {
         TestDeviceIdentity testDeviceIdentity;
         if (authenticationType == AuthenticationType.SAS)
         {
-            testDeviceIdentity = getSasTestDevice(iotHubConnectionString, protocol, needCleanTwin, sasTokenTimeToLiveSeconds);
+            testDeviceIdentity = getSasTestDevice(iotHubConnectionString, protocol, needCleanTwin, optionsBuilder);
         }
         else
         {
-            testDeviceIdentity = getX509TestDevice(iotHubConnectionString, protocol, needCleanTwin);
+            testDeviceIdentity = getX509TestDevice(iotHubConnectionString, protocol, needCleanTwin, optionsBuilder);
         }
 
         if (needCleanTwin)
@@ -241,10 +241,10 @@ public class Tools
      */
     public static TestDeviceIdentity getTestDevice(String iotHubConnectionString, IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean needCleanTwin) throws URISyntaxException, IOException, IotHubException, GeneralSecurityException
     {
-        return getTestDevice(iotHubConnectionString, protocol, authenticationType, needCleanTwin, 60 * 60);
+        return getTestDevice(iotHubConnectionString, protocol, authenticationType, needCleanTwin, ClientOptions.builder());
     }
 
-    private static TestDeviceIdentity getSasTestDevice(String iotHubConnectionString, IotHubClientProtocol protocol, boolean needCleanTwin, int sasTokenTimeToLiveSeconds) throws URISyntaxException, IOException, IotHubException, GeneralSecurityException
+    private static TestDeviceIdentity getSasTestDevice(String iotHubConnectionString, IotHubClientProtocol protocol, boolean needCleanTwin, ClientOptions.ClientOptionsBuilder optionsBuilder) throws URISyntaxException, IOException, IotHubException, GeneralSecurityException
     {
         // Don't want multiple methods calling this simultaneously and each thinking that they need to create
         // 100 devices. Forcing them to enter this block one at a time means that the first caller creates the 100 devices,
@@ -282,10 +282,9 @@ public class Tools
                 testDeviceIdentity = testSasDeviceQueue.remove();
             }
 
-            ClientOptions clientOptions = ClientOptions.builder()
+            ClientOptions clientOptions = optionsBuilder
                 .amqpAuthenticationSessionTimeout(AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS)
                 .amqpDeviceSessionTimeout(AMQP_DEVICE_SESSION_TIMEOUT_SECONDS)
-                .sasTokenExpiryTime(sasTokenTimeToLiveSeconds)
                 .build();
 
             testDeviceIdentity.setDeviceClient(new DeviceClient(getRegistyManager(iotHubConnectionString).getDeviceConnectionString(testDeviceIdentity.getDevice()), protocol, clientOptions));
@@ -293,7 +292,7 @@ public class Tools
         }
     }
 
-    private static TestDeviceIdentity getX509TestDevice(String iotHubConnectionString, IotHubClientProtocol protocol, boolean needCleanTwin) throws URISyntaxException, IOException, IotHubException, GeneralSecurityException
+    private static TestDeviceIdentity getX509TestDevice(String iotHubConnectionString, IotHubClientProtocol protocol, boolean needCleanTwin, ClientOptions.ClientOptionsBuilder optionsBuilder) throws URISyntaxException, IOException, IotHubException, GeneralSecurityException
     {
         // Don't want multiple methods calling this simultaneously and each thinking that they need to create
         // 100 devices. Forcing them to enter this block one at a time means that the first caller creates the 100 devices,
@@ -333,7 +332,7 @@ public class Tools
             }
 
             SSLContext sslContext = SSLContextBuilder.buildSSLContext(IntegrationTest.x509CertificateGenerator.getPublicCertificate(), IntegrationTest.x509CertificateGenerator.getPrivateKey());
-            ClientOptions clientOptions = ClientOptions.builder()
+            ClientOptions clientOptions = optionsBuilder
                 .sslContext(sslContext)
                 .amqpAuthenticationSessionTimeout(AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS)
                 .amqpDeviceSessionTimeout(AMQP_DEVICE_SESSION_TIMEOUT_SECONDS)
@@ -359,22 +358,23 @@ public class Tools
      * @param protocol The device side protocol for the client to use.
      * @param authenticationType The device side authentication type for the client to use.
      * @param needCleanTwin True if the returned module identity needs to not have any pre-existing desired or reported properties, false otherwise.
+     * @param optionsBuilder The options that the client will use.
      * @return A {@link TestDeviceIdentity} that was either recycled from a previous test when possible, or was just created for this test.
      * @throws URISyntaxException If the connection string cannot be parsed.
      * @throws IOException If the registry addition of a module fails.
      * @throws IotHubException If the registry addition of a module fails.
      * @throws GeneralSecurityException If creating the x509 certificates for an x509 module fails.
      */
-    public static TestModuleIdentity getTestModule(String iotHubConnectionString, IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean needCleanTwin) throws URISyntaxException, IOException, IotHubException, InterruptedException, ModuleClientException, GeneralSecurityException
+    public static TestModuleIdentity getTestModule(String iotHubConnectionString, IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean needCleanTwin, ClientOptions.ClientOptionsBuilder optionsBuilder) throws URISyntaxException, IOException, IotHubException, InterruptedException, ModuleClientException, GeneralSecurityException
     {
         TestModuleIdentity testModuleIdentity;
         if (authenticationType == AuthenticationType.SAS)
         {
-            testModuleIdentity = getSasTestModule(iotHubConnectionString, protocol, needCleanTwin);
+            testModuleIdentity = getSasTestModule(iotHubConnectionString, protocol, needCleanTwin, optionsBuilder);
         }
         else
         {
-            testModuleIdentity = getX509TestModule(iotHubConnectionString, protocol, needCleanTwin);
+            testModuleIdentity = getX509TestModule(iotHubConnectionString, protocol, needCleanTwin, optionsBuilder);
         }
 
         if (needCleanTwin)
@@ -387,7 +387,33 @@ public class Tools
         return testModuleIdentity;
     }
 
-    private static TestModuleIdentity getSasTestModule(String iotHubConnectionString, IotHubClientProtocol protocol, boolean needCleanTwin) throws URISyntaxException, IOException, IotHubException, InterruptedException, ModuleClientException, GeneralSecurityException
+    /**
+     * Return a module identity and client that can be used for a test. If a recycled identity is available to use, this method will prioritize using
+     * that instead of creating a new identity. When creating a new identity, this method will not create a batch of identities
+     * since there is no bulk add service API for just modules. This method will also prioritize
+     * returning cached identities with twin changes over cached identities with no twin changes, but needCleanTwin can be used
+     * to never return a cached identity with twin changes.
+     *
+     * For instance, a test method that just wants to send telemetry from a module identity should set needCleanTwin to false
+     * so that it can use any available module. Conversely, a test method that involves setting reported or desired properties
+     * should set needCleanTwin to true to avoid previous twin state interfering with the upcoming test.
+     *
+     * @param iotHubConnectionString The connection string for the IoT Hub where the identity will be registered to.
+     * @param protocol The device side protocol for the client to use.
+     * @param authenticationType The device side authentication type for the client to use.
+     * @param needCleanTwin True if the returned module identity needs to not have any pre-existing desired or reported properties, false otherwise.
+     * @return A {@link TestDeviceIdentity} that was either recycled from a previous test when possible, or was just created for this test.
+     * @throws URISyntaxException If the connection string cannot be parsed.
+     * @throws IOException If the registry addition of a module fails.
+     * @throws IotHubException If the registry addition of a module fails.
+     * @throws GeneralSecurityException If creating the x509 certificates for an x509 module fails.
+     */
+    public static TestModuleIdentity getTestModule(String iotHubConnectionString, IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean needCleanTwin) throws URISyntaxException, IOException, IotHubException, InterruptedException, ModuleClientException, GeneralSecurityException
+    {
+        return getTestModule(iotHubConnectionString, protocol, authenticationType, needCleanTwin, ClientOptions.builder());
+    }
+
+    private static TestModuleIdentity getSasTestModule(String iotHubConnectionString, IotHubClientProtocol protocol, boolean needCleanTwin, ClientOptions.ClientOptionsBuilder optionsBuilder) throws URISyntaxException, IOException, IotHubException, InterruptedException, ModuleClientException, GeneralSecurityException
     {
         // Want to make sure that no thread checks the size of a queue and then has the size change before it can
         // remove an identity from the queue.
@@ -426,7 +452,7 @@ public class Tools
                 testModuleIdentity = testSasModuleQueue.remove();
             }
 
-            ClientOptions clientOptions = ClientOptions.builder()
+            ClientOptions clientOptions = optionsBuilder
                 .amqpAuthenticationSessionTimeout(AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS)
                 .amqpDeviceSessionTimeout(AMQP_DEVICE_SESSION_TIMEOUT_SECONDS)
                 .build();
@@ -436,7 +462,7 @@ public class Tools
         }
     }
 
-    private static TestModuleIdentity getX509TestModule(String iotHubConnectionString, IotHubClientProtocol protocol, boolean needCleanTwin) throws URISyntaxException, IOException, IotHubException, InterruptedException, ModuleClientException, GeneralSecurityException
+    private static TestModuleIdentity getX509TestModule(String iotHubConnectionString, IotHubClientProtocol protocol, boolean needCleanTwin, ClientOptions.ClientOptionsBuilder optionsBuilder) throws URISyntaxException, IOException, IotHubException, InterruptedException, ModuleClientException, GeneralSecurityException
     {
         // Want to make sure that no thread checks the size of a queue and then has the size change before it can
         // remove an identity from the queue.
@@ -479,7 +505,7 @@ public class Tools
             }
 
             SSLContext sslContext = SSLContextBuilder.buildSSLContext(IntegrationTest.x509CertificateGenerator.getPublicCertificate(), IntegrationTest.x509CertificateGenerator.getPrivateKey());
-            ClientOptions clientOptions = ClientOptions.builder()
+            ClientOptions clientOptions = optionsBuilder
                 .sslContext(sslContext)
                 .amqpAuthenticationSessionTimeout(AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS)
                 .amqpDeviceSessionTimeout(AMQP_DEVICE_SESSION_TIMEOUT_SECONDS)

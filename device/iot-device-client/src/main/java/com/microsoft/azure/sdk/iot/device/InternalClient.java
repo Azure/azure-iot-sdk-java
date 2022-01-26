@@ -131,6 +131,18 @@ public class InternalClient
                 throw new IllegalArgumentException("ClientOption receiveInterval must be greater than 0");
             }
 
+            if (clientOptions.getProxySettings() != null)
+            {
+                if (this.isMultiplexed)
+                {
+                    throw new IllegalStateException(
+                        "Cannot set the proxy settings of a multiplexed device. " +
+                            "Proxy settings for the multiplexed connection can only be set at multiplexing client constructor time.");
+                }
+
+                verifyRegisteredIfMultiplexing();
+            }
+
             this.deviceIO.setMaxNumberOfMessagesSentPerSendThread(clientOptions.getMessagesSentPerThread());
             this.deviceIO.setSendPeriodInMilliseconds(clientOptions.getSendInterval());
             this.deviceIO.setReceivePeriodInMilliseconds(clientOptions.getReceiveInterval());
@@ -655,36 +667,6 @@ public class InternalClient
         }
 
         this.method.subscribeToDeviceMethod(methodCallback, methodCallbackContext);
-    }
-
-    /**
-     * Set the proxy settings for this client to connect through. If null then any previous settings will be erased
-     * @param proxySettings the settings to be used when connecting to iothub through a proxy. If null, any previously saved
-     *                      settings will be erased, and no proxy will be used
-     */
-    public void setProxySettings(ProxySettings proxySettings)
-    {
-        if (this.isMultiplexed)
-        {
-            throw new IllegalStateException(
-                    "Cannot set the proxy settings of a multiplexed device. " +
-                            "Proxy settings for the multiplexed connection can only be set at multiplexing client constructor time.");
-        }
-
-        verifyRegisteredIfMultiplexing();
-
-        if (this.deviceIO.isOpen())
-        {
-            throw new IllegalStateException("Cannot set proxy after connection was already opened");
-        }
-
-        IotHubClientProtocol protocol = this.deviceIO.getProtocol();
-        if (protocol != HTTPS && protocol != AMQPS_WS && protocol != MQTT_WS && proxySettings != null)
-        {
-            throw new IllegalArgumentException("Use of proxies is unsupported unless using HTTPS, MQTT_WS or AMQPS_WS");
-        }
-
-        this.config.setProxySettings(proxySettings);
     }
 
     /**

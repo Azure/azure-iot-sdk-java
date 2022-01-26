@@ -228,18 +228,17 @@ public class TokenRenewalTests extends IntegrationTest
         Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
         for (IotHubClientProtocol protocol: IotHubClientProtocol.values())
         {
-            clients.add(createDeviceClient(protocol));
+            clients.add(createDeviceClient(protocol, null));
             if (protocol == HTTPS || protocol == MQTT_WS || protocol == AMQPS_WS)
             {
-                InternalClient client = createDeviceClient(protocol);
                 ProxySettings proxySettings = new ProxySettings(testProxy, testProxyUser, testProxyPass);
-                client.setProxySettings(proxySettings);
+                InternalClient client = createDeviceClient(protocol, proxySettings);
                 clients.add(client);
             }
 
             if (protocol != IotHubClientProtocol.HTTPS && !isBasicTierHub)
             {
-                clients.add(createModuleClient(protocol));
+                clients.add(createModuleClient(protocol, null));
             }
 
             // Add another client with a custom sas token provider. This is important to test
@@ -262,7 +261,7 @@ public class TokenRenewalTests extends IntegrationTest
 
         for (int i = 0; i < MULTIPLEX_COUNT; i++)
         {
-            DeviceClient deviceClientToMultiplex = (DeviceClient) createDeviceClient(protocol);
+            DeviceClient deviceClientToMultiplex = (DeviceClient) createDeviceClient(protocol, null);
             clientsToCreate.add(deviceClientToMultiplex);
         }
 
@@ -358,7 +357,7 @@ public class TokenRenewalTests extends IntegrationTest
         }
     }
 
-    private InternalClient createModuleClient(IotHubClientProtocol protocol) throws IOException, IotHubException, ModuleClientException, URISyntaxException, InterruptedException {
+    private InternalClient createModuleClient(IotHubClientProtocol protocol, ProxySettings proxySettings) throws IOException, IotHubException, ModuleClientException, URISyntaxException, InterruptedException {
         UUID uuid = UUID.randomUUID();
         String deviceId = "token-renewal-test-device-" + protocol + "-" + uuid.toString();
         String moduleId = "token-renewal-test-module-" + protocol + "-" + uuid.toString();
@@ -366,14 +365,25 @@ public class TokenRenewalTests extends IntegrationTest
         device = Tools.addDeviceWithRetry(registryManager, device);
         Module module = Module.createModule(deviceId, moduleId, AuthenticationType.SAS);
         module = Tools.addModuleWithRetry(registryManager, module);
-        ModuleClient moduleClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), protocol);
+
+        ClientOptions options =
+            ClientOptions.builder()
+                .sasTokenExpiryTime(SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL)
+                .proxySettings(proxySettings)
+                .build();
+
+        ModuleClient moduleClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), protocol, options);
         testIdentities.add(new TestModuleIdentity(moduleClient, device, module));
         return moduleClient;
     }
 
-    private InternalClient createDeviceClient(IotHubClientProtocol protocol) throws URISyntaxException, IOException, IotHubException, GeneralSecurityException
+    private InternalClient createDeviceClient(IotHubClientProtocol protocol, ProxySettings proxySettings) throws URISyntaxException, IOException, IotHubException, GeneralSecurityException
     {
-        TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SAS, false, SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL);
+        ClientOptions.ClientOptionsBuilder optionsBuilder =
+            ClientOptions.builder()
+                .sasTokenExpiryTime(SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL)
+                .proxySettings(proxySettings);
+        TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SAS, false, optionsBuilder);
         com.microsoft.azure.sdk.iot.service.Device device = testDeviceIdentity.getDevice();
         testIdentities.add(testDeviceIdentity);
         return new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), protocol);

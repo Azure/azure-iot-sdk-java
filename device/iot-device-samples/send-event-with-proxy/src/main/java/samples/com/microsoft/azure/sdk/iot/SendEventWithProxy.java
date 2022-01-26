@@ -181,12 +181,13 @@ public class SendEventWithProxy
         System.out.println("Successfully read input parameters.");
         System.out.format("Using communication protocol %s.\n", protocol.name());
 
-        DeviceClient client = new DeviceClient(connString, protocol);
-
         Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHostname, proxyPort));
         ProxySettings httpProxySettings = new ProxySettings(proxy, proxyUsername, proxyPassword);
         System.out.println("Using proxy address: " + proxyHostname + ":" + proxyPort);
-        client.setProxySettings(httpProxySettings);
+
+        ClientOptions clientOptions = ClientOptions.builder().proxySettings(httpProxySettings).build();
+        DeviceClient client = new DeviceClient(connString, protocol, clientOptions);
+
 
         System.out.println("Successfully created an IoT Hub client.");
 

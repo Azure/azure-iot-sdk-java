@@ -248,9 +248,16 @@ public class SendMessagesCommon extends IntegrationTest
 
         public void setup(SSLContext customSSLContext, boolean useCustomSasTokenProvider) throws Exception
         {
+            ClientOptions.ClientOptionsBuilder optionsBuilder = ClientOptions.builder();
+            if (this.useHttpProxy)
+            {
+                Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
+                optionsBuilder.proxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass));
+            }
+
             if (clientType == ClientType.DEVICE_CLIENT)
             {
-                this.identity = Tools.getTestDevice(iotHubConnectionString, this.protocol, this.authenticationType, false);
+                this.identity = Tools.getTestDevice(iotHubConnectionString, this.protocol, this.authenticationType, false, optionsBuilder);
 
                 if (customSSLContext != null)
                 {
@@ -267,14 +274,7 @@ public class SendMessagesCommon extends IntegrationTest
             }
             else if (clientType == ClientType.MODULE_CLIENT)
             {
-                this.identity = Tools.getTestModule(iotHubConnectionString, this.protocol, this.authenticationType , false);
-            }
-
-            if (this.useHttpProxy)
-            {
-                Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-                ProxySettings proxySettings = new ProxySettings(testProxy, testProxyUser, testProxyPass);
-                this.identity.getClient().setProxySettings(proxySettings);
+                this.identity = Tools.getTestModule(iotHubConnectionString, this.protocol, this.authenticationType , false, optionsBuilder);
             }
 
             buildMessageLists();
