@@ -32,11 +32,11 @@ public class SendEventX509
 
     //PEM encoded representation of the private key
     private static final String privateKeyString =
-            "-----BEGIN EC PRIVATE KEY-----\n" +
+            "-----BEGIN PRIVATE KEY-----\n" +
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
-            "-----END EC PRIVATE KEY-----\n";
+            "-----END PRIVATE KEY-----\n";
 
     private  static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds
     private  static final List<String> failedMessageListOnClose = new ArrayList<>(); // List of messages that failed on close

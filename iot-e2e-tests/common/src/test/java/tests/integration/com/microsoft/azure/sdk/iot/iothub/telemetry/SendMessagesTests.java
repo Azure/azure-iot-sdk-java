@@ -6,11 +6,15 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.telemetry;
 
 
+import com.microsoft.azure.sdk.iot.device.ClientOptions;
+import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,10 +24,17 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.IotHubServicesCommo
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.MessageAndResult;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.SSLContextBuilder;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Success;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestDeviceIdentity;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509CertificateGenerator;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.SendMessagesCommon;
+
+import javax.net.ssl.SSLContext;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.security.GeneralSecurityException;
+import java.util.UUID;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.HTTPS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
@@ -198,5 +209,31 @@ public class SendMessagesTests extends SendMessagesCommon
         this.testInstance.setup(SSLContextBuilder.buildSSLContext());
 
         IotHubServicesCommon.sendMessages(testInstance.identity.getClient(), testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
+    }
+
+    @ContinuousIntegrationTest
+    @Test
+    public void sendMessagesWithECCCertificate() throws GeneralSecurityException, IOException, IotHubException, URISyntaxException
+    {
+        if (testInstance.authenticationType != AuthenticationType.SELF_SIGNED || testInstance.clientType != ClientType.DEVICE_CLIENT)
+        {
+            // test is only applicable for self-signed device clients
+            return;
+        }
+
+        X509CertificateGenerator eccCertGenerator =
+            new X509CertificateGenerator(X509CertificateGenerator.CertificateAlgorithm.ECC);
+
+        SSLContext sslContext = SSLContextBuilder.buildSSLContext(eccCertGenerator.getX509Certificate(), eccCertGenerator.getPrivateKey());
+
+        Device eccDevice = Device.createDevice(UUID.randomUUID().toString(), AuthenticationType.SELF_SIGNED);
+        eccDevice.setThumbprint(eccCertGenerator.getX509Thumbprint(), eccCertGenerator.getX509Thumbprint());
+        eccDevice = registryManager.addDevice(eccDevice);
+
+        ClientOptions clientOptions = ClientOptions.builder().sslContext(sslContext).build();
+        DeviceClient deviceClient = new DeviceClient(registryManager.getDeviceConnectionString(eccDevice), testInstance.protocol, clientOptions);
+
+        deviceClient.open(false);
+        deviceClient.close();
     }
 }

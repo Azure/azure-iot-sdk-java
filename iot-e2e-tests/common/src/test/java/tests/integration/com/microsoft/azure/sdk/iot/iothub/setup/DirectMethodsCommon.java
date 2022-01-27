@@ -7,13 +7,9 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 
 import com.azure.core.credential.AzureSasCredential;
-import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.Module;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
@@ -21,13 +17,11 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodsClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceConnectionString;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceEmulator;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceTestManager;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
@@ -40,8 +34,6 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
@@ -74,7 +66,6 @@ public class DirectMethodsCommon extends IntegrationTest
     protected static final Long CONNECTION_TIMEOUT = TimeUnit.SECONDS.toSeconds(5);
     protected static final String PAYLOAD_STRING = "This is a valid payload";
 
-    protected static final int NUMBER_INVOKES_PARALLEL = 10;
     // How much to wait until a message makes it to the server, in milliseconds
     protected static final Integer SEND_TIMEOUT_MILLISECONDS = 60000;
 
@@ -147,8 +138,8 @@ public class DirectMethodsCommon extends IntegrationTest
             this.protocol = protocol;
             this.authenticationType = authenticationType;
             this.clientType = clientType;
-            this.publicKeyCert = x509CertificateGenerator.getPublicCertificate();
-            this.privateKey = x509CertificateGenerator.getPrivateKey();
+            this.publicKeyCert = x509CertificateGenerator.getPublicCertificatePEM();
+            this.privateKey = x509CertificateGenerator.getPrivateKeyPEM();
             this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
             this.methodServiceClient = new DirectMethodsClient(iotHubConnectionString, DirectMethodsClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
             this.registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
@@ -212,75 +203,6 @@ public class DirectMethodsCommon extends IntegrationTest
         this.testInstance.dispose();
     }
 
-    protected static class RunnableInvoke implements Runnable
-    {
-        protected String deviceId;
-        protected String moduleId;
-        protected String testName;
-        protected CountDownLatch latch;
-        protected MethodResult result = null;
-        protected DirectMethodsClient methodServiceClient;
-        protected Exception exception = null;
-
-        public RunnableInvoke(DirectMethodsClient methodServiceClient, String deviceId, String moduleId, String testName, CountDownLatch latch)
-        {
-            this.methodServiceClient = methodServiceClient;
-            this.deviceId = deviceId;
-            this.moduleId = moduleId;
-            this.testName = testName;
-            this.latch = latch;
-        }
-
-        @Override
-        public void run()
-        {
-            // Arrange
-            exception = null;
-
-            // Act
-            try
-            {
-                if (moduleId != null)
-                {
-                    result = methodServiceClient.invoke(deviceId, moduleId, DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, testName);
-                }
-                else
-                {
-                    result = methodServiceClient.invoke(deviceId, DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, testName);
-                }
-            }
-            catch (Exception e)
-            {
-                exception = e;
-            }
-
-            latch.countDown();
-        }
-
-        public String getExpectedPayload()
-        {
-            return DeviceEmulator.METHOD_LOOPBACK + ":" + testName;
-        }
-
-        public MethodResult getResult()
-        {
-            return result;
-        }
-
-        public Exception getException()
-        {
-            return exception;
-        }
-    }
-
-    protected void setConnectionStatusCallback(final List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates)
-    {
-
-        IotHubConnectionStatusChangeCallback connectionStatusUpdateCallback = (status, statusChangeReason, throwable, callbackContext) -> actualStatusUpdates.add(new Pair<>(status, throwable));
-
-        this.testInstance.deviceTestManager.client.setConnectionStatusChangeCallback(connectionStatusUpdateCallback, null);
-    }
-
     protected void invokeMethodSucceed() throws Exception
     {
         // Arrange
@@ -304,11 +226,6 @@ public class DirectMethodsCommon extends IntegrationTest
         assertEquals((long)DeviceEmulator.METHOD_SUCCESS, (long)result.getStatus());
         assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, result.getPayload());
         Assert.assertEquals(0, deviceTestManger.getStatusError());
-    }
-
-    protected String getModuleConnectionString(Module module) throws IotHubException, IOException
-    {
-        return DeviceConnectionString.get(iotHubConnectionString, testInstance.registryManager.getDevice(module.getDeviceId()), module);
     }
 
     protected static DirectMethodsClient buildDeviceMethodClientWithAzureSasCredential()

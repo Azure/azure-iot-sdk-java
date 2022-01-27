@@ -38,6 +38,41 @@ public class SSLContextBuilder
     /**
      * Create an SSLContext instance with the provided public certificate and private key that also trusts the public
      * certificates loaded in your device's trusted root certification authorities certificate store.
+     * @param publicKeyCertificate the public key to use for x509 authentication. Does not need to include the
+     *                                   Iot Hub trusted certificate as it will be added automatically as long as it is
+     *                                   in your device's trusted root certification authorities certificate store.
+     * @param privateKey The private key to use for x509 authentication
+     * @return The created SSLContext that uses the provided public key and private key
+     * @throws GeneralSecurityException If the certificate creation fails, or if the SSLContext creation using those certificates fails.
+     * @throws IOException If the certificates cannot be read.
+     */
+    public static SSLContext buildSSLContext(X509Certificate publicKeyCertificate, PrivateKey privateKey) throws GeneralSecurityException, IOException
+    {
+        char[] temporaryPassword = generateTemporaryPassword();
+
+        KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+        keystore.load(null);
+        keystore.setCertificateEntry(CERTIFICATE_ALIAS, publicKeyCertificate);
+        keystore.setKeyEntry(PRIVATE_KEY_ALIAS, privateKey, temporaryPassword, new Certificate[] {publicKeyCertificate});
+
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        kmf.init(keystore, temporaryPassword);
+
+        SSLContext sslContext = SSLContext.getInstance(SSL_CONTEXT_INSTANCE);
+
+        // By leaving the TrustManager array null, the SSLContext will trust the certificates stored on your device's
+        // trusted root certification authorities certificate store.
+        //
+        // This must include the Baltimore CyberTrust Root public certificate: https://baltimore-cybertrust-root.chain-demos.digicert.com/info/index.html
+        // and eventually it will need to include the DigiCert Global Root G2 public certificate: https://global-root-g2.chain-demos.digicert.com/info/index.html
+        sslContext.init(kmf.getKeyManagers(), null, new SecureRandom());
+
+        return sslContext;
+    }
+
+    /**
+     * Create an SSLContext instance with the provided public certificate and private key that also trusts the public
+     * certificates loaded in your device's trusted root certification authorities certificate store.
      * @param publicKeyCertificateString the public key to use for x509 authentication. Does not need to include the
      *                                   Iot Hub trusted certificate as it will be added automatically as long as it is
      *                                   in your device's trusted root certification authorities certificate store.

@@ -33,6 +33,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509CertificateGenerator;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.DeviceProvisioningServiceTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
@@ -218,6 +219,20 @@ public class ProvisioningTests extends ProvisioningCommon
         assertNotNull(retrievedTpmAttestation.getEndorsementKey());
     }
 
+    @ContinuousIntegrationTest
+    @Test
+    public void individualEnrollmentWithECCCertificates() throws Exception
+    {
+        if (testInstance.attestationType != AttestationType.X509)
+        {
+            // test is only relevant for x509 authentication
+            return;
+        }
+
+        testInstance.certificateAlgorithm = X509CertificateGenerator.CertificateAlgorithm.ECC;
+        customAllocationFlow(EnrollmentType.INDIVIDUAL);
+    }
+
     /***
      * This test flow uses a custom allocation policy to decide which of the two hubs a device should be provisioned to.
      * The custom allocation policy has a webhook to an Azure function, and that function will always dictate to provision
@@ -281,7 +296,7 @@ public class ProvisioningTests extends ProvisioningCommon
 
         testInstance.securityProvider = getSecurityProviderInstance(enrollmentType, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubsToStartAt, capabilities);
 
-        ProvisioningStatus provisioningStatus = registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, iothubsToStartAt);
+        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, iothubsToStartAt);
 
         assertProvisionedDeviceCapabilitiesAreExpected(capabilities, farAwayIotHubConnectionString);
 

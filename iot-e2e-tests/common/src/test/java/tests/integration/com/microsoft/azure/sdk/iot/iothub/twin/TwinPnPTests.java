@@ -119,8 +119,6 @@ public class TwinPnPTests extends IntegrationTest
         public BaseDevice identity;
         public AuthenticationType authenticationType;
         public ClientType clientType;
-        public String publicKeyCert;
-        public String privateKey;
         public String x509Thumbprint;
 
         private final TwinClient twinServiceClient;
@@ -131,8 +129,6 @@ public class TwinPnPTests extends IntegrationTest
             this.protocol = protocol;
             this.authenticationType = authenticationType;
             this.clientType = clientType;
-            this.publicKeyCert = x509CertificateGenerator.getPublicCertificate();
-            this.privateKey = x509CertificateGenerator.getPrivateKey();
             this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
 
             this.twinServiceClient = new TwinClient(iotHubConnectionString);
@@ -173,7 +169,7 @@ public class TwinPnPTests extends IntegrationTest
                 else if (authenticationType == SELF_SIGNED)
                 {
                     //x509 device client
-                    SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCert, privateKey);
+                    SSLContext sslContext = SSLContextBuilder.buildSSLContext(x509CertificateGenerator.getX509Certificate(), x509CertificateGenerator.getPrivateKey());
                     clientOptionsBuilder.sslContext(sslContext);
                     this.client = new DeviceClient(registryManager.getDeviceConnectionString(deviceX509), protocol, clientOptionsBuilder.build());
                     this.identity = deviceX509;
@@ -199,7 +195,7 @@ public class TwinPnPTests extends IntegrationTest
                 {
                     //x509 module client
                     moduleX509 = Tools.addModuleWithRetry(registryManager, moduleX509);
-                    SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCert, privateKey);
+                    SSLContext sslContext = SSLContextBuilder.buildSSLContext(x509CertificateGenerator.getX509Certificate(), x509CertificateGenerator.getPrivateKey());
                     clientOptionsBuilder.sslContext(sslContext);
                     this.client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509, moduleX509), protocol, clientOptionsBuilder.build());
                     this.identity = moduleX509;

@@ -55,7 +55,7 @@ public class ProvisioningServiceClientTests
     {
         String registrationId = testPrefix + UUID.randomUUID();
         X509CertificateGenerator certificateGenerator = new X509CertificateGenerator(registrationId);
-        String leafPublicPem = certificateGenerator.getPublicCertificate();
+        String leafPublicPem = certificateGenerator.getPublicCertificatePEM();
         Attestation attestation = X509Attestation.createFromClientCertificates(leafPublicPem);
         IndividualEnrollment individualEnrollment = new IndividualEnrollment(registrationId, attestation);
         provisioningServiceClient.createOrUpdateIndividualEnrollment(individualEnrollment);

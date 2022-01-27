@@ -204,6 +204,7 @@ public class ProvisioningCommon extends IntegrationTest
         public SecurityProvider securityProvider;
         public String provisionedIotHubUri;
         public ProvisioningServiceClient provisioningServiceClient;
+        public X509CertificateGenerator.CertificateAlgorithm certificateAlgorithm;
 
         public ProvisioningTestInstance(ProvisioningDeviceClientTransportProtocol protocol, AttestationType attestationType)
         {
@@ -213,6 +214,8 @@ public class ProvisioningCommon extends IntegrationTest
             this.registrationId = "java-provisioning-test-" + this.attestationType.toString().toLowerCase().replace("_", "-") + "-" + UUID.randomUUID().toString();
             this.provisioningServiceClient =
                     new ProvisioningServiceClient(provisioningServiceConnectionString);
+
+            this.certificateAlgorithm = X509CertificateGenerator.CertificateAlgorithm.RSA;
         }
     }
 
@@ -550,9 +553,9 @@ public class ProvisioningCommon extends IntegrationTest
             }
             else if (testInstance.attestationType == AttestationType.X509)
             {
-                X509CertificateGenerator certificateGenerator = new X509CertificateGenerator(testInstance.registrationId);
-                String leafPublicPem = certificateGenerator.getPublicCertificate();
-                String leafPrivateKeyPem = certificateGenerator.getPrivateKey();
+                X509CertificateGenerator certificateGenerator = new X509CertificateGenerator(testInstance.certificateAlgorithm, testInstance.registrationId);
+                String leafPublicPem = certificateGenerator.getPublicCertificatePEM();
+                String leafPrivateKeyPem = certificateGenerator.getPrivateKeyPEM();
 
                 Collection<X509Certificate> signerCertificates = new LinkedList<>();
                 Attestation attestation = X509Attestation.createFromClientCertificates(leafPublicPem);

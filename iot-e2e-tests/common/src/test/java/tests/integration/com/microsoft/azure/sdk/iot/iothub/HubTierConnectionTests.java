@@ -70,8 +70,6 @@ public class HubTierConnectionTests extends IntegrationTest
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
-        String publicKeyCert = x509CertificateGenerator.getPublicCertificate();
-        String privateKey = x509CertificateGenerator.getPrivateKey();
         String x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
 
         registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
@@ -88,7 +86,7 @@ public class HubTierConnectionTests extends IntegrationTest
         Tools.addDeviceWithRetry(registryManager, deviceX509);
 
         hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString).getHostName();
-        SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCert, privateKey);
+        SSLContext sslContext = SSLContextBuilder.buildSSLContext(x509CertificateGenerator.getX509Certificate(), x509CertificateGenerator.getPrivateKey());
 
         ClientOptions options = ClientOptions.builder().sslContext(sslContext).build();
 
@@ -157,8 +155,8 @@ public class HubTierConnectionTests extends IntegrationTest
             this.protocol = protocol;
             this.identity = identity;
             this.authenticationType = authenticationType;
-            this.publicKeyCert = x509CertificateGenerator.getPublicCertificate();
-            this.privateKey = x509CertificateGenerator.getPrivateKey();
+            this.publicKeyCert = x509CertificateGenerator.getPublicCertificatePEM();
+            this.privateKey = x509CertificateGenerator.getPrivateKeyPEM();
             this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
             String deviceId = identity.getDeviceId();
             this.useHttpProxy = useHttpProxy;

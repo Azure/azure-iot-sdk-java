@@ -331,7 +331,7 @@ public class Tools
                 testDeviceIdentity = testX509DeviceQueue.remove();
             }
 
-            SSLContext sslContext = SSLContextBuilder.buildSSLContext(IntegrationTest.x509CertificateGenerator.getPublicCertificate(), IntegrationTest.x509CertificateGenerator.getPrivateKey());
+            SSLContext sslContext = SSLContextBuilder.buildSSLContext(IntegrationTest.x509CertificateGenerator.getX509Certificate(), IntegrationTest.x509CertificateGenerator.getPrivateKey());
             ClientOptions clientOptions = optionsBuilder
                 .sslContext(sslContext)
                 .amqpAuthenticationSessionTimeout(AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS)
@@ -504,7 +504,7 @@ public class Tools
                 testModuleIdentity = testX509ModuleQueue.remove();
             }
 
-            SSLContext sslContext = SSLContextBuilder.buildSSLContext(IntegrationTest.x509CertificateGenerator.getPublicCertificate(), IntegrationTest.x509CertificateGenerator.getPrivateKey());
+            SSLContext sslContext = SSLContextBuilder.buildSSLContext(IntegrationTest.x509CertificateGenerator.getX509Certificate(), IntegrationTest.x509CertificateGenerator.getPrivateKey());
             ClientOptions clientOptions = optionsBuilder
                 .sslContext(sslContext)
                 .amqpAuthenticationSessionTimeout(AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS)

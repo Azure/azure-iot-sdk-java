@@ -207,8 +207,6 @@ public class SendMessagesCommon extends IntegrationTest
         public TestIdentity identity;
         public AuthenticationType authenticationType;
         public ClientType clientType;
-        public String publicKeyCert;
-        public String privateKey;
         public String x509Thumbprint;
         public boolean useHttpProxy;
 
@@ -217,15 +215,13 @@ public class SendMessagesCommon extends IntegrationTest
             this.protocol = protocol;
             this.authenticationType = authenticationType;
             this.clientType = clientType;
-            this.publicKeyCert = x509CertificateGenerator.getPublicCertificate();
-            this.privateKey = x509CertificateGenerator.getPrivateKey();
             this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
             this.useHttpProxy = useHttpProxy;
         }
 
         public void setup() throws Exception
         {
-            SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCert, privateKey);
+            SSLContext sslContext = SSLContextBuilder.buildSSLContext(x509CertificateGenerator.getX509Certificate(), x509CertificateGenerator.getPrivateKey());
             setup(sslContext);
         }
 

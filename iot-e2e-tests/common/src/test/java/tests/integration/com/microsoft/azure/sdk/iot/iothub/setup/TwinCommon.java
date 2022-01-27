@@ -368,8 +368,8 @@ public class TwinCommon extends IntegrationTest
         {
             this.protocol = protocol;
             this.authenticationType = authenticationType;
-            this.publicKeyCert = x509CertificateGenerator.getPublicCertificate();
-            this.privateKey = x509CertificateGenerator.getPrivateKey();
+            this.publicKeyCert = x509CertificateGenerator.getPublicCertificatePEM();
+            this.privateKey = x509CertificateGenerator.getPrivateKeyPEM();
             this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
             this.clientType = clientType;
             

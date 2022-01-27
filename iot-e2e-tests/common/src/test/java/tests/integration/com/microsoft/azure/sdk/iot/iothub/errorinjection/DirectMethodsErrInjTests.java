@@ -6,6 +6,7 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.errorinjection;
 
 
+import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
 import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
@@ -247,7 +248,8 @@ public class DirectMethodsErrInjTests extends DirectMethodsCommon
     {
         // Arrange
         List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates = new ArrayList<>();
-        setConnectionStatusCallback(actualStatusUpdates);
+        IotHubConnectionStatusChangeCallback connectionStatusUpdateCallback = (status, statusChangeReason, throwable, callbackContext) -> actualStatusUpdates.add(new Pair<>(status, throwable));
+        this.testInstance.deviceTestManager.client.setConnectionStatusChangeCallback(connectionStatusUpdateCallback, null);
         invokeMethodSucceed();
 
         // Act
