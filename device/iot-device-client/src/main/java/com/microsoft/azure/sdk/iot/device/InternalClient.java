@@ -6,7 +6,7 @@
 package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.twin.DeviceMethod;
-import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodCallback;
+import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
 import com.microsoft.azure.sdk.iot.device.twin.DeviceTwin;
 import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
@@ -148,17 +148,6 @@ public class InternalClient
     {
         this.config = null;
         this.deviceIO = null;
-    }
-
-    /**
-     * Starts asynchronously sending and receiving messages from an IoT hub. If
-     * the client is already open, the function shall do nothing.
-     *
-     * @throws IOException if a connection to an IoT hub cannot be established.
-     */
-    public void open() throws IOException
-    {
-        this.open(false);
     }
 
     /**
@@ -638,7 +627,7 @@ public class InternalClient
      * @throws IOException if called when client is not opened.
      * @throws IllegalArgumentException if either callback are null.
      */
-    public void subscribeToMethodsAsync(DeviceMethodCallback methodCallback, Object methodCallbackContext,
+    public void subscribeToMethodsAsync(MethodCallback methodCallback, Object methodCallbackContext,
                                         IotHubEventCallback methodStatusCallback, Object methodStatusCallbackContext)
             throws IOException
     {

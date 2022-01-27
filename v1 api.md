@@ -129,7 +129,7 @@ public final class DeviceClient extends InternalClient implements Closeable
 			throws IOException;
 
     public void subscribeToDeviceMethod(
-        DeviceMethodCallback deviceMethodCallback, 
+        DeviceMethodCallback methodCallback, 
         Object deviceMethodCallbackContext,
         IotHubEventCallback deviceMethodStatusCallback, 
         Object deviceMethodStatusCallbackContext)
@@ -174,6 +174,12 @@ public final class ModuleClient extends InternalClient
     
     public static ModuleClient createFromEnvironment(IotHubClientProtocol protocol, ClientOptions clientOptions) throws ModuleClientException;
     
+    public void open() throws IOException;
+    
+    public void open(boolean withRetry) throws IOException;
+
+    public void close();
+    
     public void sendEventAsync(Message message, IotHubEventCallback callback, Object callbackContext, String outputName);
 
     public MethodResult invokeMethod(String deviceId, MethodRequest methodRequest) throws ModuleClientException;
@@ -215,7 +221,7 @@ public final class ModuleClient extends InternalClient
     public ModuleClient setMessageCallback(String inputName, MessageCallback callback, Object context);
 	
     public void subscribeToDeviceMethod(
-		DeviceMethodCallback deviceMethodCallback, 
+		DeviceMethodCallback methodCallback, 
 		Object deviceMethodCallbackContext,
         IotHubEventCallback deviceMethodStatusCallback, 
 		Object deviceMethodStatusCallbackContext)

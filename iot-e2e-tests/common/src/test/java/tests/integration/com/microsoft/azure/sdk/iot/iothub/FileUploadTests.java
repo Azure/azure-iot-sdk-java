@@ -241,7 +241,7 @@ public class FileUploadTests extends IntegrationTest
 
         Thread.sleep(5000);
 
-        deviceClient.open();
+        deviceClient.open(false);
         return deviceClient;
     }
 

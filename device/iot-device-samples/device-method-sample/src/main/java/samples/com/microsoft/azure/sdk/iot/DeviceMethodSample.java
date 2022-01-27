@@ -4,8 +4,8 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodCallback;
-import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodData;
+import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
+import com.microsoft.azure.sdk.iot.device.twin.MethodData;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import java.io.IOException;
@@ -47,19 +47,19 @@ public class DeviceMethodSample
         }
     }
 
-    protected static class SampleDeviceMethodCallback implements DeviceMethodCallback
+    protected static class SampleMethodCallback implements MethodCallback
     {
         @Override
-        public DeviceMethodData call(String methodName, Object methodData, Object context)
+        public MethodData call(String methodName, Object methodData, Object context)
         {
-            DeviceMethodData deviceMethodData;
+            MethodData deviceMethodData;
             int status = method_default(methodData);
             if ("command".equals(methodName))
             {
                 status = method_command(methodData);
             }
 
-            deviceMethodData = new DeviceMethodData(status, "executed " + methodName);
+            deviceMethodData = new MethodData(status, "executed " + methodName);
 
             return deviceMethodData;
         }
@@ -174,11 +174,11 @@ public class DeviceMethodSample
 
         try
         {
-            client.open();
+            client.open(false);
 
             System.out.println("Opened connection to IoT Hub.");
 
-            client.subscribeToMethodsAsync(new SampleDeviceMethodCallback(), null, new DeviceMethodStatusCallback(), null);
+            client.subscribeToMethodsAsync(new SampleMethodCallback(), null, new DeviceMethodStatusCallback(), null);
 
             System.out.println("Subscribed to device method");
 

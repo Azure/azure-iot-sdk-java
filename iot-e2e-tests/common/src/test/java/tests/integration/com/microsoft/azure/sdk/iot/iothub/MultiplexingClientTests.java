@@ -9,7 +9,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodData;
+import com.microsoft.azure.sdk.iot.device.twin.MethodData;
 import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
 import com.microsoft.azure.sdk.iot.device.twin.TwinPropertyCallback;
@@ -258,7 +258,7 @@ public class MultiplexingClientTests extends IntegrationTest
     public void sendMessages() throws Exception
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
-        testInstance.multiplexingClient.open();
+        testInstance.multiplexingClient.open(false);
 
         testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray);
 
@@ -273,7 +273,7 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.setup(0);
         ConnectionStatusChangeTracker connectionStatusChangeTracker = new ConnectionStatusChangeTracker();
         testInstance.multiplexingClient.setConnectionStatusChangeCallback(connectionStatusChangeTracker, null);
-        testInstance.multiplexingClient.open();
+        testInstance.multiplexingClient.open(false);
 
         assertTrue(
             "Connection status callback never executed with CONNECTED status after opening multiplexing client with no devices registered",
@@ -293,7 +293,7 @@ public class MultiplexingClientTests extends IntegrationTest
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
         testInstance.multiplexingClient.unregisterDeviceClients(testInstance.deviceClientArray);
-        testInstance.multiplexingClient.open();
+        testInstance.multiplexingClient.open(false);
 
         testInstance.multiplexingClient.registerDeviceClients(testInstance.deviceClientArray);
 
@@ -306,7 +306,7 @@ public class MultiplexingClientTests extends IntegrationTest
     public void canUnregisterAllClientsThenReregisterAllClientsOnOpenConnection() throws Exception
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
-        testInstance.multiplexingClient.open();
+        testInstance.multiplexingClient.open(false);
 
         testInstance.multiplexingClient.unregisterDeviceClients(testInstance.deviceClientArray);
         testInstance.multiplexingClient.registerDeviceClients(testInstance.deviceClientArray);
@@ -323,11 +323,11 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
 
         // Open and close the connection once
-        testInstance.multiplexingClient.open();
+        testInstance.multiplexingClient.open(false);
         testInstance.multiplexingClient.close();
 
         // Re-open the connection and verify that it can still send telemetry
-        testInstance.multiplexingClient.open();
+        testInstance.multiplexingClient.open(false);
         testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray);
         testInstance.multiplexingClient.close();
     }
@@ -347,7 +347,7 @@ public class MultiplexingClientTests extends IntegrationTest
             testInstance.setup(MultiplexingClient.MAX_MULTIPLEX_DEVICE_COUNT_AMQPS_WS);
         }
 
-        testInstance.multiplexingClient.open();
+        testInstance.multiplexingClient.open(false);
 
         testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray);
 
@@ -387,7 +387,7 @@ public class MultiplexingClientTests extends IntegrationTest
                 try
                 {
                     openExceptions[finalI] = new AtomicReference<>();
-                    testInstances[finalI].multiplexingClient.open();
+                    testInstances[finalI].multiplexingClient.open(false);
                 }
                 catch (MultiplexingClientException e)
                 {
@@ -462,7 +462,7 @@ public class MultiplexingClientTests extends IntegrationTest
         long startOpenTime = System.currentTimeMillis();
         for (int i = 0; i < multiplexingClientCount; i++)
         {
-            testInstances[i].multiplexingClient.open();
+            testInstances[i].multiplexingClient.open(false);
         }
 
         long finishOpenTime = System.currentTimeMillis();
@@ -504,7 +504,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
         //re-setup test instance to use proxy instead
         testInstance.setup(DEVICE_MULTIPLEX_COUNT, MultiplexingClientOptions.builder().proxySettings(proxySettings).build(), false);
-        testInstance.multiplexingClient.open();
+        testInstance.multiplexingClient.open(false);
 
         testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray);
 
@@ -564,7 +564,7 @@ public class MultiplexingClientTests extends IntegrationTest
     public void receiveMessagesIncludingProperties() throws Exception
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
-        testInstance.multiplexingClient.open();
+        testInstance.multiplexingClient.open(false);
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
@@ -586,7 +586,7 @@ public class MultiplexingClientTests extends IntegrationTest
     public void cloudToDeviceMessageSubscriptionNotPreservedByDeviceClientAfterUnregistration() throws Exception
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
-        testInstance.multiplexingClient.open();
+        testInstance.multiplexingClient.open(false);
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             String expectedMessageCorrelationId = UUID.randomUUID().toString();
@@ -667,14 +667,14 @@ public class MultiplexingClientTests extends IntegrationTest
     public void invokeMethodSucceed() throws Exception
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
-        testInstance.multiplexingClient.open();
+        testInstance.multiplexingClient.open(false);
         DirectMethodsClient directMethodServiceClientClient = new DirectMethodsClient(iotHubConnectionString);
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             // Subscribe to methods on the multiplexed client
             String expectedMethodName = UUID.randomUUID().toString();
-            DeviceMethodCallback deviceMethodCallback = new DeviceMethodCallback(expectedMethodName);
+            MethodCallback deviceMethodCallback = new MethodCallback(expectedMethodName);
             subscribeToDeviceMethod(testInstance.deviceClientArray.get(i), deviceMethodCallback);
             testDeviceMethod(directMethodServiceClientClient, testInstance.deviceIdentityArray.get(i).getDeviceId(), expectedMethodName, deviceMethodCallback);
         }
@@ -689,9 +689,9 @@ public class MultiplexingClientTests extends IntegrationTest
     public void methodsSubscriptionNotPreservedByDeviceClientAfterUnregistration() throws Exception
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
-        testInstance.multiplexingClient.open();
+        testInstance.multiplexingClient.open(false);
         DirectMethodsClient directMethodServiceClientClient = new DirectMethodsClient(iotHubConnectionString);
-        List<DeviceMethodCallback> deviceMethodCallbacks = new ArrayList<>();
+        List<MethodCallback> deviceMethodCallbacks = new ArrayList<>();
         List<String> expectedMethodNames = new ArrayList<>();
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
@@ -699,7 +699,7 @@ public class MultiplexingClientTests extends IntegrationTest
             // Subscribe to methods on the multiplexed client
             String expectedMethodName = UUID.randomUUID().toString();
             expectedMethodNames.add(expectedMethodName);
-            DeviceMethodCallback deviceMethodCallback = new DeviceMethodCallback(expectedMethodName);
+            MethodCallback deviceMethodCallback = new MethodCallback(expectedMethodName);
             deviceMethodCallbacks.add(deviceMethodCallback);
             subscribeToDeviceMethod(testInstance.deviceClientArray.get(i), deviceMethodCallback);
             testDeviceMethod(directMethodServiceClientClient, testInstance.deviceIdentityArray.get(i).getDeviceId(), expectedMethodNames.get(i), deviceMethodCallbacks.get(i));
@@ -722,7 +722,7 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.multiplexingClient.close();
     }
 
-    private static void testDeviceMethod(DirectMethodsClient directMethodServiceClientClient, String deviceId, String expectedMethodName, DeviceMethodCallback deviceMethodCallback) throws IOException, IotHubException, InterruptedException {
+    private static void testDeviceMethod(DirectMethodsClient directMethodServiceClientClient, String deviceId, String expectedMethodName, MethodCallback deviceMethodCallback) throws IOException, IotHubException, InterruptedException {
         // Give the method subscription some extra buffer time before invoking the method
         Thread.sleep(1000);
 
@@ -734,7 +734,7 @@ public class MultiplexingClientTests extends IntegrationTest
         assertTrue("Device method callback fired, but unexpected method name was received", deviceMethodCallback.expectedMethodReceived);
     }
 
-    private static void subscribeToDeviceMethod(DeviceClient deviceClient, DeviceMethodCallback deviceMethodCallback) throws InterruptedException, IOException
+    private static void subscribeToDeviceMethod(DeviceClient deviceClient, MethodCallback deviceMethodCallback) throws InterruptedException, IOException
     {
         Success methodsSubscribedSuccess = new Success();
         deviceClient.subscribeToMethodsAsync(deviceMethodCallback, null, (responseStatus, callbackContext) -> {
@@ -756,27 +756,27 @@ public class MultiplexingClientTests extends IntegrationTest
         }
     }
 
-    private static class DeviceMethodCallback implements com.microsoft.azure.sdk.iot.device.twin.DeviceMethodCallback
+    private static class MethodCallback implements com.microsoft.azure.sdk.iot.device.twin.MethodCallback
     {
         public boolean deviceMethodCallbackFired = false;
         public boolean expectedMethodReceived = false;
 
         final String expectedMethodName;
 
-        public DeviceMethodCallback(String expectedMethodName)
+        public MethodCallback(String expectedMethodName)
         {
             this.expectedMethodName = expectedMethodName;
         }
 
         @Override
-        public DeviceMethodData call(String methodName, Object methodData, Object context) {
+        public MethodData call(String methodName, Object methodData, Object context) {
             deviceMethodCallbackFired = true;
             if (methodName.equals(expectedMethodName))
             {
                 expectedMethodReceived = true;
             }
 
-            return new DeviceMethodData(200, null);
+            return new MethodData(200, null);
         }
 
         public void resetExpectations()
@@ -828,7 +828,7 @@ public class MultiplexingClientTests extends IntegrationTest
     public void testTwin() throws Exception
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT, MultiplexingClientOptions.builder().build(), true);
-        testInstance.multiplexingClient.open();
+        testInstance.multiplexingClient.open(false);
 
         TwinClient twinClientServiceClient = new TwinClient(iotHubConnectionString, TwinClientOptions.builder().httpReadTimeout(0).build());
 
@@ -864,7 +864,7 @@ public class MultiplexingClientTests extends IntegrationTest
     public void twinSubscriptionNotPreservedByDeviceClientAfterUnregistration() throws Exception
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT, MultiplexingClientOptions.builder().build(), true);
-        testInstance.multiplexingClient.open();
+        testInstance.multiplexingClient.open(false);
 
         TwinClient twinClientServiceClient = new TwinClient(iotHubConnectionString, TwinClientOptions.builder().httpReadTimeout(0).build());
         String expectedPropertyKey = UUID.randomUUID().toString();
@@ -1039,7 +1039,7 @@ public class MultiplexingClientTests extends IntegrationTest
         DeviceClient clientToRegisterAfterOpen = testInstance.deviceClientArray.get(DEVICE_MULTIPLEX_COUNT - 1);
         testInstance.multiplexingClient.unregisterDeviceClient(clientToRegisterAfterOpen);
 
-        testInstance.multiplexingClient.open();
+        testInstance.multiplexingClient.open(false);
 
         ConnectionStatusChangeTracker connectionStatusChangeTracker = new ConnectionStatusChangeTracker();
         clientToRegisterAfterOpen.setConnectionStatusChangeCallback(connectionStatusChangeTracker, null);
@@ -1065,7 +1065,7 @@ public class MultiplexingClientTests extends IntegrationTest
         ConnectionStatusChangeTracker connectionStatusChangeTracker = new ConnectionStatusChangeTracker();
         clientToUnregisterAfterOpen.setConnectionStatusChangeCallback(connectionStatusChangeTracker, null);
 
-        testInstance.multiplexingClient.open();
+        testInstance.multiplexingClient.open(false);
 
         assertConnectionStateCallbackFiredConnected(connectionStatusChangeTracker, DEVICE_SESSION_OPEN_TIMEOUT);
 
@@ -1112,7 +1112,7 @@ public class MultiplexingClientTests extends IntegrationTest
             testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
         }
 
-        testInstance.multiplexingClient.open();
+        testInstance.multiplexingClient.open(false);
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
@@ -1169,7 +1169,7 @@ public class MultiplexingClientTests extends IntegrationTest
             testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
         }
 
-        testInstance.multiplexingClient.open();
+        testInstance.multiplexingClient.open(false);
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
@@ -1223,7 +1223,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
         testInstance.multiplexingClient.setConnectionStatusChangeCallback(multiplexedConnectionStatusChangeTracker, null);
 
-        testInstance.multiplexingClient.open();
+        testInstance.multiplexingClient.open(false);
 
         assertTrue(
                 "Multiplexed level connection status callback should have fired with CONNECTED after opening the multiplexing client",
@@ -1281,7 +1281,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
         testInstance.multiplexingClient.unregisterDeviceClient(testInstance.deviceClientArray.get(0));
 
-        testInstance.multiplexingClient.open();
+        testInstance.multiplexingClient.open(false);
 
         // Get a valid connection string, but swap out the deviceId for a deviceId that does exist, but whose symmetric key is different
         String incorrectConnectionString = registryManager.getDeviceConnectionString(testInstance.deviceIdentityArray.get(1)).replace(testInstance.deviceIdentityArray.get(1).getDeviceId(), testInstance.deviceIdentityArray.get(0).getDeviceId());
@@ -1327,7 +1327,7 @@ public class MultiplexingClientTests extends IntegrationTest
         boolean expectedExceptionThrown = false;
         try
         {
-            testInstance.multiplexingClient.open();
+            testInstance.multiplexingClient.open(false);
         }
         catch (MultiplexingClientDeviceRegistrationAuthenticationException e)
         {
@@ -1357,7 +1357,7 @@ public class MultiplexingClientTests extends IntegrationTest
             testInstance.multiplexingClient.unregisterDeviceClient(testInstance.deviceClientArray.get(i));
         }
 
-        testInstance.multiplexingClient.open();
+        testInstance.multiplexingClient.open(false);
 
         List<DeviceClient> clientsWithIncorrectCredentials = new ArrayList<>();
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
@@ -1437,7 +1437,7 @@ public class MultiplexingClientTests extends IntegrationTest
         boolean expectedExceptionThrown = false;
         try
         {
-            testInstance.multiplexingClient.open();
+            testInstance.multiplexingClient.open(false);
         }
         catch (MultiplexingClientDeviceRegistrationAuthenticationException e)
         {
@@ -1489,7 +1489,7 @@ public class MultiplexingClientTests extends IntegrationTest
         DeviceClient nonMultiplexedDeviceClient = new DeviceClient(deviceConnectionString, testInstance.protocol);
 
         //By opening the client once, this client can no longer be registered to a multiplexing client
-        nonMultiplexedDeviceClient.open();
+        nonMultiplexedDeviceClient.open(false);
         registrationsUnwindForUnsupportedOperationExceptions(nonMultiplexedDeviceClient);
         nonMultiplexedDeviceClient.close();
     }
@@ -1544,7 +1544,7 @@ public class MultiplexingClientTests extends IntegrationTest
             testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
         }
 
-        testInstance.multiplexingClient.open();
+        testInstance.multiplexingClient.open(false);
 
         // Disable a device that is on the multiplexed connection and that already has an open session
         Device deviceToDisable = registryManager.getDevice(testInstance.deviceIdentityArray.get(0).getDeviceId());
@@ -1618,7 +1618,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
         try
         {
-            testInstance.multiplexingClient.open();
+            testInstance.multiplexingClient.open(false);
 
             // verify that the disabled device eventually loses its device session
             long startTime = System.currentTimeMillis();
@@ -1675,7 +1675,7 @@ public class MultiplexingClientTests extends IntegrationTest
             testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
         }
 
-        testInstance.multiplexingClient.open();
+        testInstance.multiplexingClient.open(false);
 
         // Disable a device that will be on the multiplexed connection
         Device deviceToDisable = registryManager.getDevice(testInstance.deviceIdentityArray.get(0).getDeviceId());
@@ -1770,7 +1770,7 @@ public class MultiplexingClientTests extends IntegrationTest
     public void failedRegistrationDoesNotAffectSubsequentRegistrations() throws Exception
     {
         testInstance.setup(0);
-        testInstance.multiplexingClient.open();
+        testInstance.multiplexingClient.open(false);
 
         TestDeviceIdentity testDeviceIdentity =
             Tools.getTestDevice(iotHubConnectionString, this.testInstance.protocol, AuthenticationType.SAS, false);
@@ -1824,15 +1824,15 @@ public class MultiplexingClientTests extends IntegrationTest
             testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
         }
 
-        testInstance.multiplexingClient.open();
+        testInstance.multiplexingClient.open(false);
 
         // Subscribe to methods for all multiplexed clients
-        DeviceMethodCallback[] deviceMethodCallbacks = new DeviceMethodCallback[DEVICE_MULTIPLEX_COUNT];
+        MethodCallback[] deviceMethodCallbacks = new MethodCallback[DEVICE_MULTIPLEX_COUNT];
         String[] expectedMethodNames = new String[DEVICE_MULTIPLEX_COUNT];
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             expectedMethodNames[i] = UUID.randomUUID().toString();
-            deviceMethodCallbacks[i] = new DeviceMethodCallback(expectedMethodNames[i]);
+            deviceMethodCallbacks[i] = new MethodCallback(expectedMethodNames[i]);
             subscribeToDeviceMethod(testInstance.deviceClientArray.get(i), deviceMethodCallbacks[i]);
         }
 

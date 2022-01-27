@@ -381,7 +381,7 @@ public class DesiredPropertiesTests extends TwinCommon
 
         Success desiredPropertiesCallbackState = new Success();
 
-        testInstance.testIdentity.getClient().open();
+        testInstance.testIdentity.getClient().open(false);
         testInstance.testIdentity.getClient().startTwinAsync(new DeviceTwinStatusCallback(), testInstance.deviceUnderTest, twinPropertiesCallback, desiredPropertiesCallbackState);
 
         long startTime = System.currentTimeMillis();

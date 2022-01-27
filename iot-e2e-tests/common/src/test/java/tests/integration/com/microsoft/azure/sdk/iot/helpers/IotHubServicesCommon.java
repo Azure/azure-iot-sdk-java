@@ -49,7 +49,7 @@ public class IotHubServicesCommon
     {
         try
         {
-            client.open();
+            client.open(false);
 
             for (MessageAndResult messageAndResult : messagesToSend)
             {
@@ -106,7 +106,7 @@ public class IotHubServicesCommon
     {
         try
         {
-            client.open();
+            client.open(false);
 
             if (protocol != IotHubClientProtocol.HTTPS)
             {
@@ -136,7 +136,7 @@ public class IotHubServicesCommon
     {
         try
         {
-            client.open();
+            client.open(false);
 
             // Send the initial message
             MessageAndResult messageToSend = new MessageAndResult(new Message("test message"), IotHubStatusCode.OK_EMPTY);
@@ -225,7 +225,7 @@ public class IotHubServicesCommon
             expiredMessage.setAbsoluteExpiryTime(1); //setting this to 0 causes the message to never expire
             Success messageSentExpiredCallback = new Success();
 
-            client.open();
+            client.open(false);
             client.sendEventAsync(expiredMessage, new EventCallback(IotHubStatusCode.MESSAGE_EXPIRED), messageSentExpiredCallback);
 
             long startTime = System.currentTimeMillis();
@@ -260,7 +260,7 @@ public class IotHubServicesCommon
         final List<Pair<IotHubConnectionStatus, Throwable>> statusUpdates = new ArrayList<>();
         client.setConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> statusUpdates.add(new Pair<>(status, throwable)), new Object());
 
-        client.open();
+        client.open(false);
 
         client.sendEventAsync(errorInjectionMessage, new EventCallback(null), new Success());
 

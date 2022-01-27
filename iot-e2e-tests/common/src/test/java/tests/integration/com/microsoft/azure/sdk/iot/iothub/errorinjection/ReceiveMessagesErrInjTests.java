@@ -216,7 +216,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
 
         try
         {
-            testInstance.identity.getClient().open();
+            testInstance.identity.getClient().open(false);
 
             IotHubStatusCode expectedStatusCode = IotHubStatusCode.OK_EMPTY;
 

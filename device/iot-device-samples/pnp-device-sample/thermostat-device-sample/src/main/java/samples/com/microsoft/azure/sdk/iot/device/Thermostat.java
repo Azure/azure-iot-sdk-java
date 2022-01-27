@@ -149,7 +149,7 @@ public class Thermostat {
 
         log.debug("Set handler to receive \"getMaxMinReport\" command.");
         String methodName = "getMaxMinReport";
-        deviceClient.subscribeToMethodsAsync(new GetMaxMinReportDeviceMethodCallback(), methodName, new MethodIotHubEventCallback(), methodName);
+        deviceClient.subscribeToMethodsAsync(new GetMaxMinReportMethodCallback(), methodName, new MethodIotHubEventCallback(), methodName);
 
         new Thread(new Runnable() {
             @SneakyThrows({InterruptedException.class, IOException.class})
@@ -205,8 +205,8 @@ public class Thermostat {
             String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
 
             log.debug("Opening the device client.");
-            deviceClient = DeviceClient.createFromSecurityProvider(iotHubUri, deviceId, securityClientSymmetricKey, IotHubClientProtocol.MQTT, options);
-            deviceClient.open();
+            deviceClient = new DeviceClient(iotHubUri, deviceId, securityClientSymmetricKey, IotHubClientProtocol.MQTT, options);
+            deviceClient.open(false);
         }
     }
 
@@ -240,7 +240,7 @@ public class Thermostat {
             }
         }, deviceClient);
 
-        deviceClient.open();
+        deviceClient.open(false);
     }
 
     /**
@@ -304,13 +304,13 @@ public class Thermostat {
      * The callback to handle "getMaxMinReport" command.
      * This method will returns the max, min and average temperature from the specified time to the current time.
      */
-    private static class GetMaxMinReportDeviceMethodCallback implements DeviceMethodCallback
+    private static class GetMaxMinReportMethodCallback implements MethodCallback
     {
         final String commandName = "getMaxMinReport";
 
         @SneakyThrows
         @Override
-        public DeviceMethodData call(String methodName, Object methodData, Object context) {
+        public MethodData call(String methodName, Object methodData, Object context) {
             if (methodName.equalsIgnoreCase(commandName)) {
 
                 String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
@@ -350,15 +350,15 @@ public class Thermostat {
                             startTime,
                             endTime);
 
-                    return new DeviceMethodData(StatusCode.COMPLETED.value, responsePayload);
+                    return new MethodData(StatusCode.COMPLETED.value, responsePayload);
                 }
 
                 log.debug("Command: No relevant readings found since {}, cannot generate any report.", since);
-                return new DeviceMethodData(StatusCode.NOT_FOUND.value, null);
+                return new MethodData(StatusCode.NOT_FOUND.value, null);
             }
 
             log.error("Command: Unknown command {} invoked from service.", methodName);
-            return new DeviceMethodData(StatusCode.NOT_FOUND.value, null);
+            return new MethodData(StatusCode.NOT_FOUND.value, null);
         }
     }
 

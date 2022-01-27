@@ -30,6 +30,8 @@ Breaking changes:
 - ```ModuleClient.createFromEnvironment(...)``` APIs now require a unix domain socket implementation to be provided, rather than the SDK providing one. A sample [here](./device/iot-device-samples/unix-domain-socket-sample) demonstrates one such implementation that can be provided.
 - All ```setOption(...)``` options such as setting SAS token expiry, HTTPS read timeout, etc, have been converted to options in the ```ClientOptions``` constructor argument.
 - ```setProxySettings``` has been removed and replaced by providing the same proxy settings to the ```ClientOptions``` builder.
+- ```open()``` has been removed from DeviceClient, ModuleClient and MultiplexingClient in favor of ```open(boolean withRetry)```
+- ```DeviceClient.createFromSecurityProvider(...)``` has been replaced with a normal constructor with the same arguments.
 
 ## IoT hub Service Client
  

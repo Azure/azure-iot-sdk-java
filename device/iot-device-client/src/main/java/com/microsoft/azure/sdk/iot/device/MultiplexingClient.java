@@ -146,25 +146,6 @@ public class MultiplexingClient
      * <p>
      * If this client is already open, then this method will do nothing.
      * <p>
-     * @throws MultiplexingClientException If any IO or authentication errors occur while opening the multiplexed connection.
-     * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or many of the registered devices failed to authenticate.
-     * Any devices not found in the map of registration exceptions provided by
-     * {@link MultiplexingClientDeviceRegistrationAuthenticationException#getRegistrationExceptions()} have registered successfully.
-     * Even when this is thrown, the AMQPS/AMQPS_WS connection is still open, and other clients may be registered to it.
-     */
-    public void open() throws MultiplexingClientException
-    {
-        this.open(false);
-    }
-
-    /**
-     * Opens this multiplexing client. This may be done before or after registering any number of device clients.
-     * <p>
-     * This call behaves synchronously, so if it returns without throwing, then all registered device clients were
-     * successfully opened.
-     * <p>
-     * If this client is already open, then this method will do nothing.
-     * <p>
      * @param withRetry if true, this open call will apply the current retry policy to allow for the open call to be
      * retried if it fails.
      *
@@ -249,7 +230,7 @@ public class MultiplexingClient
      * <p>
      * If the multiplexing client is already open, then this device client will automatically
      * be opened, too. If the multiplexing client is not open yet, then this device client will not be opened until
-     * {@link MultiplexingClient#open()} is called.
+     * {@link MultiplexingClient#open(boolean)} is called.
      * <p>
      * If the multiplexed connection is already open, then this call will add this device client to the
      * multiplexed connection, and then will block until the registration has been completed.
@@ -302,7 +283,7 @@ public class MultiplexingClient
      * <p>
      * If the multiplexing client is already open, then this device client will automatically
      * be opened, too. If the multiplexing client is not open yet, then this device client will not be opened until
-     * {@link MultiplexingClient#open()} is called.
+     * {@link MultiplexingClient#open(boolean)} is called.
      * <p>
      * If the multiplexed connection is already open, then this call will add this device client to the
      * multiplexed connection, and then will block until the registration has been completed.
@@ -355,7 +336,7 @@ public class MultiplexingClient
      * <p>
      * If the multiplexing client is already open, then these device clients will automatically
      * be opened, too. If the multiplexing client is not open yet, then these device clients will not be opened until
-     * {@link MultiplexingClient#open()} is called.
+     * {@link MultiplexingClient#open(boolean)} is called.
      * <p>
      * If the multiplexed connection is already open, then this call will asynchronously add each device client to the
      * multiplexed connection, and then will block until all registrations have been completed.
@@ -407,7 +388,7 @@ public class MultiplexingClient
      * <p>
      * If the multiplexing client is already open, then these device clients will automatically
      * be opened, too. If the multiplexing client is not open yet, then these device clients will not be opened until
-     * {@link MultiplexingClient#open()} is called.
+     * {@link MultiplexingClient#open(boolean)} is called.
      * <p>
      * If the multiplexed connection is already open, then this call will asynchronously add each device client to the
      * multiplexed connection, and then will block until all registrations have been completed.

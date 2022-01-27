@@ -64,7 +64,7 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
 
     public void receiveMessage(int messageSize) throws Exception
     {
-        testInstance.identity.getClient().open();
+        testInstance.identity.getClient().open(false);
 
         Message serviceMessage = createCloudToDeviceMessage(messageSize);
 

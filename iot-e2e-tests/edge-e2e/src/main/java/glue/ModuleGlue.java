@@ -3,8 +3,8 @@ package glue;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.hsm.UnixDomainSocketChannel;
-import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodCallback;
-import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodData;
+import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
+import com.microsoft.azure.sdk.iot.device.twin.MethodData;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
 import com.microsoft.azure.sdk.iot.device.twin.TwinPropertyCallback;
 import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
@@ -96,7 +96,7 @@ public class ModuleGlue
         {
             UnixDomainSocketChannel unixDomainSocketChannel = new UnixDomainSocketSample.UnixDomainSocketChannelImpl();
             ModuleClient client = ModuleClient.createFromEnvironment(unixDomainSocketChannel, protocol);
-            client.open();
+            client.open(false);
 
             this._clientCount++;
             String connectionId = "moduleClient_" + this._clientCount;
@@ -145,7 +145,7 @@ public class ModuleGlue
 
             ModuleClient client = new ModuleClient(connectionString, protocol, clientOptionsBuilder.build());
 
-            client.open();
+            client.open(false);
 
             this._clientCount++;
             String connectionId = "moduleClient_" + this._clientCount;
@@ -478,7 +478,7 @@ public class ModuleGlue
         }
     }
 
-    private static class DeviceMethodCallbackImpl implements DeviceMethodCallback
+    private static class MethodCallbackImpl implements MethodCallback
     {
         public Handler<AsyncResult<Void>> _handler;
         public String _requestBody;
@@ -494,7 +494,7 @@ public class ModuleGlue
         }
 
         @Override
-        public DeviceMethodData call(String methodName, Object methodData, Object context)
+        public MethodData call(String methodName, Object methodData, Object context)
         {
             System.out.printf("method %s called%n", methodName);
             if (methodName.equals(this._methodName))
@@ -507,7 +507,7 @@ public class ModuleGlue
                 {
                     this._handler.handle(Future.failedFuture(e));
                     this.reset();
-                    return new DeviceMethodData(500, "exception parsing methodData");
+                    return new MethodData(500, "exception parsing methodData");
                 }
                 System.out.printf("methodData: %s%n", methodDataString);
 
@@ -517,26 +517,26 @@ public class ModuleGlue
                     System.out.printf("Method data looks correct.  Returning result: %s%n", _responseBody);
                     this._handler.handle(Future.succeededFuture());
                     this.reset();
-                    return new DeviceMethodData(this._statusCode, this._responseBody);
+                    return new MethodData(this._statusCode, this._responseBody);
                 }
                 else
                 {
                     System.out.printf("method data does not match.  Expected %s%n", this._requestBody);
                     this._handler.handle(Future.failedFuture("methodData does not match"));
                     this.reset();
-                    return new DeviceMethodData(500, "methodData not received as expected");
+                    return new MethodData(500, "methodData not received as expected");
                 }
             }
             else
             {
                 this._handler.handle(Future.failedFuture("unexpected call: " + methodName));
                 this.reset();
-                return new DeviceMethodData(404, "method " + methodName + " not handled");
+                return new MethodData(404, "method " + methodName + " not handled");
             }
         }
     }
 
-    DeviceMethodCallbackImpl _methodCallback = new DeviceMethodCallbackImpl();
+    MethodCallbackImpl _methodCallback = new MethodCallbackImpl();
 
     public void enableMethods(String connectionId, Handler<AsyncResult<Void>> handler)
     {

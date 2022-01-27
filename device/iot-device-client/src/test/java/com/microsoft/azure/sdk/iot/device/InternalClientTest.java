@@ -99,7 +99,7 @@ public class InternalClientTest
         };
 
         //act
-        DeviceClient.createFromSecurityProvider(expectedUri, expectedDeviceId, mockSecurityProvider, expectedProtocol);
+        new DeviceClient(expectedUri, expectedDeviceId, mockSecurityProvider, expectedProtocol);
 
         //assert
         new Verifications()
@@ -136,7 +136,7 @@ public class InternalClientTest
 
         final ClientOptions clientOptions = ClientOptions.builder().build();
         //act
-        final DeviceClient dc = DeviceClient.createFromSecurityProvider(expectedUri, expectedDeviceId, mockSecurityProvider, expectedProtocol, clientOptions);
+        final DeviceClient dc = new DeviceClient(expectedUri, expectedDeviceId, mockSecurityProvider, expectedProtocol, clientOptions);
 
         new Verifications()
         {
@@ -1162,7 +1162,7 @@ public class InternalClientTest
      */
     @Test
     public void subscribeToDeviceMethodSucceeds(@Mocked final IotHubEventCallback mockedStatusCB,
-                                                @Mocked final DeviceMethodCallback mockedDeviceMethodCB,
+                                                @Mocked final MethodCallback mockedDeviceMethodCB,
                                                 @Mocked final DeviceMethod mockedMethod) throws IOException, URISyntaxException
     {
         //arrange
@@ -1180,7 +1180,7 @@ public class InternalClientTest
 
         //act
 
-        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {DeviceMethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, mockedDeviceMethodCB, NULL_OBJECT, mockedStatusCB, NULL_OBJECT);
+        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {MethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, mockedDeviceMethodCB, NULL_OBJECT, mockedStatusCB, NULL_OBJECT);
 
         //assert
         new Verifications()
@@ -1198,7 +1198,7 @@ public class InternalClientTest
      */
     @Test (expected = IOException.class)
     public void subscribeToDeviceMethodThrowsIfClientNotOpen(@Mocked final IotHubEventCallback mockedStatusCB,
-                                                             @Mocked final DeviceMethodCallback mockedDeviceMethodCB)
+                                                             @Mocked final MethodCallback mockedDeviceMethodCB)
             throws IOException, URISyntaxException
     {
         //arrange
@@ -1214,7 +1214,7 @@ public class InternalClientTest
         final InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
 
         //act
-        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {DeviceMethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, mockedDeviceMethodCB, null, mockedStatusCB, null);
+        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {MethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, mockedDeviceMethodCB, null, mockedStatusCB, null);
     }
 
     /*
@@ -1238,11 +1238,11 @@ public class InternalClientTest
         Deencapsulation.invoke(client, "open");
 
         //act
-        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {DeviceMethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, null, null, mockedStatusCB, null);
+        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {MethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, null, null, mockedStatusCB, null);
     }
 
     @Test (expected = IllegalArgumentException.class)
-    public void subscribeToDeviceMethodThrowsIfDeviceMethodStatusCallbackNull(@Mocked final DeviceMethodCallback mockedDeviceMethodCB)
+    public void subscribeToDeviceMethodThrowsIfDeviceMethodStatusCallbackNull(@Mocked final MethodCallback mockedDeviceMethodCB)
             throws IOException, URISyntaxException
     {
         //arrange
@@ -1267,7 +1267,7 @@ public class InternalClientTest
      */
     @Test
     public void subscribeToDeviceMethodWorksEvenWhenCalledTwice(@Mocked final IotHubEventCallback mockedStatusCB,
-                                                                @Mocked final DeviceMethodCallback mockedDeviceMethodCB,
+                                                                @Mocked final MethodCallback mockedDeviceMethodCB,
                                                                 @Mocked final DeviceMethod mockedMethod) throws IOException, URISyntaxException
     {
         //arrange
@@ -1281,10 +1281,10 @@ public class InternalClientTest
         };
         final InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         Deencapsulation.invoke(client, "open");
-        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {DeviceMethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, mockedDeviceMethodCB, NULL_OBJECT, mockedStatusCB, NULL_OBJECT);
+        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {MethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, mockedDeviceMethodCB, NULL_OBJECT, mockedStatusCB, NULL_OBJECT);
 
         // act
-        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {DeviceMethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, mockedDeviceMethodCB, NULL_OBJECT, mockedStatusCB, NULL_OBJECT);
+        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {MethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, mockedDeviceMethodCB, NULL_OBJECT, mockedStatusCB, NULL_OBJECT);
 
         // assert
         new Verifications()
@@ -1440,7 +1440,7 @@ public class InternalClientTest
             }
         };
         InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
-        client.open();
+        client.open(false);
         Deencapsulation.invoke(client, "startTwinAsync", new Class[] {IotHubEventCallback.class, Object.class, PropertyCallback.class, Object.class}, mockedStatusCB, null, mockedPropertyCB, null);
         mockDevice.setDesiredPropertyCallback(new Property("Desired", null), null, null);
 

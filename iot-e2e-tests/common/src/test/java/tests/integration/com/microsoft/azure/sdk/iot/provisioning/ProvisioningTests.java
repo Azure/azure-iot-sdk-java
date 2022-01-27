@@ -434,8 +434,8 @@ public class ProvisioningTests extends ProvisioningCommon
     {
         //hardcoded AMQP here only because we aren't testing this connection. We just need to open a connection to send a twin update so that
         // we can test if the twin updates carry over after reprovisioning
-        DeviceClient deviceClient = DeviceClient.createFromSecurityProvider(iothubUri, deviceId, testInstance.securityProvider, IotHubClientProtocol.AMQPS);
-        deviceClient.open();
+        DeviceClient deviceClient = new DeviceClient(iothubUri, deviceId, testInstance.securityProvider, IotHubClientProtocol.AMQPS);
+        deviceClient.open(false);
         CountDownLatch twinLock = new CountDownLatch(2);
         deviceClient.startTwinAsync(new StubTwinCallback(twinLock), null, new StubTwinCallback(twinLock), null);
         Set<Property> reportedProperties = new HashSet<>();

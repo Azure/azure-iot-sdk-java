@@ -12,11 +12,9 @@ public final class DeviceClient extends InternalClient
 
     public DeviceClient(String hostName, String deviceId, SasTokenProvider sasTokenProvider, IotHubClientProtocol protocol, ClientOptions clientOptions);
 
-    public static DeviceClient createFromSecurityProvider(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol) throws URISyntaxException, IOException;
+    public DeviceClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol) throws URISyntaxException, IOException;
 
-    public static DeviceClient createFromSecurityProvider(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol, ClientOptions clientOptions) throws URISyntaxException, IOException;
- 
-    public void open() throws IOException;
+    public DeviceClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol, ClientOptions clientOptions) throws URISyntaxException, IOException;
 
     public void open(boolean withRetry) throws IOException;
 
@@ -110,6 +108,10 @@ public final class ModuleClient extends InternalClient
 
     public static ModuleClient createFromEnvironment(UnixDomainSocketChannel unixDomainSocketChannel, IotHubClientProtocol protocol, ClientOptions clientOptions) throws ModuleClientException;
 
+    public void open(boolean withRetry) throws IOException;
+
+    public void close();
+    
     public void sendEventAsync(Message message, IotHubEventCallback callback, Object callbackContext, String outputName);
 
     public MethodResult invokeMethod(String deviceId, MethodRequest methodRequest) throws ModuleClientException;

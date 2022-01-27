@@ -143,7 +143,7 @@ public class SendEventX509
 
         System.out.println("Successfully created an IoT Hub client.");
 
-        client.open();
+        client.open(false);
 
         System.out.println("Opened connection to IoT Hub.");
         System.out.println("Sending the following event messages:");

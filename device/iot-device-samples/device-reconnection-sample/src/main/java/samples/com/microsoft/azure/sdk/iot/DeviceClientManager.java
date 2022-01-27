@@ -70,7 +70,7 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
                 if(connectionStatus == ConnectionStatus.CONNECTING) {
                     try {
                         log.debug("Opening the device client instance...");
-                        client.open();
+                        client.open(false);
                         connectionStatus = ConnectionStatus.CONNECTED;
                         break;
                     }

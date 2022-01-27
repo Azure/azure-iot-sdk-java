@@ -85,7 +85,7 @@ public class SendMessagesTests extends SendMessagesCommon
             }
         }, null);
 
-        testInstance.identity.getClient().open();
+        testInstance.identity.getClient().open(false);
 
         long startTime = System.currentTimeMillis();
         while (!messageSent.wasCallbackFired())
@@ -161,7 +161,7 @@ public class SendMessagesTests extends SendMessagesCommon
     public void sendMessagesWithUnusualApplicationProperties() throws Exception
     {
         this.testInstance.setup();
-        this.testInstance.identity.getClient().open();
+        this.testInstance.identity.getClient().open(false);
         Message msg = new Message("asdf");
 
         //All of these characters should be allowed within application properties

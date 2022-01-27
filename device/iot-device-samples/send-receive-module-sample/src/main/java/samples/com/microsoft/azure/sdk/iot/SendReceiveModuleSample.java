@@ -259,7 +259,7 @@ public class SendReceiveModuleSample
 
         client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
-        client.open();
+        client.open(false);
 
         System.out.println("Opened connection to IoT Hub.");
 

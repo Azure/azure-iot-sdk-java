@@ -429,7 +429,7 @@ public class ProvisioningCommon extends IntegrationTest
                 continue;
             }
 
-            DeviceClient deviceClient = DeviceClient.createFromSecurityProvider(iothubUri, deviceId, testInstance.securityProvider, iotHubClientProtocol);
+            DeviceClient deviceClient = new DeviceClient(iothubUri, deviceId, testInstance.securityProvider, iotHubClientProtocol);
             deviceClient.close();
         }
     }

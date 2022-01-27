@@ -301,7 +301,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         {
             testInstance.identity.getClient().setRetryPolicy(new NoRetry());
         }
-        testInstance.identity.getClient().open();
+        testInstance.identity.getClient().open(false);
 
         // Act
         MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage,IotHubStatusCode.OK_EMPTY);

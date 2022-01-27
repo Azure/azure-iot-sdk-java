@@ -122,8 +122,8 @@ public class ProvisioningTpmSample
                 String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
                 try
                 {
-                    deviceClient = DeviceClient.createFromSecurityProvider(iotHubUri, deviceId, securityClientTPMEmulator, IotHubClientProtocol.MQTT);
-                    deviceClient.open();
+                    deviceClient = new DeviceClient(iotHubUri, deviceId, securityClientTPMEmulator, IotHubClientProtocol.MQTT);
+                    deviceClient.open(false);
                     Message messageToSendFromDeviceToHub =  new Message("Whatever message you would like to send");
 
                     System.out.println("Sending message from device to IoT Hub...");

@@ -320,7 +320,7 @@ public class TwinCommon extends IntegrationTest
 
         if (openDeviceClient)
         {
-            client.open();
+            client.open(false);
             client.startTwinAsync(new DeviceTwinStatusCallback(), deviceState, deviceState.dCDeviceForTwin, deviceState);
         }
 

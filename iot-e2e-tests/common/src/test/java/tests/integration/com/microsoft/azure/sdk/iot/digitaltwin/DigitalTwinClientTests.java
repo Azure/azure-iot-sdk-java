@@ -6,8 +6,8 @@ package tests.integration.com.microsoft.azure.sdk.iot.digitaltwin;
 import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodCallback;
-import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodData;
+import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
+import com.microsoft.azure.sdk.iot.device.twin.MethodData;
 import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
 import com.microsoft.azure.sdk.iot.device.twin.TwinPropertyCallback;
@@ -121,7 +121,7 @@ public class DigitalTwinClientTests extends IntegrationTest
     @Before
     public void setUp() throws URISyntaxException, IOException, IotHubException {
         this.deviceClient = createDeviceClient(protocol);
-        deviceClient.open();
+        deviceClient.open(false);
         digitalTwinClient =
             new DigitalTwinClient(
                 IOTHUB_CONNECTION_STRING,
@@ -198,7 +198,7 @@ public class DigitalTwinClientTests extends IntegrationTest
         // register the devices before the multiplexing client has been opened
         multiplexingClient.registerDeviceClients(multiplexedDeviceClients);
 
-        multiplexingClient.open();
+        multiplexingClient.open(false);
 
         // act
         String thermostatDeviceId = multiplexedDeviceClients.get(0).getConfig().getDeviceId();
@@ -232,7 +232,7 @@ public class DigitalTwinClientTests extends IntegrationTest
         multiplexedDeviceClients.add(createDeviceClient(protocol, E2ETestConstants.THERMOSTAT_MODEL_ID));
         multiplexedDeviceClients.add(createDeviceClient(protocol, E2ETestConstants.TEMPERATURE_CONTROLLER_MODEL_ID));
 
-        multiplexingClient.open();
+        multiplexingClient.open(false);
 
         // register the devices after the multiplexing client has been opened
         multiplexingClient.registerDeviceClients(multiplexedDeviceClients);
@@ -442,20 +442,20 @@ public class DigitalTwinClientTests extends IntegrationTest
         Integer deviceFailureResponseStatus = 500;
 
         // Device method callback
-        DeviceMethodCallback deviceMethodCallback = (methodName, methodData, context) -> {
+        MethodCallback methodCallback = (methodName, methodData, context) -> {
             String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
             if(methodName.equalsIgnoreCase(commandName)) {
-                return new DeviceMethodData(deviceSuccessResponseStatus, jsonRequest);
+                return new MethodData(deviceSuccessResponseStatus, jsonRequest);
             }
             else {
-                return new DeviceMethodData(deviceFailureResponseStatus, jsonRequest);
+                return new MethodData(deviceFailureResponseStatus, jsonRequest);
             }
         };
 
         // IotHub event callback
         IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) -> {};
 
-        deviceClient.subscribeToMethodsAsync(deviceMethodCallback, commandName, iotHubEventCallback, commandName);
+        deviceClient.subscribeToMethodsAsync(methodCallback, commandName, iotHubEventCallback, commandName);
 
         // act
         DigitalTwinCommandResponse responseWithNoPayload = this.digitalTwinClient.invokeCommand(deviceId, commandName, null);

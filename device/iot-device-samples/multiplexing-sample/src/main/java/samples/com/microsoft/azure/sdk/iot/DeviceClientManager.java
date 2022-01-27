@@ -48,7 +48,7 @@ public class DeviceClientManager extends ClientManagerBase
     @Override
     protected void openClient() throws IOException
     {
-        deviceClient.open();
+        deviceClient.open(true);
     }
 
     /**

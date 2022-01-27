@@ -130,8 +130,8 @@ public class ProvisioningSymmetricKeyEnrollmentGroupSample
                 String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
                 try
                 {
-                    deviceClient = DeviceClient.createFromSecurityProvider(iotHubUri, deviceId, securityClientSymmetricKey, IotHubClientProtocol.MQTT);
-                    deviceClient.open();
+                    deviceClient = new DeviceClient(iotHubUri, deviceId, securityClientSymmetricKey, IotHubClientProtocol.MQTT);
+                    deviceClient.open(false);
                     Message messageToSendFromDeviceToHub =  new Message("Whatever message you would like to send");
 
                     System.out.println("Sending message from device to IoT Hub...");

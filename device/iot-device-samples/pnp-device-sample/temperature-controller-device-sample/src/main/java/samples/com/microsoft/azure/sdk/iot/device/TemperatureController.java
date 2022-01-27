@@ -247,8 +247,8 @@ public class TemperatureController {
             String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
 
             log.debug("Opening the device client.");
-            deviceClient = DeviceClient.createFromSecurityProvider(iotHubUri, deviceId, securityClientSymmetricKey, IotHubClientProtocol.MQTT, options);
-            deviceClient.open();
+            deviceClient = new DeviceClient(iotHubUri, deviceId, securityClientSymmetricKey, IotHubClientProtocol.MQTT, options);
+            deviceClient.open(false);
         }
     }
 
@@ -269,13 +269,13 @@ public class TemperatureController {
             }
         }, deviceClient);
 
-        deviceClient.open();
+        deviceClient.open(false);
     }
 
     /**
      * The callback to handle "reboot" command. This method will send a temperature update (of 0°C) over telemetry for both associated components.
      */
-    private static class MethodCallback implements DeviceMethodCallback
+    private static class MethodCallback implements com.microsoft.azure.sdk.iot.device.twin.MethodCallback
     {
         final String reboot = "reboot";
         final String getMaxMinReport1 = "thermostat1*getMaxMinReport";
@@ -283,7 +283,7 @@ public class TemperatureController {
 
         @SneakyThrows(InterruptedException.class)
         @Override
-        public DeviceMethodData call(String methodName, Object methodData, Object context) {
+        public MethodData call(String methodName, Object methodData, Object context) {
             String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
 
             switch (methodName) {
@@ -299,7 +299,7 @@ public class TemperatureController {
                     maxTemperature.put(THERMOSTAT_2, 0.0d);
 
                     temperatureReadings.clear();
-                    return new DeviceMethodData(StatusCode.COMPLETED.value, null);
+                    return new MethodData(StatusCode.COMPLETED.value, null);
 
                 case getMaxMinReport1:
                 case getMaxMinReport2:
@@ -339,19 +339,19 @@ public class TemperatureController {
                                     startTime,
                                     endTime);
 
-                            return new DeviceMethodData(StatusCode.COMPLETED.value, responsePayload);
+                            return new MethodData(StatusCode.COMPLETED.value, responsePayload);
                         }
 
                         log.debug("Command: component=\"{}\", no relevant readings found since {}, cannot generate any report.", componentName, since);
-                        return new DeviceMethodData(StatusCode.NOT_FOUND.value, null);
+                        return new MethodData(StatusCode.NOT_FOUND.value, null);
                     }
 
                     log.debug("Command: component=\"{}\", no temperature readings sent yet, cannot generate any report.", componentName);
-                    return new DeviceMethodData(StatusCode.NOT_FOUND.value, null);
+                    return new MethodData(StatusCode.NOT_FOUND.value, null);
 
                 default:
                     log.debug("Command: command=\"{}\" is not implemented, no action taken.", methodName);
-                    return new DeviceMethodData(StatusCode.NOT_FOUND.value, null);
+                    return new MethodData(StatusCode.NOT_FOUND.value, null);
             }
         }
     }

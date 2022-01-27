@@ -181,7 +181,7 @@ public class ModuleTwinSample
         try
         {
             System.out.println("Open connection to IoT Hub.");
-            client.open();
+            client.open(false);
 
             System.out.println("Start device Twin and get remaining properties...");
             // Properties already set in the Service will shows up in the generic onProperty callback, with value and version.

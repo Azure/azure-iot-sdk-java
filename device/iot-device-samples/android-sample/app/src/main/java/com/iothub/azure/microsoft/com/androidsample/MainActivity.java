@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
 
         try
         {
-            client.open();
+            client.open(false);
             if (protocol == IotHubClientProtocol.MQTT)
             {
                 MessageCallbackMqtt callback = new MessageCallbackMqtt();

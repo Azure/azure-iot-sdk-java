@@ -66,7 +66,7 @@ public class MultiplexingClientManager extends ClientManagerBase
     @Override
     protected void openClient() throws MultiplexingClientException
     {
-        this.multiplexingClient.open();
+        this.multiplexingClient.open(false);
     }
 
     /**

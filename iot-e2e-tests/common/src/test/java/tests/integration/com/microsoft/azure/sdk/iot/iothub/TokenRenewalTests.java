@@ -159,8 +159,8 @@ public class TokenRenewalTests extends IntegrationTest
         }
 
         openEachClient(clients);
-        amqpMultiplexingClient.open();
-        amqpWsMultiplexingClient.open();
+        amqpMultiplexingClient.open(false);
+        amqpWsMultiplexingClient.open(false);
 
         //wait until old sas token has expired, this should force the config to generate a new one from the device key
         System.out.println("Sleeping..." + System.currentTimeMillis());
@@ -285,7 +285,7 @@ public class TokenRenewalTests extends IntegrationTest
         {
             try
             {
-                client.open();
+                client.open(false);
             } catch (UnsupportedOperationException ex)
             {
                 //client was a multiplexing client which was already opened, safe to ignore

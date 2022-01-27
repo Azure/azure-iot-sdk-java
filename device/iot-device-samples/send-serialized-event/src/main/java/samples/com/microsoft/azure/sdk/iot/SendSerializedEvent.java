@@ -156,7 +156,7 @@ public class SendSerializedEvent
 
             System.out.println("Successfully created an IoT Hub client.");
 
-            client.open();
+            client.open(false);
 
             System.out.println("Opened connection to IoT Hub.");
 

@@ -338,7 +338,7 @@ public class SendMessagesCommon extends IntegrationTest
         public void openConnection() throws IOException, URISyntaxException
         {
             client = new DeviceClient(connString, protocol);
-            client.open();
+            client.open(false);
         }
 
         public void sendMessages()

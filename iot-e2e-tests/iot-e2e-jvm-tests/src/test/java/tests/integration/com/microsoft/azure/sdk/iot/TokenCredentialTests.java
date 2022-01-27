@@ -5,7 +5,7 @@ package tests.integration.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodData;
+import com.microsoft.azure.sdk.iot.device.twin.MethodData;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
@@ -92,7 +92,7 @@ public class TokenCredentialTests
 
         RegistryManager registryManager = new RegistryManager(iotHubConnectionString);
         DeviceClient deviceClient = createDeviceClient(MQTT, registryManager);
-        deviceClient.open();
+        deviceClient.open(false);
 
         // arrange
         DigitalTwinClient digitalTwinClient = buildDigitalTwinClientWithTokenCredential();
@@ -145,12 +145,12 @@ public class TokenCredentialTests
         registryManager.addDevice(device);
 
         DeviceClient deviceClient = new DeviceClient(registryManager.getDeviceConnectionString(device), MQTT);
-        deviceClient.open();
+        deviceClient.open(false);
         final int successStatusCode = 200;
         final AtomicBoolean methodsSubscriptionComplete = new AtomicBoolean(false);
         final AtomicBoolean methodsSubscribedSuccessfully = new AtomicBoolean(false);
         deviceClient.subscribeToMethodsAsync(
-            (methodName, methodData, context) -> new DeviceMethodData(successStatusCode, "success"),
+            (methodName, methodData, context) -> new MethodData(successStatusCode, "success"),
             null,
             (responseStatus, callbackContext) ->
             {

@@ -102,7 +102,7 @@ public class DeviceClientTest
         final IotHubClientProtocol expectedProtocol = IotHubClientProtocol.HTTPS;
 
         //act
-        DeviceClient.createFromSecurityProvider(expectedUri, expectedDeviceId, mockSecurityProvider, expectedProtocol, null);
+        new DeviceClient(expectedUri, expectedDeviceId, mockSecurityProvider, expectedProtocol, null);
 
         //assert
         new Verifications()
@@ -220,7 +220,7 @@ public class DeviceClientTest
         DeviceClient client = new DeviceClient(connString, protocol);
 
         // act
-        client.open();
+        client.open(false);
 
         // assert
         new Verifications()

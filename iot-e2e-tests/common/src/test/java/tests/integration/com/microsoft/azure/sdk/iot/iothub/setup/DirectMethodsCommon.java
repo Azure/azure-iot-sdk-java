@@ -189,7 +189,7 @@ public class DirectMethodsCommon extends IntegrationTest
     public void openDeviceClientAndSubscribeToMethods() throws Exception
     {
         testInstance.setup();
-        testInstance.deviceTestManager.client.open();
+        testInstance.deviceTestManager.client.open(false);
 
         try
         {
