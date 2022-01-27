@@ -282,7 +282,7 @@ public class IotHubTransport implements IotHubListener
         }
         else if (message != null)
         {
-            log.info("Message was received from IotHub ({})", message);
+            log.debug("Message was received from IotHub ({})", message);
             this.addToReceivedMessagesQueue(message);
         }
         else
@@ -572,7 +572,7 @@ public class IotHubTransport implements IotHubListener
             for (Message singleMessage : ((BatchMessage) message).getNestedMessages())
             {
                 this.addToWaitingQueue(new IotHubTransportPacket(singleMessage, callback, callbackContext, null, System.currentTimeMillis(), deviceId));
-                log.info("Messages were queued to be sent later ({})", singleMessage);
+                log.debug("Messages were queued to be sent later ({})", singleMessage);
             }
 
             return;
@@ -581,7 +581,7 @@ public class IotHubTransport implements IotHubListener
         IotHubTransportPacket packet = new IotHubTransportPacket(message, callback, callbackContext, null, System.currentTimeMillis(), deviceId);
         this.addToWaitingQueue(packet);
 
-        log.info("Message was queued to be sent later ({})", message);
+        log.debug("Message was queued to be sent later ({})", message);
     }
 
     public IotHubClientProtocol getProtocol()
@@ -1055,7 +1055,7 @@ public class IotHubTransport implements IotHubListener
 
         if (transportMessage != null)
         {
-            log.info("Message was received from IotHub ({})", transportMessage);
+            log.debug("Message was received from IotHub ({})", transportMessage);
             this.addToReceivedMessagesQueue(transportMessage);
 
             try
@@ -1169,7 +1169,7 @@ public class IotHubTransport implements IotHubListener
      */
     private void handleDisconnection(TransportException transportException)
     {
-        log.info("Handling a disconnection event", transportException);
+        log.debug("Handling a disconnection event", transportException);
 
         synchronized (this.inProgressMessagesLock)
         {
@@ -1488,7 +1488,7 @@ public class IotHubTransport implements IotHubListener
                 }
             }
 
-            log.info("Sending message ({})", message);
+            log.debug("Sending message ({})", message);
             IotHubStatusCode statusCode = this.iotHubTransportConnection.sendMessage(message);
             log.trace("Sent message ({}) to protocol level, returned status code was {}", message, statusCode);
 
@@ -1565,7 +1565,7 @@ public class IotHubTransport implements IotHubListener
         {
             if (throwable == null)
             {
-                log.info("Updating transport status to new status {} with reason {}", newConnectionStatus, reason);
+                log.debug("Updating transport status to new status {} with reason {}", newConnectionStatus, reason);
             }
             else
             {
