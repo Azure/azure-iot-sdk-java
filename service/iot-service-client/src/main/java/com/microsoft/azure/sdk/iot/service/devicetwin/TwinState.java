@@ -277,14 +277,12 @@ public class TwinState extends RegisterManager
     }
 
     /**
-     * Factory
-     *
      * <p> Create a new instance of the TwinState parsing the provided string as a JSON with the full Twin information.
      *
      * @param json the {@code String} with the JSON received from the service. It cannot be {@code null} or empty.
      * @return The new instance of the {@code TwinState}.
      */
-    public static TwinState createFromTwinJson(String json)
+    public TwinState(String json)
     {
         /* SRS_TWIN_STATE_21_011: [The factory shall throw IllegalArgumentException if the JSON is null or empty.] */
         if (Tools.isNullOrEmpty(json))
@@ -303,13 +301,28 @@ public class TwinState extends RegisterManager
          * as part of the collection. So, we need to reorganize this map using the
          * TwinCollection format. This constructor will do that.
          */
-        result.tags = new TwinCollection(result.getTags());
+        this.tags = new TwinCollection(result.getTags());
         if (result.properties != null)
         {
-            result.properties = new TwinProperties(result.properties.getDesired(), result.properties.getReported());
+            this.properties = new TwinProperties(result.properties.getDesired(), result.properties.getReported());
         }
 
-        return result;
+        this.configurations = result.configurations;
+        this.deviceScope = result.deviceScope;
+        this.parentScopes.addAll(result.parentScopes);
+        this.connectionState = result.connectionState;
+        this.setDeviceId(result.getDeviceId());
+        this.setModuleId(result.getModuleId());
+        this.setETag(result.getETag());
+        this.setConnectionStateUpdatedTime(result.getConnectionStateUpdatedTime());
+        this.setCapabilities(result.getCapabilities());
+        this.setModelId(result.getModelId());
+        this.setGenerationId(result.getGenerationId());
+        this.setLastActivityTime(result.getLastActivityTime());
+        this.setStatus(result.getStatus());
+        this.setStatusReason(result.getStatusReason());
+        this.setStatusUpdatedTime(result.getStatusUpdatedTime());
+        this.setVersion(result.getVersion());
     }
 
     /**

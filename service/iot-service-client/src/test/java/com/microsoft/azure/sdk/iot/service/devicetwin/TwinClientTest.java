@@ -194,16 +194,12 @@ public class TwinClientTest
         new NonStrictExpectations()
         {
             {
-                mockedDevice.getDeviceId();
-                result = "SomeDevID";
-                TwinState.createFromTwinJson((String)any);
-                result = mockedTwinState;
-                mockedTwinState.getCapabilities();
-                result = mockCapabilities;
                 mockedTwinState.getConfigurations();
                 result = mockConfigurations;
                 mockedTwinState.getConnectionState();
                 result = expectedConnectionState;
+                new TwinState((String)any);
+                result = mockedTwinState;
             }
         };
 
@@ -220,8 +216,6 @@ public class TwinClientTest
                 mockedHttpRequest.setHeaderField(anyString, anyString);
                 times = 6;
                 mockedHttpRequest.send();
-                times = 1;
-                TwinState.createFromTwinJson((String)any);
                 times = 1;
                 mockedTwinState.getETag();
                 times = 1;
@@ -257,19 +251,15 @@ public class TwinClientTest
         constructorExpectations(connectionString);
         TwinClient testTwin = new TwinClient(connectionString);
         TwinCollection testMap = new TwinCollection();
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
                 mockedDevice.getDeviceId();
                 result = "SomeDevID";
                 mockedDevice.getModuleId();
                 result = "SomeModuleID";
-                TwinState.createFromTwinJson((String)any);
+                new TwinState((String)any);
                 result = mockedTwinState;
-                mockedTwinState.getCapabilities();
-                result = mockCapabilities;
-                mockedTwinState.getConfigurations();
-                result = mockConfigurations;
             }
         };
 
@@ -285,8 +275,6 @@ public class TwinClientTest
                 mockedHttpRequest.setHeaderField(anyString, anyString);
                 times = 6;
                 mockedHttpRequest.send();
-                times = 1;
-                TwinState.createFromTwinJson((String)any);
                 times = 1;
                 mockedTwinState.getETag();
                 times = 1;
@@ -900,142 +888,6 @@ public class TwinClientTest
 
         //act
         boolean result = testTwin.hasNextTwin(testQuery);
-    }
-
-    //Tests_SRS_DEVICETWIN_25_059: [ The method shall parse the next element from the query response as Twin Document using TwinState and provide the response on Twin.]
-    @Test
-    public void nextRetrievesCorrectlyWithoutModuleId() throws IotHubException, IOException
-    {
-        //arrange
-        final Integer version = 15;
-        final String etag = "validEtag";
-        final String connectionString = "testString";
-        final int connectTimeout = 1234;
-        final int readTimeout = 5678;
-        constructorExpectations(connectionString);
-        TwinClient testTwin = new TwinClient(connectionString, TwinClientOptions.builder().httpConnectTimeout(connectTimeout).httpReadTimeout(readTimeout).build());
-        final String expectedString = "testJsonAsNext";
-        final String modelId = "testModelId";
-        TwinCollection tags = new TwinCollection();
-        tags.put("tagsKey", "tagsValue");
-        TwinCollection rp = new TwinCollection();
-        rp.put("rpKey", "rpValue");
-        TwinCollection dp = new TwinCollection();
-        dp.put("dpKey", "dpValue");
-
-        new Expectations()
-        {
-            {
-                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
-                result = mockedQuery;
-                Deencapsulation.invoke(mockedQuery, "next");
-                result = expectedString;
-                mockedTwinState.getDeviceId();
-                result = "testDeviceID";
-                mockedTwinState.getModuleId();
-                result = null;
-                mockedTwinState.getVersion();
-                result = version;
-                mockedTwinState.getETag();
-                result = etag;
-                mockedTwinState.getModelId();
-                result = modelId;
-                mockedTwinState.getTags();
-                result = tags;
-                mockedTwinState.getDesiredProperty();
-                result = dp;
-                mockedTwinState.getReportedProperty();
-                result = rp;
-                mockCapabilities.isIotEdge();
-                result = Boolean.TRUE;
-            }
-        };
-
-        Query testQuery = testTwin.queryTwin(VALID_SQL_QUERY);
-
-        //act
-        Twin result = testTwin.getNextTwin(testQuery);
-
-        //assert
-        assertNotNull(result.getTags());
-        assertNotNull(result.getReportedProperties());
-        assertNotNull(result.getDesiredProperties());
-
-        assertEquals(version, result.getVersion());
-        assertEquals(etag, result.getETag());
-        assertEqualSetAndMap(result.getTags(), (Map)tags);
-        assertEqualSetAndMap(result.getDesiredProperties(), (Map)dp);
-        assertEqualSetAndMap(result.getReportedProperties(), (Map)rp);
-        assertTrue(result.getCapabilities().isIotEdge());
-        assertNull(result.getModuleId());
-        assertEquals(result.getModelId(), result.getModelId());
-    }
-
-    @Test
-    public void nextRetrievesCorrectlyWithoutModelId() throws IotHubException, IOException
-    {
-        //arrange
-        final Integer version = 15;
-        final String etag = "validEtag";
-        final int connectTimeout = 1234;
-        final int readTimeout = 5678;
-        final String connectionString = "someConnectionString";
-        constructorExpectations(connectionString);
-        TwinClient testTwin = new TwinClient(connectionString, TwinClientOptions.builder().httpConnectTimeout(connectTimeout).httpReadTimeout(readTimeout).build());
-        final String expectedString = "testJsonAsNext";
-        final String moduleId = "testModuleId";
-        TwinCollection tags = new TwinCollection();
-        tags.put("tagsKey", "tagsValue");
-        TwinCollection rp = new TwinCollection();
-        rp.put("rpKey", "rpValue");
-        TwinCollection dp = new TwinCollection();
-        dp.put("dpKey", "dpValue");
-
-        new Expectations()
-        {
-            {
-                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
-                result = mockedQuery;
-                Deencapsulation.invoke(mockedQuery, "next");
-                result = expectedString;
-                mockedTwinState.getDeviceId();
-                result = "testDeviceID";
-                mockedTwinState.getModuleId();
-                result = moduleId;
-                mockedTwinState.getVersion();
-                result = version;
-                mockedTwinState.getETag();
-                result = etag;
-                mockedTwinState.getModelId();
-                result = null;
-                mockedTwinState.getTags();
-                result = tags;
-                mockedTwinState.getDesiredProperty();
-                result = dp;
-                mockedTwinState.getReportedProperty();
-                result = rp;
-                mockCapabilities.isIotEdge();
-                result = Boolean.TRUE;
-            }
-        };
-
-        Query testQuery = testTwin.queryTwin(VALID_SQL_QUERY);
-
-        //act
-        Twin result = testTwin.getNextTwin(testQuery);
-
-        assertNotNull(result.getTags());
-        assertNotNull(result.getReportedProperties());
-        assertNotNull(result.getDesiredProperties());
-
-        assertEquals(version, result.getVersion());
-        assertEquals(etag, result.getETag());
-        assertEqualSetAndMap(result.getTags(), (Map)tags);
-        assertEqualSetAndMap(result.getDesiredProperties(), (Map)dp);
-        assertEqualSetAndMap(result.getReportedProperties(), (Map)rp);
-        assertTrue(result.getCapabilities().isIotEdge());
-        assertNull(result.getModelId());
-        assertEquals(result.getModuleId(), result.getModuleId());
     }
 
     @Test (expected = IllegalArgumentException.class)

@@ -230,7 +230,7 @@ public class JobsResponseParser
 
         if (map.containsKey(UPDATETWIN_TAG))
         {
-            jobsResponseParser.updateTwin = TwinState.createFromTwinJson(gson.toJson(map.get(UPDATETWIN_TAG)));
+            jobsResponseParser.updateTwin = new TwinState(gson.toJson(map.get(UPDATETWIN_TAG)));
         }
 
         if (map.containsKey(CLOUDTODEVICEMETHOD_TAG))

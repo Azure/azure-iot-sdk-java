@@ -345,7 +345,7 @@ public class TwinStateTest
         final String json = null;
 
         // act
-        TwinState.createFromTwinJson(json);
+        new TwinState(json);
 
         // assert
     }
@@ -358,7 +358,7 @@ public class TwinStateTest
         final String json = "";
 
         // act
-        TwinState.createFromTwinJson(json);
+        new TwinState(json);
 
         // assert
     }
@@ -377,7 +377,7 @@ public class TwinStateTest
                 "}";
 
         // act
-        TwinState.createFromTwinJson(json);
+        new TwinState(json);
 
         // assert
     }
@@ -391,7 +391,7 @@ public class TwinStateTest
                 "{\"tags\":{\"tag1\":\"val1\",\"tag2\":\"val2\",\"tag3\":\"val3\"},\"properties\":{\"desired\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"},\"reported\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"}},\"configurations\":{\"p1\":{\"status\":\"targeted\"},\"p2\":{\"status\":\"applied\"}},\"deviceScope\":null,\"parentScopes\":[],\"deviceId\":\"validDeviceId\",\"moduleId\":null,\"modelId\":null,\"generationId\":\"validGenerationId\",\"etag\":\"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\",\"version\":3,\"status\":\"enabled\",\"statusReason\":\"validStatusReason\",\"statusUpdatedTime\":\"2016-06-01T21:22:41+00:00\",\"connectionState\":\"Disconnected\",\"connectionStateUpdatedTime\":\"2016-06-01T21:22:41+00:00\",\"lastActivityTime\":\"xxx\",\"capabilities\":null}";
 
         // act
-        TwinState twinState = TwinState.createFromTwinJson(json);
+        TwinState twinState = new TwinState(json);
 
         // assert
         Helpers.assertJson(Deencapsulation.invoke(twinState, "toJsonElement").toString(), json);
@@ -406,7 +406,7 @@ public class TwinStateTest
                 "{\"tags\":{\"tag1\":\"val1\",\"tag2\":\"val2\",\"tag3\":\"val3\"},\"properties\":{\"desired\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"},\"reported\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"}},\"configurations\":null,\"deviceScope\":null,\"parentScopes\":[],\"deviceId\":null,\"moduleId\":null,\"modelId\":null,\"generationId\":null,\"etag\":null,\"version\":null,\"status\":null,\"statusReason\":null,\"statusUpdatedTime\":null,\"connectionState\":null,\"connectionStateUpdatedTime\":null,\"lastActivityTime\":null,\"capabilities\":null}";
 
         // act
-        TwinState twinState = TwinState.createFromTwinJson(json);
+        TwinState twinState = new TwinState(json);
 
         // assert
         Helpers.assertJson(Deencapsulation.invoke(twinState, "toJsonElement").toString(), json);

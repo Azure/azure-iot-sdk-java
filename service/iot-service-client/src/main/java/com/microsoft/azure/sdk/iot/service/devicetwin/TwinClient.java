@@ -190,7 +190,7 @@ public class TwinClient
 
         String twinString = new String(response.getBody(), StandardCharsets.UTF_8);
 
-        TwinState twinState = TwinState.createFromTwinJson(twinString);
+        TwinState twinState = new TwinState(twinString);
 
         twin.setVersion(twinState.getVersion());
         twin.setModelId(twinState.getModelId());
@@ -299,7 +299,7 @@ public class TwinClient
 
         String responseTwinJson = new String(httpResponse.getBody(), StandardCharsets.UTF_8);
 
-        twinState = TwinState.createFromTwinJson(responseTwinJson);
+        twinState = new TwinState(responseTwinJson);
 
         Twin responseTwin;
         if (twinState.getModuleId() == null)
@@ -628,7 +628,7 @@ public class TwinClient
 
     private Twin jsonToTwin(String json)
     {
-        TwinState twinState = TwinState.createFromTwinJson(json);
+        TwinState twinState = new TwinState(json);
 
         Twin twin = new Twin(twinState.getDeviceId());
         twin.setVersion(twinState.getVersion());

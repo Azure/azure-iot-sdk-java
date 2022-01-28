@@ -33,7 +33,7 @@ public class JobsParserTest
 
     private TwinState makeTwinSample()
     {
-        return TwinState.createFromTwinJson(
+        return new TwinState(
                 "{\"tags\":{" +
                     "\"tag1\":{\"KeyChar\":\"c\",\"KeyBool\":true,\"keyString\":\"value1\",\"keyEnum\":\"val1\",\"keyDouble\":1234.456}}," +
                 "\"properties\":{" +
