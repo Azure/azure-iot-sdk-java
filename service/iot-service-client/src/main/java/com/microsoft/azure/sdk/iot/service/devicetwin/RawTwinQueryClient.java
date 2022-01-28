@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
-public class RawTwinQuery
+public class RawTwinQueryClient
 {
     private static final int DEFAULT_PAGE_SIZE = 100;
 
@@ -29,7 +29,7 @@ public class RawTwinQuery
     private AzureSasCredential azureSasCredential;
     private IotHubConnectionString iotHubConnectionString;
 
-    private RawTwinQuery()
+    private RawTwinQueryClient()
     {
 
     }
@@ -39,7 +39,7 @@ public class RawTwinQuery
      *
      * @param connectionString The iot hub connection string
      */
-    public RawTwinQuery(String connectionString)
+    public RawTwinQueryClient(String connectionString)
     {
         if (connectionString == null || connectionString.isEmpty())
         {
@@ -57,7 +57,7 @@ public class RawTwinQuery
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
      */
-    public RawTwinQuery(String hostName, TokenCredential credential)
+    public RawTwinQueryClient(String hostName, TokenCredential credential)
     {
         if (hostName == null || hostName.isEmpty())
         {
@@ -77,7 +77,7 @@ public class RawTwinQuery
      * @param azureSasCredential The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed.
      */
-    public RawTwinQuery(String hostName, AzureSasCredential azureSasCredential)
+    public RawTwinQueryClient(String hostName, AzureSasCredential azureSasCredential)
     {
         if (hostName == null || hostName.isEmpty())
         {
@@ -138,11 +138,11 @@ public class RawTwinQuery
     }
 
     /**
-     * Returns the availability of next element in response. Sends the request again (if possible)
+     * Returns the availability of next element in response. Sends the sendHttpRequest again (if possible)
      * to retrieve response until no response is found.
      * @param query Object corresponding to the query
      * @return True if available and false otherwise
-     * @throws IotHubException If IotHub could not respond successfully to the query request
+     * @throws IotHubException If IotHub could not respond successfully to the query sendHttpRequest
      * @throws IOException If any of the input parameters are incorrect
      */
     public boolean hasNext(Query query) throws IotHubException, IOException
@@ -160,7 +160,7 @@ public class RawTwinQuery
      * @param query Object corresponding for this query
      * @return Next json element as a response to this query
      * @throws IOException If any of input parameters are incorrect
-     * @throws IotHubException If IotHub could not respond successfully to the query request
+     * @throws IotHubException If IotHub could not respond successfully to the query sendHttpRequest
      * @throws NoSuchElementException If no other element is found
      */
     public String next(Query query) throws IOException, IotHubException, NoSuchElementException

@@ -14,7 +14,6 @@ import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
@@ -22,6 +21,7 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.QueryType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
+import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,6 +34,8 @@ import java.util.Date;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
+
+import static com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest.REQUEST_ID;
 
 /**
  * Use the JobClient to schedule and cancel jobs for a group of devices using IoT hub.
@@ -220,15 +222,18 @@ public class JobClient
 
         ProxyOptions proxyOptions = options.getProxyOptions();
         Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
-        HttpResponse response = DeviceOperations.request(
-            this.getAuthenticationToken(),
+
+        HttpRequest httpRequest = new HttpRequest(
             url,
             HttpMethod.PUT,
             json.getBytes(StandardCharsets.UTF_8),
-            null,
-            options.getHttpConnectTimeout(),
-            options.getHttpReadTimeout(),
+            this.getAuthenticationToken(),
             proxy);
+
+        httpRequest.setReadTimeoutMillis(options.getHttpReadTimeout());
+        httpRequest.setConnectTimeoutMillis(options.getHttpConnectTimeout());
+
+        HttpResponse response = httpRequest.send();
 
         return new JobResult(response.getBody());
     }
@@ -310,15 +315,18 @@ public class JobClient
 
         ProxyOptions proxyOptions = options.getProxyOptions();
         Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
-        HttpResponse response = DeviceOperations.request(
-            this.getAuthenticationToken(),
+
+        HttpRequest httpRequest = new HttpRequest(
             url,
             HttpMethod.PUT,
             json.getBytes(StandardCharsets.UTF_8),
-            null,
-            options.getHttpConnectTimeout(),
-            options.getHttpReadTimeout(),
+            this.getAuthenticationToken(),
             proxy);
+
+        httpRequest.setReadTimeoutMillis(options.getHttpReadTimeout());
+        httpRequest.setConnectTimeoutMillis(options.getHttpConnectTimeout());
+
+        HttpResponse response = httpRequest.send();
 
         return new JobResult(response.getBody());
     }
@@ -353,15 +361,18 @@ public class JobClient
 
         ProxyOptions proxyOptions = options.getProxyOptions();
         Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
-        HttpResponse response = DeviceOperations.request(
-            this.getAuthenticationToken(),
+
+        HttpRequest httpRequest = new HttpRequest(
             url,
             HttpMethod.GET,
-            new byte[]{},
-            null,
-            options.getHttpConnectTimeout(),
-            options.getHttpReadTimeout(),
+            new byte[0],
+            this.getAuthenticationToken(),
             proxy);
+
+        httpRequest.setReadTimeoutMillis(options.getHttpReadTimeout());
+        httpRequest.setConnectTimeoutMillis(options.getHttpConnectTimeout());
+
+        HttpResponse response = httpRequest.send();
 
         return new JobResult(response.getBody());
     }
@@ -395,15 +406,18 @@ public class JobClient
 
         ProxyOptions proxyOptions = options.getProxyOptions();
         Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
-        HttpResponse response = DeviceOperations.request(
-            this.getAuthenticationToken(),
+
+        HttpRequest httpRequest = new HttpRequest(
             url,
             HttpMethod.POST,
             EMPTY_JSON,
-            null,
-            options.getHttpConnectTimeout(),
-            options.getHttpReadTimeout(),
+            this.getAuthenticationToken(),
             proxy);
+
+        httpRequest.setReadTimeoutMillis(options.getHttpReadTimeout());
+        httpRequest.setConnectTimeoutMillis(options.getHttpConnectTimeout());
+
+        HttpResponse response = httpRequest.send();
 
         return new JobResult(response.getBody());
     }

@@ -815,12 +815,8 @@ public class Tools
 
         String sasTokenString = new IotHubServiceSasToken(iotHubConnectionString).toString();
 
-        HttpRequest request = new HttpRequest(url, HttpMethod.POST, jsonPayload.getBytes(StandardCharsets.UTF_8));
+        HttpRequest request = new HttpRequest(url, HttpMethod.POST, jsonPayload.getBytes(StandardCharsets.UTF_8), sasTokenString);
         request.setReadTimeoutMillis(IntegrationTest.HTTP_READ_TIMEOUT);
-        request.setHeaderField("authorization", sasTokenString);
-        request.setHeaderField("Accept", "application/json");
-        request.setHeaderField("Content-Type", "application/json");
-        request.setHeaderField("charset", "utf-8");
 
         HttpResponse response = request.send();
 

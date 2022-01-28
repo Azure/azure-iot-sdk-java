@@ -70,7 +70,7 @@ public class QueryTest
     @Mocked
     Proxy mockedProxy;
 
-    //Tests_SRS_QUERY_25_001: [The constructor shall validate query and save query, pagesize and request type]
+    //Tests_SRS_QUERY_25_001: [The constructor shall validate query and save query, pagesize and sendHttpRequest type]
     @Test
     public void constructorWithSQLQuerySucceeds() throws IllegalArgumentException
     {
@@ -166,7 +166,7 @@ public class QueryTest
         Query testQuery = Deencapsulation.newInstance(Query.class, DEFAULT_QUERY, DEFAULT_PAGE_SIZE, null);
     }
 
-    //Tests_SRS_QUERY_25_001: [The constructor shall validate query and save query, pagesize and request type]
+    //Tests_SRS_QUERY_25_001: [The constructor shall validate query and save query, pagesize and sendHttpRequest type]
     //Tests_SRS_QUERY_25_017: [If the query is avaliable then isSqlQuery shall be set to true, and false otherwise.]
     @Test
     public void constructorWithOutSQLQuerySucceeds() throws IllegalArgumentException
@@ -234,39 +234,6 @@ public class QueryTest
             {
                 mockHttpResponse.getHeaderFields();
                 result = testHeaderResponseMap;
-            }
-        };
-    }
-
-    //Tests_SRS_QUERY_25_005: [The method shall update the request continuation token and request pagesize which shall be used for processing subsequent query request.]
-    //Tests_SRS_QUERY_25_018: [The method shall send the query request again.]
-    @Test
-    public void continueQuerySetsTokenAndSends() throws IOException, IotHubException
-    {
-
-        //arrange
-        final String testToken = UUID.randomUUID().toString();
-        Query testQuery = Deencapsulation.newInstance(Query.class, DEFAULT_QUERY, DEFAULT_PAGE_SIZE, DEFAULT_QUERY_TYPE);
-        setupSendQuery(testQuery, testToken);
-        testQuery.sendQueryRequest(mockIotHubConnectionString, mockUrl, mockHttpMethod, DEFAULT_TIMEOUT, DEFAULT_TIMEOUT, null);
-
-        //act
-        Deencapsulation.invoke(testQuery, "continueQuery", testToken);
-
-        //assert
-        assertEquals(testToken, Deencapsulation.getField(testQuery, "requestContinuationToken"));
-
-        new Verifications()
-        {
-            {
-                new HttpRequest(mockUrl, mockHttpMethod, (byte[]) any);
-                times = 2;
-                mockHttpRequest.setHeaderField("x-ms-max-item-count", String.valueOf(DEFAULT_PAGE_SIZE));
-                times = 2;
-                mockHttpRequest.setHeaderField("x-ms-continuation", testToken);
-                times = 1;
-                mockHttpRequest.setHeaderField(anyString, anyString);
-                minTimes = 10;
             }
         };
     }
@@ -485,7 +452,7 @@ public class QueryTest
         assertTrue(hasNext);
     }
 
-    //Tests_SRS_QUERY_25_021: [If no further query response is available, then this method shall continue to request query to IotHub if continuation token is available.]
+    //Tests_SRS_QUERY_25_021: [If no further query response is available, then this method shall continue to sendHttpRequest query to IotHub if continuation token is available.]
     @Test
     public void hasNextReturnsFalseIfNextDoesNotExistsAndTokenIsNull() throws IotHubException, IOException
     {

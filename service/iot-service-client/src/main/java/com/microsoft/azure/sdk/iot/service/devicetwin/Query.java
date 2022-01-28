@@ -13,6 +13,7 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
+import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 
 import java.io.IOException;
@@ -59,7 +60,7 @@ public class Query
      * Constructor for Query.
      *
      * @param query Sql style query to be sent to IotHub.
-     * @param pageSize page size for the query response to request query over.
+     * @param pageSize page size for the query response to sendHttpRequest query over.
      * @param requestQueryType Type of query.
      * @throws IllegalArgumentException if the input parameters are invalid.
      */
@@ -90,7 +91,7 @@ public class Query
     /**
      * Constructor for Query.
      *
-     * @param pageSize page size for the query response to request query over.
+     * @param pageSize page size for the query response to sendHttpRequest query over.
      * @param requestQueryType Type of query.
      * @throws IllegalArgumentException if the input parameters are invalid.
      */
@@ -117,11 +118,11 @@ public class Query
     }
 
     /**
-     * Continuation token to be used for next query request.
+     * Continuation token to be used for next query sendHttpRequest.
      *
-     * @param continuationToken token to be used for next query request. Can be {@code null}.
-     * @throws IOException if sending the request is unsuccessful because of input parameters.
-     * @throws IotHubException if sending the request is unsuccessful at the Hub.
+     * @param continuationToken token to be used for next query sendHttpRequest. Can be {@code null}.
+     * @throws IOException if sending the sendHttpRequest is unsuccessful because of input parameters.
+     * @throws IotHubException if sending the sendHttpRequest is unsuccessful at the Hub.
      */
     private void continueQuery(String continuationToken) throws IOException, IotHubException
     {
@@ -139,13 +140,13 @@ public class Query
     }
 
     /**
-     * Sends request for the query to the IotHub.
+     * Sends sendHttpRequest for the query to the IotHub.
      *
      * @param iotHubConnectionString Hub Connection String.
      * @param url URL to Query on.
      * @param method HTTP Method for the requesting a query.
-     * @param httpConnectTimeout the http connect timeout to use for this request.
-     * @param httpReadTimeout the http read timeout to use for this request.
+     * @param httpConnectTimeout the http connect timeout to use for this sendHttpRequest.
+     * @param httpReadTimeout the http read timeout to use for this sendHttpRequest.
      * @param proxy the proxy to use, or null if no proxy should be used.
      * @return QueryResponse object which holds the response Iterator.
      * @throws IOException If any of the input parameters are not valid.
@@ -182,8 +183,6 @@ public class Query
         }
         queryHeaders.put(PAGE_SIZE_KEY, String.valueOf(pageSize));
 
-        DeviceOperations.setHeaders(queryHeaders);
-
         if (isSqlQuery)
         {
             QueryRequestParser requestParser = new QueryRequestParser(this.query);
@@ -194,16 +193,18 @@ public class Query
             payload = new byte[0];
         }
 
-        HttpResponse httpResponse =
-                DeviceOperations.request(
-                        iotHubConnectionString,
-                        url,
-                        method,
-                        payload,
-                        null,
-                        httpConnectTimeout,
-                        httpReadTimeout,
-                        proxy);
+        HttpRequest httpRequest = new HttpRequest(
+            url,
+            method,
+            payload,
+            new IotHubServiceSasToken(iotHubConnectionString).toString(),
+            proxy);
+
+        httpRequest.setReadTimeoutMillis(httpReadTimeout);
+        httpRequest.setConnectTimeoutMillis(httpConnectTimeout);
+        httpRequest.setHeaders(queryHeaders);
+
+        HttpResponse httpResponse = httpRequest.send();
 
         this.responseContinuationToken = null;
         Map<String, String> headers = httpResponse.getHeaderFields();
@@ -229,7 +230,7 @@ public class Query
 
         if (this.requestQueryType != this.responseQueryType)
         {
-            throw new IotHubException("Query response does not match query request");
+            throw new IotHubException("Query response does not match query sendHttpRequest");
         }
 
         this.queryResponse = new QueryResponse(new String(httpResponse.getBody(), StandardCharsets.UTF_8));
@@ -237,15 +238,15 @@ public class Query
     }
 
     /**
-     * Sends request for the query to the IotHub.
+     * Sends sendHttpRequest for the query to the IotHub.
      *
      * @param credentialCache The RBAC authorization token provider. May be null if azureSasCredential or iotHubConnectionString is not.
      * @param azureSasCredential The SAS authorization token provider. May be null if credential or iotHubConnectionString is not.
      * @param iotHubConnectionString The iot hub connection string that SAS tokens will be derived from. May be null if azureSasCredential or credential is not.
      * @param url URL to Query on.
      * @param method HTTP Method for the requesting a query.
-     * @param httpConnectTimeout the http connect timeout to use for this request.
-     * @param httpReadTimeout the http read timeout to use for this request.
+     * @param httpConnectTimeout the http connect timeout to use for this sendHttpRequest.
+     * @param httpReadTimeout the http read timeout to use for this sendHttpRequest.
      * @param proxy the proxy to use, or null if no proxy should be used.
      * @return QueryResponse object which holds the response Iterator.
      * @throws IOException If any of the input parameters are not valid.
@@ -282,8 +283,6 @@ public class Query
         }
         queryHeaders.put(PAGE_SIZE_KEY, String.valueOf(pageSize));
 
-        DeviceOperations.setHeaders(queryHeaders);
-
         if (isSqlQuery)
         {
             QueryRequestParser requestParser = new QueryRequestParser(this.query);
@@ -308,16 +307,17 @@ public class Query
             authorizationToken = new IotHubServiceSasToken(iotHubConnectionString).toString();
         }
 
-        HttpResponse httpResponse =
-                DeviceOperations.request(
-                        authorizationToken,
-                        url,
-                        method,
-                        payload,
-                        null,
-                        httpConnectTimeout,
-                        httpReadTimeout,
-                        proxy);
+        HttpRequest httpRequest = new HttpRequest(
+            url,
+            method,
+            payload,
+            authorizationToken,
+            proxy);
+
+        httpRequest.setReadTimeoutMillis(httpReadTimeout);
+        httpRequest.setConnectTimeoutMillis(httpConnectTimeout);
+
+        HttpResponse httpResponse = httpRequest.send();
 
         this.responseContinuationToken = null;
         Map<String, String> headers = httpResponse.getHeaderFields();
@@ -343,7 +343,7 @@ public class Query
 
         if (this.requestQueryType != this.responseQueryType)
         {
-            throw new IotHubException("Query response does not match query request");
+            throw new IotHubException("Query response does not match query sendHttpRequest");
         }
 
         this.queryResponse = new QueryResponse(new String(httpResponse.getBody(), StandardCharsets.UTF_8));
@@ -363,8 +363,8 @@ public class Query
      * Returns the availability of next element in the query response.
      *
      * @return the availability of next element in the query response.
-     * @throws IOException if sending the request is unsuccessful because of input parameters.
-     * @throws IotHubException if sending the request is unsuccessful at the Hub.
+     * @throws IOException if sending the sendHttpRequest is unsuccessful because of input parameters.
+     * @throws IotHubException if sending the sendHttpRequest is unsuccessful at the Hub.
      */
     public boolean hasNext() throws IOException, IotHubException
     {
@@ -384,8 +384,8 @@ public class Query
      * provides the next element in query response.
      *
      * @return the next element in query response.
-     * @throws IOException if sending the request is unsuccessful because of input parameters.
-     * @throws IotHubException if sending the request is unsuccessful at the Hub.
+     * @throws IOException if sending the sendHttpRequest is unsuccessful because of input parameters.
+     * @throws IotHubException if sending the sendHttpRequest is unsuccessful at the Hub.
      * @throws NoSuchElementException if no further elements are available.
      */
     public Object next() throws IOException, IotHubException, NoSuchElementException

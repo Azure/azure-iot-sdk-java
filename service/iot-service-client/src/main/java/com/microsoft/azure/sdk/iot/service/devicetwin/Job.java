@@ -55,7 +55,7 @@ public class Job
      * @param startTimeUtc Date time in Utc to start the job
      * @param maxExecutionTimeInSeconds Max execution time in seconds, i.e., ttl duration the job can run
      * @throws IOException if the function contains invalid parameters
-     * @throws IotHubException if the http request failed
+     * @throws IotHubException if the http sendHttpRequest failed
      */
     void scheduleUpdateTwin(
         String queryCondition,
@@ -98,7 +98,7 @@ public class Job
      * @param startTimeUtc Date time in Utc to start the job
      * @param maxExecutionTimeInSeconds Max execution time in seconds, i.e., ttl duration the job can run
      * @throws IOException if the function contains invalid parameters
-     * @throws IotHubException if the http request failed
+     * @throws IotHubException if the http sendHttpRequest failed
      */
     void scheduleDeviceMethod(
         String queryCondition,
@@ -146,7 +146,7 @@ public class Job
      *
      * @return a jobResult object with the current job status.
      * @throws IOException if the function failed to get the status with the current job information
-     * @throws IotHubException if the http request failed
+     * @throws IotHubException if the http sendHttpRequest failed
      */
     public JobResult get() throws IOException, IotHubException
     {
@@ -158,7 +158,7 @@ public class Job
      *
      * @return a jobResult object with the current job status.
      * @throws IOException if the function failed to cancel the job with the current job information
-     * @throws IotHubException if the http request failed
+     * @throws IotHubException if the http sendHttpRequest failed
      */
     public JobResult cancel() throws IOException, IotHubException
     {

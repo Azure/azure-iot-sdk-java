@@ -15,6 +15,7 @@ import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
+import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,6 +30,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+
+import static com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest.REQUEST_ID;
 
 /**
  * Use the TwinClient class to manage the device twins in IoT hubs.
@@ -178,15 +181,18 @@ public class TwinClient
     {
         ProxyOptions proxyOptions = options.getProxyOptions();
         Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
-        HttpResponse response = DeviceOperations.request(
-                this.getAuthenticationToken(),
-                url,
-                HttpMethod.GET,
-                new byte[0],
-                String.valueOf(requestId++),
-                options.getHttpConnectTimeout(),
-                options.getHttpReadTimeout(),
-                proxy);
+        HttpRequest httpRequest = new HttpRequest(
+            url,
+            HttpMethod.GET,
+            new byte[0],
+            this.getAuthenticationToken(),
+            proxy);
+
+        httpRequest.setReadTimeoutMillis(options.getHttpReadTimeout());
+        httpRequest.setConnectTimeoutMillis(options.getHttpConnectTimeout());
+        httpRequest.setHeaderField(REQUEST_ID, String.valueOf(requestId++));
+
+        HttpResponse response = httpRequest.send();
 
         String twinString = new String(response.getBody(), StandardCharsets.UTF_8);
 
@@ -243,15 +249,20 @@ public class TwinClient
 
         ProxyOptions proxyOptions = options.getProxyOptions();
         Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
-        DeviceOperations.request(
-                this.getAuthenticationToken(),
-                url,
-                HttpMethod.PATCH,
-                twinJson.getBytes(StandardCharsets.UTF_8),
-                String.valueOf(requestId++),
-                options.getHttpConnectTimeout(),
-                options.getHttpReadTimeout(),
-                proxy);
+
+        HttpRequest httpRequest = new HttpRequest(
+            url,
+            HttpMethod.PATCH,
+            twinJson.getBytes(StandardCharsets.UTF_8),
+            this.getAuthenticationToken(),
+            proxy);
+
+        httpRequest.setReadTimeoutMillis(options.getHttpReadTimeout());
+        httpRequest.setConnectTimeoutMillis(options.getHttpConnectTimeout());
+        httpRequest.setHeaderField(REQUEST_ID, String.valueOf(requestId++));
+
+        // no need to return http response since method returns void
+        httpRequest.send();
     }
 
     /**
@@ -259,8 +270,8 @@ public class TwinClient
      *
      * @param twin The twin object to replace the current twin object.
      * @throws IotHubException If any an IoT hub level exception is thrown. For instance,
-     * if the request is unauthorized, a exception that extends IotHubException will be thrown.
-     * @throws IOException If the request failed to send to IoT hub.
+     * if the sendHttpRequest is unauthorized, a exception that extends IotHubException will be thrown.
+     * @throws IOException If the sendHttpRequest failed to send to IoT hub.
      * @return The Twin object's current state returned from the service after the replace operation.
      */
     public Twin replaceTwin(Twin twin) throws IotHubException, IOException
@@ -287,15 +298,18 @@ public class TwinClient
                 ? null
                 : options.getProxyOptions().getProxy();
 
-        HttpResponse httpResponse = DeviceOperations.request(
-            this.iotHubConnectionString,
+        HttpRequest httpRequest = new HttpRequest(
             url,
             HttpMethod.PUT,
             twinJson.getBytes(StandardCharsets.UTF_8),
-            String.valueOf(requestId++),
-            options.getHttpConnectTimeout(),
-            options.getHttpReadTimeout(),
+            this.getAuthenticationToken(),
             proxy);
+
+        httpRequest.setReadTimeoutMillis(options.getHttpReadTimeout());
+        httpRequest.setConnectTimeoutMillis(options.getHttpConnectTimeout());
+        httpRequest.setHeaderField(REQUEST_ID, String.valueOf(requestId++));
+
+        HttpResponse httpResponse = httpRequest.send();
 
         String responseTwinJson = new String(httpResponse.getBody(), StandardCharsets.UTF_8);
 
@@ -329,7 +343,7 @@ public class TwinClient
      * @param sqlQuery SQL-style query string to query Iot hub for Twin.
      * @param pageSize Size to limit query response by.
      * @return {@link Query} Object to be used for looking up responses for this query.
-     * @throws IotHubException If query request was not successful at the Iot hub.
+     * @throws IotHubException If query sendHttpRequest was not successful at the Iot hub.
      * @throws IOException If input parameters are invalid.
      */
     public Query queryTwin(String sqlQuery, Integer pageSize) throws IotHubException, IOException
@@ -367,7 +381,7 @@ public class TwinClient
      *
      * @param sqlQuery SQL-style query string to query Iot hub for twin.
      * @return {@link Query} Object to be used for looking up responses for this query.
-     * @throws IotHubException If query request was not successful at the Iot hub.
+     * @throws IotHubException If query sendHttpRequest was not successful at the Iot hub.
      * @throws IOException If input parameters are invalid.
      */
     public Query queryTwin(String sqlQuery) throws IotHubException, IOException
@@ -466,7 +480,7 @@ public class TwinClient
     /**
      * Returns the next twin document.
      *
-     * @param twinQuery The object corresponding to the query in request.
+     * @param twinQuery The object corresponding to the query in sendHttpRequest.
      * @return Returns the next twin document.
      * @throws IOException If the input parameter is incorrect.
      * @throws IotHubException If an unsuccessful response from IoT Hub is received.
@@ -584,7 +598,7 @@ public class TwinClient
      * @param maxExecutionTimeInSeconds Max run time in seconds, I.E., the duration the job can run.
      * @return A {@link Job} class that represent this job on IoT hub.
      * @throws IOException If the function contains invalid parameters.
-     * @throws IotHubException If the HTTP request failed.
+     * @throws IotHubException If the HTTP sendHttpRequest failed.
      */
     public Job scheduleUpdateTwin(
             String queryCondition,

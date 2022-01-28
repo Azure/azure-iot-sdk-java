@@ -14,6 +14,7 @@ import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
+import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,6 +24,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Objects;
+
+import static com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest.REQUEST_ID;
 
 /**
  * The client to directly invoke direct methods on devices and modules in IoT hub.
@@ -145,7 +148,7 @@ public class DirectMethodsClient
     /**
      * Directly invokes a method on the device and return its result.
      *
-     * @param deviceId is the device where the request is send to.
+     * @param deviceId is the device where the sendHttpRequest is send to.
      * @param methodName is the name of the method that shall be invoked on the device.
      * @param responseTimeoutInSeconds is the maximum waiting time for a response from the device in seconds.
      * @param connectTimeoutInSeconds is the maximum waiting time for a response from the connection in seconds.
@@ -179,7 +182,7 @@ public class DirectMethodsClient
      * Directly invokes a method on the module and return its result.
      *
      * @param deviceId is the device where the module is related to.
-     * @param moduleId is the module where the request is sent to.
+     * @param moduleId is the module where the sendHttpRequest is sent to.
      * @param methodName is the name of the method that shall be invoked on the device.
      * @param responseTimeoutInSeconds is the maximum waiting time for a response from the device in seconds.
      * @param connectTimeoutInSeconds is the maximum waiting time for a response from the connection in seconds.
@@ -219,7 +222,7 @@ public class DirectMethodsClient
     /**
      * Directly invokes a method on the device and return its result.
      *
-     * @param url is the path where the request is send to.
+     * @param url is the path where the sendHttpRequest is send to.
      * @param methodName is the name of the method that shall be invoked on the device.
      * @param responseTimeoutInSeconds is the maximum waiting time for a response from the device in seconds.
      * @param connectTimeoutInSeconds is the maximum waiting time for a response from the connection in seconds.
@@ -245,15 +248,18 @@ public class DirectMethodsClient
 
         ProxyOptions proxyOptions = options.getProxyOptions();
         Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
-        HttpResponse response = DeviceOperations.request(
-            this.getAuthenticationToken(),
+        HttpRequest httpRequest = new HttpRequest(
             url,
             HttpMethod.POST,
             json.getBytes(StandardCharsets.UTF_8),
-            String.valueOf(requestId++),
-            options.getHttpConnectTimeout(),
-            options.getHttpReadTimeout(),
+            this.getAuthenticationToken(),
             proxy);
+
+        httpRequest.setReadTimeoutMillis(options.getHttpReadTimeout());
+        httpRequest.setConnectTimeoutMillis(options.getHttpConnectTimeout());
+        httpRequest.setHeaderField(REQUEST_ID, String.valueOf(requestId++));
+
+        HttpResponse response = httpRequest.send();
 
         MethodParser methodParserResponse = new MethodParser();
         methodParserResponse.fromJson(new String(response.getBody(), StandardCharsets.UTF_8));
@@ -273,7 +279,7 @@ public class DirectMethodsClient
      * @param maxExecutionTimeInSeconds Max execution time in seconds, i.e., ttl duration the job can run.
      * @return a Job class that represent this job on IotHub.
      * @throws IOException if the function contains invalid parameters.
-     * @throws IotHubException if the http request failed.
+     * @throws IotHubException if the http sendHttpRequest failed.
      */
     public Job scheduleDeviceMethod(
         String queryCondition,

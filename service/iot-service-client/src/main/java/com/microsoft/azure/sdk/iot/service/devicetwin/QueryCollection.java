@@ -13,6 +13,7 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
+import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 
 import java.io.IOException;
@@ -21,6 +22,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest.REQUEST_ID;
 
 public class QueryCollection
 {
@@ -201,8 +204,6 @@ public class QueryCollection
      */
     private QueryCollectionResponse<String> sendQueryRequest(QueryOptions options) throws IOException, IotHubException
     {
-        DeviceOperations.setHeaders(buildQueryHeaders(options));
-
         byte[] payload;
         if (isSqlQuery)
         {
@@ -228,15 +229,17 @@ public class QueryCollection
             authorizationToken = new IotHubServiceSasToken(iotHubConnectionString).toString();
         }
 
-        HttpResponse httpResponse = DeviceOperations.request(
-                authorizationToken,
-                this.url,
-                this.httpMethod,
-                payload,
-                null,
-                this.httpConnectTimeout,
-                this.httpReadTimeout,
-                this.proxy);
+        HttpRequest httpRequest = new HttpRequest(
+            url,
+            HttpMethod.GET,
+            payload,
+            authorizationToken,
+            proxy);
+
+        httpRequest.setReadTimeoutMillis(httpReadTimeout);
+        httpRequest.setConnectTimeoutMillis(httpConnectTimeout);
+        httpRequest.setHeaders(buildQueryHeaders(options));
+        HttpResponse httpResponse = httpRequest.send();
 
         handleQueryResponse(httpResponse);
 
@@ -338,7 +341,7 @@ public class QueryCollection
 
         if (requestQueryType != responseQueryType)
         {
-            throw new IOException("Query response does not match query request");
+            throw new IOException("Query response does not match query sendHttpRequest");
         }
     }
 

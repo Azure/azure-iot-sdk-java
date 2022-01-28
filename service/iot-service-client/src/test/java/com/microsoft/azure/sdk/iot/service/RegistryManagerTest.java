@@ -596,10 +596,9 @@ public class RegistryManagerTest
             {
                 IotHubConnectionString.getUrlDevice(anyString, deviceId);
                 times = 1;
-                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], (Proxy) any);
+                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], anyString, (Proxy) any);
                 times = 1;
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
-                mockHttpRequest.setHeaderField("authorization", anyString);
                 mockHttpRequest.setHeaderField("If-Match", etag);
             }
         };
@@ -652,10 +651,9 @@ public class RegistryManagerTest
             {
                 IotHubConnectionString.getUrlDevice(anyString, deviceId);
                 times = 1;
-                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], (Proxy) any);
+                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], anyString, (Proxy) any);
                 times = 1;
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
-                mockHttpRequest.setHeaderField("authorization", anyString);
                 mockHttpRequest.setHeaderField("If-Match", "*");
             }
         };
@@ -685,13 +683,8 @@ public class RegistryManagerTest
                 result = mockProxyOptions;
                 mockProxyOptions.getProxy();
                 result = mockProxy;
-                new HttpRequest(mockUrl, HttpMethod.GET, new byte[0], mockProxy);
+                new HttpRequest(mockUrl, HttpMethod.GET, new byte[0], anyString, mockProxy);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
-                mockHttpRequest.setHeaderField("authorization", anyString);
-                mockHttpRequest.setHeaderField("Request-Id", "1001");
-                mockHttpRequest.setHeaderField("Accept", "application/json");
-                mockHttpRequest.setHeaderField("Content-Type", "application/json");
-                mockHttpRequest.setHeaderField("charset", "utf-8");
                 mockHttpRequest.send();
                 IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
@@ -734,13 +727,8 @@ public class RegistryManagerTest
         {
             {
                 IotHubConnectionString.getUrlCreateExportImportJob(anyString);
-                new HttpRequest(mockUrl, HttpMethod.POST, (byte[]) any, (Proxy) any);
+                new HttpRequest(mockUrl, HttpMethod.POST, (byte[]) any, anyString, (Proxy) any);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
-                mockHttpRequest.setHeaderField("authorization", anyString);
-                mockHttpRequest.setHeaderField("Request-Id", "1001");
-                mockHttpRequest.setHeaderField("Accept", "application/json");
-                mockHttpRequest.setHeaderField("Content-Type", "application/json");
-                mockHttpRequest.setHeaderField("charset", "utf-8");
                 mockHttpRequest.send();
                 IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
@@ -806,13 +794,8 @@ public class RegistryManagerTest
         {
             {
                 IotHubConnectionString.getUrlCreateExportImportJob(anyString);
-                new HttpRequest(mockUrl, HttpMethod.POST, (byte[]) any, (Proxy) any);
+                new HttpRequest(mockUrl, HttpMethod.POST, (byte[]) any, anyString, (Proxy) any);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
-                mockHttpRequest.setHeaderField("authorization", anyString);
-                mockHttpRequest.setHeaderField("Request-Id", "1001");
-                mockHttpRequest.setHeaderField("Accept", "application/json");
-                mockHttpRequest.setHeaderField("Content-Type", "application/json");
-                mockHttpRequest.setHeaderField("charset", "utf-8");
                 mockHttpRequest.send();
                 IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
@@ -877,13 +860,8 @@ public class RegistryManagerTest
         {
             {
                 IotHubConnectionString.getUrlCreateExportImportJob(anyString);
-                new HttpRequest(mockUrl, HttpMethod.POST, (byte[]) any, (Proxy) any);
+                new HttpRequest(mockUrl, HttpMethod.POST, (byte[]) any, anyString, (Proxy) any);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
-                mockHttpRequest.setHeaderField("authorization", anyString);
-                mockHttpRequest.setHeaderField("Request-Id", "1001");
-                mockHttpRequest.setHeaderField("Accept", "application/json");
-                mockHttpRequest.setHeaderField("Content-Type", "application/json");
-                mockHttpRequest.setHeaderField("charset", "utf-8");
                 mockHttpRequest.send();
                 IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
@@ -922,13 +900,8 @@ public class RegistryManagerTest
         {
             {
                 IotHubConnectionString.getUrlCreateExportImportJob(anyString);
-                new HttpRequest(mockUrl, HttpMethod.POST, (byte[]) any, (Proxy) any);
+                new HttpRequest(mockUrl, HttpMethod.POST, (byte[]) any, anyString, (Proxy) any);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
-                mockHttpRequest.setHeaderField("authorization", anyString);
-                mockHttpRequest.setHeaderField("Request-Id", "1001");
-                mockHttpRequest.setHeaderField("Accept", "application/json");
-                mockHttpRequest.setHeaderField("Content-Type", "application/json");
-                mockHttpRequest.setHeaderField("charset", "utf-8");
                 mockHttpRequest.send();
                 IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
@@ -983,15 +956,9 @@ public class RegistryManagerTest
         {
             {
                 IotHubConnectionString.getUrlImportExportJob(anyString, jobId);
-                new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any, (Proxy) any);
+                new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any, anyString, (Proxy) any);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
-                mockHttpRequest.setHeaderField("authorization", anyString);
-                mockHttpRequest.setHeaderField("Request-Id", "1001");
-                mockHttpRequest.setHeaderField("Accept", "application/json");
-                mockHttpRequest.setHeaderField("Content-Type", "application/json");
-                mockHttpRequest.setHeaderField("charset", "utf-8");
                 mockHttpRequest.send();
-                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
         };
         assertNotNull(jobProperties);
@@ -1270,10 +1237,9 @@ public class RegistryManagerTest
             {
                 IotHubConnectionString.getUrlModule(anyString, deviceId, moduleId);
                 times = 1;
-                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], (Proxy) any);
+                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], anyString, (Proxy) any);
                 times = 1;
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
-                mockHttpRequest.setHeaderField("authorization", anyString);
                 mockHttpRequest.setHeaderField("If-Match", etag);
             }
         };
@@ -1398,10 +1364,9 @@ public class RegistryManagerTest
             {
                 IotHubConnectionString.getUrlModule(anyString, deviceId, moduleId);
                 times = 1;
-                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], (Proxy) any);
+                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], anyString, (Proxy) any);
                 times = 1;
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
-                mockHttpRequest.setHeaderField("authorization", anyString);
                 mockHttpRequest.setHeaderField("If-Match", "*");
             }
         };
@@ -1679,10 +1644,9 @@ public class RegistryManagerTest
             {
                 IotHubConnectionString.getUrlConfiguration(anyString, configId);
                 times = 1;
-                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], (Proxy) any);
+                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], anyString, (Proxy) any);
                 times = 1;
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
-                mockHttpRequest.setHeaderField("authorization", anyString);
                 mockHttpRequest.setHeaderField("If-Match", etag);
             }
         };
@@ -1710,10 +1674,9 @@ public class RegistryManagerTest
             {
                 IotHubConnectionString.getUrlConfiguration(anyString, configId);
                 times = 1;
-                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], (Proxy) any);
+                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], anyString, (Proxy) any);
                 times = 1;
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
-                mockHttpRequest.setHeaderField("authorization", anyString);
                 mockHttpRequest.setHeaderField("If-Match", "*");
             }
         };
@@ -1773,7 +1736,7 @@ public class RegistryManagerTest
                 IotHubConnectionString.getUrlApplyConfigurationContent(anyString, expectedDeviceId);
                 times = 1;
 
-                new HttpRequest(mockUrl, HttpMethod.POST, expectedJson.getBytes(StandardCharsets.UTF_8), (Proxy) any);
+                new HttpRequest(mockUrl, HttpMethod.POST, expectedJson.getBytes(StandardCharsets.UTF_8), anyString, (Proxy) any);
                 times = 1;
 
                 mockHttpRequest.send();
@@ -1809,7 +1772,7 @@ public class RegistryManagerTest
                 result = mockUrl;
                 mockIotHubConnectionString.getHostName();
                 result = "someHostname";
-                new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any, (Proxy) any);
+                new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any, anyString, (Proxy) any);
                 result = mockHttpRequest;
                 new DeviceParser(anyString);
                 result = mockDeviceParser;
@@ -1865,15 +1828,9 @@ public class RegistryManagerTest
         {
             {
                 IotHubConnectionString.getUrlDevice(anyString, requestDeviceId);
-                new HttpRequest(mockUrl, httpMethod, (byte[]) any, (Proxy) any);
+                new HttpRequest(mockUrl, httpMethod, (byte[]) any, anyString, (Proxy) any);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
-                mockHttpRequest.setHeaderField("authorization", anyString);
-                mockHttpRequest.setHeaderField("Request-Id", "1001");
-                mockHttpRequest.setHeaderField("Accept", "application/json");
-                mockHttpRequest.setHeaderField("Content-Type", "application/json");
-                mockHttpRequest.setHeaderField("charset", "utf-8");
                 mockHttpRequest.send();
-                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
         };
         assertNotNull(responseDevice);
@@ -1906,14 +1863,9 @@ public class RegistryManagerTest
             {
                 IotHubConnectionString.getUrlDeviceList(anyString, numberOfDevices);
                 times = 1;
-                new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any, (Proxy) any);
+                new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any, anyString, (Proxy) any);
                 times = 1;
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
-                mockHttpRequest.setHeaderField("authorization", anyString);
-                mockHttpRequest.setHeaderField("Request-Id", "1001");
-                mockHttpRequest.setHeaderField("Accept", "application/json");
-                mockHttpRequest.setHeaderField("Content-Type", "application/json");
-                mockHttpRequest.setHeaderField("charset", "utf-8");
                 mockHttpRequest.send();
             }
         };
@@ -1948,15 +1900,10 @@ public class RegistryManagerTest
         {
             {
                 IotHubConnectionString.getUrlModule(anyString, requestDeviceId, requestModuleId);
-                new HttpRequest(mockUrl, httpMethod, (byte[]) any, (Proxy) any);
+                new HttpRequest(mockUrl, httpMethod, (byte[]) any, anyString, (Proxy) any);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
-                mockHttpRequest.setHeaderField("authorization", anyString);
-                mockHttpRequest.setHeaderField("Request-Id", "1001");
-                mockHttpRequest.setHeaderField("Accept", "application/json");
-                mockHttpRequest.setHeaderField("Content-Type", "application/json");
-                mockHttpRequest.setHeaderField("charset", "utf-8");
+                mockHttpRequest.setConnectTimeoutMillis(anyInt);
                 mockHttpRequest.send();
-                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
         };
         assertNotNull(responseModule);
@@ -1989,14 +1936,9 @@ public class RegistryManagerTest
             {
                 IotHubConnectionString.getUrlModulesOnDevice(anyString, deviceId);
                 times = 1;
-                new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any, (Proxy) any);
+                new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any, anyString, (Proxy) any);
                 times = 1;
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
-                mockHttpRequest.setHeaderField("authorization", anyString);
-                mockHttpRequest.setHeaderField("Request-Id", "1001");
-                mockHttpRequest.setHeaderField("Accept", "application/json");
-                mockHttpRequest.setHeaderField("Content-Type", "application/json");
-                mockHttpRequest.setHeaderField("charset", "utf-8");
                 mockHttpRequest.send();
             }
         };
@@ -2031,15 +1973,9 @@ public class RegistryManagerTest
         {
             {
                 IotHubConnectionString.getUrlConfiguration(anyString, requestConfigId);
-                new HttpRequest(mockUrl, httpMethod, (byte[]) any, (Proxy) any);
+                new HttpRequest(mockUrl, httpMethod, (byte[]) any, anyString, (Proxy) any);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
-                mockHttpRequest.setHeaderField("authorization", anyString);
-                mockHttpRequest.setHeaderField("Request-Id", "1001");
-                mockHttpRequest.setHeaderField("Accept", "application/json");
-                mockHttpRequest.setHeaderField("Content-Type", "application/json");
-                mockHttpRequest.setHeaderField("charset", "utf-8");
                 mockHttpRequest.send();
-                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
         };
         assertNotNull(responseConfig);
@@ -2072,14 +2008,10 @@ public class RegistryManagerTest
             {
                 IotHubConnectionString.getUrlConfigurationsList(anyString, numOfConfigs);
                 times = 1;
-                new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any, (Proxy) any);
+                new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any, anyString, (Proxy) any);
                 times = 1;
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
-                mockHttpRequest.setHeaderField("authorization", anyString);
-                mockHttpRequest.setHeaderField("Request-Id", "1001");
-                mockHttpRequest.setHeaderField("Accept", "application/json");
-                mockHttpRequest.setHeaderField("Content-Type", "application/json");
-                mockHttpRequest.setHeaderField("charset", "utf-8");
+                mockHttpRequest.setConnectTimeoutMillis(anyInt);
                 mockHttpRequest.send();
             }
         };

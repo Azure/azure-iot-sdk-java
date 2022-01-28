@@ -172,13 +172,13 @@ public class TwinClientTest
     **Tests_SRS_DEVICETWIN_25_007: [** The function shall create a new HttpRequest with http method as Get **]**
     **Tests_SRS_DEVICETWIN_25_008: [** The function shall set the following HTTP headers specified in the IotHub TwinClient doc.
                                                 1. Key as authorization with value as sastoken
-                                                2. Key as request id with a new string value for every request
+                                                2. Key as sendHttpRequest id with a new string value for every sendHttpRequest
                                                 3. Key as User-Agent with value specified by the clientIdentifier and its version
                                                 4. Key as Accept with value as application/json
                                                 5. Key as Content-Type and value as application/json
                                                 6. Key as charset and value as utf-8
                                                 7. Key as If-Match and value as '*'  **]**
-     **Tests_SRS_DEVICETWIN_25_009: [** The function shall send the created request and get the response **]**
+     **Tests_SRS_DEVICETWIN_25_009: [** The function shall send the created sendHttpRequest and get the response **]**
      **Tests_SRS_DEVICETWIN_25_011: [** The function shall deserialize the payload by calling updateTwin Api on the twin object **]**
      **Tests_SRS_DEVICETWIN_25_012: [** The function shall set eTag, tags, desired property map, reported property map on the user device **]**
      */
@@ -214,7 +214,7 @@ public class TwinClientTest
                 mockedHttpRequest.setReadTimeoutMillis(anyInt);
                 times = 1;
                 mockedHttpRequest.setHeaderField(anyString, anyString);
-                times = 6;
+                times = 1;
                 mockedHttpRequest.send();
                 times = 1;
                 mockedTwinState.getETag();
@@ -273,7 +273,7 @@ public class TwinClientTest
                 mockedHttpRequest.setReadTimeoutMillis(anyInt);
                 times = 1;
                 mockedHttpRequest.setHeaderField(anyString, anyString);
-                times = 6;
+                times = 1;
                 mockedHttpRequest.send();
                 times = 1;
                 mockedTwinState.getETag();
@@ -456,30 +456,6 @@ public class TwinClientTest
     }
 
     /*
-    **Tests_SRS_DEVICETWIN_25_010: [** The function shall verify the response status and throw proper Exception **]**
-     */
-    @Test (expected = IotHubException.class)
-    public void getTwinThrowsVerificationFailure(@Mocked Twin mockedDevice) throws Exception
-    {
-        //arrange
-        final String connectionString = "testString";
-        constructorExpectations(connectionString);
-        TwinClient testTwin = new TwinClient(connectionString);
-        new NonStrictExpectations()
-        {
-            {
-                mockedDevice.getDeviceId();
-                result = "SomeDevID";
-                IotHubExceptionManager.httpResponseVerification(mockedHttpResponse);
-                result = new IotHubException();
-            }
-        };
-
-        //act
-        testTwin.getTwin(mockedDevice);
-    }
-
-    /*
     **Tests_SRS_DEVICETWIN_25_030: [** The function shall build the URL for this operation by calling getUrlTwinDesired **]**
     **Tests_SRS_DEVICETWIN_25_031: [** The function shall serialize the desired properties map by calling resetDesiredProperty Api on the twin object for the device provided by the user**]**
     **Tests_SRS_DEVICETWIN_25_016: [** The function shall create a new SAS token **]**
@@ -488,14 +464,14 @@ public class TwinClientTest
 
     **Tests_SRS_DEVICETWIN_25_018: [** The function shall set the following HTTP headers specified in the IotHub TwinClient doc.
                                                 1. Key as authorization with value as sastoken
-                                                2. Key as request id with a new string value for every request
+                                                2. Key as sendHttpRequest id with a new string value for every sendHttpRequest
                                                 3. Key as User-Agent with value specified by the clientIdentifier and its version
                                                 4. Key as Accept with value as application/json
                                                 5. Key as Content-Type and value as application/json
                                                 6. Key as charset and value as utf-8
                                                 7. Key as If-Match and value as '*'  **]**
 
-    **Tests_SRS_DEVICETWIN_25_019: [** The function shall send the created request and get the response **]**
+    **Tests_SRS_DEVICETWIN_25_019: [** The function shall send the created sendHttpRequest and get the response **]**
 
     **Tests_SRS_DEVICETWIN_25_020: [** The function shall verify the response status and throw proper Exception **]**
 
@@ -539,7 +515,7 @@ public class TwinClientTest
                 mockedHttpRequest.setReadTimeoutMillis(anyInt);
                 times = 1;
                 mockedHttpRequest.setHeaderField(anyString, anyString);
-                times = 6;
+                times = 1;
                 mockedHttpRequest.send();
                 times = 1;
             }
@@ -659,7 +635,7 @@ public class TwinClientTest
                 mockedHttpRequest.setReadTimeoutMillis(anyInt);
                 times = 1;
                 mockedHttpRequest.setHeaderField(anyString, anyString);
-                times = 6;
+                times = 1;
                 mockedHttpRequest.send();
                 times = 1;
             }
@@ -704,42 +680,11 @@ public class TwinClientTest
                 mockedHttpRequest.setReadTimeoutMillis(anyInt);
                 times = 1;
                 mockedHttpRequest.setHeaderField(anyString, anyString);
-                times = 6;
+                times = 1;
                 mockedHttpRequest.send();
                 times = 1;
             }
         };
-    }
-
-    @Test (expected = IotHubException.class)
-    public void updateTwinThrowsVerificationThrows(@Mocked Twin mockedDevice) throws Exception
-    {
-        //arrange
-        final String connectionString = "testString";
-        constructorExpectations(connectionString);
-        TwinClient testTwin = new TwinClient(connectionString);
-        TwinCollection testMap = new TwinCollection();
-        testMap.put("TestKey", "TestValue");
-        new NonStrictExpectations()
-        {
-            {
-                mockedDevice.getDeviceId();
-                result = "SomeDevID";
-                Deencapsulation.invoke(mockedDevice, "getDesiredMap");
-                result = testMap;
-                Deencapsulation.invoke(mockedDevice, "getTagsMap");
-                result = testMap;
-                new TwinState((TwinCollection)any, (TwinCollection)any, null);
-                result = mockedTwinState;
-                mockedTwinState.toJsonElement().toString();
-                result = "SomeJsonString";
-                IotHubExceptionManager.httpResponseVerification(mockedHttpResponse);
-                result = new IotHubException();
-            }
-        };
-
-        //act
-        testTwin.updateTwin(mockedDevice);
     }
 
     //Tests_SRS_DEVICETWIN_25_049: [ The method shall build the URL for this operation by calling getUrlTwinQuery ]

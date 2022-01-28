@@ -8,18 +8,12 @@ package com.microsoft.azure.sdk.iot.service.devicetwin;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
-import com.microsoft.azure.sdk.iot.service.devicetwin.QueryType;
-import com.microsoft.azure.sdk.iot.service.devicetwin.RawTwinQuery;
-import com.microsoft.azure.sdk.iot.service.devicetwin.SqlQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import mockit.*;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.NoSuchElementException;
 
 import static org.junit.Assert.*;
@@ -28,7 +22,7 @@ import static org.junit.Assert.*;
     Unit Tests for Raw Query
     Coverage : 100% methods, 100% lines
  */
-public class RawTwinQueryTest
+public class RawTwinQueryClientTest
 {
     @Mocked Query mockedQuery;
     @Mocked IotHubConnectionStringBuilder mockedIotHubConnectionStringBuilder;
@@ -50,14 +44,14 @@ public class RawTwinQueryTest
     public void constructorThrowsOnNullConnectionString() throws IOException
     {
         //act
-        RawTwinQuery rawTwinQuery = new RawTwinQuery(null);
+        RawTwinQueryClient rawTwinQueryClient = new RawTwinQueryClient(null);
     }
 
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnEmptyConnectionString() throws IOException
     {
         //act
-        RawTwinQuery rawTwinQuery = new RawTwinQuery("");
+        RawTwinQueryClient rawTwinQueryClient = new RawTwinQueryClient("");
     }
 
     //Tests_SRS_RAW_QUERY_25_006: [ The method shall build the URL for this operation by calling getUrlTwinQuery ]
@@ -68,7 +62,7 @@ public class RawTwinQueryTest
     public void rawQuerySucceeds() throws IotHubException, IOException
     {
         //arrange
-        RawTwinQuery rawTwinQuery = new RawTwinQuery(VALID_CONNECTION_STRING);
+        RawTwinQueryClient rawTwinQueryClient = new RawTwinQueryClient(VALID_CONNECTION_STRING);
 
         new Expectations()
         {
@@ -79,7 +73,7 @@ public class RawTwinQueryTest
         };
 
         //act
-        rawTwinQuery.query(VALID_SQL_QUERY);
+        rawTwinQueryClient.query(VALID_SQL_QUERY);
 
         //assert
     }
@@ -89,20 +83,20 @@ public class RawTwinQueryTest
     public void rawQueryThrowsOnNullQuery() throws IotHubException, IOException
     {
         //arrange
-        RawTwinQuery rawTwinQuery = new RawTwinQuery(VALID_CONNECTION_STRING);
+        RawTwinQueryClient rawTwinQueryClient = new RawTwinQueryClient(VALID_CONNECTION_STRING);
 
         //act
-        rawTwinQuery.query(null);
+        rawTwinQueryClient.query(null);
     }
 
     @Test (expected = IllegalArgumentException.class)
     public void rawQueryThrowsOnEmptyQuery() throws IotHubException, IOException
     {
         //arrange
-        RawTwinQuery rawTwinQuery = new RawTwinQuery(VALID_CONNECTION_STRING);
+        RawTwinQueryClient rawTwinQueryClient = new RawTwinQueryClient(VALID_CONNECTION_STRING);
 
         //act
-        rawTwinQuery.query("");
+        rawTwinQueryClient.query("");
     }
 
     //Tests_SRS_RAW_QUERY_25_005: [ The method shall throw IllegalArgumentException if the page size is zero or negative.]
@@ -110,20 +104,20 @@ public class RawTwinQueryTest
     public void rawQueryThrowsOnNegativePageSize() throws IotHubException, IOException
     {
         //arrange
-        RawTwinQuery rawTwinQuery = new RawTwinQuery(VALID_CONNECTION_STRING);
+        RawTwinQueryClient rawTwinQueryClient = new RawTwinQueryClient(VALID_CONNECTION_STRING);
 
         //act
-        rawTwinQuery.query(VALID_SQL_QUERY, -1);
+        rawTwinQueryClient.query(VALID_SQL_QUERY, -1);
     }
 
     @Test (expected = IllegalArgumentException.class)
     public void rawQueryThrowsOnZeroPageSize() throws IotHubException, IOException
     {
         //arrange
-        RawTwinQuery rawTwinQuery = new RawTwinQuery(VALID_CONNECTION_STRING);
+        RawTwinQueryClient rawTwinQueryClient = new RawTwinQueryClient(VALID_CONNECTION_STRING);
 
         //act
-        rawTwinQuery.query(VALID_SQL_QUERY, 0);
+        rawTwinQueryClient.query(VALID_SQL_QUERY, 0);
     }
 
     //Tests_SRS_RAW_QUERY_25_011: [ The method shall check if a response to query is avaliable by calling hasNext on the query object.]
@@ -132,7 +126,7 @@ public class RawTwinQueryTest
     public void hasNextSucceeds() throws IotHubException, IOException
     {
         //arrange
-        RawTwinQuery rawTwinQuery = new RawTwinQuery(VALID_CONNECTION_STRING);
+        RawTwinQueryClient rawTwinQueryClient = new RawTwinQueryClient(VALID_CONNECTION_STRING);
 
         new NonStrictExpectations()
         {
@@ -144,10 +138,10 @@ public class RawTwinQueryTest
             }
         };
 
-        Query testQuery = rawTwinQuery.query(VALID_SQL_QUERY);
+        Query testQuery = rawTwinQueryClient.query(VALID_SQL_QUERY);
 
         //act
-        boolean result = rawTwinQuery.hasNext(testQuery);
+        boolean result = rawTwinQueryClient.hasNext(testQuery);
 
         //assert
         assertTrue(result);
@@ -158,7 +152,7 @@ public class RawTwinQueryTest
     public void hasNextThrowsOnNullQuery() throws IotHubException, IOException
     {
         //arrange
-        RawTwinQuery rawTwinQuery = new RawTwinQuery(VALID_CONNECTION_STRING);
+        RawTwinQueryClient rawTwinQueryClient = new RawTwinQueryClient(VALID_CONNECTION_STRING);
 
         new NonStrictExpectations()
         {
@@ -168,17 +162,17 @@ public class RawTwinQueryTest
             }
         };
 
-        Query testQuery = rawTwinQuery.query(VALID_SQL_QUERY);
+        Query testQuery = rawTwinQueryClient.query(VALID_SQL_QUERY);
 
         //act
-        rawTwinQuery.hasNext(null);
+        rawTwinQueryClient.hasNext(null);
     }
 
     @Test (expected = IotHubException.class)
     public void hasNextThrowsIfQueryHasNextThrows() throws IotHubException, IOException
     {
         //arrange
-        RawTwinQuery rawTwinQuery = new RawTwinQuery(VALID_CONNECTION_STRING);
+        RawTwinQueryClient rawTwinQueryClient = new RawTwinQueryClient(VALID_CONNECTION_STRING);
 
         new NonStrictExpectations()
         {
@@ -190,10 +184,10 @@ public class RawTwinQueryTest
             }
         };
 
-        Query testQuery = rawTwinQuery.query(VALID_SQL_QUERY);
+        Query testQuery = rawTwinQueryClient.query(VALID_SQL_QUERY);
 
         //act
-        boolean result = rawTwinQuery.hasNext(testQuery);
+        boolean result = rawTwinQueryClient.hasNext(testQuery);
     }
 
     //Tests_SRS_RAW_QUERY_25_016: [ The method shall return the next element from the query response.]
@@ -201,7 +195,7 @@ public class RawTwinQueryTest
     public void nextRetrievesCorrectly() throws IotHubException, IOException
     {
         //arrange
-        RawTwinQuery rawTwinQuery = new RawTwinQuery(VALID_CONNECTION_STRING);
+        RawTwinQueryClient rawTwinQueryClient = new RawTwinQueryClient(VALID_CONNECTION_STRING);
         final String expectedString = "testJsonAsNext";
 
         new NonStrictExpectations()
@@ -216,10 +210,10 @@ public class RawTwinQueryTest
             }
         };
 
-        Query testQuery = rawTwinQuery.query(VALID_SQL_QUERY);
+        Query testQuery = rawTwinQueryClient.query(VALID_SQL_QUERY);
 
         //act
-        String result = rawTwinQuery.next(testQuery);
+        String result = rawTwinQueryClient.next(testQuery);
 
         //assert
         assertEquals(expectedString, result);
@@ -230,7 +224,7 @@ public class RawTwinQueryTest
     public void nextThrowsOnNullQuery() throws IotHubException, IOException
     {
         //arrange
-        RawTwinQuery rawTwinQuery = new RawTwinQuery(VALID_CONNECTION_STRING);
+        RawTwinQueryClient rawTwinQueryClient = new RawTwinQueryClient(VALID_CONNECTION_STRING);
 
         new NonStrictExpectations()
         {
@@ -240,17 +234,17 @@ public class RawTwinQueryTest
             }
         };
 
-        Query testQuery = rawTwinQuery.query(VALID_SQL_QUERY);
+        Query testQuery = rawTwinQueryClient.query(VALID_SQL_QUERY);
 
         //act
-        rawTwinQuery.next(null);
+        rawTwinQueryClient.next(null);
     }
 
     @Test (expected = IotHubException.class)
     public void nextThrowsOnQueryNextThrows() throws IotHubException, IOException
     {
         //arrange
-        RawTwinQuery rawTwinQuery = new RawTwinQuery(VALID_CONNECTION_STRING);
+        RawTwinQueryClient rawTwinQueryClient = new RawTwinQueryClient(VALID_CONNECTION_STRING);
 
         new NonStrictExpectations()
         {
@@ -262,10 +256,10 @@ public class RawTwinQueryTest
             }
         };
 
-        Query testQuery = rawTwinQuery.query(VALID_SQL_QUERY);
+        Query testQuery = rawTwinQueryClient.query(VALID_SQL_QUERY);
 
         //act
-        rawTwinQuery.next(testQuery);
+        rawTwinQueryClient.next(testQuery);
     }
 
     //Tests_SRS_RAW_QUERY_25_015: [ The method shall check if hasNext returns true and throw NoSuchElementException otherwise ]
@@ -273,7 +267,7 @@ public class RawTwinQueryTest
     public void nextThrowsIfNoNewElements() throws IotHubException, IOException
     {
         //arrange
-        RawTwinQuery rawTwinQuery = new RawTwinQuery(VALID_CONNECTION_STRING);
+        RawTwinQueryClient rawTwinQueryClient = new RawTwinQueryClient(VALID_CONNECTION_STRING);
 
         new NonStrictExpectations()
         {
@@ -287,10 +281,10 @@ public class RawTwinQueryTest
             }
         };
 
-        Query testQuery = rawTwinQuery.query(VALID_SQL_QUERY);
+        Query testQuery = rawTwinQueryClient.query(VALID_SQL_QUERY);
 
         //act
-        String result = rawTwinQuery.next(testQuery);
+        String result = rawTwinQueryClient.next(testQuery);
     }
 
     //Tests_SRS_RAW_QUERY_25_017: [ If the next element from the query response is an object other than String, then this method shall throw IOException ]
@@ -298,7 +292,7 @@ public class RawTwinQueryTest
     public void nextThrowsIfNonStringRetrieved() throws IotHubException, IOException
     {
         //arrange
-        RawTwinQuery rawTwinQuery = new RawTwinQuery(VALID_CONNECTION_STRING);
+        RawTwinQueryClient rawTwinQueryClient = new RawTwinQueryClient(VALID_CONNECTION_STRING);
 
         new NonStrictExpectations()
         {
@@ -312,9 +306,9 @@ public class RawTwinQueryTest
             }
         };
 
-        Query testQuery = rawTwinQuery.query(VALID_SQL_QUERY);
+        Query testQuery = rawTwinQueryClient.query(VALID_SQL_QUERY);
 
         //act
-        String result = rawTwinQuery.next(testQuery);
+        String result = rawTwinQueryClient.next(testQuery);
     }
 }

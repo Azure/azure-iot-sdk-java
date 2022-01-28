@@ -56,9 +56,6 @@ public class QueryCollectionTest
     HttpMethod mockHttpMethod;
 
     @Mocked
-    DeviceOperations mockDeviceOperations;
-
-    @Mocked
     IotHubServiceSasToken mockIotHubServiceSasToken;
 
     @Mocked
@@ -283,39 +280,6 @@ public class QueryCollectionTest
 
         //act
         Deencapsulation.invoke(queryCollection, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class, QueryOptions.class}, mockConnectionString, mockUrl, null, expectedTimeout, mockQueryOptions, expectedTimeout, mockedProxy);
-    }
-
-    //Tests_SRS_QUERYCOLLECTION_34_012: [If a continuation token is not provided from the passed in query options, but there is a continuation token saved in the latest queryCollectionResponse, that token shall be put in the query headers to continue the query.]
-    //Tests_SRS_QUERYCOLLECTION_34_014: [If the provided query options is null, this object's page size shall be included in the query headers.]
-    @Test
-    public void sendQueryRequestGetsContinuationTokenFromCurrentIfOptionsHasNone(@Mocked final URL mockUrl) throws IOException, IotHubException
-    {
-        //arrange
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class}, expectedPageSize, QueryType.RAW, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout, expectedTimeout, mockedProxy);
-        Deencapsulation.setField(queryCollection, "isSqlQuery", false);
-        Deencapsulation.setField(queryCollection, "responseContinuationToken", expectedRequestContinuationToken);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockHttpResponse.getHeaderFields();
-                result = expectedValidResponseHeaders;
-            }
-        };
-
-        QueryOptions options = null;
-
-        //act
-        Deencapsulation.invoke(queryCollection, "sendQueryRequest", new Class[] {QueryOptions.class}, options);
-
-        //assert
-        new Verifications()
-        {
-            {
-                DeviceOperations.setHeaders(expectedValidRequestHeaders);
-                times = 1;
-            }
-        };
     }
 
     //Tests_SRS_QUERYCOLLECTION_34_025: [If this query is the initial query, this function shall return true.]

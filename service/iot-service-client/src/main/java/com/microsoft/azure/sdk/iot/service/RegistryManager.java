@@ -178,7 +178,7 @@ public class RegistryManager
         String deviceJson = device.toDeviceParser().toJson();
 
         URL url = IotHubConnectionString.getUrlDevice(this.hostName, device.getDeviceId());
-        HttpRequest request = CreateRequest(url, HttpMethod.PUT, deviceJson.getBytes(StandardCharsets.UTF_8));
+        HttpRequest request = createRequest(url, HttpMethod.PUT, deviceJson.getBytes(StandardCharsets.UTF_8));
 
         HttpResponse response = request.send();
 
@@ -206,7 +206,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlDevice(this.hostName, deviceId);
 
-        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0]);
+        HttpRequest request = createRequest(url, HttpMethod.GET, new byte[0]);
 
         HttpResponse response = request.send();
 
@@ -265,7 +265,7 @@ public class RegistryManager
         }
 
         URL url = IotHubConnectionString.getUrlDevice(this.hostName, device.getDeviceId());
-        HttpRequest request = CreateRequest(url, HttpMethod.PUT, device.toDeviceParser().toJson().getBytes(StandardCharsets.UTF_8));
+        HttpRequest request = createRequest(url, HttpMethod.PUT, device.toDeviceParser().toJson().getBytes(StandardCharsets.UTF_8));
 
         request.setHeaderField("If-Match", "*");
 
@@ -330,7 +330,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlDevice(this.hostName, deviceId);
 
-        HttpRequest request = CreateRequest(url, HttpMethod.DELETE, new byte[0]);
+        HttpRequest request = createRequest(url, HttpMethod.DELETE, new byte[0]);
         request.setHeaderField("If-Match", etag);
 
         HttpResponse response = request.send();
@@ -349,7 +349,7 @@ public class RegistryManager
     {
         URL url = IotHubConnectionString.getUrlDeviceStatistics(this.hostName);
 
-        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0]);
+        HttpRequest request = createRequest(url, HttpMethod.GET, new byte[0]);
 
         HttpResponse response = request.send();
 
@@ -382,7 +382,7 @@ public class RegistryManager
         URL url = IotHubConnectionString.getUrlCreateExportImportJob(this.hostName);
 
         String jobPropertiesJson = CreateExportJobPropertiesJson(exportBlobContainerUri, excludeKeys);
-        HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(StandardCharsets.UTF_8));
+        HttpRequest request = createRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(StandardCharsets.UTF_8));
 
         HttpResponse response = request.send();
 
@@ -412,7 +412,7 @@ public class RegistryManager
 
         exportDevicesParameters.setType(JobProperties.JobType.EXPORT);
         String jobPropertiesJson = exportDevicesParameters.toJobPropertiesParser().toJson();
-        HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(StandardCharsets.UTF_8));
+        HttpRequest request = createRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(StandardCharsets.UTF_8));
 
         HttpResponse response = request.send();
 
@@ -442,7 +442,7 @@ public class RegistryManager
         URL url = IotHubConnectionString.getUrlCreateExportImportJob(this.hostName);
 
         String jobPropertiesJson = CreateImportJobPropertiesJson(importBlobContainerUri, outputBlobContainerUri);
-        HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(StandardCharsets.UTF_8));
+        HttpRequest request = createRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(StandardCharsets.UTF_8));
 
         HttpResponse response = request.send();
 
@@ -472,7 +472,7 @@ public class RegistryManager
 
         importDevicesParameters.setType(JobProperties.JobType.IMPORT);
         String jobPropertiesJson = importDevicesParameters.toJobPropertiesParser().toJson();
-        HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(StandardCharsets.UTF_8));
+        HttpRequest request = createRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(StandardCharsets.UTF_8));
 
         HttpResponse response = request.send();
 
@@ -500,7 +500,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlImportExportJob(this.hostName, jobId);
 
-        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0]);
+        HttpRequest request = createRequest(url, HttpMethod.GET, new byte[0]);
 
         HttpResponse response = request.send();
 
@@ -527,7 +527,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlModule(this.hostName, module.getDeviceId(), module.getId());
 
-        HttpRequest request = CreateRequest(url, HttpMethod.PUT, moduleJson.getBytes(StandardCharsets.UTF_8));
+        HttpRequest request = createRequest(url, HttpMethod.PUT, moduleJson.getBytes(StandardCharsets.UTF_8));
 
         HttpResponse response = request.send();
 
@@ -561,7 +561,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlModule(this.hostName, deviceId, moduleId);
 
-        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0]);
+        HttpRequest request = createRequest(url, HttpMethod.GET, new byte[0]);
 
         HttpResponse response = request.send();
 
@@ -589,7 +589,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlModulesOnDevice(this.hostName, deviceId);
 
-        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0]);
+        HttpRequest request = createRequest(url, HttpMethod.GET, new byte[0]);
 
         HttpResponse response = request.send();
 
@@ -628,7 +628,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlModule(this.hostName, module.getDeviceId(), module.getId());
 
-        HttpRequest request = CreateRequest(url, HttpMethod.PUT, module.toDeviceParser().toJson().getBytes(StandardCharsets.UTF_8));
+        HttpRequest request = createRequest(url, HttpMethod.PUT, module.toDeviceParser().toJson().getBytes(StandardCharsets.UTF_8));
         request.setHeaderField("If-Match", "*");
 
         HttpResponse response = request.send();
@@ -700,7 +700,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlModule(this.hostName, deviceId, moduleId);
 
-        HttpRequest request = CreateRequest(url, HttpMethod.DELETE, new byte[0]);
+        HttpRequest request = createRequest(url, HttpMethod.DELETE, new byte[0]);
         request.setHeaderField("If-Match", etag);
 
         HttpResponse response = request.send();
@@ -729,7 +729,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlConfiguration(this.hostName, configuration.getId());
 
-        HttpRequest request = CreateRequest(url, HttpMethod.PUT, configurationJson.getBytes(StandardCharsets.UTF_8));
+        HttpRequest request = createRequest(url, HttpMethod.PUT, configurationJson.getBytes(StandardCharsets.UTF_8));
 
         HttpResponse response = request.send();
 
@@ -758,7 +758,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlConfiguration(this.hostName, configurationId);
 
-        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0]);
+        HttpRequest request = createRequest(url, HttpMethod.GET, new byte[0]);
 
         HttpResponse response = request.send();
 
@@ -787,7 +787,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlConfigurationsList(this.hostName, maxCount);
 
-        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0]);
+        HttpRequest request = createRequest(url, HttpMethod.GET, new byte[0]);
 
         HttpResponse response = request.send();
 
@@ -826,7 +826,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlConfiguration(this.hostName, configuration.getId());
 
-        HttpRequest request = CreateRequest(url, HttpMethod.PUT, configuration.toConfigurationParser().toJson().getBytes(StandardCharsets.UTF_8));
+        HttpRequest request = createRequest(url, HttpMethod.PUT, configuration.toConfigurationParser().toJson().getBytes(StandardCharsets.UTF_8));
 
         request.setHeaderField("If-Match", "*");
 
@@ -891,7 +891,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlConfiguration(this.hostName, configurationId);
 
-        HttpRequest request = CreateRequest(url, HttpMethod.DELETE, new byte[0]);
+        HttpRequest request = createRequest(url, HttpMethod.DELETE, new byte[0]);
         request.setHeaderField("If-Match", etag);
 
         HttpResponse response = request.send();
@@ -916,7 +916,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlApplyConfigurationContent(this.hostName, deviceId);
 
-        HttpRequest request = CreateRequest(url, HttpMethod.POST, content.toConfigurationContentParser().toJson().getBytes(StandardCharsets.UTF_8));
+        HttpRequest request = createRequest(url, HttpMethod.POST, content.toConfigurationContentParser().toJson().getBytes(StandardCharsets.UTF_8));
 
         HttpResponse response = request.send();
 
@@ -947,7 +947,7 @@ public class RegistryManager
         return new JobProperties(new JobPropertiesParser(bodyStr));
     }
 
-    private HttpRequest CreateRequest(URL url, HttpMethod method, byte[] payload)
+    private HttpRequest createRequest(URL url, HttpMethod method, byte[] payload)
             throws IOException
     {
         Proxy proxy = null;
@@ -956,15 +956,9 @@ public class RegistryManager
             proxy = this.options.getProxyOptions().getProxy();
         }
 
-        HttpRequest request = new HttpRequest(url, method, payload, proxy);
+        HttpRequest request = new HttpRequest(url, method, payload, getAuthenticationToken(), proxy);
         request.setReadTimeoutMillis(options.getHttpReadTimeout());
         request.setConnectTimeoutMillis(options.getHttpConnectTimeout());
-
-        request.setHeaderField("authorization", getAuthenticationToken());
-        request.setHeaderField("Request-Id", "1001");
-        request.setHeaderField("Accept", "application/json");
-        request.setHeaderField("Content-Type", "application/json");
-        request.setHeaderField("charset", "utf-8");
         return request;
     }
 

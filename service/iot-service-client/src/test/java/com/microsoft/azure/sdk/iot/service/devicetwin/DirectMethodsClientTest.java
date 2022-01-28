@@ -8,6 +8,7 @@ import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
 import mockit.Deencapsulation;
 import mockit.Expectations;
 import mockit.Mock;
@@ -41,6 +42,9 @@ public class DirectMethodsClientTest
 
     @Mocked
     IotHubServiceSasToken mockedIotHubServiceSasToken;
+
+    @Mocked
+    HttpRequest mockHttpRequest;
 
     private static final String STANDARD_HOSTNAME = "testHostName.azure.net";
     private static final String STANDARD_SHAREDACCESSKEYNAME = "testKeyName";
@@ -398,7 +402,6 @@ public class DirectMethodsClientTest
     @SuppressWarnings("EmptyMethod")
     @Test (expected = IllegalArgumentException.class)
     public void invokeThrowOnCreateMethodResponseFailed(
-            @Mocked final DeviceOperations request,
             @Mocked final IotHubServiceSasToken iotHubServiceSasToken)
             throws Exception
     {
@@ -453,7 +456,6 @@ public class DirectMethodsClientTest
     @Test
     public void invokeSucceed(
             @Mocked final MethodParser methodParser,
-            @Mocked final DeviceOperations request,
             @Mocked final IotHubServiceSasToken iotHubServiceSasToken)
             throws Exception
     {
