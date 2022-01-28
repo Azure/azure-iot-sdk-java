@@ -83,13 +83,13 @@ public class HttpRequest
             this.connection = (HttpsURLConnection) url.openConnection();
         }
 
-        if (method != HttpMethod.POST && method != HttpMethod.PUT)
+        if (method != HttpMethod.POST && method != HttpMethod.PUT && method != HttpMethod.PATCH)
         {
             if (body.length > 0)
             {
                 throw new IllegalArgumentException(
                     "Cannot write a body to a request that "
-                        + "is not a POST or a PUT request.");
+                        + "is not a POST, PATCH or PUT request.");
             }
         }
         else
