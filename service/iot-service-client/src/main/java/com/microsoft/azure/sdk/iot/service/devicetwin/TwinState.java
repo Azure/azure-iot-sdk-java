@@ -280,7 +280,6 @@ public class TwinState extends RegisterManager
      * <p> Create a new instance of the TwinState parsing the provided string as a JSON with the full Twin information.
      *
      * @param json the {@code String} with the JSON received from the service. It cannot be {@code null} or empty.
-     * @return The new instance of the {@code TwinState}.
      */
     public TwinState(String json)
     {

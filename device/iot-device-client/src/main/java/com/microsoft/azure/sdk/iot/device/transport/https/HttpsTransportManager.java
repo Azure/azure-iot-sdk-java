@@ -104,6 +104,7 @@ public class HttpsTransportManager
      * in the ResponseMessage, which contains the status and the payload.
      *
      * @param message is the message to send.
+     * @param additionalHeaders the http headers to use in the request.
      * @return the IotHub response with the status and payload.
      * @throws IOException if the IotHub communication failed.
      * @throws IllegalArgumentException if the provided message is null, or invalid.

@@ -123,7 +123,6 @@ public final class DeviceClient extends InternalClient
      * @param deviceId The id for the device to use
      * @param securityProvider The security provider for the device
      * @param protocol The protocol the device shall use for communication to the IoT Hub
-     * @return The created device client instance
      * @throws URISyntaxException If the provided connectionString could not be parsed.
      * @throws IOException If the SecurityProvider throws any exception while authenticating
      */
@@ -140,7 +139,6 @@ public final class DeviceClient extends InternalClient
      * @param securityProvider The security provider for the device
      * @param protocol The protocol the device shall use for communication to the IoT Hub
      * @param clientOptions The options that allow configuration of the device client instance during initialization
-     * @return The created device client instance
      * @throws URISyntaxException If the provided connectionString could not be parsed.
      * @throws IOException If the SecurityProvider throws any exception while authenticating
      */
