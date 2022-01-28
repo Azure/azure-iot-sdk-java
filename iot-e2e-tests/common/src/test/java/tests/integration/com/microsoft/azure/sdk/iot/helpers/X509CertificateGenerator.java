@@ -217,7 +217,6 @@ public class X509CertificateGenerator
      */
     private void generateCertificate(CertificateAlgorithm algorithm, String commonName) throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, SignatureException, NoSuchProviderException, InvalidKeyException, InvalidAlgorithmParameterException
     {
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance(CertificateAlgorithm.getKeyPairAlgorithm(algorithm));
         keyGen.initialize(CertificateAlgorithm.getParameterSpec(algorithm));
         KeyPair keypair = keyGen.generateKeyPair();
