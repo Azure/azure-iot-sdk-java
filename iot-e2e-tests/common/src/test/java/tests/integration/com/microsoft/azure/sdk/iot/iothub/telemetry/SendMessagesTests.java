@@ -16,6 +16,7 @@ import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -125,12 +126,8 @@ public class SendMessagesTests extends SendMessagesCommon
     @Test
     public void sendMessagesWithCustomSasTokenProvider() throws Exception
     {
-        if (testInstance.authenticationType != SAS)
-        {
-            // SAS token provider can't be used for x509 auth
-            return;
-        }
-        
+        Assume.assumeTrue(testInstance.authenticationType == SAS);
+
         this.testInstance.setup(true);
 
         IotHubServicesCommon.sendMessages(testInstance.identity.getClient(), testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
@@ -149,10 +146,7 @@ public class SendMessagesTests extends SendMessagesCommon
     public void sendManySmallMessagesAsBatch() throws Exception
     {
         // Only send batch messages in large quantities when using HTTPS protocol.
-        if (this.testInstance.protocol != HTTPS)
-        {
-            return;
-        }
+        Assume.assumeFalse(this.testInstance.protocol != HTTPS);
 
         this.testInstance.setup();
 
@@ -187,11 +181,8 @@ public class SendMessagesTests extends SendMessagesCommon
     @ContinuousIntegrationTest
     public void expiredMessagesAreNotSent() throws Exception
     {
-        if (testInstance.useHttpProxy)
-        {
-            //Not worth testing
-            return;
-        }
+        // Not worth testing for both w/ and w/o proxy
+        Assume.assumeFalse(testInstance.useHttpProxy);
 
         this.testInstance.setup();
 
@@ -201,11 +192,8 @@ public class SendMessagesTests extends SendMessagesCommon
     @Test
     public void sendMessagesWithCustomSSLContextAndSasAuth() throws Exception
     {
-        if (testInstance.authenticationType != SAS)
-        {
-            //only testing sas based auth with custom ssl context here
-            return;
-        }
+        //only testing sas based auth with custom ssl context here
+        Assume.assumeFalse(testInstance.authenticationType != SAS);
 
         this.testInstance.setup(SSLContextBuilder.buildSSLContext());
 
@@ -214,19 +202,13 @@ public class SendMessagesTests extends SendMessagesCommon
 
     @ContinuousIntegrationTest
     @Test
-    public void sendMessagesWithECCCertificate() throws GeneralSecurityException, IOException, IotHubException, URISyntaxException
+    public void sendMessagesWithECCCertificate() throws GeneralSecurityException, IOException, IotHubException, URISyntaxException, InterruptedException
     {
-        if (testInstance.authenticationType != AuthenticationType.SELF_SIGNED || testInstance.clientType != ClientType.DEVICE_CLIENT)
-        {
-            // test is only applicable for self-signed device clients
-            return;
-        }
+        // test is only applicable for self-signed device clients
+        Assume.assumeFalse(testInstance.authenticationType != AuthenticationType.SELF_SIGNED || testInstance.clientType != ClientType.DEVICE_CLIENT);
 
-        if (Tools.isAndroid())
-        {
-            // ECC cert generation is broken for Android. "ECDSA KeyPairGenerator is not available"
-            return;
-        }
+        // ECC cert generation is broken for Android. "ECDSA KeyPairGenerator is not available"
+        Assume.assumeFalse(Tools.isAndroid());
 
         X509CertificateGenerator eccCertGenerator =
             new X509CertificateGenerator(X509CertificateGenerator.CertificateAlgorithm.ECC);
