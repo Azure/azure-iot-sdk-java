@@ -97,7 +97,17 @@ public class HttpRequest
             this.body = Arrays.copyOf(body, body.length);
         }
 
-        this.connection.setRequestMethod(method.name());
+        if (method == HttpMethod.PATCH)
+        {
+            // This HTTP library doesn't support PATCH calls, but using this header we can override this limitation.
+            // https://bugs.openjdk.java.net/browse/JDK-7016595
+            this.setHeaderField("X-HTTP-Method-Override", "PATCH");
+            this.connection.setRequestMethod("POST");
+        }
+        else
+        {
+            this.connection.setRequestMethod(method.name());
+        }
 
         this.setHeaderField(USER_AGENT, TransportUtils.javaServiceClientIdentifier + TransportUtils.serviceVersion);
         this.setHeaderField(ACCEPT, ACCEPT_VALUE);

@@ -24,6 +24,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.IotHubServicesCommo
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.MessageAndResult;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.SSLContextBuilder;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Success;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509CertificateGenerator;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
@@ -218,6 +219,12 @@ public class SendMessagesTests extends SendMessagesCommon
         if (testInstance.authenticationType != AuthenticationType.SELF_SIGNED || testInstance.clientType != ClientType.DEVICE_CLIENT)
         {
             // test is only applicable for self-signed device clients
+            return;
+        }
+
+        if (Tools.isAndroid())
+        {
+            // ECC cert generation is broken for Android. "ECDSA KeyPairGenerator is not available"
             return;
         }
 

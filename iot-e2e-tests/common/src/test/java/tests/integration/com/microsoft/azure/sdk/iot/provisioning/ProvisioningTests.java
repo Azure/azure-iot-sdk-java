@@ -229,6 +229,12 @@ public class ProvisioningTests extends ProvisioningCommon
             return;
         }
 
+        if (Tools.isAndroid())
+        {
+            // ECC cert generation is broken for Android. "ECDSA KeyPairGenerator is not available"
+            return;
+        }
+
         testInstance.certificateAlgorithm = X509CertificateGenerator.CertificateAlgorithm.ECC;
         customAllocationFlow(EnrollmentType.INDIVIDUAL);
     }
