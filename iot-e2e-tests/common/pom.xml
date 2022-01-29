@@ -194,6 +194,9 @@
                                     android compatible versions of these libraries instead-->
                                     <exclude>junit:junit</exclude>
                                     <exclude>org.apache.commons:commons-lang3</exclude>
+                                    <exclude>org.apache.logging.log4j:log4j-api</exclude>
+                                    <exclude>org.apache.logging.log4j:log4j-core</exclude>
+                                    <exclude>org.apache.logging.log4j:log4j-slf4j-impl</exclude>
                                 </excludes>
                             </artifactSet>
                         </configuration>

@@ -35,13 +35,9 @@ public class QueryCollection
     private final String query;
     private final boolean isSqlQuery;
 
-    private final QueryType requestQueryType;
-    private QueryType responseQueryType;
-
     private String responseContinuationToken;
 
     private final URL url;
-    private final HttpMethod httpMethod;
 
     private final int httpConnectTimeout;
     private final int httpReadTimeout;
@@ -59,10 +55,8 @@ public class QueryCollection
      *
      * @param query the sql query to use.
      * @param pageSize the size of the page to return per query collection response.
-     * @param requestQueryType the type of query this is.
      * @param iotHubConnectionString the connection string to connect with to query against.
      * @param url the url to query against.
-     * @param httpMethod the http method to call with the query.
      * @param httpConnectTimeout the http connect timeout to use.
      * @param httpReadTimeout the http read timeout to use.
      * @param proxy proxy type
@@ -73,70 +67,24 @@ public class QueryCollection
     QueryCollection(
         String query,
         int pageSize,
-        QueryType requestQueryType,
         IotHubConnectionString iotHubConnectionString,
         URL url,
-        HttpMethod httpMethod,
         int httpConnectTimeout,
         int httpReadTimeout,
         Proxy proxy)
     {
-        this.validateQueryRequestArguments(iotHubConnectionString, url, httpMethod, pageSize, requestQueryType);
+        this.validateQueryRequestArguments(iotHubConnectionString, url, pageSize);
 
         ParserUtility.validateQuery(query);
 
         this.pageSize = pageSize;
         this.query = query;
-        this.requestQueryType = requestQueryType;
         this.responseContinuationToken = null;
-        this.httpMethod = httpMethod;
         this.httpConnectTimeout = httpConnectTimeout;
         this.httpReadTimeout = httpReadTimeout;
         this.proxy = proxy;
         this.url = url;
-        this.responseQueryType = QueryType.UNKNOWN;
         this.isSqlQuery = true;
-        this.isInitialQuery = true;
-        this.iotHubConnectionString = iotHubConnectionString;
-    }
-
-    /**
-     * Constructor for non-sql based queries.
-     *
-     * @param pageSize the size of the page to return per query collection response.
-     * @param requestQueryType the type of query this is.
-     * @param iotHubConnectionString the connection string to connect with to query against.
-     * @param url the url to query against.
-     * @param httpMethod the http method to call with the query.
-     * @param httpConnectTimeout the http connect timeout to use.
-     * @param httpReadTimeout the http read timeout to use.
-     * @param proxy the proxy type
-     * @throws IllegalArgumentException if page size is 0 or negative, or if the query type is null or unknown,
-     *  or if the provided connection string is null, or if the provided url is null, or if the provided http method is null.
-     */
-    protected QueryCollection(
-            int pageSize,
-            QueryType requestQueryType,
-            IotHubConnectionString iotHubConnectionString,
-            URL url,
-            HttpMethod httpMethod,
-            int httpConnectTimeout,
-            int httpReadTimeout,
-            Proxy proxy)
-    {
-        this.validateQueryRequestArguments(iotHubConnectionString, url, httpMethod, pageSize, requestQueryType);
-
-        this.pageSize = pageSize;
-        this.requestQueryType = requestQueryType;
-        this.query = null;
-        this.responseQueryType = QueryType.UNKNOWN;
-        this.responseContinuationToken = null;
-        this.httpMethod = httpMethod;
-        this.httpConnectTimeout = httpConnectTimeout;
-        this.httpReadTimeout = httpReadTimeout;
-        this.proxy = proxy;
-        this.url = url;
-        this.isSqlQuery = false;
         this.isInitialQuery = true;
         this.iotHubConnectionString = iotHubConnectionString;
     }
@@ -144,20 +92,15 @@ public class QueryCollection
     QueryCollection(
             String query,
             int pageSize,
-            QueryType requestQueryType,
             TokenCredentialCache credentialCache,
             URL url,
-            HttpMethod httpMethod,
             int httpConnectTimeout,
             int httpReadTimeout,
             Proxy proxy)
     {
         this.pageSize = pageSize;
-        this.requestQueryType = requestQueryType;
         this.query = query;
-        this.responseQueryType = QueryType.UNKNOWN;
         this.responseContinuationToken = null;
-        this.httpMethod = httpMethod;
         this.httpConnectTimeout = httpConnectTimeout;
         this.httpReadTimeout = httpReadTimeout;
         this.proxy = proxy;
@@ -170,20 +113,15 @@ public class QueryCollection
     QueryCollection(
             String query,
             int pageSize,
-            QueryType requestQueryType,
             AzureSasCredential azureSasCredential,
             URL url,
-            HttpMethod httpMethod,
             int httpConnectTimeout,
             int httpReadTimeout,
             Proxy proxy)
     {
         this.pageSize = pageSize;
-        this.requestQueryType = requestQueryType;
         this.query = query;
-        this.responseQueryType = QueryType.UNKNOWN;
         this.responseContinuationToken = null;
-        this.httpMethod = httpMethod;
         this.httpConnectTimeout = httpConnectTimeout;
         this.httpReadTimeout = httpReadTimeout;
         this.proxy = proxy;
@@ -231,7 +169,7 @@ public class QueryCollection
 
         HttpRequest httpRequest = new HttpRequest(
             url,
-            HttpMethod.GET,
+            HttpMethod.POST,
             payload,
             authorizationToken,
             proxy);
@@ -309,14 +247,9 @@ public class QueryCollection
         return this.pageSize;
     }
 
-    private void validateQueryRequestArguments(
-            IotHubConnectionString iotHubConnectionString,
-            URL url,
-            HttpMethod method,
-            int pageSize,
-            QueryType requestQueryType)
+    private void validateQueryRequestArguments(IotHubConnectionString iotHubConnectionString, URL url, int pageSize)
     {
-        if (iotHubConnectionString == null || url == null || method == null)
+        if (iotHubConnectionString == null || url == null)
         {
             throw new IllegalArgumentException("Input parameters cannot be null");
         }
@@ -324,24 +257,6 @@ public class QueryCollection
         if (pageSize <= 0)
         {
             throw new IllegalArgumentException("Page Size cannot be zero or negative");
-        }
-
-        if (requestQueryType == null || requestQueryType == QueryType.UNKNOWN)
-        {
-            throw new IllegalArgumentException("Cannot process a unknown type query");
-        }
-    }
-
-    private void validateResponseQueryType(QueryType responseQueryType, QueryType requestQueryType) throws IOException
-    {
-        if (responseQueryType == null || responseQueryType == QueryType.UNKNOWN)
-        {
-            throw new IOException("Query response type is not defined by IotHub");
-        }
-
-        if (requestQueryType != responseQueryType)
-        {
-            throw new IOException("Query response does not match query sendHttpRequest");
         }
     }
 
@@ -375,19 +290,10 @@ public class QueryCollection
         this.responseContinuationToken = null;
         for (Map.Entry<String, String> header : headers.entrySet())
         {
-            switch (header.getKey())
+            if (CONTINUATION_TOKEN_KEY.equals(header.getKey()))
             {
-                case CONTINUATION_TOKEN_KEY:
-                    this.responseContinuationToken = header.getValue();
-                    break;
-                case ITEM_TYPE_KEY:
-                    this.responseQueryType = QueryType.fromString(header.getValue());
-                    break;
-                default:
-                    break;
+                this.responseContinuationToken = header.getValue();
             }
         }
-
-        validateResponseQueryType(this.responseQueryType, this.requestQueryType);
     }
 }

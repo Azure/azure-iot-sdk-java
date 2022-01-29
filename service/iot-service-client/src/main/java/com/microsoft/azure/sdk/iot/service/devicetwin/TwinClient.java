@@ -421,10 +421,8 @@ public class TwinClient
             return new QueryCollection(
                     sqlQuery,
                     pageSize,
-                    QueryType.TWIN,
                     this.credentialCache,
                     IotHubConnectionString.getUrlTwinQuery(this.hostName),
-                    HttpMethod.POST,
                     options.getHttpConnectTimeout(),
                     options.getHttpReadTimeout(),
                     proxy);
@@ -434,10 +432,8 @@ public class TwinClient
             return new QueryCollection(
                     sqlQuery,
                     pageSize,
-                    QueryType.TWIN,
                     this.azureSasCredential,
                     IotHubConnectionString.getUrlTwinQuery(this.hostName),
-                    HttpMethod.POST,
                     options.getHttpConnectTimeout(),
                     options.getHttpReadTimeout(),
                     proxy);
@@ -447,10 +443,8 @@ public class TwinClient
             return new QueryCollection(
                     sqlQuery,
                     pageSize,
-                    QueryType.TWIN,
                     this.iotHubConnectionString,
                     IotHubConnectionString.getUrlTwinQuery(this.hostName),
-                    HttpMethod.POST,
                     options.getHttpConnectTimeout(),
                     options.getHttpReadTimeout(),
                     proxy);
