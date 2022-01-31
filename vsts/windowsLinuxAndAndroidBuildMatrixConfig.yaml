@@ -64,6 +64,30 @@ jobs:
           TargetFolder: '$(Build.ArtifactStagingDirectory)'
         continueOnError: true
         condition: always()
+      
+      - task: CopyFiles@2
+        displayName: 'Copy Build Results to Artifact Staging Directory'
+        inputs:
+          flattenFolders: true
+          SourceFolder: '$(Build.SourcesDirectory)'
+          Contents: |
+            **/target/*.jar
+            **/target/*.pom
+            !**/target/*-sources.jar
+            !**/target/*-javadoc.jar
+            !**/target/dice-*
+            !**/target/provisioning-x509-cert-generator*
+            !**/target/*emulator*
+            !**/*sample*/**/target/**
+            !**/*test*/**/target/**
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/buildOutput'
+        continueOnError: true
+        condition: always()
+
+      - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+        displayName: 'Generate SBOM for Build Artifacts'
+        inputs:
+          BuildDropPath: '$(Build.ArtifactStagingDirectory)/buildOutput'
 
       - task: PublishBuildArtifacts@1
         displayName: 'Publish Artifact Staging Directory'
