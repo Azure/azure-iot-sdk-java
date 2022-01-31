@@ -147,7 +147,7 @@ public class X509Attestation extends Attestation implements Serializable
         /* SRS_X509_ATTESTATION_21_009: [The factory shall throw IllegalArgumentException if the primary certificate is null or empty.] */
         if (primary == null || primary.isEmpty())
         {
-            throw new IllegalArgumentException("primary certificate cannot be null or empty");
+            throw new IllegalArgumentException("primary certificate cannot be null or empty  " + System.getProperty("os.name").toLowerCase());
         }
 
         /* SRS_X509_ATTESTATION_21_010: [The factory shall create a new instance of the X509Certificates with the provided primary and secondary certificates.] */
