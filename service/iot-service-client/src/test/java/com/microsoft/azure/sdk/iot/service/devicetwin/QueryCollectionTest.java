@@ -106,7 +106,7 @@ public class QueryCollectionTest
         };
 
         //act
-        Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class},"anyString", 20, QueryType.DEVICE_JOB, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout, expectedTimeout, mockedProxy);
+        Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, IotHubConnectionString.class, URL.class, int.class, int.class, Proxy.class},"anyString", 20, mockConnectionString, mockUrl, expectedTimeout, expectedTimeout, mockedProxy);
     }
     
     //Tests_SRS_QUERYCOLLECTION_34_002: [If the provided page size is not a positive integer, an IllegalArgumentException shall be thrown.]
@@ -114,7 +114,7 @@ public class QueryCollectionTest
     public void constructorThrowsForNegativePageSize(@Mocked final URL mockUrl)
     {
         //act
-        Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class},"anyString", -1, QueryType.DEVICE_JOB, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout, expectedTimeout, mockedProxy);
+        Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, IotHubConnectionString.class, URL.class, int.class, int.class, Proxy.class},"anyString", -1, mockConnectionString, mockUrl, expectedTimeout, expectedTimeout, mockedProxy);
     }
 
     //Tests_SRS_QUERYCOLLECTION_34_003: [If the provided page size is not a positive integer, an IllegalArgumentException shall be thrown.]
@@ -122,7 +122,7 @@ public class QueryCollectionTest
     public void constructorThrowsForZeroPageSize(@Mocked final URL mockUrl)
     {
         //act
-        Deencapsulation.newInstance(QueryCollection.class, new Class[] {int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class},0, QueryType.DEVICE_JOB, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout, expectedTimeout, mockedProxy);
+        Deencapsulation.newInstance(QueryCollection.class, new Class[] {int.class, IotHubConnectionString.class, URL.class, int.class, int.class, Proxy.class},0, mockConnectionString, mockUrl, expectedTimeout, expectedTimeout, mockedProxy);
     }
 
     //Tests_SRS_QUERYCOLLECTION_34_004: [If the provided QueryType is null or UNKNOWN, an IllegalArgumentException shall be thrown.]
@@ -130,7 +130,7 @@ public class QueryCollectionTest
     public void constructorThrowsForNullQueryType(@Mocked final URL mockUrl)
     {
         //act
-        Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class},"anyString", 20, null, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout, expectedTimeout, mockedProxy);
+        Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, IotHubConnectionString.class, URL.class, int.class, int.class, Proxy.class},"anyString", 20, null, mockConnectionString, mockUrl, expectedTimeout, expectedTimeout, mockedProxy);
     }
 
     //Tests_SRS_QUERYCOLLECTION_34_005: [If the provided QueryType is null or UNKNOWN, an IllegalArgumentException shall be thrown.]
@@ -138,7 +138,7 @@ public class QueryCollectionTest
     public void constructorThrowsForUnknownQueryType(@Mocked final URL mockUrl)
     {
         //act
-        Deencapsulation.newInstance(QueryCollection.class, new Class[] {int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class},20, QueryType.UNKNOWN, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout, expectedTimeout, mockedProxy);
+        Deencapsulation.newInstance(QueryCollection.class, new Class[] {int.class, IotHubConnectionString.class, URL.class, int.class, int.class, Proxy.class},20, QueryType.UNKNOWN, mockConnectionString, mockUrl, expectedTimeout, expectedTimeout, mockedProxy);
     }
 
     //Tests_SRS_QUERYCOLLECTION_34_038: [If the provided connection string, url, or http method is null, this function shall throw an IllegalArgumentException.]
@@ -146,7 +146,7 @@ public class QueryCollectionTest
     public void constructorWithQueryThrowsForNullConnectionString(@Mocked final URL mockUrl)
     {
         //act
-        Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class}, "any query",20, QueryType.JOB_RESPONSE, null, mockUrl, mockHttpMethod, expectedTimeout, expectedTimeout, mockedProxy);
+        Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, IotHubConnectionString.class, URL.class, int.class, int.class, Proxy.class}, "any query",20, QueryType.JOB_RESPONSE, null, mockUrl, expectedTimeout, expectedTimeout, mockedProxy);
     }
 
     //Tests_SRS_QUERYCOLLECTION_34_038: [If the provided connection string, url, or http method is null, this function shall throw an IllegalArgumentException.]
@@ -154,7 +154,7 @@ public class QueryCollectionTest
     public void constructorWithQueryThrowsForNullUrl(@Mocked final URL mockUrl)
     {
         //act
-        Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class},"any query", 20, QueryType.JOB_RESPONSE, mockConnectionString, null, mockHttpMethod, expectedTimeout, expectedTimeout, mockedProxy);
+        Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, IotHubConnectionString.class, URL.class, int.class, int.class, Proxy.class},"any query", 20, mockConnectionString, null, expectedTimeout, expectedTimeout, mockedProxy);
     }
 
     //Tests_SRS_QUERYCOLLECTION_34_038: [If the provided connection string, url, or http method is null, this function shall throw an IllegalArgumentException.]
@@ -162,7 +162,7 @@ public class QueryCollectionTest
     public void constructorWithQueryThrowsForNullHttpMethod(@Mocked final URL mockUrl)
     {
         //act
-        Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class},"any query", 20, QueryType.JOB_RESPONSE, mockConnectionString, mockUrl, null, expectedTimeout, expectedTimeout, mockedProxy);
+        Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, IotHubConnectionString.class, URL.class, int.class, int.class, Proxy.class},"any query", 20, mockConnectionString, mockUrl, null, expectedTimeout, expectedTimeout, mockedProxy);
     }
 
     //Tests_SRS_QUERYCOLLECTION_34_038: [If the provided connection string, url, or http method is null, this function shall throw an IllegalArgumentException.]
@@ -170,7 +170,7 @@ public class QueryCollectionTest
     public void constructorThrowsForNullConnectionString(@Mocked final URL mockUrl)
     {
         //act
-        Deencapsulation.newInstance(QueryCollection.class, new Class[] {int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class},20, QueryType.JOB_RESPONSE, null, mockUrl, mockHttpMethod, expectedTimeout, expectedTimeout, mockedProxy);
+        Deencapsulation.newInstance(QueryCollection.class, new Class[] {int.class, IotHubConnectionString.class, URL.class, int.class, int.class, Proxy.class},20, QueryType.JOB_RESPONSE, null, mockUrl, mockHttpMethod, expectedTimeout, expectedTimeout, mockedProxy);
     }
 
     //Tests_SRS_QUERYCOLLECTION_34_038: [If the provided connection string, url, or http method is null, this function shall throw an IllegalArgumentException.]
@@ -178,7 +178,7 @@ public class QueryCollectionTest
     public void constructorThrowsForNullUrl()
     {
         //act
-        Deencapsulation.newInstance(QueryCollection.class, new Class[] {int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class},20, QueryType.JOB_RESPONSE, mockConnectionString, null, mockHttpMethod, expectedTimeout, expectedTimeout, mockedProxy);
+        Deencapsulation.newInstance(QueryCollection.class, new Class[] {int.class, IotHubConnectionString.class, URL.class, int.class, int.class, Proxy.class},20, mockConnectionString, null, mockHttpMethod, expectedTimeout, expectedTimeout, mockedProxy);
     }
 
     //Tests_SRS_QUERYCOLLECTION_34_038: [If the provided connection string, url, or http method is null, this function shall throw an IllegalArgumentException.]
@@ -186,7 +186,7 @@ public class QueryCollectionTest
     public void constructorThrowsForNullHttpMethod(@Mocked final URL mockUrl)
     {
         //act
-        Deencapsulation.newInstance(QueryCollection.class, new Class[] {int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class},20, QueryType.JOB_RESPONSE, mockConnectionString, mockUrl, null, expectedTimeout, expectedTimeout, mockedProxy);
+        Deencapsulation.newInstance(QueryCollection.class, new Class[] {int.class, IotHubConnectionString.class, URL.class, int.class, int.class, Proxy.class},20, mockConnectionString, mockUrl, null, expectedTimeout, expectedTimeout, mockedProxy);
     }
 
     //Tests_SRS_QUERYCOLLECTION_34_006: [This function shall save the provided query, pageSize, requestQueryType, iotHubConnectionString, url, httpMethod and timeout.]
@@ -200,52 +200,17 @@ public class QueryCollectionTest
         QueryType expectedQueryType = QueryType.JOB_RESPONSE;
 
         //act
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class}, expectedQuery, expectedPageSize, expectedQueryType, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout, expectedTimeout, mockedProxy);
+        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, IotHubConnectionString.class, URL.class, int.class, int.class, Proxy.class}, expectedQuery, expectedPageSize, mockConnectionString, mockUrl, expectedTimeout, expectedTimeout, mockedProxy);
 
         //assert
         String actualQuery = Deencapsulation.getField(queryCollection, "query");
         int actualPageSize = Deencapsulation.getField(queryCollection, "pageSize");
-        QueryType actualQueryType = Deencapsulation.getField(queryCollection, "requestQueryType");
         boolean actualIsSqlQuery = Deencapsulation.getField(queryCollection, "isSqlQuery");
-        HttpMethod actualHttpMethod = Deencapsulation.getField(queryCollection, "httpMethod");
         URL actualUrl = Deencapsulation.getField(queryCollection, "url");
 
         assertEquals(expectedQuery, actualQuery);
         assertEquals(expectedPageSize, actualPageSize);
-        assertEquals(expectedQueryType, actualQueryType);
         assertTrue(actualIsSqlQuery);
-        assertEquals(actualHttpMethod, mockHttpMethod);
-        assertEquals(actualUrl, mockUrl);
-    }
-
-        //this.iotHubConnectionString = iotHubConnectionString;
-        //this.httpMethod = httpMethod;
-        //this.timeout = timeout;
-        //this.url = url;
-
-    //Tests_SRS_QUERYCOLLECTION_34_007: [This function shall save the provided pageSize, requestQueryType, iotHubConnectionString, url, httpMethod and timeout.]
-    //Tests_SRS_QUERYCOLLECTION_34_009: [The constructed QueryCollection shall not be a sql query type.]
-    @Test
-    public void constructorSavesPageSizeAndQueryType(@Mocked final URL mockUrl)
-    {
-        //arrange
-        int expectedPageSize = 22;
-        QueryType expectedQueryType = QueryType.JOB_RESPONSE;
-
-        //act
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class}, expectedPageSize, expectedQueryType, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout, expectedTimeout, mockedProxy);
-
-        //assert
-        int actualPageSize = Deencapsulation.getField(queryCollection, "pageSize");
-        QueryType actualQueryType = Deencapsulation.getField(queryCollection, "requestQueryType");
-        boolean actualIsSqlQuery = Deencapsulation.getField(queryCollection, "isSqlQuery");
-        HttpMethod actualHttpMethod = Deencapsulation.getField(queryCollection, "httpMethod");
-        URL actualUrl = Deencapsulation.getField(queryCollection, "url");
-
-        assertEquals(expectedPageSize, actualPageSize);
-        assertEquals(expectedQueryType, actualQueryType);
-        assertFalse(actualIsSqlQuery);
-        assertEquals(actualHttpMethod, mockHttpMethod);
         assertEquals(actualUrl, mockUrl);
     }
 
@@ -257,7 +222,7 @@ public class QueryCollectionTest
         QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {int.class, QueryType.class}, 22, QueryType.JOB_RESPONSE);
 
         //act
-        Deencapsulation.invoke(queryCollection, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class, QueryOptions.class}, null, mockUrl, mockHttpMethod, expectedTimeout, mockQueryOptions, expectedTimeout, mockedProxy);
+        Deencapsulation.invoke(queryCollection, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, int.class, int.class, Proxy.class, QueryOptions.class}, null, mockUrl, mockHttpMethod, expectedTimeout, mockQueryOptions, expectedTimeout, mockedProxy);
     }
 
     //Tests_SRS_QUERYCOLLECTION_34_010: [If the provided connection string, url, or method is null, an IllegalArgumentException shall be thrown.]
@@ -268,7 +233,7 @@ public class QueryCollectionTest
         QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {int.class, QueryType.class}, 22, QueryType.JOB_RESPONSE);
 
         //act
-        Deencapsulation.invoke(queryCollection, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class, QueryOptions.class}, mockConnectionString, null, mockHttpMethod, expectedTimeout, mockQueryOptions, expectedTimeout, mockedProxy);
+        Deencapsulation.invoke(queryCollection, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, int.class, int.class, Proxy.class, QueryOptions.class}, mockConnectionString, null, mockHttpMethod, expectedTimeout, mockQueryOptions, expectedTimeout, mockedProxy);
     }
 
     //Tests_SRS_QUERYCOLLECTION_34_010: [If the provided connection string, url, or method is null, an IllegalArgumentException shall be thrown.]
@@ -279,7 +244,7 @@ public class QueryCollectionTest
         QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {int.class, QueryType.class}, expectedPageSize, QueryType.JOB_RESPONSE);
 
         //act
-        Deencapsulation.invoke(queryCollection, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class, QueryOptions.class}, mockConnectionString, mockUrl, null, expectedTimeout, mockQueryOptions, expectedTimeout, mockedProxy);
+        Deencapsulation.invoke(queryCollection, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, int.class, int.class, Proxy.class, QueryOptions.class}, mockConnectionString, mockUrl, null, expectedTimeout, mockQueryOptions, expectedTimeout, mockedProxy);
     }
 
     //Tests_SRS_QUERYCOLLECTION_34_025: [If this query is the initial query, this function shall return true.]
@@ -287,7 +252,7 @@ public class QueryCollectionTest
     public void hasNextReturnsTrueIfItIsTheInitialQuery(@Mocked final URL mockUrl)
     {
         //arrange
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class}, "some query", expectedPageSize, QueryType.DEVICE_JOB, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout, expectedTimeout, mockedProxy);
+        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, IotHubConnectionString.class, URL.class, int.class, int.class, Proxy.class}, "some query", expectedPageSize, mockConnectionString, mockUrl, expectedTimeout, expectedTimeout, mockedProxy);
         Deencapsulation.setField(queryCollection, "isInitialQuery", true);
 
         //act
@@ -302,7 +267,7 @@ public class QueryCollectionTest
     public void hasNextReturnsFalseIfNoContinuationToken(@Mocked final URL mockUrl) throws IOException, IotHubException
     {
         //arrange
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class}, "some query", expectedPageSize, QueryType.DEVICE_JOB, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout, expectedTimeout, mockedProxy);
+        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, IotHubConnectionString.class, URL.class, int.class, int.class, Proxy.class}, "some query", expectedPageSize, mockConnectionString, mockUrl, expectedTimeout, expectedTimeout, mockedProxy);
         Deencapsulation.setField(queryCollection, "responseContinuationToken", null);
         Deencapsulation.setField(queryCollection, "isInitialQuery", false);
 
@@ -318,7 +283,7 @@ public class QueryCollectionTest
     public void hasNextReturnsTrueIfContinuationTokenSaved(@Mocked final URL mockUrl) throws IOException, IotHubException
     {
         //arrange
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class}, "some query", expectedPageSize, QueryType.DEVICE_JOB, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout, expectedTimeout, mockedProxy);
+        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, IotHubConnectionString.class, URL.class, int.class, int.class, Proxy.class}, "some query", expectedPageSize, mockConnectionString, mockUrl, expectedTimeout, expectedTimeout, mockedProxy);
         Deencapsulation.setField(queryCollection, "responseContinuationToken", "any continuation token");
         Deencapsulation.setField(queryCollection, "isInitialQuery", false);
 
@@ -334,7 +299,7 @@ public class QueryCollectionTest
     public void nextReturnsNextSetIfItHasOne() throws IOException, IotHubException
     {
         //arrange
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class},"anyString", expectedPageSize, QueryType.JOB_RESPONSE, mockConnectionString, new URL("http://www.microsoft.com"), mockHttpMethod, expectedTimeout, expectedTimeout, mockedProxy);
+        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, IotHubConnectionString.class, URL.class, int.class, int.class, Proxy.class},"anyString", expectedPageSize, mockConnectionString, new URL("http://www.microsoft.com"), expectedTimeout, expectedTimeout, mockedProxy);
 
         new MockUp<QueryCollection>()
         {
@@ -368,7 +333,7 @@ public class QueryCollectionTest
     public void nextReturnsNullIfItDoesNotHaveNext() throws IOException, IotHubException
     {
         //arrange
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class},"anyString", expectedPageSize, QueryType.JOB_RESPONSE, mockConnectionString, new URL("http://www.microsoft.com"), mockHttpMethod, expectedTimeout, expectedTimeout, mockedProxy);
+        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, IotHubConnectionString.class, URL.class, int.class, int.class, Proxy.class},"anyString", expectedPageSize, mockConnectionString, new URL("http://www.microsoft.com"), expectedTimeout, expectedTimeout, mockedProxy);
 
         new MockUp<QueryCollection>()
         {
@@ -390,7 +355,7 @@ public class QueryCollectionTest
     public void nextWithOptionsReturnsNextSetIfItHasOne() throws IOException, IotHubException
     {
         //arrange
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class},"anyString", expectedPageSize, QueryType.JOB_RESPONSE, mockConnectionString, new URL("http://www.microsoft.com"), mockHttpMethod, expectedTimeout, expectedTimeout, mockedProxy);
+        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, IotHubConnectionString.class, URL.class, int.class, int.class, Proxy.class},"anyString", expectedPageSize, mockConnectionString, new URL("http://www.microsoft.com"), expectedTimeout, expectedTimeout, mockedProxy);
 
         new MockUp<QueryCollection>()
         {
@@ -417,7 +382,7 @@ public class QueryCollectionTest
     public void nextWithOptionsReturnsNullIfItDoesNotHaveNext() throws IOException, IotHubException
     {
         //arrange
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class},"anyString", expectedPageSize, QueryType.JOB_RESPONSE, mockConnectionString, new URL("http://www.microsoft.com"), mockHttpMethod, expectedTimeout, expectedTimeout, mockedProxy);
+        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, IotHubConnectionString.class, URL.class, int.class, int.class, Proxy.class},"anyString", expectedPageSize, mockConnectionString, new URL("http://www.microsoft.com"), expectedTimeout, expectedTimeout, mockedProxy);
 
         //only mocking one method for QueryCollection, not the whole class
         new NonStrictExpectations(queryCollection)
@@ -441,7 +406,7 @@ public class QueryCollectionTest
     {
         //arrange
         Integer expectedPageSize = 290;
-        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class},"anyString", expectedPageSize, QueryType.JOB_RESPONSE, mockConnectionString, mockUrl, mockHttpMethod, expectedTimeout, expectedTimeout, mockedProxy);
+        QueryCollection queryCollection = Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, IotHubConnectionString.class, URL.class, int.class, int.class, Proxy.class},"anyString", expectedPageSize, mockConnectionString, mockUrl, expectedTimeout, expectedTimeout, mockedProxy);
         Deencapsulation.setField(queryCollection, "pageSize", expectedPageSize);
 
         //act

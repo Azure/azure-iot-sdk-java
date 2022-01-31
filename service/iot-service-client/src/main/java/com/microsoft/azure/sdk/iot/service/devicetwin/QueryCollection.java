@@ -28,7 +28,6 @@ import static com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest.REQ
 public class QueryCollection
 {
     private static final String CONTINUATION_TOKEN_KEY = "x-ms-continuation";
-    private static final String ITEM_TYPE_KEY = "x-ms-item-type";
     private static final String PAGE_SIZE_KEY = "x-ms-max-item-count";
 
     private final int pageSize;
