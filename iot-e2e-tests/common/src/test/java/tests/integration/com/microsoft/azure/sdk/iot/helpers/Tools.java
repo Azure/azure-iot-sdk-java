@@ -944,8 +944,6 @@ public class Tools
         return ExceptionUtils.getStackTrace(throwable);
     }
 
-    private static final String OS = System.getProperty("os.name").toLowerCase();
-
     public static boolean isAndroid()
     {
         return IS_ANDROID;
