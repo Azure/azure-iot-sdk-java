@@ -59,6 +59,7 @@ public class Tools
 {
     private static final long RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS = 60 * 1000;
     private static final long WAIT_FOR_RETRY = 2000;
+    private static boolean IS_ANDROID = false;
 
     private static final String ANDROID_BUILD_CONFIG_CLASS = "com.iothub.azure.microsoft.com.androide2e.test.BuildConfig";
     private static final Map<String, String> ANDROID_ENV_VAR = retrieveAndroidEnvVariables();
@@ -69,6 +70,7 @@ public class Tools
 
         if (ANDROID_ENV_VAR.containsKey(environmentVariableName))
         {
+            IS_ANDROID = true;
             environmentVariableValue = ANDROID_ENV_VAR.get(environmentVariableName);
         }
         else
@@ -88,6 +90,7 @@ public class Tools
         String environmentVariableValue;
         if (ANDROID_ENV_VAR.containsKey(environmentVariableName))
         {
+            IS_ANDROID = true;
             environmentVariableValue = ANDROID_ENV_VAR.get(environmentVariableName);
         }
         else
@@ -118,6 +121,7 @@ public class Tools
                 try
                 {
                     envVariables.put(field.getName(), field.get(null).toString());
+                    IS_ANDROID = true;
                 }
                 catch (IllegalAccessException e)
                 {
@@ -128,6 +132,7 @@ public class Tools
         catch (ClassNotFoundException e)
         {
             log.debug("Likely running the JVM tests, ignoring ClassNotFoundException\n");
+            IS_ANDROID = false;
         }
 
         return envVariables;
@@ -943,23 +948,6 @@ public class Tools
 
     public static boolean isAndroid()
     {
-        return !(isWindows() || isMac() || isUnix());
-    }
-
-    public static boolean isWindows()
-    {
-        return (OS.contains("win"));
-    }
-
-    public static boolean isMac()
-    {
-        return (OS.contains("mac"));
-    }
-
-    public static boolean isUnix()
-    {
-        return (OS.contains("nix")
-            || OS.contains("nux")
-            || OS.contains("aix"));
+        return IS_ANDROID;
     }
 }
