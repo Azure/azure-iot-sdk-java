@@ -21,7 +21,7 @@ public class TokenCredentialCache
     private final TokenCredential tokenCredential;
     private AccessToken accessToken;
 
-    public static final String[] IOTHUB_PUBLIC_SCOPE = new String[]{"https://iothubs.azure.net/.default"};
+    public static final String[] PROVISIONING_PUBLIC_SCOPE = new String[]{"https://azure-devices-provisioning.net/.default"};
     public static final String BEARER_TOKEN_PREFIX = "Bearer ";
 
     /**
@@ -45,7 +45,7 @@ public class TokenCredentialCache
     {
         if (this.accessToken == null || isAccessTokenCloseToExpiry(this.accessToken))
         {
-            this.accessToken = tokenCredential.getToken(new TokenRequestContext().addScopes(IOTHUB_PUBLIC_SCOPE)).block();
+            this.accessToken = tokenCredential.getToken(new TokenRequestContext().addScopes(PROVISIONING_PUBLIC_SCOPE)).block();
         }
 
         return this.accessToken;
