@@ -188,8 +188,7 @@ public class TwinClientTest
         };
 
         //act
-        Deencapsulation.invoke(testTwin,"getTwinOperation", new Class[]{URL.class, Twin.class},
-                mockUrl, mockedDevice);
+        Deencapsulation.invoke(testTwin,"getTwin", new Class[]{URL.class}, mockUrl);
 
         //assert
         new Verifications()
@@ -340,7 +339,7 @@ public class TwinClientTest
         new Verifications()
         {
             {
-                IotHubConnectionString.getUrlTwin(anyString, anyString);
+                IotHubConnectionString.getUrlModuleTwin(anyString, anyString, anyString);
                 times = 1;
             }
         };
@@ -364,7 +363,7 @@ public class TwinClientTest
         new Verifications()
         {
             {
-                IotHubConnectionString.getUrlTwin(anyString, anyString);
+                IotHubConnectionString.getUrlModuleTwin(anyString, anyString, anyString);
                 times = 1;
             }
         };

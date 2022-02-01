@@ -208,7 +208,7 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
+                new JobResult(anyString);
                 result = mockedJobResult;
             }
         };
@@ -275,7 +275,7 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
+                new JobResult(anyString);
                 result = mockedJobResult;
             }
         };
@@ -346,7 +346,7 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
+                new JobResult(anyString);
                 result = mockedJobResult;
             }
         };
@@ -602,7 +602,7 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
+                new JobResult(anyString);
                 result = mockedJobResult;
             }
         };
@@ -678,7 +678,7 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
+                new JobResult(anyString);
                 result = mockedJobResult;
             }
         };
@@ -807,7 +807,7 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
+                new JobResult(anyString);
                 result = mockedJobResult;
             }
         };
@@ -884,7 +884,7 @@ public class JobClientTest
         final String methodName = "validMethodName";
         final Set<String> payload = new HashSet<>();
         final Date startTimeUtc = new Date();
-        final long maxExecutionTimeInSeconds = 10;
+        final int maxExecutionTimeInSeconds = 10;
         final String json = "validJson";
         JobClient testJobClient = null;
 
@@ -918,7 +918,8 @@ public class JobClientTest
         }
 
         //act
-        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc);
+        ScheduleDirectMethodOptions options = ScheduleDirectMethodOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
+        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
     }
 
     /* Tests_SRS_JOBCLIENT_21_015: [If the methodName is null or empty, the scheduleDirectMethod shall throws IllegalArgumentException.] */
@@ -974,40 +975,6 @@ public class JobClientTest
         testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_015: [If the methodName is null or empty, the scheduleDirectMethod shall throws IllegalArgumentException.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void scheduleDeviceMethodThrowsOnInvalidMethodName() throws IOException, IotHubException
-    {
-        //arrange
-        final String connectionString = "testString";
-        final String jobId = "ValidJobId";
-        final String queryCondition = "validQueryCondition";
-        final String methodName = "invalidMethodName";
-        final Set<String> payload = new HashSet<>();
-        final Date startTimeUtc = new Date();
-        final long maxExecutionTimeInSeconds = 10;
-        JobClient testJobClient = null;
-        new NonStrictExpectations()
-        {
-            {
-                new MethodParser(methodName, anyInt, anyInt, payload);
-                result = new IllegalArgumentException();
-            }
-        };
-
-        try
-        {
-            testJobClient = new JobClient(connectionString);
-        }
-        catch (IllegalArgumentException e)
-        {
-            assertTrue("Test did not run because createFromConnectionString failed to create new instance of the JobClient", true);
-        }
-
-        //act
-        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc);
-    }
-
     /* Tests_SRS_JOBCLIENT_21_016: [If the startTimeUtc is null, the scheduleDirectMethod shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void scheduleDeviceMethodThrowsOnNullStartTimeUtc() throws IOException, IotHubException
@@ -1045,7 +1012,7 @@ public class JobClientTest
         final String methodName = "validMethodName";
         final Set<String> payload = new HashSet<>();
         final Date startTimeUtc = new Date();
-        final long maxExecutionTimeInSeconds = -10;
+        final int maxExecutionTimeInSeconds = -10;
         JobClient testJobClient = null;
         try
         {
@@ -1057,7 +1024,8 @@ public class JobClientTest
         }
 
         //act
-        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc);
+        ScheduleDirectMethodOptions options = ScheduleDirectMethodOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
+        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
     }
 
     /* Tests_SRS_JOBCLIENT_21_018: [The scheduleDirectMethod shall create a json String that represent the invoke method job using the JobsParser class.] */
@@ -1071,7 +1039,7 @@ public class JobClientTest
         final String methodName = "validMethodName";
         final Set<String> payload = new HashSet<>();
         final Date startTimeUtc = new Date();
-        final long maxExecutionTimeInSeconds = 10;
+        final int maxExecutionTimeInSeconds = 10;
         final String json = "validJson";
 
         //assert
@@ -1099,7 +1067,7 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
+                new JobResult(anyString);
                 result = mockedJobResult;
             }
         };
@@ -1107,7 +1075,8 @@ public class JobClientTest
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        JobResult jobResult = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc);
+        ScheduleDirectMethodOptions options = ScheduleDirectMethodOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
+        JobResult jobResult = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
     }
 
     /* Tests_SRS_JOBCLIENT_21_019: [The scheduleDirectMethod shall create a URL for Jobs using the iotHubConnectionString.] */
@@ -1121,7 +1090,7 @@ public class JobClientTest
         final String methodName = "validMethodName";
         final Set<String> payload = new HashSet<>();
         final Date startTimeUtc = new Date();
-        final long maxExecutionTimeInSeconds = 10;
+        final int maxExecutionTimeInSeconds = 10;
         final String json = "validJson";
 
         new NonStrictExpectations()
@@ -1148,7 +1117,7 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
+                new JobResult(anyString);
                 result = mockedJobResult;
             }
         };
@@ -1156,7 +1125,8 @@ public class JobClientTest
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        JobResult jobResult = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc);
+        ScheduleDirectMethodOptions options = ScheduleDirectMethodOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
+        JobResult jobResult = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
 
         //assert
         new Verifications()
@@ -1179,7 +1149,7 @@ public class JobClientTest
         final String methodName = "validMethodName";
         final Set<String> payload = new HashSet<>();
         final Date startTimeUtc = new Date();
-        final long maxExecutionTimeInSeconds = 10;
+        final int maxExecutionTimeInSeconds = 10;
         final String json = "validJson";
 
         new NonStrictExpectations()
@@ -1206,7 +1176,7 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
+                new JobResult(anyString);
                 result = mockedJobResult;
             }
         };
@@ -1214,7 +1184,8 @@ public class JobClientTest
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc);
+        ScheduleDirectMethodOptions options = ScheduleDirectMethodOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
+        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
     }
 
     /* Tests_SRS_JOBCLIENT_21_021: [If the scheduleDirectMethod failed to send a PUT request, it shall throw IOException.] */
@@ -1229,7 +1200,7 @@ public class JobClientTest
         final String methodName = "validMethodName";
         final Set<String> payload = new HashSet<>();
         final Date startTimeUtc = new Date();
-        final long maxExecutionTimeInSeconds = 10;
+        final int maxExecutionTimeInSeconds = 10;
         final String json = "validJson";
 
         new NonStrictExpectations()
@@ -1250,7 +1221,7 @@ public class JobClientTest
                 IotHubConnectionString.getUrlJobs(anyString, jobId);
                 result = mockedURL;
 
-                                new HttpRequest(mockedURL, HttpMethod.PUT, json.getBytes(StandardCharsets.UTF_8), anyString, (Proxy) any);
+                new HttpRequest(mockedURL, HttpMethod.PUT, json.getBytes(StandardCharsets.UTF_8), anyString, (Proxy) any);
                 result = new IOException();
             }
         };
@@ -1258,7 +1229,8 @@ public class JobClientTest
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc);
+        ScheduleDirectMethodOptions options = ScheduleDirectMethodOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
+        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
     }
 
     /* Tests_SRS_JOBCLIENT_21_023: [The scheduleDirectMethod shall parse the iothub response and return it as JobResult.] */
@@ -1272,7 +1244,7 @@ public class JobClientTest
         final String methodName = "validMethodName";
         final Set<String> payload = new HashSet<>();
         final Date startTimeUtc = new Date();
-        final long maxExecutionTimeInSeconds = 10;
+        final int maxExecutionTimeInSeconds = 10;
         final String json = "validJson";
 
         new Expectations()
@@ -1299,7 +1271,7 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
+                new JobResult(anyString);
                 result = mockedJobResult;
             }
         };
@@ -1307,7 +1279,8 @@ public class JobClientTest
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        JobResult jobResult = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc);
+        ScheduleDirectMethodOptions options = ScheduleDirectMethodOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
+        JobResult jobResult = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
 
         //assert
         assertNotNull(jobResult);
@@ -1410,7 +1383,7 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
+                new JobResult(anyString);
                 result = mockedJobResult;
             }
         };
@@ -1459,7 +1432,7 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
+                new JobResult(anyString);
                 result = mockedJobResult;
             }
         };
@@ -1499,7 +1472,7 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
+                new JobResult(anyString);
                 result = mockedJobResult;
             }
         };
@@ -1615,7 +1588,7 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
+                new JobResult(anyString);
                 result = mockedJobResult;
             }
         };
@@ -1664,7 +1637,7 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
+                new JobResult(anyString);
                 result = mockedJobResult;
             }
         };
@@ -1739,7 +1712,7 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
+                new JobResult(anyString);
                 result = mockedJobResult;
             }
         };

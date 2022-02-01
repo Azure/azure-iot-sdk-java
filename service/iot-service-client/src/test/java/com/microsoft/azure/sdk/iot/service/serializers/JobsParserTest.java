@@ -210,7 +210,7 @@ public class JobsParserTest
         JobsParser jobsParser= new JobsParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
 
         // Assert
-        assertEquals("scheduleDirectMethod", Deencapsulation.getField(jobsParser, "jobType"));
+        assertEquals("scheduleDeviceMethod", Deencapsulation.getField(jobsParser, "jobType"));
     }
 
     /* Tests_SRS_JOBSPARSER_21_006: [The constructor shall set the updateTwin as null.] */
@@ -246,7 +246,7 @@ public class JobsParserTest
         String expectedJson =
                 "{" +
                         "\"jobId\":\"" + jobId + "\"," +
-                        "\"type\":\"scheduleDirectMethod\"," +
+                        "\"type\":\"scheduleDeviceMethod\"," +
                         "\"cloudToDeviceMethod\":" + cloudToDeviceMethod.toJson() + "," +
                         "\"updateTwin\":null," +
                         "\"queryCondition\":\"" + queryCondition + "\"," +
