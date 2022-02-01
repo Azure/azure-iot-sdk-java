@@ -24,6 +24,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceConnectionStr
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.SSLContextBuilder;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestModuleIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
@@ -237,7 +238,14 @@ public class TwinPnPTests extends IntegrationTest
         this.testInstance.setup();
 
         // act
-        testInstance.twin = testInstance.twinServiceClient.getTwin(testInstance.identity.getDeviceId());
+        if (testInstance.clientType == ClientType.DEVICE_CLIENT)
+        {
+            testInstance.twin = testInstance.twinServiceClient.getTwin(testInstance.identity.getDeviceId());
+        }
+        else
+        {
+            testInstance.twin = testInstance.twinServiceClient.getTwin(testInstance.identity.getDeviceId(), ((Module)testInstance.identity).getId());
+        }
 
         // assert
         assertEquals(ModelId, testInstance.twin.getModelId());
