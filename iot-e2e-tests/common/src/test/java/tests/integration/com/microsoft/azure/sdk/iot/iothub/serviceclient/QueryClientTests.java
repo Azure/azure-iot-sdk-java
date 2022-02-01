@@ -79,40 +79,57 @@ public class QueryClientTests extends IntegrationTest
     {
         String deviceId1 = UUID.randomUUID().toString();
         String deviceId2 = UUID.randomUUID().toString();
+        Device device1 = Device.createDevice(deviceId1, AuthenticationType.SAS);
+        Device device2 = Device.createDevice(deviceId2, AuthenticationType.SAS);
 
-        registryManager.addDevice(Device.createDevice(deviceId1, AuthenticationType.SAS));
-        registryManager.addDevice(Device.createDevice(deviceId2, AuthenticationType.SAS));
+        registryManager.addDevice(device1);
+        registryManager.addDevice(device2);
 
-        Thread.sleep(2000);
+        try
+        {
+            Thread.sleep(2000);
 
-        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
-        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
-        AzureSasCredential azureSasCredential = new AzureSasCredential(serviceSasToken.toString());
-        QueryClientOptions options = QueryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
-        QueryClient queryClient = new QueryClient(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
-        String twinQueryString = "SELECT * FROM devices WHERE deviceId IN ['" + deviceId1 + "', '" + deviceId2 + "']";
+            IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+            IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+            AzureSasCredential azureSasCredential = new AzureSasCredential(serviceSasToken.toString());
+            QueryClientOptions options = QueryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
+            QueryClient queryClient = new QueryClient(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
+            String twinQueryString = "SELECT * FROM devices WHERE deviceId IN ['" + deviceId1 + "', '" + deviceId2 + "']";
 
-        // force 1 result per page in order to test pagination
-        QueryPageOptions queryPageOptions = QueryPageOptions.builder().pageSize(1).build();
-        TwinQueryResponse twinQueryResponse = queryClient.queryTwins(twinQueryString, queryPageOptions);
+            // force 1 result per page in order to test pagination
+            QueryPageOptions queryPageOptions = QueryPageOptions.builder().pageSize(1).build();
+            TwinQueryResponse twinQueryResponse = queryClient.queryTwins(twinQueryString, queryPageOptions);
 
-        List<Twin> twinList = new ArrayList<>();
-        assertTrue(twinQueryResponse.hasNext());
+            List<Twin> twinList = new ArrayList<>();
+            assertTrue(twinQueryResponse.hasNext());
 
-        // query should have 2 results, and since the first page only had 1 result, there should be a continuation token present
-        assertNotNull(twinQueryResponse.getContinuationToken());
-        twinList.add(twinQueryResponse.next());
+            // query should have 2 results, and since the first page only had 1 result, there should be a continuation token present
+            assertNotNull(twinQueryResponse.getContinuationToken());
+            twinList.add(twinQueryResponse.next());
 
-        assertTrue(twinQueryResponse.hasNext());
-        twinList.add(twinQueryResponse.next());
+            assertTrue(twinQueryResponse.hasNext());
+            twinList.add(twinQueryResponse.next());
 
-        // query should only have 2 results, and since the both results have been queried, there should be no more continuation tokens
-        assertNull(twinQueryResponse.getContinuationToken());
-        assertFalse(twinQueryResponse.hasNext());
+            // query should only have 2 results, and since the both results have been queried, there should be no more continuation tokens
+            assertNull(twinQueryResponse.getContinuationToken());
+            assertFalse(twinQueryResponse.hasNext());
 
-        assertEquals(2, twinList.size());
-        assertTrue(twinList.get(0).getDeviceId().equals(deviceId1) || twinList.get(0).getDeviceId().equals(deviceId2));
-        assertTrue(twinList.get(1).getDeviceId().equals(deviceId1) || twinList.get(1).getDeviceId().equals(deviceId2));
+            assertEquals(2, twinList.size());
+            assertTrue(twinList.get(0).getDeviceId().equals(deviceId1) || twinList.get(0).getDeviceId().equals(deviceId2));
+            assertTrue(twinList.get(1).getDeviceId().equals(deviceId1) || twinList.get(1).getDeviceId().equals(deviceId2));
+        }
+        finally
+        {
+            try
+            {
+                registryManager.removeDevice(deviceId1);
+                registryManager.removeDevice(deviceId2);
+            }
+            catch (IOException | IotHubException e)
+            {
+                log.debug("Failed to clean up devices after test");
+            }
+        }
     }
 
     @Test
@@ -124,52 +141,66 @@ public class QueryClientTests extends IntegrationTest
 
         registryManager.addDevice(Device.createDevice(deviceId, AuthenticationType.SAS));
 
-        Thread.sleep(2000);
-
-        final String queryCondition = "DeviceId IN ['" + deviceId + "']";
-        Twin twinUpdate = new Twin();
-        Set<Pair> desiredProperties = new HashSet<>();
-        desiredProperties.add(new Pair("key", "value"));
-        twinUpdate.setDesiredProperties(desiredProperties);
-        Date dateThreeMinutesInFuture = new Date(System.currentTimeMillis() + (1000 * 60 * 3));
-
         try
         {
-            jobClient.scheduleUpdateTwin(jobId, queryCondition, twinUpdate, dateThreeMinutesInFuture, 100);
-        }
-        catch (IotHubTooManyRequestsException e)
-        {
-            log.info("Throttled when creating job. Will use existing job(s) to test query");
-        }
-
-        QueryClient queryClient = new QueryClient(iotHubConnectionString);
-
-        String query = SqlQuery.createSqlQuery("*", SqlQuery.FromType.JOBS, null,null).getQuery();
-
-        JobQueryResponse response = queryClient.queryJobs(query);
-        long startTime = System.currentTimeMillis();
-        while (!response.hasNext())
-        {
-            if (System.currentTimeMillis() - startTime > QUERY_TIMEOUT_MILLISECONDS)
-            {
-                fail("Timed out waiting for the expected query response");
-            }
-
             Thread.sleep(2000);
 
-            response = queryClient.queryJobs(query);
+            final String queryCondition = "DeviceId IN ['" + deviceId + "']";
+            Twin twinUpdate = new Twin();
+            Set<Pair> desiredProperties = new HashSet<>();
+            desiredProperties.add(new Pair("key", "value"));
+            twinUpdate.setDesiredProperties(desiredProperties);
+            Date dateThreeMinutesInFuture = new Date(System.currentTimeMillis() + (1000 * 60 * 3));
+
+            try
+            {
+                jobClient.scheduleUpdateTwin(jobId, queryCondition, twinUpdate, dateThreeMinutesInFuture, 100);
+            }
+            catch (IotHubTooManyRequestsException e)
+            {
+                log.info("Throttled when creating job. Will use existing job(s) to test query");
+            }
+
+            QueryClient queryClient = new QueryClient(iotHubConnectionString);
+
+            String query = SqlQuery.createSqlQuery("*", SqlQuery.FromType.JOBS, null,null).getQuery();
+
+            JobQueryResponse response = queryClient.queryJobs(query);
+            long startTime = System.currentTimeMillis();
+            while (!response.hasNext())
+            {
+                if (System.currentTimeMillis() - startTime > QUERY_TIMEOUT_MILLISECONDS)
+                {
+                    fail("Timed out waiting for the expected query response");
+                }
+
+                Thread.sleep(2000);
+
+                response = queryClient.queryJobs(query);
+            }
+
+            JobResult jobResult = response.next();
+
+            assertNotNull(jobResult.getJobId());
+            assertNotNull(jobResult.getJobType());
+            assertNotNull(jobResult.getStartTime());
+            assertNotNull(jobResult.getEndTime());
+            assertNotNull(jobResult.getCreatedTime());
+            assertNotNull(jobResult.getLastUpdatedDateTime());
+            assertNotNull(jobResult.getJobStatus());
+            assertNotNull(jobResult.getDeviceId());
         }
-
-        JobResult jobResult = response.next();
-
-        assertNotNull(jobResult.getJobId());
-        assertNotNull(jobResult.getJobType());
-        assertNotNull(jobResult.getStartTime());
-        assertNotNull(jobResult.getEndTime());
-        assertNotNull(jobResult.getCreatedTime());
-        assertNotNull(jobResult.getLastUpdatedDateTime());
-        assertNotNull(jobResult.getJobStatus());
-        assertNotNull(jobResult.getDeviceId());
+        finally
+        {
+            try
+            {
+                registryManager.removeDevice(deviceId);
+            }
+            catch (IOException | IotHubException e)
+            {
+                log.debug("Failed to clean up devices after test");
+            }
+        }
     }
 
     @Test
@@ -181,50 +212,64 @@ public class QueryClientTests extends IntegrationTest
 
         registryManager.addDevice(Device.createDevice(deviceId, AuthenticationType.SAS));
 
-        Thread.sleep(2000);
-
-        final String queryCondition = "DeviceId IN ['" + deviceId + "']";
-        Twin twinUpdate = new Twin();
-        Set<Pair> desiredProperties = new HashSet<>();
-        desiredProperties.add(new Pair("key", "value"));
-        twinUpdate.setDesiredProperties(desiredProperties);
-        Date now = new Date(System.currentTimeMillis());
         try
         {
-            jobClient.scheduleUpdateTwin(jobId, queryCondition, twinUpdate, now, 10);
-        }
-        catch (IotHubTooManyRequestsException e)
-        {
-            log.info("Throttled when creating job. Will use existing job(s) to test query");
-        }
-
-        QueryClient queryClient = new QueryClient(iotHubConnectionString);
-        JobQueryResponse response = queryClient.queryJobs(JobType.scheduleUpdateTwin, JobStatus.completed);
-
-        long startTime = System.currentTimeMillis();
-        while (!response.hasNext())
-        {
-            if (System.currentTimeMillis() - startTime > QUERY_TIMEOUT_MILLISECONDS)
-            {
-                fail("Timed out waiting for the expected query response");
-            }
-
             Thread.sleep(2000);
 
-            response = queryClient.queryJobs(JobType.scheduleUpdateTwin, JobStatus.enqueued);
+            final String queryCondition = "DeviceId IN ['" + deviceId + "']";
+            Twin twinUpdate = new Twin();
+            Set<Pair> desiredProperties = new HashSet<>();
+            desiredProperties.add(new Pair("key", "value"));
+            twinUpdate.setDesiredProperties(desiredProperties);
+            Date now = new Date(System.currentTimeMillis());
+            try
+            {
+                jobClient.scheduleUpdateTwin(jobId, queryCondition, twinUpdate, now, 10);
+            }
+            catch (IotHubTooManyRequestsException e)
+            {
+                log.info("Throttled when creating job. Will use existing job(s) to test query");
+            }
+
+            QueryClient queryClient = new QueryClient(iotHubConnectionString);
+            JobQueryResponse response = queryClient.queryJobs(JobType.scheduleUpdateTwin, JobStatus.completed);
+
+            long startTime = System.currentTimeMillis();
+            while (!response.hasNext())
+            {
+                if (System.currentTimeMillis() - startTime > QUERY_TIMEOUT_MILLISECONDS)
+                {
+                    fail("Timed out waiting for the expected query response");
+                }
+
+                Thread.sleep(2000);
+
+                response = queryClient.queryJobs(JobType.scheduleUpdateTwin, JobStatus.enqueued);
+            }
+
+            JobResult jobResult = response.next();
+
+            assertNotNull(jobResult.getJobId());
+            assertNotNull(jobResult.getJobType());
+            assertNotNull(jobResult.getStartTime());
+            assertNotNull(jobResult.getEndTime());
+            assertNotNull(jobResult.getCreatedTime());
+            assertNotNull(jobResult.getMaxExecutionTimeInSeconds());
+            assertNotNull(jobResult.getJobStatus());
+            assertNotNull(jobResult.getJobStatistics());
+            assertTrue(jobResult.getJobStatistics().getDeviceCount() > 0);
         }
-
-        JobResult jobResult = response.next();
-
-        assertNotNull(jobResult.getJobId());
-        assertNotNull(jobResult.getJobType());
-        assertNotNull(jobResult.getStartTime());
-        assertNotNull(jobResult.getEndTime());
-        assertNotNull(jobResult.getCreatedTime());
-        assertNotNull(jobResult.getMaxExecutionTimeInSeconds());
-        assertNotNull(jobResult.getJobStatus());
-        assertNotNull(jobResult.getJobStatistics());
-        assertTrue(jobResult.getJobStatistics().getDeviceCount() > 0);
+        finally
+        {
+            try
+            {
+                registryManager.removeDevice(deviceId);
+            }
+            catch (IOException | IotHubException e)
+            {
+                log.debug("Failed to clean up devices after test");
+            }
+        }
     }
 
     @Test
@@ -237,64 +282,81 @@ public class QueryClientTests extends IntegrationTest
             devices[i] = registryManager.addDevice(Device.createDevice(UUID.randomUUID().toString(), AuthenticationType.SAS));
         }
 
-        Gson gson = new GsonBuilder().enableComplexMapKeySerialization().serializeNulls().create();
-
-        // Add same desired on multiple devices
-        final String queryProperty = PROPERTY_KEY_QUERY + UUID.randomUUID().toString();
-        final String queryPropertyValue = PROPERTY_VALUE_QUERY + UUID.randomUUID().toString();
-
-        TwinClient twinClient = new TwinClient(iotHubConnectionString);
-        for (int i = 0; i < deviceCount; i++)
+        try
         {
-            Twin twin = twinClient.getTwin(devices[i].getDeviceId());
-            Set<Pair> desiredProperties = twin.getDesiredProperties();
-            desiredProperties.add(new Pair(queryProperty, queryPropertyValue));
-            twin.setDesiredProperties(desiredProperties);
-            twinClient.updateTwin(twin);
-        }
+            Gson gson = new GsonBuilder().enableComplexMapKeySerialization().serializeNulls().create();
 
-        Thread.sleep(DESIRED_PROPERTIES_PROPAGATION_TIME_MILLISECONDS);
+            // Add same desired on multiple devices
+            final String queryProperty = PROPERTY_KEY_QUERY + UUID.randomUUID().toString();
+            final String queryPropertyValue = PROPERTY_VALUE_QUERY + UUID.randomUUID().toString();
 
-        // Raw Query for multiple devices having same property
-        final String select = "properties.desired." + queryProperty + " AS " + queryProperty + "," + " COUNT() AS numberOfDevices";
-        final String groupBy = "properties.desired." + queryProperty;
-        final String sqlQuery = SqlQuery.createSqlQuery(select, SqlQuery.FromType.DEVICES, null, groupBy).getQuery();
-
-        boolean querySucceeded = false;
-        long startTime = System.currentTimeMillis();
-        while (!querySucceeded)
-        {
-            QueryClient queryClient = new QueryClient(iotHubConnectionString);
-            RawQueryResponse rawQueryResponse = queryClient.queryRaw(sqlQuery);
-            while (rawQueryResponse.hasNext())
+            TwinClient twinClient = new TwinClient(iotHubConnectionString);
+            for (int i = 0; i < deviceCount; i++)
             {
-                String result = rawQueryResponse.next();
-                assertNotNull(result);
-                Map map = gson.fromJson(result, Map.class);
-                if (map.containsKey("numberOfDevices") && map.containsKey(queryProperty))
-                {
-                    // Casting as a double first to get the value from the map, but then casting to an int because the
-                    // number of devices should always be an integer
-                    int actualNumberOfDevices = (int) (double) map.get("numberOfDevices");
-                    if (actualNumberOfDevices == deviceCount)
-                    {
-                        // Due to propagation delays, there will be times when the query is executed and only a
-                        // subset of the expected devices are queryable. This test will loop until all of them are queryable
-                        // to avoid this issue.
-                        querySucceeded = true;
-                    }
-                    else
-                    {
-                        log.info("Expected device count not correct, re-running query");
-                        Thread.sleep(200);
-                        rawQueryResponse = queryClient.queryRaw(sqlQuery);
-                    }
-                }
+                Twin twin = twinClient.getTwin(devices[i].getDeviceId());
+                Set<Pair> desiredProperties = twin.getDesiredProperties();
+                desiredProperties.add(new Pair(queryProperty, queryPropertyValue));
+                twin.setDesiredProperties(desiredProperties);
+                twinClient.updateTwin(twin);
             }
 
-            if (System.currentTimeMillis() - startTime > QUERY_TIMEOUT_MILLISECONDS)
+            Thread.sleep(DESIRED_PROPERTIES_PROPAGATION_TIME_MILLISECONDS);
+
+            // Raw Query for multiple devices having same property
+            final String select = "properties.desired." + queryProperty + " AS " + queryProperty + "," + " COUNT() AS numberOfDevices";
+            final String groupBy = "properties.desired." + queryProperty;
+            final String sqlQuery = SqlQuery.createSqlQuery(select, SqlQuery.FromType.DEVICES, null, groupBy).getQuery();
+
+            boolean querySucceeded = false;
+            long startTime = System.currentTimeMillis();
+            while (!querySucceeded)
             {
-                fail("Timed out waiting for query results to match expectations");
+                QueryClient queryClient = new QueryClient(iotHubConnectionString);
+                RawQueryResponse rawQueryResponse = queryClient.queryRaw(sqlQuery);
+                while (rawQueryResponse.hasNext())
+                {
+                    String result = rawQueryResponse.next();
+                    assertNotNull(result);
+                    Map map = gson.fromJson(result, Map.class);
+                    if (map.containsKey("numberOfDevices") && map.containsKey(queryProperty))
+                    {
+                        // Casting as a double first to get the value from the map, but then casting to an int because the
+                        // number of devices should always be an integer
+                        int actualNumberOfDevices = (int) (double) map.get("numberOfDevices");
+                        if (actualNumberOfDevices == deviceCount)
+                        {
+                            // Due to propagation delays, there will be times when the query is executed and only a
+                            // subset of the expected devices are queryable. This test will loop until all of them are queryable
+                            // to avoid this issue.
+                            querySucceeded = true;
+                        }
+                        else
+                        {
+                            log.info("Expected device count not correct, re-running query");
+                            Thread.sleep(200);
+                            rawQueryResponse = queryClient.queryRaw(sqlQuery);
+                        }
+                    }
+                }
+
+                if (System.currentTimeMillis() - startTime > QUERY_TIMEOUT_MILLISECONDS)
+                {
+                    fail("Timed out waiting for query results to match expectations");
+                }
+            }
+        }
+        finally
+        {
+            try
+            {
+                for (int i = 0; i < deviceCount; i++)
+                {
+                    registryManager.removeDevice(devices[i]);
+                }
+            }
+            catch (IOException | IotHubException e)
+            {
+                log.debug("Failed to clean up devices after test");
             }
         }
     }
