@@ -5,6 +5,10 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
+import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
+import com.microsoft.azure.sdk.iot.service.query.QueryClient;
+import com.microsoft.azure.sdk.iot.service.query.SqlQuery;
+import com.microsoft.azure.sdk.iot.service.query.TwinQueryResponse;
 import com.microsoft.azure.sdk.iot.service.twin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
@@ -38,14 +42,14 @@ public class DeviceTwinSample
         System.out.println("Starting sample...");
         System.out.println("Creating the Device Twin");
         TwinClient twinClient = new TwinClient(iotHubConnectionString);
-
-        Twin device = new Twin(deviceId);
+        JobClient jobClient = new JobClient(iotHubConnectionString);
+        QueryClient queryClient = new QueryClient(iotHubConnectionString);
 
         try
         {
             // Manage complete twin
             // ============================== get initial twin properties =============================
-            getInitialState(twinClient, device);
+            Twin device = getInitialState(twinClient, deviceId);
 
             // ================================ patch desired property ===============================
             patchDesiredProperties(twinClient, device);
@@ -54,16 +58,16 @@ public class DeviceTwinSample
             replaceDesiredProperties(twinClient, device);
 
             // ============================ schedule update desired property ==========================
-            scheduleUpdateDesiredProperties(twinClient, device);
+            scheduleUpdateDesiredProperties(twinClient, device, jobClient);
 
             // =================================== cancel job scheduled ===============================
-            cancelJob(twinClient, device);
+            cancelJob(twinClient, device, jobClient);
 
             // ================================= remove desired property ==============================
             removeDesiredProperties(twinClient, device);
 
             // ======================================= query twin =====================================
-            queryTwin(twinClient);
+            queryTwin(queryClient);
         }
         catch (IotHubException | IOException e)
         {
@@ -73,16 +77,17 @@ public class DeviceTwinSample
         System.out.println("Shutting down sample...");
     }
 
-    private static void getInitialState(TwinClient twinClient, Twin device) throws IOException, IotHubException
+    private static Twin getInitialState(TwinClient twinClient, String deviceId) throws IOException, IotHubException
     {
         System.out.println("Getting the Device twin");
-        twinClient.getTwin(device);
+        Twin device = twinClient.getTwin(deviceId);
         System.out.println(device);
 
         //Update Twin Tags and Desired Properties
         Set<Pair> tags = new HashSet<>();
         tags.add(new Pair("HomeID", UUID.randomUUID()));
         device.setTags(tags);
+        return device;
     }
 
     private static void patchDesiredProperties(TwinClient twinClient, Twin device) throws IOException, IotHubException
@@ -96,7 +101,7 @@ public class DeviceTwinSample
         twinClient.updateTwin(device);
 
         System.out.println("Getting the updated Device twin");
-        twinClient.getTwin(device);
+        device = twinClient.getTwin(device.getDeviceId());
         System.out.println(device);
     }
 
@@ -112,7 +117,7 @@ public class DeviceTwinSample
         device = twinClient.replaceTwin(device);
 
         System.out.println("Getting the updated Device twin");
-        twinClient.getTwin(device);
+        device = twinClient.getTwin(device.getDeviceId());
         System.out.println(device);
     }
 
@@ -125,11 +130,11 @@ public class DeviceTwinSample
         twinClient.updateTwin(device);
 
         System.out.println("Getting the updated Device twin");
-        twinClient.getTwin(device);
+        device = twinClient.getTwin(device.getDeviceId());
         System.out.println(device);
     }
 
-    private static void scheduleUpdateDesiredProperties(TwinClient twinClient, Twin device) throws IOException, IotHubException, InterruptedException
+    private static void scheduleUpdateDesiredProperties(TwinClient twinClient, Twin device, JobClient jobClient) throws IOException, IotHubException, InterruptedException
     {
         // new set of desired properties
         Set<Pair> desiredProperties = new HashSet<>();
@@ -146,23 +151,23 @@ public class DeviceTwinSample
         String queryCondition = "DeviceId IN ['" + deviceId + "']";
 
         System.out.println("Schedule updating Device twin (new temp, hum) in 10 seconds");
-        Job job = twinClient.scheduleUpdateTwin(queryCondition, device, updateDateInFuture, MAX_EXECUTION_TIME_IN_SECONDS);
+        String jobId = UUID.randomUUID().toString();
+        JobResult jobResult = jobClient.scheduleUpdateTwin(jobId, queryCondition, device, updateDateInFuture, MAX_EXECUTION_TIME_IN_SECONDS);
 
         System.out.println("Wait for job completed...");
-        JobResult jobResult = job.get();
         while (jobResult.getJobStatus() != JobStatus.completed)
         {
             Thread.sleep(GIVE_100_MILLISECONDS_TO_IOTHUB);
-            jobResult = job.get();
+            jobResult = jobClient.getJob(jobId);
         }
         System.out.println("job completed");
 
         System.out.println("Getting the updated Device twin");
-        twinClient.getTwin(device);
+        device = twinClient.getTwin(device.getDeviceId());
         System.out.println(device);
     }
 
-    private static void cancelJob(TwinClient twinClient, Twin device) throws IOException, IotHubException, InterruptedException
+    private static void cancelJob(TwinClient twinClient, Twin device, JobClient jobClient) throws IOException, IotHubException, InterruptedException
     {
         // new set of desired properties
         Set<Pair> desiredProperties = new HashSet<>();
@@ -179,38 +184,38 @@ public class DeviceTwinSample
         String queryCondition = "DeviceId IN ['" + deviceId + "']";
 
         System.out.println("Cancel updating Device twin (new temp, hum) in 10 minutes");
-        Job job = twinClient.scheduleUpdateTwin(queryCondition, device, updateDateInFuture, MAX_EXECUTION_TIME_IN_SECONDS);
+        String jobId = UUID.randomUUID().toString();
+        JobResult jobResult = jobClient.scheduleUpdateTwin(jobId, queryCondition, device, updateDateInFuture, MAX_EXECUTION_TIME_IN_SECONDS);
 
         Thread.sleep(WAIT_1_SECOND_TO_CANCEL_IN_MILLISECONDS);
         System.out.println("Cancel job after 1 second");
-        job.cancel();
+        jobClient.cancelJob(jobId);
 
         System.out.println("Wait for job cancelled...");
-        JobResult jobResult = job.get();
+        jobResult = jobClient.getJob(jobId);
         while (jobResult.getJobStatus() != JobStatus.cancelled)
         {
             Thread.sleep(GIVE_100_MILLISECONDS_TO_IOTHUB);
-            jobResult = job.get();
+            jobResult = jobClient.getJob(jobId);
         }
         System.out.println("job cancelled");
 
         System.out.println("Getting the updated Device twin (no changes)");
-        twinClient.getTwin(device);
+        device = twinClient.getTwin(device.getDeviceId());
         System.out.println(device);
     }
 
-    private static void queryTwin(TwinClient twinClient) throws IOException, IotHubException
+    private static void queryTwin(QueryClient queryClient) throws IOException, IotHubException
     {
         System.out.println("Started Querying twin");
 
         SqlQuery sqlQuery = SqlQuery.createSqlQuery("*", SqlQuery.FromType.DEVICES, null, null);
+        TwinQueryResponse twinQueryResponse = queryClient.queryTwins(sqlQuery.getQuery());
 
-        Query twinQuery = twinClient.queryTwin(sqlQuery.getQuery(), 3);
-
-        while (twinClient.hasNextTwin(twinQuery))
+        while (twinQueryResponse.hasNext())
         {
-            Twin d = twinClient.getNextTwin(twinQuery);
-            System.out.println(d);
+            Twin queriedTwin = twinQueryResponse.next();
+            System.out.println(queriedTwin);
         }
     }
 }

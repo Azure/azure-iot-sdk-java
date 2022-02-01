@@ -5,8 +5,9 @@
 
 package samples.com.microsoft.azure.sdk.iot.service.sdk;
 
+import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
+import com.microsoft.azure.sdk.iot.service.jobs.ScheduleDirectMethodOptions;
 import com.microsoft.azure.sdk.iot.service.twin.DirectMethodsClient;
-import com.microsoft.azure.sdk.iot.service.twin.Job;
 import com.microsoft.azure.sdk.iot.service.twin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /** Manages device Method operations on IotHub */
@@ -28,11 +30,11 @@ public class DeviceMethodSample
     private static final long GIVE_100_MILLISECONDS_TO_IOTHUB = 100L;
     private static final long ADD_10_SECONDS_IN_MILLISECONDS = 10000L;
     private static final long ADD_10_MINUTES_IN_MILLISECONDS = 600000L;
-    private static final long MAX_EXECUTION_TIME_IN_SECONDS = 100L;
+    private static final int MAX_EXECUTION_TIME_IN_SECONDS = 100;
 
     private static final String methodName = "[Function Name]";
-    private static final Long responseTimeout = TimeUnit.SECONDS.toSeconds(200);
-    private static final Long connectTimeout = TimeUnit.SECONDS.toSeconds(5);
+    private static final int responseTimeout = 200;
+    private static final int connectTimeout = 5;
     private static final Map<String, Object> payload = new HashMap<String, Object>()
     {
         {
@@ -52,6 +54,7 @@ public class DeviceMethodSample
         System.out.println("Starting sample...");
         System.out.println("Creating the Device Method");
         DirectMethodsClient methodClient = new DirectMethodsClient(iotHubConnectionString);
+        JobClient jobClient = new JobClient(iotHubConnectionString);
 
         try
         {
@@ -60,10 +63,10 @@ public class DeviceMethodSample
             invokeMethod(methodClient);
 
             // ================================= schedule invoke method ===============================
-            scheduleInvokeMethod(methodClient);
+            scheduleInvokeMethod(methodClient, jobClient);
 
             // ================================== cancel job scheduled ================================
-            cancelScheduleInvokeMethod(methodClient);
+            cancelScheduleInvokeMethod(methodClient, jobClient);
         }
         catch (IotHubException | IOException e)
         {
@@ -85,7 +88,7 @@ public class DeviceMethodSample
         System.out.println("Payload=" + result.getPayload());
     }
 
-    private static void scheduleInvokeMethod(DirectMethodsClient methodClient) throws IotHubException, IOException, InterruptedException
+    private static void scheduleInvokeMethod(DirectMethodsClient methodClient, JobClient jobClient) throws IotHubException, IOException, InterruptedException
     {
         // query condition that defines the list of device to invoke
         String queryCondition = "DeviceId IN ['" + deviceId + "']";
@@ -94,19 +97,27 @@ public class DeviceMethodSample
         Date invokeDateInFuture = new Date(new Date().getTime() + ADD_10_SECONDS_IN_MILLISECONDS); // 10 seconds in the future.
 
         System.out.println("Schedule invoke method on the Device in 10 seconds");
-        Job job = methodClient.scheduleDeviceMethod(queryCondition, methodName, responseTimeout, connectTimeout, payload, invokeDateInFuture, MAX_EXECUTION_TIME_IN_SECONDS);
+        ScheduleDirectMethodOptions options =
+            ScheduleDirectMethodOptions.builder()
+                .payload(payload)
+                .methodConnectTimeout(connectTimeout)
+                .methodResponseTimeout(responseTimeout)
+                .maxExecutionTimeInSeconds(MAX_EXECUTION_TIME_IN_SECONDS)
+                .build();
+
+        String jobId = UUID.randomUUID().toString();
+        JobResult job = jobClient.scheduleDirectMethod(jobId, queryCondition, methodName, invokeDateInFuture, options);
 
         System.out.println("Wait for job completed...");
-        JobResult jobResult = job.get();
-        while (jobResult.getJobStatus() != JobStatus.completed)
+        while (job.getJobStatus() != JobStatus.completed)
         {
             Thread.sleep(GIVE_100_MILLISECONDS_TO_IOTHUB);
-            jobResult = job.get();
+            job = jobClient.getJob(jobId);
         }
         System.out.println("job completed");
     }
 
-    private static void cancelScheduleInvokeMethod(DirectMethodsClient methodClient) throws IotHubException, IOException, InterruptedException
+    private static void cancelScheduleInvokeMethod(DirectMethodsClient methodClient, JobClient jobClient) throws IotHubException, IOException, InterruptedException
     {
         // query condition that defines the list of device to invoke
         String queryCondition = "DeviceId IN ['" + deviceId + "']";
@@ -115,18 +126,26 @@ public class DeviceMethodSample
         Date invokeDateInFuture = new Date(new Date().getTime() + ADD_10_MINUTES_IN_MILLISECONDS); // 10 minutes in the future.
 
         System.out.println("Schedule invoke method on the Device in 10 minutes");
-        Job job = methodClient.scheduleDeviceMethod(queryCondition, methodName, responseTimeout, connectTimeout, payload, invokeDateInFuture, MAX_EXECUTION_TIME_IN_SECONDS);
+        ScheduleDirectMethodOptions options =
+            ScheduleDirectMethodOptions.builder()
+                .payload(payload)
+                .methodConnectTimeout(connectTimeout)
+                .methodResponseTimeout(responseTimeout)
+                .maxExecutionTimeInSeconds(MAX_EXECUTION_TIME_IN_SECONDS)
+                .build();
+
+        String jobId = UUID.randomUUID().toString();
+        JobResult job = jobClient.scheduleDirectMethod(jobId, queryCondition, methodName, invokeDateInFuture, options);
 
         Thread.sleep(WAIT_1_SECOND_TO_CANCEL_IN_MILLISECONDS);
         System.out.println("Cancel job after 1 second");
-        job.cancel();
+        jobClient.cancelJob(jobId);
 
         System.out.println("Wait for job cancelled...");
-        JobResult jobResult = job.get();
-        while (jobResult.getJobStatus() != JobStatus.cancelled)
+        while (job.getJobStatus() != JobStatus.cancelled)
         {
             Thread.sleep(GIVE_100_MILLISECONDS_TO_IOTHUB);
-            jobResult = job.get();
+            job = jobClient.getJob(jobId);
         }
         System.out.println("job cancelled");
     }
