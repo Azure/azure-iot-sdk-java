@@ -177,7 +177,7 @@ public final class DeviceClientConfig
         this.productInfo = new ProductInfo();
     }
 
-    public DeviceClientConfig(String hostName, SasTokenProvider sasTokenProvider, @NonNull ClientOptions clientOptions, String deviceId, String moduleId)
+    public DeviceClientConfig(String hostName, SasTokenProvider sasTokenProvider, ClientOptions clientOptions, String deviceId, String moduleId)
     {
         SSLContext sslContext = clientOptions != null ? clientOptions.sslContext : null;
         setKeepAliveInterval(clientOptions);
