@@ -2,6 +2,7 @@
 
 $targetBranch = ($env:TARGET_BRANCH)
 $isPullRequestBuild = "true";
+$snapshot = "";
 if (($env:TARGET_BRANCH).toLower().Contains("system.pullrequest.targetbranch"))
 {
     Write-Host "Not a pull request build, will run all tests"
@@ -10,6 +11,7 @@ if (($env:TARGET_BRANCH).toLower().Contains("system.pullrequest.targetbranch"))
 else
 {
     Write-Host "Pull request build detected"
+    $snapshot = "-SNAPSHOT"
 }
 
-mvn -DRUN_PROVISIONING_TESTS="$Env:runProvisioningTests" -DRUN_DIGITAL_TESTS="$Env:runDigitalTwinTests" -DRUN_IOTHUB_TESTS="$Env:runIotHubTests" -DIS_PULL_REQUEST="$isPullRequestBuild" install -T 2C
+mvn -Dsnapshot="$snapshot" -DRUN_PROVISIONING_TESTS="$Env:runProvisioningTests" -DRUN_DIGITAL_TESTS="$Env:runDigitalTwinTests" -DRUN_IOTHUB_TESTS="$Env:runIotHubTests" -DIS_PULL_REQUEST="$isPullRequestBuild" install -T 2C
