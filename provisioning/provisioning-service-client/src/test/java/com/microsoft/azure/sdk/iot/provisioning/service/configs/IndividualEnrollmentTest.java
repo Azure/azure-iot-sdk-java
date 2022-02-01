@@ -126,7 +126,6 @@ public class IndividualEnrollmentTest
     }
 
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_001: [The constructor shall judge and store the provided parameters using the IndividualEnrollment setters.] */
     @Test
     public void constructorWithParametersUsesSetters()
     {
@@ -141,7 +140,6 @@ public class IndividualEnrollmentTest
         assertNotNull(enrollment.mockedAttestation);
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_002: [The constructor shall throw IllegalArgumentException if the JSON is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorWithJsonThrowsOnNullJson()
     {
@@ -154,7 +152,6 @@ public class IndividualEnrollmentTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_002: [The constructor shall throw IllegalArgumentException if the JSON is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorWithJsonThrowsOnEmptyJson()
     {
@@ -167,7 +164,6 @@ public class IndividualEnrollmentTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_003: [The constructor shall throw JsonSyntaxException if the JSON is invalid.] */
     @Test (expected = JsonSyntaxException.class)
     public void constructorWithJsonThrowsOnInvalidJson()
     {
@@ -180,8 +176,6 @@ public class IndividualEnrollmentTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_004: [The constructor shall deserialize the provided JSON for the enrollment class and subclasses.] */
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_005: [The constructor shall judge and store the provided mandatory parameters `registrationId` and `attestation` using the IndividualEnrollment setters.] */
     @Test
     public void constructorWithJsonUsesSetters()
     {
@@ -207,7 +201,6 @@ public class IndividualEnrollmentTest
         assertNotNull(enrollment.getAttestation());
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_006: [If the `deviceId`, `iotHubHostName`, `provisioningStatus`, or `registrationState` is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
     @Test
     public void constructorWithJsonSetsOptionalParametersUsesSetters()
     {
@@ -245,7 +238,6 @@ public class IndividualEnrollmentTest
         assertEquals(ProvisioningStatus.ENABLED, Deencapsulation.getField(enrollment, "provisioningStatus"));
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_006: [If the `deviceId`, `iotHubHostName`, `provisioningStatus`, or `registrationState` is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
     @Test
     public void constructorWithJsonWithOptionalParametersSucceedOnNull()
     {
@@ -271,7 +263,6 @@ public class IndividualEnrollmentTest
         assertNull(enrollment.mockedProvisioningStatus);
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_007: [If the initialTwin is not null, the constructor shall convert the raw Twin and store it.] */
     @Test
     public void constructorWithJsonSetsInitialTwinUsesSetters(
             @Mocked final TwinState mockedTwinState)
@@ -325,7 +316,6 @@ public class IndividualEnrollmentTest
         };
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_007: [If the initialTwin is not null, the constructor shall convert the raw Twin and store it.] */
     @Test
     public void constructorWithJsonSetsInitialTwin()
     {
@@ -363,7 +353,6 @@ public class IndividualEnrollmentTest
         Helpers.assertJson(twinState.toString(), jsonTwin);
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_007: [If the initialTwin is not null, the constructor shall convert the raw Twin and store it.] */
     @Test
     public void constructorWithJsonSetsInitialTwinSucceedOnNull()
     {
@@ -422,7 +411,6 @@ public class IndividualEnrollmentTest
         Helpers.assertJson(optionalDeviceInformation.toString(), jsonOptional);
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_009: [If the createdDateTimeUtc is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
     @Test
     public void constructorWithJsonSetsCreatedDateTimeUtcUsesSetters()
     {
@@ -449,7 +437,6 @@ public class IndividualEnrollmentTest
         assertEquals(VALID_DATE.toString(), Deencapsulation.getField(enrollment, "createdDateTimeUtcDate").toString());
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_009: [If the createdDateTimeUtc is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
     @Test
     public void constructorWithJsonSetsCreatedDateTimeUtcSucceedOnNull()
     {
@@ -475,7 +462,6 @@ public class IndividualEnrollmentTest
         assertNull(enrollment.mockedCreatedDateTimeUtc);
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_010: [If the lastUpdatedDateTimeUtc is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
     @Test
     public void constructorWithJsonSetsLastUpdatedDateTimeUtcUsesSetters()
     {
@@ -502,7 +488,6 @@ public class IndividualEnrollmentTest
         assertEquals(VALID_DATE.toString(), Deencapsulation.getField(enrollment, "lastUpdatedDateTimeUtcDate").toString());
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_010: [If the lastUpdatedDateTimeUtc is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
     @Test
     public void constructorWithJsonSetsLastUpdatedDateTimeUtcSucceedOnNull()
     {
@@ -528,7 +513,6 @@ public class IndividualEnrollmentTest
         assertNull(enrollment.mockedLastUpdatedDateTimeUtc);
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_011: [If the etag is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
     @Test
     public void constructorWithJsonSetsEtagUsesSetters()
     {
@@ -556,7 +540,6 @@ public class IndividualEnrollmentTest
         assertEquals(VALID_PARSED_ETAG, Deencapsulation.getField(enrollment, "etag"));
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_011: [If the etag is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
     @Test
     public void constructorWithJsonSetsEtagSucceedOnNull()
     {
@@ -587,7 +570,6 @@ public class IndividualEnrollmentTest
         assertNull(enrollment.mockedEtag);
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_012: [The toJson shall return a String with the information in this class in a JSON format, by use the toJsonElement.] */
     @Test
     public void toJsonSimpleEnrollment()
     {
@@ -601,7 +583,6 @@ public class IndividualEnrollmentTest
         Helpers.assertJson(enrollment.mockedJsonElement.toString(), result);
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_013: [The toJsonElement shall return a JsonElement with the information in this class in a JSON format.] */
     @Test
     public void toJsonElementSimpleEnrollment()
     {
@@ -633,7 +614,6 @@ public class IndividualEnrollmentTest
         Helpers.assertJson(result.toString(), json);
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_014: [If the initialTwin is not null, the toJsonElement shall include its content in the final JSON.] */
     @Test
     public void toJsonElementSimpleEnrollmentWithTwin()
     {
@@ -685,7 +665,6 @@ public class IndividualEnrollmentTest
         Helpers.assertJson(result.toString(), json);
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_015: [The toString shall return a String with the information in this class in a pretty print JSON.] */
     @Test
     public void toStringSimpleEnrollmentWithTwin()
     {
@@ -737,18 +716,6 @@ public class IndividualEnrollmentTest
         Helpers.assertJson(result, json);
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_016: [The getRegistrationId shall return a String with the stored registrationId.] */
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_019: [The getDeviceId shall return a String with the stored deviceId.] */
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_022: [The getDeviceRegistrationState shall return a DeviceRegistrationState with the stored registrationState.] */
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_025: [The getAttestation shall return a AttestationMechanism with the stored attestation.] */
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_028: [The getIotHubHostName shall return a String with the stored iotHubHostName.] */
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_031: [The getInitialTwin shall return a TwinState with the stored initialTwin.] */
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_034: [The getProvisioningStatus shall return a TwinState with the stored provisioningStatus.] */
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_037: [The getCreatedDateTimeUtc shall return a Date with the stored createdDateTimeUtcDate.] */
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_040: [The getLastUpdatedDateTimeUtc shall return a Date with the stored lastUpdatedDateTimeUtcDate.] */
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_046: [The getEtag shall return a String with the stored etag.] */
-    /* SRS_INDIVIDUAL_ENROLLMENT_34_052: [If the device capabilities is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
-    /* SRS_INDIVIDUAL_ENROLLMENT_34_053: [This function shall save the provided capabilities.] */
     @Test
     public void gettersSimpleEnrollment() throws ProvisioningServiceClientException
     {
@@ -807,7 +774,6 @@ public class IndividualEnrollmentTest
         assertEquals(VALID_PARSED_ETAG, individualEnrollment.getEtag());
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_018: [The setRegistrationId shall store the provided registrationId.] */
     @Test
     public void setRegistrationIdSucceed()
     {
@@ -823,7 +789,6 @@ public class IndividualEnrollmentTest
         assertEquals(newRegistrationId, Deencapsulation.getField(individualEnrollment, "registrationId"));
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_021: [The setDeviceId shall store the provided deviceId.] */
     @Test
     public void setDeviceIdSucceed()
     {
@@ -839,7 +804,6 @@ public class IndividualEnrollmentTest
         assertEquals(newDeviceId, Deencapsulation.getField(individualEnrollment, "deviceId"));
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_024: [The setRegistrationState shall store the provided registrationState.] */
     @Test
     public void setRegistrationStateSucceed(@Mocked final DeviceRegistrationState mockedDeviceRegistrationState)
     {
@@ -878,7 +842,6 @@ public class IndividualEnrollmentTest
         individualEnrollment.setOptionalDeviceInformation((TwinCollection) null);
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_027: [The setAttestation shall store the provided attestation.] */
     @Test
     public void setAttestationMechanismSucceed(
             @Mocked final TpmAttestation mockedTpmAttestation,
@@ -903,7 +866,6 @@ public class IndividualEnrollmentTest
         assertNotNull(Deencapsulation.getField(individualEnrollment, "attestation"));
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_050: [The setAttestation shall throw IllegalArgumentException if the attestation is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void setAttestationThrowsOnNull()
     {
@@ -916,7 +878,6 @@ public class IndividualEnrollmentTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_051: [The setAttestation shall store the provided attestation using the AttestationMechanism object.] */
     @Test
     public void setAttestationSucceed(
             @Mocked final TpmAttestation mockedTpmAttestation,
@@ -938,7 +899,6 @@ public class IndividualEnrollmentTest
         };
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_030: [The setIotHubHostName shall store the provided iotHubHostName.] */
     @Test
     public void setIotHubHostNameSucceed()
     {
@@ -954,7 +914,6 @@ public class IndividualEnrollmentTest
         assertEquals(newHostName, Deencapsulation.getField(individualEnrollment, "iotHubHostName"));
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_033: [The setInitialTwin shall store the provided initialTwin.] */
     @Test
     public void setInitialTwinSucceed(@Mocked final TwinState mockedTwinState)
     {
@@ -969,7 +928,6 @@ public class IndividualEnrollmentTest
         assertEquals(mockedTwinState, Deencapsulation.getField(individualEnrollment, "initialTwin"));
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_036: [The setProvisioningStatus shall store the provided provisioningStatus.] */
     @Test
     public void setProvisioningStatusSucceed()
     {
@@ -984,7 +942,6 @@ public class IndividualEnrollmentTest
         assertEquals(ProvisioningStatus.DISABLED, Deencapsulation.getField(individualEnrollment, "provisioningStatus"));
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_038: [The setCreatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
     @Test
     public void setCreatedDateTimeUtcSucceed()
     {
@@ -999,7 +956,6 @@ public class IndividualEnrollmentTest
         Helpers.assertDateWithError((Date)Deencapsulation.getField(individualEnrollment, "createdDateTimeUtcDate"), VALID_DATE_AS_STRING);
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_039: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
     public void setCreatedDateTimeUtcThrowsOnNull()
     {
@@ -1012,7 +968,6 @@ public class IndividualEnrollmentTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_039: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
     public void setCreatedDateTimeUtcThrowsOnEmpty()
     {
@@ -1025,7 +980,6 @@ public class IndividualEnrollmentTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_039: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
     public void setCreatedDateTimeUtcThrowsOnInvalid()
     {
@@ -1038,7 +992,6 @@ public class IndividualEnrollmentTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_041: [The setLastUpdatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
     @Test
     public void setLastUpdatedDateTimeUtcSucceed()
     {
@@ -1053,7 +1006,6 @@ public class IndividualEnrollmentTest
         Helpers.assertDateWithError((Date)Deencapsulation.getField(individualEnrollment, "lastUpdatedDateTimeUtcDate"), VALID_DATE_AS_STRING);
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_042: [The setLastUpdatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
     public void setLastUpdatedDateTimeUtcThrowsOnNull()
     {
@@ -1066,7 +1018,6 @@ public class IndividualEnrollmentTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_042: [The setLastUpdatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
     public void setLastUpdatedDateTimeUtcThrowsOnEmpty()
     {
@@ -1079,7 +1030,6 @@ public class IndividualEnrollmentTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_042: [The setLastUpdatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
     public void setLastUpdatedDateTimeUtcThrowsOnInvalid()
     {
@@ -1092,7 +1042,6 @@ public class IndividualEnrollmentTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_048: [The setEtag shall store the provided etag.] */
     @Test
     public void setEtagSucceed()
     {
@@ -1108,7 +1057,6 @@ public class IndividualEnrollmentTest
         assertEquals(newEtag, Deencapsulation.getField(individualEnrollment, "etag"));
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_34_054: [This function shall return the saved capabilities.] */
     @Test
     public void setDeviceCapabilitiesSucceed()
     {
@@ -1124,7 +1072,6 @@ public class IndividualEnrollmentTest
         assertEquals(capabilities, Deencapsulation.getField(individualEnrollment, "capabilities"));
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_049: [The IndividualEnrollment shall provide an empty constructor to make GSON happy.] */
     @Test
     public void constructorSucceed()
     {
@@ -1135,7 +1082,6 @@ public class IndividualEnrollmentTest
         assertNotNull(individualEnrollment);
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_34_069: [This function shall set the reprovision policy to the value from the json.] */
     @Test
     public void constructorWithJsonSetsReprovisioningPolicy()
     {
@@ -1169,7 +1115,6 @@ public class IndividualEnrollmentTest
         assertTrue(individualEnrollment.getReprovisionPolicy().getUpdateHubAssignment());
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_34_068: [This function shall set the custom allocation definition to the value from the json.] */
     @Test
     public void constructorWithJsonSetsCustomAllocationDefinition()
     {
@@ -1205,7 +1150,6 @@ public class IndividualEnrollmentTest
         assertEquals(expectedWebhookUrl, individualEnrollment.getCustomAllocationDefinition().getWebhookUrl());
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_34_067: [This function shall set the allocation policy to the value from the json.] */
     @Test
     public void constructorWithJsonSetsAllocationPolicyGeoLatency()
     {
@@ -1331,7 +1275,6 @@ public class IndividualEnrollmentTest
     }
 
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_34_066: [This function shall set the iothubs list to the value from the json.] */
     @Test
     public void constructorWithJsonSetsIotHubs()
     {
@@ -1364,7 +1307,6 @@ public class IndividualEnrollmentTest
         assertTrue(individualEnrollment.getIotHubs().contains(expectedIotHub2));
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_34_060: [This function shall set the allocation policy.] */
     @Test
     public void setAllocationPolicyWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
     {
@@ -1379,7 +1321,6 @@ public class IndividualEnrollmentTest
         assertEquals(expectedAllocationPolicy, individualEnrollment.getAllocationPolicy());
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_34_059: [This function shall get the allocation policy.] */
     @Test
     public void getAllocationPolicyWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
     {
@@ -1395,7 +1336,6 @@ public class IndividualEnrollmentTest
         assertEquals(expectedAllocationPolicy, actualAllocationPolicy);
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_34_064: [This function shall set the custom allocation definition.] */
     @Test
     public void setCustomAllocationDefinitionWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
     {
@@ -1410,7 +1350,6 @@ public class IndividualEnrollmentTest
         assertEquals(expectedCustomAllocationDefinition, individualEnrollment.getCustomAllocationDefinition());
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_34_063: [This function shall get the custom allocation definition.] */
     @Test
     public void getCustomAllocationDefinitionWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
     {
@@ -1426,7 +1365,6 @@ public class IndividualEnrollmentTest
         assertEquals(expectedCustomAllocationDefinition, actualCustomAllocationDefinition);
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_34_058: [This function shall set the reprovision policy.] */
     @Test
     public void setReprovisionPolicyWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
     {
@@ -1441,7 +1379,6 @@ public class IndividualEnrollmentTest
         assertEquals(expectedReprovisionPolicy, individualEnrollment.getReprovisionPolicy());
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_34_057: [This function shall get the reprovision policy.] */
     @Test
     public void getReprovisionPolicyWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
     {
@@ -1457,7 +1394,6 @@ public class IndividualEnrollmentTest
         assertEquals(expectedReprovisionPolicy, actualReprovisionPolicy);
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_34_062: [This function shall set the iothubs list.] */
     @Test
     public void setIotHubsWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
     {
@@ -1472,7 +1408,6 @@ public class IndividualEnrollmentTest
         assertEquals(expectedIotHubs, individualEnrollment.getIotHubs());
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_34_061: [This function shall get the iothubs list.] */
     @Test
     public void getIotHubsWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
     {
