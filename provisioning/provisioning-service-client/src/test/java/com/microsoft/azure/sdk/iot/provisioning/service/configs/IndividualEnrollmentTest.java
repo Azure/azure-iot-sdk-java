@@ -389,6 +389,38 @@ public class IndividualEnrollmentTest
         // assert
         assertNull(individualEnrollment.getInitialTwin());
     }
+    @Test
+    public void constructorWithJsonSetsOptionalDeviceInformation()
+    {
+        // arrange
+        final String jsonOptional =
+                "  {\n" +
+                "    \"tag1\": \"valueTag1\",\n" +
+                "    \"tag2\": \"valueTag2\"\n" +
+                "  }";
+        final String json = "{\n" +
+                "  \"registrationId\": \"" + VALID_REGISTRATION_ID + "\",\n" +
+                "  \"deviceId\": \"" + VALID_DEVICE_ID + "\",\n" +
+                "  \"attestation\": {\n" +
+                "    \"type\": \"tpm\",\n" +
+                "    \"tpm\": {\n" +
+                "      \"endorsementKey\": \"" + VALID_ENDORSEMENT_KEY + "\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"optionalDeviceInformation\": " + jsonOptional + ",\n" +
+                "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
+                "  \"provisioningStatus\": \"enabled\",\n" +
+                "  \"createdDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"lastUpdatedDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\"\n" +
+                "}";
+
+        // act
+        IndividualEnrollment individualEnrollment = new IndividualEnrollment(json);
+
+        // assert
+        TwinCollection optionalDeviceInformation = individualEnrollment.getOptionalDeviceInformation();
+        Helpers.assertJson(optionalDeviceInformation.toString(), jsonOptional);
+    }
 
     /* SRS_INDIVIDUAL_ENROLLMENT_21_009: [If the createdDateTimeUtc is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
     @Test
@@ -537,6 +569,10 @@ public class IndividualEnrollmentTest
                 "    \"tpm\": {\n" +
                 "      \"endorsementKey\": \"" + VALID_ENDORSEMENT_KEY + "\"\n" +
                 "    }\n" +
+                "  },\n" +
+                "  \"optionalDeviceInformation\" : {\n" +
+                "      \"test1\": \"testVal1\",\n" +
+                "      \"test2\": \"testVal2\"\n" +
                 "  },\n" +
                 "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
                 "  \"provisioningStatus\": \"enabled\",\n" +
@@ -816,6 +852,30 @@ public class IndividualEnrollmentTest
 
         // assert
         assertEquals(mockedDeviceRegistrationState, Deencapsulation.getField(individualEnrollment, "registrationState"));
+    }
+
+    @Test
+    public void setOptionalDeviceInformationSucceed(@Mocked TwinCollection mockedOptionalDeviceInformation)
+    {
+        // arrange
+        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
+        assertNotEquals(mockedOptionalDeviceInformation, Deencapsulation.getField(individualEnrollment, "optionalDeviceInformation"));
+
+        // act
+        Deencapsulation.invoke(individualEnrollment, "setOptionalDeviceInformation", new Class[] {TwinCollection.class}, mockedOptionalDeviceInformation);
+
+        // assert
+        assertEquals(mockedOptionalDeviceInformation, Deencapsulation.getField(individualEnrollment, "optionalDeviceInformation"));
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void setOptionalDeviceInformationThrowsOnNull()
+    {
+        // arrange
+        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
+
+        // act
+        individualEnrollment.setOptionalDeviceInformation((TwinCollection) null);
     }
 
     /* SRS_INDIVIDUAL_ENROLLMENT_21_027: [The setAttestation shall store the provided attestation.] */
