@@ -5,8 +5,9 @@
 
 package samples.com.microsoft.azure.sdk.iot.service.sdk;
 
+import com.microsoft.azure.sdk.iot.service.jobs.DirectMethodsJobOptions;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
-import com.microsoft.azure.sdk.iot.service.jobs.ScheduleDirectMethodOptions;
+import com.microsoft.azure.sdk.iot.service.twin.DirectMethodRequestOptions;
 import com.microsoft.azure.sdk.iot.service.twin.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.twin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -18,7 +19,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /** Manages device Method operations on IotHub */
 public class DeviceMethodSample
@@ -79,7 +79,14 @@ public class DeviceMethodSample
     private static void invokeMethod(DirectMethodsClient methodClient) throws IotHubException, IOException
     {
         System.out.println("directly invoke method on the Device");
-        MethodResult result = methodClient.invoke(deviceId, methodName, responseTimeout, connectTimeout, payload);
+        DirectMethodRequestOptions options =
+            DirectMethodRequestOptions.builder()
+                .payload(payload)
+                .methodConnectTimeout(connectTimeout)
+                .methodResponseTimeout(responseTimeout)
+                .build();
+
+        MethodResult result = methodClient.invoke(deviceId, methodName, options);
         if(result == null)
         {
             throw new IOException("Method invoke returns null");
@@ -97,8 +104,8 @@ public class DeviceMethodSample
         Date invokeDateInFuture = new Date(new Date().getTime() + ADD_10_SECONDS_IN_MILLISECONDS); // 10 seconds in the future.
 
         System.out.println("Schedule invoke method on the Device in 10 seconds");
-        ScheduleDirectMethodOptions options =
-            ScheduleDirectMethodOptions.builder()
+        DirectMethodsJobOptions options =
+            DirectMethodsJobOptions.builder()
                 .payload(payload)
                 .methodConnectTimeout(connectTimeout)
                 .methodResponseTimeout(responseTimeout)
@@ -126,8 +133,8 @@ public class DeviceMethodSample
         Date invokeDateInFuture = new Date(new Date().getTime() + ADD_10_MINUTES_IN_MILLISECONDS); // 10 minutes in the future.
 
         System.out.println("Schedule invoke method on the Device in 10 minutes");
-        ScheduleDirectMethodOptions options =
-            ScheduleDirectMethodOptions.builder()
+        DirectMethodsJobOptions options =
+            DirectMethodsJobOptions.builder()
                 .payload(payload)
                 .methodConnectTimeout(connectTimeout)
                 .methodResponseTimeout(responseTimeout)

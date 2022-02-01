@@ -284,12 +284,7 @@ public class AzureSasCredentialSample
         try
         {
             System.out.println("Invoking method on device if it is online");
-            directMethodsClient.invoke(
-                deviceId,
-                "someMethodName",
-                5,
-                2,
-                "Some method invocation payload");
+            directMethodsClient.invoke(deviceId, "someMethodName");
         }
         catch (IotHubException e)
         {

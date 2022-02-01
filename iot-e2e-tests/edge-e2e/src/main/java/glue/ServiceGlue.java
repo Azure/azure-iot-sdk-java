@@ -1,5 +1,6 @@
 package glue;
 
+import com.microsoft.azure.sdk.iot.service.twin.DirectMethodRequestOptions;
 import com.microsoft.azure.sdk.iot.service.twin.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.twin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -84,13 +85,20 @@ public class ServiceGlue
             System.out.printf("invoking%n");
             try
             {
+                DirectMethodRequestOptions options =
+                    DirectMethodRequestOptions.builder()
+                        .payload(payload)
+                        .methodConnectTimeout(connectionTimeout)
+                        .methodResponseTimeout(responseTimeout)
+                        .build();
+
                 if (moduleId == null)
                 {
-                    result = client.invoke(deviceId, methodName, responseTimeout, connectionTimeout, payload);
+                    result = client.invoke(deviceId, methodName, options);
                 }
                 else
                 {
-                    result = client.invoke(deviceId, moduleId, methodName, responseTimeout, connectionTimeout, payload);
+                    result = client.invoke(deviceId, moduleId, methodName, options);
                 }
             }
             catch (IotHubException e)

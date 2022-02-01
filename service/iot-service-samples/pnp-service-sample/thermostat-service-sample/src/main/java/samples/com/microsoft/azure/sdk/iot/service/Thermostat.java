@@ -75,7 +75,15 @@ public class Thermostat {
 
         // Invoke the command.
         String commandInput = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(5).format(DateTimeFormatter.ISO_DATE_TIME);
-        MethodResult result = methodClient.invoke(deviceId, methodToInvoke, responseTimeout, connectTimeout, commandInput);
+
+        DirectMethodRequestOptions options =
+            DirectMethodRequestOptions.builder()
+                .payload(commandInput)
+                .methodConnectTimeout(connectTimeout)
+                .methodResponseTimeout(responseTimeout)
+                .build();
+
+        MethodResult result = methodClient.invoke(deviceId, methodToInvoke, options);
         if(result == null)
         {
             throw new IOException("Method result is null");

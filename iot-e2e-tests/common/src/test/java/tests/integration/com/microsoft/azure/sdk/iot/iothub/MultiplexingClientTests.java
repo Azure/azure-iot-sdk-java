@@ -727,7 +727,7 @@ public class MultiplexingClientTests extends IntegrationTest
         Thread.sleep(1000);
 
         // Invoke method on the multiplexed device
-        directMethodServiceClientClient.invoke(deviceId, expectedMethodName, 200, 200, null);
+        directMethodServiceClientClient.invoke(deviceId, expectedMethodName);
 
         // No need to wait for the device to receive the method invocation since the service client call does that already
         assertTrue("Device method callback never fired on device", deviceMethodCallback.deviceMethodCallbackFired);

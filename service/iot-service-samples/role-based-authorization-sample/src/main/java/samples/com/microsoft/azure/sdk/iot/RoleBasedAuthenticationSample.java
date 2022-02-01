@@ -24,6 +24,7 @@ import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.ServiceClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
+import com.microsoft.azure.sdk.iot.service.twin.DirectMethodRequestOptions;
 import com.microsoft.azure.sdk.iot.service.twin.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.twin.DirectMethodsClientOptions;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
@@ -277,12 +278,12 @@ public class RoleBasedAuthenticationSample
         try
         {
             System.out.println("Invoking method on device if it is online");
-            directMethodsClient.invoke(
-                deviceId,
-                "someMethodName",
-                5,
-                2,
-                "Some method invocation payload");
+            DirectMethodRequestOptions directMethodRequestOptions =
+                DirectMethodRequestOptions.builder()
+                    .payload("Some method invocation payload")
+                    .build();
+
+            directMethodsClient.invoke(deviceId, "someMethodName", directMethodRequestOptions);
         }
         catch (IotHubException e)
         {

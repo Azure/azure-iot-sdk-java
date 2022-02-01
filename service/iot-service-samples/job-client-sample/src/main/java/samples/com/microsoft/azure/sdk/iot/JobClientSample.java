@@ -4,7 +4,7 @@
  */
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.service.jobs.ScheduleDirectMethodOptions;
+import com.microsoft.azure.sdk.iot.service.jobs.DirectMethodsJobOptions;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.twin.Pair;
 import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
@@ -18,7 +18,6 @@ import com.microsoft.azure.sdk.iot.service.jobs.JobType;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 /*
     Jobs on IotHub using the JobClient
@@ -134,8 +133,8 @@ public class JobClientSample
 
         System.out.println("Schedule method job " + jobIdMethod + " for device " + deviceId + "...");
 
-        ScheduleDirectMethodOptions options =
-            ScheduleDirectMethodOptions.builder()
+        DirectMethodsJobOptions options =
+            DirectMethodsJobOptions.builder()
                 .payload(payload)
                 .methodConnectTimeout(connectTimeout)
                 .methodResponseTimeout(responseTimeout)

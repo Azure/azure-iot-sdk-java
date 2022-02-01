@@ -14,6 +14,7 @@ import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.twin.DirectMethodRequestOptions;
 import com.microsoft.azure.sdk.iot.service.twin.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.twin.DirectMethodsClientOptions;
 import com.microsoft.azure.sdk.iot.service.twin.MethodResult;
@@ -209,14 +210,19 @@ public class DirectMethodsCommon extends IntegrationTest
         DeviceTestManager deviceTestManger = this.testInstance.deviceTestManager;
 
         // Act
+        DirectMethodRequestOptions options =
+            DirectMethodRequestOptions.builder()
+                .payload(PAYLOAD_STRING)
+                .build();
+
         MethodResult result;
         if (testInstance.identity instanceof TestModuleIdentity)
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity)testInstance.identity).getModule().getId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity)testInstance.identity).getModule().getId(), DeviceEmulator.METHOD_LOOPBACK, options);
         }
         else
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_LOOPBACK, options);
         }
 
         deviceTestManger.waitIotHub(1, 10);

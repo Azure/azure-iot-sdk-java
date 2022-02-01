@@ -242,7 +242,14 @@ public class DirectMethodsClientTest
         {
             try
             {
-                testMethod.invoke(testCase.deviceId, testCase.methodName, testCase.responseTimeoutInSeconds, testCase.connectTimeoutInSeconds, testCase.payload);
+                DirectMethodRequestOptions options =
+                    DirectMethodRequestOptions.builder()
+                        .payload(testCase.payload)
+                        .methodConnectTimeout(testCase.connectTimeoutInSeconds)
+                        .methodResponseTimeout(testCase.responseTimeoutInSeconds)
+                        .build();
+
+                testMethod.invoke(testCase.deviceId, testCase.methodName, options);
                 assertTrue(
                         "Negative case> DeviceId=" + testCase.deviceId +
                         " MethodName=" + testCase.methodName +
@@ -273,7 +280,14 @@ public class DirectMethodsClientTest
         {
             try
             {
-                testMethod.invoke(testCase.deviceId, testCase.moduleId, testCase.methodName, testCase.responseTimeoutInSeconds, testCase.connectTimeoutInSeconds, testCase.payload);
+                DirectMethodRequestOptions options =
+                    DirectMethodRequestOptions.builder()
+                        .payload(testCase.payload)
+                        .methodConnectTimeout(testCase.connectTimeoutInSeconds)
+                        .methodResponseTimeout(testCase.responseTimeoutInSeconds)
+                        .build();
+
+                testMethod.invoke(testCase.deviceId, testCase.moduleId, testCase.methodName, options);
                 assertTrue(
                         "Negative case> DeviceId=" + testCase.deviceId +
                                 " ModuleName=" + testCase.moduleId +
@@ -308,7 +322,7 @@ public class DirectMethodsClientTest
         };
 
         //act
-        testMethod.invoke(STANDARD_DEVICEID, STANDARD_MODULEID, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP);
+        testMethod.invoke(STANDARD_DEVICEID, STANDARD_MODULEID, STANDARD_METHODNAME);
     }
 
     /* Tests_SRS_DEVICEMETHOD_21_005: [The invoke shall throw IllegalArgumentException if the provided methodName is null, empty, or not valid.] */
@@ -330,7 +344,7 @@ public class DirectMethodsClientTest
         DirectMethodsClient testMethod = new DirectMethodsClient(STANDARD_CONNECTIONSTRING);
 
         //act
-        testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP);
+        testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME);
 
     }
 
@@ -352,7 +366,7 @@ public class DirectMethodsClientTest
         };
 
         //act
-        testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP);
+        testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME);
     }
 
     /* Tests_SRS_DEVICEMETHOD_21_012: [If `MethodParser` return a null Json, the invoke shall throw IllegalArgumentException.] */
@@ -373,7 +387,7 @@ public class DirectMethodsClientTest
         };
 
         //act
-        testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP);
+        testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME);
     }
 
     /* Tests_SRS_DEVICEMETHOD_21_008: [The invoke shall build the Method URL `{iot hub}/twins/{device id}/methods/` by calling getUrlMethod.] */
@@ -395,7 +409,7 @@ public class DirectMethodsClientTest
         };
 
         //act
-        testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP);
+        testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME);
     }
 
     /* Tests_SRS_DEVICEMETHOD_21_013: [The invoke shall deserialize the payload using the `serializer.MethodParser`.] */
@@ -436,7 +450,7 @@ public class DirectMethodsClientTest
         };
 
         //act
-        testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP);
+        testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME);
     }
 
     private void constructorExpectations()
@@ -477,7 +491,7 @@ public class DirectMethodsClientTest
         };
 
         //act
-        MethodResult result = testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, 0, 0, STANDARD_PAYLOAD_MAP);
+        MethodResult result = testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME);
 
         //assert
         assertThat(result.getStatus(), is(123));

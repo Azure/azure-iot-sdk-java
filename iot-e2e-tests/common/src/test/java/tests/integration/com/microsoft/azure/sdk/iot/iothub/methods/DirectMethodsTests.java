@@ -14,6 +14,7 @@ import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.twin.DirectMethodRequestOptions;
 import com.microsoft.azure.sdk.iot.service.twin.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.twin.DirectMethodsClientOptions;
 import com.microsoft.azure.sdk.iot.service.twin.MethodResult;
@@ -136,11 +137,11 @@ public class DirectMethodsTests extends DirectMethodsCommon
         MethodResult result;
         if (testInstance.identity instanceof TestModuleIdentity)
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, null);
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_LOOPBACK);
         }
         else
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, null);
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_LOOPBACK);
         }
         deviceTestManger.waitIotHub(1, 10);
 
@@ -162,13 +163,20 @@ public class DirectMethodsTests extends DirectMethodsCommon
 
         try
         {
+            DirectMethodRequestOptions options =
+                DirectMethodRequestOptions.builder()
+                    .payload("7000")
+                    .methodResponseTimeout(RESPONSE_TIMEOUT)
+                    .methodConnectTimeout(CONNECTION_TIMEOUT)
+                    .build();
+
             if (testInstance.identity instanceof TestModuleIdentity)
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, 5, CONNECTION_TIMEOUT, "7000");
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, options);
             }
             else
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, 5, CONNECTION_TIMEOUT, "7000");
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, options);
             }
             assert true;
         }
@@ -178,14 +186,21 @@ public class DirectMethodsTests extends DirectMethodsCommon
         }
 
         // Act
+        DirectMethodRequestOptions options =
+            DirectMethodRequestOptions.builder()
+                .payload("100")
+                .methodResponseTimeout(RESPONSE_TIMEOUT)
+                .methodConnectTimeout(CONNECTION_TIMEOUT)
+                .build();
+
         MethodResult result;
         if (testInstance.identity instanceof TestModuleIdentity)
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, "100");
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, options);
         }
         else
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, "100");
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, options);
         }
         deviceTestManger.waitIotHub(1, 10);
 
@@ -208,13 +223,20 @@ public class DirectMethodsTests extends DirectMethodsCommon
         boolean expectedExceptionCaught = false;
         try
         {
+            DirectMethodRequestOptions options =
+                DirectMethodRequestOptions.builder()
+                    .payload("7000")
+                    .methodResponseTimeout(RESPONSE_TIMEOUT)
+                    .methodConnectTimeout(CONNECTION_TIMEOUT)
+                    .build();
+
             if (testInstance.identity instanceof TestModuleIdentity)
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, 5, CONNECTION_TIMEOUT, "7000");
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), options);
             }
             else
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, 5, CONNECTION_TIMEOUT, "7000");
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, options);
             }
         }
         catch (IotHubGatewayTimeoutException e)
@@ -242,13 +264,19 @@ public class DirectMethodsTests extends DirectMethodsCommon
             //force the device offline
             testInstance.deviceTestManager.client.close();
 
+            DirectMethodRequestOptions options =
+                DirectMethodRequestOptions.builder()
+                    .methodResponseTimeout(RESPONSE_TIMEOUT)
+                    .methodConnectTimeout(CONNECTION_TIMEOUT)
+                    .build();
+
             if (testInstance.identity instanceof TestModuleIdentity)
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, null);
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_LOOPBACK, options);
             }
             else
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, null);
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_LOOPBACK, options);
             }
 
             Assert.fail(buildExceptionMessage("Invoking method on device or module that wasn't online should have thrown an exception", testInstance.deviceTestManager.client));
@@ -276,11 +304,11 @@ public class DirectMethodsTests extends DirectMethodsCommon
         {
             if (testInstance.identity instanceof TestModuleIdentity)
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), "ThisModuleDoesNotExist", DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, null);
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), "ThisModuleDoesNotExist", DeviceEmulator.METHOD_LOOPBACK);
             }
             else
             {
-                testInstance.methodServiceClient.invoke("ThisDeviceDoesNotExist", DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, null);
+                testInstance.methodServiceClient.invoke("ThisDeviceDoesNotExist", DeviceEmulator.METHOD_LOOPBACK);
             }
 
             Assert.fail(buildExceptionMessage("Invoking method on device or module that doesn't exist should have thrown an exception", testInstance.deviceTestManager.client));

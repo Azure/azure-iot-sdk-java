@@ -16,6 +16,7 @@ import com.microsoft.azure.sdk.iot.service.Message;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
+import com.microsoft.azure.sdk.iot.service.twin.DirectMethodRequestOptions;
 import com.microsoft.azure.sdk.iot.service.twin.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
@@ -179,12 +180,7 @@ public class TokenCredentialTests
 
         assertTrue("Method subscription callback fired with non 200 status code", methodsSubscribedSuccessfully.get());
 
-        MethodResult result = methodServiceClient.invoke(
-            device.getDeviceId(),
-            "someMethod",
-            5,
-            5,
-            null);
+        MethodResult result = methodServiceClient.invoke(device.getDeviceId(), "someMethod");
 
         assertEquals((long) successStatusCode, (long) result.getStatus());
     }

@@ -150,19 +150,26 @@ public class DirectMethodsClient
      *
      * @param deviceId is the device where the sendHttpRequest is send to.
      * @param methodName is the name of the method that shall be invoked on the device.
-     * @param responseTimeoutInSeconds is the maximum waiting time for a response from the device in seconds.
-     * @param connectTimeoutInSeconds is the maximum waiting time for a response from the connection in seconds.
-     * @param payload is the the method parameter.
      * @return the status and payload resulted from the method invoke.
      * @throws IotHubException This exception is thrown if the response verification failed.
      * @throws IOException This exception is thrown if the IO operation failed.
      */
-    public MethodResult invoke(
-        String deviceId,
-        String methodName,
-        int responseTimeoutInSeconds,
-        int connectTimeoutInSeconds,
-        Object payload) throws IotHubException, IOException
+    public MethodResult invoke(String deviceId, String methodName) throws IotHubException, IOException
+    {
+        return invoke(deviceId, methodName, DirectMethodRequestOptions.builder().build());
+    }
+
+    /**
+     * Directly invokes a method on the device and return its result.
+     *
+     * @param deviceId is the device where the sendHttpRequest is send to.
+     * @param methodName is the name of the method that shall be invoked on the device.
+     * @param options the optional parameters for this request, including the method's payload. May not be null.
+     * @return the status and payload resulted from the method invoke.
+     * @throws IotHubException This exception is thrown if the response verification failed.
+     * @throws IOException This exception is thrown if the IO operation failed.
+     */
+    public MethodResult invoke(String deviceId, String methodName, DirectMethodRequestOptions options) throws IotHubException, IOException
     {
         if (deviceId == null || deviceId.isEmpty())
         {
@@ -174,8 +181,10 @@ public class DirectMethodsClient
             throw new IllegalArgumentException("methodName is empty or null.");
         }
 
+        Objects.requireNonNull(options);
+
         URL url = IotHubConnectionString.getUrlMethod(this.hostName, deviceId);
-        return invokeMethod(url, methodName, responseTimeoutInSeconds, connectTimeoutInSeconds, payload);
+        return invokeMethod(url, methodName, options.getMethodResponseTimeout(), options.getMethodConnectTimeout(), options.getPayload());
     }
 
     /**
@@ -184,9 +193,22 @@ public class DirectMethodsClient
      * @param deviceId is the device where the module is related to.
      * @param moduleId is the module where the sendHttpRequest is sent to.
      * @param methodName is the name of the method that shall be invoked on the device.
-     * @param responseTimeoutInSeconds is the maximum waiting time for a response from the device in seconds.
-     * @param connectTimeoutInSeconds is the maximum waiting time for a response from the connection in seconds.
-     * @param payload is the the method parameter.
+     * @return the status and payload resulted from the method invoke.
+     * @throws IotHubException This exception is thrown if the response verification failed.
+     * @throws IOException This exception is thrown if the IO operation failed.
+     */
+    public MethodResult invoke(String deviceId, String moduleId, String methodName) throws IotHubException, IOException
+    {
+        return invoke(deviceId, moduleId, methodName, DirectMethodRequestOptions.builder().build());
+    }
+
+    /**
+     * Directly invokes a method on the module and return its result.
+     *
+     * @param deviceId is the device where the module is related to.
+     * @param moduleId is the module where the sendHttpRequest is sent to.
+     * @param methodName is the name of the method that shall be invoked on the device.
+     * @param options the optional parameters for this request, including the method's payload. May not be null.
      * @return the status and payload resulted from the method invoke.
      * @throws IotHubException This exception is thrown if the response verification failed.
      * @throws IOException This exception is thrown if the IO operation failed.
@@ -195,9 +217,7 @@ public class DirectMethodsClient
         String deviceId,
         String moduleId,
         String methodName,
-        int responseTimeoutInSeconds,
-        int connectTimeoutInSeconds,
-        Object payload) throws IotHubException, IOException
+        DirectMethodRequestOptions options) throws IotHubException, IOException
     {
         if (deviceId == null || deviceId.isEmpty())
         {
@@ -214,9 +234,11 @@ public class DirectMethodsClient
             throw new IllegalArgumentException("methodName is empty or null.");
         }
 
+        Objects.requireNonNull(options);
+
         URL url = IotHubConnectionString.getUrlModuleMethod(this.hostName, deviceId, moduleId);
 
-        return invokeMethod(url, methodName, responseTimeoutInSeconds, connectTimeoutInSeconds, payload);
+        return invokeMethod(url, methodName, options.getMethodResponseTimeout(), options.getMethodConnectTimeout(), options.getPayload());
     }
 
     /**
@@ -236,7 +258,8 @@ public class DirectMethodsClient
         String methodName,
         int responseTimeoutInSeconds,
         int connectTimeoutInSeconds,
-        Object payload) throws IotHubException, IOException
+        Object payload)
+            throws IotHubException, IOException
     {
         MethodParser methodParser = new MethodParser(methodName, responseTimeoutInSeconds, connectTimeoutInSeconds, payload);
 

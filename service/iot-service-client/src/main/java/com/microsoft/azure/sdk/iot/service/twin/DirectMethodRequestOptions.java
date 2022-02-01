@@ -1,19 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-package com.microsoft.azure.sdk.iot.service.jobs;
+package com.microsoft.azure.sdk.iot.service.twin;
 
 import lombok.Builder;
 import lombok.Getter;
 
-import java.util.Date;
-
-/**
- * The optional parameters to be used when scheduling direct methods with
- * {@link JobClient#scheduleDirectMethod(String, String, String, Date, ScheduleDirectMethodOptions)}.
- */
 @Builder
-public class ScheduleDirectMethodOptions
+public class DirectMethodRequestOptions
 {
     /**
      * The payload of the direct method request. May be null.
@@ -36,10 +30,4 @@ public class ScheduleDirectMethodOptions
     @Getter
     @Builder.Default
     private final int methodConnectTimeout = 0;
-
-    /**
-     * The timeout for the direct method request job as a whole.
-     */
-    @Getter
-    private final int maxExecutionTimeInSeconds;
 }

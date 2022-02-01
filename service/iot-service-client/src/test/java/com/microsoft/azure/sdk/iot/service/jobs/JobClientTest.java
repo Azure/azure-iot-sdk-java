@@ -918,7 +918,7 @@ public class JobClientTest
         }
 
         //act
-        ScheduleDirectMethodOptions options = ScheduleDirectMethodOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
+        DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
         testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
     }
 
@@ -1024,7 +1024,7 @@ public class JobClientTest
         }
 
         //act
-        ScheduleDirectMethodOptions options = ScheduleDirectMethodOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
+        DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
         testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
     }
 
@@ -1075,7 +1075,7 @@ public class JobClientTest
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        ScheduleDirectMethodOptions options = ScheduleDirectMethodOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
+        DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
         JobResult jobResult = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
     }
 
@@ -1125,7 +1125,7 @@ public class JobClientTest
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        ScheduleDirectMethodOptions options = ScheduleDirectMethodOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
+        DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
         JobResult jobResult = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
 
         //assert
@@ -1184,7 +1184,7 @@ public class JobClientTest
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        ScheduleDirectMethodOptions options = ScheduleDirectMethodOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
+        DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
         testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
     }
 
@@ -1229,7 +1229,7 @@ public class JobClientTest
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        ScheduleDirectMethodOptions options = ScheduleDirectMethodOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
+        DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
         testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
     }
 
@@ -1279,7 +1279,7 @@ public class JobClientTest
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        ScheduleDirectMethodOptions options = ScheduleDirectMethodOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
+        DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
         JobResult jobResult = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
 
         //assert

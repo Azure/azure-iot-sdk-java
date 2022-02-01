@@ -248,7 +248,7 @@ public class JobClient
         Date startTimeUtc)
             throws IOException, IotHubException
     {
-        return scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, ScheduleDirectMethodOptions.builder().build());
+        return scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, DirectMethodsJobOptions.builder().build());
     }
 
     /**
@@ -268,7 +268,7 @@ public class JobClient
         String queryCondition,
         String methodName,
         Date startTimeUtc,
-        ScheduleDirectMethodOptions options)
+        DirectMethodsJobOptions options)
             throws IOException, IotHubException
     {
         URL url;

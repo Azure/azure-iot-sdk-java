@@ -7,7 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 
 import com.azure.core.credential.AzureSasCredential;
-import com.microsoft.azure.sdk.iot.service.jobs.ScheduleDirectMethodOptions;
+import com.microsoft.azure.sdk.iot.service.jobs.DirectMethodsJobOptions;
 import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
@@ -238,8 +238,8 @@ public class JobClientTests extends IntegrationTest
                 jobIdsPending.add(jobId);
                 try
                 {
-                    ScheduleDirectMethodOptions options =
-                        ScheduleDirectMethodOptions.builder()
+                    DirectMethodsJobOptions options =
+                        DirectMethodsJobOptions.builder()
                             .payload(PAYLOAD_STRING)
                             .methodConnectTimeout(CONNECTION_TIMEOUT)
                             .methodResponseTimeout(RESPONSE_TIMEOUT)
@@ -352,8 +352,8 @@ public class JobClientTests extends IntegrationTest
 
         // Act
         String jobId = JOB_ID_NAME + UUID.randomUUID();
-        ScheduleDirectMethodOptions options =
-            ScheduleDirectMethodOptions.builder()
+        DirectMethodsJobOptions options =
+            DirectMethodsJobOptions.builder()
                 .payload(PAYLOAD_STRING)
                 .methodConnectTimeout(CONNECTION_TIMEOUT)
                 .methodResponseTimeout(RESPONSE_TIMEOUT)
@@ -421,8 +421,8 @@ public class JobClientTests extends IntegrationTest
                 {
                     if (index % 2 == 0)
                     {
-                        ScheduleDirectMethodOptions options =
-                            ScheduleDirectMethodOptions.builder()
+                        DirectMethodsJobOptions options =
+                            DirectMethodsJobOptions.builder()
                                 .payload(PAYLOAD_STRING)
                                 .methodConnectTimeout(CONNECTION_TIMEOUT)
                                 .methodResponseTimeout(RESPONSE_TIMEOUT)
@@ -540,8 +540,8 @@ public class JobClientTests extends IntegrationTest
                 jobIdsPending.add(jobId);
                 try
                 {
-                    ScheduleDirectMethodOptions options =
-                        ScheduleDirectMethodOptions.builder()
+                    DirectMethodsJobOptions options =
+                        DirectMethodsJobOptions.builder()
                             .payload(PAYLOAD_STRING)
                             .methodConnectTimeout(CONNECTION_TIMEOUT)
                             .methodResponseTimeout(RESPONSE_TIMEOUT)
