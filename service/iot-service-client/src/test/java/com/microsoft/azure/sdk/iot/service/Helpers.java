@@ -5,9 +5,8 @@ package com.microsoft.azure.sdk.iot.service;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.microsoft.azure.sdk.iot.service.devicetwin.TwinCollection;
-import com.microsoft.azure.sdk.iot.service.devicetwin.TwinMetadata;
-import org.hamcrest.MatcherAssert;
+import com.microsoft.azure.sdk.iot.service.twin.TwinCollection;
+import com.microsoft.azure.sdk.iot.service.twin.TwinMetadata;
 import org.junit.Assert;
 
 import java.text.ParseException;

@@ -35,11 +35,11 @@ import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodsClient;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodsClientOptions;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
-import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClient;
-import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClientOptions;
+import com.microsoft.azure.sdk.iot.service.twin.DirectMethodsClient;
+import com.microsoft.azure.sdk.iot.service.twin.DirectMethodsClientOptions;
+import com.microsoft.azure.sdk.iot.service.twin.Twin;
+import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
+import com.microsoft.azure.sdk.iot.service.twin.TwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
@@ -952,8 +952,8 @@ public class MultiplexingClientTests extends IntegrationTest
 
     private static void testDesiredPropertiesFlow(DeviceClient deviceClient, TwinClient twinClientServiceClient, TwinPropertyCallbackImpl twinPropertyCallback, String expectedPropertyKey, String expectedPropertyValue) throws IOException, IotHubException, InterruptedException {
         Twin serviceClientTwin = new Twin(deviceClient.getConfig().getDeviceId());
-        Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
-        desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(expectedPropertyKey, expectedPropertyValue));
+        Set<com.microsoft.azure.sdk.iot.service.twin.Pair> desiredProperties = new HashSet<>();
+        desiredProperties.add(new com.microsoft.azure.sdk.iot.service.twin.Pair(expectedPropertyKey, expectedPropertyValue));
         serviceClientTwin.setDesiredProperties(desiredProperties);
         twinClientServiceClient.updateTwin(serviceClientTwin);
 
@@ -983,9 +983,9 @@ public class MultiplexingClientTests extends IntegrationTest
         // Verify that the new reported property value can be seen from the service client
         Twin serviceClientTwin = twinClientServiceClient.getTwin(deviceClient.getConfig().getDeviceId());
 
-        Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> retrievedReportedProperties = serviceClientTwin.getReportedProperties();
+        Set<com.microsoft.azure.sdk.iot.service.twin.Pair> retrievedReportedProperties = serviceClientTwin.getReportedProperties();
         assertEquals(1, retrievedReportedProperties.size());
-        com.microsoft.azure.sdk.iot.service.devicetwin.Pair retrievedReportedPropertyPair = retrievedReportedProperties.iterator().next();
+        com.microsoft.azure.sdk.iot.service.twin.Pair retrievedReportedPropertyPair = retrievedReportedProperties.iterator().next();
         assertTrue(retrievedReportedPropertyPair.getKey().equalsIgnoreCase(expectedPropertyKey));
         String actualReportedPropertyValue = retrievedReportedPropertyPair.getValue().toString();
         assertEquals(expectedReportedPropertyValue, actualReportedPropertyValue);

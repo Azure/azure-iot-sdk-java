@@ -3,7 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.service.serializers;
 
-import com.microsoft.azure.sdk.iot.service.devicetwin.TwinState;
+import com.microsoft.azure.sdk.iot.service.jobs.JobsParser;
+import com.microsoft.azure.sdk.iot.service.twin.TwinState;
 import mockit.Deencapsulation;
 import org.junit.Test;
 import com.microsoft.azure.sdk.iot.service.Helpers;

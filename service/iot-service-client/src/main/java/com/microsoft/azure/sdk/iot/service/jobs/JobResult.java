@@ -6,12 +6,10 @@ package com.microsoft.azure.sdk.iot.service.jobs;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
-import com.microsoft.azure.sdk.iot.service.serializers.JobsResponseParser;
-import com.microsoft.azure.sdk.iot.service.serializers.JobsStatisticsParser;
-import com.microsoft.azure.sdk.iot.service.devicetwin.TwinState;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
-import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
+import com.microsoft.azure.sdk.iot.service.twin.TwinState;
+import com.microsoft.azure.sdk.iot.service.twin.Twin;
+import com.microsoft.azure.sdk.iot.service.twin.MethodResult;
+import com.microsoft.azure.sdk.iot.service.twin.Pair;
 import lombok.Getter;
 
 import java.nio.charset.Charset;

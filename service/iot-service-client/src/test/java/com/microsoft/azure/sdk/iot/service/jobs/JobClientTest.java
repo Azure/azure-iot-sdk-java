@@ -5,15 +5,14 @@
 
 package com.microsoft.azure.sdk.iot.service.jobs;
 
-import com.microsoft.azure.sdk.iot.service.serializers.JobsParser;
 import com.microsoft.azure.sdk.iot.service.serializers.MethodParser;
-import com.microsoft.azure.sdk.iot.service.devicetwin.TwinCollection;
-import com.microsoft.azure.sdk.iot.service.devicetwin.TwinState;
+import com.microsoft.azure.sdk.iot.service.twin.TwinCollection;
+import com.microsoft.azure.sdk.iot.service.twin.TwinState;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
+import com.microsoft.azure.sdk.iot.service.twin.Twin;
+import com.microsoft.azure.sdk.iot.service.twin.Pair;
 import com.microsoft.azure.sdk.iot.service.query.SqlQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;

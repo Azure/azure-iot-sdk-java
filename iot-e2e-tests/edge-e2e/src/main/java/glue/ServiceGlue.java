@@ -1,7 +1,7 @@
 package glue;
 
-import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodsClient;
-import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
+import com.microsoft.azure.sdk.iot.service.twin.DirectMethodsClient;
+import com.microsoft.azure.sdk.iot.service.twin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import io.swagger.server.api.MainApiException;
 import io.swagger.server.api.model.ConnectResponse;

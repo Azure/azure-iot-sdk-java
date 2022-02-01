@@ -1,13 +1,10 @@
 package io.swagger.server.api.verticle;
 
-import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
-import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClient;
-import com.microsoft.azure.sdk.iot.service.devicetwin.TwinCollection;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
+import com.microsoft.azure.sdk.iot.service.twin.Pair;
+import com.microsoft.azure.sdk.iot.service.twin.TwinCollection;
+import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import io.vertx.core.json.JsonObject;
 
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class WrappedTwin

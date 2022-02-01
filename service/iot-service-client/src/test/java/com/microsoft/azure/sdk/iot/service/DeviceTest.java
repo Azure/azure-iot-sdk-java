@@ -5,7 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceCapabilities;
+import com.microsoft.azure.sdk.iot.service.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
 import com.microsoft.azure.sdk.iot.service.serializers.AuthenticationParser;

@@ -5,9 +5,9 @@
 
 package samples.com.microsoft.azure.sdk.iot.service.sdk;
 
-import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodsClient;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Job;
-import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
+import com.microsoft.azure.sdk.iot.service.twin.DirectMethodsClient;
+import com.microsoft.azure.sdk.iot.service.twin.Job;
+import com.microsoft.azure.sdk.iot.service.twin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
 import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;

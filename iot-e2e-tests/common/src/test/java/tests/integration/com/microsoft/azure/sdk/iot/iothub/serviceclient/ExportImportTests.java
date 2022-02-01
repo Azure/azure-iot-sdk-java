@@ -15,7 +15,7 @@ import com.azure.storage.blob.specialized.BlobInputStream;
 import com.azure.storage.blob.specialized.BlockBlobClient;
 import com.microsoft.azure.sdk.iot.service.serializers.ExportImportDeviceParser;
 import com.microsoft.azure.sdk.iot.service.serializers.StorageAuthenticationType;
-import com.microsoft.azure.sdk.iot.service.devicetwin.TwinCollection;
+import com.microsoft.azure.sdk.iot.service.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.DeviceStatus;
 import com.microsoft.azure.sdk.iot.service.ExportImportDevice;

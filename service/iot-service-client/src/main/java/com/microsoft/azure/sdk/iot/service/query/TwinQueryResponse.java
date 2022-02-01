@@ -7,7 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
+import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -87,7 +87,7 @@ public class TwinQueryResponse
             QueryPageOptions nextPageOptions =
                 QueryPageOptions.builder()
                     .continuationToken(this.continuationToken)
-                    .pageSize(pageOptions.pageSize)
+                    .pageSize(pageOptions.getPageSize())
                     .build();
 
             TwinQueryResponse nextPage = this.queryClient.queryTwins(this.originalQuery, nextPageOptions);

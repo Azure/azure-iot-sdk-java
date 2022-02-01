@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.service.serializers;
 
-import com.microsoft.azure.sdk.iot.service.devicetwin.TwinCollection;
+import com.microsoft.azure.sdk.iot.service.twin.TwinCollection;
 import org.junit.Test;
 
 import java.security.NoSuchAlgorithmException;

@@ -6,7 +6,7 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.twin;
 
 import com.google.gson.JsonParser;
-import com.microsoft.azure.sdk.iot.service.devicetwin.TwinCollection;
+import com.microsoft.azure.sdk.iot.service.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
 import com.microsoft.azure.sdk.iot.device.twin.TwinPropertiesCallback;
@@ -15,7 +15,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
+import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -95,10 +95,10 @@ public class DesiredPropertiesTests extends TwinCommon
             testInstance.deviceUnderTest.sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.deviceUnderTest.sCDeviceForTwin.getDeviceId());
         }
 
-        Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
-        Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> tags = new HashSet<>();
-        desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(propertyKey, propertyValue));
-        tags.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(tagKey, tagValue));
+        Set<com.microsoft.azure.sdk.iot.service.twin.Pair> desiredProperties = new HashSet<>();
+        Set<com.microsoft.azure.sdk.iot.service.twin.Pair> tags = new HashSet<>();
+        desiredProperties.add(new com.microsoft.azure.sdk.iot.service.twin.Pair(propertyKey, propertyValue));
+        tags.add(new com.microsoft.azure.sdk.iot.service.twin.Pair(tagKey, tagValue));
         testInstance.deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
         testInstance.deviceUnderTest.sCDeviceForTwin.setTags(tags);
         testInstance.deviceUnderTest.sCDeviceForTwin = testInstance.twinServiceClient.replaceTwin(testInstance.deviceUnderTest.sCDeviceForTwin);
@@ -114,14 +114,14 @@ public class DesiredPropertiesTests extends TwinCommon
         }
 
         assertEquals(1, testInstance.deviceUnderTest.sCDeviceForTwin.getDesiredProperties().size());
-        com.microsoft.azure.sdk.iot.service.devicetwin.Pair actualDesiredProperty =
+        com.microsoft.azure.sdk.iot.service.twin.Pair actualDesiredProperty =
             testInstance.deviceUnderTest.sCDeviceForTwin.getDesiredProperties().iterator().next();
 
         assertEquals(propertyKey, actualDesiredProperty.getKey());
         assertEquals(propertyValue, actualDesiredProperty.getValue());
 
         assertEquals(1, testInstance.deviceUnderTest.sCDeviceForTwin.getTags().size());
-        com.microsoft.azure.sdk.iot.service.devicetwin.Pair actualTags =
+        com.microsoft.azure.sdk.iot.service.twin.Pair actualTags =
             testInstance.deviceUnderTest.sCDeviceForTwin.getTags().iterator().next();
 
         assertEquals(tagKey, actualTags.getKey());
@@ -131,8 +131,8 @@ public class DesiredPropertiesTests extends TwinCommon
         desiredProperties.clear();
         tags.clear();
 
-        desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(propertyUpdateKey, propertyUpdateValue));
-        tags.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(tagUpdateKey, tagUpdateValue));
+        desiredProperties.add(new com.microsoft.azure.sdk.iot.service.twin.Pair(propertyUpdateKey, propertyUpdateValue));
+        tags.add(new com.microsoft.azure.sdk.iot.service.twin.Pair(tagUpdateKey, tagUpdateValue));
         testInstance.deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
         testInstance.deviceUnderTest.sCDeviceForTwin.setTags(tags);
         testInstance.deviceUnderTest.sCDeviceForTwin = testInstance.twinServiceClient.replaceTwin(testInstance.deviceUnderTest.sCDeviceForTwin);
@@ -218,10 +218,10 @@ public class DesiredPropertiesTests extends TwinCommon
         testInstance.testIdentity.getClient().subscribeToTwinDesiredPropertiesAsync(desiredPropertiesCB);
         Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
-        Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
+        Set<com.microsoft.azure.sdk.iot.service.twin.Pair> desiredProperties = new HashSet<>();
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
-            desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(PROPERTY_KEY + i, updatePropertyValue));
+            desiredProperties.add(new com.microsoft.azure.sdk.iot.service.twin.Pair(PROPERTY_KEY + i, updatePropertyValue));
         }
         testInstance.deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
         testInstance.twinServiceClient.updateTwin(testInstance.deviceUnderTest.sCDeviceForTwin);
@@ -262,8 +262,8 @@ public class DesiredPropertiesTests extends TwinCommon
 
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
-            Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
-            desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(PROPERTY_KEY + i, updatePropertyValue));
+            Set<com.microsoft.azure.sdk.iot.service.twin.Pair> desiredProperties = new HashSet<>();
+            desiredProperties.add(new com.microsoft.azure.sdk.iot.service.twin.Pair(PROPERTY_KEY + i, updatePropertyValue));
             testInstance.deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
             testInstance.twinServiceClient.updateTwin(testInstance.deviceUnderTest.sCDeviceForTwin);
             Thread.sleep(DELAY_BETWEEN_OPERATIONS);
@@ -286,8 +286,8 @@ public class DesiredPropertiesTests extends TwinCommon
         testInstance.deviceUnderTest.dCDeviceForTwin.getDesiredProp().clear();
         for (int i = 0; i < MAX_DEVICES; i++)
         {
-            Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
-            desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(PROPERTY_KEY + i, PROPERTY_VALUE + i));
+            Set<com.microsoft.azure.sdk.iot.service.twin.Pair> desiredProperties = new HashSet<>();
+            desiredProperties.add(new com.microsoft.azure.sdk.iot.service.twin.Pair(PROPERTY_KEY + i, PROPERTY_VALUE + i));
             testInstance.devicesUnderTest[i].sCDeviceForTwin.setDesiredProperties(desiredProperties);
             testInstance.twinServiceClient.updateTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin);
             testInstance.devicesUnderTest[i].sCDeviceForTwin.clearTwin();
@@ -305,8 +305,8 @@ public class DesiredPropertiesTests extends TwinCommon
                 testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId());
             }
 
-            Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = testInstance.devicesUnderTest[i].sCDeviceForTwin.getDesiredProperties();
-            for (com.microsoft.azure.sdk.iot.service.devicetwin.Pair dp : desiredProperties)
+            Set<com.microsoft.azure.sdk.iot.service.twin.Pair> desiredProperties = testInstance.devicesUnderTest[i].sCDeviceForTwin.getDesiredProperties();
+            for (com.microsoft.azure.sdk.iot.service.twin.Pair dp : desiredProperties)
             {
                 dp.setValue(PROPERTY_VALUE_UPDATE + i);
             }
@@ -327,7 +327,7 @@ public class DesiredPropertiesTests extends TwinCommon
                 testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId());
             }
 
-            for (com.microsoft.azure.sdk.iot.service.devicetwin.Pair dp : testInstance.devicesUnderTest[i].sCDeviceForTwin.getDesiredProperties())
+            for (com.microsoft.azure.sdk.iot.service.twin.Pair dp : testInstance.devicesUnderTest[i].sCDeviceForTwin.getDesiredProperties())
             {
                 Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessage("Unexpected desired property key, expected " + PROPERTY_KEY + i + " but was " + dp.getKey(), testInstance.testIdentity.getClient()), PROPERTY_KEY + i, dp.getKey());
                 Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessage("Unexpected desired property value, expected " + PROPERTY_VALUE_UPDATE + i + " but was " + dp.getValue(), testInstance.testIdentity.getClient()), PROPERTY_VALUE_UPDATE + i, dp.getValue());
@@ -348,8 +348,8 @@ public class DesiredPropertiesTests extends TwinCommon
                 testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId());
             }
 
-            Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = testInstance.devicesUnderTest[i].sCDeviceForTwin.getDesiredProperties();
-            for (com.microsoft.azure.sdk.iot.service.devicetwin.Pair dp : desiredProperties)
+            Set<com.microsoft.azure.sdk.iot.service.twin.Pair> desiredProperties = testInstance.devicesUnderTest[i].sCDeviceForTwin.getDesiredProperties();
+            for (com.microsoft.azure.sdk.iot.service.twin.Pair dp : desiredProperties)
             {
                 dp.setValue(null);
             }
@@ -458,9 +458,9 @@ public class DesiredPropertiesTests extends TwinCommon
             serviceClientTwin = new Twin(testInstance.testIdentity.getClient().getConfig().getDeviceId(), testInstance.testIdentity.getClient().getConfig().getModuleId());
         }
 
-        Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
-        desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(expectedKey1, expectedValue1));
-        desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(expectedKey2, expectedValue2));
+        Set<com.microsoft.azure.sdk.iot.service.twin.Pair> desiredProperties = new HashSet<>();
+        desiredProperties.add(new com.microsoft.azure.sdk.iot.service.twin.Pair(expectedKey1, expectedValue1));
+        desiredProperties.add(new com.microsoft.azure.sdk.iot.service.twin.Pair(expectedKey2, expectedValue2));
         serviceClientTwin.setDesiredProperties(desiredProperties);
 
         testInstance.twinServiceClient.updateTwin(serviceClientTwin);
