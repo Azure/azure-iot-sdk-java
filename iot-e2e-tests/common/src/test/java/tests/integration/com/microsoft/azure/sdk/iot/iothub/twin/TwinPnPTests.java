@@ -237,7 +237,7 @@ public class TwinPnPTests extends IntegrationTest
         this.testInstance.setup();
 
         // act
-        testInstance.twinServiceClient.getTwin(testInstance.twin);
+        testInstance.twin = testInstance.twinServiceClient.getTwin(testInstance.identity.getDeviceId());
 
         // assert
         assertEquals(ModelId, testInstance.twin.getModelId());

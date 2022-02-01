@@ -973,7 +973,6 @@ public class MultiplexingClientTests extends IntegrationTest
     }
 
     private static void testReportedPropertiesFlow(DeviceClient deviceClient, TwinClient twinClientServiceClient, String expectedPropertyKey, String expectedPropertyValue) throws IOException, IotHubException, InterruptedException {
-        Twin serviceClientTwin = new Twin(deviceClient.getConfig().getDeviceId());
         String expectedReportedPropertyValue = expectedPropertyValue + "-reported";
         Set<Property> reportedProperties = new HashSet<>();
         reportedProperties.add(new Property(expectedPropertyKey, expectedReportedPropertyValue));
@@ -982,7 +981,7 @@ public class MultiplexingClientTests extends IntegrationTest
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_REPORTED_PROPERTY_ACKNOWLEDGEMENT);
 
         // Verify that the new reported property value can be seen from the service client
-        twinClientServiceClient.getTwin(serviceClientTwin);
+        Twin serviceClientTwin = twinClientServiceClient.getTwin(deviceClient.getConfig().getDeviceId());
 
         Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> retrievedReportedProperties = serviceClientTwin.getReportedProperties();
         assertEquals(1, retrievedReportedProperties.size());

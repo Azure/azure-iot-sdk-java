@@ -20,15 +20,10 @@ import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 
 import static com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest.REQUEST_ID;
@@ -40,7 +35,6 @@ import static com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest.REQ
 public class TwinClient
 {
     private int requestId = 0;
-    private final int DEFAULT_PAGE_SIZE = 100;
 
     private final TwinClientOptions options;
     private final String hostName;
@@ -153,31 +147,41 @@ public class TwinClient
     /**
      * This method retrieves device twin for the specified device.
      *
-     * @param twin The device with a valid id for which device twin is to be retrieved.
+     * @param deviceId The id of the device whose twin will be retrieved.
      * @throws IOException This exception is thrown if the IO operation failed.
      * @throws IotHubException This exception is thrown if the response verification failed.
+     * @return The retrieved twin object for the specified device.
      */
-    public void getTwin(Twin twin) throws IotHubException, IOException
+    public Twin getTwin(String deviceId) throws IotHubException, IOException
     {
-        if (twin == null || twin.getDeviceId() == null || twin.getDeviceId().length() == 0)
+        if (deviceId == null || deviceId.isEmpty())
         {
-            throw new IllegalArgumentException("Instantiate a device and set device id to be used");
+            throw new IllegalArgumentException("DeviceId must not be null or empty");
         }
 
-        URL url;
-        if ((twin.getModuleId() == null) || twin.getModuleId().length() ==0)
-        {
-            url = IotHubConnectionString.getUrlTwin(this.hostName, twin.getDeviceId());
-        }
-        else
-        {
-            url = IotHubConnectionString.getUrlModuleTwin(this.hostName, twin.getDeviceId(), twin.getModuleId());
-        }
-
-        getTwinOperation(url, twin);
+        return getTwin(IotHubConnectionString.getUrlTwin(this.hostName, deviceId));
     }
 
-    private void getTwinOperation(URL url, Twin twin) throws IotHubException, IOException
+    /**
+     * This method retrieves device twin for the specified device.
+     *
+     * @param deviceId The id of the device whose twin will be retrieved.
+     * @param moduleId The id of the module on the device whose twin will be retrieved.
+     * @throws IOException This exception is thrown if the IO operation failed.
+     * @throws IotHubException This exception is thrown if the response verification failed.
+     * @return The retrieved twin object for the specified module on the specified device.
+     */
+    public Twin getTwin(String deviceId, String moduleId) throws IotHubException, IOException
+    {
+        if (deviceId == null || deviceId.isEmpty())
+        {
+            throw new IllegalArgumentException("DeviceId must not be null or empty");
+        }
+
+        return getTwin(IotHubConnectionString.getUrlModuleTwin(this.hostName, deviceId, moduleId));
+    }
+
+    private Twin getTwin(URL url) throws IotHubException, IOException
     {
         ProxyOptions proxyOptions = options.getProxyOptions();
         Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
@@ -198,6 +202,8 @@ public class TwinClient
 
         TwinState twinState = new TwinState(twinString);
 
+        Twin twin = new Twin(twinState.getDeviceId());
+        twin.setModuleId(twinState.getModuleId());
         twin.setVersion(twinState.getVersion());
         twin.setModelId(twinState.getModelId());
         twin.setETag(twinState.getETag());
@@ -207,6 +213,7 @@ public class TwinClient
         twin.setCapabilities(twinState.getCapabilities());
         twin.setConfigurations(twinState.getConfigurations());
         twin.setConnectionState(twinState.getConnectionState());
+        return twin;
     }
 
     /**
@@ -388,8 +395,6 @@ public class TwinClient
 
         return job;
     }
-
-
 
     private String getAuthenticationToken()
     {

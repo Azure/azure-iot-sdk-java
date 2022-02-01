@@ -77,15 +77,18 @@ public class RegistryGlue
         }
         else
         {
-            WrappedTwin twin = new WrappedTwin(deviceId, moduleId);
+            Twin twin = null;
             try
             {
-                client.getTwin(twin);
+                twin = client.getTwin(deviceId, moduleId);
             } catch (IOException | IotHubException e)
             {
                 handler.handle(Future.failedFuture(e));
             }
-            handler.handle(Future.succeededFuture(twin.toJsonObject()));
+
+            WrappedTwin wrappedTwin = new WrappedTwin(twin);
+
+            handler.handle(Future.succeededFuture(wrappedTwin.toJsonObject()));
         }
     }
 

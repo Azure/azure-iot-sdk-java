@@ -338,7 +338,15 @@ public class TwinCommon extends IntegrationTest
                 deviceState.sCDeviceForTwin = new Twin(deviceState.sCDeviceForRegistryManager.getDeviceId(), deviceState.sCModuleForRegistryManager.getId());
             }
 
-            testInstance.twinServiceClient.getTwin(deviceState.sCDeviceForTwin);
+            if (testInstance.testIdentity instanceof TestModuleIdentity)
+            {
+                deviceState.sCDeviceForTwin = testInstance.twinServiceClient.getTwin(deviceState.sCDeviceForTwin.getDeviceId(), deviceState.sCDeviceForTwin.getModuleId());
+            }
+            else
+            {
+                deviceState.sCDeviceForTwin = testInstance.twinServiceClient.getTwin(deviceState.sCDeviceForTwin.getDeviceId());
+            }
+
             Thread.sleep(DELAY_BETWEEN_OPERATIONS);
         }
     }
@@ -447,7 +455,16 @@ public class TwinCommon extends IntegrationTest
             }
 
             actualCount = 0;
-            testInstance.twinServiceClient.getTwin(deviceState.sCDeviceForTwin);
+
+            if (testInstance.testIdentity instanceof TestModuleIdentity)
+            {
+                deviceState.sCDeviceForTwin = testInstance.twinServiceClient.getTwin(deviceState.sCDeviceForTwin.getDeviceId(), deviceState.sCDeviceForTwin.getModuleId());
+            }
+            else
+            {
+                deviceState.sCDeviceForTwin = testInstance.twinServiceClient.getTwin(deviceState.sCDeviceForTwin.getDeviceId());
+            }
+
             Set<Pair> repProperties = deviceState.sCDeviceForTwin.getReportedProperties();
 
             for (Pair p : repProperties)
@@ -480,7 +497,16 @@ public class TwinCommon extends IntegrationTest
             }
 
             actualCount = 0;
-            testInstance.twinServiceClient.getTwin(deviceState.sCDeviceForTwin);
+
+            if (testInstance.testIdentity instanceof TestModuleIdentity)
+            {
+                deviceState.sCDeviceForTwin = testInstance.twinServiceClient.getTwin(deviceState.sCDeviceForTwin.getDeviceId(), deviceState.sCDeviceForTwin.getModuleId());
+            }
+            else
+            {
+                deviceState.sCDeviceForTwin = testInstance.twinServiceClient.getTwin(deviceState.sCDeviceForTwin.getDeviceId());
+            }
+
             Set<Pair> repProperties = deviceState.sCDeviceForTwin.getReportedProperties();
 
             for (Pair p : repProperties)

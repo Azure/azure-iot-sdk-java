@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestModuleIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.TwinCommon;
@@ -72,7 +73,15 @@ public class TwinTagsTests extends TwinCommon
         // Update Tags and desired properties on multiple devices
         for (int i = 0; i < MAX_DEVICES; i++)
         {
-            testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin);
+            if (testInstance.testIdentity instanceof TestModuleIdentity)
+            {
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId(), testInstance.devicesUnderTest[i].sCDeviceForTwin.getModuleId());
+            }
+            else
+            {
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId());
+            }
+
             Set<Pair> tags = testInstance.devicesUnderTest[i].sCDeviceForTwin.getTags();
             for (Pair tag : tags)
             {
@@ -94,7 +103,14 @@ public class TwinTagsTests extends TwinCommon
         // Read updates on multiple devices
         for (int i = 0; i < MAX_DEVICES; i++)
         {
-            testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin);
+            if (testInstance.testIdentity instanceof TestModuleIdentity)
+            {
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId(), testInstance.devicesUnderTest[i].sCDeviceForTwin.getModuleId());
+            }
+            else
+            {
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId());
+            }
 
             for (Pair t : testInstance.devicesUnderTest[i].sCDeviceForTwin.getTags())
             {
@@ -132,7 +148,15 @@ public class TwinTagsTests extends TwinCommon
         // Read updates on multiple devices
         for (int i = 0; i < MAX_DEVICES; i++)
         {
-            testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin);
+            if (testInstance.testIdentity instanceof TestModuleIdentity)
+            {
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId(), testInstance.devicesUnderTest[i].sCDeviceForTwin.getModuleId());
+            }
+            else
+            {
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId());
+            }
+
             Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
             for (Pair t : testInstance.devicesUnderTest[i].sCDeviceForTwin.getTags())
@@ -162,7 +186,15 @@ public class TwinTagsTests extends TwinCommon
         // Update Tags on multiple devices
         for (int i = 0; i < MAX_DEVICES; i++)
         {
-            testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin);
+            if (testInstance.testIdentity instanceof TestModuleIdentity)
+            {
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId(), testInstance.devicesUnderTest[i].sCDeviceForTwin.getModuleId());
+            }
+            else
+            {
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId());
+            }
+
             Set<Pair> tags = testInstance.devicesUnderTest[i].sCDeviceForTwin.getTags();
             for (Pair tag : tags)
             {
@@ -176,7 +208,14 @@ public class TwinTagsTests extends TwinCommon
         // Read updates on multiple devices
         for (int i = 0; i < MAX_DEVICES; i++)
         {
-            testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin);
+            if (testInstance.testIdentity instanceof TestModuleIdentity)
+            {
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId(), testInstance.devicesUnderTest[i].sCDeviceForTwin.getModuleId());
+            }
+            else
+            {
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId());
+            }
 
             for (Pair t : testInstance.devicesUnderTest[i].sCDeviceForTwin.getTags())
             {
@@ -188,7 +227,15 @@ public class TwinTagsTests extends TwinCommon
         // Delete tags
         for (int i = 0; i < MAX_DEVICES; i++)
         {
-            testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin);
+            if (testInstance.testIdentity instanceof TestModuleIdentity)
+            {
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId(), testInstance.devicesUnderTest[i].sCDeviceForTwin.getModuleId());
+            }
+            else
+            {
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId());
+            }
+
             Set<Pair> tags = testInstance.devicesUnderTest[i].sCDeviceForTwin.getTags();
             for (Pair tag : tags)
             {
@@ -202,7 +249,14 @@ public class TwinTagsTests extends TwinCommon
         // Verify tags were deleted successfully
         for (int i = 0; i < MAX_DEVICES; i++)
         {
-            testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin);
+            if (testInstance.testIdentity instanceof TestModuleIdentity)
+            {
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId(), testInstance.devicesUnderTest[i].sCDeviceForTwin.getModuleId());
+            }
+            else
+            {
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId());
+            }
 
             assertEquals(buildExceptionMessage("Tags were not deleted by being set null", testInstance.testIdentity.getClient()), 0, testInstance.devicesUnderTest[i].sCDeviceForTwin.getTags().size());
         }

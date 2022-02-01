@@ -444,10 +444,10 @@ public class ProvisioningCommon extends IntegrationTest
 
         boolean deviceFoundInCorrectHub = false;
         long startTime = System.currentTimeMillis();
-        Twin twin = new Twin(testInstance.provisionedDeviceId);
+        Twin twin = new Twin();
         while (!deviceFoundInCorrectHub)
         {
-            twinClient.getTwin(twin);
+            twin = twinClient.getTwin(testInstance.provisionedDeviceId);
             deviceFoundInCorrectHub = twin.getCapabilities() != null;
 
             Thread.sleep(3000);

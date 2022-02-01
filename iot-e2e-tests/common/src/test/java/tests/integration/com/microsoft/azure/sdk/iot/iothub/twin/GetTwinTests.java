@@ -18,6 +18,8 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Assume;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -50,6 +52,15 @@ public class GetTwinTests extends TwinCommon
         super(protocol, authenticationType, clientType);
     }
 
+    @Before
+    public void setup()
+    {
+        // this class primarily tests the twin service client, so no need to parameterize on most device side options
+        Assume.assumeTrue(
+            testInstance.protocol == IotHubClientProtocol.MQTT
+                && testInstance.authenticationType == AuthenticationType.SAS);
+    }
+
     @Test
     @StandardTierHubOnlyTest
     public void testGetDeviceTwinWithConnectionString() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
@@ -71,14 +82,6 @@ public class GetTwinTests extends TwinCommon
     @StandardTierHubOnlyTest
     public void serviceClientTokenRenewalWithAzureSasCredential() throws Exception
     {
-        if (testInstance.protocol != IotHubClientProtocol.AMQPS
-            || testInstance.clientType != ClientType.DEVICE_CLIENT
-            || testInstance.authenticationType != AuthenticationType.SAS)
-        {
-            // This test is for the service client, so no need to rerun it for all the different client types or device protocols
-            return;
-        }
-
         super.setUpNewDeviceAndModule();
 
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);

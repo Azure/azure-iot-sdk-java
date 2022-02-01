@@ -243,17 +243,13 @@ public class TwinClientTest
         new Expectations()
         {
             {
-                mockedDevice.getDeviceId();
-                result = "SomeDevID";
-                mockedDevice.getModuleId();
-                result = "SomeModuleID";
                 new TwinState((String)any);
                 result = mockedTwinState;
             }
         };
 
         //act
-        testTwin.getTwin(mockedDevice);
+        testTwin.getTwin("SomeDevID", "SomeModuleID");
 
         //assert
         new Verifications()
@@ -312,16 +308,9 @@ public class TwinClientTest
         //arrange
         final String connectionString = "testString";
         TwinClient testTwin = new TwinClient(connectionString);
-        new NonStrictExpectations()
-        {
-            {
-                mockedDevice.getDeviceId();
-                result = "";
-            }
-        };
 
         //act
-        testTwin.getTwin(mockedDevice);
+        testTwin.getTwin("");
     }
 
     /*
@@ -333,16 +322,9 @@ public class TwinClientTest
         //arrange
         final String connectionString = "testString";
         TwinClient testTwin = new TwinClient(connectionString);
-        new NonStrictExpectations()
-        {
-            {
-                mockedDevice.getDeviceId();
-                result = null;
-            }
-        };
 
         //act
-        testTwin.getTwin(mockedDevice);
+        testTwin.getTwin(null);
     }
 
     /*
@@ -355,18 +337,9 @@ public class TwinClientTest
         final String connectionString = "testString";
         constructorExpectations(connectionString);
         TwinClient testTwin = new TwinClient(connectionString);
-        new NonStrictExpectations()
-        {
-            {
-                mockedDevice.getDeviceId();
-                result = "somedeviceId";
-                mockedDevice.getModuleId();
-                result = "";
-            }
-        };
 
         //act
-        testTwin.getTwin(mockedDevice);
+        testTwin.getTwin("somedeviceId", "");
 
         //assert
         new Verifications()
@@ -388,18 +361,9 @@ public class TwinClientTest
         final String connectionString = "testString";
         constructorExpectations(connectionString);
         TwinClient testTwin = new TwinClient(connectionString);
-        new NonStrictExpectations()
-        {
-            {
-                mockedDevice.getDeviceId();
-                result = "somedeviceId";
-                mockedDevice.getModuleId();
-                result = null;
-            }
-        };
 
         //act
-        testTwin.getTwin(mockedDevice);
+        testTwin.getTwin("somedeviceId", null);
 
         //assert
         new Verifications()
@@ -421,18 +385,9 @@ public class TwinClientTest
         final String connectionString = "testString";
         constructorExpectations(connectionString);
         TwinClient testTwin = new TwinClient(connectionString);
-        new NonStrictExpectations()
-        {
-            {
-                mockedDevice.getDeviceId();
-                result = "somedeviceId";
-                mockedDevice.getModuleId();
-                result = "somemoduleId";
-            }
-        };
 
         //act
-        testTwin.getTwin(mockedDevice);
+        testTwin.getTwin("somedeviceId", "somemoduleId");
 
         //assert
         new Verifications()

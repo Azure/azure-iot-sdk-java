@@ -117,12 +117,11 @@ public class RoleBasedAuthenticationSample
         // rather than symmetric key based authentication that comes with constructors that take connection strings.
         TwinClient twinClient = new TwinClient(iotHubHostName, credential, options);
 
-        Twin newDeviceTwin = new Twin(deviceId);
-
+        Twin newDeviceTwin = null;
         try
         {
             System.out.println("Getting twin for device " + deviceId);
-            twinClient.getTwin(newDeviceTwin);
+            newDeviceTwin = twinClient.getTwin(deviceId);
         }
         catch (IotHubException | IOException e)
         {
