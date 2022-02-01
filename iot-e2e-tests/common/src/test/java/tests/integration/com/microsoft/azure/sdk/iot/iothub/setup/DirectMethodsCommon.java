@@ -62,8 +62,8 @@ public class DirectMethodsCommon extends IntegrationTest
 
     protected static String iotHubConnectionString = "";
 
-    protected static final Long RESPONSE_TIMEOUT = TimeUnit.SECONDS.toSeconds(200);
-    protected static final Long CONNECTION_TIMEOUT = TimeUnit.SECONDS.toSeconds(5);
+    protected static final int RESPONSE_TIMEOUT = 200;
+    protected static final int CONNECTION_TIMEOUT = 5;
     protected static final String PAYLOAD_STRING = "This is a valid payload";
 
     // How much to wait until a message makes it to the server, in milliseconds

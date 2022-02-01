@@ -5,6 +5,7 @@ package com.microsoft.azure.sdk.iot.service.serializers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.microsoft.azure.sdk.iot.service.jobs.JobsStatisticsParser;
 import org.junit.Test;
 
 import java.text.ParseException;

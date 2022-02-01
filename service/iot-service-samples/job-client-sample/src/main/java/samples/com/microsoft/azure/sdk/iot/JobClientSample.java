@@ -4,6 +4,7 @@
  */
 package samples.com.microsoft.azure.sdk.iot;
 
+import com.microsoft.azure.sdk.iot.service.jobs.ScheduleDirectMethodOptions;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.twin.Pair;
 import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
@@ -40,8 +41,8 @@ public class JobClientSample
      */
     private static final String jobIdMethod = "DHCMD" + UUID.randomUUID();
     private static final String methodName = "reboot";
-    private static final Long responseTimeout = TimeUnit.SECONDS.toSeconds(200);
-    private static final Long connectTimeout = TimeUnit.SECONDS.toSeconds(5);
+    private static final int responseTimeout = 200;
+    private static final int connectTimeout = 5;
     private static final Map<String, Object> payload = new HashMap<String, Object>()
     {
         {
@@ -50,7 +51,7 @@ public class JobClientSample
         }
     };
     private static final Date startTimeUtc = new Date();
-    private static final long maxExecutionTimeInSeconds = 100;
+    private static final int maxExecutionTimeInSeconds = 100;
 
     public static void main(String[] args) throws Exception
     {
@@ -132,7 +133,23 @@ public class JobClientSample
         final String queryCondition = "DeviceId IN ['" + deviceId + "']";
 
         System.out.println("Schedule method job " + jobIdMethod + " for device " + deviceId + "...");
-        JobResult jobResultMethod = jobClient.scheduleDirectMethod(jobIdMethod, queryCondition, methodName, responseTimeout, connectTimeout, payload, startTimeUtc, maxExecutionTimeInSeconds);
+
+        ScheduleDirectMethodOptions options =
+            ScheduleDirectMethodOptions.builder()
+                .payload(payload)
+                .methodConnectTimeout(connectTimeout)
+                .methodResponseTimeout(responseTimeout)
+                .maxExecutionTimeInSeconds(maxExecutionTimeInSeconds)
+                .build();
+
+        JobResult jobResultMethod =
+            jobClient.scheduleDirectMethod(
+                jobIdMethod,
+                queryCondition,
+                methodName,
+                startTimeUtc,
+                options);
+
         if(jobResultMethod == null)
         {
             throw new IOException("Schedule method Job returns null");

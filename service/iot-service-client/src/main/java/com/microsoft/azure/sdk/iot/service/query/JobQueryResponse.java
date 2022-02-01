@@ -106,7 +106,7 @@ public class JobQueryResponse //TODO probably need to split this in two since on
             QueryPageOptions nextPageOptions =
                 QueryPageOptions.builder()
                     .continuationToken(this.continuationToken)
-                    .pageSize(pageOptions.pageSize)
+                    .pageSize(pageOptions.getPageSize())
                     .build();
 
             JobQueryResponse nextPage;

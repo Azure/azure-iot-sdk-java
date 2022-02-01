@@ -182,8 +182,8 @@ public class TokenCredentialTests
         MethodResult result = methodServiceClient.invoke(
             device.getDeviceId(),
             "someMethod",
-            5l,
-            5l,
+            5,
+            5,
             null);
 
         assertEquals((long) successStatusCode, (long) result.getStatus());

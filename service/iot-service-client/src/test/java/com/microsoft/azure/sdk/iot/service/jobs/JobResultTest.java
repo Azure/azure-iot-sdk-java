@@ -368,7 +368,7 @@ public class JobResultTest
         final int methodReturnStatus = 200;
         final Date now = new Date();
 
-        MethodParser methodParser = new MethodParser("methodName", null, null, new TwinCollection());
+        MethodParser methodParser = new MethodParser("methodName", 0, 0, new TwinCollection());
 
         JobsResponseParserExpectations(json, null, methodParser, now, mockedMethodParser, "scheduleUpdateTwin");
         new NonStrictExpectations()
@@ -423,7 +423,7 @@ public class JobResultTest
         final String json = "validJson";
         final Date now = new Date();
 
-        MethodParser methodParser = new MethodParser("methodName", null, null, new TwinCollection());
+        MethodParser methodParser = new MethodParser("methodName", 0, 0, new TwinCollection());
 
         JobsResponseParserExpectations(json, null, methodParser, now, mockedMethodParser, "scheduleUpdateTwin");
         new NonStrictExpectations()

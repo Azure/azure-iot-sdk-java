@@ -78,7 +78,7 @@ public class RawQueryResponse
             QueryPageOptions nextPageOptions =
                 QueryPageOptions.builder()
                     .continuationToken(this.continuationToken)
-                    .pageSize(pageOptions.pageSize)
+                    .pageSize(pageOptions.getPageSize())
                     .build();
 
             RawQueryResponse nextPage = this.queryClient.queryRaw(this.originalQuery, nextPageOptions);

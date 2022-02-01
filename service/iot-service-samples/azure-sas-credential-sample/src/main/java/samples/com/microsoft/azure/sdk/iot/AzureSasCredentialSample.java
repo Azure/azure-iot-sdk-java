@@ -287,8 +287,8 @@ public class AzureSasCredentialSample
             directMethodsClient.invoke(
                 deviceId,
                 "someMethodName",
-                5L,
-                2L,
+                5,
+                2,
                 "Some method invocation payload");
         }
         catch (IotHubException e)

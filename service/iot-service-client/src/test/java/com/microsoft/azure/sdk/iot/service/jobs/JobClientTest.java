@@ -844,7 +844,7 @@ public class JobClientTest
         }
 
         //act
-        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc);
     }
 
     /* Tests_SRS_JOBCLIENT_21_014: [If the JobId is null, empty, or invalid, the scheduleDirectMethod shall throws IllegalArgumentException.] */
@@ -870,7 +870,7 @@ public class JobClientTest
         }
 
         //act
-        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc);
     }
 
     /* Tests_SRS_JOBCLIENT_21_014: [If the JobId is null, empty, or invalid, the scheduleDirectMethod shall throws IllegalArgumentException.] */
@@ -894,7 +894,7 @@ public class JobClientTest
                 IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                new MethodParser(methodName, null, null, payload);
+                new MethodParser(methodName, anyInt, anyInt, payload);
                 result = mockedMethodParser;
 
                 new JobsParser(jobId, mockedMethodParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
@@ -918,7 +918,7 @@ public class JobClientTest
         }
 
         //act
-        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc);
     }
 
     /* Tests_SRS_JOBCLIENT_21_015: [If the methodName is null or empty, the scheduleDirectMethod shall throws IllegalArgumentException.] */
@@ -945,7 +945,7 @@ public class JobClientTest
         }
 
         //act
-        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc);
     }
 
     /* Tests_SRS_JOBCLIENT_21_015: [If the methodName is null or empty, the scheduleDirectMethod shall throws IllegalArgumentException.] */
@@ -971,7 +971,7 @@ public class JobClientTest
         }
 
         //act
-        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc);
     }
 
     /* Tests_SRS_JOBCLIENT_21_015: [If the methodName is null or empty, the scheduleDirectMethod shall throws IllegalArgumentException.] */
@@ -990,7 +990,7 @@ public class JobClientTest
         new NonStrictExpectations()
         {
             {
-                new MethodParser(methodName, null, null, payload);
+                new MethodParser(methodName, anyInt, anyInt, payload);
                 result = new IllegalArgumentException();
             }
         };
@@ -1005,7 +1005,7 @@ public class JobClientTest
         }
 
         //act
-        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc);
     }
 
     /* Tests_SRS_JOBCLIENT_21_016: [If the startTimeUtc is null, the scheduleDirectMethod shall throws IllegalArgumentException.] */
@@ -1031,7 +1031,7 @@ public class JobClientTest
         }
 
         //act
-        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc);
     }
 
     /* Tests_SRS_JOBCLIENT_21_017: [If the maxExecutionTimeInSeconds is negative, the scheduleDirectMethod shall throws IllegalArgumentException.] */
@@ -1057,7 +1057,7 @@ public class JobClientTest
         }
 
         //act
-        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc);
     }
 
     /* Tests_SRS_JOBCLIENT_21_018: [The scheduleDirectMethod shall create a json String that represent the invoke method job using the JobsParser class.] */
@@ -1081,7 +1081,7 @@ public class JobClientTest
                 IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                new MethodParser(methodName, null, null, payload);
+                new MethodParser(methodName, anyInt, anyInt, payload);
                 result = mockedMethodParser;
 
                 new JobsParser(jobId, mockedMethodParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
@@ -1107,7 +1107,7 @@ public class JobClientTest
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        JobResult jobResult = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        JobResult jobResult = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc);
     }
 
     /* Tests_SRS_JOBCLIENT_21_019: [The scheduleDirectMethod shall create a URL for Jobs using the iotHubConnectionString.] */
@@ -1130,7 +1130,7 @@ public class JobClientTest
                 IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                new MethodParser(methodName, null, null, payload);
+                new MethodParser(methodName, anyInt, anyInt, payload);
                 result = mockedMethodParser;
 
                 new JobsParser(jobId, mockedMethodParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
@@ -1156,7 +1156,7 @@ public class JobClientTest
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        JobResult jobResult = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        JobResult jobResult = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc);
 
         //assert
         new Verifications()
@@ -1188,7 +1188,7 @@ public class JobClientTest
                 IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                new MethodParser(methodName, null, null, payload);
+                new MethodParser(methodName, anyInt, anyInt, payload);
                 result = mockedMethodParser;
 
                 new JobsParser(jobId, mockedMethodParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
@@ -1214,7 +1214,7 @@ public class JobClientTest
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc);
     }
 
     /* Tests_SRS_JOBCLIENT_21_021: [If the scheduleDirectMethod failed to send a PUT request, it shall throw IOException.] */
@@ -1238,7 +1238,7 @@ public class JobClientTest
                 IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                new MethodParser(methodName, null, null, payload);
+                new MethodParser(methodName, anyInt, anyInt, payload);
                 result = mockedMethodParser;
 
                 new JobsParser(jobId, mockedMethodParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
@@ -1258,7 +1258,7 @@ public class JobClientTest
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc);
     }
 
     /* Tests_SRS_JOBCLIENT_21_023: [The scheduleDirectMethod shall parse the iothub response and return it as JobResult.] */
@@ -1281,7 +1281,7 @@ public class JobClientTest
                 IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                new MethodParser(methodName, null, null, payload);
+                new MethodParser(methodName, anyInt, anyInt, payload);
                 result = mockedMethodParser;
 
                 new JobsParser(jobId, mockedMethodParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
@@ -1307,7 +1307,7 @@ public class JobClientTest
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        JobResult jobResult = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        JobResult jobResult = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc);
 
         //assert
         assertNotNull(jobResult);

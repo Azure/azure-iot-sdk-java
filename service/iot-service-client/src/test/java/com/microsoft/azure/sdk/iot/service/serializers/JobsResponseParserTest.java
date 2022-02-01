@@ -5,6 +5,8 @@ package com.microsoft.azure.sdk.iot.service.serializers;
 
 import com.google.gson.JsonParseException;
 import com.microsoft.azure.sdk.iot.service.Helpers;
+import com.microsoft.azure.sdk.iot.service.jobs.JobQueryResponseError;
+import com.microsoft.azure.sdk.iot.service.jobs.JobsResponseParser;
 import mockit.Deencapsulation;
 import org.junit.Test;
 

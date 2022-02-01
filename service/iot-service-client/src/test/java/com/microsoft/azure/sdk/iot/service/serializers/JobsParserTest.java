@@ -24,8 +24,8 @@ public class JobsParserTest
     private MethodParser makeMethodSample()
     {
         String methodName = "testMethodName";
-        Long responseTimeout = 100L;
-        Long connectTimeout = 5L;
+        int responseTimeout = 100;
+        int connectTimeout = 5;
         Object payload = "{\"testPayload\":\"Success\"}";
 
         return new MethodParser(methodName, responseTimeout, connectTimeout, payload);

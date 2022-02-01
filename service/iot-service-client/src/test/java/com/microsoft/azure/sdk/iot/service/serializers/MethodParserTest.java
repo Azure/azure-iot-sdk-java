@@ -33,8 +33,8 @@ public class MethodParserTest
     private static final String ILLEGAL_STRING_DOLLAR = "illegal$key";
     private static final String ILLEGAL_STRING_INJECTION = "illegal\",key";
     private static final String STANDARD_NAME = "validName";
-    private static final long STANDARD_TIMEOUT = TimeUnit.SECONDS.toSeconds(20);
-    private static final long ILLEGAL_NEGATIVE_TIMEOUT = TimeUnit.SECONDS.toSeconds(-20);
+    private static final int STANDARD_TIMEOUT = 20;
+    private static final int ILLEGAL_NEGATIVE_TIMEOUT = -20;
     private static final Map<String, Object> PAYLOAD_MAP = new HashMap<String, Object>()
     {{
         put("string", "STRING");
@@ -103,8 +103,8 @@ public class MethodParserTest
     {
 
         String name;
-        Long responseTimeout;
-        Long connectTimeout;
+        int responseTimeout;
+        int connectTimeout;
         Object payload;
 
         String json;
@@ -125,8 +125,8 @@ public class MethodParserTest
     private static void assertMethod(
             MethodParser methodParser,
             String expectedName,
-            Long expectedResponseTimeout,
-            Long expectedConnectTimeout,
+            int expectedResponseTimeout,
+            int expectedConnectTimeout,
             Integer expectedStatus,
             Object expectedPayload,
             String expectedOperation
@@ -135,8 +135,8 @@ public class MethodParserTest
         assertNotNull(methodParser);
 
         String actualName = Deencapsulation.getField(methodParser, "name");
-        Long actualResponseTimeout = Deencapsulation.getField(methodParser, "responseTimeout");
-        Long actualConnectTimeout = Deencapsulation.getField(methodParser, "connectTimeout");
+        int actualResponseTimeout = Deencapsulation.getField(methodParser, "responseTimeout");
+        int actualConnectTimeout = Deencapsulation.getField(methodParser, "connectTimeout");
         Integer actualStatus = Deencapsulation.getField(methodParser, "status");
         Object actualPayload = Deencapsulation.getField(methodParser, "payload");
         Object actualOperation = Deencapsulation.getField(methodParser, "operation");
@@ -144,6 +144,50 @@ public class MethodParserTest
         assertEquals(actualName, expectedName);
         assertEquals(actualResponseTimeout, expectedResponseTimeout);
         assertEquals(actualConnectTimeout, expectedConnectTimeout);
+        assertEquals(actualStatus, expectedStatus);
+        assertEquals(actualOperation.toString(), expectedOperation);
+        if (expectedPayload instanceof Number)
+        {
+            assertEquals(((Number) expectedPayload).doubleValue(), ((Number) actualPayload).doubleValue(), 1e-10);
+        }
+        else if (expectedPayload instanceof List)
+        {
+            Helpers.assertListEquals((List) expectedPayload, (List) actualPayload);
+        }
+        else if (actualPayload instanceof Map)
+        {
+            Helpers.assertMap((Map) expectedPayload, (Map) actualPayload);
+        }
+        else
+        {
+            assertEquals(expectedPayload, actualPayload);
+        }
+    }
+
+    /**
+     * Test helper, will throw if one of the parameters (name, responseTimeout, connectTimeout, or payload) do not fits the ones in the `method`.
+     *
+     * @param methodParser            is the actually method
+     * @param expectedName            is the expected name in the actually method
+     * @param expectedPayload         is an object with all expected parameters in the actually method.
+     * @param expectedOperation       is the expected operation type.
+     */
+    private static void assertMethod(
+        MethodParser methodParser,
+        String expectedName,
+        Integer expectedStatus,
+        Object expectedPayload,
+        String expectedOperation
+    )
+    {
+        assertNotNull(methodParser);
+
+        String actualName = Deencapsulation.getField(methodParser, "name");
+        Integer actualStatus = Deencapsulation.getField(methodParser, "status");
+        Object actualPayload = Deencapsulation.getField(methodParser, "payload");
+        Object actualOperation = Deencapsulation.getField(methodParser, "operation");
+
+        assertEquals(actualName, expectedName);
         assertEquals(actualStatus, expectedStatus);
         assertEquals(actualOperation.toString(), expectedOperation);
         if (expectedPayload instanceof Number)
@@ -176,8 +220,7 @@ public class MethodParserTest
         MethodParser methodParser = new MethodParser();
 
         // Assert
-        assertMethod(methodParser, null, null, null,
-                     null, null, "none"
+        assertMethod(methodParser, null, null, null, "none"
         );
     }
 
@@ -242,8 +285,7 @@ public class MethodParserTest
             MethodParser methodParser = new MethodParser(testCase.payload);
 
             // Assert
-            assertMethod(methodParser, null, null, null,
-                         null, testCase.payload, "payload"
+            assertMethod(methodParser, null, null, testCase.payload, "payload"
             );
             String json = methodParser.toJson();
             Helpers.assertJson(testCase.json, json);
@@ -274,8 +316,7 @@ public class MethodParserTest
             methodParser.fromJson(testCase.json);
 
             // Assert
-            assertMethod(methodParser, null, null, null,
-                         null, testCase.payload, "payload"
+            assertMethod(methodParser, null, null, testCase.payload, "payload"
             );
         }
     }
@@ -302,8 +343,7 @@ public class MethodParserTest
             methodParser.fromJson(testCase.jsonResult);
 
             // Assert
-            assertMethod(methodParser, null, null, null,
-                         testCase.status, testCase.payload, "response"
+            assertMethod(methodParser, null, testCase.status, testCase.payload, "response"
             );
         }
     }
@@ -490,8 +530,8 @@ public class MethodParserTest
     @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
     private static TestMethod createMethodRequestWithTimeout(
             String methodName,
-            long responseTimeOut,
-            long connectTimeout,
+            int responseTimeOut,
+            int connectTimeout,
             String value,
             boolean wrapValue,
             Object expected
@@ -529,7 +569,7 @@ public class MethodParserTest
     @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
     private static TestMethod createMethodRequestWithResponseTimeout(
             String methodName,
-            long responseTimeOut,
+            int responseTimeOut,
             String payload,
             boolean wrapPayloadAsString,
             Object expectedPayload
@@ -551,7 +591,7 @@ public class MethodParserTest
     @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
     private static TestMethod createMethodRequestWithConnectTimeout(
             String methodName,
-            long connectTimeout,
+            int connectTimeout,
             String payload,
             boolean wrapPayloadAsString,
             Object expectedPayload

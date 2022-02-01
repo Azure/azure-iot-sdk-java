@@ -317,11 +317,11 @@ public class QueryClient
         httpRequest.setConnectTimeoutMillis(this.options.getHttpConnectTimeout());
         httpRequest.setReadTimeoutMillis(this.options.getHttpReadTimeout());
 
-        if (options.continuationToken != null)
+        if (options.getContinuationToken() != null)
         {
-            httpRequest.setHeaderField(CONTINUATION_TOKEN_KEY, options.continuationToken);
+            httpRequest.setHeaderField(CONTINUATION_TOKEN_KEY, options.getContinuationToken());
         }
 
-        httpRequest.setHeaderField(PAGE_SIZE_KEY, String.valueOf(options.pageSize));
+        httpRequest.setHeaderField(PAGE_SIZE_KEY, String.valueOf(options.getPageSize()));
     }
 }

@@ -7,6 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 
 import com.azure.core.credential.AzureSasCredential;
+import com.microsoft.azure.sdk.iot.service.jobs.ScheduleDirectMethodOptions;
 import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
@@ -84,8 +85,8 @@ public class JobClientTests extends IntegrationTest
     private static final String JOB_ID_NAME = "JobTest";
 
     private static final long MAX_TIME_WAIT_FOR_PREVIOUSLY_SCHEDULED_JOBS_TO_FINISH_IN_MILLIS = 6 * 60 * 1000; // 6 minutes
-    private static final long RESPONSE_TIMEOUT = TimeUnit.SECONDS.toSeconds(120);
-    private static final long CONNECTION_TIMEOUT = TimeUnit.SECONDS.toSeconds(5);
+    private static final int RESPONSE_TIMEOUT = 120;
+    private static final int CONNECTION_TIMEOUT = 5;
     private static final long TEST_TIMEOUT_MILLISECONDS = 7 * 60 * 1000L; // 7 minutes
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS = 200; // 0.2 sec
     private static final String PAYLOAD_STRING = "This is a valid payload";
@@ -95,7 +96,7 @@ public class JobClientTests extends IntegrationTest
     private static Device testDevice;
 
     private static final int MAX_NUMBER_JOBS = 3;
-    private static final long MAX_EXECUTION_TIME_IN_SECONDS = 15;
+    private static final int MAX_EXECUTION_TIME_IN_SECONDS = 15;
 
     @BeforeClass
     public static void setUp() throws IOException, IotHubException, InterruptedException, URISyntaxException
@@ -237,10 +238,15 @@ public class JobClientTests extends IntegrationTest
                 jobIdsPending.add(jobId);
                 try
                 {
-                    jobClient.scheduleDirectMethod(
-                        jobId, queryCondition,
-                        DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING,
-                        new Date(), MAX_EXECUTION_TIME_IN_SECONDS);
+                    ScheduleDirectMethodOptions options =
+                        ScheduleDirectMethodOptions.builder()
+                            .payload(PAYLOAD_STRING)
+                            .methodConnectTimeout(CONNECTION_TIMEOUT)
+                            .methodResponseTimeout(RESPONSE_TIMEOUT)
+                            .maxExecutionTimeInSeconds(MAX_EXECUTION_TIME_IN_SECONDS)
+                            .build();
+
+                    jobClient.scheduleDirectMethod(jobId, queryCondition, DeviceEmulator.METHOD_LOOPBACK, new Date(), options);
 
                     JobResult jobResult = jobClient.getJob(jobId);
                     while (jobResult.getJobStatus() != JobStatus.completed)
@@ -346,15 +352,15 @@ public class JobClientTests extends IntegrationTest
 
         // Act
         String jobId = JOB_ID_NAME + UUID.randomUUID();
-        jobClient.scheduleDirectMethod(
-            jobId,
-            queryCondition,
-            DeviceEmulator.METHOD_LOOPBACK,
-            RESPONSE_TIMEOUT,
-            CONNECTION_TIMEOUT,
-            PAYLOAD_STRING,
-            new Date(),
-            MAX_EXECUTION_TIME_IN_SECONDS);
+        ScheduleDirectMethodOptions options =
+            ScheduleDirectMethodOptions.builder()
+                .payload(PAYLOAD_STRING)
+                .methodConnectTimeout(CONNECTION_TIMEOUT)
+                .methodResponseTimeout(RESPONSE_TIMEOUT)
+                .maxExecutionTimeInSeconds(MAX_EXECUTION_TIME_IN_SECONDS)
+                .build();
+
+        jobClient.scheduleDirectMethod(jobId, queryCondition, DeviceEmulator.METHOD_LOOPBACK, new Date(), options);
 
         JobResult jobResult = jobClient.getJob(jobId);
         while (jobResult.getJobStatus() != JobStatus.completed)
@@ -415,10 +421,15 @@ public class JobClientTests extends IntegrationTest
                 {
                     if (index % 2 == 0)
                     {
-                        jobClient.scheduleDirectMethod(
-                            jobId, queryCondition,
-                            DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING,
-                            future, MAX_EXECUTION_TIME_IN_SECONDS);
+                        ScheduleDirectMethodOptions options =
+                            ScheduleDirectMethodOptions.builder()
+                                .payload(PAYLOAD_STRING)
+                                .methodConnectTimeout(CONNECTION_TIMEOUT)
+                                .methodResponseTimeout(RESPONSE_TIMEOUT)
+                                .maxExecutionTimeInSeconds(MAX_EXECUTION_TIME_IN_SECONDS)
+                                .build();
+
+                        jobClient.scheduleDirectMethod(jobId, queryCondition, DeviceEmulator.METHOD_LOOPBACK, future, options);
                     }
                     else
                     {
@@ -529,10 +540,15 @@ public class JobClientTests extends IntegrationTest
                 jobIdsPending.add(jobId);
                 try
                 {
-                    jobClient.scheduleDirectMethod(
-                        jobId, queryCondition,
-                        DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING,
-                        (index % 2 == 0) ? future : new Date(), MAX_EXECUTION_TIME_IN_SECONDS);
+                    ScheduleDirectMethodOptions options =
+                        ScheduleDirectMethodOptions.builder()
+                            .payload(PAYLOAD_STRING)
+                            .methodConnectTimeout(CONNECTION_TIMEOUT)
+                            .methodResponseTimeout(RESPONSE_TIMEOUT)
+                            .maxExecutionTimeInSeconds(MAX_EXECUTION_TIME_IN_SECONDS)
+                            .build();
+
+                    jobClient.scheduleDirectMethod(jobId, queryCondition, DeviceEmulator.METHOD_LOOPBACK, (index % 2 == 0) ? future : new Date(), options);
 
                     JobStatus expectedJobStatus = JobStatus.completed;
                     if (index % 2 == 0)

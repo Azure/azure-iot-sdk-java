@@ -24,8 +24,6 @@ import java.util.Set;
  */
 public class JobResult
 {
-    private static final Charset DEFAULT_IOTHUB_MESSAGE_CHARSET = StandardCharsets.UTF_8;
-
     /**
      * The unique identifier for this job.
      */

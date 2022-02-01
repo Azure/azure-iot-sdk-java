@@ -78,8 +78,8 @@ public class ServiceGlue
             JsonObject params = (JsonObject) methodInvokeParameters;
             String methodName = params.getString("methodName");
             String payload = params.getString("payload");
-            Long responseTimeout = params.getLong("responseTimeoutInSeconds", 0L);
-            Long connectionTimeout = params.getLong("connectTimeoutInSeconds", 0L);
+            int responseTimeout = params.getInteger("responseTimeoutInSeconds", 0);
+            int connectionTimeout = params.getInteger("connectTimeoutInSeconds", 0);
             MethodResult result = null;
             System.out.printf("invoking%n");
             try

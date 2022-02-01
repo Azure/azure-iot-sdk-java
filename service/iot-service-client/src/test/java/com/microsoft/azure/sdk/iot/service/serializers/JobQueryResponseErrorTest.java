@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.service.serializers;
 
+import com.microsoft.azure.sdk.iot.service.jobs.JobQueryResponseError;
 import org.junit.Test;
 
 import java.io.IOException;
