@@ -17,6 +17,8 @@ import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClientOptions;
 import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
 import com.microsoft.azure.sdk.iot.service.jobs.JobType;
+import com.microsoft.azure.sdk.iot.service.query.QueryPageOptions;
+import com.microsoft.azure.sdk.iot.service.query.TwinsQueryResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -25,10 +27,14 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
+import static junit.framework.TestCase.*;
 
 @Slf4j
 public class QueryClientTests extends IntegrationTest
@@ -62,7 +68,29 @@ public class QueryClientTests extends IntegrationTest
         Thread.sleep(2000);
 
         QueryClient queryClient = new QueryClient(iotHubConnectionString);
-        queryClient.queryTwins("SELECT * FROM devices WHERE deviceId IN ['" + deviceId1 + "', '" + deviceId2 + "']");
+        String twinQueryString = "SELECT * FROM devices WHERE deviceId IN ['" + deviceId1 + "', '" + deviceId2 + "']";
+
+        // force 1 result per page in order to test pagination
+        QueryPageOptions queryPageOptions = QueryPageOptions.builder().pageSize(1).build();
+        TwinsQueryResponse twinsQueryResponse = queryClient.queryTwins(twinQueryString, queryPageOptions);
+
+        List<Twin> twinList = new ArrayList<>();
+        assertTrue(twinsQueryResponse.hasNext());
+
+        // query should have 2 results, and since the first page only had 1 result, there should be a continuation token present
+        assertNotNull(twinsQueryResponse.getContinuationToken());
+        twinList.add(twinsQueryResponse.next());
+
+        assertTrue(twinsQueryResponse.hasNext());
+        twinList.add(twinsQueryResponse.next());
+
+        // query should only have 2 results, and since the both results have been queried, there should be no more continuation tokens
+        assertNull(twinsQueryResponse.getContinuationToken());
+        assertFalse(twinsQueryResponse.hasNext());
+
+        assertEquals(2, twinList.size());
+        assertTrue(twinList.get(0).getDeviceId().equals(deviceId1) || twinList.get(0).getDeviceId().equals(deviceId2));
+        assertTrue(twinList.get(1).getDeviceId().equals(deviceId1) || twinList.get(1).getDeviceId().equals(deviceId2));
     }
 
     @Test

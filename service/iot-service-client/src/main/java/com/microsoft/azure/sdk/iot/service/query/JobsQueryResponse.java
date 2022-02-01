@@ -14,14 +14,14 @@ import lombok.Setter;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class JobsQueryResponse //TODO probably need to split this in two since one job query returns jobs and the other returns results I think?
 {
     private final transient Gson gson;
 
-    List<JobResult> jobs;
+    Iterator<JobResult> jobs;
 
     @Setter(AccessLevel.PACKAGE) // value is retrieved from header, not json payload
     @Getter
@@ -36,7 +36,7 @@ public class JobsQueryResponse //TODO probably need to split this in two since o
 
         try
         {
-            this.jobs = Arrays.asList(gson.fromJson(json, JobResult[].class));
+            this.jobs = Arrays.asList(gson.fromJson(json, JobResult[].class)).iterator();
         }
         catch (JsonSyntaxException malformed)
         {
@@ -49,7 +49,7 @@ public class JobsQueryResponse //TODO probably need to split this in two since o
 
     public boolean hasNext()
     {
-        return this.jobs.iterator().hasNext() || this.continuationToken != null;
+        return this.jobs.hasNext() || this.continuationToken != null;
     }
 
     public JobResult next() throws IotHubException, IOException
@@ -61,7 +61,7 @@ public class JobsQueryResponse //TODO probably need to split this in two since o
     {
         try
         {
-            return this.jobs.iterator().next();
+            return this.jobs.next();
         }
         catch (NoSuchElementException ex)
         {
@@ -82,7 +82,7 @@ public class JobsQueryResponse //TODO probably need to split this in two since o
             this.jobs = nextPage.jobs;
             this.continuationToken = nextPage.continuationToken;
 
-            return this.jobs.iterator().next();
+            return this.jobs.next();
         }
     }
 }

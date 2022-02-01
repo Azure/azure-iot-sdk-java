@@ -3,8 +3,10 @@
 
 package com.microsoft.azure.sdk.iot.service.query;
 
+import com.fasterxml.jackson.databind.util.ArrayIterator;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -13,7 +15,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -21,7 +25,7 @@ public class TwinsQueryResponse
 {
     private final transient Gson gson;
 
-    List<Twin> twins;
+    Iterator<Twin> twins;
 
     @Setter(AccessLevel.PACKAGE) // value is retrieved from header, not json payload
     @Getter
@@ -36,7 +40,14 @@ public class TwinsQueryResponse
 
         try
         {
-            this.twins = Arrays.asList(gson.fromJson(json, Twin[].class)); //TODO this won't work since Twin isn't a parser class. Use Twin.fromJson();
+            JsonObject[] twinJsonArray = gson.fromJson(json, JsonObject[].class);
+            List<Twin> twinArray = new ArrayList<>();
+            for (JsonObject twinJson : twinJsonArray)
+            {
+                twinArray.add(Twin.fromJson(twinJson.toString()));
+            }
+
+            this.twins = twinArray.iterator();
         }
         catch (JsonSyntaxException malformed)
         {
@@ -49,7 +60,7 @@ public class TwinsQueryResponse
 
     public boolean hasNext()
     {
-        return this.twins.iterator().hasNext() || this.continuationToken != null;
+        return this.twins.hasNext() || this.continuationToken != null;
     }
 
     public Twin next() throws IotHubException, IOException
@@ -61,7 +72,7 @@ public class TwinsQueryResponse
     {
         try
         {
-            return this.twins.iterator().next();
+            return this.twins.next();
         }
         catch (NoSuchElementException ex)
         {
@@ -82,7 +93,7 @@ public class TwinsQueryResponse
             this.twins = nextPage.twins;
             this.continuationToken = nextPage.continuationToken;
 
-            return this.twins.iterator().next();
+            return this.twins.next();
         }
     }
 }

@@ -14,14 +14,14 @@ import lombok.Setter;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class RawQueryResponse
 {
     private final transient Gson gson;
 
-    List<JsonObject> jsonObjects;
+    Iterator<JsonObject> jsonObjects;
 
     @Setter(AccessLevel.PACKAGE) // value is retrieved from header, not json payload
     @Getter
@@ -36,7 +36,7 @@ public class RawQueryResponse
 
         try
         {
-            this.jsonObjects = Arrays.asList(gson.fromJson(json, JsonObject[].class));
+            this.jsonObjects = Arrays.asList(gson.fromJson(json, JsonObject[].class)).iterator();
         }
         catch (JsonSyntaxException malformed)
         {
@@ -49,7 +49,7 @@ public class RawQueryResponse
 
     public boolean hasNext()
     {
-        return this.jsonObjects.iterator().hasNext() || this.continuationToken != null;
+        return this.jsonObjects.hasNext() || this.continuationToken != null;
     }
 
     public String next() throws IotHubException, IOException
@@ -61,7 +61,7 @@ public class RawQueryResponse
     {
         try
         {
-            return this.jsonObjects.iterator().next().getAsString();
+            return this.jsonObjects.next().toString();
         }
         catch (NoSuchElementException ex)
         {
@@ -82,7 +82,7 @@ public class RawQueryResponse
             this.jsonObjects = nextPage.jsonObjects;
             this.continuationToken = nextPage.continuationToken;
 
-            return this.jsonObjects.iterator().next().getAsString();
+            return this.jsonObjects.next().toString();
         }
     }
 }
