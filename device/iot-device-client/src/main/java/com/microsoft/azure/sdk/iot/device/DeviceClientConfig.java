@@ -186,7 +186,12 @@ public final class DeviceClientConfig
 
         this.useWebsocket = false;
         this.productInfo = new ProductInfo();
-        this.payloadConvention = clientOptions.getPayloadConvention();
+
+        if (clientOptions != null) {
+            this.payloadConvention = clientOptions.getPayloadConvention();
+        } else {
+            this.payloadConvention = DefaultPayloadConvention.getInstance();
+        }
         log.debug("Device configured to use SAS token provided authentication provider");
     }
 
