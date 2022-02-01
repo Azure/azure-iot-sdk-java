@@ -18,8 +18,9 @@ import lombok.Setter;
  * </p>
  *  <p>
  *      Example usage inside of the {@link DeviceCommandCallback}
- *      <pre>
-*{@code
+ *  </p>
+ *  <pre>
+ *{@code
  *public DeviceCommandResponse call(DeviceCommandRequest deviceCommandRequest)
  *{
  *   // In this instance we will deal with the default component
@@ -29,8 +30,7 @@ import lombok.Setter;
  *      // Do work here
  *   }
  *}}
- *      </pre>
- *  </p>
+ *  </pre>
  */
 @AllArgsConstructor
 public class DeviceCommandRequest

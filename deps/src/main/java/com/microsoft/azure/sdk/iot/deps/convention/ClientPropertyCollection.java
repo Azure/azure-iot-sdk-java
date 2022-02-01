@@ -223,6 +223,39 @@ public class ClientPropertyCollection extends PayloadCollection
     }
 
     /**
+     * Add a single new entry in the ClientPropertyCollection. This is the same as {@link ClientPropertyCollection#put(String, Object)}.
+     *
+     * <p> Override {@code HashMap.put(String, Object)}.
+     *
+     * <p> This function will add a single pair key value to the ClientPropertyCollection.
+     *
+     * @param propertyName  the {@code String} that represents the name of the new entry. It cannot be {@code null} or empty.
+     * @param propertyValue the {@code Object} that represents the value of the new entry. It cannot be user defined type or array.
+     * @return The {@code Object} that corresponds to the last value of this key. It will be {@code null} if there is no previous value.
+     */
+    public final void putRootProperty(String propertyName, Object propertyValue)
+    {
+        put(propertyName, propertyValue);
+    }
+
+    /**
+     * Add all information in the provided Map to the ClientPropertyCollection. This is the same as {@link ClientPropertyCollection#putAll(Map)}.
+     *
+     * <p> This function will add all entries in the Map to the ClientPropertyCollection. If the provided
+     * key already exists, it will replace the value by the new one. This function will not
+     * delete or change the content of the other keys in the Map.
+     *
+     * <p> As defined by the Twin, the value of a entry can be an inner Map. TwinCollection will
+     * accept up to 5 levels of inner Maps.
+     *
+     * @param map A {@code Map} of entries to add to the TwinCollection.
+     */
+    public final void putRootProperties(Map<? extends String, Object> map)
+    {
+        putAll(map);
+    }
+
+    /**
      * Add a single new entry in the ClientPropertyCollection nested under a component.
      *
      * <p> Override {@code HashMap.put(String, Object)}.

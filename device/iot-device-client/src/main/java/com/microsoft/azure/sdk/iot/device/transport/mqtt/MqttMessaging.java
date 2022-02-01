@@ -103,7 +103,6 @@ public class MqttMessaging extends Mqtt
         separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CONTENT_ENCODING, message.getContentEncoding(), false);
         separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CONTENT_TYPE, message.getContentType(), false);
         separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CREATION_TIME_UTC, message.getCreationTimeUTCString(), false);
-        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, MQTT_TELEMETRY_COMPONENTNAME, message.getComponentName(), false);
 
         if (message.isSecurityMessage())
         {

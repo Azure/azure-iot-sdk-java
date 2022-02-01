@@ -1343,15 +1343,6 @@ public class InternalClient
     /**
      * Sends the TelemetryMessage to IoT hub.
      * @param telemetryMessage The user supplied telemetry message.
-     */
-    public void sendTelemetryAsync(TelemetryMessage telemetryMessage)
-    {
-        sendTelemetryAsync(telemetryMessage, null, null);
-    }
-
-    /**
-     * Sends the TelemetryMessage to IoT hub.
-     * @param telemetryMessage The user supplied telemetry message.
      * @param callback the callback to be invoked when a response is received. Can be {@code null}.
      * @param callbackContext a context to be passed to the callback. Can be {@code null} if no callback is provided.
      */

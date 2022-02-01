@@ -166,6 +166,7 @@ public class ModuleClient extends InternalClient
      *                   SAS based credentials, then the sslContext will be used for x509 authentication. If the provided connection string
      *                   does contain SAS based credentials, the sslContext will still be used during SSL negotiation.
      * @throws URISyntaxException if the hostname in the connection string is not a valid URI
+     * @throws ModuleClientException if the module is unable to be created
      * @deprecated For x509 authentication, use {@link #ModuleClient(String, IotHubClientProtocol, ClientOptions)} and provide
      * an SSLContext instance in the {@link ClientOptions} instance. For a sample on how to build this SSLContext,
      * see <a href="https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-samples/send-event-x509/src/main/java/samples/com/microsoft/azure/sdk/iot/SendEventX509.java">this code</a> which references
