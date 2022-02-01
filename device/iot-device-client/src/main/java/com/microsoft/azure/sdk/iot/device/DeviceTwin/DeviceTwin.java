@@ -18,10 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubMessageResult.ABANDON;
