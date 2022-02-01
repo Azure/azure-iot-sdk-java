@@ -3,7 +3,7 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.service.devicetwin;
+package com.microsoft.azure.sdk.iot.service.query;
 
 public class SqlQuery
 {
@@ -54,13 +54,11 @@ public class SqlQuery
     {
         if (selection == null || fromType == null)
         {
-            //Codes_SRS_SQL_QUERY_25_001: [ The constructor shall throw IllegalArgumentException if either input string selection or fromType is null or empty ]
             throw new IllegalArgumentException("selection and from are mandatory");
         }
 
         SqlQuery sqlQuery = new SqlQuery();
 
-        //Codes_SRS_SQL_QUERY_25_002: [ The constructor shall build the sql query string from the given Input ]
         sqlQuery.query.append(SELECT)
                 .append(selection)
                 .append(SPACE)
@@ -71,7 +69,6 @@ public class SqlQuery
 
         if (where != null && where.length() > 0)
         {
-            //Codes_SRS_SQL_QUERY_25_003: [ The constructor shall append where to the sql query string only when provided ]
             sqlQuery.query.append(WHERE)
                     .append(where)
                     .append(SPACE);
@@ -79,12 +76,10 @@ public class SqlQuery
 
         if (groupby != null && groupby.length() > 0)
         {
-            //Codes_SRS_SQL_QUERY_25_004: [ The constructor shall append groupby to the sql query string only when provided ]
             sqlQuery.query.append(GROUP_BY)
                     .append(groupby);
         }
 
-        //Codes_SRS_SQL_QUERY_25_005: [ The constructor shall create a new SqlQuery instance and return it ]
         return sqlQuery;
     }
 
@@ -94,7 +89,6 @@ public class SqlQuery
      */
     public String getQuery()
     {
-        //Codes_SRS_SQL_QUERY_25_006: [ The method shall return the sql query string built ]
         return query.toString();
     }
 }

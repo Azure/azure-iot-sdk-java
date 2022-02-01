@@ -28,8 +28,8 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
-import com.microsoft.azure.sdk.iot.service.devicetwin.RawTwinQueryClient;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.runners.Parameterized;
@@ -358,7 +358,7 @@ public class TwinCommon extends IntegrationTest
         public ClientType clientType;
         public TwinClient twinServiceClient;
         public RegistryManager registryManager;
-        public RawTwinQueryClient rawTwinQueryClient;
+        public QueryClient queryClient;
         public DeviceState deviceUnderTest;
         public DeviceState[] devicesUnderTest;
         public TestIdentity testIdentity;
@@ -375,7 +375,7 @@ public class TwinCommon extends IntegrationTest
             
             this.twinServiceClient = new TwinClient(iotHubConnectionString, TwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
             this.registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-            this.rawTwinQueryClient = new RawTwinQueryClient(iotHubConnectionString);
+            this.queryClient = new QueryClient(iotHubConnectionString);
         }
     }
 

@@ -24,8 +24,10 @@ import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.query.QueryClient;
+import com.microsoft.azure.sdk.iot.service.query.QueryClientOptions;
+import com.microsoft.azure.sdk.iot.service.query.TwinsQueryResponse;
 import junit.framework.AssertionFailedError;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
@@ -58,7 +60,6 @@ import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDevice
 import static junit.framework.TestCase.fail;
 import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.junit.Assert.*;
-import static tests.integration.com.microsoft.azure.sdk.iot.iothub.twin.QueryTwinTests.QUERY_TIMEOUT_MILLISECONDS;
 
 @Slf4j
 public class ProvisioningCommon extends IntegrationTest
@@ -130,6 +131,7 @@ public class ProvisioningCommon extends IntegrationTest
     public static String provisioningServiceIdScope = "";
 
     public static final long MAX_TIME_TO_WAIT_FOR_REGISTRATION_MILLISECONDS = 60 * 1000;
+    public static final int QUERY_TIMEOUT_MILLISECONDS = 4 * 60 * 1000; // 4 minutes
 
     public static final int MAX_TPM_CONNECT_RETRY_ATTEMPTS = 10;
 
@@ -441,12 +443,12 @@ public class ProvisioningCommon extends IntegrationTest
         TwinClient twinClient = new TwinClient(provisionedHubConnectionString, TwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
 
         boolean deviceFoundInCorrectHub = false;
-        Query query = null;
         long startTime = System.currentTimeMillis();
+        Twin twin = new Twin(testInstance.provisionedDeviceId);
         while (!deviceFoundInCorrectHub)
         {
-            query = twinClient.queryTwin("SELECT * FROM devices WHERE deviceId = '" + testInstance.provisionedDeviceId +"'");
-            deviceFoundInCorrectHub = twinClient.hasNextTwin(query);
+            twinClient.getTwin(twin);
+            deviceFoundInCorrectHub = twin.getCapabilities() != null;
 
             Thread.sleep(3000);
 
@@ -456,14 +458,13 @@ public class ProvisioningCommon extends IntegrationTest
             }
         }
 
-        Twin provisionedDevice = twinClient.getNextTwin(query);
         if (expectedDeviceCapabilities.isIotEdge())
         {
-            assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Provisioned device isn't edge device: " + testInstance.provisionedDeviceId, getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), provisionedDevice.getCapabilities().isIotEdge());
+            assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Provisioned device isn't edge device: " + testInstance.provisionedDeviceId, getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), twin.getCapabilities().isIotEdge());
         }
         else
         {
-            assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Provisioned device shouldn't be edge device " + testInstance.provisionedDeviceId, getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), provisionedDevice.getCapabilities() == null || !provisionedDevice.getCapabilities().isIotEdge());
+            assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Provisioned device shouldn't be edge device " + testInstance.provisionedDeviceId, getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), twin.getCapabilities() == null || !twin.getCapabilities().isIotEdge());
         }
     }
 

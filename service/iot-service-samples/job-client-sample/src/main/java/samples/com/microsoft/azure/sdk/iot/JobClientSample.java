@@ -6,8 +6,9 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
-import com.microsoft.azure.sdk.iot.service.devicetwin.SqlQuery;
+import com.microsoft.azure.sdk.iot.service.query.JobsQueryResponse;
+import com.microsoft.azure.sdk.iot.service.query.QueryClient;
+import com.microsoft.azure.sdk.iot.service.query.SqlQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
@@ -68,10 +69,11 @@ public class JobClientSample
         monitorJob(jobClient, jobIdMethod);
 
         // *************************************** Query Jobs Response ***************************************
-        queryJobsResponse(jobClient);
+        QueryClient queryClient = new QueryClient(iotHubConnectionString);
+        queryJobsResponse(queryClient);
 
         // *************************************** Query Device Job ***************************************
-        queryDeviceJobs(jobClient);
+        queryDeviceJobs(queryClient);
 
         System.out.println("Shutting down sample...");
     }
@@ -102,25 +104,26 @@ public class JobClientSample
         System.out.println(jobResult);
     }
 
-    private static void queryDeviceJobs(JobClient jobClient) throws IOException, IotHubException
+    private static void queryDeviceJobs(QueryClient queryClient) throws IOException, IotHubException
     {
         System.out.println("Query device job");
-        Query deviceJobQuery = jobClient.queryDeviceJob(SqlQuery.createSqlQuery("*", SqlQuery.FromType.JOBS, null, null).getQuery());
-        while (jobClient.hasNextJob(deviceJobQuery))
+        String jobsQueryString = SqlQuery.createSqlQuery("*", SqlQuery.FromType.JOBS, null, null).getQuery();
+        JobsQueryResponse jobsQueryResponse = queryClient.queryJobs(jobsQueryString);
+        while (jobsQueryResponse.hasNext())
         {
             System.out.println("Query device job response");
-            System.out.println(jobClient.getNextJob(deviceJobQuery));
+            System.out.println(jobsQueryResponse.next());
         }
     }
 
-    private static void queryJobsResponse(JobClient jobClient) throws IOException, IotHubException
+    private static void queryJobsResponse(QueryClient queryClient) throws IOException, IotHubException
     {
         System.out.println("Querying job response");
-        Query jobResponseQuery = jobClient.queryJobResponse(JobType.scheduleDeviceMethod, JobStatus.completed);
-        while (jobClient.hasNextJob(jobResponseQuery))
+        JobsQueryResponse jobResponseQuery = queryClient.queryJobs(JobType.scheduleDeviceMethod, JobStatus.completed);
+        while (jobResponseQuery.hasNext())
         {
             System.out.println("job response");
-            System.out.println(jobClient.getNextJob(jobResponseQuery));
+            System.out.println(jobResponseQuery.next());
         }
     }
 

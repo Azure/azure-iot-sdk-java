@@ -7,6 +7,8 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 
 import com.azure.core.credential.AzureSasCredential;
+import com.microsoft.azure.sdk.iot.service.query.JobsQueryResponse;
+import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.service.serializers.JobsResponseParser;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
@@ -20,8 +22,7 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
-import com.microsoft.azure.sdk.iot.service.devicetwin.SqlQuery;
+import com.microsoft.azure.sdk.iot.service.query.SqlQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
@@ -121,97 +122,6 @@ public class JobClientTests extends IntegrationTest
         }
     }
 
-    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
-    private static JobResult queryDeviceJobResult(String jobId, JobType jobType, JobStatus jobStatus) throws IOException, IotHubException
-    {
-        String queryContent = SqlQuery.createSqlQuery("*", SqlQuery.FromType.JOBS,
-            "devices.jobs.jobId = '" + jobId + "' and devices.jobs.jobType = '" + jobType.toString() + "'",
-            null).getQuery();
-        Query query = jobClient.queryDeviceJob(queryContent);
-        JobResult jobResult;
-        while (jobClient.hasNextJob(query))
-        {
-            jobResult = jobClient.getNextJob(query);
-            if (jobResult.getJobId().equals(jobId))
-            {
-                if (jobResult.getJobType() == jobType)
-                {
-                    if (jobResult.getJobStatus() == jobStatus)
-                    {
-                        //query confirmed that the specified job has the correct type, and status
-                        return jobResult;
-                    }
-                    else
-                    {
-                        throw new AssertionError("queryDeviceJob received job unexpected status. Expected " + jobStatus + " but job ended with status " + jobResult.getJobStatus());
-                    }
-                }
-                else
-                {
-                    throw new AssertionError("queryDeviceJob received job with the wrong job type. Expected " + jobType + " but found " + jobResult.getJobType());
-                }
-            }
-        }
-
-        throw new AssertionError("queryDeviceJob did not find the job");
-    }
-
-    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
-    private JobResult queryJobResponseResult(String jobId, JobType jobType, JobStatus jobStatus) throws IOException, IotHubException
-    {
-        Query query = jobClient.queryJobResponse(jobType, jobStatus);
-        JobResult jobResult;
-        while (jobClient.hasNextJob(query))
-        {
-            jobResult = jobClient.getNextJob(query);
-            if (jobResult.getJobId().equals(jobId) &&
-                (jobResult.getJobType() == jobType) &&
-                (jobResult.getJobStatus() == jobStatus))
-            {
-                log.info("Iothub confirmed {} {} for type {}", jobId, jobStatus, jobType);
-                return jobResult;
-            }
-        }
-        throw new AssertionError("queryDeviceJob did not find the job");
-    }
-
-    @Before
-    public void cleanToStart() throws IOException, IotHubException
-    {
-        for (DeviceTestManager device : devices)
-        {
-            device.clearStatistics();
-        }
-
-        log.info("Waiting for all previously scheduled jobs to finish...");
-        long startTime = System.currentTimeMillis();
-        Query activeJobsQuery = jobClient.queryDeviceJob("SELECT * FROM devices.jobs");
-        while (activeJobsQuery.hasNext())
-        {
-            JobsResponseParser job = JobsResponseParser.createFromJson(activeJobsQuery.next().toString());
-
-            JobStatus jobStatus = jobClient.getJob(job.getJobId()).getJobStatus();
-            while (jobStatus.equals(JobStatus.enqueued) || jobStatus.equals(JobStatus.queued) || jobStatus.equals(JobStatus.running) || jobStatus.equals(JobStatus.scheduled))
-            {
-                try
-                {
-                    Thread.sleep(500);
-                    jobStatus = jobClient.getJob(job.getJobId()).getJobStatus();
-                } catch (InterruptedException e)
-                {
-                    fail("Unexpected interrupted exception occurred");
-                }
-
-                if (System.currentTimeMillis() - startTime > MAX_TIME_WAIT_FOR_PREVIOUSLY_SCHEDULED_JOBS_TO_FINISH_IN_MILLIS)
-                {
-                    fail("Waited too long for previously scheduled jobs to finish");
-                }
-            }
-        }
-
-        log.info("Done waiting for jobs to finish!");
-    }
-
     @AfterClass
     public static void tearDown() throws Exception
     {
@@ -263,7 +173,7 @@ public class JobClientTests extends IntegrationTest
                         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS);
                         jobResult = jobClient.getJob(jobId);
                     }
-                    jobResult = queryJobResponseResult(jobId, JobType.scheduleUpdateTwin, JobStatus.completed);
+                    jobResult = queryDeviceJobResult(jobId, JobType.scheduleUpdateTwin, JobStatus.completed);
                     jobResults.put(jobId, jobResult);
                 } catch (IotHubException | IOException | InterruptedException e)
                 {
@@ -694,5 +604,41 @@ public class JobClientTests extends IntegrationTest
         AzureSasCredential azureSasCredential = new AzureSasCredential(serviceSasToken.toString());
         JobClientOptions options = JobClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
         return new JobClient(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
+    }
+
+    private static JobResult queryDeviceJobResult(String jobId, JobType jobType, JobStatus jobStatus) throws IOException, IotHubException
+    {
+        QueryClient queryClient = new QueryClient(iotHubConnectionString);
+        String queryContent = SqlQuery.createSqlQuery("*", SqlQuery.FromType.JOBS,
+            "devices.jobs.jobId = '" + jobId + "' and devices.jobs.jobType = '" + jobType.toString() + "'",
+            null).getQuery();
+
+        JobsQueryResponse jobsQueryResponse = queryClient.queryJobs(queryContent);
+
+        while (jobsQueryResponse.hasNext())
+        {
+            JobResult jobResult = jobsQueryResponse.next();
+            if (jobResult.getJobId().equals(jobId))
+            {
+                if (jobResult.getJobType() == jobType)
+                {
+                    if (jobResult.getJobStatus() == jobStatus)
+                    {
+                        //query confirmed that the specified job has the correct type, and status
+                        return jobResult;
+                    }
+                    else
+                    {
+                        throw new AssertionError("queryDeviceJob received job unexpected status. Expected " + jobStatus + " but job ended with status " + jobResult.getJobStatus());
+                    }
+                }
+                else
+                {
+                    throw new AssertionError("queryDeviceJob received job with the wrong job type. Expected " + jobType + " but found " + jobResult.getJobType());
+                }
+            }
+        }
+
+        throw new AssertionError("queryDeviceJob did not find the job");
     }
 }

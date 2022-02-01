@@ -7,6 +7,9 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.identity.ClientSecretCredentialBuilder;
+import com.microsoft.azure.sdk.iot.service.query.QueryClient;
+import com.microsoft.azure.sdk.iot.service.query.QueryClientOptions;
+import com.microsoft.azure.sdk.iot.service.query.JobsQueryResponse;
 import com.microsoft.azure.sdk.iot.service.serializers.ErrorCodeDescription;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.FeedbackBatch;
@@ -26,8 +29,7 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.DirectMethodsClientOptions
 import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClientOptions;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
-import com.microsoft.azure.sdk.iot.service.devicetwin.SqlQuery;
+import com.microsoft.azure.sdk.iot.service.query.SqlQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClientOptions;
@@ -228,22 +230,25 @@ public class RoleBasedAuthenticationSample
     {
         // JobClient has some configurable options for HTTP read and connect timeouts, as well as for setting proxies.
         // For this sample, the default options will be used though.
-        JobClientOptions options = JobClientOptions.builder().build();
+        JobClientOptions jobClientOptions = JobClientOptions.builder().build();
+        QueryClientOptions queryClientOptions = QueryClientOptions.builder().build();
 
         // This constructor takes in your implementation of TokenCredential which allows you to use RBAC authentication
         // rather than symmetric key based authentication that comes with constructors that take connection strings.
-        JobClient jobClient = new JobClient(iotHubHostName, credential, options);
+        JobClient jobClient = new JobClient(iotHubHostName, credential, jobClientOptions);
+        QueryClient queryClient = new QueryClient(iotHubHostName, credential, queryClientOptions);
 
         try
         {
             System.out.println("Querying all active jobs for your IoT Hub");
 
-            Query deviceJobQuery = jobClient.queryDeviceJob(SqlQuery.createSqlQuery("*", SqlQuery.FromType.JOBS, null, null).getQuery());
+            String jobsQueryString = SqlQuery.createSqlQuery("*", SqlQuery.FromType.JOBS, null, null).getQuery();
+            JobsQueryResponse deviceJobsQueryResponse = queryClient.queryJobs(jobsQueryString);
             int queriedJobCount = 0;
-            while (jobClient.hasNextJob(deviceJobQuery))
+            while (deviceJobsQueryResponse.hasNext())
             {
                 queriedJobCount++;
-                JobResult job = jobClient.getNextJob(deviceJobQuery);
+                JobResult job = deviceJobsQueryResponse.next();
                 System.out.println(String.format("Job %s of type %s has status %s", job.getJobId(), job.getJobType(), job.getJobStatus()));
             }
 

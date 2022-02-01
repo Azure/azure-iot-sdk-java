@@ -71,6 +71,31 @@ public class Twin
     @Getter
     private List<String> parentScopes = new ArrayList<>();
 
+    public static Twin fromJson(String json)
+    {
+        TwinState twinState = new TwinState(json);
+
+        Twin twin = new Twin(twinState.getDeviceId());
+        twin.setVersion(twinState.getVersion());
+        twin.setETag(twinState.getETag());
+        twin.setTags(twinState.getTags());
+        twin.setDesiredProperties(twinState.getDesiredProperty());
+        twin.setReportedProperties(twinState.getReportedProperty());
+        twin.setCapabilities(twinState.getCapabilities());
+        twin.setConnectionState(twinState.getConnectionState());
+        twin.setConfigurations(twinState.getConfigurations());
+        twin.setModelId(twinState.getModelId());
+        twin.setDeviceScope(twinState.getDeviceScope());
+        twin.setParentScopes(twinState.getParentScopes());
+
+        if (twinState.getModuleId() != null && !twinState.getModuleId().isEmpty())
+        {
+            twin.setModuleId(twinState.getModuleId());
+        }
+
+        return twin;
+    }
+
     /**
      * Constructor to create an instance for a device.
      */

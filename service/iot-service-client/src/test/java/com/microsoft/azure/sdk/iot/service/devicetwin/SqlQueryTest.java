@@ -5,7 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
-import com.microsoft.azure.sdk.iot.service.devicetwin.SqlQuery;
+import com.microsoft.azure.sdk.iot.service.query.SqlQuery;
 import org.junit.Test;
 
 import java.io.IOException;
