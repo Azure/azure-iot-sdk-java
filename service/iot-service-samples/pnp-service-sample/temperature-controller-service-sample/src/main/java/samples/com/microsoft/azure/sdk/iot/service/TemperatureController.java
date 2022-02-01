@@ -46,8 +46,7 @@ public class TemperatureController {
 
     private static void GetAndUpdateTwin() throws IOException, IotHubException {
         // Get the twin and retrieve model Id set by Device client.
-        Twin twin = new Twin(deviceId);
-        twinClient.getTwin(twin);
+        Twin twin = twinClient.getTwin(deviceId);
         System.out.println("Model Id of this Twin is: " + twin.getModelId());
 
         // Update the twin for thermostat1 component.
@@ -67,7 +66,7 @@ public class TemperatureController {
         twinClient.updateTwin(twin);
 
         // Get the updated twin properties.
-        twinClient.getTwin(twin);
+        twin = twinClient.getTwin(deviceId);
         System.out.println("The updated desired properties: " + twin.getDesiredProperties().iterator().next().getValue());
     }
 
@@ -76,8 +75,8 @@ public class TemperatureController {
         String methodToInvoke = "reboot";
         System.out.println("Invoking method: " + methodToInvoke);
 
-        Long responseTimeout = TimeUnit.SECONDS.toSeconds(200);
-        Long connectTimeout = TimeUnit.SECONDS.toSeconds(5);
+        int responseTimeout = 200;
+        int connectTimeout = 5;
 
         // Invoke the command.
         String commandInput = "5";
@@ -94,8 +93,8 @@ public class TemperatureController {
         String methodToInvoke = PnpHelper.CreateComponentCommandName("thermostat1", "getMaxMinReport");
         System.out.println("Invoking method: " + methodToInvoke);
 
-        Long responseTimeout = TimeUnit.SECONDS.toSeconds(200);
-        Long connectTimeout = TimeUnit.SECONDS.toSeconds(5);
+        int responseTimeout = 200;
+        int connectTimeout = 5;
 
         // Invoke the command.
         // The command payload should be in the following format:
