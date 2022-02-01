@@ -13,7 +13,7 @@ import java.util.Date;
  * {@link JobClient#scheduleDirectMethod(String, String, String, Date, DirectMethodsJobOptions)}.
  */
 @Builder
-public class DirectMethodsJobOptions
+public final class DirectMethodsJobOptions
 {
     /**
      * The payload of the direct method request. May be null.

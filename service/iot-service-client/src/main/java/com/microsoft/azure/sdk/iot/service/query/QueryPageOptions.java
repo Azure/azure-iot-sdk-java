@@ -10,7 +10,7 @@ import lombok.Getter;
  * The optional parameters for each query page request.
  */
 @Builder
-public class QueryPageOptions
+public final class QueryPageOptions
 {
     /**
      * The number of results per page. Larger page sizes will require the client to send fewer HTTP requests to continue

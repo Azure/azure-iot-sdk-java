@@ -21,7 +21,7 @@ import java.util.Objects;
  * It can also be used to know when files have been uploaded by devices.
  */
 @Slf4j
-public class ServiceClient
+public final class ServiceClient
 {
     private final AmqpSend amqpMessageSender;
     private final String hostName;

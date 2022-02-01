@@ -24,7 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 @Slf4j
-public class QueryClient
+public final class QueryClient
 {
     private static final String CONTINUATION_TOKEN_KEY = "x-ms-continuation";
     private static final String PAGE_SIZE_KEY = "x-ms-max-item-count";

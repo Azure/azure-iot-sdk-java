@@ -17,7 +17,7 @@ import static com.microsoft.azure.sdk.iot.device.MultiplexingClient.*;
  * level settings on these parameters.
  */
 @Builder
-public class MultiplexingClientOptions
+public final class MultiplexingClientOptions
 {
     /**
      * The details of the proxy to connect to, if set. If not set, the multiplexing client will not connect through a proxy.

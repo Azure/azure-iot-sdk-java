@@ -11,7 +11,7 @@ import lombok.Getter;
  * Configurable options for all {@link QueryClient} operations.
  */
 @Builder
-public class QueryClientOptions
+public final class QueryClientOptions
 {
     protected static final Integer DEFAULT_HTTP_READ_TIMEOUT_MS = 24000; // 24 seconds
     protected static final Integer DEFAULT_HTTP_CONNECT_TIMEOUT_MS = 24000; // 24 seconds

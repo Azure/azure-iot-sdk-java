@@ -31,7 +31,7 @@ import static com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest.REQ
  * The client to directly invoke direct methods on devices and modules in IoT hub.
  */
 @Slf4j
-public class DirectMethodsClient
+public final class DirectMethodsClient
 {
     private Integer requestId = 0;
 

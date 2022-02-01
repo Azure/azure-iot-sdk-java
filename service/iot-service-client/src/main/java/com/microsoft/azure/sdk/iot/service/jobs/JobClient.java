@@ -35,7 +35,7 @@ import java.util.Set;
  * Use the JobClient to schedule and cancel jobs for a group of devices using IoT hub.
  */
 @Slf4j
-public class JobClient
+public final class JobClient
 {
     private final static byte[] EMPTY_JSON = "{}".getBytes(StandardCharsets.UTF_8);
 

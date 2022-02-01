@@ -41,7 +41,7 @@ import java.util.Objects;
  * To access twins, use the {@link TwinClient}.
  */
 @Slf4j
-public class RegistryManager
+public final class RegistryManager
 {
     private final String hostName;
     private TokenCredentialCache credentialCache;

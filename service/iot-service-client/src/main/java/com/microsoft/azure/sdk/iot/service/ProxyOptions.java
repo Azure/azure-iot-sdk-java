@@ -9,7 +9,7 @@ import java.net.Proxy;
  * The settings supported by this SDK when communicating to IoT Hub through a proxy. HTTP proxies are supported by this SDK,
  * but only if the proxy does not require authentication.
  */
-public class ProxyOptions
+public final class ProxyOptions
 {
     @Getter
     private final Proxy proxy;

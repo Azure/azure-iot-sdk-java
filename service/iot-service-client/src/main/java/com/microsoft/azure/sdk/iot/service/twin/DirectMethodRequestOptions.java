@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Builder
-public class DirectMethodRequestOptions
+public final class DirectMethodRequestOptions
 {
     /**
      * The payload of the direct method request. May be null.

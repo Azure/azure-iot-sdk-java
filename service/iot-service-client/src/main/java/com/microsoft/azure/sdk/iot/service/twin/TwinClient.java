@@ -31,7 +31,7 @@ import static com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest.REQ
  * Use the TwinClient class to manage the device twins in IoT hubs.
  */
 @Slf4j
-public class TwinClient
+public final class TwinClient
 {
     private int requestId = 0;
 
