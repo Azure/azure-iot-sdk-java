@@ -208,7 +208,7 @@ public class TwinPnPTests extends IntegrationTest
                 }
             }
 
-            this.client.open(false);
+            this.client.open(true);
         }
 
         public void dispose()

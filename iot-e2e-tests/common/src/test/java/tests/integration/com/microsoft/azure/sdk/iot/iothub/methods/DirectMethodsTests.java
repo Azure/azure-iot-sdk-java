@@ -226,13 +226,13 @@ public class DirectMethodsTests extends DirectMethodsCommon
             DirectMethodRequestOptions options =
                 DirectMethodRequestOptions.builder()
                     .payload("7000")
-                    .methodResponseTimeout(RESPONSE_TIMEOUT)
+                    .methodResponseTimeout(5)
                     .methodConnectTimeout(CONNECTION_TIMEOUT)
                     .build();
 
             if (testInstance.identity instanceof TestModuleIdentity)
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), options);
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, options);
             }
             else
             {
