@@ -19,6 +19,4 @@ public interface IotHubEventCallback
      * @param callbackContext a custom context given by the developer.
      */
     void execute(IotHubStatusCode responseStatus, Object callbackContext);
-
-    void clientPropThing(IotHubStatusCode responseStatus, Object callbackContext);
 }
