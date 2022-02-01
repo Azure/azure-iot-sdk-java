@@ -7,9 +7,9 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.identity.ClientSecretCredentialBuilder;
+import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.service.query.QueryClientOptions;
-import com.microsoft.azure.sdk.iot.service.query.JobsQueryResponse;
 import com.microsoft.azure.sdk.iot.service.serializers.ErrorCodeDescription;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.FeedbackBatch;
@@ -242,12 +242,12 @@ public class RoleBasedAuthenticationSample
             System.out.println("Querying all active jobs for your IoT Hub");
 
             String jobsQueryString = SqlQuery.createSqlQuery("*", SqlQuery.FromType.JOBS, null, null).getQuery();
-            JobsQueryResponse deviceJobsQueryResponse = queryClient.queryJobs(jobsQueryString);
+            JobQueryResponse deviceJobQueryResponse = queryClient.queryJobs(jobsQueryString);
             int queriedJobCount = 0;
-            while (deviceJobsQueryResponse.hasNext())
+            while (deviceJobQueryResponse.hasNext())
             {
                 queriedJobCount++;
-                JobResult job = deviceJobsQueryResponse.next();
+                JobResult job = deviceJobQueryResponse.next();
                 System.out.println(String.format("Job %s of type %s has status %s", job.getJobId(), job.getJobType(), job.getJobStatus()));
             }
 

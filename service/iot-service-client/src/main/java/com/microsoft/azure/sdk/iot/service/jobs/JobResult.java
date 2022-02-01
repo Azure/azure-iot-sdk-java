@@ -136,24 +136,19 @@ public class JobResult
     /**
      * CONSTRUCTOR
      *
-     * @param body is a array of bytes that contains the response message for jobs
+     * @param json the json string to be deserialized
      * @throws JsonParseException if the content of body is a invalid json
      * @throws IllegalArgumentException if the provided body is null
      */
-    JobResult(byte[] body) throws JsonParseException, IllegalArgumentException
+    public JobResult(String json) throws JsonParseException, IllegalArgumentException
     {
-        /* Codes_SRS_JOBRESULT_21_001: [The constructor shall throw IllegalArgumentException if the input body is null.] */
-        if (body == null)
+        if (json == null)
         {
             throw new IllegalArgumentException("null body");
         }
 
-        /* Codes_SRS_JOBRESULT_21_002: [The constructor shall parse the body using the JobsResponseParser.] */
-        /* Codes_SRS_JOBRESULT_21_003: [The constructor shall throw JsonParseException if the input body contains a invalid json.] */
-        String json = new String(body, DEFAULT_IOTHUB_MESSAGE_CHARSET);
         JobsResponseParser jobsResponseParser = JobsResponseParser.createFromJson(json);
 
-        /* Codes_SRS_JOBRESULT_21_004: [The constructor shall locally store all results information in the provided body.] */
         this.jobId = jobsResponseParser.getJobId();
         this.queryCondition = jobsResponseParser.getQueryCondition();
         this.createdTime = jobsResponseParser.getCreatedTime();
@@ -217,7 +212,6 @@ public class JobResult
     @Override
     public String toString()
     {
-        /* Codes_SRS_JOBRESULT_21_020: [The toString shall return a String with a pretty print json that represents this class.] */
         Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
         return gson.toJson(this);
     }

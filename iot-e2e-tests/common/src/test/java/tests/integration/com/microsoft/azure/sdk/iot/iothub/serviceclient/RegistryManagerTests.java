@@ -724,6 +724,4 @@ public class RegistryManagerTests extends IntegrationTest
         RegistryManagerOptions options = RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
         return new RegistryManager(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
     }
-
-
 }

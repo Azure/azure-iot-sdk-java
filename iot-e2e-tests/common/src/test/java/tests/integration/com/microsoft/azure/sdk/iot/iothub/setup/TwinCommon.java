@@ -123,25 +123,18 @@ public class TwinCommon extends IntegrationTest
 
     public static final long DESIRED_PROPERTIES_PROPAGATION_TIME_MILLISECONDS = 5 * 1000; //5 seconds
 
-    protected static final long MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS = 5000; // 5 sec
-
     // Max reported properties to be tested
     protected static final Integer MAX_PROPERTIES_TO_TEST = 5;
 
     //Max devices to test
     protected static final Integer MAX_DEVICES = 3;
 
-    //Default Page Size for Query
-    protected static final Integer PAGE_SIZE = 2;
-
     protected static String iotHubConnectionString = "";
 
     // Constants used in for Testing
     protected static final String PROPERTY_KEY = "Key";
-    protected static final String PROPERTY_KEY_QUERY = "KeyQuery";
     protected static final String PROPERTY_VALUE = "Value";
     protected static final String PROPERTY_VALUE_ARRAY = "[\"Value\",\"Value2\"]" ;
-    protected static final String PROPERTY_VALUE_QUERY = "ValueQuery";
     protected static final String PROPERTY_VALUE_UPDATE = "Update";
     protected static final String PROPERTY_VALUE_UPDATE2 = "Update2";
     protected static final String PROPERTY_VALUE_UPDATE_ARRAY = "[\"1stUpdate1\",\"1stUpdate2\"]";

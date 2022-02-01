@@ -7,9 +7,8 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 
 import com.azure.core.credential.AzureSasCredential;
-import com.microsoft.azure.sdk.iot.service.query.JobsQueryResponse;
+import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
-import com.microsoft.azure.sdk.iot.service.serializers.JobsResponseParser;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.Device;
@@ -32,7 +31,6 @@ import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
 import com.microsoft.azure.sdk.iot.service.jobs.JobType;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -239,7 +237,7 @@ public class JobClientTests extends IntegrationTest
                 jobIdsPending.add(jobId);
                 try
                 {
-                    jobClient.scheduleDeviceMethod(
+                    jobClient.scheduleDirectMethod(
                         jobId, queryCondition,
                         DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING,
                         new Date(), MAX_EXECUTION_TIME_IN_SECONDS);
@@ -348,7 +346,7 @@ public class JobClientTests extends IntegrationTest
 
         // Act
         String jobId = JOB_ID_NAME + UUID.randomUUID();
-        jobClient.scheduleDeviceMethod(
+        jobClient.scheduleDirectMethod(
             jobId,
             queryCondition,
             DeviceEmulator.METHOD_LOOPBACK,
@@ -417,7 +415,7 @@ public class JobClientTests extends IntegrationTest
                 {
                     if (index % 2 == 0)
                     {
-                        jobClient.scheduleDeviceMethod(
+                        jobClient.scheduleDirectMethod(
                             jobId, queryCondition,
                             DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING,
                             future, MAX_EXECUTION_TIME_IN_SECONDS);
@@ -531,7 +529,7 @@ public class JobClientTests extends IntegrationTest
                 jobIdsPending.add(jobId);
                 try
                 {
-                    jobClient.scheduleDeviceMethod(
+                    jobClient.scheduleDirectMethod(
                         jobId, queryCondition,
                         DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING,
                         (index % 2 == 0) ? future : new Date(), MAX_EXECUTION_TIME_IN_SECONDS);
@@ -613,11 +611,11 @@ public class JobClientTests extends IntegrationTest
             "devices.jobs.jobId = '" + jobId + "' and devices.jobs.jobType = '" + jobType.toString() + "'",
             null).getQuery();
 
-        JobsQueryResponse jobsQueryResponse = queryClient.queryJobs(queryContent);
+        JobQueryResponse jobQueryResponse = queryClient.queryJobs(queryContent);
 
-        while (jobsQueryResponse.hasNext())
+        while (jobQueryResponse.hasNext())
         {
-            JobResult jobResult = jobsQueryResponse.next();
+            JobResult jobResult = jobQueryResponse.next();
             if (jobResult.getJobId().equals(jobId))
             {
                 if (jobResult.getJobType() == jobType)

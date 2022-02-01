@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service.jobs;
 
-import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.service.serializers.JobsParser;
 import com.microsoft.azure.sdk.iot.service.serializers.MethodParser;
 import com.microsoft.azure.sdk.iot.service.devicetwin.TwinCollection;
@@ -13,7 +12,6 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.TwinState;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
-import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.query.SqlQuery;
@@ -36,7 +34,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.NoSuchElementException;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -825,7 +822,7 @@ public class JobClientTest
         assertNotNull(jobResult);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_014: [If the JobId is null, empty, or invalid, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
+    /* Tests_SRS_JOBCLIENT_21_014: [If the JobId is null, empty, or invalid, the scheduleDirectMethod shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void scheduleDeviceMethodThrowsOnNullJobId() throws IOException, IotHubException
     {
@@ -848,10 +845,10 @@ public class JobClientTest
         }
 
         //act
-        testJobClient.scheduleDeviceMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_014: [If the JobId is null, empty, or invalid, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
+    /* Tests_SRS_JOBCLIENT_21_014: [If the JobId is null, empty, or invalid, the scheduleDirectMethod shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void scheduleDeviceMethodThrowsOnEmptyJobId() throws IOException, IotHubException
     {
@@ -874,10 +871,10 @@ public class JobClientTest
         }
 
         //act
-        testJobClient.scheduleDeviceMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_014: [If the JobId is null, empty, or invalid, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
+    /* Tests_SRS_JOBCLIENT_21_014: [If the JobId is null, empty, or invalid, the scheduleDirectMethod shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void scheduleDeviceMethodThrowsOnInvalidJobId() throws IOException, IotHubException
     {
@@ -922,10 +919,10 @@ public class JobClientTest
         }
 
         //act
-        testJobClient.scheduleDeviceMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_015: [If the methodName is null or empty, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
+    /* Tests_SRS_JOBCLIENT_21_015: [If the methodName is null or empty, the scheduleDirectMethod shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void scheduleDeviceMethodThrowsOnNullMethodName() throws IOException, IotHubException
     {
@@ -949,10 +946,10 @@ public class JobClientTest
         }
 
         //act
-        testJobClient.scheduleDeviceMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_015: [If the methodName is null or empty, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
+    /* Tests_SRS_JOBCLIENT_21_015: [If the methodName is null or empty, the scheduleDirectMethod shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void scheduleDeviceMethodThrowsOnEmptyMethodName() throws IOException, IotHubException
     {
@@ -975,10 +972,10 @@ public class JobClientTest
         }
 
         //act
-        testJobClient.scheduleDeviceMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_015: [If the methodName is null or empty, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
+    /* Tests_SRS_JOBCLIENT_21_015: [If the methodName is null or empty, the scheduleDirectMethod shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void scheduleDeviceMethodThrowsOnInvalidMethodName() throws IOException, IotHubException
     {
@@ -1009,10 +1006,10 @@ public class JobClientTest
         }
 
         //act
-        testJobClient.scheduleDeviceMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_016: [If the startTimeUtc is null, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
+    /* Tests_SRS_JOBCLIENT_21_016: [If the startTimeUtc is null, the scheduleDirectMethod shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void scheduleDeviceMethodThrowsOnNullStartTimeUtc() throws IOException, IotHubException
     {
@@ -1035,10 +1032,10 @@ public class JobClientTest
         }
 
         //act
-        testJobClient.scheduleDeviceMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_017: [If the maxExecutionTimeInSeconds is negative, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
+    /* Tests_SRS_JOBCLIENT_21_017: [If the maxExecutionTimeInSeconds is negative, the scheduleDirectMethod shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void scheduleDeviceMethodThrowsOnNegativeMaxExecutionTimeInSeconds() throws IOException, IotHubException
     {
@@ -1061,10 +1058,10 @@ public class JobClientTest
         }
 
         //act
-        testJobClient.scheduleDeviceMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_018: [The scheduleDeviceMethod shall create a json String that represent the invoke method job using the JobsParser class.] */
+    /* Tests_SRS_JOBCLIENT_21_018: [The scheduleDirectMethod shall create a json String that represent the invoke method job using the JobsParser class.] */
     @Test
     public void scheduleDeviceMethodCreateJson() throws IOException, IotHubException
     {
@@ -1111,10 +1108,10 @@ public class JobClientTest
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        JobResult jobResult = testJobClient.scheduleDeviceMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        JobResult jobResult = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_019: [The scheduleDeviceMethod shall create a URL for Jobs using the iotHubConnectionString.] */
+    /* Tests_SRS_JOBCLIENT_21_019: [The scheduleDirectMethod shall create a URL for Jobs using the iotHubConnectionString.] */
     @Test
     public void scheduleDeviceMethodCreateUrl() throws IOException, IotHubException
     {
@@ -1160,7 +1157,7 @@ public class JobClientTest
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        JobResult jobResult = testJobClient.scheduleDeviceMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        JobResult jobResult = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
 
         //assert
         new Verifications()
@@ -1172,7 +1169,7 @@ public class JobClientTest
         };
     }
 
-    /* Tests_SRS_JOBCLIENT_21_020: [The scheduleDeviceMethod shall send a PUT request to the iothub using the created url and json.] */
+    /* Tests_SRS_JOBCLIENT_21_020: [The scheduleDirectMethod shall send a PUT request to the iothub using the created url and json.] */
     @Test
     public void scheduleDeviceMethodSendPUT() throws IOException, IotHubException
     {
@@ -1218,11 +1215,11 @@ public class JobClientTest
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        testJobClient.scheduleDeviceMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_021: [If the scheduleDeviceMethod failed to send a PUT request, it shall throw IOException.] */
-    /* Tests_SRS_JOBCLIENT_21_022: [If the scheduleDeviceMethod failed to verify the iothub response, it shall throw IotHubException.] */
+    /* Tests_SRS_JOBCLIENT_21_021: [If the scheduleDirectMethod failed to send a PUT request, it shall throw IOException.] */
+    /* Tests_SRS_JOBCLIENT_21_022: [If the scheduleDirectMethod failed to verify the iothub response, it shall throw IotHubException.] */
     @Test (expected = IOException.class)
     public void scheduleDeviceMethodThrowsOnSendPUT() throws IOException, IotHubException
     {
@@ -1262,10 +1259,10 @@ public class JobClientTest
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        testJobClient.scheduleDeviceMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_023: [The scheduleDeviceMethod shall parse the iothub response and return it as JobResult.] */
+    /* Tests_SRS_JOBCLIENT_21_023: [The scheduleDirectMethod shall parse the iothub response and return it as JobResult.] */
     @Test
     public void scheduleDeviceMethodParseResponse() throws IOException, IotHubException
     {
@@ -1311,7 +1308,7 @@ public class JobClientTest
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        JobResult jobResult = testJobClient.scheduleDeviceMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        JobResult jobResult = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
 
         //assert
         assertNotNull(jobResult);

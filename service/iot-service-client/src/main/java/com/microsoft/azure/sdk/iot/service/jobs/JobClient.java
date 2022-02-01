@@ -29,7 +29,6 @@ import java.net.Proxy;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 
@@ -45,7 +44,7 @@ public class JobClient
     private TokenCredentialCache credentialCache;
     private AzureSasCredential azureSasCredential;
     private IotHubConnectionString iotHubConnectionString;
-    private JobClientOptions options;
+    private JobClientOptions clientOptions;
 
     /**
      * Constructor to create instance from connection string
@@ -61,11 +60,11 @@ public class JobClient
      * Constructor to create instance from connection string
      *
      * @param connectionString The iot hub connection string
-     * @param options The connection options to use when connecting to the service.
+     * @param clientOptions The connection clientOptions to use when connecting to the service.
      */
-    public JobClient(String connectionString, JobClientOptions options)
+    public JobClient(String connectionString, JobClientOptions clientOptions)
     {
-        Objects.requireNonNull(options);
+        Objects.requireNonNull(clientOptions);
         if (connectionString == null || connectionString.isEmpty())
         {
             throw new IllegalArgumentException("connection string cannot be null or empty");
@@ -73,7 +72,7 @@ public class JobClient
 
         this.iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         this.hostName = this.iotHubConnectionString.getHostName();
-        this.options = options;
+        this.clientOptions = clientOptions;
         commonConstructorSetup();
     }
 
@@ -95,12 +94,12 @@ public class JobClient
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
      * this library when they are needed. The provided tokens must be Json Web Tokens.
-     * @param options The connection options to use when connecting to the service.
+     * @param clientOptions The connection clientOptions to use when connecting to the service.
      */
-    public JobClient(String hostName, TokenCredential credential, JobClientOptions options)
+    public JobClient(String hostName, TokenCredential credential, JobClientOptions clientOptions)
     {
         Objects.requireNonNull(credential);
-        Objects.requireNonNull(options);
+        Objects.requireNonNull(clientOptions);
 
         if (hostName == null || hostName.isEmpty())
         {
@@ -109,7 +108,7 @@ public class JobClient
 
         this.hostName = hostName;
         this.credentialCache = new TokenCredentialCache(credential);
-        this.options = options;
+        this.clientOptions = clientOptions;
         commonConstructorSetup();
     }
 
@@ -129,12 +128,12 @@ public class JobClient
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
-     * @param options The connection options to use when connecting to the service.
+     * @param clientOptions The connection clientOptions to use when connecting to the service.
      */
-    public JobClient(String hostName, AzureSasCredential azureSasCredential, JobClientOptions options)
+    public JobClient(String hostName, AzureSasCredential azureSasCredential, JobClientOptions clientOptions)
     {
         Objects.requireNonNull(azureSasCredential);
-        Objects.requireNonNull(options);
+        Objects.requireNonNull(clientOptions);
 
         if (hostName == null || hostName.isEmpty())
         {
@@ -143,7 +142,7 @@ public class JobClient
 
         this.hostName = hostName;
         this.azureSasCredential = azureSasCredential;
-        this.options = options;
+        this.clientOptions = clientOptions;
         commonConstructorSetup();
     }
 
@@ -214,7 +213,7 @@ public class JobClient
             throw new IllegalArgumentException("Invalid JobId to create url");
         }
 
-        ProxyOptions proxyOptions = options.getProxyOptions();
+        ProxyOptions proxyOptions = clientOptions.getProxyOptions();
         Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
 
         HttpRequest httpRequest = new HttpRequest(
@@ -224,12 +223,12 @@ public class JobClient
             this.getAuthenticationToken(),
             proxy);
 
-        httpRequest.setReadTimeoutMillis(options.getHttpReadTimeout());
-        httpRequest.setConnectTimeoutMillis(options.getHttpConnectTimeout());
+        httpRequest.setReadTimeoutMillis(clientOptions.getHttpReadTimeout());
+        httpRequest.setConnectTimeoutMillis(clientOptions.getHttpConnectTimeout());
 
         HttpResponse response = httpRequest.send();
 
-        return new JobResult(response.getBody());
+        return new JobResult(new String(response.getBody()));
     }
 
     /**
@@ -238,26 +237,40 @@ public class JobClient
      * @param jobId Unique Job Id for this job
      * @param queryCondition Query condition to evaluate which devices to run the job on. It can be {@code null} or empty
      * @param methodName Method name to be invoked
-     * @param responseTimeoutInSeconds Maximum interval of time, in seconds, that the Direct Method will wait for answer. It can be {@code null}.
-     * @param connectTimeoutInSeconds Maximum interval of time, in seconds, that the Direct Method will wait for the connection. It can be {@code null}.
-     * @param payload Object that contains the payload defined by the user. It can be {@code null}.
      * @param startTimeUtc Date time in Utc to start the job
-     * @param maxExecutionTimeInSeconds Max execution time in seconds, i.e., ttl duration the job can run
      * @return a jobResult object
-     * @throws IllegalArgumentException if one of the provided parameters is invalid
      * @throws IOException if the function cannot create a URL for the job, or the IO failed on request
      * @throws IotHubException if the http request failed
      */
-    public JobResult scheduleDeviceMethod(
+    public JobResult scheduleDirectMethod(
         String jobId,
         String queryCondition,
         String methodName,
-        Long responseTimeoutInSeconds,
-        Long connectTimeoutInSeconds,
-        Object payload,
+        Date startTimeUtc)
+            throws IOException, IotHubException
+    {
+        return scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, ScheduleDirectMethodOptions.builder().build());
+    }
+
+    /**
+     * Creates a new Job to invoke method on one or multiple devices
+     *
+     * @param jobId Unique Job Id for this job
+     * @param queryCondition Query condition to evaluate which devices to run the job on. It can be {@code null} or empty
+     * @param methodName Method name to be invoked
+     * @param startTimeUtc Date time in Utc to start the job
+     * @param options the optional parameters for this request. May not be null.
+     * @return a jobResult object
+     * @throws IOException if the function cannot create a URL for the job, or the IO failed on request
+     * @throws IotHubException if the http request failed
+     */
+    public JobResult scheduleDirectMethod(
+        String jobId,
+        String queryCondition,
+        String methodName,
         Date startTimeUtc,
-        long maxExecutionTimeInSeconds)
-        throws IllegalArgumentException, IOException, IotHubException
+        ScheduleDirectMethodOptions options)
+            throws IOException, IotHubException
     {
         URL url;
 
@@ -276,7 +289,9 @@ public class JobClient
             throw new IllegalArgumentException("startTimeUtc cannot be null");
         }
 
-        if (maxExecutionTimeInSeconds < 0)
+        Objects.requireNonNull(options);
+
+        if (options.getMaxExecutionTimeInSeconds() < 0)
         {
             throw new IllegalArgumentException("maxExecutionTimeInSeconds cannot be less than 0");
         }
@@ -284,9 +299,9 @@ public class JobClient
         MethodParser cloudToDeviceMethod =
             new MethodParser(
                 methodName,
-                responseTimeoutInSeconds,
-                connectTimeoutInSeconds,
-                payload);
+                options.getMethodResponseTimeout(),
+                options.getMethodConnectTimeout(),
+                options.getPayload());
 
         JobsParser jobsParser =
             new JobsParser(
@@ -294,7 +309,7 @@ public class JobClient
                 cloudToDeviceMethod,
                 queryCondition,
                 startTimeUtc,
-                maxExecutionTimeInSeconds);
+                options.getMaxExecutionTimeInSeconds());
 
         String json = jobsParser.toJson();
 
@@ -307,7 +322,7 @@ public class JobClient
             throw new IllegalArgumentException("Invalid JobId to create url");
         }
 
-        ProxyOptions proxyOptions = options.getProxyOptions();
+        ProxyOptions proxyOptions = this.clientOptions.getProxyOptions();
         Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
 
         HttpRequest httpRequest = new HttpRequest(
@@ -317,12 +332,12 @@ public class JobClient
             this.getAuthenticationToken(),
             proxy);
 
-        httpRequest.setReadTimeoutMillis(options.getHttpReadTimeout());
-        httpRequest.setConnectTimeoutMillis(options.getHttpConnectTimeout());
+        httpRequest.setReadTimeoutMillis(this.clientOptions.getHttpReadTimeout());
+        httpRequest.setConnectTimeoutMillis(this.clientOptions.getHttpConnectTimeout());
 
         HttpResponse response = httpRequest.send();
 
-        return new JobResult(response.getBody());
+        return new JobResult(new String(response.getBody()));
     }
 
     /**
@@ -353,7 +368,7 @@ public class JobClient
             throw new IllegalArgumentException("Invalid JobId to create url");
         }
 
-        ProxyOptions proxyOptions = options.getProxyOptions();
+        ProxyOptions proxyOptions = clientOptions.getProxyOptions();
         Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
 
         HttpRequest httpRequest = new HttpRequest(
@@ -363,12 +378,12 @@ public class JobClient
             this.getAuthenticationToken(),
             proxy);
 
-        httpRequest.setReadTimeoutMillis(options.getHttpReadTimeout());
-        httpRequest.setConnectTimeoutMillis(options.getHttpConnectTimeout());
+        httpRequest.setReadTimeoutMillis(clientOptions.getHttpReadTimeout());
+        httpRequest.setConnectTimeoutMillis(clientOptions.getHttpConnectTimeout());
 
         HttpResponse response = httpRequest.send();
 
-        return new JobResult(response.getBody());
+        return new JobResult(new String(response.getBody()));
     }
 
     /**
@@ -398,7 +413,7 @@ public class JobClient
             throw new IllegalArgumentException("Invalid JobId to create url");
         }
 
-        ProxyOptions proxyOptions = options.getProxyOptions();
+        ProxyOptions proxyOptions = clientOptions.getProxyOptions();
         Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
 
         HttpRequest httpRequest = new HttpRequest(
@@ -408,12 +423,12 @@ public class JobClient
             this.getAuthenticationToken(),
             proxy);
 
-        httpRequest.setReadTimeoutMillis(options.getHttpReadTimeout());
-        httpRequest.setConnectTimeoutMillis(options.getHttpConnectTimeout());
+        httpRequest.setReadTimeoutMillis(clientOptions.getHttpReadTimeout());
+        httpRequest.setConnectTimeoutMillis(clientOptions.getHttpConnectTimeout());
 
         HttpResponse response = httpRequest.send();
 
-        return new JobResult(response.getBody());
+        return new JobResult(new String(response.getBody()));
     }
 
     private TwinState getParserFromDevice(Twin device)
@@ -479,7 +494,7 @@ public class JobClient
     {
         // Three different constructor types for this class, and each type provides either a TokenCredential implementation,
         // an AzureSasCredential instance, or just the connection string. The sas token can be retrieved from the non-null
-        // one of the three options.
+        // one of the three clientOptions.
         if (this.credentialCache != null)
         {
             return this.credentialCache.getTokenString();

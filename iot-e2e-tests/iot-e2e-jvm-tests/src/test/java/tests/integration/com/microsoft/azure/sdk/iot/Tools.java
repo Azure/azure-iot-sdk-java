@@ -15,6 +15,8 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClientOptions;
+import com.microsoft.azure.sdk.iot.service.query.QueryClient;
+import com.microsoft.azure.sdk.iot.service.query.QueryClientOptions;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
@@ -99,12 +101,20 @@ public class Tools
         return new DigitalTwinClient(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
     }
 
-    public static TwinClient buildDeviceTwinClientWithTokenCredential()
+    public static TwinClient buildTwinClientWithTokenCredential()
     {
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
         TokenCredential tokenCredential = buildTokenCredentialFromEnvironment();
         TwinClientOptions options = TwinClientOptions.builder().build();
         return new TwinClient(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
+    }
+
+    public static QueryClient buildQueryClientWithTokenCredential()
+    {
+        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+        TokenCredential tokenCredential = buildTokenCredentialFromEnvironment();
+        QueryClientOptions options = QueryClientOptions.builder().build();
+        return new QueryClient(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
     }
 
     public static TokenCredential buildTokenCredentialFromEnvironment()

@@ -24,6 +24,8 @@ import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.customized.DigitalTwinGetHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.serialization.BasicDigitalTwin;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.query.QueryClient;
+import com.microsoft.azure.sdk.iot.service.query.TwinQueryResponse;
 import com.microsoft.rest.ServiceResponseWithHeaders;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assume;
@@ -192,7 +194,7 @@ public class TokenCredentialTests
     {
         Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
 
-        TwinClient twinServiceClient = buildDeviceTwinClientWithTokenCredential();
+        TwinClient twinServiceClient = buildTwinClientWithTokenCredential();
 
         RegistryManager registryManager = new RegistryManager(iotHubConnectionString);
         Device device = Device.createDevice("some-device-" + UUID.randomUUID(), AuthenticationType.SAS);
@@ -201,6 +203,19 @@ public class TokenCredentialTests
         Twin twin = twinServiceClient.getTwin(device.getDeviceId());
 
         assertNotNull(twin.getETag());
+    }
+
+    @Test
+    public void testQueryTwinWithTokenCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
+    {
+        Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
+
+        QueryClient queryClient = buildQueryClientWithTokenCredential();
+
+        TwinQueryResponse twinQueryResponse = queryClient.queryTwins("SELECT * FROM devices");
+
+        // only testing that authentication works, so no need to delve deeper into what the query response contents are
+        assertNotNull(twinQueryResponse);
     }
 
     private DeviceClient createDeviceClient(IotHubClientProtocol protocol, RegistryManager registryManager) throws IOException, IotHubException, URISyntaxException

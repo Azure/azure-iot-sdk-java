@@ -5,19 +5,25 @@ package com.microsoft.azure.sdk.iot.service.query;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
+import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
+import com.microsoft.azure.sdk.iot.service.jobs.JobType;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
-public class JobsQueryResponse //TODO probably need to split this in two since one job query returns jobs and the other returns results I think?
+public class JobQueryResponse //TODO probably need to split this in two since one job query returns jobs and the other returns results I think?
 {
     private final transient Gson gson;
 
@@ -29,22 +35,45 @@ public class JobsQueryResponse //TODO probably need to split this in two since o
 
     final QueryClient queryClient;
     final String originalQuery;
+    final JobType jobType;
+    final JobStatus jobStatus;
 
-    JobsQueryResponse(String json, QueryClient queryClient, String originalQuery)
+    JobQueryResponse(String json, QueryClient queryClient, String originalQuery)
     {
         gson = new GsonBuilder().disableHtmlEscaping().create();
 
-        try
+        JsonObject[] twinJsonArray = gson.fromJson(json, JsonObject[].class);
+        List<JobResult> jobsArray = new ArrayList<>();
+        for (JsonObject twinJson : twinJsonArray)
         {
-            this.jobs = Arrays.asList(gson.fromJson(json, JobResult[].class)).iterator();
+            jobsArray.add(new JobResult(twinJson.toString()));
         }
-        catch (JsonSyntaxException malformed)
-        {
-            throw new IllegalArgumentException("Malformed json:" + malformed);
-        }
+
+        this.jobs = jobsArray.iterator();
 
         this.queryClient = queryClient;
         this.originalQuery = originalQuery;
+        this.jobType = null;
+        this.jobStatus = null;
+    }
+
+    JobQueryResponse(String json, QueryClient queryClient, JobType jobType, JobStatus jobStatus)
+    {
+        gson = new GsonBuilder().disableHtmlEscaping().create();
+
+        JsonObject[] twinJsonArray = gson.fromJson(json, JsonObject[].class);
+        List<JobResult> jobsArray = new ArrayList<>();
+        for (JsonObject twinJson : twinJsonArray)
+        {
+            jobsArray.add(new JobResult(twinJson.toString()));
+        }
+
+        this.jobs = jobsArray.iterator();
+
+        this.queryClient = queryClient;
+        this.originalQuery = null;
+        this.jobType = jobType;
+        this.jobStatus = jobStatus;
     }
 
     public boolean hasNext()
@@ -59,6 +88,8 @@ public class JobsQueryResponse //TODO probably need to split this in two since o
 
     public JobResult next(QueryPageOptions pageOptions) throws IotHubException, IOException
     {
+        Objects.requireNonNull(pageOptions);
+
         try
         {
             return this.jobs.next();
@@ -69,7 +100,7 @@ public class JobsQueryResponse //TODO probably need to split this in two since o
 
             if (this.continuationToken == null)
             {
-                return null;
+                throw ex;
             }
 
             QueryPageOptions nextPageOptions =
@@ -78,7 +109,16 @@ public class JobsQueryResponse //TODO probably need to split this in two since o
                     .pageSize(pageOptions.pageSize)
                     .build();
 
-            JobsQueryResponse nextPage = this.queryClient.queryJobs(this.originalQuery, nextPageOptions);
+            JobQueryResponse nextPage;
+            if (this.originalQuery != null)
+            {
+                nextPage = this.queryClient.queryJobs(this.originalQuery, nextPageOptions);
+            }
+            else
+            {
+                nextPage = this.queryClient.queryJobs(this.jobType, this.jobStatus, nextPageOptions);
+            }
+
             this.jobs = nextPage.jobs;
             this.continuationToken = nextPage.continuationToken;
 

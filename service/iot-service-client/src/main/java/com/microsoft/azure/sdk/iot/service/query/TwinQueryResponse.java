@@ -3,7 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.service.query;
 
-import com.fasterxml.jackson.databind.util.ArrayIterator;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -16,12 +15,12 @@ import lombok.Setter;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
-public class TwinsQueryResponse
+public class TwinQueryResponse
 {
     private final transient Gson gson;
 
@@ -34,7 +33,7 @@ public class TwinsQueryResponse
     final QueryClient queryClient;
     final String originalQuery;
 
-    public TwinsQueryResponse(String json, QueryClient queryClient, String originalQuery)
+    public TwinQueryResponse(String json, QueryClient queryClient, String originalQuery)
     {
         gson = new GsonBuilder().disableHtmlEscaping().create();
 
@@ -70,6 +69,8 @@ public class TwinsQueryResponse
 
     public Twin next(QueryPageOptions pageOptions) throws IotHubException, IOException
     {
+        Objects.requireNonNull(pageOptions);
+
         try
         {
             return this.twins.next();
@@ -80,7 +81,7 @@ public class TwinsQueryResponse
 
             if (this.continuationToken == null)
             {
-                return null;
+                throw ex;
             }
 
             QueryPageOptions nextPageOptions =
@@ -89,7 +90,7 @@ public class TwinsQueryResponse
                     .pageSize(pageOptions.pageSize)
                     .build();
 
-            TwinsQueryResponse nextPage = this.queryClient.queryTwins(this.originalQuery, nextPageOptions);
+            TwinQueryResponse nextPage = this.queryClient.queryTwins(this.originalQuery, nextPageOptions);
             this.twins = nextPage.twins;
             this.continuationToken = nextPage.continuationToken;
 

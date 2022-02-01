@@ -6,7 +6,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.azure.core.credential.AzureSasCredential;
-import com.microsoft.azure.sdk.iot.service.query.JobsQueryResponse;
+import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.service.query.QueryClientOptions;
 import com.microsoft.azure.sdk.iot.service.serializers.ErrorCodeDescription;
@@ -30,8 +30,6 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.devicetwin.TwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.query.SqlQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
-import com.microsoft.azure.sdk.iot.service.jobs.JobClientOptions;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
 import lombok.extern.slf4j.Slf4j;
 
@@ -251,12 +249,12 @@ public class AzureSasCredentialSample
             System.out.println("Querying all active jobs for your IoT Hub");
 
             String jobQueryString = SqlQuery.createSqlQuery("*", SqlQuery.FromType.JOBS, null, null).getQuery();
-            JobsQueryResponse jobsQueryResponse = queryClient.queryJobs(jobQueryString);
+            JobQueryResponse jobQueryResponse = queryClient.queryJobs(jobQueryString);
             int queriedJobCount = 0;
-            while (jobsQueryResponse.hasNext())
+            while (jobQueryResponse.hasNext())
             {
                 queriedJobCount++;
-                JobResult job = jobsQueryResponse.next();
+                JobResult job = jobQueryResponse.next();
                 System.out.println(String.format("Job %s of type %s has status %s", job.getJobId(), job.getJobType(), job.getJobStatus()));
             }
 

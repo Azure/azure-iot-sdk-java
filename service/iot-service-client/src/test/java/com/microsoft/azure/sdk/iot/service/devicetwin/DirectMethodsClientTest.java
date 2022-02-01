@@ -497,7 +497,7 @@ public class DirectMethodsClientTest
         };
     }
 
-    /* Tests_SRS_DEVICEMETHOD_21_016: [If the methodName is null or empty, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
+    /* Tests_SRS_DEVICEMETHOD_21_016: [If the methodName is null or empty, the scheduleDirectMethod shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void scheduleDeviceMethodThrowOnMethodNameNull() throws IOException, IotHubException
     {
@@ -512,7 +512,7 @@ public class DirectMethodsClientTest
         testMethod.scheduleDeviceMethod(queryCondition, methodName, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP, now, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_DEVICEMETHOD_21_016: [If the methodName is null or empty, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
+    /* Tests_SRS_DEVICEMETHOD_21_016: [If the methodName is null or empty, the scheduleDirectMethod shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void scheduleDeviceMethodThrowOnEmptyMethodName() throws IOException, IotHubException
     {
@@ -527,7 +527,7 @@ public class DirectMethodsClientTest
         testMethod.scheduleDeviceMethod(queryCondition, methodName, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP, now, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_DEVICEMETHOD_21_017: [If the startTimeUtc is null, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
+    /* Tests_SRS_DEVICEMETHOD_21_017: [If the startTimeUtc is null, the scheduleDirectMethod shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void scheduleDeviceMethodThrowOnStartTimeUtcNull() throws IOException, IotHubException
     {
@@ -541,7 +541,7 @@ public class DirectMethodsClientTest
         testMethod.scheduleDeviceMethod(queryCondition, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP, now, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_DEVICEMETHOD_21_018: [If the maxExecutionTimeInSeconds is negative, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
+    /* Tests_SRS_DEVICEMETHOD_21_018: [If the maxExecutionTimeInSeconds is negative, the scheduleDirectMethod shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void scheduleDeviceMethodThrowOnInvalidMaxExecutionTimeInSeconds() throws IOException, IotHubException
     {
@@ -555,8 +555,8 @@ public class DirectMethodsClientTest
         testMethod.scheduleDeviceMethod(queryCondition, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP, now, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_DEVICEMETHOD_21_019: [The scheduleDeviceMethod shall create a new instance of the Job class.] */
-    /* Tests_SRS_DEVICEMETHOD_21_023: [The scheduleDeviceMethod shall return the created instance of the Job class.] */
+    /* Tests_SRS_DEVICEMETHOD_21_019: [The scheduleDirectMethod shall create a new instance of the Job class.] */
+    /* Tests_SRS_DEVICEMETHOD_21_023: [The scheduleDirectMethod shall return the created instance of the Job class.] */
     @Test
     public void scheduleDeviceMethodCreateJobSucceed(@Mocked Job mockedJob) throws IOException, IotHubException
     {
@@ -585,7 +585,7 @@ public class DirectMethodsClientTest
         assertNotNull(job);
     }
 
-    /* Tests_SRS_DEVICEMETHOD_21_020: [If the scheduleDeviceMethod failed to create a new instance of the Job class, it shall throws IOException. Threw by the Jobs constructor.] */
+    /* Tests_SRS_DEVICEMETHOD_21_020: [If the scheduleDirectMethod failed to create a new instance of the Job class, it shall throws IOException. Threw by the Jobs constructor.] */
     @Test (expected = IOException.class)
     public void scheduleDeviceMethodCreateJobThrow(@Mocked Job mockedJob) throws IOException, IotHubException
     {
@@ -611,7 +611,7 @@ public class DirectMethodsClientTest
         testMethod.scheduleDeviceMethod(queryCondition, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP, now, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_DEVICEMETHOD_21_021: [The scheduleDeviceMethod shall invoke the scheduleDeviceMethod in the Job class with the received parameters.] */
+    /* Tests_SRS_DEVICEMETHOD_21_021: [The scheduleDirectMethod shall invoke the scheduleDirectMethod in the Job class with the received parameters.] */
     @Test
     public void scheduleDeviceMethodScheduleDeviceMethodSucceed(@Mocked Job mockedJob) throws IOException, IotHubException
     {
@@ -639,13 +639,13 @@ public class DirectMethodsClientTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockedJob, "scheduleDeviceMethod", queryCondition, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP, now, maxExecutionTimeInSeconds);
+                Deencapsulation.invoke(mockedJob, "scheduleDirectMethod", queryCondition, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP, now, maxExecutionTimeInSeconds);
                 times = 1;
             }
         };
     }
 
-    /* Tests_SRS_DEVICEMETHOD_21_022: [If scheduleDeviceMethod failed, the scheduleDeviceMethod shall throws IotHubException. Threw by the scheduleUpdateTwin.] */
+    /* Tests_SRS_DEVICEMETHOD_21_022: [If scheduleDirectMethod failed, the scheduleDirectMethod shall throws IotHubException. Threw by the scheduleUpdateTwin.] */
     @Test (expected = IotHubException.class)
     public void scheduleDeviceMethodScheduleDeviceMethodThrow(@Mocked Job mockedJob) throws IOException, IotHubException
     {
@@ -663,7 +663,7 @@ public class DirectMethodsClientTest
                 result = STANDARD_CONNECTIONSTRING;
                 Deencapsulation.newInstance(Job.class, new Class[]{String.class}, anyString);
                 result = mockedJob;
-                Deencapsulation.invoke(mockedJob, "scheduleDeviceMethod", queryCondition, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP, now, maxExecutionTimeInSeconds);
+                Deencapsulation.invoke(mockedJob, "scheduleDirectMethod", queryCondition, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP, now, maxExecutionTimeInSeconds);
                 result = new IotHubException();
                 times = 1;
             }

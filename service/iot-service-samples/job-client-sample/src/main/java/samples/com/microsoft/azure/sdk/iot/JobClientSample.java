@@ -6,7 +6,7 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.service.devicetwin.Twin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
-import com.microsoft.azure.sdk.iot.service.query.JobsQueryResponse;
+import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.service.query.SqlQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -108,18 +108,18 @@ public class JobClientSample
     {
         System.out.println("Query device job");
         String jobsQueryString = SqlQuery.createSqlQuery("*", SqlQuery.FromType.JOBS, null, null).getQuery();
-        JobsQueryResponse jobsQueryResponse = queryClient.queryJobs(jobsQueryString);
-        while (jobsQueryResponse.hasNext())
+        JobQueryResponse jobQueryResponse = queryClient.queryJobs(jobsQueryString);
+        while (jobQueryResponse.hasNext())
         {
             System.out.println("Query device job response");
-            System.out.println(jobsQueryResponse.next());
+            System.out.println(jobQueryResponse.next());
         }
     }
 
     private static void queryJobsResponse(QueryClient queryClient) throws IOException, IotHubException
     {
         System.out.println("Querying job response");
-        JobsQueryResponse jobResponseQuery = queryClient.queryJobs(JobType.scheduleDeviceMethod, JobStatus.completed);
+        JobQueryResponse jobResponseQuery = queryClient.queryJobs(JobType.scheduleDeviceMethod, JobStatus.completed);
         while (jobResponseQuery.hasNext())
         {
             System.out.println("job response");
@@ -132,7 +132,7 @@ public class JobClientSample
         final String queryCondition = "DeviceId IN ['" + deviceId + "']";
 
         System.out.println("Schedule method job " + jobIdMethod + " for device " + deviceId + "...");
-        JobResult jobResultMethod = jobClient.scheduleDeviceMethod(jobIdMethod, queryCondition, methodName, responseTimeout, connectTimeout, payload, startTimeUtc, maxExecutionTimeInSeconds);
+        JobResult jobResultMethod = jobClient.scheduleDirectMethod(jobIdMethod, queryCondition, methodName, responseTimeout, connectTimeout, payload, startTimeUtc, maxExecutionTimeInSeconds);
         if(jobResultMethod == null)
         {
             throw new IOException("Schedule method Job returns null");

@@ -12,7 +12,6 @@ import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
 import com.microsoft.azure.sdk.iot.service.jobs.JobType;
-import com.microsoft.azure.sdk.iot.service.serializers.QueryRequestParser;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
@@ -28,7 +27,6 @@ import java.util.Objects;
 public class QueryClient
 {
     private static final String CONTINUATION_TOKEN_KEY = "x-ms-continuation";
-    private static final String ITEM_TYPE_KEY = "x-ms-item-type";
     private static final String PAGE_SIZE_KEY = "x-ms-max-item-count";
 
     private final String hostName;
@@ -147,12 +145,12 @@ public class QueryClient
         log.debug("Initialized a QueryClient instance client using SDK version {}", TransportUtils.serviceVersion);
     }
 
-    public TwinsQueryResponse queryTwins(String query) throws IOException, IotHubException
+    public TwinQueryResponse queryTwins(String query) throws IOException, IotHubException
     {
         return queryTwins(query, QueryPageOptions.builder().build());
     }
 
-    public TwinsQueryResponse queryTwins(String query, QueryPageOptions options) throws IOException, IotHubException
+    public TwinQueryResponse queryTwins(String query, QueryPageOptions options) throws IOException, IotHubException
     {
         if (query == null || query.isEmpty())
         {
@@ -181,20 +179,20 @@ public class QueryClient
         HttpResponse httpResponse = httpRequest.send();
 
         String responsePayload = new String(httpResponse.getBody(), StandardCharsets.UTF_8);
-        TwinsQueryResponse twinsQueryResponse = new TwinsQueryResponse(responsePayload, this, query);
+        TwinQueryResponse twinQueryResponse = new TwinQueryResponse(responsePayload, this, query);
 
         String continuationToken = httpResponse.getHeaderFields().get(CONTINUATION_TOKEN_KEY); // may be null
-        twinsQueryResponse.setContinuationToken(continuationToken);
+        twinQueryResponse.setContinuationToken(continuationToken);
 
-        return twinsQueryResponse;
+        return twinQueryResponse;
     }
 
-    public JobsQueryResponse queryJobs(String query) throws IOException, IotHubException
+    public JobQueryResponse queryJobs(String query) throws IOException, IotHubException
     {
         return queryJobs(query, QueryPageOptions.builder().build());
     }
 
-    public JobsQueryResponse queryJobs(String query, QueryPageOptions options) throws IOException, IotHubException
+    public JobQueryResponse queryJobs(String query, QueryPageOptions options) throws IOException, IotHubException
     {
         Proxy proxy = null;
         if (this.options.getProxyOptions() != null)
@@ -217,20 +215,20 @@ public class QueryClient
         HttpResponse httpResponse = httpRequest.send();
 
         String responsePayload = new String(httpResponse.getBody(), StandardCharsets.UTF_8);
-        JobsQueryResponse jobsQueryResponse = new JobsQueryResponse(responsePayload, this, query);
+        JobQueryResponse jobQueryResponse = new JobQueryResponse(responsePayload, this, query);
 
         String continuationToken = httpResponse.getHeaderFields().get(CONTINUATION_TOKEN_KEY); // may be null
-        jobsQueryResponse.setContinuationToken(continuationToken);
+        jobQueryResponse.setContinuationToken(continuationToken);
 
-        return jobsQueryResponse;
+        return jobQueryResponse;
     }
 
-    public JobsQueryResponse queryJobs(JobType jobType, JobStatus jobStatus) throws IOException, IotHubException
+    public JobQueryResponse queryJobs(JobType jobType, JobStatus jobStatus) throws IOException, IotHubException
     {
         return queryJobs(jobType, jobStatus, QueryPageOptions.builder().build());
     }
 
-    public JobsQueryResponse queryJobs(JobType jobType, JobStatus jobStatus, QueryPageOptions options) throws IOException, IotHubException
+    public JobQueryResponse queryJobs(JobType jobType, JobStatus jobStatus, QueryPageOptions options) throws IOException, IotHubException
     {
         String jobTypeString = (jobType == null) ? null : jobType.toString();
         String jobStatusString = (jobStatus == null) ? null : jobStatus.toString();
@@ -253,12 +251,12 @@ public class QueryClient
         HttpResponse httpResponse = httpRequest.send();
 
         String responsePayload = new String(httpResponse.getBody(), StandardCharsets.UTF_8);
-        JobsQueryResponse jobsQueryResponse = new JobsQueryResponse(responsePayload, this, null); //todo wat do here for original query?
+        JobQueryResponse jobQueryResponse = new JobQueryResponse(responsePayload, this, jobType, jobStatus);
 
         String continuationToken = httpResponse.getHeaderFields().get(CONTINUATION_TOKEN_KEY); // may be null
-        jobsQueryResponse.setContinuationToken(continuationToken);
+        jobQueryResponse.setContinuationToken(continuationToken);
 
-        return jobsQueryResponse;
+        return jobQueryResponse;
     }
 
     public RawQueryResponse queryRaw(String query) throws IOException, IotHubException

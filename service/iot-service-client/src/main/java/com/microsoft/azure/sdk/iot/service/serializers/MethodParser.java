@@ -51,14 +51,14 @@ public class MethodParser
     @SerializedName(RESPONSE_TIMEOUT_IN_SECONDS_TAG)
     @Getter
     @Setter
-    private Long responseTimeout;
+    private int responseTimeout;
 
     private static final String CONNECT_TIMEOUT_IN_SECONDS_TAG = "connectTimeoutInSeconds";
     @Expose(deserialize = false)
     @SerializedName(CONNECT_TIMEOUT_IN_SECONDS_TAG)
     @Getter
     @Setter
-    private Long connectTimeout;
+    private int connectTimeout;
 
     private static final String STATUS_TAG = "status";
     @Expose(serialize = false)
@@ -79,8 +79,8 @@ public class MethodParser
     public MethodParser()
     {
         this.name = null;
-        this.responseTimeout = null;
-        this.connectTimeout = null;
+        this.responseTimeout = 0;
+        this.connectTimeout = 0;
         this.status = null;
         this.payload = null;
 
@@ -97,21 +97,14 @@ public class MethodParser
      * @param payload - Object that contains the payload defined by the user. It can be {@code null}.
      * @throws IllegalArgumentException This exception is thrown if the one of the provided information do not fits the requirements.
      */
-    public MethodParser(String name, Long responseTimeout, Long connectTimeout, Object payload) throws IllegalArgumentException
+    public MethodParser(String name, int responseTimeout, int connectTimeout, Object payload) throws IllegalArgumentException
     {
         this();
 
         validateKey(name);
 
-        if (responseTimeout != null)
-        {
-            validateTimeout(responseTimeout);
-        }
-
-        if (connectTimeout != null)
-        {
-            validateTimeout(connectTimeout);
-        }
+        validateTimeout(responseTimeout);
+        validateTimeout(connectTimeout);
 
         this.name = name;
         this.responseTimeout = responseTimeout;
@@ -235,13 +228,13 @@ public class MethodParser
                         JsonElement responseTimeoutNode = jsonObject.get(RESPONSE_TIMEOUT_IN_SECONDS_TAG);
                         if (responseTimeoutNode != null)
                         {
-                            responseTimeout = responseTimeoutNode.getAsLong();
+                            responseTimeout = responseTimeoutNode.getAsInt();
 
                         }
                         JsonElement connetionTimeoutNode = jsonObject.get(CONNECT_TIMEOUT_IN_SECONDS_TAG);
                         if (connetionTimeoutNode != null)
                         {
-                            connectTimeout = connetionTimeoutNode.getAsLong();
+                            connectTimeout = connetionTimeoutNode.getAsInt();
                         }
                         JsonElement payloadNode = jsonObject.get(PAYLOAD_TAG);
                         if (payloadNode != null)
@@ -367,11 +360,11 @@ public class MethodParser
             }
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty(METHOD_NAME_TAG, name);
-            if (responseTimeout != null)
+            if (responseTimeout != 0)
             {
                 jsonObject.addProperty(RESPONSE_TIMEOUT_IN_SECONDS_TAG, responseTimeout);
             }
-            if (connectTimeout != null)
+            if (connectTimeout != 0)
             {
                 jsonObject.addProperty(CONNECT_TIMEOUT_IN_SECONDS_TAG, connectTimeout);
             }
@@ -441,7 +434,7 @@ public class MethodParser
      * @param timeout is the timeout value in seconds.
      * @throws IllegalArgumentException This exception is thrown if the provided timeout value do not fits the requirements.
      */
-    private void validateTimeout(Long timeout) throws IllegalArgumentException
+    private void validateTimeout(int timeout) throws IllegalArgumentException
     {
         if (timeout < 0)
         {

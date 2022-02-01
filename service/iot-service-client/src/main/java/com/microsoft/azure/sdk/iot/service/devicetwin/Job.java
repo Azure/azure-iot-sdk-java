@@ -125,7 +125,7 @@ public class Job
             throw new IllegalArgumentException("maxExecutionTimeInSeconds cannot be negative");
         }
 
-        JobResult jobResult = this.jobClient.scheduleDeviceMethod(
+        JobResult jobResult = this.jobClient.scheduleDirectMethod(
             jobId,
             queryCondition,
             methodName,

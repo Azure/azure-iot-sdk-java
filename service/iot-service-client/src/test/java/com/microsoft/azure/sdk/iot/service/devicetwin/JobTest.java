@@ -283,7 +283,7 @@ public class JobTest
                 queryCondition, deviceTwin, now, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_JOB_21_012: [If the methodName is null or empty, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
+    /* Tests_SRS_JOB_21_012: [If the methodName is null or empty, the scheduleDirectMethod shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void scheduleDeviceMethodThrowOnNullMethodName() throws IOException
     {
@@ -297,12 +297,12 @@ public class JobTest
         Job job = Deencapsulation.newInstance(Job.class, new Class[]{String.class}, connectionString);
 
         // act
-        Deencapsulation.invoke(job, "scheduleDeviceMethod",
+        Deencapsulation.invoke(job, "scheduleDirectMethod",
                 new Class[]{String.class, String.class, Long.class, Long.class, Object.class, Date.class, Long.class},
                 queryCondition, methodName, null, null, payload, now, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_JOB_21_012: [If the methodName is null or empty, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
+    /* Tests_SRS_JOB_21_012: [If the methodName is null or empty, the scheduleDirectMethod shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void scheduleDeviceMethodThrowOnEmptyMethodName() throws IOException
     {
@@ -316,12 +316,12 @@ public class JobTest
         Job job = Deencapsulation.newInstance(Job.class, new Class[]{String.class}, connectionString);
 
         // act
-        Deencapsulation.invoke(job, "scheduleDeviceMethod",
+        Deencapsulation.invoke(job, "scheduleDirectMethod",
                 new Class[]{String.class, String.class, Long.class, Long.class, Object.class, Date.class, Long.class},
                 queryCondition, methodName, null, null, payload, now, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_JOB_21_013: [If the startTimeUtc is null, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
+    /* Tests_SRS_JOB_21_013: [If the startTimeUtc is null, the scheduleDirectMethod shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void scheduleDeviceMethodThrowOnNullStartTimeUtc() throws IOException
     {
@@ -335,12 +335,12 @@ public class JobTest
         Job job = Deencapsulation.newInstance(Job.class, new Class[]{String.class}, connectionString);
 
         // act
-        Deencapsulation.invoke(job, "scheduleDeviceMethod",
+        Deencapsulation.invoke(job, "scheduleDirectMethod",
                 new Class[]{String.class, String.class, Long.class, Long.class, Object.class, Date.class, Long.class},
                 queryCondition, methodName, null, null, payload, now, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_JOB_21_014: [If the maxExecutionTimeInSeconds is negative, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
+    /* Tests_SRS_JOB_21_014: [If the maxExecutionTimeInSeconds is negative, the scheduleDirectMethod shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void scheduleDeviceMethodThrowOnInvalidMaxExecutionTimeInSeconds() throws IOException
     {
@@ -354,12 +354,12 @@ public class JobTest
         Job job = Deencapsulation.newInstance(Job.class, new Class[]{String.class}, connectionString);
 
         // act
-        Deencapsulation.invoke(job, "scheduleDeviceMethod",
+        Deencapsulation.invoke(job, "scheduleDirectMethod",
                 new Class[]{String.class, String.class, Long.class, Long.class, Object.class, Date.class, Long.class},
                 queryCondition, methodName, null, null, payload, now, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_JOB_21_015: [The scheduleDeviceMethod shall invoke the scheduleDeviceMethod in the JobClient class with the received parameters.] */
+    /* Tests_SRS_JOB_21_015: [The scheduleDirectMethod shall invoke the scheduleDirectMethod in the JobClient class with the received parameters.] */
     @Test
     public void scheduleDeviceMethodInvokeJobClient() throws IOException, IotHubException
     {
@@ -377,7 +377,7 @@ public class JobTest
             {
                 new JobClient(connectionString);
                 result = mockedJobClient;
-                mockedJobClient.scheduleDeviceMethod((String)any, queryCondition, methodName, null, null, payload, now, maxExecutionTimeInSeconds);
+                mockedJobClient.scheduleDirectMethod((String)any, queryCondition, methodName, null, null, payload, now, maxExecutionTimeInSeconds);
                 result = mockedJobResult;
                 times = 1;
                 mockedJobResult.getJobStatus();
@@ -388,12 +388,12 @@ public class JobTest
         Job job = Deencapsulation.newInstance(Job.class, new Class[]{String.class}, connectionString);
 
         // act
-        Deencapsulation.invoke(job, "scheduleDeviceMethod",
+        Deencapsulation.invoke(job, "scheduleDirectMethod",
                 new Class[]{String.class, String.class, Long.class, Long.class, Object.class, Date.class, Long.class},
                 queryCondition, methodName, null, null, payload, now, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_JOB_21_016: [If scheduleDeviceMethod failed, the scheduleDeviceMethod shall throws IotHubException. Threw by the scheduleUpdateTwin.] */
+    /* Tests_SRS_JOB_21_016: [If scheduleDirectMethod failed, the scheduleDirectMethod shall throws IotHubException. Threw by the scheduleUpdateTwin.] */
     @Test (expected = IOException.class)
     public void scheduleDeviceMethodThrowOnInvokeJobClient() throws IOException, IotHubException
     {
@@ -411,7 +411,7 @@ public class JobTest
             {
                 new JobClient(connectionString);
                 result = mockedJobClient;
-                mockedJobClient.scheduleDeviceMethod((String)any, queryCondition, methodName, null, null, payload, now, maxExecutionTimeInSeconds);
+                mockedJobClient.scheduleDirectMethod((String)any, queryCondition, methodName, null, null, payload, now, maxExecutionTimeInSeconds);
                 result = new IOException();
                 times = 1;
             }
@@ -420,12 +420,12 @@ public class JobTest
         Job job = Deencapsulation.newInstance(Job.class, new Class[]{String.class}, connectionString);
 
         // act
-        Deencapsulation.invoke(job, "scheduleDeviceMethod",
+        Deencapsulation.invoke(job, "scheduleDirectMethod",
                 new Class[]{String.class, String.class, Long.class, Long.class, Object.class, Date.class, Long.class},
                 queryCondition, methodName, null, null, payload, now, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_JOB_21_017: [If the Iothub reported fail as result of the scheduleDeviceMethod, the scheduleDeviceMethod shall throws IotHubException.] */
+    /* Tests_SRS_JOB_21_017: [If the Iothub reported fail as result of the scheduleDirectMethod, the scheduleDirectMethod shall throws IotHubException.] */
     @Test (expected = IotHubException.class)
     public void scheduleDeviceMethodThrowOnInvokeJobClientFail() throws IOException, IotHubException
     {
@@ -443,7 +443,7 @@ public class JobTest
             {
                 new JobClient(connectionString);
                 result = mockedJobClient;
-                mockedJobClient.scheduleDeviceMethod((String)any, queryCondition, methodName, null, null, payload, now, maxExecutionTimeInSeconds);
+                mockedJobClient.scheduleDirectMethod((String)any, queryCondition, methodName, null, null, payload, now, maxExecutionTimeInSeconds);
                 result = mockedJobResult;
                 mockedJobResult.getJobStatus();
                 result = JobStatus.failed;
@@ -453,7 +453,7 @@ public class JobTest
         Job job = Deencapsulation.newInstance(Job.class, new Class[]{String.class}, connectionString);
 
         // act
-        Deencapsulation.invoke(job, "scheduleDeviceMethod",
+        Deencapsulation.invoke(job, "scheduleDirectMethod",
                 new Class[]{String.class, String.class, Long.class, Long.class, Object.class, Date.class, Long.class},
                 queryCondition, methodName, null, null, payload, now, maxExecutionTimeInSeconds);
     }

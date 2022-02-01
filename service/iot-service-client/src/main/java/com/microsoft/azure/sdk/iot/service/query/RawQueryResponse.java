@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 public class RawQueryResponse
 {
@@ -59,6 +60,8 @@ public class RawQueryResponse
 
     public String next(QueryPageOptions pageOptions) throws IotHubException, IOException
     {
+        Objects.requireNonNull(pageOptions);
+
         try
         {
             return this.jsonObjects.next().toString();
@@ -69,7 +72,7 @@ public class RawQueryResponse
 
             if (this.continuationToken == null)
             {
-                return null;
+                throw ex;
             }
 
             QueryPageOptions nextPageOptions =

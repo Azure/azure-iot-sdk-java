@@ -382,7 +382,7 @@ public class JobResultTest
                 mockedJobsResponseParser.getJobId();
                 result = JOB_ID;
                 mockedJobsResponseParser.getType();
-                result = "scheduleDeviceMethod";
+                result = "scheduleDirectMethod";
                 mockedJobsResponseParser.getJobsStatus();
                 result = "completed";
                 mockedJobsResponseParser.getCloudToDeviceMethod();
@@ -437,7 +437,7 @@ public class JobResultTest
                 mockedJobsResponseParser.getJobId();
                 result = JOB_ID;
                 mockedJobsResponseParser.getType();
-                result = "scheduleDeviceMethod";
+                result = "scheduleDirectMethod";
                 mockedJobsResponseParser.getJobsStatus();
                 result = "completed";
                 mockedJobsResponseParser.getCloudToDeviceMethod();

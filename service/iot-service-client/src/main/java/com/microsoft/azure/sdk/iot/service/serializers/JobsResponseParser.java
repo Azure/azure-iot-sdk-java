@@ -244,9 +244,17 @@ public class JobsResponseParser
             if (responseMap.containsKey(DEVICE_METHOD_RESPONSE_TAG))
             {
                 MethodParser methodParserResponse = new MethodParser();
-                String outcomeResponse = gson.toJson(responseMap.get(DEVICE_METHOD_RESPONSE_TAG));
-                methodParserResponse.fromJson(outcomeResponse);
-                jobsResponseParser.methodResponse = methodParserResponse;
+                Object value = responseMap.get(DEVICE_METHOD_RESPONSE_TAG);
+                if (value == null)
+                {
+                    jobsResponseParser.methodResponse = null;
+                }
+                else
+                {
+                    String outcomeResponse = gson.toJson(value);
+                    methodParserResponse.fromJson(outcomeResponse);
+                    jobsResponseParser.methodResponse = methodParserResponse;
+                }
             }
             else
             {
@@ -450,7 +458,7 @@ public class JobsResponseParser
      * Getter for cloud to device method json
      *
      * @return the json of cloud to device method. It is {@code null} if type
-     * is not scheduleDeviceMethod
+     * is not scheduleDirectMethod
      */
     public MethodParser getCloudToDeviceMethod()
     {
