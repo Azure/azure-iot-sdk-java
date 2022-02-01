@@ -103,6 +103,12 @@ public class IndividualEnrollment extends Serializable
     @SerializedName(DEVICE_REGISTRATION_STATE_TAG)
     private DeviceRegistrationState registrationState;
 
+    // optional device information.
+    private static final String OPTIONAL_DEVICE_INFORMATION_TAG = "optionalDeviceInformation";
+    @Expose
+    @SerializedName(OPTIONAL_DEVICE_INFORMATION_TAG)
+    private TwinCollection optionalDeviceInformation;
+
     // the attestation
     private static final String ATTESTATION_TAG = "attestation";
     @Expose
@@ -276,6 +282,10 @@ public class IndividualEnrollment extends Serializable
         {
             this.setRegistrationState(result.registrationState);
         }
+        if (result.optionalDeviceInformation != null)
+        {
+            this.setOptionalDeviceInformation(result.optionalDeviceInformation);
+        }
 
         if (result.initialTwin != null)
         {
@@ -420,6 +430,29 @@ public class IndividualEnrollment extends Serializable
     protected final void setRegistrationState(DeviceRegistrationState registrationState)
     {
         this.registrationState = registrationState;
+    }
+
+    /**
+     * Getter for the optionalDeviceInformation.
+     *
+     * @return The {@code TwinCollection} with the optional device information. It can be {@code null}.
+     */
+    public TwinCollection getOptionalDeviceInformation() { return this.optionalDeviceInformation; }
+
+    /**
+     * Setter for the optionalDeviceInformation.
+     *
+     * @param optionalDeviceInformation the {@code TwinCollection} with the new optional device information. It cannot be {@code null}.
+     * @throws IllegalArgumentException If the provided optionalDeviceInformation is {@code null}
+     * @see TwinCollection
+     */
+    public void setOptionalDeviceInformation(TwinCollection optionalDeviceInformation)
+    {
+        if (optionalDeviceInformation == null)
+        {
+            throw new IllegalArgumentException("optionalDeviceInformation cannot be null");
+        }
+        this.optionalDeviceInformation = optionalDeviceInformation;
     }
 
     /**
