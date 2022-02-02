@@ -9,6 +9,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
+import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
+import com.microsoft.azure.sdk.iot.service.jobs.JobProperties;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.blob.*;
 
@@ -67,13 +69,13 @@ public class DeviceManagerImportSample
         importBlob.upload(stream, blobToImport.length);
 
         // Starting the import job
-        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
-        JobProperties importJob = registryManager.importDevices(containerSasUri, containerSasUri);
+        JobClient jobClient = new JobClient(SampleUtils.iotHubConnectionString);
+        JobProperties importJob = jobClient.importDevices(containerSasUri, containerSasUri);
 
         // Waiting for the import job to complete
         while(true)
         {
-            importJob = registryManager.getJob(importJob.getJobId());
+            importJob = jobClient.getImportExportJob(importJob.getJobId());
             if (importJob.getStatus() == JobProperties.JobStatus.COMPLETED
                     || importJob.getStatus() == JobProperties.JobStatus.FAILED)
             {

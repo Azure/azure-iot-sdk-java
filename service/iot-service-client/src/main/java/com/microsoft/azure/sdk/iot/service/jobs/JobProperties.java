@@ -3,9 +3,8 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.service;
+package com.microsoft.azure.sdk.iot.service.jobs;
 
-import com.microsoft.azure.sdk.iot.service.jobs.JobPropertiesParser;
 import com.microsoft.azure.sdk.iot.service.serializers.ManagedIdentity;
 import com.microsoft.azure.sdk.iot.service.serializers.StorageAuthenticationType;
 import lombok.Getter;

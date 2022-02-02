@@ -5,6 +5,8 @@ package com.microsoft.azure.sdk.iot.service.jobs;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
+import com.google.gson.JsonSyntaxException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
 import com.microsoft.azure.sdk.iot.service.serializers.MethodParser;
 import com.microsoft.azure.sdk.iot.service.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.service.twin.TwinState;
@@ -39,11 +41,11 @@ public final class JobClient
 {
     private final static byte[] EMPTY_JSON = "{}".getBytes(StandardCharsets.UTF_8);
 
-    private String hostName;
+    private final String hostName;
     private TokenCredentialCache credentialCache;
     private AzureSasCredential azureSasCredential;
     private IotHubConnectionString iotHubConnectionString;
-    private JobClientOptions clientOptions;
+    private final JobClientOptions clientOptions;
 
     /**
      * Constructor to create instance from connection string
@@ -159,7 +161,6 @@ public final class JobClient
      * @param startTimeUtc Date time in Utc to start the job
      * @param maxExecutionTimeInSeconds Max execution time in seconds, i.e., ttl duration the job can run
      * @return a jobResult object
-     * @throws IllegalArgumentException if one of the provided parameters is invalid
      * @throws IOException if the function cannot create a URL for the job
      * @throws IotHubException if the http request failed
      */
@@ -169,7 +170,7 @@ public final class JobClient
         Twin updateTwin,
         Date startTimeUtc,
         long maxExecutionTimeInSeconds)
-        throws IllegalArgumentException, IOException, IotHubException
+            throws IOException, IotHubException
     {
         URL url;
 
@@ -212,18 +213,7 @@ public final class JobClient
             throw new IllegalArgumentException("Invalid JobId to create url");
         }
 
-        ProxyOptions proxyOptions = clientOptions.getProxyOptions();
-        Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
-
-        HttpRequest httpRequest = new HttpRequest(
-            url,
-            HttpMethod.PUT,
-            json.getBytes(StandardCharsets.UTF_8),
-            this.getAuthenticationToken(),
-            proxy);
-
-        httpRequest.setReadTimeoutMillis(clientOptions.getHttpReadTimeout());
-        httpRequest.setConnectTimeoutMillis(clientOptions.getHttpConnectTimeout());
+        HttpRequest httpRequest = createRequest(url, HttpMethod.PUT, json.getBytes(StandardCharsets.UTF_8));
 
         HttpResponse response = httpRequest.send();
 
@@ -321,18 +311,7 @@ public final class JobClient
             throw new IllegalArgumentException("Invalid JobId to create url");
         }
 
-        ProxyOptions proxyOptions = this.clientOptions.getProxyOptions();
-        Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
-
-        HttpRequest httpRequest = new HttpRequest(
-            url,
-            HttpMethod.PUT,
-            json.getBytes(StandardCharsets.UTF_8),
-            this.getAuthenticationToken(),
-            proxy);
-
-        httpRequest.setReadTimeoutMillis(this.clientOptions.getHttpReadTimeout());
-        httpRequest.setConnectTimeoutMillis(this.clientOptions.getHttpConnectTimeout());
+        HttpRequest httpRequest = createRequest(url, HttpMethod.PUT, json.getBytes(StandardCharsets.UTF_8));
 
         HttpResponse response = httpRequest.send();
 
@@ -343,13 +322,11 @@ public final class JobClient
      * Get the current job on the iotHub.
      *
      * @param jobId Unique Job Id for this job
-     * @return a jobResult object
-     * @throws IllegalArgumentException if the jobId is invalid
+     * @return the retrieved job
      * @throws IOException if the function cannot create a URL for the job, or the IO failed on request
      * @throws IotHubException if the http request failed
      */
-    public Job getJob(String jobId)
-        throws IllegalArgumentException, IOException, IotHubException
+    public Job getJob(String jobId) throws IOException, IotHubException
     {
         URL url;
 
@@ -367,18 +344,7 @@ public final class JobClient
             throw new IllegalArgumentException("Invalid JobId to create url");
         }
 
-        ProxyOptions proxyOptions = clientOptions.getProxyOptions();
-        Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
-
-        HttpRequest httpRequest = new HttpRequest(
-            url,
-            HttpMethod.GET,
-            new byte[0],
-            this.getAuthenticationToken(),
-            proxy);
-
-        httpRequest.setReadTimeoutMillis(clientOptions.getHttpReadTimeout());
-        httpRequest.setConnectTimeoutMillis(clientOptions.getHttpConnectTimeout());
+        HttpRequest httpRequest = createRequest(url, HttpMethod.GET, new byte[0]);
 
         HttpResponse response = httpRequest.send();
 
@@ -389,13 +355,11 @@ public final class JobClient
      * Cancel a current jod on the IoTHub
      *
      * @param jobId Unique Job Id for this job
-     * @return a jobResult object
-     * @throws IllegalArgumentException if the jobId is invalid
+     * @return the cancelled job
      * @throws IOException if the function cannot create a URL for the job, or the IO failed on request
      * @throws IotHubException if the http request failed
      */
-    public Job cancelJob(String jobId)
-        throws IllegalArgumentException, IOException, IotHubException
+    public Job cancelJob(String jobId) throws IOException, IotHubException
     {
         URL url;
         if (jobId == null || jobId.isEmpty())
@@ -412,22 +376,158 @@ public final class JobClient
             throw new IllegalArgumentException("Invalid JobId to create url");
         }
 
-        ProxyOptions proxyOptions = clientOptions.getProxyOptions();
-        Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
-
-        HttpRequest httpRequest = new HttpRequest(
-            url,
-            HttpMethod.POST,
-            EMPTY_JSON,
-            this.getAuthenticationToken(),
-            proxy);
-
-        httpRequest.setReadTimeoutMillis(clientOptions.getHttpReadTimeout());
-        httpRequest.setConnectTimeoutMillis(clientOptions.getHttpConnectTimeout());
+        HttpRequest httpRequest = createRequest(url, HttpMethod.POST, EMPTY_JSON);
 
         HttpResponse response = httpRequest.send();
 
         return new Job(new String(response.getBody()));
+    }
+
+    /**
+     * Create a bulk export job.
+     *
+     * @param exportBlobContainerUri URI containing SAS token to a blob container where export data will be placed
+     * @param excludeKeys Whether the devices keys should be excluded from the exported data or not
+     *
+     * @return A JobProperties object for the newly created bulk export job
+     *
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
+     */
+    public JobProperties exportDevices(String exportBlobContainerUri, Boolean excludeKeys)
+        throws IOException, IotHubException
+    {
+        if (exportBlobContainerUri == null || excludeKeys == null)
+        {
+            throw new IllegalArgumentException("Export blob uri cannot be null");
+        }
+
+        URL url = IotHubConnectionString.getUrlCreateExportImportJob(this.hostName);
+
+        String jobPropertiesJson = CreateExportJobPropertiesJson(exportBlobContainerUri, excludeKeys);
+        HttpRequest request = createRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(StandardCharsets.UTF_8));
+
+        HttpResponse response = request.send();
+
+        return ProcessJobResponse(response);
+    }
+
+    /**
+     * Create a bulk export job.
+     *
+     * @param exportDevicesParameters A JobProperties object containing input parameters for export Devices job
+     *                                This API also supports identity based storage authentication, identity authentication
+     *                                support is currently available in limited regions. If a user wishes to try it out,
+     *                                they will need to set an Environment Variable of "EnabledStorageIdentity" and set it to "1"
+     *                                otherwise default key based authentication is used for storage
+     *                                <a href="https://docs.microsoft.com/en-us/azure/iot-hub/virtual-network-support"> More details here </a>
+     *
+     * @return A JobProperties object for the newly created bulk export job
+     *
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
+     */
+    public JobProperties exportDevices(JobProperties exportDevicesParameters) throws IOException, IotHubException
+    {
+        URL url = IotHubConnectionString.getUrlCreateExportImportJob(this.hostName);
+
+        exportDevicesParameters.setType(JobProperties.JobType.EXPORT);
+        String jobPropertiesJson = exportDevicesParameters.toJobPropertiesParser().toJson();
+        HttpRequest request = createRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(StandardCharsets.UTF_8));
+
+        HttpResponse response = request.send();
+
+        return ProcessJobResponse(response);
+    }
+
+    /**
+     * Create a bulk import job.
+     *
+     * @param importBlobContainerUri URI containing SAS token to a blob container that contains registry data to sync
+     * @param outputBlobContainerUri URI containing SAS token to a blob container where the result of the bulk import operation will be placed
+     *
+     * @return A JobProperties object for the newly created bulk import job
+     *
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
+     */
+    public JobProperties importDevices(String importBlobContainerUri, String outputBlobContainerUri)
+        throws IOException, IotHubException
+    {
+        if (importBlobContainerUri == null || outputBlobContainerUri == null)
+        {
+            throw new IllegalArgumentException("Import blob uri or output blob uri cannot be null");
+        }
+
+        URL url = IotHubConnectionString.getUrlCreateExportImportJob(this.hostName);
+
+        String jobPropertiesJson = CreateImportJobPropertiesJson(importBlobContainerUri, outputBlobContainerUri);
+        HttpRequest request = createRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(StandardCharsets.UTF_8));
+
+        HttpResponse response = request.send();
+
+        return ProcessJobResponse(response);
+    }
+
+    /**
+     * Create a bulk import job.
+     *
+     * @param importDevicesParameters A JobProperties object containing input parameters for import Devices job
+     *                                This API also supports identity based storage authentication, identity authentication
+     *                                support is currently available in limited regions. If a user wishes to try it out,
+     *                                they will need to set an Environment Variable of "EnabledStorageIdentity" and set it to "1"
+     *                                otherwise default key based authentication is used for storage
+     *                                <a href="https://docs.microsoft.com/en-us/azure/iot-hub/virtual-network-support"> More details here </a>
+     *
+     * @return A JobProperties object for the newly created bulk import job
+     *
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
+     */
+    public JobProperties importDevices(JobProperties importDevicesParameters)
+        throws IOException, IotHubException
+    {
+        URL url = IotHubConnectionString.getUrlCreateExportImportJob(this.hostName);
+
+        importDevicesParameters.setType(JobProperties.JobType.IMPORT);
+        String jobPropertiesJson = importDevicesParameters.toJobPropertiesParser().toJson();
+        HttpRequest request = createRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(StandardCharsets.UTF_8));
+
+        HttpResponse response = request.send();
+
+        return ProcessJobResponse(response);
+    }
+
+    /**
+     * Get the properties of an existing job.
+     *
+     * @param importExportJobId The id of the job to be retrieved.
+     *
+     * @return A JobProperties object for the requested job id
+     *
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
+     */
+    public JobProperties getImportExportJob(String importExportJobId) throws IOException, IotHubException
+    {
+        if (importExportJobId == null)
+        {
+            throw new IllegalArgumentException("importExportJobId cannot be null");
+        }
+
+        URL url = IotHubConnectionString.getUrlImportExportJob(this.hostName, importExportJobId);
+
+        HttpRequest request = createRequest(url, HttpMethod.GET, new byte[0]);
+
+        HttpResponse response = request.send();
+
+        return ProcessJobResponse(response);
+    }
+
+    private JobProperties ProcessJobResponse(HttpResponse response) throws IotHubException
+    {
+        String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
+        return new JobProperties(new JobPropertiesParser(bodyStr));
     }
 
     private TwinState getParserFromDevice(Twin device)
@@ -484,11 +584,6 @@ public final class JobClient
         return map;
     }
 
-    @SuppressWarnings("unused")
-    protected JobClient()
-    {
-    }
-
     private String getAuthenticationToken()
     {
         // Three different constructor types for this class, and each type provides either a TokenCredential implementation,
@@ -504,5 +599,38 @@ public final class JobClient
         }
 
         return new IotHubServiceSasToken(iotHubConnectionString).toString();
+    }
+
+    private String CreateExportJobPropertiesJson(String exportBlobContainerUri, Boolean excludeKeysInExport)
+    {
+        JobProperties jobProperties = new JobProperties();
+        jobProperties.setType(JobProperties.JobType.EXPORT);
+        jobProperties.setOutputBlobContainerUri(exportBlobContainerUri);
+        jobProperties.setExcludeKeysInExport(excludeKeysInExport);
+        return jobProperties.toJobPropertiesParser().toJson();
+    }
+
+    private String CreateImportJobPropertiesJson(String importBlobContainerUri, String outputBlobContainerUri)
+    {
+        JobProperties jobProperties = new JobProperties();
+        jobProperties.setType(JobProperties.JobType.IMPORT);
+        jobProperties.setInputBlobContainerUri(importBlobContainerUri);
+        jobProperties.setOutputBlobContainerUri(outputBlobContainerUri);
+        return jobProperties.toJobPropertiesParser().toJson();
+    }
+
+    private HttpRequest createRequest(URL url, HttpMethod method, byte[] payload)
+        throws IOException
+    {
+        Proxy proxy = null;
+        if (this.clientOptions.getProxyOptions() != null)
+        {
+            proxy = this.clientOptions.getProxyOptions().getProxy();
+        }
+
+        HttpRequest request = new HttpRequest(url, method, payload, getAuthenticationToken(), proxy);
+        request.setReadTimeoutMillis(this.clientOptions.getHttpReadTimeout());
+        request.setConnectTimeoutMillis(this.clientOptions.getHttpConnectTimeout());
+        return request;
     }
 }

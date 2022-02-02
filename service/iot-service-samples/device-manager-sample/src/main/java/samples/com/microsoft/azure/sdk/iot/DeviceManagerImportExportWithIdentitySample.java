@@ -5,9 +5,10 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
+import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
 import com.microsoft.azure.sdk.iot.service.serializers.ManagedIdentity;
 import com.microsoft.azure.sdk.iot.service.serializers.StorageAuthenticationType;
-import com.microsoft.azure.sdk.iot.service.JobProperties;
+import com.microsoft.azure.sdk.iot.service.jobs.JobProperties;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import java.io.IOException;
@@ -35,7 +36,7 @@ public class DeviceManagerImportExportWithIdentitySample {
     }
 
     public static void ExportDevices() throws IOException, IotHubException, InterruptedException {
-        RegistryManager registryManager = new RegistryManager(sourceHubConnectionString);
+        JobClient jobClient = new JobClient(sourceHubConnectionString);
 
         // If StorageAuthenticationType is set to IdentityBased and userAssignedIdentity property is
         // not null, the jobs will use user defined managed identity. If the IoT hub is not
@@ -55,11 +56,11 @@ public class DeviceManagerImportExportWithIdentitySample {
                 StorageAuthenticationType.IDENTITY,
                 identity);
 
-        JobProperties exportJob = registryManager.exportDevices(jobProperties);
+        JobProperties exportJob = jobClient.exportDevices(jobProperties);
 
         while(true)
         {
-            exportJob = registryManager.getJob(exportJob.getJobId());
+            exportJob = jobClient.getImportExportJob(exportJob.getJobId());
             if (exportJob.getStatus() == JobProperties.JobStatus.COMPLETED)
             {
                 break;
@@ -69,7 +70,7 @@ public class DeviceManagerImportExportWithIdentitySample {
     }
 
     public static void ImportDevices() throws IOException, IotHubException, InterruptedException {
-        RegistryManager registryManager = new RegistryManager(destinationHubConnectionString);
+        JobClient jobClient = new JobClient(sourceHubConnectionString);
 
         // If StorageAuthenticationType is set to IdentityBased and userAssignedIdentity property is
         // not null, the jobs will use user defined managed identity. If the IoT hub is not
@@ -89,11 +90,11 @@ public class DeviceManagerImportExportWithIdentitySample {
                 StorageAuthenticationType.IDENTITY,
                 identity);
 
-        JobProperties exportJob = registryManager.importDevices(jobProperties);
+        JobProperties exportJob = jobClient.importDevices(jobProperties);
 
         while(true)
         {
-            exportJob = registryManager.getJob(exportJob.getJobId());
+            exportJob = jobClient.getImportExportJob(exportJob.getJobId());
             if (exportJob.getStatus() == JobProperties.JobStatus.COMPLETED)
             {
                 break;

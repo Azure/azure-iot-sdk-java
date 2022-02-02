@@ -13,6 +13,8 @@ import com.azure.storage.blob.sas.BlobContainerSasPermission;
 import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 import com.azure.storage.blob.specialized.BlobInputStream;
 import com.azure.storage.blob.specialized.BlockBlobClient;
+import com.microsoft.azure.sdk.iot.service.jobs.Job;
+import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
 import com.microsoft.azure.sdk.iot.service.serializers.ExportImportDeviceParser;
 import com.microsoft.azure.sdk.iot.service.serializers.StorageAuthenticationType;
 import com.microsoft.azure.sdk.iot.service.twin.TwinCollection;
@@ -20,7 +22,7 @@ import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.DeviceStatus;
 import com.microsoft.azure.sdk.iot.service.ExportImportDevice;
 import com.microsoft.azure.sdk.iot.service.ImportMode;
-import com.microsoft.azure.sdk.iot.service.JobProperties;
+import com.microsoft.azure.sdk.iot.service.jobs.JobProperties;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
@@ -69,6 +71,7 @@ public class ExportImportTests extends IntegrationTest
     private static BlobContainerClient exportContainer;
 
     private static RegistryManager registryManager;
+    private static JobClient jobClient;
 
     @BeforeClass
     public static void setUp() throws IOException
@@ -79,6 +82,7 @@ public class ExportImportTests extends IntegrationTest
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
         registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        jobClient = new JobClient(iotHubConnectionString);
         String uuid = UUID.randomUUID().toString();
         deviceId = deviceId.concat("-" + uuid);
 
@@ -243,11 +247,11 @@ public class ExportImportTests extends IntegrationTest
                             excludeKeys,
                             storageAuthenticationType.get());
 
-                    exportJob = registryManager.exportDevices(exportJobProperties);
+                    exportJob = jobClient.exportDevices(exportJobProperties);
                 }
                 else
                 {
-                    exportJob = registryManager.exportDevices(containerSasUri, excludeKeys);
+                    exportJob = jobClient.exportDevices(containerSasUri, excludeKeys);
                 }
                 exportJobScheduled = true;
 
@@ -264,7 +268,7 @@ public class ExportImportTests extends IntegrationTest
         long startTime = System.currentTimeMillis();
         while (true)
         {
-            exportJob = registryManager.getJob(exportJob.getJobId());
+            exportJob = jobClient.getImportExportJob(exportJob.getJobId());
             jobStatus = exportJob.getStatus();
             if (jobStatus == JobProperties.JobStatus.COMPLETED || jobStatus == JobProperties.JobStatus.FAILED)
             {
@@ -349,11 +353,11 @@ public class ExportImportTests extends IntegrationTest
                 {
                     // For a given StorageAuthenticationType, create JobProperties and pass it
                     JobProperties importJobProperties = JobProperties.createForImportJob(getContainerSasUri(importContainer), getContainerSasUri(importContainer), storageAuthenticationType.get());
-                    importJob = registryManager.importDevices(importJobProperties);
+                    importJob = jobClient.importDevices(importJobProperties);
                 }
                 else
                 {
-                    importJob = registryManager.importDevices(getContainerSasUri(importContainer), getContainerSasUri(importContainer));
+                    importJob = jobClient.importDevices(getContainerSasUri(importContainer), getContainerSasUri(importContainer));
                 }
                 importJobScheduled = true;
             }
@@ -368,7 +372,7 @@ public class ExportImportTests extends IntegrationTest
         long startTime = System.currentTimeMillis();
         while (true)
         {
-            importJob = registryManager.getJob(importJob.getJobId());
+            importJob = jobClient.getImportExportJob(importJob.getJobId());
             if (importJob.getStatus() == JobProperties.JobStatus.COMPLETED
                     || importJob.getStatus() == JobProperties.JobStatus.FAILED)
             {
