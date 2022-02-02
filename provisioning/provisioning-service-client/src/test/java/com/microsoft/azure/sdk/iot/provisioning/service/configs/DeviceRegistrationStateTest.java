@@ -350,7 +350,7 @@ public class DeviceRegistrationStateTest
                         "    \"assignedHub\":\"" + VALID_ASSIGNED_HUB + "\",\n" +
                         "    \"deviceId\":\"" + VALID_DEVICE_ID + "\",\n" +
                         "    \"status\":\"" + VALID_STATUS + "\",\n" +
-                        "    \"substatus\":INVALID_SUBSTATUS\",\n" +
+                        "    \"substatus\":\"INVALID_SUBSTATUS\",\n" +
                         "    \"lastUpdatedDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
                         "    \"errorCode\":" + VALID_ERROR_CODE + ",\n" +
                         "    \"errorMessage\":\"" + VALID_ERROR_MESSAGE + "\",\n" +
@@ -358,8 +358,6 @@ public class DeviceRegistrationStateTest
                         "}";
         // act
         new DeviceRegistrationState(json);
-
-        // assert
     }
 
     @Test
