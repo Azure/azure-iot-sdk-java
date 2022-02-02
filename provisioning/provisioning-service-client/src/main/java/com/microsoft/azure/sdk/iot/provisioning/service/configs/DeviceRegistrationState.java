@@ -79,6 +79,12 @@ public class DeviceRegistrationState implements Serializable
     @SerializedName(STATE_TAG)
     private EnrollmentStatus status;
 
+    /// substatus for 'assigned' devices
+    private static final String SUBSTATUS_TAG = "substatus";
+    @Expose
+    @SerializedName(SUBSTATUS_TAG)
+    private ProvisioningServiceClientSubstatus substatus;
+
     // error code
     private static final String ERROR_CODE_TAG = "errorCode";
     @Expose
