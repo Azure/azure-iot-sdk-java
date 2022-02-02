@@ -11,7 +11,7 @@ import com.microsoft.azure.sdk.iot.service.twin.DirectMethodRequestOptions;
 import com.microsoft.azure.sdk.iot.service.twin.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.twin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
+import com.microsoft.azure.sdk.iot.service.jobs.Job;
 import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
 
 import java.io.IOException;
@@ -113,7 +113,7 @@ public class DeviceMethodSample
                 .build();
 
         String jobId = UUID.randomUUID().toString();
-        JobResult job = jobClient.scheduleDirectMethod(jobId, queryCondition, methodName, invokeDateInFuture, options);
+        Job job = jobClient.scheduleDirectMethod(jobId, queryCondition, methodName, invokeDateInFuture, options);
 
         System.out.println("Wait for job completed...");
         while (job.getJobStatus() != JobStatus.completed)
@@ -142,7 +142,7 @@ public class DeviceMethodSample
                 .build();
 
         String jobId = UUID.randomUUID().toString();
-        JobResult job = jobClient.scheduleDirectMethod(jobId, queryCondition, methodName, invokeDateInFuture, options);
+        Job job = jobClient.scheduleDirectMethod(jobId, queryCondition, methodName, invokeDateInFuture, options);
 
         Thread.sleep(WAIT_1_SECOND_TO_CANCEL_IN_MILLISECONDS);
         System.out.println("Cancel job after 1 second");

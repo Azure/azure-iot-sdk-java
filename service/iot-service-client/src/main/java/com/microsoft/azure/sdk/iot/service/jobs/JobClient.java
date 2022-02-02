@@ -163,7 +163,7 @@ public final class JobClient
      * @throws IOException if the function cannot create a URL for the job
      * @throws IotHubException if the http request failed
      */
-    public JobResult scheduleUpdateTwin(
+    public Job scheduleUpdateTwin(
         String jobId,
         String queryCondition,
         Twin updateTwin,
@@ -227,7 +227,7 @@ public final class JobClient
 
         HttpResponse response = httpRequest.send();
 
-        return new JobResult(new String(response.getBody()));
+        return new Job(new String(response.getBody()));
     }
 
     /**
@@ -241,7 +241,7 @@ public final class JobClient
      * @throws IOException if the function cannot create a URL for the job, or the IO failed on request
      * @throws IotHubException if the http request failed
      */
-    public JobResult scheduleDirectMethod(
+    public Job scheduleDirectMethod(
         String jobId,
         String queryCondition,
         String methodName,
@@ -263,7 +263,7 @@ public final class JobClient
      * @throws IOException if the function cannot create a URL for the job, or the IO failed on request
      * @throws IotHubException if the http request failed
      */
-    public JobResult scheduleDirectMethod(
+    public Job scheduleDirectMethod(
         String jobId,
         String queryCondition,
         String methodName,
@@ -336,7 +336,7 @@ public final class JobClient
 
         HttpResponse response = httpRequest.send();
 
-        return new JobResult(new String(response.getBody()));
+        return new Job(new String(response.getBody()));
     }
 
     /**
@@ -348,7 +348,7 @@ public final class JobClient
      * @throws IOException if the function cannot create a URL for the job, or the IO failed on request
      * @throws IotHubException if the http request failed
      */
-    public JobResult getJob(String jobId)
+    public Job getJob(String jobId)
         throws IllegalArgumentException, IOException, IotHubException
     {
         URL url;
@@ -382,7 +382,7 @@ public final class JobClient
 
         HttpResponse response = httpRequest.send();
 
-        return new JobResult(new String(response.getBody()));
+        return new Job(new String(response.getBody()));
     }
 
     /**
@@ -394,7 +394,7 @@ public final class JobClient
      * @throws IOException if the function cannot create a URL for the job, or the IO failed on request
      * @throws IotHubException if the http request failed
      */
-    public JobResult cancelJob(String jobId)
+    public Job cancelJob(String jobId)
         throws IllegalArgumentException, IOException, IotHubException
     {
         URL url;
@@ -427,7 +427,7 @@ public final class JobClient
 
         HttpResponse response = httpRequest.send();
 
-        return new JobResult(new String(response.getBody()));
+        return new Job(new String(response.getBody()));
     }
 
     private TwinState getParserFromDevice(Twin device)

@@ -5,13 +5,13 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
+import com.microsoft.azure.sdk.iot.service.jobs.Job;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.service.query.SqlQuery;
 import com.microsoft.azure.sdk.iot.service.query.TwinQueryResponse;
 import com.microsoft.azure.sdk.iot.service.twin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
 import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
 
 import java.io.IOException;
@@ -152,13 +152,13 @@ public class DeviceTwinSample
 
         System.out.println("Schedule updating Device twin (new temp, hum) in 10 seconds");
         String jobId = UUID.randomUUID().toString();
-        JobResult jobResult = jobClient.scheduleUpdateTwin(jobId, queryCondition, device, updateDateInFuture, MAX_EXECUTION_TIME_IN_SECONDS);
+        Job job = jobClient.scheduleUpdateTwin(jobId, queryCondition, device, updateDateInFuture, MAX_EXECUTION_TIME_IN_SECONDS);
 
         System.out.println("Wait for job completed...");
-        while (jobResult.getJobStatus() != JobStatus.completed)
+        while (job.getJobStatus() != JobStatus.completed)
         {
             Thread.sleep(GIVE_100_MILLISECONDS_TO_IOTHUB);
-            jobResult = jobClient.getJob(jobId);
+            job = jobClient.getJob(jobId);
         }
         System.out.println("job completed");
 
@@ -185,18 +185,18 @@ public class DeviceTwinSample
 
         System.out.println("Cancel updating Device twin (new temp, hum) in 10 minutes");
         String jobId = UUID.randomUUID().toString();
-        JobResult jobResult = jobClient.scheduleUpdateTwin(jobId, queryCondition, device, updateDateInFuture, MAX_EXECUTION_TIME_IN_SECONDS);
+        Job job = jobClient.scheduleUpdateTwin(jobId, queryCondition, device, updateDateInFuture, MAX_EXECUTION_TIME_IN_SECONDS);
 
         Thread.sleep(WAIT_1_SECOND_TO_CANCEL_IN_MILLISECONDS);
         System.out.println("Cancel job after 1 second");
         jobClient.cancelJob(jobId);
 
         System.out.println("Wait for job cancelled...");
-        jobResult = jobClient.getJob(jobId);
-        while (jobResult.getJobStatus() != JobStatus.cancelled)
+        job = jobClient.getJob(jobId);
+        while (job.getJobStatus() != JobStatus.cancelled)
         {
             Thread.sleep(GIVE_100_MILLISECONDS_TO_IOTHUB);
-            jobResult = jobClient.getJob(jobId);
+            job = jobClient.getJob(jobId);
         }
         System.out.println("job cancelled");
 

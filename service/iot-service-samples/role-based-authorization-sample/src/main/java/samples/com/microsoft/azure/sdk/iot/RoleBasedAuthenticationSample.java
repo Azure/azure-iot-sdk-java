@@ -7,6 +7,7 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.identity.ClientSecretCredentialBuilder;
+import com.microsoft.azure.sdk.iot.service.jobs.Job;
 import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.service.query.QueryClientOptions;
@@ -34,7 +35,6 @@ import com.microsoft.azure.sdk.iot.service.query.SqlQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClientOptions;
-import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -248,7 +248,7 @@ public class RoleBasedAuthenticationSample
             while (deviceJobQueryResponse.hasNext())
             {
                 queriedJobCount++;
-                JobResult job = deviceJobQueryResponse.next();
+                Job job = deviceJobQueryResponse.next();
                 System.out.println(String.format("Job %s of type %s has status %s", job.getJobId(), job.getJobType(), job.getJobStatus()));
             }
 

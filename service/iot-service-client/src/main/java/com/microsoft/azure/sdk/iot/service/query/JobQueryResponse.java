@@ -6,9 +6,8 @@ package com.microsoft.azure.sdk.iot.service.query;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
+import com.microsoft.azure.sdk.iot.service.jobs.Job;
 import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
 import com.microsoft.azure.sdk.iot.service.jobs.JobType;
 import lombok.AccessLevel;
@@ -17,7 +16,6 @@ import lombok.Setter;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -27,7 +25,7 @@ public class JobQueryResponse //TODO probably need to split this in two since on
 {
     private final transient Gson gson;
 
-    Iterator<JobResult> jobs;
+    Iterator<Job> jobs;
 
     @Setter(AccessLevel.PACKAGE) // value is retrieved from header, not json payload
     @Getter
@@ -43,10 +41,10 @@ public class JobQueryResponse //TODO probably need to split this in two since on
         gson = new GsonBuilder().disableHtmlEscaping().create();
 
         JsonObject[] twinJsonArray = gson.fromJson(json, JsonObject[].class);
-        List<JobResult> jobsArray = new ArrayList<>();
+        List<Job> jobsArray = new ArrayList<>();
         for (JsonObject twinJson : twinJsonArray)
         {
-            jobsArray.add(new JobResult(twinJson.toString()));
+            jobsArray.add(new Job(twinJson.toString()));
         }
 
         this.jobs = jobsArray.iterator();
@@ -62,10 +60,10 @@ public class JobQueryResponse //TODO probably need to split this in two since on
         gson = new GsonBuilder().disableHtmlEscaping().create();
 
         JsonObject[] twinJsonArray = gson.fromJson(json, JsonObject[].class);
-        List<JobResult> jobsArray = new ArrayList<>();
+        List<Job> jobsArray = new ArrayList<>();
         for (JsonObject twinJson : twinJsonArray)
         {
-            jobsArray.add(new JobResult(twinJson.toString()));
+            jobsArray.add(new Job(twinJson.toString()));
         }
 
         this.jobs = jobsArray.iterator();
@@ -81,12 +79,12 @@ public class JobQueryResponse //TODO probably need to split this in two since on
         return this.jobs.hasNext() || this.continuationToken != null;
     }
 
-    public JobResult next() throws IotHubException, IOException
+    public Job next() throws IotHubException, IOException
     {
         return next(QueryPageOptions.builder().build());
     }
 
-    public JobResult next(QueryPageOptions pageOptions) throws IotHubException, IOException
+    public Job next(QueryPageOptions pageOptions) throws IotHubException, IOException
     {
         Objects.requireNonNull(pageOptions);
 

@@ -20,9 +20,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Collection with the result of a job operation.
+ * Metadata for a particular job created with the {@link JobClient}.
  */
-public class JobResult
+public class Job
 {
     /**
      * The unique identifier for this job.
@@ -136,7 +136,7 @@ public class JobResult
      * @throws JsonParseException if the content of body is a invalid json
      * @throws IllegalArgumentException if the provided body is null
      */
-    public JobResult(String json) throws JsonParseException, IllegalArgumentException
+    public Job(String json) throws JsonParseException, IllegalArgumentException
     {
         if (json == null)
         {
@@ -189,6 +189,7 @@ public class JobResult
             this.updateTwin.setTags(mapToSet(twinState.getTags()));
             this.updateTwin.setDesiredProperties(mapToSet(twinState.getDesiredProperty()));
         }
+
         this.failureReason = jobsResponseParser.getFailureReason();
         this.statusMessage = jobsResponseParser.getStatusMessage();
         JobsStatisticsParser jobsStatisticsParser = jobsResponseParser.getJobStatistics();
@@ -196,6 +197,7 @@ public class JobResult
         {
             this.jobStatistics = new JobStatistics(jobsStatisticsParser);
         }
+
         this.deviceId = jobsResponseParser.getDeviceId();
         this.parentJobId = jobsResponseParser.getParentJobId();
     }

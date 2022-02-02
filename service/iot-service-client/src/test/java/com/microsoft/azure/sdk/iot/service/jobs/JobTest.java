@@ -13,7 +13,6 @@ import org.junit.Test;
 
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -24,7 +23,7 @@ import static org.junit.Assert.*;
  * Unit test for job statistics
  * 100% methods, 100% lines covered
  */
-public class JobResultTest
+public class JobTest
 {
     @Mocked
     JobsResponseParser mockedJobsResponseParser;
@@ -153,7 +152,7 @@ public class JobResultTest
         final byte[] resultBytes = null;
 
         //act
-        Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, resultBytes);
+        Deencapsulation.newInstance(Job.class, new Class[] {byte[].class}, resultBytes);
     }
 
     /* Tests_SRS_JOBRESULT_21_002: [The constructor shall parse the body using the JobsResponseParser.] */
@@ -173,7 +172,7 @@ public class JobResultTest
         JobsResponseParserExpectations(json, twinState, null, new Date(), null, "scheduleUpdateTwin");
 
         //act
-        JobResult jobResult = new JobResult(json);
+        Job job = new Job(json);
 
         //assert
         new Verifications()
@@ -201,7 +200,7 @@ public class JobResultTest
         };
 
         //act
-        JobResult jobResult = new JobResult(json);
+        Job job = new Job(json);
     }
 
     /* Tests_SRS_JOBRESULT_21_004: [The constructor shall locally store all results information in the provided body.] */
@@ -222,24 +221,24 @@ public class JobResultTest
         JobsResponseParserExpectations(json, twinState, null, now, null, "scheduleUpdateTwin");
 
         //act
-        JobResult jobResult = new JobResult(json);
+        Job job = new Job(json);
 
         //assert
-        assertEquals(JOB_ID, Deencapsulation.getField(jobResult, "jobId"));
-        assertEquals(QUERY_CONDITION, Deencapsulation.getField(jobResult, "queryCondition"));
-        assertEquals(now, Deencapsulation.getField(jobResult, "createdTime"));
-        assertEquals(now, Deencapsulation.getField(jobResult, "startTime"));
-        assertEquals(now, Deencapsulation.getField(jobResult, "endTime"));
-        assertEquals(MAX_EXECUTION_TIME_IN_SECONDS, (long)Deencapsulation.getField(jobResult, "maxExecutionTimeInSeconds"));
-        assertEquals(JobType.scheduleUpdateTwin, Deencapsulation.getField(jobResult, "jobType"));
-        assertEquals(JobStatus.enqueued, Deencapsulation.getField(jobResult, "jobStatus"));
-        assertNull(Deencapsulation.getField(jobResult, "cloudToDeviceMethod"));
-        assertNotNull(Deencapsulation.getField(jobResult, "updateTwin"));
-        assertEquals(FAILURE_REASON, Deencapsulation.getField(jobResult, "failureReason"));
-        assertEquals(STATUS_MESSAGE, Deencapsulation.getField(jobResult, "statusMessage"));
-        assertNotNull(Deencapsulation.getField(jobResult, "jobStatistics"));
-        assertEquals(DEVICE_ID, Deencapsulation.getField(jobResult, "deviceId"));
-        assertEquals(PARENT_JOB_ID, Deencapsulation.getField(jobResult, "parentJobId"));
+        assertEquals(JOB_ID, Deencapsulation.getField(job, "jobId"));
+        assertEquals(QUERY_CONDITION, Deencapsulation.getField(job, "queryCondition"));
+        assertEquals(now, Deencapsulation.getField(job, "createdTime"));
+        assertEquals(now, Deencapsulation.getField(job, "startTime"));
+        assertEquals(now, Deencapsulation.getField(job, "endTime"));
+        assertEquals(MAX_EXECUTION_TIME_IN_SECONDS, (long)Deencapsulation.getField(job, "maxExecutionTimeInSeconds"));
+        assertEquals(JobType.scheduleUpdateTwin, Deencapsulation.getField(job, "jobType"));
+        assertEquals(JobStatus.enqueued, Deencapsulation.getField(job, "jobStatus"));
+        assertNull(Deencapsulation.getField(job, "cloudToDeviceMethod"));
+        assertNotNull(Deencapsulation.getField(job, "updateTwin"));
+        assertEquals(FAILURE_REASON, Deencapsulation.getField(job, "failureReason"));
+        assertEquals(STATUS_MESSAGE, Deencapsulation.getField(job, "statusMessage"));
+        assertNotNull(Deencapsulation.getField(job, "jobStatistics"));
+        assertEquals(DEVICE_ID, Deencapsulation.getField(job, "deviceId"));
+        assertEquals(PARENT_JOB_ID, Deencapsulation.getField(job, "parentJobId"));
     }
 
     /* Tests_SRS_JOBRESULT_21_004: [The constructor shall locally store all results information in the provided body.] */
@@ -260,10 +259,10 @@ public class JobResultTest
         JobsResponseParserExpectations(json, twinState, null, now, null, "scheduleUpdateTwin");
 
         //act
-        JobResult jobResult = new JobResult(json);
+        Job job = new Job(json);
 
         //assert
-        assertNotNull(Deencapsulation.getField(jobResult, "updateTwin"));
+        assertNotNull(Deencapsulation.getField(job, "updateTwin"));
     }
 
     /* Tests_SRS_JOBRESULT_21_005: [The getJobId shall return the stored jobId.] */
@@ -297,24 +296,24 @@ public class JobResultTest
         JobsResponseParserExpectations(json, twinState, null, now, null, "scheduleUpdateTwin");
 
         //act
-        JobResult jobResult = new JobResult(json);
+        Job job = new Job(json);
 
         //assert
-        assertEquals(JOB_ID, jobResult.getJobId());
-        assertEquals(QUERY_CONDITION, jobResult.getQueryCondition());
-        assertEquals(now, jobResult.getCreatedTime());
-        assertEquals(now, jobResult.getStartTime());
-        assertEquals(now, jobResult.getEndTime());
-        assertEquals(MAX_EXECUTION_TIME_IN_SECONDS, (long)jobResult.getMaxExecutionTimeInSeconds());
-        assertEquals(JobType.scheduleUpdateTwin, jobResult.getJobType());
-        assertEquals(JobStatus.enqueued, jobResult.getJobStatus());
-        assertNull(jobResult.getCloudToDeviceMethod());
-        assertNotNull(jobResult.getUpdateTwin());
-        assertEquals(FAILURE_REASON, jobResult.getFailureReason());
-        assertEquals(STATUS_MESSAGE, jobResult.getStatusMessage());
-        assertNotNull(jobResult.getJobStatistics());
-        assertEquals(DEVICE_ID, jobResult.getDeviceId());
-        assertEquals(PARENT_JOB_ID, jobResult.getParentJobId());
+        assertEquals(JOB_ID, job.getJobId());
+        assertEquals(QUERY_CONDITION, job.getQueryCondition());
+        assertEquals(now, job.getCreatedTime());
+        assertEquals(now, job.getStartTime());
+        assertEquals(now, job.getEndTime());
+        assertEquals(MAX_EXECUTION_TIME_IN_SECONDS, (long) job.getMaxExecutionTimeInSeconds());
+        assertEquals(JobType.scheduleUpdateTwin, job.getJobType());
+        assertEquals(JobStatus.enqueued, job.getJobStatus());
+        assertNull(job.getCloudToDeviceMethod());
+        assertNotNull(job.getUpdateTwin());
+        assertEquals(FAILURE_REASON, job.getFailureReason());
+        assertEquals(STATUS_MESSAGE, job.getStatusMessage());
+        assertNotNull(job.getJobStatistics());
+        assertEquals(DEVICE_ID, job.getDeviceId());
+        assertEquals(PARENT_JOB_ID, job.getParentJobId());
     }
 
     /* Tests_SRS_JOBRESULT_21_021: [The getUpdateTwin shall return the nullable deviceId.] */
@@ -334,25 +333,25 @@ public class JobResultTest
         jobsResponseParserWithNullDeviceIdExpectations(json, twinState, null, now, null, "scheduleUpdateTwin");
 
         //act
-        JobResult jobResult = new JobResult(json);
+        Job job = new Job(json);
 
         //assert
-        assertEquals(JOB_ID, jobResult.getJobId());
-        assertEquals(QUERY_CONDITION, jobResult.getQueryCondition());
-        assertEquals(now, jobResult.getCreatedTime());
-        assertEquals(now, jobResult.getStartTime());
-        assertEquals(now, jobResult.getEndTime());
-        assertEquals(MAX_EXECUTION_TIME_IN_SECONDS, (long)jobResult.getMaxExecutionTimeInSeconds());
-        assertEquals(JobType.scheduleUpdateTwin, jobResult.getJobType());
-        assertEquals(JobStatus.enqueued, jobResult.getJobStatus());
-        assertNull(jobResult.getCloudToDeviceMethod());
-        assertNotNull(jobResult.getUpdateTwin());
-        assertEquals(FAILURE_REASON, jobResult.getFailureReason());
-        assertEquals(STATUS_MESSAGE, jobResult.getStatusMessage());
-        assertNotNull(jobResult.getJobStatistics());
-        assertNull(jobResult.getDeviceId());
-        assertNull(jobResult.getUpdateTwin().getDeviceId());
-        assertEquals(PARENT_JOB_ID, jobResult.getParentJobId());
+        assertEquals(JOB_ID, job.getJobId());
+        assertEquals(QUERY_CONDITION, job.getQueryCondition());
+        assertEquals(now, job.getCreatedTime());
+        assertEquals(now, job.getStartTime());
+        assertEquals(now, job.getEndTime());
+        assertEquals(MAX_EXECUTION_TIME_IN_SECONDS, (long) job.getMaxExecutionTimeInSeconds());
+        assertEquals(JobType.scheduleUpdateTwin, job.getJobType());
+        assertEquals(JobStatus.enqueued, job.getJobStatus());
+        assertNull(job.getCloudToDeviceMethod());
+        assertNotNull(job.getUpdateTwin());
+        assertEquals(FAILURE_REASON, job.getFailureReason());
+        assertEquals(STATUS_MESSAGE, job.getStatusMessage());
+        assertNotNull(job.getJobStatistics());
+        assertNull(job.getDeviceId());
+        assertNull(job.getUpdateTwin().getDeviceId());
+        assertEquals(PARENT_JOB_ID, job.getParentJobId());
     }
 
     /* Tests_SRS_JOBRESULT_21_013: [The getCloudToDeviceMethod shall return the stored cloudToDeviceMethod.] */
@@ -400,19 +399,19 @@ public class JobResultTest
         };
 
         //act
-        JobResult jobResult = new JobResult(json);
+        Job job = new Job(json);
 
         //assert
-        assertEquals(JOB_ID, jobResult.getJobId());
-        assertEquals(JobType.scheduleDeviceMethod, jobResult.getJobType());
-        assertEquals(JobStatus.completed, jobResult.getJobStatus());
-        assertNotNull(jobResult.getCloudToDeviceMethod());
-        assertNotNull(jobResult.getOutcomeResult());
-        MethodResult methodResult = jobResult.getOutcomeResult();
+        assertEquals(JOB_ID, job.getJobId());
+        assertEquals(JobType.scheduleDeviceMethod, job.getJobType());
+        assertEquals(JobStatus.completed, job.getJobStatus());
+        assertNotNull(job.getCloudToDeviceMethod());
+        assertNotNull(job.getOutcomeResult());
+        MethodResult methodResult = job.getOutcomeResult();
         assertEquals(methodReturnStatus, (long)methodResult.getStatus());
         assertEquals(methodReturnPayload, methodResult.getPayload());
-        assertNotNull(jobResult.getLastUpdatedDateTime());
-        assertNull(jobResult.getError());
+        assertNotNull(job.getLastUpdatedDateTime());
+        assertNull(job.getError());
     }
 
     /* Tests_SRS_JOBRESULT_25_021: [The getOutcomeResult shall return the stored outcome.] */
@@ -453,10 +452,10 @@ public class JobResultTest
         };
 
         //act
-        JobResult jobResult = new JobResult(json);
+        Job job = new Job(json);
 
         //assert
-        assertNull(jobResult.getOutcomeResult());
+        assertNull(job.getOutcomeResult());
     }
 
     /* Tests_SRS_JOBRESULT_21_020: [The toString shall return a String with a pretty print json that represents this class.] */
@@ -509,10 +508,10 @@ public class JobResultTest
         twinState.setETag(ETAG);
 
         JobsResponseParserExpectations(json, twinState, null, now, null, "scheduleUpdateTwin");
-        JobResult jobResult = new JobResult(json);
+        Job job = new Job(json);
 
         //act
-        String prettyPrint = jobResult.toString();
+        String prettyPrint = job.toString();
 
         //assert
         assertThat(prettyPrint, is(expectedPrettyPrint));
@@ -572,10 +571,10 @@ public class JobResultTest
         twinState.setETag(ETAG);
 
         JobsResponseParserExpectations(json, twinState, null, now, null, "unknown");
-        JobResult jobResult = new JobResult(json);
+        Job job = new Job(json);
 
         //act
-        String prettyPrint = jobResult.toString();
+        String prettyPrint = job.toString();
 
         //assert
         assertThat(prettyPrint, is(expectedPrettyPrint));

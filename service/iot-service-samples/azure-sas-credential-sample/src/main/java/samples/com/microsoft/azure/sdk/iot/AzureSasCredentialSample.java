@@ -30,7 +30,7 @@ import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.query.SqlQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
+import com.microsoft.azure.sdk.iot.service.jobs.Job;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -254,7 +254,7 @@ public class AzureSasCredentialSample
             while (jobQueryResponse.hasNext())
             {
                 queriedJobCount++;
-                JobResult job = jobQueryResponse.next();
+                Job job = jobQueryResponse.next();
                 System.out.println(String.format("Job %s of type %s has status %s", job.getJobId(), job.getJobType(), job.getJobStatus()));
             }
 

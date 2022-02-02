@@ -66,7 +66,7 @@ public class JobClientTest
     Twin mockedTwin;
 
     @Mocked
-    JobResult mockedJobResult;
+    Job mockedJob;
 
     @Mocked
     HttpResponse mockedHttpResponse;
@@ -208,15 +208,15 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new JobResult(anyString);
-                result = mockedJobResult;
+                new Job(anyString);
+                result = mockedJob;
             }
         };
 
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        JobResult jobResult = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
+        Job job = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
     }
 
     /* Tests_SRS_JOBCLIENT_21_004: [The scheduleUpdateTwin shall create a json String that represent the twin job using the JobsParser class.] */
@@ -275,15 +275,15 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new JobResult(anyString);
-                result = mockedJobResult;
+                new Job(anyString);
+                result = mockedJob;
             }
         };
 
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        JobResult jobResult = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
+        Job job = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
     }
 
     /* Tests_SRS_JOBCLIENT_21_004: [The scheduleUpdateTwin shall create a json String that represent the twin job using the JobsParser class.] */
@@ -346,15 +346,15 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new JobResult(anyString);
-                result = mockedJobResult;
+                new Job(anyString);
+                result = mockedJob;
             }
         };
 
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        JobResult jobResult = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
+        Job job = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
     }
 
     /* Tests_SRS_JOBCLIENT_21_005: [If the JobId is null, empty, or invalid, the scheduleUpdateTwin shall throws IllegalArgumentException.] */
@@ -602,15 +602,15 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new JobResult(anyString);
-                result = mockedJobResult;
+                new Job(anyString);
+                result = mockedJob;
             }
         };
 
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        JobResult jobResult = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
+        Job job = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
 
         //assert
         new Verifications()
@@ -678,15 +678,15 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new JobResult(anyString);
-                result = mockedJobResult;
+                new Job(anyString);
+                result = mockedJob;
             }
         };
 
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        JobResult jobResult = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
+        Job job = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
     }
 
     /* Tests_SRS_JOBCLIENT_21_011: [If the scheduleUpdateTwin failed to send a PUT request, it shall throw IOException.] */
@@ -751,7 +751,7 @@ public class JobClientTest
         testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_013: [The scheduleUpdateTwin shall parse the iothub response and return it as JobResult.] */
+    /* Tests_SRS_JOBCLIENT_21_013: [The scheduleUpdateTwin shall parse the iothub response and return it as Job.] */
     @Test
     public void scheduleUpdateTwinReturnResponse() throws IOException, IotHubException
     {
@@ -807,18 +807,18 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new JobResult(anyString);
-                result = mockedJobResult;
+                new Job(anyString);
+                result = mockedJob;
             }
         };
 
         JobClient testJobClient = new JobClient(connectionString);
 
         //act
-        JobResult jobResult = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
+        Job job = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
 
         //assert
-        assertNotNull(jobResult);
+        assertNotNull(job);
     }
 
     /* Tests_SRS_JOBCLIENT_21_014: [If the JobId is null, empty, or invalid, the scheduleDirectMethod shall throws IllegalArgumentException.] */
@@ -1067,8 +1067,8 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new JobResult(anyString);
-                result = mockedJobResult;
+                new Job(anyString);
+                result = mockedJob;
             }
         };
 
@@ -1076,7 +1076,7 @@ public class JobClientTest
 
         //act
         DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
-        JobResult jobResult = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
+        Job job = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
     }
 
     /* Tests_SRS_JOBCLIENT_21_019: [The scheduleDirectMethod shall create a URL for Jobs using the iotHubConnectionString.] */
@@ -1117,8 +1117,8 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new JobResult(anyString);
-                result = mockedJobResult;
+                new Job(anyString);
+                result = mockedJob;
             }
         };
 
@@ -1126,7 +1126,7 @@ public class JobClientTest
 
         //act
         DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
-        JobResult jobResult = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
+        Job job = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
 
         //assert
         new Verifications()
@@ -1176,8 +1176,8 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new JobResult(anyString);
-                result = mockedJobResult;
+                new Job(anyString);
+                result = mockedJob;
             }
         };
 
@@ -1233,7 +1233,7 @@ public class JobClientTest
         testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_023: [The scheduleDirectMethod shall parse the iothub response and return it as JobResult.] */
+    /* Tests_SRS_JOBCLIENT_21_023: [The scheduleDirectMethod shall parse the iothub response and return it as Job.] */
     @Test
     public void scheduleDeviceMethodParseResponse() throws IOException, IotHubException
     {
@@ -1271,8 +1271,8 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new JobResult(anyString);
-                result = mockedJobResult;
+                new Job(anyString);
+                result = mockedJob;
             }
         };
 
@@ -1280,10 +1280,10 @@ public class JobClientTest
 
         //act
         DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
-        JobResult jobResult = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
+        Job job = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
 
         //assert
-        assertNotNull(jobResult);
+        assertNotNull(job);
     }
 
 
@@ -1383,8 +1383,8 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new JobResult(anyString);
-                result = mockedJobResult;
+                new Job(anyString);
+                result = mockedJob;
             }
         };
         try
@@ -1432,8 +1432,8 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new JobResult(anyString);
-                result = mockedJobResult;
+                new Job(anyString);
+                result = mockedJob;
             }
         };
         try
@@ -1449,7 +1449,7 @@ public class JobClientTest
         testJobClient.getJob(jobId);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_029: [The getJob shall parse the iothub response and return it as JobResult.] */
+    /* Tests_SRS_JOBCLIENT_21_029: [The getJob shall parse the iothub response and return it as Job.] */
     @Test
     public void getJobParseResponse() throws IOException, IotHubException
     {
@@ -1472,8 +1472,8 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new JobResult(anyString);
-                result = mockedJobResult;
+                new Job(anyString);
+                result = mockedJob;
             }
         };
         try
@@ -1486,10 +1486,10 @@ public class JobClientTest
         }
 
         //act
-        JobResult jobResult = testJobClient.getJob(jobId);
+        Job job = testJobClient.getJob(jobId);
 
         //assert
-        assertNotNull(jobResult);
+        assertNotNull(job);
     }
 
     /* Tests_SRS_JOBCLIENT_21_030: [If the JobId is null, empty, or invalid, the cancelJob shall throws IllegalArgumentException.] */
@@ -1588,8 +1588,8 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new JobResult(anyString);
-                result = mockedJobResult;
+                new Job(anyString);
+                result = mockedJob;
             }
         };
         try
@@ -1637,8 +1637,8 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new JobResult(anyString);
-                result = mockedJobResult;
+                new Job(anyString);
+                result = mockedJob;
             }
         };
         try
@@ -1689,7 +1689,7 @@ public class JobClientTest
         testJobClient.cancelJob(jobId);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_035: [The cancelJob shall parse the iothub response and return it as JobResult.] */
+    /* Tests_SRS_JOBCLIENT_21_035: [The cancelJob shall parse the iothub response and return it as Job.] */
     @Test
     public void cancelJobParseResponse() throws IOException, IotHubException
     {
@@ -1712,8 +1712,8 @@ public class JobClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new JobResult(anyString);
-                result = mockedJobResult;
+                new Job(anyString);
+                result = mockedJob;
             }
         };
         try
@@ -1726,9 +1726,9 @@ public class JobClientTest
         }
 
         //act
-        JobResult jobResult = testJobClient.cancelJob(jobId);
+        Job job = testJobClient.cancelJob(jobId);
 
         //assert
-        assertNotNull(jobResult);
+        assertNotNull(job);
     }
 }

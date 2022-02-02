@@ -20,7 +20,7 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubTooManyRequestsException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClientOptions;
-import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
+import com.microsoft.azure.sdk.iot.service.jobs.Job;
 import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
 import com.microsoft.azure.sdk.iot.service.jobs.JobType;
 import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
@@ -179,16 +179,16 @@ public class QueryClientTests extends IntegrationTest
                 response = queryClient.queryJobs(query);
             }
 
-            JobResult jobResult = response.next();
+            Job job = response.next();
 
-            assertNotNull(jobResult.getJobId());
-            assertNotNull(jobResult.getJobType());
-            assertNotNull(jobResult.getStartTime());
-            assertNotNull(jobResult.getEndTime());
-            assertNotNull(jobResult.getCreatedTime());
-            assertNotNull(jobResult.getLastUpdatedDateTime());
-            assertNotNull(jobResult.getJobStatus());
-            assertNotNull(jobResult.getDeviceId());
+            assertNotNull(job.getJobId());
+            assertNotNull(job.getJobType());
+            assertNotNull(job.getStartTime());
+            assertNotNull(job.getEndTime());
+            assertNotNull(job.getCreatedTime());
+            assertNotNull(job.getLastUpdatedDateTime());
+            assertNotNull(job.getJobStatus());
+            assertNotNull(job.getDeviceId());
         }
         finally
         {
@@ -247,17 +247,17 @@ public class QueryClientTests extends IntegrationTest
                 response = queryClient.queryJobs(JobType.scheduleUpdateTwin, JobStatus.enqueued);
             }
 
-            JobResult jobResult = response.next();
+            Job job = response.next();
 
-            assertNotNull(jobResult.getJobId());
-            assertNotNull(jobResult.getJobType());
-            assertNotNull(jobResult.getStartTime());
-            assertNotNull(jobResult.getEndTime());
-            assertNotNull(jobResult.getCreatedTime());
-            assertNotNull(jobResult.getMaxExecutionTimeInSeconds());
-            assertNotNull(jobResult.getJobStatus());
-            assertNotNull(jobResult.getJobStatistics());
-            assertTrue(jobResult.getJobStatistics().getDeviceCount() > 0);
+            assertNotNull(job.getJobId());
+            assertNotNull(job.getJobType());
+            assertNotNull(job.getStartTime());
+            assertNotNull(job.getEndTime());
+            assertNotNull(job.getCreatedTime());
+            assertNotNull(job.getMaxExecutionTimeInSeconds());
+            assertNotNull(job.getJobStatus());
+            assertNotNull(job.getJobStatistics());
+            assertTrue(job.getJobStatistics().getDeviceCount() > 0);
         }
         finally
         {
