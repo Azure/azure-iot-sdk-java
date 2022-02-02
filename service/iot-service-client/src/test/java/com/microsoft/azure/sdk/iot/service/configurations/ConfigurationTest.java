@@ -1,7 +1,9 @@
-package com.microsoft.azure.sdk.iot.service;
+package com.microsoft.azure.sdk.iot.service.configurations;
 
+import com.microsoft.azure.sdk.iot.service.configurations.Configuration;
+import com.microsoft.azure.sdk.iot.service.configurations.ConfigurationMetrics;
 import com.microsoft.azure.sdk.iot.service.serializers.ConfigurationMetricsParser;
-import com.microsoft.azure.sdk.iot.service.serializers.ConfigurationParser;
+import com.microsoft.azure.sdk.iot.service.configurations.ConfigurationParser;
 import com.microsoft.azure.sdk.iot.service.serializers.ParserUtility;
 import mockit.Deencapsulation;
 import mockit.Mocked;

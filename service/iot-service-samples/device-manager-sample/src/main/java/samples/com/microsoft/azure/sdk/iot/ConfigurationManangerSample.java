@@ -5,9 +5,9 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.service.Configuration;
-import com.microsoft.azure.sdk.iot.service.ConfigurationContent;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.configurations.Configuration;
+import com.microsoft.azure.sdk.iot.service.configurations.ConfigurationContent;
+import com.microsoft.azure.sdk.iot.service.configurations.ConfigurationsClient;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
 import java.io.IOException;
@@ -74,11 +74,11 @@ public class ConfigurationManangerSample
 
     private static void GetAllConfiguration()
     {
-        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
+        ConfigurationsClient configurationsClient = new ConfigurationsClient(SampleUtils.iotHubConnectionString);
 
         try
         {
-            List<Configuration> configList = registryManager.getConfigurations(20);
+            List<Configuration> configList = configurationsClient.getConfigurations(20);
             System.out.println(configList.size() + " Configurations found");
 
             for (Configuration config : configList)
@@ -94,7 +94,7 @@ public class ConfigurationManangerSample
 
     private static void AddConfiguration()
     {
-        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
+        ConfigurationsClient configurationsClient = new ConfigurationsClient(SampleUtils.iotHubConnectionString);
 
         ConfigurationContent content = new ConfigurationContent();
         content.setDeviceContent(DEVICE_CONTENT_SAMPLE);
@@ -108,7 +108,7 @@ public class ConfigurationManangerSample
 
         try
         {
-            config = registryManager.addConfiguration(config);
+            config = configurationsClient.addConfiguration(config);
             System.out.println("Add configuration " + config.getId() + " succeeded.");
             printConfiguration(config);
         }
@@ -120,12 +120,12 @@ public class ConfigurationManangerSample
 
     private static Configuration GetConfiguration()
     {
-        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
+        ConfigurationsClient configurationsClient = new ConfigurationsClient(SampleUtils.iotHubConnectionString);
 
         Configuration returnConfig = null;
         try
         {
-            returnConfig = registryManager.getConfiguration(SampleUtils.configurationId);
+            returnConfig = configurationsClient.getConfiguration(SampleUtils.configurationId);
             printConfiguration(returnConfig);
         }
         catch (IotHubException | IOException iote)
@@ -138,12 +138,12 @@ public class ConfigurationManangerSample
 
     private static void UpdateConfiguration(Configuration config)
     {
-        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
+        ConfigurationsClient configurationsClient = new ConfigurationsClient(SampleUtils.iotHubConnectionString);
 
         config.setPriority(1);
         try
         {
-            config = registryManager.updateConfiguration(config);
+            config = configurationsClient.updateConfiguration(config);
             printConfiguration(config);
         }
         catch (IotHubException | IOException iote)
@@ -154,11 +154,11 @@ public class ConfigurationManangerSample
 
     private static void RemoveConfiguration()
     {
-        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
+        ConfigurationsClient configurationsClient = new ConfigurationsClient(SampleUtils.iotHubConnectionString);
 
         try
         {
-            registryManager.removeConfiguration(SampleUtils.configurationId);
+            configurationsClient.removeConfiguration(SampleUtils.configurationId);
             System.out.println("Device removed: " + SampleUtils.configurationId);
         }
         catch (IotHubException | IOException iote)

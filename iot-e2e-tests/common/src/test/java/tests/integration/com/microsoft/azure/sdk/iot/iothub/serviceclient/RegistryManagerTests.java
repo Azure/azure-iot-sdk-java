@@ -8,8 +8,8 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.service.twin.DeviceCapabilities;
-import com.microsoft.azure.sdk.iot.service.Configuration;
-import com.microsoft.azure.sdk.iot.service.ConfigurationContent;
+import com.microsoft.azure.sdk.iot.service.configurations.Configuration;
+import com.microsoft.azure.sdk.iot.service.configurations.ConfigurationContent;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.DeviceStatus;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
@@ -447,112 +447,6 @@ public class RegistryManagerTests extends IntegrationTest
         assertTrue(buildExceptionMessage("", hostName), moduleWasDeletedSuccessfully(testInstance.registryManager, testInstance.deviceId, testInstance.moduleId));
     }
 
-    @Test
-    @StandardTierHubOnlyTest
-    public void crud_adm_configuration_e2e() throws Exception
-    {
-        // Arrange
-        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
-        final HashMap<String, Object> testDeviceContent = new HashMap<String, Object>()
-        {
-            {
-                put("properties.desired.chiller-water", new HashMap<String, Object>()
-                        {
-                            {
-                                put("temperature", 66);
-                                put("pressure", 28);
-                            }
-                        }
-                );
-            }
-        };
-
-        //-Create-//
-        Configuration configAdded = new Configuration(testInstance.configId);
-
-        ConfigurationContent content = new ConfigurationContent();
-        content.setDeviceContent(testDeviceContent);
-        configAdded.setContent(content);
-        configAdded.getMetrics().setQueries(new HashMap<String, String>(){{put("waterSettingsPending",
-                "SELECT deviceId FROM devices WHERE properties.reported.chillerWaterSettings.status=\'pending\'");}});
-        configAdded.setTargetCondition("properties.reported.chillerProperties.model=\'4000x\'");
-        configAdded.setPriority(20);
-        testInstance.registryManager.addConfiguration(configAdded);
-
-        //-Read-//
-        Configuration configRetrieved = testInstance.registryManager.getConfiguration(testInstance.configId);
-
-        //-Update-//
-        Configuration configUpdated = testInstance.registryManager.getConfiguration(testInstance.configId);
-        configUpdated.setPriority(1);
-        configUpdated = testInstance.registryManager.updateConfiguration(configUpdated);
-
-        //-Delete-//
-        testInstance.registryManager.removeConfiguration(testInstance.configId);
-
-        // Assert
-        assertEquals(buildExceptionMessage("", hostName), testInstance.configId, configAdded.getId());
-        assertEquals(buildExceptionMessage("", hostName), testInstance.configId, configRetrieved.getId());
-        String actualString = configRetrieved.getContent().getDeviceContent().get("properties.desired.chiller-water").toString();
-        actualString = actualString.substring(1, actualString.length()-1);
-        String[] keyValuePairs = actualString.split(",");
-        HashMap<String, String> actualMap = new HashMap<>();
-        for (String pair : keyValuePairs)
-        {
-            String[] entry = pair.split("=");
-            actualMap.put(entry[0].trim(), entry[1].trim());
-        }
-        assertEquals(buildExceptionMessage("", hostName), "66.0", actualMap.get("temperature"));
-        assertEquals(buildExceptionMessage("", hostName), "28.0", actualMap.get("pressure"));
-        assertEquals(buildExceptionMessage("", hostName), "SELECT deviceId FROM devices WHERE properties.reported.chillerWaterSettings.status=\'pending\'",
-                configRetrieved.getMetrics().getQueries().get("waterSettingsPending"));
-        assertEquals(buildExceptionMessage("", hostName), "properties.reported.chillerProperties.model=\'4000x\'",
-                configRetrieved.getTargetCondition());
-        assertEquals(buildExceptionMessage("", hostName), new Integer(20), configRetrieved.getPriority());
-        assertEquals(buildExceptionMessage("", hostName), testInstance.configId, configUpdated.getId());
-        assertEquals(buildExceptionMessage("", hostName), new Integer(1), configUpdated.getPriority());
-        assertTrue(buildExceptionMessage("", hostName), configWasDeletedSuccessfully(testInstance.registryManager, testInstance.configId));
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    public void apply_configuration_e2e() throws Exception
-    {
-        // Arrange
-        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
-        Device deviceSetup = Device.createFromId(testInstance.deviceId, DeviceStatus.Enabled, null);
-        Tools.addDeviceWithRetry(testInstance.registryManager, deviceSetup);
-        final HashMap<String, Object> testDeviceContent = new HashMap<String, Object>()
-        {
-            {
-                put("properties.desired.chiller-water", new HashMap<String, Object>()
-                        {
-                            {
-                                put("temperature", 66);
-                                put("pressure", 28);
-                            }
-                        }
-                );
-            }
-        };
-        ConfigurationContent content = new ConfigurationContent();
-        content.setDeviceContent(testDeviceContent);
-
-        boolean expectedExceptionThrown = false;
-
-        // Act
-        try
-        {
-            testInstance.registryManager.applyConfigurationContentOnDevice(testInstance.deviceId, content);
-        }
-        catch (IotHubBadFormatException e)
-        {
-            expectedExceptionThrown = true;
-        }
-
-        assertTrue("Bad format exception wasn't thrown but was expected", expectedExceptionThrown);
-    }
-
     @StandardTierHubOnlyTest
     @Test
     @ContinuousIntegrationTest
@@ -697,22 +591,6 @@ public class RegistryManagerTests extends IntegrationTest
         }
 
         // module could still be retrieved, so it was not deleted successfully
-        return false;
-    }
-
-    private static boolean configWasDeletedSuccessfully(RegistryManager registryManager, String configId) throws IOException
-    {
-        try
-        {
-            registryManager.getConfiguration(configId);
-        }
-        catch (IotHubException e)
-        {
-            // configuration should have been deleted, so this catch is expected
-            return true;
-        }
-
-        // configuration could still be retrieved, so it was not deleted successfully
         return false;
     }
 

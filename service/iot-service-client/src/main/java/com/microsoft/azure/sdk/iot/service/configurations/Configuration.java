@@ -3,11 +3,10 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.service;
+package com.microsoft.azure.sdk.iot.service.configurations;
 
 import com.microsoft.azure.sdk.iot.service.serializers.ConfigurationContentParser;
 import com.microsoft.azure.sdk.iot.service.serializers.ConfigurationMetricsParser;
-import com.microsoft.azure.sdk.iot.service.serializers.ConfigurationParser;
 import com.microsoft.azure.sdk.iot.service.serializers.ParserUtility;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,8 +27,7 @@ public class Configuration
     {
         this();
 
-        // Codes_SRS_SERVICE_SDK_JAVA_CONFIGURATION_28_001: [The function shall throw IllegalArgumentException if the input string is empty or null]
-        if (Tools.isNullOrEmpty(configurationId))
+        if (configurationId == null || configurationId.isEmpty())
         {
             throw new IllegalArgumentException("configuration id cannot be null or empty");
         }
@@ -42,7 +40,6 @@ public class Configuration
      */
     private Configuration()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_MODULE_28_002: [The constructor shall initialize all properties to default values]
         this.schemaVersion = "1.0";
         this.metrics = new ConfigurationMetrics();
 
@@ -50,9 +47,6 @@ public class Configuration
         this.lastUpdatedTimeUtc = UTC_TIME_DEFAULT;
         this.createdTimeUtc = UTC_TIME_DEFAULT;
     }
-
-    // Codes_SRS_SERVICE_SDK_JAVA_MODULE_28_003: [The Configuration class shall have the following properties: id, schemaVersion,
-    // labels, content, targetCondition, createdTimeUtc, lastUpdatedTimeUtc, priority, systemMetrics, metrics, etag
 
     /**
      * Configuration name
@@ -137,8 +131,6 @@ public class Configuration
      */
     ConfigurationParser toConfigurationParser()
     {
-        //Codes_SRS_SERVICE_SDK_JAVA_CONFIGURATION_28_004: [This method shall return a new instance of a ConfigurationParser
-        //object that is populated using the properties of this.]
         ConfigurationParser configurationParser = new ConfigurationParser();
 
         configurationParser.setId(this.id);
@@ -187,12 +179,9 @@ public class Configuration
     {
         if (parser.getId() == null)
         {
-            //Codes_SRS_SERVICE_SDK_JAVA_CONFIGURATION_28_005: [If the provided parser is missing the id,
-            //an IllegalArgumentException shall be thrown.]
             throw new IllegalArgumentException("configurationParser must have a configurationId assigned");
         }
 
-        //Codes_SRS_SERVICE_SDK_JAVA_CONFIGURATION_28_005: [This constructor shall create a new Configuration object using the values within the provided parser.]
         this.id = parser.getId();
         this.schemaVersion = parser.getSchemaVersion();
         this.labels = parser.getLabels();

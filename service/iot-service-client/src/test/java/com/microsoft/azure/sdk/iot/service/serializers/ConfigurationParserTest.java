@@ -1,5 +1,6 @@
 package com.microsoft.azure.sdk.iot.service.serializers;
 
+import com.microsoft.azure.sdk.iot.service.configurations.ConfigurationParser;
 import org.junit.Test;
 
 import java.util.HashMap;

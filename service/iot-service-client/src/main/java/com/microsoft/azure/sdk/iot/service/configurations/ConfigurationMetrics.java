@@ -1,4 +1,4 @@
-package com.microsoft.azure.sdk.iot.service;
+package com.microsoft.azure.sdk.iot.service.configurations;
 
 import lombok.Getter;
 import lombok.Setter;
