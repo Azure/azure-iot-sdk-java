@@ -81,6 +81,7 @@ public class DeviceRegistrationState implements Serializable
 
     /// substatus for 'assigned' devices
     private static final String SUBSTATUS_TAG = "substatus";
+    private static final String QUOTED_SUBSTATUS_TAG = "\"" + SUBSTATUS_TAG + "\"";
     @Expose
     @SerializedName(SUBSTATUS_TAG)
     private ProvisioningServiceClientSubstatus substatus;
@@ -148,12 +149,24 @@ public class DeviceRegistrationState implements Serializable
         {
             if (json.contains(QUOTED_STATE_TAG))
             {
-                throw new IllegalArgumentException("status is nor valid");
+                throw new IllegalArgumentException("status is not valid");
             }
         }
         else
         {
             this.status = result.status;
+        }
+
+        if (result.substatus == null)
+        {
+            if (json.contains(QUOTED_SUBSTATUS_TAG))
+            {
+                throw new IllegalArgumentException("substatus is not valid");
+            }
+        }
+        else
+        {
+            this.substatus = result.substatus;
         }
 
         if (result.errorCode != null)
@@ -232,6 +245,13 @@ public class DeviceRegistrationState implements Serializable
     {
         return this.status;
     }
+
+    /**
+     * Getter for the substatus.
+     *
+     * @return The {@code ProvisioningServiceClientSubstatus} with the substatus content. It can be {@code null}.
+     */
+    public ProvisioningServiceClientSubstatus getSubstatus() { return this.substatus; }
 
     /**
      * Getter for the errorCode.
