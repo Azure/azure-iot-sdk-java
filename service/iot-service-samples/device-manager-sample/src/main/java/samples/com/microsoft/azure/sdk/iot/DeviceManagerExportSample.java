@@ -34,7 +34,7 @@ public class DeviceManagerExportSample
         JobClient jobClient = new JobClient(SampleUtils.iotHubConnectionString);
         JobProperties exportJob = jobClient.exportDevices(containerSasUri, excludeKeys);
 
-        while(true)
+        while (true)
         {
             exportJob = jobClient.getImportExportJob(exportJob.getJobId());
             if (exportJob.getStatus() == JobProperties.JobStatus.COMPLETED)
@@ -44,7 +44,7 @@ public class DeviceManagerExportSample
             Thread.sleep(500);
         }
 
-        for(ListBlobItem blobItem : container.listBlobs())
+        for (ListBlobItem blobItem : container.listBlobs())
         {
             if (blobItem instanceof CloudBlob)
             {
