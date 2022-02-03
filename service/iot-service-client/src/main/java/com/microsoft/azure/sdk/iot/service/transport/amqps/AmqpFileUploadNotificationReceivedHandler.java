@@ -35,7 +35,7 @@ import java.util.Map;
  * Creates and sets SASL authentication for transport
  */
 @Slf4j
-class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHandler
+public class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHandler
 {
     private static final String FILE_NOTIFICATION_RECEIVE_TAG = "filenotificationreceiver";
     private static final String FILENOTIFICATION_ENDPOINT = "/messages/serviceBound/filenotifications";
@@ -47,27 +47,25 @@ class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHandler
      * Constructor to set up connection parameters and initialize
      * handshaker and flow controller for transport
      * @param hostName The address string of the service (example: AAA.BBB.CCC)
-     * @param userName The username string to use SASL authentication (example: user@sas.service)
      * @param sasToken The SAS token string
      * @param amqpFeedbackReceivedEvent callback to delegate the received message to the user API
      * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
      * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
      *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.
      */
-    AmqpFileUploadNotificationReceivedHandler(
+    public AmqpFileUploadNotificationReceivedHandler(
             String hostName,
-            String userName,
             String sasToken,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
     {
-        super(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, sslContext);
+        super(hostName, sasToken, iotHubServiceClientProtocol, proxyOptions, sslContext);
         this.amqpFeedbackReceivedEvent = amqpFeedbackReceivedEvent;
     }
 
-    AmqpFileUploadNotificationReceivedHandler(
+    public AmqpFileUploadNotificationReceivedHandler(
             String hostName,
             TokenCredential credential,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
@@ -79,7 +77,7 @@ class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHandler
         this.amqpFeedbackReceivedEvent = amqpFeedbackReceivedEvent;
     }
 
-    AmqpFileUploadNotificationReceivedHandler(
+    public AmqpFileUploadNotificationReceivedHandler(
             String hostName,
             AzureSasCredential sasTokenProvider,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,

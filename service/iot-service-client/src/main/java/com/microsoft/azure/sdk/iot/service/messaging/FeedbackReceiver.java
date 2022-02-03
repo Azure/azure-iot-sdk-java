@@ -8,7 +8,9 @@ package com.microsoft.azure.sdk.iot.service.messaging;
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
-import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpReceive;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFeedbackReceivedEvent;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFeedbackReceivedHandler;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.ReactorRunner;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
@@ -20,91 +22,54 @@ import java.util.Objects;
  * method returns a FeedbackBatch instead of a Message.
  */
 @Slf4j
-public class FeedbackReceiver
+public class FeedbackReceiver implements AmqpFeedbackReceivedEvent
 {
-    private static final long DEFAULT_TIMEOUT_MS = 60000;
+    private AmqpFeedbackReceivedHandler amqpReceiveHandler;
+    private FeedbackMessageReceivedCallback feedbackMessageReceivedCallback;
+    private final String hostName;
+    private ReactorRunner amqpConnectionReactorRunner;
 
-    private final AmqpReceive amqpReceive;
-
-    /**
-     * Constructor to verify initialization parameters
-     * Create instance of AmqpReceive
-     *
-     * @param hostName The iot hub host name
-     * @param userName The iot hub user name
-     * @param sasToken The iot hub SAS token for the given device
-     * @param iotHubServiceClientProtocol protocol to be used
-     *
-     */
-    FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)
-    {
-        this(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
-    }
-
-    /**
-     * Constructor to verify initialization parameters
-     * Create instance of AmqpReceive
-     *
-     * @param hostName The iot hub host name
-     * @param userName The iot hub user name
-     * @param sasToken The iot hub SAS token for the given device
-     * @param iotHubServiceClientProtocol protocol to be used
-     * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
-     */
-    private FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions)
-    {
-        this(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, null);
-    }
-
-    /**
-     * Constructor to verify initialization parameters
-     * Create instance of AmqpReceive
-     *
-     * @param hostName The iot hub host name
-     * @param userName The iot hub user name
-     * @param sasToken The iot hub SAS token for the given device
-     * @param iotHubServiceClientProtocol protocol to be used
-     * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
-     * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
-     *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.
-     */
     FeedbackReceiver(
-            String hostName,
-            String userName,
-            String sasToken,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            ProxyOptions proxyOptions,
-            SSLContext sslContext)
+        FeedbackMessageReceivedCallback feedbackMessageReceivedCallback,
+        String hostName,
+        String sasToken,
+        IotHubServiceClientProtocol iotHubServiceClientProtocol,
+        ProxyOptions proxyOptions,
+        SSLContext sslContext)
     {
         if (Tools.isNullOrEmpty(hostName))
         {
             throw new IllegalArgumentException("hostName cannot be null or empty");
         }
-
-        if (Tools.isNullOrEmpty(userName))
-        {
-            throw new IllegalArgumentException("userName cannot be null or empty");
-        }
-
         if (Tools.isNullOrEmpty(sasToken))
         {
             throw new IllegalArgumentException("sasToken cannot be null or empty");
         }
-
         if (iotHubServiceClientProtocol == null)
         {
             throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
         }
 
-        this.amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, sslContext);
+        Objects.requireNonNull(feedbackMessageReceivedCallback);
+
+        this.hostName = hostName;
+        this.feedbackMessageReceivedCallback = feedbackMessageReceivedCallback;
+        this.amqpReceiveHandler = new AmqpFeedbackReceivedHandler(
+            hostName,
+            sasToken,
+            iotHubServiceClientProtocol,
+            this,
+            proxyOptions,
+            sslContext);
     }
 
     FeedbackReceiver(
-            String hostName,
-            TokenCredential credential,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            ProxyOptions proxyOptions,
-            SSLContext sslContext)
+        FeedbackMessageReceivedCallback feedbackMessageReceivedCallback,
+        String hostName,
+        TokenCredential credential,
+        IotHubServiceClientProtocol iotHubServiceClientProtocol,
+        ProxyOptions proxyOptions,
+        SSLContext sslContext)
     {
         if (Tools.isNullOrEmpty(hostName))
         {
@@ -113,22 +78,26 @@ public class FeedbackReceiver
 
         Objects.requireNonNull(credential);
         Objects.requireNonNull(iotHubServiceClientProtocol);
+        Objects.requireNonNull(feedbackMessageReceivedCallback);
 
-        this.amqpReceive =
-                new AmqpReceive(
-                        hostName,
-                        credential,
-                        iotHubServiceClientProtocol,
-                        proxyOptions,
-                        sslContext);
+        this.hostName = hostName;
+        this.feedbackMessageReceivedCallback = feedbackMessageReceivedCallback;
+        this.amqpReceiveHandler = new AmqpFeedbackReceivedHandler(
+            hostName,
+            credential,
+            iotHubServiceClientProtocol,
+            this,
+            proxyOptions,
+            sslContext);
     }
 
     FeedbackReceiver(
-            String hostName,
-            AzureSasCredential sasTokenProvider,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            ProxyOptions proxyOptions,
-            SSLContext sslContext)
+        FeedbackMessageReceivedCallback feedbackMessageReceivedCallback,
+        String hostName,
+        AzureSasCredential sasTokenProvider,
+        IotHubServiceClientProtocol iotHubServiceClientProtocol,
+        ProxyOptions proxyOptions,
+        SSLContext sslContext)
     {
         if (Tools.isNullOrEmpty(hostName))
         {
@@ -137,85 +106,82 @@ public class FeedbackReceiver
 
         Objects.requireNonNull(sasTokenProvider);
         Objects.requireNonNull(iotHubServiceClientProtocol);
+        Objects.requireNonNull(feedbackMessageReceivedCallback);
 
-        this.amqpReceive =
-                new AmqpReceive(
-                        hostName,
-                        sasTokenProvider,
-                        iotHubServiceClientProtocol,
-                        proxyOptions,
-                        sslContext);
+        this.hostName = hostName;
+        this.feedbackMessageReceivedCallback = feedbackMessageReceivedCallback;
+        this.amqpReceiveHandler = new AmqpFeedbackReceivedHandler(
+            hostName,
+            sasTokenProvider,
+            iotHubServiceClientProtocol,
+            this,
+            proxyOptions,
+            sslContext);
     }
-        
+
     /**
      * Open AmqpReceive object
      *
-     * @throws IOException This exception is thrown if the input AmqpReceive object is null
      */
     public void open() throws IOException
     {
-        if (this.amqpReceive == null)
+        log.debug("Opening file upload notification receiver");
+
+        this.amqpConnectionReactorRunner =
+            new ReactorRunner(amqpReceiveHandler, hostName, "AmqpFileUploadNotificationReceiver");
+
+        new Thread(() ->
         {
-            throw new IOException("AMQP receiver is not initialized");
-        }
+            try
+            {
+                amqpConnectionReactorRunner.run();
 
-        log.info("Opening feedback receiver client");
+                log.trace("Amqp receive reactor stopped, checking that the connection was opened");
+                amqpReceiveHandler.verifyConnectionWasOpened();
+                log.trace("Amqp receive reactor did successfully open the connection, returning without exception");
+            }
+            catch (IOException e)
+            {
+                //TODO add some connection status callback to the user?
+                log.warn("Amqp connection thread encountered an exception", e);
+            }
+        }).start();
 
-        this.amqpReceive.open();
-
-        log.info("Opened feedback receiver client");
+        log.debug("Opened file upload notification receiver");
     }
 
     /**
      * Close AmqpReceive object
      *
-     * @throws IOException This exception is thrown if the input AmqpReceive object is null
      */
-    public void close() throws IOException
+    public void close()
     {
-        if (this.amqpReceive == null)
-        {
-            throw new IOException("AMQP receiver is not initialized");
-        }
+        log.debug("Closing file upload notification receiver");
 
-        log.info("Closing feedback receiver client");
+        this.amqpConnectionReactorRunner.stop();
 
-        this.amqpReceive.close();
-
-        log.info("Closed feedback receiver client");
+        log.debug("Closed file upload notification receiver");
     }
 
     /**
-     * Receive FeedbackBatch with default timeout
-     *
-     * This function is synchronized internally so that only one receive operation is allowed at a time.
-     * In order to do more receive operations at a time, you will need to instantiate another FeedbackReceiver instance.
-     *
-     * @return The received FeedbackBatch object
-     * @throws IOException This exception is thrown if the input AmqpReceive object is null
+     * Handle on feedback received Proton event
+     * Parse received json and save result to a member variable
+     * Release semaphore for wait function
+     * @param feedbackJson Received Json string to process
      */
-    public FeedbackBatch receive() throws IOException
+    public synchronized IotHubMessageResult onFeedbackReceived(String feedbackJson)
     {
-        return receive(DEFAULT_TIMEOUT_MS);
-    }
-
-    /**
-     * Receive FeedbackBatch with specific timeout
-     *
-     * This function is synchronized internally so that only one receive operation is allowed at a time.
-     * In order to do more receive operations at a time, you will need to instantiate another FeedbackReceiver instance.
-     *
-     * @param timeoutMs The timeout in milliseconds
-     * @return The received FeedbackBatch object
-     * @throws IOException This exception is thrown if the input AmqpReceive object is null
-     */
-    public FeedbackBatch receive(long timeoutMs) throws IOException
-    {
-        if (this.amqpReceive == null)
+        try
         {
-            throw new IOException("AMQP receiver is not initialized");
-        }
+            FeedbackBatch feedbackBatch = FeedbackBatchMessage.parse(feedbackJson);
 
-        return this.amqpReceive.receive(timeoutMs);
+            return feedbackMessageReceivedCallback.onFeedbackMessageReceived(feedbackBatch);
+        }
+        catch (Exception e)
+        {
+            // this should never happen. However if it does, proton can't handle it. So guard against throwing it at proton.
+            log.warn("Encountered an exception while handling feedback batch message", e);
+            return IotHubMessageResult.REJECT;
+        }
     }
 }

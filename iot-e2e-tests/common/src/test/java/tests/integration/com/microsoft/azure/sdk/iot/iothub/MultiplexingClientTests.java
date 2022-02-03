@@ -126,7 +126,6 @@ public class MultiplexingClientTests extends IntegrationTest
 
         registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
         serviceClient = new ServiceClient(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
-        serviceClient.open();
 
         return Arrays.asList(
                 new Object[][]
@@ -202,15 +201,6 @@ public class MultiplexingClientTests extends IntegrationTest
             {
                 Tools.disposeTestIdentities(this.testDevicesArrayIdentity, iotHubConnectionString);
             }
-        }
-    }
-
-    @AfterClass
-    public static void tearDown() throws Exception
-    {
-        if (serviceClient != null)
-        {
-            serviceClient.close();
         }
     }
 

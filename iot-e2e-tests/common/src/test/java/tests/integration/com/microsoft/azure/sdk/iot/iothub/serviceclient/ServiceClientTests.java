@@ -7,6 +7,11 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
+import com.microsoft.azure.sdk.iot.service.messaging.FeedbackBatch;
+import com.microsoft.azure.sdk.iot.service.messaging.FeedbackMessageReceivedCallback;
+import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotification;
+import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationReceivedCallback;
+import com.microsoft.azure.sdk.iot.service.messaging.IotHubMessageResult;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.messaging.FeedbackReceiver;
 import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationReceiver;
@@ -253,8 +258,6 @@ public class ServiceClientTests extends IntegrationTest
             serviceClient = new ServiceClient(iotHubConnectionString, testInstance.protocol, serviceClientOptions);
         }
 
-        serviceClient.open();
-
         Message message;
         if (withPayload)
         {
@@ -275,7 +278,6 @@ public class ServiceClientTests extends IntegrationTest
         serviceClient.send(device.getDeviceId(), message);
 
         Device deviceGetAfter = registryManager.getDevice(device.getDeviceId());
-        serviceClient.close();
 
         Tools.disposeTestIdentity(testDeviceIdentity, iotHubConnectionString);
 
@@ -311,7 +313,6 @@ public class ServiceClientTests extends IntegrationTest
         IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
         AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
         serviceClient = new ServiceClient(iotHubConnectionStringObj.getHostName(), sasCredential, testInstance.protocol);
-        serviceClient.open();
 
         Message message = new Message(SMALL_PAYLOAD);
         serviceClient.send(device.getDeviceId(), message);
@@ -345,7 +346,6 @@ public class ServiceClientTests extends IntegrationTest
         // The final c2d send should succeed since the shared access signature has been renewed
         serviceClient.send(device.getDeviceId(), message);
 
-        serviceClient.close();
         Tools.disposeTestIdentity(testDeviceIdentity, iotHubConnectionString);
     }
 
@@ -370,28 +370,17 @@ public class ServiceClientTests extends IntegrationTest
                 sasTokenProvider,
                 testInstance.protocol);
 
-        FeedbackReceiver feedbackReceiver = serviceClient.getFeedbackReceiver();
-        feedbackReceiver.open();
-
         // received feedback message can be ignored since we no longer have any tests that need to consume them
-        // All this test cares about is that this API doesn't result in an unauthorized exception
-        feedbackReceiver.receive(2 * 1000);
-
+        // All this test cares about is that opening the connection doesn't result in an unauthorized exception
+        FeedbackReceiver feedbackReceiver = serviceClient.getFeedbackReceiver(feedbackBatch -> IotHubMessageResult.COMPLETE);
+        feedbackReceiver.open();
         feedbackReceiver.close();
-        serviceClient.close();
     }
 
     @Test
     @StandardTierHubOnlyTest
     public void fileUploadNotificationReceiverWithAzureSasCredential() throws Exception
     {
-        RegistryManager registryManager =
-                new RegistryManager(
-                        iotHubConnectionString,
-                        RegistryManagerOptions.builder()
-                                .httpReadTimeout(HTTP_READ_TIMEOUT)
-                                .build());
-
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
 
         IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
@@ -402,15 +391,11 @@ public class ServiceClientTests extends IntegrationTest
                 sasTokenProvider,
                 testInstance.protocol);
 
-        FileUploadNotificationReceiver fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver();
-        fileUploadNotificationReceiver.open();
-
         // received file upload notifications can be ignored since we no longer have any tests that need to consume them
-        // All this test cares about is that this API doesn't result in an unauthorized exception
-        fileUploadNotificationReceiver.receive(2 * 1000);
-
+        // All this test cares about is that opening the connection doesn't result in an unauthorized exception
+        FileUploadNotificationReceiver fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver(notification -> IotHubMessageResult.COMPLETE);
+        fileUploadNotificationReceiver.open();
         fileUploadNotificationReceiver.close();
-        serviceClient.close();
     }
 
     @Ignore // The IoT Hub instance we use for this test is currently offline, so this test cannot be run
@@ -424,7 +409,6 @@ public class ServiceClientTests extends IntegrationTest
 
         try
         {
-            serviceClient.open();
             // don't need a real device Id since the request is sent to a fake service
             serviceClient.send("some deviceId", new Message("some message"));
         }
@@ -451,10 +435,8 @@ public class ServiceClientTests extends IntegrationTest
 
         try
         {
-            serviceClient.open();
-            FeedbackReceiver receiver = serviceClient.getFeedbackReceiver();
+            FeedbackReceiver receiver = serviceClient.getFeedbackReceiver(feedbackBatch -> IotHubMessageResult.COMPLETE);
             receiver.open();
-            receiver.receive(1000);
         }
         catch (IOException e)
         {
@@ -479,10 +461,8 @@ public class ServiceClientTests extends IntegrationTest
 
         try
         {
-            serviceClient.open();
-            FileUploadNotificationReceiver receiver = serviceClient.getFileUploadNotificationReceiver();
+            FileUploadNotificationReceiver receiver = serviceClient.getFileUploadNotificationReceiver(notification -> IotHubMessageResult.COMPLETE);
             receiver.open();
-            receiver.receive(1000);
         }
         catch (IOException e)
         {

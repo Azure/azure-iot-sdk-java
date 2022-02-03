@@ -8,6 +8,9 @@ package samples.com.microsoft.azure.sdk.iot;
 import com.azure.core.credential.TokenCredential;
 import com.azure.identity.ClientSecretCredentialBuilder;
 import com.microsoft.azure.sdk.iot.service.jobs.scheduled.Job;
+import com.microsoft.azure.sdk.iot.service.messaging.FeedbackMessageReceivedCallback;
+import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationReceivedCallback;
+import com.microsoft.azure.sdk.iot.service.messaging.IotHubMessageResult;
 import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.service.query.QueryClientOptions;
@@ -51,7 +54,7 @@ public class RoleBasedAuthenticationSample
     private static final int FILE_UPLOAD_NOTIFICATION_LISTEN_SECONDS = 5 * 1000; // 5 seconds
     private static final int FEEDBACK_MESSAGE_LISTEN_SECONDS = 5 * 1000; // 5 seconds
 
-    public static void main(String[] args)
+    public static void main(String[] args) throws InterruptedException
     {
         SamplesArguments parsedArguments = new SamplesArguments(args);
 
@@ -136,7 +139,7 @@ public class RoleBasedAuthenticationSample
         System.out.println("ETag: " + newDeviceTwin.getETag());
     }
 
-    private static void runServiceClientSample(String iotHubHostName, TokenCredential credential, String deviceId)
+    private static void runServiceClientSample(String iotHubHostName, TokenCredential credential, String deviceId) throws InterruptedException
     {
         // ServiceClient has some configurable options for setting a custom SSLContext, as well as for setting proxies.
         // For this sample, the default options will be used though.
@@ -170,23 +173,21 @@ public class RoleBasedAuthenticationSample
         {
             // FeedbackReceiver will use the same authentication mechanism that the ServiceClient itself uses,
             // so the below APIs are also RBAC authenticated.
-            FeedbackReceiver feedbackReceiver = serviceClient.getFeedbackReceiver();
-
-            System.out.println("Opening feedback receiver to listen for feedback messages");
-            feedbackReceiver.open();
-            FeedbackBatch feedbackBatch = feedbackReceiver.receive(FEEDBACK_MESSAGE_LISTEN_SECONDS);
-
-            if (feedbackBatch != null)
+            FeedbackReceiver feedbackReceiver = serviceClient.getFeedbackReceiver(feedbackBatch ->
             {
                 for (FeedbackRecord feedbackRecord : feedbackBatch.getRecords())
                 {
                     System.out.println(String.format("Feedback record received for device %s with status %s", feedbackRecord.getDeviceId(), feedbackRecord.getStatusCode()));
                 }
-            }
-            else
-            {
-                System.out.println("No feedback records were received");
-            }
+
+                return IotHubMessageResult.COMPLETE;
+            });
+
+            System.out.println("Opening feedback receiver to listen for feedback messages");
+            feedbackReceiver.open();
+
+            System.out.println("Sleeping for 5 seconds while waiting for feedback messages...");
+            Thread.sleep(5000);
 
             feedbackReceiver.close();
         }
@@ -201,20 +202,17 @@ public class RoleBasedAuthenticationSample
         {
             // FileUploadNotificationReceiver will use the same authentication mechanism that the ServiceClient itself uses,
             // so the below APIs are also RBAC authenticated.
-            FileUploadNotificationReceiver fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver();
+            FileUploadNotificationReceiver fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver(notification ->
+            {
+                System.out.println("File upload notification received for device " + notification.getDeviceId());
+                return IotHubMessageResult.COMPLETE;
+            });
 
             System.out.println("Opening file upload notification receiver and listening for file upload notifications");
             fileUploadNotificationReceiver.open();
-            FileUploadNotification fileUploadNotification = fileUploadNotificationReceiver.receive(FILE_UPLOAD_NOTIFICATION_LISTEN_SECONDS);
 
-            if (fileUploadNotification != null)
-            {
-                System.out.println("File upload notification received for device " + fileUploadNotification.getDeviceId());
-            }
-            else
-            {
-                System.out.println("No feedback records were received");
-            }
+            System.out.println("Sleeping for 5 seconds while waiting for file upload notifications...");
+            Thread.sleep(5000);
 
             fileUploadNotificationReceiver.close();
         }
@@ -228,14 +226,12 @@ public class RoleBasedAuthenticationSample
 
     private static void runJobClientSample(String iotHubHostName, TokenCredential credential)
     {
-        // ScheduledJobsClient has some configurable options for HTTP read and connect timeouts, as well as for setting proxies.
+        // QueryClientOptions has some configurable options for HTTP read and connect timeouts, as well as for setting proxies.
         // For this sample, the default options will be used though.
-        ScheduledJobsClientOptions jobClientOptions = ScheduledJobsClientOptions.builder().build();
         QueryClientOptions queryClientOptions = QueryClientOptions.builder().build();
 
         // This constructor takes in your implementation of TokenCredential which allows you to use RBAC authentication
         // rather than symmetric key based authentication that comes with constructors that take connection strings.
-        ScheduledJobsClient jobClient = new ScheduledJobsClient(iotHubHostName, credential, jobClientOptions);
         QueryClient queryClient = new QueryClient(iotHubHostName, credential, queryClientOptions);
 
         try

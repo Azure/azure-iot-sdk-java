@@ -8,45 +8,35 @@ package com.microsoft.azure.sdk.iot.service.messaging;
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
-import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFileUploadNotificationReceive;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFeedbackReceivedEvent;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFileUploadNotificationReceivedHandler;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.ReactorRunner;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.qpid.proton.reactor.impl.IO;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.Objects;
 
 @Slf4j
-public class FileUploadNotificationReceiver
+public class FileUploadNotificationReceiver implements AmqpFeedbackReceivedEvent
 {
-    private static final long DEFAULT_TIMEOUT_MS = 60000;
-    private final AmqpFileUploadNotificationReceive amqpFileUploadNotificationReceive;
+    private AmqpFileUploadNotificationReceivedHandler amqpReceiveHandler;
+    private FileUploadNotificationReceivedCallback notificationReceivedCallback;
+    private final String hostName;
+    private ReactorRunner amqpConnectionReactorRunner;
 
-    /**
-     * Constructor to verify initialization parameters
-     * Create instance of AmqpReceive
-     * @param hostName The iot hub host name
-     * @param userName The iot hub user name
-     * @param sasToken The iot hub SAS token for the given device
-     * @param iotHubServiceClientProtocol The iot hub protocol name
-     * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
-     * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
-     *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.
-     */
     FileUploadNotificationReceiver(
-            String hostName,
-            String userName,
-            String sasToken,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            ProxyOptions proxyOptions,
-            SSLContext sslContext)
+        FileUploadNotificationReceivedCallback notificationReceivedCallback,
+        String hostName,
+        String sasToken,
+        IotHubServiceClientProtocol iotHubServiceClientProtocol,
+        ProxyOptions proxyOptions,
+        SSLContext sslContext)
     {
         if (Tools.isNullOrEmpty(hostName))
         {
             throw new IllegalArgumentException("hostName cannot be null or empty");
-        }
-        if (Tools.isNullOrEmpty(userName))
-        {
-            throw new IllegalArgumentException("userName cannot be null or empty");
         }
         if (Tools.isNullOrEmpty(sasToken))
         {
@@ -57,15 +47,26 @@ public class FileUploadNotificationReceiver
             throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
         }
 
-        this.amqpFileUploadNotificationReceive = new AmqpFileUploadNotificationReceive(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, sslContext);
+        Objects.requireNonNull(notificationReceivedCallback);
+
+        this.hostName = hostName;
+        this.notificationReceivedCallback = notificationReceivedCallback;
+        this.amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(
+            hostName,
+            sasToken,
+            iotHubServiceClientProtocol,
+            this,
+            proxyOptions,
+            sslContext);
     }
 
     FileUploadNotificationReceiver(
-            String hostName,
-            TokenCredential credential,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            ProxyOptions proxyOptions,
-            SSLContext sslContext)
+        FileUploadNotificationReceivedCallback notificationReceivedCallback,
+        String hostName,
+        TokenCredential credential,
+        IotHubServiceClientProtocol iotHubServiceClientProtocol,
+        ProxyOptions proxyOptions,
+        SSLContext sslContext)
     {
         if (Tools.isNullOrEmpty(hostName))
         {
@@ -74,22 +75,26 @@ public class FileUploadNotificationReceiver
 
         Objects.requireNonNull(credential);
         Objects.requireNonNull(iotHubServiceClientProtocol);
+        Objects.requireNonNull(notificationReceivedCallback);
 
-        this.amqpFileUploadNotificationReceive =
-                new AmqpFileUploadNotificationReceive(
-                        hostName,
-                        credential,
-                        iotHubServiceClientProtocol,
-                        proxyOptions,
-                        sslContext);
+        this.hostName = hostName;
+        this.notificationReceivedCallback = notificationReceivedCallback;
+        this.amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(
+            hostName,
+            credential,
+            iotHubServiceClientProtocol,
+            this,
+            proxyOptions,
+            sslContext);
     }
 
     FileUploadNotificationReceiver(
-            String hostName,
-            AzureSasCredential sasTokenProvider,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            ProxyOptions proxyOptions,
-            SSLContext sslContext)
+        FileUploadNotificationReceivedCallback notificationReceivedCallback,
+        String hostName,
+        AzureSasCredential sasTokenProvider,
+        IotHubServiceClientProtocol iotHubServiceClientProtocol,
+        ProxyOptions proxyOptions,
+        SSLContext sslContext)
     {
         if (Tools.isNullOrEmpty(hostName))
         {
@@ -98,27 +103,48 @@ public class FileUploadNotificationReceiver
 
         Objects.requireNonNull(sasTokenProvider);
         Objects.requireNonNull(iotHubServiceClientProtocol);
+        Objects.requireNonNull(notificationReceivedCallback);
 
-        this.amqpFileUploadNotificationReceive =
-                new AmqpFileUploadNotificationReceive(
-                        hostName,
-                        sasTokenProvider,
-                        iotHubServiceClientProtocol,
-                        proxyOptions,
-                        sslContext);
+        this.hostName = hostName;
+        this.notificationReceivedCallback = notificationReceivedCallback;
+        this.amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(
+            hostName,
+            sasTokenProvider,
+            iotHubServiceClientProtocol,
+            this,
+            proxyOptions,
+            sslContext);
     }
 
     /**
      * Open AmqpReceive object
      *
      */
-    public void open()
+    public void open() throws IOException
     {
-        log.info("Opening file upload notification receiver");
+        log.debug("Opening file upload notification receiver");
 
-        this.amqpFileUploadNotificationReceive.open();
+        this.amqpConnectionReactorRunner =
+            new ReactorRunner(amqpReceiveHandler, hostName, "AmqpFileUploadNotificationReceiver");
 
-        log.info("Opened file upload notification receiver");
+        new Thread(() ->
+        {
+            try
+            {
+                amqpConnectionReactorRunner.run();
+
+                log.trace("Amqp receive reactor stopped, checking that the connection was opened");
+                amqpReceiveHandler.verifyConnectionWasOpened();
+                log.trace("Amqp receive reactor did successfully open the connection, returning without exception");
+            }
+            catch (IOException e)
+            {
+                //TODO add some connection status callback to the user?
+                log.warn("Amqp connection thread encountered an exception", e);
+            }
+        }).start();
+
+        log.debug("Opened file upload notification receiver");
     }
 
     /**
@@ -127,48 +153,36 @@ public class FileUploadNotificationReceiver
      */
     public void close()
     {
-        log.info("Closing file upload notification receiver");
+        log.debug("Closing file upload notification receiver");
 
-        this.amqpFileUploadNotificationReceive.close();
+        this.amqpConnectionReactorRunner.stop();
 
-        log.info("Closed file upload notification receiver");
+        log.debug("Closed file upload notification receiver");
     }
 
     /**
-     * Receive FileUploadNotification with default timeout
-     *
-     * QoS for receiving file upload notifications is at least once
-     *
-     * This function is synchronized internally so that only one receive operation is allowed at a time.
-     * In order to do more receive operations at a time, you will need to instantiate another FileUploadNotificationReceiver instance.
-     *
-     * @return The received FileUploadNotification object
-     * @throws IOException This exception is thrown if the input AmqpReceive object is null
+     * Handle on feedback received Proton event
+     * Parse received json and save result to a member variable
+     * Release semaphore for wait function
+     * @param feedbackJson Received Json string to process
      */
-    public FileUploadNotification receive() throws IOException
+    public synchronized IotHubMessageResult onFeedbackReceived(String feedbackJson)
     {
-        return receive(DEFAULT_TIMEOUT_MS);
-    }
-
-    /**
-     * Receive FileUploadNotification with specific timeout
-     *
-     * QoS for receiving file upload notifications is at least once
-     *
-     * This function is synchronized internally so that only one receive operation is allowed at a time.
-     * In order to do more receive operations at a time, you will need to instantiate another FileUploadNotificationReceiver instance.
-     *
-     * @param timeoutMs The timeout in milliseconds
-     * @return The received FileUploadNotification object
-     * @throws IOException This exception is thrown if the input AmqpReceive object is null
-     */
-    public FileUploadNotification receive(long timeoutMs) throws IOException
-    {
-        if (this.amqpFileUploadNotificationReceive == null)
+        try
         {
-            throw new IOException("AMQP receiver is not initialized");
-        }
+            FileUploadNotificationParser notificationParser = new FileUploadNotificationParser(feedbackJson);
 
-        return this.amqpFileUploadNotificationReceive.receive(timeoutMs);
+            FileUploadNotification fileUploadNotification = new FileUploadNotification(notificationParser.getDeviceId(),
+                notificationParser.getBlobUri(), notificationParser.getBlobName(), notificationParser.getLastUpdatedTime(),
+                notificationParser.getBlobSizeInBytesTag(), notificationParser.getEnqueuedTimeUtc());
+
+            return notificationReceivedCallback.onFileUploadNotificationReceived(fileUploadNotification);
+        }
+        catch (Exception e)
+        {
+            // this should never happen. However if it does, proton can't handle it. So guard against throwing it at proton.
+            log.warn("Encountered an exception while handling file upload notification", e);
+            return IotHubMessageResult.REJECT;
+        }
     }
 }

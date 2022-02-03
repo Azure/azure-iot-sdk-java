@@ -61,7 +61,6 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
 
     AmqpConnectionHandler(
         String hostName,
-        String userName,
         String sasToken,
         IotHubServiceClientProtocol iotHubServiceClientProtocol,
         ProxyOptions proxyOptions,
@@ -82,7 +81,6 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         this.proxyOptions = proxyOptions;
         this.hostName = hostName;
         this.sasToken = sasToken;
-        this.userName = userName;
 
         commonConstructorSetup(iotHubServiceClientProtocol, proxyOptions, sslContext);
     }
@@ -261,7 +259,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
      * @throws IOException if an exception was encountered while openinging the AMQP connection. The encountered
      * exception will be the inner exception
      */
-    void verifyConnectionWasOpened() throws IOException
+    public void verifyConnectionWasOpened() throws IOException
     {
         if (this.protonJExceptionParser != null)
         {

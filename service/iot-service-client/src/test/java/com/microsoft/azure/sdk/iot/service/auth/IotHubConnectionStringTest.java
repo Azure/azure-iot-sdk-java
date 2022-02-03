@@ -26,27 +26,6 @@ public class IotHubConnectionStringTest
 {
     private static final String URL_API_VERSION = Deencapsulation.getField(IotHubConnectionString.class, "URL_API_VERSION");
 
-    // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_001: [The function shall serialize the object properties to a string using the following format: SharedAccessKeyName@SAS.root.IotHubName]
-    @Test
-    public void getUserStringGoodCase() throws IOException
-    {
-        // arrange
-        final String iotHubName = "b.c.d";
-        final String hostName = "HOSTNAME." + iotHubName;
-        final String sharedAccessKeyName = "ACCESSKEYNAME";
-        final String policyName = "SharedAccessKey";
-        final String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
-        final String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        final IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
-        final String expected = sharedAccessKeyName +  "@SAS.root.HOSTNAME";
-        
-        // act
-        String actual = iotHubConnectionString.getUserString();
-        
-        // assert
-        assertEquals("UserString mismatch!", expected, actual);
-    }
-
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_002: [The function shall throw IllegalArgumentException if the input string is empty or null]
     // assert
     @Test (expected = IllegalArgumentException.class)

@@ -27,7 +27,6 @@ public final class ServiceClient
 {
     private final AmqpSend amqpMessageSender;
     private final String hostName;
-    private String userName;
     private String sasToken;
     private final IotHubServiceClientProtocol iotHubServiceClientProtocol;
     private TokenCredential credential;
@@ -69,14 +68,12 @@ public final class ServiceClient
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
 
         this.hostName = iotHubConnectionString.getHostName();
-        this.userName = iotHubConnectionString.getUserString();
         this.sasToken = new IotHubServiceSasToken(iotHubConnectionString).toString();
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
         this.options = options;
         this.amqpMessageSender =
                 new AmqpSend(
                         this.hostName,
-                        this.userName,
                         this.sasToken,
                         iotHubServiceClientProtocol,
                         options.getProxyOptions(),
@@ -232,7 +229,6 @@ public final class ServiceClient
         IotHubServiceSasToken iotHubServiceSasToken = new IotHubServiceSasToken(iotHubConnectionString);
 
         this.hostName = iotHubConnectionString.getHostName();
-        this.userName = iotHubConnectionString.getUserString();
         this.sasToken = iotHubServiceSasToken.toString();
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
         this.options = options;
@@ -244,7 +240,6 @@ public final class ServiceClient
 
         this.amqpMessageSender = new AmqpSend(
                 this.hostName,
-                this.userName,
                 this.sasToken,
                 this.iotHubServiceClientProtocol,
                 options.getProxyOptions(),
@@ -256,39 +251,6 @@ public final class ServiceClient
     private static void commonConstructorSetup()
     {
         log.debug("Initialized a ServiceClient instance using SDK version {}", TransportUtils.serviceVersion);
-    }
-
-    /**
-     * Open AMQP sender
-     * @throws IOException This exception is thrown if the AmqpSender object is not initialized
-     */
-    public void open() throws IOException
-    {
-        if (this.amqpMessageSender == null)
-        {
-            throw new IOException("AMQP sender is not initialized");
-        }
-
-        log.info("Opening service client...");
-
-        this.amqpMessageSender.open();
-        log.info("Service client opened successfully");
-    }
-
-    /**
-     * Close AMQP sender
-     * @throws IOException This exception is thrown if the AmqpSender object is not initialized
-     */
-    public void close() throws IOException
-    {
-        if (this.amqpMessageSender == null)
-        {
-            throw new IOException("AMQP sender is not initialized");
-        }
-
-        log.info("Closing service client...");
-        this.amqpMessageSender.close();
-        log.info("Service client closed successfully");
     }
 
     /**
@@ -330,34 +292,36 @@ public final class ServiceClient
      *
      * @return The instance of the FeedbackReceiver
      */
-     public FeedbackReceiver getFeedbackReceiver()
+     public FeedbackReceiver getFeedbackReceiver(FeedbackMessageReceivedCallback feedbackMessageReceivedCallback)
      {
          if (this.credential != null)
          {
              return new FeedbackReceiver(
-                     this.hostName,
-                     this.credential,
-                     this.iotHubServiceClientProtocol,
-                     this.options.getProxyOptions(),
-                     this.options.getSslContext());
+                 feedbackMessageReceivedCallback,
+                 this.hostName,
+                 this.credential,
+                 this.iotHubServiceClientProtocol,
+                 this.options.getProxyOptions(),
+                 this.options.getSslContext());
          }
          else if (this.sasTokenProvider != null)
          {
              return new FeedbackReceiver(
-                     this.hostName,
-                     this.sasTokenProvider,
-                     this.iotHubServiceClientProtocol,
-                     this.options.getProxyOptions(),
-                     this.options.getSslContext());
+                 feedbackMessageReceivedCallback,
+                 this.hostName,
+                 this.sasTokenProvider,
+                 this.iotHubServiceClientProtocol,
+                 this.options.getProxyOptions(),
+                 this.options.getSslContext());
          }
 
         return new FeedbackReceiver(
-                this.hostName,
-                this.userName,
-                this.sasToken,
-                this.iotHubServiceClientProtocol,
-                this.options.getProxyOptions(),
-                this.options.getSslContext());
+            feedbackMessageReceivedCallback,
+            this.hostName,
+            this.sasToken,
+            this.iotHubServiceClientProtocol,
+            this.options.getProxyOptions(),
+            this.options.getSslContext());
      }
 
     /**
@@ -365,33 +329,35 @@ public final class ServiceClient
      *
      * @return The instance of the FileUploadNotificationReceiver
      */
-    public FileUploadNotificationReceiver getFileUploadNotificationReceiver()
+    public FileUploadNotificationReceiver getFileUploadNotificationReceiver(FileUploadNotificationReceivedCallback fileUploadNotificationReceivedCallback)
     {
         if (this.credential != null)
         {
             return new FileUploadNotificationReceiver(
-                    this.hostName,
-                    this.credential,
-                    this.iotHubServiceClientProtocol,
-                    this.options.getProxyOptions(),
-                    this.options.getSslContext());
+                fileUploadNotificationReceivedCallback,
+                this.hostName,
+                this.credential,
+                this.iotHubServiceClientProtocol,
+                this.options.getProxyOptions(),
+                this.options.getSslContext());
         }
         else if (this.sasTokenProvider != null)
         {
             return new FileUploadNotificationReceiver(
-                    this.hostName,
-                    this.sasTokenProvider,
-                    this.iotHubServiceClientProtocol,
-                    this.options.getProxyOptions(),
-                    this.options.getSslContext());
-        }
-
-        return new FileUploadNotificationReceiver(
+                fileUploadNotificationReceivedCallback,
                 this.hostName,
-                this.userName,
-                this.sasToken,
+                this.sasTokenProvider,
                 this.iotHubServiceClientProtocol,
                 this.options.getProxyOptions(),
                 this.options.getSslContext());
+        }
+
+        return new FileUploadNotificationReceiver(
+            fileUploadNotificationReceivedCallback,
+            this.hostName,
+            this.sasToken,
+            this.iotHubServiceClientProtocol,
+            this.options.getProxyOptions(),
+            this.options.getSslContext());
     }
 }

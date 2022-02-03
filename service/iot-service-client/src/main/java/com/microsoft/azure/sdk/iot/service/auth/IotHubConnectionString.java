@@ -71,20 +71,6 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     }
 
     /**
-     * Serialize user string
-     *
-     * @return The user string in the following format: "SharedAccessKeyName@SAS.root.IotHubName"
-     */
-    public String getUserString()
-    {
-        return this.sharedAccessKeyName +
-                USER_SEPARATOR +
-                USER_SAS +
-                USER_ROOT +
-                this.iotHubName;
-    }
-
-    /**
      * Create url for requesting device method
      *
      * @param deviceId The name of the device

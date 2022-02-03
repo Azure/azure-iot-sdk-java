@@ -69,7 +69,6 @@ public class IotHubConnectionStringBuilderTest
         assertEquals("Parser error: SharedAccessKey mismatch!", iotHubConnectionString.getSharedAccessKey(), sharedAccessKey);
         assertEquals("Parser error: SharedAccessSignature mismatch!", "", iotHubConnectionString.getSharedAccessSignature());
         assertEquals("Parser error: IotHubName mismatch!", iotHubName, iotHubConnectionString.getIotHubName());
-        assertEquals("Parser error: UserString mismatch!", userString, iotHubConnectionString.getUserString());
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_003: [The function shall throw IllegalArgumentException if the input string is empty or null]
@@ -247,7 +246,6 @@ public class IotHubConnectionStringBuilderTest
         assertEquals("Parser error: SharedAccessKey mismatch!", iotHubConnectionString.getSharedAccessKey(), sharedAccessKey);
         assertEquals("Parser error: SharedAccessSignature mismatch!", "", iotHubConnectionString.getSharedAccessSignature());
         assertEquals("Parser error: IotHubName mismatch!", iotHubName, iotHubConnectionString.getIotHubName());
-        assertEquals("Parser error: UserString mismatch!", userString, iotHubConnectionString.getUserString());
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_009: [The function shall tokenize and parse the given connection string and fill up the target IotHubConnectionString object with proper values]
@@ -272,7 +270,6 @@ public class IotHubConnectionStringBuilderTest
         assertEquals("Parser error: SharedAccessKey mismatch!", iotHubConnectionString.getSharedAccessKey(), sharedAccessKey);
         assertEquals("Parser error: SharedAccessSignature mismatch!", "", iotHubConnectionString.getSharedAccessSignature());
         assertEquals("Parser error: IotHubName mismatch!", iotHubName, iotHubConnectionString.getIotHubName());
-        assertEquals("Parser error: UserString mismatch!", userString, iotHubConnectionString.getUserString());
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_010: [The function shall create new ServiceAuthenticationWithSharedAccessPolicyToken and set the authenticationMethod if sharedAccessKey is not defined]

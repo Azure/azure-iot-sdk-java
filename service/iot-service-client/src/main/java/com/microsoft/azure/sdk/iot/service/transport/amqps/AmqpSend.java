@@ -27,7 +27,6 @@ import java.util.Objects;
 public class AmqpSend
 {
     private final String hostName;
-    private String userName;
     private String sasToken;
     private TokenCredential credential;
     private AzureSasCredential sasTokenProvider;
@@ -38,25 +37,6 @@ public class AmqpSend
     /**
      * Constructor to set up connection parameters
      * @param hostName The address string of the service (example: AAA.BBB.CCC)
-     * @param userName The username string to use SASL authentication (example: user@sas.service)
-     * @param sasToken The SAS token string
-     * @param iotHubServiceClientProtocol protocol to use
-     * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
-     */
-    public AmqpSend(
-            String hostName,
-            String userName,
-            String sasToken,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            ProxyOptions proxyOptions)
-    {
-        this(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, null);
-    }
-
-    /**
-     * Constructor to set up connection parameters
-     * @param hostName The address string of the service (example: AAA.BBB.CCC)
-     * @param userName The username string to use SASL authentication (example: user@sas.service)
      * @param sasToken The SAS token string
      * @param iotHubServiceClientProtocol protocol to use
      * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
@@ -64,7 +44,6 @@ public class AmqpSend
      */
     public AmqpSend(
             String hostName,
-            String userName,
             String sasToken,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             ProxyOptions proxyOptions,
@@ -85,7 +64,6 @@ public class AmqpSend
         }
 
         this.hostName = hostName;
-        this.userName = userName;
         this.sasToken = sasToken;
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
         this.proxyOptions = proxyOptions;
@@ -137,22 +115,6 @@ public class AmqpSend
     }
 
     /**
-     * Create AmqpsSendHandler and store it in a member variable
-     */
-    @SuppressWarnings("EmptyMethod")
-    public void open()
-    {
-    }
-
-    /**
-     * Invalidate AmqpsSendHandler member variable
-     */
-    @SuppressWarnings("EmptyMethod")
-    public void close()
-    {
-    }
-
-    /**
      * Create binary message
      * Initialize and start Proton reactor
      * Send the created message
@@ -192,7 +154,6 @@ public class AmqpSend
                 amqpSendHandler =
                         new AmqpSendHandler(
                                 this.hostName,
-                                this.userName,
                                 this.sasToken,
                                 this.iotHubServiceClientProtocol,
                                 this.proxyOptions,

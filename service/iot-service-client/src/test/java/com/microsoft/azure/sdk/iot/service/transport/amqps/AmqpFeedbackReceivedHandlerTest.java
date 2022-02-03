@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
+import com.microsoft.azure.sdk.iot.service.messaging.IotHubMessageResult;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import mockit.Deencapsulation;
@@ -64,7 +65,7 @@ public class AmqpFeedbackReceivedHandlerTest
     @Mocked Source source;
     @Mocked ReadableBuffer readBuf;
 
-    AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent = feedbackJson -> {};
+    AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent = feedbackJson -> IotHubMessageResult.COMPLETE;
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_001: [The constructor shall copy all input parameters to private member variables for event processing]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_002: [The constructor shall initialize a new Handshaker (Proton) object to handle communication handshake]
@@ -74,7 +75,6 @@ public class AmqpFeedbackReceivedHandlerTest
     {
         // Arrange
         final String hostName = "aaa";
-        final String userName = "bbb";
         final String sasToken = "ccc";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Assert
@@ -90,7 +90,7 @@ public class AmqpFeedbackReceivedHandlerTest
             }
         };
         // Act
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent);
+        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent, null, null);
         final String _hostName = Deencapsulation.getField(amqpReceiveHandler, "hostName");
         final String _sasToken = Deencapsulation.getField(amqpReceiveHandler, "sasToken");
         AmqpFeedbackReceivedEvent _amqpFeedbackReceivedEvent = Deencapsulation.getField(amqpReceiveHandler, "amqpFeedbackReceivedEvent");
@@ -111,12 +111,11 @@ public class AmqpFeedbackReceivedHandlerTest
     {
         // Arrange
         final String hostName = "aaa";
-        final String userName = "bbb";
         final String sasToken = "ccc";
         final String hostAddr = hostName + ":5671";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         createProtonObjects();
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent);
+        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent, null, null);
         // Assert
         new Expectations()
         {
@@ -149,7 +148,7 @@ public class AmqpFeedbackReceivedHandlerTest
         final String userName = "bbb";
         final String sasToken = "ccc";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
+        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null, null);
         // Assert
         new Expectations()
         {
@@ -177,7 +176,7 @@ public class AmqpFeedbackReceivedHandlerTest
         final String userName = "bbb";
         final String sasToken = "ccc";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS_WS;
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
+        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null, null);
         // Assert
         new Expectations()
         {
@@ -214,7 +213,7 @@ public class AmqpFeedbackReceivedHandlerTest
         final String userName = "bbb";
         final String sasToken = "ccc";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
+        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null, null);
         // Assert
         new Expectations()
         {
@@ -237,7 +236,7 @@ public class AmqpFeedbackReceivedHandlerTest
         String userName = "bbb";
         String sasToken = "ccc";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
+        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null, null);
 
         // Act
         amqpReceiveHandler.onLinkRemoteOpen(mockEvent);
@@ -255,7 +254,7 @@ public class AmqpFeedbackReceivedHandlerTest
         String userName = "bbb";
         String sasToken = "ccc";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
+        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null, null);
 
         Deencapsulation.setField(amqpReceiveHandler, "linkOpenedRemotely", true);
         Deencapsulation.setField(amqpReceiveHandler, "sessionOpenedRemotely", true);
@@ -275,7 +274,7 @@ public class AmqpFeedbackReceivedHandlerTest
         String userName = "bbb";
         String sasToken = "ccc";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
+        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null, null);
 
         Deencapsulation.setField(amqpReceiveHandler, "connectionOpenedRemotely", false);
         Deencapsulation.setField(amqpReceiveHandler, "linkOpenedRemotely", true);
@@ -295,7 +294,7 @@ public class AmqpFeedbackReceivedHandlerTest
         String userName = "bbb";
         String sasToken = "ccc";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
+        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null, null);
 
         Deencapsulation.setField(amqpReceiveHandler, "sessionOpenedRemotely", false);
         Deencapsulation.setField(amqpReceiveHandler, "linkOpenedRemotely", true);
@@ -315,7 +314,7 @@ public class AmqpFeedbackReceivedHandlerTest
         String userName = "bbb";
         String sasToken = "ccc";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
+        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null, null);
 
         Deencapsulation.setField(amqpReceiveHandler, "linkOpenedRemotely", false);
         Deencapsulation.setField(amqpReceiveHandler, "sessionOpenedRemotely", true);

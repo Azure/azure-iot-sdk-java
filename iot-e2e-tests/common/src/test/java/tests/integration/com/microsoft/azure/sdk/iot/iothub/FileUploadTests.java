@@ -56,7 +56,6 @@ public class FileUploadTests extends IntegrationTest
 {
     // Max time to wait to see it on Hub
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS = 180000; // 3 minutes
-    private static final long MAXIMUM_TIME_TO_WAIT_FOR_CALLBACK_MILLISECONDS = 5000; // 5 sec
 
     //Max time to wait before timing out test
     private static final long MAX_MILLISECS_TIMEOUT_KILL_TEST = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS + 50000; // 50 secs
@@ -69,10 +68,6 @@ public class FileUploadTests extends IntegrationTest
     private static final String REMOTE_FILE_NAME_EXT = ".txt";
 
     protected static String iotHubConnectionString = "";
-
-    // States of SDK
-    private static RegistryManager registryManager;
-    private static ServiceClient serviceClient;
 
     protected static HttpProxyServer proxyServer;
     protected static String testProxyHostname = "127.0.0.1";
@@ -90,11 +85,6 @@ public class FileUploadTests extends IntegrationTest
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
-
-        registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-
-        serviceClient = new ServiceClient(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
-        serviceClient.open();
 
         return Arrays.asList(
                 new Object[][]
@@ -151,44 +141,6 @@ public class FileUploadTests extends IntegrationTest
     {
         String messageBody;
         STATUS messageStatus;
-    }
-
-    private static class FileUploadCallback implements IotHubEventCallback
-    {
-        @Override
-        public void execute(IotHubStatusCode responseStatus, Object context)
-        {
-            FileUploadState f = (FileUploadState) context;
-            System.out.println("Callback fired with status " + responseStatus);
-            if (context instanceof FileUploadState)
-            {
-                FileUploadState fileUploadState = (FileUploadState) context;
-                fileUploadState.isCallbackTriggered = true;
-
-                // On failure, Don't update fileUploadStatus any further
-                if ((responseStatus == OK || responseStatus == OK_EMPTY) && fileUploadState.fileUploadStatus != FAILURE)
-                {
-                    fileUploadState.fileUploadStatus = SUCCESS;
-                }
-                else
-                {
-                    fileUploadState.fileUploadStatus = FAILURE;
-                }
-            }
-            else if (context instanceof MessageState)
-            {
-                MessageState messageState = (MessageState) context;
-                // On failure, Don't update message status any further
-                if ((responseStatus == OK || responseStatus == OK_EMPTY) && messageState.messageStatus != FAILURE)
-                {
-                    messageState.messageStatus = SUCCESS;
-                }
-                else
-                {
-                    messageState.messageStatus = FAILURE;
-                }
-            }
-        }
     }
 
     @Before
@@ -278,22 +230,5 @@ public class FileUploadTests extends IntegrationTest
         assertEquals(buildExceptionMessage("File upload status should be SUCCESS but was " + testInstance.fileUploadState[0].fileUploadStatus, deviceClient), SUCCESS, testInstance.fileUploadState[0].fileUploadStatus);
 
         tearDownDeviceClient(deviceClient);
-    }
-
-    private void waitForFileUploadStatusCallbackTriggered(int fileUploadStateIndex, DeviceClient deviceClient) throws InterruptedException
-    {
-        if (!testInstance.fileUploadState[fileUploadStateIndex].isCallbackTriggered)
-        {
-            //wait until file upload callback is triggered
-            long startTime = System.currentTimeMillis();
-            while (!testInstance.fileUploadState[fileUploadStateIndex].isCallbackTriggered)
-            {
-                Thread.sleep(300);
-                if (System.currentTimeMillis() - startTime > MAXIMUM_TIME_TO_WAIT_FOR_CALLBACK_MILLISECONDS)
-                {
-                    assertTrue(buildExceptionMessage("File upload callback was not triggered", deviceClient), testInstance.fileUploadState[fileUploadStateIndex].isCallbackTriggered);
-                }
-            }
-        }
     }
 }

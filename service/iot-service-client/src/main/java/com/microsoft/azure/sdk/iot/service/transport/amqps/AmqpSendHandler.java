@@ -54,43 +54,38 @@ class AmqpSendHandler extends AmqpConnectionHandler
      * Constructor to set up connection parameters and initialize handshaker for transport
      *
      * @param hostName The address string of the service (example: AAA.BBB.CCC)
-     * @param userName The username string to use SASL authentication (example: user@sas.service)
      * @param sasToken The SAS token string
      * @param iotHubServiceClientProtocol protocol to use
      */
     AmqpSendHandler(
             String hostName,
-            String userName,
             String sasToken,
             IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
-        this(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
+        this(hostName, sasToken, iotHubServiceClientProtocol, null);
     }
 
     /**
      * Constructor to set up connection parameters and initialize handshaker for transport
      *
      * @param hostName The address string of the service (example: AAA.BBB.CCC)
-     * @param userName The username string to use SASL authentication (example: user@sas.service)
      * @param sasToken The SAS token string
      * @param iotHubServiceClientProtocol protocol to use
      * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
      */
     private AmqpSendHandler(
         String hostName,
-        String userName,
         String sasToken,
         IotHubServiceClientProtocol iotHubServiceClientProtocol,
         ProxyOptions proxyOptions)
     {
-        this(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, null);
+        this(hostName, sasToken, iotHubServiceClientProtocol, proxyOptions, null);
     }
 
     /**
      * Constructor to set up connection parameters and initialize handshaker for transport
      *
      * @param hostName The address string of the service (example: AAA.BBB.CCC)
-     * @param userName The username string to use SASL authentication (example: user@sas.service)
      * @param sasToken The SAS token string
      * @param iotHubServiceClientProtocol protocol to use
      * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
@@ -99,13 +94,12 @@ class AmqpSendHandler extends AmqpConnectionHandler
      */
     AmqpSendHandler(
             String hostName,
-            String userName,
             String sasToken,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
     {
-        super(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, sslContext);
+        super(hostName, sasToken, iotHubServiceClientProtocol, proxyOptions, sslContext);
     }
 
     AmqpSendHandler(

@@ -34,7 +34,7 @@ import java.util.Map;
  * Creates and sets SASL authentication for transport
  */
 @Slf4j
-class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
+public class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
 {
     public static final String RECEIVE_TAG = "receiver";
     private static final String ENDPOINT = "/messages/servicebound/feedback";
@@ -46,47 +46,6 @@ class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
      * Constructor to set up connection parameters and initialize
      * handshaker and flow controller for transport
      * @param hostName The address string of the service (example: AAA.BBB.CCC)
-     * @param userName The username string to use SASL authentication (example: user@sas.service)
-     * @param sasToken The SAS token string
-     * @param iotHubServiceClientProtocol protocol to use
-     * @param amqpFeedbackReceivedEvent callback to delegate the received message to the user API
-     */
-    AmqpFeedbackReceivedHandler(
-            String hostName,
-            String userName,
-            String sasToken,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent)
-    {
-        this(hostName, userName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent, null);
-    }
-
-    /**
-     * Constructor to set up connection parameters and initialize
-     * handshaker and flow controller for transport
-     * @param hostName The address string of the service (example: AAA.BBB.CCC)
-     * @param userName The username string to use SASL authentication (example: user@sas.service)
-     * @param sasToken The SAS token string
-     * @param iotHubServiceClientProtocol protocol to use
-     * @param amqpFeedbackReceivedEvent callback to delegate the received message to the user API
-     * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
-     */
-    private AmqpFeedbackReceivedHandler(
-        String hostName,
-        String userName,
-        String sasToken,
-        IotHubServiceClientProtocol iotHubServiceClientProtocol,
-        AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent,
-        ProxyOptions proxyOptions)
-    {
-        this(hostName, userName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent, proxyOptions, null);
-    }
-
-    /**
-     * Constructor to set up connection parameters and initialize
-     * handshaker and flow controller for transport
-     * @param hostName The address string of the service (example: AAA.BBB.CCC)
-     * @param userName The username string to use SASL authentication (example: user@sas.service)
      * @param sasToken The SAS token string
      * @param iotHubServiceClientProtocol protocol to use
      * @param amqpFeedbackReceivedEvent callback to delegate the received message to the user API
@@ -94,20 +53,19 @@ class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
      * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
      *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.
      */
-    AmqpFeedbackReceivedHandler(
+    public AmqpFeedbackReceivedHandler(
             String hostName,
-            String userName,
             String sasToken,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
     {
-        super(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, sslContext);
+        super(hostName, sasToken, iotHubServiceClientProtocol, proxyOptions, sslContext);
         this.amqpFeedbackReceivedEvent = amqpFeedbackReceivedEvent;
     }
 
-    AmqpFeedbackReceivedHandler(
+    public AmqpFeedbackReceivedHandler(
             String hostName,
             TokenCredential credential,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
@@ -119,7 +77,7 @@ class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
         this.amqpFeedbackReceivedEvent = amqpFeedbackReceivedEvent;
     }
 
-    AmqpFeedbackReceivedHandler(
+    public AmqpFeedbackReceivedHandler(
             String hostName,
             AzureSasCredential sasTokenProvider,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,

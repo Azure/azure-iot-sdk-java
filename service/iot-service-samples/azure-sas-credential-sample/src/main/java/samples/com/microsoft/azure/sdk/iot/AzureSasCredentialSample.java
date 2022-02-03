@@ -6,6 +6,9 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.azure.core.credential.AzureSasCredential;
+import com.microsoft.azure.sdk.iot.service.messaging.FeedbackMessageReceivedCallback;
+import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationReceivedCallback;
+import com.microsoft.azure.sdk.iot.service.messaging.IotHubMessageResult;
 import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.service.query.QueryClientOptions;
@@ -178,27 +181,25 @@ public class AzureSasCredentialSample
         {
             // FeedbackReceiver will use the same authentication mechanism that the ServiceClient itself uses,
             // so the below APIs are also RBAC authenticated.
-            FeedbackReceiver feedbackReceiver = serviceClient.getFeedbackReceiver();
-
-            System.out.println("Opening feedback receiver to listen for feedback messages");
-            feedbackReceiver.open();
-            FeedbackBatch feedbackBatch = feedbackReceiver.receive(FEEDBACK_MESSAGE_LISTEN_SECONDS);
-
-            if (feedbackBatch != null)
+            FeedbackReceiver feedbackReceiver = serviceClient.getFeedbackReceiver(feedbackBatch ->
             {
                 for (FeedbackRecord feedbackRecord : feedbackBatch.getRecords())
                 {
                     System.out.println(String.format("Feedback record received for device %s with status %s", feedbackRecord.getDeviceId(), feedbackRecord.getStatusCode()));
                 }
-            }
-            else
-            {
-                System.out.println("No feedback records were received");
-            }
+
+                return IotHubMessageResult.COMPLETE;
+            });
+
+            System.out.println("Opening feedback receiver to listen for feedback messages");
+            feedbackReceiver.open();
+
+            System.out.println("Sleeping 5 seconds while waiting for feedback records to be received");
+            Thread.sleep(5000);
 
             feedbackReceiver.close();
         }
-        catch (IOException e)
+        catch (IOException | InterruptedException e)
         {
             System.err.println("Failed to listen for feedback messages");
             e.printStackTrace();
@@ -209,24 +210,21 @@ public class AzureSasCredentialSample
         {
             // FileUploadNotificationReceiver will use the same authentication mechanism that the ServiceClient itself uses,
             // so the below APIs are also RBAC authenticated.
-            FileUploadNotificationReceiver fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver();
+            FileUploadNotificationReceiver fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver(notification ->
+            {
+                System.out.println("File upload notification received for device " + notification.getDeviceId());
+                return IotHubMessageResult.COMPLETE;
+            });
 
             System.out.println("Opening file upload notification receiver and listening for file upload notifications");
             fileUploadNotificationReceiver.open();
-            FileUploadNotification fileUploadNotification = fileUploadNotificationReceiver.receive(FILE_UPLOAD_NOTIFICATION_LISTEN_SECONDS);
 
-            if (fileUploadNotification != null)
-            {
-                System.out.println("File upload notification received for device " + fileUploadNotification.getDeviceId());
-            }
-            else
-            {
-                System.out.println("No feedback records were received");
-            }
+            System.out.println("Sleeping 5 seconds while waiting for feedback records to be received");
+            Thread.sleep(5000);
 
             fileUploadNotificationReceiver.close();
         }
-        catch (IOException e)
+        catch (IOException | InterruptedException e)
         {
             System.err.println("Failed to listen for file upload notification messages");
             e.printStackTrace();

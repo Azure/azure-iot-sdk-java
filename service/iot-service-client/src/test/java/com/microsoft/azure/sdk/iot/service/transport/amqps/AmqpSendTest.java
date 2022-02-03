@@ -42,14 +42,12 @@ public class AmqpSendTest
         String sasToken = "ccc";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Act
-        AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
+        AmqpSend amqpSend = new AmqpSend(hostName, sasToken, iotHubServiceClientProtocol, null, null);
         String _hostName = Deencapsulation.getField(amqpSend, "hostName");
-        String _userName = Deencapsulation.getField(amqpSend, "userName");
         String _sasToken = Deencapsulation.getField(amqpSend, "sasToken");
         IotHubServiceClientProtocol _ioIotHubServiceClientProtocol = Deencapsulation.getField(amqpSend, "iotHubServiceClientProtocol");
         // Assert
         assertEquals(hostName, _hostName);
-        assertEquals(userName, _userName);
         assertEquals(sasToken, _sasToken);
         assertEquals(iotHubServiceClientProtocol, _ioIotHubServiceClientProtocol);
     }
@@ -64,14 +62,12 @@ public class AmqpSendTest
         String sasToken = "ccc";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS_WS;
         // Act
-        AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
+        AmqpSend amqpSend = new AmqpSend(hostName, sasToken, iotHubServiceClientProtocol, null, null);
         String _hostName = Deencapsulation.getField(amqpSend, "hostName");
-        String _userName = Deencapsulation.getField(amqpSend, "userName");
         String _sasToken = Deencapsulation.getField(amqpSend, "sasToken");
         IotHubServiceClientProtocol _ioIotHubServiceClientProtocol = Deencapsulation.getField(amqpSend, "iotHubServiceClientProtocol");
         // Assert
         assertEquals(hostName, _hostName);
-        assertEquals(userName, _userName);
         assertEquals(sasToken, _sasToken);
         assertEquals(iotHubServiceClientProtocol, _ioIotHubServiceClientProtocol);
     }
@@ -87,7 +83,7 @@ public class AmqpSendTest
         String sasToken = "ccc";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Act
-        AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
+        AmqpSend amqpSend = new AmqpSend(hostName, sasToken, iotHubServiceClientProtocol, null, null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
@@ -101,7 +97,7 @@ public class AmqpSendTest
         String sasToken = "ccc";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Act
-        AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
+        AmqpSend amqpSend = new AmqpSend(hostName, sasToken, iotHubServiceClientProtocol, null, null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
@@ -115,7 +111,7 @@ public class AmqpSendTest
         String sasToken = null;
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Act
-        AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
+        AmqpSend amqpSend = new AmqpSend(hostName, sasToken, iotHubServiceClientProtocol, null, null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
@@ -129,7 +125,7 @@ public class AmqpSendTest
         String sasToken = "";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Act
-        AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
+        AmqpSend amqpSend = new AmqpSend(hostName, sasToken, iotHubServiceClientProtocol, null, null);
     }
     
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
@@ -144,7 +140,7 @@ public class AmqpSendTest
         
         IotHubServiceClientProtocol iotHubServiceClientProtocol = null;
         // Act
-        AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
+        AmqpSend amqpSend = new AmqpSend(hostName, sasToken, iotHubServiceClientProtocol, null, null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_005: [The event handler shall throw IOException if the send handler object is not initialized]
@@ -161,7 +157,7 @@ public class AmqpSendTest
         String content = "abcdefghijklmnopqrst";
         Message message = new Message(content);
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
+        AmqpSend amqpSend = new AmqpSend(hostName, sasToken, iotHubServiceClientProtocol, null, null);
         // Act
         amqpSend.send(deviceId, moduleId, message);
     }

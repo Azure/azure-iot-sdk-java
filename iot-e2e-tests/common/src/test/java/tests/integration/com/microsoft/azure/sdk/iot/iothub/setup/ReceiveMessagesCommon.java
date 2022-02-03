@@ -145,24 +145,13 @@ public class ReceiveMessagesCommon extends IntegrationTest
             {
                 this.identity = Tools.getTestModule(iotHubConnectionString, this.protocol, this.authenticationType, false);
             }
-
-            testInstance.serviceClient.open();
         }
 
         public void dispose()
         {
-            try
+            if (this.identity != null && this.identity.getClient() != null)
             {
-                if (this.identity != null && this.identity.getClient() != null)
-                {
-                    this.identity.getClient().close();
-                }
-
-                this.serviceClient.close();
-            }
-            catch (IOException e)
-            {
-                log.error("Failed to close clients during cleanup", e);
+                this.identity.getClient().close();
             }
 
             Tools.disposeTestIdentity(this.identity, iotHubConnectionString);
