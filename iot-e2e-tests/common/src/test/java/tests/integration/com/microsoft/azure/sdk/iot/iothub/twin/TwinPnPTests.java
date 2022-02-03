@@ -148,7 +148,7 @@ public class TwinPnPTests extends IntegrationTest
 
             /* Create device on the service */
             Device device = new Device(deviceId);
-            Module module = new Module(deviceId, moduleId, null);
+            Module module = new Module(deviceId, moduleId);
 
             Device deviceX509 = new Device(deviceX509Id, AuthenticationType.SELF_SIGNED);
             deviceX509.setThumbprint(x509Thumbprint, x509Thumbprint);
