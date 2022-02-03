@@ -13,6 +13,7 @@ import com.azure.storage.blob.sas.BlobContainerSasPermission;
 import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 import com.azure.storage.blob.specialized.BlobInputStream;
 import com.azure.storage.blob.specialized.BlockBlobClient;
+import com.microsoft.azure.sdk.iot.service.jobs.registry.RegistryJobsClient;
 import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobsClient;
 import com.microsoft.azure.sdk.iot.service.jobs.registry.ExportImportDeviceParser;
 import com.microsoft.azure.sdk.iot.service.jobs.registry.StorageAuthenticationType;
@@ -70,7 +71,7 @@ public class ExportImportTests extends IntegrationTest
     private static BlobContainerClient exportContainer;
 
     private static RegistryManager registryManager;
-    private static ScheduledJobsClient jobClient;
+    private static RegistryJobsClient jobClient;
 
     @BeforeClass
     public static void setUp() throws IOException
@@ -81,7 +82,7 @@ public class ExportImportTests extends IntegrationTest
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
         registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-        jobClient = new ScheduledJobsClient(iotHubConnectionString);
+        jobClient = new RegistryJobsClient(iotHubConnectionString);
         String uuid = UUID.randomUUID().toString();
         deviceId = deviceId.concat("-" + uuid);
 
@@ -267,7 +268,7 @@ public class ExportImportTests extends IntegrationTest
         long startTime = System.currentTimeMillis();
         while (true)
         {
-            exportJob = jobClient.getImportExportJob(exportJob.getJobId());
+            exportJob = jobClient.getJob(exportJob.getJobId());
             jobStatus = exportJob.getStatus();
             if (jobStatus == JobProperties.JobStatus.COMPLETED || jobStatus == JobProperties.JobStatus.FAILED)
             {
@@ -371,7 +372,7 @@ public class ExportImportTests extends IntegrationTest
         long startTime = System.currentTimeMillis();
         while (true)
         {
-            importJob = jobClient.getImportExportJob(importJob.getJobId());
+            importJob = jobClient.getJob(importJob.getJobId());
             if (importJob.getStatus() == JobProperties.JobStatus.COMPLETED
                     || importJob.getStatus() == JobProperties.JobStatus.FAILED)
             {
