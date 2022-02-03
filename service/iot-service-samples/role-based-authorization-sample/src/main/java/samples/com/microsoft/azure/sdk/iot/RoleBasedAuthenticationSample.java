@@ -11,23 +11,23 @@ import com.microsoft.azure.sdk.iot.service.jobs.Job;
 import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.service.query.QueryClientOptions;
-import com.microsoft.azure.sdk.iot.service.serializers.ErrorCodeDescription;
-import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.FeedbackBatch;
-import com.microsoft.azure.sdk.iot.service.FeedbackReceiver;
-import com.microsoft.azure.sdk.iot.service.FeedbackRecord;
-import com.microsoft.azure.sdk.iot.service.FileUploadNotification;
-import com.microsoft.azure.sdk.iot.service.FileUploadNotificationReceiver;
-import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
-import com.microsoft.azure.sdk.iot.service.Message;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
-import com.microsoft.azure.sdk.iot.service.ServiceClient;
-import com.microsoft.azure.sdk.iot.service.ServiceClientOptions;
+import com.microsoft.azure.sdk.iot.service.exceptions.ErrorCodeDescription;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
+import com.microsoft.azure.sdk.iot.service.messaging.FeedbackBatch;
+import com.microsoft.azure.sdk.iot.service.messaging.FeedbackReceiver;
+import com.microsoft.azure.sdk.iot.service.messaging.FeedbackRecord;
+import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotification;
+import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationReceiver;
+import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.messaging.Message;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.messaging.ServiceClient;
+import com.microsoft.azure.sdk.iot.service.messaging.ServiceClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.twin.DirectMethodRequestOptions;
-import com.microsoft.azure.sdk.iot.service.twin.DirectMethodsClient;
-import com.microsoft.azure.sdk.iot.service.twin.DirectMethodsClientOptions;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodRequestOptions;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClientOptions;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClientOptions;
@@ -90,7 +90,7 @@ public class RoleBasedAuthenticationSample
         RegistryManager registryManager = new RegistryManager(iotHubHostName, credential, options);
 
         String deviceId = "my-new-device-" + UUID.randomUUID().toString();
-        Device newDevice = Device.createDevice(deviceId, AuthenticationType.SAS);
+        Device newDevice = new Device(deviceId, AuthenticationType.SAS);
 
         try
         {

@@ -7,9 +7,9 @@ package samples.com.microsoft.azure.sdk.iot.service.sdk;
 
 import com.microsoft.azure.sdk.iot.service.jobs.DirectMethodsJobOptions;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
-import com.microsoft.azure.sdk.iot.service.twin.DirectMethodRequestOptions;
-import com.microsoft.azure.sdk.iot.service.twin.DirectMethodsClient;
-import com.microsoft.azure.sdk.iot.service.twin.MethodResult;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodRequestOptions;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
+import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.jobs.Job;
 import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;

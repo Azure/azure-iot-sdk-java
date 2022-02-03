@@ -5,8 +5,8 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.service.Module;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.registry.Module;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
 import java.io.IOException;
@@ -57,7 +57,7 @@ public class ModuleManagerSample
         {
             moduleId = SampleUtils.moduleId1;
         }
-        Module module = Module.createFromId(SampleUtils.deviceId, moduleId, null);
+        Module module = new Module(SampleUtils.deviceId, moduleId, null);
 
         try
         {
@@ -83,7 +83,7 @@ public class ModuleManagerSample
             System.out.println("Module: " + returnModule.getId());
             System.out.println("Module primary key: " + returnModule.getPrimaryKey());
             System.out.println("Module secondary key: " + returnModule.getSecondaryKey());
-            System.out.println("Module eTag: " + returnModule.geteTag());
+            System.out.println("Module eTag: " + returnModule.getETag());
         }
         catch (IotHubException | IOException iote)
         {
@@ -96,7 +96,7 @@ public class ModuleManagerSample
             System.out.println("Module: " + module.getId());
             System.out.println("Module primary key: " + module.getPrimaryKey());
             System.out.println("Module secondary key: " + module.getSecondaryKey());
-            System.out.println("Module eTag: " + module.geteTag());
+            System.out.println("Module eTag: " + module.getETag());
         }
     }
 
@@ -107,7 +107,7 @@ public class ModuleManagerSample
 
         RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
-        Module module = Module.createFromId(SampleUtils.deviceId, SampleUtils.moduleId0, null);
+        Module module = new Module(SampleUtils.deviceId, SampleUtils.moduleId0, null);
         module.getSymmetricKey().setPrimaryKey(primaryKey);
         module.getSymmetricKey().setSecondaryKey(secondaryKey);
         try

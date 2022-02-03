@@ -12,8 +12,9 @@ import com.microsoft.azure.sdk.iot.device.twin.TwinPropertyCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
@@ -187,7 +188,7 @@ public class TwinWithVersionTests extends IntegrationTest
     public static class DeviceTwinWithVersionTestInstance
     {
         public IotHubClientProtocol protocol;
-        private com.microsoft.azure.sdk.iot.service.Device deviceForRegistryManager;
+        private Device deviceForRegistryManager;
         public TestDeviceIdentity testDeviceIdentity;
 
         private final TwinClient twinServiceClient;

@@ -4,7 +4,7 @@
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
 import com.microsoft.azure.sdk.iot.device.InternalClient;
-import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
 
 /**
  * An abstract representation of a device-side identity that will be used by a test. See {@link TestDeviceIdentity} and

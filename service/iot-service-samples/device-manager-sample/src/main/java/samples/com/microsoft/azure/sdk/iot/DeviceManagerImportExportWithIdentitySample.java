@@ -6,10 +6,9 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
-import com.microsoft.azure.sdk.iot.service.serializers.ManagedIdentity;
-import com.microsoft.azure.sdk.iot.service.serializers.StorageAuthenticationType;
+import com.microsoft.azure.sdk.iot.service.jobs.ManagedIdentity;
+import com.microsoft.azure.sdk.iot.service.jobs.StorageAuthenticationType;
 import com.microsoft.azure.sdk.iot.service.jobs.JobProperties;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import java.io.IOException;
 

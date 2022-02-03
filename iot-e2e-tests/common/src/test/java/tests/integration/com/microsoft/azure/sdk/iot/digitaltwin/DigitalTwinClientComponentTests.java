@@ -5,8 +5,8 @@ package tests.integration.com.microsoft.azure.sdk.iot.digitaltwin;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.twin.*;
-import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.UpdateOperationUtility;
@@ -94,7 +94,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
         ClientOptions options = ClientOptions.builder().modelId(E2ETestConstants.TEMPERATURE_CONTROLLER_MODEL_ID).build();
 
         this.deviceId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        Device device = Device.createDevice(deviceId, AuthenticationType.SAS);
+        Device device = new Device(deviceId, AuthenticationType.SAS);
         Device registeredDevice = registryManager.addDevice(device);
         String deviceConnectionString = registryManager.getDeviceConnectionString(registeredDevice);
         return new DeviceClient(deviceConnectionString, protocol, options);

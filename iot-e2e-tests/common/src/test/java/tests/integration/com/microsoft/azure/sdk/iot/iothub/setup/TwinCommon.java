@@ -7,6 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.google.gson.JsonParser;
+import com.microsoft.azure.sdk.iot.service.registry.Module;
 import com.microsoft.azure.sdk.iot.service.twin.TwinConnectionState;
 import com.microsoft.azure.sdk.iot.device.twin.Device;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
@@ -18,10 +19,10 @@ import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
@@ -174,8 +175,8 @@ public class TwinCommon extends IntegrationTest
 
     public class DeviceState
     {
-        public com.microsoft.azure.sdk.iot.service.Device sCDeviceForRegistryManager;
-        public com.microsoft.azure.sdk.iot.service.Module sCModuleForRegistryManager;
+        public com.microsoft.azure.sdk.iot.service.registry.Device sCDeviceForRegistryManager;
+        public Module sCModuleForRegistryManager;
         public Twin sCDeviceForTwin;
         public DeviceExtension dCDeviceForTwin;
         public OnProperty dCOnProperty = new OnProperty();

@@ -5,8 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
-import com.microsoft.azure.sdk.iot.service.serializers.ErrorCodeDescription;
-
 /**
  * 409 Conflict
  * Likely caused by trying to create a resource that already exists

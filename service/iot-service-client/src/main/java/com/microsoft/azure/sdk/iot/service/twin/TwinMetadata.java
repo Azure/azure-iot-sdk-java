@@ -5,7 +5,7 @@ package com.microsoft.azure.sdk.iot.service.twin;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.microsoft.azure.sdk.iot.service.serializers.ParserUtility;
+import com.microsoft.azure.sdk.iot.service.ParserUtility;
 
 import java.util.Date;
 import java.util.Map;

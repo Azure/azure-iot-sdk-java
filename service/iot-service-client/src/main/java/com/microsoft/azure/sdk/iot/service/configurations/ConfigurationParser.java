@@ -6,9 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.service.serializers.ConfigurationContentParser;
-import com.microsoft.azure.sdk.iot.service.serializers.ConfigurationMetricsParser;
-import com.microsoft.azure.sdk.iot.service.serializers.ParserUtility;
+import com.microsoft.azure.sdk.iot.service.ParserUtility;
 import lombok.Getter;
 import lombok.Setter;
 

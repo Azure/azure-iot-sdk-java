@@ -10,12 +10,14 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import com.microsoft.azure.sdk.iot.service.DeviceStatus;
-import com.microsoft.azure.sdk.iot.service.Module;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
+import com.microsoft.azure.sdk.iot.service.registry.Module;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -81,7 +83,7 @@ public class TokenRenewalTests extends IntegrationTest
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
-        iotHubHostName = com.microsoft.azure.sdk.iot.service.IotHubConnectionString.createIotHubConnectionString(iotHubConnectionString).getHostName();
+        iotHubHostName = IotHubConnectionString.createIotHubConnectionString(iotHubConnectionString).getHostName();
         registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
     }
 
@@ -246,7 +248,7 @@ public class TokenRenewalTests extends IntegrationTest
             // with it behave the same way as mqtt/amqp connections without it.
             UUID uuid = UUID.randomUUID();
             String deviceId = "token-renewal-test-device-with-custom-sas-token-provider-" + protocol + "-" + uuid.toString();
-            com.microsoft.azure.sdk.iot.service.Device device = com.microsoft.azure.sdk.iot.service.Device.createFromId(deviceId, DeviceStatus.Enabled, null);
+            Device device = new Device(deviceId);
             device = registryManager.addDevice(device);
             SasTokenProvider sasTokenProvider = new SasTokenProviderImpl(registryManager.getDeviceConnectionString(device), SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL);
             clients.add(new DeviceClient(iotHubHostName, deviceId, sasTokenProvider, protocol));
@@ -361,9 +363,9 @@ public class TokenRenewalTests extends IntegrationTest
         UUID uuid = UUID.randomUUID();
         String deviceId = "token-renewal-test-device-" + protocol + "-" + uuid.toString();
         String moduleId = "token-renewal-test-module-" + protocol + "-" + uuid.toString();
-        com.microsoft.azure.sdk.iot.service.Device device = com.microsoft.azure.sdk.iot.service.Device.createFromId(deviceId, DeviceStatus.Enabled, null);
+        Device device = new Device(deviceId);
         device = Tools.addDeviceWithRetry(registryManager, device);
-        Module module = Module.createModule(deviceId, moduleId, AuthenticationType.SAS);
+        Module module = new Module(deviceId, moduleId, AuthenticationType.SAS);
         module = Tools.addModuleWithRetry(registryManager, module);
 
         ClientOptions options =
@@ -384,7 +386,7 @@ public class TokenRenewalTests extends IntegrationTest
                 .sasTokenExpiryTime(SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL)
                 .proxySettings(proxySettings);
         TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SAS, false);
-        com.microsoft.azure.sdk.iot.service.Device device = testDeviceIdentity.getDevice();
+        Device device = testDeviceIdentity.getDevice();
         testIdentities.add(testDeviceIdentity);
         return new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), protocol, optionsBuilder.build());
     }

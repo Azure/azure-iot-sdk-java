@@ -5,10 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.service.FeedbackBatchMessage;
-import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
-import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFeedbackReceivedHandler;
-import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpReceive;
+import com.microsoft.azure.sdk.iot.service.messaging.FeedbackBatchMessage;
+import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import mockit.Deencapsulation;
 import mockit.Expectations;
 import mockit.Mocked;

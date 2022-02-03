@@ -11,7 +11,7 @@ import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -215,7 +215,7 @@ public class SendMessagesTests extends SendMessagesCommon
 
         SSLContext sslContext = SSLContextBuilder.buildSSLContext(eccCertGenerator.getX509Certificate(), eccCertGenerator.getPrivateKey());
 
-        Device eccDevice = Device.createDevice(UUID.randomUUID().toString(), AuthenticationType.SELF_SIGNED);
+        Device eccDevice = new Device(UUID.randomUUID().toString(), AuthenticationType.SELF_SIGNED);
         eccDevice.setThumbprint(eccCertGenerator.getX509Thumbprint(), eccCertGenerator.getX509Thumbprint());
         eccDevice = registryManager.addDevice(eccDevice);
 

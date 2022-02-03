@@ -7,10 +7,13 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
+import com.microsoft.azure.sdk.iot.service.jobs.ExportImportDevice;
+import com.microsoft.azure.sdk.iot.service.jobs.ImportMode;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
 import com.microsoft.azure.sdk.iot.service.jobs.JobProperties;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
+import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.blob.*;
 
@@ -42,7 +45,7 @@ public class DeviceManagerImportSample
         for (int i = 0; i < 1; i++)
         {
             String deviceId = UUID.randomUUID().toString();
-            Device device = Device.createFromId(deviceId, null, null);
+            Device device = new Device(deviceId);
             AuthenticationMechanism authentication = new AuthenticationMechanism(device.getSymmetricKey());
 
             ExportImportDevice deviceToAdd = new ExportImportDevice();

@@ -1,7 +1,5 @@
 package com.microsoft.azure.sdk.iot.service.configurations;
 
-import com.microsoft.azure.sdk.iot.service.configurations.ConfigurationContent;
-import com.microsoft.azure.sdk.iot.service.serializers.ConfigurationContentParser;
 import org.junit.Assert;
 import org.junit.Test;
 

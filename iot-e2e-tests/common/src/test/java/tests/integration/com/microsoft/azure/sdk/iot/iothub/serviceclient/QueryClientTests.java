@@ -6,11 +6,11 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 import com.azure.core.credential.AzureSasCredential;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.twin.Pair;
@@ -79,8 +79,8 @@ public class QueryClientTests extends IntegrationTest
     {
         String deviceId1 = UUID.randomUUID().toString();
         String deviceId2 = UUID.randomUUID().toString();
-        Device device1 = Device.createDevice(deviceId1, AuthenticationType.SAS);
-        Device device2 = Device.createDevice(deviceId2, AuthenticationType.SAS);
+        Device device1 = new Device(deviceId1, AuthenticationType.SAS);
+        Device device2 = new Device(deviceId2, AuthenticationType.SAS);
 
         registryManager.addDevice(device1);
         registryManager.addDevice(device2);
@@ -139,7 +139,7 @@ public class QueryClientTests extends IntegrationTest
 
         String deviceId = UUID.randomUUID().toString();
 
-        registryManager.addDevice(Device.createDevice(deviceId, AuthenticationType.SAS));
+        registryManager.addDevice(new Device(deviceId, AuthenticationType.SAS));
 
         try
         {
@@ -210,7 +210,7 @@ public class QueryClientTests extends IntegrationTest
 
         String deviceId = UUID.randomUUID().toString();
 
-        registryManager.addDevice(Device.createDevice(deviceId, AuthenticationType.SAS));
+        registryManager.addDevice(new Device(deviceId, AuthenticationType.SAS));
 
         try
         {
@@ -279,7 +279,7 @@ public class QueryClientTests extends IntegrationTest
         Device[] devices = new Device[deviceCount];
         for (int i = 0; i < deviceCount; i++)
         {
-            devices[i] = registryManager.addDevice(Device.createDevice(UUID.randomUUID().toString(), AuthenticationType.SAS));
+            devices[i] = registryManager.addDevice(new Device(UUID.randomUUID().toString(), AuthenticationType.SAS));
         }
 
         try

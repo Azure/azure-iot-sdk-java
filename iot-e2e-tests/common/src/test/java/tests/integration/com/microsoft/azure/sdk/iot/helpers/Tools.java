@@ -5,21 +5,21 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
-import com.microsoft.azure.sdk.iot.service.serializers.AuthenticationParser;
-import com.microsoft.azure.sdk.iot.service.serializers.AuthenticationTypeParser;
-import com.microsoft.azure.sdk.iot.service.serializers.ExportImportDeviceParser;
-import com.microsoft.azure.sdk.iot.service.serializers.SymmetricKeyParser;
-import com.microsoft.azure.sdk.iot.service.serializers.X509ThumbprintParser;
+import com.microsoft.azure.sdk.iot.service.registry.serializers.AuthenticationParser;
+import com.microsoft.azure.sdk.iot.service.registry.serializers.AuthenticationTypeParser;
+import com.microsoft.azure.sdk.iot.service.jobs.ExportImportDeviceParser;
+import com.microsoft.azure.sdk.iot.service.registry.serializers.SymmetricKeyParser;
+import com.microsoft.azure.sdk.iot.service.registry.serializers.X509ThumbprintParser;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.ModuleClient;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
-import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.service.Module;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.registry.Module;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
@@ -271,7 +271,7 @@ public class Tools
                     List<Device> devicesToAdd = new ArrayList<>();
                     for (int i = 0; i < PROACTIVE_TEST_DEVICE_REGISRATION_COUNT; i++)
                     {
-                        Device deviceToAdd = Device.createDevice("test-device-" + UUID.randomUUID().toString(), AuthenticationType.SAS);
+                        Device deviceToAdd = new Device("test-device-" + UUID.randomUUID().toString(), AuthenticationType.SAS);
                         deviceToAdd.setSymmetricKey(new SymmetricKey());
                         devicesToAdd.add(deviceToAdd);
                     }
@@ -319,7 +319,7 @@ public class Tools
                     List<Device> devicesToAdd = new ArrayList<>();
                     for (int i = 0; i < PROACTIVE_TEST_DEVICE_REGISRATION_COUNT; i++)
                     {
-                        Device deviceToAdd = Device.createDevice("test-device-" + UUID.randomUUID().toString(), AuthenticationType.SELF_SIGNED);
+                        Device deviceToAdd = new Device("test-device-" + UUID.randomUUID().toString(), AuthenticationType.SELF_SIGNED);
                         String x509Thumbprint = IntegrationTest.x509CertificateGenerator.getX509Thumbprint();
                         deviceToAdd.setThumbprint(x509Thumbprint, x509Thumbprint);
                         devicesToAdd.add(deviceToAdd);
@@ -442,7 +442,7 @@ public class Tools
                     {
                         TestDeviceIdentity testDeviceIdentity = getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SAS, needCleanTwin);
                         devices.add(testDeviceIdentity.device);
-                        modulesToAdd.add(Module.createModule(testDeviceIdentity.device.getDeviceId(), "test-module-" + UUID.randomUUID(), AuthenticationType.SAS));
+                        modulesToAdd.add(new Module(testDeviceIdentity.device.getDeviceId(), "test-module-" + UUID.randomUUID(), AuthenticationType.SAS));
                     }
 
                     addModules(modulesToAdd, iotHubConnectionString);
@@ -491,7 +491,7 @@ public class Tools
                     {
                         TestDeviceIdentity testDeviceIdentity = getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SELF_SIGNED, needCleanTwin);
                         devices.add(testDeviceIdentity.device);
-                        Module module = Module.createModule(testDeviceIdentity.device.getDeviceId(), "test-module-" + UUID.randomUUID(), AuthenticationType.SELF_SIGNED);
+                        Module module = new Module(testDeviceIdentity.device.getDeviceId(), "test-module-" + UUID.randomUUID(), AuthenticationType.SELF_SIGNED);
                         String x509Thumbprint = IntegrationTest.x509CertificateGenerator.getX509Thumbprint();
                         module.setThumbprint(x509Thumbprint, x509Thumbprint);
                         modulesToAdd.add(module);

@@ -7,7 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.microsoft.azure.sdk.iot.service.Helpers;
-import com.microsoft.azure.sdk.iot.service.serializers.ParserUtility;
+import com.microsoft.azure.sdk.iot.service.ParserUtility;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.Verifications;

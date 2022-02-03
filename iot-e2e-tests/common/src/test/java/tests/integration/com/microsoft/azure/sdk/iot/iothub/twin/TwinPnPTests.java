@@ -8,10 +8,10 @@ import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.InternalClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.ModuleClient;
-import com.microsoft.azure.sdk.iot.service.BaseDevice;
-import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.Module;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryIdentity;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
+import com.microsoft.azure.sdk.iot.service.registry.Module;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
@@ -24,7 +24,6 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceConnectionStr
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.SSLContextBuilder;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestModuleIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
@@ -117,7 +116,7 @@ public class TwinPnPTests extends IntegrationTest
     {
         public InternalClient client;
         public IotHubClientProtocol protocol;
-        public BaseDevice identity;
+        public RegistryIdentity identity;
         public AuthenticationType authenticationType;
         public ClientType clientType;
         public String x509Thumbprint;
@@ -148,12 +147,12 @@ public class TwinPnPTests extends IntegrationTest
             ModelId = "dtmi:com:test:e2e;" + TEST_VERSION;
 
             /* Create device on the service */
-            Device device = Device.createFromId(deviceId, null, null);
-            Module module = Module.createFromId(deviceId, moduleId, null);
+            Device device = new Device(deviceId);
+            Module module = new Module(deviceId, moduleId, null);
 
-            Device deviceX509 = Device.createDevice(deviceX509Id, AuthenticationType.SELF_SIGNED);
+            Device deviceX509 = new Device(deviceX509Id, AuthenticationType.SELF_SIGNED);
             deviceX509.setThumbprint(x509Thumbprint, x509Thumbprint);
-            Module moduleX509 = Module.createModule(deviceX509Id, moduleX509Id, AuthenticationType.SELF_SIGNED);
+            Module moduleX509 = new Module(deviceX509Id, moduleX509Id, AuthenticationType.SELF_SIGNED);
             moduleX509.setThumbprint(x509Thumbprint, x509Thumbprint);
             device = Tools.addDeviceWithRetry(registryManager, device);
             deviceX509 = Tools.addDeviceWithRetry(registryManager, deviceX509);

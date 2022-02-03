@@ -9,18 +9,17 @@ import com.microsoft.azure.sdk.iot.device.twin.MethodData;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
-import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.DeviceStatus;
-import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
-import com.microsoft.azure.sdk.iot.service.Message;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.ServiceClient;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
+import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
+import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.messaging.Message;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.messaging.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.twin.DirectMethodRequestOptions;
-import com.microsoft.azure.sdk.iot.service.twin.DirectMethodsClient;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
-import com.microsoft.azure.sdk.iot.service.twin.MethodResult;
+import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.customized.DigitalTwinGetHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.serialization.BasicDigitalTwin;
@@ -65,7 +64,7 @@ public class TokenCredentialTests
         // We remove and recreate the device for a clean start
         RegistryManager registryManager = new RegistryManager(iotHubConnectionString);
 
-        Device device = Device.createDevice("some-device-" + UUID.randomUUID(), AuthenticationType.SAS);
+        Device device = new Device("some-device-" + UUID.randomUUID(), AuthenticationType.SAS);
         registryManager.addDevice(device);
 
         Device deviceGetBefore = registryManager.getDevice(device.getDeviceId());
@@ -116,7 +115,7 @@ public class TokenCredentialTests
         //-Create-//
         RegistryManager registryManager = new RegistryManager(iotHubConnectionString);
         String deviceId = "some-device-" + UUID.randomUUID();
-        Device deviceAdded = Device.createFromId(deviceId, DeviceStatus.Enabled, null);
+        Device deviceAdded = new Device(deviceId);
         registryManager.addDevice(deviceAdded);
 
         //-Read-//
@@ -144,7 +143,7 @@ public class TokenCredentialTests
         DirectMethodsClient methodServiceClient = buildDeviceMethodClientWithTokenCredential();
 
         RegistryManager registryManager = new RegistryManager(iotHubConnectionString);
-        Device device = Device.createDevice("some-device-" + UUID.randomUUID(), AuthenticationType.SAS);
+        Device device = new Device("some-device-" + UUID.randomUUID(), AuthenticationType.SAS);
         registryManager.addDevice(device);
 
         DeviceClient deviceClient = new DeviceClient(registryManager.getDeviceConnectionString(device), MQTT);
@@ -193,7 +192,7 @@ public class TokenCredentialTests
         TwinClient twinServiceClient = buildTwinClientWithTokenCredential();
 
         RegistryManager registryManager = new RegistryManager(iotHubConnectionString);
-        Device device = Device.createDevice("some-device-" + UUID.randomUUID(), AuthenticationType.SAS);
+        Device device = new Device("some-device-" + UUID.randomUUID(), AuthenticationType.SAS);
         registryManager.addDevice(device);
 
         Twin twin = twinServiceClient.getTwin(device.getDeviceId());
@@ -218,7 +217,7 @@ public class TokenCredentialTests
     {
         ClientOptions options = ClientOptions.builder().modelId(THERMOSTAT_MODEL_ID).build();
         String deviceId = "some-device-" + UUID.randomUUID();
-        Device device = Device.createDevice(deviceId, AuthenticationType.SAS);
+        Device device = new Device(deviceId, AuthenticationType.SAS);
         Device registeredDevice = registryManager.addDevice(device);
         String deviceConnectionString = registryManager.getDeviceConnectionString(registeredDevice);
         return new DeviceClient(deviceConnectionString, protocol, options);

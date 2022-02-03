@@ -7,9 +7,10 @@ package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
-import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
@@ -132,7 +133,7 @@ class AmqpSendHandler extends AmqpConnectionHandler
      * @param deviceId The device name string
      * @param message The message to be sent
      */
-    public void createProtonMessage(String deviceId, com.microsoft.azure.sdk.iot.service.Message message)
+    public void createProtonMessage(String deviceId, Message message)
     {
         populateProtonMessage(String.format(DEVICE_PATH_FORMAT, deviceId), message);
     }
@@ -146,12 +147,12 @@ class AmqpSendHandler extends AmqpConnectionHandler
     public void createProtonMessage(
             String deviceId,
             String moduleId,
-            com.microsoft.azure.sdk.iot.service.Message message)
+            Message message)
     {
         populateProtonMessage(String.format(MODULE_PATH_FORMAT, deviceId, moduleId), message);
     }
 
-    private void populateProtonMessage(String targetPath, com.microsoft.azure.sdk.iot.service.Message message)
+    private void populateProtonMessage(String targetPath, Message message)
     {
         org.apache.qpid.proton.message.Message protonMessage = Proton.message();
 

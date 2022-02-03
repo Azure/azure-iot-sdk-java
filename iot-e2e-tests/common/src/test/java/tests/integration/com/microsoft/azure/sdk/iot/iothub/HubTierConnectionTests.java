@@ -5,8 +5,12 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.twin.MethodData;
 import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryIdentity;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManagerOptions;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -58,7 +62,7 @@ public class HubTierConnectionTests extends IntegrationTest
 
     protected static RegistryManager registryManager;
 
-    public HubTierConnectionTests(DeviceClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, boolean useHttpProxy)
+    public HubTierConnectionTests(DeviceClient client, IotHubClientProtocol protocol, RegistryIdentity identity, AuthenticationType authenticationType, boolean useHttpProxy)
     {
         this.testInstance = new HubTierConnectionTestInstance(client, protocol, identity, authenticationType, useHttpProxy);
     }
@@ -77,8 +81,8 @@ public class HubTierConnectionTests extends IntegrationTest
         String deviceId = "java-tier-connection-e2e-test".concat("-" + uuid);
         String deviceIdX509 = "java-tier-connection-e2e-test-X509".concat("-" + uuid);
 
-        Device device = Device.createFromId(deviceId, null, null);
-        Device deviceX509 = Device.createDevice(deviceIdX509, SELF_SIGNED);
+        Device device = new Device(deviceId);
+        Device deviceX509 = new Device(deviceIdX509, SELF_SIGNED);
 
         deviceX509.setThumbprint(x509Thumbprint, x509Thumbprint);
 
@@ -140,7 +144,7 @@ public class HubTierConnectionTests extends IntegrationTest
     {
         public DeviceClient client;
         public IotHubClientProtocol protocol;
-        public BaseDevice identity;
+        public RegistryIdentity identity;
         public AuthenticationType authenticationType;
         public ClientType clientType;
         public String publicKeyCert;
@@ -149,7 +153,7 @@ public class HubTierConnectionTests extends IntegrationTest
         public CorrelationDetailsLoggingAssert correlationDetailsLoggingAssert;
         public boolean useHttpProxy;
 
-        public HubTierConnectionTestInstance(DeviceClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, boolean useHttpProxy)
+        public HubTierConnectionTestInstance(DeviceClient client, IotHubClientProtocol protocol, RegistryIdentity identity, AuthenticationType authenticationType, boolean useHttpProxy)
         {
             this.client = client;
             this.protocol = protocol;

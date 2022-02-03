@@ -6,8 +6,8 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.service.twin.DeviceCapabilities;
-import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
 import java.io.IOException;
@@ -47,7 +47,7 @@ public class DeviceManagerSample
     {
         RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
-        Device device = Device.createFromId(SampleUtils.deviceId, null, null);
+        Device device = new Device(SampleUtils.deviceId);
         try
         {
             device = registryManager.addDevice(device);
@@ -73,7 +73,7 @@ public class DeviceManagerSample
             System.out.println("Device: " + returnDevice.getDeviceId());
             System.out.println("Device primary key: " + returnDevice.getPrimaryKey());
             System.out.println("Device secondary key: " + returnDevice.getSecondaryKey());
-            System.out.println("Device ETag: " + returnDevice.geteTag());
+            System.out.println("Device ETag: " + returnDevice.getETag());
         }
         catch (IotHubException | IOException iote)
         {
@@ -86,7 +86,7 @@ public class DeviceManagerSample
         RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
         // Create an Edge device, and set leaf-device as a child.
-        Device edge = Device.createFromId(SampleUtils.edgeId, null, null);
+        Device edge = new Device(SampleUtils.edgeId);
         DeviceCapabilities capabilities = new DeviceCapabilities();
         capabilities.setIotEdge(true);
         edge.setCapabilities(capabilities);

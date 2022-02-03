@@ -13,18 +13,17 @@ import com.azure.storage.blob.sas.BlobContainerSasPermission;
 import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 import com.azure.storage.blob.specialized.BlobInputStream;
 import com.azure.storage.blob.specialized.BlockBlobClient;
-import com.microsoft.azure.sdk.iot.service.jobs.Job;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
-import com.microsoft.azure.sdk.iot.service.serializers.ExportImportDeviceParser;
-import com.microsoft.azure.sdk.iot.service.serializers.StorageAuthenticationType;
+import com.microsoft.azure.sdk.iot.service.jobs.ExportImportDeviceParser;
+import com.microsoft.azure.sdk.iot.service.jobs.StorageAuthenticationType;
 import com.microsoft.azure.sdk.iot.service.twin.TwinCollection;
-import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.DeviceStatus;
-import com.microsoft.azure.sdk.iot.service.ExportImportDevice;
-import com.microsoft.azure.sdk.iot.service.ImportMode;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
+import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
+import com.microsoft.azure.sdk.iot.service.jobs.ExportImportDevice;
+import com.microsoft.azure.sdk.iot.service.jobs.ImportMode;
 import com.microsoft.azure.sdk.iot.service.jobs.JobProperties;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubTooManyDevicesException;
 import mockit.Deencapsulation;
@@ -212,7 +211,7 @@ public class ExportImportTests extends IntegrationTest
         for (int i = 0; i < numberOfDevices; i++)
         {
             String deviceId = "java-bulk-test-" + UUID.randomUUID().toString();
-            Device device = Device.createFromId(deviceId, null, null);
+            Device device = new Device(deviceId);
             AuthenticationMechanism authentication = new AuthenticationMechanism(device.getSymmetricKey());
 
             ExportImportDevice deviceToAdd = new ExportImportDevice();

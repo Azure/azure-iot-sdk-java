@@ -5,9 +5,9 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.DeviceStatus;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
+import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
@@ -60,11 +60,11 @@ public class DeviceManagerX509Sample
 
         if (isSelfSigned)
         {
-            device = Device.createDevice(SampleUtils.deviceId, AuthenticationType.SELF_SIGNED);
+            device = new Device(SampleUtils.deviceId, AuthenticationType.SELF_SIGNED);
         }
         else
         {
-            device = Device.createDevice(SampleUtils.deviceId, AuthenticationType.CERTIFICATE_AUTHORITY);
+            device = new Device(SampleUtils.deviceId, AuthenticationType.CERTIFICATE_AUTHORITY);
         }
 
         try
@@ -94,7 +94,7 @@ public class DeviceManagerX509Sample
             returnDevice = registryManager.getDevice(SampleUtils.deviceId);
 
             System.out.println("Device: " + returnDevice.getDeviceId());
-            System.out.println("Device eTag: " + returnDevice.geteTag());
+            System.out.println("Device eTag: " + returnDevice.getETag());
 
             if (isSelfSigned)
             {
@@ -115,11 +115,11 @@ public class DeviceManagerX509Sample
         Device device;
         if (isSelfSigned)
         {
-            device = Device.createDevice(SampleUtils.deviceId, AuthenticationType.SELF_SIGNED);
+            device = new Device(SampleUtils.deviceId, AuthenticationType.SELF_SIGNED);
         }
         else
         {
-            device = Device.createDevice(SampleUtils.deviceId, AuthenticationType.CERTIFICATE_AUTHORITY);
+            device = new Device(SampleUtils.deviceId, AuthenticationType.CERTIFICATE_AUTHORITY);
         }
 
         device.setStatus(DeviceStatus.Disabled);

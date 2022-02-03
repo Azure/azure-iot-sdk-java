@@ -5,8 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
-import com.microsoft.azure.sdk.iot.service.serializers.ErrorCodeDescription;
-
 /**
  * Create bad gateway exception (device sent malformed response)
  */

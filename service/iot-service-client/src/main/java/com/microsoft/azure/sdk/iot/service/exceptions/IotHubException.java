@@ -5,8 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
-import com.microsoft.azure.sdk.iot.service.serializers.ErrorCodeDescription;
-import com.microsoft.azure.sdk.iot.service.serializers.ErrorMessageParser;
 import lombok.Getter;
 
 /**

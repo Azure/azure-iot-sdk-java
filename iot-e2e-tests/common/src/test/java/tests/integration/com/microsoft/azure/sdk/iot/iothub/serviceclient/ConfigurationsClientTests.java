@@ -3,10 +3,10 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
-import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.DeviceStatus;
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
+import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.configurations.Configuration;
 import com.microsoft.azure.sdk.iot.service.configurations.ConfigurationContent;
 import com.microsoft.azure.sdk.iot.service.configurations.ConfigurationsClient;
@@ -182,7 +182,7 @@ public class ConfigurationsClientTests extends IntegrationTest
     {
         // Arrange
         ConfigurationsClientTestInstance testInstance = new ConfigurationsClientTestInstance();
-        Device deviceSetup = Device.createFromId(testInstance.deviceId, DeviceStatus.Enabled, null);
+        Device deviceSetup = new Device(testInstance.deviceId);
         Tools.addDeviceWithRetry(testInstance.registryManager, deviceSetup);
         final HashMap<String, Object> testDeviceContent = new HashMap<String, Object>()
         {

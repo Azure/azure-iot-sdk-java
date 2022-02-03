@@ -8,16 +8,14 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.service.twin.DeviceCapabilities;
-import com.microsoft.azure.sdk.iot.service.configurations.Configuration;
-import com.microsoft.azure.sdk.iot.service.configurations.ConfigurationContent;
-import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.DeviceStatus;
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.Module;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
+import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.registry.Module;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
@@ -42,7 +40,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.UUID;
 
 import static junit.framework.TestCase.fail;
@@ -140,7 +137,7 @@ public class RegistryManagerTests extends IntegrationTest
     public void serviceValidatesSymmetricKey() throws IOException, IotHubException
     {
         RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
-        Device device = Device.createDevice(testInstance.deviceId, AuthenticationType.SAS);
+        Device device = new Device(testInstance.deviceId, AuthenticationType.SAS);
         SymmetricKey symmetricKey = new SymmetricKey();
         symmetricKey.setPrimaryKey("1");
         symmetricKey.setSecondaryKey("2");
@@ -173,9 +170,9 @@ public class RegistryManagerTests extends IntegrationTest
 
         RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance(registryManager);
 
-        Device device1 = Device.createDevice(testInstance.deviceId + "-1", AuthenticationType.SAS);
-        Device device2 = Device.createDevice(testInstance.deviceId + "-2", AuthenticationType.SAS);
-        Device device3 = Device.createDevice(testInstance.deviceId + "-3", AuthenticationType.SAS);
+        Device device1 = new Device(testInstance.deviceId + "-1", AuthenticationType.SAS);
+        Device device2 = new Device(testInstance.deviceId + "-2", AuthenticationType.SAS);
+        Device device3 = new Device(testInstance.deviceId + "-3", AuthenticationType.SAS);
 
         azureSasCredential.update(serviceSasToken.toString());
 
@@ -207,7 +204,7 @@ public class RegistryManagerTests extends IntegrationTest
     public static void deviceLifecycle(RegistryManagerTestInstance testInstance) throws Exception
     {
         //-Create-//
-        Device deviceAdded = Device.createFromId(testInstance.deviceId, DeviceStatus.Enabled, null);
+        Device deviceAdded = new Device(testInstance.deviceId);
         Tools.addDeviceWithRetry(testInstance.registryManager, deviceAdded);
 
         //-Read-//
@@ -237,7 +234,7 @@ public class RegistryManagerTests extends IntegrationTest
         RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance(registryManagerOptions);
 
         //-Create-//
-        Device deviceAdded = Device.createFromId(testInstance.deviceId, DeviceStatus.Enabled, null);
+        Device deviceAdded = new Device(testInstance.deviceId);
         Tools.addDeviceWithRetry(testInstance.registryManager, deviceAdded);
 
         //-Read-//
@@ -263,7 +260,7 @@ public class RegistryManagerTests extends IntegrationTest
     {
         //-Create-//
         RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
-        Device deviceAdded = Device.createDevice(testInstance.deviceId, AuthenticationType.CERTIFICATE_AUTHORITY);
+        Device deviceAdded = new Device(testInstance.deviceId, AuthenticationType.CERTIFICATE_AUTHORITY);
         Tools.addDeviceWithRetry(testInstance.registryManager, deviceAdded);
 
         //-Read-//
@@ -294,7 +291,7 @@ public class RegistryManagerTests extends IntegrationTest
     {
         //-Create-//
         RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
-        Device deviceAdded = Device.createDevice(testInstance.deviceId, AuthenticationType.SELF_SIGNED);
+        Device deviceAdded = new Device(testInstance.deviceId, AuthenticationType.SELF_SIGNED);
         deviceAdded.setThumbprint(primaryThumbprint, secondaryThumbprint);
         Tools.addDeviceWithRetry(testInstance.registryManager, deviceAdded);
 
@@ -340,12 +337,12 @@ public class RegistryManagerTests extends IntegrationTest
         RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
         SymmetricKey expectedSymmetricKey = new SymmetricKey();
 
-        Device deviceSetup = Device.createFromId(testInstance.deviceId, DeviceStatus.Enabled, null);
+        Device deviceSetup = new Device(testInstance.deviceId);
         Tools.addDeviceWithRetry(testInstance.registryManager, deviceSetup);
         deleteModuleIfItExistsAlready(testInstance.registryManager, testInstance.deviceId, testInstance.moduleId);
 
         //-Create-//
-        Module moduleAdded = Module.createFromId(testInstance.deviceId, testInstance.moduleId, null);
+        Module moduleAdded = new Module(testInstance.deviceId, testInstance.moduleId);
         Tools.addModuleWithRetry(testInstance.registryManager, moduleAdded);
 
         //-Read-//
@@ -377,12 +374,12 @@ public class RegistryManagerTests extends IntegrationTest
         // Arrange
         RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
         deleteModuleIfItExistsAlready(testInstance.registryManager, testInstance.deviceId, testInstance.moduleId);
-        Device deviceSetup = Device.createFromId(testInstance.deviceId, DeviceStatus.Enabled, null);
+        Device deviceSetup = new Device(testInstance.deviceId);
         Tools.addDeviceWithRetry(testInstance.registryManager, deviceSetup);
         deleteModuleIfItExistsAlready(testInstance.registryManager, testInstance.deviceId, testInstance.moduleId);
 
         //-Create-//
-        Module moduleAdded = Module.createModule(testInstance.deviceId, testInstance.moduleId, AuthenticationType.CERTIFICATE_AUTHORITY);
+        Module moduleAdded = new Module(testInstance.deviceId, testInstance.moduleId, AuthenticationType.CERTIFICATE_AUTHORITY);
         Tools.addModuleWithRetry(testInstance.registryManager, moduleAdded);
 
         //-Read-//
@@ -411,12 +408,12 @@ public class RegistryManagerTests extends IntegrationTest
     {
         // Arrange
         RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
-        Device deviceSetup = Device.createFromId(testInstance.deviceId, DeviceStatus.Enabled, null);
+        Device deviceSetup = new Device(testInstance.deviceId);
         Tools.addDeviceWithRetry(testInstance.registryManager, deviceSetup);
         deleteModuleIfItExistsAlready(testInstance.registryManager, testInstance.deviceId, testInstance.moduleId);
 
         //-Create-//
-        Module moduleAdded = Module.createModule(testInstance.deviceId, testInstance.moduleId, AuthenticationType.SELF_SIGNED);
+        Module moduleAdded = new Module(testInstance.deviceId, testInstance.moduleId, AuthenticationType.SELF_SIGNED);
         moduleAdded.setThumbprint(primaryThumbprint, secondaryThumbprint);
         Tools.addModuleWithRetry(testInstance.registryManager, moduleAdded);
 
@@ -459,22 +456,19 @@ public class RegistryManagerTests extends IntegrationTest
         String deviceId = this.testInstance.deviceId;
 
         //-Create-//
-        Device edgeDevice1 = Device.createFromId(edge1Id, DeviceStatus.Enabled, null);
+        Device edgeDevice1 = new Device(edge1Id);
         DeviceCapabilities capabilities = new DeviceCapabilities();
         capabilities.setIotEdge(true);
         edgeDevice1.setCapabilities(capabilities);
         edgeDevice1 = Tools.addDeviceWithRetry(this.testInstance.registryManager, edgeDevice1);
 
-        Device edgeDevice2 = Device.createFromId(edge2Id, DeviceStatus.Enabled, null);
+        Device edgeDevice2 = new Device(edge2Id);
         capabilities.setIotEdge(true);
         edgeDevice2.setCapabilities(capabilities);
         edgeDevice2.getParentScopes().add(edgeDevice1.getScope()); // set edge1 as parent
         edgeDevice2 = Tools.addDeviceWithRetry(this.testInstance.registryManager, edgeDevice2);
 
-        Device leafDevice = Device.createFromId(
-                deviceId,
-                DeviceStatus.Enabled,
-                null);
+        Device leafDevice = new Device(deviceId);
         assertNotNull(edgeDevice1.getScope());
         leafDevice.setScope(edgeDevice1.getScope());
         Tools.addDeviceWithRetry(this.testInstance.registryManager, leafDevice);
