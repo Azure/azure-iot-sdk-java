@@ -125,10 +125,10 @@ public class FeedbackReceiver implements AmqpFeedbackReceivedEvent
      */
     public void open() throws IOException
     {
-        log.debug("Opening file upload notification receiver");
+        log.debug("Opening feedback receiver");
 
         this.amqpConnectionReactorRunner =
-            new ReactorRunner(amqpReceiveHandler, hostName, "AmqpFileUploadNotificationReceiver");
+            new ReactorRunner(amqpReceiveHandler, hostName, "AmqpFeedbackReceiver");
 
         new Thread(() ->
         {
@@ -147,7 +147,7 @@ public class FeedbackReceiver implements AmqpFeedbackReceivedEvent
             }
         }).start();
 
-        log.debug("Opened file upload notification receiver");
+        log.debug("Opened feedback receiver");
     }
 
     /**
@@ -156,11 +156,11 @@ public class FeedbackReceiver implements AmqpFeedbackReceivedEvent
      */
     public void close()
     {
-        log.debug("Closing file upload notification receiver");
+        log.debug("Closing feedback receiver");
 
         this.amqpConnectionReactorRunner.stop();
 
-        log.debug("Closed file upload notification receiver");
+        log.debug("Closed feedback receiver");
     }
 
     /**
@@ -169,7 +169,7 @@ public class FeedbackReceiver implements AmqpFeedbackReceivedEvent
      * Release semaphore for wait function
      * @param feedbackJson Received Json string to process
      */
-    public synchronized IotHubMessageResult onFeedbackReceived(String feedbackJson)
+    public IotHubMessageResult onFeedbackReceived(String feedbackJson)
     {
         try
         {

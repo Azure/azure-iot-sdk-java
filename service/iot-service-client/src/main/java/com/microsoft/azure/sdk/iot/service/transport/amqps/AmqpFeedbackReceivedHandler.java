@@ -7,6 +7,7 @@ package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
+import com.microsoft.azure.sdk.iot.service.messaging.IotHubMessageResult;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
@@ -14,8 +15,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
+import org.apache.qpid.proton.amqp.messaging.Rejected;
 import org.apache.qpid.proton.amqp.messaging.Released;
 import org.apache.qpid.proton.amqp.messaging.Source;
+import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.engine.Delivery;
 import org.apache.qpid.proton.engine.EndpointState;
 import org.apache.qpid.proton.engine.Event;
@@ -123,24 +126,24 @@ public class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
             // onLinkLocalClose closes the session locally and eventually the connection and reactor
             if (recv.getLocalState() == EndpointState.ACTIVE)
             {
-                delivery.disposition(Accepted.getInstance());
-                delivery.settle();
+                IotHubMessageResult messageResult = amqpFeedbackReceivedEvent.onFeedbackReceived(msg.getBody().toString());
 
-                log.debug("Closing amqp feedback receiver link since a feedback message was received");
-                recv.close();
-            }
-            else
-            {
-                //Each connection should only handle one message. Any further deliveries must be released so that
-                // another connection can receive it instead
-                log.trace("Releasing a delivery since this connection already handled one, service will send it again later");
-                delivery.disposition(Released.getInstance());
-                delivery.settle();
-            }
+                DeliveryState deliveryState = Accepted.getInstance();
+                if (messageResult == IotHubMessageResult.ABANDON)
+                {
+                    deliveryState = Released.getInstance();
+                }
+                else if (messageResult == IotHubMessageResult.REJECT)
+                {
+                    deliveryState = new Rejected();
+                }
+                else if (messageResult == IotHubMessageResult.COMPLETE)
+                {
+                    deliveryState = Accepted.getInstance();
+                }
 
-            if (amqpFeedbackReceivedEvent != null)
-            {
-                amqpFeedbackReceivedEvent.onFeedbackReceived(msg.getBody().toString());
+                delivery.disposition(deliveryState);
+                delivery.settle();
             }
         }
     }

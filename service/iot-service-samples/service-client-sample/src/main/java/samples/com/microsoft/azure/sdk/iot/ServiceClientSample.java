@@ -13,11 +13,14 @@ import com.microsoft.azure.sdk.iot.service.messaging.IotHubMessageResult;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.messaging.ServiceClient;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Service client example for:
@@ -63,73 +66,51 @@ public class ServiceClientSample
         }
 
         System.out.println("********* Sleeping main thread while waiting for file upload notifications and/or feedback batch messages...");
-        Thread.sleep(10000);
+        Thread.sleep(5000);
 
-        closeFileUploadNotificationReceiver();
-        closeFileUploadNotificationReceiver();
-        closeFeedbackReceiver();
+        fileUploadNotificationReceiver.close();
+        feedbackReceiver.close();
 
         System.out.println("********* Shutting down ServiceClient sample...");
     }
 
     protected static void openFeedbackReceiver() throws IOException
     {
-        if (serviceClient != null)
-        {
-            feedbackReceiver = serviceClient.getFeedbackReceiver(
-                feedbackBatch ->
+        feedbackReceiver = serviceClient.getFeedbackReceiver(
+            feedbackBatch ->
+            {
+                System.out.println(" Feedback received, feedback time: " + feedbackBatch.getEnqueuedTimeUtc());
+                System.out.println(" Record size: " + feedbackBatch.getRecords().size());
+
+                for (int i = 0; i < feedbackBatch.getRecords().size(); i++)
                 {
-                    System.out.println(" Feedback received, feedback time: " + feedbackBatch.getEnqueuedTimeUtc());
-                    System.out.println(" Record size: " + feedbackBatch.getRecords().size());
-
-                    for (int i = 0; i < feedbackBatch.getRecords().size(); i++)
-                    {
-                        System.out.println(" Message Id : " + feedbackBatch.getRecords().get(i).getOriginalMessageId());
-                        System.out.println(" Device Id : " + feedbackBatch.getRecords().get(i).getDeviceId());
-                        System.out.println(" Status description : " + feedbackBatch.getRecords().get(i).getDescription());
-                    }
-
-                    return IotHubMessageResult.COMPLETE;
+                    System.out.println(" Message Id : " + feedbackBatch.getRecords().get(i).getOriginalMessageId());
+                    System.out.println(" Device Id : " + feedbackBatch.getRecords().get(i).getDeviceId());
+                    System.out.println(" Status description : " + feedbackBatch.getRecords().get(i).getDescription());
                 }
-            );
-            feedbackReceiver.open();
-            System.out.println("********* Successfully opened FeedbackReceiver...");
-        }
-    }
 
-    protected static void closeFeedbackReceiver() throws IOException
-    {
-        feedbackReceiver.close();
-        feedbackReceiver = null;
-        System.out.println("********* Successfully closed FeedbackReceiver.");
+                return IotHubMessageResult.COMPLETE;
+            }
+        );
+        feedbackReceiver.open();
+        System.out.println("********* Successfully opened FeedbackReceiver...");
     }
-
 
     protected static void openFileUploadNotificationReceiver() throws IOException
     {
-        if (serviceClient != null)
+        fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver(notification ->
         {
-            fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver(notification ->
-            {
-                System.out.println("File Upload notification received");
-                System.out.println("Device Id : " + notification.getDeviceId());
-                System.out.println("Blob Uri: " + notification.getBlobUri());
-                System.out.println("Blob Name: " + notification.getBlobName());
-                System.out.println("Last Updated : " + notification.getLastUpdatedTimeDate());
-                System.out.println("Blob Size (Bytes): " + notification.getBlobSizeInBytes());
-                System.out.println("Enqueued Time: " + notification.getEnqueuedTimeUtcDate());
-                return IotHubMessageResult.COMPLETE;
-            });
-            fileUploadNotificationReceiver.open();
-            System.out.println("********* Successfully opened fileUploadNotificationReceiver...");
-        }
-    }
-
-    protected static void closeFileUploadNotificationReceiver() throws IOException
-    {
-        fileUploadNotificationReceiver.close();
-        fileUploadNotificationReceiver = null;
-        System.out.println("********* Successfully closed fileUploadNotificationReceiver.");
+            System.out.println("File Upload notification received");
+            System.out.println("Device Id : " + notification.getDeviceId());
+            System.out.println("Blob Uri: " + notification.getBlobUri());
+            System.out.println("Blob Name: " + notification.getBlobName());
+            System.out.println("Last Updated : " + notification.getLastUpdatedTimeDate());
+            System.out.println("Blob Size (Bytes): " + notification.getBlobSizeInBytes());
+            System.out.println("Enqueued Time: " + notification.getEnqueuedTimeUtcDate());
+            return IotHubMessageResult.COMPLETE;
+        });
+        fileUploadNotificationReceiver.open();
+        System.out.println("********* Successfully opened fileUploadNotificationReceiver...");
     }
 
     protected static void sendMultipleCommands() throws InterruptedException, IOException, IotHubException

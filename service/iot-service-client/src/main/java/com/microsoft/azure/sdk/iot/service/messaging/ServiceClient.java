@@ -12,7 +12,7 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
-import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSend;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSendHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -25,7 +25,6 @@ import java.util.Objects;
 @Slf4j
 public final class ServiceClient
 {
-    private final AmqpSend amqpMessageSender;
     private final String hostName;
     private String sasToken;
     private final IotHubServiceClientProtocol iotHubServiceClientProtocol;
@@ -71,13 +70,6 @@ public final class ServiceClient
         this.sasToken = new IotHubServiceSasToken(iotHubConnectionString).toString();
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
         this.options = options;
-        this.amqpMessageSender =
-                new AmqpSend(
-                        this.hostName,
-                        this.sasToken,
-                        iotHubServiceClientProtocol,
-                        options.getProxyOptions(),
-                        options.getSslContext());
 
         commonConstructorSetup();
     }
@@ -140,14 +132,6 @@ public final class ServiceClient
             throw new UnsupportedOperationException("Proxies are only supported over AMQPS_WS");
         }
 
-        this.amqpMessageSender =
-                new AmqpSend(
-                        hostName,
-                        credential,
-                        this.iotHubServiceClientProtocol,
-                        options.getProxyOptions(),
-                        options.getSslContext());
-
         commonConstructorSetup();
     }
 
@@ -190,13 +174,6 @@ public final class ServiceClient
         this.sasTokenProvider = azureSasCredential;
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
         this.options = options;
-        this.amqpMessageSender =
-                new AmqpSend(
-                        hostName,
-                        azureSasCredential,
-                        iotHubServiceClientProtocol,
-                        options.getProxyOptions(),
-                        options.getSslContext());
 
         commonConstructorSetup();
     }
@@ -238,13 +215,6 @@ public final class ServiceClient
             throw new UnsupportedOperationException("Proxies are only supported over AMQPS_WS");
         }
 
-        this.amqpMessageSender = new AmqpSend(
-                this.hostName,
-                this.sasToken,
-                this.iotHubServiceClientProtocol,
-                options.getProxyOptions(),
-                options.getSslContext());
-
         commonConstructorSetup();
     }
 
@@ -254,8 +224,7 @@ public final class ServiceClient
     }
 
     /**
-     * Send a one-way message to the specified device. This function is synchronized internally so that only one send operation
-     * is allowed at a time. In order to do more send operations at a time, you will need to instantiate another service client instance.
+     * Send a one-way message to the specified device.
      *
      * @param deviceId The device identifier for the target device
      * @param message The message for the device
@@ -268,8 +237,7 @@ public final class ServiceClient
     }
 
     /**
-     * Send a one-way message to the specified module. This function is synchronized internally so that only one send operation
-     * is allowed at a time. In order to do more send operations at a time, you will need to instantiate another service client instance.
+     * Send a one-way message to the specified module.
      *
      * @param deviceId The device identifier for the target device
      * @param moduleId The module identifier for the target device
@@ -279,12 +247,39 @@ public final class ServiceClient
      */
     public void send(String deviceId, String moduleId, Message message) throws IOException, IotHubException
     {
-        if (this.amqpMessageSender == null)
+        AmqpSendHandler amqpSendHandler;
+        if (this.credential != null)
         {
-            throw new IOException("AMQP sender is not initialized");
+            amqpSendHandler =
+                new AmqpSendHandler(
+                    this.hostName,
+                    this.credential,
+                    this.iotHubServiceClientProtocol,
+                    this.options.getProxyOptions(),
+                    this.options.getSslContext());
+        }
+        else if (this.sasTokenProvider != null)
+        {
+            amqpSendHandler =
+                new AmqpSendHandler(
+                    this.hostName,
+                    this.sasTokenProvider,
+                    this.iotHubServiceClientProtocol,
+                    this.options.getProxyOptions(),
+                    this.options.getSslContext());
+        }
+        else
+        {
+            amqpSendHandler =
+                new AmqpSendHandler(
+                    this.hostName,
+                    this.sasToken,
+                    this.iotHubServiceClientProtocol,
+                    this.options.getProxyOptions(),
+                    this.options.getSslContext());
         }
 
-        this.amqpMessageSender.send(deviceId, moduleId, message);
+        amqpSendHandler.send(deviceId, moduleId, message);
     }
 
     /**

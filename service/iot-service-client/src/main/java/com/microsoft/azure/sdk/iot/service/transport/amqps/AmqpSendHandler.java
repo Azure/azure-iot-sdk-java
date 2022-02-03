@@ -7,18 +7,27 @@ package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
-import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.Symbol;
-import org.apache.qpid.proton.amqp.messaging.*;
+import org.apache.qpid.proton.amqp.messaging.Accepted;
+import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
+import org.apache.qpid.proton.amqp.messaging.Data;
+import org.apache.qpid.proton.amqp.messaging.Properties;
+import org.apache.qpid.proton.amqp.messaging.Section;
+import org.apache.qpid.proton.amqp.messaging.Target;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
-import org.apache.qpid.proton.engine.*;
+import org.apache.qpid.proton.engine.Delivery;
+import org.apache.qpid.proton.engine.EndpointState;
+import org.apache.qpid.proton.engine.Event;
+import org.apache.qpid.proton.engine.Sender;
+import org.apache.qpid.proton.engine.Session;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -35,7 +44,7 @@ import java.util.Map;
  * Creates and sets SASL authentication for transport
  */
 @Slf4j
-class AmqpSendHandler extends AmqpConnectionHandler
+public class AmqpSendHandler extends AmqpConnectionHandler
 {
     private static final String SEND_TAG = "sender";
     private static final String ENDPOINT = "/messages/devicebound";
@@ -47,40 +56,7 @@ class AmqpSendHandler extends AmqpConnectionHandler
 
     private AmqpResponseVerification amqpResponse;
     private org.apache.qpid.proton.message.Message messageToBeSent;
-
     private int nextTag = 0;
-
-    /**
-     * Constructor to set up connection parameters and initialize handshaker for transport
-     *
-     * @param hostName The address string of the service (example: AAA.BBB.CCC)
-     * @param sasToken The SAS token string
-     * @param iotHubServiceClientProtocol protocol to use
-     */
-    AmqpSendHandler(
-            String hostName,
-            String sasToken,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol)
-    {
-        this(hostName, sasToken, iotHubServiceClientProtocol, null);
-    }
-
-    /**
-     * Constructor to set up connection parameters and initialize handshaker for transport
-     *
-     * @param hostName The address string of the service (example: AAA.BBB.CCC)
-     * @param sasToken The SAS token string
-     * @param iotHubServiceClientProtocol protocol to use
-     * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
-     */
-    private AmqpSendHandler(
-        String hostName,
-        String sasToken,
-        IotHubServiceClientProtocol iotHubServiceClientProtocol,
-        ProxyOptions proxyOptions)
-    {
-        this(hostName, sasToken, iotHubServiceClientProtocol, proxyOptions, null);
-    }
 
     /**
      * Constructor to set up connection parameters and initialize handshaker for transport
@@ -92,7 +68,7 @@ class AmqpSendHandler extends AmqpConnectionHandler
      * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
      *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.
      */
-    AmqpSendHandler(
+    public AmqpSendHandler(
             String hostName,
             String sasToken,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
@@ -102,7 +78,7 @@ class AmqpSendHandler extends AmqpConnectionHandler
         super(hostName, sasToken, iotHubServiceClientProtocol, proxyOptions, sslContext);
     }
 
-    AmqpSendHandler(
+    public AmqpSendHandler(
             String hostName,
             TokenCredential tokenProvider,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
@@ -112,7 +88,7 @@ class AmqpSendHandler extends AmqpConnectionHandler
         super(hostName, tokenProvider, iotHubServiceClientProtocol, proxyOptions, sslContext);
     }
 
-    AmqpSendHandler(
+    public AmqpSendHandler(
             String hostName,
             AzureSasCredential sasTokenProvider,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
@@ -122,31 +98,37 @@ class AmqpSendHandler extends AmqpConnectionHandler
         super(hostName, sasTokenProvider, iotHubServiceClientProtocol, proxyOptions, sslContext);
     }
 
-    /**
-     * Create Proton message from deviceId and content string
-     * @param deviceId The device name string
-     * @param message The message to be sent
-     */
-    public void createProtonMessage(String deviceId, Message message)
+    public void send(String deviceId, String moduleId, Message message) throws IOException, IotHubException
     {
-        populateProtonMessage(String.format(DEVICE_PATH_FORMAT, deviceId), message);
+        if (moduleId == null)
+        {
+            messageToBeSent = createProtonMessage(deviceId, message);
+            log.info("Sending cloud to device message");
+        }
+        else
+        {
+            messageToBeSent = createProtonMessage(deviceId, moduleId, message);
+            log.info("Sending cloud to device module message");
+        }
+
+        new ReactorRunner(this).run();
+
+        log.trace("Amqp send reactor stopped, checking that the connection opened, and that the message was sent");
+
+        verifySendSucceeded();
     }
 
-    /**
-     * Create Proton message from deviceId and content string
-     * @param deviceId The device name string
-     * @param moduleId The device name string
-     * @param message The message to be sent
-     */
-    public void createProtonMessage(
-            String deviceId,
-            String moduleId,
-            Message message)
+    static org.apache.qpid.proton.message.Message createProtonMessage(String deviceId, Message message)
     {
-        populateProtonMessage(String.format(MODULE_PATH_FORMAT, deviceId, moduleId), message);
+        return populateProtonMessage(String.format(DEVICE_PATH_FORMAT, deviceId), message);
     }
 
-    private void populateProtonMessage(String targetPath, Message message)
+    static org.apache.qpid.proton.message.Message createProtonMessage(String deviceId, String moduleId, Message message)
+    {
+        return populateProtonMessage(String.format(MODULE_PATH_FORMAT, deviceId, moduleId), message);
+    }
+
+    static org.apache.qpid.proton.message.Message populateProtonMessage(String targetPath, Message message)
     {
         org.apache.qpid.proton.message.Message protonMessage = Proton.message();
 
@@ -185,7 +167,7 @@ class AmqpSendHandler extends AmqpConnectionHandler
 
         Section section = new Data(binary);
         protonMessage.setBody(section);
-        messageToBeSent = protonMessage;
+        return protonMessage;
     }
 
     /**
@@ -217,7 +199,7 @@ class AmqpSendHandler extends AmqpConnectionHandler
                     }
                 }
 
-                byte[] tag = String.valueOf(nextTag).getBytes(StandardCharsets.UTF_8);
+                byte[] tag = String.valueOf(this.nextTag).getBytes(StandardCharsets.UTF_8);
 
                 //want to avoid negative delivery tags since -1 is the designated failure value
                 if (this.nextTag == Integer.MAX_VALUE || this.nextTag < 0)

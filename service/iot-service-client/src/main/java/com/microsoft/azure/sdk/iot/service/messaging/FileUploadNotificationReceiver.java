@@ -166,7 +166,7 @@ public class FileUploadNotificationReceiver implements AmqpFeedbackReceivedEvent
      * Release semaphore for wait function
      * @param feedbackJson Received Json string to process
      */
-    public synchronized IotHubMessageResult onFeedbackReceived(String feedbackJson)
+    public IotHubMessageResult onFeedbackReceived(String feedbackJson)
     {
         try
         {

@@ -47,9 +47,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
     private boolean linkOpenedRemotely;
     private String connectionId;
 
-    private final String hostName;
-    @SuppressWarnings("unused") // Leaving for future use
-    protected String userName = null;
+    protected final String hostName;
     private String sasToken;
     private TokenCredential credential;
     private AzureSasCredential sasTokenProvider;
@@ -250,7 +248,8 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         }
     }
 
-    protected String getConnectionId() {
+    public String getConnectionId()
+    {
         return this.connectionId;
     }
 
