@@ -62,6 +62,7 @@ public class QueryClientTests extends IntegrationTest
     private static final int QUERY_TIMEOUT_MILLISECONDS = 1000 * 60; // 1 minute
     protected static final String PROPERTY_KEY_QUERY = "KeyQuery";
     protected static final String PROPERTY_VALUE_QUERY = "ValueQuery";
+    protected static final QueryClientOptions options = QueryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
 
     @BeforeClass
     public static void setup()
@@ -92,7 +93,6 @@ public class QueryClientTests extends IntegrationTest
             IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
             IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
             AzureSasCredential azureSasCredential = new AzureSasCredential(serviceSasToken.toString());
-            QueryClientOptions options = QueryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
             QueryClient queryClient = new QueryClient(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
             String twinQueryString = "SELECT * FROM devices WHERE deviceId IN ['" + deviceId1 + "', '" + deviceId2 + "']";
 
@@ -161,7 +161,7 @@ public class QueryClientTests extends IntegrationTest
                 log.info("Throttled when creating job. Will use existing job(s) to test query");
             }
 
-            QueryClient queryClient = new QueryClient(iotHubConnectionString);
+            QueryClient queryClient = new QueryClient(iotHubConnectionString, options);
 
             String query = SqlQuery.createSqlQuery("*", SqlQuery.FromType.JOBS, null,null).getQuery();
 
@@ -231,7 +231,7 @@ public class QueryClientTests extends IntegrationTest
                 log.info("Throttled when creating job. Will use existing job(s) to test query");
             }
 
-            QueryClient queryClient = new QueryClient(iotHubConnectionString);
+            QueryClient queryClient = new QueryClient(iotHubConnectionString, options);
             JobQueryResponse response = queryClient.queryJobs(JobType.scheduleUpdateTwin, JobStatus.completed);
 
             long startTime = System.currentTimeMillis();
@@ -311,7 +311,7 @@ public class QueryClientTests extends IntegrationTest
             long startTime = System.currentTimeMillis();
             while (!querySucceeded)
             {
-                QueryClient queryClient = new QueryClient(iotHubConnectionString);
+                QueryClient queryClient = new QueryClient(iotHubConnectionString, options);
                 RawQueryResponse rawQueryResponse = queryClient.queryRaw(sqlQuery);
                 while (rawQueryResponse.hasNext())
                 {
