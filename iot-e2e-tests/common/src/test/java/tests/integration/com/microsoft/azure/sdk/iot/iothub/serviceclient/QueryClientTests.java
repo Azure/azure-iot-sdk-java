@@ -6,6 +6,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 import com.azure.core.credential.AzureSasCredential;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobsClient;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
@@ -18,11 +19,10 @@ import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubTooManyRequestsException;
-import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
-import com.microsoft.azure.sdk.iot.service.jobs.JobClientOptions;
-import com.microsoft.azure.sdk.iot.service.jobs.Job;
-import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
-import com.microsoft.azure.sdk.iot.service.jobs.JobType;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobsClientOptions;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.Job;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.JobStatus;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.JobType;
 import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.service.query.QueryClientOptions;
@@ -57,7 +57,7 @@ public class QueryClientTests extends IntegrationTest
     protected static String iotHubConnectionString = "";
     protected static String hostName;
     protected static RegistryManager registryManager;
-    protected static JobClient jobClient;
+    protected static ScheduledJobsClient jobClient;
 
     private static final int QUERY_TIMEOUT_MILLISECONDS = 1000 * 60; // 1 minute
     protected static final String PROPERTY_KEY_QUERY = "KeyQuery";
@@ -70,7 +70,7 @@ public class QueryClientTests extends IntegrationTest
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
         registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-        jobClient = new JobClient(iotHubConnectionString, JobClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        jobClient = new ScheduledJobsClient(iotHubConnectionString, ScheduledJobsClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
         hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString).getHostName();
     }
 

@@ -24,7 +24,7 @@
 -keep class com.microsoft.azure.sdk.iot.deps.serializer.* { *; }
 -keep class com.microsoft.azure.sdk.iot.provisioning.service.configs.* { *; }
 -keep class com.microsoft.azure.sdk.iot.deps.twin.* { *; }
--keep class com.microsoft.azure.sdk.iot.service.jobs.ImportMode { *; }
+-keep class com.microsoft.azure.sdk.iot.service.jobs.registry.ImportMode { *; }
 -keep class com.microsoft.azure.sdk.iot.service.AuthenticationMechanism { *; }
 -keep class com.microsoft.azure.sdk.iot.device.edge.MethodRequest { *; }
 -keep class com.microsoft.azure.sdk.iot.device.hsm.parser.ErrorResponse { *; }

@@ -7,14 +7,14 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 
 import com.azure.core.credential.AzureSasCredential;
-import com.microsoft.azure.sdk.iot.service.jobs.DirectMethodsJobOptions;
-import com.microsoft.azure.sdk.iot.service.jobs.Job;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.DirectMethodsJobOptions;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.Job;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobsClient;
 import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
-import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
@@ -26,10 +26,9 @@ import com.microsoft.azure.sdk.iot.service.twin.Pair;
 import com.microsoft.azure.sdk.iot.service.query.SqlQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
-import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
-import com.microsoft.azure.sdk.iot.service.jobs.JobClientOptions;
-import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
-import com.microsoft.azure.sdk.iot.service.jobs.JobType;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobsClientOptions;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.JobStatus;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.JobType;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -74,7 +73,7 @@ public class JobClientTests extends IntegrationTest
 {
     protected static String iotHubConnectionString = "";
     public static boolean isBasicTierHub;
-    private static JobClient jobClient;
+    private static ScheduledJobsClient jobClient;
     private static RegistryManager registryManager;
 
     private static final String STANDARD_PROPERTY_HOMETEMP = "HomeTemp(F)";
@@ -105,7 +104,7 @@ public class JobClientTests extends IntegrationTest
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
-        jobClient = new JobClient(iotHubConnectionString);
+        jobClient = new ScheduledJobsClient(iotHubConnectionString);
         registryManager = new RegistryManager(
             iotHubConnectionString,
             RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
@@ -317,9 +316,9 @@ public class JobClientTests extends IntegrationTest
         IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
 
         AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
-        JobClient jobClientWithSasCredential = new JobClient(iotHubConnectionStringObj.getHostName(), sasCredential);
+        ScheduledJobsClient jobClientWithSasCredential = new ScheduledJobsClient(iotHubConnectionStringObj.getHostName(), sasCredential);
 
-        // JobClient usage should succeed since the shared access signature hasn't expired yet
+        // ScheduledJobsClient usage should succeed since the shared access signature hasn't expired yet
         scheduleDeviceMethod(jobClientWithSasCredential);
 
         // deliberately expire the SAS token to provoke a 401 to ensure that the job client is using the shared
@@ -340,11 +339,11 @@ public class JobClientTests extends IntegrationTest
         serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
         sasCredential.update(serviceSasToken.toString());
 
-        // JobClient usage should succeed since the shared access signature has been renewed
+        // ScheduledJobsClient usage should succeed since the shared access signature has been renewed
         scheduleDeviceMethod(jobClientWithSasCredential);
     }
 
-    private static void scheduleDeviceMethod(JobClient jobClient) throws IOException, IotHubException, InterruptedException
+    private static void scheduleDeviceMethod(ScheduledJobsClient jobClient) throws IOException, IotHubException, InterruptedException
     {
         DeviceTestManager deviceTestManger = devices.get(0);
         final String deviceId = testDevice.getDeviceId();
@@ -611,13 +610,13 @@ public class JobClientTests extends IntegrationTest
         return pendingJobIds.toString();
     }
 
-    private static JobClient buildJobClientWithAzureSasCredential()
+    private static ScheduledJobsClient buildJobClientWithAzureSasCredential()
     {
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
         IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
         AzureSasCredential azureSasCredential = new AzureSasCredential(serviceSasToken.toString());
-        JobClientOptions options = JobClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
-        return new JobClient(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
+        ScheduledJobsClientOptions options = ScheduledJobsClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
+        return new ScheduledJobsClient(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
     }
 
     private static Job queryDeviceJobResult(String jobId, JobType jobType, JobStatus jobStatus) throws IOException, IotHubException

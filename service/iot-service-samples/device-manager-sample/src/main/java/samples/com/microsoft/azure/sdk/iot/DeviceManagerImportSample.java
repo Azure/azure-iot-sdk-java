@@ -8,10 +8,10 @@ package samples.com.microsoft.azure.sdk.iot;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
-import com.microsoft.azure.sdk.iot.service.jobs.ExportImportDevice;
-import com.microsoft.azure.sdk.iot.service.jobs.ImportMode;
-import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
-import com.microsoft.azure.sdk.iot.service.jobs.JobProperties;
+import com.microsoft.azure.sdk.iot.service.jobs.registry.ExportImportDevice;
+import com.microsoft.azure.sdk.iot.service.jobs.registry.ImportMode;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobsClient;
+import com.microsoft.azure.sdk.iot.service.jobs.registry.JobProperties;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
 import com.microsoft.azure.storage.CloudStorageAccount;
@@ -72,7 +72,7 @@ public class DeviceManagerImportSample
         importBlob.upload(stream, blobToImport.length);
 
         // Starting the import job
-        JobClient jobClient = new JobClient(SampleUtils.iotHubConnectionString);
+        ScheduledJobsClient jobClient = new ScheduledJobsClient(SampleUtils.iotHubConnectionString);
         JobProperties importJob = jobClient.importDevices(containerSasUri, containerSasUri);
 
         // Waiting for the import job to complete

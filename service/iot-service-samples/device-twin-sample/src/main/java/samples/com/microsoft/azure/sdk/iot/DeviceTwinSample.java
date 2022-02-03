@@ -5,14 +5,14 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.service.jobs.Job;
-import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.Job;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobsClient;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.service.query.SqlQuery;
 import com.microsoft.azure.sdk.iot.service.query.TwinQueryResponse;
 import com.microsoft.azure.sdk.iot.service.twin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.JobStatus;
 
 import java.io.IOException;
 import java.util.*;
@@ -42,7 +42,7 @@ public class DeviceTwinSample
         System.out.println("Starting sample...");
         System.out.println("Creating the Device Twin");
         TwinClient twinClient = new TwinClient(iotHubConnectionString);
-        JobClient jobClient = new JobClient(iotHubConnectionString);
+        ScheduledJobsClient jobClient = new ScheduledJobsClient(iotHubConnectionString);
         QueryClient queryClient = new QueryClient(iotHubConnectionString);
 
         try
@@ -134,7 +134,7 @@ public class DeviceTwinSample
         System.out.println(device);
     }
 
-    private static void scheduleUpdateDesiredProperties(TwinClient twinClient, Twin device, JobClient jobClient) throws IOException, IotHubException, InterruptedException
+    private static void scheduleUpdateDesiredProperties(TwinClient twinClient, Twin device, ScheduledJobsClient jobClient) throws IOException, IotHubException, InterruptedException
     {
         // new set of desired properties
         Set<Pair> desiredProperties = new HashSet<>();
@@ -167,7 +167,7 @@ public class DeviceTwinSample
         System.out.println(device);
     }
 
-    private static void cancelJob(TwinClient twinClient, Twin device, JobClient jobClient) throws IOException, IotHubException, InterruptedException
+    private static void cancelJob(TwinClient twinClient, Twin device, ScheduledJobsClient jobClient) throws IOException, IotHubException, InterruptedException
     {
         // new set of desired properties
         Set<Pair> desiredProperties = new HashSet<>();

@@ -7,7 +7,7 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.identity.ClientSecretCredentialBuilder;
-import com.microsoft.azure.sdk.iot.service.jobs.Job;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.Job;
 import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.service.query.QueryClientOptions;
@@ -33,8 +33,8 @@ import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.query.SqlQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
-import com.microsoft.azure.sdk.iot.service.jobs.JobClientOptions;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobsClient;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobsClientOptions;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -228,14 +228,14 @@ public class RoleBasedAuthenticationSample
 
     private static void runJobClientSample(String iotHubHostName, TokenCredential credential)
     {
-        // JobClient has some configurable options for HTTP read and connect timeouts, as well as for setting proxies.
+        // ScheduledJobsClient has some configurable options for HTTP read and connect timeouts, as well as for setting proxies.
         // For this sample, the default options will be used though.
-        JobClientOptions jobClientOptions = JobClientOptions.builder().build();
+        ScheduledJobsClientOptions jobClientOptions = ScheduledJobsClientOptions.builder().build();
         QueryClientOptions queryClientOptions = QueryClientOptions.builder().build();
 
         // This constructor takes in your implementation of TokenCredential which allows you to use RBAC authentication
         // rather than symmetric key based authentication that comes with constructors that take connection strings.
-        JobClient jobClient = new JobClient(iotHubHostName, credential, jobClientOptions);
+        ScheduledJobsClient jobClient = new ScheduledJobsClient(iotHubHostName, credential, jobClientOptions);
         QueryClient queryClient = new QueryClient(iotHubHostName, credential, queryClientOptions);
 
         try
@@ -267,7 +267,7 @@ public class RoleBasedAuthenticationSample
 
     private static void runDeviceMethodClientSample(String iotHubHostName, TokenCredential credential, String deviceId)
     {
-        // JobClient has some configurable options for HTTP read and connect timeouts, as well as for setting proxies.
+        // ScheduledJobsClient has some configurable options for HTTP read and connect timeouts, as well as for setting proxies.
         // For this sample, the default options will be used though.
         DirectMethodsClientOptions options = DirectMethodsClientOptions.builder().build();
 

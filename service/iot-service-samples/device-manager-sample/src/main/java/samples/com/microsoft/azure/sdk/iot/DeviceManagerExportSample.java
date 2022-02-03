@@ -5,8 +5,8 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
-import com.microsoft.azure.sdk.iot.service.jobs.JobProperties;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobsClient;
+import com.microsoft.azure.sdk.iot.service.jobs.registry.JobProperties;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.blob.CloudBlob;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
@@ -30,7 +30,7 @@ public class DeviceManagerExportSample
         container.createIfNotExists();
         String containerSasUri = SampleUtils.getContainerSasUri(container);
 
-        JobClient jobClient = new JobClient(SampleUtils.iotHubConnectionString);
+        ScheduledJobsClient jobClient = new ScheduledJobsClient(SampleUtils.iotHubConnectionString);
         JobProperties exportJob = jobClient.exportDevices(containerSasUri, excludeKeys);
 
         while (true)

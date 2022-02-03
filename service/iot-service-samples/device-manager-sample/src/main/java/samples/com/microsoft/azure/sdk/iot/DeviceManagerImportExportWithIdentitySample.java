@@ -5,10 +5,10 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
-import com.microsoft.azure.sdk.iot.service.jobs.ManagedIdentity;
-import com.microsoft.azure.sdk.iot.service.jobs.StorageAuthenticationType;
-import com.microsoft.azure.sdk.iot.service.jobs.JobProperties;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobsClient;
+import com.microsoft.azure.sdk.iot.service.jobs.registry.ManagedIdentity;
+import com.microsoft.azure.sdk.iot.service.jobs.registry.StorageAuthenticationType;
+import com.microsoft.azure.sdk.iot.service.jobs.registry.JobProperties;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import java.io.IOException;
 
@@ -35,7 +35,7 @@ public class DeviceManagerImportExportWithIdentitySample {
     }
 
     public static void ExportDevices() throws IOException, IotHubException, InterruptedException {
-        JobClient jobClient = new JobClient(sourceHubConnectionString);
+        ScheduledJobsClient jobClient = new ScheduledJobsClient(sourceHubConnectionString);
 
         // If StorageAuthenticationType is set to IdentityBased and userAssignedIdentity property is
         // not null, the jobs will use user defined managed identity. If the IoT hub is not
@@ -69,7 +69,7 @@ public class DeviceManagerImportExportWithIdentitySample {
     }
 
     public static void ImportDevices() throws IOException, IotHubException, InterruptedException {
-        JobClient jobClient = new JobClient(sourceHubConnectionString);
+        ScheduledJobsClient jobClient = new ScheduledJobsClient(sourceHubConnectionString);
 
         // If StorageAuthenticationType is set to IdentityBased and userAssignedIdentity property is
         // not null, the jobs will use user defined managed identity. If the IoT hub is not

@@ -30,7 +30,7 @@ import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.query.SqlQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.jobs.Job;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.Job;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -273,7 +273,7 @@ public class AzureSasCredentialSample
 
     private static void runDeviceMethodClientSample(String iotHubHostName, AzureSasCredential credential, String deviceId)
     {
-        // JobClient has some configurable options for HTTP read and connect timeouts, as well as for setting proxies.
+        // ScheduledJobsClient has some configurable options for HTTP read and connect timeouts, as well as for setting proxies.
         // For this sample, the default options will be used though.
         DirectMethodsClientOptions options = DirectMethodsClientOptions.builder().build();
 
