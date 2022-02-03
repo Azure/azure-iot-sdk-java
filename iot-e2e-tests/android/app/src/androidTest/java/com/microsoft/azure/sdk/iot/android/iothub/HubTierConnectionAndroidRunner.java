@@ -3,7 +3,7 @@ package com.microsoft.azure.sdk.iot.android.iothub;
 import com.microsoft.azure.sdk.iot.android.helper.TestGroup13;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.service.BaseDevice;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryIdentity;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 
 import org.junit.runner.RunWith;
@@ -15,7 +15,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.iothub.HubTierConnectionTes
 @RunWith(Parameterized.class)
 public class HubTierConnectionAndroidRunner extends HubTierConnectionTests
 {
-    public HubTierConnectionAndroidRunner(DeviceClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, boolean useHttpProxy)
+    public HubTierConnectionAndroidRunner(DeviceClient client, IotHubClientProtocol protocol, RegistryIdentity identity, AuthenticationType authenticationType, boolean useHttpProxy)
     {
         super(client, protocol, identity, authenticationType, useHttpProxy);
     }

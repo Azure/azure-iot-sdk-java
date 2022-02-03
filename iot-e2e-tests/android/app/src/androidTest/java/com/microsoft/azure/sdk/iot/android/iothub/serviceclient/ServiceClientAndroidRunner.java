@@ -5,7 +5,7 @@
 package com.microsoft.azure.sdk.iot.android.iothub.serviceclient;
 
 import com.microsoft.azure.sdk.iot.android.helper.TestGroup13;
-import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
