@@ -144,6 +144,7 @@ public class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
 
                 delivery.disposition(deliveryState);
                 delivery.settle();
+                recv.flow(1); // flow back the credit so the service can send another message now
             }
         }
     }

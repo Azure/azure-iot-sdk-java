@@ -7,9 +7,9 @@ package com.microsoft.azure.sdk.iot.android.iothub.serviceclient;
 
 import com.microsoft.azure.sdk.iot.android.helper.TestGroup14;
 
-import tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient.RegistryManagerTests;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient.registry.RegistryClientTests;
 
 @TestGroup14
-public class RegistryManagerAndroidRunner extends RegistryManagerTests
+public class RegistryClientAndroidRunner extends RegistryClientTests
 {
 }

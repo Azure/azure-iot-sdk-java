@@ -104,10 +104,24 @@
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
         </dependency>
+        <!--
+        This newer Azure storage SDK has some compatibility issues with Android. Leaving this dependency alone
+        until this issue can be investigated further
+        -->
         <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-storage-blob</artifactId>
             <version>12.8.0</version>
+        </dependency>
+        <!--
+        This older Azure storage SDK works fine for our test purposes, but upgrading to a more modern SDK may
+        be necessary in the future
+        -->
+        <dependency>
+            <groupId>com.microsoft.azure</groupId>
+            <artifactId>azure-storage</artifactId>
+            <version>8.6.6</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>
