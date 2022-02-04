@@ -181,7 +181,7 @@ public class FeedbackReceiver implements AmqpFeedbackReceivedEvent
         {
             // this should never happen. However if it does, proton can't handle it. So guard against throwing it at proton.
             log.warn("Encountered an exception while handling feedback batch message", e);
-            return IotHubMessageResult.REJECT;
+            return IotHubMessageResult.ABANDON;
         }
     }
 }

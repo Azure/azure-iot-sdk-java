@@ -134,10 +134,6 @@ public class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHan
                 {
                     deliveryState = Released.getInstance();
                 }
-                else if (messageResult == IotHubMessageResult.REJECT)
-                {
-                    deliveryState = new Rejected();
-                }
                 else if (messageResult == IotHubMessageResult.COMPLETE)
                 {
                     deliveryState = Accepted.getInstance();

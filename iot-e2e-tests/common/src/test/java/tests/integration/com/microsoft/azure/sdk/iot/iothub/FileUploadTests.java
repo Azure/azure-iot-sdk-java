@@ -25,16 +25,13 @@ import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.BasicProxyAuthenticator;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.Success;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestDeviceIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
@@ -47,9 +44,12 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -119,6 +119,7 @@ public class FileUploadTests extends IntegrationTest
             this.protocol = protocol;
             this.authenticationType = authenticationType;
             this.withProxy = withProxy;
+            this.fileUploadState = new FileUploadState();
         }
     }
 
@@ -127,18 +128,15 @@ public class FileUploadTests extends IntegrationTest
         String blobName;
         InputStream fileInputStream;
         long fileLength;
-    }
 
-    @Before
-    public void setUpFileUploadState()
-    {
-        testInstance.fileUploadState = new FileUploadState();
-        byte[] buf = new byte[10];
-        new Random().nextBytes(buf);
-        testInstance.fileUploadState = new FileUploadState();
-        testInstance.fileUploadState.blobName = REMOTE_FILE_NAME + REMOTE_FILE_NAME_EXT;
-        testInstance.fileUploadState.fileInputStream = new ByteArrayInputStream(buf);
-        testInstance.fileUploadState.fileLength = buf.length;
+        public FileUploadState()
+        {
+            byte[] buf = new byte[10];
+            new Random().nextBytes(buf);
+            blobName = REMOTE_FILE_NAME + UUID.randomUUID() + REMOTE_FILE_NAME_EXT;
+            fileInputStream = new ByteArrayInputStream(buf);
+            fileLength = buf.length;
+        }
     }
 
     @BeforeClass
@@ -227,15 +225,52 @@ public class FileUploadTests extends IntegrationTest
         deviceClient.completeFileUpload(fileUploadCompletionNotification);
 
         // assert
-        waitForFileUploadNotification(deviceClient.getConfig().getDeviceId());
+        List<String> expectedBlobNames = new ArrayList<>();
+        expectedBlobNames.add(deviceClient.getConfig().getDeviceId() + "/" + testInstance.fileUploadState.blobName);
+        waitForFileUploadNotifications(deviceClient.getConfig().getDeviceId(), expectedBlobNames);
 
         tearDownDeviceClient(deviceClient);
     }
 
-    private void waitForFileUploadNotification(String expectedDeviceId) throws InterruptedException, IOException
+    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    public void getAndCompleteSasUriWithMultipleUploads() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException, StorageException
+    {
+        // arrange
+        int fileUploadCount = 5;
+
+        DeviceClient deviceClient = setUpDeviceClient(testInstance.protocol);
+        FileUploadState[] fileUploadStates = new FileUploadState[fileUploadCount];
+        List<String> expectedBlobNames = new ArrayList<>();
+        for (int i = 0; i < fileUploadCount; i++)
+        {
+            fileUploadStates[i] = new FileUploadState();
+            FileUploadSasUriResponse sasUriResponse = deviceClient.getFileUploadSasUri(new FileUploadSasUriRequest(fileUploadStates[i].blobName));
+
+            CloudBlockBlob blob = new CloudBlockBlob(sasUriResponse.getBlobUri());
+            blob.upload(fileUploadStates[i].fileInputStream, fileUploadStates[i].fileLength);
+
+            expectedBlobNames.add(deviceClient.getConfig().getDeviceId() + "/" + fileUploadStates[i].blobName);
+
+            FileUploadCompletionNotification fileUploadCompletionNotification = new FileUploadCompletionNotification();
+            fileUploadCompletionNotification.setCorrelationId(sasUriResponse.getCorrelationId());
+            fileUploadCompletionNotification.setStatusCode(0);
+
+            fileUploadCompletionNotification.setSuccess(true);
+
+            fileUploadCompletionNotification.setStatusDescription("Succeed to upload to storage.");
+
+            deviceClient.completeFileUpload(fileUploadCompletionNotification);
+        }
+
+        // assert
+        waitForFileUploadNotifications(deviceClient.getConfig().getDeviceId(), expectedBlobNames);
+
+        tearDownDeviceClient(deviceClient);
+    }
+
+    private void waitForFileUploadNotifications(String expectedDeviceId, List<String> expectedBlobNames) throws InterruptedException, IOException
     {
         ServiceClientOptions.ServiceClientOptionsBuilder optionsBuilder = ServiceClientOptions.builder();
-
         if (testInstance.withProxy)
         {
             Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
@@ -243,17 +278,30 @@ public class FileUploadTests extends IntegrationTest
         }
 
         ServiceClient serviceClient = new ServiceClient(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS_WS, optionsBuilder.build());
-        final Success notificationReceived = new Success();
 
         FileUploadNotificationReceiver receiver = serviceClient.getFileUploadNotificationReceiver(notification ->
         {
-            String deviceId = notification.getDeviceId();
-            log.info("notification received for device {}", deviceId);
-            if (deviceId.equals(expectedDeviceId))
+            // if one of the expected file upload notifications is found, remove it from the list of expected notifications
+            String actualDeviceId = notification.getDeviceId();
+            String actualBlobName = notification.getBlobName();
+            log.info("notification received for device {} with blob name {}", actualDeviceId, actualBlobName);
+            if (actualDeviceId.equals(expectedDeviceId))
             {
-                notificationReceived.setResult(true);
-                notificationReceived.callbackWasFired();
-                return IotHubMessageResult.COMPLETE;
+                String matchedBlobName = null;
+                for (String expectedBlobName : expectedBlobNames)
+                {
+                    if (expectedBlobName.equals(actualBlobName))
+                    {
+                        matchedBlobName = expectedBlobName;
+                        break;
+                    }
+                }
+
+                if (matchedBlobName != null)
+                {
+                    expectedBlobNames.remove(matchedBlobName);
+                    return IotHubMessageResult.COMPLETE;
+                }
             }
 
             return IotHubMessageResult.ABANDON;
@@ -262,17 +310,16 @@ public class FileUploadTests extends IntegrationTest
         receiver.open();
 
         long startTime = System.currentTimeMillis();
-        while (!notificationReceived.wasCallbackFired())
+        while (!expectedBlobNames.isEmpty())
         {
             Thread.sleep(1000);
 
             if (System.currentTimeMillis() - startTime > NOTIFICATION_TIMEOUT_MILLIS)
             {
-                fail("Timed out waiting on notification for device " + expectedDeviceId);
+                fail("Timed out waiting on one or more file upload notifications for device " + expectedDeviceId);
             }
         }
 
         receiver.close();
-        assertTrue(notificationReceived.getResult());
     }
 }

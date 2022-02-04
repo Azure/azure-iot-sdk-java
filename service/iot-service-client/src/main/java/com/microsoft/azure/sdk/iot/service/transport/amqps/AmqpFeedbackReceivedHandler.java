@@ -133,10 +133,6 @@ public class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
                 {
                     deliveryState = Released.getInstance();
                 }
-                else if (messageResult == IotHubMessageResult.REJECT)
-                {
-                    deliveryState = new Rejected();
-                }
                 else if (messageResult == IotHubMessageResult.COMPLETE)
                 {
                     deliveryState = Accepted.getInstance();

@@ -182,7 +182,7 @@ public class FileUploadNotificationReceiver implements AmqpFeedbackReceivedEvent
         {
             // this should never happen. However if it does, proton can't handle it. So guard against throwing it at proton.
             log.warn("Encountered an exception while handling file upload notification", e);
-            return IotHubMessageResult.REJECT;
+            return IotHubMessageResult.ABANDON;
         }
     }
 }

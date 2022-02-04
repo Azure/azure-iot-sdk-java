@@ -4,7 +4,7 @@
 package com.microsoft.azure.sdk.iot.service.messaging;
 
 /**
- * A return value from a message callback that instructs an IoT hub to complete, abandon, or reject the message. These
+ * A return value from a message callback that instructs an IoT hub to complete or abandon the message. These
  * states are only valid for AMQP messages.
  */
 public enum IotHubMessageResult
@@ -16,6 +16,7 @@ public enum IotHubMessageResult
      * </p>
      */
     COMPLETE,
+
     /**
      * Instructs IoT hub to abandon the message.
      * <p>
@@ -24,12 +25,5 @@ public enum IotHubMessageResult
      *     After the max is reached, the message will be set to to the dead lettered state and removed.
      * </p>
      */
-    ABANDON,
-    /**
-     * Instructs IoT hub to reject the message.
-     * <p>
-     *      This will remove the message from the IoT hub messaging queue and sets the message to the dead lettered state.
-     * </p>
-     */
-    REJECT
+    ABANDON
 }
