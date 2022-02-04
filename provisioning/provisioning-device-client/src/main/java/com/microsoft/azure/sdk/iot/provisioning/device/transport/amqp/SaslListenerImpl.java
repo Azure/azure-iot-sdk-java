@@ -19,7 +19,6 @@ class SaslListenerImpl implements SaslListener
      */
     public SaslListenerImpl(SaslHandler saslHandler)
     {
-        // Codes_SRS_SASLLISTENERIMPL_34_001: [This constructor shall save the provided handler.]
         this.saslHandler = saslHandler;
     }
 
@@ -40,17 +39,14 @@ class SaslListenerImpl implements SaslListener
             String chosenMechanism;
             try
             {
-                // Codes_SRS_SASLLISTENERIMPL_34_002: [This function shall retrieve the remote mechanisms and give them to the saved saslHandler object to decide which mechanism to use.]
                 chosenMechanism = this.saslHandler.chooseSaslMechanism(mechanisms);
                 sasl.setMechanisms(chosenMechanism);
 
                 if (PLAIN.equalsIgnoreCase(chosenMechanism))
                 {
-                    //Codes_SRS_SASLLISTENERIMPL_34_015: [If the chosen mechanism is PLAIN, this function shall call sasl.plain(...) with the inputs given by the saslhandler.]
                     sasl.plain(this.saslHandler.getPlainUsername(), this.saslHandler.getPlainPassword());
                 }
 
-                // Codes_SRS_SASLLISTENERIMPL_34_003: [This function shall ask the saved saslHandler object to create the init payload for the chosen sasl mechanism and then send that payload if the init payload is larger than 0 bytes.]
                 byte[] initMessage = this.saslHandler.getInitPayload(chosenMechanism);
 
                 if (initMessage != null && initMessage.length > 0)
@@ -60,8 +56,6 @@ class SaslListenerImpl implements SaslListener
             }
             catch (Exception e)
             {
-                //Codes_SRS_SASLLISTENERIMPL_34_012: [If any exception is thrown while the saslHandler handles the sasl mechanisms, this function shall save that exception and shall not create and send the init payload.]
-                //Codes_SRS_SASLLISTENERIMPL_34_013: [If any exception is thrown while the saslHandler builds the init payload, this function shall save that exception and shall not send the returned init payload.]
                 this.savedException = e;
             }
         }
@@ -80,11 +74,9 @@ class SaslListenerImpl implements SaslListener
         }
         else
         {
-            // Codes_SRS_SASLLISTENERIMPL_34_004: [This function shall retrieve the sasl challenge from the provided sasl object.]
             byte[] saslChallenge = new byte[sasl.pending()];
             sasl.recv(saslChallenge, 0, saslChallenge.length);
 
-            // Codes_SRS_SASLLISTENERIMPL_34_005: [This function shall give the sasl challenge bytes to the saved saslHandler and send the payload it returns.]
             byte[] challengeResponse;
             try
             {
@@ -93,7 +85,6 @@ class SaslListenerImpl implements SaslListener
             }
             catch (Exception e)
             {
-                //Codes_SRS_SASLLISTENERIMPL_34_014: [If any exception is thrown while the saslHandler handles the challenge, this function shall save that exception and shall not send the challenge response.]
                 this.savedException = e;
             }
         }
@@ -117,28 +108,22 @@ class SaslListenerImpl implements SaslListener
                 switch (sasl.getOutcome())
                 {
                     case PN_SASL_TEMP:
-                        // Codes_SRS_SASLLISTENERIMPL_34_006: [If the sasl outcome is PN_SASL_TEMP, this function shall tell the saved saslHandler to handleOutcome with SYS_TEMP.]
                         this.saslHandler.handleOutcome(SaslHandler.SaslOutcome.SYS_TEMP);
                         break;
                     case PN_SASL_PERM:
-                        // Codes_SRS_SASLLISTENERIMPL_34_007: [If the sasl outcome is PN_SASL_PERM, this function shall tell the saved saslHandler to handleOutcome with SYS_PERM.]
                         this.saslHandler.handleOutcome(SaslHandler.SaslOutcome.SYS_PERM);
                         break;
                     case PN_SASL_AUTH:
-                        // Codes_SRS_SASLLISTENERIMPL_34_008: [If the sasl outcome is PN_SASL_AUTH, this function shall tell the saved saslHandler to handleOutcome with AUTH.]
                         this.saslHandler.handleOutcome(SaslHandler.SaslOutcome.AUTH);
                         break;
                     case PN_SASL_OK:
-                        // Codes_SRS_SASLLISTENERIMPL_34_009: [If the sasl outcome is PN_SASL_OK, this function shall tell the saved saslHandler to handleOutcome with OK.]
                         this.saslHandler.handleOutcome(SaslHandler.SaslOutcome.OK);
                         break;
                     case PN_SASL_NONE:
-                        // Codes_SRS_SASLLISTENERIMPL_34_011: [If the sasl outcome is PN_SASL_NONE, this function shall save an IllegalStateException.]
                         throw new IllegalStateException("Sasl negotiation did not finish yet");
                     case PN_SASL_SYS:
                     case PN_SASL_SKIPPED:
                     default:
-                        // Codes_SRS_SASLLISTENERIMPL_34_010: [If the sasl outcome is PN_SASL_SYS or PN_SASL_SKIPPED, this function shall tell the saved saslHandler to handleOutcome with SYS.]
                         this.saslHandler.handleOutcome(SaslHandler.SaslOutcome.SYS);
                         break;
                 }

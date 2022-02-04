@@ -470,11 +470,9 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
 
         if (link instanceof Sender)
         {
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_038: [If this link is the Sender link and the event type is DELIVERY, the event handler shall get the Delivery (Proton) object from the event.]
             Delivery d = event.getDelivery();
             DeliveryState remoteState = d.getRemoteState();
 
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_039: [The event handler shall note the remote delivery state and use it and the Delivery (Proton) hash code to inform the AmqpsIotHubConnection of the message receipt.]
             boolean messageAcknowledgedAsSuccess = remoteState.equals(Accepted.getInstance());
 
             if (!messageAcknowledgedAsSuccess)

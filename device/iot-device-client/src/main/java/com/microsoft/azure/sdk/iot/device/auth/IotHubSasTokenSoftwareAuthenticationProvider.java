@@ -83,7 +83,6 @@ public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasToken
     @Override
     public boolean isAuthenticationProviderRenewalNecessary()
     {
-        // Codes_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_018: [This function shall return true if a deviceKey is present and if super.isAuthenticationProviderRenewalNecessary returns true.]
         return (super.isAuthenticationProviderRenewalNecessary() && this.deviceKey == null);
     }
 
@@ -101,7 +100,6 @@ public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasToken
     @Override
     public boolean canRefreshToken()
     {
-        // Codes_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_017: [This function shall return true if a deviceKey is present.]
         return this.deviceKey != null;
     }
 
@@ -115,12 +113,9 @@ public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasToken
     {
         if (this.deviceKey != null)
         {
-            //Codes_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_004: [If the saved sas token has expired and there is a device key present, the saved sas token shall be renewed.]
-            //Codes_SRS_IOTHUBSASTOKENAUTHENTICATION_34_006: [If the saved sas token has not expired and there is a device key present, but this method is called to proactively renew and the token should renew, the saved sas token shall be renewed.]
             this.sasToken = new IotHubSasToken(this.hostname, this.deviceId, this.deviceKey, null, this.moduleId, getExpiryTimeInSeconds());
         }
 
-        //Codes_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_005: [This function shall return the saved sas token.]
         return this.sasToken.toString().toCharArray();
     }
 }

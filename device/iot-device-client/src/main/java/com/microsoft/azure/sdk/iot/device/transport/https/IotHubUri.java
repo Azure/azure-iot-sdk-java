@@ -66,12 +66,7 @@ public final class IotHubUri
             rawPath = String.format(PATH_FORMAT_WITH_MODULEID, deviceId, moduleId, iotHubMethodPath);
         }
 
-        // Codes_SRS_IOTHUBURI_11_011: [The constructor shall URL-encode the device ID.]
-        // Codes_SRS_IOTHUBURI_11_012: [The constructor shall URL-encode the IoT Hub method path.]
         this.path = urlEncodePath(rawPath);
-
-        // Codes_SRS_IOTHUBURI_11_008: [If queryParams is not empty, the constructor shall return a URI pointing to the address '[iotHubHostname]/devices/[deviceId]/[IoT Hub method path]? api-version=2016-02-03 &[queryFragment] '.]
-        // Codes_SRS_IOTHUBURI_11_009: [If the queryParams is empty, the constructor shall return a URI pointing to the address '[iotHubHostname]/devices/[deviceId]/[IoT Hub method path]?api-version=2016-02-03'.]
         StringBuilder uriBuilder = new StringBuilder(this.hostname);
         uriBuilder.append(this.path);
         uriBuilder.append("?");
@@ -81,7 +76,6 @@ public final class IotHubUri
             for (Map.Entry<String, String> param : queryParams.entrySet())
             {
                 uriBuilder.append("&");
-                // Codes_SRS_IOTHUBURI_11_013: [The constructor shall URL-encode each query param.]
                 appendQueryParam(uriBuilder, param.getKey(),
                         param.getValue());
             }
@@ -102,9 +96,6 @@ public final class IotHubUri
      */
     public IotHubUri(String iotHubHostname, String deviceId, String iotHubMethodPath, String moduleId)
     {
-        // Codes_SRS_IOTHUBURI_11_007: [The constructor shall return a URI pointing to the address '[iotHubHostname] /devices/[deviceId]/[IoT Hub method path]?api-version=2016-02-03'.]
-        // Codes_SRS_IOTHUBURI_11_015: [The constructor shall URL-encode the device ID.]
-        // Codes_SRS_IOTHUBURI_11_016: [The constructor shall URL-encode the IoT Hub method path.]
         this(iotHubHostname, deviceId, iotHubMethodPath, null, moduleId);
     }
 
@@ -116,14 +107,11 @@ public final class IotHubUri
     @Override
     public String toString()
     {
-        // Codes_SRS_IOTHUBURI_11_001: [The string representation of the IoT Hub URI shall be constructed with the format '[iotHubHostname]/devices/[deviceId]/[IoT Hub method path]?api-version=2016-02-03(&[queryFragment]) '.]
         return this.uri;
     }
 
     public String toStringWithoutApiVersion()
     {
-        // Codes_SRS_IOTHUBURI_11_010: [The string representation of the IoT Hub URI without api version shall be
-        // constructed with the format '[iotHubHostname]/[IoT Hub path]'.]
         return this.hostname + this.path;
     }
 
@@ -134,7 +122,6 @@ public final class IotHubUri
      */
     public String getHostname()
     {
-        // Codes_SRS_IOTHUBURI_11_005: [The function shall return the IoT hub hostname given in the constructor.]
         return this.hostname;
     }
 
@@ -145,7 +132,6 @@ public final class IotHubUri
      */
     public String getPath()
     {
-        // Codes_SRS_IOTHUBURI_11_006: [The function shall return a URI with the format '/devices/[deviceId]/[IoT Hub method path]'.]
         return this.path;
     }
 
@@ -162,8 +148,6 @@ public final class IotHubUri
      */
     public static String getResourceUri(String iotHubHostname, String deviceId, String moduleId)
     {
-        // Codes_SRS_IOTHUBURI_11_002: [The function shall return a URI with the format '[iotHubHostname]/devices/[deviceId]'.]
-        // Codes_SRS_IOTHUBURI_11_019: [The constructor shall URL-encode the device ID.]
         IotHubUri iotHubUri = new IotHubUri(iotHubHostname, deviceId, "", moduleId);
         return iotHubUri.getHostname() + iotHubUri.getPath();
     }

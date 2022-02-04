@@ -72,8 +72,6 @@ public class HttpsHsmClient
     public SignResponse sign(String apiVersion, String moduleName, SignRequest signRequest, String generationId) throws IOException, TransportException, HsmException
     {
         log.debug("Sending sign request...");
-        // Codes_SRS_HSMHTTPCLIENT_34_002: [This function shall build an http request with the url in the format
-        // <base url>/modules/<url encoded name>/genid/<url encoded gen id>/sign?api-version=<url encoded api version>.]
         String uri = baseUrl != null ? baseUrl.replaceFirst("/*$", "") : "";
 
         byte[] body = signRequest.toJson().getBytes(StandardCharsets.UTF_8);
@@ -87,7 +85,6 @@ public class HttpsHsmClient
         String responseBody = new String(response.getBody(), StandardCharsets.UTF_8);
         if (responseCode >= 200 && responseCode < 300)
         {
-            // Codes_SRS_HSMHTTPCLIENT_34_004: [If the response from the http call is 200, this function shall return the SignResponse built from the response body json.]
             return SignResponse.fromJson(responseBody);
         }
         else
@@ -99,7 +96,6 @@ public class HttpsHsmClient
                 exceptionMessage = exceptionMessage + " Error response message: " + errorResponse.getMessage();
             }
 
-            // Codes_SRS_HSMHTTPCLIENT_34_005: [If the response from the http call is not 200, this function shall throw an HsmException.]
             throw new HsmException(exceptionMessage);
         }
     }
@@ -117,29 +113,21 @@ public class HttpsHsmClient
         log.debug("Getting trust bundle...");
         if (apiVersion == null || apiVersion.isEmpty())
         {
-            // Codes_SRS_HSMHTTPCLIENT_34_007: [If the provided api version is null or empty, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("api version cannot be null or empty");
         }
 
-        // Codes_SRS_HSMHTTPCLIENT_34_008: [This function shall build an http request with the url in the format
-        // <base url>/trust-bundle?api-version=<url encoded api version>.]
         String uri = baseUrl != null ? baseUrl.replaceFirst("/*$", "") : "";
 
-        // Codes_SRS_HSMHTTPCLIENT_34_009: [This function shall send a GET http request to the built url.]
-        HttpsResponse response = sendRequestBasedOnScheme(HttpsMethod.GET, new byte[0], uri, "/trust-bundle"
-                // Codes_SRS_HSMHTTPCLIENT_34_009: [This function shall send a GET http request to the built url.]
-                , API_VERSION_QUERY_STRING_PREFIX + apiVersion);
+        HttpsResponse response = sendRequestBasedOnScheme(HttpsMethod.GET, new byte[0], uri, "/trust-bundle", API_VERSION_QUERY_STRING_PREFIX + apiVersion);
 
         int statusCode = response.getStatus();
         String body = response.getBody() != null ? new String(response.getBody(), StandardCharsets.UTF_8) : "";
         if (statusCode >= 200 && statusCode < 300)
         {
-            // Codes_SRS_HSMHTTPCLIENT_34_010: [If the response from the http request is 200, this function shall return the trust bundle response.]
             return TrustBundleResponse.fromJson(body);
         }
         else
         {
-            // Codes_SRS_HSMHTTPCLIENT_34_011: [If the response from the http request is not 200, this function shall throw an HSMException.]
             ErrorResponse errorResponse = ErrorResponse.fromJson(body);
             if (errorResponse != null)
             {
@@ -192,7 +180,6 @@ public class HttpsHsmClient
         // will go into the unix socket request later, such as headers, method, etc.
         HttpsRequest httpsRequest = new HttpsRequest(requestUrl, httpsMethod, body, "");
 
-        // Codes_SRS_HSMHTTPCLIENT_34_003: [This function shall build an http request with headers ContentType and Accept with value application/json.]
         httpsRequest.setHeaderField("Accept", "application/json");
 
         if (body.length > 0)
@@ -223,7 +210,6 @@ public class HttpsHsmClient
             String unixAddressPrefix = UNIX_SCHEME + "://";
             String localUnixSocketPath = baseUri.substring(baseUri.indexOf(unixAddressPrefix) + unixAddressPrefix.length());
 
-            // Codes_SRS_HSMHTTPCLIENT_34_006: [If the scheme of the provided url is Unix, this function shall send the http request using unix domain sockets.]
             response = sendHttpRequestUsingUnixSocket(httpsRequest, path, queryString, localUnixSocketPath);
         }
         else

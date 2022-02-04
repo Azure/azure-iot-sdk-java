@@ -59,7 +59,6 @@ public class IotHubTransportMessage extends Message
      */
     public IotHubTransportMessage(String body)
     {
-        // Codes_SRS_IOTHUBTRANSPORTMESSAGE_21_002: [This method shall throw IllegalArgumentException if the body argument is null.]
         super(body);
         super.setMessageType(MessageType.UNKNOWN);
         this.methodName = null;

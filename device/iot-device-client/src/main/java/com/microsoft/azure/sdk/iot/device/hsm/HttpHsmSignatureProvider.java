@@ -44,22 +44,17 @@ public class HttpHsmSignatureProvider implements SignatureProvider
     {
         if (providerUri == null || providerUri.isEmpty())
         {
-            // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_004: [If the providerUri is null or empty, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("provider uri cannot be null or empty");
         }
 
         if (apiVersion == null || apiVersion.isEmpty())
         {
-            // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_005: [If the apiVersion is null or empty, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("apiVersion cannot be null or empty");
         }
 
         log.trace("Creating HttpHsmSignatureProvider with providerUri {}", providerUri);
 
-        // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_002: [This constructor shall create a new HttpsHsmClient with the provided providerUri.]
         this.httpClient = new HttpsHsmClient(providerUri, unixDomainSocketChannel);
-
-        // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_003: [This constructor shall save the provided api version.]
         this.apiVersion = apiVersion;
     }
 
@@ -76,11 +71,9 @@ public class HttpHsmSignatureProvider implements SignatureProvider
     {
         if (data == null || data.isEmpty())
         {
-            // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_007: [If the provided data is null or empty, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("Data cannot be null or empty");
         }
 
-        // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_006: [This function shall create a signRequest for the hsm http client to sign, and shall return the utf-8 encoded result of that signing.]
         SignRequest signRequest = new SignRequest();
         signRequest.setAlgo(defaultSignRequestAlgo);
         signRequest.setData(data.getBytes(ENCODING_CHARSET));

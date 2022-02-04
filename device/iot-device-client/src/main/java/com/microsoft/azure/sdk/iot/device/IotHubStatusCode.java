@@ -85,7 +85,6 @@ public enum IotHubStatusCode
      */
     public static IotHubStatusCode getIotHubStatusCode(int httpsStatus)
     {
-        // Codes_SRS_IOTHUBSTATUSCODE_11_001: [The function shall convert the given HTTPS status code to the corresponding IoT Hub status code.]
         IotHubStatusCode iotHubStatus;
         switch (httpsStatus)
         {
@@ -123,7 +122,6 @@ public enum IotHubStatusCode
                 iotHubStatus = SERVER_BUSY;
                 break;
             default:
-                // Codes_SRS_IOTHUBSTATUSCODE_11_002: [If the given HTTPS status code does not map to an IoT Hub status code, the function return status code ERROR.]
                 iotHubStatus = ERROR;
         }
 

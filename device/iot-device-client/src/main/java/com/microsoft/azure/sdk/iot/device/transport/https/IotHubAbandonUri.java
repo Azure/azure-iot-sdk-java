@@ -30,7 +30,6 @@ final class IotHubAbandonUri
      */
     public IotHubAbandonUri(String iotHubHostname, String deviceId, String eTag, String moduleId)
     {
-        // Codes_SRS_IOTHUBABANDONURI_11_001: [The constructor returns a URI with the format "[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]/abandon?api-version=2016-02-03".]
         String abandonPath = String.format(ABANDON_PATH_FORMAT, eTag);
         this.uri = new IotHubUri(iotHubHostname, deviceId, abandonPath, moduleId);
     }
@@ -43,7 +42,6 @@ final class IotHubAbandonUri
     @Override
     public String toString()
     {
-        // Codes_SRS_IOTHUBABANDONURI_11_002: [The string representation of the IoT Hub event URI shall be constructed with the format "[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]/abandon?api-version=2016-02-03".]
         return this.uri.toString();
     }
 
@@ -54,7 +52,6 @@ final class IotHubAbandonUri
      */
     public String getHostname()
     {
-        // Codes_SRS_IOTHUBABANDONURI_11_003: [The function shall return the hostname given in the constructor.]
         return this.uri.getHostname();
     }
 
@@ -65,7 +62,6 @@ final class IotHubAbandonUri
      */
     public String getPath()
     {
-        // Codes_SRS_IOTHUBABANDONURI_11_004: [The function shall return a URI with the format '/devices/[deviceId]/messages/devicebound/[eTag]/abandon'.]
         return this.uri.getPath();
     }
 

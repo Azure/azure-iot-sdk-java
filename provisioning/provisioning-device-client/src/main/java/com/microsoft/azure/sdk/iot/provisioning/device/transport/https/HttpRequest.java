@@ -31,12 +31,7 @@ public class HttpRequest
      */
     public HttpRequest(URL url, HttpMethod method, byte[] body) throws IOException
     {
-        // Codes_SRS_HTTPREQUEST_25_001: [The function shall open a connection with the given URL as the endpoint.]
-        // Codes_SRS_HTTPREQUEST_25_003: [The function shall use the given HTTPS method (i.e. GET) as the request method.]
-        // Codes_SRS_HTTPREQUEST_25_004: [If an IOException occurs in setting up the HTTPS connection, the function shall throw an IOException.]
         this.connection = new HttpConnection(url, method);
-
-        // Codes_SRS_HTTPREQUEST_25_002: [The function shall write the body to the connection.]
         this.connection.writeOutput(body);
     }
 
@@ -56,7 +51,6 @@ public class HttpRequest
         Map<String, List<String>> headerFields;
         try
         {
-            // Codes_SRS_HTTPREQUEST_25_005: [The function shall send an HTTPS request as formatted in the constructor.]
             this.connection.connect();
 
             responseStatus = this.connection.getResponseStatus();
@@ -71,17 +65,14 @@ public class HttpRequest
             // response, then getResponseStatus() returns a valid status code.
             // Otherwise, a connection could not be established and
             // getResponseStatus() throws an IOException.
-            // Codes_SRS_HTTPREQUEST_25_007: [If the client cannot connect to the server, the function shall throw an IOException.]
             responseStatus = this.connection.getResponseStatus();
             headerFields = this.connection.getResponseHeaders();
-            // Codes_SRS_HTTPREQUEST_25_008: [If an I/O exception occurs because of a bad response status code, the function shall attempt to flush or read the error stream so that the underlying HTTPS connection can be reused.]
             // Connections are transparently managed by Java.
             // The error stream must be cleared so that the connection
             // can be reused later.
             errorReason = this.connection.readError();
         }
 
-        // Codes_SRS_HTTPREQUEST_25_006: [The function shall return the HTTPS response received, including the status code, body, header fields, and error reason (if any).]
         return new HttpResponse(responseStatus, responseBody, headerFields,
                 errorReason);
     }
@@ -96,7 +87,6 @@ public class HttpRequest
      */
     public HttpRequest setHeaderField(String field, String value)
     {
-        // Codes_SRS_HTTPREQUEST_25_009: [The function shall set the header field with the given name to the given value.]
         this.connection.setRequestHeader(field, value);
         return this;
     }
@@ -112,7 +102,6 @@ public class HttpRequest
      */
     public HttpRequest setReadTimeoutMillis(int timeout)
     {
-        // Codes_SRS_HTTPREQUEST_25_010: [The function shall set the read timeout for the request to the given value.]
         this.connection.setReadTimeoutMillis(timeout);
         return this;
     }
@@ -121,10 +110,9 @@ public class HttpRequest
     {
         if (sslContext == null)
         {
-            //Codes_SRS_HTTPSREQUEST_25_015: [The function shall throw IllegalArgumentException if parameter is null .]
             throw new IllegalArgumentException("Context cannot be null");
         }
-        //Codes_SRS_HTTPSREQUEST_25_016: [The function shall set the SSL context for the IotHub.]
+
         this.connection.setSSLContext(sslContext);
         return this;
     }

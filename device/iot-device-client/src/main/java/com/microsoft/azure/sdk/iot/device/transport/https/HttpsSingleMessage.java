@@ -49,7 +49,6 @@ final class HttpsSingleMessage implements HttpsMessage
     {
         HttpsSingleMessage httpsMsg = new HttpsSingleMessage();
 
-        // Codes_SRS_HTTPSSINGLEMESSAGE_21_002: [The parsed HttpsSingleMessage shall set the contentType as `binary/octet-stream`.]
         httpsMsg.contentType = HTTPS_SINGLE_MESSAGE_CONTENT_TYPE;
 
         parser(httpsMsg, message);
@@ -69,7 +68,6 @@ final class HttpsSingleMessage implements HttpsMessage
     {
         HttpsSingleMessage httpsMsg = new HttpsSingleMessage();
 
-        // Codes_SRS_HTTPSSINGLEMESSAGE_21_017: [The parsed HttpsSingleMessage shall set the contentType as `application/json;charset=utf-8`.]
         httpsMsg.contentType = HTTPS_SINGLE_JSON_MESSAGE_CONTENT_TYPE;
 
         parser(httpsMsg, message);
@@ -78,13 +76,9 @@ final class HttpsSingleMessage implements HttpsMessage
 
     private static void parser(HttpsSingleMessage httpsMsg, Message message)
     {
-        // Codes_SRS_HTTPSSINGLEMESSAGE_11_001: [The parsed HttpsSingleMessage shall have a copy of the original message body as its body.]
-        // Codes_SRS_HTTPSSINGLEMESSAGE_21_016: [The parsed HttpsSingleMessage shall have a copy of the original message body as its body.]
         byte[] msgBody = message.getBytes();
         httpsMsg.body = Arrays.copyOf(msgBody, msgBody.length);
 
-        // Codes_SRS_HTTPSSINGLEMESSAGE_11_003: [The parsed HttpsSingleMessage shall add the prefix 'iothub-app-' to each of the message properties.]
-        // Codes_SRS_HTTPSSINGLEMESSAGE_21_018: [The parsed HttpsSingleMessage shall add the prefix 'iothub-app-' to each of the message properties.]
         MessageProperty[] msgProperties = message.getProperties();
         httpsMsg.properties = new MessageProperty[msgProperties.length];
         int countProperty;
@@ -97,8 +91,6 @@ final class HttpsSingleMessage implements HttpsMessage
                     property.getValue());
         }
 
-        // Codes_SRS_HTTPSSINGLEMESSAGE_34_014: [If the message contains a system property, the parsed HttpsSingleMessage shall add the corresponding property with property value]
-        // Codes_SRS_HTTPSSINGLEMESSAGE_34_019: [If the message contains a system property, the parsed HttpsSingleMessage shall add the corresponding property with property value]
         Map<String, String> sysProperties = new HashMap<>();
 
         if (message.getUserId() != null)
@@ -144,7 +136,6 @@ final class HttpsSingleMessage implements HttpsMessage
     public static HttpsSingleMessage parseHttpsMessage(HttpsResponse response) {
         HttpsSingleMessage msg = new HttpsSingleMessage();
 
-        // Codes_SRS_HTTPSSINGLEMESSAGE_11_004: [The parsed HttpsSingleMessage shall have a copy of the original response body as its body.]
         byte[] responseBody = response.getBody();
         msg.body = Arrays.copyOf(responseBody, responseBody.length);
 
@@ -157,12 +148,10 @@ final class HttpsSingleMessage implements HttpsMessage
             String propertyValue = field.getValue();
             if (isValidHttpsAppProperty(propertyName, propertyValue))
             {
-                // Codes_SRS_HTTPSSINGLEMESSAGE_11_006: [The parsed HttpsSingleMessage shall include all valid HTTPS application-defined properties in the response header as message properties.]
                 properties.add(new MessageProperty(propertyName, propertyValue));
             }
             else if (isValidHttpsSystemProperty(propertyName, propertyValue))
             {
-                // Codes_SRS_HTTPSSINGLEMESSAGE_34_021: [The parsed HttpsSingleMessage shall include all valid HTTPS system-defined properties in the response header as message properties.]
                 String systemPropertyName = propertyName.substring(HTTPS_SYSTEM_PROPERTY_PREFIX.length());
                 systemProperties.put(HTTPS_SYSTEM_PROPERTY_PREFIX + systemPropertyName.toLowerCase(), propertyValue);
             }
@@ -181,9 +170,7 @@ final class HttpsSingleMessage implements HttpsMessage
      */
     public Message toMessage()
     {
-        // Codes_SRS_HTTPSSINGLEMESSAGE_11_007: [The function shall return an IoT Hub message with a copy of the message body as its body.]
         Message msg = new Message(this.getBody());
-        // Codes_SRS_HTTPSSINGLEMESSAGE_11_008: [The function shall return an IoT Hub message with application-defined properties that have the prefix 'iothub-app' removed.]
         for (MessageProperty property : this.properties)
         {
             String propertyName = httpsAppPropertyToAppProperty(property.getName());
@@ -191,7 +178,6 @@ final class HttpsSingleMessage implements HttpsMessage
             msg.setProperty(propertyName, propertyValue);
         }
 
-        // Codes_SRS_HTTPSSINGLEMESSAGE_34_020: [The function shall return an IoT Hub message with all system properties set accordingly.]
         if (this.systemProperties.containsKey(MESSAGE_ID_KEY))
         {
             msg.setMessageId(this.systemProperties.get(MESSAGE_ID_KEY));
@@ -232,7 +218,6 @@ final class HttpsSingleMessage implements HttpsMessage
      */
     public byte[] getBody()
     {
-        // Codes_SRS_HTTPSSINGLEMESSAGE_11_009: [The function shall return a copy of the message body.]
         return Arrays.copyOf(this.body, this.body.length);
     }
 
@@ -243,7 +228,6 @@ final class HttpsSingleMessage implements HttpsMessage
      * @return the message body as a string.
      */
     public String getBodyAsString() {
-        // Codes_SRS_HTTPSSINGLEMESSAGE_11_010: [The function shall return the message body as a string encoded using charset UTF-8.]
         return new String(this.body, Message.DEFAULT_IOTHUB_MESSAGE_CHARSET);
     }
 
@@ -254,7 +238,6 @@ final class HttpsSingleMessage implements HttpsMessage
      */
     public String getContentType()
     {
-        // Codes_SRS_HTTPSSINGLEMESSAGE_11_011: [The function shall return the message content-type as 'binary/octet-stream'.]
         return this.contentType;
     }
 
@@ -265,7 +248,6 @@ final class HttpsSingleMessage implements HttpsMessage
      */
     public boolean isBase64Encoded()
     {
-        // Codes_SRS_HTTPSSINGLEMESSAGE_11_012: [The function shall return whether the message is Base64-encoded.]
         return this.base64Encoded;
     }
 
@@ -276,7 +258,6 @@ final class HttpsSingleMessage implements HttpsMessage
      */
     public MessageProperty[] getProperties()
     {
-        // Codes_SRS_HTTPSSINGLEMESSAGE_11_013: [The function shall return a copy of the message properties.]
         int propertiesSize = this.properties.length;
         MessageProperty[] propertiesCopy =
                 new MessageProperty[propertiesSize];
@@ -300,7 +281,6 @@ final class HttpsSingleMessage implements HttpsMessage
      */
     public Map<String, String> getSystemProperties()
     {
-        // Codes_SRS_HTTPSSINGLEMESSAGE_34_015: [The function shall return a copy of the message's system properties.]
         return new HashMap<>(this.systemProperties);
     }
 

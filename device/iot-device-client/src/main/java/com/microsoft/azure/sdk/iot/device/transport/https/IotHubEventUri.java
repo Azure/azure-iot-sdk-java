@@ -33,7 +33,6 @@ final class IotHubEventUri
     @Override
     public String toString()
     {
-        // Codes_SRS_IOTHUBEVENTURI_11_002: [The string representation of the IoT Hub event URI shall be constructed with the format '[iotHubHostname]/devices/[deviceId]/messages/events?api-version=2016-02-03 '.]
         return (this.uri != null ? this.uri.toString() : null);
     }
 
@@ -44,7 +43,6 @@ final class IotHubEventUri
      */
     public String getHostname()
     {
-        // Codes_SRS_IOTHUBEVENTURI_11_003: [The function shall return the hostname given in the constructor.]
         return (this.uri != null ? this.uri.getHostname() : null);
     }
 
@@ -55,7 +53,6 @@ final class IotHubEventUri
      */
     public String getPath()
     {
-        // Codes_SRS_IOTHUBEVENTURI_11_004: [The function shall return a URI with the format '/devices/[deviceId]/messages/events'.]
         return (this.uri != null ? this.uri.getPath() : null);
     }
 

@@ -78,17 +78,8 @@ public final class DeviceMethod
                                  */
                                 MethodParser methodParserObject = new MethodParser(responseData.getResponseMessage());
                                 IotHubTransportMessage responseMessage = new IotHubTransportMessage(methodParserObject.toJson().getBytes(StandardCharsets.UTF_8), MessageType.DEVICE_METHODS);
-                                /*
-                                 **Codes_SRS_DEVICEMETHOD_25_012: [**The device method message sent to IotHub shall have same the request id as the invoking message.**]**
-                                 */
                                 responseMessage.setRequestId(methodMessage.getRequestId());
-
-                                // Codes_SRS_DEVICEMETHOD_34_016: [The device method message sent to IotHub shall have the sending device's id set as the connection device id.]
                                 responseMessage.setConnectionDeviceId(this.nestedConfig.getDeviceId());
-
-                                /*
-                                 **Codes_SRS_DEVICEMETHOD_25_013: [**The device method message sent to IotHub shall have the status provided by the user as the message status.**]**
-                                 */
                                 responseMessage.setStatus(String.valueOf(responseData.getStatus()));
                                 responseMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_SEND_RESPONSE);
 
@@ -99,9 +90,6 @@ public final class DeviceMethod
                             {
                                 log.info("User callback did not send any data for response");
                                 result = IotHubMessageResult.REJECT;
-                                /*
-                                 **Codes_SRS_DEVICEMETHOD_25_014: [**If the user invoked callback failed for any reason then the user shall be notified on the status callback registered by the user as ERROR before marking the status of the sent message as Rejected.**]**
-                                 */
                                 deviceMethodStatusCallback.execute(iotHubStatus, deviceMethodStatusCallbackContext);
                             }
                         } catch (Exception e)

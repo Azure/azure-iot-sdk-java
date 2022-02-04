@@ -35,10 +35,7 @@ public class HttpsHsmTrustBundleProvider implements TrustBundleProvider
      */
     public String getTrustBundleCerts(String providerUri, String apiVersion, UnixDomainSocketChannel unixDomainSocketChannel) throws URISyntaxException, TransportException, IOException, HsmException
     {
-        // Codes_SRS_TRUSTBUNDLEPROVIDER_34_001: [This function shall create an HttpsHsmClient using the provided provider uri.]
         HttpsHsmClient httpsHsmClient = new HttpsHsmClient(providerUri, unixDomainSocketChannel);
-
-        // Codes_SRS_TRUSTBUNDLEPROVIDER_34_002: [This function shall invoke getTrustBundle on the HttpsHsmClient and return the resulting certificates.]
         TrustBundleResponse response = httpsHsmClient.getTrustBundle(apiVersion);
         return response.getCertificates();
     }

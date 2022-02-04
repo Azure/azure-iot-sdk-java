@@ -46,16 +46,11 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
             }
 
             this.securityProvider = (SecurityProviderTpm) securityProvider;
-
-            // Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_033: [This constructor shall generate and save a sas token from the security provider with the default time to live.]
             this.sasToken = new IotHubSasToken(hostname, deviceId, null, this.generateSasTokenSignatureFromSecurityProvider(this.tokenValidSecs), moduleId, 0);
-
-            // Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_034: [This constructor shall retrieve and save the ssl context from the security provider.]
             this.iotHubSSLContext = new IotHubSSLContext(securityProvider.getSSLContext());
         }
         catch (SecurityProviderException e)
         {
-            //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_023: [If the security provider throws an exception while retrieving a sas token or ssl context from it, this function shall throw an IOException.]
             throw new IOException(e);
         }
     }
@@ -76,7 +71,6 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
     @Override
     public boolean canRefreshToken()
     {
-        //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_013: [This function shall return true.]
         return true;
     }
 
@@ -87,7 +81,6 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
     public boolean isAuthenticationProviderRenewalNecessary()
     {
         //Hardware will always be able to generate new sas tokens
-        //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_012: [This function shall return false.]
         return false;
     }
 
@@ -100,7 +93,6 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
             String encodedTokenScope = URLEncoder.encode(tokenScope, ENCODING_FORMAT_NAME);
             if (encodedTokenScope == null || encodedTokenScope.isEmpty())
             {
-                //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_009: [If the token scope cannot be encoded, this function shall throw an IOException.]
                 throw new IOException("Could not construct token scope");
             }
 
@@ -108,7 +100,6 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
             byte[] token = this.securityProvider.signWithIdentity(encodedTokenScope.concat("\n" + expiryTimeUTC).getBytes(StandardCharsets.UTF_8));
             if (token == null || token.length == 0)
             {
-                //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_010: [If the call for the saved security provider to sign with identity returns null or empty bytes, this function shall throw an IOException.]
                 throw new IOException("Security provider could not sign data successfully");
             }
 
@@ -118,7 +109,6 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
         }
         catch (UnsupportedEncodingException | SecurityProviderException e)
         {
-            //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_011: [When generating the sas token signature from the security provider, if an UnsupportedEncodingException or SecurityProviderException is thrown, this function shall throw an IOException.]
             throw new IOException(e);
         }
     }

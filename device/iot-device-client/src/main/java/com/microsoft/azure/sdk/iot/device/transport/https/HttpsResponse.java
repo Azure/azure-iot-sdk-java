@@ -32,7 +32,6 @@ public class HttpsResponse
             Map<String, List<String>> headerFields,
             byte[] errorReason)
     {
-        // Codes_SRS_HTTPSRESPONSE_11_001: [The constructor shall store the input arguments so that the getters can return them later.]
         this.status = status;
         this.body = Arrays.copyOf(body, body.length);
         this.errorReason = errorReason;
@@ -58,7 +57,6 @@ public class HttpsResponse
      */
     public int getStatus()
     {
-        // Codes_SRS_HTTPSRESPONSE_11_002: [The function shall return the status code given in the constructor.]
         return this.status;
     }
 
@@ -69,7 +67,6 @@ public class HttpsResponse
      */
     public byte[] getBody()
     {
-        // Codes_SRS_HTTPSRESPONSE_11_003: [The function shall return a copy of the body given in the constructor.]
         return Arrays.copyOf(this.body, this.body.length);
     }
 
@@ -86,7 +83,6 @@ public class HttpsResponse
      */
     public String getHeaderField(String field) throws IllegalArgumentException
     {
-        // Codes_SRS_HTTPSRESPONSE_11_008: [The function shall match the header field name in a case-insensitive manner.]
         String canonicalizedField = canonicalizeFieldName(field);
         String values = this.headerFields.get(canonicalizedField);
         if (values == null)
@@ -94,11 +90,9 @@ public class HttpsResponse
             String errMsg = String.format("Could not find a value "
                     + "associated with the header field name '%s'.%n", field);
 
-            // Codes_SRS_HTTPSRESPONSE_11_006: [If a value could not be found for the given header field name, the function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException(errMsg);
         }
 
-        // Codes_SRS_HTTPSRESPONSE_11_004: [The function shall return a comma-separated list of the values associated with the header field name.]
         return values;
     }
 
@@ -125,7 +119,6 @@ public class HttpsResponse
      */
     public byte[] getErrorReason()
     {
-        // Codes_SRS_HTTPSRESPONSE_11_007: [The function shall return the error reason given in the constructor.]
         return this.errorReason;
     }
 

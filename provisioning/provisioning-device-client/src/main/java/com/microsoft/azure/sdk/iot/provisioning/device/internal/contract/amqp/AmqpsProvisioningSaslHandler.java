@@ -65,35 +65,29 @@ class AmqpsProvisioningSaslHandler implements SaslHandler
     {
         if (idScope == null || idScope.isEmpty())
         {
-            // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_002: [If any of the arguments are null or empty other than the autorizationCallbackContext, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("IdScope cannot be null or empty");
         }
 
         if (registrationId == null || registrationId.isEmpty())
         {
-            // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_002: [If any of the arguments are null or empty other than the autorizationCallbackContext, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("RegistrationId cannot be null or empty");
         }
 
         if (endorsementKey == null || endorsementKey.length == 0)
         {
-            // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_002: [If any of the arguments are null or empty other than the autorizationCallbackContext, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("Endorsement Key cannot be null or empty");
         }
 
         if (storageRootKey == null || storageRootKey.length == 0)
         {
-            // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_002: [If any of the arguments are null or empty other than the autorizationCallbackContext, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("Storage root key cannot be null or empty");
         }
 
         if (responseCallback == null)
         {
-            // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_002: [If any of the arguments are null or empty other than the autorizationCallbackContext, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("responseCallback cannot be null");
         }
 
-        // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_001: [This constructor shall save the provided idScope, registrationId, endorsementKey, storageRootKey, responseCallback and autorizationCallbackContext .]
         this.idScope = idScope;
         this.registrationId = registrationId;
         this.endorsementKey = endorsementKey;
@@ -113,7 +107,6 @@ class AmqpsProvisioningSaslHandler implements SaslHandler
     {
         if (this.challengeState != ChallengeState.WAITING_FOR_MECHANISMS)
         {
-            // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_003: [If this handler is not in the state where it is expecting to choose a sasl mechanism, this function shall throw in IllegalStateException.]
             throw new IllegalStateException("Handler is not in a state to handle choosing a mechanism");
         }
 
@@ -125,13 +118,11 @@ class AmqpsProvisioningSaslHandler implements SaslHandler
 
         if (!tpmMechanismOfferedByService)
         {
-            // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_004: [If the provided mechanisms array does not contain "TPM" then this function shall throw a SecurityException.]
             throw new ProvisioningDeviceSecurityException("Service endpoint does not support TPM authentication");
         }
 
         this.challengeState = ChallengeState.WAITING_TO_BUILD_INIT;
 
-        // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_005: [This function shall return "TPM".]
         return TPM_MECHANISM;
     }
 
@@ -144,11 +135,9 @@ class AmqpsProvisioningSaslHandler implements SaslHandler
     {
         if (this.challengeState != ChallengeState.WAITING_TO_BUILD_INIT)
         {
-            // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_006: [If this handler is not in the state where it is expecting to build the init payload, this function shall throw in IllegalStateException.]
             throw new IllegalStateException("Handler is not in a state to build the init payload");
         }
 
-        // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_007: [This function shall return the init payload bytes in the format "control byte + scopeId + null byte + registration id + null byte + base64 decoded endorsement key".]
         byte[] saslInitBytes = buildSaslInitPayload(this.idScope, this.registrationId, this.endorsementKey);
         this.challengeState = ChallengeState.WAITING_FOR_FIRST_CHALLENGE;
         return saslInitBytes;
@@ -163,7 +152,6 @@ class AmqpsProvisioningSaslHandler implements SaslHandler
     {
         if (saslChallenge == null)
         {
-            // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_009: [If the provided saslChallenge is null, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("Challenge data cannot be null");
         }
 
@@ -180,23 +168,18 @@ class AmqpsProvisioningSaslHandler implements SaslHandler
                 return handleThirdChallenge(saslChallenge);
 
             case WAITING_FOR_MECHANISMS:
-                // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_020: [If this object is not waiting for a first, second or third challenge, this function shall throw an IllegalStateException.]
                 throw new IllegalStateException("Unexpected challenge received when expecting to choose sasl mechanism");
 
             case WAITING_TO_BUILD_INIT:
-                // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_020: [If this object is not waiting for a first, second or third challenge, this function shall throw an IllegalStateException.]
                 throw new IllegalStateException("Unexpected challenge received when expecting to build sasl init payload");
 
             case WAITING_TO_SEND_SAS_TOKEN:
-                // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_020: [If this object is not waiting for a first, second or third challenge, this function shall throw an IllegalStateException.]
                 throw new IllegalStateException("Unexpected challenge received when expecting to send sas token");
 
             case WAITING_FOR_FINAL_OUTCOME:
-                // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_020: [If this object is not waiting for a first, second or third challenge, this function shall throw an IllegalStateException.]
                 throw new IllegalStateException("Unexpected challenge received when expecting Sasl outcome");
 
             default:
-                // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_020: [If this object is not waiting for a first, second or third challenge, this function shall throw an IllegalStateException.]
                 throw new IllegalStateException("Unexpected challenge received");
         }
     }
@@ -209,7 +192,6 @@ class AmqpsProvisioningSaslHandler implements SaslHandler
     {
         if (this.challengeState != ChallengeState.WAITING_FOR_FINAL_OUTCOME)
         {
-            // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_021: [If this object is not waiting for the sasl outcome, this function shall throw an IllegalStateException.]
             throw new IllegalStateException("This handler is not ready to handle the sasl outcome");
         }
 
@@ -221,18 +203,15 @@ class AmqpsProvisioningSaslHandler implements SaslHandler
 
             case AUTH:
                 //bad credentials
-                // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_022: [If the sasl outcome is not OK, this function shall throw a SecurityException.]
                 throw new ProvisioningDeviceSecurityException("Sas token was rejected by the service");
 
             case SYS_TEMP:
-                // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_022: [If the sasl outcome is not OK, this function shall throw a SecurityException.]
                 throw new ProvisioningDeviceSecurityException("Sasl negotiation failed due to transient system error");
                 
             case SYS:
             case SYS_PERM:
             default:
                 //some other kind of failure
-                // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_022: [If the sasl outcome is not OK, this function shall throw a SecurityException.]
                 throw new ProvisioningDeviceSecurityException("Sasl negotiation with service failed");
         }
     }
@@ -256,7 +235,6 @@ class AmqpsProvisioningSaslHandler implements SaslHandler
      */
     public void setSasToken(String sasToken)
     {
-        // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_008: [This function shall save the provided sas token.]
         this.sasToken = sasToken;
     }
 
@@ -265,11 +243,9 @@ class AmqpsProvisioningSaslHandler implements SaslHandler
         //validate challenge
         if (challengeData.length != 1 || challengeData[0] != NULL_BYTE)
         {
-            // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_010: [If this object is waiting for the first challenge, this function shall validate that this challenge payload contains only a null byte and shall throw an IllegalStateException if it is not.]
             throw new IllegalStateException("Unexpected challenge data");
         }
 
-        // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_011: [If this object is waiting for the first challenge, this function shall return a payload in the format "control byte + base64 decoded storage root key".]
         return buildFirstSaslChallengeResponsePayload(this.storageRootKey);
     }
 
@@ -278,17 +254,14 @@ class AmqpsProvisioningSaslHandler implements SaslHandler
         //validate challenge
         if (challengeData.length < 1 || challengeData[0] != INTERMEDIATE_SEGMENT_CONTROL_BYTE)
         {
-            // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_012: [If this object is waiting for the second challenge, this function shall validate that this challenge payload contains a control byte with the mask 0x80 and shall throw an IllegalStateException if it is not.]
             throw new IllegalStateException("Unexpected challenge data");
         }
 
         this.challengeState = ChallengeState.WAITING_FOR_THIRD_CHALLENGE;
 
-        // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_013: [If this object is waiting for the second challenge, this function shall read the challenge in the format "control byte + nonce (first half)" and save the nonce portion.]
         this.challengeKey = new byte[challengeData.length-1];
         System.arraycopy(challengeData, 1, this.challengeKey, 0, challengeData.length-1);
 
-        // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_014: [If this object is waiting for the second challenge, this function shall return a payload of one null byte.]
         return new byte[]{NULL_BYTE};
     }
 
@@ -297,19 +270,15 @@ class AmqpsProvisioningSaslHandler implements SaslHandler
         //validate challenge
         if (challengeData.length < 1 || challengeData[0] != FINAL_SEGMENT_CONTROL_BYTE)
         {
-            // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_015: [If this object is waiting for the third challenge, this function shall validate that this challenge payload contains a control byte with the mask 0xC1 and shall throw an IllegalStateException if it is not.]
             throw new IllegalStateException("Unexpected challenge data");
         }
 
-        // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_016: [If this object is waiting for the third challenge, this function shall read the challenge in the format "control byte + nonce (second half)" and save the nonce portion.]
         this.challengeKey = buildNonceFromThirdChallenge(challengeData);
 
-        // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_017: [If this object is waiting for the third challenge, this function shall put together the full nonce byte array and run the saved responseCallback with the nonce and DPS_REGISTRATION_RECEIVED.]
         this.responseCallback.run(new ResponseData(this.challengeKey, ContractState.DPS_REGISTRATION_RECEIVED, 0), this.authorizationCallbackContext);
         
         this.challengeState = ChallengeState.WAITING_TO_SEND_SAS_TOKEN;
 
-        // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_018: [If this object is waiting for the third challenge, after running the saved responseCallback, this function shall wait for the sas token to be set before returning a payload in the format "control byte + sas token".]
         long millisecondsElapsed = 0;
         long waitTimeStart = System.currentTimeMillis();
         while (this.sasToken == null && millisecondsElapsed < MAX_MILLISECONDS_TIMEOUT_FOR_SAS_TOKEN_WAIT)
@@ -329,7 +298,6 @@ class AmqpsProvisioningSaslHandler implements SaslHandler
 
         if (millisecondsElapsed >= MAX_MILLISECONDS_TIMEOUT_FOR_SAS_TOKEN_WAIT)
         {
-            // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_019: [If this object is waiting for the third challenge, and if the sas token is not provided within 3 minutes of waiting, this function shall throw a SecurityException.]
             throw new ProvisioningDeviceSecurityException("Sasl negotiation failed: Sas token was never supplied to finish negotiation");
         }
 

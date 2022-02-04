@@ -65,13 +65,9 @@ public abstract class IotHubSasTokenWithRefreshAuthenticationProvider extends Io
     {
         if (hostname == null || deviceId == null || moduleId == null || hostname.isEmpty() || deviceId.isEmpty() || moduleId.isEmpty())
         {
-            // Codes_SRS_MODULEAUTHENTICATIONWITHTOKENREFRESH_34_001: [If any of the provided arguments are null or empty, this
-            // function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("No argument can be null or empty");
         }
 
-        // Codes_SRS_MODULEAUTHENTICATIONWITHTOKENREFRESH_34_002: [This function shall return the path
-        // "<hostname>/devices/<device id>/modules/<module id> url encoded with utf-8.]
         return URLEncoder.encode(String.format("%s/devices/%s/modules/%s", hostname, deviceId, moduleId), StandardCharsets.UTF_8.name());
     }
 
@@ -82,7 +78,6 @@ public abstract class IotHubSasTokenWithRefreshAuthenticationProvider extends Io
     @Override
     public boolean isAuthenticationProviderRenewalNecessary()
     {
-        // Codes_SRS_MODULEAUTHENTICATIONWITHTOKENREFRESH_34_003: [This function shall always return false.]
         return false;
     }
 

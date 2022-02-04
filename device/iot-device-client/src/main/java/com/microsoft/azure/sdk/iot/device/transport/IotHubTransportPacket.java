@@ -42,17 +42,14 @@ public final class IotHubTransportPacket
     {
         if (startTimeMillis < 1)
         {
-            // Codes_SRS_IOTHUBTRANSPORTPACKET_34_010: [If startTimeMillis is 0 or negative, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("start time cannot be 0 or negative");
         }
 
         if (message == null)
         {
-            // Codes_SRS_IOTHUBTRANSPORTPACKET_34_011: [If message is null, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("Message cannot be null");
         }
 
-        // Codes_SRS_IOTHUBTRANSPORTPACKET_11_001: [The constructor shall save the message, callback, status, startTimeMillis, and callback context.]
         this.message = message;
         this.eventCallback = eventCallback;
         this.callbackContext = callbackContext;
@@ -68,7 +65,6 @@ public final class IotHubTransportPacket
      */
     public Message getMessage()
     {
-        // Codes_SRS_IOTHUBTRANSPORTPACKET_11_002: [The function shall return the message given in the constructor.]
         return this.message;
     }
 
@@ -79,7 +75,6 @@ public final class IotHubTransportPacket
      */
     public IotHubEventCallback getCallback()
     {
-        // Codes_SRS_IOTHUBTRANSPORTPACKET_11_003: [The function shall return the event callback given in the constructor.]
         return this.eventCallback;
     }
 
@@ -90,7 +85,6 @@ public final class IotHubTransportPacket
      */
     public Object getContext()
     {
-        // Codes_SRS_IOTHUBTRANSPORTPACKET_11_004: [The function shall return the callback context given in the constructor.]
         return this.callbackContext;
     }
 
@@ -100,7 +94,6 @@ public final class IotHubTransportPacket
      */
     public IotHubStatusCode getStatus()
     {
-        // Codes_SRS_IOTHUBTRANSPORTPACKET_34_005: [This function shall return the saved status.]
         return this.status;
     }
 
@@ -110,7 +103,6 @@ public final class IotHubTransportPacket
      */
     public void setStatus(IotHubStatusCode status)
     {
-        // Codes_SRS_IOTHUBTRANSPORTPACKET_34_006: [This function shall save the provided status.]
         this.status = status;
     }
 
@@ -120,7 +112,6 @@ public final class IotHubTransportPacket
      */
     public long getStartTimeMillis()
     {
-        // Codes_SRS_IOTHUBTRANSPORTPACKET_34_007: [This function shall return the saved startTimeMillis.]
         return this.startTimeMillis;
     }
 
@@ -130,7 +121,6 @@ public final class IotHubTransportPacket
      */
     public int getCurrentRetryAttempt()
     {
-        // Codes_SRS_IOTHUBTRANSPORTPACKET_34_008: [This function shall return the saved current retry attempt.]
         return this.currentRetryAttempt;
     }
 
@@ -139,7 +129,6 @@ public final class IotHubTransportPacket
      */
     public void incrementRetryAttempt()
     {
-        // Codes_SRS_IOTHUBTRANSPORTPACKET_34_009: [This function shall increment the saved retry attempt count by 1.]
         this.currentRetryAttempt++;
     }
 
@@ -147,7 +136,8 @@ public final class IotHubTransportPacket
      * Get the Id of the device that this packet is being sent from.
      * @return The Id of the device that this packet is being sent from.
      */
-    public String getDeviceId() {
+    public String getDeviceId()
+    {
         return deviceId;
     }
 }
