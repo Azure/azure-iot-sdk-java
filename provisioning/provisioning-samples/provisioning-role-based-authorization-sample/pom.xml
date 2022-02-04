@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) Microsoft. All rights reserved. -->
+<!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -8,9 +9,18 @@
         <version>1.8.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>provisioning-role-based-authorization-sample</artifactId>
-
+    <version>1.8.1</version>
+    <name>Provisioning Role Based Authorization sample</name>
+    <developers>
+        <developer>
+            <id>microsoft</id>
+            <name>Microsoft</name>
+        </developer>
+    </developers>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
@@ -23,5 +33,4 @@
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
-
 </project>

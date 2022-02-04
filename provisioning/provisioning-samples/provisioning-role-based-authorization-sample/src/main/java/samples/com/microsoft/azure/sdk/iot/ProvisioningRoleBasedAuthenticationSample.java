@@ -15,6 +15,7 @@ public class ProvisioningRoleBasedAuthenticationSample
     {
         SamplesArguments parsedArguments = new SamplesArguments(args);
 
+        // ****************** Create a TokenCredential from provided arguments **********************
         TokenCredential credential =
             new ClientSecretCredentialBuilder()
                     .tenantId(parsedArguments.getTenantId())
