@@ -9,7 +9,10 @@ import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFeedbackReceivedHandler;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.ConnectionLossCallback;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.ReactorRunner;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
@@ -26,6 +29,13 @@ public class FeedbackReceiver
     private final AmqpFeedbackReceivedHandler amqpReceiveHandler;
     private final String hostName;
     private ReactorRunner amqpConnectionReactorRunner;
+
+    /**
+     * The callback to be executed if this receiver loses its connection unexpectedly
+     */
+    @Setter
+    @Getter
+    private ConnectionLossCallback connectionLossCallback;
 
     FeedbackReceiver(
         FeedbackMessageReceivedCallback feedbackMessageReceivedCallback,
@@ -137,8 +147,12 @@ public class FeedbackReceiver
             }
             catch (IOException e)
             {
-                //TODO add some connection status callback to the user?
                 log.warn("Amqp connection thread encountered an exception", e);
+
+                if (this.connectionLossCallback != null)
+                {
+                    this.connectionLossCallback.onConnectionLost(e);
+                }
             }
         }).start();
 
