@@ -46,4 +46,11 @@ public class SamplesArguments
         this.deviceProvisioningServiceHostName = cmd.getOptionValue(DPS_HOSTNAME);
         this.provisioningSharedAccessSignature = cmd.getOptionValue(PROVISIONING_SHARED_ACCESS_SIGNATURE);
     }
+
+    public String getDPSHostName()
+    {
+        return this.deviceProvisioningServiceHostName;
+    }
+
+    public String getProvisioningSharedAccessSignature() { return this.provisioningSharedAccessSignature; }
 }
