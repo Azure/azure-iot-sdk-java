@@ -114,44 +114,7 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
 
         waitForMessageToBeReceived(messageReceived, testInstance.protocol.toString());
 
-        waitForFeedbackMessage(serviceMessage.getMessageId());
-
         Thread.sleep(200);
         testInstance.identity.getClient().close();
-    }
-
-    private void waitForFeedbackMessage(String expectedMessageId) throws InterruptedException, IOException
-    {
-        final Success feedbackReceived = new Success();
-        FeedbackReceiver receiver = testInstance.serviceClient.getFeedbackReceiver(feedbackBatch ->
-        {
-            for (FeedbackRecord feedbackRecord : feedbackBatch.getRecords())
-            {
-                if (feedbackRecord.getDeviceId().equals(testInstance.identity.getDeviceId())
-                    && feedbackRecord.getOriginalMessageId().equals(expectedMessageId))
-                {
-                    feedbackReceived.setResult(true);
-                    feedbackReceived.callbackWasFired();
-                }
-            }
-
-            return IotHubMessageResult.ABANDON;
-        });
-
-        receiver.open();
-
-        long startTime = System.currentTimeMillis();
-        while (!feedbackReceived.wasCallbackFired())
-        {
-            Thread.sleep(1000);
-
-            if (System.currentTimeMillis() - startTime > FEEDBACK_TIMEOUT_MILLIS)
-            {
-                fail("Timed out waiting on notification for device " + testInstance.identity.getDeviceId());
-            }
-        }
-
-        receiver.close();
-        assertTrue(feedbackReceived.getResult());
     }
 }
