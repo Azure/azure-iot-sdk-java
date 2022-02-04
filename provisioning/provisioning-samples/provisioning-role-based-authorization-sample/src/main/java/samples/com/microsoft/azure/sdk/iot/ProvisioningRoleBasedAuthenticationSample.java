@@ -25,6 +25,8 @@ public class ProvisioningRoleBasedAuthenticationSample
         ProvisioningServiceClient provisioningServiceClient = new ProvisioningServiceClient(parsedArguments.getDPSHostName(), credential);
 
         runIndividualEnrollmentSample(provisioningServiceClient);
+
+        runEnrollmentGroupSample(provisioningServiceClient);
     }
 
     private static void runIndividualEnrollmentSample (ProvisioningServiceClient provisioningServiceClient) throws ProvisioningServiceClientException
@@ -62,5 +64,48 @@ public class ProvisioningRoleBasedAuthenticationSample
         // *********************************** Delete info of individualEnrollment ************************************
         System.out.println("\nDelete the individualEnrollment...");
         provisioningServiceClient.deleteIndividualEnrollment(registrationId);
+    }
+
+    private static void runEnrollmentGroupSample (ProvisioningServiceClient provisioningServiceClient) throws ProvisioningServiceClientException
+    {
+        /*
+         * Create the device collection.
+         */
+        String enrollmentGroupId = "enrollmentgroupid-" + UUID.randomUUID();
+
+        // *************************************** Create a new enrollmentGroup ****************************************
+        System.out.println("\nCreate a new enrollmentGroup...");
+        Attestation attestation = new SymmetricKeyAttestation("", "");
+        EnrollmentGroup enrollmentGroup =
+                new EnrollmentGroup(
+                        enrollmentGroupId,
+                        attestation);
+        System.out.println("\nAdd new enrollmentGroup...");
+        EnrollmentGroup enrollmentGroupResult =  provisioningServiceClient.createOrUpdateEnrollmentGroup(enrollmentGroup);
+        System.out.println("\nEnrollmentGroup created with success...");
+        System.out.println(enrollmentGroupResult);
+
+        // **************************************** Get info of enrollmentGroup ****************************************
+        System.out.println("\nGet the enrollmentGroup information...");
+        EnrollmentGroup getResult = provisioningServiceClient.getEnrollmentGroup(enrollmentGroupId);
+        System.out.println(getResult);
+
+        // *************************************** Query info of enrollmentGroup ***************************************
+        System.out.println("\nCreate a query for the enrollmentGroups...");
+        QuerySpecification querySpecification =
+                new QuerySpecificationBuilder("*", QuerySpecificationBuilder.FromType.ENROLLMENT_GROUPS)
+                        .createSqlQuery();
+        Query query = provisioningServiceClient.createEnrollmentGroupQuery(querySpecification);
+
+        while(query.hasNext())
+        {
+            System.out.println("\nQuery the next enrollmentGroups...");
+            QueryResult queryResult = query.next();
+            System.out.println(queryResult);
+        }
+
+        // ************************************** Delete info of enrollmentGroup ***************************************
+        System.out.println("\nDelete the enrollmentGroup...");
+        provisioningServiceClient.deleteEnrollmentGroup(enrollmentGroupId);
     }
 }
