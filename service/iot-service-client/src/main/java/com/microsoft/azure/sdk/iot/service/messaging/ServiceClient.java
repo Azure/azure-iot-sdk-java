@@ -178,46 +178,6 @@ public final class ServiceClient
         commonConstructorSetup();
     }
 
-    /**
-     * Initialize AMQP sender using given connection string
-     *
-     * @param iotHubConnectionString The ConnectionString object for the IotHub
-     * @param iotHubServiceClientProtocol protocol to use
-     */
-    private ServiceClient(IotHubConnectionString iotHubConnectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol)
-    {
-        this(iotHubConnectionString, iotHubServiceClientProtocol, ServiceClientOptions.builder().build());
-    }
-
-    /**
-     * Initialize AMQP sender using given connection string
-     *
-     * @param iotHubConnectionString The ConnectionString object for the IotHub
-     * @param iotHubServiceClientProtocol protocol to use
-     * @param options options for proxy
-     */
-    private ServiceClient(
-        IotHubConnectionString iotHubConnectionString,
-        IotHubServiceClientProtocol iotHubServiceClientProtocol,
-        ServiceClientOptions options)
-    {
-        Objects.requireNonNull(iotHubConnectionString);
-
-        IotHubServiceSasToken iotHubServiceSasToken = new IotHubServiceSasToken(iotHubConnectionString);
-
-        this.hostName = iotHubConnectionString.getHostName();
-        this.sasToken = iotHubServiceSasToken.toString();
-        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
-        this.options = options;
-
-        if (this.options.getProxyOptions() != null && this.iotHubServiceClientProtocol != IotHubServiceClientProtocol.AMQPS_WS)
-        {
-            throw new UnsupportedOperationException("Proxies are only supported over AMQPS_WS");
-        }
-
-        commonConstructorSetup();
-    }
-
     private static void commonConstructorSetup()
     {
         log.debug("Initialized a ServiceClient instance using SDK version {}", TransportUtils.serviceVersion);
@@ -287,10 +247,10 @@ public final class ServiceClient
      *
      * @return The instance of the FeedbackReceiver
      */
-     public FeedbackReceiver getFeedbackReceiver(FeedbackMessageReceivedCallback feedbackMessageReceivedCallback)
-     {
-         if (this.credential != null)
-         {
+    public FeedbackReceiver getFeedbackReceiver(FeedbackMessageReceivedCallback feedbackMessageReceivedCallback)
+    {
+        if (this.credential != null)
+        {
              return new FeedbackReceiver(
                  feedbackMessageReceivedCallback,
                  this.hostName,
@@ -299,8 +259,8 @@ public final class ServiceClient
                  this.options.getProxyOptions(),
                  this.options.getSslContext());
          }
-         else if (this.sasTokenProvider != null)
-         {
+        else if (this.sasTokenProvider != null)
+        {
              return new FeedbackReceiver(
                  feedbackMessageReceivedCallback,
                  this.hostName,
@@ -317,7 +277,7 @@ public final class ServiceClient
             this.iotHubServiceClientProtocol,
             this.options.getProxyOptions(),
             this.options.getSslContext());
-     }
+    }
 
     /**
      * Instantiate a new FileUploadNotificationReceiver object.

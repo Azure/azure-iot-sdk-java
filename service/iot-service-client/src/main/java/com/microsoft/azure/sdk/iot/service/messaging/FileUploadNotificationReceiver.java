@@ -8,21 +8,18 @@ package com.microsoft.azure.sdk.iot.service.messaging;
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
-import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFeedbackReceivedEvent;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFileUploadNotificationReceivedHandler;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.ReactorRunner;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.qpid.proton.reactor.impl.IO;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.Objects;
 
 @Slf4j
-public class FileUploadNotificationReceiver implements AmqpFeedbackReceivedEvent
+public class FileUploadNotificationReceiver
 {
     private AmqpFileUploadNotificationReceivedHandler amqpReceiveHandler;
-    private FileUploadNotificationReceivedCallback notificationReceivedCallback;
     private final String hostName;
     private ReactorRunner amqpConnectionReactorRunner;
 
@@ -50,12 +47,11 @@ public class FileUploadNotificationReceiver implements AmqpFeedbackReceivedEvent
         Objects.requireNonNull(notificationReceivedCallback);
 
         this.hostName = hostName;
-        this.notificationReceivedCallback = notificationReceivedCallback;
         this.amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(
             hostName,
             sasToken,
             iotHubServiceClientProtocol,
-            this,
+            notificationReceivedCallback,
             proxyOptions,
             sslContext);
     }
@@ -78,12 +74,11 @@ public class FileUploadNotificationReceiver implements AmqpFeedbackReceivedEvent
         Objects.requireNonNull(notificationReceivedCallback);
 
         this.hostName = hostName;
-        this.notificationReceivedCallback = notificationReceivedCallback;
         this.amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(
             hostName,
             credential,
             iotHubServiceClientProtocol,
-            this,
+            notificationReceivedCallback,
             proxyOptions,
             sslContext);
     }
@@ -106,12 +101,11 @@ public class FileUploadNotificationReceiver implements AmqpFeedbackReceivedEvent
         Objects.requireNonNull(notificationReceivedCallback);
 
         this.hostName = hostName;
-        this.notificationReceivedCallback = notificationReceivedCallback;
         this.amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(
             hostName,
             sasTokenProvider,
             iotHubServiceClientProtocol,
-            this,
+            notificationReceivedCallback,
             proxyOptions,
             sslContext);
     }
@@ -149,7 +143,6 @@ public class FileUploadNotificationReceiver implements AmqpFeedbackReceivedEvent
 
     /**
      * Close AmqpReceive object
-     *
      */
     public void close()
     {
@@ -158,31 +151,5 @@ public class FileUploadNotificationReceiver implements AmqpFeedbackReceivedEvent
         this.amqpConnectionReactorRunner.stop();
 
         log.debug("Closed file upload notification receiver");
-    }
-
-    /**
-     * Handle on feedback received Proton event
-     * Parse received json and save result to a member variable
-     * Release semaphore for wait function
-     * @param feedbackJson Received Json string to process
-     */
-    public IotHubMessageResult onFeedbackReceived(String feedbackJson)
-    {
-        try
-        {
-            FileUploadNotificationParser notificationParser = new FileUploadNotificationParser(feedbackJson);
-
-            FileUploadNotification fileUploadNotification = new FileUploadNotification(notificationParser.getDeviceId(),
-                notificationParser.getBlobUri(), notificationParser.getBlobName(), notificationParser.getLastUpdatedTime(),
-                notificationParser.getBlobSizeInBytesTag(), notificationParser.getEnqueuedTimeUtc());
-
-            return notificationReceivedCallback.onFileUploadNotificationReceived(fileUploadNotification);
-        }
-        catch (Exception e)
-        {
-            // this should never happen. However if it does, proton can't handle it. So guard against throwing it at proton.
-            log.warn("Encountered an exception while handling file upload notification", e);
-            return IotHubMessageResult.ABANDON;
-        }
     }
 }

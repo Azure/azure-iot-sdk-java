@@ -349,9 +349,9 @@ public class ServiceClient
 
     public void send(String deviceId, String moduleId, Message message) throws IOException, IotHubException;
 
-    public FeedbackReceiver getFeedbackReceiver();
+    public FeedbackReceiver getFeedbackReceiver(FeedbackMessageReceivedCallback feedbackMessageReceivedCallback);
 
-    public FileUploadNotificationReceiver getFileUploadNotificationReceiver();
+    public FileUploadNotificationReceiver getFileUploadNotificationReceiver(FileUploadNotificationReceivedCallback fileUploadNotificationReceivedCallback);
 }
 
 @Builder
@@ -364,26 +364,28 @@ public class ServiceClientOptions
     private final SSLContext sslContext;
 }
 
+public interface FeedbackMessageReceivedCallback
+{
+    public IotHubMessageResult onFeedbackMessageReceived(FeedbackBatch feedbackBatch);
+}
+
 public class FeedbackReceiver
 {
     public void open() throws IOException;
 
-    public void close() throws IOException;
+    public void close();
+}
 
-    public FeedbackBatch receive() throws IOException;
-
-    public FeedbackBatch receive(long timeoutMs) throws IOException;
+public interface FileUploadNotificationReceivedCallback
+{
+    public IotHubMessageResult onFileUploadNotificationReceived(FileUploadNotification notification);
 }
 
 public class FileUploadNotificationReceiver
 {
-    public void open();
+    public void open() throws IOException;
 
     public void close();
-
-    public FileUploadNotification receive() throws IOException;
-
-    public FileUploadNotification receive(long timeoutMs) throws IOException;
 }
 
 ```

@@ -7,6 +7,9 @@ package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
+import com.microsoft.azure.sdk.iot.service.messaging.FeedbackBatch;
+import com.microsoft.azure.sdk.iot.service.messaging.FeedbackBatchMessage;
+import com.microsoft.azure.sdk.iot.service.messaging.FeedbackMessageReceivedCallback;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubMessageResult;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
@@ -15,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
-import org.apache.qpid.proton.amqp.messaging.Rejected;
 import org.apache.qpid.proton.amqp.messaging.Released;
 import org.apache.qpid.proton.amqp.messaging.Source;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
@@ -42,7 +44,7 @@ public class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
     public static final String RECEIVE_TAG = "receiver";
     private static final String ENDPOINT = "/messages/servicebound/feedback";
 
-    private final AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent;
+    private final FeedbackMessageReceivedCallback feedbackMessageReceivedCallback;
     private Receiver feedbackReceiverLink;
 
     /**
@@ -51,7 +53,7 @@ public class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
      * @param hostName The address string of the service (example: AAA.BBB.CCC)
      * @param sasToken The SAS token string
      * @param iotHubServiceClientProtocol protocol to use
-     * @param amqpFeedbackReceivedEvent callback to delegate the received message to the user API
+     * @param feedbackMessageReceivedCallback callback to delegate the received message to the user API
      * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
      * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
      *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.
@@ -60,36 +62,36 @@ public class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
             String hostName,
             String sasToken,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent,
+            FeedbackMessageReceivedCallback feedbackMessageReceivedCallback,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
     {
         super(hostName, sasToken, iotHubServiceClientProtocol, proxyOptions, sslContext);
-        this.amqpFeedbackReceivedEvent = amqpFeedbackReceivedEvent;
+        this.feedbackMessageReceivedCallback = feedbackMessageReceivedCallback;
     }
 
     public AmqpFeedbackReceivedHandler(
             String hostName,
             TokenCredential credential,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent,
+            FeedbackMessageReceivedCallback feedbackMessageReceivedCallback,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
     {
         super(hostName, credential, iotHubServiceClientProtocol, proxyOptions, sslContext);
-        this.amqpFeedbackReceivedEvent = amqpFeedbackReceivedEvent;
+        this.feedbackMessageReceivedCallback = feedbackMessageReceivedCallback;
     }
 
     public AmqpFeedbackReceivedHandler(
             String hostName,
             AzureSasCredential sasTokenProvider,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent,
+            FeedbackMessageReceivedCallback feedbackMessageReceivedCallback,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
     {
         super(hostName, sasTokenProvider, iotHubServiceClientProtocol, proxyOptions, sslContext);
-        this.amqpFeedbackReceivedEvent = amqpFeedbackReceivedEvent;
+        this.feedbackMessageReceivedCallback = feedbackMessageReceivedCallback;
     }
 
     @Override
@@ -126,7 +128,17 @@ public class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
             // onLinkLocalClose closes the session locally and eventually the connection and reactor
             if (recv.getLocalState() == EndpointState.ACTIVE)
             {
-                IotHubMessageResult messageResult = amqpFeedbackReceivedEvent.onFeedbackReceived(msg.getBody().toString());
+                IotHubMessageResult messageResult = IotHubMessageResult.ABANDON;
+                try
+                {
+                    FeedbackBatch feedbackBatch = FeedbackBatchMessage.parse(msg.getBody().toString());
+
+                    messageResult = feedbackMessageReceivedCallback.onFeedbackMessageReceived(feedbackBatch);
+                }
+                catch (Exception e)
+                {
+                    log.warn("Encountered an exception while handling feedback batch message", e);
+                }
 
                 DeliveryState deliveryState = Accepted.getInstance();
                 if (messageResult == IotHubMessageResult.ABANDON)
