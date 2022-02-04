@@ -9,8 +9,17 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.telemetry;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.ModuleClient;
+import com.microsoft.azure.sdk.iot.service.ProxyOptions;
+import com.microsoft.azure.sdk.iot.service.messaging.FeedbackBatch;
+import com.microsoft.azure.sdk.iot.service.messaging.FeedbackMessageReceivedCallback;
+import com.microsoft.azure.sdk.iot.service.messaging.FeedbackReceiver;
+import com.microsoft.azure.sdk.iot.service.messaging.FeedbackRecord;
+import com.microsoft.azure.sdk.iot.service.messaging.IotHubMessageResult;
+import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
+import com.microsoft.azure.sdk.iot.service.messaging.ServiceClient;
+import com.microsoft.azure.sdk.iot.service.messaging.ServiceClientOptions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +32,14 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubT
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.ReceiveMessagesCommon;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.util.UUID;
+
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
+import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.fail;
 
 /**
  * Test class containing all non error injection tests to be run on JVM and android pertaining to receiving messages on a device/module.
@@ -67,6 +83,7 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
         testInstance.identity.getClient().open(false);
 
         Message serviceMessage = createCloudToDeviceMessage(messageSize);
+        serviceMessage.setMessageId(UUID.randomUUID().toString());
 
         com.microsoft.azure.sdk.iot.device.MessageCallback callback = new MessageCallback(serviceMessage);
 
@@ -97,7 +114,44 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
 
         waitForMessageToBeReceived(messageReceived, testInstance.protocol.toString());
 
+        waitForFeedbackMessage(serviceMessage.getMessageId());
+
         Thread.sleep(200);
         testInstance.identity.getClient().close();
+    }
+
+    private void waitForFeedbackMessage(String expectedMessageId) throws InterruptedException, IOException
+    {
+        final Success feedbackReceived = new Success();
+        FeedbackReceiver receiver = testInstance.serviceClient.getFeedbackReceiver(feedbackBatch ->
+        {
+            for (FeedbackRecord feedbackRecord : feedbackBatch.getRecords())
+            {
+                if (feedbackRecord.getDeviceId().equals(testInstance.identity.getDeviceId())
+                    && feedbackRecord.getOriginalMessageId().equals(expectedMessageId))
+                {
+                    feedbackReceived.setResult(true);
+                    feedbackReceived.callbackWasFired();
+                }
+            }
+
+            return IotHubMessageResult.ABANDON;
+        });
+
+        receiver.open();
+
+        long startTime = System.currentTimeMillis();
+        while (!feedbackReceived.wasCallbackFired())
+        {
+            Thread.sleep(1000);
+
+            if (System.currentTimeMillis() - startTime > FEEDBACK_TIMEOUT_MILLIS)
+            {
+                fail("Timed out waiting on notification for device " + testInstance.identity.getDeviceId());
+            }
+        }
+
+        receiver.close();
+        assertTrue(feedbackReceived.getResult());
     }
 }

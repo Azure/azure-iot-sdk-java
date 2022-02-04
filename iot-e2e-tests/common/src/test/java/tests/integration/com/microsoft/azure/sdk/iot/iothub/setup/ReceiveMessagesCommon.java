@@ -7,6 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.service.messaging.DeliveryAcknowledgement;
 import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -89,9 +90,6 @@ public class ReceiveMessagesCommon extends IntegrationTest
 
     protected static Map<String, String> messageProperties = new HashMap<>(3);
 
-    protected final static String SET_MINIMUM_POLLING_INTERVAL = "SetMinimumPollingInterval";
-    protected final static Long ONE_SECOND_POLLING_INTERVAL = 1000L;
-
     protected static int MESSAGE_SIZE_IN_BYTES = 1000;
     protected static int LARGE_MESSAGE_SIZE_IN_BYTES = 65000; // Max C2D message size is 65535
 
@@ -100,8 +98,8 @@ public class ReceiveMessagesCommon extends IntegrationTest
     // How much to wait until receiving a message from the server, in milliseconds
     protected static final int RECEIVE_TIMEOUT_MILLISECONDS = 3 * 60 * 1000; // 3 minutes
 
-    protected static String expectedCorrelationId = "1234";
-    protected static String expectedMessageId = "5678";
+    protected static final int FEEDBACK_TIMEOUT_MILLIS = 60 * 1000; // 1 minute
+
     protected static final long ERROR_INJECTION_RECOVERY_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
 
     public ReceiveMessagesTestInstance testInstance;
@@ -204,7 +202,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
             boolean resultValue = true;
             HashMap<String, String> messageProperties = (HashMap<String, String>) ReceiveMessagesTests.messageProperties;
             Success messageReceived = (Success)context;
-            if (!hasExpectedProperties(msg, messageProperties) || !hasExpectedSystemProperties(msg))
+            if (!hasExpectedProperties(msg, messageProperties) || !hasExpectedSystemProperties(msg, expectedMessage.getCorrelationId(), expectedMessage.getMessageId()))
             {
                 log.warn("Unexpected properties in the received message");
                 resultValue = false;
@@ -241,7 +239,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
             HashMap<String, String> messageProperties = (HashMap<String, String>) ReceiveMessagesTests.messageProperties;
             Success messageReceived = (Success)context;
             boolean resultValue = true;
-            if (!hasExpectedProperties(msg, messageProperties) || !hasExpectedSystemProperties(msg))
+            if (!hasExpectedProperties(msg, messageProperties) || !hasExpectedSystemProperties(msg, expectedMessage.getCorrelationId(), expectedMessage.getMessageId()))
             {
                 log.warn("Unexpected properties in the received message");
                 resultValue = false;
@@ -273,7 +271,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
         return true;
     }
 
-    protected static boolean hasExpectedSystemProperties(com.microsoft.azure.sdk.iot.device.Message msg)
+    protected static boolean hasExpectedSystemProperties(com.microsoft.azure.sdk.iot.device.Message msg, String expectedCorrelationId, String expectedMessageId)
     {
         if (msg.getCorrelationId() == null || !msg.getCorrelationId().equals(expectedCorrelationId))
         {
@@ -288,9 +286,10 @@ public class ReceiveMessagesCommon extends IntegrationTest
         byte[] payload = new byte[messageSize];
         new Random().nextBytes(payload);
         com.microsoft.azure.sdk.iot.service.messaging.Message serviceMessage = new Message(payload);
-        serviceMessage.setCorrelationId(expectedCorrelationId);
-        serviceMessage.setMessageId(expectedMessageId);
+        serviceMessage.setCorrelationId(UUID.randomUUID().toString());
+        serviceMessage.setMessageId(UUID.randomUUID().toString());
         serviceMessage.setProperties(messageProperties);
+        serviceMessage.setDeliveryAcknowledgement(DeliveryAcknowledgement.Full);
         return serviceMessage;
     }
 
