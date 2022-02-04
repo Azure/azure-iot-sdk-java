@@ -16,10 +16,13 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.Objects;
 
+/**
+ * A receiver that listens for file upload notifications and completes/abandons each notification after they are received.
+ */
 @Slf4j
 public class FileUploadNotificationReceiver
 {
-    private AmqpFileUploadNotificationReceivedHandler amqpReceiveHandler;
+    private final AmqpFileUploadNotificationReceivedHandler amqpReceiveHandler;
     private final String hostName;
     private ReactorRunner amqpConnectionReactorRunner;
 

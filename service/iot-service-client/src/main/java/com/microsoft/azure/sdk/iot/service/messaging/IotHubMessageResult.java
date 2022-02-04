@@ -4,26 +4,22 @@
 package com.microsoft.azure.sdk.iot.service.messaging;
 
 /**
- * A return value from a message callback that instructs an IoT hub to complete or abandon the message. These
- * states are only valid for AMQP messages.
+ * The possible acknowledgement types for a received file upload notification and/or for a received cloud to device
+ * feedback message.
  */
 public enum IotHubMessageResult
 {
     /**
-     * Instructs IoT hub to complete the message.
-     * <p>
-     *      This will remove it from the IoT hub messaging queue and set the message to the Completed state.
-     * </p>
+     * This acknowledgement will remove the received message from the service's message queue so that it won't be sent
+     * again.
      */
     COMPLETE,
 
     /**
-     * Instructs IoT hub to abandon the message.
-     * <p>
-     *     This will put the message back into the IoT hub messaging queue to be processed again. The message will
-     *     be enqueued back to the IoT hub messaging queue for the value specified for "Max Delivery Count" times.
-     *     After the max is reached, the message will be set to to the dead lettered state and removed.
-     * </p>
+     * This acknowledgement will requeue the received message back into the service's message queue so that it will be
+     * sent again. This may be done if the message in question should be received by a different receiver, or at a later
+     * time. Each service message has a finite number of times that it can be received and then abandoned before the message
+     * will be removed from the queue. This maximum number of times it can be received can be set through the Azure portal.
      */
     ABANDON
 }

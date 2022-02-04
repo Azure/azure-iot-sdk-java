@@ -17,13 +17,13 @@ import java.io.IOException;
 import java.util.Objects;
 
 /**
- * FeedbackReceiver is a specialized receiver whose ReceiveAsync
- * method returns a FeedbackBatch instead of a Message.
+ * A receiver that listens for cloud to device feedback messages and completes/abandons each notification after
+ * they are received.
  */
 @Slf4j
 public class FeedbackReceiver
 {
-    private AmqpFeedbackReceivedHandler amqpReceiveHandler;
+    private final AmqpFeedbackReceivedHandler amqpReceiveHandler;
     private final String hostName;
     private ReactorRunner amqpConnectionReactorRunner;
 
