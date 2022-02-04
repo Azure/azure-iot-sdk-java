@@ -21,7 +21,7 @@ public class SamplesArguments
 
     public SamplesArguments(String[] args)
     {
-        Option hostName = new Option("h", DPS_HOSTNAME, true, "IoT Hub host name (\"my-azure-iot-hub.azure-devices.net\" for example)");
+        Option hostName = new Option("d", DPS_HOSTNAME, true, "Device Provisioning Service host name (\"my-dps.azure-devices-provisioning.net\") for example");
         Option tenantId = new Option("t", TENANT_ID, true, "AAD Tenant Id");
         Option clientId = new Option("c", CLIENT_ID, true, "AAD Client Id");
         Option clientSecret = new Option("s", CLIENT_SECRET, true, "AAD Client Secret");
@@ -59,7 +59,7 @@ public class SamplesArguments
         this.clientSecret = cmd.getOptionValue(CLIENT_SECRET);
     }
 
-    public String getIotHubHostName()
+    public String getDPSHostName()
     {
         return this.deviceProvisioningServiceHostName;
     }
