@@ -14,7 +14,6 @@ import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol
 import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.messaging.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
