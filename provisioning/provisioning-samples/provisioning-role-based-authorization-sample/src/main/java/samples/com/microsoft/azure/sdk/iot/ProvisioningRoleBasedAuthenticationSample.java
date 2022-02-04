@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.azure.core.credential.TokenCredential;

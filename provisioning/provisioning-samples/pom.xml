@@ -75,6 +75,7 @@
         <module>service-bulkoperation-sample</module>
         <module>service-enrollment-group-sample</module>
         <module>provisioning-role-based-authorization-sample</module>
+        <module>provisioning-azure-sas-credential-sample</module>
     </modules>
     <build>
         <plugins>
