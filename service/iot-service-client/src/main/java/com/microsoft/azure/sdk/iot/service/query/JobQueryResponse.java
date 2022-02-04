@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.jobs.scheduled.Job;
 import com.microsoft.azure.sdk.iot.service.jobs.scheduled.JobStatus;
 import com.microsoft.azure.sdk.iot.service.jobs.scheduled.JobType;
+import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,7 +22,10 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
-public class JobQueryResponse //TODO probably need to split this in two since one job query returns jobs and the other returns results I think?
+/**
+ * A pageable set of {@link Job} objects returned from a query.
+ */
+public class JobQueryResponse
 {
     private final transient Gson gson;
 
@@ -74,16 +78,35 @@ public class JobQueryResponse //TODO probably need to split this in two since on
         this.jobStatus = jobStatus;
     }
 
+    /**
+     * @return True if the query has at least one more job to return. False otherwise.
+     */
     public boolean hasNext()
     {
         return this.jobs.hasNext() || this.continuationToken != null;
     }
 
+    /**
+     * Return the next job from the query. If the previous page of query results has been exhausted, then this method
+     * will make a request to the service to get the next page of results using the default paging options.
+     * @return the next job from the query.
+     * @throws IotHubException If any IoT Hub level errors occur such as an {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException}.
+     * @throws IOException If any network level errors occur.
+     */
     public Job next() throws IotHubException, IOException
     {
         return next(QueryPageOptions.builder().build());
     }
 
+    /**
+     * Return the next job from the query. If the previous page of query results has been exhausted, then this method
+     * will make a request to the service to get the next page of results using the provided paging options.
+     * @return the next job from the query.
+     * @param pageOptions the options for the next page of results if the next page is retrieved to fulfil this request
+     * for the next job. May not be null.
+     * @throws IotHubException If any IoT Hub level errors occur such as an {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException}.
+     * @throws IOException If any network level errors occur.
+     */
     public Job next(QueryPageOptions pageOptions) throws IotHubException, IOException
     {
         Objects.requireNonNull(pageOptions);

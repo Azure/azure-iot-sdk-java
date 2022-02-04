@@ -182,42 +182,15 @@ public final class TwinClient
 
     private Twin getTwin(URL url) throws IotHubException, IOException
     {
-        ProxyOptions proxyOptions = options.getProxyOptions();
-        Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
-        HttpRequest httpRequest = new HttpRequest(
-            url,
-            HttpMethod.GET,
-            new byte[0],
-            this.getAuthenticationToken(),
-            proxy);
-
-        httpRequest.setReadTimeoutMillis(options.getHttpReadTimeout());
-        httpRequest.setConnectTimeoutMillis(options.getHttpConnectTimeout());
-        httpRequest.setHeaderField(REQUEST_ID, String.valueOf(requestId++));
-
+        HttpRequest httpRequest = createRequest(url, HttpMethod.GET, new byte[0]);
         HttpResponse response = httpRequest.send();
-
         String twinString = new String(response.getBody(), StandardCharsets.UTF_8);
-
-        TwinState twinState = new TwinState(twinString);
-
-        Twin twin = new Twin(twinState.getDeviceId());
-        twin.setModuleId(twinState.getModuleId());
-        twin.setVersion(twinState.getVersion());
-        twin.setModelId(twinState.getModelId());
-        twin.setETag(twinState.getETag());
-        twin.setTags(twinState.getTags());
-        twin.setDesiredProperties(twinState.getDesiredProperty());
-        twin.setReportedProperties(twinState.getReportedProperty());
-        twin.setCapabilities(twinState.getCapabilities());
-        twin.setConfigurations(twinState.getConfigurations());
-        twin.setConnectionState(twinState.getConnectionState());
-        return twin;
+        return new Twin(twinString);
     }
 
     /**
      * This method updates device twin for the specified device.
-     * <p>This API uses the IoT Hub PATCH API when sending updates, but it sends the full twin with each patch update.
+     * <p>This API uses the IoT Hub PATCH API when sending updates, but it sends the full twin with each patch replace.
      * As a result, devices subscribed to twin will receive notifications that each property is changed when this API is
      * called, even if only some of the properties were changed.</p>
      * <p>See <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/devices/updatetwin">PATCH</a> for
@@ -253,19 +226,7 @@ public final class TwinClient
         TwinState twinState = new TwinState(twin.getTagsMap(), twin.getDesiredMap(), null);
         String twinJson = twinState.toJsonElement().toString();
 
-        ProxyOptions proxyOptions = options.getProxyOptions();
-        Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
-
-        HttpRequest httpRequest = new HttpRequest(
-            url,
-            HttpMethod.PATCH,
-            twinJson.getBytes(StandardCharsets.UTF_8),
-            this.getAuthenticationToken(),
-            proxy);
-
-        httpRequest.setReadTimeoutMillis(options.getHttpReadTimeout());
-        httpRequest.setConnectTimeoutMillis(options.getHttpConnectTimeout());
-        httpRequest.setHeaderField(REQUEST_ID, String.valueOf(requestId++));
+        HttpRequest httpRequest = createRequest(url, HttpMethod.PATCH, twinJson.getBytes(StandardCharsets.UTF_8));
 
         // no need to return http response since method returns void
         httpRequest.send();
@@ -299,48 +260,26 @@ public final class TwinClient
 
         TwinState twinState = new TwinState(twin.getTagsMap(), twin.getDesiredMap(), null);
         String twinJson = twinState.toJsonElement().toString();
-
-        Proxy proxy = options.getProxyOptions() == null
-                ? null
-                : options.getProxyOptions().getProxy();
-
-        HttpRequest httpRequest = new HttpRequest(
-            url,
-            HttpMethod.PUT,
-            twinJson.getBytes(StandardCharsets.UTF_8),
-            this.getAuthenticationToken(),
-            proxy);
-
-        httpRequest.setReadTimeoutMillis(options.getHttpReadTimeout());
-        httpRequest.setConnectTimeoutMillis(options.getHttpConnectTimeout());
-        httpRequest.setHeaderField(REQUEST_ID, String.valueOf(requestId++));
+        HttpRequest httpRequest = createRequest(url, HttpMethod.PUT, twinJson.getBytes(StandardCharsets.UTF_8));
 
         HttpResponse httpResponse = httpRequest.send();
+        String twinString = new String(httpResponse.getBody(), StandardCharsets.UTF_8);
+        return new Twin(twinString);
+    }
 
-        String responseTwinJson = new String(httpResponse.getBody(), StandardCharsets.UTF_8);
-
-        twinState = new TwinState(responseTwinJson);
-
-        Twin responseTwin;
-        if (twinState.getModuleId() == null)
+    private HttpRequest createRequest(URL url, HttpMethod method, byte[] payload) throws IOException
+    {
+        Proxy proxy = null;
+        if (this.options.getProxyOptions() != null)
         {
-            responseTwin = new Twin(twinState.getDeviceId());
-        }
-        else
-        {
-            responseTwin = new Twin(twinState.getDeviceId(), twinState.getModuleId());
+            proxy = this.options.getProxyOptions().getProxy();
         }
 
-        responseTwin.setVersion(twinState.getVersion());
-        responseTwin.setModelId(twinState.getModelId());
-        responseTwin.setETag(twinState.getETag());
-        responseTwin.setTags(twinState.getTags());
-        responseTwin.setDesiredProperties(twinState.getDesiredProperty());
-        responseTwin.setReportedProperties(twinState.getReportedProperty());
-        responseTwin.setCapabilities(twinState.getCapabilities());
-        responseTwin.setConfigurations(twinState.getConfigurations());
-        responseTwin.setConnectionState(twinState.getConnectionState());
-        return responseTwin;
+        HttpRequest request = new HttpRequest(url, method, payload, getAuthenticationToken(), proxy);
+        request.setReadTimeoutMillis(options.getHttpReadTimeout());
+        request.setConnectTimeoutMillis(options.getHttpConnectTimeout());
+        request.setHeaderField(REQUEST_ID, String.valueOf(requestId++));
+        return request;
     }
 
     private String getAuthenticationToken()

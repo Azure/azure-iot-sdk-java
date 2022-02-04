@@ -162,7 +162,7 @@ public class ConfigurationsClient
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public Configuration addConfiguration(Configuration configuration) throws IOException, IotHubException
+    public Configuration add(Configuration configuration) throws IOException, IotHubException
     {
         if (configuration == null)
         {
@@ -190,7 +190,7 @@ public class ConfigurationsClient
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public Configuration getConfiguration(String configurationId) throws IOException, IotHubException
+    public Configuration get(String configurationId) throws IOException, IotHubException
     {
         if (configurationId == null || configurationId.isEmpty())
         {
@@ -216,7 +216,7 @@ public class ConfigurationsClient
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public List<Configuration> getConfigurations(int maxCount) throws IOException, IotHubException
+    public List<Configuration> get(int maxCount) throws IOException, IotHubException
     {
         if (maxCount < 1)
         {
@@ -254,7 +254,7 @@ public class ConfigurationsClient
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public Configuration updateConfiguration(Configuration configuration) throws IOException, IotHubException
+    public Configuration replace(Configuration configuration) throws IOException, IotHubException
     {
         if (configuration == null)
         {
@@ -281,7 +281,7 @@ public class ConfigurationsClient
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public void removeConfiguration(String configurationId) throws IOException, IotHubException
+    public void delete(String configurationId) throws IOException, IotHubException
     {
         removeConfigurationOperation(configurationId, "*");
     }
@@ -289,18 +289,18 @@ public class ConfigurationsClient
     /**
      * Send remove configuration request and verify response
      *
-     * @param config The configuration to be removed
+     * @param configuration The configuration to be removed
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public void removeConfiguration(Configuration config) throws IOException, IotHubException
+    public void delete(Configuration configuration) throws IOException, IotHubException
     {
-        if (config == null)
+        if (configuration == null)
         {
             throw new IllegalArgumentException("configuration cannot be null or empty");
         }
 
-        removeConfigurationOperation(config.getId(), config.getEtag());
+        removeConfigurationOperation(configuration.getId(), configuration.getEtag());
     }
 
     /**

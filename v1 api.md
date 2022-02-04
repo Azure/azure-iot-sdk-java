@@ -522,6 +522,168 @@ public class FileUploadNotificationReceiver
 
 ```java
 
+@Slf4j
+public class RegistryManager
+{
+    @Deprecated
+    public RegistryManager();
+
+    @Deprecated
+    public static RegistryManager createFromConnectionString(String connectionString) throws IOException;
+
+    @Deprecated
+    public static RegistryManager createFromConnectionString(
+            String connectionString,
+            RegistryManagerOptions options) throws IOException;
+
+    public RegistryManager(String connectionString);
+
+    public RegistryManager(String connectionString, RegistryManagerOptions options);
+
+    public RegistryManager(String hostName, TokenCredential credential);
+
+    public RegistryManager(String hostName, TokenCredential credential, RegistryManagerOptions options);
+
+    public RegistryManager(String hostName, AzureSasCredential azureSasCredential);
+
+    public RegistryManager(String hostName, AzureSasCredential azureSasCredential, RegistryManagerOptions options);
+
+    @Deprecated
+    public void open();
+
+    public void close();
+
+    public Device addDevice(Device device) throws IOException, IotHubException, JsonSyntaxException;
+
+    @Deprecated
+    public CompletableFuture<Device> addDeviceAsync(Device device) throws IOException, IotHubException;
+
+    public Device getDevice(String deviceId) throws IOException, IotHubException, JsonSyntaxException;
+
+    @Deprecated
+    public CompletableFuture<Device> getDeviceAsync(String deviceId) throws IOException, IotHubException;
+
+    @Deprecated
+    public ArrayList<Device> getDevices(Integer maxCount) throws IOException, IotHubException, JsonSyntaxException;
+
+    @Deprecated
+    public CompletableFuture<ArrayList<Device>> getDevicesAsync(Integer maxCount) throws IOException, IotHubException;
+
+    public String getDeviceConnectionString(Device device);
+
+    public Device updateDevice(Device device) throws IOException, IotHubException;
+
+    @Deprecated
+    public Device updateDevice(Device device, Boolean forceUpdate)
+            throws IOException, IotHubException, JsonSyntaxException;
+
+    @Deprecated
+    public CompletableFuture<Device> updateDeviceAsync(Device device) throws IOException, IotHubException;
+
+    @Deprecated
+    public CompletableFuture<Device> updateDeviceAsync(Device device, Boolean forceUpdate) throws IOException, IotHubException;
+
+    public void removeDevice(String deviceId) throws IOException, IotHubException;
+
+    public void removeDevice(Device device) throws IOException, IotHubException, IllegalArgumentException;
+
+    @Deprecated
+    public CompletableFuture<Boolean> removeDeviceAsync(String deviceId) throws IOException, IotHubException;
+
+    public RegistryStatistics getStatistics() throws IOException, IotHubException, JsonSyntaxException;
+
+    @Deprecated
+    public CompletableFuture<RegistryStatistics> getStatisticsAsync() throws IOException, IotHubException;
+
+    public JobProperties exportDevices(String exportBlobContainerUri, Boolean excludeKeys)
+            throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException;
+
+    @Deprecated
+    public CompletableFuture<JobProperties> exportDevicesAsync(String exportBlobContainerUri, Boolean excludeKeys)
+            throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException;
+
+    public JobProperties exportDevices(JobProperties exportDevicesParameters)
+            throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException;
+
+    @Deprecated
+    public CompletableFuture<JobProperties> exportDevicesAsync(JobProperties exportDevicesParameters)
+            throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException;
+
+    public JobProperties importDevices(String importBlobContainerUri, String outputBlobContainerUri)
+            throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException;
+
+    @Deprecated
+    public CompletableFuture<JobProperties> importDevicesAsync(String importBlobContainerUri, String outputBlobContainerUri)
+            throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException;
+
+    public JobProperties importDevices(JobProperties importDevicesParameters)
+            throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException;
+
+    @Deprecated
+    public CompletableFuture<JobProperties> importDevicesAsync(JobProperties importParameters)
+            throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException;
+
+    public JobProperties getJob(String jobId)
+            throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException;
+
+    @Deprecated
+    public CompletableFuture<JobProperties> getJobAsync(String jobId)
+            throws IllegalArgumentException, IOException, IotHubException;
+
+    public Module addModule(Module module) throws IOException, IotHubException, JsonSyntaxException;
+
+    public Module getModule(String deviceId, String moduleId) throws IOException, IotHubException, JsonSyntaxException;
+
+    public List<Module> getModulesOnDevice(String deviceId) throws IOException, IotHubException, JsonSyntaxException;
+
+    public Module updateModule(Module module) throws IOException, IotHubException;
+
+    @Deprecated
+    public Module updateModule(Module module, Boolean forceUpdate)
+            throws IOException, IotHubException, JsonSyntaxException;
+
+    public void removeModule(String deviceId, String moduleId) throws IOException, IotHubException;
+
+    public void removeModule(Module module) throws IOException, IotHubException, IllegalArgumentException;
+
+    public Configuration addConfiguration(Configuration configuration)
+            throws IOException, IotHubException, JsonSyntaxException;
+
+    public Configuration getConfiguration(String configurationId)
+            throws IOException, IotHubException, JsonSyntaxException;
+
+    public List<Configuration> getConfigurations(Integer maxCount)
+            throws IOException, IotHubException, JsonSyntaxException;
+
+    public Configuration updateConfiguration(Configuration configuration) throws IOException, IotHubException;
+
+    @Deprecated
+    public Configuration updateConfiguration(Configuration configuration, Boolean forceUpdate)
+            throws IOException, IotHubException, JsonSyntaxException;
+
+    public void removeConfiguration(String configurationId) throws IOException, IotHubException;
+
+    public void removeConfiguration(Configuration config) throws IOException, IotHubException, IllegalArgumentException;
+
+    public void applyConfigurationContentOnDevice(String deviceId, ConfigurationContent content)
+            throws IOException, IotHubException;
+}
+
+
+@Builder
+public class RegistryManagerOptions
+{
+    @Getter
+    private final ProxyOptions proxyOptions;
+
+    @Getter
+    @Builder.Default
+    private final int httpReadTimeout = DEFAULT_HTTP_READ_TIMEOUT_MS;
+
+    @Getter
+    @Builder.Default
+    private final int httpConnectTimeout = DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
+}
 ```
 
 </details>
@@ -541,12 +703,83 @@ public class FileUploadNotificationReceiver
 
 ```java
 
+public class DeviceMethod
+{
+    @Deprecated
+    public static DeviceMethod createFromConnectionString(String connectionString) throws IOException;
+
+    @Deprecated
+    public static DeviceMethod createFromConnectionString(
+        String connectionString,
+        DeviceMethodClientOptions options) throws IOException;
+
+    public DeviceMethod(String connectionString);
+
+    public DeviceMethod(String connectionString, DeviceMethodClientOptions options);
+
+    public DeviceMethod(String hostName, TokenCredential credential);
+
+    public DeviceMethod(String hostName, TokenCredential credential, DeviceMethodClientOptions options);
+
+    public DeviceMethod(String hostName, AzureSasCredential azureSasCredential);
+
+    public DeviceMethod(String hostName, AzureSasCredential azureSasCredential, DeviceMethodClientOptions options);
+
+    public synchronized MethodResult invoke(
+        String deviceId,
+        String methodName,
+        Long responseTimeoutInSeconds,
+        Long connectTimeoutInSeconds,
+        Object payload) throws IotHubException, IOException;
+
+    public synchronized MethodResult invoke(
+        String deviceId,
+        String moduleId,
+        String methodName,
+        Long responseTimeoutInSeconds,
+        Long connectTimeoutInSeconds,
+        Object payload) throws IotHubException, IOException;
+
+    public Job scheduleDeviceMethod(
+        String queryCondition,
+        String methodName,
+        Long responseTimeoutInSeconds,
+        Long connectTimeoutInSeconds,
+        Object payload,
+        Date startTimeUtc,
+        long maxExecutionTimeInSeconds) throws IOException, IotHubException;
+}
+
+@Builder
+public class DeviceMethodClientOptions
+{
+    @Getter
+    private final ProxyOptions proxyOptions;
+
+    @Getter
+    @Builder.Default
+    private final int httpReadTimeout = DEFAULT_HTTP_READ_TIMEOUT_MS;
+
+    @Getter
+    @Builder.Default
+    private final int httpConnectTimeout = DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
+}
+
 ```
 
 </details>
 
 <details>
   <summary>JobsClient and Options</summary>
+
+```java
+
+```
+
+</details>
+
+<details>
+  <summary>QueryClient and Options</summary>
 
 ```java
 

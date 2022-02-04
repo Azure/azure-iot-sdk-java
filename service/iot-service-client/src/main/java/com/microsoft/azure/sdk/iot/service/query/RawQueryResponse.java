@@ -18,6 +18,9 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
+/**
+ * A pageable set of undefined json objects returned from a query.
+ */
 public class RawQueryResponse
 {
     private final transient Gson gson;
@@ -48,16 +51,35 @@ public class RawQueryResponse
         this.originalQuery = originalQuery;
     }
 
+    /**
+     * @return True if the query has at least one more json object to return. False otherwise.
+     */
     public boolean hasNext()
     {
         return this.jsonObjects.hasNext() || this.continuationToken != null;
     }
 
+    /**
+     * Return the next json object from the query. If the previous page of query results has been exhausted, then this method
+     * will make a request to the service to get the next page of results using the default paging options.
+     * @return the next json object from the query.
+     * @throws IotHubException If any IoT Hub level errors occur such as an {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException}.
+     * @throws IOException If any network level errors occur.
+     */
     public String next() throws IotHubException, IOException
     {
         return next(QueryPageOptions.builder().build());
     }
 
+    /**
+     * Return the next json object from the query. If the previous page of query results has been exhausted, then this method
+     * will make a request to the service to get the next page of results using the provided paging options.
+     * @return the next json object from the query.
+     * @param pageOptions the options for the next page of results if the next page is retrieved to fulfil this request
+     * for the next json object. May not be null.
+     * @throws IotHubException If any IoT Hub level errors occur such as an {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException}.
+     * @throws IOException If any network level errors occur.
+     */
     public String next(QueryPageOptions pageOptions) throws IotHubException, IOException
     {
         Objects.requireNonNull(pageOptions);

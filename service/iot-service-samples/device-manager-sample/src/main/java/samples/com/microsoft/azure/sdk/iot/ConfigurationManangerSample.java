@@ -78,7 +78,7 @@ public class ConfigurationManangerSample
 
         try
         {
-            List<Configuration> configList = configurationsClient.getConfigurations(20);
+            List<Configuration> configList = configurationsClient.get(20);
             System.out.println(configList.size() + " Configurations found");
 
             for (Configuration config : configList)
@@ -108,7 +108,7 @@ public class ConfigurationManangerSample
 
         try
         {
-            config = configurationsClient.addConfiguration(config);
+            config = configurationsClient.add(config);
             System.out.println("Add configuration " + config.getId() + " succeeded.");
             printConfiguration(config);
         }
@@ -125,7 +125,7 @@ public class ConfigurationManangerSample
         Configuration returnConfig = null;
         try
         {
-            returnConfig = configurationsClient.getConfiguration(SampleUtils.configurationId);
+            returnConfig = configurationsClient.get(SampleUtils.configurationId);
             printConfiguration(returnConfig);
         }
         catch (IotHubException | IOException iote)
@@ -143,7 +143,7 @@ public class ConfigurationManangerSample
         config.setPriority(1);
         try
         {
-            config = configurationsClient.updateConfiguration(config);
+            config = configurationsClient.replace(config);
             printConfiguration(config);
         }
         catch (IotHubException | IOException iote)
@@ -158,7 +158,7 @@ public class ConfigurationManangerSample
 
         try
         {
-            configurationsClient.removeConfiguration(SampleUtils.configurationId);
+            configurationsClient.delete(SampleUtils.configurationId);
             System.out.println("Device removed: " + SampleUtils.configurationId);
         }
         catch (IotHubException | IOException iote)

@@ -138,18 +138,18 @@ public class ConfigurationsClientTests extends IntegrationTest
             "SELECT deviceId FROM devices WHERE properties.reported.chillerWaterSettings.status=\'pending\'");}});
         configAdded.setTargetCondition("properties.reported.chillerProperties.model=\'4000x\'");
         configAdded.setPriority(20);
-        testInstance.configurationsClient.addConfiguration(configAdded);
+        testInstance.configurationsClient.add(configAdded);
 
         //-Read-//
-        Configuration configRetrieved = testInstance.configurationsClient.getConfiguration(testInstance.configId);
+        Configuration configRetrieved = testInstance.configurationsClient.get(testInstance.configId);
 
         //-Update-//
-        Configuration configUpdated = testInstance.configurationsClient.getConfiguration(testInstance.configId);
+        Configuration configUpdated = testInstance.configurationsClient.get(testInstance.configId);
         configUpdated.setPriority(1);
-        configUpdated = testInstance.configurationsClient.updateConfiguration(configUpdated);
+        configUpdated = testInstance.configurationsClient.replace(configUpdated);
 
         //-Delete-//
-        testInstance.configurationsClient.removeConfiguration(testInstance.configId);
+        testInstance.configurationsClient.delete(testInstance.configId);
 
         // Assert
         assertEquals(buildExceptionMessage("", hostName), testInstance.configId, configAdded.getId());
@@ -218,7 +218,7 @@ public class ConfigurationsClientTests extends IntegrationTest
     {
         try
         {
-            configurationsClient.getConfiguration(configId);
+            configurationsClient.get(configId);
         }
         catch (IotHubException e)
         {

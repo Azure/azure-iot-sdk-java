@@ -341,10 +341,6 @@ public class ServiceClient
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             ServiceClientOptions options);
 
-    public void open() throws IOException;
-
-    public void close() throws IOException;
-
     public void send(String deviceId, Message message) throws IOException, IotHubException;
 
     public void send(String deviceId, String moduleId, Message message) throws IOException, IotHubException;
@@ -371,6 +367,10 @@ public interface FeedbackMessageReceivedCallback
 
 public class FeedbackReceiver
 {
+    @Setter
+    @Getter
+    private ConnectionLostCallback connectionLostCallback;
+    
     public void open() throws IOException;
 
     public void close();
@@ -383,6 +383,10 @@ public interface FileUploadNotificationReceivedCallback
 
 public class FileUploadNotificationReceiver
 {
+    @Setter
+    @Getter
+    private ConnectionLostCallback connectionLostCallback;
+    
     public void open() throws IOException;
 
     public void close();
@@ -393,10 +397,64 @@ public class FileUploadNotificationReceiver
 </details>
 
 <details>
-  <summary>RegistryManager and Options</summary>
+  <summary>RegistryClient and Options</summary>
 
 ```java
+public final class RegistryClient
+{
+    public RegistryClient(String connectionString);
 
+    public RegistryClient(String connectionString, RegistryClientOptions options);
+
+    public RegistryClient(String hostName, TokenCredential credential);
+
+    public RegistryClient(String hostName, TokenCredential credential, RegistryClientOptions options);
+
+    public RegistryClient(String hostName, AzureSasCredential azureSasCredential);
+
+    public RegistryClient(String hostName, AzureSasCredential azureSasCredential, RegistryClientOptions options);
+
+    public Device addDevice(Device device) throws IOException, IotHubException;
+
+    public Device getDevice(String deviceId) throws IOException, IotHubException;
+
+    public String getDeviceConnectionString(Device device);
+
+    public Device updateDevice(Device device) throws IOException, IotHubException;
+
+    public void removeDevice(String deviceId) throws IOException, IotHubException;
+
+    public void removeDevice(Device device) throws IOException, IotHubException;
+
+    public RegistryStatistics getStatistics() throws IOException, IotHubException;
+
+    public Module addModule(Module module) throws IOException, IotHubException;
+
+    public Module getModule(String deviceId, String moduleId) throws IOException, IotHubException;
+
+    public List<Module> getModulesOnDevice(String deviceId) throws IOException, IotHubException;
+
+    public Module updateModule(Module module) throws IOException, IotHubException;
+
+    public void removeModule(String deviceId, String moduleId) throws IOException, IotHubException;
+
+    public void removeModule(Module module) throws IOException, IotHubException;
+}
+
+@Builder
+public final class RegistryClientOptions
+{
+    @Getter
+    private final ProxyOptions proxyOptions;
+
+    @Getter
+    @Builder.Default
+    private final int httpReadTimeout = DEFAULT_HTTP_READ_TIMEOUT_MS;
+
+    @Getter
+    @Builder.Default
+    private final int httpConnectTimeout = DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
+}
 ```
 
 </details>
@@ -405,6 +463,45 @@ public class FileUploadNotificationReceiver
   <summary>TwinClient and Options</summary>
 
 ```java
+
+public final class TwinClient
+{
+    public TwinClient(String connectionString);
+
+    public TwinClient(String connectionString, TwinClientOptions options);
+
+    public TwinClient(String hostName, TokenCredential credential);
+
+    public TwinClient(String hostName, TokenCredential credential, TwinClientOptions options);
+
+    public TwinClient(String hostName, AzureSasCredential azureSasCredential);
+
+    public TwinClient(String hostName, AzureSasCredential azureSasCredential, TwinClientOptions options);
+
+    public Twin getTwin(String deviceId) throws IotHubException, IOException;
+
+    public Twin getTwin(String deviceId, String moduleId) throws IotHubException, IOException;
+
+    public void updateTwin(Twin twin) throws IotHubException, IOException;
+
+    public Twin replaceTwin(Twin twin) throws IotHubException, IOException;
+}
+
+@Builder
+public final class TwinClientOptions
+{
+    @Getter
+    private final ProxyOptions proxyOptions;
+
+    @Getter
+    @Builder.Default
+    private final int httpReadTimeout = DEFAULT_HTTP_READ_TIMEOUT_MS;
+
+    @Getter
+    @Builder.Default
+    private final int httpConnectTimeout = DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
+}
+
 
 ```
 
@@ -416,6 +513,63 @@ public class FileUploadNotificationReceiver
 
 ```java
 
+public final class DirectMethodsClient
+{
+    public DirectMethodsClient(String connectionString);
+
+    public DirectMethodsClient(String connectionString, DirectMethodsClientOptions options);
+
+    public DirectMethodsClient(String hostName, TokenCredential credential);
+
+    public DirectMethodsClient(String hostName, TokenCredential credential, DirectMethodsClientOptions options);
+
+    public DirectMethodsClient(String hostName, AzureSasCredential azureSasCredential);
+
+    public DirectMethodsClient(String hostName, AzureSasCredential azureSasCredential, DirectMethodsClientOptions options);
+
+    public MethodResult invoke(String deviceId, String methodName) 
+        throws IotHubException, IOException;
+
+    public MethodResult invoke(String deviceId, String methodName, DirectMethodRequestOptions options) 
+        throws IotHubException, IOException;
+
+    public MethodResult invoke(String deviceId, String moduleId, String methodName) 
+        throws IotHubException, IOException;
+
+    public MethodResult invoke(String deviceId, String moduleId, String methodName, DirectMethodRequestOptions options) 
+        throws IotHubException, IOException;
+}
+
+@Builder
+public final class DirectMethodsClientOptions
+{
+    @Getter
+    private final ProxyOptions proxyOptions;
+
+    @Getter
+    @Builder.Default
+    private final int httpReadTimeout = DEFAULT_HTTP_READ_TIMEOUT_MS;
+
+    @Getter
+    @Builder.Default
+    private final int httpConnectTimeout = DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
+}
+
+@Builder
+public final class DirectMethodRequestOptions
+{
+    @Getter
+    private final Object payload;
+
+    @Getter
+    @Builder.Default
+    private final int methodResponseTimeout = 200;
+
+    @Getter
+    @Builder.Default
+    private final int methodConnectTimeout = 200;
+}
+
 ```
 
 </details>
@@ -424,6 +578,138 @@ public class FileUploadNotificationReceiver
   <summary>JobsClient and Options</summary>
 
 ```java
+
+```
+
+</details>
+
+<details>
+  <summary>QueryClient and Options</summary>
+
+```java
+
+@Slf4j
+public final class QueryClient
+{
+    public QueryClient(String connectionString);
+
+    public QueryClient(String connectionString, QueryClientOptions options);
+
+    public QueryClient(String hostName, TokenCredential credential);
+
+    public QueryClient(String hostName, TokenCredential credential, QueryClientOptions options);
+
+    public QueryClient(String hostName, AzureSasCredential azureSasCredential);
+
+    public QueryClient(String hostName, AzureSasCredential azureSasCredential, QueryClientOptions options);
+
+    public TwinQueryResponse queryTwins(String query) throws IOException, IotHubException;
+
+    public TwinQueryResponse queryTwins(String query, QueryPageOptions options) throws IOException, IotHubException;
+
+    public JobQueryResponse queryJobs(String query) throws IOException, IotHubException;
+
+    public JobQueryResponse queryJobs(String query, QueryPageOptions options) throws IOException, IotHubException;
+
+    public JobQueryResponse queryJobs(JobType jobType, JobStatus jobStatus) throws IOException, IotHubException;
+
+    public JobQueryResponse queryJobs(JobType jobType, JobStatus jobStatus, QueryPageOptions options) throws IOException, IotHubException;
+
+    public RawQueryResponse queryRaw(String query) throws IOException, IotHubException;
+
+    public RawQueryResponse queryRaw(String query, QueryPageOptions options) throws IOException, IotHubException;
+}
+
+public class TwinQueryResponse
+{
+    @Getter
+    String continuationToken = "";
+
+    public boolean hasNext();
+
+    public Twin next() throws IotHubException, IOException;
+
+    public Twin next(QueryPageOptions pageOptions) throws IotHubException, IOException;
+}
+
+@Builder
+public final class QueryClientOptions
+{
+    @Getter
+    private final ProxyOptions proxyOptions;
+
+    @Getter
+    @Builder.Default
+    private final int httpReadTimeout = DEFAULT_HTTP_READ_TIMEOUT_MS;
+
+    @Getter
+    @Builder.Default
+    private final int httpConnectTimeout = DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
+}
+
+@Builder
+public final class QueryPageOptions
+{
+    @Getter
+    @Builder.Default
+    private int pageSize = 50;
+
+    @Getter
+    private String continuationToken;
+}
+
+```
+
+</details>
+
+<details>
+  <summary>ConfigurationsClient and Options</summary>
+
+```java
+
+public class ConfigurationsClient
+{
+    public ConfigurationsClient(String connectionString);
+
+    public ConfigurationsClient(String connectionString, ConfigurationsClientOptions options);
+
+    public ConfigurationsClient(String hostName, TokenCredential credential);
+
+    public ConfigurationsClient(String hostName, TokenCredential credential, ConfigurationsClientOptions options);
+
+    public ConfigurationsClient(String hostName, AzureSasCredential azureSasCredential);
+
+    public ConfigurationsClient(String hostName, AzureSasCredential azureSasCredential, ConfigurationsClientOptions options);
+
+    public Configuration add(Configuration configuration) throws IOException, IotHubException;
+
+    public Configuration get(String configurationId) throws IOException, IotHubException;
+
+    public List<Configuration> get(int maxCount) throws IOException, IotHubException;
+
+    public Configuration replace(Configuration configuration) throws IOException, IotHubException;
+
+    public void delete(String configurationId) throws IOException, IotHubException;
+
+    public void delete(Configuration configuration) throws IOException, IotHubException;
+
+    public void applyConfigurationContentOnDevice(String deviceId, ConfigurationContent content) throws IOException, IotHubException;
+}
+
+@Builder
+public class ConfigurationsClientOptions
+{
+    @Getter
+    private final ProxyOptions proxyOptions;
+
+    @Getter
+    @Builder.Default
+    private final int httpReadTimeout = DEFAULT_HTTP_READ_TIMEOUT_MS;
+
+    @Getter
+    @Builder.Default
+    private final int httpConnectTimeout = DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
+}
 
 ```
 

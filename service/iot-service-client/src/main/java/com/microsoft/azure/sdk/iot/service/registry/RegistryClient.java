@@ -7,7 +7,6 @@ package com.microsoft.azure.sdk.iot.service.registry;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
-import com.google.gson.JsonSyntaxException;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
@@ -168,7 +167,7 @@ public final class RegistryClient
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public Device addDevice(Device device) throws IOException, IotHubException, JsonSyntaxException
+    public Device addDevice(Device device) throws IOException, IotHubException
     {
         if (device == null)
         {
@@ -197,7 +196,7 @@ public final class RegistryClient
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public Device getDevice(String deviceId) throws IOException, IotHubException, JsonSyntaxException
+    public Device getDevice(String deviceId) throws IOException, IotHubException
     {
         if (deviceId == null || deviceId.isEmpty())
         {
@@ -291,9 +290,8 @@ public final class RegistryClient
      * @param device The device name to remove
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
-     * @throws IllegalArgumentException This exception is thrown if the device is null
      */
-    public void removeDevice(Device device) throws IOException, IotHubException, IllegalArgumentException
+    public void removeDevice(Device device) throws IOException, IotHubException
     {
         if (device == null)
         {
@@ -340,7 +338,7 @@ public final class RegistryClient
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public RegistryStatistics getStatistics() throws IOException, IotHubException, JsonSyntaxException
+    public RegistryStatistics getStatistics() throws IOException, IotHubException
     {
         URL url = IotHubConnectionString.getUrlDeviceStatistics(this.hostName);
 
@@ -363,7 +361,7 @@ public final class RegistryClient
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public Module addModule(Module module) throws IOException, IotHubException, JsonSyntaxException
+    public Module addModule(Module module) throws IOException, IotHubException
     {
         if (module == null)
         {
@@ -394,7 +392,7 @@ public final class RegistryClient
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public Module getModule(String deviceId, String moduleId) throws IOException, IotHubException, JsonSyntaxException
+    public Module getModule(String deviceId, String moduleId) throws IOException, IotHubException
     {
         if (deviceId == null || deviceId.isEmpty())
         {
@@ -427,7 +425,7 @@ public final class RegistryClient
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public List<Module> getModulesOnDevice(String deviceId) throws IOException, IotHubException, JsonSyntaxException
+    public List<Module> getModulesOnDevice(String deviceId) throws IOException, IotHubException
     {
         if (deviceId == null || deviceId.isEmpty())
         {
@@ -506,9 +504,8 @@ public final class RegistryClient
      * @param module The module to be removed
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
-     * @throws IllegalArgumentException This exception is thrown if the input module is null
      */
-    public void removeModule(Module module) throws IOException, IotHubException, IllegalArgumentException
+    public void removeModule(Module module) throws IOException, IotHubException
     {
         if (module == null)
         {
@@ -555,8 +552,7 @@ public final class RegistryClient
         IotHubExceptionManager.httpResponseVerification(response);
     }
 
-    private HttpRequest createRequest(URL url, HttpMethod method, byte[] payload)
-        throws IOException
+    private HttpRequest createRequest(URL url, HttpMethod method, byte[] payload) throws IOException
     {
         Proxy proxy = null;
         if (this.options.getProxyOptions() != null)

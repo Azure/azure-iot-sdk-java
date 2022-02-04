@@ -167,7 +167,7 @@ public class ConfigurationsClientTest
         constructorExpectations(connectionString);
         ConfigurationsClient configurationsClient = new ConfigurationsClient(connectionString);
 
-        configurationsClient.addConfiguration(null);
+        configurationsClient.add(null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_042: [The function shall deserialize the given configuration object to Json string]
@@ -194,7 +194,7 @@ public class ConfigurationsClientTest
         commonConfigExpectations(connectionString, configId);
 
         ConfigurationsClient configurationsClient = new ConfigurationsClient(connectionString);
-        Configuration returnConfig = configurationsClient.addConfiguration(config);
+        Configuration returnConfig = configurationsClient.add(config);
 
         commonConfigVerifications(HttpMethod.PUT, configId, returnConfig);
     }
@@ -208,7 +208,7 @@ public class ConfigurationsClientTest
         constructorExpectations(connectionString);
         ConfigurationsClient configurationsClient = new ConfigurationsClient(connectionString);
 
-        configurationsClient.getConfiguration(null);
+        configurationsClient.get(null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_049: [The constructor shall throw IllegalArgumentException if the configurationId string is null or empty]
@@ -220,7 +220,7 @@ public class ConfigurationsClientTest
         constructorExpectations(connectionString);
         ConfigurationsClient configurationsClient = new ConfigurationsClient(connectionString);
 
-        configurationsClient.getConfiguration("");
+        configurationsClient.get("");
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_050: [The function shall get the URL for the configuration]
@@ -238,7 +238,7 @@ public class ConfigurationsClientTest
         commonConfigExpectations(connectionString, configurationId);
 
         ConfigurationsClient configurationsClient = new ConfigurationsClient(connectionString);
-        Configuration returnConfiguration = configurationsClient.getConfiguration(configurationId);
+        Configuration returnConfiguration = configurationsClient.get(configurationId);
 
         commonConfigVerifications(HttpMethod.GET, configurationId, returnConfiguration);
     }
@@ -252,7 +252,7 @@ public class ConfigurationsClientTest
         constructorExpectations(connectionString);
         ConfigurationsClient configurationsClient = new ConfigurationsClient(connectionString);
 
-        configurationsClient.getConfigurations(0);
+        configurationsClient.get(0);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_057: [The function shall get the URL for the device]
@@ -270,7 +270,7 @@ public class ConfigurationsClientTest
         getConfigsExpectations(connectionString, numberOfConfigs);
 
         ConfigurationsClient configurationsClient = new ConfigurationsClient(connectionString);
-        List<Configuration> configs =  configurationsClient.getConfigurations(10);
+        List<Configuration> configs =  configurationsClient.get(10);
 
         getConfigsVerifications(numberOfConfigs, configs);
         assertEquals(2, configs.size());
@@ -285,10 +285,10 @@ public class ConfigurationsClientTest
         constructorExpectations(connectionString);
         ConfigurationsClient configurationsClient = new ConfigurationsClient(connectionString);
 
-        configurationsClient.updateConfiguration(null);
+        configurationsClient.replace(null);
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_064: [The function shall call updateConfiguration with forceUpdate = false]
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_064: [The function shall call replace with forceUpdate = false]
     @Test
     public void updateConfiguration_good_case() throws Exception
     {
@@ -306,7 +306,7 @@ public class ConfigurationsClientTest
         commonConfigExpectations(connectionString, configId);
 
         ConfigurationsClient configurationsClient = new ConfigurationsClient(connectionString);
-        Configuration returnConfig = configurationsClient.updateConfiguration(config);
+        Configuration returnConfig = configurationsClient.replace(config);
         commonConfigVerifications(HttpMethod.PUT, configId, returnConfig);
 
         new VerificationsInOrder()
@@ -326,7 +326,7 @@ public class ConfigurationsClientTest
         ConfigurationsClient configurationsClient = new ConfigurationsClient(connectionString);
 
         Configuration config = null;
-        configurationsClient.removeConfiguration(config);
+        configurationsClient.delete(config);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_087: [The function shall throw IllegalArgumentException if the input etag is null or empty]
@@ -348,7 +348,7 @@ public class ConfigurationsClientTest
             }
         };
 
-        configurationsClient.removeConfiguration(config);
+        configurationsClient.delete(config);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_087: [The function shall throw IllegalArgumentException if the input etag is null or empty]
@@ -370,7 +370,7 @@ public class ConfigurationsClientTest
             }
         };
 
-        configurationsClient.removeConfiguration(config);
+        configurationsClient.delete(config);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_073: [The function shall throw IllegalArgumentException if the input string is null or empty]
@@ -382,7 +382,7 @@ public class ConfigurationsClientTest
         constructorExpectations(connectionString);
         ConfigurationsClient configurationsClient = new ConfigurationsClient(connectionString);
 
-        configurationsClient.removeConfiguration((String)null);
+        configurationsClient.delete((String)null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_073: [The function shall throw IllegalArgumentException if the input string is null or empty]
@@ -394,7 +394,7 @@ public class ConfigurationsClientTest
         constructorExpectations(connectionString);
         ConfigurationsClient configurationsClient = new ConfigurationsClient(connectionString);
 
-        configurationsClient.removeConfiguration("");
+        configurationsClient.delete("");
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_074: [The function shall get the URL for the configuration]
@@ -423,7 +423,7 @@ public class ConfigurationsClientTest
         constructorExpectations(connectionString);
 
         ConfigurationsClient configurationsClient = new ConfigurationsClient(connectionString);
-        configurationsClient.removeConfiguration(config);
+        configurationsClient.delete(config);
 
         new VerificationsInOrder()
         {
@@ -452,7 +452,7 @@ public class ConfigurationsClientTest
 
         constructorExpectations(connectionString);
         ConfigurationsClient configurationsClient = new ConfigurationsClient(connectionString);
-        configurationsClient.removeConfiguration(configId);
+        configurationsClient.delete(configId);
 
         new VerificationsInOrder()
         {

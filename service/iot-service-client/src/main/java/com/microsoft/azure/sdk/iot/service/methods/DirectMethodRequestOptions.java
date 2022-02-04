@@ -17,17 +17,17 @@ public final class DirectMethodRequestOptions
 
     /**
      * The timeout (in seconds) before the direct method request will fail if the device fails to respond to the request.
-     * By default, there is no timeout.
+     * By default, this is set to 200 seconds (the maximum allowed value).
      */
     @Getter
     @Builder.Default
-    private final int methodResponseTimeout = 0;
+    private final int methodResponseTimeout = 200;
 
     /**
      * The timeout (in seconds) before the direct method request will fail if the request takes too long to reach the device.
-     * By default, there is no timeout.
+     * By default, this is set to 200 seconds (the maximum allowed value).
      */
     @Getter
     @Builder.Default
-    private final int methodConnectTimeout = 0;
+    private final int methodConnectTimeout = 200;
 }

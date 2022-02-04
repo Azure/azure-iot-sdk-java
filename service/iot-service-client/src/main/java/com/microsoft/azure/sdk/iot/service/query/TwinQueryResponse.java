@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
+/**
+ * A pageable set of {@link Twin} objects returned from a query.
+ */
 public class TwinQueryResponse
 {
     private final transient Gson gson;
@@ -57,16 +60,35 @@ public class TwinQueryResponse
         this.originalQuery = originalQuery;
     }
 
+    /**
+     * @return True if the query has at least one more twin to return. False otherwise.
+     */
     public boolean hasNext()
     {
         return this.twins.hasNext() || this.continuationToken != null;
     }
 
+    /**
+     * Return the next Twin from the query. If the previous page of query results has been exhausted, then this method
+     * will make a request to the service to get the next page of results using the default paging options.
+     * @return the next Twin from the query.
+     * @throws IotHubException If any IoT Hub level errors occur such as an {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException}.
+     * @throws IOException If any network level errors occur.
+     */
     public Twin next() throws IotHubException, IOException
     {
         return next(QueryPageOptions.builder().build());
     }
 
+    /**
+     * Return the next Twin from the query. If the previous page of query results has been exhausted, then this method
+     * will make a request to the service to get the next page of results using the provided paging options.
+     * @param pageOptions the options for the next page of results if the next page is retrieved to fulfil this request
+     * for the next Twin. May not be null.
+     * @return the next Twin from the query.
+     * @throws IotHubException If any IoT Hub level errors occur such as an {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException}.
+     * @throws IOException If any network level errors occur.
+     */
     public Twin next(QueryPageOptions pageOptions) throws IotHubException, IOException
     {
         Objects.requireNonNull(pageOptions);

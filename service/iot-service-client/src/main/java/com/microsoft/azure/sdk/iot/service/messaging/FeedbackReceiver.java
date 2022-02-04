@@ -9,7 +9,7 @@ import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFeedbackReceivedHandler;
-import com.microsoft.azure.sdk.iot.service.transport.amqps.ConnectionLossCallback;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.ConnectionLostCallback;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.ReactorRunner;
 import lombok.Getter;
 import lombok.Setter;
@@ -35,7 +35,7 @@ public class FeedbackReceiver
      */
     @Setter
     @Getter
-    private ConnectionLossCallback connectionLossCallback;
+    private ConnectionLostCallback connectionLostCallback;
 
     FeedbackReceiver(
         FeedbackMessageReceivedCallback feedbackMessageReceivedCallback,
@@ -149,9 +149,9 @@ public class FeedbackReceiver
             {
                 log.warn("Amqp connection thread encountered an exception", e);
 
-                if (this.connectionLossCallback != null)
+                if (this.connectionLostCallback != null)
                 {
-                    this.connectionLossCallback.onConnectionLost(e);
+                    this.connectionLostCallback.onConnectionLost(e);
                 }
             }
         }).start();
