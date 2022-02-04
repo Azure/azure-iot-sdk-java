@@ -7,7 +7,7 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
@@ -54,7 +54,7 @@ public class DeviceManagerX509Sample
 
     private static void AddDevice()
     {
-        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
+        RegistryClient registryClient = new RegistryClient(SampleUtils.iotHubConnectionString);
 
         Device device;
 
@@ -69,7 +69,7 @@ public class DeviceManagerX509Sample
 
         try
         {
-            device = registryManager.addDevice(device);
+            device = registryClient.addDevice(device);
 
             System.out.println("Device created: " + device.getDeviceId());
             if (isSelfSigned)
@@ -86,12 +86,12 @@ public class DeviceManagerX509Sample
 
     private static void GetDevice()
     {
-        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
+        RegistryClient registryClient = new RegistryClient(SampleUtils.iotHubConnectionString);
 
         Device returnDevice;
         try
         {
-            returnDevice = registryManager.getDevice(SampleUtils.deviceId);
+            returnDevice = registryClient.getDevice(SampleUtils.deviceId);
 
             System.out.println("Device: " + returnDevice.getDeviceId());
             System.out.println("Device eTag: " + returnDevice.getETag());
@@ -110,7 +110,7 @@ public class DeviceManagerX509Sample
 
     private static void UpdateDevice()
     {
-        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
+        RegistryClient registryClient = new RegistryClient(SampleUtils.iotHubConnectionString);
 
         Device device;
         if (isSelfSigned)
@@ -126,7 +126,7 @@ public class DeviceManagerX509Sample
 
         try
         {
-            device = registryManager.updateDevice(device);
+            device = registryClient.updateDevice(device);
 
             System.out.println("Device updated: " + device.getDeviceId());
 
@@ -144,11 +144,11 @@ public class DeviceManagerX509Sample
 
     private static void RemoveDevice()
     {
-        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
+        RegistryClient registryClient = new RegistryClient(SampleUtils.iotHubConnectionString);
 
         try
         {
-            registryManager.removeDevice(SampleUtils.deviceId);
+            registryClient.removeDevice(SampleUtils.deviceId);
 
             System.out.println("Device removed: " + SampleUtils.deviceId);
         }

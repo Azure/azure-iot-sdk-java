@@ -33,7 +33,7 @@ run this sample with.
  * but it is a good reference for how to create shared access signatures in Java.
  *
  * @param resourceUri The resource that the shared access token should grant access to. For cases where the token
- * will be used for more than one function (i.e. used by registryManager to create a device and used by serviceClient
+ * will be used for more than one function (i.e. used by registryClient to create a device and used by serviceClient
  * to send cloud to device messages), this value should be the hostName of your IoT Hub
  * ("my-azure-iot-hub.azure-devices.net" for example). Shared access signatures do support scoping of the resource
  * authorization by making this resourceUri more specific. For example, a resourceUri of "my-azure-iot-hub.azure-devices.net/devices"

@@ -11,10 +11,9 @@ import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
 import com.microsoft.azure.sdk.iot.service.registry.Module;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
@@ -45,7 +44,7 @@ import static junit.framework.TestCase.assertTrue;
 public class TokenRenewalTests extends IntegrationTest
 {
     protected static String iotHubConnectionString;
-    private static RegistryManager registryManager;
+    private static RegistryClient registryClient;
     protected static HttpProxyServer proxyServer;
     private static String iotHubHostName;
     protected static String testProxyHostname = "127.0.0.1";
@@ -84,7 +83,7 @@ public class TokenRenewalTests extends IntegrationTest
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
         iotHubHostName = IotHubConnectionString.createIotHubConnectionString(iotHubConnectionString).getHostName();
-        registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
     }
 
     @BeforeClass
@@ -249,8 +248,8 @@ public class TokenRenewalTests extends IntegrationTest
             UUID uuid = UUID.randomUUID();
             String deviceId = "token-renewal-test-device-with-custom-sas-token-provider-" + protocol + "-" + uuid.toString();
             Device device = new Device(deviceId);
-            device = registryManager.addDevice(device);
-            SasTokenProvider sasTokenProvider = new SasTokenProviderImpl(registryManager.getDeviceConnectionString(device), SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL);
+            device = registryClient.addDevice(device);
+            SasTokenProvider sasTokenProvider = new SasTokenProviderImpl(registryClient.getDeviceConnectionString(device), SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL);
             clients.add(new DeviceClient(iotHubHostName, deviceId, sasTokenProvider, protocol));
         }
 
@@ -364,9 +363,9 @@ public class TokenRenewalTests extends IntegrationTest
         String deviceId = "token-renewal-test-device-" + protocol + "-" + uuid.toString();
         String moduleId = "token-renewal-test-module-" + protocol + "-" + uuid.toString();
         Device device = new Device(deviceId);
-        device = Tools.addDeviceWithRetry(registryManager, device);
+        device = Tools.addDeviceWithRetry(registryClient, device);
         Module module = new Module(deviceId, moduleId, AuthenticationType.SAS);
-        module = Tools.addModuleWithRetry(registryManager, module);
+        module = Tools.addModuleWithRetry(registryClient, module);
 
         ClientOptions options =
             ClientOptions.builder()

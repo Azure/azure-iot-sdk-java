@@ -6,23 +6,19 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.azure.core.credential.AzureSasCredential;
-import com.microsoft.azure.sdk.iot.service.messaging.FeedbackMessageReceivedCallback;
-import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationReceivedCallback;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubMessageResult;
 import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.service.query.QueryClientOptions;
 import com.microsoft.azure.sdk.iot.service.exceptions.ErrorCodeDescription;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
-import com.microsoft.azure.sdk.iot.service.messaging.FeedbackBatch;
 import com.microsoft.azure.sdk.iot.service.messaging.FeedbackReceiver;
 import com.microsoft.azure.sdk.iot.service.messaging.FeedbackRecord;
-import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotification;
 import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationReceiver;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.messaging.Message;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.messaging.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.messaging.ServiceClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
@@ -91,13 +87,13 @@ public class AzureSasCredentialSample
 
     private static String runRegistryManagerSample(String iotHubHostName, AzureSasCredential credential)
     {
-        // RegistryManager has some configurable options for HTTP read and connect timeouts, as well as for setting proxies.
+        // RegistryClient has some configurable options for HTTP read and connect timeouts, as well as for setting proxies.
         // For this sample, the default options will be used though.
-        RegistryManagerOptions options = RegistryManagerOptions.builder().build();
+        RegistryClientOptions options = RegistryClientOptions.builder().build();
 
         // This constructor takes in your implementation of AzureSasCredential which allows you to use symmetric key based
         // authentication without giving the client your connection string.
-        RegistryManager registryManager = new RegistryManager(iotHubHostName, credential, options);
+        RegistryClient registryClient = new RegistryClient(iotHubHostName, credential, options);
 
         String deviceId = "my-new-device-" + UUID.randomUUID().toString();
         Device newDevice = new Device(deviceId, AuthenticationType.SAS);
@@ -105,7 +101,7 @@ public class AzureSasCredentialSample
         try
         {
             System.out.println("Creating device " + deviceId);
-            registryManager.addDevice(newDevice);
+            registryClient.addDevice(newDevice);
             System.out.println("Successfully created device " + deviceId);
         }
         catch (IOException | IotHubException e)

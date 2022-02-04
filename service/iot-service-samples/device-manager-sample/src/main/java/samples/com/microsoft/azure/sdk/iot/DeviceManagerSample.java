@@ -7,7 +7,7 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.service.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
 import java.io.IOException;
@@ -45,12 +45,12 @@ public class DeviceManagerSample
     
     private static void AddDevice()
     {
-        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
+        RegistryClient registryClient = new RegistryClient(SampleUtils.iotHubConnectionString);
 
         Device device = new Device(SampleUtils.deviceId);
         try
         {
-            device = registryManager.addDevice(device);
+            device = registryClient.addDevice(device);
 
             System.out.println("Device created: " + device.getDeviceId());
             System.out.println("Device key: " + device.getPrimaryKey());
@@ -63,12 +63,12 @@ public class DeviceManagerSample
     
     private static void GetDevice()
     {
-        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
+        RegistryClient registryClient = new RegistryClient(SampleUtils.iotHubConnectionString);
         
         Device returnDevice;
         try
         {
-            returnDevice = registryManager.getDevice(SampleUtils.deviceId);
+            returnDevice = registryClient.getDevice(SampleUtils.deviceId);
 
             System.out.println("Device: " + returnDevice.getDeviceId());
             System.out.println("Device primary key: " + returnDevice.getPrimaryKey());
@@ -83,7 +83,7 @@ public class DeviceManagerSample
     
     private static void UpdateDevice()
     {
-        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
+        RegistryClient registryClient = new RegistryClient(SampleUtils.iotHubConnectionString);
 
         // Create an Edge device, and set leaf-device as a child.
         Device edge = new Device(SampleUtils.edgeId);
@@ -93,12 +93,12 @@ public class DeviceManagerSample
 
         try
         {
-            edge = registryManager.addDevice(edge);
+            edge = registryClient.addDevice(edge);
 
             // Set Edge device as a parent by getting its scope and adding it to the device's device scope.
-            Device device = registryManager.getDevice(SampleUtils.deviceId);
+            Device device = registryClient.getDevice(SampleUtils.deviceId);
             device.setScope(edge.getScope());
-            device = registryManager.updateDevice(device);
+            device = registryClient.updateDevice(device);
 
             System.out.println("Device updated: " + device.getDeviceId());
             System.out.println("Device scope: " + device.getScope());
@@ -112,14 +112,14 @@ public class DeviceManagerSample
     
     private static void RemoveDevice()
     {
-        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
+        RegistryClient registryClient = new RegistryClient(SampleUtils.iotHubConnectionString);
         
         try
         {
-            registryManager.removeDevice(SampleUtils.deviceId);
+            registryClient.removeDevice(SampleUtils.deviceId);
             System.out.println("Device removed: " + SampleUtils.deviceId);
 
-            registryManager.removeDevice(SampleUtils.edgeId);
+            registryClient.removeDevice(SampleUtils.edgeId);
             System.out.println("Edge removed: " + SampleUtils.edgeId);
         }
         catch (IotHubException | IOException iote)

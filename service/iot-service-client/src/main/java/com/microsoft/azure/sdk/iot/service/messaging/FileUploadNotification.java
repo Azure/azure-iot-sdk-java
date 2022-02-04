@@ -44,11 +44,9 @@ public class FileUploadNotification
         if (deviceId == null || blobUri == null || blobName == null || lastUpdatedTimeDate == null || blobSizeInBytes == null || enqueuedTimeUtcDate == null ||
                 deviceId.isEmpty() || blobName.isEmpty() || blobUri.isEmpty())
         {
-            // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATION_25_002: [** If any of the parameters are null or empty then this method shall throw IllegalArgumentException.**]
             throw new IllegalArgumentException("Null data for notification is not accepted");
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATION_25_001: [** The constructor shall save all the parameters only if they are valid **]
         this.deviceId = deviceId;
         this.blobUri = blobUri;
         this.blobName = blobName;

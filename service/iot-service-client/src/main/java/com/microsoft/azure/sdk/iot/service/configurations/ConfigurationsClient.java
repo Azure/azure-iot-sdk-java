@@ -69,7 +69,7 @@ public class ConfigurationsClient
 
         if (options == null)
         {
-            throw new IllegalArgumentException("RegistryManagerOptions cannot be null for this constructor");
+            throw new IllegalArgumentException("RegistryClientOptions cannot be null for this constructor");
         }
 
         this.iotHubConnectionString =

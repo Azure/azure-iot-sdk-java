@@ -8,6 +8,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 import com.azure.core.credential.AzureSasCredential;
 import com.google.gson.JsonParser;
 import com.microsoft.azure.sdk.iot.service.registry.Module;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.twin.TwinConnectionState;
 import com.microsoft.azure.sdk.iot.device.twin.Device;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
@@ -21,8 +22,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
@@ -359,7 +359,7 @@ public class TwinCommon extends IntegrationTest
         public String x509Thumbprint;
         public ClientType clientType;
         public TwinClient twinServiceClient;
-        public RegistryManager registryManager;
+        public RegistryClient registryClient;
         public QueryClient queryClient;
         public DeviceState deviceUnderTest;
         public DeviceState[] devicesUnderTest;
@@ -376,7 +376,7 @@ public class TwinCommon extends IntegrationTest
             this.clientType = clientType;
             
             this.twinServiceClient = new TwinClient(iotHubConnectionString, TwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-            this.registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+            this.registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
             this.queryClient = new QueryClient(iotHubConnectionString);
         }
     }

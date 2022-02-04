@@ -36,7 +36,7 @@ import static org.junit.Assert.*;
  * Lines: 96%
  */
 @RunWith(JMockit.class)
-public class RegistryManagerTest
+public class RegistryClientTest
 {
     @Mocked
     Device device;
@@ -125,9 +125,9 @@ public class RegistryManagerTest
     @Test
     public void testOptionsDefaults()
     {
-        RegistryManagerOptions options = RegistryManagerOptions.builder().build();
-        assertEquals((int) Deencapsulation.getField(RegistryManagerOptions.class, "DEFAULT_HTTP_READ_TIMEOUT_MS"), options.getHttpReadTimeout());
-        assertEquals((int) Deencapsulation.getField(RegistryManagerOptions.class, "DEFAULT_HTTP_CONNECT_TIMEOUT_MS"), options.getHttpConnectTimeout());
+        RegistryClientOptions options = RegistryClientOptions.builder().build();
+        assertEquals((int) Deencapsulation.getField(RegistryClientOptions.class, "DEFAULT_HTTP_READ_TIMEOUT_MS"), options.getHttpReadTimeout());
+        assertEquals((int) Deencapsulation.getField(RegistryClientOptions.class, "DEFAULT_HTTP_CONNECT_TIMEOUT_MS"), options.getHttpConnectTimeout());
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_001: [The constructor shall throw IllegalArgumentException if the input string is null or empty]
@@ -137,7 +137,7 @@ public class RegistryManagerTest
     {
         String connectionString = null;
 
-        new RegistryManager(connectionString);
+        new RegistryClient(connectionString);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_001: [The constructor shall throw IllegalArgumentException if the input string is null or empty]
@@ -147,20 +147,20 @@ public class RegistryManagerTest
     {
         String connectionString = null;
 
-        new RegistryManager(connectionString);
+        new RegistryClient(connectionString);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_002: [The constructor shall create an IotHubConnectionString object from the given connection string]
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_003: [The constructor shall create a new RegistryManager, stores the created IotHubConnectionString object and return with it]
+    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_003: [The constructor shall create a new RegistryClient, stores the created IotHubConnectionString object and return with it]
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_34_090: [The function shall start this object's executor service]
     @Test
     public void constructor_good_case() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
+        RegistryClient registryClient = new RegistryClient(connectionString);
 
-        assertNotNull(registryManager);
+        assertNotNull(registryClient);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_004: [The constructor shall throw IllegalArgumentException if the input device is null]
@@ -170,9 +170,9 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
+        RegistryClient registryClient = new RegistryClient(connectionString);
 
-        registryManager.addDevice(null);
+        registryClient.addDevice(null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_005: [The function shall deserialize the given device object to Json string]
@@ -198,8 +198,8 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = new RegistryManager(connectionString);
-        Device returnDevice = registryManager.addDevice(device);
+        RegistryClient registryClient = new RegistryClient(connectionString);
+        Device returnDevice = registryClient.addDevice(device);
 
         commonVerifications(HttpMethod.PUT, deviceId, returnDevice);
     }
@@ -211,9 +211,9 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
+        RegistryClient registryClient = new RegistryClient(connectionString);
 
-        registryManager.getDevice(null);
+        registryClient.getDevice(null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_015: [The function shall get the URL for the device]
@@ -230,8 +230,8 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = new RegistryManager(connectionString);
-        Device returnDevice = registryManager.getDevice(deviceId);
+        RegistryClient registryClient = new RegistryClient(connectionString);
+        Device returnDevice = registryClient.getDevice(deviceId);
 
         commonVerifications(HttpMethod.GET, deviceId, returnDevice);
     }
@@ -260,9 +260,9 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = new RegistryManager(connectionString);
-        Device returnDevice = registryManager.getDevice(deviceId);
-        String returnDeviceConnectionString =  registryManager.getDeviceConnectionString(returnDevice);
+        RegistryClient registryClient = new RegistryClient(connectionString);
+        Device returnDevice = registryClient.getDevice(deviceId);
+        String returnDeviceConnectionString =  registryClient.getDeviceConnectionString(returnDevice);
 
         assertEquals(expectedDeviceConnectionString, returnDeviceConnectionString);
     }
@@ -294,9 +294,9 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = new RegistryManager(connectionString);
-        Device returnDevice = registryManager.getDevice(deviceId);
-        String returnDeviceConnectionString =  registryManager.getDeviceConnectionString(returnDevice);
+        RegistryClient registryClient = new RegistryClient(connectionString);
+        Device returnDevice = registryClient.getDevice(deviceId);
+        String returnDeviceConnectionString =  registryClient.getDeviceConnectionString(returnDevice);
 
         assertEquals(expectedDeviceConnectionString, returnDeviceConnectionString);
     }
@@ -308,8 +308,8 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
-        registryManager.getDeviceConnectionString(null);
+        RegistryClient registryClient = new RegistryClient(connectionString);
+        registryClient.getDeviceConnectionString(null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_032: [The function shall throw IllegalArgumentException if the input device is null]
@@ -328,9 +328,9 @@ public class RegistryManagerTest
             }
         };
 
-        RegistryManager registryManager = new RegistryManager(connectionString);
+        RegistryClient registryClient = new RegistryClient(connectionString);
 
-        registryManager.updateDevice(null);
+        registryClient.updateDevice(null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_033: [The function shall call updateDevice with forceUpdate = false]
@@ -350,8 +350,8 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = new RegistryManager(connectionString);
-        Device returnDevice = registryManager.updateDevice(device);
+        RegistryClient registryClient = new RegistryClient(connectionString);
+        Device returnDevice = registryClient.updateDevice(device);
         commonVerifications(HttpMethod.PUT, deviceId, returnDevice);
 
         new VerificationsInOrder()
@@ -369,10 +369,10 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
+        RegistryClient registryClient = new RegistryClient(connectionString);
 
         Device device = null;
-        registryManager.removeDevice(device);
+        registryClient.removeDevice(device);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_087: [The function shall throw IllegalArgumentException if the input etag is null or empty]
@@ -382,7 +382,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
+        RegistryClient registryClient = new RegistryClient(connectionString);
 
         new NonStrictExpectations()
         {
@@ -394,7 +394,7 @@ public class RegistryManagerTest
             }
         };
 
-        registryManager.removeDevice(device);
+        registryClient.removeDevice(device);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_087: [The function shall throw IllegalArgumentException if the input etag is null or empty]
@@ -404,7 +404,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
+        RegistryClient registryClient = new RegistryClient(connectionString);
 
         new NonStrictExpectations()
         {
@@ -416,7 +416,7 @@ public class RegistryManagerTest
             }
         };
 
-        registryManager.removeDevice(device);
+        registryClient.removeDevice(device);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_047: [The function shall get the URL for the device]
@@ -444,8 +444,8 @@ public class RegistryManagerTest
             }
         };
 
-        RegistryManager registryManager = new RegistryManager(connectionString);
-        registryManager.removeDevice(device);
+        RegistryClient registryClient = new RegistryClient(connectionString);
+        registryClient.removeDevice(device);
 
         new VerificationsInOrder()
         {
@@ -467,10 +467,10 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
+        RegistryClient registryClient = new RegistryClient(connectionString);
 
         String deviceId = null;
-        registryManager.removeDevice(deviceId);
+        registryClient.removeDevice(deviceId);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_046: [The function shall throw IllegalArgumentException if the input deviceId is null or empty]
@@ -480,9 +480,9 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
+        RegistryClient registryClient = new RegistryClient(connectionString);
 
-        registryManager.removeDevice("");
+        registryClient.removeDevice("");
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_047: [The function shall get the URL for the device]
@@ -499,8 +499,8 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = new RegistryManager(connectionString);
-        registryManager.removeDevice(deviceId);
+        RegistryClient registryClient = new RegistryClient(connectionString);
+        registryClient.removeDevice(deviceId);
 
         new VerificationsInOrder()
         {
@@ -522,20 +522,20 @@ public class RegistryManagerTest
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_058: [The function shall verify the response status and throw proper Exception]
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_059: [The function shall create a new RegistryStatistics object from the response and return with it]
     @Test
-    public void getStatistics_good_case(@Mocked Proxy mockProxy, @Mocked ProxyOptions mockProxyOptions, @Mocked RegistryManagerOptions registryManagerOptions) throws Exception
+    public void getStatistics_good_case(@Mocked Proxy mockProxy, @Mocked ProxyOptions mockProxyOptions, @Mocked RegistryClientOptions registryClientOptions) throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         String deviceId = "somedevice";
 
         commonExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = new RegistryManager(connectionString, registryManagerOptions);
+        RegistryClient registryClient = new RegistryClient(connectionString, registryClientOptions);
 
         new Expectations()
         {
             {
                 IotHubConnectionString.getUrlDeviceStatistics(anyString);
-                registryManagerOptions.getProxyOptions();
+                registryClientOptions.getProxyOptions();
                 result = mockProxyOptions;
                 mockProxyOptions.getProxy();
                 result = mockProxy;
@@ -547,7 +547,7 @@ public class RegistryManagerTest
         };
 
         // act
-        RegistryStatistics statistics = registryManager.getStatistics();
+        RegistryStatistics statistics = registryClient.getStatistics();
 
         assertNotNull(statistics);
     }
@@ -568,9 +568,9 @@ public class RegistryManagerTest
             }
         };
 
-        RegistryManager registryManager = new RegistryManager(connectionString);
+        RegistryClient registryClient = new RegistryClient(connectionString);
 
-        registryManager.addModule(null);
+        registryClient.addModule(null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_002: [The function shall deserialize the given module object to Json string]
@@ -599,8 +599,8 @@ public class RegistryManagerTest
 
         commonModuleExpectations(connectionString, deviceId, moduleId);
 
-        RegistryManager registryManager = new RegistryManager(connectionString);
-        Module returnModule = registryManager.addModule(module);
+        RegistryClient registryClient = new RegistryClient(connectionString);
+        Module returnModule = registryClient.addModule(module);
 
         commonModuleVerifications(HttpMethod.PUT, deviceId, moduleId, returnModule);
     }
@@ -612,9 +612,9 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
+        RegistryClient registryClient = new RegistryClient(connectionString);
 
-        registryManager.getModule(null, "somemodule");
+        registryClient.getModule(null, "somemodule");
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_009: [The constructor shall throw IllegalArgumentException if the deviceId string is null or empty]
@@ -624,9 +624,9 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
+        RegistryClient registryClient = new RegistryClient(connectionString);
 
-        registryManager.getModule("", "somemodule");
+        registryClient.getModule("", "somemodule");
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_010: [The constructor shall throw IllegalArgumentException if the moduleId string is null or empty]
@@ -636,9 +636,9 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
+        RegistryClient registryClient = new RegistryClient(connectionString);
 
-        registryManager.getModule("somedevice", null);
+        registryClient.getModule("somedevice", null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_010: [The constructor shall throw IllegalArgumentException if the moduleId string is null or empty]
@@ -648,9 +648,9 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
+        RegistryClient registryClient = new RegistryClient(connectionString);
 
-        registryManager.getModule("somedevice","");
+        registryClient.getModule("somedevice","");
     }
 
     private void constructorExpectations(String connectionString)
@@ -681,8 +681,8 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, moduleId);
 
-        RegistryManager registryManager = new RegistryManager(connectionString);
-        Module returnModule = registryManager.getModule(deviceId, moduleId);
+        RegistryClient registryClient = new RegistryClient(connectionString);
+        Module returnModule = registryClient.getModule(deviceId, moduleId);
 
         commonModuleVerifications(HttpMethod.GET, deviceId, moduleId, returnModule);
     }
@@ -694,9 +694,9 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
+        RegistryClient registryClient = new RegistryClient(connectionString);
 
-        registryManager.getModulesOnDevice(null);
+        registryClient.getModulesOnDevice(null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_017: [The constructor shall throw IllegalArgumentException if the input string is null or empty]
@@ -706,9 +706,9 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
+        RegistryClient registryClient = new RegistryClient(connectionString);
 
-        registryManager.getModulesOnDevice("");
+        registryClient.getModulesOnDevice("");
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_018: [The function shall get the URL for the device]
@@ -725,8 +725,8 @@ public class RegistryManagerTest
 
         getModulesExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = new RegistryManager(connectionString);
-        List<Module> modules =  registryManager.getModulesOnDevice(deviceId);
+        RegistryClient registryClient = new RegistryClient(connectionString);
+        List<Module> modules =  registryClient.getModulesOnDevice(deviceId);
 
         getModulesVerifications(deviceId, modules);
         assertEquals(3, modules.size());
@@ -739,9 +739,9 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
+        RegistryClient registryClient = new RegistryClient(connectionString);
 
-        registryManager.updateModule(null);
+        registryClient.updateModule(null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_025: [The function shall call updateDevice with forceUpdate = false]
@@ -764,8 +764,8 @@ public class RegistryManagerTest
 
         commonModuleExpectations(connectionString, deviceId, moduleId);
 
-        RegistryManager registryManager = new RegistryManager(connectionString);
-        Module returnModule = registryManager.updateModule(module);
+        RegistryClient registryClient = new RegistryClient(connectionString);
+        Module returnModule = registryClient.updateModule(module);
         commonModuleVerifications(HttpMethod.PUT, deviceId, moduleId, returnModule);
 
         new VerificationsInOrder()
@@ -783,10 +783,10 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
+        RegistryClient registryClient = new RegistryClient(connectionString);
 
         Module module = null;
-        registryManager.removeModule(module);
+        registryClient.removeModule(module);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_036: [The function shall get the URL for the module]
@@ -817,8 +817,8 @@ public class RegistryManagerTest
             }
         };
 
-        RegistryManager registryManager = new RegistryManager(connectionString);
-        registryManager.removeModule(module);
+        RegistryClient registryClient = new RegistryClient(connectionString);
+        registryClient.removeModule(module);
 
         new VerificationsInOrder()
         {
@@ -840,9 +840,9 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
+        RegistryClient registryClient = new RegistryClient(connectionString);
 
-        registryManager.removeModule(null, "somemodule");
+        registryClient.removeModule(null, "somemodule");
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_034: [The function shall throw IllegalArgumentException if the deviceId is null or empty]
@@ -852,9 +852,9 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
+        RegistryClient registryClient = new RegistryClient(connectionString);
 
-        registryManager.removeModule("", "somemodule");
+        registryClient.removeModule("", "somemodule");
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_035: [The function shall throw IllegalArgumentException if the moduleId is null or empty]
@@ -864,9 +864,9 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
+        RegistryClient registryClient = new RegistryClient(connectionString);
 
-        registryManager.removeModule("somedevice", null);
+        registryClient.removeModule("somedevice", null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_035: [The function shall throw IllegalArgumentException if the moduleId is null or empty]
@@ -876,9 +876,9 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
+        RegistryClient registryClient = new RegistryClient(connectionString);
 
-        registryManager.removeModule("somedevice", "");
+        registryClient.removeModule("somedevice", "");
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_078: [The function shall throw IllegalArgumentException if the etag is null or empty]
@@ -888,7 +888,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
+        RegistryClient registryClient = new RegistryClient(connectionString);
 
         new NonStrictExpectations()
         {
@@ -902,7 +902,7 @@ public class RegistryManagerTest
             }
         };
 
-        registryManager.removeModule(module);
+        registryClient.removeModule(module);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_078: [The function shall throw IllegalArgumentException if the etag is null or empty]
@@ -912,7 +912,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
+        RegistryClient registryClient = new RegistryClient(connectionString);
 
         new NonStrictExpectations()
         {
@@ -926,7 +926,7 @@ public class RegistryManagerTest
             }
         };
 
-        registryManager.removeModule(module);
+        registryClient.removeModule(module);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_036: [The function shall get the URL for the module]
@@ -944,8 +944,8 @@ public class RegistryManagerTest
 
         commonModuleExpectations(connectionString, deviceId, moduleId);
 
-        RegistryManager registryManager = new RegistryManager(connectionString);
-        registryManager.removeModule(deviceId, moduleId);
+        RegistryClient registryClient = new RegistryClient(connectionString);
+        registryClient.removeModule(deviceId, moduleId);
 
         new VerificationsInOrder()
         {
@@ -964,7 +964,7 @@ public class RegistryManagerTest
     public void getDevicesWithCustomHttpTimeouts(@Mocked final IotHubConnectionString mockIotHubConnectionString,
                                                  @Mocked final RegistryIdentityParser mockRegistryIdentityParser,
                                                  @Mocked final Device mockDevice,
-                                                 @Mocked final RegistryManagerOptions mockOptions)
+                                                 @Mocked final RegistryClientOptions mockOptions)
             throws IOException, IotHubException
     {
         // arrange
@@ -996,10 +996,10 @@ public class RegistryManagerTest
             }
         };
 
-        RegistryManager registryManager = new RegistryManager(mockConnectionString, mockOptions);
+        RegistryClient registryClient = new RegistryClient(mockConnectionString, mockOptions);
 
         // act
-        registryManager.getDevice(mockDeviceId);
+        registryClient.getDevice(mockDeviceId);
 
         // assert
         new Verifications()

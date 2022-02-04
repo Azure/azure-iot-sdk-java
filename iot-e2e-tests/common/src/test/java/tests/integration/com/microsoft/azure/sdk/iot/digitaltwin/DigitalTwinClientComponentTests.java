@@ -6,7 +6,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.digitaltwin;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.twin.*;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.UpdateOperationUtility;
@@ -46,7 +46,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
 {
 
     private static final String IOTHUB_CONNECTION_STRING = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.IOTHUB_CONNECTION_STRING_ENV_VAR_NAME);
-    private static RegistryManager registryManager;
+    private static RegistryClient registryClient;
     private String deviceId;
     private DeviceClient deviceClient;
     private DigitalTwinClient digitalTwinClient = null;
@@ -70,7 +70,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
 
     @BeforeClass
     public static void setUpBeforeClass() throws IOException {
-        registryManager = new RegistryManager(IOTHUB_CONNECTION_STRING);
+        registryClient = new RegistryClient(IOTHUB_CONNECTION_STRING);
     }
 
     @Before
@@ -84,7 +84,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
     public void cleanUp() {
         try {
             deviceClient.close();
-            registryManager.removeDevice(deviceId);
+            registryClient.removeDevice(deviceId);
         } catch (Exception ex) {
             log.error("An exception occurred while closing/ deleting the device {}: {}", deviceId, ex);
         }
@@ -95,8 +95,8 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
 
         this.deviceId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         Device device = new Device(deviceId, AuthenticationType.SAS);
-        Device registeredDevice = registryManager.addDevice(device);
-        String deviceConnectionString = registryManager.getDeviceConnectionString(registeredDevice);
+        Device registeredDevice = registryClient.addDevice(device);
+        String deviceConnectionString = registryClient.getDeviceConnectionString(registeredDevice);
         return new DeviceClient(deviceConnectionString, protocol, options);
     }
 

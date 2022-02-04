@@ -7,10 +7,6 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
-import com.microsoft.azure.sdk.iot.service.messaging.FeedbackBatch;
-import com.microsoft.azure.sdk.iot.service.messaging.FeedbackMessageReceivedCallback;
-import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotification;
-import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationReceivedCallback;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubMessageResult;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.messaging.FeedbackReceiver;
@@ -20,8 +16,8 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.messaging.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.messaging.ServiceClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
@@ -210,10 +206,10 @@ public class ServiceClientTests extends IntegrationTest
             boolean withAzureSasCredential) throws Exception
     {
         // We remove and recreate the device for a clean start
-        RegistryManager registryManager =
-                new RegistryManager(
+        RegistryClient registryClient =
+                new RegistryClient(
                         iotHubConnectionString,
-                        RegistryManagerOptions.builder()
+                        RegistryClientOptions.builder()
                                 .httpReadTimeout(HTTP_READ_TIMEOUT)
                                 .build());
 
@@ -226,7 +222,7 @@ public class ServiceClientTests extends IntegrationTest
 
         Device device = testDeviceIdentity.getDevice();
 
-        Device deviceGetBefore = registryManager.getDevice(device.getDeviceId());
+        Device deviceGetBefore = registryClient.getDevice(device.getDeviceId());
 
         // Create service client
         ProxyOptions proxyOptions = null;
@@ -277,7 +273,7 @@ public class ServiceClientTests extends IntegrationTest
 
         serviceClient.send(device.getDeviceId(), message);
 
-        Device deviceGetAfter = registryManager.getDevice(device.getDeviceId());
+        Device deviceGetAfter = registryClient.getDevice(device.getDeviceId());
 
         Tools.disposeTestIdentity(testDeviceIdentity, iotHubConnectionString);
 
@@ -291,9 +287,9 @@ public class ServiceClientTests extends IntegrationTest
     @StandardTierHubOnlyTest
     public void serviceClientTokenRenewalWithAzureSasCredential() throws Exception
     {
-        RegistryManager registryManager = new RegistryManager(
+        RegistryClient registryClient = new RegistryClient(
             iotHubConnectionString,
-            RegistryManagerOptions.builder()
+            RegistryClientOptions.builder()
                 .httpReadTimeout(HTTP_READ_TIMEOUT)
                 .build());
 
@@ -353,10 +349,10 @@ public class ServiceClientTests extends IntegrationTest
     @StandardTierHubOnlyTest
     public void feedbackMessageReceiverWithAzureSasCredential() throws Exception
     {
-        RegistryManager registryManager =
-                new RegistryManager(
+        RegistryClient registryClient =
+                new RegistryClient(
                         iotHubConnectionString,
-                        RegistryManagerOptions.builder()
+                        RegistryClientOptions.builder()
                                 .httpReadTimeout(HTTP_READ_TIMEOUT)
                                 .build());
 

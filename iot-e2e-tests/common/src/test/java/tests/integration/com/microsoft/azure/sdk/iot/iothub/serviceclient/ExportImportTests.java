@@ -14,17 +14,16 @@ import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 import com.azure.storage.blob.specialized.BlobInputStream;
 import com.azure.storage.blob.specialized.BlockBlobClient;
 import com.microsoft.azure.sdk.iot.service.jobs.registry.RegistryJobsClient;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobsClient;
 import com.microsoft.azure.sdk.iot.service.jobs.registry.ExportImportDeviceParser;
 import com.microsoft.azure.sdk.iot.service.jobs.registry.StorageAuthenticationType;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
 import com.microsoft.azure.sdk.iot.service.jobs.registry.ExportImportDevice;
 import com.microsoft.azure.sdk.iot.service.jobs.registry.ImportMode;
 import com.microsoft.azure.sdk.iot.service.jobs.registry.JobProperties;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubTooManyDevicesException;
 import mockit.Deencapsulation;
@@ -70,7 +69,7 @@ public class ExportImportTests extends IntegrationTest
     private static BlobContainerClient importContainer;
     private static BlobContainerClient exportContainer;
 
-    private static RegistryManager registryManager;
+    private static RegistryClient registryClient;
     private static RegistryJobsClient jobClient;
 
     @BeforeClass
@@ -81,7 +80,7 @@ public class ExportImportTests extends IntegrationTest
         storageAccountConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.STORAGE_ACCOUNT_CONNECTION_STRING_ENV_VAR_NAME);
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
-        registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
         jobClient = new RegistryJobsClient(iotHubConnectionString);
         String uuid = UUID.randomUUID().toString();
         deviceId = deviceId.concat("-" + uuid);

@@ -8,10 +8,10 @@ import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.InternalClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.ModuleClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryIdentity;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.registry.Module;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
@@ -50,7 +50,7 @@ import static org.junit.Assert.assertEquals;
 public class TwinPnPTests extends IntegrationTest
 {
     protected static String iotHubConnectionString = "";
-    private static RegistryManager registryManager;
+    private static RegistryClient registryClient;
     private String ModelId;
 
     @Parameterized.Parameters(name = "{0}_{1}_{2}")
@@ -59,7 +59,7 @@ public class TwinPnPTests extends IntegrationTest
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
 
-        registryManager = new RegistryManager(iotHubConnectionString);
+        registryClient = new RegistryClient(iotHubConnectionString);
 
         List inputs = new ArrayList(Arrays.asList(
                 new Object[][]
@@ -154,8 +154,8 @@ public class TwinPnPTests extends IntegrationTest
             deviceX509.setThumbprint(x509Thumbprint, x509Thumbprint);
             Module moduleX509 = new Module(deviceX509Id, moduleX509Id, AuthenticationType.SELF_SIGNED);
             moduleX509.setThumbprint(x509Thumbprint, x509Thumbprint);
-            device = Tools.addDeviceWithRetry(registryManager, device);
-            deviceX509 = Tools.addDeviceWithRetry(registryManager, deviceX509);
+            device = Tools.addDeviceWithRetry(registryClient, device);
+            deviceX509 = Tools.addDeviceWithRetry(registryClient, deviceX509);
             ClientOptions.ClientOptionsBuilder clientOptionsBuilder = ClientOptions.builder().modelId(ModelId);
 
             if (clientType == ClientType.DEVICE_CLIENT)
@@ -163,7 +163,7 @@ public class TwinPnPTests extends IntegrationTest
                 if (authenticationType == SAS)
                 {
                     //sas device client
-                    this.client = new DeviceClient(registryManager.getDeviceConnectionString(device), protocol, clientOptionsBuilder.build());
+                    this.client = new DeviceClient(registryClient.getDeviceConnectionString(device), protocol, clientOptionsBuilder.build());
                     this.identity = device;
                 }
                 else if (authenticationType == SELF_SIGNED)
@@ -171,7 +171,7 @@ public class TwinPnPTests extends IntegrationTest
                     //x509 device client
                     SSLContext sslContext = SSLContextBuilder.buildSSLContext(x509CertificateGenerator.getX509Certificate(), x509CertificateGenerator.getPrivateKey());
                     clientOptionsBuilder.sslContext(sslContext);
-                    this.client = new DeviceClient(registryManager.getDeviceConnectionString(deviceX509), protocol, clientOptionsBuilder.build());
+                    this.client = new DeviceClient(registryClient.getDeviceConnectionString(deviceX509), protocol, clientOptionsBuilder.build());
                     this.identity = deviceX509;
                 }
                 else
@@ -186,7 +186,7 @@ public class TwinPnPTests extends IntegrationTest
                 if (authenticationType == SAS)
                 {
                     //sas module client
-                    module = Tools.addModuleWithRetry(registryManager, module);
+                    module = Tools.addModuleWithRetry(registryClient, module);
                     this.client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), protocol, clientOptionsBuilder.build());
                     this.identity = module;
                     this.twin = new Twin(deviceId, moduleId);
@@ -194,7 +194,7 @@ public class TwinPnPTests extends IntegrationTest
                 else if (authenticationType == SELF_SIGNED)
                 {
                     //x509 module client
-                    moduleX509 = Tools.addModuleWithRetry(registryManager, moduleX509);
+                    moduleX509 = Tools.addModuleWithRetry(registryClient, moduleX509);
                     SSLContext sslContext = SSLContextBuilder.buildSSLContext(x509CertificateGenerator.getX509Certificate(), x509CertificateGenerator.getPrivateKey());
                     clientOptionsBuilder.sslContext(sslContext);
                     this.client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509, moduleX509), protocol, clientOptionsBuilder.build());
@@ -215,7 +215,7 @@ public class TwinPnPTests extends IntegrationTest
             try
             {
                 this.client.close();
-                registryManager.removeDevice(this.identity.getDeviceId()); //removes all modules associated with this device, too
+                registryClient.removeDevice(this.identity.getDeviceId()); //removes all modules associated with this device, too
             }
             catch (Exception e)
             {

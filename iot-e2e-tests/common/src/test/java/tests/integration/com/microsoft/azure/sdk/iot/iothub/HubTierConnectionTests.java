@@ -7,10 +7,10 @@ import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryIdentity;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManagerOptions;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -60,7 +60,7 @@ public class HubTierConnectionTests extends IntegrationTest
 
     public HubTierConnectionTestInstance testInstance;
 
-    protected static RegistryManager registryManager;
+    protected static RegistryClient registryClient;
 
     public HubTierConnectionTests(DeviceClient client, IotHubClientProtocol protocol, RegistryIdentity identity, AuthenticationType authenticationType, boolean useHttpProxy)
     {
@@ -76,7 +76,7 @@ public class HubTierConnectionTests extends IntegrationTest
 
         String x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
 
-        registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
         String uuid = UUID.randomUUID().toString();
         String deviceId = "java-tier-connection-e2e-test".concat("-" + uuid);
         String deviceIdX509 = "java-tier-connection-e2e-test-X509".concat("-" + uuid);
@@ -86,8 +86,8 @@ public class HubTierConnectionTests extends IntegrationTest
 
         deviceX509.setThumbprint(x509Thumbprint, x509Thumbprint);
 
-        Tools.addDeviceWithRetry(registryManager, device);
-        Tools.addDeviceWithRetry(registryManager, deviceX509);
+        Tools.addDeviceWithRetry(registryClient, device);
+        Tools.addDeviceWithRetry(registryClient, deviceX509);
 
         hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString).getHostName();
         SSLContext sslContext = SSLContextBuilder.buildSSLContext(x509CertificateGenerator.getX509Certificate(), x509CertificateGenerator.getPrivateKey());
@@ -116,7 +116,7 @@ public class HubTierConnectionTests extends IntegrationTest
     @BeforeClass
     public static void classSetup()
     {
-        registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
     }
 
     @BeforeClass

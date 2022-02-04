@@ -17,8 +17,8 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
@@ -74,7 +74,7 @@ public class JobClientTests extends IntegrationTest
     protected static String iotHubConnectionString = "";
     public static boolean isBasicTierHub;
     private static ScheduledJobsClient jobClient;
-    private static RegistryManager registryManager;
+    private static RegistryClient registryClient;
 
     private static final String STANDARD_PROPERTY_HOMETEMP = "HomeTemp(F)";
 
@@ -105,15 +105,15 @@ public class JobClientTests extends IntegrationTest
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
         jobClient = new ScheduledJobsClient(iotHubConnectionString);
-        registryManager = new RegistryManager(
+        registryClient = new RegistryClient(
             iotHubConnectionString,
-            RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+            RegistryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
 
         String uuid = UUID.randomUUID().toString();
         for (int i = 0; i < MAX_DEVICES; i++)
         {
-            testDevice = Tools.addDeviceWithRetry(registryManager, new Device(DEVICE_ID_NAME.concat("-" + i + "-" + uuid)));
-            DeviceTestManager testManager = new DeviceTestManager(new DeviceClient(registryManager.getDeviceConnectionString(testDevice), IotHubClientProtocol.AMQPS));
+            testDevice = Tools.addDeviceWithRetry(registryClient, new Device(DEVICE_ID_NAME.concat("-" + i + "-" + uuid)));
+            DeviceTestManager testManager = new DeviceTestManager(new DeviceClient(registryClient.getDeviceConnectionString(testDevice), IotHubClientProtocol.AMQPS));
             testManager.client.open(false);
             testManager.subscribe(true, true);
             devices.add(testManager);

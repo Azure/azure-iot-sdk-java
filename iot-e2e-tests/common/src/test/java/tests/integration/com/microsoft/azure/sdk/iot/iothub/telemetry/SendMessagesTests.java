@@ -217,10 +217,10 @@ public class SendMessagesTests extends SendMessagesCommon
 
         Device eccDevice = new Device(UUID.randomUUID().toString(), AuthenticationType.SELF_SIGNED);
         eccDevice.setThumbprint(eccCertGenerator.getX509Thumbprint(), eccCertGenerator.getX509Thumbprint());
-        eccDevice = registryManager.addDevice(eccDevice);
+        eccDevice = registryClient.addDevice(eccDevice);
 
         ClientOptions clientOptions = ClientOptions.builder().sslContext(sslContext).build();
-        DeviceClient deviceClient = new DeviceClient(registryManager.getDeviceConnectionString(eccDevice), testInstance.protocol, clientOptions);
+        DeviceClient deviceClient = new DeviceClient(registryClient.getDeviceConnectionString(eccDevice), testInstance.protocol, clientOptions);
 
         deviceClient.open(false);
         deviceClient.close();

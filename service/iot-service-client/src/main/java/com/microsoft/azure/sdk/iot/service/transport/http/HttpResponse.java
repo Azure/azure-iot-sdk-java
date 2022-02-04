@@ -33,7 +33,6 @@ public class HttpResponse
                         Map<String, List<String>> headerFields,
                         byte[] errorReason)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPRESPONSE_12_001: [The constructor shall store the input arguments so that the getters can return them later.]
         this.status = status;
         this.body = Arrays.copyOf(body, body.length);
         this.errorReason = errorReason;
@@ -59,7 +58,6 @@ public class HttpResponse
      */
     public int getStatus()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPRESPONSE_12_002: [The function shall return the status code given in the constructor.]
         return this.status;
     }
 
@@ -70,7 +68,6 @@ public class HttpResponse
      */
     public byte[] getBody()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPRESPONSE_12_003: [The function shall return a copy of the body given in the constructor.]
         return Arrays.copyOf(this.body, this.body.length);
     }
 
@@ -87,10 +84,8 @@ public class HttpResponse
      */
     public String getHeaderField(String field)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPRESPONSE_12_008: [The function shall match the header field name in a case-insensitive manner.]
         String canonicalizedField = canonicalizeFieldName(field);
         String values = this.headerFields.get(canonicalizedField);
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPRESPONSE_12_006: [If a value could not be found for the given header field name, the function shall throw an IllegalArgumentException.]
         if (values == null)
         {
             String errMsg = String.format("Could not find a value "
@@ -99,7 +94,6 @@ public class HttpResponse
             throw new IllegalArgumentException(errMsg);
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPRESPONSE_12_004: [The function shall return a comma-separated list of the values associated with the header field name.]
         return values;
     }
 
@@ -126,7 +120,6 @@ public class HttpResponse
      */
     public byte[] getErrorReason()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPRESPONSE_12_007: [The function shall return the error reason given in the constructor.]
         return this.errorReason;
     }
 

@@ -10,8 +10,8 @@ import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodRequestOptions;
@@ -131,7 +131,7 @@ public class DirectMethodsCommon extends IntegrationTest
         public String privateKey;
         public String x509Thumbprint;
         public DirectMethodsClient methodServiceClient;
-        public RegistryManager registryManager;
+        public RegistryClient registryClient;
 
         protected DeviceMethodTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
         {
@@ -142,7 +142,7 @@ public class DirectMethodsCommon extends IntegrationTest
             this.privateKey = x509CertificateGenerator.getPrivateKeyPEM();
             this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
             this.methodServiceClient = new DirectMethodsClient(iotHubConnectionString, DirectMethodsClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-            this.registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+            this.registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
         }
 
         public void setup() throws Exception {

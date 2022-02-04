@@ -15,8 +15,8 @@ import com.microsoft.azure.sdk.iot.device.ProxySettings;
 import com.microsoft.azure.sdk.iot.device.SasTokenProvider;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
@@ -73,7 +73,7 @@ public class SendMessagesCommon extends IntegrationTest
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
-        registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
         hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString).getHostName();
 
         List inputs = new ArrayList(Arrays.asList(
@@ -163,7 +163,7 @@ public class SendMessagesCommon extends IntegrationTest
     //How much messages each device will send to the hub for each connection.
     protected static final Integer NUM_MESSAGES_PER_CONNECTION = 6;
 
-    protected static RegistryManager registryManager;
+    protected static RegistryClient registryClient;
     protected static HttpProxyServer proxyServer;
     protected static String testProxyHostname = "127.0.0.1";
     protected static int testProxyPort = 8899;
@@ -183,7 +183,7 @@ public class SendMessagesCommon extends IntegrationTest
     @BeforeClass
     public static void classSetup()
     {
-        registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
     }
 
     @BeforeClass
@@ -249,12 +249,12 @@ public class SendMessagesCommon extends IntegrationTest
                 if (customSSLContext != null)
                 {
                     ClientOptions options = ClientOptions.builder().sslContext(customSSLContext).build();
-                    DeviceClient clientWithCustomSSLContext = new DeviceClient(registryManager.getDeviceConnectionString(testInstance.identity.getDevice()), protocol, options);
+                    DeviceClient clientWithCustomSSLContext = new DeviceClient(registryClient.getDeviceConnectionString(testInstance.identity.getDevice()), protocol, options);
                     ((TestDeviceIdentity)this.identity).setDeviceClient(clientWithCustomSSLContext);
                 }
                 else if (useCustomSasTokenProvider)
                 {
-                    SasTokenProvider sasTokenProvider = new SasTokenProviderImpl(registryManager.getDeviceConnectionString(this.identity.getDevice()));
+                    SasTokenProvider sasTokenProvider = new SasTokenProviderImpl(registryClient.getDeviceConnectionString(this.identity.getDevice()));
                     DeviceClient clientWithCustomSasTokenProvider = new DeviceClient(hostName, testInstance.identity.getDeviceId(), sasTokenProvider, protocol, null);
                     ((TestDeviceIdentity)this.identity).setDeviceClient(clientWithCustomSasTokenProvider);
                 }

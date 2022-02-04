@@ -5,9 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service.auth;
 
-import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMethod;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
-
 /**
  * Extend AuthenticationMethod class, provide getters
  * for protected properties and implement populate function to set
@@ -26,23 +23,18 @@ class ServiceAuthenticationWithSharedAccessPolicyToken extends AuthenticationMet
     @Override
     public IotHubConnectionString populate(IotHubConnectionString iotHubConnectionString)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICEAUTHENTICATIONWITHSHAREDACCESSTOKEN_12_002: [The function shall throw IllegalArgumentException if the input object is null]
         if (iotHubConnectionString == null)
         {
             throw new IllegalArgumentException("Input parameter \"iotHubConnectionStringBuilder\" is null");
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICEAUTHENTICATIONWITHSHAREDACCESSTOKEN_12_003: [The function shall save the policyName and token to the target object]
         iotHubConnectionString.setSharedAccessKeyName(this.policyName);
         iotHubConnectionString.setSharedAccessSignature(this.token);
 
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICEAUTHENTICATIONWITHSHAREDACCESSTOKEN_12_004: [The function shall set the access key to null]
         iotHubConnectionString.setSharedAccessKey(null);
 
         return iotHubConnectionString;
     }
-
-    // Codes_SRS_SERVICE_SDK_JAVA_SERVICEAUTHENTICATIONWITHSHAREDACCESSTOKEN_12_001: [Provide access to the following properties: policyName, token]
 
     /**
      * Constructor to create instance from policy name and policy key

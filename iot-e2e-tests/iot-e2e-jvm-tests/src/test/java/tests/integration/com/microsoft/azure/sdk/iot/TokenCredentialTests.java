@@ -13,7 +13,7 @@ import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.messaging.Message;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.messaging.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
@@ -62,12 +62,12 @@ public class TokenCredentialTests
         Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
 
         // We remove and recreate the device for a clean start
-        RegistryManager registryManager = new RegistryManager(iotHubConnectionString);
+        RegistryClient registryClient = new RegistryClient(iotHubConnectionString);
 
         Device device = new Device("some-device-" + UUID.randomUUID(), AuthenticationType.SAS);
-        registryManager.addDevice(device);
+        registryClient.addDevice(device);
 
-        Device deviceGetBefore = registryManager.getDevice(device.getDeviceId());
+        Device deviceGetBefore = registryClient.getDevice(device.getDeviceId());
 
         // Create service client
         ServiceClient serviceClient = buildServiceClientWithTokenCredential(IotHubServiceClientProtocol.AMQPS);
@@ -76,9 +76,9 @@ public class TokenCredentialTests
 
         serviceClient.send(device.getDeviceId(), message);
 
-        Device deviceGetAfter = registryManager.getDevice(device.getDeviceId());
+        Device deviceGetAfter = registryClient.getDevice(device.getDeviceId());
 
-        registryManager.removeDevice(device.getDeviceId());
+        registryClient.removeDevice(device.getDeviceId());
 
         // Assert
         assertEquals(0, deviceGetBefore.getCloudToDeviceMessageCount());
@@ -90,8 +90,8 @@ public class TokenCredentialTests
     {
         Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
 
-        RegistryManager registryManager = new RegistryManager(iotHubConnectionString);
-        DeviceClient deviceClient = createDeviceClient(MQTT, registryManager);
+        RegistryClient registryClient = new RegistryClient(iotHubConnectionString);
+        DeviceClient deviceClient = createDeviceClient(MQTT, registryClient);
         deviceClient.open(false);
 
         // arrange
@@ -111,21 +111,21 @@ public class TokenCredentialTests
     public void deviceLifecycleWithTokenCredential() throws Exception
     {
         //-Create-//
-        RegistryManager registryManager = new RegistryManager(iotHubConnectionString);
+        RegistryClient registryClient = new RegistryClient(iotHubConnectionString);
         String deviceId = "some-device-" + UUID.randomUUID();
         Device deviceAdded = new Device(deviceId);
-        registryManager.addDevice(deviceAdded);
+        registryClient.addDevice(deviceAdded);
 
         //-Read-//
-        Device deviceRetrieved = registryManager.getDevice(deviceId);
+        Device deviceRetrieved = registryClient.getDevice(deviceId);
 
         //-Update-//
-        Device deviceUpdated = registryManager.getDevice(deviceId);
+        Device deviceUpdated = registryClient.getDevice(deviceId);
         deviceUpdated.setStatus(DeviceStatus.Disabled);
-        deviceUpdated = registryManager.updateDevice(deviceUpdated);
+        deviceUpdated = registryClient.updateDevice(deviceUpdated);
 
         //-Delete-//
-        registryManager.removeDevice(deviceId);
+        registryClient.removeDevice(deviceId);
 
         // Assert
         assertEquals(deviceId, deviceAdded.getDeviceId());
@@ -140,11 +140,11 @@ public class TokenCredentialTests
 
         DirectMethodsClient methodServiceClient = buildDeviceMethodClientWithTokenCredential();
 
-        RegistryManager registryManager = new RegistryManager(iotHubConnectionString);
+        RegistryClient registryClient = new RegistryClient(iotHubConnectionString);
         Device device = new Device("some-device-" + UUID.randomUUID(), AuthenticationType.SAS);
-        registryManager.addDevice(device);
+        registryClient.addDevice(device);
 
-        DeviceClient deviceClient = new DeviceClient(registryManager.getDeviceConnectionString(device), MQTT);
+        DeviceClient deviceClient = new DeviceClient(registryClient.getDeviceConnectionString(device), MQTT);
         deviceClient.open(false);
         final int successStatusCode = 200;
         final AtomicBoolean methodsSubscriptionComplete = new AtomicBoolean(false);
@@ -189,9 +189,9 @@ public class TokenCredentialTests
 
         TwinClient twinServiceClient = buildTwinClientWithTokenCredential();
 
-        RegistryManager registryManager = new RegistryManager(iotHubConnectionString);
+        RegistryClient registryClient = new RegistryClient(iotHubConnectionString);
         Device device = new Device("some-device-" + UUID.randomUUID(), AuthenticationType.SAS);
-        registryManager.addDevice(device);
+        registryClient.addDevice(device);
 
         Twin twin = twinServiceClient.getTwin(device.getDeviceId());
 
@@ -211,13 +211,13 @@ public class TokenCredentialTests
         assertNotNull(twinQueryResponse);
     }
 
-    private DeviceClient createDeviceClient(IotHubClientProtocol protocol, RegistryManager registryManager) throws IOException, IotHubException, URISyntaxException
+    private DeviceClient createDeviceClient(IotHubClientProtocol protocol, RegistryClient registryClient) throws IOException, IotHubException, URISyntaxException
     {
         ClientOptions options = ClientOptions.builder().modelId(THERMOSTAT_MODEL_ID).build();
         String deviceId = "some-device-" + UUID.randomUUID();
         Device device = new Device(deviceId, AuthenticationType.SAS);
-        Device registeredDevice = registryManager.addDevice(device);
-        String deviceConnectionString = registryManager.getDeviceConnectionString(registeredDevice);
+        Device registeredDevice = registryClient.addDevice(device);
+        String deviceConnectionString = registryClient.getDeviceConnectionString(registeredDevice);
         return new DeviceClient(deviceConnectionString, protocol, options);
     }
 }

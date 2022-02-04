@@ -12,8 +12,8 @@ import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.messaging.ServiceClient;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.After;
@@ -120,7 +120,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
         public String publicKeyCert;
         public String privateKey;
         public String x509Thumbprint;
-        public RegistryManager registryManager;
+        public RegistryClient registryClient;
         public ServiceClient serviceClient;
 
         public ReceiveMessagesTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
@@ -131,7 +131,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
             this.publicKeyCert = x509CertificateGenerator.getPublicCertificatePEM();
             this.privateKey = x509CertificateGenerator.getPrivateKeyPEM();
             this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
-            this.registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+            this.registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
             this.serviceClient = new ServiceClient(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
         }
 

@@ -10,8 +10,8 @@ import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobsClient;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.twin.Pair;
@@ -56,7 +56,7 @@ public class QueryClientTests extends IntegrationTest
 {
     protected static String iotHubConnectionString = "";
     protected static String hostName;
-    protected static RegistryManager registryManager;
+    protected static RegistryClient registryClient;
     protected static ScheduledJobsClient jobClient;
 
     private static final int QUERY_TIMEOUT_MILLISECONDS = 1000 * 60; // 1 minute
@@ -70,7 +70,7 @@ public class QueryClientTests extends IntegrationTest
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
-        registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
         jobClient = new ScheduledJobsClient(iotHubConnectionString, ScheduledJobsClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
         hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString).getHostName();
     }
@@ -83,8 +83,8 @@ public class QueryClientTests extends IntegrationTest
         Device device1 = new Device(deviceId1, AuthenticationType.SAS);
         Device device2 = new Device(deviceId2, AuthenticationType.SAS);
 
-        registryManager.addDevice(device1);
-        registryManager.addDevice(device2);
+        registryClient.addDevice(device1);
+        registryClient.addDevice(device2);
 
         try
         {
@@ -122,8 +122,8 @@ public class QueryClientTests extends IntegrationTest
         {
             try
             {
-                registryManager.removeDevice(deviceId1);
-                registryManager.removeDevice(deviceId2);
+                registryClient.removeDevice(deviceId1);
+                registryClient.removeDevice(deviceId2);
             }
             catch (IOException | IotHubException e)
             {
@@ -139,7 +139,7 @@ public class QueryClientTests extends IntegrationTest
 
         String deviceId = UUID.randomUUID().toString();
 
-        registryManager.addDevice(new Device(deviceId, AuthenticationType.SAS));
+        registryClient.addDevice(new Device(deviceId, AuthenticationType.SAS));
 
         try
         {
@@ -194,7 +194,7 @@ public class QueryClientTests extends IntegrationTest
         {
             try
             {
-                registryManager.removeDevice(deviceId);
+                registryClient.removeDevice(deviceId);
             }
             catch (IOException | IotHubException e)
             {
@@ -210,7 +210,7 @@ public class QueryClientTests extends IntegrationTest
 
         String deviceId = UUID.randomUUID().toString();
 
-        registryManager.addDevice(new Device(deviceId, AuthenticationType.SAS));
+        registryClient.addDevice(new Device(deviceId, AuthenticationType.SAS));
 
         try
         {
@@ -263,7 +263,7 @@ public class QueryClientTests extends IntegrationTest
         {
             try
             {
-                registryManager.removeDevice(deviceId);
+                registryClient.removeDevice(deviceId);
             }
             catch (IOException | IotHubException e)
             {
@@ -279,7 +279,7 @@ public class QueryClientTests extends IntegrationTest
         Device[] devices = new Device[deviceCount];
         for (int i = 0; i < deviceCount; i++)
         {
-            devices[i] = registryManager.addDevice(new Device(UUID.randomUUID().toString(), AuthenticationType.SAS));
+            devices[i] = registryClient.addDevice(new Device(UUID.randomUUID().toString(), AuthenticationType.SAS));
         }
 
         try
@@ -351,7 +351,7 @@ public class QueryClientTests extends IntegrationTest
             {
                 for (int i = 0; i < deviceCount; i++)
                 {
-                    registryManager.removeDevice(devices[i]);
+                    registryClient.removeDevice(devices[i]);
                 }
             }
             catch (IOException | IotHubException e)

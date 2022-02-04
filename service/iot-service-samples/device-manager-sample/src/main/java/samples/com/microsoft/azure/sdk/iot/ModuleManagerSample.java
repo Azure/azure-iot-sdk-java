@@ -6,7 +6,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.service.registry.Module;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
 import java.io.IOException;
@@ -46,7 +46,7 @@ public class ModuleManagerSample
 
     private static void AddModule(int n)
     {
-        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
+        RegistryClient registryClient = new RegistryClient(SampleUtils.iotHubConnectionString);
 
         String moduleId;
         if (n == 0)
@@ -61,7 +61,7 @@ public class ModuleManagerSample
 
         try
         {
-            module = registryManager.addModule(module);
+            module = registryClient.addModule(module);
 
             System.out.println("Module created: " + module.getId());
         }
@@ -73,12 +73,12 @@ public class ModuleManagerSample
 
     private static void GetModule() throws Exception
     {
-        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
+        RegistryClient registryClient = new RegistryClient(SampleUtils.iotHubConnectionString);
 
         Module returnModule;
         try
         {
-            returnModule = registryManager.getModule(SampleUtils.deviceId, SampleUtils.moduleId0);
+            returnModule = registryClient.getModule(SampleUtils.deviceId, SampleUtils.moduleId0);
 
             System.out.println("Module: " + returnModule.getId());
             System.out.println("Module primary key: " + returnModule.getPrimaryKey());
@@ -90,7 +90,7 @@ public class ModuleManagerSample
             iote.printStackTrace();
         }
 
-        List<Module> list = registryManager.getModulesOnDevice(SampleUtils.deviceId);
+        List<Module> list = registryClient.getModulesOnDevice(SampleUtils.deviceId);
         for (Module module : list)
         {
             System.out.println("Module: " + module.getId());
@@ -105,14 +105,14 @@ public class ModuleManagerSample
         String primaryKey = "[New primary key goes here]";
         String secondaryKey = "[New secondary key goes here]";
 
-        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
+        RegistryClient registryClient = new RegistryClient(SampleUtils.iotHubConnectionString);
 
         Module module = new Module(SampleUtils.deviceId, SampleUtils.moduleId0, null);
         module.getSymmetricKey().setPrimaryKey(primaryKey);
         module.getSymmetricKey().setSecondaryKey(secondaryKey);
         try
         {
-            module = registryManager.updateModule(module);
+            module = registryClient.updateModule(module);
 
             System.out.println("Device updated: " + module.getId());
             System.out.println("Device primary key: " + module.getPrimaryKey());
@@ -126,13 +126,13 @@ public class ModuleManagerSample
 
     private static void RemoveModule()
     {
-        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
+        RegistryClient registryClient = new RegistryClient(SampleUtils.iotHubConnectionString);
 
         try
         {
-            registryManager.removeModule(SampleUtils.deviceId, SampleUtils.moduleId0);
+            registryClient.removeModule(SampleUtils.deviceId, SampleUtils.moduleId0);
             System.out.println("Module removed: " + SampleUtils.moduleId0);
-            registryManager.removeModule(SampleUtils.deviceId, SampleUtils.moduleId1);
+            registryClient.removeModule(SampleUtils.deviceId, SampleUtils.moduleId1);
             System.out.println("Module removed: " + SampleUtils.moduleId1);
         }
         catch (IotHubException | IOException iote)

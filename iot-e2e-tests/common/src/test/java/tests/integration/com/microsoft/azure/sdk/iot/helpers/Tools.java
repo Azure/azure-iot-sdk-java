@@ -5,6 +5,7 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.registry.serializers.AuthenticationParser;
 import com.microsoft.azure.sdk.iot.service.registry.serializers.AuthenticationTypeParser;
 import com.microsoft.azure.sdk.iot.service.jobs.registry.ExportImportDeviceParser;
@@ -18,8 +19,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.registry.Module;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
@@ -149,17 +149,17 @@ public class Tools
         return possibleExceptionCause.isInstance(exceptionToSearch) || (exceptionToSearch != null && isCause(possibleExceptionCause, exceptionToSearch.getCause()));
     }
 
-    private static RegistryManager registryManager;
+    private static RegistryClient registryClient;
 
-    public static RegistryManager getRegistyManager(String iotHubConnectionString) throws IOException
+    public static RegistryClient getRegistyManager(String iotHubConnectionString) throws IOException
     {
-        if (registryManager == null)
+        if (registryClient == null)
         {
-            RegistryManagerOptions options = RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
-            registryManager = new RegistryManager(iotHubConnectionString, options);
+            RegistryClientOptions options = RegistryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
+            registryClient = new RegistryClient(iotHubConnectionString, options);
         }
 
-        return registryManager;
+        return registryClient;
     }
 
     private static Queue<TestDeviceIdentity> testSasDeviceQueue = new ConcurrentLinkedQueue<>();  // queue contains SAS device identities that are ready to be re-used, and that have no twin modifications yet
@@ -676,7 +676,7 @@ public class Tools
         }
     }
 
-    public static Device addDeviceWithRetry(RegistryManager registryManager, Device device) throws IotHubException, IOException, InterruptedException
+    public static Device addDeviceWithRetry(RegistryClient registryClient, Device device) throws IotHubException, IOException, InterruptedException
     {
         long startTime = System.currentTimeMillis();
         Device ret = null;
@@ -685,7 +685,7 @@ public class Tools
             try
             {
                 log.debug("Attempting to add device {} to registry", device.getDeviceId());
-                ret = registryManager.addDevice(device);
+                ret = registryClient.addDevice(device);
                 log.debug("Successfully added device {} to registry", device.getDeviceId());
                 break;
             }
@@ -837,7 +837,7 @@ public class Tools
         return new URL(stringBuilder);
     }
 
-    public static Module addModuleWithRetry(RegistryManager registryManager, Module module) throws IotHubException, IOException, InterruptedException
+    public static Module addModuleWithRetry(RegistryClient registryClient, Module module) throws IotHubException, IOException, InterruptedException
     {
         long startTime = System.currentTimeMillis();
         Module ret = null;
@@ -846,7 +846,7 @@ public class Tools
             try
             {
                 log.debug("Attempting to add module {} to registry", module.getId());
-                ret = registryManager.addModule(module);
+                ret = registryClient.addModule(module);
                 log.debug("Successfully added module {} to registry", module.getId());
                 break;
             }
@@ -864,14 +864,14 @@ public class Tools
         return ret;
     }
 
-    public static void getStatisticsWithRetry(RegistryManager registryManager) throws IotHubException, IOException, InterruptedException
+    public static void getStatisticsWithRetry(RegistryClient registryClient) throws IotHubException, IOException, InterruptedException
     {
         long startTime = System.currentTimeMillis();
         while (System.currentTimeMillis() - startTime < RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS)
         {
             try
             {
-                registryManager.getStatistics();
+                registryClient.getStatistics();
                 break;
             }
             catch (UnknownHostException | SocketException e)
@@ -887,7 +887,7 @@ public class Tools
         }
     }
 
-    public static Device getDeviceWithRetry(RegistryManager registryManager, String id) throws IotHubException, IOException, InterruptedException
+    public static Device getDeviceWithRetry(RegistryClient registryClient, String id) throws IotHubException, IOException, InterruptedException
     {
         long startTime = System.currentTimeMillis();
         Device ret = null;
@@ -895,7 +895,7 @@ public class Tools
         {
             try
             {
-                ret = registryManager.getDevice(id);
+                ret = registryClient.getDevice(id);
                 break;
             }
             catch (UnknownHostException | SocketException e)
@@ -913,7 +913,7 @@ public class Tools
         return ret;
     }
 
-    public static Module getModuleWithRetry(RegistryManager registryManager, String deviceid, String moduleid) throws IotHubException, IOException, InterruptedException
+    public static Module getModuleWithRetry(RegistryClient registryClient, String deviceid, String moduleid) throws IotHubException, IOException, InterruptedException
     {
         long startTime = System.currentTimeMillis();
         Module ret = null;
@@ -921,7 +921,7 @@ public class Tools
         {
             try
             {
-                ret = registryManager.getModule(deviceid, moduleid);
+                ret = registryClient.getModule(deviceid, moduleid);
                 break;
             }
             catch (UnknownHostException | SocketException e)

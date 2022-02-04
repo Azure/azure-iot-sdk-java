@@ -19,8 +19,8 @@ import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderX50
 import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
@@ -134,7 +134,7 @@ public class ProvisioningCommon extends IntegrationTest
 
     protected static final String CUSTOM_ALLOCATION_WEBHOOK_API_VERSION = "2019-03-31";
 
-    public RegistryManager registryManager = null;
+    public RegistryClient registryClient = null;
 
     //sending reported properties for twin operations takes some time to get the appropriate callback
     public static final int MAX_TWIN_PROPAGATION_WAIT_SECONDS = 60;
@@ -221,7 +221,7 @@ public class ProvisioningCommon extends IntegrationTest
     @Before
     public void setUp() throws Exception
     {
-        registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
 
         this.testInstance = new ProvisioningTestInstance(this.testInstance.protocol, this.testInstance.attestationType);
     }
@@ -229,7 +229,7 @@ public class ProvisioningCommon extends IntegrationTest
     @After
     public void tearDown()
     {
-        registryManager = null;
+        registryClient = null;
 
         if (testInstance != null && testInstance.securityProvider != null && testInstance.securityProvider instanceof SecurityProviderTPMEmulator)
         {

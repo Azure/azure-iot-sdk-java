@@ -4,9 +4,8 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 import com.microsoft.azure.sdk.iot.service.registry.Device;
-import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.configurations.Configuration;
 import com.microsoft.azure.sdk.iot.service.configurations.ConfigurationContent;
 import com.microsoft.azure.sdk.iot.service.configurations.ConfigurationsClient;
@@ -67,7 +66,7 @@ public class ConfigurationsClientTests extends IntegrationTest
         public String moduleId;
         public String configId;
         private ConfigurationsClient configurationsClient;
-        private RegistryManager registryManager;
+        private RegistryClient registryClient;
 
         public ConfigurationsClientTestInstance()
         {
@@ -81,7 +80,7 @@ public class ConfigurationsClientTests extends IntegrationTest
             this.moduleId = moduleIdPrefix + uuid;
             this.configId = configIdPrefix + uuid;
             this.configurationsClient = configurationsClient;
-            this.registryManager = new RegistryManager(iotHubConnectionString);
+            this.registryClient = new RegistryClient(iotHubConnectionString);
         }
 
         public ConfigurationsClientTestInstance(ConfigurationsClientOptions options)
@@ -91,7 +90,7 @@ public class ConfigurationsClientTests extends IntegrationTest
             this.moduleId = moduleIdPrefix + uuid;
             this.configId = configIdPrefix + uuid;
             this.configurationsClient = new ConfigurationsClient(iotHubConnectionString, options);
-            this.registryManager = new RegistryManager(iotHubConnectionString);
+            this.registryClient = new RegistryClient(iotHubConnectionString);
         }
     }
 
@@ -183,7 +182,7 @@ public class ConfigurationsClientTests extends IntegrationTest
         // Arrange
         ConfigurationsClientTestInstance testInstance = new ConfigurationsClientTestInstance();
         Device deviceSetup = new Device(testInstance.deviceId);
-        Tools.addDeviceWithRetry(testInstance.registryManager, deviceSetup);
+        Tools.addDeviceWithRetry(testInstance.registryClient, deviceSetup);
         final HashMap<String, Object> testDeviceContent = new HashMap<String, Object>()
         {
             {

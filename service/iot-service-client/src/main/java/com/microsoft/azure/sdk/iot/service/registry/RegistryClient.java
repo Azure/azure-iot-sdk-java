@@ -37,27 +37,27 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Use the RegistryManager client to manage the identity registry in IoT hubs.
+ * Use the RegistryClient to manage the identity registry in IoT hubs.
  * To access twins, use the {@link TwinClient}.
  */
 @Slf4j
-public final class RegistryManager
+public final class RegistryClient
 {
     private final String hostName;
     private TokenCredentialCache credentialCache;
     private AzureSasCredential azureSasCredential;
     private IotHubConnectionString iotHubConnectionString;
 
-    private final RegistryManagerOptions options;
+    private final RegistryClientOptions options;
 
     /**
      * Constructor to create instance from connection string
      *
      * @param connectionString The iot hub connection string
      */
-    public RegistryManager(String connectionString)
+    public RegistryClient(String connectionString)
     {
-        this(connectionString, RegistryManagerOptions.builder().build());
+        this(connectionString, RegistryClientOptions.builder().build());
     }
 
     /**
@@ -66,7 +66,7 @@ public final class RegistryManager
      * @param connectionString The iot hub connection string
      * @param options The connection options to use when connecting to the service.
      */
-    public RegistryManager(String connectionString, RegistryManagerOptions options)
+    public RegistryClient(String connectionString, RegistryClientOptions options)
     {
         if (connectionString == null || connectionString.isEmpty())
         {
@@ -75,7 +75,7 @@ public final class RegistryManager
 
         if (options == null)
         {
-            throw new IllegalArgumentException("RegistryManagerOptions cannot be null for this constructor");
+            throw new IllegalArgumentException("RegistryClientOptions cannot be null for this constructor");
         }
 
         this.iotHubConnectionString =
@@ -87,26 +87,26 @@ public final class RegistryManager
     }
 
     /**
-     * Create a new RegistryManager instance.
+     * Create a new RegistryClient instance.
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
      */
-    public RegistryManager(String hostName, TokenCredential credential)
+    public RegistryClient(String hostName, TokenCredential credential)
     {
-        this(hostName, credential, RegistryManagerOptions.builder().build());
+        this(hostName, credential, RegistryClientOptions.builder().build());
     }
 
     /**
-     * Create a new RegistryManager instance.
+     * Create a new RegistryClient instance.
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
      * @param options The connection options to use when connecting to the service.
      */
-    public RegistryManager(String hostName, TokenCredential credential, RegistryManagerOptions options)
+    public RegistryClient(String hostName, TokenCredential credential, RegistryClientOptions options)
     {
         Objects.requireNonNull(credential, "credential cannot be null");
         Objects.requireNonNull(options, "options cannot be null");
@@ -122,24 +122,24 @@ public final class RegistryManager
     }
 
     /**
-     * Create a new RegistryManager instance.
+     * Create a new RegistryClient instance.
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
      */
-    public RegistryManager(String hostName, AzureSasCredential azureSasCredential)
+    public RegistryClient(String hostName, AzureSasCredential azureSasCredential)
     {
-        this(hostName, azureSasCredential, RegistryManagerOptions.builder().build());
+        this(hostName, azureSasCredential, RegistryClientOptions.builder().build());
     }
 
     /**
-     * Create a new RegistryManager instance.
+     * Create a new RegistryClient instance.
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
      * @param options The connection options to use when connecting to the service.
      */
-    public RegistryManager(String hostName, AzureSasCredential azureSasCredential, RegistryManagerOptions options)
+    public RegistryClient(String hostName, AzureSasCredential azureSasCredential, RegistryClientOptions options)
     {
         Objects.requireNonNull(azureSasCredential, "azureSasCredential cannot be null");
         Objects.requireNonNull(options, "options cannot be null");
@@ -156,7 +156,7 @@ public final class RegistryManager
 
     private static void commonConstructorSetup()
     {
-        log.debug("Initialized a RegistryManager instance client using SDK version {}", TransportUtils.serviceVersion);
+        log.debug("Initialized a RegistryClient instance client using SDK version {}", TransportUtils.serviceVersion);
     }
 
     /**

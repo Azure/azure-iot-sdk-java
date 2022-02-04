@@ -19,8 +19,8 @@ import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
@@ -83,7 +83,7 @@ import static org.junit.Assert.assertTrue;
 public class DigitalTwinClientTests extends IntegrationTest
 {
     private static final String IOTHUB_CONNECTION_STRING = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.IOTHUB_CONNECTION_STRING_ENV_VAR_NAME);
-    private static RegistryManager registryManager;
+    private static RegistryClient registryClient;
     private String deviceId;
     private DeviceClient deviceClient;
     private DigitalTwinClient digitalTwinClient = null;
@@ -110,10 +110,10 @@ public class DigitalTwinClientTests extends IntegrationTest
 
     @BeforeClass
     public static void setUpBeforeClass() {
-        registryManager =
-            new RegistryManager(
+        registryClient =
+            new RegistryClient(
                 IOTHUB_CONNECTION_STRING,
-                RegistryManagerOptions.builder()
+                RegistryClientOptions.builder()
                     .httpReadTimeout(0)
                     .build());
     }
@@ -134,7 +134,7 @@ public class DigitalTwinClientTests extends IntegrationTest
     public void cleanUp() {
         try {
             deviceClient.close();
-            registryManager.removeDevice(deviceId);
+            registryClient.removeDevice(deviceId);
         } catch (Exception ex) {
             log.error("An exception occurred while closing/ deleting the device {}: {}", deviceId, ex);
         }
@@ -149,8 +149,8 @@ public class DigitalTwinClientTests extends IntegrationTest
 
         this.deviceId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         Device device = new Device(deviceId, AuthenticationType.SAS);
-        Device registeredDevice = registryManager.addDevice(device);
-        String deviceConnectionString = registryManager.getDeviceConnectionString(registeredDevice);
+        Device registeredDevice = registryClient.addDevice(device);
+        String deviceConnectionString = registryClient.getDeviceConnectionString(registeredDevice);
         return new DeviceClient(deviceConnectionString, protocol, options);
     }
 

@@ -41,23 +41,23 @@ public class RegistryStatisticsTest
     }
 
     @Test
-    public void constructorSucceeds(@Mocked RegistryManager mockedRegistryManager) throws IOException, IotHubException
+    public void constructorSucceeds(@Mocked RegistryClient mockedRegistryClient) throws IOException, IotHubException
     {
         //arrange
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = new RegistryManager(connectionString);
+        RegistryClient registryClient = new RegistryClient(connectionString);
 
         // act
-        RegistryStatistics statistics = registryManager.getStatistics();
+        RegistryStatistics statistics = registryClient.getStatistics();
     }
 
     @Test
-    public void gettersSucceeds(@Mocked RegistryManager mockedRegistryManager) throws IOException, IotHubException
+    public void gettersSucceeds(@Mocked RegistryClient mockedRegistryClient) throws IOException, IotHubException
     {
         //arrange
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = new RegistryManager(connectionString);
-        RegistryStatistics statistics = registryManager.getStatistics();
+        RegistryClient registryClient = new RegistryClient(connectionString);
+        RegistryStatistics statistics = registryClient.getStatistics();
 
         //act
         final long disabledDeviceCount = statistics.getDisabledDeviceCount();

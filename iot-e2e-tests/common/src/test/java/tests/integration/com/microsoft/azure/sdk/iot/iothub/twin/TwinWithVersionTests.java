@@ -13,8 +13,8 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
@@ -193,14 +193,14 @@ public class TwinWithVersionTests extends IntegrationTest
 
         private final TwinClient twinServiceClient;
         private DeviceTwinWithVersionTestDevice deviceTwinWithVersionTestDevice;
-        public RegistryManager registryManager;
+        public RegistryClient registryClient;
 
         public DeviceTwinWithVersionTestInstance(IotHubClientProtocol protocol) throws IOException
         {
             this.protocol = protocol;
 
             this.twinServiceClient = new TwinClient(iotHubConnectionString, TwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-            this.registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+            this.registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
             this.deviceTwinWithVersionTestDevice = new DeviceTwinWithVersionTestDevice();
         }
     }
