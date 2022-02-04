@@ -53,7 +53,6 @@ import java.util.Random;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeFalse;
 
 /**
  * Test class containing all tests to be run on JVM and android pertaining to FileUpload.
@@ -123,17 +122,11 @@ public class FileUploadTests extends IntegrationTest
         }
     }
 
-    enum STATUS
-    {
-        SUCCESS, FAILURE
-    }
-
     private static class FileUploadState
     {
         String blobName;
         InputStream fileInputStream;
         long fileLength;
-        boolean isCallbackTriggered;
     }
 
     @Before
