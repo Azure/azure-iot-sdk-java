@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
+import com.microsoft.azure.sdk.iot.service.messaging.FeedbackMessageReceivedCallback;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubMessageResult;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -65,7 +66,7 @@ public class AmqpFeedbackReceivedHandlerTest
     @Mocked Source source;
     @Mocked ReadableBuffer readBuf;
 
-    AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent = feedbackJson -> IotHubMessageResult.COMPLETE;
+    FeedbackMessageReceivedCallback feedbackMessageReceivedCallback = feedbackBatch -> IotHubMessageResult.COMPLETE;
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_001: [The constructor shall copy all input parameters to private member variables for event processing]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_002: [The constructor shall initialize a new Handshaker (Proton) object to handle communication handshake]
@@ -90,14 +91,12 @@ public class AmqpFeedbackReceivedHandlerTest
             }
         };
         // Act
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent, null, null);
+        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, sasToken, iotHubServiceClientProtocol, feedbackMessageReceivedCallback, null, null);
         final String _hostName = Deencapsulation.getField(amqpReceiveHandler, "hostName");
         final String _sasToken = Deencapsulation.getField(amqpReceiveHandler, "sasToken");
-        AmqpFeedbackReceivedEvent _amqpFeedbackReceivedEvent = Deencapsulation.getField(amqpReceiveHandler, "amqpFeedbackReceivedEvent");
         // Assert
         assertEquals(hostName, _hostName);
         assertEquals(sasToken, _sasToken);
-        assertEquals(amqpFeedbackReceivedEvent, _amqpFeedbackReceivedEvent);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_004: [The event handler shall get the Link, Receiver and Delivery (Proton) objects from the event]
@@ -115,7 +114,7 @@ public class AmqpFeedbackReceivedHandlerTest
         final String hostAddr = hostName + ":5671";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         createProtonObjects();
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent, null, null);
+        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, sasToken, iotHubServiceClientProtocol, feedbackMessageReceivedCallback, null, null);
         // Assert
         new Expectations()
         {

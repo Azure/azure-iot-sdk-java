@@ -53,6 +53,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * Test class containing all tests to be run on JVM and android pertaining to FileUpload.
@@ -205,6 +206,9 @@ public class FileUploadTests extends IntegrationTest
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
     public void getAndCompleteSasUriWithUpload() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException, StorageException
     {
+        // Android has some compatibility issues with the azure storage SDK
+        assumeFalse(Tools.isAndroid());
+
         // arrange
         DeviceClient deviceClient = setUpDeviceClient(testInstance.protocol);
 
@@ -235,6 +239,9 @@ public class FileUploadTests extends IntegrationTest
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
     public void getAndCompleteSasUriWithMultipleUploads() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException, StorageException
     {
+        // Android has some compatibility issues with the azure storage SDK
+        assumeFalse(Tools.isAndroid());
+
         // arrange
         int fileUploadCount = 5;
 

@@ -56,32 +56,6 @@ public class ServiceClientTest
         new ServiceClient(connectionString, iotHubServiceClientProtocol);
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_002: [The constructor shall create IotHubConnectionString object using the IotHubConnectionStringBuilder]
-    // Tests_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_003: [The constructor shall create a new instance of ServiceClient using the created IotHubConnectionString object and the given iotHubServiceClientProtocol return with it]
-    @Test
-    public void createFromConnectionString_check_call_flow() throws Exception
-    {
-        // Arrange
-        String iotHubName = "b.c.d";
-        String hostName = "HOSTNAME." + iotHubName;
-        String sharedAccessKeyName = "ACCESSKEYNAME";
-        String policyName = "SharedAccessKey";
-        String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
-        String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        new Expectations()
-        {
-            {
-                IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
-                Deencapsulation.newInstance(ServiceClient.class, iotHubConnectionString, iotHubServiceClientProtocol);
-            }
-        };
-        // Act
-        ServiceClient iotHubServiceClient = (ServiceClient) new ServiceClient(connectionString, iotHubServiceClientProtocol);
-        // Assert
-        assertNotEquals(null, iotHubServiceClient);
-    }
-
     // Tests_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_004: [The constructor shall throw IllegalArgumentException if the input object is null]
     // Assert
     @Test (expected = IllegalArgumentException.class)
