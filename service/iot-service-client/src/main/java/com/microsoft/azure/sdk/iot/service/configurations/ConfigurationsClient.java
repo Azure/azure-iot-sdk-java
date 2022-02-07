@@ -155,15 +155,15 @@ public class ConfigurationsClient
     }
 
     /**
-     * Add configuration using the given Configuration object
+     * Create a new configuration using the given Configuration object
      * Return with the response configuration object from IotHub
      *
-     * @param configuration The configuration object to add
+     * @param configuration The configuration object to create
      * @return The configuration object for the requested operation
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public Configuration add(Configuration configuration) throws IOException, IotHubException
+    public Configuration create(Configuration configuration) throws IOException, IotHubException
     {
         if (configuration == null)
         {

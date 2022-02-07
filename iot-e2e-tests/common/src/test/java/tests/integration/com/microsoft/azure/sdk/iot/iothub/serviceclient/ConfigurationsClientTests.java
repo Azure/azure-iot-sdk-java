@@ -138,7 +138,7 @@ public class ConfigurationsClientTests extends IntegrationTest
             "SELECT deviceId FROM devices WHERE properties.reported.chillerWaterSettings.status=\'pending\'");}});
         configAdded.setTargetCondition("properties.reported.chillerProperties.model=\'4000x\'");
         configAdded.setPriority(20);
-        testInstance.configurationsClient.add(configAdded);
+        testInstance.configurationsClient.create(configAdded);
 
         //-Read-//
         Configuration configRetrieved = testInstance.configurationsClient.get(testInstance.configId);

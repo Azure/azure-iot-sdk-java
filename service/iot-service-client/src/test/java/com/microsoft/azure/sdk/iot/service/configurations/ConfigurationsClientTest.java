@@ -169,7 +169,7 @@ public class ConfigurationsClientTest
         constructorExpectations(connectionString);
         ConfigurationsClient configurationsClient = new ConfigurationsClient(connectionString);
 
-        configurationsClient.add(null);
+        configurationsClient.create(null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_042: [The function shall deserialize the given configuration object to Json string]
@@ -196,7 +196,7 @@ public class ConfigurationsClientTest
         commonConfigExpectations(connectionString, configId);
 
         ConfigurationsClient configurationsClient = new ConfigurationsClient(connectionString);
-        Configuration returnConfig = configurationsClient.add(config);
+        Configuration returnConfig = configurationsClient.create(config);
 
         commonConfigVerifications(HttpMethod.PUT, configId, returnConfig);
     }

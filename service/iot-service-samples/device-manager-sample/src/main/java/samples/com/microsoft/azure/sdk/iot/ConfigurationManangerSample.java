@@ -108,7 +108,7 @@ public class ConfigurationManangerSample
 
         try
         {
-            config = configurationsClient.add(config);
+            config = configurationsClient.create(config);
             System.out.println("Add configuration " + config.getId() + " succeeded.");
             printConfiguration(config);
         }

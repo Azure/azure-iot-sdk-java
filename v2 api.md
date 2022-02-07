@@ -778,7 +778,7 @@ public class ConfigurationsClient
 
     public ConfigurationsClient(String hostName, AzureSasCredential azureSasCredential, ConfigurationsClientOptions options);
 
-    public Configuration add(Configuration configuration) throws IOException, IotHubException;
+    public Configuration create(Configuration configuration) throws IOException, IotHubException;
 
     public Configuration get(String configurationId) throws IOException, IotHubException;
 
