@@ -695,6 +695,87 @@ public class RegistryManagerOptions
 
 ```java
 
+public class DeviceTwin
+{
+    @Deprecated
+    public static DeviceTwin createFromConnectionString(String connectionString) throws IOException;
+
+    @Deprecated
+    public static DeviceTwin createFromConnectionString(
+            String connectionString,
+            DeviceTwinClientOptions options) throws IOException;
+
+    public DeviceTwin(String connectionString);
+
+    public DeviceTwin(String connectionString, DeviceTwinClientOptions options);
+
+    public DeviceTwin(String hostName, TokenCredential credential);
+
+    public DeviceTwin(String hostName, TokenCredential credential, DeviceTwinClientOptions options);
+
+    public DeviceTwin(String hostName, AzureSasCredential azureSasCredential);
+
+    public DeviceTwin(String hostName, AzureSasCredential azureSasCredential, DeviceTwinClientOptions options);
+
+    public void getTwin(DeviceTwinDevice device) throws IotHubException, IOException;
+
+    public synchronized void updateTwin(DeviceTwinDevice device) throws IotHubException, IOException;
+
+    @Deprecated
+    public void updateDesiredProperties(DeviceTwinDevice device) throws UnsupportedOperationException;
+
+    public void replaceDesiredProperties(DeviceTwinDevice device) throws UnsupportedOperationException;
+
+    public void replaceTags(DeviceTwinDevice device) throws UnsupportedOperationException;
+
+    public DeviceTwinDevice replaceTwin(DeviceTwinDevice device) throws IotHubException, IOException;
+
+    public synchronized Query queryTwin(String sqlQuery, Integer pageSize) throws IotHubException, IOException;
+
+    public synchronized Query queryTwin(String sqlQuery) throws IotHubException, IOException;
+
+    public synchronized QueryCollection queryTwinCollection(String sqlQuery) throws MalformedURLException;
+
+    public synchronized QueryCollection queryTwinCollection(String sqlQuery, Integer pageSize) throws MalformedURLException;
+
+    public synchronized boolean hasNextDeviceTwin(Query deviceTwinQuery) throws IotHubException, IOException;
+
+    public synchronized DeviceTwinDevice getNextDeviceTwin(Query deviceTwinQuery)
+            throws IOException, IotHubException, NoSuchElementException;
+
+    public synchronized boolean hasNext(QueryCollection deviceTwinQueryCollection);
+
+    public synchronized QueryCollectionResponse<DeviceTwinDevice> next(QueryCollection deviceTwinQueryCollection) 
+        throws IOException, IotHubException;
+
+    public synchronized QueryCollectionResponse<DeviceTwinDevice> next(
+            QueryCollection deviceTwinQueryCollection,
+            QueryOptions options) 
+                throws IOException, IotHubException;
+
+    public Job scheduleUpdateTwin(
+            String queryCondition,
+            DeviceTwinDevice updateTwin,
+            Date startTimeUtc,
+            long maxExecutionTimeInSeconds) 
+                throws IOException, IotHubException;
+}
+
+@Builder
+public class DeviceTwinClientOptions
+{
+    @Getter
+    private final ProxyOptions proxyOptions;
+
+    @Getter
+    @Builder.Default
+    private final int httpReadTimeout = DEFAULT_HTTP_READ_TIMEOUT_MS;
+
+    @Getter
+    @Builder.Default
+    private final int httpConnectTimeout = DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
+}
+
 ```
 
 </details>
@@ -782,7 +863,7 @@ public class JobClient
     public static JobClient createFromConnectionString(String connectionString)
         throws IOException, IllegalArgumentException;
 
-    public JobClient(String connectionString)
+    public JobClient(String connectionString);
 
     public JobClient(String connectionString, JobClientOptions options);
 

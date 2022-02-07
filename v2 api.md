@@ -527,17 +527,13 @@ public final class DirectMethodsClient
 
     public DirectMethodsClient(String hostName, AzureSasCredential azureSasCredential, DirectMethodsClientOptions options);
 
-    public MethodResult invoke(String deviceId, String methodName) 
-        throws IotHubException, IOException;
+    public MethodResult invoke(String deviceId, String methodName) throws IotHubException, IOException;
 
-    public MethodResult invoke(String deviceId, String methodName, DirectMethodRequestOptions options) 
-        throws IotHubException, IOException;
+    public MethodResult invoke(String deviceId, String methodName, DirectMethodRequestOptions options) throws IotHubException, IOException;
 
-    public MethodResult invoke(String deviceId, String moduleId, String methodName) 
-        throws IotHubException, IOException;
+    public MethodResult invoke(String deviceId, String moduleId, String methodName) throws IotHubException, IOException;
 
-    public MethodResult invoke(String deviceId, String moduleId, String methodName, DirectMethodRequestOptions options) 
-        throws IotHubException, IOException;
+    public MethodResult invoke(String deviceId, String moduleId, String methodName, DirectMethodRequestOptions options) throws IotHubException, IOException;
 }
 
 @Builder
