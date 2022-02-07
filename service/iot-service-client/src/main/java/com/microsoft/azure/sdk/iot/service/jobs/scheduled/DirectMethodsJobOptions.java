@@ -42,5 +42,6 @@ public final class DirectMethodsJobOptions
      * By default, this is set to 200 seconds.
      */
     @Getter
+    @Builder.Default
     private final int maxExecutionTimeInSeconds = 200;
 }
