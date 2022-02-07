@@ -297,11 +297,11 @@ public class QueryClientTests extends IntegrationTest
             TwinClient twinClient = new TwinClient(iotHubConnectionString);
             for (int i = 0; i < deviceCount; i++)
             {
-                Twin twin = twinClient.getTwin(devices[i].getDeviceId());
+                Twin twin = twinClient.get(devices[i].getDeviceId());
                 Set<Pair> desiredProperties = twin.getDesiredProperties();
                 desiredProperties.add(new Pair(queryProperty, queryPropertyValue));
                 twin.setDesiredProperties(desiredProperties);
-                twinClient.updateTwin(twin);
+                twinClient.patch(twin);
             }
 
             Thread.sleep(DESIRED_PROPERTIES_PROPAGATION_TIME_MILLISECONDS);

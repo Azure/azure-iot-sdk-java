@@ -25,8 +25,6 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -150,7 +148,7 @@ public class TwinClientTest
                                                 6. Key as charset and value as utf-8
                                                 7. Key as If-Match and value as '*'  **]**
      **Tests_SRS_DEVICETWIN_25_009: [** The function shall send the created sendHttpRequest and get the response **]**
-     **Tests_SRS_DEVICETWIN_25_011: [** The function shall deserialize the payload by calling updateTwin Api on the twin object **]**
+     **Tests_SRS_DEVICETWIN_25_011: [** The function shall deserialize the payload by calling patch Api on the twin object **]**
      **Tests_SRS_DEVICETWIN_25_012: [** The function shall set eTag, tags, desired property map, reported property map on the user device **]**
      */
     @Test
@@ -162,7 +160,7 @@ public class TwinClientTest
         TwinClient testTwin = new TwinClient(connectionString);
 
         //act
-        Deencapsulation.invoke(testTwin,"getTwin", new Class[]{URL.class}, mockUrl);
+        Deencapsulation.invoke(testTwin,"get", new Class[]{URL.class}, mockUrl);
 
         //assert
         new Verifications()
@@ -174,7 +172,7 @@ public class TwinClientTest
                 times = 1;
                 mockedHttpRequest.send();
                 times = 1;
-                new Twin(anyString);
+                Twin.fromJson(anyString);
                 times = 1;
             }
         };
@@ -189,7 +187,7 @@ public class TwinClientTest
         TwinClient testTwin = new TwinClient(connectionString);
 
         //act
-        testTwin.getTwin("SomeDevID", "SomeModuleID");
+        testTwin.get("SomeDevID", "SomeModuleID");
 
         //assert
         new Verifications()
@@ -201,7 +199,7 @@ public class TwinClientTest
                 times = 1;
                 mockedHttpRequest.send();
                 times = 1;
-                new Twin(anyString);
+                Twin.fromJson(anyString);
                 times = 1;
             }
         };
@@ -218,7 +216,7 @@ public class TwinClientTest
         TwinClient testTwin = new TwinClient(connectionString);
 
         //act
-        testTwin.getTwin(null);
+        testTwin.get(null);
     }
 
     /*
@@ -232,7 +230,7 @@ public class TwinClientTest
         TwinClient testTwin = new TwinClient(connectionString);
 
         //act
-        testTwin.getTwin("");
+        testTwin.get("");
     }
 
     /*
@@ -246,7 +244,7 @@ public class TwinClientTest
         TwinClient testTwin = new TwinClient(connectionString);
 
         //act
-        testTwin.getTwin(null);
+        testTwin.get(null);
     }
 
     /*
@@ -261,7 +259,7 @@ public class TwinClientTest
         TwinClient testTwin = new TwinClient(connectionString);
 
         //act
-        testTwin.getTwin("somedeviceId", "");
+        testTwin.get("somedeviceId", "");
 
         //assert
         new Verifications()
@@ -285,7 +283,7 @@ public class TwinClientTest
         TwinClient testTwin = new TwinClient(connectionString);
 
         //act
-        testTwin.getTwin("somedeviceId", null);
+        testTwin.get("somedeviceId", null);
 
         //assert
         new Verifications()
@@ -309,7 +307,7 @@ public class TwinClientTest
         TwinClient testTwin = new TwinClient(connectionString);
 
         //act
-        testTwin.getTwin("somedeviceId", "somemoduleId");
+        testTwin.get("somedeviceId", "somemoduleId");
 
         //assert
         new Verifications()
@@ -370,7 +368,7 @@ public class TwinClientTest
         };
 
         //act
-        testTwin.updateTwin(mockedDevice);
+        testTwin.patch(mockedDevice);
 
         //assert
         new Verifications()
@@ -398,7 +396,7 @@ public class TwinClientTest
         TwinClient testTwin = new TwinClient(connectionString);
 
         //act
-        testTwin.updateTwin(null);
+        testTwin.patch(null);
     }
 
     @Test (expected = IllegalArgumentException.class)
@@ -416,7 +414,7 @@ public class TwinClientTest
         };
 
         //act
-        testTwin.updateTwin(mockedDevice);
+        testTwin.patch(mockedDevice);
     }
 
     @Test (expected = IllegalArgumentException.class)
@@ -434,7 +432,7 @@ public class TwinClientTest
         };
 
         //act
-        testTwin.updateTwin(mockedDevice);
+        testTwin.patch(mockedDevice);
     }
 
     /*
@@ -460,7 +458,7 @@ public class TwinClientTest
         };
 
         //act
-        testTwin.updateTwin(mockedDevice);
+        testTwin.patch(mockedDevice);
     }
 
 
@@ -490,7 +488,7 @@ public class TwinClientTest
         };
 
         //act
-        testTwin.updateTwin(mockedDevice);
+        testTwin.patch(mockedDevice);
 
         //assert
         new Verifications()
@@ -535,7 +533,7 @@ public class TwinClientTest
         };
 
         //act
-        testTwin.updateTwin(mockedDevice);
+        testTwin.patch(mockedDevice);
 
         //assert
         new Verifications()

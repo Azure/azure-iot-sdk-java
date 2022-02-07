@@ -444,7 +444,7 @@ public class ProvisioningCommon extends IntegrationTest
         Twin twin = new Twin();
         while (!deviceFoundInCorrectHub)
         {
-            twin = twinClient.getTwin(testInstance.provisionedDeviceId);
+            twin = twinClient.get(testInstance.provisionedDeviceId);
             deviceFoundInCorrectHub = twin.getCapabilities() != null;
 
             Thread.sleep(3000);

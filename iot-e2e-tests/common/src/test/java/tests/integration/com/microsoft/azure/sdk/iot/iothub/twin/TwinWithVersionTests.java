@@ -272,7 +272,7 @@ public class TwinWithVersionTests extends IntegrationTest
         assertEquals(buildExceptionMessage("Expected 2, but reported properties version was " + testInstance.deviceTwinWithVersionTestDevice.reportedPropertyVersion, testInstance.deviceTwinWithVersionTestDevice.deviceClient), 2, (int)testInstance.deviceTwinWithVersionTestDevice.reportedPropertyVersion);
 
         // test service client
-        Twin deviceOnServiceClient = testInstance.twinServiceClient.getTwin(testInstance.deviceTwinWithVersionTestDevice.deviceId);
+        Twin deviceOnServiceClient = testInstance.twinServiceClient.get(testInstance.deviceTwinWithVersionTestDevice.deviceId);
         assertEquals(buildExceptionMessage("Expected reported properties version 2 but was " + deviceOnServiceClient.getReportedPropertiesVersion(), testInstance.deviceTwinWithVersionTestDevice.deviceClient), 2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
         Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
         assertSetEquals(PROPERTIES, reported);
@@ -358,7 +358,7 @@ public class TwinWithVersionTests extends IntegrationTest
         }while (testInstance.deviceTwinWithVersionTestDevice.reportedPropertyVersion != 3);
 
         // test service client
-        Twin deviceOnServiceClient = testInstance.twinServiceClient.getTwin(testInstance.deviceTwinWithVersionTestDevice.deviceId);
+        Twin deviceOnServiceClient = testInstance.twinServiceClient.get(testInstance.deviceTwinWithVersionTestDevice.deviceId);
         assertEquals(buildExceptionMessage("Expected reported properties version 3 but was " + deviceOnServiceClient.getReportedPropertiesVersion(), testInstance.deviceTwinWithVersionTestDevice.deviceClient), 3, (int)deviceOnServiceClient.getReportedPropertiesVersion());        Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
         assertSetEquals(newValues, reported);
     }
@@ -441,7 +441,7 @@ public class TwinWithVersionTests extends IntegrationTest
         assertEquals(buildExceptionMessage("Expected 2, but reported properties version was " + testInstance.deviceTwinWithVersionTestDevice.reportedPropertyVersion, testInstance.deviceTwinWithVersionTestDevice.deviceClient), 2, (int)testInstance.deviceTwinWithVersionTestDevice.reportedPropertyVersion);
 
         // test service client
-        Twin deviceOnServiceClient = testInstance.twinServiceClient.getTwin(testInstance.deviceTwinWithVersionTestDevice.deviceId);
+        Twin deviceOnServiceClient = testInstance.twinServiceClient.get(testInstance.deviceTwinWithVersionTestDevice.deviceId);
         assertEquals(buildExceptionMessage("Expected reported properties version 2 but was " + deviceOnServiceClient.getReportedPropertiesVersion(), testInstance.deviceTwinWithVersionTestDevice.deviceClient), 2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
         Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
         assertSetEquals(PROPERTIES, reported);
@@ -525,7 +525,7 @@ public class TwinWithVersionTests extends IntegrationTest
         assertEquals(buildExceptionMessage("Expected 2, but reported properties version was " + testInstance.deviceTwinWithVersionTestDevice.reportedPropertyVersion, testInstance.deviceTwinWithVersionTestDevice.deviceClient), 2, (int)testInstance.deviceTwinWithVersionTestDevice.reportedPropertyVersion);
 
         // test service client
-        Twin deviceOnServiceClient = testInstance.twinServiceClient.getTwin(testInstance.deviceTwinWithVersionTestDevice.deviceId);
+        Twin deviceOnServiceClient = testInstance.twinServiceClient.get(testInstance.deviceTwinWithVersionTestDevice.deviceId);
         assertEquals(buildExceptionMessage("Expected reported properties version 2 but was " + deviceOnServiceClient.getReportedPropertiesVersion(), testInstance.deviceTwinWithVersionTestDevice.deviceClient), 2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
         Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
         assertSetEquals(PROPERTIES, reported);

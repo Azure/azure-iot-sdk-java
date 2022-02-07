@@ -46,7 +46,7 @@ public class Thermostat {
 
     private static void GetAndUpdateTwin() throws IOException, IotHubException {
         // Get the twin and retrieve model Id set by Device client.
-        Twin twin = twinClient.getTwin(deviceId);
+        Twin twin = twinClient.get(deviceId);
         System.out.println("Model Id of this Twin is: " + twin.getModelId());
 
         // Update the twin.
@@ -60,10 +60,10 @@ public class Thermostat {
         String propertyName = "targetTemperature";
         double propertyValue = 60.2;
         twin.setDesiredProperties(Collections.singleton(new Pair(propertyName, propertyValue)));
-        twinClient.updateTwin(twin);
+        twinClient.patch(twin);
 
         // Get the updated twin properties.
-        twin = twinClient.getTwin(deviceId);
+        twin = twinClient.get(deviceId);
         System.out.println("The updated desired properties: " + twin.getDesiredProperties().iterator().next().getValue());
     }
 

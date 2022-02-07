@@ -9,7 +9,6 @@ import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -151,14 +150,14 @@ public final class TwinClient
      * @throws IotHubException This exception is thrown if the response verification failed.
      * @return The retrieved twin object for the specified device.
      */
-    public Twin getTwin(String deviceId) throws IotHubException, IOException
+    public Twin get(String deviceId) throws IotHubException, IOException
     {
         if (deviceId == null || deviceId.isEmpty())
         {
             throw new IllegalArgumentException("DeviceId must not be null or empty");
         }
 
-        return getTwin(IotHubConnectionString.getUrlTwin(this.hostName, deviceId));
+        return get(IotHubConnectionString.getUrlTwin(this.hostName, deviceId));
     }
 
     /**
@@ -170,17 +169,17 @@ public final class TwinClient
      * @throws IotHubException This exception is thrown if the response verification failed.
      * @return The retrieved twin object for the specified module on the specified device.
      */
-    public Twin getTwin(String deviceId, String moduleId) throws IotHubException, IOException
+    public Twin get(String deviceId, String moduleId) throws IotHubException, IOException
     {
         if (deviceId == null || deviceId.isEmpty())
         {
             throw new IllegalArgumentException("DeviceId must not be null or empty");
         }
 
-        return getTwin(IotHubConnectionString.getUrlModuleTwin(this.hostName, deviceId, moduleId));
+        return get(IotHubConnectionString.getUrlModuleTwin(this.hostName, deviceId, moduleId));
     }
 
-    private Twin getTwin(URL url) throws IotHubException, IOException
+    private Twin get(URL url) throws IotHubException, IOException
     {
         HttpRequest httpRequest = createRequest(url, HttpMethod.GET, new byte[0]);
         HttpResponse response = httpRequest.send();
@@ -200,7 +199,7 @@ public final class TwinClient
      * @throws IOException This exception is thrown if the IO operation failed.
      * @throws IotHubException This exception is thrown if the response verification failed.
      */
-    public void updateTwin(Twin twin) throws IotHubException, IOException
+    public void patch(Twin twin) throws IotHubException, IOException
     {
         if (twin == null || twin.getDeviceId() == null || twin.getDeviceId().length() == 0)
         {
@@ -241,7 +240,7 @@ public final class TwinClient
      * @throws IOException If the sendHttpRequest failed to send to IoT hub.
      * @return The Twin object's current state returned from the service after the replace operation.
      */
-    public Twin replaceTwin(Twin twin) throws IotHubException, IOException
+    public Twin replace(Twin twin) throws IotHubException, IOException
     {
         if (twin == null || twin.getDeviceId() == null || twin.getDeviceId().length() == 0)
         {

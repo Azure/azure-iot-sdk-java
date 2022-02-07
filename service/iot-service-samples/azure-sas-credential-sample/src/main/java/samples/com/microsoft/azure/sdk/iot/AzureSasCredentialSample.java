@@ -129,7 +129,7 @@ public class AzureSasCredentialSample
         try
         {
             System.out.println("Getting twin for device " + deviceId);
-            newDeviceTwin = twinClient.getTwin(deviceId);
+            newDeviceTwin = twinClient.get(deviceId);
         }
         catch (IotHubException | IOException e)
         {

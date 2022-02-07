@@ -478,13 +478,13 @@ public final class TwinClient
 
     public TwinClient(String hostName, AzureSasCredential azureSasCredential, TwinClientOptions options);
 
-    public Twin getTwin(String deviceId) throws IotHubException, IOException;
+    public Twin get(String deviceId) throws IotHubException, IOException;
 
-    public Twin getTwin(String deviceId, String moduleId) throws IotHubException, IOException;
+    public Twin get(String deviceId, String moduleId) throws IotHubException, IOException;
 
-    public void updateTwin(Twin twin) throws IotHubException, IOException;
+    public void patch(Twin twin) throws IotHubException, IOException;
 
-    public Twin replaceTwin(Twin twin) throws IotHubException, IOException;
+    public Twin replace(Twin twin) throws IotHubException, IOException;
 }
 
 @Builder

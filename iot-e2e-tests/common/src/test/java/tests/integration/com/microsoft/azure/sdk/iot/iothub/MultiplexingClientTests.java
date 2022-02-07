@@ -945,7 +945,7 @@ public class MultiplexingClientTests extends IntegrationTest
         Set<com.microsoft.azure.sdk.iot.service.twin.Pair> desiredProperties = new HashSet<>();
         desiredProperties.add(new com.microsoft.azure.sdk.iot.service.twin.Pair(expectedPropertyKey, expectedPropertyValue));
         serviceClientTwin.setDesiredProperties(desiredProperties);
-        twinClientServiceClient.updateTwin(serviceClientTwin);
+        twinClientServiceClient.patch(serviceClientTwin);
 
         long startTime = System.currentTimeMillis();
         while (!twinPropertyCallback.receivedCallback)
@@ -971,7 +971,7 @@ public class MultiplexingClientTests extends IntegrationTest
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_REPORTED_PROPERTY_ACKNOWLEDGEMENT);
 
         // Verify that the new reported property value can be seen from the service client
-        Twin serviceClientTwin = twinClientServiceClient.getTwin(deviceClient.getConfig().getDeviceId());
+        Twin serviceClientTwin = twinClientServiceClient.get(deviceClient.getConfig().getDeviceId());
 
         Set<com.microsoft.azure.sdk.iot.service.twin.Pair> retrievedReportedProperties = serviceClientTwin.getReportedProperties();
         assertEquals(1, retrievedReportedProperties.size());

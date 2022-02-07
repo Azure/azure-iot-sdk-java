@@ -48,7 +48,7 @@ public class TemperatureController {
 
     private static void GetAndUpdateTwin() throws IOException, IotHubException {
         // Get the twin and retrieve model Id set by Device client.
-        Twin twin = twinClient.getTwin(deviceId);
+        Twin twin = twinClient.get(deviceId);
         System.out.println("Model Id of this Twin is: " + twin.getModelId());
 
         // Update the twin for thermostat1 component.
@@ -65,10 +65,10 @@ public class TemperatureController {
         double propertyValue = 60.2;
         String componentName = "thermostat1";
         twin.setDesiredProperties(PnpHelper.CreateComponentPropertyPatch(propertyName, propertyValue, componentName));
-        twinClient.updateTwin(twin);
+        twinClient.patch(twin);
 
         // Get the updated twin properties.
-        twin = twinClient.getTwin(deviceId);
+        twin = twinClient.get(deviceId);
         System.out.println("The updated desired properties: " + twin.getDesiredProperties().iterator().next().getValue());
     }
 

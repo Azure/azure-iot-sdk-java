@@ -80,7 +80,7 @@ public class RegistryGlue
             Twin twin = null;
             try
             {
-                twin = client.getTwin(deviceId, moduleId);
+                twin = client.get(deviceId, moduleId);
             } catch (IOException | IotHubException e)
             {
                 handler.handle(Future.failedFuture(e));
@@ -114,7 +114,7 @@ public class RegistryGlue
             twin.setDesiredProperties(newProps);
             try
             {
-                client.updateTwin(twin);
+                client.patch(twin);
             }
             catch (IotHubException | IOException e)
             {

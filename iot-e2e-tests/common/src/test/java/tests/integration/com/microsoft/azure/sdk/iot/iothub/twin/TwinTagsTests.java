@@ -66,7 +66,7 @@ public class TwinTagsTests extends TwinCommon
             desiredProperties.add(new Pair(PROPERTY_KEY + i, PROPERTY_VALUE + i));
             testInstance.devicesUnderTest[i].sCDeviceForTwin.setDesiredProperties(desiredProperties);
 
-            testInstance.twinServiceClient.updateTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin);
+            testInstance.twinServiceClient.patch(testInstance.devicesUnderTest[i].sCDeviceForTwin);
             testInstance.devicesUnderTest[i].sCDeviceForTwin.clearTwin();
         }
 
@@ -75,11 +75,11 @@ public class TwinTagsTests extends TwinCommon
         {
             if (testInstance.testIdentity instanceof TestModuleIdentity)
             {
-                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId(), testInstance.devicesUnderTest[i].sCDeviceForTwin.getModuleId());
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.get(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId(), testInstance.devicesUnderTest[i].sCDeviceForTwin.getModuleId());
             }
             else
             {
-                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId());
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.get(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId());
             }
 
             Set<Pair> tags = testInstance.devicesUnderTest[i].sCDeviceForTwin.getTags();
@@ -96,7 +96,7 @@ public class TwinTagsTests extends TwinCommon
             }
             testInstance.devicesUnderTest[i].sCDeviceForTwin.setDesiredProperties(desiredProperties);
 
-            testInstance.twinServiceClient.updateTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin);
+            testInstance.twinServiceClient.patch(testInstance.devicesUnderTest[i].sCDeviceForTwin);
             testInstance.devicesUnderTest[i].sCDeviceForTwin.clearTwin();
         }
 
@@ -105,11 +105,11 @@ public class TwinTagsTests extends TwinCommon
         {
             if (testInstance.testIdentity instanceof TestModuleIdentity)
             {
-                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId(), testInstance.devicesUnderTest[i].sCDeviceForTwin.getModuleId());
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.get(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId(), testInstance.devicesUnderTest[i].sCDeviceForTwin.getModuleId());
             }
             else
             {
-                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId());
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.get(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId());
             }
 
             for (Pair t : testInstance.devicesUnderTest[i].sCDeviceForTwin.getTags())
@@ -140,7 +140,7 @@ public class TwinTagsTests extends TwinCommon
             Set<Pair> tags = new HashSet<>();
             tags.add(new Pair(TAG_KEY + i, TAG_VALUE + i));
             testInstance.devicesUnderTest[i].sCDeviceForTwin.setTags(tags);
-            testInstance.twinServiceClient.updateTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin);
+            testInstance.twinServiceClient.patch(testInstance.devicesUnderTest[i].sCDeviceForTwin);
             Thread.sleep(DELAY_BETWEEN_OPERATIONS);
             testInstance.devicesUnderTest[i].sCDeviceForTwin.clearTwin();
         }
@@ -150,11 +150,11 @@ public class TwinTagsTests extends TwinCommon
         {
             if (testInstance.testIdentity instanceof TestModuleIdentity)
             {
-                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId(), testInstance.devicesUnderTest[i].sCDeviceForTwin.getModuleId());
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.get(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId(), testInstance.devicesUnderTest[i].sCDeviceForTwin.getModuleId());
             }
             else
             {
-                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId());
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.get(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId());
             }
 
             Thread.sleep(DELAY_BETWEEN_OPERATIONS);
@@ -179,7 +179,7 @@ public class TwinTagsTests extends TwinCommon
             Set<Pair> tags = new HashSet<>();
             tags.add(new Pair(TAG_KEY + i, TAG_VALUE + i));
             testInstance.devicesUnderTest[i].sCDeviceForTwin.setTags(tags);
-            testInstance.twinServiceClient.updateTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin);
+            testInstance.twinServiceClient.patch(testInstance.devicesUnderTest[i].sCDeviceForTwin);
             testInstance.devicesUnderTest[i].sCDeviceForTwin.clearTwin();
         }
 
@@ -188,11 +188,11 @@ public class TwinTagsTests extends TwinCommon
         {
             if (testInstance.testIdentity instanceof TestModuleIdentity)
             {
-                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId(), testInstance.devicesUnderTest[i].sCDeviceForTwin.getModuleId());
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.get(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId(), testInstance.devicesUnderTest[i].sCDeviceForTwin.getModuleId());
             }
             else
             {
-                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId());
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.get(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId());
             }
 
             Set<Pair> tags = testInstance.devicesUnderTest[i].sCDeviceForTwin.getTags();
@@ -201,7 +201,7 @@ public class TwinTagsTests extends TwinCommon
                 tag.setValue(TAG_VALUE_UPDATE + i);
             }
             testInstance.devicesUnderTest[i].sCDeviceForTwin.setTags(tags);
-            testInstance.twinServiceClient.updateTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin);
+            testInstance.twinServiceClient.patch(testInstance.devicesUnderTest[i].sCDeviceForTwin);
             testInstance.devicesUnderTest[i].sCDeviceForTwin.clearTwin();
         }
 
@@ -210,11 +210,11 @@ public class TwinTagsTests extends TwinCommon
         {
             if (testInstance.testIdentity instanceof TestModuleIdentity)
             {
-                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId(), testInstance.devicesUnderTest[i].sCDeviceForTwin.getModuleId());
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.get(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId(), testInstance.devicesUnderTest[i].sCDeviceForTwin.getModuleId());
             }
             else
             {
-                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId());
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.get(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId());
             }
 
             for (Pair t : testInstance.devicesUnderTest[i].sCDeviceForTwin.getTags())
@@ -229,11 +229,11 @@ public class TwinTagsTests extends TwinCommon
         {
             if (testInstance.testIdentity instanceof TestModuleIdentity)
             {
-                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId(), testInstance.devicesUnderTest[i].sCDeviceForTwin.getModuleId());
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.get(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId(), testInstance.devicesUnderTest[i].sCDeviceForTwin.getModuleId());
             }
             else
             {
-                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId());
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.get(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId());
             }
 
             Set<Pair> tags = testInstance.devicesUnderTest[i].sCDeviceForTwin.getTags();
@@ -242,7 +242,7 @@ public class TwinTagsTests extends TwinCommon
                 tag.setValue(null);
             }
             testInstance.devicesUnderTest[i].sCDeviceForTwin.setTags(tags);
-            testInstance.twinServiceClient.updateTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin);
+            testInstance.twinServiceClient.patch(testInstance.devicesUnderTest[i].sCDeviceForTwin);
             testInstance.devicesUnderTest[i].sCDeviceForTwin.clearTwin();
         }
 
@@ -251,11 +251,11 @@ public class TwinTagsTests extends TwinCommon
         {
             if (testInstance.testIdentity instanceof TestModuleIdentity)
             {
-                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId(), testInstance.devicesUnderTest[i].sCDeviceForTwin.getModuleId());
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.get(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId(), testInstance.devicesUnderTest[i].sCDeviceForTwin.getModuleId());
             }
             else
             {
-                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId());
+                testInstance.devicesUnderTest[i].sCDeviceForTwin = testInstance.twinServiceClient.get(testInstance.devicesUnderTest[i].sCDeviceForTwin.getDeviceId());
             }
 
             assertEquals(buildExceptionMessage("Tags were not deleted by being set null", testInstance.testIdentity.getClient()), 0, testInstance.devicesUnderTest[i].sCDeviceForTwin.getTags().size());

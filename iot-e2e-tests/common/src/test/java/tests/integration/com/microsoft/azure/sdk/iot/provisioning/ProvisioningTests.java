@@ -409,7 +409,7 @@ public class ProvisioningTests extends ProvisioningCommon
                 twinClient = new TwinClient(iotHubConnectionString, TwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
             }
 
-            Twin device = twinClient.getTwin(testInstance.provisionedDeviceId);
+            Twin device = twinClient.get(testInstance.provisionedDeviceId);
 
             if (reprovisionPolicy.getMigrateDeviceData())
             {

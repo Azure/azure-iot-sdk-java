@@ -193,7 +193,7 @@ public class TokenCredentialTests
         Device device = new Device("some-device-" + UUID.randomUUID(), AuthenticationType.SAS);
         registryClient.addDevice(device);
 
-        Twin twin = twinServiceClient.getTwin(device.getDeviceId());
+        Twin twin = twinServiceClient.get(device.getDeviceId());
 
         assertNotNull(twin.getETag());
     }

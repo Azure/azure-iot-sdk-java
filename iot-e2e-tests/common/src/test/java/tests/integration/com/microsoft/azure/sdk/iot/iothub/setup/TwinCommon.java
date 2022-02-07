@@ -334,11 +334,11 @@ public class TwinCommon extends IntegrationTest
 
             if (testInstance.testIdentity instanceof TestModuleIdentity)
             {
-                deviceState.sCDeviceForTwin = testInstance.twinServiceClient.getTwin(deviceState.sCDeviceForTwin.getDeviceId(), deviceState.sCDeviceForTwin.getModuleId());
+                deviceState.sCDeviceForTwin = testInstance.twinServiceClient.get(deviceState.sCDeviceForTwin.getDeviceId(), deviceState.sCDeviceForTwin.getModuleId());
             }
             else
             {
-                deviceState.sCDeviceForTwin = testInstance.twinServiceClient.getTwin(deviceState.sCDeviceForTwin.getDeviceId());
+                deviceState.sCDeviceForTwin = testInstance.twinServiceClient.get(deviceState.sCDeviceForTwin.getDeviceId());
             }
 
             Thread.sleep(DELAY_BETWEEN_OPERATIONS);
@@ -452,11 +452,11 @@ public class TwinCommon extends IntegrationTest
 
             if (testInstance.testIdentity instanceof TestModuleIdentity)
             {
-                deviceState.sCDeviceForTwin = testInstance.twinServiceClient.getTwin(deviceState.sCDeviceForTwin.getDeviceId(), deviceState.sCDeviceForTwin.getModuleId());
+                deviceState.sCDeviceForTwin = testInstance.twinServiceClient.get(deviceState.sCDeviceForTwin.getDeviceId(), deviceState.sCDeviceForTwin.getModuleId());
             }
             else
             {
-                deviceState.sCDeviceForTwin = testInstance.twinServiceClient.getTwin(deviceState.sCDeviceForTwin.getDeviceId());
+                deviceState.sCDeviceForTwin = testInstance.twinServiceClient.get(deviceState.sCDeviceForTwin.getDeviceId());
             }
 
             Set<Pair> repProperties = deviceState.sCDeviceForTwin.getReportedProperties();
@@ -494,11 +494,11 @@ public class TwinCommon extends IntegrationTest
 
             if (testInstance.testIdentity instanceof TestModuleIdentity)
             {
-                deviceState.sCDeviceForTwin = testInstance.twinServiceClient.getTwin(deviceState.sCDeviceForTwin.getDeviceId(), deviceState.sCDeviceForTwin.getModuleId());
+                deviceState.sCDeviceForTwin = testInstance.twinServiceClient.get(deviceState.sCDeviceForTwin.getDeviceId(), deviceState.sCDeviceForTwin.getModuleId());
             }
             else
             {
-                deviceState.sCDeviceForTwin = testInstance.twinServiceClient.getTwin(deviceState.sCDeviceForTwin.getDeviceId());
+                deviceState.sCDeviceForTwin = testInstance.twinServiceClient.get(deviceState.sCDeviceForTwin.getDeviceId());
             }
 
             Set<Pair> repProperties = deviceState.sCDeviceForTwin.getReportedProperties();
@@ -635,7 +635,7 @@ public class TwinCommon extends IntegrationTest
             desiredProperties.add(new Pair(PROPERTY_KEY + i, propertyUpdateValue));
         }
         testInstance.deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
-        testInstance.twinServiceClient.updateTwin(testInstance.deviceUnderTest.sCDeviceForTwin);
+        testInstance.twinServiceClient.patch(testInstance.deviceUnderTest.sCDeviceForTwin);
 
         // assert
         waitAndVerifyTwinStatusBecomesSuccess();
@@ -669,7 +669,7 @@ public class TwinCommon extends IntegrationTest
             desiredProperties.add(new Pair(PROPERTY_KEY + i, PROPERTY_VALUE_UPDATE + UUID.randomUUID()));
         }
         testInstance.deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
-        testInstance.twinServiceClient.updateTwin(testInstance.deviceUnderTest.sCDeviceForTwin);
+        testInstance.twinServiceClient.patch(testInstance.deviceUnderTest.sCDeviceForTwin);
         Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
         for (int i = 0; i < testInstance.deviceUnderTest.dCDeviceForTwin.propertyStateList.length; i++)

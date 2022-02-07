@@ -80,7 +80,7 @@ public class DeviceTwinSample
     private static Twin getInitialState(TwinClient twinClient, String deviceId) throws IOException, IotHubException
     {
         System.out.println("Getting the Device twin");
-        Twin device = twinClient.getTwin(deviceId);
+        Twin device = twinClient.get(deviceId);
         System.out.println(device);
 
         //Update Twin Tags and Desired Properties
@@ -98,10 +98,10 @@ public class DeviceTwinSample
         device.setDesiredProperties(desiredProperties);
 
         System.out.println("Updating Device twin (new temp, hum)");
-        twinClient.updateTwin(device);
+        twinClient.patch(device);
 
         System.out.println("Getting the updated Device twin");
-        device = twinClient.getTwin(device.getDeviceId());
+        device = twinClient.get(device.getDeviceId());
         System.out.println(device);
     }
 
@@ -114,10 +114,10 @@ public class DeviceTwinSample
         // By replacing the twin rather than patching it, any desired properties that existed on the twin prior to this call
         // that aren't present on the new set of desired properties will be deleted.
         System.out.println("Replacing Device twin");
-        device = twinClient.replaceTwin(device);
+        device = twinClient.replace(device);
 
         System.out.println("Getting the updated Device twin");
-        device = twinClient.getTwin(device.getDeviceId());
+        device = twinClient.get(device.getDeviceId());
         System.out.println(device);
     }
 
@@ -127,10 +127,10 @@ public class DeviceTwinSample
         desiredProperties.add(new Pair("hum", null));
         device.setDesiredProperties(desiredProperties);
         System.out.println("Updating Device twin (remove hum)");
-        twinClient.updateTwin(device);
+        twinClient.patch(device);
 
         System.out.println("Getting the updated Device twin");
-        device = twinClient.getTwin(device.getDeviceId());
+        device = twinClient.get(device.getDeviceId());
         System.out.println(device);
     }
 
@@ -163,7 +163,7 @@ public class DeviceTwinSample
         System.out.println("job completed");
 
         System.out.println("Getting the updated Device twin");
-        device = twinClient.getTwin(device.getDeviceId());
+        device = twinClient.get(device.getDeviceId());
         System.out.println(device);
     }
 
@@ -201,7 +201,7 @@ public class DeviceTwinSample
         System.out.println("job cancelled");
 
         System.out.println("Getting the updated Device twin (no changes)");
-        device = twinClient.getTwin(device.getDeviceId());
+        device = twinClient.get(device.getDeviceId());
         System.out.println(device);
     }
 
