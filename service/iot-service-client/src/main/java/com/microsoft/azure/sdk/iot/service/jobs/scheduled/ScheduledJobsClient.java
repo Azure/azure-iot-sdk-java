@@ -162,12 +162,7 @@ public final class ScheduledJobsClient
      * @throws IOException if the function cannot create a URL for the job
      * @throws IotHubException if the http request failed
      */
-    public ScheduledJob scheduleUpdateTwin(
-        String jobId,
-        String queryCondition,
-        Twin updateTwin,
-        Date startTimeUtc,
-        long maxExecutionTimeInSeconds)
+    public ScheduledJob scheduleUpdateTwin(String jobId, String queryCondition, Twin updateTwin, Date startTimeUtc, long maxExecutionTimeInSeconds)
             throws IOException, IotHubException
     {
         URL url;
@@ -229,11 +224,7 @@ public final class ScheduledJobsClient
      * @throws IOException if the function cannot create a URL for the job, or the IO failed on request
      * @throws IotHubException if the http request failed
      */
-    public ScheduledJob scheduleDirectMethod(
-        String jobId,
-        String queryCondition,
-        String methodName,
-        Date startTimeUtc)
+    public ScheduledJob scheduleDirectMethod(String jobId, String queryCondition, String methodName, Date startTimeUtc)
             throws IOException, IotHubException
     {
         return scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, DirectMethodsJobOptions.builder().build());
@@ -251,12 +242,7 @@ public final class ScheduledJobsClient
      * @throws IOException if the function cannot create a URL for the job, or the IO failed on request
      * @throws IotHubException if the http request failed
      */
-    public ScheduledJob scheduleDirectMethod(
-        String jobId,
-        String queryCondition,
-        String methodName,
-        Date startTimeUtc,
-        DirectMethodsJobOptions options)
+    public ScheduledJob scheduleDirectMethod(String jobId, String queryCondition, String methodName, Date startTimeUtc, DirectMethodsJobOptions options)
             throws IOException, IotHubException
     {
         URL url;

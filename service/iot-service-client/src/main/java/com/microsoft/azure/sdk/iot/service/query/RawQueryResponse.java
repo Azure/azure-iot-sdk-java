@@ -65,8 +65,9 @@ public class RawQueryResponse
      * @return the next json object from the query.
      * @throws IotHubException If any IoT Hub level errors occur such as an {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException}.
      * @throws IOException If any network level errors occur.
+     * @throws NoSuchElementException If there is no next object to return anymore.
      */
-    public String next() throws IotHubException, IOException
+    public String next() throws IotHubException, IOException, NoSuchElementException
     {
         return next(QueryPageOptions.builder().build());
     }
@@ -79,6 +80,7 @@ public class RawQueryResponse
      * for the next json object. May not be null.
      * @throws IotHubException If any IoT Hub level errors occur such as an {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException}.
      * @throws IOException If any network level errors occur.
+     * @throws NoSuchElementException If there is no next object to return anymore.
      */
     public String next(QueryPageOptions pageOptions) throws IotHubException, IOException
     {

@@ -74,6 +74,7 @@ public class TwinQueryResponse
      * @return the next Twin from the query.
      * @throws IotHubException If any IoT Hub level errors occur such as an {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException}.
      * @throws IOException If any network level errors occur.
+     * @throws NoSuchElementException If there is no next Twin to return anymore.
      */
     public Twin next() throws IotHubException, IOException
     {
@@ -88,8 +89,9 @@ public class TwinQueryResponse
      * @return the next Twin from the query.
      * @throws IotHubException If any IoT Hub level errors occur such as an {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException}.
      * @throws IOException If any network level errors occur.
+     * @throws NoSuchElementException If there is no next Twin to return anymore.
      */
-    public Twin next(QueryPageOptions pageOptions) throws IotHubException, IOException
+    public Twin next(QueryPageOptions pageOptions) throws IotHubException, IOException, NoSuchElementException
     {
         Objects.requireNonNull(pageOptions);
 

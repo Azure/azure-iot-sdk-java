@@ -39,7 +39,8 @@ public final class DirectMethodsJobOptions
 
     /**
      * The timeout for the direct method request job as a whole.
+     * By default, this is set to 200 seconds.
      */
     @Getter
-    private final int maxExecutionTimeInSeconds;
+    private final int maxExecutionTimeInSeconds = 200;
 }

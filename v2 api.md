@@ -629,27 +629,13 @@ public final class ScheduledJobsClient
 
     public ScheduledJobsClient(String hostName, AzureSasCredential azureSasCredential, ScheduledJobsClientOptions clientOptions);
 
-    public ScheduledJob scheduleUpdateTwin(
-        String jobId,
-        String queryCondition,
-        Twin updateTwin,
-        Date startTimeUtc,
-        long maxExecutionTimeInSeconds)
+    public ScheduledJob scheduleUpdateTwin(String jobId, String queryCondition, Twin updateTwin, Date startTimeUtc, long maxExecutionTimeInSeconds)
             throws IOException, IotHubException;
 
-    public ScheduledJob scheduleDirectMethod(
-        String jobId,
-        String queryCondition,
-        String methodName,
-        Date startTimeUtc)
+    public ScheduledJob scheduleDirectMethod(String jobId, String queryCondition, String methodName, Date startTimeUtc)
             throws IOException, IotHubException;
 
-    public ScheduledJob scheduleDirectMethod(
-        String jobId,
-        String queryCondition,
-        String methodName,
-        Date startTimeUtc,
-        DirectMethodsJobOptions options)
+    public ScheduledJob scheduleDirectMethod(String jobId, String queryCondition, String methodName, Date startTimeUtc, DirectMethodsJobOptions options)
             throws IOException, IotHubException;
 
     public ScheduledJob get(String jobId) throws IOException, IotHubException;
@@ -723,6 +709,23 @@ public class TwinQueryResponse
     public Twin next() throws IotHubException, IOException;
 
     public Twin next(QueryPageOptions pageOptions) throws IotHubException, IOException;
+}
+
+public class TwinQueryExample
+{
+    public void printTwins(String connectionString)
+    {
+        QueryClient queryClient = new QueryClient(connectionString);
+        String twinQueryString = "SELECT * FROM devices";
+        QueryPageOptions queryPageOptions = QueryPageOptions.builder().pageSize(20).build();
+        TwinQueryResponse twinQueryResponse = queryClient.queryTwins(twinQueryString, queryPageOptions);
+        
+        while (twinQueryResponse.hasNext())
+        {
+            Twin queriedTwin = twinQueryResponse.next();
+            System.out.println(queriedTwin);
+        }
+    }
 }
 
 @Builder

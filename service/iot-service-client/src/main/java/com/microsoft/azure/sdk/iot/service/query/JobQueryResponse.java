@@ -91,8 +91,9 @@ public class JobQueryResponse
      * @return the next job from the query.
      * @throws IotHubException If any IoT Hub level errors occur such as an {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException}.
      * @throws IOException If any network level errors occur.
+     * @throws NoSuchElementException If there is no next ScheduledJob to return anymore.
      */
-    public ScheduledJob next() throws IotHubException, IOException
+    public ScheduledJob next() throws IotHubException, IOException, NoSuchElementException
     {
         return next(QueryPageOptions.builder().build());
     }
@@ -105,8 +106,9 @@ public class JobQueryResponse
      * for the next job. May not be null.
      * @throws IotHubException If any IoT Hub level errors occur such as an {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException}.
      * @throws IOException If any network level errors occur.
+     * @throws NoSuchElementException If there is no next ScheduledJob to return anymore.
      */
-    public ScheduledJob next(QueryPageOptions pageOptions) throws IotHubException, IOException
+    public ScheduledJob next(QueryPageOptions pageOptions) throws IotHubException, IOException, NoSuchElementException
     {
         Objects.requireNonNull(pageOptions);
 
