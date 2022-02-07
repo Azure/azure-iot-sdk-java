@@ -4,8 +4,7 @@
 package com.microsoft.azure.sdk.iot.service.jobs.registry;
 
 import com.microsoft.azure.sdk.iot.service.ParserUtility;
-import com.microsoft.azure.sdk.iot.service.jobs.registry.JobPropertiesParser;
-import com.microsoft.azure.sdk.iot.service.jobs.registry.StorageAuthenticationType;
+import com.microsoft.azure.sdk.iot.service.jobs.registry.serializers.JobPropertiesParser;
 import junit.framework.TestCase;
 import mockit.Deencapsulation;
 import org.junit.Test;
@@ -19,7 +18,7 @@ import static junit.framework.TestCase.assertEquals;
  * Methods: 100%
  * Lines: 100%
  */
-public class JobPropertiesParserTest
+public class RegistryJobParserTest
 {
     //Tests_SRS_JOB_PROPERTIES_PARSER_34_001: [The constructor shall create and return an instance of a JobPropertiesParser object based off the provided json.]
     //Tests_SRS_JOB_PROPERTIES_PARSER_34_002: [This method shall return a json representation of this.]

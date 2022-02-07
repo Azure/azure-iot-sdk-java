@@ -3,8 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.service.jobs.registry;
 
-import com.microsoft.azure.sdk.iot.service.jobs.registry.JobProperties;
-import com.microsoft.azure.sdk.iot.service.jobs.registry.JobPropertiesParser;
+import com.microsoft.azure.sdk.iot.service.jobs.registry.serializers.JobPropertiesParser;
 import mockit.Deencapsulation;
 import org.junit.Test;
 
@@ -17,7 +16,7 @@ import static junit.framework.TestCase.assertEquals;
  * Methods:100%
  * Lines: 100%
  */
-public class JobPropertiesTest
+public class RegistryJobTest
 {
     //Tests_SRS_SERVICE_SDK_JAVA_JOB_PROPERTIES_34_003: [This method shall convert the provided parser into a JobProperty object and return it.]
     @Test
@@ -33,11 +32,11 @@ public class JobPropertiesTest
         parser.setProgress(0);
         parser.setExcludeKeysInExport(false);
         parser.setJobId("jobId");
-        parser.setStatus(JobProperties.JobStatus.COMPLETED.toString());
-        parser.setType(JobProperties.JobType.IMPORT.toString());
+        parser.setStatus(RegistryJob.JobStatus.COMPLETED.toString());
+        parser.setType(RegistryJob.JobType.IMPORT.toString());
 
         // act
-        JobProperties jobProperties = jobPropertiesConstructorWithParser(parser);
+        RegistryJob jobProperties = jobPropertiesConstructorWithParser(parser);
 
         // assert
         assertEquals(parser.getInputBlobContainerUri(), jobProperties.getInputBlobContainerUri());
@@ -57,7 +56,7 @@ public class JobPropertiesTest
     public void toJobPropertiesParser()
     {
         // arrange
-        JobProperties jobProperties = new JobProperties();
+        RegistryJob jobProperties = new RegistryJob();
         jobProperties.setEndTimeUtc(new Date(System.currentTimeMillis()));
         jobProperties.setStartTimeUtc(new Date(System.currentTimeMillis()));
         jobProperties.setFailureReason("failureReason");
@@ -66,8 +65,8 @@ public class JobPropertiesTest
         jobProperties.setProgress(0);
         jobProperties.setExcludeKeysInExport(false);
         jobProperties.setJobId("jobId");
-        jobProperties.setStatus(JobProperties.JobStatus.COMPLETED);
-        jobProperties.setType(JobProperties.JobType.IMPORT);
+        jobProperties.setStatus(RegistryJob.JobStatus.COMPLETED);
+        jobProperties.setType(RegistryJob.JobType.IMPORT);
 
         // act
         JobPropertiesParser parser = toJobPropertiesParser(jobProperties);
@@ -85,13 +84,13 @@ public class JobPropertiesTest
         assertEquals(parser.getStartTimeUtc(), jobProperties.getStartTimeUtc());
     }
 
-    private JobPropertiesParser toJobPropertiesParser(JobProperties jobProperties)
+    private JobPropertiesParser toJobPropertiesParser(RegistryJob jobProperties)
     {
         return Deencapsulation.invoke(jobProperties, "toJobPropertiesParser");
     }
 
-    private JobProperties jobPropertiesConstructorWithParser(JobPropertiesParser parser)
+    private RegistryJob jobPropertiesConstructorWithParser(JobPropertiesParser parser)
     {
-        return Deencapsulation.newInstance(JobProperties.class, new Class[] { JobPropertiesParser.class }, parser);
+        return Deencapsulation.newInstance(RegistryJob.class, new Class[] { JobPropertiesParser.class }, parser);
     }
 }

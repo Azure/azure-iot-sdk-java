@@ -30,11 +30,7 @@ class QueryRequestParser
      */
     QueryRequestParser(String query) throws IllegalArgumentException
     {
-        //Codes_SRS_QUERY_REQUEST_PARSER_25_001: [The constructor shall create an instance of the QueryRequestParser.]
-        //Codes_SRS_QUERY_REQUEST_PARSER_25_003: [If the provided query is null, empty, or not valid, the constructor shall throws IllegalArgumentException.]
         ParserUtility.validateQuery(query);
-
-        //Codes_SRS_QUERY_REQUEST_PARSER_25_002: [The constructor shall set the query value with the provided query.]
         this.query = query;
     }
 

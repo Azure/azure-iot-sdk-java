@@ -6,6 +6,8 @@ package com.microsoft.azure.sdk.iot.service.jobs.scheduled;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.serializers.JobsResponseParser;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.serializers.JobsStatisticsParser;
 import com.microsoft.azure.sdk.iot.service.twin.TwinState;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
@@ -20,7 +22,7 @@ import java.util.Set;
 /**
  * Metadata for a particular job created with the {@link ScheduledJobsClient}.
  */
-public class Job
+public class ScheduledJob
 {
     /**
      * The unique identifier for this job.
@@ -68,13 +70,13 @@ public class Job
      * The type of job to execute.
      */
     @Getter
-    private final JobType jobType;
+    private final ScheduledJobType jobType;
 
     /**
      * The status of the job.
      */
     @Getter
-    private final JobStatus jobStatus;
+    private final ScheduledJobStatus jobStatus;
 
     /**
      * The method type and parameters.
@@ -134,7 +136,7 @@ public class Job
      * @throws JsonParseException if the content of body is a invalid json
      * @throws IllegalArgumentException if the provided body is null
      */
-    public Job(String json) throws JsonParseException, IllegalArgumentException
+    public ScheduledJob(String json) throws JsonParseException, IllegalArgumentException
     {
         if (json == null)
         {
@@ -150,8 +152,8 @@ public class Job
         this.endTime = jobsResponseParser.getEndTimeDate();
         this.lastUpdatedDateTime = jobsResponseParser.getLastUpdatedTimeDate();
         this.maxExecutionTimeInSeconds = jobsResponseParser.getMaxExecutionTimeInSeconds();
-        this.jobType = JobType.valueOf(jobsResponseParser.getType());
-        this.jobStatus = JobStatus.valueOf(jobsResponseParser.getJobsStatus());
+        this.jobType = ScheduledJobType.valueOf(jobsResponseParser.getType());
+        this.jobStatus = ScheduledJobStatus.valueOf(jobsResponseParser.getJobsStatus());
 
         if (jobsResponseParser.getCloudToDeviceMethod() != null)
         {
@@ -160,7 +162,7 @@ public class Job
 
         if (jobsResponseParser.getOutcome() != null)
         {
-            if (this.jobType == JobType.scheduleDeviceMethod)
+            if (this.jobType == ScheduledJobType.scheduleDeviceMethod)
             {
                 try
                 {

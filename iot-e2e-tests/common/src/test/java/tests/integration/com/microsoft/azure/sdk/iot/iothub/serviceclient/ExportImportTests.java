@@ -13,8 +13,9 @@ import com.azure.storage.blob.sas.BlobContainerSasPermission;
 import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 import com.azure.storage.blob.specialized.BlobInputStream;
 import com.azure.storage.blob.specialized.BlockBlobClient;
+import com.microsoft.azure.sdk.iot.service.jobs.registry.RegistryJob;
 import com.microsoft.azure.sdk.iot.service.jobs.registry.RegistryJobsClient;
-import com.microsoft.azure.sdk.iot.service.jobs.registry.ExportImportDeviceParser;
+import com.microsoft.azure.sdk.iot.service.jobs.registry.serializers.ExportImportDeviceParser;
 import com.microsoft.azure.sdk.iot.service.jobs.registry.StorageAuthenticationType;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
@@ -23,7 +24,6 @@ import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
 import com.microsoft.azure.sdk.iot.service.jobs.registry.ExportImportDevice;
 import com.microsoft.azure.sdk.iot.service.jobs.registry.ImportMode;
-import com.microsoft.azure.sdk.iot.service.jobs.registry.JobProperties;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubTooManyDevicesException;
 import mockit.Deencapsulation;
@@ -233,15 +233,15 @@ public class ExportImportTests extends IntegrationTest
         String containerSasUri = getContainerSasUri(exportContainer);
 
         boolean exportJobScheduled = false;
-        JobProperties exportJob = null;
+        RegistryJob exportJob = null;
         while (!exportJobScheduled)
         {
             try
             {
                 if (storageAuthenticationType.isPresent())
                 {
-                    JobProperties exportJobProperties =
-                        JobProperties.createForExportJob(
+                    RegistryJob exportJobProperties =
+                        RegistryJob.createForExportJob(
                             containerSasUri,
                             excludeKeys,
                             storageAuthenticationType.get());
@@ -262,14 +262,14 @@ public class ExportImportTests extends IntegrationTest
             }
         }
 
-        JobProperties.JobStatus jobStatus;
+        RegistryJob.JobStatus jobStatus;
 
         long startTime = System.currentTimeMillis();
         while (true)
         {
-            exportJob = jobClient.getJob(exportJob.getJobId());
+            exportJob = jobClient.get(exportJob.getJobId());
             jobStatus = exportJob.getStatus();
-            if (jobStatus == JobProperties.JobStatus.COMPLETED || jobStatus == JobProperties.JobStatus.FAILED)
+            if (jobStatus == RegistryJob.JobStatus.COMPLETED || jobStatus == RegistryJob.JobStatus.FAILED)
             {
                 break;
             }
@@ -307,7 +307,7 @@ public class ExportImportTests extends IntegrationTest
         }
         scanner.close();
 
-        if (jobStatus != JobProperties.JobStatus.COMPLETED)
+        if (jobStatus != RegistryJob.JobStatus.COMPLETED)
         {
             Assert.fail("The export job was not completed successfully");
         }
@@ -343,15 +343,15 @@ public class ExportImportTests extends IntegrationTest
 
         // Starting the import job
         boolean importJobScheduled = false;
-        JobProperties importJob = null;
+        RegistryJob importJob = null;
         while (!importJobScheduled)
         {
             try
             {
                 if (storageAuthenticationType.isPresent())
                 {
-                    // For a given StorageAuthenticationType, create JobProperties and pass it
-                    JobProperties importJobProperties = JobProperties.createForImportJob(getContainerSasUri(importContainer), getContainerSasUri(importContainer), storageAuthenticationType.get());
+                    // For a given StorageAuthenticationType, create RegistryJob and pass it
+                    RegistryJob importJobProperties = RegistryJob.createForImportJob(getContainerSasUri(importContainer), getContainerSasUri(importContainer), storageAuthenticationType.get());
                     importJob = jobClient.importDevices(importJobProperties);
                 }
                 else
@@ -371,9 +371,9 @@ public class ExportImportTests extends IntegrationTest
         long startTime = System.currentTimeMillis();
         while (true)
         {
-            importJob = jobClient.getJob(importJob.getJobId());
-            if (importJob.getStatus() == JobProperties.JobStatus.COMPLETED
-                    || importJob.getStatus() == JobProperties.JobStatus.FAILED)
+            importJob = jobClient.get(importJob.getJobId());
+            if (importJob.getStatus() == RegistryJob.JobStatus.COMPLETED
+                    || importJob.getStatus() == RegistryJob.JobStatus.FAILED)
             {
                 break;
             }
@@ -387,7 +387,7 @@ public class ExportImportTests extends IntegrationTest
         }
 
         // Checking the result of the import job
-        if (importJob.getStatus() != JobProperties.JobStatus.COMPLETED)
+        if (importJob.getStatus() != RegistryJob.JobStatus.COMPLETED)
         {
             Assert.fail("The import job was not completed successfully for " + importMode + " operation.");
         }

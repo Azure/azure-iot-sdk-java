@@ -7,12 +7,13 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.identity.ClientSecretCredentialBuilder;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.Job;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJob;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubMessageResult;
 import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.service.query.QueryClientOptions;
 import com.microsoft.azure.sdk.iot.service.exceptions.ErrorCodeDescription;
+import com.microsoft.azure.sdk.iot.service.query.SqlQueryBuilder;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.messaging.FeedbackReceiver;
 import com.microsoft.azure.sdk.iot.service.messaging.FeedbackRecord;
@@ -30,7 +31,6 @@ import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClientOptions;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClientOptions;
-import com.microsoft.azure.sdk.iot.service.query.SqlQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
 import java.io.IOException;
@@ -232,14 +232,14 @@ public class RoleBasedAuthenticationSample
         {
             System.out.println("Querying all active jobs for your IoT Hub");
 
-            String jobsQueryString = SqlQuery.createSqlQuery("*", SqlQuery.FromType.JOBS, null, null).getQuery();
+            String jobsQueryString = SqlQueryBuilder.createSqlQuery("*", SqlQueryBuilder.FromType.JOBS, null, null);
             JobQueryResponse deviceJobQueryResponse = queryClient.queryJobs(jobsQueryString);
             int queriedJobCount = 0;
             while (deviceJobQueryResponse.hasNext())
             {
                 queriedJobCount++;
-                Job job = deviceJobQueryResponse.next();
-                System.out.println(String.format("Job %s of type %s has status %s", job.getJobId(), job.getJobType(), job.getJobStatus()));
+                ScheduledJob job = deviceJobQueryResponse.next();
+                System.out.println(String.format("ScheduledJob %s of type %s has status %s", job.getJobId(), job.getJobType(), job.getJobStatus()));
             }
 
             if (queriedJobCount == 0)

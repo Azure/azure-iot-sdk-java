@@ -5,7 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.service.jobs.scheduled;
 
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.JobQueryResponseError;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.serializers.JobQueryResponseError;
 import org.junit.Test;
 
 import java.io.IOException;

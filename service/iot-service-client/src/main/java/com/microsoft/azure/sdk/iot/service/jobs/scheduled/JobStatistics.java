@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.service.jobs.scheduled;
 
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.serializers.JobsStatisticsParser;
 import lombok.Getter;
 
 /**

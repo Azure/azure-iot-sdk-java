@@ -5,18 +5,19 @@
 
 package com.microsoft.azure.sdk.iot.service.jobs.registry;
 
+import com.microsoft.azure.sdk.iot.service.jobs.registry.serializers.JobPropertiesParser;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 
 import java.util.Date;
 /**
- * Contains properties of a Job.
+ * Contains properties of a ScheduledJob.
  * See online <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/createimportexportjob">documentation</a> for more information.
 */
-public class JobProperties
+public class RegistryJob
 {
-    public JobProperties()
+    public RegistryJob()
     {
         this.setJobId("");
     }
@@ -101,10 +102,10 @@ public class JobProperties
     private ManagedIdentity identity;
 
     /**
-     * Constructs a new JobProperties object using a JobPropertiesParser object
+     * Constructs a new RegistryJob object using a JobPropertiesParser object
      * @param parser the parser object to convert from
      */
-    JobProperties(JobPropertiesParser parser)
+    RegistryJob(JobPropertiesParser parser)
     {
         //Codes_SRS_SERVICE_SDK_JAVA_JOB_PROPERTIES_34_003: [This method shall convert the provided parser into a JobProperty object and return it.]
         this.endTimeUtc = parser.getEndTimeUtc();
@@ -161,15 +162,15 @@ public class JobProperties
     }
 
     /**
-     * Creates an instance of JobProperties with parameters ready to start an Import job
+     * Creates an instance of RegistryJob with parameters ready to start an Import job
      *
      * @param inputBlobContainerUri URI to a blob container that contains registry data to sync.
      *                              Including a SAS token is dependent on the StorageAuthenticationType
      * @param outputBlobContainerUri URI to a blob container. This is used to output the status of the job and the results.
      *                               Including a SAS token is dependent on the StorageAuthenticationType
-     * @return An instance of JobProperties
+     * @return An instance of RegistryJob
      */
-    public static JobProperties createForImportJob(
+    public static RegistryJob createForImportJob(
             String inputBlobContainerUri,
             String outputBlobContainerUri)
     {
@@ -178,22 +179,22 @@ public class JobProperties
     }
 
     /**
-     * Creates an instance of JobProperties with parameters ready to start an Import job
+     * Creates an instance of RegistryJob with parameters ready to start an Import job
      *
      * @param inputBlobContainerUri URI to a blob container that contains registry data to sync.
      *                              Including a SAS token is dependent on the StorageAuthenticationType
      * @param outputBlobContainerUri URI to a blob container. This is used to output the status of the job and the results.
      *                               Including a SAS token is dependent on the StorageAuthenticationType
      * @param storageAuthenticationType Specifies authentication type being used for connecting to storage account
-     * @return An instance of JobProperties
+     * @return An instance of RegistryJob
      */
-    public static JobProperties createForImportJob(
+    public static RegistryJob createForImportJob(
             String inputBlobContainerUri,
             String outputBlobContainerUri,
             StorageAuthenticationType storageAuthenticationType)
     {
-        JobProperties importJobProperties = new JobProperties();
-        importJobProperties.setType(JobProperties.JobType.IMPORT);
+        RegistryJob importJobProperties = new RegistryJob();
+        importJobProperties.setType(RegistryJob.JobType.IMPORT);
         importJobProperties.setInputBlobContainerUri(inputBlobContainerUri);
         importJobProperties.setOutputBlobContainerUri(outputBlobContainerUri);
         importJobProperties.setStorageAuthenticationType(storageAuthenticationType);
@@ -201,7 +202,7 @@ public class JobProperties
     }
 
     /**
-     * Creates an instance of JobProperties with parameters ready to start an Import job
+     * Creates an instance of RegistryJob with parameters ready to start an Import job
      *
      * @param inputBlobContainerUri URI to a blob container that contains registry data to sync.
      *                              Including a SAS token is dependent on the StorageAuthenticationType
@@ -209,16 +210,16 @@ public class JobProperties
      *                               Including a SAS token is dependent on the StorageAuthenticationType
      * @param storageAuthenticationType Specifies authentication type being used for connecting to storage account
      * @param identity the managed identity used to access the storage account for import jobs.
-     * @return An instance of JobProperties
+     * @return An instance of RegistryJob
      */
-    public static JobProperties createForImportJob(
+    public static RegistryJob createForImportJob(
             String inputBlobContainerUri,
             String outputBlobContainerUri,
             StorageAuthenticationType storageAuthenticationType,
             ManagedIdentity identity)
     {
-        JobProperties importJobProperties = new JobProperties();
-        importJobProperties.setType(JobProperties.JobType.IMPORT);
+        RegistryJob importJobProperties = new RegistryJob();
+        importJobProperties.setType(RegistryJob.JobType.IMPORT);
         importJobProperties.setInputBlobContainerUri(inputBlobContainerUri);
         importJobProperties.setOutputBlobContainerUri(outputBlobContainerUri);
         importJobProperties.setStorageAuthenticationType(storageAuthenticationType);
@@ -227,14 +228,14 @@ public class JobProperties
     }
 
     /**
-     * Creates an instance of JobProperties with parameters ready to start an Export job
+     * Creates an instance of RegistryJob with parameters ready to start an Export job
      *
      * @param outputBlobContainerUri URI to a blob container. This is used to output the status of the job and the results.
      *                               Including a SAS token is dependent on the StorageAuthenticationType
      * @param excludeKeysInExport Indicates if authorization keys are included in export output
-     * @return An instance of JobProperties
+     * @return An instance of RegistryJob
      */
-    public static JobProperties createForExportJob(
+    public static RegistryJob createForExportJob(
             String outputBlobContainerUri,
             Boolean excludeKeysInExport)
     {
@@ -243,21 +244,21 @@ public class JobProperties
     }
 
     /**
-     * Creates an instance of JobProperties with parameters ready to start an Export job
+     * Creates an instance of RegistryJob with parameters ready to start an Export job
      *
      * @param outputBlobContainerUri URI to a blob container. This is used to output the status of the job and the results.
      *                               Including a SAS token is dependent on the StorageAuthenticationType
      * @param excludeKeysInExport Indicates if authorization keys are included in export output
      * @param storageAuthenticationType Specifies authentication type being used for connecting to storage account
-     * @return An instance of JobProperties
+     * @return An instance of RegistryJob
      */
-    public static JobProperties createForExportJob(
+    public static RegistryJob createForExportJob(
             String outputBlobContainerUri,
             Boolean excludeKeysInExport,
             StorageAuthenticationType storageAuthenticationType)
     {
-        JobProperties exportJobProperties = new JobProperties();
-        exportJobProperties.setType(JobProperties.JobType.EXPORT);
+        RegistryJob exportJobProperties = new RegistryJob();
+        exportJobProperties.setType(RegistryJob.JobType.EXPORT);
         exportJobProperties.setOutputBlobContainerUri(outputBlobContainerUri);
         exportJobProperties.setExcludeKeysInExport(excludeKeysInExport);
         exportJobProperties.setStorageAuthenticationType(storageAuthenticationType);
@@ -265,23 +266,23 @@ public class JobProperties
     }
 
     /**
-     * Creates an instance of JobProperties with parameters ready to start an Export job
+     * Creates an instance of RegistryJob with parameters ready to start an Export job
      *
      * @param outputBlobContainerUri URI to a blob container. This is used to output the status of the job and the results.
      *                               Including a SAS token is dependent on the StorageAuthenticationType
      * @param excludeKeysInExport Indicates if authorization keys are included in export output
      * @param storageAuthenticationType Specifies authentication type being used for connecting to storage account
      * @param identity the managed identity used to access the storage account for export jobs.
-     * @return An instance of JobProperties
+     * @return An instance of RegistryJob
      */
-    public static JobProperties createForExportJob(
+    public static RegistryJob createForExportJob(
             String outputBlobContainerUri,
             Boolean excludeKeysInExport,
             StorageAuthenticationType storageAuthenticationType,
             ManagedIdentity identity)
     {
-        JobProperties exportJobProperties = new JobProperties();
-        exportJobProperties.setType(JobProperties.JobType.EXPORT);
+        RegistryJob exportJobProperties = new RegistryJob();
+        exportJobProperties.setType(RegistryJob.JobType.EXPORT);
         exportJobProperties.setOutputBlobContainerUri(outputBlobContainerUri);
         exportJobProperties.setExcludeKeysInExport(excludeKeysInExport);
         exportJobProperties.setStorageAuthenticationType(storageAuthenticationType);

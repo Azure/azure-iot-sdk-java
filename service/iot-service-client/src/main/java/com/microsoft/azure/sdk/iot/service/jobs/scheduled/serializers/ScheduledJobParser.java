@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.service.jobs.scheduled;
+package com.microsoft.azure.sdk.iot.service.jobs.scheduled.serializers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.service.methods.MethodParser;
+import com.microsoft.azure.sdk.iot.service.methods.serializers.MethodParser;
 import com.microsoft.azure.sdk.iot.service.ParserUtility;
 import com.microsoft.azure.sdk.iot.service.twin.TwinState;
 
@@ -21,14 +21,14 @@ import java.util.TimeZone;
  */
 // This suppression below is addressing warnings of fields used for serialization.
 @SuppressWarnings({"FieldCanBeLocal", "unused"})
-public class JobsParser
+public class ScheduledJobParser
 {
     private transient static final String DATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
     private transient static final String TIMEZONE = "UTC";
     private transient static final String SCHEDULE_DEVICE_METHOD = "scheduleDeviceMethod";
     private transient static final String SCHEDULE_UPDATE_TWIN = "scheduleUpdateTwin";
 
-    // Job identifier
+    // ScheduledJob identifier
     private static final String JOBID_TAG = "jobId";
     @Expose(deserialize = false)
     @SerializedName(JOBID_TAG)
@@ -86,7 +86,7 @@ public class JobsParser
      * @param maxExecutionTimeInSeconds is the maximum time that the device can expend to execute the job. Cannot be negative
      * @throws IllegalArgumentException if one of the parameter is not valid.
      */
-    public JobsParser(
+    public ScheduledJobParser(
             String jobId, MethodParser cloudToDeviceMethod,
             String queryCondition, Date startTime, long maxExecutionTimeInSeconds)
             throws IllegalArgumentException
@@ -122,7 +122,7 @@ public class JobsParser
      * @param maxExecutionTimeInSeconds is the maximum time that the device can expend to execute the job. Cannot be negative
      * @throws IllegalArgumentException if one of the parameter is not valid.
      */
-    public JobsParser(
+    public ScheduledJobParser(
             String jobId, TwinState updateTwin,
             String queryCondition, Date startTime, long maxExecutionTimeInSeconds)
             throws IllegalArgumentException
@@ -204,7 +204,7 @@ public class JobsParser
      * Empty constructor: Used only to keep GSON happy.
      */
     @SuppressWarnings("unused")
-    JobsParser()
+    ScheduledJobParser()
     {
     }
 }

@@ -10,8 +10,8 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.JobStatus;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.JobType;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobStatus;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobType;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
@@ -223,12 +223,12 @@ public final class QueryClient
         return jobQueryResponse;
     }
 
-    public JobQueryResponse queryJobs(JobType jobType, JobStatus jobStatus) throws IOException, IotHubException
+    public JobQueryResponse queryJobs(ScheduledJobType jobType, ScheduledJobStatus jobStatus) throws IOException, IotHubException
     {
         return queryJobs(jobType, jobStatus, QueryPageOptions.builder().build());
     }
 
-    public JobQueryResponse queryJobs(JobType jobType, JobStatus jobStatus, QueryPageOptions options) throws IOException, IotHubException
+    public JobQueryResponse queryJobs(ScheduledJobType jobType, ScheduledJobStatus jobStatus, QueryPageOptions options) throws IOException, IotHubException
     {
         String jobTypeString = (jobType == null) ? null : jobType.toString();
         String jobStatusString = (jobStatus == null) ? null : jobStatus.toString();

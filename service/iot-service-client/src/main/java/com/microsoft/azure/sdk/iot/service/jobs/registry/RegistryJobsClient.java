@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.jobs.registry.serializers.JobPropertiesParser;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
@@ -28,8 +29,6 @@ import java.util.Objects;
 @Slf4j
 public final class RegistryJobsClient
 {
-    private final static byte[] EMPTY_JSON = "{}".getBytes(StandardCharsets.UTF_8);
-
     private final String hostName;
     private TokenCredentialCache credentialCache;
     private AzureSasCredential azureSasCredential;
@@ -147,15 +146,14 @@ public final class RegistryJobsClient
      * @param exportBlobContainerUri URI containing SAS token to a blob container where export data will be placed
      * @param excludeKeys Whether the devices keys should be excluded from the exported data or not
      *
-     * @return A JobProperties object for the newly created bulk export job
+     * @return A RegistryJob object for the newly created bulk export job
      *
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public JobProperties exportDevices(String exportBlobContainerUri, Boolean excludeKeys)
-        throws IOException, IotHubException
+    public RegistryJob exportDevices(String exportBlobContainerUri, boolean excludeKeys) throws IOException, IotHubException
     {
-        if (exportBlobContainerUri == null || excludeKeys == null)
+        if (exportBlobContainerUri == null)
         {
             throw new IllegalArgumentException("Export blob uri cannot be null");
         }
@@ -173,23 +171,23 @@ public final class RegistryJobsClient
     /**
      * Create a bulk export job.
      *
-     * @param exportDevicesParameters A JobProperties object containing input parameters for export Devices job
+     * @param exportDevicesParameters A RegistryJob object containing input parameters for export Devices job
      *                                This API also supports identity based storage authentication, identity authentication
      *                                support is currently available in limited regions. If a user wishes to try it out,
      *                                they will need to set an Environment Variable of "EnabledStorageIdentity" and set it to "1"
      *                                otherwise default key based authentication is used for storage
      *                                <a href="https://docs.microsoft.com/en-us/azure/iot-hub/virtual-network-support"> More details here </a>
      *
-     * @return A JobProperties object for the newly created bulk export job
+     * @return A RegistryJob object for the newly created bulk export job
      *
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public JobProperties exportDevices(JobProperties exportDevicesParameters) throws IOException, IotHubException
+    public RegistryJob exportDevices(RegistryJob exportDevicesParameters) throws IOException, IotHubException
     {
         URL url = IotHubConnectionString.getUrlCreateExportImportJob(this.hostName);
 
-        exportDevicesParameters.setType(JobProperties.JobType.EXPORT);
+        exportDevicesParameters.setType(RegistryJob.JobType.EXPORT);
         String jobPropertiesJson = exportDevicesParameters.toJobPropertiesParser().toJson();
         HttpRequest request = createRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(StandardCharsets.UTF_8));
 
@@ -204,13 +202,12 @@ public final class RegistryJobsClient
      * @param importBlobContainerUri URI containing SAS token to a blob container that contains registry data to sync
      * @param outputBlobContainerUri URI containing SAS token to a blob container where the result of the bulk import operation will be placed
      *
-     * @return A JobProperties object for the newly created bulk import job
+     * @return A RegistryJob object for the newly created bulk import job
      *
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public JobProperties importDevices(String importBlobContainerUri, String outputBlobContainerUri)
-        throws IOException, IotHubException
+    public RegistryJob importDevices(String importBlobContainerUri, String outputBlobContainerUri) throws IOException, IotHubException
     {
         if (importBlobContainerUri == null || outputBlobContainerUri == null)
         {
@@ -230,24 +227,23 @@ public final class RegistryJobsClient
     /**
      * Create a bulk import job.
      *
-     * @param importDevicesParameters A JobProperties object containing input parameters for import Devices job
+     * @param importDevicesParameters A RegistryJob object containing input parameters for import Devices job
      *                                This API also supports identity based storage authentication, identity authentication
      *                                support is currently available in limited regions. If a user wishes to try it out,
      *                                they will need to set an Environment Variable of "EnabledStorageIdentity" and set it to "1"
      *                                otherwise default key based authentication is used for storage
      *                                <a href="https://docs.microsoft.com/en-us/azure/iot-hub/virtual-network-support"> More details here </a>
      *
-     * @return A JobProperties object for the newly created bulk import job
+     * @return A RegistryJob object for the newly created bulk import job
      *
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public JobProperties importDevices(JobProperties importDevicesParameters)
-        throws IOException, IotHubException
+    public RegistryJob importDevices(RegistryJob importDevicesParameters) throws IOException, IotHubException
     {
         URL url = IotHubConnectionString.getUrlCreateExportImportJob(this.hostName);
 
-        importDevicesParameters.setType(JobProperties.JobType.IMPORT);
+        importDevicesParameters.setType(RegistryJob.JobType.IMPORT);
         String jobPropertiesJson = importDevicesParameters.toJobPropertiesParser().toJson();
         HttpRequest request = createRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(StandardCharsets.UTF_8));
 
@@ -259,21 +255,21 @@ public final class RegistryJobsClient
     /**
      * Get the properties of an existing job.
      *
-     * @param importExportJobId The id of the job to be retrieved.
+     * @param jobId The id of the import/export job to be retrieved.
      *
-     * @return A JobProperties object for the requested job id
+     * @return A RegistryJob object for the requested job id
      *
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public JobProperties getJob(String importExportJobId) throws IOException, IotHubException
+    public RegistryJob get(String jobId) throws IOException, IotHubException
     {
-        if (importExportJobId == null)
+        if (jobId == null)
         {
             throw new IllegalArgumentException("importExportJobId cannot be null");
         }
 
-        URL url = IotHubConnectionString.getUrlImportExportJob(this.hostName, importExportJobId);
+        URL url = IotHubConnectionString.getUrlImportExportJob(this.hostName, jobId);
 
         HttpRequest request = createRequest(url, HttpMethod.GET, new byte[0]);
 
@@ -282,10 +278,10 @@ public final class RegistryJobsClient
         return processJobResponse(response);
     }
 
-    private JobProperties processJobResponse(HttpResponse response) throws IotHubException
+    private RegistryJob processJobResponse(HttpResponse response) throws IotHubException
     {
         String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
-        return new JobProperties(new JobPropertiesParser(bodyStr));
+        return new RegistryJob(new JobPropertiesParser(bodyStr));
     }
 
     private String getAuthenticationToken()
@@ -305,10 +301,10 @@ public final class RegistryJobsClient
         return new IotHubServiceSasToken(iotHubConnectionString).toString();
     }
 
-    private String createExportJobPropertiesJson(String exportBlobContainerUri, Boolean excludeKeysInExport)
+    private String createExportJobPropertiesJson(String exportBlobContainerUri, boolean excludeKeysInExport)
     {
-        JobProperties jobProperties = new JobProperties();
-        jobProperties.setType(JobProperties.JobType.EXPORT);
+        RegistryJob jobProperties = new RegistryJob();
+        jobProperties.setType(RegistryJob.JobType.EXPORT);
         jobProperties.setOutputBlobContainerUri(exportBlobContainerUri);
         jobProperties.setExcludeKeysInExport(excludeKeysInExport);
         return jobProperties.toJobPropertiesParser().toJson();
@@ -316,15 +312,14 @@ public final class RegistryJobsClient
 
     private String createImportJobPropertiesJson(String importBlobContainerUri, String outputBlobContainerUri)
     {
-        JobProperties jobProperties = new JobProperties();
-        jobProperties.setType(JobProperties.JobType.IMPORT);
+        RegistryJob jobProperties = new RegistryJob();
+        jobProperties.setType(RegistryJob.JobType.IMPORT);
         jobProperties.setInputBlobContainerUri(importBlobContainerUri);
         jobProperties.setOutputBlobContainerUri(outputBlobContainerUri);
         return jobProperties.toJobPropertiesParser().toJson();
     }
 
-    private HttpRequest createRequest(URL url, HttpMethod method, byte[] payload)
-        throws IOException
+    private HttpRequest createRequest(URL url, HttpMethod method, byte[] payload) throws IOException
     {
         Proxy proxy = null;
         if (this.clientOptions.getProxyOptions() != null)

@@ -3,8 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.service.jobs.scheduled;
 
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.JobsParser;
-import com.microsoft.azure.sdk.iot.service.methods.MethodParser;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.serializers.ScheduledJobParser;
+import com.microsoft.azure.sdk.iot.service.methods.serializers.MethodParser;
 import com.microsoft.azure.sdk.iot.service.twin.TwinState;
 import mockit.Deencapsulation;
 import org.junit.Test;
@@ -19,7 +19,7 @@ import static org.junit.Assert.assertNull;
  * Unit tests for jobs serializer
  * 100% methods, 100% lines covered
  */
-public class JobsParserTest
+public class ScheduledJobParserTest
 {
 
     private MethodParser makeMethodSample()
@@ -56,7 +56,7 @@ public class JobsParserTest
         MethodParser cloudToDeviceMethod = makeMethodSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
+        ScheduledJobParser jobsParser= new ScheduledJobParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
 
         // Assert
         assertEquals(jobId, Deencapsulation.getField(jobsParser, "jobId"));
@@ -77,7 +77,7 @@ public class JobsParserTest
         MethodParser cloudToDeviceMethod = makeMethodSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
+        ScheduledJobParser jobsParser= new ScheduledJobParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
 
         // Assert
         Helpers.assertDateWithError(startTime, (String)Deencapsulation.getField(jobsParser, "startTime"));
@@ -96,7 +96,7 @@ public class JobsParserTest
         MethodParser cloudToDeviceMethod = makeMethodSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
+        ScheduledJobParser jobsParser= new ScheduledJobParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
     }
 
     /* Tests_SRS_JOBSPARSER_21_002: [If any common parameter is invalid, the constructor shall throws IllegalArgumentException.] */
@@ -112,7 +112,7 @@ public class JobsParserTest
         MethodParser cloudToDeviceMethod = makeMethodSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
+        ScheduledJobParser jobsParser= new ScheduledJobParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
     }
 
     /* Tests_SRS_JOBSPARSER_21_002: [If any common parameter is invalid, the constructor shall throws IllegalArgumentException.] */
@@ -128,7 +128,7 @@ public class JobsParserTest
         MethodParser cloudToDeviceMethod = makeMethodSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
+        ScheduledJobParser jobsParser= new ScheduledJobParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
     }
 
     /* Tests_SRS_JOBSPARSER_21_002: [If any common parameter is invalid, the constructor shall throws IllegalArgumentException.] */
@@ -144,7 +144,7 @@ public class JobsParserTest
         MethodParser cloudToDeviceMethod = makeMethodSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
+        ScheduledJobParser jobsParser= new ScheduledJobParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
     }
 
     /* Tests_SRS_JOBSPARSER_21_002: [If any common parameter is invalid, the constructor shall throws IllegalArgumentException.] */
@@ -160,7 +160,7 @@ public class JobsParserTest
         MethodParser cloudToDeviceMethod = makeMethodSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
+        ScheduledJobParser jobsParser= new ScheduledJobParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
     }
 
     /* Tests_SRS_JOBSPARSER_21_003: [The constructor shall store the JsonElement for the cloudToDeviceMethod.] */
@@ -175,7 +175,7 @@ public class JobsParserTest
         MethodParser cloudToDeviceMethod = makeMethodSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
+        ScheduledJobParser jobsParser= new ScheduledJobParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
 
         // Assert
         Helpers.assertJson(cloudToDeviceMethod.toJsonElement().toString(), Deencapsulation.getField(jobsParser, "cloudToDeviceMethod").toString());
@@ -193,7 +193,7 @@ public class JobsParserTest
         MethodParser cloudToDeviceMethod = null;
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
+        ScheduledJobParser jobsParser= new ScheduledJobParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
     }
 
     /* Tests_SRS_JOBSPARSER_21_005: [The constructor shall set the jobType as scheduleDirectMethod.] */
@@ -208,7 +208,7 @@ public class JobsParserTest
         MethodParser cloudToDeviceMethod = makeMethodSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
+        ScheduledJobParser jobsParser= new ScheduledJobParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
 
         // Assert
         assertEquals("scheduleDeviceMethod", Deencapsulation.getField(jobsParser, "jobType"));
@@ -226,7 +226,7 @@ public class JobsParserTest
         MethodParser cloudToDeviceMethod = makeMethodSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
+        ScheduledJobParser jobsParser= new ScheduledJobParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
 
         // Assert
         assertNull(Deencapsulation.getField(jobsParser, "updateTwin"));
@@ -242,7 +242,7 @@ public class JobsParserTest
         Date startTime = new Date();
         long maxExecutionTimeInSeconds = 10L;
         MethodParser cloudToDeviceMethod = makeMethodSample();
-        JobsParser jobsParser= new JobsParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
+        ScheduledJobParser jobsParser= new ScheduledJobParser(jobId, cloudToDeviceMethod, queryCondition, startTime, maxExecutionTimeInSeconds);
 
         String expectedJson =
                 "{" +
@@ -278,7 +278,7 @@ public class JobsParserTest
         TwinState twinState = makeTwinSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
+        ScheduledJobParser jobsParser= new ScheduledJobParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
 
         // Assert
         assertEquals(jobId, Deencapsulation.getField(jobsParser, "jobId"));
@@ -299,7 +299,7 @@ public class JobsParserTest
         TwinState twinState = makeTwinSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
+        ScheduledJobParser jobsParser= new ScheduledJobParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
 
         // Assert
         Helpers.assertDateWithError(startTime, (String)Deencapsulation.getField(jobsParser, "startTime"));
@@ -318,7 +318,7 @@ public class JobsParserTest
         TwinState twinState = makeTwinSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
+        ScheduledJobParser jobsParser= new ScheduledJobParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
     }
 
     /* Tests_SRS_JOBSPARSER_21_008: [If any common parameter is invalid, the constructor shall throws IllegalArgumentException.] */
@@ -334,7 +334,7 @@ public class JobsParserTest
         TwinState twinState = makeTwinSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
+        ScheduledJobParser jobsParser= new ScheduledJobParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
     }
 
     /* Tests_SRS_JOBSPARSER_21_008: [If any common parameter is invalid, the constructor shall throws IllegalArgumentException.] */
@@ -350,7 +350,7 @@ public class JobsParserTest
         TwinState twinState = makeTwinSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
+        ScheduledJobParser jobsParser= new ScheduledJobParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
     }
 
     /* Tests_SRS_JOBSPARSER_21_008: [If any common parameter is invalid, the constructor shall throws IllegalArgumentException.] */
@@ -366,7 +366,7 @@ public class JobsParserTest
         TwinState twinState = makeTwinSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
+        ScheduledJobParser jobsParser= new ScheduledJobParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
     }
 
     /* Tests_SRS_JOBSPARSER_21_008: [If any common parameter is invalid, the constructor shall throws IllegalArgumentException.] */
@@ -382,7 +382,7 @@ public class JobsParserTest
         TwinState twinState = makeTwinSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
+        ScheduledJobParser jobsParser= new ScheduledJobParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
     }
 
     /* Tests_SRS_JOBSPARSER_21_009: [The constructor shall store the JsonElement for the updateTwin.] */
@@ -397,7 +397,7 @@ public class JobsParserTest
         TwinState twinState = makeTwinSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
+        ScheduledJobParser jobsParser= new ScheduledJobParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
 
         // Assert
         Helpers.assertJson(twinState.toJsonElement().toString(), Deencapsulation.getField(jobsParser, "updateTwin").toString());
@@ -415,7 +415,7 @@ public class JobsParserTest
         TwinState twinState = null;
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
+        ScheduledJobParser jobsParser= new ScheduledJobParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
     }
 
     /* Tests_SRS_JOBSPARSER_21_011: [The constructor shall set the jobType as scheduleUpdateTwin.] */
@@ -430,7 +430,7 @@ public class JobsParserTest
         TwinState twinState = makeTwinSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
+        ScheduledJobParser jobsParser= new ScheduledJobParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
 
         // Assert
         assertEquals("scheduleUpdateTwin", Deencapsulation.getField(jobsParser, "jobType"));
@@ -448,7 +448,7 @@ public class JobsParserTest
         TwinState twinState = makeTwinSample();
 
         // Act
-        JobsParser jobsParser= new JobsParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
+        ScheduledJobParser jobsParser= new ScheduledJobParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
 
         // Assert
         assertNull(Deencapsulation.getField(jobsParser, "cloudToDeviceMethod"));
@@ -464,7 +464,7 @@ public class JobsParserTest
         Date startTime = new Date();
         long maxExecutionTimeInSeconds = 10L;
         TwinState twinState = makeTwinSample();
-        JobsParser jobsParser= new JobsParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
+        ScheduledJobParser jobsParser= new ScheduledJobParser(jobId, twinState, queryCondition, startTime, maxExecutionTimeInSeconds);
 
         String expectedJson =
                 "{" +

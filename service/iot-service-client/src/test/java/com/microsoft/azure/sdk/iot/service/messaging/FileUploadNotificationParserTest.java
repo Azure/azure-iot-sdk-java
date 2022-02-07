@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.service.messaging;
 
-import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationParser;
+import com.microsoft.azure.sdk.iot.service.messaging.serializers.FileUploadNotificationParser;
 import mockit.Deencapsulation;
 import org.junit.Test;
 

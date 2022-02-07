@@ -5,14 +5,14 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.Job;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJob;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobStatus;
 import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobsClient;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
-import com.microsoft.azure.sdk.iot.service.query.SqlQuery;
+import com.microsoft.azure.sdk.iot.service.query.SqlQueryBuilder;
 import com.microsoft.azure.sdk.iot.service.query.TwinQueryResponse;
 import com.microsoft.azure.sdk.iot.service.twin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.JobStatus;
 
 import java.io.IOException;
 import java.util.*;
@@ -152,13 +152,13 @@ public class DeviceTwinSample
 
         System.out.println("Schedule updating Device twin (new temp, hum) in 10 seconds");
         String jobId = UUID.randomUUID().toString();
-        Job job = jobClient.scheduleUpdateTwin(jobId, queryCondition, device, updateDateInFuture, MAX_EXECUTION_TIME_IN_SECONDS);
+        ScheduledJob job = jobClient.scheduleUpdateTwin(jobId, queryCondition, device, updateDateInFuture, MAX_EXECUTION_TIME_IN_SECONDS);
 
         System.out.println("Wait for job completed...");
-        while (job.getJobStatus() != JobStatus.completed)
+        while (job.getJobStatus() != ScheduledJobStatus.completed)
         {
             Thread.sleep(GIVE_100_MILLISECONDS_TO_IOTHUB);
-            job = jobClient.getJob(jobId);
+            job = jobClient.get(jobId);
         }
         System.out.println("job completed");
 
@@ -185,18 +185,18 @@ public class DeviceTwinSample
 
         System.out.println("Cancel updating Device twin (new temp, hum) in 10 minutes");
         String jobId = UUID.randomUUID().toString();
-        Job job = jobClient.scheduleUpdateTwin(jobId, queryCondition, device, updateDateInFuture, MAX_EXECUTION_TIME_IN_SECONDS);
+        ScheduledJob job = jobClient.scheduleUpdateTwin(jobId, queryCondition, device, updateDateInFuture, MAX_EXECUTION_TIME_IN_SECONDS);
 
         Thread.sleep(WAIT_1_SECOND_TO_CANCEL_IN_MILLISECONDS);
         System.out.println("Cancel job after 1 second");
-        jobClient.cancelJob(jobId);
+        jobClient.cancel(jobId);
 
         System.out.println("Wait for job cancelled...");
-        job = jobClient.getJob(jobId);
-        while (job.getJobStatus() != JobStatus.cancelled)
+        job = jobClient.get(jobId);
+        while (job.getJobStatus() != ScheduledJobStatus.cancelled)
         {
             Thread.sleep(GIVE_100_MILLISECONDS_TO_IOTHUB);
-            job = jobClient.getJob(jobId);
+            job = jobClient.get(jobId);
         }
         System.out.println("job cancelled");
 
@@ -209,8 +209,8 @@ public class DeviceTwinSample
     {
         System.out.println("Started Querying twin");
 
-        SqlQuery sqlQuery = SqlQuery.createSqlQuery("*", SqlQuery.FromType.DEVICES, null, null);
-        TwinQueryResponse twinQueryResponse = queryClient.queryTwins(sqlQuery.getQuery());
+        String sqlQuery = SqlQueryBuilder.createSqlQuery("*", SqlQueryBuilder.FromType.DEVICES, null, null);
+        TwinQueryResponse twinQueryResponse = queryClient.queryTwins(sqlQuery);
 
         while (twinQueryResponse.hasNext())
         {

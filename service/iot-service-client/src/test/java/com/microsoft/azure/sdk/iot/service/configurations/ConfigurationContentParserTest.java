@@ -1,7 +1,7 @@
 package com.microsoft.azure.sdk.iot.service.configurations;
 
 import com.google.gson.JsonElement;
-import com.microsoft.azure.sdk.iot.service.configurations.ConfigurationContentParser;
+import com.microsoft.azure.sdk.iot.service.configurations.serializers.ConfigurationContentParser;
 import org.junit.Test;
 
 import java.util.HashMap;

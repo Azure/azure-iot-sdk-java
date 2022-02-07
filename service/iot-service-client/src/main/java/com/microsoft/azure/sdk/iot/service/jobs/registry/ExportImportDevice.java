@@ -7,6 +7,7 @@ package com.microsoft.azure.sdk.iot.service.jobs.registry;
 
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
+import com.microsoft.azure.sdk.iot.service.jobs.registry.serializers.ExportImportDeviceParser;
 import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
 import com.microsoft.azure.sdk.iot.service.registry.serializers.AuthenticationParser;
 import com.microsoft.azure.sdk.iot.service.registry.serializers.AuthenticationTypeParser;

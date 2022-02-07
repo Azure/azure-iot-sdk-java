@@ -6,7 +6,11 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 import com.azure.core.credential.AzureSasCredential;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJob;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobStatus;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobType;
 import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobsClient;
+import com.microsoft.azure.sdk.iot.service.query.SqlQueryBuilder;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
@@ -20,15 +24,11 @@ import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubTooManyRequestsException;
 import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobsClientOptions;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.Job;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.JobStatus;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.JobType;
 import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.service.query.QueryClientOptions;
 import com.microsoft.azure.sdk.iot.service.query.QueryPageOptions;
 import com.microsoft.azure.sdk.iot.service.query.RawQueryResponse;
-import com.microsoft.azure.sdk.iot.service.query.SqlQuery;
 import com.microsoft.azure.sdk.iot.service.query.TwinQueryResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.BeforeClass;
@@ -167,7 +167,7 @@ public class QueryClientTests extends IntegrationTest
 
             QueryClient queryClient = new QueryClient(iotHubConnectionString, options);
 
-            String query = SqlQuery.createSqlQuery("*", SqlQuery.FromType.JOBS, null,null).getQuery();
+            String query = SqlQueryBuilder.createSqlQuery("*", SqlQueryBuilder.FromType.JOBS, null,null);
 
             JobQueryResponse response = queryClient.queryJobs(query);
             long startTime = System.currentTimeMillis();
@@ -183,7 +183,7 @@ public class QueryClientTests extends IntegrationTest
                 response = queryClient.queryJobs(query);
             }
 
-            Job job = response.next();
+            ScheduledJob job = response.next();
 
             assertNotNull(job.getJobId());
             assertNotNull(job.getJobType());
@@ -236,7 +236,7 @@ public class QueryClientTests extends IntegrationTest
             }
 
             QueryClient queryClient = new QueryClient(iotHubConnectionString, options);
-            JobQueryResponse response = queryClient.queryJobs(JobType.scheduleUpdateTwin, JobStatus.completed);
+            JobQueryResponse response = queryClient.queryJobs(ScheduledJobType.scheduleUpdateTwin, ScheduledJobStatus.completed);
 
             long startTime = System.currentTimeMillis();
             while (!response.hasNext())
@@ -248,10 +248,10 @@ public class QueryClientTests extends IntegrationTest
 
                 Thread.sleep(2000);
 
-                response = queryClient.queryJobs(JobType.scheduleUpdateTwin, JobStatus.enqueued);
+                response = queryClient.queryJobs(ScheduledJobType.scheduleUpdateTwin, ScheduledJobStatus.enqueued);
             }
 
-            Job job = response.next();
+            ScheduledJob job = response.next();
 
             assertNotNull(job.getJobId());
             assertNotNull(job.getJobType());
@@ -309,7 +309,7 @@ public class QueryClientTests extends IntegrationTest
             // Raw Query for multiple devices having same property
             final String select = "properties.desired." + queryProperty + " AS " + queryProperty + "," + " COUNT() AS numberOfDevices";
             final String groupBy = "properties.desired." + queryProperty;
-            final String sqlQuery = SqlQuery.createSqlQuery(select, SqlQuery.FromType.DEVICES, null, groupBy).getQuery();
+            final String sqlQuery = SqlQueryBuilder.createSqlQuery(select, SqlQueryBuilder.FromType.DEVICES, null, groupBy);
 
             boolean querySucceeded = false;
             long startTime = System.currentTimeMillis();

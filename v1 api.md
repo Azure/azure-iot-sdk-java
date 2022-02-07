@@ -774,6 +774,79 @@ public class DeviceMethodClientOptions
 
 ```java
 
+public class JobClient
+{
+    @Deprecated
+    public static JobClient createFromConnectionString(String connectionString)
+        throws IOException, IllegalArgumentException;
+
+    public JobClient(String connectionString)
+
+    public JobClient(String connectionString, JobClientOptions options);
+
+    public JobClient(String hostName, TokenCredential credential);
+
+    public JobClient(String hostName, TokenCredential credential, JobClientOptions options);
+
+    public JobClient(String hostName, AzureSasCredential azureSasCredential);
+
+    public JobClient(String hostName, AzureSasCredential azureSasCredential, JobClientOptions options);
+
+    public synchronized JobResult scheduleUpdateTwin(
+        String jobId,
+        String queryCondition,
+        DeviceTwinDevice updateTwin,
+        Date startTimeUtc,
+        long maxExecutionTimeInSeconds)
+        throws IllegalArgumentException, IOException, IotHubException;
+
+    public synchronized JobResult scheduleDeviceMethod(
+        String jobId,
+        String queryCondition,
+        String methodName,
+        Long responseTimeoutInSeconds,
+        Long connectTimeoutInSeconds,
+        Object payload,
+        Date startTimeUtc,
+        long maxExecutionTimeInSeconds)
+        throws IllegalArgumentException, IOException, IotHubException;
+
+    public synchronized JobResult getJob(String jobId)
+        throws IllegalArgumentException, IOException, IotHubException;
+
+    public synchronized JobResult cancelJob(String jobId)
+        throws IllegalArgumentException, IOException, IotHubException;
+
+    public synchronized Query queryDeviceJob(String sqlQuery, Integer pageSize) throws IotHubException, IOException;
+
+    public synchronized Query queryDeviceJob(String sqlQuery) throws IotHubException, IOException;
+
+    public synchronized boolean hasNextJob(Query query) throws IotHubException, IOException;
+
+    public synchronized JobResult getNextJob(Query query) throws IOException, IotHubException, NoSuchElementException;
+
+    public synchronized Query queryJobResponse(JobType jobType, JobStatus jobStatus, Integer pageSize)
+        throws IOException, IotHubException;
+
+    public synchronized Query queryJobResponse(JobType jobType, JobStatus jobStatus)
+        throws IotHubException, IOException;
+}
+
+@Builder
+public class JobClientOptions
+{
+    @Getter
+    private final ProxyOptions proxyOptions;
+
+    @Getter
+    @Builder.Default
+    private final int httpReadTimeout = DEFAULT_HTTP_READ_TIMEOUT_MS;
+
+    @Getter
+    @Builder.Default
+    private final int httpConnectTimeout = DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
+}
+
 ```
 
 </details>

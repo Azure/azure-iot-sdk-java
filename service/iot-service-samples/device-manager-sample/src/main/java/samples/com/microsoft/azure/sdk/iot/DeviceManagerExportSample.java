@@ -6,8 +6,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.service.jobs.registry.RegistryJobsClient;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobsClient;
-import com.microsoft.azure.sdk.iot.service.jobs.registry.JobProperties;
+import com.microsoft.azure.sdk.iot.service.jobs.registry.RegistryJob;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.blob.CloudBlob;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
@@ -32,12 +31,12 @@ public class DeviceManagerExportSample
         String containerSasUri = SampleUtils.getContainerSasUri(container);
 
         RegistryJobsClient jobClient = new RegistryJobsClient(SampleUtils.iotHubConnectionString);
-        JobProperties exportJob = jobClient.exportDevices(containerSasUri, excludeKeys);
+        RegistryJob exportJob = jobClient.exportDevices(containerSasUri, excludeKeys);
 
         while (true)
         {
-            exportJob = jobClient.getJob(exportJob.getJobId());
-            if (exportJob.getStatus() == JobProperties.JobStatus.COMPLETED)
+            exportJob = jobClient.get(exportJob.getJobId());
+            if (exportJob.getStatus() == RegistryJob.JobStatus.COMPLETED)
             {
                 break;
             }

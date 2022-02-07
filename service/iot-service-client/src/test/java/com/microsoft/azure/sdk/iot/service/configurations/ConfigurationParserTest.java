@@ -1,6 +1,9 @@
 package com.microsoft.azure.sdk.iot.service.configurations;
 
 import com.microsoft.azure.sdk.iot.service.ParserUtility;
+import com.microsoft.azure.sdk.iot.service.configurations.serializers.ConfigurationContentParser;
+import com.microsoft.azure.sdk.iot.service.configurations.serializers.ConfigurationMetricsParser;
+import com.microsoft.azure.sdk.iot.service.configurations.serializers.ConfigurationParser;
 import junit.framework.TestCase;
 import org.junit.Test;
 

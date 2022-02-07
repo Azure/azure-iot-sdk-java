@@ -7,10 +7,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.Job;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.JobStatus;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.JobType;
-import com.microsoft.azure.sdk.iot.service.twin.Twin;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJob;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobStatus;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobType;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,13 +22,13 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 
 /**
- * A pageable set of {@link Job} objects returned from a query.
+ * A pageable set of {@link ScheduledJob} objects returned from a query.
  */
 public class JobQueryResponse
 {
     private final transient Gson gson;
 
-    Iterator<Job> jobs;
+    Iterator<ScheduledJob> jobs;
 
     @Setter(AccessLevel.PACKAGE) // value is retrieved from header, not json payload
     @Getter
@@ -37,18 +36,18 @@ public class JobQueryResponse
 
     final QueryClient queryClient;
     final String originalQuery;
-    final JobType jobType;
-    final JobStatus jobStatus;
+    final ScheduledJobType jobType;
+    final ScheduledJobStatus jobStatus;
 
     JobQueryResponse(String json, QueryClient queryClient, String originalQuery)
     {
         gson = new GsonBuilder().disableHtmlEscaping().create();
 
         JsonObject[] twinJsonArray = gson.fromJson(json, JsonObject[].class);
-        List<Job> jobsArray = new ArrayList<>();
+        List<ScheduledJob> jobsArray = new ArrayList<>();
         for (JsonObject twinJson : twinJsonArray)
         {
-            jobsArray.add(new Job(twinJson.toString()));
+            jobsArray.add(new ScheduledJob(twinJson.toString()));
         }
 
         this.jobs = jobsArray.iterator();
@@ -59,15 +58,15 @@ public class JobQueryResponse
         this.jobStatus = null;
     }
 
-    JobQueryResponse(String json, QueryClient queryClient, JobType jobType, JobStatus jobStatus)
+    JobQueryResponse(String json, QueryClient queryClient, ScheduledJobType jobType, ScheduledJobStatus jobStatus)
     {
         gson = new GsonBuilder().disableHtmlEscaping().create();
 
         JsonObject[] twinJsonArray = gson.fromJson(json, JsonObject[].class);
-        List<Job> jobsArray = new ArrayList<>();
+        List<ScheduledJob> jobsArray = new ArrayList<>();
         for (JsonObject twinJson : twinJsonArray)
         {
-            jobsArray.add(new Job(twinJson.toString()));
+            jobsArray.add(new ScheduledJob(twinJson.toString()));
         }
 
         this.jobs = jobsArray.iterator();
@@ -93,7 +92,7 @@ public class JobQueryResponse
      * @throws IotHubException If any IoT Hub level errors occur such as an {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException}.
      * @throws IOException If any network level errors occur.
      */
-    public Job next() throws IotHubException, IOException
+    public ScheduledJob next() throws IotHubException, IOException
     {
         return next(QueryPageOptions.builder().build());
     }
@@ -107,7 +106,7 @@ public class JobQueryResponse
      * @throws IotHubException If any IoT Hub level errors occur such as an {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException}.
      * @throws IOException If any network level errors occur.
      */
-    public Job next(QueryPageOptions pageOptions) throws IotHubException, IOException
+    public ScheduledJob next(QueryPageOptions pageOptions) throws IotHubException, IOException
     {
         Objects.requireNonNull(pageOptions);
 

@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.service.jobs.registry;
 
-import com.microsoft.azure.sdk.iot.service.jobs.registry.ExportImportDeviceParser;
+import com.microsoft.azure.sdk.iot.service.jobs.registry.serializers.ExportImportDeviceParser;
 import com.microsoft.azure.sdk.iot.service.registry.serializers.AuthenticationParser;
 import com.microsoft.azure.sdk.iot.service.registry.serializers.AuthenticationTypeParser;
 import com.microsoft.azure.sdk.iot.service.registry.serializers.SymmetricKeyParser;

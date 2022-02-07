@@ -135,7 +135,6 @@ public class AmqpSendHandler extends AmqpConnectionHandler
         Properties properties = new Properties();
         properties.setMessageId(message.getMessageId());
         properties.setTo(targetPath);
-        properties.setAbsoluteExpiryTime(message.getExpiryTimeUtc());
         properties.setCorrelationId(message.getCorrelationId());
         if (message.getUserId() != null)
         {

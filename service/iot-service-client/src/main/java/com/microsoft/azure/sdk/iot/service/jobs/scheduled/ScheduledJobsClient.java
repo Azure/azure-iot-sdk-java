@@ -5,7 +5,8 @@ package com.microsoft.azure.sdk.iot.service.jobs.scheduled;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
-import com.microsoft.azure.sdk.iot.service.methods.MethodParser;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.serializers.ScheduledJobParser;
+import com.microsoft.azure.sdk.iot.service.methods.serializers.MethodParser;
 import com.microsoft.azure.sdk.iot.service.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.service.twin.TwinState;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
@@ -150,9 +151,9 @@ public final class ScheduledJobsClient
     }
 
     /**
-     * Creates a new Job to update twin tags and desired properties on one or multiple devices
+     * Creates a new ScheduledJob to update twin tags and desired properties on one or multiple devices
      *
-     * @param jobId Unique Job Id for this job
+     * @param jobId Unique ScheduledJob Id for this job
      * @param queryCondition Query condition to evaluate which devices to run the job on. It can be {@code null} or empty
      * @param updateTwin Twin object to use for the update
      * @param startTimeUtc Date time in Utc to start the job
@@ -161,7 +162,7 @@ public final class ScheduledJobsClient
      * @throws IOException if the function cannot create a URL for the job
      * @throws IotHubException if the http request failed
      */
-    public Job scheduleUpdateTwin(
+    public ScheduledJob scheduleUpdateTwin(
         String jobId,
         String queryCondition,
         Twin updateTwin,
@@ -191,8 +192,8 @@ public final class ScheduledJobsClient
             throw new IllegalArgumentException("maxExecutionTimeInSeconds cannot be negative");
         }
 
-        JobsParser jobsParser =
-            new JobsParser(
+        ScheduledJobParser jobsParser =
+            new ScheduledJobParser(
                 jobId,
                 getParserFromDevice(updateTwin),
                 queryCondition,
@@ -214,13 +215,13 @@ public final class ScheduledJobsClient
 
         HttpResponse response = httpRequest.send();
 
-        return new Job(new String(response.getBody()));
+        return new ScheduledJob(new String(response.getBody()));
     }
 
     /**
-     * Creates a new Job to invoke method on one or multiple devices
+     * Creates a new ScheduledJob to invoke method on one or multiple devices
      *
-     * @param jobId Unique Job Id for this job
+     * @param jobId Unique ScheduledJob Id for this job
      * @param queryCondition Query condition to evaluate which devices to run the job on. It can be {@code null} or empty
      * @param methodName Method name to be invoked
      * @param startTimeUtc Date time in Utc to start the job
@@ -228,7 +229,7 @@ public final class ScheduledJobsClient
      * @throws IOException if the function cannot create a URL for the job, or the IO failed on request
      * @throws IotHubException if the http request failed
      */
-    public Job scheduleDirectMethod(
+    public ScheduledJob scheduleDirectMethod(
         String jobId,
         String queryCondition,
         String methodName,
@@ -239,9 +240,9 @@ public final class ScheduledJobsClient
     }
 
     /**
-     * Creates a new Job to invoke method on one or multiple devices
+     * Creates a new ScheduledJob to invoke method on one or multiple devices
      *
-     * @param jobId Unique Job Id for this job
+     * @param jobId Unique ScheduledJob Id for this job
      * @param queryCondition Query condition to evaluate which devices to run the job on. It can be {@code null} or empty
      * @param methodName Method name to be invoked
      * @param startTimeUtc Date time in Utc to start the job
@@ -250,7 +251,7 @@ public final class ScheduledJobsClient
      * @throws IOException if the function cannot create a URL for the job, or the IO failed on request
      * @throws IotHubException if the http request failed
      */
-    public Job scheduleDirectMethod(
+    public ScheduledJob scheduleDirectMethod(
         String jobId,
         String queryCondition,
         String methodName,
@@ -289,8 +290,8 @@ public final class ScheduledJobsClient
                 options.getMethodConnectTimeout(),
                 options.getPayload());
 
-        JobsParser jobsParser =
-            new JobsParser(
+        ScheduledJobParser jobsParser =
+            new ScheduledJobParser(
                 jobId,
                 cloudToDeviceMethod,
                 queryCondition,
@@ -312,18 +313,18 @@ public final class ScheduledJobsClient
 
         HttpResponse response = httpRequest.send();
 
-        return new Job(new String(response.getBody()));
+        return new ScheduledJob(new String(response.getBody()));
     }
 
     /**
      * Get the current job on the iotHub.
      *
-     * @param jobId Unique Job Id for this job
+     * @param jobId Unique ScheduledJob Id for this job
      * @return the retrieved job
      * @throws IOException if the function cannot create a URL for the job, or the IO failed on request
      * @throws IotHubException if the http request failed
      */
-    public Job getJob(String jobId) throws IOException, IotHubException
+    public ScheduledJob get(String jobId) throws IOException, IotHubException
     {
         URL url;
 
@@ -345,18 +346,18 @@ public final class ScheduledJobsClient
 
         HttpResponse response = httpRequest.send();
 
-        return new Job(new String(response.getBody()));
+        return new ScheduledJob(new String(response.getBody()));
     }
 
     /**
      * Cancel a current jod on the IoTHub
      *
-     * @param jobId Unique Job Id for this job
+     * @param jobId Unique ScheduledJob Id for this job
      * @return the cancelled job
      * @throws IOException if the function cannot create a URL for the job, or the IO failed on request
      * @throws IotHubException if the http request failed
      */
-    public Job cancelJob(String jobId) throws IOException, IotHubException
+    public ScheduledJob cancel(String jobId) throws IOException, IotHubException
     {
         URL url;
         if (jobId == null || jobId.isEmpty())
@@ -377,7 +378,7 @@ public final class ScheduledJobsClient
 
         HttpResponse response = httpRequest.send();
 
-        return new Job(new String(response.getBody()));
+        return new ScheduledJob(new String(response.getBody()));
     }
 
     private TwinState getParserFromDevice(Twin device)

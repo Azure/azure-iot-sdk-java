@@ -579,6 +579,103 @@ public final class DirectMethodRequestOptions
 
 ```java
 
+public final class RegistryJobsClient
+{
+    public RegistryJobsClient(String connectionString);
+
+    public RegistryJobsClient(String connectionString, RegistryJobsClientOptions clientOptions);
+
+    public RegistryJobsClient(String hostName, TokenCredential credential);
+
+    public RegistryJobsClient(String hostName, TokenCredential credential, RegistryJobsClientOptions clientOptions);
+
+    public RegistryJobsClient(String hostName, AzureSasCredential azureSasCredential);
+
+    public RegistryJobsClient(String hostName, AzureSasCredential azureSasCredential, RegistryJobsClientOptions clientOptions);
+
+    public RegistryJob exportDevices(String exportBlobContainerUri, boolean excludeKeys) throws IOException, IotHubException;
+
+    public RegistryJob exportDevices(RegistryJob exportDevicesParameters) throws IOException, IotHubException;
+
+    public RegistryJob importDevices(String importBlobContainerUri, String outputBlobContainerUri) throws IOException, IotHubException;
+
+    public RegistryJob importDevices(RegistryJob importDevicesParameters) throws IOException, IotHubException;
+
+    public RegistryJob get(String jobId) throws IOException, IotHubException;
+}
+
+@Builder
+public final class RegistryJobsClientOptions
+{
+    @Getter
+    private final ProxyOptions proxyOptions;
+
+    @Getter
+    @Builder.Default
+    private final int httpReadTimeout = DEFAULT_HTTP_READ_TIMEOUT_MS;
+
+    @Getter
+    @Builder.Default
+    private final int httpConnectTimeout = DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
+}
+
+public final class ScheduledJobsClient
+{
+    public ScheduledJobsClient(String connectionString);
+
+    public ScheduledJobsClient(String connectionString, ScheduledJobsClientOptions clientOptions);
+
+    public ScheduledJobsClient(String hostName, TokenCredential credential);
+
+    public ScheduledJobsClient(String hostName, TokenCredential credential, ScheduledJobsClientOptions clientOptions);
+
+    public ScheduledJobsClient(String hostName, AzureSasCredential azureSasCredential);
+
+    public ScheduledJobsClient(String hostName, AzureSasCredential azureSasCredential, ScheduledJobsClientOptions clientOptions);
+
+    public ScheduledJob scheduleUpdateTwin(
+        String jobId,
+        String queryCondition,
+        Twin updateTwin,
+        Date startTimeUtc,
+        long maxExecutionTimeInSeconds)
+            throws IOException, IotHubException;
+
+    public ScheduledJob scheduleDirectMethod(
+        String jobId,
+        String queryCondition,
+        String methodName,
+        Date startTimeUtc)
+            throws IOException, IotHubException;
+
+    public ScheduledJob scheduleDirectMethod(
+        String jobId,
+        String queryCondition,
+        String methodName,
+        Date startTimeUtc,
+        DirectMethodsJobOptions options)
+            throws IOException, IotHubException;
+
+    public ScheduledJob get(String jobId) throws IOException, IotHubException;
+
+    public ScheduledJob cancel(String jobId) throws IOException, IotHubException;
+}
+
+@Builder
+public final class ScheduledJobsClientOptions
+{
+    @Getter
+    private final ProxyOptions proxyOptions;
+
+    @Getter
+    @Builder.Default
+    private final int httpReadTimeout = DEFAULT_HTTP_READ_TIMEOUT_MS;
+
+    @Getter
+    @Builder.Default
+    private final int httpConnectTimeout = DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
+}
+
 ```
 
 </details>

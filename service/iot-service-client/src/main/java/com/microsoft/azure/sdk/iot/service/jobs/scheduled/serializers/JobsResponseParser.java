@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.service.jobs.scheduled;
+package com.microsoft.azure.sdk.iot.service.jobs.scheduled.serializers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -9,7 +9,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.service.methods.MethodParser;
+import com.microsoft.azure.sdk.iot.service.methods.serializers.MethodParser;
 import com.microsoft.azure.sdk.iot.service.ParserUtility;
 import com.microsoft.azure.sdk.iot.service.twin.TwinState;
 import lombok.Getter;
@@ -23,7 +23,7 @@ import java.util.Map;
 @SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
 public class JobsResponseParser
 {
-    // Job identifier
+    // ScheduledJob identifier
     private static final String JOBID_TAG = "jobId";
     @SerializedName(JOBID_TAG)
     @SuppressWarnings("unused") // used by reflection during json serialization/deserialization
@@ -196,7 +196,7 @@ public class JobsResponseParser
     @Getter
     private String parentJobId;
 
-    // The error on the Job Response, if any.
+    // The error on the ScheduledJob Response, if any.
     private static final String ERROR_TAG = "error";
     @SerializedName(ERROR_TAG)
     @SuppressWarnings("unused") // used by reflection during json serialization/deserialization

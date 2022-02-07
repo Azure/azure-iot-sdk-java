@@ -5,9 +5,9 @@ package com.microsoft.azure.sdk.iot.service.jobs.scheduled;
 
 import com.google.gson.JsonParseException;
 import com.microsoft.azure.sdk.iot.service.Helpers;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.JobQueryResponseError;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.JobsResponseParser;
-import com.microsoft.azure.sdk.iot.service.methods.MethodParser;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.serializers.JobQueryResponseError;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.serializers.JobsResponseParser;
+import com.microsoft.azure.sdk.iot.service.methods.serializers.MethodParser;
 import mockit.Deencapsulation;
 import org.junit.Test;
 

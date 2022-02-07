@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.service.configurations;
 
+import com.microsoft.azure.sdk.iot.service.configurations.serializers.ConfigurationContentParser;
+import com.microsoft.azure.sdk.iot.service.configurations.serializers.ConfigurationParser;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;

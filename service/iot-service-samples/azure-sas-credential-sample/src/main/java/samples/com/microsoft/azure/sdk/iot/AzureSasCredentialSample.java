@@ -6,11 +6,13 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.azure.core.credential.AzureSasCredential;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJob;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubMessageResult;
 import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.service.query.QueryClientOptions;
 import com.microsoft.azure.sdk.iot.service.exceptions.ErrorCodeDescription;
+import com.microsoft.azure.sdk.iot.service.query.SqlQueryBuilder;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.messaging.FeedbackReceiver;
 import com.microsoft.azure.sdk.iot.service.messaging.FeedbackRecord;
@@ -27,9 +29,7 @@ import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClientOptions;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClientOptions;
-import com.microsoft.azure.sdk.iot.service.query.SqlQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.Job;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -242,14 +242,14 @@ public class AzureSasCredentialSample
         {
             System.out.println("Querying all active jobs for your IoT Hub");
 
-            String jobQueryString = SqlQuery.createSqlQuery("*", SqlQuery.FromType.JOBS, null, null).getQuery();
+            String jobQueryString = SqlQueryBuilder.createSqlQuery("*", SqlQueryBuilder.FromType.JOBS, null, null);
             JobQueryResponse jobQueryResponse = queryClient.queryJobs(jobQueryString);
             int queriedJobCount = 0;
             while (jobQueryResponse.hasNext())
             {
                 queriedJobCount++;
-                Job job = jobQueryResponse.next();
-                System.out.println(String.format("Job %s of type %s has status %s", job.getJobId(), job.getJobType(), job.getJobStatus()));
+                ScheduledJob job = jobQueryResponse.next();
+                System.out.println(String.format("ScheduledJob %s of type %s has status %s", job.getJobId(), job.getJobType(), job.getJobStatus()));
             }
 
             if (queriedJobCount == 0)

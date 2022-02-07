@@ -6,13 +6,13 @@
 package samples.com.microsoft.azure.sdk.iot.service.sdk;
 
 import com.microsoft.azure.sdk.iot.service.jobs.scheduled.DirectMethodsJobOptions;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJob;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobStatus;
 import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobsClient;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodRequestOptions;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.Job;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.JobStatus;
 
 import java.io.IOException;
 import java.util.Date;
@@ -113,13 +113,13 @@ public class DeviceMethodSample
                 .build();
 
         String jobId = UUID.randomUUID().toString();
-        Job job = jobClient.scheduleDirectMethod(jobId, queryCondition, methodName, invokeDateInFuture, options);
+        ScheduledJob job = jobClient.scheduleDirectMethod(jobId, queryCondition, methodName, invokeDateInFuture, options);
 
         System.out.println("Wait for job completed...");
-        while (job.getJobStatus() != JobStatus.completed)
+        while (job.getJobStatus() != ScheduledJobStatus.completed)
         {
             Thread.sleep(GIVE_100_MILLISECONDS_TO_IOTHUB);
-            job = jobClient.getJob(jobId);
+            job = jobClient.get(jobId);
         }
         System.out.println("job completed");
     }
@@ -142,17 +142,17 @@ public class DeviceMethodSample
                 .build();
 
         String jobId = UUID.randomUUID().toString();
-        Job job = jobClient.scheduleDirectMethod(jobId, queryCondition, methodName, invokeDateInFuture, options);
+        ScheduledJob job = jobClient.scheduleDirectMethod(jobId, queryCondition, methodName, invokeDateInFuture, options);
 
         Thread.sleep(WAIT_1_SECOND_TO_CANCEL_IN_MILLISECONDS);
         System.out.println("Cancel job after 1 second");
-        jobClient.cancelJob(jobId);
+        jobClient.cancel(jobId);
 
         System.out.println("Wait for job cancelled...");
-        while (job.getJobStatus() != JobStatus.cancelled)
+        while (job.getJobStatus() != ScheduledJobStatus.cancelled)
         {
             Thread.sleep(GIVE_100_MILLISECONDS_TO_IOTHUB);
-            job = jobClient.getJob(jobId);
+            job = jobClient.get(jobId);
         }
         System.out.println("job cancelled");
     }

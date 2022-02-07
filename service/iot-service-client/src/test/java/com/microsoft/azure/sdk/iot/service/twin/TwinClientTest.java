@@ -9,7 +9,7 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
-import com.microsoft.azure.sdk.iot.service.query.SqlQuery;
+import com.microsoft.azure.sdk.iot.service.query.SqlQueryBuilder;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 import mockit.Deencapsulation;
@@ -82,19 +82,8 @@ public class TwinClientTest
     @Before
     public void setUp() throws IOException
     {
-        VALID_SQL_QUERY = SqlQuery.createSqlQuery("tags.Floor, AVG(properties.reported.temperature) AS AvgTemperature",
-                SqlQuery.FromType.DEVICES, "tags.building = '43'", null).getQuery();
-    }
-
-    private void assertEqualSetAndMap(Set<Pair> pairSet, Map<String, String> map)
-    {
-        assertEquals(pairSet.size(), map.size());
-        for (Pair p : pairSet)
-        {
-            String val = map.get(p.getKey());
-            assertNotNull(val);
-            assertEquals(p.getValue(), val);
-        }
+        VALID_SQL_QUERY = SqlQueryBuilder.createSqlQuery("tags.Floor, AVG(properties.reported.temperature) AS AvgTemperature",
+                SqlQueryBuilder.FromType.DEVICES, "tags.building = '43'", null);
     }
 
     @Test

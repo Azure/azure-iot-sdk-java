@@ -9,8 +9,9 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.methods.MethodParser;
-import com.microsoft.azure.sdk.iot.service.query.SqlQuery;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.serializers.ScheduledJobParser;
+import com.microsoft.azure.sdk.iot.service.methods.serializers.MethodParser;
+import com.microsoft.azure.sdk.iot.service.query.SqlQueryBuilder;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
@@ -44,8 +45,8 @@ import static org.junit.Assert.*;
 public class ScheduledJobsClientTest
 {
     private static String VALID_SQL_QUERY = null;
-    private static final JobType JOB_TYPE_DEFAULT = JobType.scheduleDeviceMethod;
-    private static final JobStatus JOB_STATUS_DEFAULT = JobStatus.completed;
+    private static final ScheduledJobType JOB_TYPE_DEFAULT = ScheduledJobType.scheduleDeviceMethod;
+    private static final ScheduledJobStatus JOB_STATUS_DEFAULT = ScheduledJobStatus.completed;
 
     @Mocked
     IotHubConnectionStringBuilder mockedConnectionStringBuilder;
@@ -54,7 +55,7 @@ public class ScheduledJobsClientTest
     IotHubConnectionString mockedIotHubConnectionString;
 
     @Mocked
-    JobsParser mockedJobsParser;
+    ScheduledJobParser mockedJobsParser;
 
     @Mocked
     TwinState mockedTwinState;
@@ -66,7 +67,7 @@ public class ScheduledJobsClientTest
     Twin mockedTwin;
 
     @Mocked
-    Job mockedJob;
+    ScheduledJob mockedJob;
 
     @Mocked
     HttpResponse mockedHttpResponse;
@@ -83,8 +84,8 @@ public class ScheduledJobsClientTest
     @Before
     public void setUp() throws IOException
     {
-        VALID_SQL_QUERY = SqlQuery.createSqlQuery("*",
-                                                  SqlQuery.FromType.JOBS, null, null).getQuery();
+        VALID_SQL_QUERY = SqlQueryBuilder.createSqlQuery("*",
+                                                  SqlQueryBuilder.FromType.JOBS, null, null);
     }
 
     /* Tests_SRS_JOBCLIENT_21_002: [The constructor shall create an IotHubConnectionStringBuilder object from the given connection string.] */
@@ -151,7 +152,7 @@ public class ScheduledJobsClientTest
         new ScheduledJobsClient(connectionString);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_004: [The scheduleUpdateTwin shall create a json String that represent the twin job using the JobsParser class.] */
+    /* Tests_SRS_JOBCLIENT_21_004: [The scheduleUpdateTwin shall create a json String that represent the twin job using the ScheduledJobParser class.] */
     @Test
     public void scheduleUpdateTwinCreateJson() throws IOException, IotHubException
     {
@@ -193,7 +194,7 @@ public class ScheduledJobsClientTest
                 mockedTwin.getETag();
                 result = null;
 
-                new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+                new ScheduledJobParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
                 result = mockedJobsParser;
 
                 mockedJobsParser.toJson();
@@ -208,7 +209,7 @@ public class ScheduledJobsClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new Job(anyString);
+                new ScheduledJob(anyString);
                 result = mockedJob;
             }
         };
@@ -216,10 +217,10 @@ public class ScheduledJobsClientTest
         ScheduledJobsClient testJobClient = new ScheduledJobsClient(connectionString);
 
         //act
-        Job job = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
+        ScheduledJob job = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_004: [The scheduleUpdateTwin shall create a json String that represent the twin job using the JobsParser class.] */
+    /* Tests_SRS_JOBCLIENT_21_004: [The scheduleUpdateTwin shall create a json String that represent the twin job using the ScheduledJobParser class.] */
     @Test
     public void scheduleUpdateTwinCreateJsonWithEtag() throws IOException, IotHubException
     {
@@ -260,7 +261,7 @@ public class ScheduledJobsClientTest
                 mockedTwin.getETag();
                 result = "1234";
 
-                new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+                new ScheduledJobParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
                 result = mockedJobsParser;
 
                 mockedJobsParser.toJson();
@@ -275,7 +276,7 @@ public class ScheduledJobsClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new Job(anyString);
+                new ScheduledJob(anyString);
                 result = mockedJob;
             }
         };
@@ -283,10 +284,10 @@ public class ScheduledJobsClientTest
         ScheduledJobsClient testJobClient = new ScheduledJobsClient(connectionString);
 
         //act
-        Job job = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
+        ScheduledJob job = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_004: [The scheduleUpdateTwin shall create a json String that represent the twin job using the JobsParser class.] */
+    /* Tests_SRS_JOBCLIENT_21_004: [The scheduleUpdateTwin shall create a json String that represent the twin job using the ScheduledJobParser class.] */
     @Test
     public void scheduleUpdateTwinCreateJsonWithProperties() throws IOException, IotHubException
     {
@@ -331,7 +332,7 @@ public class ScheduledJobsClientTest
                 mockedTwin.getETag();
                 result = "1234";
 
-                new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+                new ScheduledJobParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
                 result = mockedJobsParser;
 
                 mockedJobsParser.toJson();
@@ -346,7 +347,7 @@ public class ScheduledJobsClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new Job(anyString);
+                new ScheduledJob(anyString);
                 result = mockedJob;
             }
         };
@@ -354,7 +355,7 @@ public class ScheduledJobsClientTest
         ScheduledJobsClient testJobClient = new ScheduledJobsClient(connectionString);
 
         //act
-        Job job = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
+        ScheduledJob job = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
     }
 
     /* Tests_SRS_JOBCLIENT_21_005: [If the JobId is null, empty, or invalid, the scheduleUpdateTwin shall throws IllegalArgumentException.] */
@@ -447,7 +448,7 @@ public class ScheduledJobsClientTest
                 mockedTwin.getETag();
                 result = null;
 
-                new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+                new ScheduledJobParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
                 result = mockedJobsParser;
 
                 mockedJobsParser.toJson();
@@ -587,7 +588,7 @@ public class ScheduledJobsClientTest
                 mockedTwin.getETag();
                 result = null;
 
-                new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+                new ScheduledJobParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
                 result = mockedJobsParser;
 
                 mockedJobsParser.toJson();
@@ -602,7 +603,7 @@ public class ScheduledJobsClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new Job(anyString);
+                new ScheduledJob(anyString);
                 result = mockedJob;
             }
         };
@@ -610,7 +611,7 @@ public class ScheduledJobsClientTest
         ScheduledJobsClient testJobClient = new ScheduledJobsClient(connectionString);
 
         //act
-        Job job = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
+        ScheduledJob job = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
 
         //assert
         new Verifications()
@@ -663,7 +664,7 @@ public class ScheduledJobsClientTest
                 mockedTwin.getETag();
                 result = null;
 
-                new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+                new ScheduledJobParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
                 result = mockedJobsParser;
 
                 mockedJobsParser.toJson();
@@ -678,7 +679,7 @@ public class ScheduledJobsClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new Job(anyString);
+                new ScheduledJob(anyString);
                 result = mockedJob;
             }
         };
@@ -686,7 +687,7 @@ public class ScheduledJobsClientTest
         ScheduledJobsClient testJobClient = new ScheduledJobsClient(connectionString);
 
         //act
-        Job job = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
+        ScheduledJob job = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
     }
 
     /* Tests_SRS_JOBCLIENT_21_011: [If the scheduleUpdateTwin failed to send a PUT request, it shall throw IOException.] */
@@ -731,7 +732,7 @@ public class ScheduledJobsClientTest
                 mockedTwin.getETag();
                 result = null;
 
-                new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+                new ScheduledJobParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
                 result = mockedJobsParser;
 
                 mockedJobsParser.toJson();
@@ -751,7 +752,7 @@ public class ScheduledJobsClientTest
         testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_013: [The scheduleUpdateTwin shall parse the iothub response and return it as Job.] */
+    /* Tests_SRS_JOBCLIENT_21_013: [The scheduleUpdateTwin shall parse the iothub response and return it as ScheduledJob.] */
     @Test
     public void scheduleUpdateTwinReturnResponse() throws IOException, IotHubException
     {
@@ -792,7 +793,7 @@ public class ScheduledJobsClientTest
                 mockedTwin.getETag();
                 result = null;
 
-                new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+                new ScheduledJobParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
                 result = mockedJobsParser;
 
                 mockedJobsParser.toJson();
@@ -807,7 +808,7 @@ public class ScheduledJobsClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new Job(anyString);
+                new ScheduledJob(anyString);
                 result = mockedJob;
             }
         };
@@ -815,7 +816,7 @@ public class ScheduledJobsClientTest
         ScheduledJobsClient testJobClient = new ScheduledJobsClient(connectionString);
 
         //act
-        Job job = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
+        ScheduledJob job = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
 
         //assert
         assertNotNull(job);
@@ -897,7 +898,7 @@ public class ScheduledJobsClientTest
                 new MethodParser(methodName, anyInt, anyInt, payload);
                 result = mockedMethodParser;
 
-                new JobsParser(jobId, mockedMethodParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+                new ScheduledJobParser(jobId, mockedMethodParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
                 result = mockedJobsParser;
 
                 mockedJobsParser.toJson();
@@ -1028,7 +1029,7 @@ public class ScheduledJobsClientTest
         testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_018: [The scheduleDirectMethod shall create a json String that represent the invoke method job using the JobsParser class.] */
+    /* Tests_SRS_JOBCLIENT_21_018: [The scheduleDirectMethod shall create a json String that represent the invoke method job using the ScheduledJobParser class.] */
     @Test
     public void scheduleDeviceMethodCreateJson() throws IOException, IotHubException
     {
@@ -1052,7 +1053,7 @@ public class ScheduledJobsClientTest
                 new MethodParser(methodName, anyInt, anyInt, payload);
                 result = mockedMethodParser;
 
-                new JobsParser(jobId, mockedMethodParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+                new ScheduledJobParser(jobId, mockedMethodParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
                 result = mockedJobsParser;
 
                 mockedJobsParser.toJson();
@@ -1067,7 +1068,7 @@ public class ScheduledJobsClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new Job(anyString);
+                new ScheduledJob(anyString);
                 result = mockedJob;
             }
         };
@@ -1076,7 +1077,7 @@ public class ScheduledJobsClientTest
 
         //act
         DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
-        Job job = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
+        ScheduledJob job = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
     }
 
     /* Tests_SRS_JOBCLIENT_21_019: [The scheduleDirectMethod shall create a URL for Jobs using the iotHubConnectionString.] */
@@ -1102,7 +1103,7 @@ public class ScheduledJobsClientTest
                 new MethodParser(methodName, anyInt, anyInt, payload);
                 result = mockedMethodParser;
 
-                new JobsParser(jobId, mockedMethodParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+                new ScheduledJobParser(jobId, mockedMethodParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
                 result = mockedJobsParser;
 
                 mockedJobsParser.toJson();
@@ -1117,7 +1118,7 @@ public class ScheduledJobsClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new Job(anyString);
+                new ScheduledJob(anyString);
                 result = mockedJob;
             }
         };
@@ -1126,7 +1127,7 @@ public class ScheduledJobsClientTest
 
         //act
         DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
-        Job job = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
+        ScheduledJob job = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
 
         //assert
         new Verifications()
@@ -1161,7 +1162,7 @@ public class ScheduledJobsClientTest
                 new MethodParser(methodName, anyInt, anyInt, payload);
                 result = mockedMethodParser;
 
-                new JobsParser(jobId, mockedMethodParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+                new ScheduledJobParser(jobId, mockedMethodParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
                 result = mockedJobsParser;
 
                 mockedJobsParser.toJson();
@@ -1176,7 +1177,7 @@ public class ScheduledJobsClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new Job(anyString);
+                new ScheduledJob(anyString);
                 result = mockedJob;
             }
         };
@@ -1212,7 +1213,7 @@ public class ScheduledJobsClientTest
                 new MethodParser(methodName, anyInt, anyInt, payload);
                 result = mockedMethodParser;
 
-                new JobsParser(jobId, mockedMethodParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+                new ScheduledJobParser(jobId, mockedMethodParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
                 result = mockedJobsParser;
 
                 mockedJobsParser.toJson();
@@ -1233,7 +1234,7 @@ public class ScheduledJobsClientTest
         testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_023: [The scheduleDirectMethod shall parse the iothub response and return it as Job.] */
+    /* Tests_SRS_JOBCLIENT_21_023: [The scheduleDirectMethod shall parse the iothub response and return it as ScheduledJob.] */
     @Test
     public void scheduleDeviceMethodParseResponse() throws IOException, IotHubException
     {
@@ -1256,7 +1257,7 @@ public class ScheduledJobsClientTest
                 new MethodParser(methodName, anyInt, anyInt, payload);
                 result = mockedMethodParser;
 
-                new JobsParser(jobId, mockedMethodParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+                new ScheduledJobParser(jobId, mockedMethodParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
                 result = mockedJobsParser;
 
                 mockedJobsParser.toJson();
@@ -1271,7 +1272,7 @@ public class ScheduledJobsClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new Job(anyString);
+                new ScheduledJob(anyString);
                 result = mockedJob;
             }
         };
@@ -1280,14 +1281,14 @@ public class ScheduledJobsClientTest
 
         //act
         DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
-        Job job = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
+        ScheduledJob job = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
 
         //assert
         assertNotNull(job);
     }
 
 
-    /* Tests_SRS_JOBCLIENT_21_024: [If the JobId is null, empty, or invalid, the getJob shall throws IllegalArgumentException.] */
+    /* Tests_SRS_JOBCLIENT_21_024: [If the JobId is null, empty, or invalid, the get shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void getJobThrowsOnNullJobId() throws IOException, IotHubException
     {
@@ -1305,10 +1306,10 @@ public class ScheduledJobsClientTest
         }
 
         //act
-        testJobClient.getJob(jobId);
+        testJobClient.get(jobId);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_024: [If the JobId is null, empty, or invalid, the getJob shall throws IllegalArgumentException.] */
+    /* Tests_SRS_JOBCLIENT_21_024: [If the JobId is null, empty, or invalid, the get shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void getJobThrowsOnEmptyJobId() throws IOException, IotHubException
     {
@@ -1326,10 +1327,10 @@ public class ScheduledJobsClientTest
         }
 
         //act
-        testJobClient.getJob(jobId);
+        testJobClient.get(jobId);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_024: [If the JobId is null, empty, or invalid, the getJob shall throws IllegalArgumentException.] */
+    /* Tests_SRS_JOBCLIENT_21_024: [If the JobId is null, empty, or invalid, the get shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void getJobThrowsOnInvalidJobId() throws IOException, IotHubException
     {
@@ -1357,10 +1358,10 @@ public class ScheduledJobsClientTest
         }
 
         //act
-        testJobClient.getJob(jobId);
+        testJobClient.get(jobId);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_025: [The getJob shall create a URL for Jobs using the iotHubConnectionString.] */
+    /* Tests_SRS_JOBCLIENT_21_025: [The get shall create a URL for Jobs using the iotHubConnectionString.] */
     @Test
     public void getJobCreateURL() throws IOException, IotHubException
     {
@@ -1383,7 +1384,7 @@ public class ScheduledJobsClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new Job(anyString);
+                new ScheduledJob(anyString);
                 result = mockedJob;
             }
         };
@@ -1397,7 +1398,7 @@ public class ScheduledJobsClientTest
         }
 
         //act
-        testJobClient.getJob(jobId);
+        testJobClient.get(jobId);
 
         //assert
         new Verifications()
@@ -1409,7 +1410,7 @@ public class ScheduledJobsClientTest
         };
     }
 
-    /* Tests_SRS_JOBCLIENT_21_026: [The getJob shall send a GET request to the iothub using the created url.] */
+    /* Tests_SRS_JOBCLIENT_21_026: [The get shall send a GET request to the iothub using the created url.] */
     @Test
     public void getJobSendGET() throws IOException, IotHubException
     {
@@ -1432,7 +1433,7 @@ public class ScheduledJobsClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new Job(anyString);
+                new ScheduledJob(anyString);
                 result = mockedJob;
             }
         };
@@ -1446,10 +1447,10 @@ public class ScheduledJobsClientTest
         }
 
         //act
-        testJobClient.getJob(jobId);
+        testJobClient.get(jobId);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_029: [The getJob shall parse the iothub response and return it as Job.] */
+    /* Tests_SRS_JOBCLIENT_21_029: [The get shall parse the iothub response and return it as ScheduledJob.] */
     @Test
     public void getJobParseResponse() throws IOException, IotHubException
     {
@@ -1472,7 +1473,7 @@ public class ScheduledJobsClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new Job(anyString);
+                new ScheduledJob(anyString);
                 result = mockedJob;
             }
         };
@@ -1486,13 +1487,13 @@ public class ScheduledJobsClientTest
         }
 
         //act
-        Job job = testJobClient.getJob(jobId);
+        ScheduledJob job = testJobClient.get(jobId);
 
         //assert
         assertNotNull(job);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_030: [If the JobId is null, empty, or invalid, the cancelJob shall throws IllegalArgumentException.] */
+    /* Tests_SRS_JOBCLIENT_21_030: [If the JobId is null, empty, or invalid, the cancel shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void cancelJobThrowsOnNullJobId() throws IOException, IotHubException
     {
@@ -1510,10 +1511,10 @@ public class ScheduledJobsClientTest
         }
 
         //act
-        testJobClient.cancelJob(jobId);
+        testJobClient.cancel(jobId);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_030: [If the JobId is null, empty, or invalid, the cancelJob shall throws IllegalArgumentException.] */
+    /* Tests_SRS_JOBCLIENT_21_030: [If the JobId is null, empty, or invalid, the cancel shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void cancelJobThrowsOnEmptyJobId() throws IOException, IotHubException
     {
@@ -1531,10 +1532,10 @@ public class ScheduledJobsClientTest
         }
 
         //act
-        testJobClient.cancelJob(jobId);
+        testJobClient.cancel(jobId);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_030: [If the JobId is null, empty, or invalid, the cancelJob shall throws IllegalArgumentException.] */
+    /* Tests_SRS_JOBCLIENT_21_030: [If the JobId is null, empty, or invalid, the cancel shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void cancelJobThrowsOnInvalidJobId() throws IOException, IotHubException
     {
@@ -1562,10 +1563,10 @@ public class ScheduledJobsClientTest
         }
 
         //act
-        testJobClient.cancelJob(jobId);
+        testJobClient.cancel(jobId);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_031: [The cancelJob shall create a cancel URL for Jobs using the iotHubConnectionString.] */
+    /* Tests_SRS_JOBCLIENT_21_031: [The cancel shall create a cancel URL for Jobs using the iotHubConnectionString.] */
     @Test
     public void cancelJobCreateURL() throws IOException, IotHubException
     {
@@ -1588,7 +1589,7 @@ public class ScheduledJobsClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new Job(anyString);
+                new ScheduledJob(anyString);
                 result = mockedJob;
             }
         };
@@ -1602,7 +1603,7 @@ public class ScheduledJobsClientTest
         }
 
         //act
-        testJobClient.cancelJob(jobId);
+        testJobClient.cancel(jobId);
 
         //assert
         new Verifications()
@@ -1614,7 +1615,7 @@ public class ScheduledJobsClientTest
         };
     }
 
-    /* Tests_SRS_JOBCLIENT_21_032: [The cancelJob shall send a POST request to the iothub using the created url.] */
+    /* Tests_SRS_JOBCLIENT_21_032: [The cancel shall send a POST request to the iothub using the created url.] */
     @Test
     public void cancelJobSendPOST() throws IOException, IotHubException
     {
@@ -1637,7 +1638,7 @@ public class ScheduledJobsClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new Job(anyString);
+                new ScheduledJob(anyString);
                 result = mockedJob;
             }
         };
@@ -1651,11 +1652,11 @@ public class ScheduledJobsClientTest
         }
 
         //act
-        testJobClient.cancelJob(jobId);
+        testJobClient.cancel(jobId);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_033: [If the cancelJob failed to send a POST request, it shall throw IOException.] */
-    /* Tests_SRS_JOBCLIENT_21_034: [If the cancelJob failed to verify the iothub response, it shall throw IotHubException.] */
+    /* Tests_SRS_JOBCLIENT_21_033: [If the cancel failed to send a POST request, it shall throw IOException.] */
+    /* Tests_SRS_JOBCLIENT_21_034: [If the cancel failed to verify the iothub response, it shall throw IotHubException.] */
     @Test (expected = IOException.class)
     public void cancelJobThrowsOnSendPOST() throws IOException, IotHubException
     {
@@ -1686,10 +1687,10 @@ public class ScheduledJobsClientTest
         }
 
         //act
-        testJobClient.cancelJob(jobId);
+        testJobClient.cancel(jobId);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_035: [The cancelJob shall parse the iothub response and return it as Job.] */
+    /* Tests_SRS_JOBCLIENT_21_035: [The cancel shall parse the iothub response and return it as ScheduledJob.] */
     @Test
     public void cancelJobParseResponse() throws IOException, IotHubException
     {
@@ -1712,7 +1713,7 @@ public class ScheduledJobsClientTest
                 mockHttpRequest.send();
                 result = mockedHttpResponse;
 
-                new Job(anyString);
+                new ScheduledJob(anyString);
                 result = mockedJob;
             }
         };
@@ -1726,7 +1727,7 @@ public class ScheduledJobsClientTest
         }
 
         //act
-        Job job = testJobClient.cancelJob(jobId);
+        ScheduledJob job = testJobClient.cancel(jobId);
 
         //assert
         assertNotNull(job);

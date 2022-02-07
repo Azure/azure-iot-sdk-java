@@ -1,13 +1,15 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.service.jobs.registry;
+package com.microsoft.azure.sdk.iot.service.jobs.registry.serializers;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.service.ParserUtility;
+import com.microsoft.azure.sdk.iot.service.jobs.registry.ManagedIdentity;
+import com.microsoft.azure.sdk.iot.service.jobs.registry.StorageAuthenticationType;
 import lombok.Getter;
 import lombok.Setter;
 

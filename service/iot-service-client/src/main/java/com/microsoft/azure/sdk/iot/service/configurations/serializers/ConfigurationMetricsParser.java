@@ -1,4 +1,4 @@
-package com.microsoft.azure.sdk.iot.service.configurations;
+package com.microsoft.azure.sdk.iot.service.configurations.serializers;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;

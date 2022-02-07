@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.service.methods;
+package com.microsoft.azure.sdk.iot.service.methods.serializers;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;

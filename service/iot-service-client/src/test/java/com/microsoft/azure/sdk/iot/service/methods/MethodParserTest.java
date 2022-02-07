@@ -5,7 +5,7 @@ package com.microsoft.azure.sdk.iot.service.methods;
 
 import com.google.gson.JsonElement;
 import com.microsoft.azure.sdk.iot.service.Helpers;
-import com.microsoft.azure.sdk.iot.service.methods.MethodParser;
+import com.microsoft.azure.sdk.iot.service.methods.serializers.MethodParser;
 import mockit.Deencapsulation;
 import org.junit.Test;
 

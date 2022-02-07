@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service.messaging;
 
-import com.microsoft.azure.sdk.iot.service.messaging.DeliveryAcknowledgement;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -44,12 +43,6 @@ public class Message
     {
         this.to = "/devices/" + deviceId + "/messages/devicebound";
     }
-
-    /**
-    * Expiry time in UTC Interpreted by hub on C2D messages. Ignored in other cases.
-    **/
-    @Getter
-    private Date expiryTimeUtc;
 
     /**
     * Used by receiver to Abandon, Reject or Complete the message

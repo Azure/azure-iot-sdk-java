@@ -5,7 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.service.query;
 
-public class SqlQuery
+public class SqlQueryBuilder
 {
     private static final String SPACE = " ";
     private static final String SELECT = "select" + SPACE;
@@ -37,7 +37,7 @@ public class SqlQuery
         }
     }
 
-    private SqlQuery()
+    private SqlQueryBuilder()
     {
         this.query = new StringBuilder();
     }
@@ -48,16 +48,16 @@ public class SqlQuery
      * @param fromType From enum for Query. Cannot be {@code null}.
      * @param where Where clause for Query. Can be {@code null}.
      * @param groupby GroupBy clause for query. Can be {@code null}
-     * @return SqlQuery Object as specified by param
+     * @return SqlQueryBuilder Object as specified by param
      */
-    public static SqlQuery createSqlQuery(String selection, FromType fromType, String where, String groupby)
+    public static String createSqlQuery(String selection, FromType fromType, String where, String groupby)
     {
         if (selection == null || fromType == null)
         {
             throw new IllegalArgumentException("selection and from are mandatory");
         }
 
-        SqlQuery sqlQuery = new SqlQuery();
+        SqlQueryBuilder sqlQuery = new SqlQueryBuilder();
 
         sqlQuery.query.append(SELECT)
                 .append(selection)
@@ -80,15 +80,6 @@ public class SqlQuery
                     .append(groupby);
         }
 
-        return sqlQuery;
-    }
-
-    /**
-     * Getter for the String corresponding to Sql Query String created
-     * @return String corresponding to Sql Query created
-     */
-    public String getQuery()
-    {
-        return query.toString();
+        return sqlQuery.query.toString();
     }
 }

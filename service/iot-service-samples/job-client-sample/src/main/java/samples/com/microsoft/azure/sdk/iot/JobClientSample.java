@@ -5,16 +5,16 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.service.jobs.scheduled.DirectMethodsJobOptions;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.Job;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJob;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobStatus;
 import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobsClient;
+import com.microsoft.azure.sdk.iot.service.query.SqlQueryBuilder;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.twin.Pair;
 import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
-import com.microsoft.azure.sdk.iot.service.query.SqlQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.JobStatus;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.JobType;
+import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobType;
 
 import java.io.IOException;
 import java.util.*;
@@ -25,7 +25,7 @@ import java.util.*;
 public class JobClientSample
 {
     /*
-     * Details for Job client
+     * Details for ScheduledJob client
      */
     public static final String iotHubConnectionString = "[IOT HUB Connection String]";
     public static final String deviceId = "[Device ID]";
@@ -61,18 +61,18 @@ public class JobClientSample
         ScheduledJobsClient jobClient = createJobClient();
 
         // *************************************** Schedule twin job ***************************************
-        Job jobTwin = scheduleUpdateTwin(jobClient);
+        ScheduledJob jobTwin = scheduleUpdateTwin(jobClient);
         monitorJob(jobClient, jobIdTwin);
 
         // *************************************** Schedule method job ***************************************
-        Job jobMethod = scheduleUpdateMethod(jobClient);
+        ScheduledJob jobMethod = scheduleUpdateMethod(jobClient);
         monitorJob(jobClient, jobIdMethod);
 
         // *************************************** Query Jobs Response ***************************************
         QueryClient queryClient = new QueryClient(iotHubConnectionString);
         queryJobsResponse(queryClient);
 
-        // *************************************** Query Device Job ***************************************
+        // *************************************** Query Device ScheduledJob ***************************************
         queryDeviceJobs(queryClient);
 
         System.out.println("Shutting down sample...");
@@ -91,15 +91,15 @@ public class JobClientSample
     private static void monitorJob(ScheduledJobsClient jobClient, String jobId) throws IOException, IotHubException, InterruptedException
     {
         System.out.println("Monitoring jobClient for job completion...");
-        Job job = jobClient.getJob(jobId);
+        ScheduledJob job = jobClient.get(jobId);
         System.out.println("First get response");
         System.out.println(job);
-        while(job.getJobStatus() != JobStatus.completed)
+        while(job.getJobStatus() != ScheduledJobStatus.completed)
         {
             Thread.sleep(1000);
-            job = jobClient.getJob(jobId);
+            job = jobClient.get(jobId);
         }
-        System.out.println("Job ends with status " + job.getJobStatus());
+        System.out.println("ScheduledJob ends with status " + job.getJobStatus());
         System.out.println("Last get response");
         System.out.println(job);
     }
@@ -107,7 +107,7 @@ public class JobClientSample
     private static void queryDeviceJobs(QueryClient queryClient) throws IOException, IotHubException
     {
         System.out.println("Query device job");
-        String jobsQueryString = SqlQuery.createSqlQuery("*", SqlQuery.FromType.JOBS, null, null).getQuery();
+        String jobsQueryString = SqlQueryBuilder.createSqlQuery("*", SqlQueryBuilder.FromType.JOBS, null, null);
         JobQueryResponse jobQueryResponse = queryClient.queryJobs(jobsQueryString);
         while (jobQueryResponse.hasNext())
         {
@@ -119,7 +119,7 @@ public class JobClientSample
     private static void queryJobsResponse(QueryClient queryClient) throws IOException, IotHubException
     {
         System.out.println("Querying job response");
-        JobQueryResponse jobResponseQuery = queryClient.queryJobs(JobType.scheduleDeviceMethod, JobStatus.completed);
+        JobQueryResponse jobResponseQuery = queryClient.queryJobs(ScheduledJobType.scheduleDeviceMethod, ScheduledJobStatus.completed);
         while (jobResponseQuery.hasNext())
         {
             System.out.println("job response");
@@ -127,7 +127,7 @@ public class JobClientSample
         }
     }
 
-    private static Job scheduleUpdateMethod(ScheduledJobsClient jobClient) throws IOException, IotHubException
+    private static ScheduledJob scheduleUpdateMethod(ScheduledJobsClient jobClient) throws IOException, IotHubException
     {
         final String queryCondition = "DeviceId IN ['" + deviceId + "']";
 
@@ -141,7 +141,7 @@ public class JobClientSample
                 .maxExecutionTimeInSeconds(maxExecutionTimeInSeconds)
                 .build();
 
-        Job jobMethod =
+        ScheduledJob jobMethod =
             jobClient.scheduleDirectMethod(
                 jobIdMethod,
                 queryCondition,
@@ -151,7 +151,7 @@ public class JobClientSample
 
         if(jobMethod == null)
         {
-            throw new IOException("Schedule method Job returns null");
+            throw new IOException("Schedule method ScheduledJob returns null");
         }
         System.out.println("Schedule method job response");
         System.out.println(jobMethod);
@@ -159,7 +159,7 @@ public class JobClientSample
         return jobMethod;
     }
 
-    private static Job scheduleUpdateTwin(ScheduledJobsClient jobClient) throws IOException, IotHubException
+    private static ScheduledJob scheduleUpdateTwin(ScheduledJobsClient jobClient) throws IOException, IotHubException
     {
         final String queryCondition = "DeviceId IN ['" + deviceId + "']";
         Twin updateTwin = new Twin(deviceId);
@@ -168,10 +168,10 @@ public class JobClientSample
         updateTwin.setTags(tags);
 
         System.out.println("Schedule twin job " + jobIdTwin + " for device " + deviceId + "...");
-        Job job = jobClient.scheduleUpdateTwin(jobIdTwin, queryCondition, updateTwin, startTimeUtc , maxExecutionTimeInSeconds);
+        ScheduledJob job = jobClient.scheduleUpdateTwin(jobIdTwin, queryCondition, updateTwin, startTimeUtc , maxExecutionTimeInSeconds);
         if(job == null)
         {
-            throw new IOException("Schedule Twin Job returns null");
+            throw new IOException("Schedule Twin ScheduledJob returns null");
         }
         System.out.println("Schedule twin job response");
         System.out.println(job);

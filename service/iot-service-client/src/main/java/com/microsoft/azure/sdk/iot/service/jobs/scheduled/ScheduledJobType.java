@@ -5,15 +5,9 @@
 
 package com.microsoft.azure.sdk.iot.service.jobs.scheduled;
 
-public enum JobStatus
+public enum ScheduledJobType
 {
-    // List of possible IoTHub response status for a job
-    unknown,
-    enqueued,
-    running,
-    completed,
-    failed,
-    cancelled,
-    scheduled,
-    queued
+    // List of possible jobs
+    scheduleDeviceMethod,
+    scheduleUpdateTwin
 }

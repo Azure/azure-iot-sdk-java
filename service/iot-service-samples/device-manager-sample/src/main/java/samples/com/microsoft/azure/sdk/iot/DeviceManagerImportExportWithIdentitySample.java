@@ -5,11 +5,10 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
+import com.microsoft.azure.sdk.iot.service.jobs.registry.RegistryJob;
 import com.microsoft.azure.sdk.iot.service.jobs.registry.RegistryJobsClient;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobsClient;
 import com.microsoft.azure.sdk.iot.service.jobs.registry.ManagedIdentity;
 import com.microsoft.azure.sdk.iot.service.jobs.registry.StorageAuthenticationType;
-import com.microsoft.azure.sdk.iot.service.jobs.registry.JobProperties;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import java.io.IOException;
 
@@ -50,18 +49,18 @@ public class DeviceManagerImportExportWithIdentitySample {
         ManagedIdentity identity = new ManagedIdentity();
         identity.setUserAssignedIdentity(userDefinedManagedIdentityResourceId);
 
-        JobProperties jobProperties = JobProperties.createForExportJob(
+        RegistryJob jobProperties = RegistryJob.createForExportJob(
                 blobContainerUri,
                 false,
                 StorageAuthenticationType.IDENTITY,
                 identity);
 
-        JobProperties exportJob = jobClient.exportDevices(jobProperties);
+        RegistryJob exportJob = jobClient.exportDevices(jobProperties);
 
         while(true)
         {
-            exportJob = jobClient.getJob(exportJob.getJobId());
-            if (exportJob.getStatus() == JobProperties.JobStatus.COMPLETED)
+            exportJob = jobClient.get(exportJob.getJobId());
+            if (exportJob.getStatus() == RegistryJob.JobStatus.COMPLETED)
             {
                 break;
             }
@@ -84,18 +83,18 @@ public class DeviceManagerImportExportWithIdentitySample {
         ManagedIdentity identity = new ManagedIdentity();
         identity.setUserAssignedIdentity(userDefinedManagedIdentityResourceId);
 
-        JobProperties jobProperties = JobProperties.createForImportJob(
+        RegistryJob jobProperties = RegistryJob.createForImportJob(
                 blobContainerUri,
                 blobContainerUri,
                 StorageAuthenticationType.IDENTITY,
                 identity);
 
-        JobProperties exportJob = jobClient.importDevices(jobProperties);
+        RegistryJob exportJob = jobClient.importDevices(jobProperties);
 
         while(true)
         {
-            exportJob = jobClient.getJob(exportJob.getJobId());
-            if (exportJob.getStatus() == JobProperties.JobStatus.COMPLETED)
+            exportJob = jobClient.get(exportJob.getJobId());
+            if (exportJob.getStatus() == RegistryJob.JobStatus.COMPLETED)
             {
                 break;
             }
