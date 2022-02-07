@@ -185,7 +185,7 @@ public final class TwinClient
         HttpRequest httpRequest = createRequest(url, HttpMethod.GET, new byte[0]);
         HttpResponse response = httpRequest.send();
         String twinString = new String(response.getBody(), StandardCharsets.UTF_8);
-        return new Twin(twinString);
+        return Twin.fromJson(twinString);
     }
 
     /**
@@ -264,7 +264,7 @@ public final class TwinClient
 
         HttpResponse httpResponse = httpRequest.send();
         String twinString = new String(httpResponse.getBody(), StandardCharsets.UTF_8);
-        return new Twin(twinString);
+        return Twin.fromJson(twinString);
     }
 
     private HttpRequest createRequest(URL url, HttpMethod method, byte[] payload) throws IOException

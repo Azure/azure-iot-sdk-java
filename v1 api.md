@@ -374,30 +374,32 @@ public class ServiceClient
             ServiceClientOptions options)
 				throws IOException;
 			
-	public ServiceClient(String connectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol);
-	
-	public ServiceClient(
+    public ServiceClient(
+        String connectionString, 
+        IotHubServiceClientProtocol iotHubServiceClientProtocol);
+
+    public ServiceClient(
             String connectionString,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             ServiceClientOptions options);
-			
-	public ServiceClient(
+
+    public ServiceClient(
             String hostName,
             TokenCredential credential,
             IotHubServiceClientProtocol iotHubServiceClientProtocol);
-			
-	public ServiceClient(
+
+    public ServiceClient(
             String hostName,
             TokenCredential credential,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             ServiceClientOptions options);
-			
-	public ServiceClient(
+
+    public ServiceClient(
             String hostName,
             AzureSasCredential azureSasCredential,
             IotHubServiceClientProtocol iotHubServiceClientProtocol);
-			
-	public ServiceClient(
+
+    public ServiceClient(
             String hostName,
             AzureSasCredential azureSasCredential,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
@@ -406,11 +408,15 @@ public class ServiceClient
 	public void open() throws IOException;
 	
 	public void close() throws IOException;
-	
-	public void send(String deviceId, Message message) throws IOException, IotHubException;
-	
-	public void send(String deviceId, String moduleId, Message message) throws IOException, IotHubException;
-	
+
+    public void send(String deviceId, Message message) throws IOException, IotHubException;
+
+    public void send(String deviceId, String moduleId, Message message) throws IOException, IotHubException;
+
+    public FeedbackReceiver getFeedbackReceiver();
+
+    public FileUploadNotificationReceiver getFileUploadNotificationReceiver();	
+
 	@Deprecated
     public CompletableFuture<Void> openAsync();
 	
@@ -422,10 +428,6 @@ public class ServiceClient
 	
 	@Deprecated 
 	public FeedbackReceiver getFeedbackReceiver(String deviceId);
-	
-	public FeedbackReceiver getFeedbackReceiver();
-	
-	public FileUploadNotificationReceiver getFileUploadNotificationReceiver();
 }
 
 @Builder

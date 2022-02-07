@@ -160,19 +160,6 @@ public class TwinClientTest
         final String connectionString = "testString";
         constructorExpectations(connectionString);
         TwinClient testTwin = new TwinClient(connectionString);
-        TwinCollection testMap = new TwinCollection();
-        String expectedConnectionState = TwinConnectionState.CONNECTED.toString();
-        new NonStrictExpectations()
-        {
-            {
-                mockedTwinState.getConfigurations();
-                result = mockConfigurations;
-                mockedTwinState.getConnectionState();
-                result = expectedConnectionState;
-                new TwinState((String)any);
-                result = mockedTwinState;
-            }
-        };
 
         //act
         Deencapsulation.invoke(testTwin,"getTwin", new Class[]{URL.class}, mockUrl);
@@ -187,27 +174,7 @@ public class TwinClientTest
                 times = 1;
                 mockedHttpRequest.send();
                 times = 1;
-                mockedTwinState.getETag();
-                times = 1;
-                Deencapsulation.invoke(mockedDevice, "setETag", anyString);
-                times = 1;
-                mockedTwinState.getTags();
-                times = 1;
-                Deencapsulation.invoke(mockedDevice, "setTags", testMap);
-                times = 1;
-                mockedTwinState.getDesiredProperty();
-                times = 1;
-                Deencapsulation.invoke(mockedDevice, "setDesiredProperties", testMap);
-                times = 1;
-                mockedTwinState.getReportedProperty();
-                times = 1;
-                Deencapsulation.invoke(mockedDevice, "setReportedProperties", testMap );
-                times = 1;
-                Deencapsulation.invoke(mockedDevice, "setCapabilities", mockCapabilities);
-                times = 1;
-                Deencapsulation.invoke(mockedDevice, "setConfigurations", mockConfigurations);
-                times = 1;
-                Deencapsulation.invoke(mockedDevice, "setConnectionState", expectedConnectionState);
+                new Twin(anyString);
                 times = 1;
             }
         };
@@ -220,14 +187,6 @@ public class TwinClientTest
         final String connectionString = "testString";
         constructorExpectations(connectionString);
         TwinClient testTwin = new TwinClient(connectionString);
-        TwinCollection testMap = new TwinCollection();
-        new Expectations()
-        {
-            {
-                new TwinState((String)any);
-                result = mockedTwinState;
-            }
-        };
 
         //act
         testTwin.getTwin("SomeDevID", "SomeModuleID");
@@ -242,25 +201,7 @@ public class TwinClientTest
                 times = 1;
                 mockedHttpRequest.send();
                 times = 1;
-                mockedTwinState.getETag();
-                times = 1;
-                Deencapsulation.invoke(mockedDevice, "setETag", anyString);
-                times = 1;
-                mockedTwinState.getTags();
-                times = 1;
-                Deencapsulation.invoke(mockedDevice, "setTags", testMap);
-                times = 1;
-                mockedTwinState.getDesiredProperty();
-                times = 1;
-                Deencapsulation.invoke(mockedDevice, "setDesiredProperties", testMap);
-                times = 1;
-                mockedTwinState.getReportedProperty();
-                times = 1;
-                Deencapsulation.invoke(mockedDevice, "setReportedProperties", testMap );
-                times = 1;
-                Deencapsulation.invoke(mockedDevice, "setCapabilities", mockCapabilities);
-                times = 1;
-                Deencapsulation.invoke(mockedDevice, "setConfigurations", mockConfigurations);
+                new Twin(anyString);
                 times = 1;
             }
         };

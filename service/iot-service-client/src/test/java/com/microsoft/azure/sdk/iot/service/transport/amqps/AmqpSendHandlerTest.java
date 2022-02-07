@@ -212,7 +212,6 @@ public class AmqpSendHandlerTest
             {
                 properties.setTo(toProperty);
                 properties.setMessageId(any);
-                properties.setAbsoluteExpiryTime((Date) any);
                 properties.setCorrelationId(any);
             }
         };
@@ -266,7 +265,6 @@ public class AmqpSendHandlerTest
             {
                 properties.setTo(toProperty);
                 properties.setMessageId(any);
-                properties.setAbsoluteExpiryTime((Date) any);
                 properties.setCorrelationId(any);
             }
         };
