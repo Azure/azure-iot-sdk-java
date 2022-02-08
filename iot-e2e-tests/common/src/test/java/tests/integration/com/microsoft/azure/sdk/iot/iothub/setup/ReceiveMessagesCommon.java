@@ -201,17 +201,21 @@ public class ReceiveMessagesCommon extends IntegrationTest
         {
             boolean resultValue = true;
             HashMap<String, String> messageProperties = (HashMap<String, String>) ReceiveMessagesTests.messageProperties;
-            Success messageReceived = (Success)context;
-            if (!hasExpectedProperties(msg, messageProperties) || !hasExpectedSystemProperties(msg, expectedMessage.getCorrelationId(), expectedMessage.getMessageId()))
-            {
-                log.warn("Unexpected properties in the received message");
-                resultValue = false;
-            }
+            Success messageReceived = (Success) context;
 
-            if (this.expectedMessage != null && !ArrayUtils.isEquals(this.expectedMessage.getBytes(), msg.getBytes()))
+            if (expectedMessage != null)
             {
-                log.warn("Unexpected payload in the received message");
-                resultValue = false;
+                if (!hasExpectedProperties(msg, messageProperties) || !hasExpectedSystemProperties(msg, expectedMessage.getCorrelationId(), expectedMessage.getMessageId()))
+                {
+                    log.warn("Unexpected properties in the received message");
+                    resultValue = false;
+                }
+
+                if (!ArrayUtils.isEquals(this.expectedMessage.getBytes(), msg.getBytes()))
+                {
+                    log.warn("Unexpected payload in the received message");
+                    resultValue = false;
+                }
             }
 
             messageReceived.callbackWasFired();
