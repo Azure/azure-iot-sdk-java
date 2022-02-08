@@ -249,7 +249,7 @@ public class TokenRenewalTests extends IntegrationTest
             String deviceId = "token-renewal-test-device-with-custom-sas-token-provider-" + protocol + "-" + uuid.toString();
             Device device = new Device(deviceId);
             device = registryClient.addDevice(device);
-            SasTokenProvider sasTokenProvider = new SasTokenProviderImpl(registryClient.getDeviceConnectionString(device), SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL);
+            SasTokenProvider sasTokenProvider = new SasTokenProviderImpl(Tools.getDeviceConnectionString(iotHubConnectionString, device), SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL);
             clients.add(new DeviceClient(iotHubHostName, deviceId, sasTokenProvider, protocol));
         }
 

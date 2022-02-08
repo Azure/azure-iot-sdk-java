@@ -163,7 +163,7 @@ public class TwinPnPTests extends IntegrationTest
                 if (authenticationType == SAS)
                 {
                     //sas device client
-                    this.client = new DeviceClient(registryClient.getDeviceConnectionString(device), protocol, clientOptionsBuilder.build());
+                    this.client = new DeviceClient(Tools.getDeviceConnectionString(iotHubConnectionString, device), protocol, clientOptionsBuilder.build());
                     this.identity = device;
                 }
                 else if (authenticationType == SELF_SIGNED)
@@ -171,7 +171,7 @@ public class TwinPnPTests extends IntegrationTest
                     //x509 device client
                     SSLContext sslContext = SSLContextBuilder.buildSSLContext(x509CertificateGenerator.getX509Certificate(), x509CertificateGenerator.getPrivateKey());
                     clientOptionsBuilder.sslContext(sslContext);
-                    this.client = new DeviceClient(registryClient.getDeviceConnectionString(deviceX509), protocol, clientOptionsBuilder.build());
+                    this.client = new DeviceClient(Tools.getDeviceConnectionString(iotHubConnectionString, deviceX509), protocol, clientOptionsBuilder.build());
                     this.identity = deviceX509;
                 }
                 else

@@ -177,7 +177,7 @@ public class MultiplexingClientTests extends IntegrationTest
             this.multiplexingClient = new MultiplexingClient(connectionString.getHostName(), this.protocol, options);
             for (int i = 0; i < multiplexingDeviceSessionCount; i++)
             {
-                this.deviceClientArray.add(i, new DeviceClient(registryClient.getDeviceConnectionString(deviceIdentityArray.get(i)), this.protocol));
+                this.deviceClientArray.add(i, new DeviceClient(Tools.getDeviceConnectionString(iotHubConnectionString, deviceIdentityArray.get(i)), this.protocol));
             }
 
             this.multiplexingClient.registerDeviceClients(this.deviceClientArray);
@@ -1273,7 +1273,7 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.multiplexingClient.open(false);
 
         // Get a valid connection string, but swap out the deviceId for a deviceId that does exist, but whose symmetric key is different
-        String incorrectConnectionString = registryClient.getDeviceConnectionString(testInstance.deviceIdentityArray.get(1)).replace(testInstance.deviceIdentityArray.get(1).getDeviceId(), testInstance.deviceIdentityArray.get(0).getDeviceId());
+        String incorrectConnectionString = Tools.getDeviceConnectionString(iotHubConnectionString, testInstance.deviceIdentityArray.get(1)).replace(testInstance.deviceIdentityArray.get(1).getDeviceId(), testInstance.deviceIdentityArray.get(0).getDeviceId());
 
         DeviceClient clientWithIncorrectCredentials = new DeviceClient(incorrectConnectionString, testInstance.protocol);
 
@@ -1308,7 +1308,7 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.multiplexingClient.unregisterDeviceClient(testInstance.deviceClientArray.get(0));
 
         // Get a valid connection string, but swap out the deviceId for a deviceId that does exist, but whose symmetric key is different
-        String incorrectConnectionString = registryClient.getDeviceConnectionString(testInstance.deviceIdentityArray.get(1)).replace(testInstance.deviceIdentityArray.get(1).getDeviceId(), testInstance.deviceIdentityArray.get(0).getDeviceId());
+        String incorrectConnectionString = Tools.getDeviceConnectionString(iotHubConnectionString, testInstance.deviceIdentityArray.get(1)).replace(testInstance.deviceIdentityArray.get(1).getDeviceId(), testInstance.deviceIdentityArray.get(0).getDeviceId());
 
         DeviceClient clientWithIncorrectCredentials = new DeviceClient(incorrectConnectionString, testInstance.protocol);
         testInstance.multiplexingClient.registerDeviceClient(clientWithIncorrectCredentials);
@@ -1355,12 +1355,12 @@ public class MultiplexingClientTests extends IntegrationTest
             String incorrectConnectionString;
             if (i == DEVICE_MULTIPLEX_COUNT - 1)
             {
-                incorrectConnectionString = registryClient.getDeviceConnectionString(testInstance.deviceIdentityArray.get(0));
+                incorrectConnectionString = Tools.getDeviceConnectionString(iotHubConnectionString, testInstance.deviceIdentityArray.get(0));
                 incorrectConnectionString = incorrectConnectionString.replace(testInstance.deviceIdentityArray.get(0).getDeviceId(), testInstance.deviceIdentityArray.get(i).getDeviceId());
             }
             else
             {
-                incorrectConnectionString = registryClient.getDeviceConnectionString(testInstance.deviceIdentityArray.get(i+1));
+                incorrectConnectionString = Tools.getDeviceConnectionString(iotHubConnectionString, testInstance.deviceIdentityArray.get(i+1));
                 incorrectConnectionString = incorrectConnectionString.replace(testInstance.deviceIdentityArray.get(i+1).getDeviceId(), testInstance.deviceIdentityArray.get(i).getDeviceId());
             }
 
@@ -1410,12 +1410,12 @@ public class MultiplexingClientTests extends IntegrationTest
             String incorrectConnectionString;
             if (i == DEVICE_MULTIPLEX_COUNT - 1)
             {
-                incorrectConnectionString = registryClient.getDeviceConnectionString(testInstance.deviceIdentityArray.get(0));
+                incorrectConnectionString = Tools.getDeviceConnectionString(iotHubConnectionString, testInstance.deviceIdentityArray.get(0));
                 incorrectConnectionString = incorrectConnectionString.replace(testInstance.deviceIdentityArray.get(0).getDeviceId(), testInstance.deviceIdentityArray.get(i).getDeviceId());
             }
             else
             {
-                incorrectConnectionString = registryClient.getDeviceConnectionString(testInstance.deviceIdentityArray.get(i+1));
+                incorrectConnectionString = Tools.getDeviceConnectionString(iotHubConnectionString, testInstance.deviceIdentityArray.get(i+1));
                 incorrectConnectionString =incorrectConnectionString.replace(testInstance.deviceIdentityArray.get(i+1).getDeviceId(), testInstance.deviceIdentityArray.get(i).getDeviceId());
             }
             DeviceClient clientWithIncorrectCredentials = new DeviceClient(incorrectConnectionString, testInstance.protocol);
@@ -1451,7 +1451,7 @@ public class MultiplexingClientTests extends IntegrationTest
     public void registrationsUnwindForMqttClient() throws Exception
     {
         Device mqttDevice = Tools.getTestDevice(iotHubConnectionString, IotHubClientProtocol.MQTT, AuthenticationType.SAS, false).getDevice();
-        String deviceConnectionString = registryClient.getDeviceConnectionString(mqttDevice);
+        String deviceConnectionString = Tools.getDeviceConnectionString(iotHubConnectionString, mqttDevice);
 
         // MQTT clients should throw UnsupportedOperationException when registered
         DeviceClient mqttDeviceClient = new DeviceClient(deviceConnectionString, IotHubClientProtocol.MQTT);
@@ -1464,7 +1464,7 @@ public class MultiplexingClientTests extends IntegrationTest
         // Create a new device client that uses x509 auth, which should throw an UnsupportedOperationException
         // since x509 auth isn't supported while multiplexing
         Device x509Device = Tools.getTestDevice(iotHubConnectionString, IotHubClientProtocol.MQTT, AuthenticationType.SELF_SIGNED, false).getDevice();
-        String deviceConnectionString = registryClient.getDeviceConnectionString(x509Device);
+        String deviceConnectionString = Tools.getDeviceConnectionString(iotHubConnectionString, x509Device);
         ClientOptions options = ClientOptions.builder().sslContext(new IotHubSSLContext().getSSLContext()).build();
         DeviceClient x509DeviceClient = new DeviceClient(deviceConnectionString, testInstance.protocol, options);
         registrationsUnwindForUnsupportedOperationExceptions(x509DeviceClient);
@@ -1474,7 +1474,7 @@ public class MultiplexingClientTests extends IntegrationTest
     public void registrationsUnwindForAlreadyOpenClient() throws Exception
     {
         Device nonMultiplexedDevice = Tools.getTestDevice(iotHubConnectionString, testInstance.protocol, AuthenticationType.SAS, false).getDevice();
-        String deviceConnectionString = registryClient.getDeviceConnectionString(nonMultiplexedDevice);
+        String deviceConnectionString = Tools.getDeviceConnectionString(iotHubConnectionString, nonMultiplexedDevice);
         DeviceClient nonMultiplexedDeviceClient = new DeviceClient(deviceConnectionString, testInstance.protocol);
 
         //By opening the client once, this client can no longer be registered to a multiplexing client
@@ -1487,7 +1487,7 @@ public class MultiplexingClientTests extends IntegrationTest
     public void registrationsUnwindForClientOfDifferentHostName() throws Exception
     {
         Device nonMultiplexedDevice = Tools.getTestDevice(iotHubConnectionString, testInstance.protocol, AuthenticationType.SAS, false).getDevice();
-        String deviceConnectionString = registryClient.getDeviceConnectionString(nonMultiplexedDevice);
+        String deviceConnectionString = Tools.getDeviceConnectionString(iotHubConnectionString, nonMultiplexedDevice);
 
         // intentionally change the hostname of the device to simulate registering a device with a different hostname
         // to a multiplexing client. It shouldn't matter that the hostname itself isn't tied to an actual IoT Hub since
@@ -1510,7 +1510,7 @@ public class MultiplexingClientTests extends IntegrationTest
         IotHubClientProtocol protocol = testInstance.protocol == IotHubClientProtocol.AMQPS ? IotHubClientProtocol.AMQPS_WS : IotHubClientProtocol.AMQPS;
 
         Device newDevice = Tools.getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SAS, false).getDevice();
-        String deviceConnectionString = registryClient.getDeviceConnectionString(newDevice);
+        String deviceConnectionString = Tools.getDeviceConnectionString(iotHubConnectionString, newDevice);
 
         DeviceClient differentProtocolDeviceClient = new DeviceClient(deviceConnectionString, protocol);
         registrationsUnwindForUnsupportedOperationExceptions(differentProtocolDeviceClient);
@@ -1764,7 +1764,7 @@ public class MultiplexingClientTests extends IntegrationTest
         TestDeviceIdentity testDeviceIdentity =
             Tools.getTestDevice(iotHubConnectionString, this.testInstance.protocol, AuthenticationType.SAS, false);
 
-        String deviceConnectionString = registryClient.getDeviceConnectionString(testDeviceIdentity.getDevice());
+        String deviceConnectionString = Tools.getDeviceConnectionString(iotHubConnectionString, testDeviceIdentity.getDevice());
         String deviceNotFoundConnectionString = deviceConnectionString.replace(testDeviceIdentity.getDeviceId(), testDeviceIdentity.getDeviceId().toUpperCase());
         DeviceClient validDeviceClient = new DeviceClient(deviceConnectionString, testInstance.protocol);
         DeviceClient invalidDeviceClient = new DeviceClient(deviceNotFoundConnectionString, testInstance.protocol);

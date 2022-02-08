@@ -249,12 +249,12 @@ public class SendMessagesCommon extends IntegrationTest
                 if (customSSLContext != null)
                 {
                     ClientOptions options = ClientOptions.builder().sslContext(customSSLContext).build();
-                    DeviceClient clientWithCustomSSLContext = new DeviceClient(registryClient.getDeviceConnectionString(testInstance.identity.getDevice()), protocol, options);
+                    DeviceClient clientWithCustomSSLContext = new DeviceClient(Tools.getDeviceConnectionString(iotHubConnectionString, testInstance.identity.getDevice()), protocol, options);
                     ((TestDeviceIdentity)this.identity).setDeviceClient(clientWithCustomSSLContext);
                 }
                 else if (useCustomSasTokenProvider)
                 {
-                    SasTokenProvider sasTokenProvider = new SasTokenProviderImpl(registryClient.getDeviceConnectionString(this.identity.getDevice()));
+                    SasTokenProvider sasTokenProvider = new SasTokenProviderImpl(Tools.getDeviceConnectionString(iotHubConnectionString, this.identity.getDevice()));
                     DeviceClient clientWithCustomSasTokenProvider = new DeviceClient(hostName, testInstance.identity.getDeviceId(), sasTokenProvider, protocol, null);
                     ((TestDeviceIdentity)this.identity).setDeviceClient(clientWithCustomSasTokenProvider);
                 }

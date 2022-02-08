@@ -220,7 +220,7 @@ public class SendMessagesTests extends SendMessagesCommon
         eccDevice = registryClient.addDevice(eccDevice);
 
         ClientOptions clientOptions = ClientOptions.builder().sslContext(sslContext).build();
-        DeviceClient deviceClient = new DeviceClient(registryClient.getDeviceConnectionString(eccDevice), testInstance.protocol, clientOptions);
+        DeviceClient deviceClient = new DeviceClient(Tools.getDeviceConnectionString(iotHubConnectionString, eccDevice), testInstance.protocol, clientOptions);
 
         deviceClient.open(false);
         deviceClient.close();

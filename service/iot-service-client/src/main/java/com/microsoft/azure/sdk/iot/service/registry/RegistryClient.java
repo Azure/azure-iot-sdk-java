@@ -217,33 +217,6 @@ public final class RegistryClient
     }
 
     /**
-     * Return the iothub device connection string for a provided device.
-     * @param device The device object to get the connectionString
-     * @return The iothub device connection string
-     */
-    public String getDeviceConnectionString(Device device)
-    {
-        if (device == null)
-        {
-            throw new IllegalArgumentException("device cannot be null");
-        }
-
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(String.format("HostName=%s;", this.hostName));
-        stringBuilder.append(String.format("DeviceId=%s;", device.getDeviceId()));
-        if (device.getPrimaryKey() == null)
-        {
-            //self signed or CA signed
-            stringBuilder.append("x509=true");
-        }
-        else
-        {
-            stringBuilder.append(String.format("SharedAccessKey=%s", device.getPrimaryKey()));
-        }
-        return stringBuilder.toString();
-    }
-
-    /**
      * Update device not forced
      *
      * @param device The device object containing updated data

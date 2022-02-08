@@ -113,7 +113,7 @@ public class JobClientTests extends IntegrationTest
         for (int i = 0; i < MAX_DEVICES; i++)
         {
             testDevice = Tools.addDeviceWithRetry(registryClient, new Device(DEVICE_ID_NAME.concat("-" + i + "-" + uuid)));
-            DeviceTestManager testManager = new DeviceTestManager(new DeviceClient(registryClient.getDeviceConnectionString(testDevice), IotHubClientProtocol.AMQPS));
+            DeviceTestManager testManager = new DeviceTestManager(new DeviceClient(Tools.getDeviceConnectionString(iotHubConnectionString, testDevice), IotHubClientProtocol.AMQPS));
             testManager.client.open(false);
             testManager.subscribe(true, true);
             devices.add(testManager);

@@ -144,7 +144,7 @@ public class TokenCredentialTests
         Device device = new Device("some-device-" + UUID.randomUUID(), AuthenticationType.SAS);
         registryClient.addDevice(device);
 
-        DeviceClient deviceClient = new DeviceClient(registryClient.getDeviceConnectionString(device), MQTT);
+        DeviceClient deviceClient = new DeviceClient(Tools.getDeviceConnectionString(iotHubConnectionString, device), MQTT);
         deviceClient.open(false);
         final int successStatusCode = 200;
         final AtomicBoolean methodsSubscriptionComplete = new AtomicBoolean(false);
@@ -217,7 +217,7 @@ public class TokenCredentialTests
         String deviceId = "some-device-" + UUID.randomUUID();
         Device device = new Device(deviceId, AuthenticationType.SAS);
         Device registeredDevice = registryClient.addDevice(device);
-        String deviceConnectionString = registryClient.getDeviceConnectionString(registeredDevice);
+        String deviceConnectionString = Tools.getDeviceConnectionString(iotHubConnectionString, registeredDevice);
         return new DeviceClient(deviceConnectionString, protocol, options);
     }
 }

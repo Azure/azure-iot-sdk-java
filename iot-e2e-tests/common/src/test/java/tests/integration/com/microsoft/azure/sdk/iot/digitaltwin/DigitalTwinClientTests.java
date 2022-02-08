@@ -150,7 +150,7 @@ public class DigitalTwinClientTests extends IntegrationTest
         this.deviceId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         Device device = new Device(deviceId, AuthenticationType.SAS);
         Device registeredDevice = registryClient.addDevice(device);
-        String deviceConnectionString = registryClient.getDeviceConnectionString(registeredDevice);
+        String deviceConnectionString = Tools.getDeviceConnectionString(IOTHUB_CONNECTION_STRING, registeredDevice);
         return new DeviceClient(deviceConnectionString, protocol, options);
     }
 

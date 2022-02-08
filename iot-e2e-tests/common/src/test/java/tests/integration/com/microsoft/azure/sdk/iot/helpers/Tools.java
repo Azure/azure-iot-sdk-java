@@ -5,6 +5,7 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.registry.serializers.AuthenticationParser;
 import com.microsoft.azure.sdk.iot.service.registry.serializers.AuthenticationTypeParser;
@@ -292,7 +293,7 @@ public class Tools
                 .amqpDeviceSessionTimeout(AMQP_DEVICE_SESSION_TIMEOUT_SECONDS)
                 .build();
 
-            testDeviceIdentity.setDeviceClient(new DeviceClient(getRegistyManager(iotHubConnectionString).getDeviceConnectionString(testDeviceIdentity.getDevice()), protocol, clientOptions));
+            testDeviceIdentity.setDeviceClient(new DeviceClient(getDeviceConnectionString(iotHubConnectionString, testDeviceIdentity.getDevice()), protocol, clientOptions));
             return testDeviceIdentity;
         }
     }
@@ -342,7 +343,7 @@ public class Tools
                 .amqpAuthenticationSessionTimeout(AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS)
                 .amqpDeviceSessionTimeout(AMQP_DEVICE_SESSION_TIMEOUT_SECONDS)
                 .build();
-            DeviceClient client = new DeviceClient(getRegistyManager(iotHubConnectionString).getDeviceConnectionString(testDeviceIdentity.getDevice()), protocol, clientOptions);
+            DeviceClient client = new DeviceClient(getDeviceConnectionString(iotHubConnectionString, testDeviceIdentity.getDevice()), protocol, clientOptions);
             testDeviceIdentity.setDeviceClient(client);
             return testDeviceIdentity;
         }
@@ -947,5 +948,32 @@ public class Tools
     public static boolean isAndroid()
     {
         return IS_ANDROID;
+    }
+
+    public static String getHostName(String iotHubConnectionString)
+    {
+        return IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString).getHostName();
+    }
+
+    public static String getDeviceConnectionString(String iothubConnectionString, Device device)
+    {
+        if (device == null)
+        {
+            throw new IllegalArgumentException("device cannot be null");
+        }
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(String.format("HostName=%s;", getHostName(iothubConnectionString)));
+        stringBuilder.append(String.format("DeviceId=%s;", device.getDeviceId()));
+        if (device.getPrimaryKey() == null)
+        {
+            //self signed or CA signed
+            stringBuilder.append("x509=true");
+        }
+        else
+        {
+            stringBuilder.append(String.format("SharedAccessKey=%s", device.getPrimaryKey()));
+        }
+        return stringBuilder.toString();
     }
 }
