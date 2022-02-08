@@ -25,7 +25,7 @@
         <module>handle-messages</module>
         <module>send-receive-sample</module>
         <module>device-twin-sample</module>
-        <module>device-method-sample</module>
+        <module>direct-method-sample</module>
         <module>module-twin-sample</module>
         <module>module-method-sample</module>
         <module>file-upload-sample</module>
