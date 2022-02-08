@@ -214,7 +214,7 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
         // check that any previous thread pools have been shut down.
         stopWorkerThreads();
 
-        log.info("Starting worker threads");
+        log.debug("Starting worker threads");
 
         this.sendTaskScheduler = Executors.newScheduledThreadPool(1);
         this.receiveTaskScheduler = Executors.newScheduledThreadPool(1);
