@@ -9,7 +9,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.twin.MethodData;
+import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
 import com.microsoft.azure.sdk.iot.device.twin.TwinPropertyCallback;
@@ -664,9 +664,9 @@ public class MultiplexingClientTests extends IntegrationTest
         {
             // Subscribe to methods on the multiplexed client
             String expectedMethodName = UUID.randomUUID().toString();
-            MethodCallback deviceMethodCallback = new MethodCallback(expectedMethodName);
-            subscribeToDeviceMethod(testInstance.deviceClientArray.get(i), deviceMethodCallback);
-            testDeviceMethod(directMethodServiceClientClient, testInstance.deviceIdentityArray.get(i).getDeviceId(), expectedMethodName, deviceMethodCallback);
+            DirectMethodCallback directMethodCallback = new DirectMethodCallback(expectedMethodName);
+            subscribeToDirectMethod(testInstance.deviceClientArray.get(i), directMethodCallback);
+            testDirectMethods(directMethodServiceClientClient, testInstance.deviceIdentityArray.get(i).getDeviceId(), expectedMethodName, directMethodCallback);
         }
 
         testInstance.multiplexingClient.close();
@@ -681,7 +681,7 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
         testInstance.multiplexingClient.open(false);
         DirectMethodsClient directMethodServiceClientClient = new DirectMethodsClient(iotHubConnectionString);
-        List<MethodCallback> deviceMethodCallbacks = new ArrayList<>();
+        List<DirectMethodCallback> directDirectMethodCallbacks = new ArrayList<>();
         List<String> expectedMethodNames = new ArrayList<>();
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
@@ -689,15 +689,15 @@ public class MultiplexingClientTests extends IntegrationTest
             // Subscribe to methods on the multiplexed client
             String expectedMethodName = UUID.randomUUID().toString();
             expectedMethodNames.add(expectedMethodName);
-            MethodCallback deviceMethodCallback = new MethodCallback(expectedMethodName);
-            deviceMethodCallbacks.add(deviceMethodCallback);
-            subscribeToDeviceMethod(testInstance.deviceClientArray.get(i), deviceMethodCallback);
-            testDeviceMethod(directMethodServiceClientClient, testInstance.deviceIdentityArray.get(i).getDeviceId(), expectedMethodNames.get(i), deviceMethodCallbacks.get(i));
+            DirectMethodCallback deviceDirectMethodCallback = new DirectMethodCallback(expectedMethodName);
+            directDirectMethodCallbacks.add(deviceDirectMethodCallback);
+            subscribeToDirectMethod(testInstance.deviceClientArray.get(i), deviceDirectMethodCallback);
+            testDirectMethods(directMethodServiceClientClient, testInstance.deviceIdentityArray.get(i).getDeviceId(), expectedMethodNames.get(i), directDirectMethodCallbacks.get(i));
         }
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
-            deviceMethodCallbacks.get(i).resetExpectations();
+            directDirectMethodCallbacks.get(i).resetExpectations();
         }
 
         testInstance.multiplexingClient.unregisterDeviceClients(testInstance.deviceClientArray);
@@ -705,14 +705,14 @@ public class MultiplexingClientTests extends IntegrationTest
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
-            subscribeToDeviceMethod(testInstance.deviceClientArray.get(i), deviceMethodCallbacks.get(i));
-            testDeviceMethod(directMethodServiceClientClient, testInstance.deviceIdentityArray.get(i).getDeviceId(), expectedMethodNames.get(i), deviceMethodCallbacks.get(i));
+            subscribeToDirectMethod(testInstance.deviceClientArray.get(i), directDirectMethodCallbacks.get(i));
+            testDirectMethods(directMethodServiceClientClient, testInstance.deviceIdentityArray.get(i).getDeviceId(), expectedMethodNames.get(i), directDirectMethodCallbacks.get(i));
         }
 
         testInstance.multiplexingClient.close();
     }
 
-    private static void testDeviceMethod(DirectMethodsClient directMethodServiceClientClient, String deviceId, String expectedMethodName, MethodCallback deviceMethodCallback) throws IOException, IotHubException, InterruptedException {
+    private static void testDirectMethods(DirectMethodsClient directMethodServiceClientClient, String deviceId, String expectedMethodName, DirectMethodCallback deviceDirectMethodCallback) throws IOException, IotHubException, InterruptedException {
         // Give the method subscription some extra buffer time before invoking the method
         Thread.sleep(1000);
 
@@ -720,14 +720,14 @@ public class MultiplexingClientTests extends IntegrationTest
         directMethodServiceClientClient.invoke(deviceId, expectedMethodName);
 
         // No need to wait for the device to receive the method invocation since the service client call does that already
-        assertTrue("Device method callback never fired on device", deviceMethodCallback.deviceMethodCallbackFired);
-        assertTrue("Device method callback fired, but unexpected method name was received", deviceMethodCallback.expectedMethodReceived);
+        assertTrue("Device method callback never fired on device", deviceDirectMethodCallback.directMethodCallbackFired);
+        assertTrue("Device method callback fired, but unexpected method name was received", deviceDirectMethodCallback.expectedMethodReceived);
     }
 
-    private static void subscribeToDeviceMethod(DeviceClient deviceClient, MethodCallback deviceMethodCallback) throws InterruptedException, IOException
+    private static void subscribeToDirectMethod(DeviceClient deviceClient, DirectMethodCallback deviceDirectMethodCallback) throws InterruptedException, IOException
     {
         Success methodsSubscribedSuccess = new Success();
-        deviceClient.subscribeToMethodsAsync(deviceMethodCallback, null, (responseStatus, callbackContext) -> {
+        deviceClient.subscribeToMethodsAsync(deviceDirectMethodCallback, null, (responseStatus, callbackContext) -> {
             ((Success) callbackContext).setCallbackStatusCode(responseStatus);
             ((Success) callbackContext).setResult(responseStatus == IotHubStatusCode.OK_EMPTY);
             ((Success) callbackContext).callbackWasFired();
@@ -746,32 +746,32 @@ public class MultiplexingClientTests extends IntegrationTest
         }
     }
 
-    private static class MethodCallback implements com.microsoft.azure.sdk.iot.device.twin.MethodCallback
+    private static class DirectMethodCallback implements com.microsoft.azure.sdk.iot.device.twin.MethodCallback
     {
-        public boolean deviceMethodCallbackFired = false;
+        public boolean directMethodCallbackFired = false;
         public boolean expectedMethodReceived = false;
 
         final String expectedMethodName;
 
-        public MethodCallback(String expectedMethodName)
+        public DirectMethodCallback(String expectedMethodName)
         {
             this.expectedMethodName = expectedMethodName;
         }
 
         @Override
-        public MethodData call(String methodName, Object methodData, Object context) {
-            deviceMethodCallbackFired = true;
+        public DirectMethodResponse call(String methodName, Object methodData, Object context) {
+            directMethodCallbackFired = true;
             if (methodName.equals(expectedMethodName))
             {
                 expectedMethodReceived = true;
             }
 
-            return new MethodData(200, null);
+            return new DirectMethodResponse(200, null);
         }
 
         public void resetExpectations()
         {
-            deviceMethodCallbackFired = false;
+            directMethodCallbackFired = false;
             expectedMethodReceived = false;
         }
     }
@@ -1816,13 +1816,13 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.multiplexingClient.open(false);
 
         // Subscribe to methods for all multiplexed clients
-        MethodCallback[] deviceMethodCallbacks = new MethodCallback[DEVICE_MULTIPLEX_COUNT];
+        DirectMethodCallback[] deviceDirectMethodCallbacks = new DirectMethodCallback[DEVICE_MULTIPLEX_COUNT];
         String[] expectedMethodNames = new String[DEVICE_MULTIPLEX_COUNT];
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             expectedMethodNames[i] = UUID.randomUUID().toString();
-            deviceMethodCallbacks[i] = new MethodCallback(expectedMethodNames[i]);
-            subscribeToDeviceMethod(testInstance.deviceClientArray.get(i), deviceMethodCallbacks[i]);
+            deviceDirectMethodCallbacks[i] = new DirectMethodCallback(expectedMethodNames[i]);
+            subscribeToDirectMethod(testInstance.deviceClientArray.get(i), deviceDirectMethodCallbacks[i]);
         }
 
         // Start twin for all multiplexed clients
@@ -1878,7 +1878,7 @@ public class MultiplexingClientTests extends IntegrationTest
             testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray);
 
             // test receiving direct methods
-            testDeviceMethod(directMethodServiceClientClient, testInstance.deviceIdentityArray.get(i).getDeviceId(), expectedMethodNames[i], deviceMethodCallbacks[i]);
+            testDirectMethods(directMethodServiceClientClient, testInstance.deviceIdentityArray.get(i).getDeviceId(), expectedMethodNames[i], deviceDirectMethodCallbacks[i]);
 
             // Send desired property update to multiplexed device
             testDesiredPropertiesFlow(testInstance.deviceClientArray.get(i), twinClientServiceClient, twinPropertyCallbacks[i], expectedPropertyKeys[i], expectedPropertyValues[i]);

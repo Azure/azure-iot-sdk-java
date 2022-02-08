@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /** Manages device Method operations on IotHub */
-public class DeviceMethodSample
+public class DirectMethodSample
 {
     public static final String iotHubConnectionString = "[IOT HUB Connection String]";
     public static final String deviceId = "[Device ID]";

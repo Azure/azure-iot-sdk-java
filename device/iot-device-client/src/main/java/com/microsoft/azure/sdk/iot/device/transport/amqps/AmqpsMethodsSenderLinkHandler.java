@@ -82,7 +82,7 @@ final class AmqpsMethodsSenderLinkHandler extends AmqpsSenderLinkHandler
         if (message.getMessageType() == MessageType.DEVICE_METHODS)
         {
             MessageImpl protonMessage = super.iotHubMessageToProtonMessage(message);
-            IotHubTransportMessage deviceMethodMessage = (IotHubTransportMessage) message;
+            IotHubTransportMessage directMethodMessage = (IotHubTransportMessage) message;
 
             Properties properties;
             if (protonMessage.getProperties() != null)
@@ -94,17 +94,17 @@ final class AmqpsMethodsSenderLinkHandler extends AmqpsSenderLinkHandler
                 properties = new Properties();
             }
 
-            if (deviceMethodMessage.getRequestId() != null)
+            if (directMethodMessage.getRequestId() != null)
             {
-                properties.setCorrelationId(UUID.fromString(deviceMethodMessage.getRequestId()));
+                properties.setCorrelationId(UUID.fromString(directMethodMessage.getRequestId()));
             }
 
             protonMessage.setProperties(properties);
 
             Map<String, Object> userProperties = new HashMap<>();
-            if (deviceMethodMessage.getStatus() != null)
+            if (directMethodMessage.getStatus() != null)
             {
-                userProperties.put(APPLICATION_PROPERTY_KEY_IOTHUB_STATUS, Integer.parseInt(deviceMethodMessage.getStatus()));
+                userProperties.put(APPLICATION_PROPERTY_KEY_IOTHUB_STATUS, Integer.parseInt(directMethodMessage.getStatus()));
             }
 
             if (protonMessage.getApplicationProperties() != null && protonMessage.getApplicationProperties().getValue() != null)

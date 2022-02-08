@@ -6,12 +6,9 @@
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.security.GeneralSecurityException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 
@@ -60,7 +57,7 @@ public class DeviceTestManager
         if (enableMethod)
         {
             /* Enable DirectMethodsClient on the device client using the callbacks from the DeviceEmulator */
-            deviceEmulator.subscribeToDeviceMethod();
+            deviceEmulator.subscribeToDirectMethod();
         }
 
         if (enableTwin)

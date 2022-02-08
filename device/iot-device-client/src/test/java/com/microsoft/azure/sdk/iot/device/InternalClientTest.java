@@ -1158,12 +1158,12 @@ public class InternalClientTest
     }
 
     /*
-    Tests_SRS_INTERNALCLIENT_25_038: [**This method shall subscribe to device methods by calling subscribeToMethodsAsync on DeviceMethod object which it created.**]**
+    Tests_SRS_INTERNALCLIENT_25_038: [**This method shall subscribe to device methods by calling subscribeToMethodsAsync on DirectMethod object which it created.**]**
      */
     @Test
     public void subscribeToDeviceMethodSucceeds(@Mocked final IotHubEventCallback mockedStatusCB,
                                                 @Mocked final MethodCallback mockedDeviceMethodCB,
-                                                @Mocked final DeviceMethod mockedMethod) throws IOException, URISyntaxException
+                                                @Mocked final DirectMethod mockedMethod) throws IOException, URISyntaxException
     {
         //arrange
         
@@ -1186,7 +1186,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockedMethod.subscribeToDeviceMethod(mockedDeviceMethodCB, any);
+                mockedMethod.subscribeToDirectMethods(mockedDeviceMethodCB, any);
                 times = 1;
             }
         };
@@ -1268,7 +1268,7 @@ public class InternalClientTest
     @Test
     public void subscribeToDeviceMethodWorksEvenWhenCalledTwice(@Mocked final IotHubEventCallback mockedStatusCB,
                                                                 @Mocked final MethodCallback mockedDeviceMethodCB,
-                                                                @Mocked final DeviceMethod mockedMethod) throws IOException, URISyntaxException
+                                                                @Mocked final DirectMethod mockedMethod) throws IOException, URISyntaxException
     {
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
@@ -1290,7 +1290,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockedMethod.subscribeToDeviceMethod(mockedDeviceMethodCB, any);
+                mockedMethod.subscribeToDirectMethods(mockedDeviceMethodCB, any);
                 times = 2;
             }
         };

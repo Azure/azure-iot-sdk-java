@@ -179,7 +179,7 @@ public class HttpsTransportManager
         {
             //Codes_SRS_HTTPSTRANSPORTMANAGER_34_017: [If a moduleId is not provided, this function shall call invokeMethod with the provided request and
             // a uri in the format twins/<device id>/methods?api-version=<api_version>.]
-            uri = getDeviceMethodUri(deviceId);
+            uri = getDirectMethodUri(deviceId);
         }
         else
         {
@@ -239,7 +239,7 @@ public class HttpsTransportManager
         return new MethodResult(resultJson);
     }
 
-    private static URI getDeviceMethodUri(String deviceId) throws UnsupportedEncodingException, URISyntaxException
+    private static URI getDirectMethodUri(String deviceId) throws UnsupportedEncodingException, URISyntaxException
     {
         deviceId = URLEncoder.encode(deviceId, StandardCharsets.UTF_8.name());
         return new URI(String.format(DeviceMethodUriFormat, deviceId));

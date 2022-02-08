@@ -4,8 +4,8 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
-import com.microsoft.azure.sdk.iot.device.twin.MethodData;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import java.io.IOException;
@@ -17,7 +17,7 @@ import java.util.Scanner;
  * Device Method Sample for an IoT Hub. Default protocol is to use
  * MQTT transport.
  */
-public class DeviceMethodSample
+public class DirectMethodSample
 {
     private static final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
     private static final int METHOD_SUCCESS = 200;
@@ -50,16 +50,16 @@ public class DeviceMethodSample
     protected static class SampleMethodCallback implements MethodCallback
     {
         @Override
-        public MethodData call(String methodName, Object methodData, Object context)
+        public DirectMethodResponse call(String methodName, Object methodData, Object context)
         {
-            MethodData deviceMethodData;
+            DirectMethodResponse deviceMethodData;
             int status = method_default(methodData);
             if ("command".equals(methodName))
             {
                 status = method_command(methodData);
             }
 
-            deviceMethodData = new MethodData(status, "executed " + methodName);
+            deviceMethodData = new DirectMethodResponse(status, "executed " + methodName);
 
             return deviceMethodData;
         }

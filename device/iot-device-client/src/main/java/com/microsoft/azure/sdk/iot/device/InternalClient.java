@@ -5,7 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.twin.DeviceMethod;
+import com.microsoft.azure.sdk.iot.device.twin.DirectMethod;
 import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
 import com.microsoft.azure.sdk.iot.device.twin.DeviceTwin;
 import com.microsoft.azure.sdk.iot.device.twin.Pair;
@@ -44,7 +44,7 @@ public class InternalClient
     private Object connectionStatusChangeCallbackContext;
 
     private DeviceTwin twin;
-    private DeviceMethod method;
+    private DirectMethod method;
 
     InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, ClientOptions clientOptions)
     {
@@ -646,10 +646,10 @@ public class InternalClient
 
         if (this.method == null)
         {
-            this.method = new DeviceMethod(this, methodStatusCallback, methodStatusCallbackContext);
+            this.method = new DirectMethod(this, methodStatusCallback, methodStatusCallbackContext);
         }
 
-        this.method.subscribeToDeviceMethod(methodCallback, methodCallbackContext);
+        this.method.subscribeToDirectMethods(methodCallback, methodCallbackContext);
     }
 
     // only used by the MultiplexingClient class to signal to this client that it needs to re-register twin

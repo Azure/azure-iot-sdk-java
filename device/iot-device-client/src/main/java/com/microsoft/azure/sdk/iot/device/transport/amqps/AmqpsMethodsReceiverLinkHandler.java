@@ -83,8 +83,8 @@ final class AmqpsMethodsReceiverLinkHandler extends AmqpsReceiverLinkHandler
         iotHubTransportMessage.setMessageType(MessageType.DEVICE_METHODS);
         iotHubTransportMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
 
-        MessageCallback messageCallback = deviceClientConfig.getDeviceMethodsMessageCallback();
-        Object messageContext = deviceClientConfig.getDeviceMethodsMessageContext();
+        MessageCallback messageCallback = deviceClientConfig.getDirectMethodsMessageCallback();
+        Object messageContext = deviceClientConfig.getDirectMethodsMessageContext();
 
         iotHubTransportMessage.setMessageCallback(messageCallback);
         iotHubTransportMessage.setMessageCallbackContext(messageContext);

@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class MethodDataTest
+public class DirectMethodResponseTest
 {
     /*
     **Tests_SRS_DEVICEMETHODDATA_25_001: [**The constructor shall save the status and response message provided by user.**]**
@@ -16,7 +16,7 @@ public class MethodDataTest
     public void constructorSucceeds()
     {
         //act
-        MethodData testData = new MethodData(0, "testMessage");
+        DirectMethodResponse testData = new DirectMethodResponse(0, "testMessage");
 
         //assert
         int testStatus = testData.getStatus();
@@ -33,7 +33,7 @@ public class MethodDataTest
     public void GetStatusGets()
     {
         //arrange
-        MethodData testData = new MethodData(0, "testMessage");
+        DirectMethodResponse testData = new DirectMethodResponse(0, "testMessage");
 
         //act
         int testStatus = testData.getStatus();
@@ -50,7 +50,7 @@ public class MethodDataTest
     public void getResponseMessageGets()
     {
         //arrange
-        MethodData testData = new MethodData(0, "testMessage");
+        DirectMethodResponse testData = new DirectMethodResponse(0, "testMessage");
 
         //act
         String testResponse = testData.getResponseMessage();
@@ -66,7 +66,7 @@ public class MethodDataTest
     public void setStatusSets()
     {
         //arrange
-        MethodData testData = new MethodData(0, "testMessage");
+        DirectMethodResponse testData = new DirectMethodResponse(0, "testMessage");
 
         //act
         testData.setStatus(200);
@@ -84,7 +84,7 @@ public class MethodDataTest
     public void setResponseMessageSets()
     {
         //arrange
-        MethodData testData = new MethodData(0, "originalMessage");
+        DirectMethodResponse testData = new DirectMethodResponse(0, "originalMessage");
 
         //act
         testData.setResponseMessage("testMessage");

@@ -6,8 +6,8 @@ package tests.integration.com.microsoft.azure.sdk.iot.digitaltwin;
 import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
-import com.microsoft.azure.sdk.iot.device.twin.MethodData;
 import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
 import com.microsoft.azure.sdk.iot.device.twin.TwinPropertyCallback;
@@ -445,10 +445,10 @@ public class DigitalTwinClientTests extends IntegrationTest
         MethodCallback methodCallback = (methodName, methodData, context) -> {
             String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
             if(methodName.equalsIgnoreCase(commandName)) {
-                return new MethodData(deviceSuccessResponseStatus, jsonRequest);
+                return new DirectMethodResponse(deviceSuccessResponseStatus, jsonRequest);
             }
             else {
-                return new MethodData(deviceFailureResponseStatus, jsonRequest);
+                return new DirectMethodResponse(deviceFailureResponseStatus, jsonRequest);
             }
         };
 

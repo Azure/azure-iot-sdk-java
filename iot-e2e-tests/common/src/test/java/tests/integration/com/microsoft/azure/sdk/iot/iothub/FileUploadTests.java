@@ -49,6 +49,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.ServiceLoader;
 import java.util.UUID;
 
 import static org.junit.Assert.assertTrue;
@@ -166,9 +167,6 @@ public class FileUploadTests extends IntegrationTest
         TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, protocol, testInstance.authenticationType, false, optionsBuilder);
         DeviceClient deviceClient = testDeviceIdentity.getDeviceClient();
 
-
-        Thread.sleep(5000);
-
         deviceClient.open(false);
         return deviceClient;
     }
@@ -241,6 +239,9 @@ public class FileUploadTests extends IntegrationTest
     {
         // Android has some compatibility issues with the azure storage SDK
         assumeFalse(Tools.isAndroid());
+
+        // This test is moreso for the service client, so don't parameterize on device side options
+        assumeFalse(testInstance.withProxy || testInstance.authenticationType == AuthenticationType.SELF_SIGNED);
 
         // arrange
         int fileUploadCount = 5;

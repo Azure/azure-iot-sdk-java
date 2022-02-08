@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.nio.charset.StandardCharsets;
 
 @Slf4j
-public final class DeviceMethod
+public final class DirectMethod
 {
     private MethodCallback methodCallback;
     private Object deviceMethodCallbackContext;
@@ -41,7 +41,7 @@ public final class DeviceMethod
                 if (message.getMessageType() != MessageType.DEVICE_METHODS)
                 {
                     /*
-                    **Codes_SRS_DEVICEMETHOD_25_009: [**If the received message is not of type DeviceMethod and DEVICE_OPERATION_METHOD_RECEIVE_REQUEST then user shall be notified on the status callback registered by the user as ERROR before marking the status of the sent message as Abandon **]**
+                    **Codes_SRS_DEVICEMETHOD_25_009: [**If the received message is not of type DirectMethod and DEVICE_OPERATION_METHOD_RECEIVE_REQUEST then user shall be notified on the status callback registered by the user as ERROR before marking the status of the sent message as Abandon **]**
                      */
                     log.error("Unexpected message type received {}", message.getMessageType());
                     deviceMethodStatusCallback.execute(iotHubStatus, deviceMethodStatusCallbackContext);
@@ -61,10 +61,10 @@ public final class DeviceMethod
                         try
                         {
                             /*
-                             **Codes_SRS_DEVICEMETHOD_25_008: [**If the message is of type DeviceMethod and DEVICE_OPERATION_METHOD_RECEIVE_REQUEST then user registered device method callback gets invoked providing the user with method name and payload along with the user context. **]**
+                             **Codes_SRS_DEVICEMETHOD_25_008: [**If the message is of type DirectMethod and DEVICE_OPERATION_METHOD_RECEIVE_REQUEST then user registered device method callback gets invoked providing the user with method name and payload along with the user context. **]**
                              */
                             log.trace("Executing method invocation callback for method name {} for message {}", methodMessage.getMethodName(), methodMessage);
-                            MethodData responseData = methodCallback.call(methodMessage.getMethodName(), methodMessage.getBytes(), deviceMethodCallbackContext);
+                            DirectMethodResponse responseData = methodCallback.call(methodMessage.getMethodName(), methodMessage.getBytes(), deviceMethodCallbackContext);
                             log.trace("Method invocation callback returned for method name {} for message {}", methodMessage.getMethodName(), methodMessage);
 
                             /*
@@ -134,7 +134,7 @@ public final class DeviceMethod
      * @param client  Device client  object for this connection instance for the device. Cannot be {@code null}
      * @throws  IllegalArgumentException This exception is thrown if either deviceIO or config or deviceMethodStatusCallback are null
      */
-    public DeviceMethod(InternalClient client, IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext) throws IllegalArgumentException
+    public DirectMethod(InternalClient client, IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext) throws IllegalArgumentException
     {
         if (client == null)
         {
@@ -150,7 +150,7 @@ public final class DeviceMethod
         this.config = client.getConfig();
         this.deviceMethodStatusCallback = deviceMethodStatusCallback;
         this.deviceMethodStatusCallbackContext = deviceMethodStatusCallbackContext;
-        this.config.setDeviceMethodsMessageCallback(new deviceMethodResponseCallback(), null);
+        this.config.setDirectMethodsMessageCallback(new deviceMethodResponseCallback(), null);
     }
 
     /**
@@ -161,7 +161,7 @@ public final class DeviceMethod
      *                                    callback.
      * @throws IllegalArgumentException This exception is thrown when methodCallback is provided null.
      */
-    public void subscribeToDeviceMethod(MethodCallback methodCallback, Object deviceMethodCallbackContext) throws IllegalArgumentException
+    public void subscribeToDirectMethods(MethodCallback methodCallback, Object deviceMethodCallbackContext) throws IllegalArgumentException
     {
         if (methodCallback == null)
         {

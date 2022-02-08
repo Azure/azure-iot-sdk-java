@@ -5,7 +5,7 @@ package tests.integration.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.twin.MethodData;
+import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
@@ -150,7 +150,7 @@ public class TokenCredentialTests
         final AtomicBoolean methodsSubscriptionComplete = new AtomicBoolean(false);
         final AtomicBoolean methodsSubscribedSuccessfully = new AtomicBoolean(false);
         deviceClient.subscribeToMethodsAsync(
-            (methodName, methodData, context) -> new MethodData(successStatusCode, "success"),
+            (methodName, methodData, context) -> new DirectMethodResponse(successStatusCode, "success"),
             null,
             (responseStatus, callbackContext) ->
             {

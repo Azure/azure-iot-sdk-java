@@ -5,7 +5,7 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
-import com.microsoft.azure.sdk.iot.device.twin.MethodData;
+import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import java.nio.charset.StandardCharsets;
@@ -40,7 +40,7 @@ public class ModuleMethodSample
         return METHOD_NOT_DEFINED;
     }
 
-    protected static class DeviceMethodStatusCallback implements IotHubEventCallback
+    protected static class DirectMethodStatusCallback implements IotHubEventCallback
     {
         public void execute(IotHubStatusCode status, Object context)
         {
@@ -51,18 +51,18 @@ public class ModuleMethodSample
     protected static class SampleMethodCallback implements MethodCallback
     {
         @Override
-        public MethodData call(String methodName, Object methodData, Object context)
+        public DirectMethodResponse call(String methodName, Object methodData, Object context)
         {
-            MethodData deviceMethodData;
+            DirectMethodResponse deviceDirectMethodResponse;
             int status = method_default(methodData);
             if ("command".equals(methodName))
             {
                 status = method_command(methodData);
             }
 
-            deviceMethodData = new MethodData(status, "executed " + methodName);
+            deviceDirectMethodResponse = new DirectMethodResponse(status, "executed " + methodName);
 
-            return deviceMethodData;
+            return deviceDirectMethodResponse;
         }
     }
 
@@ -167,7 +167,7 @@ public class ModuleMethodSample
 
             System.out.println("Opened connection to IoT Hub.");
 
-            client.subscribeToMethodsAsync(new SampleMethodCallback(), null, new DeviceMethodStatusCallback(), null);
+            client.subscribeToMethodsAsync(new SampleMethodCallback(), null, new DirectMethodStatusCallback(), null);
 
             System.out.println("Subscribed to device method");
 

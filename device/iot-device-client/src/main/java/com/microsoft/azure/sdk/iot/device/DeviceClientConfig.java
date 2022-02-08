@@ -84,9 +84,9 @@ public final class DeviceClientConfig
     /**
      * The callback to be invoked if a message of Device Method type received.
      */
-    private MessageCallback deviceMethodsMessageCallback;
+    private MessageCallback directMethodsMessageCallback;
     /** The context to be passed in to the device method type message callback. */
-    private Object deviceMethodsMessageContext;
+    private Object directMethodsMessageContext;
 
     /**
      * The callback to be invoked if a message of Device Twin type received.
@@ -538,10 +538,10 @@ public final class DeviceClientConfig
      * @param callback Callback for device method messages.
      * @param context is the context for the callback.
      */
-    public void setDeviceMethodsMessageCallback(MessageCallback callback, Object context)
+    public void setDirectMethodsMessageCallback(MessageCallback callback, Object context)
     {
-        this.deviceMethodsMessageCallback = callback;
-        this.deviceMethodsMessageContext = context;
+        this.directMethodsMessageCallback = callback;
+        this.directMethodsMessageContext = context;
     }
 
     /**
@@ -549,9 +549,9 @@ public final class DeviceClientConfig
      *
      * @return the device method message callback.
      */
-    public MessageCallback getDeviceMethodsMessageCallback()
+    public MessageCallback getDirectMethodsMessageCallback()
     {
-        return this.deviceMethodsMessageCallback;
+        return this.directMethodsMessageCallback;
     }
 
     /**
@@ -559,9 +559,9 @@ public final class DeviceClientConfig
      *
      * @return the device method message context.
      */
-    public Object getDeviceMethodsMessageContext()
+    public Object getDirectMethodsMessageContext()
     {
-        return this.deviceMethodsMessageContext;
+        return this.directMethodsMessageContext;
     }
 
     /**
@@ -643,10 +643,10 @@ public final class DeviceClientConfig
     protected DeviceClientConfig()
     {
         this.authenticationProvider = null;
-        this.deviceMethodsMessageCallback = null;
+        this.directMethodsMessageCallback = null;
         this.defaultDeviceTelemetryMessageCallback = null;
         this.deviceTwinMessageCallback = null;
-        this.deviceMethodsMessageContext = null;
+        this.directMethodsMessageContext = null;
         this.defaultDeviceTelemetryMessageContext = null;
         this.deviceTwinMessageContext = null;
         this.useWebsocket = false;

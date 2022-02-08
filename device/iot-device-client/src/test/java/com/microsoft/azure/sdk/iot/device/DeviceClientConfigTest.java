@@ -422,10 +422,10 @@ public class DeviceClientConfigTest
     }
 
     /*
-    **Tests_SRS_DEVICECLIENTCONFIG_25_022: [**The function shall return the current DeviceMethod message context.**] **
+    **Tests_SRS_DEVICECLIENTCONFIG_25_022: [**The function shall return the current DirectMethod message context.**] **
     **Tests_SRS_DEVICECLIENTCONFIG_25_023: [**The function shall set the DeviceTwin message callback.**] **
-    **Tests_SRS_DEVICECLIENTCONFIG_25_021: [**The function shall return the current DeviceMethod message callback.**] **
-    **Tests_SRS_DEVICECLIENTCONFIG_25_022: [**The function shall return the current DeviceMethod message context.**] **
+    **Tests_SRS_DEVICECLIENTCONFIG_25_021: [**The function shall return the current DirectMethod message callback.**] **
+    **Tests_SRS_DEVICECLIENTCONFIG_25_022: [**The function shall return the current DirectMethod message context.**] **
      */
     @Test
     public void getAndSetDeviceMethodMessageCallbackAndContextsMatch(
@@ -446,12 +446,12 @@ public class DeviceClientConfigTest
 
         DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString, IotHubClientProtocol.AMQPS);
         Object context = new Object();
-        config.setDeviceMethodsMessageCallback(mockCallback, context);
-        Object testContext = config.getDeviceMethodsMessageContext();
+        config.setDirectMethodsMessageCallback(mockCallback, context);
+        Object testContext = config.getDirectMethodsMessageContext();
 
 
         assertThat(testContext, is(context));
-        assertEquals(config.getDeviceMethodsMessageCallback(), mockCallback);
+        assertEquals(config.getDirectMethodsMessageCallback(), mockCallback);
     }
 
     @Test
@@ -473,8 +473,8 @@ public class DeviceClientConfigTest
 
         DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString, IotHubClientProtocol.AMQPS);
         Object dMContext = new Object();
-        config.setDeviceMethodsMessageCallback(mockCallback, dMContext);
-        Object testContextDM = config.getDeviceMethodsMessageContext();
+        config.setDirectMethodsMessageCallback(mockCallback, dMContext);
+        Object testContextDM = config.getDirectMethodsMessageContext();
 
         Object dTcontext = new Object();
         config.setDeviceTwinMessageCallback(mockCallback, dTcontext);
@@ -485,7 +485,7 @@ public class DeviceClientConfigTest
 
 
         assertThat(testContextDM, is(dMContext));
-        assertEquals(config.getDeviceMethodsMessageCallback(), mockCallback);
+        assertEquals(config.getDirectMethodsMessageCallback(), mockCallback);
     }
 
     @Test

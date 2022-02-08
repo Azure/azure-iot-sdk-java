@@ -59,8 +59,8 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
 
     //Messaging clients, never null
     private final MqttMessaging deviceMessaging;
-    private final MqttDeviceTwin deviceTwin;
-    private final MqttDeviceMethod deviceMethod;
+    private final MqttTwin deviceTwin;
+    private final MqttDirectMethod directMethod;
 
     private final Map<IotHubTransportMessage, Integer> receivedMessagesToAcknowledge = new ConcurrentHashMap<>();
 
@@ -225,13 +225,13 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             unacknowledgedSentMessages,
             receivedMessages);
 
-        this.deviceMethod = new MqttDeviceMethod(
+        this.directMethod = new MqttDirectMethod(
             deviceId,
             connectOptions,
             unacknowledgedSentMessages,
             receivedMessages);
 
-        this.deviceTwin = new MqttDeviceTwin(
+        this.deviceTwin = new MqttTwin(
             deviceId,
             connectOptions,
             unacknowledgedSentMessages,
@@ -252,7 +252,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             this.connectionId = UUID.randomUUID().toString();
             this.deviceMessaging.setConnectionId(this.connectionId);
             this.deviceTwin.setConnectionId(this.connectionId);
-            this.deviceMethod.setConnectionId(this.connectionId);
+            this.directMethod.setConnectionId(this.connectionId);
 
             if (this.state == IotHubConnectionStatus.CONNECTED)
             {
@@ -280,7 +280,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             mqttAsyncClient.setCallback(this.deviceMessaging);
             this.deviceMessaging.setMqttAsyncClient(mqttAsyncClient);
             this.deviceTwin.setMqttAsyncClient(mqttAsyncClient);
-            this.deviceMethod.setMqttAsyncClient(mqttAsyncClient);
+            this.directMethod.setMqttAsyncClient(mqttAsyncClient);
 
             this.deviceMessaging.start();
             this.state = IotHubConnectionStatus.CONNECTED;
@@ -306,7 +306,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
 
             log.debug("Closing MQTT connection");
 
-            this.deviceMethod.stop();
+            this.directMethod.stop();
             this.deviceTwin.stop();
             this.deviceMessaging.stop();
 
@@ -356,9 +356,9 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
 
         if (message.getMessageType() == DEVICE_METHODS)
         {
-            this.deviceMethod.start();
+            this.directMethod.start();
             log.trace("Sending MQTT device method message ({})", message);
-            this.deviceMethod.send((IotHubTransportMessage) message);
+            this.directMethod.send((IotHubTransportMessage) message);
         }
         else if (message.getMessageType() == DEVICE_TWIN)
         {
@@ -406,8 +406,8 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         log.trace("Sending MQTT ACK for a received message ({})", message);
         if (message.getMessageType() == DEVICE_METHODS)
         {
-            this.deviceMethod.start();
-            this.deviceMethod.sendMessageAcknowledgement(messageId);
+            this.directMethod.start();
+            this.directMethod.sendMessageAcknowledgement(messageId);
         }
         else if (message.getMessageType() == DEVICE_TWIN)
         {
@@ -437,7 +437,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         IotHubTransportMessage transportMessage = null;
         try
         {
-            transportMessage = this.deviceMethod.receive();
+            transportMessage = this.directMethod.receive();
             if (transportMessage != null)
             {
                 log.trace("Received MQTT device method message ({})", transportMessage);
@@ -483,8 +483,8 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                     transportMessage.setMessageCallbackContext(this.config.getDeviceTwinMessageContext());
                     break;
                 case DEVICE_METHODS:
-                    transportMessage.setMessageCallback(this.config.getDeviceMethodsMessageCallback());
-                    transportMessage.setMessageCallbackContext(this.config.getDeviceMethodsMessageContext());
+                    transportMessage.setMessageCallback(this.config.getDirectMethodsMessageCallback());
+                    transportMessage.setMessageCallbackContext(this.config.getDirectMethodsMessageContext());
                     break;
                 case DEVICE_TELEMETRY:
                     transportMessage.setMessageCallback(this.config.getDeviceTelemetryMessageCallback(transportMessage.getInputName()));

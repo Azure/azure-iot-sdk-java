@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Queue;
 
 @Slf4j
-class MqttDeviceMethod extends Mqtt
+class MqttDirectMethod extends Mqtt
 {
     private final String subscribeTopic;
     private final String responseTopic;
@@ -37,7 +37,7 @@ class MqttDeviceMethod extends Mqtt
     private static final int METHOD_TOKEN = 3;
     private static final int REQID_TOKEN = 4;
 
-    public MqttDeviceMethod(
+    public MqttDirectMethod(
         String deviceId,
         MqttConnectOptions connectOptions,
         Map<Integer, Message> unacknowledgedSentMessages,

@@ -10,7 +10,6 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.ReconnectionNotifier;
-import com.microsoft.azure.sdk.iot.device.transport.mqtt.*;
 import mockit.*;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -104,10 +103,10 @@ public class MqttTest
         }
         else
         {
-            MqttDeviceTwin mqttDeviceTwin = new MqttDeviceTwin(null, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
-            Deencapsulation.invoke(mqttDeviceTwin, "setListener", new Class[]{IotHubListener.class}, listener);
-            Deencapsulation.invoke(mqttDeviceTwin, "setMqttAsyncClient", mockMqttAsyncClient);
-            return mqttDeviceTwin;
+            MqttTwin mqttTwin = new MqttTwin(null, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+            Deencapsulation.invoke(mqttTwin, "setListener", new Class[]{IotHubListener.class}, listener);
+            Deencapsulation.invoke(mqttTwin, "setMqttAsyncClient", mockMqttAsyncClient);
+            return mqttTwin;
         }
     }
 

@@ -310,7 +310,7 @@ public class Thermostat {
 
         @SneakyThrows
         @Override
-        public MethodData call(String methodName, Object methodData, Object context) {
+        public DirectMethodResponse call(String methodName, Object methodData, Object context) {
             if (methodName.equalsIgnoreCase(commandName)) {
 
                 String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
@@ -350,15 +350,15 @@ public class Thermostat {
                             startTime,
                             endTime);
 
-                    return new MethodData(StatusCode.COMPLETED.value, responsePayload);
+                    return new DirectMethodResponse(StatusCode.COMPLETED.value, responsePayload);
                 }
 
                 log.debug("Command: No relevant readings found since {}, cannot generate any report.", since);
-                return new MethodData(StatusCode.NOT_FOUND.value, null);
+                return new DirectMethodResponse(StatusCode.NOT_FOUND.value, null);
             }
 
             log.error("Command: Unknown command {} invoked from service.", methodName);
-            return new MethodData(StatusCode.NOT_FOUND.value, null);
+            return new DirectMethodResponse(StatusCode.NOT_FOUND.value, null);
         }
     }
 

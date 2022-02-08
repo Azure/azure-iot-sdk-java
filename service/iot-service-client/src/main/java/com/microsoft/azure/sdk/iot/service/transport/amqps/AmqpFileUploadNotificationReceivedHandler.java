@@ -116,13 +116,12 @@ public class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHan
 
             if (msg.getBody() instanceof Data)
             {
-                String feedbackJson = msg.getBody().toString();
-
+                String fileUploadNotificationJson = ((Data) msg.getBody()).getValue().toString();
                 IotHubMessageResult messageResult = IotHubMessageResult.ABANDON;
 
                 try
                 {
-                    FileUploadNotificationParser notificationParser = new FileUploadNotificationParser(feedbackJson);
+                    FileUploadNotificationParser notificationParser = new FileUploadNotificationParser(fileUploadNotificationJson);
 
                     FileUploadNotification fileUploadNotification = new FileUploadNotification(notificationParser.getDeviceId(),
                         notificationParser.getBlobUri(), notificationParser.getBlobName(), notificationParser.getLastUpdatedTime(),

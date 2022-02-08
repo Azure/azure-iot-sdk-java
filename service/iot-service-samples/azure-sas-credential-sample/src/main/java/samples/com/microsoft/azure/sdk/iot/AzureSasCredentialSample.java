@@ -82,7 +82,7 @@ public class AzureSasCredentialSample
 
         runJobClientSample(iotHubHostName, credential);
 
-        runDeviceMethodClientSample(iotHubHostName, credential, newDeviceId);
+        runDirectMethodClientSample(iotHubHostName, credential, newDeviceId);
     }
 
     private static String runRegistryManagerSample(String iotHubHostName, AzureSasCredential credential)
@@ -265,7 +265,7 @@ public class AzureSasCredentialSample
         }
     }
 
-    private static void runDeviceMethodClientSample(String iotHubHostName, AzureSasCredential credential, String deviceId)
+    private static void runDirectMethodClientSample(String iotHubHostName, AzureSasCredential credential, String deviceId)
     {
         // ScheduledJobsClient has some configurable options for HTTP read and connect timeouts, as well as for setting proxies.
         // For this sample, the default options will be used though.

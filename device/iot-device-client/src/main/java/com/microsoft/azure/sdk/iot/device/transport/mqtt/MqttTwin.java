@@ -19,7 +19,7 @@ import java.util.Queue;
 import java.util.regex.Pattern;
 
 @Slf4j
-class MqttDeviceTwin extends Mqtt
+class MqttTwin extends Mqtt
 {
     private final String subscribeTopic;
     private final Map<String, DeviceOperations> requestMap = new HashMap<>();
@@ -48,7 +48,7 @@ class MqttDeviceTwin extends Mqtt
     //Placement for $iothub/twin/PATCH/properties/desired/?$version={new version}
     private static final int PATCH_VERSION_TOKEN = 5;
 
-    public MqttDeviceTwin(
+    public MqttTwin(
         String deviceId,
         MqttConnectOptions connectOptions,
         Map<Integer, Message> unacknowledgedSentMessages,

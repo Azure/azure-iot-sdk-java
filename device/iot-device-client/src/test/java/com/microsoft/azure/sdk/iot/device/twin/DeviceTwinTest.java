@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 import static org.junit.Assert.*;
 
-/* Unit tests for DeviceMethod
+/* Unit tests for DirectMethod
  * 100% methods covered
  * 98% lines covered
  */

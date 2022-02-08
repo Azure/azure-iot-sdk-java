@@ -55,13 +55,13 @@ public class MqttIotHubConnectionTest
     private DeviceClientConfig mockConfig;
 
     @Mocked
-    private MqttDeviceTwin mockDeviceTwin;
+    private MqttTwin mockDeviceTwin;
 
     @Mocked
     private MqttMessaging mockDeviceMessaging;
 
     @Mocked
-    private MqttDeviceMethod mockDeviceMethod;
+    private MqttDirectMethod mockDeviceMethod;
 
     @Mocked
     private IotHubUri mockIotHubUri;
@@ -1040,12 +1040,12 @@ public class MqttIotHubConnectionTest
                 mockedTransportMessage.getMessageType();
                 result = MessageType.DEVICE_METHODS;
 
-                mockConfig.getDeviceMethodsMessageCallback();
+                mockConfig.getDirectMethodsMessageCallback();
                 result = mockedMessageCallback;
 
                 mockedTransportMessage.setMessageCallback(mockedMessageCallback);
 
-                mockConfig.getDeviceMethodsMessageContext();
+                mockConfig.getDirectMethodsMessageContext();
                 result = callbackContext;
 
                 mockedTransportMessage.setMessageCallbackContext(callbackContext);
@@ -1161,9 +1161,9 @@ public class MqttIotHubConnectionTest
                 result = mockedMqttConnection;
                 new MqttMessaging(anyString, null, anyString, anyBoolean, (MqttConnectOptions) any, (Map) any, (Queue) any);
                 result = mockDeviceMessaging;
-                new MqttDeviceTwin(anyString, (MqttConnectOptions) any, (Map) any, (Queue) any);
+                new MqttTwin(anyString, (MqttConnectOptions) any, (Map) any, (Queue) any);
                 result = mockDeviceTwin;
-                new MqttDeviceMethod(anyString, (MqttConnectOptions) any, (Map) any, (Queue) any);
+                new MqttDirectMethod(anyString, (MqttConnectOptions) any, (Map) any, (Queue) any);
                 result = mockDeviceMethod;
                 mockDeviceMessaging.start();
                 result = null;

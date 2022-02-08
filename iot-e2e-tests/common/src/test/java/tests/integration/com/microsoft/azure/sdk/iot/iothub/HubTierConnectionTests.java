@@ -2,7 +2,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.twin.MethodData;
+import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
@@ -172,13 +172,13 @@ public class HubTierConnectionTests extends IntegrationTest
     protected static class MethodCallback implements com.microsoft.azure.sdk.iot.device.twin.MethodCallback
     {
         @Override
-        public MethodData call(String methodName, Object methodData, Object context)
+        public DirectMethodResponse call(String methodName, Object methodData, Object context)
         {
-            return new MethodData(200, "payload");
+            return new DirectMethodResponse(200, "payload");
         }
     }
 
-    protected static class DeviceMethodStatusCallback implements IotHubEventCallback
+    protected static class DirectMethodStatusCallback implements IotHubEventCallback
     {
         public void execute(IotHubStatusCode status, Object context)
         {
@@ -197,7 +197,7 @@ public class HubTierConnectionTests extends IntegrationTest
         testInstance.client.open(false);
 
         //act
-        testInstance.client.subscribeToMethodsAsync(new MethodCallback(), null, new DeviceMethodStatusCallback(), null);
+        testInstance.client.subscribeToMethodsAsync(new MethodCallback(), null, new DirectMethodStatusCallback(), null);
 
         //assert
         waitForDisconnect(connectionStatusUpdates, WAIT_FOR_DISCONNECT_TIMEOUT_MILLISECONDS, testInstance.client);

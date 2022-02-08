@@ -7,8 +7,8 @@ package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.twin.Device;
+import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
-import com.microsoft.azure.sdk.iot.device.twin.MethodData;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -69,45 +69,32 @@ public class DeviceEmulator
      * Enable device method on this device using the local callbacks.
      * @throws IOException if the client failed to subscribe on the device method.
      */
-    void subscribeToDeviceMethod() throws IOException, InterruptedException
+    void subscribeToDirectMethod() throws IOException, InterruptedException
     {
-        subscribeToDeviceMethod(null, null, null, null);
+        subscribeToDirectMethod(null, null, null, null);
     }
 
-    /**
-     * Enable device method on this device.
-     * @param methodCallback is the callback called when a service invoke a method on this device. If it is null,
-     *                             the DeviceEmulator will take care of it using the MethodInvokeCallback.
-     * @param deviceMethodCallbackContext is the context for the methodCallback. Only used if the
-     *                                    methodCallback is not null.
-     * @param deviceMethodStatusCallback is the callback called when the service receive the response for the invoked
-     *                                   method. If it is null, the DeviceEmulator will take care of it using
-     *                                   DeviceStatusCallback.
-     * @param deviceMethodStatusCallbackContext is the context for the deviceMethodStatusCallback.Only used if the
-     *                                    deviceMethodStatusCallback is not null.
-     * @throws IOException if the client failed to subscribe on the device method.
-     */
     @SuppressWarnings("SameParameterValue") // DeviceEmulator will subscribe to default callback in case the supplied callback is null
-    void subscribeToDeviceMethod(
-        MethodCallback methodCallback, Object deviceMethodCallbackContext,
-        IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext)
+    void subscribeToDirectMethod(
+        MethodCallback methodCallback, Object directMethodCallbackContext,
+        IotHubEventCallback directMethodStatusCallback, Object directMethodStatusCallbackContext)
             throws IOException, InterruptedException
     {
         if(methodCallback == null)
         {
             methodCallback = new MethodInvokeCallback();
-            deviceMethodCallbackContext = null;
+            directMethodCallbackContext = null;
         }
 
-        if(deviceMethodStatusCallback == null)
+        if(directMethodStatusCallback == null)
         {
-            deviceMethodStatusCallback = new DeviceStatusCallback();
-            deviceMethodStatusCallbackContext = deviceStatus;
+            directMethodStatusCallback = new DeviceStatusCallback();
+            directMethodStatusCallbackContext = deviceStatus;
         }
 
         client.subscribeToMethodsAsync(
-            methodCallback, deviceMethodCallbackContext,
-                deviceMethodStatusCallback, deviceMethodStatusCallbackContext);
+            methodCallback, directMethodCallbackContext,
+                directMethodStatusCallback, directMethodStatusCallbackContext);
 
         long startTime = System.currentTimeMillis();
         while (deviceStatus.statusOk == 0)
@@ -255,10 +242,10 @@ public class DeviceEmulator
     protected class MethodInvokeCallback implements MethodCallback
     {
         @Override
-        public synchronized MethodData call(String methodName, Object methodData, Object context)
+        public synchronized DirectMethodResponse call(String methodName, Object methodData, Object context)
         {
             System.out.println("Device invoked " + methodName);
-            MethodData deviceMethodData;
+            DirectMethodResponse directMethodResponse;
             int status;
             String result;
             try
@@ -289,9 +276,9 @@ public class DeviceEmulator
                 result = e.toString();
                 status = METHOD_THROWS;
             }
-            deviceMethodData = new MethodData(status, result);
+            directMethodResponse = new DirectMethodResponse(status, result);
 
-            return deviceMethodData;
+            return directMethodResponse;
         }
     }
 

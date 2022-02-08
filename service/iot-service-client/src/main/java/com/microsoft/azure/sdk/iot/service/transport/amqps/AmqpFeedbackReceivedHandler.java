@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
+import org.apache.qpid.proton.amqp.messaging.Data;
 import org.apache.qpid.proton.amqp.messaging.Released;
 import org.apache.qpid.proton.amqp.messaging.Source;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
@@ -131,7 +132,8 @@ public class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
                 IotHubMessageResult messageResult = IotHubMessageResult.ABANDON;
                 try
                 {
-                    FeedbackBatch feedbackBatch = FeedbackBatchMessage.parse(msg.getBody().toString());
+                    String feedbackJson = ((Data) msg.getBody()).getValue().toString();
+                    FeedbackBatch feedbackBatch = FeedbackBatchMessage.parse(feedbackJson);
 
                     messageResult = feedbackMessageReceivedCallback.onFeedbackMessageReceived(feedbackBatch);
                 }

@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
 * 100% methods covered
 * 100% lines covered
 */
-public class DeviceMethodMessageTest
+public class DirectMethodMessageTest
 {
     /*
     **Tests_SRS_DEVICEMETHODMESSAGE_25_001: [**The constructor shall save the message body by calling super with the body as parameter.**]**
