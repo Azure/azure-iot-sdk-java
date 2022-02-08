@@ -12,6 +12,10 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.query.QueryClient;
+import com.microsoft.azure.sdk.iot.service.query.QueryClientOptions;
+import com.microsoft.azure.sdk.iot.service.query.QueryPageOptions;
+import com.microsoft.azure.sdk.iot.service.query.TwinQueryResponse;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
@@ -40,6 +44,9 @@ public final class TwinClient
     private AzureSasCredential azureSasCredential;
     private IotHubConnectionString iotHubConnectionString;
 
+    // keep a queryClient within this client so that twins can be queried
+    private final QueryClient queryClient;
+
     /**
      * Constructor to create instance from connection string.
      *
@@ -67,6 +74,15 @@ public final class TwinClient
         this.iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         this.hostName = this.iotHubConnectionString.getHostName();
         commonConstructorSetup();
+
+        QueryClientOptions queryClientOptions =
+            QueryClientOptions.builder()
+                .httpReadTimeout(options.getHttpReadTimeout())
+                .httpConnectTimeout(options.getHttpConnectTimeout())
+                .proxyOptions(options.getProxyOptions())
+                .build();
+
+        this.queryClient = new QueryClient(connectionString, queryClientOptions);
     }
 
     /**
@@ -102,6 +118,15 @@ public final class TwinClient
         this.credentialCache = new TokenCredentialCache(credential);
         this.hostName = hostName;
         commonConstructorSetup();
+
+        QueryClientOptions queryClientOptions =
+            QueryClientOptions.builder()
+                .httpReadTimeout(options.getHttpReadTimeout())
+                .httpConnectTimeout(options.getHttpConnectTimeout())
+                .proxyOptions(options.getProxyOptions())
+                .build();
+
+        this.queryClient = new QueryClient(hostName, credential, queryClientOptions);
     }
 
     /**
@@ -135,6 +160,15 @@ public final class TwinClient
         this.azureSasCredential = azureSasCredential;
         this.hostName = hostName;
         commonConstructorSetup();
+
+        QueryClientOptions queryClientOptions =
+            QueryClientOptions.builder()
+                .httpReadTimeout(options.getHttpReadTimeout())
+                .httpConnectTimeout(options.getHttpConnectTimeout())
+                .proxyOptions(options.getProxyOptions())
+                .build();
+
+        this.queryClient = new QueryClient(hostName, azureSasCredential, queryClientOptions);
     }
 
     private static void commonConstructorSetup()
@@ -264,6 +298,35 @@ public final class TwinClient
         HttpResponse httpResponse = httpRequest.send();
         String twinString = new String(httpResponse.getBody(), StandardCharsets.UTF_8);
         return Twin.fromJson(twinString);
+    }
+
+    /**
+     * Query from your IoT Hub's set of Twins.
+     *
+     * @param query The IoT Hub query for selecting which twins to get.
+     * @return The pageable set of Twins that were queried.
+     * @throws IOException If IoT Hub cannot be reached due to network level issues.
+     * @throws IotHubException If the request fails for non-network level issues such as an incorrectly formatted query.
+     * @see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-query-language">IoT Hub query language</a>
+     */
+    public TwinQueryResponse query(String query) throws IOException, IotHubException
+    {
+        return this.queryClient.queryTwins(query);
+    }
+
+    /**
+     * Query from your IoT Hub's set of Twins.
+     *
+     * @param query The IoT Hub query for selecting which twins to get.
+     * @param options The optional parameters used to decide how the query's results are returned. May not be null.
+     * @return The pageable set of Twins that were queried.
+     * @throws IOException If IoT Hub cannot be reached due to network level issues.
+     * @throws IotHubException If the request fails for non-network level issues such as an incorrectly formatted query.
+     * @see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-query-language">IoT Hub query language</a>
+     */
+    public TwinQueryResponse query(String query, QueryPageOptions options) throws IOException, IotHubException
+    {
+        return this.queryClient.queryTwins(query, options);
     }
 
     private HttpRequest createRequest(URL url, HttpMethod method, byte[] payload) throws IOException

@@ -5,7 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.service.query;
 
-import com.microsoft.azure.sdk.iot.service.query.QueryRequestParser;
+import com.microsoft.azure.sdk.iot.service.query.serializers.QueryRequestParser;
 import mockit.Deencapsulation;
 import org.junit.Test;
 import com.microsoft.azure.sdk.iot.service.Helpers;

@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobStatus;
 import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobType;
+import com.microsoft.azure.sdk.iot.service.query.serializers.QueryRequestParser;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
@@ -145,11 +146,30 @@ public final class QueryClient
         log.debug("Initialized a QueryClient instance client using SDK version {}", TransportUtils.serviceVersion);
     }
 
+    /**
+     * Query from your IoT Hub's set of Twins.
+     *
+     * @param query The IoT Hub query for selecting which twins to get.
+     * @return The pageable set of Twins that were queried.
+     * @throws IOException If IoT Hub cannot be reached due to network level issues.
+     * @throws IotHubException If the request fails for non-network level issues such as an incorrectly formatted query.
+     * @see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-query-language">IoT Hub query language</a>
+     */
     public TwinQueryResponse queryTwins(String query) throws IOException, IotHubException
     {
         return queryTwins(query, QueryPageOptions.builder().build());
     }
 
+    /**
+     * Query from your IoT Hub's set of Twins.
+     *
+     * @param query The IoT Hub query for selecting which twins to get.
+     * @param options The optional parameters used to decide how the query's results are returned.
+     * @return The pageable set of Twins that were queried.
+     * @throws IOException If IoT Hub cannot be reached due to network level issues.
+     * @throws IotHubException If the request fails for non-network level issues such as an incorrectly formatted query.
+     * @see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-query-language">IoT Hub query language</a>
+     */
     public TwinQueryResponse queryTwins(String query, QueryPageOptions options) throws IOException, IotHubException
     {
         if (query == null || query.isEmpty())
@@ -157,7 +177,7 @@ public final class QueryClient
             throw new IllegalArgumentException("Query cannot be null or empty");
         }
 
-        Objects.requireNonNull(options);
+        Objects.requireNonNull(options, "Options cannot be null");
 
         QueryRequestParser requestParser = new QueryRequestParser(query);
         byte[] payload = requestParser.toJson().getBytes(StandardCharsets.UTF_8);
@@ -187,13 +207,34 @@ public final class QueryClient
         return twinQueryResponse;
     }
 
+    /**
+     * Query from your IoT Hub's set of scheduled jobs.
+     *
+     * @param query The IoT Hub query for selecting which jobs to get.
+     * @return The pageable set of Jobs that were queried.
+     * @throws IOException If IoT Hub cannot be reached due to network level issues.
+     * @throws IotHubException If the request fails for non-network level issues such as an incorrectly formatted query.
+     * @see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-query-language#get-started-with-jobs-queries">IoT Hub query language</a>
+     */
     public JobQueryResponse queryJobs(String query) throws IOException, IotHubException
     {
         return queryJobs(query, QueryPageOptions.builder().build());
     }
 
+    /**
+     * Query from your IoT Hub's set of scheduled jobs.
+     *
+     * @param query The IoT Hub query for selecting which jobs to get.
+     * @param options The optional parameters used to decide how the query's results are returned. May not be null.
+     * @return The pageable set of Jobs that were queried.
+     * @throws IOException If IoT Hub cannot be reached due to network level issues.
+     * @throws IotHubException If the request fails for non-network level issues such as an incorrectly formatted query.
+     * @see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-query-language#get-started-with-jobs-queries">IoT Hub query language</a>
+     */
     public JobQueryResponse queryJobs(String query, QueryPageOptions options) throws IOException, IotHubException
     {
+        Objects.requireNonNull(options, "Options cannot be null");
+
         Proxy proxy = null;
         if (this.options.getProxyOptions() != null)
         {
@@ -223,13 +264,34 @@ public final class QueryClient
         return jobQueryResponse;
     }
 
+    /**
+     * Query from your IoT Hub's set of scheduled jobs by job type and job status.
+     *
+     * @param jobType The type of the job (methods or twin).
+     * @param jobStatus The status of the job ("completed", for example)
+     * @return The pageable set of Jobs that were queried.
+     * @throws IOException If IoT Hub cannot be reached due to network level issues.
+     * @throws IotHubException If the request fails for non-network level issues such as throttling.
+     */
     public JobQueryResponse queryJobs(ScheduledJobType jobType, ScheduledJobStatus jobStatus) throws IOException, IotHubException
     {
         return queryJobs(jobType, jobStatus, QueryPageOptions.builder().build());
     }
 
+    /**
+     * Query from your IoT Hub's set of scheduled jobs by job type and job status.
+     *
+     * @param jobType The type of the job (methods or twin).
+     * @param jobStatus The status of the job ("completed", for example)
+     * @param options The optional parameters used to decide how the query's results are returned. May not be null.
+     * @return The pageable set of Jobs that were queried.
+     * @throws IOException If IoT Hub cannot be reached due to network level issues.
+     * @throws IotHubException If the request fails for non-network level issues such as throttling.
+     */
     public JobQueryResponse queryJobs(ScheduledJobType jobType, ScheduledJobStatus jobStatus, QueryPageOptions options) throws IOException, IotHubException
     {
+        Objects.requireNonNull(options, "Options cannot be null");
+
         String jobTypeString = (jobType == null) ? null : jobType.toString();
         String jobStatusString = (jobStatus == null) ? null : jobStatus.toString();
 
@@ -259,13 +321,34 @@ public final class QueryClient
         return jobQueryResponse;
     }
 
+    /**
+     * Query miscellaneous data from your IoT Hub.
+     *
+     * @param query The IoT Hub query for selecting what information should be returned.
+     * @return The pageable set of results that were queried.
+     * @throws IOException If IoT Hub cannot be reached due to network level issues.
+     * @throws IotHubException If the request fails for non-network level issues such as an incorrectly formatted query.
+     * @see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-query-language#basics-of-an-iot-hub-query">IoT Hub query language</a>
+     */
     public RawQueryResponse queryRaw(String query) throws IOException, IotHubException
     {
         return queryRaw(query, QueryPageOptions.builder().build());
     }
 
+    /**
+     * Query miscellaneous data from your IoT Hub.
+     *
+     * @param query The IoT Hub query for selecting what information should be returned.
+     * @param options The optional parameters used to decide how the query's results are returned. May not be null.
+     * @return The pageable set of results that were queried.
+     * @throws IOException If IoT Hub cannot be reached due to network level issues.
+     * @throws IotHubException If the request fails for non-network level issues such as an incorrectly formatted query.
+     * @see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-query-language#basics-of-an-iot-hub-query">IoT Hub query language</a>
+     */
     public RawQueryResponse queryRaw(String query, QueryPageOptions options) throws IOException, IotHubException
     {
+        Objects.requireNonNull(options, "Options cannot be null");
+
         Proxy proxy = null;
         if (this.options.getProxyOptions() != null)
         {

@@ -7,6 +7,11 @@ import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.jobs.scheduled.serializers.ScheduledJobParser;
 import com.microsoft.azure.sdk.iot.service.methods.serializers.MethodParser;
+import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
+import com.microsoft.azure.sdk.iot.service.query.QueryClient;
+import com.microsoft.azure.sdk.iot.service.query.QueryClientOptions;
+import com.microsoft.azure.sdk.iot.service.query.QueryPageOptions;
+import com.microsoft.azure.sdk.iot.service.query.serializers.QueryRequestParser;
 import com.microsoft.azure.sdk.iot.service.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.service.twin.TwinState;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
@@ -45,6 +50,9 @@ public final class ScheduledJobsClient
     private IotHubConnectionString iotHubConnectionString;
     private final ScheduledJobsClientOptions clientOptions;
 
+    // keep a queryClient within this client so that twins can be queried
+    private final QueryClient queryClient;
+
     /**
      * Constructor to create instance from connection string
      *
@@ -73,6 +81,15 @@ public final class ScheduledJobsClient
         this.hostName = this.iotHubConnectionString.getHostName();
         this.clientOptions = clientOptions;
         commonConstructorSetup();
+
+        QueryClientOptions queryClientOptions =
+            QueryClientOptions.builder()
+                .httpReadTimeout(clientOptions.getHttpReadTimeout())
+                .httpConnectTimeout(clientOptions.getHttpConnectTimeout())
+                .proxyOptions(clientOptions.getProxyOptions())
+                .build();
+
+        this.queryClient = new QueryClient(connectionString, queryClientOptions);
     }
 
     /**
@@ -109,6 +126,15 @@ public final class ScheduledJobsClient
         this.credentialCache = new TokenCredentialCache(credential);
         this.clientOptions = clientOptions;
         commonConstructorSetup();
+
+        QueryClientOptions queryClientOptions =
+            QueryClientOptions.builder()
+                .httpReadTimeout(clientOptions.getHttpReadTimeout())
+                .httpConnectTimeout(clientOptions.getHttpConnectTimeout())
+                .proxyOptions(clientOptions.getProxyOptions())
+                .build();
+
+        this.queryClient = new QueryClient(hostName, credential, queryClientOptions);
     }
 
     /**
@@ -143,6 +169,15 @@ public final class ScheduledJobsClient
         this.azureSasCredential = azureSasCredential;
         this.clientOptions = clientOptions;
         commonConstructorSetup();
+
+        QueryClientOptions queryClientOptions =
+            QueryClientOptions.builder()
+                .httpReadTimeout(clientOptions.getHttpReadTimeout())
+                .httpConnectTimeout(clientOptions.getHttpConnectTimeout())
+                .proxyOptions(clientOptions.getProxyOptions())
+                .build();
+
+        this.queryClient = new QueryClient(hostName, azureSasCredential, queryClientOptions);
     }
 
     private static void commonConstructorSetup()
@@ -365,6 +400,64 @@ public final class ScheduledJobsClient
         HttpResponse response = httpRequest.send();
 
         return new ScheduledJob(new String(response.getBody()));
+    }
+
+    /**
+     * Query from your IoT Hub's set of scheduled jobs.
+     *
+     * @param query The IoT Hub query for selecting which jobs to get.
+     * @return The pageable set of Jobs that were queried.
+     * @throws IOException If IoT Hub cannot be reached due to network level issues.
+     * @throws IotHubException If the request fails for non-network level issues such as an incorrectly formatted query.
+     * @see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-query-language#get-started-with-jobs-queries">IoT Hub query language</a>
+     */
+    public JobQueryResponse query(String query) throws IOException, IotHubException
+    {
+        return this.queryClient.queryJobs(query);
+    }
+
+    /**
+     * Query from your IoT Hub's set of scheduled jobs.
+     *
+     * @param query The IoT Hub query for selecting which jobs to get.
+     * @param options The optional parameters used to decide how the query's results are returned. May not be null.
+     * @return The pageable set of Jobs that were queried.
+     * @throws IOException If IoT Hub cannot be reached due to network level issues.
+     * @throws IotHubException If the request fails for non-network level issues such as an incorrectly formatted query.
+     * @see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-query-language#get-started-with-jobs-queries">IoT Hub query language</a>
+     */
+    public JobQueryResponse query(String query, QueryPageOptions options) throws IOException, IotHubException
+    {
+        return this.queryClient.queryJobs(query, options);
+    }
+
+    /**
+     * Query from your IoT Hub's set of scheduled jobs by job type and job status.
+     *
+     * @param jobType The type of the job (methods or twin).
+     * @param jobStatus The status of the job ("completed", for example)
+     * @return The pageable set of Jobs that were queried.
+     * @throws IOException If IoT Hub cannot be reached due to network level issues.
+     * @throws IotHubException If the request fails for non-network level issues such as throttling.
+     */
+    public JobQueryResponse query(ScheduledJobType jobType, ScheduledJobStatus jobStatus) throws IOException, IotHubException
+    {
+        return this.queryClient.queryJobs(jobType, jobStatus);
+    }
+
+    /**
+     * Query from your IoT Hub's set of scheduled jobs by job type and job status.
+     *
+     * @param jobType The type of the job (methods or twin).
+     * @param jobStatus The status of the job ("completed", for example)
+     * @param options The optional parameters used to decide how the query's results are returned. May not be null.
+     * @return The pageable set of Jobs that were queried.
+     * @throws IOException If IoT Hub cannot be reached due to network level issues.
+     * @throws IotHubException If the request fails for non-network level issues such as throttling.
+     */
+    public JobQueryResponse query(ScheduledJobType jobType, ScheduledJobStatus jobStatus, QueryPageOptions options) throws IOException, IotHubException
+    {
+        return this.queryClient.queryJobs(jobType, jobStatus, options);
     }
 
     private TwinState getParserFromDevice(Twin device)
