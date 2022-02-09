@@ -9,7 +9,7 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.registry.serializers.AuthenticationParser;
 import com.microsoft.azure.sdk.iot.service.registry.serializers.AuthenticationTypeParser;
-import com.microsoft.azure.sdk.iot.service.jobs.registry.serializers.ExportImportDeviceParser;
+import com.microsoft.azure.sdk.iot.service.registry.serializers.ExportImportDeviceParser;
 import com.microsoft.azure.sdk.iot.service.registry.serializers.SymmetricKeyParser;
 import com.microsoft.azure.sdk.iot.service.registry.serializers.X509ThumbprintParser;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;

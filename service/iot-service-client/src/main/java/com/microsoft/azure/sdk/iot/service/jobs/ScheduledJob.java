@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.service.jobs.scheduled;
+package com.microsoft.azure.sdk.iot.service.jobs;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.serializers.JobsResponseParser;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.serializers.JobsStatisticsParser;
+import com.microsoft.azure.sdk.iot.service.jobs.serializers.JobsResponseParser;
+import com.microsoft.azure.sdk.iot.service.jobs.serializers.JobsStatisticsParser;
 import com.microsoft.azure.sdk.iot.service.twin.TwinState;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.methods.MethodResult;

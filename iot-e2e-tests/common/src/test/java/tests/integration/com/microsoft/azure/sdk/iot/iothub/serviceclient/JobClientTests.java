@@ -7,11 +7,11 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 
 import com.azure.core.credential.AzureSasCredential;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.DirectMethodsJobOptions;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJob;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobStatus;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobType;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobsClient;
+import com.microsoft.azure.sdk.iot.service.jobs.DirectMethodsJobOptions;
+import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJob;
+import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobStatus;
+import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobType;
+import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobsClient;
 import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
@@ -28,7 +28,7 @@ import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
 import com.microsoft.azure.sdk.iot.service.twin.Pair;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobsClientOptions;
+import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobsClientOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;

@@ -5,9 +5,9 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJob;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobStatus;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobsClient;
+import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJob;
+import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobStatus;
+import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobsClient;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.service.query.SqlQueryBuilder;
 import com.microsoft.azure.sdk.iot.service.query.TwinQueryResponse;

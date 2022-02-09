@@ -3,12 +3,11 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.service.jobs.registry;
+package com.microsoft.azure.sdk.iot.service.registry;
 
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.jobs.registry.serializers.ExportImportDeviceParser;
-import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
+import com.microsoft.azure.sdk.iot.service.registry.serializers.ExportImportDeviceParser;
 import com.microsoft.azure.sdk.iot.service.registry.serializers.AuthenticationParser;
 import com.microsoft.azure.sdk.iot.service.registry.serializers.AuthenticationTypeParser;
 import com.microsoft.azure.sdk.iot.service.registry.serializers.SymmetricKeyParser;

@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.service.jobs.scheduled;
 
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.serializers.ScheduledJobParser;
+import com.microsoft.azure.sdk.iot.service.jobs.serializers.ScheduledJobParser;
 import com.microsoft.azure.sdk.iot.service.methods.serializers.MethodParser;
 import com.microsoft.azure.sdk.iot.service.twin.TwinState;
 import mockit.Deencapsulation;

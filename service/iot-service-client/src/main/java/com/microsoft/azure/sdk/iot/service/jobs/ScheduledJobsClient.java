@@ -1,17 +1,16 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.service.jobs.scheduled;
+package com.microsoft.azure.sdk.iot.service.jobs;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.serializers.ScheduledJobParser;
+import com.microsoft.azure.sdk.iot.service.jobs.serializers.ScheduledJobParser;
 import com.microsoft.azure.sdk.iot.service.methods.serializers.MethodParser;
 import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.service.query.QueryClientOptions;
 import com.microsoft.azure.sdk.iot.service.query.QueryPageOptions;
-import com.microsoft.azure.sdk.iot.service.query.serializers.QueryRequestParser;
 import com.microsoft.azure.sdk.iot.service.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.service.twin.TwinState;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
@@ -531,8 +530,7 @@ public final class ScheduledJobsClient
         return new IotHubServiceSasToken(iotHubConnectionString).toString();
     }
 
-    private HttpRequest createRequest(URL url, HttpMethod method, byte[] payload)
-        throws IOException
+    private HttpRequest createRequest(URL url, HttpMethod method, byte[] payload) throws IOException
     {
         Proxy proxy = null;
         if (this.clientOptions.getProxyOptions() != null)

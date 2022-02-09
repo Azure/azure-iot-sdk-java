@@ -4,7 +4,8 @@
 package com.microsoft.azure.sdk.iot.service.jobs.registry;
 
 import com.microsoft.azure.sdk.iot.service.ParserUtility;
-import com.microsoft.azure.sdk.iot.service.jobs.registry.serializers.JobPropertiesParser;
+import com.microsoft.azure.sdk.iot.service.registry.serializers.JobPropertiesParser;
+import com.microsoft.azure.sdk.iot.service.registry.StorageAuthenticationType;
 import junit.framework.TestCase;
 import mockit.Deencapsulation;
 import org.junit.Test;

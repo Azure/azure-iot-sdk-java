@@ -3,7 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.service.jobs.scheduled;
 
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.serializers.JobsStatisticsParser;
+import com.microsoft.azure.sdk.iot.service.jobs.JobStatistics;
+import com.microsoft.azure.sdk.iot.service.jobs.serializers.JobsStatisticsParser;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;

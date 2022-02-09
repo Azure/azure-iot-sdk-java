@@ -5,10 +5,10 @@
 
 package samples.com.microsoft.azure.sdk.iot.service.sdk;
 
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.DirectMethodsJobOptions;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJob;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobStatus;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobsClient;
+import com.microsoft.azure.sdk.iot.service.jobs.DirectMethodsJobOptions;
+import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJob;
+import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobStatus;
+import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobsClient;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodRequestOptions;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.methods.MethodResult;

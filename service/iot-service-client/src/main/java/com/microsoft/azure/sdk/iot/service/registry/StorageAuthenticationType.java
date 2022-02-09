@@ -1,4 +1,4 @@
-package com.microsoft.azure.sdk.iot.service.jobs.registry;
+package com.microsoft.azure.sdk.iot.service.registry;
 
 import com.google.gson.annotations.SerializedName;
 

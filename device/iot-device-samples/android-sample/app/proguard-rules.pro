@@ -28,7 +28,7 @@
 
 # These are the recommended exclusions when using the IoT Hub service client SDK. They are commented
 # out because this sample only uses the IoT Hub device client SDK
-#-keep class com.microsoft.azure.sdk.iot.service.jobs.registry.ImportMode { *; }
+#-keep class com.microsoft.azure.sdk.iot.service.registry.ImportMode { *; }
 #-keep class com.microsoft.azure.sdk.iot.service.AuthenticationMechanism { *; }
 
 # These are the recommended exclusions when using the Device Provisioning Service device client SDK.

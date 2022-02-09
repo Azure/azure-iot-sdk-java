@@ -4,17 +4,17 @@
  */
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.DirectMethodsJobOptions;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJob;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobStatus;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobsClient;
+import com.microsoft.azure.sdk.iot.service.jobs.DirectMethodsJobOptions;
+import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJob;
+import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobStatus;
+import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobsClient;
 import com.microsoft.azure.sdk.iot.service.query.SqlQueryBuilder;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.twin.Pair;
 import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobType;
+import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobType;
 
 import java.io.IOException;
 import java.util.*;

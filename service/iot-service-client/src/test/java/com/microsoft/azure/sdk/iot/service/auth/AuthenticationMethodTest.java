@@ -18,7 +18,7 @@ public class AuthenticationMethodTest
 {
     /**
      * Test of getAuthenticationMethodSharedAccessKey class.
-     * Create and get
+     * Create and getJob
      */
     @Test
     public void ServiceAuthenticationWithSharedAccessPolicyKey() throws Exception
@@ -36,7 +36,7 @@ public class AuthenticationMethodTest
 
     /**
      * Test of ServiceAuthenticationWithSharedAccessPolicyToken class.
-     * Create and get
+     * Create and getJob
      */
     @Test
     public void getAuthenticationMethodSharedAccessToken() throws Exception

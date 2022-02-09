@@ -3,9 +3,9 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.service.jobs.registry;
+package com.microsoft.azure.sdk.iot.service.registry;
 
-import com.microsoft.azure.sdk.iot.service.jobs.registry.serializers.JobPropertiesParser;
+import com.microsoft.azure.sdk.iot.service.registry.serializers.JobPropertiesParser;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;

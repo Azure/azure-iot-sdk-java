@@ -3,7 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.service.jobs.registry;
 
-import com.microsoft.azure.sdk.iot.service.jobs.registry.serializers.JobPropertiesParser;
+import com.microsoft.azure.sdk.iot.service.registry.serializers.JobPropertiesParser;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryJob;
 import mockit.Deencapsulation;
 import org.junit.Test;
 

@@ -303,7 +303,7 @@ public final class TwinClient
     /**
      * Query from your IoT Hub's set of Twins.
      *
-     * @param query The IoT Hub query for selecting which twins to get.
+     * @param query The IoT Hub query for selecting which twins to getJob.
      * @return The pageable set of Twins that were queried.
      * @throws IOException If IoT Hub cannot be reached due to network level issues.
      * @throws IotHubException If the request fails for non-network level issues such as an incorrectly formatted query.
@@ -317,7 +317,7 @@ public final class TwinClient
     /**
      * Query from your IoT Hub's set of Twins.
      *
-     * @param query The IoT Hub query for selecting which twins to get.
+     * @param query The IoT Hub query for selecting which twins to getJob.
      * @param options The optional parameters used to decide how the query's results are returned. May not be null.
      * @return The pageable set of Twins that were queried.
      * @throws IOException If IoT Hub cannot be reached due to network level issues.

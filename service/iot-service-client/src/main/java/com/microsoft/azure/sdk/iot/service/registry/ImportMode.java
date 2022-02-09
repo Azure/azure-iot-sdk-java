@@ -3,7 +3,7 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.service.jobs.registry;
+package com.microsoft.azure.sdk.iot.service.registry;
 
 import com.google.gson.annotations.SerializedName;
 

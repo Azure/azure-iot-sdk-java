@@ -78,10 +78,10 @@ import java.util.Map;
  * <pre>
  * {@code
  *      // Get the value of the MaxSpeed, which is a inner TwinCollection.
- *      TwinCollection innerMaxSpeed = (TwinCollection) twinCollection.get("MaxSpeed");
+ *      TwinCollection innerMaxSpeed = (TwinCollection) twinCollection.getJob("MaxSpeed");
  *
  *      // From the inner TwinCollection, get the value of the NewValue.
- *      Long maxSpeedNewValue = innerMaxSpeed.get("NewValue");
+ *      Long maxSpeedNewValue = innerMaxSpeed.getJob("NewValue");
  *
  *      // As in the root TwinCollection, the inner TwinCollection contain its own metadata.
  *      // So, get the metadata information for the inner NewValue.

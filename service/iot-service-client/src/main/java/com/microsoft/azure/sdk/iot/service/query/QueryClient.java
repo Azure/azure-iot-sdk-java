@@ -10,8 +10,8 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobStatus;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.ScheduledJobType;
+import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobStatus;
+import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobType;
 import com.microsoft.azure.sdk.iot.service.query.serializers.QueryRequestParser;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
@@ -149,7 +149,7 @@ public final class QueryClient
     /**
      * Query from your IoT Hub's set of Twins.
      *
-     * @param query The IoT Hub query for selecting which twins to get.
+     * @param query The IoT Hub query for selecting which twins to getJob.
      * @return The pageable set of Twins that were queried.
      * @throws IOException If IoT Hub cannot be reached due to network level issues.
      * @throws IotHubException If the request fails for non-network level issues such as an incorrectly formatted query.
@@ -163,7 +163,7 @@ public final class QueryClient
     /**
      * Query from your IoT Hub's set of Twins.
      *
-     * @param query The IoT Hub query for selecting which twins to get.
+     * @param query The IoT Hub query for selecting which twins to getJob.
      * @param options The optional parameters used to decide how the query's results are returned.
      * @return The pageable set of Twins that were queried.
      * @throws IOException If IoT Hub cannot be reached due to network level issues.
@@ -210,7 +210,7 @@ public final class QueryClient
     /**
      * Query from your IoT Hub's set of scheduled jobs.
      *
-     * @param query The IoT Hub query for selecting which jobs to get.
+     * @param query The IoT Hub query for selecting which jobs to getJob.
      * @return The pageable set of Jobs that were queried.
      * @throws IOException If IoT Hub cannot be reached due to network level issues.
      * @throws IotHubException If the request fails for non-network level issues such as an incorrectly formatted query.
@@ -224,7 +224,7 @@ public final class QueryClient
     /**
      * Query from your IoT Hub's set of scheduled jobs.
      *
-     * @param query The IoT Hub query for selecting which jobs to get.
+     * @param query The IoT Hub query for selecting which jobs to getJob.
      * @param options The optional parameters used to decide how the query's results are returned. May not be null.
      * @return The pageable set of Jobs that were queried.
      * @throws IOException If IoT Hub cannot be reached due to network level issues.

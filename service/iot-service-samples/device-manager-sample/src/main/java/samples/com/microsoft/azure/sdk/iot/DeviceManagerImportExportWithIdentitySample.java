@@ -5,10 +5,10 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.service.jobs.registry.RegistryJob;
-import com.microsoft.azure.sdk.iot.service.jobs.registry.RegistryJobsClient;
-import com.microsoft.azure.sdk.iot.service.jobs.registry.ManagedIdentity;
-import com.microsoft.azure.sdk.iot.service.jobs.registry.StorageAuthenticationType;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryJob;
+import com.microsoft.azure.sdk.iot.service.registry.ManagedIdentity;
+import com.microsoft.azure.sdk.iot.service.registry.StorageAuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import java.io.IOException;
 
@@ -35,7 +35,7 @@ public class DeviceManagerImportExportWithIdentitySample {
     }
 
     public static void ExportDevices() throws IOException, IotHubException, InterruptedException {
-        RegistryJobsClient jobClient = new RegistryJobsClient(sourceHubConnectionString);
+        RegistryClient registryClient = new RegistryClient(sourceHubConnectionString);
 
         // If StorageAuthenticationType is set to IdentityBased and userAssignedIdentity property is
         // not null, the jobs will use user defined managed identity. If the IoT hub is not
@@ -55,11 +55,11 @@ public class DeviceManagerImportExportWithIdentitySample {
                 StorageAuthenticationType.IDENTITY,
                 identity);
 
-        RegistryJob exportJob = jobClient.exportDevices(jobProperties);
+        RegistryJob exportJob = registryClient.exportDevices(jobProperties);
 
         while(true)
         {
-            exportJob = jobClient.get(exportJob.getJobId());
+            exportJob = registryClient.getJob(exportJob.getJobId());
             if (exportJob.getStatus() == RegistryJob.JobStatus.COMPLETED)
             {
                 break;
@@ -69,7 +69,7 @@ public class DeviceManagerImportExportWithIdentitySample {
     }
 
     public static void ImportDevices() throws IOException, IotHubException, InterruptedException {
-        RegistryJobsClient jobClient = new RegistryJobsClient(sourceHubConnectionString);
+        RegistryClient registryClient = new RegistryClient(sourceHubConnectionString);
 
         // If StorageAuthenticationType is set to IdentityBased and userAssignedIdentity property is
         // not null, the jobs will use user defined managed identity. If the IoT hub is not
@@ -89,11 +89,11 @@ public class DeviceManagerImportExportWithIdentitySample {
                 StorageAuthenticationType.IDENTITY,
                 identity);
 
-        RegistryJob exportJob = jobClient.importDevices(jobProperties);
+        RegistryJob exportJob = registryClient.importDevices(jobProperties);
 
         while(true)
         {
-            exportJob = jobClient.get(exportJob.getJobId());
+            exportJob = registryClient.getJob(exportJob.getJobId());
             if (exportJob.getStatus() == RegistryJob.JobStatus.COMPLETED)
             {
                 break;

@@ -8,10 +8,10 @@ package samples.com.microsoft.azure.sdk.iot;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
-import com.microsoft.azure.sdk.iot.service.jobs.registry.ExportImportDevice;
-import com.microsoft.azure.sdk.iot.service.jobs.registry.ImportMode;
-import com.microsoft.azure.sdk.iot.service.jobs.registry.RegistryJob;
-import com.microsoft.azure.sdk.iot.service.jobs.registry.RegistryJobsClient;
+import com.microsoft.azure.sdk.iot.service.registry.ExportImportDevice;
+import com.microsoft.azure.sdk.iot.service.registry.ImportMode;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryJob;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
 import com.microsoft.azure.storage.CloudStorageAccount;
@@ -72,13 +72,13 @@ public class DeviceManagerImportSample
         importBlob.upload(stream, blobToImport.length);
 
         // Starting the import job
-        RegistryJobsClient jobClient = new RegistryJobsClient(SampleUtils.iotHubConnectionString);
-        RegistryJob importJob = jobClient.importDevices(containerSasUri, containerSasUri);
+        RegistryClient registryClient = new RegistryClient(SampleUtils.iotHubConnectionString);
+        RegistryJob importJob = registryClient.importDevices(containerSasUri, containerSasUri);
 
         // Waiting for the import job to complete
         while(true)
         {
-            importJob = jobClient.get(importJob.getJobId());
+            importJob = registryClient.getJob(importJob.getJobId());
             if (importJob.getStatus() == RegistryJob.JobStatus.COMPLETED
                     || importJob.getStatus() == RegistryJob.JobStatus.FAILED)
             {

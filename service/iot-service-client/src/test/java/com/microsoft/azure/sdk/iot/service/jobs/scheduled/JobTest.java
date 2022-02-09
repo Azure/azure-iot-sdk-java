@@ -4,8 +4,12 @@
 package com.microsoft.azure.sdk.iot.service.jobs.scheduled;
 
 import com.google.gson.JsonParseException;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.serializers.JobsResponseParser;
-import com.microsoft.azure.sdk.iot.service.jobs.scheduled.serializers.JobsStatisticsParser;
+import com.microsoft.azure.sdk.iot.service.jobs.JobStatistics;
+import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJob;
+import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobStatus;
+import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobType;
+import com.microsoft.azure.sdk.iot.service.jobs.serializers.JobsResponseParser;
+import com.microsoft.azure.sdk.iot.service.jobs.serializers.JobsStatisticsParser;
 import com.microsoft.azure.sdk.iot.service.methods.serializers.MethodParser;
 import com.microsoft.azure.sdk.iot.service.twin.TwinState;
 import com.microsoft.azure.sdk.iot.service.twin.TwinCollection;
