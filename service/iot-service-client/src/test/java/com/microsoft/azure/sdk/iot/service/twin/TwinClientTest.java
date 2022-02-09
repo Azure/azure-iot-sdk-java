@@ -88,8 +88,8 @@ public class TwinClientTest
     public void testOptionsDefaults()
     {
         TwinClientOptions options = TwinClientOptions.builder().build();
-        assertEquals((int) Deencapsulation.getField(TwinClientOptions.class, "DEFAULT_HTTP_READ_TIMEOUT_MS"), options.getHttpReadTimeoutSeconds());
-        assertEquals((int) Deencapsulation.getField(TwinClientOptions.class, "DEFAULT_HTTP_CONNECT_TIMEOUT_MS"), options.getHttpConnectTimeoutSeconds());
+        assertEquals((int) Deencapsulation.getField(TwinClientOptions.class, "DEFAULT_HTTP_READ_TIMEOUT_SECONDS"), options.getHttpReadTimeoutSeconds());
+        assertEquals((int) Deencapsulation.getField(TwinClientOptions.class, "DEFAULT_HTTP_CONNECT_TIMEOUT_SECONDS"), options.getHttpConnectTimeoutSeconds());
     }
 
     /*

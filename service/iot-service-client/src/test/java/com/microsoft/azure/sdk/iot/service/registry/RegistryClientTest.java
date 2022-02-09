@@ -126,8 +126,8 @@ public class RegistryClientTest
     public void testOptionsDefaults()
     {
         RegistryClientOptions options = RegistryClientOptions.builder().build();
-        assertEquals((int) Deencapsulation.getField(RegistryClientOptions.class, "DEFAULT_HTTP_READ_TIMEOUT_MS"), options.getHttpReadTimeoutSeconds());
-        assertEquals((int) Deencapsulation.getField(RegistryClientOptions.class, "DEFAULT_HTTP_CONNECT_TIMEOUT_MS"), options.getHttpConnectTimeoutSeconds());
+        assertEquals((int) Deencapsulation.getField(RegistryClientOptions.class, "DEFAULT_HTTP_READ_TIMEOUT_SECONDS"), options.getHttpReadTimeoutSeconds());
+        assertEquals((int) Deencapsulation.getField(RegistryClientOptions.class, "DEFAULT_HTTP_CONNECT_TIMEOUT_SECONDS"), options.getHttpConnectTimeoutSeconds());
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_001: [The constructor shall throw IllegalArgumentException if the input string is null or empty]

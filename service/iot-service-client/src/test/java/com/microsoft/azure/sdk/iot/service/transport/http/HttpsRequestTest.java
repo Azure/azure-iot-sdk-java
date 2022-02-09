@@ -143,7 +143,7 @@ public class HttpsRequestTest
         new Verifications()
         {
             {
-                mockConn.setReadTimeout(readTimeout);
+                mockConn.setReadTimeout(readTimeout * 1000);
             }
         };
     }
@@ -162,7 +162,7 @@ public class HttpsRequestTest
         new Verifications()
         {
             {
-                mockConn.setConnectTimeout(readTimeout);
+                mockConn.setConnectTimeout(readTimeout * 1000);
             }
         };
     }

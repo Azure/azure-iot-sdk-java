@@ -47,7 +47,6 @@ public class JobsResponseParserTest
         // assert
         assertEquals("jobName", Deencapsulation.getField(jobsResponseParser, "jobId"));
         assertEquals("DeviceId IN ['new_device']", Deencapsulation.getField(jobsResponseParser, "queryCondition"));
-        assertEquals(120L, (long) Deencapsulation.getField(jobsResponseParser, "maxExecutionTimeSeconds"));
         assertEquals("scheduleUpdateTwin", Deencapsulation.getField(jobsResponseParser, "type").toString());
         assertEquals("enqueued", Deencapsulation.getField(jobsResponseParser, "jobsStatus").toString());
         assertEquals("Valid failure reason", Deencapsulation.getField(jobsResponseParser, "failureReason"));

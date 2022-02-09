@@ -235,7 +235,6 @@ public class JobTest
         assertEquals(now, Deencapsulation.getField(job, "createdTime"));
         assertEquals(now, Deencapsulation.getField(job, "startTime"));
         assertEquals(now, Deencapsulation.getField(job, "endTime"));
-        assertEquals(MAX_EXECUTION_TIME_IN_SECONDS, (long)Deencapsulation.getField(job, "maxExecutionTimeSeconds"));
         assertEquals(ScheduledJobType.scheduleUpdateTwin, Deencapsulation.getField(job, "jobType"));
         assertEquals(ScheduledJobStatus.enqueued, Deencapsulation.getField(job, "jobStatus"));
         assertNull(Deencapsulation.getField(job, "cloudToDeviceMethod"));
@@ -479,7 +478,7 @@ public class JobTest
                 "  \"startTime\": \"" + nowString + "\",\n" +
                 "  \"lastUpdatedDateTime\": \"" + nowString + "\",\n" +
                 "  \"endTime\": \"" + nowString + "\",\n" +
-                "  \"maxExecutionTimeSeconds\": 100,\n" +
+                "  \"maxExecutionTimeInSeconds\": 100,\n" +
                 "  \"jobType\": \"scheduleUpdateTwin\",\n" +
                 "  \"jobStatus\": \"enqueued\",\n" +
                 "  \"updateTwin\": {\n" +
@@ -538,7 +537,7 @@ public class JobTest
                         "  \"startTime\": \"" + nowString + "\",\n" +
                         "  \"lastUpdatedDateTime\": \"" + nowString + "\",\n" +
                         "  \"endTime\": \"" + nowString + "\",\n" +
-                        "  \"maxExecutionTimeSeconds\": 100,\n" +
+                        "  \"maxExecutionTimeInSeconds\": 100,\n" +
                         "  \"jobType\": \"unknown\",\n" +
                         "  \"jobStatus\": \"enqueued\",\n" +
                         "  \"updateTwin\": {\n" +

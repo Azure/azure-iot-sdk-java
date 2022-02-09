@@ -113,8 +113,8 @@ public class ScheduledJobsClientTest
     public void testOptionsDefaults()
     {
         ScheduledJobsClientOptions options = ScheduledJobsClientOptions.builder().build();
-        assertEquals((int) Deencapsulation.getField(ScheduledJobsClientOptions.class, "DEFAULT_HTTP_READ_TIMEOUT_MS"), options.getHttpReadTimeoutSeconds());
-        assertEquals((int) Deencapsulation.getField(ScheduledJobsClientOptions.class, "DEFAULT_HTTP_CONNECT_TIMEOUT_MS"), options.getHttpConnectTimeoutSeconds());
+        assertEquals((int) Deencapsulation.getField(ScheduledJobsClientOptions.class, "DEFAULT_HTTP_READ_TIMEOUT_SECONDS"), options.getHttpReadTimeoutSeconds());
+        assertEquals((int) Deencapsulation.getField(ScheduledJobsClientOptions.class, "DEFAULT_HTTP_CONNECT_TIMEOUT_SECONDS"), options.getHttpConnectTimeoutSeconds());
     }
 
     /* Tests_SRS_JOBCLIENT_21_001: [The constructor shall throw IllegalArgumentException if the input string is null or empty.] */
