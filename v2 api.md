@@ -586,7 +586,7 @@ public final class DirectMethodRequestOptions
 </details>
 
 <details>
-  <summary>JobsClient and Options</summary>
+  <summary>ScheduledJobsClient and Options</summary>
 
 ```java
 
