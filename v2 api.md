@@ -524,7 +524,7 @@ public final class TwinClientOptions
 
 
 <details>
-  <summary>MethodsClient and Options</summary>
+  <summary>DirectMethodsClient and Options</summary>
 
 ```java
 
