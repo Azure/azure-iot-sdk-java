@@ -77,8 +77,8 @@ public final class TwinClient
 
         QueryClientOptions queryClientOptions =
             QueryClientOptions.builder()
-                .httpReadTimeout(options.getHttpReadTimeout())
-                .httpConnectTimeout(options.getHttpConnectTimeout())
+                .httpReadTimeoutSeconds(options.getHttpReadTimeoutSeconds())
+                .httpConnectTimeoutSeconds(options.getHttpConnectTimeoutSeconds())
                 .proxyOptions(options.getProxyOptions())
                 .build();
 
@@ -121,8 +121,8 @@ public final class TwinClient
 
         QueryClientOptions queryClientOptions =
             QueryClientOptions.builder()
-                .httpReadTimeout(options.getHttpReadTimeout())
-                .httpConnectTimeout(options.getHttpConnectTimeout())
+                .httpReadTimeoutSeconds(options.getHttpReadTimeoutSeconds())
+                .httpConnectTimeoutSeconds(options.getHttpConnectTimeoutSeconds())
                 .proxyOptions(options.getProxyOptions())
                 .build();
 
@@ -163,8 +163,8 @@ public final class TwinClient
 
         QueryClientOptions queryClientOptions =
             QueryClientOptions.builder()
-                .httpReadTimeout(options.getHttpReadTimeout())
-                .httpConnectTimeout(options.getHttpConnectTimeout())
+                .httpReadTimeoutSeconds(options.getHttpReadTimeoutSeconds())
+                .httpConnectTimeoutSeconds(options.getHttpConnectTimeoutSeconds())
                 .proxyOptions(options.getProxyOptions())
                 .build();
 
@@ -338,8 +338,8 @@ public final class TwinClient
         }
 
         HttpRequest request = new HttpRequest(url, method, payload, getAuthenticationToken(), proxy);
-        request.setReadTimeoutMillis(options.getHttpReadTimeout());
-        request.setConnectTimeoutMillis(options.getHttpConnectTimeout());
+        request.setReadTimeoutSeconds(options.getHttpReadTimeoutSeconds());
+        request.setConnectTimeoutSeconds(options.getHttpConnectTimeoutSeconds());
         request.setHeaderField(REQUEST_ID, String.valueOf(requestId++));
         return request;
     }

@@ -88,8 +88,8 @@ public class ServiceGlue
                 DirectMethodRequestOptions options =
                     DirectMethodRequestOptions.builder()
                         .payload(payload)
-                        .methodConnectTimeout(connectionTimeout)
-                        .methodResponseTimeout(responseTimeout)
+                        .methodConnectTimeoutSeconds(connectionTimeout)
+                        .methodResponseTimeoutSeconds(responseTimeout)
                         .build();
 
                 if (moduleId == null)

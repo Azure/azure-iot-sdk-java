@@ -85,8 +85,8 @@ public class TemperatureController {
         DirectMethodRequestOptions options =
             DirectMethodRequestOptions.builder()
                 .payload(commandInput)
-                .methodConnectTimeout(connectTimeout)
-                .methodResponseTimeout(responseTimeout)
+                .methodConnectTimeoutSeconds(connectTimeout)
+                .methodResponseTimeoutSeconds(responseTimeout)
                 .build();
 
         MethodResult result = methodClient.invoke(deviceId, methodToInvoke, options);
@@ -117,8 +117,8 @@ public class TemperatureController {
         DirectMethodRequestOptions options =
             DirectMethodRequestOptions.builder()
                 .payload(commandInput)
-                .methodConnectTimeout(connectTimeout)
-                .methodResponseTimeout(responseTimeout)
+                .methodConnectTimeoutSeconds(connectTimeout)
+                .methodResponseTimeoutSeconds(responseTimeout)
                 .build();
 
         MethodResult result = methodClient.invoke(deviceId, methodToInvoke, options);

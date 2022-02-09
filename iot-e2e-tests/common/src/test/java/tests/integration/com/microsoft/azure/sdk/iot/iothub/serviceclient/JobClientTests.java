@@ -107,7 +107,7 @@ public class JobClientTests extends IntegrationTest
         jobClient = new ScheduledJobsClient(iotHubConnectionString);
         registryClient = new RegistryClient(
             iotHubConnectionString,
-            RegistryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+            RegistryClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
 
         String uuid = UUID.randomUUID().toString();
         for (int i = 0; i < MAX_DEVICES; i++)
@@ -240,9 +240,9 @@ public class JobClientTests extends IntegrationTest
                     DirectMethodsJobOptions options =
                         DirectMethodsJobOptions.builder()
                             .payload(PAYLOAD_STRING)
-                            .methodConnectTimeout(CONNECTION_TIMEOUT)
-                            .methodResponseTimeout(RESPONSE_TIMEOUT)
-                            .maxExecutionTimeInSeconds(MAX_EXECUTION_TIME_IN_SECONDS)
+                            .methodConnectTimeoutSeconds(CONNECTION_TIMEOUT)
+                            .methodResponseTimeoutSeconds(RESPONSE_TIMEOUT)
+                            .maxExecutionTimeSeconds(MAX_EXECUTION_TIME_IN_SECONDS)
                             .build();
 
                     jobClient.scheduleDirectMethod(jobId, queryCondition, DeviceEmulator.METHOD_LOOPBACK, new Date(), options);
@@ -354,9 +354,9 @@ public class JobClientTests extends IntegrationTest
         DirectMethodsJobOptions options =
             DirectMethodsJobOptions.builder()
                 .payload(PAYLOAD_STRING)
-                .methodConnectTimeout(CONNECTION_TIMEOUT)
-                .methodResponseTimeout(RESPONSE_TIMEOUT)
-                .maxExecutionTimeInSeconds(MAX_EXECUTION_TIME_IN_SECONDS)
+                .methodConnectTimeoutSeconds(CONNECTION_TIMEOUT)
+                .methodResponseTimeoutSeconds(RESPONSE_TIMEOUT)
+                .maxExecutionTimeSeconds(MAX_EXECUTION_TIME_IN_SECONDS)
                 .build();
 
         jobClient.scheduleDirectMethod(jobId, queryCondition, DeviceEmulator.METHOD_LOOPBACK, new Date(), options);
@@ -423,9 +423,9 @@ public class JobClientTests extends IntegrationTest
                         DirectMethodsJobOptions options =
                             DirectMethodsJobOptions.builder()
                                 .payload(PAYLOAD_STRING)
-                                .methodConnectTimeout(CONNECTION_TIMEOUT)
-                                .methodResponseTimeout(RESPONSE_TIMEOUT)
-                                .maxExecutionTimeInSeconds(MAX_EXECUTION_TIME_IN_SECONDS)
+                                .methodConnectTimeoutSeconds(CONNECTION_TIMEOUT)
+                                .methodResponseTimeoutSeconds(RESPONSE_TIMEOUT)
+                                .maxExecutionTimeSeconds(MAX_EXECUTION_TIME_IN_SECONDS)
                                 .build();
 
                         jobClient.scheduleDirectMethod(jobId, queryCondition, DeviceEmulator.METHOD_LOOPBACK, future, options);
@@ -542,9 +542,9 @@ public class JobClientTests extends IntegrationTest
                     DirectMethodsJobOptions options =
                         DirectMethodsJobOptions.builder()
                             .payload(PAYLOAD_STRING)
-                            .methodConnectTimeout(CONNECTION_TIMEOUT)
-                            .methodResponseTimeout(RESPONSE_TIMEOUT)
-                            .maxExecutionTimeInSeconds(MAX_EXECUTION_TIME_IN_SECONDS)
+                            .methodConnectTimeoutSeconds(CONNECTION_TIMEOUT)
+                            .methodResponseTimeoutSeconds(RESPONSE_TIMEOUT)
+                            .maxExecutionTimeSeconds(MAX_EXECUTION_TIME_IN_SECONDS)
                             .build();
 
                     jobClient.scheduleDirectMethod(jobId, queryCondition, DeviceEmulator.METHOD_LOOPBACK, (index % 2 == 0) ? future : new Date(), options);
@@ -615,7 +615,7 @@ public class JobClientTests extends IntegrationTest
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
         IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
         AzureSasCredential azureSasCredential = new AzureSasCredential(serviceSasToken.toString());
-        ScheduledJobsClientOptions options = ScheduledJobsClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
+        ScheduledJobsClientOptions options = ScheduledJobsClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build();
         return new ScheduledJobsClient(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
     }
 

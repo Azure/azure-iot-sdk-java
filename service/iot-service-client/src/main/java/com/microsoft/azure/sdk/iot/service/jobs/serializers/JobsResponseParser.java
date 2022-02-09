@@ -100,7 +100,7 @@ public class JobsResponseParser
     private Date lastUpdatedTimeDate;
 
     // Max execution time in seconds (ttl duration)
-    private static final String MAXEXECUTIONTIMEINSECONDS_TAG = "maxExecutionTimeInSeconds";
+    private static final String MAXEXECUTIONTIMEINSECONDS_TAG = "maxExecutionTimeSeconds";
     @SerializedName(MAXEXECUTIONTIMEINSECONDS_TAG)
     @SuppressWarnings("unused") // used by reflection during json serialization/deserialization
     @Getter

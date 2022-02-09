@@ -114,7 +114,7 @@ public class DigitalTwinClientTests extends IntegrationTest
             new RegistryClient(
                 IOTHUB_CONNECTION_STRING,
                 RegistryClientOptions.builder()
-                    .httpReadTimeout(0)
+                    .httpReadTimeoutSeconds(0)
                     .build());
     }
 
@@ -126,7 +126,7 @@ public class DigitalTwinClientTests extends IntegrationTest
             new DigitalTwinClient(
                 IOTHUB_CONNECTION_STRING,
                 DigitalTwinClientOptions.builder()
-                    .httpReadTimeout(0)
+                    .httpReadTimeoutSeconds(0)
                     .build());
     }
 
@@ -264,7 +264,7 @@ public class DigitalTwinClientTests extends IntegrationTest
         DigitalTwinClientOptions clientOptions =
             DigitalTwinClientOptions.builder()
                 .proxyOptions(proxyOptions)
-                .httpReadTimeout(0)
+                .httpReadTimeoutSeconds(0)
                 .build();
 
         digitalTwinClient = new DigitalTwinClient(IOTHUB_CONNECTION_STRING, clientOptions);
@@ -285,7 +285,7 @@ public class DigitalTwinClientTests extends IntegrationTest
         // arrange
         DigitalTwinClientOptions clientOptions =
             DigitalTwinClientOptions.builder()
-                .httpConnectTimeout(-1)
+                .httpConnectTimeoutSeconds(-1)
                 .build();
 
         digitalTwinClient = new DigitalTwinClient(IOTHUB_CONNECTION_STRING, clientOptions);
@@ -297,7 +297,7 @@ public class DigitalTwinClientTests extends IntegrationTest
         // arrange
         DigitalTwinClientOptions clientOptions =
             DigitalTwinClientOptions.builder()
-                .httpReadTimeout(-1)
+                .httpReadTimeoutSeconds(-1)
                 .build();
 
         digitalTwinClient = new DigitalTwinClient(IOTHUB_CONNECTION_STRING, clientOptions);
@@ -479,7 +479,7 @@ public class DigitalTwinClientTests extends IntegrationTest
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(IOTHUB_CONNECTION_STRING);
         IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
         AzureSasCredential azureSasCredential = new AzureSasCredential(serviceSasToken.toString());
-        DigitalTwinClientOptions options = DigitalTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
+        DigitalTwinClientOptions options = DigitalTwinClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build();
         return new DigitalTwinClient(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
     }
 }

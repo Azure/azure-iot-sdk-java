@@ -362,8 +362,8 @@ public class ConfigurationsClient
         }
 
         HttpRequest request = new HttpRequest(url, method, payload, getAuthenticationToken(), proxy);
-        request.setReadTimeoutMillis(options.getHttpReadTimeout());
-        request.setConnectTimeoutMillis(options.getHttpConnectTimeout());
+        request.setReadTimeoutSeconds(options.getHttpReadTimeoutSeconds());
+        request.setConnectTimeoutSeconds(options.getHttpConnectTimeoutSeconds());
         return request;
     }
 

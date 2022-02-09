@@ -6,7 +6,6 @@
 package com.microsoft.azure.sdk.iot.service.transport.http;
 
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
@@ -14,12 +13,7 @@ import org.junit.runner.RunWith;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
-import java.net.Proxy;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -144,7 +138,7 @@ public class HttpsRequestTest
         final int readTimeout = 1;
         HttpRequest request = new HttpRequest(mockUrl, httpsMethod, body, "");
         // Act
-        request.setReadTimeoutMillis(readTimeout);
+        request.setReadTimeoutSeconds(readTimeout);
         // Assert
         new Verifications()
         {
@@ -163,7 +157,7 @@ public class HttpsRequestTest
         final int readTimeout = 1;
         HttpRequest request = new HttpRequest(mockUrl, httpsMethod, body, "");
         // Act
-        request.setConnectTimeoutMillis(readTimeout);
+        request.setConnectTimeoutSeconds(readTimeout);
         // Assert
         new Verifications()
         {

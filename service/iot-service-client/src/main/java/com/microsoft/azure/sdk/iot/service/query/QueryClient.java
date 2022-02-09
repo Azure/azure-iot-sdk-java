@@ -397,8 +397,8 @@ public final class QueryClient
 
     private void setCommonHttpHeaders(HttpRequest httpRequest, QueryPageOptions options)
     {
-        httpRequest.setConnectTimeoutMillis(this.options.getHttpConnectTimeout());
-        httpRequest.setReadTimeoutMillis(this.options.getHttpReadTimeout());
+        httpRequest.setConnectTimeoutSeconds(this.options.getHttpConnectTimeoutSeconds());
+        httpRequest.setReadTimeoutSeconds(this.options.getHttpReadTimeoutSeconds());
 
         if (options.getContinuationToken() != null)
         {

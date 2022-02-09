@@ -124,7 +124,7 @@ public class MultiplexingClientTests extends IntegrationTest
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
-        registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
         serviceClient = new ServiceClient(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
 
         return Arrays.asList(
@@ -820,7 +820,7 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.setup(DEVICE_MULTIPLEX_COUNT, MultiplexingClientOptions.builder().build(), true);
         testInstance.multiplexingClient.open(false);
 
-        TwinClient twinClientServiceClient = new TwinClient(iotHubConnectionString, TwinClientOptions.builder().httpReadTimeout(0).build());
+        TwinClient twinClientServiceClient = new TwinClient(iotHubConnectionString, TwinClientOptions.builder().httpReadTimeoutSeconds(0).build());
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
@@ -856,7 +856,7 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.setup(DEVICE_MULTIPLEX_COUNT, MultiplexingClientOptions.builder().build(), true);
         testInstance.multiplexingClient.open(false);
 
-        TwinClient twinClientServiceClient = new TwinClient(iotHubConnectionString, TwinClientOptions.builder().httpReadTimeout(0).build());
+        TwinClient twinClientServiceClient = new TwinClient(iotHubConnectionString, TwinClientOptions.builder().httpReadTimeoutSeconds(0).build());
         String expectedPropertyKey = UUID.randomUUID().toString();
         String expectedPropertyValue = UUID.randomUUID().toString();
         List<TwinPropertyCallbackImpl> twinPropertyCallbacks = new ArrayList<>();
@@ -1802,10 +1802,10 @@ public class MultiplexingClientTests extends IntegrationTest
         ConnectionStatusChangeTracker[] connectionStatusChangeTrackers = new ConnectionStatusChangeTracker[DEVICE_MULTIPLEX_COUNT];
 
         TwinClient twinClientServiceClient =
-            new TwinClient(iotHubConnectionString, TwinClientOptions.builder().httpReadTimeout(0).build());
+            new TwinClient(iotHubConnectionString, TwinClientOptions.builder().httpReadTimeoutSeconds(0).build());
 
         DirectMethodsClient directMethodServiceClientClient =
-            new DirectMethodsClient(iotHubConnectionString, DirectMethodsClientOptions.builder().httpReadTimeout(0).build());
+            new DirectMethodsClient(iotHubConnectionString, DirectMethodsClientOptions.builder().httpReadTimeoutSeconds(0).build());
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {

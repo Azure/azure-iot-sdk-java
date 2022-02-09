@@ -38,7 +38,7 @@ public class JobsResponseParserTest
                 "    \"statusMessage\":\"Valid status message\",\n" +
                 "    \"deviceId\":\"ValidDeviceId\",\n" +
                 "    \"parentJobId\":\"ValidParentJobId\",\n" +
-                "    \"maxExecutionTimeInSeconds\":120\n" +
+                "    \"maxExecutionTimeSeconds\":120\n" +
                 "}";
 
         // act
@@ -47,7 +47,7 @@ public class JobsResponseParserTest
         // assert
         assertEquals("jobName", Deencapsulation.getField(jobsResponseParser, "jobId"));
         assertEquals("DeviceId IN ['new_device']", Deencapsulation.getField(jobsResponseParser, "queryCondition"));
-        assertEquals(120L, (long) Deencapsulation.getField(jobsResponseParser, "maxExecutionTimeInSeconds"));
+        assertEquals(120L, (long) Deencapsulation.getField(jobsResponseParser, "maxExecutionTimeSeconds"));
         assertEquals("scheduleUpdateTwin", Deencapsulation.getField(jobsResponseParser, "type").toString());
         assertEquals("enqueued", Deencapsulation.getField(jobsResponseParser, "jobsStatus").toString());
         assertEquals("Valid failure reason", Deencapsulation.getField(jobsResponseParser, "failureReason"));
@@ -95,7 +95,7 @@ public class JobsResponseParserTest
                 "        \"tags\":{\"Tag1\":100},\n" +
                 "        \"properties\":{\"desired\":{},\"reported\":{}}\n" +
                 "    },\n" +
-                "    \"maxExecutionTimeInSeconds\":120\n" +
+                "    \"maxExecutionTimeSeconds\":120\n" +
                 "}";
 
         // act
@@ -122,7 +122,7 @@ public class JobsResponseParserTest
                 "        \"connectTimeoutInSeconds\":5,\n" +
                 "        \"payload\":{\"Tag1\":100}\n" +
                 "    },\n" +
-                "    \"maxExecutionTimeInSeconds\":120\n" +
+                "    \"maxExecutionTimeSeconds\":120\n" +
                 "}";
 
         // act
@@ -259,7 +259,7 @@ public class JobsResponseParserTest
                 "        \"runningCount\": 4,\n" +
                 "        \"pendingCount\": 5\n" +
                 "    },\n" +
-                "    \"maxExecutionTimeInSeconds\":120\n" +
+                "    \"maxExecutionTimeSeconds\":120\n" +
                 "}";
 
         // act
@@ -461,7 +461,7 @@ public class JobsResponseParserTest
                 "    \"createdTime\":\"2017-06-21T10:47:33.798692Z\",\n" +
                 "    \"startTime\":\"2017-06-21T16:47:33.798692Z\",\n" +
                 "    \"endTime\":\"2017-06-21T20:47:33.798692Z\",\n" +
-                "    \"maxExecutionTimeInSeconds\":120\n" +
+                "    \"maxExecutionTimeSeconds\":120\n" +
                 "}";
 
         // act
@@ -486,7 +486,7 @@ public class JobsResponseParserTest
                 "    \"createdTime\":\"InvalidDateString\",\n" +
                 "    \"startTime\":\"2017-06-21T16:47:33.798692Z\",\n" +
                 "    \"endTime\":\"2017-06-21T20:47:33.798692Z\",\n" +
-                "    \"maxExecutionTimeInSeconds\":120\n" +
+                "    \"maxExecutionTimeSeconds\":120\n" +
                 "}";
 
         // act
@@ -511,7 +511,7 @@ public class JobsResponseParserTest
                         "    \"createdDateTimeUtc\":\"\",\n" +
                         "    \"startTime\":\"2017-06-21T16:47:33.798692Z\",\n" +
                         "    \"endTime\":\"2017-06-21T20:47:33.798692Z\",\n" +
-                        "    \"maxExecutionTimeInSeconds\":120\n" +
+                        "    \"maxExecutionTimeSeconds\":120\n" +
                         "}";
 
         // act
@@ -536,7 +536,7 @@ public class JobsResponseParserTest
                         "    \"startTime\":\"2017-06-21T16:47:33.798692Z\",\n" +
                         "    \"endTime\":\"2017-06-21T20:47:33.798692Z\",\n" +
                         "    \"lastUpdatedDateTimeUtc\":\"\",\n" +
-                        "    \"maxExecutionTimeInSeconds\":120\n" +
+                        "    \"maxExecutionTimeSeconds\":120\n" +
                         "}";
 
         // act
@@ -563,7 +563,7 @@ public class JobsResponseParserTest
                         "    \"createdDateTimeUtc\":\"2017-06-21T10:47:33.798692Z\",\n" +
                         "    \"startTimeUtc\":\"invalidDate\",\n" +
                         "    \"endTime\":\"2017-06-21T20:47:33.798692Z\",\n" +
-                        "    \"maxExecutionTimeInSeconds\":120\n" +
+                        "    \"maxExecutionTimeSeconds\":120\n" +
                         "}";
 
         // act
@@ -583,7 +583,7 @@ public class JobsResponseParserTest
                         "    \"startTime\":\"2017-06-21T10:47:33.798692Z\",\n" +
                         "    \"startTimeUtc\":\"2017-06-21T10:47:33.798692Z\",\n" +
                         "    \"endTime\":\"2017-06-21T20:47:33.798692Z\",\n" +
-                        "    \"maxExecutionTimeInSeconds\":120\n" +
+                        "    \"maxExecutionTimeSeconds\":120\n" +
                         "}";
 
         // act
@@ -603,7 +603,7 @@ public class JobsResponseParserTest
                         "    \"startTime\":\"2017-06-21T10:47:33.798692Z\",\n" +
                         "    \"endTime\":\"2017-06-21T20:47:33.798692Z\",\n" +
                         "    \"endTimeUtc\":\"2017-06-21T20:47:33.798692Z\",\n" +
-                        "    \"maxExecutionTimeInSeconds\":120\n" +
+                        "    \"maxExecutionTimeSeconds\":120\n" +
                         "}";
 
         // act
@@ -623,7 +623,7 @@ public class JobsResponseParserTest
                         "    \"createdTime\":\"2017-06-21T10:47:33.798692Z\",\n" +
                         "    \"startTime\":\"2017-06-21T10:47:33.798692Z\",\n" +
                         "    \"endTime\":\"2017-06-21T20:47:33.798692Z\",\n" +
-                        "    \"maxExecutionTimeInSeconds\":120\n" +
+                        "    \"maxExecutionTimeSeconds\":120\n" +
                         "}";
 
         // act
@@ -643,7 +643,7 @@ public class JobsResponseParserTest
                         "    \"createdTime\":\"2017-06-21T10:47:33.798692Z\",\n" +
                         "    \"startTimeUtc\":\"invalidDate\",\n" +
                         "    \"endTime\":\"2017-06-21T20:47:33.798692Z\",\n" +
-                        "    \"maxExecutionTimeInSeconds\":120\n" +
+                        "    \"maxExecutionTimeSeconds\":120\n" +
                         "}";
 
         // act
@@ -668,7 +668,7 @@ public class JobsResponseParserTest
                         "    \"createdTime\":\"2017-06-21T10:47:33.798692Z\",\n" +
                         "    \"startTime\":\"2017-06-21T16:47:33.798692Z\",\n" +
                         "    \"endTimeUtc\":\"invalidDate\",\n" +
-                        "    \"maxExecutionTimeInSeconds\":120\n" +
+                        "    \"maxExecutionTimeSeconds\":120\n" +
                         "}";
 
         // act
@@ -693,7 +693,7 @@ public class JobsResponseParserTest
                 "    \"createdTime\":\"\",\n" +
                 "    \"startTime\":\"2017-06-21T16:47:33.798692Z\",\n" +
                 "    \"endTime\":\"2017-06-21T20:47:33.798692Z\",\n" +
-                "    \"maxExecutionTimeInSeconds\":120\n" +
+                "    \"maxExecutionTimeSeconds\":120\n" +
                 "}";
 
         // act
@@ -718,7 +718,7 @@ public class JobsResponseParserTest
                 "    \"createdTime\":\"2017-06-21T10:47:33.798692Z\",\n" +
                 "    \"startTime\":\"invalidDate\",\n" +
                 "    \"endTime\":\"2017-06-21T20:47:33.798692Z\",\n" +
-                "    \"maxExecutionTimeInSeconds\":120\n" +
+                "    \"maxExecutionTimeSeconds\":120\n" +
                 "}";
 
         // act
@@ -743,7 +743,7 @@ public class JobsResponseParserTest
                 "    \"createdTime\":\"2017-06-21T10:47:33.798692Z\",\n" +
                 "    \"startTime\":\"2017-06-21T16:47:33.798692Z\",\n" +
                 "    \"endTime\":\"invalidDate\",\n" +
-                "    \"maxExecutionTimeInSeconds\":120\n" +
+                "    \"maxExecutionTimeSeconds\":120\n" +
                 "}";
 
         // act
@@ -760,7 +760,7 @@ public class JobsResponseParserTest
     /* Tests_SRS_JOBSRESPONSEPARSER_21_015: [The getCreateTime shall return the createTime value.] */
     /* Tests_SRS_JOBSRESPONSEPARSER_21_016: [The getStartTime shall return the startTime value.] */
     /* Tests_SRS_JOBSRESPONSEPARSER_21_017: [The getEndTime shall return the endTime value.] */
-    /* Tests_SRS_JOBSRESPONSEPARSER_21_018: [The getMaxExecutionTimeInSeconds shall return the maxExecutionTimeInSeconds value.] */
+    /* Tests_SRS_JOBSRESPONSEPARSER_21_018: [The getMaxExecutionTimeSeconds shall return the maxExecutionTimeSeconds value.] */
     /* Tests_SRS_JOBSRESPONSEPARSER_21_019: [The getType shall return a String with the job type value.] */
     /* Tests_SRS_JOBSRESPONSEPARSER_21_020: [The getJobsStatus shall return a String with the job status value.] */
     /* Tests_SRS_JOBSRESPONSEPARSER_21_022: [The getUpdateTwin shall return the updateTwin value.] */
@@ -800,7 +800,7 @@ public class JobsResponseParserTest
                 "        \"runningCount\": 4,\n" +
                 "        \"pendingCount\": 5\n" +
                 "    },\n" +
-                "    \"maxExecutionTimeInSeconds\":120\n" +
+                "    \"maxExecutionTimeSeconds\":120\n" +
                 "}";
         JobsResponseParser jobsResponseParser = JobsResponseParser.createFromJson(json);
 
@@ -873,7 +873,7 @@ public class JobsResponseParserTest
                 "        \"connectTimeoutInSeconds\":5,\n" +
                 "        \"payload\":{\"Tag1\":100}\n" +
                 "    },\n" +
-                "    \"maxExecutionTimeInSeconds\":120\n" +
+                "    \"maxExecutionTimeSeconds\":120\n" +
                 "}";
         JobsResponseParser jobsResponseParser = JobsResponseParser.createFromJson(json);
 

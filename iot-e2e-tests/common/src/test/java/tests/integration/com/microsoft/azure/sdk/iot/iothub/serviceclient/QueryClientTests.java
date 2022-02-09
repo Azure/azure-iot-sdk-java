@@ -63,7 +63,7 @@ public class QueryClientTests extends IntegrationTest
     private static final int QUERY_TIMEOUT_MILLISECONDS = 1000 * 60; // 1 minute
     protected static final String PROPERTY_KEY_QUERY = "KeyQuery";
     protected static final String PROPERTY_VALUE_QUERY = "ValueQuery";
-    protected static final QueryClientOptions options = QueryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
+    protected static final QueryClientOptions options = QueryClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build();
 
     @BeforeClass
     public static void setup()
@@ -71,8 +71,8 @@ public class QueryClientTests extends IntegrationTest
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
-        registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-        jobClient = new ScheduledJobsClient(iotHubConnectionString, ScheduledJobsClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
+        jobClient = new ScheduledJobsClient(iotHubConnectionString, ScheduledJobsClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
         hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString).getHostName();
     }
 

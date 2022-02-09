@@ -95,7 +95,7 @@ public class DirectMethodsTests extends DirectMethodsCommon
             new DirectMethodsClient(
                 iotHubConnectionStringObj.getHostName(),
                 sasCredential,
-                DirectMethodsClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+                DirectMethodsClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
 
         super.openDeviceClientAndSubscribeToMethods();
 
@@ -166,8 +166,8 @@ public class DirectMethodsTests extends DirectMethodsCommon
             DirectMethodRequestOptions options =
                 DirectMethodRequestOptions.builder()
                     .payload("7000")
-                    .methodResponseTimeout(RESPONSE_TIMEOUT)
-                    .methodConnectTimeout(CONNECTION_TIMEOUT)
+                    .methodResponseTimeoutSeconds(RESPONSE_TIMEOUT)
+                    .methodConnectTimeoutSeconds(CONNECTION_TIMEOUT)
                     .build();
 
             if (testInstance.identity instanceof TestModuleIdentity)
@@ -189,8 +189,8 @@ public class DirectMethodsTests extends DirectMethodsCommon
         DirectMethodRequestOptions options =
             DirectMethodRequestOptions.builder()
                 .payload("100")
-                .methodResponseTimeout(RESPONSE_TIMEOUT)
-                .methodConnectTimeout(CONNECTION_TIMEOUT)
+                .methodResponseTimeoutSeconds(RESPONSE_TIMEOUT)
+                .methodConnectTimeoutSeconds(CONNECTION_TIMEOUT)
                 .build();
 
         MethodResult result;
@@ -226,8 +226,8 @@ public class DirectMethodsTests extends DirectMethodsCommon
             DirectMethodRequestOptions options =
                 DirectMethodRequestOptions.builder()
                     .payload("7000")
-                    .methodResponseTimeout(5)
-                    .methodConnectTimeout(CONNECTION_TIMEOUT)
+                    .methodResponseTimeoutSeconds(5)
+                    .methodConnectTimeoutSeconds(CONNECTION_TIMEOUT)
                     .build();
 
             if (testInstance.identity instanceof TestModuleIdentity)
@@ -266,8 +266,8 @@ public class DirectMethodsTests extends DirectMethodsCommon
 
             DirectMethodRequestOptions options =
                 DirectMethodRequestOptions.builder()
-                    .methodResponseTimeout(RESPONSE_TIMEOUT)
-                    .methodConnectTimeout(CONNECTION_TIMEOUT)
+                    .methodResponseTimeoutSeconds(RESPONSE_TIMEOUT)
+                    .methodConnectTimeoutSeconds(CONNECTION_TIMEOUT)
                     .build();
 
             if (testInstance.identity instanceof TestModuleIdentity)
@@ -351,7 +351,7 @@ public class DirectMethodsTests extends DirectMethodsCommon
             Proxy serviceSideProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
 
             ProxyOptions proxyOptions = new ProxyOptions(serviceSideProxy);
-            DirectMethodsClientOptions options = DirectMethodsClientOptions.builder().proxyOptions(proxyOptions).httpReadTimeout(HTTP_READ_TIMEOUT).build();
+            DirectMethodsClientOptions options = DirectMethodsClientOptions.builder().proxyOptions(proxyOptions).httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build();
 
             this.testInstance.methodServiceClient = new DirectMethodsClient(iotHubConnectionString, options);
 

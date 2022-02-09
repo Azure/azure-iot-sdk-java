@@ -141,8 +141,8 @@ public class DirectMethodsCommon extends IntegrationTest
             this.publicKeyCert = x509CertificateGenerator.getPublicCertificatePEM();
             this.privateKey = x509CertificateGenerator.getPrivateKeyPEM();
             this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
-            this.methodServiceClient = new DirectMethodsClient(iotHubConnectionString, DirectMethodsClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-            this.registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+            this.methodServiceClient = new DirectMethodsClient(iotHubConnectionString, DirectMethodsClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
+            this.registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
         }
 
         public void setup() throws Exception {
@@ -238,7 +238,7 @@ public class DirectMethodsCommon extends IntegrationTest
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
         IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
         AzureSasCredential azureSasCredential = new AzureSasCredential(serviceSasToken.toString());
-        DirectMethodsClientOptions options = DirectMethodsClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
+        DirectMethodsClientOptions options = DirectMethodsClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build();
         return new DirectMethodsClient(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
     }
 }

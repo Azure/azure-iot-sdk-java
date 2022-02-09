@@ -113,8 +113,8 @@ public class ScheduledJobsClientTest
     public void testOptionsDefaults()
     {
         ScheduledJobsClientOptions options = ScheduledJobsClientOptions.builder().build();
-        assertEquals((int) Deencapsulation.getField(ScheduledJobsClientOptions.class, "DEFAULT_HTTP_READ_TIMEOUT_MS"), options.getHttpReadTimeout());
-        assertEquals((int) Deencapsulation.getField(ScheduledJobsClientOptions.class, "DEFAULT_HTTP_CONNECT_TIMEOUT_MS"), options.getHttpConnectTimeout());
+        assertEquals((int) Deencapsulation.getField(ScheduledJobsClientOptions.class, "DEFAULT_HTTP_READ_TIMEOUT_MS"), options.getHttpReadTimeoutSeconds());
+        assertEquals((int) Deencapsulation.getField(ScheduledJobsClientOptions.class, "DEFAULT_HTTP_CONNECT_TIMEOUT_MS"), options.getHttpConnectTimeoutSeconds());
     }
 
     /* Tests_SRS_JOBCLIENT_21_001: [The constructor shall throw IllegalArgumentException if the input string is null or empty.] */
@@ -528,7 +528,7 @@ public class ScheduledJobsClientTest
         testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_008: [If the maxExecutionTimeInSeconds is negative, the scheduleUpdateTwin shall throws IllegalArgumentException.] */
+    /* Tests_SRS_JOBCLIENT_21_008: [If the maxExecutionTimeSeconds is negative, the scheduleUpdateTwin shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void scheduleUpdateThrowsOnNullMaxExecutionTimeInSeconds() throws IOException, IotHubException
     {
@@ -925,7 +925,7 @@ public class ScheduledJobsClientTest
         }
 
         //act
-        DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
+        DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeSeconds(maxExecutionTimeInSeconds).build();
         testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
     }
 
@@ -1008,7 +1008,7 @@ public class ScheduledJobsClientTest
         testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc);
     }
 
-    /* Tests_SRS_JOBCLIENT_21_017: [If the maxExecutionTimeInSeconds is negative, the scheduleDirectMethod shall throws IllegalArgumentException.] */
+    /* Tests_SRS_JOBCLIENT_21_017: [If the maxExecutionTimeSeconds is negative, the scheduleDirectMethod shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void scheduleDeviceMethodThrowsOnNegativeMaxExecutionTimeInSeconds() throws IOException, IotHubException
     {
@@ -1031,7 +1031,7 @@ public class ScheduledJobsClientTest
         }
 
         //act
-        DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
+        DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeSeconds(maxExecutionTimeInSeconds).build();
         testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
     }
 
@@ -1082,7 +1082,7 @@ public class ScheduledJobsClientTest
         ScheduledJobsClient testJobClient = new ScheduledJobsClient(connectionString);
 
         //act
-        DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
+        DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeSeconds(maxExecutionTimeInSeconds).build();
         ScheduledJob job = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
     }
 
@@ -1132,7 +1132,7 @@ public class ScheduledJobsClientTest
         ScheduledJobsClient testJobClient = new ScheduledJobsClient(connectionString);
 
         //act
-        DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
+        DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeSeconds(maxExecutionTimeInSeconds).build();
         ScheduledJob job = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
 
         //assert
@@ -1191,7 +1191,7 @@ public class ScheduledJobsClientTest
         ScheduledJobsClient testJobClient = new ScheduledJobsClient(connectionString);
 
         //act
-        DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
+        DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeSeconds(maxExecutionTimeInSeconds).build();
         testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
     }
 
@@ -1236,7 +1236,7 @@ public class ScheduledJobsClientTest
         ScheduledJobsClient testJobClient = new ScheduledJobsClient(connectionString);
 
         //act
-        DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
+        DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeSeconds(maxExecutionTimeInSeconds).build();
         testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
     }
 
@@ -1286,7 +1286,7 @@ public class ScheduledJobsClientTest
         ScheduledJobsClient testJobClient = new ScheduledJobsClient(connectionString);
 
         //act
-        DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeInSeconds(maxExecutionTimeInSeconds).build();
+        DirectMethodsJobOptions options = DirectMethodsJobOptions.builder().payload(payload).maxExecutionTimeSeconds(maxExecutionTimeInSeconds).build();
         ScheduledJob job = testJobClient.scheduleDirectMethod(jobId, queryCondition, methodName, startTimeUtc, options);
 
         //assert

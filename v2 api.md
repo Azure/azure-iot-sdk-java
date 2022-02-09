@@ -345,9 +345,11 @@ public class ServiceClient
 
     public void send(String deviceId, String moduleId, Message message) throws IOException, IotHubException;
 
-    public FeedbackReceiver getFeedbackReceiver(FeedbackMessageReceivedCallback feedbackMessageReceivedCallback);
+    public FeedbackReceiver getFeedbackReceiver(
+        FeedbackMessageReceivedCallback feedbackMessageReceivedCallback);
 
-    public FileUploadNotificationReceiver getFileUploadNotificationReceiver(FileUploadNotificationReceivedCallback fileUploadNotificationReceivedCallback);
+    public FileUploadNotificationReceiver getFileUploadNotificationReceiver(
+        FileUploadNotificationReceivedCallback fileUploadNotificationReceivedCallback);
 }
 
 @Builder
@@ -439,6 +441,16 @@ public final class RegistryClient
     public void removeModule(String deviceId, String moduleId) throws IOException, IotHubException;
 
     public void removeModule(Module module) throws IOException, IotHubException;
+    
+    public RegistryJob exportDevices(String exportBlobContainerUri, boolean excludeKeys) throws IOException, IotHubException;
+
+    public RegistryJob exportDevices(RegistryJob exportDevicesParameters) throws IOException, IotHubException;
+
+    public RegistryJob importDevices(String importBlobContainerUri, String outputBlobContainerUri) throws IOException, IotHubException;
+
+    public RegistryJob importDevices(RegistryJob importDevicesParameters) throws IOException, IotHubException;
+
+    public RegistryJob getJob(String jobId) throws IOException, IotHubException;
 }
 
 @Builder
@@ -449,11 +461,11 @@ public final class RegistryClientOptions
 
     @Getter
     @Builder.Default
-    private final int httpReadTimeout = DEFAULT_HTTP_READ_TIMEOUT_MS;
+    private final int httpReadTimeoutSeconds = DEFAULT_HTTP_READ_TIMEOUT_SECONDS;
 
     @Getter
     @Builder.Default
-    private final int httpConnectTimeout = DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
+    private final int httpConnectTimeoutSeconds = DEFAULT_HTTP_CONNECT_TIMEOUT_SECONDS;
 }
 ```
 
@@ -485,6 +497,10 @@ public final class TwinClient
     public void patch(Twin twin) throws IotHubException, IOException;
 
     public Twin replace(Twin twin) throws IotHubException, IOException;
+    
+    public TwinQueryResponse query(String query) throws IOException, IotHubException;
+    
+    public TwinQueryResponse query(String query, QueryPageOptions options) throws IOException, IotHubException;
 }
 
 @Builder
@@ -495,13 +511,12 @@ public final class TwinClientOptions
 
     @Getter
     @Builder.Default
-    private final int httpReadTimeout = DEFAULT_HTTP_READ_TIMEOUT_MS;
+    private final int httpReadTimeoutSeconds = DEFAULT_HTTP_READ_TIMEOUT_SECONDS;
 
     @Getter
     @Builder.Default
-    private final int httpConnectTimeout = DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
+    private final int httpConnectTimeoutSeconds = DEFAULT_HTTP_CONNECT_TIMEOUT_SECONDS;
 }
-
 
 ```
 
@@ -544,11 +559,11 @@ public final class DirectMethodsClientOptions
 
     @Getter
     @Builder.Default
-    private final int httpReadTimeout = DEFAULT_HTTP_READ_TIMEOUT_MS;
+    private final int httpReadTimeoutSeconds = DEFAULT_HTTP_READ_TIMEOUT_SECONDS;
 
     @Getter
     @Builder.Default
-    private final int httpConnectTimeout = DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
+    private final int httpConnectTimeoutSeconds = DEFAULT_HTTP_CONNECT_TIMEOUT_SECONDS;
 }
 
 @Builder
@@ -559,11 +574,11 @@ public final class DirectMethodRequestOptions
 
     @Getter
     @Builder.Default
-    private final int methodResponseTimeout = 200;
+    private final int methodResponseTimeoutSeconds = 200;
 
     @Getter
     @Builder.Default
-    private final int methodConnectTimeout = 200;
+    private final int methodConnectTimeoutSeconds = 200;
 }
 
 ```
@@ -574,46 +589,6 @@ public final class DirectMethodRequestOptions
   <summary>JobsClient and Options</summary>
 
 ```java
-
-public final class RegistryJobsClient
-{
-    public RegistryJobsClient(String connectionString);
-
-    public RegistryJobsClient(String connectionString, RegistryJobsClientOptions clientOptions);
-
-    public RegistryJobsClient(String hostName, TokenCredential credential);
-
-    public RegistryJobsClient(String hostName, TokenCredential credential, RegistryJobsClientOptions clientOptions);
-
-    public RegistryJobsClient(String hostName, AzureSasCredential azureSasCredential);
-
-    public RegistryJobsClient(String hostName, AzureSasCredential azureSasCredential, RegistryJobsClientOptions clientOptions);
-
-    public RegistryJob exportDevices(String exportBlobContainerUri, boolean excludeKeys) throws IOException, IotHubException;
-
-    public RegistryJob exportDevices(RegistryJob exportDevicesParameters) throws IOException, IotHubException;
-
-    public RegistryJob importDevices(String importBlobContainerUri, String outputBlobContainerUri) throws IOException, IotHubException;
-
-    public RegistryJob importDevices(RegistryJob importDevicesParameters) throws IOException, IotHubException;
-
-    public RegistryJob get(String jobId) throws IOException, IotHubException;
-}
-
-@Builder
-public final class RegistryJobsClientOptions
-{
-    @Getter
-    private final ProxyOptions proxyOptions;
-
-    @Getter
-    @Builder.Default
-    private final int httpReadTimeout = DEFAULT_HTTP_READ_TIMEOUT_MS;
-
-    @Getter
-    @Builder.Default
-    private final int httpConnectTimeout = DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
-}
 
 public final class ScheduledJobsClient
 {
@@ -641,6 +616,18 @@ public final class ScheduledJobsClient
     public ScheduledJob get(String jobId) throws IOException, IotHubException;
 
     public ScheduledJob cancel(String jobId) throws IOException, IotHubException;
+    
+    public JobQueryResponse query(String query) 
+        throws IOException, IotHubException;
+
+    public JobQueryResponse query(String query, QueryPageOptions options) 
+        throws IOException, IotHubException;
+
+    public JobQueryResponse query(ScheduledJobType jobType, ScheduledJobStatus jobStatus) 
+        throws IOException, IotHubException;
+
+    public JobQueryResponse query(ScheduledJobType jobType, ScheduledJobStatus jobStatus, QueryPageOptions options) 
+        throws IOException, IotHubException;
 }
 
 @Builder
@@ -651,11 +638,11 @@ public final class ScheduledJobsClientOptions
 
     @Getter
     @Builder.Default
-    private final int httpReadTimeout = DEFAULT_HTTP_READ_TIMEOUT_MS;
+    private final int httpReadTimeoutSeconds = DEFAULT_HTTP_READ_TIMEOUT_SECONDS;
 
     @Getter
     @Builder.Default
-    private final int httpConnectTimeout = DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
+    private final int httpConnectTimeoutSeconds = DEFAULT_HTTP_CONNECT_TIMEOUT_SECONDS;
 }
 
 ```
@@ -736,11 +723,11 @@ public final class QueryClientOptions
 
     @Getter
     @Builder.Default
-    private final int httpReadTimeout = DEFAULT_HTTP_READ_TIMEOUT_MS;
+    private final int httpReadTimeoutSeconds = DEFAULT_HTTP_READ_TIMEOUT_SECONDS;
 
     @Getter
     @Builder.Default
-    private final int httpConnectTimeout = DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
+    private final int httpConnectTimeoutSeconds = DEFAULT_HTTP_CONNECT_TIMEOUT_SECONDS;
 }
 
 @Builder
@@ -800,11 +787,11 @@ public class ConfigurationsClientOptions
 
     @Getter
     @Builder.Default
-    private final int httpReadTimeout = DEFAULT_HTTP_READ_TIMEOUT_MS;
+    private final int httpReadTimeoutSeconds = DEFAULT_HTTP_READ_TIMEOUT_SECONDS;
 
     @Getter
     @Builder.Default
-    private final int httpConnectTimeout = DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
+    private final int httpConnectTimeoutSeconds = DEFAULT_HTTP_CONNECT_TIMEOUT_SECONDS;
 }
 
 ```

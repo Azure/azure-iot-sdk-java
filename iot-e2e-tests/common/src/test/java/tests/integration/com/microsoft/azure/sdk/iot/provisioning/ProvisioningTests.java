@@ -402,11 +402,11 @@ public class ProvisioningTests extends ProvisioningCommon
             TwinClient twinClient;
             if (inFarAwayHub)
             {
-                twinClient = new TwinClient(farAwayIotHubConnectionString, TwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+                twinClient = new TwinClient(farAwayIotHubConnectionString, TwinClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
             }
             else
             {
-                twinClient = new TwinClient(iotHubConnectionString, TwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+                twinClient = new TwinClient(iotHubConnectionString, TwinClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
             }
 
             Twin device = twinClient.get(testInstance.provisionedDeviceId);

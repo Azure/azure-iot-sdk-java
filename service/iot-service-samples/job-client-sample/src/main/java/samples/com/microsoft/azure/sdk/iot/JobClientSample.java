@@ -136,9 +136,9 @@ public class JobClientSample
         DirectMethodsJobOptions options =
             DirectMethodsJobOptions.builder()
                 .payload(payload)
-                .methodConnectTimeout(connectTimeout)
-                .methodResponseTimeout(responseTimeout)
-                .maxExecutionTimeInSeconds(maxExecutionTimeInSeconds)
+                .methodConnectTimeoutSeconds(connectTimeout)
+                .methodResponseTimeoutSeconds(responseTimeout)
+                .maxExecutionTimeSeconds(maxExecutionTimeInSeconds)
                 .build();
 
         ScheduledJob jobMethod =

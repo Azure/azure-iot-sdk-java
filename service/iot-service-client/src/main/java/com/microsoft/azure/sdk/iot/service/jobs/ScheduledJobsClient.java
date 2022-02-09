@@ -83,8 +83,8 @@ public final class ScheduledJobsClient
 
         QueryClientOptions queryClientOptions =
             QueryClientOptions.builder()
-                .httpReadTimeout(clientOptions.getHttpReadTimeout())
-                .httpConnectTimeout(clientOptions.getHttpConnectTimeout())
+                .httpReadTimeoutSeconds(clientOptions.getHttpReadTimeoutSeconds())
+                .httpConnectTimeoutSeconds(clientOptions.getHttpConnectTimeoutSeconds())
                 .proxyOptions(clientOptions.getProxyOptions())
                 .build();
 
@@ -128,8 +128,8 @@ public final class ScheduledJobsClient
 
         QueryClientOptions queryClientOptions =
             QueryClientOptions.builder()
-                .httpReadTimeout(clientOptions.getHttpReadTimeout())
-                .httpConnectTimeout(clientOptions.getHttpConnectTimeout())
+                .httpReadTimeoutSeconds(clientOptions.getHttpReadTimeoutSeconds())
+                .httpConnectTimeoutSeconds(clientOptions.getHttpConnectTimeoutSeconds())
                 .proxyOptions(clientOptions.getProxyOptions())
                 .build();
 
@@ -171,8 +171,8 @@ public final class ScheduledJobsClient
 
         QueryClientOptions queryClientOptions =
             QueryClientOptions.builder()
-                .httpReadTimeout(clientOptions.getHttpReadTimeout())
-                .httpConnectTimeout(clientOptions.getHttpConnectTimeout())
+                .httpReadTimeoutSeconds(clientOptions.getHttpReadTimeoutSeconds())
+                .httpConnectTimeoutSeconds(clientOptions.getHttpConnectTimeoutSeconds())
                 .proxyOptions(clientOptions.getProxyOptions())
                 .build();
 
@@ -218,7 +218,7 @@ public final class ScheduledJobsClient
 
         if (maxExecutionTimeInSeconds < 0)
         {
-            throw new IllegalArgumentException("maxExecutionTimeInSeconds cannot be negative");
+            throw new IllegalArgumentException("maxExecutionTimeSeconds cannot be negative");
         }
 
         ScheduledJobParser jobsParser =
@@ -298,16 +298,16 @@ public final class ScheduledJobsClient
 
         Objects.requireNonNull(options);
 
-        if (options.getMaxExecutionTimeInSeconds() < 0)
+        if (options.getMaxExecutionTimeSeconds() < 0)
         {
-            throw new IllegalArgumentException("maxExecutionTimeInSeconds cannot be less than 0");
+            throw new IllegalArgumentException("maxExecutionTimeSeconds cannot be less than 0");
         }
 
         MethodParser cloudToDeviceMethod =
             new MethodParser(
                 methodName,
-                options.getMethodResponseTimeout(),
-                options.getMethodConnectTimeout(),
+                options.getMethodResponseTimeoutSeconds(),
+                options.getMethodConnectTimeoutSeconds(),
                 options.getPayload());
 
         ScheduledJobParser jobsParser =
@@ -316,7 +316,7 @@ public final class ScheduledJobsClient
                 cloudToDeviceMethod,
                 queryCondition,
                 startTimeUtc,
-                options.getMaxExecutionTimeInSeconds());
+                options.getMaxExecutionTimeSeconds());
 
         String json = jobsParser.toJson();
 
@@ -539,8 +539,8 @@ public final class ScheduledJobsClient
         }
 
         HttpRequest request = new HttpRequest(url, method, payload, getAuthenticationToken(), proxy);
-        request.setReadTimeoutMillis(this.clientOptions.getHttpReadTimeout());
-        request.setConnectTimeoutMillis(this.clientOptions.getHttpConnectTimeout());
+        request.setReadTimeoutSeconds(this.clientOptions.getHttpReadTimeoutSeconds());
+        request.setConnectTimeoutSeconds(this.clientOptions.getHttpConnectTimeoutSeconds());
         return request;
     }
 }

@@ -82,8 +82,8 @@ public class DirectMethodSample
         DirectMethodRequestOptions options =
             DirectMethodRequestOptions.builder()
                 .payload(payload)
-                .methodConnectTimeout(connectTimeout)
-                .methodResponseTimeout(responseTimeout)
+                .methodConnectTimeoutSeconds(connectTimeout)
+                .methodResponseTimeoutSeconds(responseTimeout)
                 .build();
 
         MethodResult result = methodClient.invoke(deviceId, methodName, options);
@@ -107,9 +107,9 @@ public class DirectMethodSample
         DirectMethodsJobOptions options =
             DirectMethodsJobOptions.builder()
                 .payload(payload)
-                .methodConnectTimeout(connectTimeout)
-                .methodResponseTimeout(responseTimeout)
-                .maxExecutionTimeInSeconds(MAX_EXECUTION_TIME_IN_SECONDS)
+                .methodConnectTimeoutSeconds(connectTimeout)
+                .methodResponseTimeoutSeconds(responseTimeout)
+                .maxExecutionTimeSeconds(MAX_EXECUTION_TIME_IN_SECONDS)
                 .build();
 
         String jobId = UUID.randomUUID().toString();
@@ -136,9 +136,9 @@ public class DirectMethodSample
         DirectMethodsJobOptions options =
             DirectMethodsJobOptions.builder()
                 .payload(payload)
-                .methodConnectTimeout(connectTimeout)
-                .methodResponseTimeout(responseTimeout)
-                .maxExecutionTimeInSeconds(MAX_EXECUTION_TIME_IN_SECONDS)
+                .methodConnectTimeoutSeconds(connectTimeout)
+                .methodResponseTimeoutSeconds(responseTimeout)
+                .maxExecutionTimeSeconds(MAX_EXECUTION_TIME_IN_SECONDS)
                 .build();
 
         String jobId = UUID.randomUUID().toString();

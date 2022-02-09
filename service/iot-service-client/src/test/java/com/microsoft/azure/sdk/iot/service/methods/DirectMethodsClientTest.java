@@ -180,8 +180,8 @@ public class DirectMethodsClientTest
     public void testOptionsDefaults()
     {
         DirectMethodsClientOptions options = DirectMethodsClientOptions.builder().build();
-        assertEquals((int) Deencapsulation.getField(DirectMethodsClientOptions.class, "DEFAULT_HTTP_READ_TIMEOUT_MS"), options.getHttpReadTimeout());
-        assertEquals((int) Deencapsulation.getField(DirectMethodsClientOptions.class, "DEFAULT_HTTP_CONNECT_TIMEOUT_MS"), options.getHttpConnectTimeout());
+        assertEquals((int) Deencapsulation.getField(DirectMethodsClientOptions.class, "DEFAULT_HTTP_READ_TIMEOUT_MS"), options.getHttpReadTimeoutSeconds());
+        assertEquals((int) Deencapsulation.getField(DirectMethodsClientOptions.class, "DEFAULT_HTTP_CONNECT_TIMEOUT_MS"), options.getHttpConnectTimeoutSeconds());
     }
 
     /* Tests_SRS_DEVICEMETHOD_21_002: [The constructor shall create an IotHubConnectionStringBuilder object from the given connection string.] */
@@ -241,8 +241,8 @@ public class DirectMethodsClientTest
                 DirectMethodRequestOptions options =
                     DirectMethodRequestOptions.builder()
                         .payload(testCase.payload)
-                        .methodConnectTimeout(testCase.connectTimeoutInSeconds)
-                        .methodResponseTimeout(testCase.responseTimeoutInSeconds)
+                        .methodConnectTimeoutSeconds(testCase.connectTimeoutInSeconds)
+                        .methodResponseTimeoutSeconds(testCase.responseTimeoutInSeconds)
                         .build();
 
                 testMethod.invoke(testCase.deviceId, testCase.methodName, options);
@@ -279,8 +279,8 @@ public class DirectMethodsClientTest
                 DirectMethodRequestOptions options =
                     DirectMethodRequestOptions.builder()
                         .payload(testCase.payload)
-                        .methodConnectTimeout(testCase.connectTimeoutInSeconds)
-                        .methodResponseTimeout(testCase.responseTimeoutInSeconds)
+                        .methodConnectTimeoutSeconds(testCase.connectTimeoutInSeconds)
+                        .methodResponseTimeoutSeconds(testCase.responseTimeoutInSeconds)
                         .build();
 
                 testMethod.invoke(testCase.deviceId, testCase.moduleId, testCase.methodName, options);

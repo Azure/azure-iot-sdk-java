@@ -94,7 +94,7 @@ public class GetTwinTests extends TwinCommon
             new TwinClient(
                 iotHubConnectionStringObj.getHostName(),
                 sasCredential,
-                TwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+                TwinClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
 
         // add first device just to make sure that the first credential update worked
         super.testGetDeviceTwin();

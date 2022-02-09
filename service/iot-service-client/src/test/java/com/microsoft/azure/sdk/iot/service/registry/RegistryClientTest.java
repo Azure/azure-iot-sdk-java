@@ -126,8 +126,8 @@ public class RegistryClientTest
     public void testOptionsDefaults()
     {
         RegistryClientOptions options = RegistryClientOptions.builder().build();
-        assertEquals((int) Deencapsulation.getField(RegistryClientOptions.class, "DEFAULT_HTTP_READ_TIMEOUT_MS"), options.getHttpReadTimeout());
-        assertEquals((int) Deencapsulation.getField(RegistryClientOptions.class, "DEFAULT_HTTP_CONNECT_TIMEOUT_MS"), options.getHttpConnectTimeout());
+        assertEquals((int) Deencapsulation.getField(RegistryClientOptions.class, "DEFAULT_HTTP_READ_TIMEOUT_MS"), options.getHttpReadTimeoutSeconds());
+        assertEquals((int) Deencapsulation.getField(RegistryClientOptions.class, "DEFAULT_HTTP_CONNECT_TIMEOUT_MS"), options.getHttpConnectTimeoutSeconds());
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_001: [The constructor shall throw IllegalArgumentException if the input string is null or empty]
@@ -378,7 +378,7 @@ public class RegistryClientTest
                 times = 1;
                 new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], anyString, (Proxy) any);
                 times = 1;
-                mockHttpRequest.setReadTimeoutMillis(anyInt);
+                mockHttpRequest.setReadTimeoutSeconds(anyInt);
                 mockHttpRequest.setHeaderField("If-Match", etag);
             }
         };
@@ -433,7 +433,7 @@ public class RegistryClientTest
                 times = 1;
                 new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], anyString, (Proxy) any);
                 times = 1;
-                mockHttpRequest.setReadTimeoutMillis(anyInt);
+                mockHttpRequest.setReadTimeoutSeconds(anyInt);
                 mockHttpRequest.setHeaderField("If-Match", "*");
             }
         };
@@ -464,7 +464,7 @@ public class RegistryClientTest
                 mockProxyOptions.getProxy();
                 result = mockProxy;
                 new HttpRequest(mockUrl, HttpMethod.GET, new byte[0], anyString, mockProxy);
-                mockHttpRequest.setReadTimeoutMillis(anyInt);
+                mockHttpRequest.setReadTimeoutSeconds(anyInt);
                 mockHttpRequest.send();
                 IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
@@ -751,7 +751,7 @@ public class RegistryClientTest
                 times = 1;
                 new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], anyString, (Proxy) any);
                 times = 1;
-                mockHttpRequest.setReadTimeoutMillis(anyInt);
+                mockHttpRequest.setReadTimeoutSeconds(anyInt);
                 mockHttpRequest.setHeaderField("If-Match", etag);
             }
         };
@@ -878,7 +878,7 @@ public class RegistryClientTest
                 times = 1;
                 new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], anyString, (Proxy) any);
                 times = 1;
-                mockHttpRequest.setReadTimeoutMillis(anyInt);
+                mockHttpRequest.setReadTimeoutSeconds(anyInt);
                 mockHttpRequest.setHeaderField("If-Match", "*");
             }
         };
@@ -913,9 +913,9 @@ public class RegistryClientTest
                 result = mockRegistryIdentityParser;
                 Deencapsulation.newInstance(Device.class, mockRegistryIdentityParser);
                 result = mockDevice;
-                mockOptions.getHttpConnectTimeout();
+                mockOptions.getHttpConnectTimeoutSeconds();
                 result = expectedHttpConnectTimeout;
-                mockOptions.getHttpReadTimeout();
+                mockOptions.getHttpReadTimeoutSeconds();
                 result = expectedHttpReadTimeout;
             }
         };
@@ -929,8 +929,8 @@ public class RegistryClientTest
         new Verifications()
         {
             {
-                mockHttpRequest.setConnectTimeoutMillis(expectedHttpConnectTimeout);
-                mockHttpRequest.setReadTimeoutMillis(expectedHttpReadTimeout);
+                mockHttpRequest.setConnectTimeoutSeconds(expectedHttpConnectTimeout);
+                mockHttpRequest.setReadTimeoutSeconds(expectedHttpReadTimeout);
             }
         };
     }
@@ -964,7 +964,7 @@ public class RegistryClientTest
             {
                 IotHubConnectionString.getUrlDevice(anyString, requestDeviceId);
                 new HttpRequest(mockUrl, httpMethod, (byte[]) any, anyString, (Proxy) any);
-                mockHttpRequest.setReadTimeoutMillis(anyInt);
+                mockHttpRequest.setReadTimeoutSeconds(anyInt);
                 mockHttpRequest.send();
             }
         };
@@ -1000,7 +1000,7 @@ public class RegistryClientTest
                 times = 1;
                 new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any, anyString, (Proxy) any);
                 times = 1;
-                mockHttpRequest.setReadTimeoutMillis(anyInt);
+                mockHttpRequest.setReadTimeoutSeconds(anyInt);
                 mockHttpRequest.send();
             }
         };
@@ -1036,8 +1036,8 @@ public class RegistryClientTest
             {
                 IotHubConnectionString.getUrlModule(anyString, requestDeviceId, requestModuleId);
                 new HttpRequest(mockUrl, httpMethod, (byte[]) any, anyString, (Proxy) any);
-                mockHttpRequest.setReadTimeoutMillis(anyInt);
-                mockHttpRequest.setConnectTimeoutMillis(anyInt);
+                mockHttpRequest.setReadTimeoutSeconds(anyInt);
+                mockHttpRequest.setConnectTimeoutSeconds(anyInt);
                 mockHttpRequest.send();
             }
         };
@@ -1073,7 +1073,7 @@ public class RegistryClientTest
                 times = 1;
                 new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any, anyString, (Proxy) any);
                 times = 1;
-                mockHttpRequest.setReadTimeoutMillis(anyInt);
+                mockHttpRequest.setReadTimeoutSeconds(anyInt);
                 mockHttpRequest.send();
             }
         };

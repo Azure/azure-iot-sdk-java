@@ -81,8 +81,8 @@ public class Thermostat {
         DirectMethodRequestOptions options =
             DirectMethodRequestOptions.builder()
                 .payload(commandInput)
-                .methodConnectTimeout(connectTimeout)
-                .methodResponseTimeout(responseTimeout)
+                .methodConnectTimeoutSeconds(connectTimeout)
+                .methodResponseTimeoutSeconds(responseTimeout)
                 .build();
 
         MethodResult result = methodClient.invoke(deviceId, methodToInvoke, options);

@@ -91,8 +91,8 @@ public class DigitalTwinAsyncClient {
         }
 
         RestClient simpleRestClient = new RestClient.Builder()
-            .withConnectionTimeout(options.getHttpConnectTimeout(), TimeUnit.MILLISECONDS)
-            .withReadTimeout(options.getHttpReadTimeout(), TimeUnit.MILLISECONDS)
+            .withConnectionTimeout(options.getHttpConnectTimeoutSeconds(), TimeUnit.SECONDS)
+            .withReadTimeout(options.getHttpReadTimeoutSeconds(), TimeUnit.SECONDS)
             .withProxy(proxy) // assigning a null proxy here just means no proxy will be used
             .withBaseUrl(httpsEndpoint)
             .withCredentials(new ServiceClientCredentialsProvider(sasTokenProvider))
@@ -143,8 +143,8 @@ public class DigitalTwinAsyncClient {
 
         RestClient simpleRestClient = new RestClient.Builder()
             .withBaseUrl(HTTPS_SCHEME + hostName) //hostname is only "my-iot-hub.azure-devices.net" so we need to add "https://"
-            .withConnectionTimeout(options.getHttpConnectTimeout(), TimeUnit.MILLISECONDS)
-            .withReadTimeout(options.getHttpReadTimeout(), TimeUnit.MILLISECONDS)
+            .withConnectionTimeout(options.getHttpConnectTimeoutSeconds(), TimeUnit.SECONDS)
+            .withReadTimeout(options.getHttpReadTimeoutSeconds(), TimeUnit.SECONDS)
             .withProxy(proxy) // assigning a null proxy here just means no proxy will be used
             .withCredentials(new ServiceClientBearerTokenCredentialProvider(bearerTokenProvider))
             .withResponseBuilderFactory(new ServiceResponseBuilder.Factory())
@@ -192,8 +192,8 @@ public class DigitalTwinAsyncClient {
 
         RestClient simpleRestClient = new RestClient.Builder()
             .withBaseUrl(HTTPS_SCHEME + hostName) //hostname is only "my-iot-hub.azure-devices.net" so we need to add "https://"
-            .withConnectionTimeout(options.getHttpConnectTimeout(), TimeUnit.MILLISECONDS)
-            .withReadTimeout(options.getHttpReadTimeout(), TimeUnit.MILLISECONDS)
+            .withConnectionTimeout(options.getHttpConnectTimeoutSeconds(), TimeUnit.SECONDS)
+            .withReadTimeout(options.getHttpReadTimeoutSeconds(), TimeUnit.SECONDS)
             .withProxy(proxy) // assigning a null proxy here just means no proxy will be used
             .withCredentials(new ServiceClientCredentialsProvider(sasTokenProvider))
             .withResponseBuilderFactory(new ServiceResponseBuilder.Factory())

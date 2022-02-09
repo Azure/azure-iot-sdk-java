@@ -235,7 +235,7 @@ public class JobTest
         assertEquals(now, Deencapsulation.getField(job, "createdTime"));
         assertEquals(now, Deencapsulation.getField(job, "startTime"));
         assertEquals(now, Deencapsulation.getField(job, "endTime"));
-        assertEquals(MAX_EXECUTION_TIME_IN_SECONDS, (long)Deencapsulation.getField(job, "maxExecutionTimeInSeconds"));
+        assertEquals(MAX_EXECUTION_TIME_IN_SECONDS, (long)Deencapsulation.getField(job, "maxExecutionTimeSeconds"));
         assertEquals(ScheduledJobType.scheduleUpdateTwin, Deencapsulation.getField(job, "jobType"));
         assertEquals(ScheduledJobStatus.enqueued, Deencapsulation.getField(job, "jobStatus"));
         assertNull(Deencapsulation.getField(job, "cloudToDeviceMethod"));
@@ -276,7 +276,7 @@ public class JobTest
     /* Tests_SRS_JOBRESULT_21_007: [The getCreatedTime shall return the stored createdTime.] */
     /* Tests_SRS_JOBRESULT_21_008: [The getStartTime shall return the stored startTime.] */
     /* Tests_SRS_JOBRESULT_21_009: [The getEndTime shall return the stored endTime.] */
-    /* Tests_SRS_JOBRESULT_21_010: [The getMaxExecutionTimeInSeconds shall return the stored maxExecutionTimeInSeconds.] */
+    /* Tests_SRS_JOBRESULT_21_010: [The getMaxExecutionTimeSeconds shall return the stored maxExecutionTimeSeconds.] */
     /* Tests_SRS_JOBRESULT_21_011: [The getType shall return the stored jobType.] */
     /* Tests_SRS_JOBRESULT_21_012: [The getJobStatus shall return the stored jobStatus.] */
     /* Tests_SRS_JOBRESULT_21_014: [The getUpdateTwin shall return the stored updateTwin.] */
@@ -479,7 +479,7 @@ public class JobTest
                 "  \"startTime\": \"" + nowString + "\",\n" +
                 "  \"lastUpdatedDateTime\": \"" + nowString + "\",\n" +
                 "  \"endTime\": \"" + nowString + "\",\n" +
-                "  \"maxExecutionTimeInSeconds\": 100,\n" +
+                "  \"maxExecutionTimeSeconds\": 100,\n" +
                 "  \"jobType\": \"scheduleUpdateTwin\",\n" +
                 "  \"jobStatus\": \"enqueued\",\n" +
                 "  \"updateTwin\": {\n" +
@@ -538,7 +538,7 @@ public class JobTest
                         "  \"startTime\": \"" + nowString + "\",\n" +
                         "  \"lastUpdatedDateTime\": \"" + nowString + "\",\n" +
                         "  \"endTime\": \"" + nowString + "\",\n" +
-                        "  \"maxExecutionTimeInSeconds\": 100,\n" +
+                        "  \"maxExecutionTimeSeconds\": 100,\n" +
                         "  \"jobType\": \"unknown\",\n" +
                         "  \"jobStatus\": \"enqueued\",\n" +
                         "  \"updateTwin\": {\n" +

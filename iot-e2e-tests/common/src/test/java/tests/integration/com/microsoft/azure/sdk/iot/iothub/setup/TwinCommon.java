@@ -375,8 +375,8 @@ public class TwinCommon extends IntegrationTest
             this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
             this.clientType = clientType;
             
-            this.twinServiceClient = new TwinClient(iotHubConnectionString, TwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-            this.registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+            this.twinServiceClient = new TwinClient(iotHubConnectionString, TwinClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
+            this.registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
             this.queryClient = new QueryClient(iotHubConnectionString);
         }
     }
@@ -693,7 +693,7 @@ public class TwinCommon extends IntegrationTest
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
         IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
         AzureSasCredential azureSasCredential = new AzureSasCredential(serviceSasToken.toString());
-        TwinClientOptions options = TwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
+        TwinClientOptions options = TwinClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build();
         return new TwinClient(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
     }
 }

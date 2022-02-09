@@ -88,8 +88,8 @@ public class TwinClientTest
     public void testOptionsDefaults()
     {
         TwinClientOptions options = TwinClientOptions.builder().build();
-        assertEquals((int) Deencapsulation.getField(TwinClientOptions.class, "DEFAULT_HTTP_READ_TIMEOUT_MS"), options.getHttpReadTimeout());
-        assertEquals((int) Deencapsulation.getField(TwinClientOptions.class, "DEFAULT_HTTP_CONNECT_TIMEOUT_MS"), options.getHttpConnectTimeout());
+        assertEquals((int) Deencapsulation.getField(TwinClientOptions.class, "DEFAULT_HTTP_READ_TIMEOUT_MS"), options.getHttpReadTimeoutSeconds());
+        assertEquals((int) Deencapsulation.getField(TwinClientOptions.class, "DEFAULT_HTTP_CONNECT_TIMEOUT_MS"), options.getHttpConnectTimeoutSeconds());
     }
 
     /*
@@ -166,7 +166,7 @@ public class TwinClientTest
         new Verifications()
         {
             {
-                mockedHttpRequest.setReadTimeoutMillis(anyInt);
+                mockedHttpRequest.setReadTimeoutSeconds(anyInt);
                 times = 1;
                 mockedHttpRequest.setHeaderField(anyString, anyString);
                 times = 1;
@@ -193,7 +193,7 @@ public class TwinClientTest
         new Verifications()
         {
             {
-                mockedHttpRequest.setReadTimeoutMillis(anyInt);
+                mockedHttpRequest.setReadTimeoutSeconds(anyInt);
                 times = 1;
                 mockedHttpRequest.setHeaderField(anyString, anyString);
                 times = 1;
@@ -376,7 +376,7 @@ public class TwinClientTest
             {
                 IotHubConnectionString.getUrlTwin(anyString, anyString);
                 times = 1;
-                mockedHttpRequest.setReadTimeoutMillis(anyInt);
+                mockedHttpRequest.setReadTimeoutSeconds(anyInt);
                 times = 1;
                 mockedHttpRequest.setHeaderField(anyString, anyString);
                 times = 1;
@@ -496,7 +496,7 @@ public class TwinClientTest
             {
                 IotHubConnectionString.getUrlTwin(anyString, anyString);
                 times = 1;
-                mockedHttpRequest.setReadTimeoutMillis(anyInt);
+                mockedHttpRequest.setReadTimeoutSeconds(anyInt);
                 times = 1;
                 mockedHttpRequest.setHeaderField(anyString, anyString);
                 times = 1;
@@ -541,7 +541,7 @@ public class TwinClientTest
             {
                 IotHubConnectionString.getUrlTwin(anyString, anyString);
                 times = 1;
-                mockedHttpRequest.setReadTimeoutMillis(anyInt);
+                mockedHttpRequest.setReadTimeoutSeconds(anyInt);
                 times = 1;
                 mockedHttpRequest.setHeaderField(anyString, anyString);
                 times = 1;

@@ -243,8 +243,8 @@ public final class DirectMethodsClient
         MethodParser methodParser =
             new MethodParser(
                 methodName,
-                options.getMethodResponseTimeout(),
-                options.getMethodConnectTimeout(),
+                options.getMethodResponseTimeoutSeconds(),
+                options.getMethodConnectTimeoutSeconds(),
                 options.getPayload());
 
         String json = methodParser.toJson();
@@ -262,8 +262,8 @@ public final class DirectMethodsClient
             this.getAuthenticationToken(),
             proxy);
 
-        httpRequest.setReadTimeoutMillis(this.options.getHttpReadTimeout());
-        httpRequest.setConnectTimeoutMillis(this.options.getHttpConnectTimeout());
+        httpRequest.setReadTimeoutSeconds(this.options.getHttpReadTimeoutSeconds());
+        httpRequest.setConnectTimeoutSeconds(this.options.getHttpConnectTimeoutSeconds());
         httpRequest.setHeaderField(REQUEST_ID, String.valueOf(requestId++));
 
         HttpResponse response = httpRequest.send();

@@ -156,7 +156,7 @@ public class Tools
     {
         if (registryClient == null)
         {
-            RegistryClientOptions options = RegistryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
+            RegistryClientOptions options = RegistryClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build();
             registryClient = new RegistryClient(iotHubConnectionString, options);
         }
 
@@ -822,7 +822,7 @@ public class Tools
         String sasTokenString = new IotHubServiceSasToken(iotHubConnectionString).toString();
 
         HttpRequest request = new HttpRequest(url, HttpMethod.POST, jsonPayload.getBytes(StandardCharsets.UTF_8), sasTokenString);
-        request.setReadTimeoutMillis(IntegrationTest.HTTP_READ_TIMEOUT);
+        request.setReadTimeoutSeconds(IntegrationTest.HTTP_READ_TIMEOUT);
 
         HttpResponse response = request.send();
 

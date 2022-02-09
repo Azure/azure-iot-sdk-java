@@ -210,7 +210,7 @@ public class ServiceClientTests extends IntegrationTest
                 new RegistryClient(
                         iotHubConnectionString,
                         RegistryClientOptions.builder()
-                                .httpReadTimeout(HTTP_READ_TIMEOUT)
+                                .httpReadTimeoutSeconds(HTTP_READ_TIMEOUT)
                                 .build());
 
         TestDeviceIdentity testDeviceIdentity =
@@ -290,7 +290,7 @@ public class ServiceClientTests extends IntegrationTest
         RegistryClient registryClient = new RegistryClient(
             iotHubConnectionString,
             RegistryClientOptions.builder()
-                .httpReadTimeout(HTTP_READ_TIMEOUT)
+                .httpReadTimeoutSeconds(HTTP_READ_TIMEOUT)
                 .build());
 
         TestDeviceIdentity testDeviceIdentity =
@@ -353,7 +353,7 @@ public class ServiceClientTests extends IntegrationTest
                 new RegistryClient(
                         iotHubConnectionString,
                         RegistryClientOptions.builder()
-                                .httpReadTimeout(HTTP_READ_TIMEOUT)
+                                .httpReadTimeoutSeconds(HTTP_READ_TIMEOUT)
                                 .build());
 
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);

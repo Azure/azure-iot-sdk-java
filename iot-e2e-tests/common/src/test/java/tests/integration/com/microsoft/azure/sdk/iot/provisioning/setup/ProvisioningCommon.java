@@ -221,7 +221,7 @@ public class ProvisioningCommon extends IntegrationTest
     @Before
     public void setUp() throws Exception
     {
-        registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
 
         this.testInstance = new ProvisioningTestInstance(this.testInstance.protocol, this.testInstance.attestationType);
     }
@@ -437,7 +437,7 @@ public class ProvisioningCommon extends IntegrationTest
     }
 
     protected void assertProvisionedDeviceCapabilitiesAreExpected(DeviceCapabilities expectedDeviceCapabilities, String provisionedHubConnectionString) throws IOException, IotHubException, InterruptedException {
-        TwinClient twinClient = new TwinClient(provisionedHubConnectionString, TwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        TwinClient twinClient = new TwinClient(provisionedHubConnectionString, TwinClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
 
         boolean deviceFoundInCorrectHub = false;
         long startTime = System.currentTimeMillis();

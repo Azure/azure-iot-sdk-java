@@ -71,7 +71,7 @@ public class ScheduledJobParser
     private String startTime;
 
     // Max execution time in seconds (ttl duration)
-    private static final String MAXEXECUTIONTIMEINSECONDS_TAG = "maxExecutionTimeInSeconds";
+    private static final String MAXEXECUTIONTIMEINSECONDS_TAG = "maxExecutionTimeSeconds";
     @Expose(deserialize = false)
     @SerializedName(MAXEXECUTIONTIMEINSECONDS_TAG)
     private long maxExecutionTimeInSeconds;
@@ -183,13 +183,13 @@ public class ScheduledJobParser
             throw new IllegalArgumentException("Null start time");
         }
 
-        /* Codes_SRS_JOBSPARSER_21_017: [If the maxExecutionTimeInSeconds is negative, the validateCommonFields shall throws IllegalArgumentException.] */
+        /* Codes_SRS_JOBSPARSER_21_017: [If the maxExecutionTimeSeconds is negative, the validateCommonFields shall throws IllegalArgumentException.] */
         if (maxExecutionTimeInSeconds < 0)
         {
             throw new IllegalArgumentException("Negative max execution time in seconds");
         }
 
-        /* Codes_SRS_JOBSPARSER_21_014: [The validateCommonFields shall store the jobId, queryCondition, and maxExecutionTimeInSeconds.] */
+        /* Codes_SRS_JOBSPARSER_21_014: [The validateCommonFields shall store the jobId, queryCondition, and maxExecutionTimeSeconds.] */
         this.jobId = jobId;
         this.queryCondition = queryCondition;
         this.maxExecutionTimeInSeconds = maxExecutionTimeInSeconds;

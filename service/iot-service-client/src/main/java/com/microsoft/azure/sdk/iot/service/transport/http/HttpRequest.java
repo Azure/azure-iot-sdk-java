@@ -213,7 +213,7 @@ public class HttpRequest
     }
 
     /**
-     * Sets the read timeout, in milliseconds, for the request. The read timeout
+     * Sets the read timeout, in seconds, for the request. The read timeout
      * is the number of milliseconds after the server receives a request and
      * before the server sends data back.
      *
@@ -221,21 +221,23 @@ public class HttpRequest
      *
      * @return The object itself, for fluent setting.
      */
-    public HttpRequest setReadTimeoutMillis(int timeout)
+    public HttpRequest setReadTimeoutSeconds(int timeout)
     {
-        this.connection.setReadTimeout(timeout);
+        int readTimeoutMillis = timeout * 1000; // http client expects milliseconds, not seconds
+        this.connection.setReadTimeout(readTimeoutMillis);
         return this;
     }
 
     /**
-     * Set the connect timeout, in milliseconds, for the request. The connect timeout
+     * Set the connect timeout, in seconds, for the request. The connect timeout
      * is the allowed amount of time for the http connection to be established.
      * @param timeout the connect timeout
      * @return the object itself, for fluent setting.
      */
-    public HttpRequest setConnectTimeoutMillis(int timeout)
+    public HttpRequest setConnectTimeoutSeconds(int timeout)
     {
-        this.connection.setConnectTimeout(timeout);
+        int connectTimeoutMillis = timeout * 1000; // http client expects milliseconds, not seconds
+        this.connection.setConnectTimeout(connectTimeoutMillis);
         return this;
     }
 

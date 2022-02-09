@@ -325,7 +325,7 @@ public class RegistryClientTests extends IntegrationTest
     @ContinuousIntegrationTest
     public void getDeviceStatisticsTest() throws Exception
     {
-        RegistryClient registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        RegistryClient registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
         Tools.getStatisticsWithRetry(registryClient);
     }
 
@@ -593,7 +593,7 @@ public class RegistryClientTests extends IntegrationTest
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
         IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
         AzureSasCredential azureSasCredential = new AzureSasCredential(serviceSasToken.toString());
-        RegistryClientOptions options = RegistryClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
+        RegistryClientOptions options = RegistryClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build();
         return new RegistryClient(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
     }
 }

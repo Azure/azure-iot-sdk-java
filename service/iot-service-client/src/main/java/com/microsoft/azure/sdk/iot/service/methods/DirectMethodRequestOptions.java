@@ -21,7 +21,7 @@ public final class DirectMethodRequestOptions
      */
     @Getter
     @Builder.Default
-    private final int methodResponseTimeout = 200;
+    private final int methodResponseTimeoutSeconds = 200;
 
     /**
      * The timeout (in seconds) before the direct method request will fail if the request takes too long to reach the device.
@@ -29,5 +29,5 @@ public final class DirectMethodRequestOptions
      */
     @Getter
     @Builder.Default
-    private final int methodConnectTimeout = 200;
+    private final int methodConnectTimeoutSeconds = 200;
 }

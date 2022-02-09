@@ -117,7 +117,7 @@ public class ConfigurationsClientTest
             {
                 IotHubConnectionString.getUrlConfiguration(anyString, requestConfigId);
                 new HttpRequest(mockUrl, httpMethod, (byte[]) any, anyString, (Proxy) any);
-                mockHttpRequest.setReadTimeoutMillis(anyInt);
+                mockHttpRequest.setReadTimeoutSeconds(anyInt);
                 mockHttpRequest.send();
             }
         };
@@ -152,8 +152,8 @@ public class ConfigurationsClientTest
                 times = 1;
                 new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any, anyString, (Proxy) any);
                 times = 1;
-                mockHttpRequest.setReadTimeoutMillis(anyInt);
-                mockHttpRequest.setConnectTimeoutMillis(anyInt);
+                mockHttpRequest.setReadTimeoutSeconds(anyInt);
+                mockHttpRequest.setConnectTimeoutSeconds(anyInt);
                 mockHttpRequest.send();
             }
         };
@@ -434,7 +434,7 @@ public class ConfigurationsClientTest
                 times = 1;
                 new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], anyString, (Proxy) any);
                 times = 1;
-                mockHttpRequest.setReadTimeoutMillis(anyInt);
+                mockHttpRequest.setReadTimeoutSeconds(anyInt);
                 mockHttpRequest.setHeaderField("If-Match", etag);
             }
         };
@@ -463,7 +463,7 @@ public class ConfigurationsClientTest
                 times = 1;
                 new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], anyString, (Proxy) any);
                 times = 1;
-                mockHttpRequest.setReadTimeoutMillis(anyInt);
+                mockHttpRequest.setReadTimeoutSeconds(anyInt);
                 mockHttpRequest.setHeaderField("If-Match", "*");
             }
         };
