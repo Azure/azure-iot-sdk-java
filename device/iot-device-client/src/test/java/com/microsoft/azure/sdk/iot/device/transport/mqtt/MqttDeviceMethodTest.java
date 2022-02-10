@@ -159,9 +159,6 @@ public class MqttDeviceMethodTest
         testMessage.setRequestId("ReqId");
         testMessage.setStatus("testStatus");
         final MqttDeviceMethod testMethod = new MqttDeviceMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
-        Map<String, DeviceOperations> testRequestMap = new HashMap<>();
-        testRequestMap.put("ReqId", DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
-        Deencapsulation.setField(testMethod, "requestMap", testRequestMap);
         testMethod.start();
 
         //act
@@ -175,7 +172,6 @@ public class MqttDeviceMethodTest
                 maxTimes = 1;
             }
         };
-        assertTrue(testRequestMap.isEmpty());
     }
 
     @Test (expected = TransportException.class)
@@ -266,26 +262,6 @@ public class MqttDeviceMethodTest
         testMessage.setRequestId("ReqId");
         testMessage.setStatus("testStatus");
         MqttDeviceMethod testMethod = new MqttDeviceMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
-        testMethod.start();
-
-        //act
-        testMethod.send(testMessage);
-    }
-
-    /*
-    Tests_SRS_MqttDeviceMethod_25_019: [**send method shall throw a TransportException if the getDeviceOperationType() is not of type DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST or DEVICE_OPERATION_METHOD_SEND_RESPONSE .**]**
-     */
-    @Test (expected = TransportException.class)
-    public void sendThrowsOnMismatchedRequestType() throws TransportException
-    {
-        final byte[] actualPayload = "TestMessage".getBytes(StandardCharsets.UTF_8);
-        final IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
-        testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_SEND_RESPONSE);
-        testMessage.setRequestId("ReqId");
-        testMessage.setStatus("testStatus");
-        MqttDeviceMethod testMethod = new MqttDeviceMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
-        Map<String, DeviceOperations> testRequestMap = new HashMap<>();
-        testRequestMap.put("ReqId", DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
         testMethod.start();
 
         //act
