@@ -139,8 +139,6 @@ public class QueryClientTests extends IntegrationTest
         // Needs investigation on why this fails consistently on android
         assumeFalse(Tools.isAndroid());
 
-        String jobId = UUID.randomUUID().toString();
-
         String deviceId = UUID.randomUUID().toString();
 
         registryClient.addDevice(new Device(deviceId, AuthenticationType.SAS));
@@ -149,21 +147,7 @@ public class QueryClientTests extends IntegrationTest
         {
             Thread.sleep(2000);
 
-            final String queryCondition = "DeviceId IN ['" + deviceId + "']";
-            Twin twinUpdate = new Twin();
-            Set<Pair> desiredProperties = new HashSet<>();
-            desiredProperties.add(new Pair("key", "value"));
-            twinUpdate.setDesiredProperties(desiredProperties);
-            Date dateThreeMinutesInFuture = new Date(System.currentTimeMillis() + (1000 * 60 * 3));
-
-            try
-            {
-                jobClient.scheduleUpdateTwin(jobId, queryCondition, twinUpdate, dateThreeMinutesInFuture, 100);
-            }
-            catch (IotHubTooManyRequestsException e)
-            {
-                log.info("Throttled when creating job. Will use existing job(s) to test query");
-            }
+            scheduleJobToBeQueried(deviceId);
 
             QueryClient queryClient = new QueryClient(iotHubConnectionString, options);
 
@@ -177,6 +161,8 @@ public class QueryClientTests extends IntegrationTest
                 {
                     fail("Timed out waiting for the expected query response");
                 }
+
+                scheduleJobToBeQueried(deviceId);
 
                 Thread.sleep(2000);
 
@@ -362,6 +348,27 @@ public class QueryClientTests extends IntegrationTest
             {
                 log.debug("Failed to clean up devices after test");
             }
+        }
+    }
+
+    private void scheduleJobToBeQueried(String deviceId) throws IOException, IotHubException
+    {
+        Twin twinUpdate = new Twin();
+        Set<Pair> desiredProperties = new HashSet<>();
+        desiredProperties.add(new Pair("key", "value"));
+        twinUpdate.setDesiredProperties(desiredProperties);
+
+        String jobId = UUID.randomUUID().toString();
+        final String queryCondition = "DeviceId IN ['" + deviceId + "']";
+        Date dateThreeMinutesInFuture = new Date(System.currentTimeMillis() + (1000 * 60 * 3));
+
+        try
+        {
+            jobClient.scheduleUpdateTwin(jobId, queryCondition, twinUpdate, dateThreeMinutesInFuture, 100);
+        }
+        catch (IotHubTooManyRequestsException e)
+        {
+            log.info("Throttled when creating job. Will use existing job(s) to test query");
         }
     }
 }
