@@ -244,7 +244,7 @@ public final class ScheduledJobsClient
 
         HttpResponse response = httpRequest.send();
 
-        return new ScheduledJob(new String(response.getBody()));
+        return new ScheduledJob(new String(response.getBody(), StandardCharsets.UTF_8));
     }
 
     /**
@@ -333,7 +333,7 @@ public final class ScheduledJobsClient
 
         HttpResponse response = httpRequest.send();
 
-        return new ScheduledJob(new String(response.getBody()));
+        return new ScheduledJob(new String(response.getBody(), StandardCharsets.UTF_8));
     }
 
     /**
@@ -366,7 +366,7 @@ public final class ScheduledJobsClient
 
         HttpResponse response = httpRequest.send();
 
-        return new ScheduledJob(new String(response.getBody()));
+        return new ScheduledJob(new String(response.getBody(), StandardCharsets.UTF_8));
     }
 
     /**
@@ -398,7 +398,7 @@ public final class ScheduledJobsClient
 
         HttpResponse response = httpRequest.send();
 
-        return new ScheduledJob(new String(response.getBody()));
+        return new ScheduledJob(new String(response.getBody(), StandardCharsets.UTF_8));
     }
 
     /**
