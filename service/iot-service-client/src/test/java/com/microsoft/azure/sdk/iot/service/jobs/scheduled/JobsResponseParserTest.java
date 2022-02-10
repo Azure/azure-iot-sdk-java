@@ -799,7 +799,7 @@ public class JobsResponseParserTest
                 "        \"runningCount\": 4,\n" +
                 "        \"pendingCount\": 5\n" +
                 "    },\n" +
-                "    \"maxExecutionTimeSeconds\":120\n" +
+                "    \"maxExecutionTimeInSeconds\":120\n" +
                 "}";
         JobsResponseParser jobsResponseParser = JobsResponseParser.createFromJson(json);
 
