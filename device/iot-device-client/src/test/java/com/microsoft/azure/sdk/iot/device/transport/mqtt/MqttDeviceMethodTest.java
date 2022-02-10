@@ -252,22 +252,6 @@ public class MqttDeviceMethodTest
         testMethod.send(testMessage);
     }
 
-    //Tests_SRS_MqttDeviceMethod_25_023: [send method shall throw an exception if a response is sent without having a method invoke on the request id if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.]
-    @Test (expected = TransportException.class)
-    public void sendThrowsOnSendingResponseWithoutReceivingMethodInvoke() throws TransportException
-    {
-        final byte[] actualPayload = "TestMessage".getBytes(StandardCharsets.UTF_8);
-        final IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
-        testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_SEND_RESPONSE);
-        testMessage.setRequestId("ReqId");
-        testMessage.setStatus("testStatus");
-        MqttDeviceMethod testMethod = new MqttDeviceMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
-        testMethod.start();
-
-        //act
-        testMethod.send(testMessage);
-    }
-
     /*
     * Tests_SRS_MQTTDEVICEMETHOD_25_026: [**This method shall call peekMessage to get the message payload from the received Messages queue corresponding to the messaging client's operation.**]**
     * Tests_SRS_MQTTDEVICEMETHOD_25_028: [**If the topic is of type post topic then this method shall parse further for method name and set it for the message by calling setMethodName for the message**]**
