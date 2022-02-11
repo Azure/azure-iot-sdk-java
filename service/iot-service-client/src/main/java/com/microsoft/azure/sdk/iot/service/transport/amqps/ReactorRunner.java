@@ -23,7 +23,7 @@ public class ReactorRunner
     private static final int REACTOR_TIMEOUT = 3141; // reactor timeout in milliseconds
     private static final int MAX_FRAME_SIZE = 4 * 1024;
 
-    public ReactorRunner(BaseHandler baseHandler) throws IOException
+    public ReactorRunner(BaseHandler... handlers) throws IOException
     {
         ReactorOptions options = new ReactorOptions();
 
@@ -33,11 +33,11 @@ public class ReactorRunner
         // expected 64 * 1024 bytes. For more context, see https://github.com/Azure/azure-iot-sdk-java/issues/742
         options.setMaxFrameSize(MAX_FRAME_SIZE);
 
-        this.reactor = Proton.reactor(options, baseHandler);
+        this.reactor = Proton.reactor(options, handlers);
         this.threadName = null;
     }
 
-    public ReactorRunner(BaseHandler baseHandler, String threadNamePrefix, String threadNamePostfix) throws IOException
+    public ReactorRunner(String threadNamePrefix, String threadNamePostfix, BaseHandler... handlers) throws IOException
     {
         ReactorOptions options = new ReactorOptions();
 
@@ -47,7 +47,7 @@ public class ReactorRunner
         // expected 64 * 1024 bytes. For more context, see https://github.com/Azure/azure-iot-sdk-java/issues/742
         options.setMaxFrameSize(MAX_FRAME_SIZE);
 
-        this.reactor = Proton.reactor(options, baseHandler);
+        this.reactor = Proton.reactor(options, handlers);
         this.threadName = threadNamePrefix + "-" + THREAD_NAME + "-" + threadNamePostfix;
     }
 

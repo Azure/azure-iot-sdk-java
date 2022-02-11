@@ -7,7 +7,7 @@ package com.microsoft.azure.sdk.iot.service.messaging;
  * The possible acknowledgement types for a received file upload notification and/or for a received cloud to device
  * feedback message.
  */
-public enum IotHubMessageResult
+public enum AcknowledgementType
 {
     /**
      * This acknowledgement will remove the received message from the service's message queue so that it won't be sent

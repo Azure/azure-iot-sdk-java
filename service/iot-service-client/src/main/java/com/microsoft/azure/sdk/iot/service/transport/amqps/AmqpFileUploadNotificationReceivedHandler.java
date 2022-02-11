@@ -9,8 +9,7 @@ import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotification;
 import com.microsoft.azure.sdk.iot.service.messaging.serializers.FileUploadNotificationParser;
-import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationReceivedCallback;
-import com.microsoft.azure.sdk.iot.service.messaging.IotHubMessageResult;
+import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
@@ -30,6 +29,7 @@ import org.apache.qpid.proton.engine.Session;
 import javax.net.ssl.SSLContext;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * Instance of the QPID-Proton-J BaseHandler class to override
@@ -44,18 +44,17 @@ public class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHan
     private static final String FILE_NOTIFICATION_RECEIVE_TAG = "filenotificationreceiver";
     private static final String FILENOTIFICATION_ENDPOINT = "/messages/serviceBound/filenotifications";
 
-    private final FileUploadNotificationReceivedCallback fileUploadNotificationReceivedCallback;
+    private final Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationReceivedCallback;
     private Receiver fileUploadNotificationReceiverLink;
 
     public AmqpFileUploadNotificationReceivedHandler(
-            String hostName,
-            String sasToken,
+            String connectionString,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            FileUploadNotificationReceivedCallback fileUploadNotificationReceivedCallback,
+            Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationReceivedCallback,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
     {
-        super(hostName, sasToken, iotHubServiceClientProtocol, proxyOptions, sslContext);
+        super(connectionString, iotHubServiceClientProtocol, proxyOptions, sslContext);
         this.fileUploadNotificationReceivedCallback = fileUploadNotificationReceivedCallback;
     }
 
@@ -63,7 +62,7 @@ public class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHan
             String hostName,
             TokenCredential credential,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            FileUploadNotificationReceivedCallback fileUploadNotificationReceivedCallback,
+            Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationReceivedCallback,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
     {
@@ -75,7 +74,7 @@ public class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHan
             String hostName,
             AzureSasCredential sasTokenProvider,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            FileUploadNotificationReceivedCallback fileUploadNotificationReceivedCallback,
+            Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationReceivedCallback,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
     {
@@ -117,7 +116,7 @@ public class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHan
             if (msg.getBody() instanceof Data)
             {
                 String fileUploadNotificationJson = ((Data) msg.getBody()).getValue().toString();
-                IotHubMessageResult messageResult = IotHubMessageResult.ABANDON;
+                AcknowledgementType messageResult = AcknowledgementType.ABANDON;
 
                 try
                 {
@@ -127,7 +126,7 @@ public class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHan
                         notificationParser.getBlobUri(), notificationParser.getBlobName(), notificationParser.getLastUpdatedTime(),
                         notificationParser.getBlobSizeInBytesTag(), notificationParser.getEnqueuedTimeUtc());
 
-                    messageResult = fileUploadNotificationReceivedCallback.onFileUploadNotificationReceived(fileUploadNotification);
+                    messageResult = fileUploadNotificationReceivedCallback.apply(fileUploadNotification);
                 }
                 catch (Exception e)
                 {
@@ -136,11 +135,11 @@ public class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHan
                 }
 
                 DeliveryState deliveryState = Accepted.getInstance();
-                if (messageResult == IotHubMessageResult.ABANDON)
+                if (messageResult == AcknowledgementType.ABANDON)
                 {
                     deliveryState = Released.getInstance();
                 }
-                else if (messageResult == IotHubMessageResult.COMPLETE)
+                else if (messageResult == AcknowledgementType.COMPLETE)
                 {
                     deliveryState = Accepted.getInstance();
                 }

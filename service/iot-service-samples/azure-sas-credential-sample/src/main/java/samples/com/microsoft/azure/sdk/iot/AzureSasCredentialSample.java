@@ -7,16 +7,14 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJob;
-import com.microsoft.azure.sdk.iot.service.messaging.IotHubMessageResult;
+import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
 import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.service.query.QueryClientOptions;
 import com.microsoft.azure.sdk.iot.service.exceptions.ErrorCodeDescription;
 import com.microsoft.azure.sdk.iot.service.query.SqlQueryBuilder;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
-import com.microsoft.azure.sdk.iot.service.messaging.FeedbackReceiver;
 import com.microsoft.azure.sdk.iot.service.messaging.FeedbackRecord;
-import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationReceiver;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
@@ -184,7 +182,7 @@ public class AzureSasCredentialSample
                     System.out.println(String.format("Feedback record received for device %s with status %s", feedbackRecord.getDeviceId(), feedbackRecord.getStatusCode()));
                 }
 
-                return IotHubMessageResult.COMPLETE;
+                return AcknowledgementType.COMPLETE;
             });
 
             System.out.println("Opening feedback receiver to listen for feedback messages");
@@ -209,7 +207,7 @@ public class AzureSasCredentialSample
             FileUploadNotificationReceiver fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver(notification ->
             {
                 System.out.println("File upload notification received for device " + notification.getDeviceId());
-                return IotHubMessageResult.COMPLETE;
+                return AcknowledgementType.COMPLETE;
             });
 
             System.out.println("Opening file upload notification receiver and listening for file upload notifications");

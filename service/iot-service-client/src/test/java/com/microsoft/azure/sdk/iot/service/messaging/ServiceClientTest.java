@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -25,12 +26,6 @@ public class ServiceClientTest
     AmqpSendHandler amqpSend;
     @Mocked
     IotHubServiceSasToken iotHubServiceSasToken;
-    @Mocked
-    FeedbackReceiver feedbackReceiver;
-    @Mocked
-    FeedbackMessageReceivedCallback feedbackMessageReceivedCallback;
-    @Mocked
-    FileUploadNotificationReceivedCallback fileUploadNotificationReceivedCallback;
 
     // Tests_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_001: [The constructor shall throw IllegalArgumentException if the input string is empty or null]
     // Assert
@@ -144,59 +139,5 @@ public class ServiceClientTest
         };
         // Act
         serviceClient.send(deviceId, moduleId, iotMessage);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_017: [The function shall create a FeedbackReceiver object and returns with it]
-    @Test
-    public void getFeedbackReceiver_good_case() throws Exception
-    {
-        // Arrange
-        String iotHubName = "IOTHUBNAME";
-        String hostName = "HOSTNAME";
-        String sharedAccessKeyName = "ACCESSKEYNAME";
-        String policyName = "SharedAccessKey";
-        String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
-        String connectionString = "HostName=" + hostName + "." + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        String deviceId = "XXX";
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        ServiceClient serviceClient = new ServiceClient(connectionString, iotHubServiceClientProtocol);
-        // Assert
-        new Expectations()
-        {
-            {
-                feedbackReceiver = new FeedbackReceiver(feedbackMessageReceivedCallback, anyString, anyString, iotHubServiceClientProtocol, (ProxyOptions) any, (SSLContext) any);
-            }
-        };
-        // Act
-        FeedbackReceiver feedbackReceiver = serviceClient.getFeedbackReceiver(feedbackMessageReceivedCallback);
-        // Assert
-        assertNotEquals(null, feedbackReceiver);
-    }
-    
-    // Tests_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_017: [The function shall create a FeedbackReceiver object and returns with it]
-    @Test
-    public void getFeedbackReceiver_good_case_without_deviceid() throws Exception
-    {
-        // Arrange
-        String iotHubName = "IOTHUBNAME";
-        String hostName = "HOSTNAME";
-        String sharedAccessKeyName = "ACCESSKEYNAME";
-        String policyName = "SharedAccessKey";
-        String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
-        String connectionString = "HostName=" + hostName + "." + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        ServiceClient serviceClient = new ServiceClient(connectionString, iotHubServiceClientProtocol);
-        // Assert
-        new Expectations()
-        {
-            {
-                feedbackReceiver = new FeedbackReceiver(feedbackMessageReceivedCallback, anyString, anyString, iotHubServiceClientProtocol, (ProxyOptions) any, (SSLContext) any);
-            }
-        };
-        // Act
-        FeedbackReceiver feedbackReceiver = serviceClient.getFeedbackReceiver(feedbackMessageReceivedCallback);
-        // Assert
-        assertNotEquals(null, feedbackReceiver);
     }
 }

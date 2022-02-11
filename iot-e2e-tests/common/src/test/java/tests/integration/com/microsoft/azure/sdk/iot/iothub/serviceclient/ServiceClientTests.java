@@ -7,10 +7,8 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
-import com.microsoft.azure.sdk.iot.service.messaging.IotHubMessageResult;
+import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
-import com.microsoft.azure.sdk.iot.service.messaging.FeedbackReceiver;
-import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationReceiver;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
@@ -345,55 +343,6 @@ public class ServiceClientTests extends IntegrationTest
         Tools.disposeTestIdentity(testDeviceIdentity, iotHubConnectionString);
     }
 
-    @Test
-    @StandardTierHubOnlyTest
-    public void feedbackMessageReceiverWithAzureSasCredential() throws Exception
-    {
-        RegistryClient registryClient =
-                new RegistryClient(
-                        iotHubConnectionString,
-                        RegistryClientOptions.builder()
-                                .httpReadTimeoutSeconds(HTTP_READ_TIMEOUT)
-                                .build());
-
-        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
-
-        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
-        AzureSasCredential sasTokenProvider = new AzureSasCredential(serviceSasToken.toString());
-
-        ServiceClient serviceClient = new ServiceClient(
-                iotHubConnectionStringObj.getHostName(),
-                sasTokenProvider,
-                testInstance.protocol);
-
-        // received feedback message can be ignored since we no longer have any tests that need to consume them
-        // All this test cares about is that opening the connection doesn't result in an unauthorized exception
-        FeedbackReceiver feedbackReceiver = serviceClient.getFeedbackReceiver(feedbackBatch -> IotHubMessageResult.COMPLETE);
-        feedbackReceiver.open();
-        feedbackReceiver.close();
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    public void fileUploadNotificationReceiverWithAzureSasCredential() throws Exception
-    {
-        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
-
-        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
-        AzureSasCredential sasTokenProvider = new AzureSasCredential(serviceSasToken.toString());
-
-        ServiceClient serviceClient = new ServiceClient(
-                iotHubConnectionStringObj.getHostName(),
-                sasTokenProvider,
-                testInstance.protocol);
-
-        // received file upload notifications can be ignored since we no longer have any tests that need to consume them
-        // All this test cares about is that opening the connection doesn't result in an unauthorized exception
-        FileUploadNotificationReceiver fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver(notification -> IotHubMessageResult.COMPLETE);
-        fileUploadNotificationReceiver.open();
-        fileUploadNotificationReceiver.close();
-    }
-
     @Ignore // The IoT Hub instance we use for this test is currently offline, so this test cannot be run
     @Test
     @ContinuousIntegrationTest
@@ -407,58 +356,6 @@ public class ServiceClientTests extends IntegrationTest
         {
             // don't need a real device Id since the request is sent to a fake service
             serviceClient.send("some deviceId", new Message("some message"));
-        }
-        catch (IOException e)
-        {
-            expectedExceptionWasCaught = true;
-        }
-        catch (Exception e)
-        {
-            fail(buildExceptionMessage("Expected IOException, but received: " + Tools.getStackTraceFromThrowable(e), hostName));
-        }
-
-        assertTrue(buildExceptionMessage("Expected an exception due to service presenting invalid certificate", hostName), expectedExceptionWasCaught);
-    }
-
-    @Ignore // The IoT Hub instance we use for this test is currently offline, so this test cannot be run
-    @Test
-    @ContinuousIntegrationTest
-    public void serviceClientValidatesRemoteCertificateWhenGettingFeedbackReceiver() throws IOException
-    {
-        boolean expectedExceptionWasCaught = false;
-
-        ServiceClient serviceClient = new ServiceClient(invalidCertificateServerConnectionString, testInstance.protocol);
-
-        try
-        {
-            FeedbackReceiver receiver = serviceClient.getFeedbackReceiver(feedbackBatch -> IotHubMessageResult.COMPLETE);
-            receiver.open();
-        }
-        catch (IOException e)
-        {
-            expectedExceptionWasCaught = true;
-        }
-        catch (Exception e)
-        {
-            fail(buildExceptionMessage("Expected IOException, but received: " + Tools.getStackTraceFromThrowable(e), hostName));
-        }
-
-        assertTrue(buildExceptionMessage("Expected an exception due to service presenting invalid certificate", hostName), expectedExceptionWasCaught);
-    }
-
-    @Ignore // The IoT Hub instance we use for this test is currently offline, so this test cannot be run
-    @Test
-    @ContinuousIntegrationTest
-    public void serviceClientValidatesRemoteCertificateWhenGettingFileUploadFeedbackReceiver() throws IOException
-    {
-        boolean expectedExceptionWasCaught = false;
-
-        ServiceClient serviceClient = new ServiceClient(invalidCertificateServerConnectionString, testInstance.protocol);
-
-        try
-        {
-            FileUploadNotificationReceiver receiver = serviceClient.getFileUploadNotificationReceiver(notification -> IotHubMessageResult.COMPLETE);
-            receiver.open();
         }
         catch (IOException e)
         {

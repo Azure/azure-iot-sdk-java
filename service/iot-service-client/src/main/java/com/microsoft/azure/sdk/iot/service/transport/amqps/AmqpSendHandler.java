@@ -61,21 +61,19 @@ public class AmqpSendHandler extends AmqpConnectionHandler
     /**
      * Constructor to set up connection parameters and initialize handshaker for transport
      *
-     * @param hostName The address string of the service (example: AAA.BBB.CCC)
-     * @param sasToken The SAS token string
+     * @param connectionString The IoT Hub connection string
      * @param iotHubServiceClientProtocol protocol to use
      * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
      * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
      *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.
      */
     public AmqpSendHandler(
-            String hostName,
-            String sasToken,
+            String connectionString,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
     {
-        super(hostName, sasToken, iotHubServiceClientProtocol, proxyOptions, sslContext);
+        super(connectionString, iotHubServiceClientProtocol, proxyOptions, sslContext);
     }
 
     public AmqpSendHandler(

@@ -11,6 +11,8 @@ import com.microsoft.azure.proton.transport.proxy.ProxyHandler;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyHandlerImpl;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
 import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubSSLContext;
@@ -48,9 +50,9 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
     private String connectionId;
 
     protected final String hostName;
-    private String sasToken;
     private TokenCredential credential;
     private AzureSasCredential sasTokenProvider;
+    private String connectionString;
     private IotHubServiceClientProtocol iotHubServiceClientProtocol;
     private ProxyOptions proxyOptions;
     private SSLContext sslContext;
@@ -58,27 +60,21 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
     Connection connection;
 
     AmqpConnectionHandler(
-        String hostName,
-        String sasToken,
+        String connectionString,
         IotHubServiceClientProtocol iotHubServiceClientProtocol,
         ProxyOptions proxyOptions,
         SSLContext sslContext)
     {
-        if (hostName == null || hostName.isEmpty())
+        if (connectionString == null || connectionString.isEmpty())
         {
-            throw new IllegalArgumentException("hostName can not be null or empty");
-        }
-
-        if (sasToken == null || sasToken.isEmpty())
-        {
-            throw new IllegalArgumentException("sasToken can not be null or empty");
+            throw new IllegalArgumentException("connectionString can not be null or empty");
         }
 
         Objects.requireNonNull(iotHubServiceClientProtocol);
 
         this.proxyOptions = proxyOptions;
-        this.hostName = hostName;
-        this.sasToken = sasToken;
+        this.hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString).getHostName();
+        this.connectionString = connectionString;
 
         commonConstructorSetup(iotHubServiceClientProtocol, proxyOptions, sslContext);
     }
@@ -244,7 +240,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         }
         else
         {
-            new CbsSessionHandler(cbsSession, this, this.sasToken);
+            new CbsSessionHandler(cbsSession, this, this.connectionString);
         }
     }
 

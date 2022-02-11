@@ -16,11 +16,11 @@ import com.microsoft.azure.sdk.iot.device.ProxySettings;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationReceiver;
-import com.microsoft.azure.sdk.iot.service.messaging.IotHubMessageResult;
+import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
+import com.microsoft.azure.sdk.iot.service.messaging.EventProcessorClient;
+import com.microsoft.azure.sdk.iot.service.messaging.EventProcessorClientBuilder;
+import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotification;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
-import com.microsoft.azure.sdk.iot.service.messaging.ServiceClient;
-import com.microsoft.azure.sdk.iot.service.messaging.ServiceClientOptions;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import lombok.extern.slf4j.Slf4j;
@@ -49,9 +49,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
-import java.util.ServiceLoader;
 import java.util.UUID;
+import java.util.function.Function;
 
+import static com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol.AMQPS_WS;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeFalse;
@@ -70,7 +71,7 @@ public class FileUploadTests extends IntegrationTest
     //Max time to wait before timing out test
     private static final long MAX_MILLISECS_TIMEOUT_KILL_TEST = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS + 50000; // 50 secs
 
-    private static final int NOTIFICATION_TIMEOUT_MILLIS = 60 * 1000; // 1 minute
+    private static final int NOTIFICATION_TIMEOUT_MILLIS = 3 * 60 * 1000; // 3 minutes
 
     // remote name of the file
     private static final String REMOTE_FILE_NAME = "File";
@@ -213,6 +214,7 @@ public class FileUploadTests extends IntegrationTest
         // act
         FileUploadSasUriResponse sasUriResponse = deviceClient.getFileUploadSasUri(new FileUploadSasUriRequest(testInstance.fileUploadState.blobName));
 
+        log.info("Uploading from device {} to blob {}", deviceClient.getConfig().getDeviceId(), sasUriResponse.getBlobName());
         CloudBlockBlob blob = new CloudBlockBlob(sasUriResponse.getBlobUri());
         blob.upload(testInstance.fileUploadState.fileInputStream, testInstance.fileUploadState.fileLength);
 
@@ -278,16 +280,7 @@ public class FileUploadTests extends IntegrationTest
 
     private void waitForFileUploadNotifications(String expectedDeviceId, List<String> expectedBlobNames) throws InterruptedException, IOException
     {
-        ServiceClientOptions.ServiceClientOptionsBuilder optionsBuilder = ServiceClientOptions.builder();
-        if (testInstance.withProxy)
-        {
-            Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-            optionsBuilder.proxyOptions(new ProxyOptions(testProxy));
-        }
-
-        ServiceClient serviceClient = new ServiceClient(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS_WS, optionsBuilder.build());
-
-        FileUploadNotificationReceiver receiver = serviceClient.getFileUploadNotificationReceiver(notification ->
+        Function<FileUploadNotification, AcknowledgementType> notificationProcessor = notification ->
         {
             // if one of the expected file upload notifications is found, remove it from the list of expected notifications
             String actualDeviceId = notification.getDeviceId();
@@ -308,26 +301,40 @@ public class FileUploadTests extends IntegrationTest
                 if (matchedBlobName != null)
                 {
                     expectedBlobNames.remove(matchedBlobName);
-                    return IotHubMessageResult.COMPLETE;
+                    return AcknowledgementType.COMPLETE;
                 }
             }
 
-            return IotHubMessageResult.ABANDON;
-        });
+            return AcknowledgementType.ABANDON;
+        };
 
-        receiver.open();
+        EventProcessorClientBuilder builder =
+            EventProcessorClient.builder()
+                .setConnectionString(iotHubConnectionString)
+                .setFileUploadNotificationProcessor(notificationProcessor)
+                .setProtocol(AMQPS_WS);
+
+        if (testInstance.withProxy)
+        {
+            Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
+            builder.setProxyOptions(new ProxyOptions(testProxy));
+        }
+
+        EventProcessorClient receiver = builder.build();
+
+        receiver.start();
 
         long startTime = System.currentTimeMillis();
         while (!expectedBlobNames.isEmpty())
         {
-            Thread.sleep(1000);
-
             if (System.currentTimeMillis() - startTime > NOTIFICATION_TIMEOUT_MILLIS)
             {
-                fail("Timed out waiting on one or more file upload notifications for device " + expectedDeviceId);
+                fail("Timed out waiting on one or more file upload notifications for device " + expectedDeviceId + " with blob name " + expectedBlobNames.get(0));
             }
+
+            Thread.sleep(1000);
         }
 
-        receiver.close();
+        receiver.stop();
     }
 }

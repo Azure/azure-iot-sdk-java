@@ -81,90 +81,17 @@ public class AmqpSendHandlerTest
     @Mocked AmqpResponseVerification responseVerification;
     @Mocked IotHubSSLContext mockedIotHubSSLContext;
 
-    // Test_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall copy all input parameters to private member variables for event processing]
-    // Test_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_002: [The constructor shall concatenate the host name with the port]
-    // Test_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_003: [The constructor shall initialize a new Handshaker (Proton) object to handle communication handshake]
-    @Test
-    public void constructor_copies_params_to_members()
-    {
-        // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        new Expectations()
-        {
-            {
-                handshaker = new Handshaker();
-            }
-        };
-        // Act
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null);
-        String _hostName = Deencapsulation.getField(amqpSendHandler, "hostName");
-        String _sasToken = Deencapsulation.getField(amqpSendHandler, "sasToken");
-        IotHubServiceClientProtocol _ioIotHubServiceClientProtocol = Deencapsulation.getField(amqpSendHandler, "iotHubServiceClientProtocol");
-        // Assert
-        assertEquals(hostName, _hostName);
-        assertEquals(sasToken, _sasToken);
-        assertEquals(iotHubServiceClientProtocol, _ioIotHubServiceClientProtocol);
-    }
-
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
     // Assert
     @Test (expected = IllegalArgumentException.class)
-    public void constructor_checks_if_hostName_null()
+    public void constructor_checks_if_connectionString_null()
     {
         // Arrange
-        String hostName = null;
-        String userName = "bbb";
-        String sasToken = "ccc";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Act
-        AmqpSendHandler amqpSend = new AmqpSendHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null);
+        AmqpSendHandler amqpSend = new AmqpSendHandler(null, iotHubServiceClientProtocol, null, null);
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
-    // Assert
-    @Test (expected = IllegalArgumentException.class)
-    public void constructor_checks_if_hostName_empty()
-    {
-        // Arrange
-        String hostName = "";
-        String userName = "bbb";
-        String sasToken = "ccc";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        // Act
-        AmqpSendHandler amqpSend = new AmqpSendHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
-    // Assert
-    @Test (expected = IllegalArgumentException.class)
-    public void constructor_checks_if_sasToken_null()
-    {
-        // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = null;
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        // Act
-        AmqpSendHandler amqpSend = new AmqpSendHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
-    // Assert
-    @Test (expected = IllegalArgumentException.class)
-    public void constructor_checks_if_sasToken_empty()
-    {
-        // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        // Act
-        AmqpSendHandler amqpSend = new AmqpSendHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null);
-    }
-    
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_004: [The function shall create a new Message (Proton) object]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_005: [The function shall set the “to” property on the Message object using the created device path]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_006: [The function shall create a Binary (Proton) object from the content string]
@@ -174,14 +101,12 @@ public class AmqpSendHandlerTest
     public void createProtonMessage_creates_Message_and_sets_Properties() throws UnsupportedEncodingException
     {
         // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
+        String connectionString = "aaa";
         String deviceId = "deviceId";
         String content = "abcdefghijklmnopqrst";
         String toProperty = "/devices/deviceId/messages/devicebound";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null);
+        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(connectionString, iotHubServiceClientProtocol, null, null);
         com.microsoft.azure.sdk.iot.service.messaging.Message iotMessage = new com.microsoft.azure.sdk.iot.service.messaging.Message(content);
         Map<String, String> userDefinedProperties = new HashMap<>(5);
         userDefinedProperties.put("key1", "value1");
@@ -226,15 +151,13 @@ public class AmqpSendHandlerTest
     public void createProtonMessage_creates_Message_and_sets_Properties_ForModule() throws UnsupportedEncodingException
     {
         // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
+        String connectionString = "aaa";
         String deviceId = "deviceId";
         String moduleId = "moduleId";
         String content = "abcdefghijklmnopqrst";
         String toProperty = "/devices/deviceId/modules/moduleId/messages/devicebound";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null);
+        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(connectionString, iotHubServiceClientProtocol, null, null);
         com.microsoft.azure.sdk.iot.service.messaging.Message iotMessage = new com.microsoft.azure.sdk.iot.service.messaging.Message(content);
         Map<String, String> userDefinedProperties = new HashMap<>(5);
         userDefinedProperties.put("key1", "value1");
@@ -277,12 +200,9 @@ public class AmqpSendHandlerTest
     public void onConnectionBound_call_flow_and_init_ok_amqp()
     {
         // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
-        String hostAddr = hostName + ":5671";
+        String connectionString = "aaa";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null);
+        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(connectionString, iotHubServiceClientProtocol, null, null);
         // Assert
         new Expectations()
         {
@@ -306,11 +226,9 @@ public class AmqpSendHandlerTest
     public void onConnectionBound_call_flow_and_init_ok_amqp_ws() throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException
     {
         // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
+        String connectionString = "aaa";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS_WS;
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null);
+        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(connectionString, iotHubServiceClientProtocol, null, null);
         // Assert
         new Expectations()
         {
@@ -336,33 +254,6 @@ public class AmqpSendHandlerTest
         amqpSendHandler.onConnectionBound(event);
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_011: [The event handler shall set the host name on the connection]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_012: [The event handler shall create a Session (Proton) object from the connection]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_013: [The event handler shall create a Sender (Proton) object and set the protocol tag on it to a predefined constant]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_014: [The event handler shall open the Connection, the Session and the Sender object]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_15_023: [The Sender object shall have the properties set to service client version identifier.]
-    @Test
-    public void onConnectionInit_creates_Session_and_open_Connection()
-    {
-        // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null);
-        // Assert
-        new Expectations()
-        {
-            {
-                connection = event.getConnection();
-                connection.setHostname(hostName);
-                connection.open();
-            }
-        };
-        // Act
-        amqpSendHandler.onConnectionInit(event);
-    }
-
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_017: [The event handler shall get the Sender (Proton) object from the link]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_018: [The event handler shall encode the message and copy to the byte buffer]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_019: [The event handler shall set the delivery tag on the Sender (Proton) object]
@@ -372,17 +263,14 @@ public class AmqpSendHandlerTest
     public void onLinkFlow_call_flow_ok() throws UnsupportedEncodingException
     {
         // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
-        String hostAddr = hostName + ":5671";
+        String connectionString = "aaa";
         String deviceId = "deviceId";
         String content = "abcdefghijklmnopqrst";
         com.microsoft.azure.sdk.iot.service.messaging.Message iotMessage = new com.microsoft.azure.sdk.iot.service.messaging.Message(content);
         String endpoint = "/messages/devicebound";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         createProtonObjects();
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null);
+        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(connectionString, iotHubServiceClientProtocol, null, null);
         AmqpSendHandler.createProtonMessage(deviceId, iotMessage);
         // Assert
         new Expectations()
@@ -405,10 +293,7 @@ public class AmqpSendHandlerTest
     public void onLinkFlowBufferOverflow_call_flow_ok() throws UnsupportedEncodingException
     {
         // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
-        String hostAddr = hostName + ":5671";
+        String connectionString = "aaa";
         String deviceId = "deviceId";
         String content = "abcdefghijklmnopqrst";
         com.microsoft.azure.sdk.iot.service.messaging.Message iotMessage = new com.microsoft.azure.sdk.iot.service.messaging.Message(content);
@@ -416,7 +301,7 @@ public class AmqpSendHandlerTest
         exceptionCount = 0;
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         createProtonObjects();
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null);
+        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(connectionString, iotHubServiceClientProtocol, null, null);
         Deencapsulation.setField(amqpSendHandler,"messageToBeSent", messageWithException);
         // Assert
         new Expectations()
@@ -449,11 +334,9 @@ public class AmqpSendHandlerTest
                                    final @Mocked Delivery mockedDelivery) throws UnsupportedEncodingException
     {
         // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
+        String connectionString = "aaa";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null);
+        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(connectionString, iotHubServiceClientProtocol, null, null);
 
         // Assert
         new Expectations()
@@ -483,11 +366,9 @@ public class AmqpSendHandlerTest
     public void sendComplete_flow_OK(final @Mocked AmqpResponseVerification mockedVerification) throws IotHubException, IOException
     {
         // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
+        String connectionString = "aaa";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null);
+        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(connectionString, iotHubServiceClientProtocol, null, null);
         Deencapsulation.setField(amqpSendHandler,"amqpResponse", mockedVerification );
         Deencapsulation.setField(amqpSendHandler, "linkOpenedRemotely", true);
         Deencapsulation.setField(amqpSendHandler, "sessionOpenedRemotely", true);
@@ -511,11 +392,9 @@ public class AmqpSendHandlerTest
                                                        final @Mocked IotHubException mockedIotHubException) throws IotHubException, IOException
     {
         // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
+        String connectionString = "aaa";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null);
+        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(connectionString, iotHubServiceClientProtocol, null, null);
         Deencapsulation.setField(amqpSendHandler,"amqpResponse", mockedVerification );
         Deencapsulation.setField(amqpSendHandler, "linkOpenedRemotely", true);
         Deencapsulation.setField(amqpSendHandler, "sessionOpenedRemotely", true);
@@ -542,11 +421,9 @@ public class AmqpSendHandlerTest
                                                                   final @Mocked Event mockedEvent) throws IotHubException, IOException
     {
         // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
+        String connectionString = "aaa";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null);
+        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(connectionString, iotHubServiceClientProtocol, null, null);
         amqpSendHandler.onTransportError(mockedEvent);
 
         // Act
@@ -559,11 +436,9 @@ public class AmqpSendHandlerTest
     public void onConnectionRemoteCloseClosesTransportTail(@Mocked final Event mockEvent, @Mocked final Transport mockTransport)
     {
         // arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
+        String connectionString = "aaa";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null);
+        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(connectionString, iotHubServiceClientProtocol, null, null);
 
         new Expectations()
         {
@@ -591,11 +466,9 @@ public class AmqpSendHandlerTest
     public void onConnectionRemoteOpenedFlagsVerifyConnectionOpened(@Mocked Event mockEvent)
     {
         // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
+        String connectionString = "aaa";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null);
+        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(connectionString, iotHubServiceClientProtocol, null, null);
 
         // Act
         amqpSendHandler.onConnectionRemoteOpen(mockEvent);
@@ -609,11 +482,9 @@ public class AmqpSendHandlerTest
     public void sendCompleteChecksForSavedException() throws IOException, IotHubException
     {
         // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
+        String connectionString = "aaa";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null);
+        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(connectionString, iotHubServiceClientProtocol, null, null);
 
         Deencapsulation.setField(amqpSendHandler, "linkOpenedRemotely", true);
         Deencapsulation.setField(amqpSendHandler, "sessionOpenedRemotely", true);
@@ -629,11 +500,9 @@ public class AmqpSendHandlerTest
     public void sendCompleteChecksThatverifyConnectionOpened() throws IOException, IotHubException
     {
         // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
+        String connectionString = "aaa";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, sasToken, iotHubServiceClientProtocol, null, null);
+        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(connectionString, iotHubServiceClientProtocol, null, null);
 
         Deencapsulation.setField(amqpSendHandler, "connectionOpenedRemotely", false);
         Deencapsulation.setField(amqpSendHandler, "sessionOpenedRemotely", false);

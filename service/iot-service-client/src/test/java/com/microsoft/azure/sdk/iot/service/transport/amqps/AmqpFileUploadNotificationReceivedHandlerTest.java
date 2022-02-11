@@ -9,10 +9,10 @@ import com.microsoft.azure.proton.transport.proxy.impl.ProxyHandlerImpl;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
 import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
-import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationReceivedCallback;
-import com.microsoft.azure.sdk.iot.service.messaging.IotHubMessageResult;
-import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
+import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotification;
+import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import mockit.Deencapsulation;
 import mockit.Expectations;
 import mockit.Mocked;
@@ -30,10 +30,28 @@ import org.apache.qpid.proton.amqp.transport.ReceiverSettleMode;
 import org.apache.qpid.proton.amqp.transport.SenderSettleMode;
 import org.apache.qpid.proton.codec.ReadableBuffer;
 import org.apache.qpid.proton.codec.WritableBuffer;
-import org.apache.qpid.proton.engine.*;
+import org.apache.qpid.proton.engine.Connection;
+import org.apache.qpid.proton.engine.Delivery;
+import org.apache.qpid.proton.engine.EndpointState;
+import org.apache.qpid.proton.engine.Event;
+import org.apache.qpid.proton.engine.EventType;
+import org.apache.qpid.proton.engine.Handler;
+import org.apache.qpid.proton.engine.HandlerException;
+import org.apache.qpid.proton.engine.Link;
+import org.apache.qpid.proton.engine.Receiver;
+import org.apache.qpid.proton.engine.Record;
+import org.apache.qpid.proton.engine.Sasl;
+import org.apache.qpid.proton.engine.Sender;
+import org.apache.qpid.proton.engine.Session;
+import org.apache.qpid.proton.engine.SslDomain;
+import org.apache.qpid.proton.engine.Transport;
 import org.apache.qpid.proton.engine.impl.TransportInternal;
 import org.apache.qpid.proton.message.Message;
-import org.apache.qpid.proton.reactor.*;
+import org.apache.qpid.proton.reactor.FlowController;
+import org.apache.qpid.proton.reactor.Handshaker;
+import org.apache.qpid.proton.reactor.Reactor;
+import org.apache.qpid.proton.reactor.Selectable;
+import org.apache.qpid.proton.reactor.Task;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -42,6 +60,7 @@ import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Map;
+import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -74,40 +93,7 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
     @Mocked ProxyHandlerImpl mockedProxyHandlerImpl;
     @Mocked SSLContext mockedSslContext;
 
-    FileUploadNotificationReceivedCallback fileUploadNotificationReceivedCallback = notification -> IotHubMessageResult.COMPLETE;
-
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_001: [The constructor shall copy all input parameters to private member variables for event processing]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_002: [The constructor shall initialize a new Handshaker (Proton) object to handle communication handshake]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_003: [The constructor shall initialize a new FlowController (Proton) object to handle communication handshake]
-    @Test
-    public void amqpReceiveHandlerCallFlowAndInitOk()
-    {
-        // Arrange
-        final String hostName = "aaa";
-        final String userName = "bbb";
-        final String sasToken = "ccc";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        // Assert
-        new Expectations()
-        {
-            {
-                handshaker = new Handshaker();
-
-                // We purposefully extend only 1 link credit to the service so that the service only sends,
-                // at most, one message. A flowcontroller here would extend 1024 link credit which we don't want.
-                flowcontroller = new FlowController();
-                times = 0;
-            }
-        };
-        // Act
-        Object amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(hostName, sasToken, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, mockedProxyOptions, mockedSslContext);
-
-        final String _hostName = Deencapsulation.getField(amqpReceiveHandler, "hostName");
-        final String _sasToken = Deencapsulation.getField(amqpReceiveHandler, "sasToken");
-        // Assert
-        assertEquals(hostName, _hostName);
-        assertEquals(sasToken, _sasToken);
-    }
+    Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationReceivedCallback = notification -> AcknowledgementType.COMPLETE;
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_021: [** The constructor shall throw IllegalArgumentException if any of the parameters are null or empty **]
     @Test (expected = IllegalArgumentException.class)
@@ -136,31 +122,6 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
         Object amqpReceiveHandler = Deencapsulation.newInstance(AmqpFileUploadNotificationReceivedHandler.class, hostName, userName, String.class, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, mockedProxyOptions, mockedSslContext);
     }
 
-    @Test (expected = IllegalArgumentException.class)
-    public void amqpReceiveHandlerEmptyHostNameThrows()
-    {
-        // Arrange
-        final String hostName = "";
-        final String userName = "bbb";
-        final String sasToken = "ccc";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-
-        // Act
-        Object amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(hostName, sasToken, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, mockedProxyOptions, mockedSslContext);
-    }
-
-    @Test (expected = IllegalArgumentException.class)
-    public void amqpReceiveHandlerEmptySasTokenThrows()
-    {
-        // Arrange
-        final String hostName = "abc";
-        final String userName = "bbb";
-        final String sasToken = "";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-
-        // Act
-        Object amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(hostName, sasToken, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, mockedProxyOptions, mockedSslContext);
-    }
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_004: [The event handler shall get the Link, Receiver and Delivery (Proton) objects from the event]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_005: [The event handler shall read the received buffer]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_006: [The event handler shall create a Message (Proton) object from the decoded buffer]
@@ -171,13 +132,11 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
     public void onDeliveryCallFlowAndInitOk(@Mocked Data mockData)
     {
         // Arrange
-        final String hostName = "aaa";
-        final String userName = "bbb";
-        final String sasToken = "ccc";
-        final String hostAddr = hostName + ":5671";
+        final String connectionString = "aaa";
+
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         createProtonObjects();
-        Object amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(hostName, sasToken, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, mockedProxyOptions, mockedSslContext);
+        Object amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(connectionString, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, mockedProxyOptions, mockedSslContext);
         // Assert
         new Expectations()
         {
@@ -209,11 +168,9 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
     public void onConnectionBoundCallFlowAndInitOkAmqps()
     {
         // Arrange
-        final String hostName = "aaa";
-        final String userName = "bbb";
-        final String sasToken = "ccc";
+        final String connectionString = "aaa";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS_WS;
-        Object amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(hostName, sasToken, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, mockedProxyOptions, mockedSslContext);
+        Object amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(connectionString, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, mockedProxyOptions, mockedSslContext);
 
         // Assert
         new Expectations()
@@ -244,43 +201,14 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
         Deencapsulation.invoke(amqpReceiveHandler, "onConnectionBound", event);
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_011: [The event handler shall set the host name on the connection]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_012: [The event handler shall create a Session (Proton) object from the connection]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_013: [The event handler shall create a Receiver (Proton) object and set the protocol tag on it to a predefined constant]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_014: [The event handler shall open the Connection, the Session and the Receiver object]
-    // Tests_SRS_SERVICE_SDK_JAVA_AmqpFileUploadNotificationReceivedHandler_15_017: [The Receiver object shall have the properties set to service client version identifier.]
-    @Test
-    public void onConnectionInitCallFlowAndInitOk()
-    {
-        // Arrange
-        final String hostName = "aaa";
-        final String userName = "bbb";
-        final String sasToken = "ccc";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        Object amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(hostName, sasToken, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, mockedProxyOptions, mockedSslContext);
-        // Assert
-        new Expectations()
-        {
-            {
-                connection = event.getConnection();
-                connection.setHostname(hostName);
-                connection.open();
-            }
-        };
-        // Act
-        Deencapsulation.invoke(amqpReceiveHandler, "onConnectionInit", event);
-    }
-
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_34_022: [This function shall set the variable 'connectionWasOpened' to true]
     @Test
     public void onLinkRemoteOpenedFlagsConnectionWasOpened(@Mocked Event mockEvent)
     {
         // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
+        String connectionString = "aaa";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpFileUploadNotificationReceivedHandler amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(hostName, sasToken, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, mockedProxyOptions, mockedSslContext);
+        AmqpFileUploadNotificationReceivedHandler amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(connectionString, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, mockedProxyOptions, mockedSslContext);
 
         // Act
         amqpReceiveHandler.onLinkRemoteOpen(mockEvent);
@@ -294,11 +222,9 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
     public void verifyConnectionOpenedChecksForSavedException() throws IOException, IotHubException
     {
         // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
+        String connectionString = "aaa";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpFileUploadNotificationReceivedHandler amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(hostName, sasToken, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, mockedProxyOptions, mockedSslContext);
+        AmqpFileUploadNotificationReceivedHandler amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(connectionString, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, mockedProxyOptions, mockedSslContext);
 
         Deencapsulation.setField(amqpReceiveHandler, "connectionOpenedRemotely", true);
         Deencapsulation.setField(amqpReceiveHandler, "sessionOpenedRemotely", true);
@@ -314,11 +240,9 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
     public void verifyConnectionOpenedChecksThatConnectionWasOpened() throws IOException, IotHubException
     {
         // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
+        String connectionString = "aaa";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpFileUploadNotificationReceivedHandler amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(hostName, sasToken, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, mockedProxyOptions, mockedSslContext);
+        AmqpFileUploadNotificationReceivedHandler amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(connectionString, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, mockedProxyOptions, mockedSslContext);
 
         Deencapsulation.setField(amqpReceiveHandler, "connectionOpenedRemotely", false);
         Deencapsulation.setField(amqpReceiveHandler, "sessionOpenedRemotely", true);

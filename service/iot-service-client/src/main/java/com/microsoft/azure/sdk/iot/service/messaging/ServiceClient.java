@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * Use the ServiceClient to send and monitor messages to devices in IoT hubs.
@@ -26,7 +27,7 @@ import java.util.Objects;
 public final class ServiceClient
 {
     private final String hostName;
-    private String sasToken;
+    private String connectionString;
     private final IotHubServiceClientProtocol iotHubServiceClientProtocol;
     private TokenCredential credential;
     private AzureSasCredential sasTokenProvider;
@@ -67,7 +68,7 @@ public final class ServiceClient
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
 
         this.hostName = iotHubConnectionString.getHostName();
-        this.sasToken = new IotHubServiceSasToken(iotHubConnectionString).toString();
+        this.connectionString = connectionString;
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
         this.options = options;
 
@@ -232,87 +233,12 @@ public final class ServiceClient
         {
             amqpSendHandler =
                 new AmqpSendHandler(
-                    this.hostName,
-                    this.sasToken,
+                    this.connectionString,
                     this.iotHubServiceClientProtocol,
                     this.options.getProxyOptions(),
                     this.options.getSslContext());
         }
 
         amqpSendHandler.send(deviceId, moduleId, message);
-    }
-
-    /**
-     * Instantiate a new FeedbackReceiver object.
-     *
-     * @return The instance of the FeedbackReceiver
-     */
-    public FeedbackReceiver getFeedbackReceiver(FeedbackMessageReceivedCallback feedbackMessageReceivedCallback)
-    {
-        if (this.credential != null)
-        {
-             return new FeedbackReceiver(
-                 feedbackMessageReceivedCallback,
-                 this.hostName,
-                 this.credential,
-                 this.iotHubServiceClientProtocol,
-                 this.options.getProxyOptions(),
-                 this.options.getSslContext());
-         }
-        else if (this.sasTokenProvider != null)
-        {
-             return new FeedbackReceiver(
-                 feedbackMessageReceivedCallback,
-                 this.hostName,
-                 this.sasTokenProvider,
-                 this.iotHubServiceClientProtocol,
-                 this.options.getProxyOptions(),
-                 this.options.getSslContext());
-         }
-
-        return new FeedbackReceiver(
-            feedbackMessageReceivedCallback,
-            this.hostName,
-            this.sasToken,
-            this.iotHubServiceClientProtocol,
-            this.options.getProxyOptions(),
-            this.options.getSslContext());
-    }
-
-    /**
-     * Instantiate a new FileUploadNotificationReceiver object.
-     *
-     * @return The instance of the FileUploadNotificationReceiver
-     */
-    public FileUploadNotificationReceiver getFileUploadNotificationReceiver(FileUploadNotificationReceivedCallback fileUploadNotificationReceivedCallback)
-    {
-        if (this.credential != null)
-        {
-            return new FileUploadNotificationReceiver(
-                fileUploadNotificationReceivedCallback,
-                this.hostName,
-                this.credential,
-                this.iotHubServiceClientProtocol,
-                this.options.getProxyOptions(),
-                this.options.getSslContext());
-        }
-        else if (this.sasTokenProvider != null)
-        {
-            return new FileUploadNotificationReceiver(
-                fileUploadNotificationReceivedCallback,
-                this.hostName,
-                this.sasTokenProvider,
-                this.iotHubServiceClientProtocol,
-                this.options.getProxyOptions(),
-                this.options.getSslContext());
-        }
-
-        return new FileUploadNotificationReceiver(
-            fileUploadNotificationReceivedCallback,
-            this.hostName,
-            this.sasToken,
-            this.iotHubServiceClientProtocol,
-            this.options.getProxyOptions(),
-            this.options.getSslContext());
     }
 }

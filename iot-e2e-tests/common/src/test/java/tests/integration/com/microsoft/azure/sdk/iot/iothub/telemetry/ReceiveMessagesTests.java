@@ -9,17 +9,8 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.telemetry;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.ModuleClient;
-import com.microsoft.azure.sdk.iot.service.ProxyOptions;
-import com.microsoft.azure.sdk.iot.service.messaging.FeedbackBatch;
-import com.microsoft.azure.sdk.iot.service.messaging.FeedbackMessageReceivedCallback;
-import com.microsoft.azure.sdk.iot.service.messaging.FeedbackReceiver;
-import com.microsoft.azure.sdk.iot.service.messaging.FeedbackRecord;
-import com.microsoft.azure.sdk.iot.service.messaging.IotHubMessageResult;
-import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.messaging.ServiceClient;
-import com.microsoft.azure.sdk.iot.service.messaging.ServiceClientOptions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,9 +23,6 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubT
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.ReceiveMessagesCommon;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.util.UUID;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;

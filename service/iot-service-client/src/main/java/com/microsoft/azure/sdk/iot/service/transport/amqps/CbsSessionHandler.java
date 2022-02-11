@@ -32,7 +32,7 @@ class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implements Au
     private CbsReceiverLinkHandler cbsReceiverLinkHandler;
     private final CbsSessionStateCallback cbsSessionStateCallback;
     private TokenCredential credential;
-    private String sasToken;
+    private String connectionString;
     private AzureSasCredential sasTokenProvider;
     private boolean senderLinkOpened = false;
     private boolean receiverLinkOpened = false;
@@ -49,10 +49,10 @@ class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implements Au
         this.sasTokenProvider = sasTokenProvider;
     }
 
-    CbsSessionHandler(Session session, CbsSessionStateCallback cbsSessionStateCallback, String sasToken)
+    CbsSessionHandler(Session session, CbsSessionStateCallback cbsSessionStateCallback, String connectionString)
     {
         this(session, cbsSessionStateCallback);
-        this.sasToken = sasToken;
+        this.connectionString = connectionString;
     }
 
     private CbsSessionHandler(Session session, CbsSessionStateCallback cbsSessionStateCallback)
@@ -82,7 +82,7 @@ class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implements Au
         }
         else
         {
-            this.cbsSenderLinkHandler = new CbsSenderLinkHandler(cbsSender, this, this.sasToken);
+            this.cbsSenderLinkHandler = new CbsSenderLinkHandler(cbsSender, this, this.connectionString);
         }
 
         Receiver cbsReceiver = this.session.receiver(CbsReceiverLinkHandler.getCbsTag());
