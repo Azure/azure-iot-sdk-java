@@ -21,7 +21,6 @@ class MqttDirectMethod extends Mqtt
 {
     private final String subscribeTopic;
     private final String responseTopic;
-    private final Map<String, DeviceOperations> requestMap = new HashMap<>();
     private boolean isStarted = false;
 
     private static final String POUND = "#";
@@ -60,11 +59,6 @@ class MqttDirectMethod extends Mqtt
     public void stop()
     {
         isStarted = false;
-
-        if (!requestMap.isEmpty())
-        {
-            log.trace("Pending {} responses to be sent to IotHub yet unsubscribed", requestMap.size());
-        }
     }
 
     /**
@@ -103,18 +97,6 @@ class MqttDirectMethod extends Mqtt
                 if (message.getRequestId() == null || message.getRequestId().isEmpty())
                 {
                     throw new IllegalArgumentException("Request id cannot be null or empty");
-                }
-
-                if (requestMap.containsKey(message.getRequestId()))
-                {
-                    if (requestMap.remove(message.getRequestId()) != DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST)
-                    {
-                        throwMethodsTransportException("Mismatched request and response operation");
-                    }
-                }
-                else
-                {
-                    throwMethodsTransportException("Sending a response for the method that was never invoked");
                 }
 
                 String topic = this.responseTopic + BACKSLASH +
@@ -180,7 +162,6 @@ class MqttDirectMethod extends Mqtt
                                 message.setRequestId(reqId);
 
                                 message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
-                                requestMap.put(reqId, DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
                             }
                             else
                             {

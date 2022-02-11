@@ -127,7 +127,7 @@ public abstract class Mqtt implements MqttCallback
             }
             catch (MqttException e)
             {
-                log.warn("Exception encountered while sending MQTT CONNECT packet", e);
+                log.debug("Exception encountered while sending MQTT CONNECT packet", e);
 
                 this.disconnect();
                 throw PahoExceptionTranslator.convertToMqttException(e, "Unable to establish MQTT connection");
