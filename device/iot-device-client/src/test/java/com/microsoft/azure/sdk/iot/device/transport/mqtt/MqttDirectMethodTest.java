@@ -157,9 +157,6 @@ public class MqttDirectMethodTest
         testMessage.setRequestId("ReqId");
         testMessage.setStatus("testStatus");
         final MqttDirectMethod testMethod = new MqttDirectMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
-        Map<String, DeviceOperations> testRequestMap = new HashMap<>();
-        testRequestMap.put("ReqId", DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
-        Deencapsulation.setField(testMethod, "requestMap", testRequestMap);
         testMethod.start();
 
         //act
