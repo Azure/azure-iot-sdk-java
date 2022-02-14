@@ -9,6 +9,13 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.telemetry;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.ModuleClient;
+import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
+import com.microsoft.azure.sdk.iot.service.messaging.ErrorContext;
+import com.microsoft.azure.sdk.iot.service.messaging.EventProcessorClient;
+import com.microsoft.azure.sdk.iot.service.messaging.FeedbackBatch;
+import com.microsoft.azure.sdk.iot.service.messaging.FeedbackRecord;
+import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotification;
+import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import org.junit.Before;
@@ -23,7 +30,10 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubT
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.ReceiveMessagesCommon;
 
+import java.io.IOException;
 import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static junit.framework.TestCase.assertTrue;
@@ -101,8 +111,52 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
         }
 
         waitForMessageToBeReceived(messageReceived, testInstance.protocol.toString());
+        waitForFeedbackMessage(serviceMessage.getMessageId());
 
         Thread.sleep(200);
         testInstance.identity.getClient().close();
+    }
+
+    private void waitForFeedbackMessage(String expectedMessageId) throws InterruptedException, IOException
+    {
+        final Success feedbackReceived = new Success();
+
+        Function<FeedbackBatch, AcknowledgementType> feedbackEventProcessor = feedbackBatch ->
+        {
+            for (FeedbackRecord feedbackRecord : feedbackBatch.getRecords())
+            {
+                if (feedbackRecord.getDeviceId().equals(testInstance.identity.getDeviceId())
+                    && feedbackRecord.getOriginalMessageId().equals(expectedMessageId))
+                {
+                    feedbackReceived.setResult(true);
+                    feedbackReceived.callbackWasFired();
+                }
+            }
+
+            return AcknowledgementType.ABANDON;
+        };
+
+        EventProcessorClient eventProcessorClient =
+            EventProcessorClient.builder()
+                .setConnectionString(iotHubConnectionString)
+                .setCloudToDeviceFeedbackMessageProcessor(feedbackEventProcessor)
+                .setProtocol(IotHubServiceClientProtocol.AMQPS_WS)
+                .build();
+
+        eventProcessorClient.start();
+
+        long startTime = System.currentTimeMillis();
+        while (!feedbackReceived.wasCallbackFired())
+        {
+            Thread.sleep(1000);
+
+            if (System.currentTimeMillis() - startTime > FEEDBACK_TIMEOUT_MILLIS)
+            {
+                fail("Timed out waiting on notification for device " + testInstance.identity.getDeviceId());
+            }
+        }
+
+        eventProcessorClient.stop();
+        assertTrue(feedbackReceived.getResult());
     }
 }
