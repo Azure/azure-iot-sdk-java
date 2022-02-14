@@ -9,6 +9,7 @@ import com.microsoft.azure.proton.transport.proxy.impl.ProxyHandlerImpl;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
 import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
 import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotification;
@@ -92,6 +93,7 @@ public class AmqpEventProcessorHandlerTest
     @Mocked ProxyImpl mockedProxyImpl;
     @Mocked ProxyHandlerImpl mockedProxyHandlerImpl;
     @Mocked SSLContext mockedSslContext;
+    @Mocked IotHubConnectionStringBuilder mockIotHubConnectionStringBuilder;
 
     Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationReceivedCallback = notification -> AcknowledgementType.COMPLETE;
 
@@ -120,45 +122,6 @@ public class AmqpEventProcessorHandlerTest
 
         // Act
         Object amqpReceiveHandler = Deencapsulation.newInstance(AmqpEventProcessorHandler.class, hostName, userName, String.class, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, mockedProxyOptions, mockedSslContext);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_004: [The event handler shall get the Link, Receiver and Delivery (Proton) objects from the event]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_005: [The event handler shall read the received buffer]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_006: [The event handler shall create a Message (Proton) object from the decoded buffer]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_007: [The event handler shall settle the Delivery with the Accepted outcome ]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_008: [The event handler shall close the Session and Connection (Proton)]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_009: [The event handler shall call the FeedbackReceived callback if it has been initialized]
-    @Test
-    public void onDeliveryCallFlowAndInitOk(@Mocked Data mockData)
-    {
-        // Arrange
-        final String connectionString = "aaa";
-
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        createProtonObjects();
-        Object amqpReceiveHandler = new AmqpEventProcessorHandler(connectionString, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, null, mockedProxyOptions, mockedSslContext);
-        // Assert
-        new Expectations()
-        {
-            {
-                event.getLink();
-                receiver.current();
-                delivery.isReadable();
-                delivery.isPartial();
-                delivery.getLink();
-                delivery.pending();
-                byte[] buffer = new byte[1024];
-                receiver.recv(buffer, 0, buffer.length);
-                message.decode(withAny(buffer), 0, anyInt);
-                delivery.disposition(Accepted.getInstance()); // send disposition frame and settle the outcome
-                delivery.settle();
-                message.getBody();
-                result = mockData;
-
-            }
-        };
-        // Act
-        Deencapsulation.invoke(amqpReceiveHandler, "onDelivery", event);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_009: [The event handler shall set the SASL PLAIN authentication on the Transport using the given user name and sas token]

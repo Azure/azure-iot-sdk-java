@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -80,6 +81,7 @@ public class AmqpSendHandlerTest
     @Mocked Disposition disposition;
     @Mocked AmqpResponseVerification responseVerification;
     @Mocked IotHubSSLContext mockedIotHubSSLContext;
+    @Mocked IotHubConnectionStringBuilder mockIotHubConnectionStringBuilder;
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
     // Assert
