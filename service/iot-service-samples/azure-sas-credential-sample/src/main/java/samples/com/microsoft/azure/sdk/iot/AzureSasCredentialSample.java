@@ -8,6 +8,10 @@ package samples.com.microsoft.azure.sdk.iot;
 import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJob;
 import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
+import com.microsoft.azure.sdk.iot.service.messaging.ErrorContext;
+import com.microsoft.azure.sdk.iot.service.messaging.EventProcessorClient;
+import com.microsoft.azure.sdk.iot.service.messaging.FeedbackBatch;
+import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotification;
 import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.service.query.QueryClientOptions;
@@ -33,6 +37,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Sample that demonstrates how to use the {@link AzureSasCredential} authentication mechanism when using the service clients.
@@ -173,9 +179,7 @@ public class AzureSasCredentialSample
 
         try
         {
-            // FeedbackReceiver will use the same authentication mechanism that the ServiceClient itself uses,
-            // so the below APIs are also RBAC authenticated.
-            FeedbackReceiver feedbackReceiver = serviceClient.getFeedbackReceiver(feedbackBatch ->
+            Function<FeedbackBatch, AcknowledgementType> feedbackProcessor = feedbackBatch ->
             {
                 for (FeedbackRecord feedbackRecord : feedbackBatch.getRecords())
                 {
@@ -183,44 +187,41 @@ public class AzureSasCredentialSample
                 }
 
                 return AcknowledgementType.COMPLETE;
-            });
+            };
 
-            System.out.println("Opening feedback receiver to listen for feedback messages");
-            feedbackReceiver.open();
+            Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationProcessor = notification ->
+            {
+                System.out.println("File upload notification received for device " + notification.getDeviceId());
+                return AcknowledgementType.COMPLETE;
+            };
+
+            Consumer<ErrorContext> errorProcessor = errorContext ->
+            {
+                System.out.println("Lost connection to service: " + errorContext.getException().getMessage());
+            };
+
+            EventProcessorClient eventProcessorClient =
+                EventProcessorClient.builder()
+                    .setHostName(iotHubHostName)
+                    .setSasTokenProvider(credential)
+                    .setFileUploadNotificationProcessor(fileUploadNotificationProcessor)
+                    .setCloudToDeviceFeedbackMessageProcessor(feedbackProcessor)
+                    .setErrorProcessor(errorProcessor)
+                    .build();
+
+            // FeedbackReceiver will use the same authentication mechanism that the ServiceClient itself uses,
+            // so the below APIs are also RBAC authenticated.
+            System.out.println("Starting event processor to listen for feedback messages and file upload notifications");
+            eventProcessorClient.start();
 
             System.out.println("Sleeping 5 seconds while waiting for feedback records to be received");
             Thread.sleep(5000);
 
-            feedbackReceiver.close();
+            eventProcessorClient.stop();
         }
         catch (IOException | InterruptedException e)
         {
             System.err.println("Failed to listen for feedback messages");
-            e.printStackTrace();
-            System.exit(-1);
-        }
-
-        try
-        {
-            // FileUploadNotificationReceiver will use the same authentication mechanism that the ServiceClient itself uses,
-            // so the below APIs are also RBAC authenticated.
-            FileUploadNotificationReceiver fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver(notification ->
-            {
-                System.out.println("File upload notification received for device " + notification.getDeviceId());
-                return AcknowledgementType.COMPLETE;
-            });
-
-            System.out.println("Opening file upload notification receiver and listening for file upload notifications");
-            fileUploadNotificationReceiver.open();
-
-            System.out.println("Sleeping 5 seconds while waiting for feedback records to be received");
-            Thread.sleep(5000);
-
-            fileUploadNotificationReceiver.close();
-        }
-        catch (IOException | InterruptedException e)
-        {
-            System.err.println("Failed to listen for file upload notification messages");
             e.printStackTrace();
             System.exit(-1);
         }
