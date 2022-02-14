@@ -115,10 +115,12 @@ class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implements Au
         }
     }
 
-    private void close()
+    void close()
     {
         log.trace("Closing this CBS session");
         this.session.close();
+        this.cbsSenderLinkHandler.close();
+        this.cbsReceiverLinkHandler.close();
     }
 
     @Override

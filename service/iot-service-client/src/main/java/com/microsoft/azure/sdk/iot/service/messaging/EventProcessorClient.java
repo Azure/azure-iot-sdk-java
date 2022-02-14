@@ -7,8 +7,7 @@ import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFeedbackReceivedHandler;
-import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFileUploadNotificationReceivedHandler;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpEventProcessorHandler;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.ReactorRunner;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,6 +19,8 @@ import java.util.function.Function;
 @Slf4j
 public class EventProcessorClient
 {
+    private static final int STOP_REACTOR_TIMEOUT_MILLISECONDS = 10 * 1000; // 10 seconds
+
     final Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationProcessor;
     final Function<FeedbackBatch, AcknowledgementType> feedbackMessageProcessor;
     final Consumer<ErrorContext> errorProcessor;
@@ -30,8 +31,7 @@ public class EventProcessorClient
     final SSLContext sslContext;
     final AzureSasCredential sasTokenProvider;
 
-    final AmqpFeedbackReceivedHandler amqpFeedbackReceivedHandler;
-    final AmqpFileUploadNotificationReceivedHandler amqpFileUploadNotificationReceivedHandler;
+    final AmqpEventProcessorHandler amqpEventProcessorHandler;
 
     ReactorRunner reactorRunner;
 
@@ -60,43 +60,21 @@ public class EventProcessorClient
         this.sslContext = sslContext;
         this.sasTokenProvider = null;
 
-        if (fileUploadNotificationProcessor != null)
-        {
-            this.amqpFileUploadNotificationReceivedHandler =
-                new AmqpFileUploadNotificationReceivedHandler(
-                    hostName,
-                    credential,
-                    iotHubServiceClientProtocol,
-                    fileUploadNotificationProcessor,
-                    proxyOptions,
-                    sslContext);
-        }
-        else
-        {
-            this.amqpFileUploadNotificationReceivedHandler = null;
-        }
-
-        if (feedbackMessageProcessor != null)
-        {
-            this.amqpFeedbackReceivedHandler =
-                new AmqpFeedbackReceivedHandler(
-                    hostName,
-                    credential,
-                    iotHubServiceClientProtocol,
-                    feedbackMessageProcessor,
-                    proxyOptions,
-                    sslContext);
-        }
-        else
-        {
-            this.amqpFeedbackReceivedHandler = null;
-        }
-
         if (fileUploadNotificationProcessor == null && feedbackMessageProcessor == null)
         {
             // TODO no processors attached
             throw new IllegalArgumentException();
         }
+
+        this.amqpEventProcessorHandler =
+            new AmqpEventProcessorHandler(
+                hostName,
+                credential,
+                iotHubServiceClientProtocol,
+                fileUploadNotificationProcessor,
+                feedbackMessageProcessor,
+                proxyOptions,
+                sslContext);
     }
 
     EventProcessorClient(
@@ -119,43 +97,21 @@ public class EventProcessorClient
         this.sslContext = sslContext;
         this.sasTokenProvider = sasTokenProvider;
 
-        if (fileUploadNotificationProcessor != null)
-        {
-            this.amqpFileUploadNotificationReceivedHandler =
-                new AmqpFileUploadNotificationReceivedHandler(
-                    hostName,
-                    sasTokenProvider,
-                    iotHubServiceClientProtocol,
-                    fileUploadNotificationProcessor,
-                    proxyOptions,
-                    sslContext);
-        }
-        else
-        {
-            this.amqpFileUploadNotificationReceivedHandler = null;
-        }
-
-        if (feedbackMessageProcessor != null)
-        {
-            this.amqpFeedbackReceivedHandler =
-                new AmqpFeedbackReceivedHandler(
-                    hostName,
-                    sasTokenProvider,
-                    iotHubServiceClientProtocol,
-                    feedbackMessageProcessor,
-                    proxyOptions,
-                    sslContext);
-        }
-        else
-        {
-            this.amqpFeedbackReceivedHandler = null;
-        }
-
         if (fileUploadNotificationProcessor == null && feedbackMessageProcessor == null)
         {
             // TODO no processors attached
             throw new IllegalArgumentException();
         }
+
+        this.amqpEventProcessorHandler =
+            new AmqpEventProcessorHandler(
+                hostName,
+                sasTokenProvider,
+                iotHubServiceClientProtocol,
+                fileUploadNotificationProcessor,
+                feedbackMessageProcessor,
+                proxyOptions,
+                sslContext);
     }
 
     EventProcessorClient(
@@ -177,69 +133,30 @@ public class EventProcessorClient
         this.sslContext = sslContext;
         this.sasTokenProvider = null;
 
-        if (fileUploadNotificationProcessor != null)
-        {
-            this.amqpFileUploadNotificationReceivedHandler =
-                new AmqpFileUploadNotificationReceivedHandler(
-                    connectionString,
-                    iotHubServiceClientProtocol,
-                    fileUploadNotificationProcessor,
-                    proxyOptions,
-                    sslContext);
-        }
-        else
-        {
-            this.amqpFileUploadNotificationReceivedHandler = null;
-        }
-
-        if (feedbackMessageProcessor != null)
-        {
-            this.amqpFeedbackReceivedHandler =
-                new AmqpFeedbackReceivedHandler(
-                    connectionString,
-                    iotHubServiceClientProtocol,
-                    feedbackMessageProcessor,
-                    proxyOptions,
-                    sslContext);
-        }
-        else
-        {
-            this.amqpFeedbackReceivedHandler = null;
-        }
-
         if (fileUploadNotificationProcessor == null && feedbackMessageProcessor == null)
         {
             // TODO no processors attached
             throw new IllegalArgumentException();
         }
+
+        this.amqpEventProcessorHandler =
+            new AmqpEventProcessorHandler(
+                connectionString,
+                iotHubServiceClientProtocol,
+                fileUploadNotificationProcessor,
+                feedbackMessageProcessor,
+                proxyOptions,
+                sslContext);
     }
 
     public void start() throws IOException
     {
         log.debug("Opening file upload notification receiver");
 
-        if (this.amqpFileUploadNotificationReceivedHandler != null && this.amqpFeedbackReceivedHandler != null)
-        {
-            this.reactorRunner = new ReactorRunner(
-                this.hostName,
-                "AmqpFileUploadNotificationAndCloudToDeviceFeedbackReceiver",
-                this.amqpFileUploadNotificationReceivedHandler,
-                this.amqpFeedbackReceivedHandler);
-        }
-        else if (this.amqpFeedbackReceivedHandler != null)
-        {
-            this.reactorRunner = new ReactorRunner(
-                this.hostName,
-                "AmqpCloudToDeviceFeedbackReceiver",
-                this.amqpFeedbackReceivedHandler);
-        }
-        else if (this.amqpFileUploadNotificationReceivedHandler != null)
-        {
-            this.reactorRunner = new ReactorRunner(
-                this.hostName,
-                "AmqpFileUploadNotificationReceiver",
-                this.amqpFileUploadNotificationReceivedHandler);
-        }
+        this.reactorRunner = new ReactorRunner(
+            this.hostName,
+            "AmqpFileUploadNotificationAndCloudToDeviceFeedbackReceiver",
+            this.amqpEventProcessorHandler);
 
         new Thread(() ->
         {
@@ -247,21 +164,14 @@ public class EventProcessorClient
             {
                 reactorRunner.run();
 
-                log.trace("Amqp receive reactor stopped, checking that the connection was opened");
-                if (this.amqpFileUploadNotificationReceivedHandler != null)
-                {
-                    this.amqpFileUploadNotificationReceivedHandler.verifyConnectionWasOpened();
-                }
-                else
-                {
-                    this.amqpFeedbackReceivedHandler.verifyConnectionWasOpened();
-                }
+                log.trace("EventProcessorClient Amqp reactor stopped, checking that the connection was opened");
+                this.amqpEventProcessorHandler.verifyConnectionWasOpened();
 
-                log.trace("Amqp receive reactor did successfully open the connection, returning without exception");
+                log.trace("EventProcessorClient  reactor did successfully open the connection, returning without exception");
             }
             catch (IOException e)
             {
-                log.warn("Amqp connection thread encountered an exception", e);
+                log.warn("EventProcessorClient Amqp connection encountered an exception", e);
 
                 if (this.errorProcessor != null)
                 {
@@ -270,15 +180,20 @@ public class EventProcessorClient
             }
         }).start();
 
-        log.debug("Opened file upload notification receiver");
+        log.debug("Opened EventProcessorClient");
     }
 
-    public void stop()
+    public void stop() throws InterruptedException
     {
-        log.debug("Closing file upload notification receiver");
+        this.stop(STOP_REACTOR_TIMEOUT_MILLISECONDS);
+    }
 
-        this.reactorRunner.stop();
+    public void stop(int timeoutMilliseconds) throws InterruptedException
+    {
+        log.debug("Closing EventProcessorClient");
 
-        log.debug("Closed file upload notification receiver");
+        this.reactorRunner.stop(timeoutMilliseconds);
+
+        log.debug("Closed EventProcessorClient ");
     }
 }

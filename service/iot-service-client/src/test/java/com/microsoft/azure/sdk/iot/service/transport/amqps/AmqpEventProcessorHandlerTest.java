@@ -5,11 +5,14 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
+import com.microsoft.azure.proton.transport.proxy.impl.ProxyHandlerImpl;
+import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
 import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
-import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
-import com.microsoft.azure.sdk.iot.service.messaging.FeedbackBatch;
-import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
+import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotification;
+import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import mockit.Deencapsulation;
 import mockit.Expectations;
 import mockit.Mocked;
@@ -18,6 +21,7 @@ import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.UnsignedLong;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
+import org.apache.qpid.proton.amqp.messaging.Data;
 import org.apache.qpid.proton.amqp.messaging.Source;
 import org.apache.qpid.proton.amqp.messaging.Target;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
@@ -26,26 +30,44 @@ import org.apache.qpid.proton.amqp.transport.ReceiverSettleMode;
 import org.apache.qpid.proton.amqp.transport.SenderSettleMode;
 import org.apache.qpid.proton.codec.ReadableBuffer;
 import org.apache.qpid.proton.codec.WritableBuffer;
-import org.apache.qpid.proton.engine.*;
+import org.apache.qpid.proton.engine.Connection;
+import org.apache.qpid.proton.engine.Delivery;
+import org.apache.qpid.proton.engine.EndpointState;
+import org.apache.qpid.proton.engine.Event;
+import org.apache.qpid.proton.engine.EventType;
+import org.apache.qpid.proton.engine.Handler;
+import org.apache.qpid.proton.engine.HandlerException;
+import org.apache.qpid.proton.engine.Link;
+import org.apache.qpid.proton.engine.Receiver;
+import org.apache.qpid.proton.engine.Record;
+import org.apache.qpid.proton.engine.Sasl;
+import org.apache.qpid.proton.engine.Sender;
+import org.apache.qpid.proton.engine.Session;
+import org.apache.qpid.proton.engine.SslDomain;
+import org.apache.qpid.proton.engine.Transport;
 import org.apache.qpid.proton.engine.impl.TransportInternal;
 import org.apache.qpid.proton.message.Message;
-import org.apache.qpid.proton.reactor.*;
+import org.apache.qpid.proton.reactor.FlowController;
+import org.apache.qpid.proton.reactor.Handshaker;
+import org.apache.qpid.proton.reactor.Reactor;
+import org.apache.qpid.proton.reactor.Selectable;
+import org.apache.qpid.proton.reactor.Task;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.function.Function;
 
-import static com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFeedbackReceivedHandler.RECEIVE_TAG;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-/** Unit tests for AmqpFeedbackReceivedHandler */
+/** Unit tests for AmqpEventProcessorHandler */
 @RunWith(JMockit.class)
-public class AmqpFeedbackReceivedHandlerTest
+public class AmqpEventProcessorHandlerTest
 {
     @Mocked Handshaker handshaker;
     @Mocked FlowController flowcontroller;
@@ -66,23 +88,55 @@ public class AmqpFeedbackReceivedHandlerTest
     @Mocked Link link;
     @Mocked Source source;
     @Mocked ReadableBuffer readBuf;
+    @Mocked ProxyOptions mockedProxyOptions;
+    @Mocked ProxyImpl mockedProxyImpl;
+    @Mocked ProxyHandlerImpl mockedProxyHandlerImpl;
+    @Mocked SSLContext mockedSslContext;
 
-    Function<FeedbackBatch, AcknowledgementType> feedbackMessageReceivedCallback = feedbackBatch -> AcknowledgementType.COMPLETE;
+    Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationReceivedCallback = notification -> AcknowledgementType.COMPLETE;
 
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_004: [The event handler shall get the Link, Receiver and Delivery (Proton) objects from the event]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_005: [The event handler shall read the received buffer]            int size = delivery.pending();
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_006: [The event handler shall create a Message (Proton) object from the decoded buffer]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_007: [** The event handler shall settle the Delivery with the Accepted outcome **]**
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_008: [The event handler shall close the Session and Connection (Proton)]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_009: [The event handler shall call the FeedbackReceived callback if it has been initialized]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_021: [** The constructor shall throw IllegalArgumentException if any of the parameters are null or empty **]
+    @Test (expected = IllegalArgumentException.class)
+    public void amqpReceiveHandlerNullHostNameThrows()
+    {
+        // Arrange
+        final String hostName = null;
+        final String userName = "bbb";
+        final String sasToken = "ccc";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+
+        // Act
+        Object amqpReceiveHandler = Deencapsulation.newInstance(AmqpEventProcessorHandler.class, String.class, userName, sasToken, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, mockedProxyOptions, mockedSslContext);
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void amqpReceiveHandlerNullSasTokenThrows()
+    {
+        // Arrange
+        final String hostName = "abc";
+        final String userName = "bbb";
+        final String sasToken = null;
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+
+        // Act
+        Object amqpReceiveHandler = Deencapsulation.newInstance(AmqpEventProcessorHandler.class, hostName, userName, String.class, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, mockedProxyOptions, mockedSslContext);
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_004: [The event handler shall get the Link, Receiver and Delivery (Proton) objects from the event]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_005: [The event handler shall read the received buffer]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_006: [The event handler shall create a Message (Proton) object from the decoded buffer]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_007: [The event handler shall settle the Delivery with the Accepted outcome ]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_008: [The event handler shall close the Session and Connection (Proton)]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_009: [The event handler shall call the FeedbackReceived callback if it has been initialized]
     @Test
-    public void onDelivery_call_flow_and_init_ok()
+    public void onDeliveryCallFlowAndInitOk(@Mocked Data mockData)
     {
         // Arrange
         final String connectionString = "aaa";
+
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         createProtonObjects();
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(connectionString, iotHubServiceClientProtocol, feedbackMessageReceivedCallback, null, null);
+        Object amqpReceiveHandler = new AmqpEventProcessorHandler(connectionString, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, null, mockedProxyOptions, mockedSslContext);
         // Assert
         new Expectations()
         {
@@ -98,48 +152,26 @@ public class AmqpFeedbackReceivedHandlerTest
                 message.decode(withAny(buffer), 0, anyInt);
                 delivery.disposition(Accepted.getInstance()); // send disposition frame and settle the outcome
                 delivery.settle();
+                message.getBody();
+                result = mockData;
+
             }
         };
         // Act
-        amqpReceiveHandler.onDelivery(event);
+        Deencapsulation.invoke(amqpReceiveHandler, "onDelivery", event);
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_009: [The event handler shall set the SASL PLAIN authentication on the Transport using the given user name and sas token]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_010: [The event handler shall set VERIFY_PEER authentication mode on the domain of the Transport]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_017: [The event handler shall not initialize WebSocket if the protocol is AMQP]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_009: [The event handler shall set the SASL PLAIN authentication on the Transport using the given user name and sas token]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_010: [The event handler shall set VERIFY_PEER authentication mode on the domain of the Transport]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_018: [The event handler shall initialize WebSocket if the protocol is AMQP_WS]
     @Test
-    public void onConnectionBound_call_flow_and_init_ok_amqp()
-    {
-        // Arrange
-        final String connectionString = "aaa";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(connectionString, iotHubServiceClientProtocol, null, null, null);
-        // Assert
-        new Expectations()
-        {
-            {
-                connection = event.getConnection();
-                transport = connection.getTransport();
-                sslDomain = Proton.sslDomain();
-                sslDomain.init(SslDomain.Mode.CLIENT);
-                sslDomain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
-                transport.ssl(sslDomain);
-            }
-        };
-        // Act
-        amqpReceiveHandler.onConnectionBound(event);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_009: [The event handler shall set the SASL PLAIN authentication on the Transport using the given user name and sas token]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_010: [The event handler shall set VERIFY_PEER authentication mode on the domain of the Transport]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_018: [The event handler shall initialize WebSocket if the protocol is AMQP_WS]
-    @Test
-    public void onConnectionBound_call_flow_and_init_ok_amqps()
+    public void onConnectionBoundCallFlowAndInitOkAmqps()
     {
         // Arrange
         final String connectionString = "aaa";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS_WS;
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(connectionString, iotHubServiceClientProtocol, null, null, null);
+        Object amqpReceiveHandler = new AmqpEventProcessorHandler(connectionString, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, null, mockedProxyOptions, mockedSslContext);
+
         // Assert
         new Expectations()
         {
@@ -148,6 +180,12 @@ public class AmqpFeedbackReceivedHandlerTest
                 result = connection;
                 connection.getTransport();
                 result = transportInternal;
+                new ProxyImpl();
+                result = mockedProxyImpl;
+                new ProxyHandlerImpl();
+                result = mockedProxyHandlerImpl;
+                mockedProxyImpl.configure(anyString, (Map<String, String>) any, mockedProxyHandlerImpl, transportInternal);
+                transportInternal.addTransportLayer(mockedProxyImpl);
                 new WebSocketImpl(anyInt);
                 result = webSocket;
                 webSocket.configure(anyString, anyString, anyString, 443, anyString, null, null);
@@ -160,17 +198,17 @@ public class AmqpFeedbackReceivedHandlerTest
             }
         };
         // Act
-        amqpReceiveHandler.onConnectionBound(event);
+        Deencapsulation.invoke(amqpReceiveHandler, "onConnectionBound", event);
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_34_018: [This function shall set the variable 'connectionWasOpened' to true]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_34_022: [This function shall set the variable 'connectionWasOpened' to true]
     @Test
     public void onLinkRemoteOpenedFlagsConnectionWasOpened(@Mocked Event mockEvent)
     {
         // Arrange
         String connectionString = "aaa";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(connectionString, iotHubServiceClientProtocol, null, null, null);
+        AmqpEventProcessorHandler amqpReceiveHandler = new AmqpEventProcessorHandler(connectionString, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, null, mockedProxyOptions, mockedSslContext);
 
         // Act
         amqpReceiveHandler.onLinkRemoteOpen(mockEvent);
@@ -179,72 +217,36 @@ public class AmqpFeedbackReceivedHandlerTest
         assertTrue(Deencapsulation.getField(amqpReceiveHandler, "linkOpenedRemotely"));
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_34_019: [if 'connectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_34_023: [if 'connectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
     @Test (expected = IOException.class)
     public void verifyConnectionOpenedChecksForSavedException() throws IOException, IotHubException
     {
         // Arrange
         String connectionString = "aaa";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(connectionString, iotHubServiceClientProtocol, null, null, null);
+        AmqpEventProcessorHandler amqpReceiveHandler = new AmqpEventProcessorHandler(connectionString, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, null, mockedProxyOptions, mockedSslContext);
 
-        Deencapsulation.setField(amqpReceiveHandler, "linkOpenedRemotely", true);
-        Deencapsulation.setField(amqpReceiveHandler, "sessionOpenedRemotely", true);
         Deencapsulation.setField(amqpReceiveHandler, "connectionOpenedRemotely", true);
+        Deencapsulation.setField(amqpReceiveHandler, "sessionOpenedRemotely", true);
+        Deencapsulation.setField(amqpReceiveHandler, "linkOpenedRemotely", true);
         Deencapsulation.setField(amqpReceiveHandler, "savedException", new SSLHandshakeException("some nonsense exception"));
 
         // Act
         Deencapsulation.invoke(amqpReceiveHandler, "verifyConnectionWasOpened");
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_34_019: [if 'connectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
+    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_34_023: [if 'connectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
     @Test (expected = IOException.class)
     public void verifyConnectionOpenedChecksThatConnectionWasOpened() throws IOException, IotHubException
     {
         // Arrange
         String connectionString = "aaa";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(connectionString, iotHubServiceClientProtocol, null, null, null);
+        AmqpEventProcessorHandler amqpReceiveHandler = new AmqpEventProcessorHandler(connectionString, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, null, mockedProxyOptions, mockedSslContext);
 
         Deencapsulation.setField(amqpReceiveHandler, "connectionOpenedRemotely", false);
-        Deencapsulation.setField(amqpReceiveHandler, "linkOpenedRemotely", true);
         Deencapsulation.setField(amqpReceiveHandler, "sessionOpenedRemotely", true);
-        Deencapsulation.setField(amqpReceiveHandler, "savedException", null);
-
-        // Act
-        Deencapsulation.invoke(amqpReceiveHandler, "verifyConnectionWasOpened");
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_34_019: [if 'connectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
-    @Test (expected = IOException.class)
-    public void verifyConnectionOpenedChecksThatSessionWasOpened() throws IOException, IotHubException
-    {
-        // Arrange
-        String connectionString = "aaa";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(connectionString, iotHubServiceClientProtocol, null, null, null);
-
-        Deencapsulation.setField(amqpReceiveHandler, "sessionOpenedRemotely", false);
         Deencapsulation.setField(amqpReceiveHandler, "linkOpenedRemotely", true);
-        Deencapsulation.setField(amqpReceiveHandler, "connectionOpenedRemotely", true);
-        Deencapsulation.setField(amqpReceiveHandler, "savedException", null);
-
-        // Act
-        Deencapsulation.invoke(amqpReceiveHandler, "verifyConnectionWasOpened");
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_34_019: [if 'connectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
-    @Test (expected = IOException.class)
-    public void verifyConnectionOpenedChecksThatLinkWasOpened() throws IOException, IotHubException
-    {
-        // Arrange
-        String connectionString = "aaa";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(connectionString, iotHubServiceClientProtocol, null, null, null);
-
-        Deencapsulation.setField(amqpReceiveHandler, "linkOpenedRemotely", false);
-        Deencapsulation.setField(amqpReceiveHandler, "sessionOpenedRemotely", true);
-        Deencapsulation.setField(amqpReceiveHandler, "connectionOpenedRemotely", true);
         Deencapsulation.setField(amqpReceiveHandler, "savedException", null);
 
         // Act
@@ -264,14 +266,12 @@ public class AmqpFeedbackReceivedHandlerTest
             { }
 
             @Override
-            public int recv(byte[] bytes, int i, int i1)
-            { return 0; }
+            public ReadableBuffer recv()
+            { return readBuf; }
 
             @Override
-            public ReadableBuffer recv()
-            {
-                return readBuf;
-            }
+            public int recv(byte[] bytes, int i, int i1)
+            { return 0; }
 
             @Override
             public int recv(WritableBuffer writableBuffer)
@@ -297,7 +297,7 @@ public class AmqpFeedbackReceivedHandlerTest
 
             @Override
             public String getName()
-            { return RECEIVE_TAG; }
+            { return "filenotificationreceiver";}
 
             @Override
             public Delivery delivery(byte[] bytes)
@@ -533,7 +533,7 @@ public class AmqpFeedbackReceivedHandlerTest
                 return null;
             }
 
-            @Override public Event.Type getType()
+            @Override public Type getType()
             { throw new UnsupportedOperationException(exceptionMessage); }
 
             @Override public Object getContext()

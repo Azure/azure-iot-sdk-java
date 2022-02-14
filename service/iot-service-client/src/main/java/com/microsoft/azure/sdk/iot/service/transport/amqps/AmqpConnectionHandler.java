@@ -20,6 +20,7 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.engine.Connection;
+import org.apache.qpid.proton.engine.EndpointState;
 import org.apache.qpid.proton.engine.Event;
 import org.apache.qpid.proton.engine.Session;
 import org.apache.qpid.proton.engine.SslDomain;
@@ -46,7 +47,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
     private Exception savedException;
     private boolean connectionOpenedRemotely;
     private boolean sessionOpenedRemotely;
-    private boolean linkOpenedRemotely;
+    protected boolean linkOpenedRemotely;
     private String connectionId;
 
     protected final String hostName;
@@ -58,6 +59,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
     private SSLContext sslContext;
 
     Connection connection;
+    private CbsSessionHandler cbsSessionHandler;
 
     AmqpConnectionHandler(
         String connectionString,
@@ -232,15 +234,15 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
 
         if (this.credential != null)
         {
-            new CbsSessionHandler(cbsSession, this, this.credential);
+            this.cbsSessionHandler = new CbsSessionHandler(cbsSession, this, this.credential);
         }
         else if (this.sasTokenProvider != null)
         {
-            new CbsSessionHandler(cbsSession, this, this.sasTokenProvider);
+            this.cbsSessionHandler = new CbsSessionHandler(cbsSession, this, this.sasTokenProvider);
         }
         else
         {
-            new CbsSessionHandler(cbsSession, this, this.connectionString);
+            this.cbsSessionHandler = new CbsSessionHandler(cbsSession, this, this.connectionString);
         }
     }
 
@@ -316,5 +318,16 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
     public void onAuthenticationFailed(IotHubException e)
     {
         this.savedException = e;
+    }
+
+    public boolean isOpen()
+    {
+        return this.connection.getLocalState() == EndpointState.ACTIVE && this.connection.getRemoteState() == EndpointState.ACTIVE;
+    }
+
+    public void closeAsync()
+    {
+        this.cbsSessionHandler.close();
+        this.connection.close();
     }
 }

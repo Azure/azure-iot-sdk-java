@@ -22,22 +22,14 @@ public class ReactorRunner
     private final Reactor reactor;
     private static final int REACTOR_TIMEOUT = 3141; // reactor timeout in milliseconds
     private static final int MAX_FRAME_SIZE = 4 * 1024;
+    private final AmqpConnectionHandler handler;
 
-    public ReactorRunner(BaseHandler... handlers) throws IOException
+    public ReactorRunner(AmqpConnectionHandler handler) throws IOException
     {
-        ReactorOptions options = new ReactorOptions();
-
-        // If this option isn't set, proton defaults to 16 * 1024 max frame size. This used to default to 4 * 1024,
-        // and this change to 16 * 1024 broke the websocket implementation that we layer on top of proton-j.
-        // By setting this frame size back to 4 * 1024, AMQPS_WS clients can send messages with payloads up to the
-        // expected 64 * 1024 bytes. For more context, see https://github.com/Azure/azure-iot-sdk-java/issues/742
-        options.setMaxFrameSize(MAX_FRAME_SIZE);
-
-        this.reactor = Proton.reactor(options, handlers);
-        this.threadName = null;
+        this(null, null, handler);
     }
 
-    public ReactorRunner(String threadNamePrefix, String threadNamePostfix, BaseHandler... handlers) throws IOException
+    public ReactorRunner(String threadNamePrefix, String threadNamePostfix, AmqpConnectionHandler handler) throws IOException
     {
         ReactorOptions options = new ReactorOptions();
 
@@ -47,8 +39,9 @@ public class ReactorRunner
         // expected 64 * 1024 bytes. For more context, see https://github.com/Azure/azure-iot-sdk-java/issues/742
         options.setMaxFrameSize(MAX_FRAME_SIZE);
 
-        this.reactor = Proton.reactor(options, handlers);
+        this.reactor = Proton.reactor(options, handler);
         this.threadName = threadNamePrefix + "-" + THREAD_NAME + "-" + threadNamePostfix;
+        this.handler = handler;
     }
 
     public void run()
@@ -77,9 +70,28 @@ public class ReactorRunner
         log.trace("Finished reactor thread {}", this.threadName);
     }
 
-    public void stop()
+    public void stop(int timeoutMilliseconds) throws InterruptedException
     {
-        this.reactor.stop();
+        try
+        {
+            this.reactor.schedule(0, this.handler);
+
+            long startTime = System.currentTimeMillis();
+            while (this.handler.isOpen())
+            {
+                Thread.sleep(300);
+
+                if (System.currentTimeMillis() - startTime > timeoutMilliseconds)
+                {
+                    log.debug("Timed out waiting for amqp connection to close gracefully. Closing forcefully now.");
+                    break;
+                }
+            }
+        }
+        finally
+        {
+            this.reactor.stop();
+        }
     }
 }
 
