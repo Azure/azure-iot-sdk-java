@@ -12,7 +12,7 @@ import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
-import com.microsoft.azure.sdk.iot.service.messaging.ServiceClient;
+import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import lombok.extern.slf4j.Slf4j;
@@ -119,7 +119,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
         public String privateKey;
         public String x509Thumbprint;
         public RegistryClient registryClient;
-        public ServiceClient serviceClient;
+        public MessagingClient messagingClient;
 
         public ReceiveMessagesTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
         {
@@ -130,7 +130,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
             this.privateKey = x509CertificateGenerator.getPrivateKeyPEM();
             this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
             this.registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
-            this.serviceClient = new ServiceClient(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
+            this.messagingClient = new MessagingClient(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
         }
 
         public void setup() throws Exception
@@ -303,12 +303,12 @@ public class ReceiveMessagesCommon extends IntegrationTest
 
     protected void sendMessageToDevice(String deviceId, int messageSize) throws IotHubException, IOException
     {
-        testInstance.serviceClient.send(deviceId, createCloudToDeviceMessage(messageSize));
+        testInstance.messagingClient.send(deviceId, createCloudToDeviceMessage(messageSize));
     }
 
     protected void sendMessageToModule(String deviceId, String moduleId, int messageSize) throws IotHubException, IOException
     {
-        testInstance.serviceClient.send(deviceId, moduleId, createCloudToDeviceMessage(messageSize));
+        testInstance.messagingClient.send(deviceId, moduleId, createCloudToDeviceMessage(messageSize));
     }
 
     protected void waitForMessageToBeReceived(Success messageReceived, String protocolName)

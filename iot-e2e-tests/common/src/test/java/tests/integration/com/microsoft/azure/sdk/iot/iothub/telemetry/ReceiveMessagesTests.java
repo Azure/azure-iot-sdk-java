@@ -101,11 +101,11 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
 
         if (testInstance.identity.getClient() instanceof DeviceClient)
         {
-            testInstance.serviceClient.send(testInstance.identity.getDeviceId(), serviceMessage);
+            testInstance.messagingClient.send(testInstance.identity.getDeviceId(), serviceMessage);
         }
         else if (testInstance.identity.getClient() instanceof ModuleClient)
         {
-            testInstance.serviceClient.send(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), serviceMessage);
+            testInstance.messagingClient.send(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), serviceMessage);
         }
 
         waitForMessageToBeReceived(messageReceived, testInstance.protocol.toString());

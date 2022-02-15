@@ -8,7 +8,7 @@ import com.azure.identity.ClientSecretCredentialBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
-import com.microsoft.azure.sdk.iot.service.messaging.ServiceClient;
+import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClientOptions;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
@@ -87,11 +87,11 @@ public class Tools
         return envVariables;
     }
 
-    public static ServiceClient buildServiceClientWithTokenCredential(IotHubServiceClientProtocol protocol)
+    public static MessagingClient buildServiceClientWithTokenCredential(IotHubServiceClientProtocol protocol)
     {
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
         TokenCredential tokenCredential = buildTokenCredentialFromEnvironment();
-        return new ServiceClient(iotHubConnectionStringObj.getHostName(), tokenCredential, protocol);
+        return new MessagingClient(iotHubConnectionStringObj.getHostName(), tokenCredential, protocol);
     }
 
     public static DigitalTwinClient buildDigitalTwinClientWithTokenCredential()

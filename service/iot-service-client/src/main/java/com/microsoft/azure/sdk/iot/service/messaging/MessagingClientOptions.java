@@ -10,7 +10,7 @@ import javax.net.ssl.SSLContext;
  * Configurable options for all service client operations
  */
 @Builder
-public final class ServiceClientOptions
+public final class MessagingClientOptions
 {
     /**
      * The options that specify what proxy to tunnel through. If null, no proxy will be used

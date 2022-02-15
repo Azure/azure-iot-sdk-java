@@ -17,14 +17,11 @@ import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol
 import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.messaging.MessageFeedbackProcessorClient;
 import com.microsoft.azure.sdk.iot.service.messaging.MessageFeedbackProcessorClientOptions;
-import com.microsoft.azure.sdk.iot.service.messaging.ServiceClient;
-import com.microsoft.azure.sdk.iot.service.registry.Device;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -50,7 +47,7 @@ public class ServiceClientSample
      */
     public static void main(String[] args) throws Exception
     {
-        System.out.println("********* Starting ServiceClient sample...");
+        System.out.println("********* Starting MessagingClient sample...");
 
 
         Function<FeedbackBatch, AcknowledgementType> feedbackMessageProcessor = feedbackBatch ->
@@ -123,12 +120,12 @@ public class ServiceClientSample
         fileUploadNotificationProcessorClient.stop();
         messageFeedbackProcessorClient.stop();
 
-        System.out.println("********* Shutting down ServiceClient sample...");
+        System.out.println("********* Shutting down MessagingClient sample...");
     }
 
     protected static void sendMultipleCommands() throws InterruptedException, IOException, IotHubException
     {
-        ServiceClient serviceClient = new ServiceClient(connectionString, protocol);
+        MessagingClient messagingClient = new MessagingClient(connectionString, protocol);
 
         Map<String, String> propertiesToSend = new HashMap<>();
         String commandMessage = "Cloud to device message: ";
@@ -150,7 +147,7 @@ public class ServiceClientSample
             messageToSend.setProperties(propertiesToSend);
 
             // send the message
-            serviceClient.send(deviceId, messageToSend);
+            messagingClient.send(deviceId, messageToSend);
         }
 
         System.out.println("All cloud to device messages sent");

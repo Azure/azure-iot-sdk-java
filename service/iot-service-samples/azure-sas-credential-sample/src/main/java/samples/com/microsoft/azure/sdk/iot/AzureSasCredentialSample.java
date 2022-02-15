@@ -15,6 +15,7 @@ import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationProce
 import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationProcessorClientOptions;
 import com.microsoft.azure.sdk.iot.service.messaging.MessageFeedbackProcessorClient;
 import com.microsoft.azure.sdk.iot.service.messaging.MessageFeedbackProcessorClientOptions;
+import com.microsoft.azure.sdk.iot.service.messaging.MessagingClientOptions;
 import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.service.query.QueryClientOptions;
@@ -26,8 +27,7 @@ import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol
 import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
-import com.microsoft.azure.sdk.iot.service.messaging.ServiceClient;
-import com.microsoft.azure.sdk.iot.service.messaging.ServiceClientOptions;
+import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClientOptions;
@@ -152,14 +152,14 @@ public class AzureSasCredentialSample
 
     private static void runServiceClientSample(String iotHubHostName, AzureSasCredential credential, String deviceId)
     {
-        // ServiceClient has some configurable options for setting a custom SSLContext, as well as for setting proxies.
+        // MessagingClient has some configurable options for setting a custom SSLContext, as well as for setting proxies.
         // For this sample, the default options will be used though.
-        ServiceClientOptions options = ServiceClientOptions.builder().build();
+        MessagingClientOptions options = MessagingClientOptions.builder().build();
 
         // This constructor takes in your implementation of AzureSasCredential which allows you to use symmetric key based
         // authentication without giving the client your connection string.
-        ServiceClient serviceClient =
-            new ServiceClient(
+        MessagingClient messagingClient =
+            new MessagingClient(
                 iotHubHostName,
                 credential,
                 IotHubServiceClientProtocol.AMQPS,
@@ -170,7 +170,7 @@ public class AzureSasCredentialSample
         try
         {
             System.out.println("Sending cloud to device message to the new device");
-            serviceClient.send(deviceId, cloudToDeviceMessage);
+            messagingClient.send(deviceId, cloudToDeviceMessage);
             System.out.println("Successfully sent cloud to device message to the new device");
         }
         catch (IOException | IotHubException e)
@@ -219,7 +219,7 @@ public class AzureSasCredentialSample
             MessageFeedbackProcessorClient messageFeedbackProcessorClient =
                 new MessageFeedbackProcessorClient(iotHubHostName, credential, IotHubServiceClientProtocol.AMQPS, feedbackMessageProcessor, messageFeedbackProcessorClientOptions);
 
-            // FeedbackReceiver will use the same authentication mechanism that the ServiceClient itself uses,
+            // FeedbackReceiver will use the same authentication mechanism that the MessagingClient itself uses,
             // so the below APIs are also RBAC authenticated.
             System.out.println("Starting event processor to listen for feedback messages and file upload notifications");
             fileUploadNotificationProcessorClient.start();

@@ -7,7 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
-import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
+import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
@@ -16,8 +16,7 @@ import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
-import com.microsoft.azure.sdk.iot.service.messaging.ServiceClient;
-import com.microsoft.azure.sdk.iot.service.messaging.ServiceClientOptions;
+import com.microsoft.azure.sdk.iot.service.messaging.MessagingClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
 import lombok.extern.slf4j.Slf4j;
@@ -58,7 +57,7 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
 @Slf4j
 @IotHubTest
 @RunWith(Parameterized.class)
-public class ServiceClientTests extends IntegrationTest
+public class MessagingClientTests extends IntegrationTest
 {
     protected static String iotHubConnectionString = "";
     protected static String invalidCertificateServerConnectionString = "";
@@ -70,7 +69,7 @@ public class ServiceClientTests extends IntegrationTest
     protected static String testProxyHostname = "127.0.0.1";
     protected static int testProxyPort = 8869;
 
-    public ServiceClientTests(IotHubServiceClientProtocol protocol)
+    public MessagingClientTests(IotHubServiceClientProtocol protocol)
     {
         this.testInstance = new ServiceClientITRunner(protocol);
     }
@@ -236,20 +235,20 @@ public class ServiceClientTests extends IntegrationTest
             sslContext = new IotHubSSLContext().getSSLContext();
         }
 
-        ServiceClientOptions serviceClientOptions =
-                ServiceClientOptions.builder()
+        MessagingClientOptions messagingClientOptions =
+                MessagingClientOptions.builder()
                         .proxyOptions(proxyOptions)
                         .sslContext(sslContext)
                         .build();
 
-        ServiceClient serviceClient;
+        MessagingClient messagingClient;
         if (withAzureSasCredential)
         {
-            serviceClient = buildServiceClientWithAzureSasCredential(testInstance.protocol, serviceClientOptions);
+            messagingClient = buildServiceClientWithAzureSasCredential(testInstance.protocol, messagingClientOptions);
         }
         else
         {
-            serviceClient = new ServiceClient(iotHubConnectionString, testInstance.protocol, serviceClientOptions);
+            messagingClient = new MessagingClient(iotHubConnectionString, testInstance.protocol, messagingClientOptions);
         }
 
         Message message;
@@ -269,7 +268,7 @@ public class ServiceClientTests extends IntegrationTest
             message = new Message();
         }
 
-        serviceClient.send(device.getDeviceId(), message);
+        messagingClient.send(device.getDeviceId(), message);
 
         Device deviceGetAfter = registryClient.getDevice(device.getDeviceId());
 
@@ -300,16 +299,16 @@ public class ServiceClientTests extends IntegrationTest
 
         Device device = testDeviceIdentity.getDevice();
 
-        ServiceClient serviceClient;
+        MessagingClient messagingClient;
         IotHubConnectionString iotHubConnectionStringObj =
             IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
 
         IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
         AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
-        serviceClient = new ServiceClient(iotHubConnectionStringObj.getHostName(), sasCredential, testInstance.protocol);
+        messagingClient = new MessagingClient(iotHubConnectionStringObj.getHostName(), sasCredential, testInstance.protocol);
 
         Message message = new Message(SMALL_PAYLOAD);
-        serviceClient.send(device.getDeviceId(), message);
+        messagingClient.send(device.getDeviceId(), message);
 
         // deliberately expire the SAS token to provoke a 401 to ensure that the registry manager is using the shared
         // access signature that is set here.
@@ -317,7 +316,7 @@ public class ServiceClientTests extends IntegrationTest
 
         try
         {
-            serviceClient.send(device.getDeviceId(), message);
+            messagingClient.send(device.getDeviceId(), message);
             fail("Expected sending cloud to device message to throw unauthorized exception since an expired SAS token was used, but no exception was thrown");
         }
         catch (IOException e)
@@ -338,7 +337,7 @@ public class ServiceClientTests extends IntegrationTest
         sasCredential.update(serviceSasToken.toString());
 
         // The final c2d send should succeed since the shared access signature has been renewed
-        serviceClient.send(device.getDeviceId(), message);
+        messagingClient.send(device.getDeviceId(), message);
 
         Tools.disposeTestIdentity(testDeviceIdentity, iotHubConnectionString);
     }
@@ -350,12 +349,12 @@ public class ServiceClientTests extends IntegrationTest
     {
         boolean expectedExceptionWasCaught = false;
 
-        ServiceClient serviceClient = new ServiceClient(invalidCertificateServerConnectionString, testInstance.protocol);
+        MessagingClient messagingClient = new MessagingClient(invalidCertificateServerConnectionString, testInstance.protocol);
 
         try
         {
             // don't need a real device Id since the request is sent to a fake service
-            serviceClient.send("some deviceId", new Message("some message"));
+            messagingClient.send("some deviceId", new Message("some message"));
         }
         catch (IOException e)
         {
@@ -369,11 +368,11 @@ public class ServiceClientTests extends IntegrationTest
         assertTrue(buildExceptionMessage("Expected an exception due to service presenting invalid certificate", hostName), expectedExceptionWasCaught);
     }
 
-    private static ServiceClient buildServiceClientWithAzureSasCredential(IotHubServiceClientProtocol protocol, ServiceClientOptions options)
+    private static MessagingClient buildServiceClientWithAzureSasCredential(IotHubServiceClientProtocol protocol, MessagingClientOptions options)
     {
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
         IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
         AzureSasCredential azureSasCredential = new AzureSasCredential(serviceSasToken.toString());
-        return new ServiceClient(iotHubConnectionStringObj.getHostName(), azureSasCredential, protocol, options);
+        return new MessagingClient(iotHubConnectionStringObj.getHostName(), azureSasCredential, protocol, options);
     }
 }

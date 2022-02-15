@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service.messaging;
 
-import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
@@ -13,14 +12,10 @@ import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSendHandler;
 import mockit.*;
 import org.junit.Test;
 
-import javax.net.ssl.SSLContext;
-import java.io.IOException;
-import java.util.function.Function;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-public class ServiceClientTest
+public class MessagingClientTest
 {
     @Mocked
     AmqpSendHandler amqpSend;
@@ -36,7 +31,7 @@ public class ServiceClientTest
         String connectionString = null;
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Act
-        new ServiceClient(connectionString, iotHubServiceClientProtocol);
+        new MessagingClient(connectionString, iotHubServiceClientProtocol);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_001: [The constructor shall throw IllegalArgumentException if the input string is empty or null]
@@ -48,7 +43,7 @@ public class ServiceClientTest
         String connectionString = "";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Act
-        new ServiceClient(connectionString, iotHubServiceClientProtocol);
+        new MessagingClient(connectionString, iotHubServiceClientProtocol);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_004: [The constructor shall throw IllegalArgumentException if the input object is null]
@@ -60,7 +55,7 @@ public class ServiceClientTest
         IotHubConnectionString iotHubConnectionString = null;
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Act
-        ServiceClient serviceClient = Deencapsulation.newInstance(ServiceClient.class, iotHubConnectionString, iotHubServiceClientProtocol); 
+        MessagingClient messagingClient = Deencapsulation.newInstance(MessagingClient.class, iotHubConnectionString, iotHubServiceClientProtocol);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_005: [The constructor shall create a SAS token object using the IotHubConnectionString]
@@ -78,10 +73,10 @@ public class ServiceClientTest
         String connectionString = "HostName=" + hostName + "." + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Act
-        ServiceClient serviceClient = new ServiceClient(connectionString, iotHubServiceClientProtocol);
+        MessagingClient messagingClient = new MessagingClient(connectionString, iotHubServiceClientProtocol);
 
         // Assert
-        assertNotEquals(hostName, Deencapsulation.getField(serviceClient, "hostName"));
+        assertNotEquals(hostName, Deencapsulation.getField(messagingClient, "hostName"));
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_013: [The function shall call send() on the member AMQP sender object with the given parameters]
@@ -100,7 +95,7 @@ public class ServiceClientTest
         String content = "HELLO";
         Message iotMessage = new Message(content);
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        ServiceClient serviceClient = new ServiceClient(connectionString, iotHubServiceClientProtocol);
+        MessagingClient messagingClient = new MessagingClient(connectionString, iotHubServiceClientProtocol);
         // Assert
         new Expectations()
         {
@@ -109,7 +104,7 @@ public class ServiceClientTest
             }
         };
         // Act
-        serviceClient.send(deviceId, iotMessage);
+        messagingClient.send(deviceId, iotMessage);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_28_002: [The function shall call send() on the member AMQP sender object with the given parameters]
@@ -129,7 +124,7 @@ public class ServiceClientTest
         String content = "HELLO";
         Message iotMessage = new Message(content);
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        ServiceClient serviceClient = new ServiceClient(connectionString, iotHubServiceClientProtocol);
+        MessagingClient messagingClient = new MessagingClient(connectionString, iotHubServiceClientProtocol);
         // Assert
         new Expectations()
         {
@@ -138,6 +133,6 @@ public class ServiceClientTest
             }
         };
         // Act
-        serviceClient.send(deviceId, moduleId, iotMessage);
+        messagingClient.send(deviceId, moduleId, iotMessage);
     }
 }

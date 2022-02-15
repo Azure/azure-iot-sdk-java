@@ -9,7 +9,6 @@ import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSendHandler;
@@ -17,14 +16,13 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.Objects;
-import java.util.function.Function;
 
 /**
- * Use the ServiceClient to send and monitor messages to devices in IoT hubs.
+ * Use the MessagingClient to send and monitor messages to devices in IoT hubs.
  * It can also be used to know when files have been uploaded by devices.
  */
 @Slf4j
-public final class ServiceClient
+public final class MessagingClient
 {
     private final String hostName;
     private String connectionString;
@@ -32,28 +30,28 @@ public final class ServiceClient
     private TokenCredential credential;
     private AzureSasCredential sasTokenProvider;
 
-    private final ServiceClientOptions options;
+    private final MessagingClientOptions options;
 
     /**
-     * Create ServiceClient from the specified connection string
+     * Create MessagingClient from the specified connection string
      * @param iotHubServiceClientProtocol  protocol to use
      * @param connectionString The connection string for the IotHub
      */
-    public ServiceClient(String connectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol)
+    public MessagingClient(String connectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
-        this(connectionString, iotHubServiceClientProtocol, ServiceClientOptions.builder().build());
+        this(connectionString, iotHubServiceClientProtocol, MessagingClientOptions.builder().build());
     }
 
     /**
-     * Create ServiceClient from the specified connection string
+     * Create MessagingClient from the specified connection string
      * @param iotHubServiceClientProtocol  protocol to use
      * @param connectionString The connection string for the IotHub
      * @param options The connection options to use when connecting to the service.
      */
-    public ServiceClient(
+    public MessagingClient(
             String connectionString,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            ServiceClientOptions options)
+            MessagingClientOptions options)
     {
         if (Tools.isNullOrEmpty(connectionString))
         {
@@ -62,7 +60,7 @@ public final class ServiceClient
 
         if (options == null)
         {
-            throw new IllegalArgumentException("ServiceClientOptions cannot be null for this constructor");
+            throw new IllegalArgumentException("MessagingClientOptions cannot be null for this constructor");
         }
 
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
@@ -76,7 +74,7 @@ public final class ServiceClient
     }
 
     /**
-     * Create a {@link ServiceClient} instance with a custom {@link TokenCredential} to allow for finer grain control
+     * Create a {@link MessagingClient} instance with a custom {@link TokenCredential} to allow for finer grain control
      * of authentication tokens used in the underlying connection.
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
@@ -84,7 +82,7 @@ public final class ServiceClient
      *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
      * @param iotHubServiceClientProtocol The protocol to open the connection with.
      */
-    public ServiceClient(
+    public MessagingClient(
             String hostName,
             TokenCredential credential,
             IotHubServiceClientProtocol iotHubServiceClientProtocol)
@@ -92,11 +90,11 @@ public final class ServiceClient
         this(hostName,
              credential,
              iotHubServiceClientProtocol,
-             ServiceClientOptions.builder().build());
+             MessagingClientOptions.builder().build());
     }
 
     /**
-     * Create a {@link ServiceClient} instance with a custom {@link TokenCredential} to allow for finer grain control
+     * Create a {@link MessagingClient} instance with a custom {@link TokenCredential} to allow for finer grain control
      * of authentication tokens used in the underlying connection.
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
@@ -105,11 +103,11 @@ public final class ServiceClient
      * @param iotHubServiceClientProtocol The protocol to open the connection with.
      * @param options The connection options to use when connecting to the service.
      */
-    public ServiceClient(
+    public MessagingClient(
             String hostName,
             TokenCredential credential,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            ServiceClientOptions options)
+            MessagingClientOptions options)
     {
         Objects.requireNonNull(credential);
 
@@ -120,7 +118,7 @@ public final class ServiceClient
 
         if (options == null)
         {
-            throw new IllegalArgumentException("ServiceClientOptions cannot be null for this constructor");
+            throw new IllegalArgumentException("MessagingClientOptions cannot be null for this constructor");
         }
 
         this.credential = credential;
@@ -137,13 +135,13 @@ public final class ServiceClient
     }
 
     /**
-     * Create a {@link ServiceClient} instance with an instance of {@link AzureSasCredential}.
+     * Create a {@link MessagingClient} instance with an instance of {@link AzureSasCredential}.
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
      * @param iotHubServiceClientProtocol The protocol to open the connection with.
      */
-    public ServiceClient(
+    public MessagingClient(
             String hostName,
             AzureSasCredential azureSasCredential,
             IotHubServiceClientProtocol iotHubServiceClientProtocol)
@@ -151,22 +149,22 @@ public final class ServiceClient
         this(hostName,
                 azureSasCredential,
                 iotHubServiceClientProtocol,
-                ServiceClientOptions.builder().build());
+                MessagingClientOptions.builder().build());
     }
 
     /**
-     * Create a {@link ServiceClient} instance with an instance of {@link AzureSasCredential}.
+     * Create a {@link MessagingClient} instance with an instance of {@link AzureSasCredential}.
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
      * @param iotHubServiceClientProtocol The protocol to open the connection with.
      * @param options The connection options to use when connecting to the service.
      */
-    public ServiceClient(
+    public MessagingClient(
             String hostName,
             AzureSasCredential azureSasCredential,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            ServiceClientOptions options)
+            MessagingClientOptions options)
     {
         Objects.requireNonNull(azureSasCredential);
         Objects.requireNonNull(options);
@@ -181,7 +179,7 @@ public final class ServiceClient
 
     private static void commonConstructorSetup()
     {
-        log.debug("Initialized a ServiceClient instance using SDK version {}", TransportUtils.serviceVersion);
+        log.debug("Initialized a MessagingClient instance using SDK version {}", TransportUtils.serviceVersion);
     }
 
     /**

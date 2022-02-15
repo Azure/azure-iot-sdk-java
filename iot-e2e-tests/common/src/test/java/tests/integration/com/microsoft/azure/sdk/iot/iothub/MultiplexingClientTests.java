@@ -27,13 +27,13 @@ import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceReg
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.UnauthorizedException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
+import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
-import com.microsoft.azure.sdk.iot.service.messaging.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClientOptions;
@@ -103,7 +103,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
     protected static String iotHubConnectionString = "";
 
-    private static ServiceClient serviceClient;
+    private static MessagingClient messagingClient;
     private static RegistryClient registryClient;
 
     protected static HttpProxyServer proxyServer;
@@ -125,7 +125,7 @@ public class MultiplexingClientTests extends IntegrationTest
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
         registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
-        serviceClient = new ServiceClient(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
+        messagingClient = new MessagingClient(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
 
         return Arrays.asList(
                 new Object[][]
@@ -604,7 +604,7 @@ public class MultiplexingClientTests extends IntegrationTest
     {
         com.microsoft.azure.sdk.iot.service.messaging.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.messaging.Message("some payload");
         serviceMessage.setCorrelationId(expectedMessageCorrelationId);
-        serviceClient.send(deviceId, serviceMessage);
+        messagingClient.send(deviceId, serviceMessage);
 
         long startTime = System.currentTimeMillis();
         while (!messageCallback.messageCallbackFired)

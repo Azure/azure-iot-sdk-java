@@ -9,12 +9,12 @@ import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
+import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
-import com.microsoft.azure.sdk.iot.service.messaging.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
@@ -70,11 +70,11 @@ public class TokenCredentialTests
         Device deviceGetBefore = registryClient.getDevice(device.getDeviceId());
 
         // Create service client
-        ServiceClient serviceClient = buildServiceClientWithTokenCredential(IotHubServiceClientProtocol.AMQPS);
+        MessagingClient messagingClient = buildServiceClientWithTokenCredential(IotHubServiceClientProtocol.AMQPS);
 
         Message message = new Message("some message".getBytes(StandardCharsets.UTF_8));
 
-        serviceClient.send(device.getDeviceId(), message);
+        messagingClient.send(device.getDeviceId(), message);
 
         Device deviceGetAfter = registryClient.getDevice(device.getDeviceId());
 
