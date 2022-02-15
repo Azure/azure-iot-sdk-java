@@ -24,33 +24,27 @@ import java.util.Objects;
 @Slf4j
 public final class MessagingClient
 {
-    private final String hostName;
-    private String connectionString;
-    private final IotHubServiceClientProtocol iotHubServiceClientProtocol;
-    private TokenCredential credential;
-    private AzureSasCredential sasTokenProvider;
-
-    private final MessagingClientOptions options;
+    private final AmqpSendHandler amqpSendHandler;
 
     /**
      * Create MessagingClient from the specified connection string
-     * @param iotHubServiceClientProtocol  protocol to use
+     * @param protocol  protocol to use
      * @param connectionString The connection string for the IotHub
      */
-    public MessagingClient(String connectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol)
+    public MessagingClient(String connectionString, IotHubServiceClientProtocol protocol)
     {
-        this(connectionString, iotHubServiceClientProtocol, MessagingClientOptions.builder().build());
+        this(connectionString, protocol, MessagingClientOptions.builder().build());
     }
 
     /**
      * Create MessagingClient from the specified connection string
-     * @param iotHubServiceClientProtocol  protocol to use
+     * @param protocol  protocol to use
      * @param connectionString The connection string for the IotHub
      * @param options The connection options to use when connecting to the service.
      */
     public MessagingClient(
             String connectionString,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            IotHubServiceClientProtocol protocol,
             MessagingClientOptions options)
     {
         if (Tools.isNullOrEmpty(connectionString))
@@ -63,12 +57,12 @@ public final class MessagingClient
             throw new IllegalArgumentException("MessagingClientOptions cannot be null for this constructor");
         }
 
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
-
-        this.hostName = iotHubConnectionString.getHostName();
-        this.connectionString = connectionString;
-        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
-        this.options = options;
+        this.amqpSendHandler =
+            new AmqpSendHandler(
+                connectionString,
+                protocol,
+                options.getProxyOptions(),
+                options.getSslContext());
 
         commonConstructorSetup();
     }
@@ -80,17 +74,14 @@ public final class MessagingClient
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
-     * @param iotHubServiceClientProtocol The protocol to open the connection with.
+     * @param protocol The protocol to open the connection with.
      */
     public MessagingClient(
             String hostName,
             TokenCredential credential,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol)
+            IotHubServiceClientProtocol protocol)
     {
-        this(hostName,
-             credential,
-             iotHubServiceClientProtocol,
-             MessagingClientOptions.builder().build());
+        this(hostName, credential, protocol, MessagingClientOptions.builder().build());
     }
 
     /**
@@ -100,13 +91,13 @@ public final class MessagingClient
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
-     * @param iotHubServiceClientProtocol The protocol to open the connection with.
+     * @param protocol The protocol to open the connection with.
      * @param options The connection options to use when connecting to the service.
      */
     public MessagingClient(
             String hostName,
             TokenCredential credential,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            IotHubServiceClientProtocol protocol,
             MessagingClientOptions options)
     {
         Objects.requireNonNull(credential);
@@ -121,15 +112,18 @@ public final class MessagingClient
             throw new IllegalArgumentException("MessagingClientOptions cannot be null for this constructor");
         }
 
-        this.credential = credential;
-        this.hostName = hostName;
-        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
-        this.options = options;
-
-        if (this.options.getProxyOptions() != null && this.iotHubServiceClientProtocol != IotHubServiceClientProtocol.AMQPS_WS)
+        if (options.getProxyOptions() != null && protocol != IotHubServiceClientProtocol.AMQPS_WS)
         {
             throw new UnsupportedOperationException("Proxies are only supported over AMQPS_WS");
         }
+
+        this.amqpSendHandler =
+            new AmqpSendHandler(
+                hostName,
+                credential,
+                protocol,
+                options.getProxyOptions(),
+                options.getSslContext());
 
         commonConstructorSetup();
     }
@@ -139,16 +133,16 @@ public final class MessagingClient
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
-     * @param iotHubServiceClientProtocol The protocol to open the connection with.
+     * @param protocol The protocol to open the connection with.
      */
     public MessagingClient(
             String hostName,
             AzureSasCredential azureSasCredential,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol)
+            IotHubServiceClientProtocol protocol)
     {
         this(hostName,
                 azureSasCredential,
-                iotHubServiceClientProtocol,
+                protocol,
                 MessagingClientOptions.builder().build());
     }
 
@@ -157,22 +151,30 @@ public final class MessagingClient
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
-     * @param iotHubServiceClientProtocol The protocol to open the connection with.
+     * @param protocol The protocol to open the connection with.
      * @param options The connection options to use when connecting to the service.
      */
     public MessagingClient(
             String hostName,
             AzureSasCredential azureSasCredential,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            IotHubServiceClientProtocol protocol,
             MessagingClientOptions options)
     {
         Objects.requireNonNull(azureSasCredential);
         Objects.requireNonNull(options);
 
-        this.hostName = hostName;
-        this.sasTokenProvider = azureSasCredential;
-        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
-        this.options = options;
+        if (options.getProxyOptions() != null && protocol != IotHubServiceClientProtocol.AMQPS_WS)
+        {
+            throw new UnsupportedOperationException("Proxies are only supported over AMQPS_WS");
+        }
+
+        this.amqpSendHandler =
+            new AmqpSendHandler(
+                hostName,
+                azureSasCredential,
+                protocol,
+                options.getProxyOptions(),
+                options.getSslContext());
 
         commonConstructorSetup();
     }
@@ -206,37 +208,6 @@ public final class MessagingClient
      */
     public void send(String deviceId, String moduleId, Message message) throws IOException, IotHubException
     {
-        AmqpSendHandler amqpSendHandler;
-        if (this.credential != null)
-        {
-            amqpSendHandler =
-                new AmqpSendHandler(
-                    this.hostName,
-                    this.credential,
-                    this.iotHubServiceClientProtocol,
-                    this.options.getProxyOptions(),
-                    this.options.getSslContext());
-        }
-        else if (this.sasTokenProvider != null)
-        {
-            amqpSendHandler =
-                new AmqpSendHandler(
-                    this.hostName,
-                    this.sasTokenProvider,
-                    this.iotHubServiceClientProtocol,
-                    this.options.getProxyOptions(),
-                    this.options.getSslContext());
-        }
-        else
-        {
-            amqpSendHandler =
-                new AmqpSendHandler(
-                    this.connectionString,
-                    this.iotHubServiceClientProtocol,
-                    this.options.getProxyOptions(),
-                    this.options.getSslContext());
-        }
-
-        amqpSendHandler.send(deviceId, moduleId, message);
+        this.amqpSendHandler.send(deviceId, moduleId, message);
     }
 }
