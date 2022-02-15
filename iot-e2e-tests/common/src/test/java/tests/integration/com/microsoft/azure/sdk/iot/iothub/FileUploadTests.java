@@ -17,10 +17,9 @@ import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
-import com.microsoft.azure.sdk.iot.service.messaging.EventProcessorClient;
-import com.microsoft.azure.sdk.iot.service.messaging.EventProcessorClientBuilder;
 import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotification;
-import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationProcessorClient;
+import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationProcessorClientOptions;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import lombok.extern.slf4j.Slf4j;
@@ -308,21 +307,19 @@ public class FileUploadTests extends IntegrationTest
             return AcknowledgementType.ABANDON;
         };
 
-        EventProcessorClientBuilder builder =
-            EventProcessorClient.builder()
-                .setConnectionString(iotHubConnectionString)
-                .setFileUploadNotificationProcessor(notificationProcessor)
-                .setProtocol(AMQPS_WS);
+        FileUploadNotificationProcessorClientOptions.FileUploadNotificationProcessorClientOptionsBuilder fileUploadNotificationProcessorClientOptionsBuilder =
+            FileUploadNotificationProcessorClientOptions.builder();
 
         if (testInstance.withProxy)
         {
             Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-            builder.setProxyOptions(new ProxyOptions(testProxy));
+            fileUploadNotificationProcessorClientOptionsBuilder.proxyOptions(new ProxyOptions(testProxy));
         }
 
-        EventProcessorClient receiver = builder.build();
+        FileUploadNotificationProcessorClient fileUploadNotificationProcessorClient =
+            new FileUploadNotificationProcessorClient(iotHubConnectionString, AMQPS_WS, notificationProcessor, fileUploadNotificationProcessorClientOptionsBuilder.build());
 
-        receiver.start();
+        fileUploadNotificationProcessorClient.start();
 
         long startTime = System.currentTimeMillis();
         while (!expectedBlobNames.isEmpty())
@@ -335,6 +332,6 @@ public class FileUploadTests extends IntegrationTest
             Thread.sleep(1000);
         }
 
-        receiver.stop();
+        fileUploadNotificationProcessorClient.stop();
     }
 }

@@ -8,18 +8,20 @@ package samples.com.microsoft.azure.sdk.iot;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.messaging.DeliveryAcknowledgement;
 import com.microsoft.azure.sdk.iot.service.messaging.ErrorContext;
-import com.microsoft.azure.sdk.iot.service.messaging.EventProcessorClient;
 import com.microsoft.azure.sdk.iot.service.messaging.FeedbackBatch;
 import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotification;
 import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
+import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationProcessorClient;
+import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationProcessorClientOptions;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.messaging.Message;
+import com.microsoft.azure.sdk.iot.service.messaging.MessageFeedbackProcessorClient;
+import com.microsoft.azure.sdk.iot.service.messaging.MessageFeedbackProcessorClientOptions;
 import com.microsoft.azure.sdk.iot.service.messaging.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -50,7 +52,8 @@ public class ServiceClientSample
     {
         System.out.println("********* Starting ServiceClient sample...");
 
-        Function<FeedbackBatch, AcknowledgementType> feedbackEventProcessor = feedbackBatch ->
+
+        Function<FeedbackBatch, AcknowledgementType> feedbackMessageProcessor = feedbackBatch ->
         {
             System.out.println(" Feedback received, feedback time: " + feedbackBatch.getEnqueuedTimeUtc());
             System.out.println(" Record size: " + feedbackBatch.getRecords().size());
@@ -82,21 +85,29 @@ public class ServiceClientSample
             System.out.println("Encountered an error while receiving events " + errorContext.getException().getMessage());
         };
 
-        EventProcessorClient eventProcessorClient =
-            EventProcessorClient.builder()
-                .setConnectionString(connectionString)
-                .setCloudToDeviceFeedbackMessageProcessor(feedbackEventProcessor)
-                .setFileUploadNotificationProcessor(fileUploadNotificationProcessor)
-                .setErrorProcessor(errorProcessor)
-                .setProtocol(protocol)
+        FileUploadNotificationProcessorClientOptions fileUploadNotificationProcessorClientOptions =
+            FileUploadNotificationProcessorClientOptions.builder()
+                .errorProcessor(errorProcessor)
                 .build();
 
-        eventProcessorClient.start();
+        FileUploadNotificationProcessorClient fileUploadNotificationProcessorClient =
+            new FileUploadNotificationProcessorClient(connectionString, protocol, fileUploadNotificationProcessor, fileUploadNotificationProcessorClientOptions);
+
+        MessageFeedbackProcessorClientOptions messageFeedbackProcessorClientOptions =
+            MessageFeedbackProcessorClientOptions.builder()
+                .errorProcessor(errorProcessor)
+                .build();
+
+        MessageFeedbackProcessorClient messageFeedbackProcessorClient =
+            new MessageFeedbackProcessorClient(connectionString, protocol, feedbackMessageProcessor, messageFeedbackProcessorClientOptions);
+
+        fileUploadNotificationProcessorClient.start();
+        messageFeedbackProcessorClient.start();
 
         Thread.sleep(2000);
 
         // Sending multiple commands
-        try
+        /*try
         {
             sendMultipleCommands();
         }
@@ -104,11 +115,13 @@ public class ServiceClientSample
         {
             System.out.println("Exception:" + e.getMessage());
         }
+        */
 
         System.out.println("********* Sleeping main thread while waiting for file upload notifications and/or feedback batch messages...");
-        Thread.sleep(10000);
+        Thread.sleep(1000);
 
-        eventProcessorClient.stop();
+        fileUploadNotificationProcessorClient.stop();
+        messageFeedbackProcessorClient.stop();
 
         System.out.println("********* Shutting down ServiceClient sample...");
     }

@@ -10,14 +10,13 @@ import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.ModuleClient;
 import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
-import com.microsoft.azure.sdk.iot.service.messaging.ErrorContext;
-import com.microsoft.azure.sdk.iot.service.messaging.EventProcessorClient;
 import com.microsoft.azure.sdk.iot.service.messaging.FeedbackBatch;
 import com.microsoft.azure.sdk.iot.service.messaging.FeedbackRecord;
-import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotification;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
+import com.microsoft.azure.sdk.iot.service.messaging.MessageFeedbackProcessorClient;
+import com.microsoft.azure.sdk.iot.service.messaging.MessageFeedbackProcessorClientOptions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,7 +31,6 @@ import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.ReceiveMessage
 
 import java.io.IOException;
 import java.util.UUID;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
@@ -121,7 +119,7 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
     {
         final Success feedbackReceived = new Success();
 
-        Function<FeedbackBatch, AcknowledgementType> feedbackEventProcessor = feedbackBatch ->
+        Function<FeedbackBatch, AcknowledgementType> feedbackMessageProcessor = feedbackBatch ->
         {
             for (FeedbackRecord feedbackRecord : feedbackBatch.getRecords())
             {
@@ -136,14 +134,14 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
             return AcknowledgementType.ABANDON;
         };
 
-        EventProcessorClient eventProcessorClient =
-            EventProcessorClient.builder()
-                .setConnectionString(iotHubConnectionString)
-                .setCloudToDeviceFeedbackMessageProcessor(feedbackEventProcessor)
-                .setProtocol(IotHubServiceClientProtocol.AMQPS_WS)
+        MessageFeedbackProcessorClientOptions messageFeedbackProcessorClientOptions =
+            MessageFeedbackProcessorClientOptions.builder()
                 .build();
 
-        eventProcessorClient.start();
+        MessageFeedbackProcessorClient messageFeedbackProcessorClient =
+            new MessageFeedbackProcessorClient(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS_WS, feedbackMessageProcessor, messageFeedbackProcessorClientOptions);
+
+        messageFeedbackProcessorClient.start();
 
         long startTime = System.currentTimeMillis();
         while (!feedbackReceived.wasCallbackFired())
@@ -156,7 +154,7 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
             }
         }
 
-        eventProcessorClient.stop();
+        messageFeedbackProcessorClient.stop();
         assertTrue(feedbackReceived.getResult());
     }
 }

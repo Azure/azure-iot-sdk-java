@@ -10,9 +10,12 @@ import com.azure.identity.ClientSecretCredentialBuilder;
 import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJob;
 import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
 import com.microsoft.azure.sdk.iot.service.messaging.ErrorContext;
-import com.microsoft.azure.sdk.iot.service.messaging.EventProcessorClient;
 import com.microsoft.azure.sdk.iot.service.messaging.FeedbackBatch;
 import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotification;
+import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationProcessorClient;
+import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationProcessorClientOptions;
+import com.microsoft.azure.sdk.iot.service.messaging.MessageFeedbackProcessorClient;
+import com.microsoft.azure.sdk.iot.service.messaging.MessageFeedbackProcessorClientOptions;
 import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.service.query.QueryClientOptions;
@@ -169,7 +172,7 @@ public class RoleBasedAuthenticationSample
 
         try
         {
-            Function<FeedbackBatch, AcknowledgementType> feedbackProcessor = feedbackBatch ->
+            Function<FeedbackBatch, AcknowledgementType> feedbackMessageProcessor = feedbackBatch ->
             {
                 for (FeedbackRecord feedbackRecord : feedbackBatch.getRecords())
                 {
@@ -190,24 +193,33 @@ public class RoleBasedAuthenticationSample
                 System.out.println("Lost connection to service: " + errorContext.getException().getMessage());
             };
 
-            EventProcessorClient eventProcessorClient =
-                EventProcessorClient.builder()
-                    .setHostName(iotHubHostName)
-                    .setCredential(credential)
-                    .setFileUploadNotificationProcessor(fileUploadNotificationProcessor)
-                    .setCloudToDeviceFeedbackMessageProcessor(feedbackProcessor)
-                    .setErrorProcessor(errorProcessor)
+            FileUploadNotificationProcessorClientOptions fileUploadNotificationProcessorClientOptions =
+                FileUploadNotificationProcessorClientOptions.builder()
+                    .errorProcessor(errorProcessor)
                     .build();
+
+            FileUploadNotificationProcessorClient fileUploadNotificationProcessorClient =
+                new FileUploadNotificationProcessorClient(iotHubHostName, credential, IotHubServiceClientProtocol.AMQPS, fileUploadNotificationProcessor, fileUploadNotificationProcessorClientOptions);
+
+            MessageFeedbackProcessorClientOptions messageFeedbackProcessorClientOptions =
+                MessageFeedbackProcessorClientOptions.builder()
+                    .errorProcessor(errorProcessor)
+                    .build();
+
+            MessageFeedbackProcessorClient messageFeedbackProcessorClient =
+                new MessageFeedbackProcessorClient(iotHubHostName, credential, IotHubServiceClientProtocol.AMQPS, feedbackMessageProcessor, messageFeedbackProcessorClientOptions);
 
             // FeedbackReceiver will use the same authentication mechanism that the ServiceClient itself uses,
             // so the below APIs are also RBAC authenticated.
             System.out.println("Starting event processor to listen for feedback messages and file upload notifications");
-            eventProcessorClient.start();
+            fileUploadNotificationProcessorClient.start();
+            messageFeedbackProcessorClient.start();
 
             System.out.println("Sleeping 5 seconds while waiting for feedback records to be received");
             Thread.sleep(5000);
 
-            eventProcessorClient.stop();
+            fileUploadNotificationProcessorClient.stop();
+            messageFeedbackProcessorClient.stop();
         }
         catch (IOException e)
         {

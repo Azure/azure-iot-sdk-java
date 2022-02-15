@@ -17,6 +17,7 @@ import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.engine.Connection;
@@ -50,6 +51,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
     protected boolean linkOpenedRemotely;
     private String connectionId;
 
+    @Getter
     protected final String hostName;
     private TokenCredential credential;
     private AzureSasCredential sasTokenProvider;
