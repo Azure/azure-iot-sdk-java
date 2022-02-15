@@ -111,13 +111,13 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
         }
 
         waitForMessageToBeReceived(messageReceived, testInstance.protocol.toString());
-        waitForFeedbackMessage(serviceMessage.getMessageId());
+        waitForFeedbackMessage();
 
         Thread.sleep(200);
         testInstance.identity.getClient().close();
     }
 
-    private void waitForFeedbackMessage(String expectedMessageId) throws InterruptedException, IOException
+    private void waitForFeedbackMessage() throws InterruptedException, IOException
     {
         final Success feedbackReceived = new Success();
 
@@ -125,8 +125,7 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
         {
             for (FeedbackRecord feedbackRecord : feedbackBatch.getRecords())
             {
-                if (feedbackRecord.getDeviceId().equals(testInstance.identity.getDeviceId())
-                    && feedbackRecord.getOriginalMessageId().equals(expectedMessageId))
+                if (feedbackRecord.getDeviceId().equals(testInstance.identity.getDeviceId()))
                 {
                     feedbackReceived.setResult(true);
                     feedbackReceived.callbackWasFired();
