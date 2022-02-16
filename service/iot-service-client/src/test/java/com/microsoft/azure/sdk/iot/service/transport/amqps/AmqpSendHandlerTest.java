@@ -82,6 +82,7 @@ public class AmqpSendHandlerTest
     @Mocked AmqpResponseVerification responseVerification;
     @Mocked IotHubSSLContext mockedIotHubSSLContext;
     @Mocked IotHubConnectionStringBuilder mockIotHubConnectionStringBuilder;
+    @Mocked Reactor mockReactor;
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
     // Assert
@@ -898,9 +899,8 @@ public class AmqpSendHandlerTest
             public Transport getTransport()
             { throw new UnsupportedOperationException(exceptionMessage); }
 
-            @Override
             public Reactor getReactor()
-            { throw new UnsupportedOperationException(exceptionMessage); }
+            { return mockReactor; }
 
             @Override
             public Selectable getSelectable()
