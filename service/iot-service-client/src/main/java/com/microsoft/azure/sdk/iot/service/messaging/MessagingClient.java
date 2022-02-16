@@ -7,15 +7,19 @@ package com.microsoft.azure.sdk.iot.service.messaging;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSendHandler;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.ReactorRunner;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 /**
  * Use the MessagingClient to send and monitor messages to devices in IoT hubs.
@@ -24,7 +28,12 @@ import java.util.Objects;
 @Slf4j
 public final class MessagingClient
 {
+    private static final int STOP_REACTOR_TIMEOUT_MILLISECONDS = 10 * 1000; // 10 seconds
+    private static final int MESSAGE_SEND_TIMEOUT_MILLISECONDS = 30 * 1000;
+
+    private final Consumer<ErrorContext> errorProcessor; // may be null if user doesn't provide one
     private final AmqpSendHandler amqpSendHandler;
+    private ReactorRunner reactorRunner;
 
     /**
      * Create MessagingClient from the specified connection string
@@ -57,6 +66,7 @@ public final class MessagingClient
             throw new IllegalArgumentException("MessagingClientOptions cannot be null for this constructor");
         }
 
+        this.errorProcessor = options.getErrorProcessor();
         this.amqpSendHandler =
             new AmqpSendHandler(
                 connectionString,
@@ -117,6 +127,7 @@ public final class MessagingClient
             throw new UnsupportedOperationException("Proxies are only supported over AMQPS_WS");
         }
 
+        this.errorProcessor = options.getErrorProcessor();
         this.amqpSendHandler =
             new AmqpSendHandler(
                 hostName,
@@ -140,10 +151,7 @@ public final class MessagingClient
             AzureSasCredential azureSasCredential,
             IotHubServiceClientProtocol protocol)
     {
-        this(hostName,
-                azureSasCredential,
-                protocol,
-                MessagingClientOptions.builder().build());
+        this(hostName, azureSasCredential, protocol, MessagingClientOptions.builder().build());
     }
 
     /**
@@ -168,6 +176,7 @@ public final class MessagingClient
             throw new UnsupportedOperationException("Proxies are only supported over AMQPS_WS");
         }
 
+        this.errorProcessor = options.getErrorProcessor();
         this.amqpSendHandler =
             new AmqpSendHandler(
                 hostName,
@@ -184,30 +193,110 @@ public final class MessagingClient
         log.debug("Initialized a MessagingClient instance using SDK version {}", TransportUtils.serviceVersion);
     }
 
-    /**
-     * Send a one-way message to the specified device.
-     *
-     * @param deviceId The device identifier for the target device
-     * @param message The message for the device
-     * @throws IOException This exception is thrown if the AmqpSender object is not initialized
-     * @throws IotHubException This exception is thrown if IotHub rejects the message for any reason
-     */
-    public void send(String deviceId, Message message) throws IOException, IotHubException
+    public void open() throws IOException
     {
-        this.send(deviceId, null, message);
+        log.debug("Opening file upload notification receiver");
+
+        this.reactorRunner = new ReactorRunner(
+            this.amqpSendHandler.getHostName(),
+            "AmqpFileUploadNotificationAndCloudToDeviceFeedbackReceiver",
+            this.amqpSendHandler);
+
+        new Thread(() ->
+        {
+            try
+            {
+                reactorRunner.run();
+
+                log.trace("EventProcessorClient Amqp reactor stopped, checking that the connection was opened");
+                this.amqpSendHandler.verifyConnectionWasOpened();
+
+                log.trace("EventProcessorClient  reactor did successfully open the connection, returning without exception");
+            }
+            catch (IOException e)
+            {
+                log.warn("EventProcessorClient Amqp connection encountered an exception", e);
+
+                if (this.errorProcessor != null)
+                {
+                    this.errorProcessor.accept(new ErrorContext(e));
+                }
+            }
+        }).start();
+
+        log.debug("Opened EventProcessorClient");
     }
 
-    /**
-     * Send a one-way message to the specified module.
-     *
-     * @param deviceId The device identifier for the target device
-     * @param moduleId The module identifier for the target device
-     * @param message The message for the device
-     * @throws IOException This exception is thrown if the AmqpSender object is not initialized
-     * @throws IotHubException This exception is thrown if IotHub rejects the message for any reason
-     */
-    public void send(String deviceId, String moduleId, Message message) throws IOException, IotHubException
+    public void close() throws InterruptedException
     {
-        this.amqpSendHandler.send(deviceId, moduleId, message);
+        this.close(STOP_REACTOR_TIMEOUT_MILLISECONDS);
+    }
+
+    public void close(int timeoutMilliseconds) throws InterruptedException
+    {
+        this.reactorRunner.stop(timeoutMilliseconds);
+    }
+
+    public void send(String deviceId, Message message) throws IOException, IotHubException, InterruptedException
+    {
+        this.send(deviceId, null, message, MESSAGE_SEND_TIMEOUT_MILLISECONDS);
+    }
+
+    public void send(String deviceId, Message message, int timeoutMilliseconds) throws IOException, IotHubException, InterruptedException
+    {
+        this.send(deviceId, null, message, timeoutMilliseconds);
+    }
+
+    public void send(String deviceId, String moduleId, Message message) throws IOException, IotHubException, InterruptedException
+    {
+        this.send(deviceId, moduleId, message, MESSAGE_SEND_TIMEOUT_MILLISECONDS);
+    }
+
+    public void send(String deviceId, String moduleId, Message message, int timeoutMilliseconds) throws IOException, IotHubException, InterruptedException
+    {
+        if (timeoutMilliseconds < 0)
+        {
+            throw new IllegalArgumentException("timeoutMilliseconds must be greater than or equal to 0");
+        }
+
+        AtomicReference<IotHubException> exception = new AtomicReference<>();
+        final CountDownLatch messageSentLock = new CountDownLatch(1);
+
+        Consumer<SendResult> onMessageAcknowledgedCallback = sendResult ->
+        {
+            if (!sendResult.wasSentSuccessfully())
+            {
+                exception.set(sendResult.getException());
+            }
+
+            messageSentLock.countDown();
+        };
+
+        this.sendAsync(deviceId, moduleId, message, onMessageAcknowledgedCallback, null);
+
+        if (timeoutMilliseconds == 0)
+        {
+            // wait indefinitely
+            messageSentLock.await();
+        }
+        else
+        {
+            boolean timedOut = !messageSentLock.await(timeoutMilliseconds, TimeUnit.MILLISECONDS);
+
+            if (timedOut)
+            {
+                throw new IotHubException("Timed out waiting for message to be acknowledged");
+            }
+        }
+    }
+
+    public void sendAsync(String deviceId, Message message, Consumer<SendResult> onMessageSentCallback, Object context)
+    {
+        this.sendAsync(deviceId, null, message, onMessageSentCallback, context);
+    }
+
+    public void sendAsync(String deviceId, String moduleId, Message message, Consumer<SendResult> onMessageSentCallback, Object context)
+    {
+        this.amqpSendHandler.sendAsync(deviceId, moduleId, message, onMessageSentCallback, context);
     }
 }

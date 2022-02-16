@@ -74,7 +74,7 @@ public class ReactorRunner
     {
         try
         {
-            this.reactor.schedule(0, this.handler);
+            this.handler.closeAsync();
 
             long startTime = System.currentTimeMillis();
             while (this.handler.isOpen())

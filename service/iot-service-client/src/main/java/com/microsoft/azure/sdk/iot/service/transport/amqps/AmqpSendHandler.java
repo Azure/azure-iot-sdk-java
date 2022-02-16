@@ -8,15 +8,14 @@ package com.microsoft.azure.sdk.iot.service.transport.amqps;
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.messaging.Message;
+import com.microsoft.azure.sdk.iot.service.messaging.SendResult;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.Symbol;
-import org.apache.qpid.proton.amqp.messaging.Accepted;
 import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
 import org.apache.qpid.proton.amqp.messaging.Data;
 import org.apache.qpid.proton.amqp.messaging.Properties;
@@ -24,17 +23,19 @@ import org.apache.qpid.proton.amqp.messaging.Section;
 import org.apache.qpid.proton.amqp.messaging.Target;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.engine.Delivery;
-import org.apache.qpid.proton.engine.EndpointState;
 import org.apache.qpid.proton.engine.Event;
 import org.apache.qpid.proton.engine.Sender;
 import org.apache.qpid.proton.engine.Session;
 
 import javax.net.ssl.SSLContext;
-import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Consumer;
 
 /**
  * Instance of the QPID-Proton-J BaseHandler class to override
@@ -51,11 +52,17 @@ public class AmqpSendHandler extends AmqpConnectionHandler
     private static final String DEVICE_PATH_FORMAT = "/devices/%s/messages/devicebound";
     private static final String MODULE_PATH_FORMAT = "/devices/%s/modules/%s/messages/devicebound";
 
-    private Object correlationId;
     private Sender cloudToDeviceMessageSendingLink;
+    private Session cloudToDeviceMessageSession;
 
-    private AmqpResponseVerification amqpResponse;
-    private org.apache.qpid.proton.message.Message messageToBeSent;
+    //TODO can this be simplified? This is a lot of state
+    private final Queue<org.apache.qpid.proton.message.Message> outgoingMessageQueue = new ConcurrentLinkedQueue<>();
+    private final Map<Integer, org.apache.qpid.proton.message.Message> unacknowledgedMessages = new ConcurrentHashMap<>();
+    private final Map<org.apache.qpid.proton.message.Message, Message> protonMessageToIotHubMessageMap = new ConcurrentHashMap<>();
+    private final Map<Message, Consumer<SendResult>> iotHubMessageToCallbackMap = new ConcurrentHashMap<>();
+    private final Map<Message, Object> iotHubMessageToCallbackContextMap = new ConcurrentHashMap<>();
+
+
     private int nextTag = 0;
 
     /**
@@ -96,24 +103,24 @@ public class AmqpSendHandler extends AmqpConnectionHandler
         super(hostName, sasTokenProvider, iotHubServiceClientProtocol, proxyOptions, sslContext);
     }
 
-    public void send(String deviceId, String moduleId, Message message) throws IOException, IotHubException
+    public void sendAsync(String deviceId, String moduleId, Message iotHubMessage, Consumer<SendResult> callback, Object context)
     {
+        org.apache.qpid.proton.message.Message protonMessageToQueue;
         if (moduleId == null)
         {
-            messageToBeSent = createProtonMessage(deviceId, message);
-            log.info("Sending cloud to device message");
+            protonMessageToQueue = createProtonMessage(deviceId, iotHubMessage);
+            log.debug("Queueing cloud to device message with correlation id {}", iotHubMessage.getCorrelationId());
         }
         else
         {
-            messageToBeSent = createProtonMessage(deviceId, moduleId, message);
-            log.info("Sending cloud to device module message");
+            protonMessageToQueue = createProtonMessage(deviceId, moduleId, iotHubMessage);
+            log.debug("Queueing cloud to module message with correlation id {}", iotHubMessage.getCorrelationId());
         }
 
-        new ReactorRunner(this).run();
-
-        log.trace("Amqp send reactor stopped, checking that the connection opened, and that the message was sent");
-
-        verifySendSucceeded();
+        outgoingMessageQueue.add(protonMessageToQueue);
+        protonMessageToIotHubMessageMap.put(protonMessageToQueue, iotHubMessage);
+        iotHubMessageToCallbackMap.put(iotHubMessage, callback);
+        iotHubMessageToCallbackContextMap.put(iotHubMessage, context);
     }
 
     static org.apache.qpid.proton.message.Message createProtonMessage(String deviceId, Message message)
@@ -174,79 +181,48 @@ public class AmqpSendHandler extends AmqpConnectionHandler
     @Override
     public void onLinkFlow(Event event)
     {
-        if (messageToBeSent != null)
-        {
-            Sender snd = (Sender)event.getLink();
-            if (snd.getCredit() > 0)
-            {
-                this.correlationId = messageToBeSent.getCorrelationId();
-                log.debug("Sending cloud to device message with correlation id {}", this.correlationId);
-                byte[] msgData = new byte[1024];
-                int length;
-                while (true)
-                {
-                    try
-                    {
-                        length = messageToBeSent.encode(msgData, 0, msgData.length);
-                        break;
-                    }
-                    catch (BufferOverflowException e)
-                    {
-                        msgData = new byte[msgData.length * 2];
-                    }
-                }
-
-                byte[] tag = String.valueOf(this.nextTag).getBytes(StandardCharsets.UTF_8);
-
-                //want to avoid negative delivery tags since -1 is the designated failure value
-                if (this.nextTag == Integer.MAX_VALUE || this.nextTag < 0)
-                {
-                    this.nextTag = 0;
-                }
-                else
-                {
-                    this.nextTag++;
-                }
-
-                snd.delivery(tag);
-                snd.send(msgData, 0, length);
-                snd.advance();
-
-                this.messageToBeSent = null;
-            }
-        }
+        //TODO log
     }
 
     @Override
     public void onDelivery(Event event)
     {
-        log.trace("Acknowledgement arrived for sent cloud to device message with correlation id {}", this.correlationId);
+        Delivery delivery = event.getDelivery();
 
-        Delivery d = event.getDelivery();
+        DeliveryState remoteState = delivery.getRemoteState();
 
-        DeliveryState remoteState = d.getRemoteState();
+        int deliveryTag = Integer.parseInt(new String(delivery.getTag(), StandardCharsets.UTF_8));
 
-        amqpResponse = new AmqpResponseVerification(remoteState);
+        org.apache.qpid.proton.message.Message protonMessage = unacknowledgedMessages.remove(deliveryTag);
 
-        d.settle();
-
-        Sender snd = event.getSender();
-
-        if (snd.getLocalState() == EndpointState.ACTIVE)
+        if (protonMessage != null)
         {
-            // By closing the link locally, proton-j will fire an event onLinkLocalClose. Within ErrorLoggingBaseHandlerWithCleanup,
-            // onLinkLocalClose closes the session locally and eventually the connection and reactor
-            if (remoteState.getClass().equals(Accepted.class))
+            Message iotHubMessage = this.protonMessageToIotHubMessageMap.remove(protonMessage);
+            if (iotHubMessage != null)
             {
-                log.debug("Closing AMQP cloud to device message sender link since the message was delivered");
+                log.trace("Acknowledgement arrived for sent cloud to device message with correlation id {}", iotHubMessage.getCorrelationId());
+                AmqpResponseVerification amqpResponse = new AmqpResponseVerification(remoteState);
+
+                Consumer<SendResult> onMessageSentCallback = this.iotHubMessageToCallbackMap.remove(iotHubMessage);
+                Object context = this.iotHubMessageToCallbackContextMap.remove(iotHubMessage);
+
+                if (onMessageSentCallback != null)
+                {
+                    SendResult sendResult = new SendResult(amqpResponse.getException() != null, context, amqpResponse.getException());
+                    onMessageSentCallback.accept(sendResult);
+                }
             }
             else
             {
-                log.debug("Closing AMQP cloud to device message sender link since the message failed to be delivered");
+                log.debug("Received an acknowledgement for a cloud to device message that this client sent, but has no record of being asked to send");
             }
-
-            snd.close();
         }
+        else
+        {
+            log.debug("Received an acknowledgement for a cloud to device message that this client did not send");
+        }
+
+        delivery.settle();
     }
 
     @Override
@@ -256,17 +232,53 @@ public class AmqpSendHandler extends AmqpConnectionHandler
         event.getTransport().close_tail();
     }
 
-    public void verifySendSucceeded() throws IotHubException, IOException
-    {
-        super.verifyConnectionWasOpened();
 
-        if (amqpResponse != null)
+    @Override
+    public void onTimerTask(Event event)
+    {
+        org.apache.qpid.proton.message.Message outgoingMessage = this.outgoingMessageQueue.poll();
+        while (outgoingMessage != null)
         {
-            if (amqpResponse.getException() != null)
+
+            log.debug("Sending cloud to device message with correlation id {}", outgoingMessage.getCorrelationId());
+            byte[] msgData = new byte[1024];
+            int length;
+            while (true)
             {
-                throw amqpResponse.getException();
+                try
+                {
+                    length = outgoingMessage.encode(msgData, 0, msgData.length);
+                    break;
+                }
+                catch (BufferOverflowException e)
+                {
+                    msgData = new byte[msgData.length * 2];
+                }
             }
+
+            byte[] tag = String.valueOf(this.nextTag).getBytes(StandardCharsets.UTF_8);
+
+            this.cloudToDeviceMessageSendingLink.delivery(tag);
+            this.cloudToDeviceMessageSendingLink.send(msgData, 0, length);
+            this.cloudToDeviceMessageSendingLink.advance();
+
+            this.unacknowledgedMessages.put(nextTag, outgoingMessage);
+
+            //want to avoid negative delivery tags since -1 is the designated failure value
+            if (this.nextTag == Integer.MAX_VALUE || this.nextTag < 0)
+            {
+                this.nextTag = 0;
+            }
+            else
+            {
+                this.nextTag++;
+            }
+
+            outgoingMessage = this.outgoingMessageQueue.poll();
         }
+
+        // schedule the next onTimerTask event so that messages can be sent again later
+        event.getReactor().schedule(200, this);
     }
 
     @Override
@@ -280,7 +292,7 @@ public class AmqpSendHandler extends AmqpConnectionHandler
             // wanted simply by adding the handler to the given session
             // or link
 
-            Session cloudToDeviceMessageSession = this.connection.session();
+            this.cloudToDeviceMessageSession = this.connection.session();
 
             // If a link doesn't have an event handler, the events go to
             // its parent session. If the session doesn't have a handler
@@ -289,9 +301,9 @@ public class AmqpSendHandler extends AmqpConnectionHandler
 
             Map<Symbol, Object> properties = new HashMap<>();
             properties.put(Symbol.getSymbol(TransportUtils.versionIdentifierKey), TransportUtils.USER_AGENT_STRING);
-            cloudToDeviceMessageSession.open();
+            this.cloudToDeviceMessageSession.open();
 
-            this.cloudToDeviceMessageSendingLink = cloudToDeviceMessageSession.sender(SEND_TAG);
+            this.cloudToDeviceMessageSendingLink = this.cloudToDeviceMessageSession.sender(SEND_TAG);
             this.cloudToDeviceMessageSendingLink.setProperties(properties);
             Target t = new Target();
             t.setAddress(ENDPOINT);
@@ -300,5 +312,23 @@ public class AmqpSendHandler extends AmqpConnectionHandler
 
             log.debug("Opening sender link for amqp cloud to device messages");
         }
+    }
+
+    @Override
+    public void closeAsync()
+    {
+        if (this.cloudToDeviceMessageSendingLink != null)
+        {
+            log.debug("Shutdown event occurred, closing cloud to device message sender link");
+            this.cloudToDeviceMessageSendingLink.close();
+        }
+
+        if (this.cloudToDeviceMessageSession != null)
+        {
+            log.debug("Shutdown event occurred, closing cloud to device message sender session");
+            this.cloudToDeviceMessageSession.close();
+        }
+
+        super.closeAsync();
     }
 }

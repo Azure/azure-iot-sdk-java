@@ -12,6 +12,8 @@ import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSendHandler;
 import mockit.*;
 import org.junit.Test;
 
+import java.util.function.Consumer;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
@@ -100,7 +102,7 @@ public class MessagingClientTest
         new Expectations()
         {
             {
-                amqpSend.send(deviceId, null, iotMessage);
+                amqpSend.sendAsync(deviceId, null, iotMessage, (Consumer<SendResult>) any, any);
             }
         };
         // Act
@@ -129,7 +131,7 @@ public class MessagingClientTest
         new Expectations()
         {
             {
-                amqpSend.send(deviceId, moduleId, iotMessage);
+                amqpSend.sendAsync(deviceId, moduleId, iotMessage, (Consumer<SendResult>) any, any);
             }
         };
         // Act

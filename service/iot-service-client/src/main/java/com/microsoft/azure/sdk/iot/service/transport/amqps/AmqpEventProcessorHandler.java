@@ -43,6 +43,7 @@ public class AmqpEventProcessorHandler extends AmqpConnectionHandler implements 
 
     private FileUploadNotificationReceiverLinkHandler fileUploadNotificationReceiverLinkHandler;
     private MessageFeedbackReceiverLinkHandler messageFeedbackReceiverLinkHandler;
+    private Session session;
 
     private final Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationReceivedCallback;
     private final Function<FeedbackBatch, AcknowledgementType> messageFeedbackReceivedCallback;
@@ -99,8 +100,8 @@ public class AmqpEventProcessorHandler extends AmqpConnectionHandler implements 
             // wanted simply by adding the handler to the given session
             // or link
 
-            Session ssn = this.connection.session();
-            ssn.open();
+            this.session = this.connection.session();
+            this.session.open();
 
             // If a link doesn't have an event handler, the events go to
             // its parent session. If the session doesn't have a handler
@@ -112,7 +113,7 @@ public class AmqpEventProcessorHandler extends AmqpConnectionHandler implements 
 
             if (this.fileUploadNotificationReceivedCallback != null)
             {
-                Receiver fileUploadNotificationReceiverLink = ssn.receiver(FILE_NOTIFICATION_RECEIVE_TAG);
+                Receiver fileUploadNotificationReceiverLink = this.session.receiver(FILE_NOTIFICATION_RECEIVE_TAG);
                 fileUploadNotificationReceiverLink.setProperties(properties);
                 fileUploadNotificationReceiverLink.open();
                 Source source = new Source();
@@ -128,7 +129,7 @@ public class AmqpEventProcessorHandler extends AmqpConnectionHandler implements 
 
             if (this.messageFeedbackReceivedCallback != null)
             {
-                Receiver feedbackReceiverLink = ssn.receiver(RECEIVE_TAG);
+                Receiver feedbackReceiverLink = this.session.receiver(RECEIVE_TAG);
                 feedbackReceiverLink.setProperties(properties);
 
                 log.debug("Opening connection, session and link for amqp feedback receiver");
@@ -147,25 +148,6 @@ public class AmqpEventProcessorHandler extends AmqpConnectionHandler implements 
     }
 
     @Override
-    public void onTimerTask(Event event)
-    {
-        //This callback is scheduled by the reactor runner as a signal to gracefully close the connection, starting with its link
-        if (this.fileUploadNotificationReceiverLinkHandler != null)
-        {
-            log.debug("Shutdown event occurred, closing file upload notification receiver link");
-            this.fileUploadNotificationReceiverLinkHandler.close();
-        }
-
-        if (this.messageFeedbackReceiverLinkHandler != null)
-        {
-            log.debug("Shutdown event occurred, closing file upload notification receiver link");
-            this.messageFeedbackReceiverLinkHandler.close();
-        }
-
-        super.closeAsync();
-    }
-
-    @Override
     public void onSenderLinkRemoteOpen()
     {
         //TODO nothing needed, right?
@@ -175,5 +157,29 @@ public class AmqpEventProcessorHandler extends AmqpConnectionHandler implements 
     public void onReceiverLinkRemoteOpen()
     {
         this.linkOpenedRemotely = true;
+    }
+
+    @Override
+    public void closeAsync()
+    {
+        if (this.session != null)
+        {
+            log.debug("Shutdown event occurred, closing session");
+            this.session.close();
+        }
+
+        if (this.fileUploadNotificationReceiverLinkHandler != null)
+        {
+            log.debug("Shutdown event occurred, closing file upload notification receiver link");
+            this.fileUploadNotificationReceiverLinkHandler.close();
+        }
+
+        if (this.messageFeedbackReceiverLinkHandler != null)
+        {
+            log.debug("Shutdown event occurred, closing cloud to device feedback message receiver link");
+            this.messageFeedbackReceiverLinkHandler.close();
+        }
+
+        super.closeAsync();
     }
 }

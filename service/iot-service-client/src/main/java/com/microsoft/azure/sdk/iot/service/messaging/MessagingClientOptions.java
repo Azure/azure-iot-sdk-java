@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import javax.net.ssl.SSLContext;
+import java.util.function.Consumer;
 
 /**
  * Configurable options for all service client operations
@@ -25,4 +26,7 @@ public final class MessagingClientOptions
      */
     @Getter
     private final SSLContext sslContext;
+
+    @Getter
+    private final Consumer<ErrorContext> errorProcessor;
 }

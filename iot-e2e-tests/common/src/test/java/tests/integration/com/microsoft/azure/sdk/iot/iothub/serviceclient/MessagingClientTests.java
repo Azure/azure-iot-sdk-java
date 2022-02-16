@@ -251,6 +251,8 @@ public class MessagingClientTests extends IntegrationTest
             messagingClient = new MessagingClient(iotHubConnectionString, testInstance.protocol, messagingClientOptions);
         }
 
+        messagingClient.open();
+
         Message message;
         if (withPayload)
         {
@@ -269,6 +271,8 @@ public class MessagingClientTests extends IntegrationTest
         }
 
         messagingClient.send(device.getDeviceId(), message);
+
+        messagingClient.close();
 
         Device deviceGetAfter = registryClient.getDevice(device.getDeviceId());
 
@@ -306,6 +310,7 @@ public class MessagingClientTests extends IntegrationTest
         IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
         AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
         messagingClient = new MessagingClient(iotHubConnectionStringObj.getHostName(), sasCredential, testInstance.protocol);
+        messagingClient.open();
 
         Message message = new Message(SMALL_PAYLOAD);
         messagingClient.send(device.getDeviceId(), message);
@@ -339,17 +344,20 @@ public class MessagingClientTests extends IntegrationTest
         // The final c2d send should succeed since the shared access signature has been renewed
         messagingClient.send(device.getDeviceId(), message);
 
+        messagingClient.close();
+
         Tools.disposeTestIdentity(testDeviceIdentity, iotHubConnectionString);
     }
 
     @Ignore // The IoT Hub instance we use for this test is currently offline, so this test cannot be run
     @Test
     @ContinuousIntegrationTest
-    public void serviceClientValidatesRemoteCertificateWhenSendingTelemetry() throws IOException
+    public void serviceClientValidatesRemoteCertificateWhenSendingTelemetry() throws IOException, InterruptedException
     {
         boolean expectedExceptionWasCaught = false;
 
         MessagingClient messagingClient = new MessagingClient(invalidCertificateServerConnectionString, testInstance.protocol);
+        messagingClient.open();
 
         try
         {
@@ -363,6 +371,10 @@ public class MessagingClientTests extends IntegrationTest
         catch (Exception e)
         {
             fail(buildExceptionMessage("Expected IOException, but received: " + Tools.getStackTraceFromThrowable(e), hostName));
+        }
+        finally
+        {
+            messagingClient.close();
         }
 
         assertTrue(buildExceptionMessage("Expected an exception due to service presenting invalid certificate", hostName), expectedExceptionWasCaught);

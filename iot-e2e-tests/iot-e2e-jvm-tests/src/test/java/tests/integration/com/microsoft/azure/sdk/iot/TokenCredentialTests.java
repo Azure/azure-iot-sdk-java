@@ -71,10 +71,13 @@ public class TokenCredentialTests
 
         // Create service client
         MessagingClient messagingClient = buildServiceClientWithTokenCredential(IotHubServiceClientProtocol.AMQPS);
+        messagingClient.open();
 
         Message message = new Message("some message".getBytes(StandardCharsets.UTF_8));
 
         messagingClient.send(device.getDeviceId(), message);
+
+        messagingClient.close();
 
         Device deviceGetAfter = registryClient.getDevice(device.getDeviceId());
 

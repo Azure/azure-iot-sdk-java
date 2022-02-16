@@ -143,6 +143,8 @@ public class ReceiveMessagesCommon extends IntegrationTest
             {
                 this.identity = Tools.getTestModule(iotHubConnectionString, this.protocol, this.authenticationType, false);
             }
+
+            this.messagingClient.open();
         }
 
         public void dispose()
@@ -153,6 +155,15 @@ public class ReceiveMessagesCommon extends IntegrationTest
             }
 
             Tools.disposeTestIdentity(this.identity, iotHubConnectionString);
+
+            try
+            {
+                this.messagingClient.close();
+            }
+            catch (InterruptedException e)
+            {
+                log.warn("Failed to close messagingClient", e);
+            }
         }
     }
 
@@ -301,12 +312,12 @@ public class ReceiveMessagesCommon extends IntegrationTest
         return serviceMessage;
     }
 
-    protected void sendMessageToDevice(String deviceId, int messageSize) throws IotHubException, IOException
+    protected void sendMessageToDevice(String deviceId, int messageSize) throws IotHubException, IOException, InterruptedException
     {
         testInstance.messagingClient.send(deviceId, createCloudToDeviceMessage(messageSize));
     }
 
-    protected void sendMessageToModule(String deviceId, String moduleId, int messageSize) throws IotHubException, IOException
+    protected void sendMessageToModule(String deviceId, String moduleId, int messageSize) throws IotHubException, IOException, InterruptedException
     {
         testInstance.messagingClient.send(deviceId, moduleId, createCloudToDeviceMessage(messageSize));
     }

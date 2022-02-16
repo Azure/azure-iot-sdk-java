@@ -28,18 +28,23 @@ class AmqpResponseVerification implements AmqpError
             return;
         }
 
-        if (state.getClass().equals(Rejected.class)) {
+        if (state.getClass().equals(Rejected.class))
+        {
             Rejected rejectedState = (Rejected) state;
             ErrorCondition errorCond = rejectedState.getError();
             this.errorCondition = errorCond.getCondition();
             this.errorDescription = errorCond.getDescription();
             this.amqpResponseVerifier();
-        } else if (state.getClass().equals(Accepted.class)
+        }
+        else if (state.getClass().equals(Accepted.class)
                 || state.getClass().equals(Received.class)
                 || state.getClass().equals(Released.class)
-                || state.getClass().equals(Modified.class)) {
+                || state.getClass().equals(Modified.class))
+        {
             log.trace("Received an acceptable delivery state: {}", state.getType());
-        } else {
+        }
+        else
+        {
             this.exception = new IotHubException("Unknown delivery state: " + state.getType());
         }
     }

@@ -22,10 +22,10 @@ public class FileUploadNotificationProcessorClient
 {
     private static final int STOP_REACTOR_TIMEOUT_MILLISECONDS = 10 * 1000; // 10 seconds
 
-    final AmqpEventProcessorHandler amqpEventProcessorHandler;
+    private final AmqpEventProcessorHandler amqpEventProcessorHandler;
     private final Consumer<ErrorContext> errorProcessor; // may be null if user doesn't provide one
 
-    ReactorRunner reactorRunner;
+    private ReactorRunner reactorRunner;
 
     public FileUploadNotificationProcessorClient(
         String hostName,

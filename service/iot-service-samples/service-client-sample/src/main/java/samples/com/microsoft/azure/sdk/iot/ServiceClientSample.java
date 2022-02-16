@@ -126,6 +126,7 @@ public class ServiceClientSample
     protected static void sendMultipleCommands() throws InterruptedException, IOException, IotHubException
     {
         MessagingClient messagingClient = new MessagingClient(connectionString, protocol);
+        messagingClient.open();
 
         Map<String, String> propertiesToSend = new HashMap<>();
         String commandMessage = "Cloud to device message: ";
@@ -149,6 +150,8 @@ public class ServiceClientSample
             // send the message
             messagingClient.send(deviceId, messageToSend);
         }
+
+        messagingClient.close();
 
         System.out.println("All cloud to device messages sent");
     }

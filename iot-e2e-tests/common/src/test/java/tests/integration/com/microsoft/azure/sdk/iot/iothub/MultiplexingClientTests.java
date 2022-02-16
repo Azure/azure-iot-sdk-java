@@ -604,7 +604,9 @@ public class MultiplexingClientTests extends IntegrationTest
     {
         com.microsoft.azure.sdk.iot.service.messaging.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.messaging.Message("some payload");
         serviceMessage.setCorrelationId(expectedMessageCorrelationId);
+        messagingClient.open();
         messagingClient.send(deviceId, serviceMessage);
+        messagingClient.close();
 
         long startTime = System.currentTimeMillis();
         while (!messageCallback.messageCallbackFired)

@@ -159,9 +159,11 @@ public class RoleBasedAuthenticationSample
         Message cloudToDeviceMessage = new Message(cloudToDeviceMessagePayload.getBytes(StandardCharsets.UTF_8));
         try
         {
+            messagingClient.open();
             System.out.println("Sending cloud to device message to the new device");
             messagingClient.send(deviceId, cloudToDeviceMessage);
             System.out.println("Successfully sent cloud to device message to the new device");
+            messagingClient.close();
         }
         catch (IOException | IotHubException e)
         {

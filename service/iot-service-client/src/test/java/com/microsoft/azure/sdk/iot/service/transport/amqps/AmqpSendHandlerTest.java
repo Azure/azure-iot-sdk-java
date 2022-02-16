@@ -357,82 +357,6 @@ public class AmqpSendHandlerTest
         amqpSendHandler.onDelivery(mockedEvent);
     }
 
-    /*
-    Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_029: [** The event handler shall check the status queue to get the response for the sent message **]**
-
-    Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_030: [** The event handler shall remove the response from the queue **]**
-
-    Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_031: [** The event handler shall get the exception from the response and throw is it is not null **]**
-     */
-    @Test
-    public void sendComplete_flow_OK(final @Mocked AmqpResponseVerification mockedVerification) throws IotHubException, IOException
-    {
-        // Arrange
-        String connectionString = "aaa";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(connectionString, iotHubServiceClientProtocol, null, null);
-        Deencapsulation.setField(amqpSendHandler,"amqpResponse", mockedVerification );
-        Deencapsulation.setField(amqpSendHandler, "linkOpenedRemotely", true);
-        Deencapsulation.setField(amqpSendHandler, "sessionOpenedRemotely", true);
-        Deencapsulation.setField(amqpSendHandler, "connectionOpenedRemotely", true);
-
-        // Assert
-        new Expectations()
-        {
-            {
-                mockedVerification.getException();
-                result = null;
-            }
-        };
-        // Act
-        amqpSendHandler.verifySendSucceeded();
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_031: [** The event handler shall get the exception from the response and throw is it is not null **]**
-    @Test (expected = IotHubException.class)
-    public void sendComplete_throws_exception_if_found(final @Mocked AmqpResponseVerification mockedVerification,
-                                                       final @Mocked IotHubException mockedIotHubException) throws IotHubException, IOException
-    {
-        // Arrange
-        String connectionString = "aaa";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(connectionString, iotHubServiceClientProtocol, null, null);
-        Deencapsulation.setField(amqpSendHandler,"amqpResponse", mockedVerification );
-        Deencapsulation.setField(amqpSendHandler, "linkOpenedRemotely", true);
-        Deencapsulation.setField(amqpSendHandler, "sessionOpenedRemotely", true);
-        Deencapsulation.setField(amqpSendHandler, "connectionOpenedRemotely", true);
-
-        // Assert
-        new Expectations()
-        {
-            {
-                mockedVerification.getException();
-                result = mockedIotHubException;
-            }
-        };
-        // Act
-        amqpSendHandler.verifySendSucceeded();
-
-    }
-
-
-    //Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_031: [** The event handler shall get the exception from the response and throw is it is not null **]**
-    @Test (expected = IOException.class)
-    public void sendComplete_throws_Connection_exception_if_found(final @Mocked AmqpResponseVerification mockedVerification,
-                                                                  final @Mocked IotHubException mockedIotHubException,
-                                                                  final @Mocked Event mockedEvent) throws IotHubException, IOException
-    {
-        // Arrange
-        String connectionString = "aaa";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(connectionString, iotHubServiceClientProtocol, null, null);
-        amqpSendHandler.onTransportError(mockedEvent);
-
-        // Act
-        amqpSendHandler.verifySendSucceeded();
-
-    }
-
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_34_032: [This function shall close the transport tail]
     @Test
     public void onConnectionRemoteCloseClosesTransportTail(@Mocked final Event mockEvent, @Mocked final Transport mockTransport)
@@ -477,42 +401,6 @@ public class AmqpSendHandlerTest
 
         // Assert
         assertTrue(Deencapsulation.getField(amqpSendHandler, "connectionOpenedRemotely"));
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_34_034: [if 'verifyConnectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
-    @Test (expected = IOException.class)
-    public void sendCompleteChecksForSavedException() throws IOException, IotHubException
-    {
-        // Arrange
-        String connectionString = "aaa";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(connectionString, iotHubServiceClientProtocol, null, null);
-
-        Deencapsulation.setField(amqpSendHandler, "linkOpenedRemotely", true);
-        Deencapsulation.setField(amqpSendHandler, "sessionOpenedRemotely", true);
-        Deencapsulation.setField(amqpSendHandler, "connectionOpenedRemotely", true);
-        Deencapsulation.setField(amqpSendHandler, "savedException", new SSLHandshakeException("some nonsense exception"));
-
-        // Act
-        amqpSendHandler.verifySendSucceeded();
-    }
-
-    //Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_34_034: [if 'verifyConnectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
-    @Test (expected = IOException.class)
-    public void sendCompleteChecksThatverifyConnectionOpened() throws IOException, IotHubException
-    {
-        // Arrange
-        String connectionString = "aaa";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(connectionString, iotHubServiceClientProtocol, null, null);
-
-        Deencapsulation.setField(amqpSendHandler, "connectionOpenedRemotely", false);
-        Deencapsulation.setField(amqpSendHandler, "sessionOpenedRemotely", false);
-        Deencapsulation.setField(amqpSendHandler, "linkOpenedRemotely", false);
-        Deencapsulation.setField(amqpSendHandler, "savedException", null);
-
-        // Act
-        amqpSendHandler.verifySendSucceeded();
     }
 
     private void createProtonObjects()

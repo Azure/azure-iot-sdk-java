@@ -334,7 +334,16 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
 
     public void closeAsync()
     {
-        this.cbsSessionHandler.close();
-        this.connection.close();
+        if (this.connection != null)
+        {
+            log.debug("Shutdown event occurred, closing file upload notification receiver link");
+            this.connection.close();
+        }
+
+        if (this.cbsSessionHandler != null)
+        {
+            log.debug("Shutdown event occurred, closing file upload notification receiver link");
+            this.cbsSessionHandler.close();
+        }
     }
 }
