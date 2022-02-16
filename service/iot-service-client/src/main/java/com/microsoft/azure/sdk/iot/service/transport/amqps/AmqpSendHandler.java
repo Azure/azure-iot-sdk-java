@@ -120,7 +120,11 @@ public class AmqpSendHandler extends AmqpConnectionHandler
         outgoingMessageQueue.add(protonMessageToQueue);
         protonMessageToIotHubMessageMap.put(protonMessageToQueue, iotHubMessage);
         iotHubMessageToCallbackMap.put(iotHubMessage, callback);
-        iotHubMessageToCallbackContextMap.put(iotHubMessage, context);
+
+        if (context != null)
+        {
+            iotHubMessageToCallbackContextMap.put(iotHubMessage, context);
+        }
     }
 
     static org.apache.qpid.proton.message.Message createProtonMessage(String deviceId, Message message)
@@ -182,6 +186,7 @@ public class AmqpSendHandler extends AmqpConnectionHandler
     public void onLinkFlow(Event event)
     {
         //TODO log
+        event.getReactor().schedule(200, this);
     }
 
     @Override
@@ -236,6 +241,14 @@ public class AmqpSendHandler extends AmqpConnectionHandler
     @Override
     public void onTimerTask(Event event)
     {
+        sendQueuedMessages();
+
+        // schedule the next onTimerTask event so that messages can be sent again later
+        event.getReactor().schedule(200, this);
+    }
+
+    private void sendQueuedMessages()
+    {
         org.apache.qpid.proton.message.Message outgoingMessage = this.outgoingMessageQueue.poll();
         while (outgoingMessage != null)
         {
@@ -276,9 +289,6 @@ public class AmqpSendHandler extends AmqpConnectionHandler
 
             outgoingMessage = this.outgoingMessageQueue.poll();
         }
-
-        // schedule the next onTimerTask event so that messages can be sent again later
-        event.getReactor().schedule(200, this);
     }
 
     @Override
