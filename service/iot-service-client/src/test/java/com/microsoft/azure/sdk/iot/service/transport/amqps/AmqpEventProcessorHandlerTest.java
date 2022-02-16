@@ -170,7 +170,7 @@ public class AmqpEventProcessorHandlerTest
     {
         // Arrange
         String connectionString = "aaa";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS_WS;
         AmqpEventProcessorHandler amqpReceiveHandler = new AmqpEventProcessorHandler(connectionString, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, null, mockedProxyOptions, mockedSslContext);
 
         // Act
@@ -186,7 +186,7 @@ public class AmqpEventProcessorHandlerTest
     {
         // Arrange
         String connectionString = "aaa";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS_WS;
         AmqpEventProcessorHandler amqpReceiveHandler = new AmqpEventProcessorHandler(connectionString, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, null, mockedProxyOptions, mockedSslContext);
 
         Deencapsulation.setField(amqpReceiveHandler, "connectionOpenedRemotely", true);
@@ -204,7 +204,7 @@ public class AmqpEventProcessorHandlerTest
     {
         // Arrange
         String connectionString = "aaa";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS_WS;
         AmqpEventProcessorHandler amqpReceiveHandler = new AmqpEventProcessorHandler(connectionString, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, null, mockedProxyOptions, mockedSslContext);
 
         Deencapsulation.setField(amqpReceiveHandler, "connectionOpenedRemotely", false);
