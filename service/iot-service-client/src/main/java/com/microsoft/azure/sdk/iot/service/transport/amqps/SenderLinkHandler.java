@@ -14,6 +14,7 @@ import org.apache.qpid.proton.engine.EndpointState;
 import org.apache.qpid.proton.engine.Event;
 import org.apache.qpid.proton.engine.Link;
 import org.apache.qpid.proton.engine.Sender;
+import org.apache.qpid.proton.message.Message;
 import org.apache.qpid.proton.message.impl.MessageImpl;
 import org.apache.qpid.proton.reactor.FlowController;
 
@@ -117,6 +118,13 @@ abstract class SenderLinkHandler extends BaseHandler
         }
     }
 
+    boolean isOpen()
+    {
+        return this.senderLink != null
+            && this.senderLink.getLocalState() == EndpointState.ACTIVE
+            && this.senderLink.getRemoteState() == EndpointState.ACTIVE;
+    }
+
     void close()
     {
         if (this.senderLink.getLocalState() != EndpointState.CLOSED)
@@ -126,7 +134,7 @@ abstract class SenderLinkHandler extends BaseHandler
         }
     }
 
-    int sendMessageAndGetDeliveryTag(MessageImpl protonMessage)
+    int sendMessageAndGetDeliveryTag(Message protonMessage)
     {
         // Callers of this method are responsible for putting the returned delivery tag into the inProgressMessages map
         // so that this link can respond to this message being acknowledged appropriately

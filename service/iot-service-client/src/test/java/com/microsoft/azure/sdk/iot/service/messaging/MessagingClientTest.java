@@ -6,13 +6,10 @@
 package com.microsoft.azure.sdk.iot.service.messaging;
 
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
-import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSendHandler;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.CloudToDeviceMessageConnectionHandler;
 import mockit.*;
 import org.junit.Test;
-
-import java.util.function.Consumer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -20,7 +17,7 @@ import static org.junit.Assert.assertNotEquals;
 public class MessagingClientTest
 {
     @Mocked
-    AmqpSendHandler amqpSend;
+    CloudToDeviceMessageConnectionHandler amqpSend;
     @Mocked
     IotHubServiceSasToken iotHubServiceSasToken;
 

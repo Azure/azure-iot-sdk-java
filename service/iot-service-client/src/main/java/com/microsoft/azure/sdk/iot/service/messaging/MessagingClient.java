@@ -9,7 +9,7 @@ import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
-import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSendHandler;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.CloudToDeviceMessageConnectionHandler;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.ReactorRunner;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,7 +32,7 @@ public final class MessagingClient
     private static final int MESSAGE_SEND_TIMEOUT_MILLISECONDS = 30 * 1000;
 
     private final Consumer<ErrorContext> errorProcessor; // may be null if user doesn't provide one
-    private final AmqpSendHandler amqpSendHandler;
+    private final CloudToDeviceMessageConnectionHandler cloudToDeviceMessageConnectionHandler;
     private ReactorRunner reactorRunner;
 
     /**
@@ -67,8 +67,8 @@ public final class MessagingClient
         }
 
         this.errorProcessor = options.getErrorProcessor();
-        this.amqpSendHandler =
-            new AmqpSendHandler(
+        this.cloudToDeviceMessageConnectionHandler =
+            new CloudToDeviceMessageConnectionHandler(
                 connectionString,
                 protocol,
                 options.getProxyOptions(),
@@ -128,8 +128,8 @@ public final class MessagingClient
         }
 
         this.errorProcessor = options.getErrorProcessor();
-        this.amqpSendHandler =
-            new AmqpSendHandler(
+        this.cloudToDeviceMessageConnectionHandler =
+            new CloudToDeviceMessageConnectionHandler(
                 hostName,
                 credential,
                 protocol,
@@ -177,8 +177,8 @@ public final class MessagingClient
         }
 
         this.errorProcessor = options.getErrorProcessor();
-        this.amqpSendHandler =
-            new AmqpSendHandler(
+        this.cloudToDeviceMessageConnectionHandler =
+            new CloudToDeviceMessageConnectionHandler(
                 hostName,
                 azureSasCredential,
                 protocol,
@@ -193,14 +193,22 @@ public final class MessagingClient
         log.debug("Initialized a MessagingClient instance using SDK version {}", TransportUtils.serviceVersion);
     }
 
-    public void open() throws IOException
+    public synchronized void open() throws IOException, InterruptedException
     {
-        log.debug("Opening file upload notification receiver");
+        log.debug("Opening MessagingClient");
 
         this.reactorRunner = new ReactorRunner(
-            this.amqpSendHandler.getHostName(),
+            this.cloudToDeviceMessageConnectionHandler.getHostName(),
             "AmqpFileUploadNotificationAndCloudToDeviceFeedbackReceiver",
-            this.amqpSendHandler);
+            this.cloudToDeviceMessageConnectionHandler);
+
+        final CountDownLatch openLatch = new CountDownLatch(1);
+        this.cloudToDeviceMessageConnectionHandler.setOnConnectionOpenedCallback(e ->
+        {
+            //TODO check for exception?
+
+            openLatch.countDown();
+        });
 
         new Thread(() ->
         {
@@ -209,7 +217,7 @@ public final class MessagingClient
                 reactorRunner.run();
 
                 log.trace("EventProcessorClient Amqp reactor stopped, checking that the connection was opened");
-                this.amqpSendHandler.verifyConnectionWasOpened();
+                this.cloudToDeviceMessageConnectionHandler.verifyConnectionWasOpened();
 
                 log.trace("EventProcessorClient  reactor did successfully open the connection, returning without exception");
             }
@@ -224,15 +232,22 @@ public final class MessagingClient
             }
         }).start();
 
-        log.debug("Opened EventProcessorClient");
+        boolean timedOut = !openLatch.await(10 * 1000, TimeUnit.MILLISECONDS);
+
+        if (timedOut)
+        {
+            //TODO
+        }
+
+        log.debug("Opened MessagingClient");
     }
 
-    public void close() throws InterruptedException
+    public synchronized void close() throws InterruptedException
     {
         this.close(STOP_REACTOR_TIMEOUT_MILLISECONDS);
     }
 
-    public void close(int timeoutMilliseconds) throws InterruptedException
+    public synchronized void close(int timeoutMilliseconds) throws InterruptedException
     {
         this.reactorRunner.stop(timeoutMilliseconds);
     }
@@ -297,6 +312,6 @@ public final class MessagingClient
 
     public void sendAsync(String deviceId, String moduleId, Message message, Consumer<SendResult> onMessageSentCallback, Object context)
     {
-        this.amqpSendHandler.sendAsync(deviceId, moduleId, message, onMessageSentCallback, context);
+        this.cloudToDeviceMessageConnectionHandler.sendAsync(deviceId, moduleId, message, onMessageSentCallback, context);
     }
 }

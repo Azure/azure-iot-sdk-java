@@ -79,7 +79,7 @@ public class ReactorRunner
             long startTime = System.currentTimeMillis();
             while (this.handler.isOpen())
             {
-                Thread.sleep(300);
+                Thread.sleep(300); // TODO switch to countdown latch
 
                 if (System.currentTimeMillis() - startTime > timeoutMilliseconds)
                 {

@@ -173,6 +173,15 @@ class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implements Au
         authenticate();
     }
 
+    boolean isOpen()
+    {
+        return this.session != null
+            && this.session.getLocalState() == EndpointState.ACTIVE
+            && this.session.getRemoteState() == EndpointState.ACTIVE
+            && this.cbsSenderLinkHandler != null
+            && this.cbsSenderLinkHandler.isOpen();
+    }
+
     private void authenticate()
     {
         UUID authenticationMessageCorrelationId = UUID.randomUUID();

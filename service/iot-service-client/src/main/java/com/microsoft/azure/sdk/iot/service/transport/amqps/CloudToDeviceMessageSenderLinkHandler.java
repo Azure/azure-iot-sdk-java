@@ -5,30 +5,21 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
-import com.azure.core.credential.AzureSasCredential;
-import com.azure.core.credential.TokenCredential;
-import com.microsoft.azure.sdk.iot.service.ProxyOptions;
-import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.messaging.SendResult;
-import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Binary;
-import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
 import org.apache.qpid.proton.amqp.messaging.Data;
 import org.apache.qpid.proton.amqp.messaging.Properties;
 import org.apache.qpid.proton.amqp.messaging.Section;
-import org.apache.qpid.proton.amqp.messaging.Target;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.engine.Delivery;
+import org.apache.qpid.proton.engine.EndpointState;
 import org.apache.qpid.proton.engine.Event;
 import org.apache.qpid.proton.engine.Sender;
-import org.apache.qpid.proton.engine.Session;
 
-import javax.net.ssl.SSLContext;
-import java.nio.BufferOverflowException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,15 +36,10 @@ import java.util.function.Consumer;
  * Creates and sets SASL authentication for transport
  */
 @Slf4j
-public class AmqpSendHandler extends AmqpConnectionHandler
+public class CloudToDeviceMessageSenderLinkHandler extends SenderLinkHandler
 {
-    private static final String SEND_TAG = "sender";
-    private static final String ENDPOINT = "/messages/devicebound";
     private static final String DEVICE_PATH_FORMAT = "/devices/%s/messages/devicebound";
     private static final String MODULE_PATH_FORMAT = "/devices/%s/modules/%s/messages/devicebound";
-
-    private Sender cloudToDeviceMessageSendingLink;
-    private Session cloudToDeviceMessageSession;
 
     //TODO can this be simplified? This is a lot of state
     private final Queue<org.apache.qpid.proton.message.Message> outgoingMessageQueue = new ConcurrentLinkedQueue<>();
@@ -62,45 +48,9 @@ public class AmqpSendHandler extends AmqpConnectionHandler
     private final Map<Message, Consumer<SendResult>> iotHubMessageToCallbackMap = new ConcurrentHashMap<>();
     private final Map<Message, Object> iotHubMessageToCallbackContextMap = new ConcurrentHashMap<>();
 
-
-    private int nextTag = 0;
-
-    /**
-     * Constructor to set up connection parameters and initialize handshaker for transport
-     *
-     * @param connectionString The IoT Hub connection string
-     * @param iotHubServiceClientProtocol protocol to use
-     * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
-     * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
-     *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.
-     */
-    public AmqpSendHandler(
-            String connectionString,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            ProxyOptions proxyOptions,
-            SSLContext sslContext)
+    public CloudToDeviceMessageSenderLinkHandler(Sender sender, String linkCorrelationId, LinkStateCallback linkStateCallback)
     {
-        super(connectionString, iotHubServiceClientProtocol, proxyOptions, sslContext);
-    }
-
-    public AmqpSendHandler(
-            String hostName,
-            TokenCredential tokenProvider,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            ProxyOptions proxyOptions,
-            SSLContext sslContext)
-    {
-        super(hostName, tokenProvider, iotHubServiceClientProtocol, proxyOptions, sslContext);
-    }
-
-    public AmqpSendHandler(
-            String hostName,
-            AzureSasCredential sasTokenProvider,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            ProxyOptions proxyOptions,
-            SSLContext sslContext)
-    {
-        super(hostName, sasTokenProvider, iotHubServiceClientProtocol, proxyOptions, sslContext);
+        super(sender, linkCorrelationId, linkStateCallback);
     }
 
     public void sendAsync(String deviceId, String moduleId, Message iotHubMessage, Consumer<SendResult> callback, Object context)
@@ -189,6 +139,27 @@ public class AmqpSendHandler extends AmqpConnectionHandler
         event.getReactor().schedule(200, this);
     }
 
+
+    @Override
+    public void onTimerTask(Event event)
+    {
+        sendQueuedMessages();
+
+        // schedule the next onTimerTask event so that messages can be sent again later
+        event.getReactor().schedule(200, this);
+    }
+
+    private void sendQueuedMessages()
+    {
+        org.apache.qpid.proton.message.Message outgoingMessage = this.outgoingMessageQueue.poll();
+        while (outgoingMessage != null)
+        {
+            int deliveryTag = this.sendMessageAndGetDeliveryTag(outgoingMessage);
+            this.unacknowledgedMessages.put(deliveryTag, outgoingMessage);
+            outgoingMessage = this.outgoingMessageQueue.poll();
+        }
+    }
+
     @Override
     public void onDelivery(Event event)
     {
@@ -237,108 +208,29 @@ public class AmqpSendHandler extends AmqpConnectionHandler
         event.getTransport().close_tail();
     }
 
-
     @Override
-    public void onTimerTask(Event event)
+    void close()
     {
-        sendQueuedMessages();
+        super.close();
 
-        // schedule the next onTimerTask event so that messages can be sent again later
-        event.getReactor().schedule(200, this);
-    }
-
-    private void sendQueuedMessages()
-    {
-        org.apache.qpid.proton.message.Message outgoingMessage = this.outgoingMessageQueue.poll();
-        while (outgoingMessage != null)
+        for (org.apache.qpid.proton.message.Message unsentMessage : outgoingMessageQueue)
         {
-
-            log.debug("Sending cloud to device message with correlation id {}", outgoingMessage.getCorrelationId());
-            byte[] msgData = new byte[1024];
-            int length;
-            while (true)
-            {
-                try
-                {
-                    length = outgoingMessage.encode(msgData, 0, msgData.length);
-                    break;
-                }
-                catch (BufferOverflowException e)
-                {
-                    msgData = new byte[msgData.length * 2];
-                }
-            }
-
-            byte[] tag = String.valueOf(this.nextTag).getBytes(StandardCharsets.UTF_8);
-
-            this.cloudToDeviceMessageSendingLink.delivery(tag);
-            this.cloudToDeviceMessageSendingLink.send(msgData, 0, length);
-            this.cloudToDeviceMessageSendingLink.advance();
-
-            this.unacknowledgedMessages.put(nextTag, outgoingMessage);
-
-            //want to avoid negative delivery tags since -1 is the designated failure value
-            if (this.nextTag == Integer.MAX_VALUE || this.nextTag < 0)
-            {
-                this.nextTag = 0;
-            }
-            else
-            {
-                this.nextTag++;
-            }
-
-            outgoingMessage = this.outgoingMessageQueue.poll();
+            //TODO
         }
+
+        for (org.apache.qpid.proton.message.Message unacknowledgedMessages : unacknowledgedMessages.values())
+        {
+            //TODO
+        }
+
+        protonMessageToIotHubMessageMap.clear();
+        iotHubMessageToCallbackMap.clear();
+        iotHubMessageToCallbackContextMap.clear();
     }
 
     @Override
-    public void onAuthenticationSucceeded()
+    protected String getLinkInstanceType()
     {
-        // Only open the session and sending link if this authentication was for the first open. This callback
-        // will be executed again after every proactive renewal, but nothing needs to be done after a proactive renewal
-        if (this.cloudToDeviceMessageSendingLink == null)
-        {
-            // Every session or link could have their own handler(s) if we
-            // wanted simply by adding the handler to the given session
-            // or link
-
-            this.cloudToDeviceMessageSession = this.connection.session();
-
-            // If a link doesn't have an event handler, the events go to
-            // its parent session. If the session doesn't have a handler
-            // the events go to its parent connection. If the connection
-            // doesn't have a handler, the events go to the reactor.
-
-            Map<Symbol, Object> properties = new HashMap<>();
-            properties.put(Symbol.getSymbol(TransportUtils.versionIdentifierKey), TransportUtils.USER_AGENT_STRING);
-            this.cloudToDeviceMessageSession.open();
-
-            this.cloudToDeviceMessageSendingLink = this.cloudToDeviceMessageSession.sender(SEND_TAG);
-            this.cloudToDeviceMessageSendingLink.setProperties(properties);
-            Target t = new Target();
-            t.setAddress(ENDPOINT);
-            this.cloudToDeviceMessageSendingLink.setTarget(t);
-            this.cloudToDeviceMessageSendingLink.open();
-
-            log.debug("Opening sender link for amqp cloud to device messages");
-        }
-    }
-
-    @Override
-    public void closeAsync()
-    {
-        if (this.cloudToDeviceMessageSendingLink != null)
-        {
-            log.debug("Shutdown event occurred, closing cloud to device message sender link");
-            this.cloudToDeviceMessageSendingLink.close();
-        }
-
-        if (this.cloudToDeviceMessageSession != null)
-        {
-            log.debug("Shutdown event occurred, closing cloud to device message sender session");
-            this.cloudToDeviceMessageSession.close();
-        }
-
-        super.closeAsync();
+        return "cloudToDeviceSender";
     }
 }

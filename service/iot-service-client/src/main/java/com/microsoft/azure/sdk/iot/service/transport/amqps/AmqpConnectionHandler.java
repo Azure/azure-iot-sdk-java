@@ -34,6 +34,7 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 @Slf4j
 abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup implements CbsSessionStateCallback
@@ -329,7 +330,10 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
 
     public boolean isOpen()
     {
-        return this.connection.getLocalState() == EndpointState.ACTIVE && this.connection.getRemoteState() == EndpointState.ACTIVE;
+        return this.connection != null
+            && this.connection.getLocalState() == EndpointState.ACTIVE
+            && this.connection.getRemoteState() == EndpointState.ACTIVE
+            && this.cbsSessionHandler.isOpen();
     }
 
     public void closeAsync()

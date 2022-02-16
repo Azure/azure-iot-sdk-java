@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -111,7 +113,7 @@ public class MessageFeedbackProcessorClient
                 options.getSslContext());
     }
 
-    public void start() throws IOException
+    public void start() throws IOException, InterruptedException
     {
         log.debug("Opening file upload notification receiver");
 
@@ -119,6 +121,14 @@ public class MessageFeedbackProcessorClient
             this.amqpEventProcessorHandler.getHostName(),
             "AmqpFileUploadNotificationAndCloudToDeviceFeedbackReceiver",
             this.amqpEventProcessorHandler);
+
+        final CountDownLatch openLatch = new CountDownLatch(1);
+        this.amqpEventProcessorHandler.setOnConnectionOpenedCallback(e ->
+        {
+            //TODO check for exception?
+
+            openLatch.countDown();
+        });
 
         new Thread(() ->
         {
@@ -141,6 +151,13 @@ public class MessageFeedbackProcessorClient
                 }
             }
         }).start();
+
+        boolean timedOut = !openLatch.await(10 * 1000, TimeUnit.MILLISECONDS);
+
+        if (timedOut)
+        {
+            //TODO
+        }
 
         log.debug("Opened EventProcessorClient");
     }

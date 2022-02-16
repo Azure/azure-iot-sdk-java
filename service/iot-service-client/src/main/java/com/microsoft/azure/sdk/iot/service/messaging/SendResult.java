@@ -10,15 +10,15 @@ import lombok.Getter;
 @AllArgsConstructor
 public class SendResult
 {
-    private boolean sentSuccessfully;
+    private final boolean sentSuccessfully;
 
     @Getter
-    private Object context;
+    private final Object context;
 
     @Getter
-    private IotHubException exception;
+    private final IotHubException exception;
 
-    // opting not to use lombok getter so that the naming is better
+    // opting not to use lombok getter so that the naming can be improved
     public boolean wasSentSuccessfully()
     {
         return this.sentSuccessfully;

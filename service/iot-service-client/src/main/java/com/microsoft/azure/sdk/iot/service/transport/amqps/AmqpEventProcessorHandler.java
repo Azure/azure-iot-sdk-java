@@ -13,6 +13,7 @@ import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.Source;
@@ -24,6 +25,7 @@ import org.apache.qpid.proton.engine.Session;
 import javax.net.ssl.SSLContext;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -44,6 +46,9 @@ public class AmqpEventProcessorHandler extends AmqpConnectionHandler implements 
     private FileUploadNotificationReceiverLinkHandler fileUploadNotificationReceiverLinkHandler;
     private MessageFeedbackReceiverLinkHandler messageFeedbackReceiverLinkHandler;
     private Session session;
+
+    @Setter
+    private Consumer<Exception> onConnectionOpenedCallback;
 
     private final Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationReceivedCallback;
     private final Function<FeedbackBatch, AcknowledgementType> messageFeedbackReceivedCallback;
@@ -156,7 +161,9 @@ public class AmqpEventProcessorHandler extends AmqpConnectionHandler implements 
     @Override
     public void onReceiverLinkRemoteOpen()
     {
-        this.linkOpenedRemotely = true;
+        this.linkOpenedRemotely = true; //TODO get rid of this wonky thing
+
+        this.onConnectionOpenedCallback.accept(null);
     }
 
     @Override
