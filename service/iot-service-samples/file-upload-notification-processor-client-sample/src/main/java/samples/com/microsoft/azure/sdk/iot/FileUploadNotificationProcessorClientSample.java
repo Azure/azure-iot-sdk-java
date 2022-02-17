@@ -82,7 +82,7 @@ public class FileUploadNotificationProcessorClientSample
                 }
                 catch (InterruptedException e)
                 {
-                    System.out.println("Interrupted while waiting to send next message. Exiting sample");
+                    System.out.println("Interrupted, exiting sample");
                     System.exit(-1);
                 }
             }
