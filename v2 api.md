@@ -308,92 +308,168 @@ public class MultiplexingClientOptions
   <summary>ServiceClient and Options</summary>
 
 ```java
-public class ServiceClient
+public final class MessagingClient
 {
-    public ServiceClient(
-        String connectionString, 
-        IotHubServiceClientProtocol iotHubServiceClientProtocol);
+    public MessagingClient(String connectionString, IotHubServiceClientProtocol protocol);
 
-    public ServiceClient(
-            String connectionString,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            ServiceClientOptions options);
+    public MessagingClient(String connectionString, IotHubServiceClientProtocol protocol, MessagingClientOptions options);
 
-    public ServiceClient(
-            String hostName,
-            TokenCredential credential,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol);
+    public MessagingClient(String hostName, TokenCredential credential, IotHubServiceClientProtocol protocol);
 
-    public ServiceClient(
-            String hostName,
-            TokenCredential credential,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            ServiceClientOptions options);
+    public MessagingClient(String hostName, TokenCredential credential, IotHubServiceClientProtocol protocol, MessagingClientOptions options);
 
-    public ServiceClient(
-            String hostName,
-            AzureSasCredential azureSasCredential,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol);
+    public MessagingClient(String hostName, AzureSasCredential azureSasCredential, IotHubServiceClientProtocol protocol);
 
-    public ServiceClient(
-            String hostName,
-            AzureSasCredential azureSasCredential,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            ServiceClientOptions options);
+    public MessagingClient(String hostName, AzureSasCredential azureSasCredential, IotHubServiceClientProtocol protocol, MessagingClientOptions options);
 
-    public void send(String deviceId, Message message) throws IOException, IotHubException;
+    private static void commonConstructorSetup();
 
-    public void send(String deviceId, String moduleId, Message message) throws IOException, IotHubException;
+    public synchronized void open() throws IotHubException, IOException, InterruptedException;
 
-    public FeedbackReceiver getFeedbackReceiver(
-        FeedbackMessageReceivedCallback feedbackMessageReceivedCallback);
+    public synchronized void close() throws InterruptedException;
 
-    public FileUploadNotificationReceiver getFileUploadNotificationReceiver(
-        FileUploadNotificationReceivedCallback fileUploadNotificationReceivedCallback);
+    public synchronized void close(int timeoutMilliseconds) throws InterruptedException;
+
+    public void send(String deviceId, Message message) throws IOException, IotHubException, InterruptedException;
+    public void send(String deviceId, Message message, int timeoutMilliseconds) throws IOException, IotHubException, InterruptedException;
+
+    public void send(String deviceId, String moduleId, Message message) throws IOException, IotHubException, InterruptedException;
+    public void send(String deviceId, String moduleId, Message message, int timeoutMilliseconds) throws IOException, IotHubException, InterruptedException;
+
+    public void sendAsync(String deviceId, Message message, Consumer<SendResult> onMessageSentCallback, Object context);
+    public void sendAsync(String deviceId, String moduleId, Message message, Consumer<SendResult> onMessageSentCallback, Object context);
 }
 
 @Builder
-public class ServiceClientOptions
+public final class MessagingClientOptions
 {
     @Getter
     private final ProxyOptions proxyOptions;
 
     @Getter
     private final SSLContext sslContext;
-}
 
-public interface FeedbackMessageReceivedCallback
-{
-    public IotHubMessageResult onFeedbackMessageReceived(FeedbackBatch feedbackBatch);
-}
-
-public class FeedbackReceiver
-{
-    @Setter
     @Getter
-    private ConnectionLostCallback connectionLostCallback;
-    
-    public void open() throws IOException;
-
-    public void close();
+    private final Consumer<ErrorContext> errorProcessor;
 }
 
-public interface FileUploadNotificationReceivedCallback
+public class FileUploadNotificationProcessorClient
 {
-    public IotHubMessageResult onFileUploadNotificationReceived(FileUploadNotification notification);
+    public FileUploadNotificationProcessorClient(
+        String hostName,
+        TokenCredential credential,
+        IotHubServiceClientProtocol iotHubServiceClientProtocol,
+        Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationProcessor);
+
+    public FileUploadNotificationProcessorClient(
+        String hostName,
+        TokenCredential credential,
+        IotHubServiceClientProtocol protocol,
+        Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationProcessor,
+        FileUploadNotificationProcessorClientOptions options);
+
+    public FileUploadNotificationProcessorClient(
+        String hostName,
+        AzureSasCredential sasTokenProvider,
+        IotHubServiceClientProtocol protocol,
+        Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationProcessor);
+
+    public FileUploadNotificationProcessorClient(
+        String hostName,
+        AzureSasCredential sasTokenProvider,
+        IotHubServiceClientProtocol protocol,
+        Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationProcessor,
+        FileUploadNotificationProcessorClientOptions options);
+
+    public FileUploadNotificationProcessorClient(
+        String connectionString,
+        IotHubServiceClientProtocol protocol,
+        Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationProcessor);
+
+    public FileUploadNotificationProcessorClient(
+        String connectionString,
+        IotHubServiceClientProtocol protocol,
+        Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationProcessor,
+        FileUploadNotificationProcessorClientOptions options);
+
+    public synchronized void start() throws IotHubException, IOException, InterruptedException;
+
+    public synchronized void stop() throws InterruptedException;
+
+    public synchronized void stop(int timeoutMilliseconds) throws InterruptedException;
 }
 
-public class FileUploadNotificationReceiver
+@Builder
+public class FileUploadNotificationProcessorClientOptions
 {
-    @Setter
     @Getter
-    private ConnectionLostCallback connectionLostCallback;
-    
-    public void open() throws IOException;
+    private final ProxyOptions proxyOptions;
 
-    public void close();
+    @Getter
+    private final SSLContext sslContext;
+
+    @Getter
+    private final Consumer<ErrorContext> errorProcessor;
 }
 
+public class MessageFeedbackProcessorClient
+{
+    public MessageFeedbackProcessorClient(
+        String hostName,
+        TokenCredential credential,
+        IotHubServiceClientProtocol iotHubServiceClientProtocol,
+        Function<FeedbackBatch, AcknowledgementType> feedbackMessageProcessor);
+
+    public MessageFeedbackProcessorClient(
+        String hostName,
+        TokenCredential credential,
+        IotHubServiceClientProtocol protocol,
+        Function<FeedbackBatch, AcknowledgementType> feedbackMessageProcessor,
+        MessageFeedbackProcessorClientOptions options);
+
+    public MessageFeedbackProcessorClient(
+        String hostName,
+        AzureSasCredential sasTokenProvider,
+        IotHubServiceClientProtocol protocol,
+        Function<FeedbackBatch, AcknowledgementType> feedbackMessageProcessor);
+
+    public MessageFeedbackProcessorClient(
+        String hostName,
+        AzureSasCredential sasTokenProvider,
+        IotHubServiceClientProtocol protocol,
+        Function<FeedbackBatch, AcknowledgementType> feedbackMessageProcessor,
+        MessageFeedbackProcessorClientOptions options);
+
+    public MessageFeedbackProcessorClient(
+        String connectionString,
+        IotHubServiceClientProtocol protocol,
+        Function<FeedbackBatch, AcknowledgementType> feedbackMessageProcessor);
+
+    public MessageFeedbackProcessorClient(
+        String connectionString,
+        IotHubServiceClientProtocol protocol,
+        Function<FeedbackBatch, AcknowledgementType> feedbackMessageProcessor,
+        MessageFeedbackProcessorClientOptions options);
+
+    public synchronized void start() throws IotHubException, IOException, InterruptedException;
+
+    public synchronized void stop() throws InterruptedException;
+
+    public synchronized void stop(int timeoutMilliseconds) throws InterruptedException;
+}
+
+@Builder
+public class MessageFeedbackProcessorClientOptions
+{
+    @Getter
+    private final ProxyOptions proxyOptions;
+
+    @Getter
+    private final SSLContext sslContext;
+
+    @Getter
+    private final Consumer<ErrorContext> errorProcessor;
+}
 ```
 
 </details>
