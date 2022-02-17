@@ -188,4 +188,10 @@ public class MessageFeedbackProcessorClient
 
         log.debug("Closed MessageFeedbackProcessorClient");
     }
+
+    public synchronized boolean isRunning()
+    {
+        //TODO
+        return true;
+    }
 }

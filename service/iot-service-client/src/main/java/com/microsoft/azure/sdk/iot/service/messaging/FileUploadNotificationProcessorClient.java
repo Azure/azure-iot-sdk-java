@@ -172,6 +172,12 @@ public class FileUploadNotificationProcessorClient
         log.debug("Opened FileUploadNotificationProcessorClient");
     }
 
+    public synchronized boolean isRunning()
+    {
+        //TODO
+        return true;
+    }
+
     public synchronized void stop() throws InterruptedException
     {
         this.stop(STOP_REACTOR_TIMEOUT_MILLISECONDS);

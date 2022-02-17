@@ -397,6 +397,8 @@ public class FileUploadNotificationProcessorClient
     public synchronized void stop() throws InterruptedException;
 
     public synchronized void stop(int timeoutMilliseconds) throws InterruptedException;
+
+    public synchronized boolean isRunning();
 }
 
 @Builder
@@ -456,6 +458,8 @@ public class MessageFeedbackProcessorClient
     public synchronized void stop() throws InterruptedException;
 
     public synchronized void stop(int timeoutMilliseconds) throws InterruptedException;
+    
+    public synchronized boolean isRunning();
 }
 
 @Builder
