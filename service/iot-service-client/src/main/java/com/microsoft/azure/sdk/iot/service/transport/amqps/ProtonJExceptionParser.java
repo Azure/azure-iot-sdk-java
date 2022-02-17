@@ -5,10 +5,14 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
 import lombok.Getter;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 import org.apache.qpid.proton.engine.Endpoint;
 import org.apache.qpid.proton.engine.Event;
+
+import java.io.IOException;
 
 @Getter
 public class ProtonJExceptionParser
@@ -21,6 +25,23 @@ public class ProtonJExceptionParser
     public ProtonJExceptionParser(Event event)
     {
         getTransportExceptionFromProtonEndpoints(event.getSender(), event.getReceiver(), event.getConnection(), event.getTransport(), event.getSession(), event.getLink());
+    }
+
+    public IotHubException getIotHubException()
+    {
+        if (error.equals("amqp:unauthorized-access"))
+        {
+            return new IotHubUnathorizedException(errorDescription);
+        }
+
+        //TODO all the other possible exceptions?
+        return null;
+    }
+
+    public IOException getNetworkException()
+    {
+        //TODO all the other possible exceptions?
+        return new IOException(errorDescription);
     }
 
     private ErrorCondition getErrorConditionFromEndpoint(Endpoint endpoint)

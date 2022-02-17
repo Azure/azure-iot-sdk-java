@@ -193,8 +193,14 @@ public final class MessagingClient
         log.debug("Initialized a MessagingClient instance using SDK version {}", TransportUtils.serviceVersion);
     }
 
-    public synchronized void open() throws IOException, InterruptedException
+    public synchronized void open() throws IotHubException, IOException, InterruptedException
     {
+        if (this.reactorRunner != null && this.cloudToDeviceMessageConnectionHandler != null && this.cloudToDeviceMessageConnectionHandler.isOpen())
+        {
+            //already open
+            return;
+        }
+
         log.debug("Opening MessagingClient");
 
         this.reactorRunner = new ReactorRunner(
@@ -221,7 +227,7 @@ public final class MessagingClient
 
                 log.trace("EventProcessorClient  reactor did successfully open the connection, returning without exception");
             }
-            catch (IOException e)
+            catch (IOException | IotHubException e)
             {
                 log.warn("EventProcessorClient Amqp connection encountered an exception", e);
 
@@ -249,7 +255,13 @@ public final class MessagingClient
 
     public synchronized void close(int timeoutMilliseconds) throws InterruptedException
     {
+        if (this.reactorRunner == null)
+        {
+            return;
+        }
+
         this.reactorRunner.stop(timeoutMilliseconds);
+        this.reactorRunner = null;
     }
 
     public void send(String deviceId, Message message) throws IOException, IotHubException, InterruptedException

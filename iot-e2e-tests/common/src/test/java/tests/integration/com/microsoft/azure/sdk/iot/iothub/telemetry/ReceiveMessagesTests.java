@@ -9,6 +9,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.telemetry;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.ModuleClient;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
 import com.microsoft.azure.sdk.iot.service.messaging.FeedbackBatch;
 import com.microsoft.azure.sdk.iot.service.messaging.FeedbackRecord;
@@ -115,7 +116,7 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
         testInstance.identity.getClient().close();
     }
 
-    private void waitForFeedbackMessage(String expectedMessageId) throws InterruptedException, IOException
+    private void waitForFeedbackMessage(String expectedMessageId) throws InterruptedException, IOException, IotHubException
     {
         final Success feedbackReceived = new Success();
 

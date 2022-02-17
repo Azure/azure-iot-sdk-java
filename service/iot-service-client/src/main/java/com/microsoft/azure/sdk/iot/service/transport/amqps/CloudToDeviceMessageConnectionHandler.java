@@ -139,9 +139,9 @@ public class CloudToDeviceMessageConnectionHandler extends AmqpConnectionHandler
 
     public void sendAsync(String deviceId, String moduleId, Message iotHubMessage, Consumer<SendResult> callback, Object context)
     {
-        if (this.cloudToDeviceMessageSenderLinkHandler == null)
+        if (!isOpen())
         {
-            throw new IllegalStateException("Must open messagingClient before sending");
+            throw new IllegalStateException("Client is currently closed. Must open messagingClient before sending.");
         }
 
         this.cloudToDeviceMessageSenderLinkHandler.sendAsync(deviceId, moduleId, iotHubMessage, callback, context);

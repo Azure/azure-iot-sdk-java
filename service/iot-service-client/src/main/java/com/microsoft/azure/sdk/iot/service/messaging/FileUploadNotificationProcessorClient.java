@@ -7,6 +7,7 @@ import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpEventProcessorHandler;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.ReactorRunner;
 import lombok.extern.slf4j.Slf4j;
@@ -116,9 +117,15 @@ public class FileUploadNotificationProcessorClient
                 options.getSslContext());
     }
 
-    public void start() throws IOException, InterruptedException
+    public synchronized void start() throws IotHubException, IOException, InterruptedException
     {
-        log.debug("Opening file upload notification receiver");
+        if (this.reactorRunner != null && this.amqpEventProcessorHandler != null && this.amqpEventProcessorHandler.isOpen())
+        {
+            //already open
+            return;
+        }
+
+        log.debug("Opening FileUploadNotificationProcessorClient");
 
         this.reactorRunner = new ReactorRunner(
             this.amqpEventProcessorHandler.getHostName(),
@@ -144,7 +151,7 @@ public class FileUploadNotificationProcessorClient
 
                 log.trace("EventProcessorClient  reactor did successfully open the connection, returning without exception");
             }
-            catch (IOException e)
+            catch (IOException | IotHubException e)
             {
                 log.warn("EventProcessorClient Amqp connection encountered an exception", e);
 
@@ -162,20 +169,26 @@ public class FileUploadNotificationProcessorClient
             //TODO
         }
 
-        log.debug("Opened EventProcessorClient");
+        log.debug("Opened FileUploadNotificationProcessorClient");
     }
 
-    public void stop() throws InterruptedException
+    public synchronized void stop() throws InterruptedException
     {
         this.stop(STOP_REACTOR_TIMEOUT_MILLISECONDS);
     }
 
-    public void stop(int timeoutMilliseconds) throws InterruptedException
+    public synchronized void stop(int timeoutMilliseconds) throws InterruptedException
     {
-        log.debug("Closing EventProcessorClient");
+        if (this.reactorRunner == null)
+        {
+            return;
+        }
+
+        log.debug("Closing FileUploadNotificationProcessorClient");
 
         this.reactorRunner.stop(timeoutMilliseconds);
+        this.reactorRunner = null;
 
-        log.debug("Closed EventProcessorClient ");
+        log.debug("Closed FileUploadNotificationProcessorClient");
     }
 }

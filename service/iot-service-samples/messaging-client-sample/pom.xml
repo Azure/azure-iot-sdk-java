@@ -1,24 +1,16 @@
-<!-- Copyright (c) Microsoft. All rights reserved. --><!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. -->
-<project>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>com.microsoft.azure.sdk.iot.samples</groupId>
         <artifactId>iot-service-samples</artifactId>
+        <groupId>com.microsoft.azure.sdk.iot.samples</groupId>
         <version>1.18.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.microsoft.azure.sdk.iot.samples.service</groupId>
-    <artifactId>service-client-sample</artifactId>
+
+    <artifactId>messaging-client-sample</artifactId>
     <version>1.18.0</version>
-    <name>Service Client Sample</name>
-    <developers>
-        <developer>
-            <id>microsoft</id>
-            <name>Microsoft</name>
-        </developer>
-    </developers>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
     <build>
         <plugins>
             <plugin>
@@ -29,7 +21,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>samples.com.microsoft.azure.sdk.iot.ServiceClientSample</mainClass>
+                            <mainClass>samples.com.microsoft.azure.sdk.iot.MessagingClientSample</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -45,4 +37,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>

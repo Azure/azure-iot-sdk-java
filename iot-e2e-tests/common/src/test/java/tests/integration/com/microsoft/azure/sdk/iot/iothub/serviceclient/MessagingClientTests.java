@@ -7,6 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
@@ -352,7 +353,7 @@ public class MessagingClientTests extends IntegrationTest
     @Ignore // The IoT Hub instance we use for this test is currently offline, so this test cannot be run
     @Test
     @ContinuousIntegrationTest
-    public void serviceClientValidatesRemoteCertificateWhenSendingTelemetry() throws IOException, InterruptedException
+    public void serviceClientValidatesRemoteCertificateWhenSendingTelemetry() throws IOException, InterruptedException, IotHubException
     {
         boolean expectedExceptionWasCaught = false;
 

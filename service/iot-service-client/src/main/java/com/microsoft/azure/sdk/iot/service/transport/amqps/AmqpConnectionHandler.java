@@ -264,11 +264,18 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
      * @throws IOException if an exception was encountered while openinging the AMQP connection. The encountered
      * exception will be the inner exception
      */
-    public void verifyConnectionWasOpened() throws IOException
+    public void verifyConnectionWasOpened() throws IOException, IotHubException
     {
         if (this.protonJExceptionParser != null)
         {
-            throw new IOException("Encountered exception during amqp connection: " + protonJExceptionParser.getError() + " with description " + protonJExceptionParser.getErrorDescription());
+            if (this.protonJExceptionParser.getIotHubException() != null)
+            {
+                throw this.protonJExceptionParser.getIotHubException();
+            }
+            else if (this.protonJExceptionParser.getNetworkException() != null)
+            {
+                throw this.protonJExceptionParser.getNetworkException();
+            }
         }
 
         if (this.savedException != null)

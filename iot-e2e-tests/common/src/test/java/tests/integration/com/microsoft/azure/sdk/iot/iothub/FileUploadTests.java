@@ -277,7 +277,7 @@ public class FileUploadTests extends IntegrationTest
         tearDownDeviceClient(deviceClient);
     }
 
-    private void waitForFileUploadNotifications(String expectedDeviceId, List<String> expectedBlobNames) throws InterruptedException, IOException
+    private void waitForFileUploadNotifications(String expectedDeviceId, List<String> expectedBlobNames) throws InterruptedException, IOException, IotHubException
     {
         Function<FileUploadNotification, AcknowledgementType> notificationProcessor = notification ->
         {
