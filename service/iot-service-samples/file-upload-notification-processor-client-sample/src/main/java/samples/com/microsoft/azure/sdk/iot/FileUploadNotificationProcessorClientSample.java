@@ -43,11 +43,9 @@ public class FileUploadNotificationProcessorClientSample
 
     public static void main(String[] args)
     {
-        AtomicBoolean fileUploadNotificationProcessorClientIsOpen = new AtomicBoolean(false);
         Consumer<ErrorContext> errorProcessor = errorContext ->
         {
             System.out.println("Encountered an error while receiving events " + errorContext.getException().getMessage());
-            fileUploadNotificationProcessorClientIsOpen.set(false);
         };
 
         Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationProcessor = notification ->
@@ -75,9 +73,8 @@ public class FileUploadNotificationProcessorClientSample
         {
             //TODO re-opening after a disconnection event succeeds even with no network? Needs more debugging
             openFileUploadNotificationProcessorClientWithRetry(fileUploadNotificationProcessorClient);
-            fileUploadNotificationProcessorClientIsOpen.set(true);
 
-            while (fileUploadNotificationProcessorClientIsOpen.get())
+            while (fileUploadNotificationProcessorClient.isRunning())
             {
                 try
                 {
