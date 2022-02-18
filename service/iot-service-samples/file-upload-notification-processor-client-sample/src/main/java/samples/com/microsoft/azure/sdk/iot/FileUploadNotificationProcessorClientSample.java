@@ -97,7 +97,6 @@ public class FileUploadNotificationProcessorClientSample
             {
                 System.out.println("Attempting to open the fileUploadNotificationProcessorClient");
                 fileUploadNotificationProcessorClient.start();
-
                 System.out.println("Successfully opened the fileUploadNotificationProcessorClient");
                 return;
             }

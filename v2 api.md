@@ -322,8 +322,6 @@ public final class MessagingClient
 
     public MessagingClient(String hostName, AzureSasCredential azureSasCredential, IotHubServiceClientProtocol protocol, MessagingClientOptions options);
 
-    private static void commonConstructorSetup();
-
     public synchronized void open() throws IotHubException, IOException, InterruptedException;
 
     public synchronized void close() throws InterruptedException;
