@@ -40,6 +40,7 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Test class containing all tests to be run for PnP.
@@ -49,6 +50,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(Parameterized.class)
 public class TwinPnPTests extends IntegrationTest
 {
+    private static final int MODEL_ID_PROPAGATION_TIMEOUT_MILLIS = 60 * 1000; // 1 minute
     protected static String iotHubConnectionString = "";
     private static RegistryClient registryClient;
     private String ModelId;
@@ -236,17 +238,29 @@ public class TwinPnPTests extends IntegrationTest
         // arrange
         this.testInstance.setup();
 
-        // act
-        if (testInstance.clientType == ClientType.DEVICE_CLIENT)
+        // immediately checking if the object returned by the get twin operation has the expected modelId sometimes fails
+        // due to propagation time variation. Instead, check until it matches or the test times out to allow for longer
+        // model id propagation times;
+        long startTime = System.currentTimeMillis();
+        while (System.currentTimeMillis() - startTime <= MODEL_ID_PROPAGATION_TIMEOUT_MILLIS)
         {
-            testInstance.twin = testInstance.twinServiceClient.get(testInstance.identity.getDeviceId());
-        }
-        else
-        {
-            testInstance.twin = testInstance.twinServiceClient.get(testInstance.identity.getDeviceId(), ((Module)testInstance.identity).getId());
+            // act
+            if (testInstance.clientType == ClientType.DEVICE_CLIENT)
+            {
+                testInstance.twin = testInstance.twinServiceClient.get(testInstance.identity.getDeviceId());
+            }
+            else
+            {
+                testInstance.twin = testInstance.twinServiceClient.get(testInstance.identity.getDeviceId(), ((Module)testInstance.identity).getId());
+            }
+
+            // assert
+            if (ModelId.equals(testInstance.twin.getModelId()))
+            {
+                return;
+            }
         }
 
-        // assert
-        assertEquals(ModelId, testInstance.twin.getModelId());
+        fail("Timed out waiting for the model id to be present in the twin service");
     }
 }

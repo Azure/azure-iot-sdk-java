@@ -233,7 +233,7 @@ public class AzureSasCredentialSample
             fileUploadNotificationProcessorClient.stop();
             messageFeedbackProcessorClient.stop();
         }
-        catch (IOException | InterruptedException e)
+        catch (IOException | IotHubException | InterruptedException e)
         {
             System.err.println("Failed to listen for feedback messages");
             e.printStackTrace();

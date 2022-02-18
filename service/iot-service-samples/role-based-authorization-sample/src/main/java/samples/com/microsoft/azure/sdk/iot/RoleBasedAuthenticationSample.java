@@ -223,7 +223,7 @@ public class RoleBasedAuthenticationSample
             fileUploadNotificationProcessorClient.stop();
             messageFeedbackProcessorClient.stop();
         }
-        catch (IOException e)
+        catch (IOException | IotHubException e)
         {
             System.err.println("Failed to listen for feedback messages");
             e.printStackTrace();
