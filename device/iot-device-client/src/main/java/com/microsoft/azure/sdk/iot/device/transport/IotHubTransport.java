@@ -1474,7 +1474,8 @@ public class IotHubTransport implements IotHubListener
 
             if (statusCode != IotHubStatusCode.OK_EMPTY && statusCode != IotHubStatusCode.OK)
             {
-                this.handleMessageException(this.inProgressPackets.remove(message.getMessageId()), IotHubStatusCode.getConnectionStatusException(statusCode, ""));
+                this.inProgressPackets.remove(message.getMessageId());
+                this.handleMessageException(packet, IotHubStatusCode.getConnectionStatusException(statusCode, ""));
             }
             else if (!messageAckExpected)
             {
@@ -1485,21 +1486,16 @@ public class IotHubTransport implements IotHubListener
         catch (TransportException transportException)
         {
             log.warn("Encountered exception while sending message with correlation id {}", message.getCorrelationId(), transportException);
-            IotHubTransportPacket outboundPacket;
 
             if (messageAckExpected)
             {
                 synchronized (this.inProgressMessagesLock)
                 {
-                    outboundPacket = this.inProgressPackets.remove(message.getMessageId());
+                    this.inProgressPackets.remove(message.getMessageId());
                 }
             }
-            else
-            {
-                outboundPacket = packet;
-            }
 
-            this.handleMessageException(outboundPacket, transportException);
+            this.handleMessageException(packet, transportException);
         }
     }
 
