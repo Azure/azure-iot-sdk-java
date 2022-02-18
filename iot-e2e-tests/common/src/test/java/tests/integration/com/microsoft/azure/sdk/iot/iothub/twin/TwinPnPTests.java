@@ -257,7 +257,7 @@ public class TwinPnPTests extends IntegrationTest
             // assert
             if (ModelId.equals(testInstance.twin.getModelId()))
             {
-                return;
+                return; // conditions met, exit test successfully
             }
         }
 

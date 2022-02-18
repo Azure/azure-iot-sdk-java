@@ -71,6 +71,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static junit.framework.TestCase.fail;
@@ -82,6 +84,7 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Parameterized.class)
 public class DigitalTwinClientTests extends IntegrationTest
 {
+    private static final int TWIN_PROPAGATION_TIMEOUT_MILLIS = 60 * 1000;
     private static final String IOTHUB_CONNECTION_STRING = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.IOTHUB_CONNECTION_STRING_ENV_VAR_NAME);
     private static RegistryClient registryClient;
     private String deviceId;
@@ -418,17 +421,28 @@ public class DigitalTwinClientTests extends IntegrationTest
         // Add properties at root level - conditional update with max overload
         UpdateOperationUtility updateOperationUtility = new UpdateOperationUtility().appendAddPropertyOperation(newPropertyPath, newPropertyValue);
         digitalTwinClient.updateDigitalTwinWithResponse(deviceId, updateOperationUtility.getUpdateOperations(), optionsWithEtag);
-        BasicDigitalTwin digitalTwin = digitalTwinClient.getDigitalTwinWithResponse(deviceId, BasicDigitalTwin.class).body();
 
-        // assert
-        assertEquals(E2ETestConstants.THERMOSTAT_MODEL_ID, digitalTwin.getMetadata().getModelId());
-        assertTrue(digitalTwin.getMetadata().getWriteableProperties().containsKey(newProperty));
-        assertEquals(newPropertyValue, digitalTwin.getMetadata().getWriteableProperties().get(newProperty).getDesiredValue());
+        long startTime = System.currentTimeMillis();
+        while (System.currentTimeMillis() - startTime <= TWIN_PROPAGATION_TIMEOUT_MILLIS)
+        {
+            BasicDigitalTwin digitalTwin = digitalTwinClient.getDigitalTwinWithResponse(deviceId, BasicDigitalTwin.class).body();
+
+            // assert
+            if (E2ETestConstants.THERMOSTAT_MODEL_ID.equals(digitalTwin.getMetadata().getModelId())
+                && digitalTwin.getMetadata().getWriteableProperties().containsKey(newProperty)
+                && newPropertyValue.equals(digitalTwin.getMetadata().getWriteableProperties().get(newProperty).getDesiredValue()))
+            {
+                return; // conditions met, exit test successfully
+            }
+        }
+
+        fail("Timed out waiting for the model id to be present in the twin service");
     }
 
     @Test
     @StandardTierHubOnlyTest
-    public void invokeRootLevelCommand() throws IOException {
+    public void invokeRootLevelCommand() throws IOException, InterruptedException
+    {
         // arrange
         String commandName = "getMaxMinReport";
         String commandInput = "\"" +ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(5).format(DateTimeFormatter.ISO_DATE_TIME) + "\"";
@@ -453,7 +467,15 @@ public class DigitalTwinClientTests extends IntegrationTest
         };
 
         // IotHub event callback
-        IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) -> {};
+        final CountDownLatch subscribedToMethodsLatch = new CountDownLatch(1);
+        IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) ->
+        {
+            subscribedToMethodsLatch.countDown();
+        };
+
+        deviceClient.subscribeToMethodsAsync(methodCallback, commandName, iotHubEventCallback, commandName);
+
+        assertTrue("Timed out waiting for client to subscribe to methods", subscribedToMethodsLatch.await(1, TimeUnit.MINUTES));
 
         deviceClient.subscribeToMethodsAsync(methodCallback, commandName, iotHubEventCallback, commandName);
 
