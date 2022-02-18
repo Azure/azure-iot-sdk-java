@@ -992,6 +992,8 @@ public class MultiplexingClientTests extends IntegrationTest
 
         public boolean clientClosedGracefully = false;
 
+        public boolean clientClosedUnexpectedly = false;
+
         @Override
         public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
         {
@@ -1009,6 +1011,8 @@ public class MultiplexingClientTests extends IntegrationTest
                 {
                     clientClosedGracefully = true;
                 }
+
+                clientClosedUnexpectedly = true;
             }
             else if (status == IotHubConnectionStatus.DISCONNECTED_RETRYING)
             {
@@ -1556,8 +1560,6 @@ public class MultiplexingClientTests extends IntegrationTest
                 }
             }
 
-            assertFalse(connectionStatusChangeTrackers[0].isOpen);
-
             // Verify that the other devices on the multiplexed connection were unaffected
             for (int i = 1; i < DEVICE_MULTIPLEX_COUNT; i++)
             {
@@ -1626,7 +1628,7 @@ public class MultiplexingClientTests extends IntegrationTest
             // Verify that the other devices on the multiplexed connection were unaffected
             for (int i = 1; i < DEVICE_MULTIPLEX_COUNT; i++)
             {
-                assertTrue(connectionStatusChangeTrackers[i].isOpen);
+                assertFalse(connectionStatusChangeTrackers[i].clientClosedUnexpectedly);
             }
 
             // Verify that the multiplexed connection itself was unaffected
