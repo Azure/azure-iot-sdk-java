@@ -238,9 +238,9 @@ public class TwinPnPTests extends IntegrationTest
         // arrange
         this.testInstance.setup();
 
-        // immediately checking if the object returned by the get twin operation has the expected modelId sometimes fails
-        // due to propagation time variation. Instead, check until it matches or the test times out to allow for longer
-        // model id propagation times;
+        // Immediately checking if the object returned by the get twin operation has the expected modelId may fail
+        // if the service is slow to propagate the model id to the twin service. To account for this potential delay,
+        // check until it matches or the test times out to allow for longer model id propagation times
         long startTime = System.currentTimeMillis();
         while (System.currentTimeMillis() - startTime <= MODEL_ID_PROPAGATION_TIMEOUT_MILLIS)
         {
