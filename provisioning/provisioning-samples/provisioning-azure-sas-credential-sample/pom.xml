@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>provisioning-samples</artifactId>
+        <groupId>com.microsoft.azure.sdk.iot.provisioning.samples</groupId>
+        <version>1.8.1</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>provisioning-azure-sas-credential-sample</artifactId>
+    <version>1.8.1</version>
+    <name>Provisioning Azure SAS Credential sample</name>
+    <developers>
+        <developer>
+            <id>microsoft</id>
+            <name>Microsoft</name>
+        </developer>
+    </developers>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
+            <artifactId>${provisioning-service-client-artifact-id}</artifactId>
+            <version>${provisioning-service-client-version}</version>
+        </dependency>
+    </dependencies>
+</project>
