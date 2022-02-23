@@ -147,7 +147,7 @@ public class FileUploadNotificationProcessorClient
 
         this.reactorRunner = new ReactorRunner(
             this.amqpEventProcessorHandler.getHostName(),
-            "AmqpFileUploadNotificationAndCloudToDeviceFeedbackReceiver",
+            "FileUploadNotificationProcessor",
             this.amqpEventProcessorHandler);
 
         final CountDownLatch openLatch = new CountDownLatch(1);

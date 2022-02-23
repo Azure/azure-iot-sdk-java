@@ -225,7 +225,7 @@ public final class MessagingClient
 
         this.reactorRunner = new ReactorRunner(
             this.cloudToDeviceMessageConnectionHandler.getHostName(),
-            "AmqpFileUploadNotificationAndCloudToDeviceFeedbackReceiver",
+            "MessagingClient",
             this.cloudToDeviceMessageConnectionHandler);
 
         final CountDownLatch openLatch = new CountDownLatch(1);

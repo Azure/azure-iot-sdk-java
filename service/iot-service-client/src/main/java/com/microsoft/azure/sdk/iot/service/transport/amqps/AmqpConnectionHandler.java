@@ -276,6 +276,8 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
     @Override
     public void onConnectionRemoteClose(Event event)
     {
+        super.onConnectionRemoteClose(event);
+
         if (this.onConnectionClosedCallback != null)
         {
             this.onConnectionClosedCallback.run();
@@ -345,12 +347,6 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         ((TransportInternal) transport).addTransportLayer(proxy);
     }
 
-    @Override
-    public void onAuthenticationFailed(IotHubException e)
-    {
-        this.protonJExceptionParser = new ProtonJExceptionParser(e);
-    }
-
     public boolean isOpen()
     {
         return this.connection != null
@@ -363,16 +359,22 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
     {
         if (this.connection != null)
         {
-            log.debug("Shutdown event occurred, closing file upload notification receiver link");
+            log.debug("Shutdown event occurred, closing amqp connection");
             this.connection.close();
         }
 
         if (this.cbsSessionHandler != null)
         {
-            log.debug("Shutdown event occurred, closing file upload notification receiver link");
+            log.debug("Shutdown event occurred, closing cbs session");
             this.cbsSessionHandler.close();
         }
 
         this.onConnectionClosedCallback = onConnectionClosedCallback;
+    }
+
+    @Override
+    public void onAuthenticationFailed(IotHubException e)
+    {
+        this.protonJExceptionParser = new ProtonJExceptionParser(e);
     }
 }

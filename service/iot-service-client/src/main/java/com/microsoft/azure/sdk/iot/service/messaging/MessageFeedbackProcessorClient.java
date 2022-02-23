@@ -147,7 +147,7 @@ public class MessageFeedbackProcessorClient
 
         this.reactorRunner = new ReactorRunner(
             this.amqpEventProcessorHandler.getHostName(),
-            "AmqpFileUploadNotificationAndCloudToDeviceFeedbackReceiver",
+            "MessageFeedbackProcessor",
             this.amqpEventProcessorHandler);
 
         final CountDownLatch openLatch = new CountDownLatch(1);
