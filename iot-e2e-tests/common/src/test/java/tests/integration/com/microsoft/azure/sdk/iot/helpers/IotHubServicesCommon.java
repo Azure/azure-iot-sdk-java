@@ -73,7 +73,10 @@ public class IotHubServicesCommon
                     long startTime = System.currentTimeMillis();
                     while (!actualStatusUpdatesContainsStatus(statusUpdates, IotHubConnectionStatus.DISCONNECTED_RETRYING))
                     {
-                        Thread.sleep(300);
+                        Thread.sleep(1000);
+
+                        // send the fault injection message again in case it wasn't sent successfully before
+                        sendMessageAndWaitForResponse(client, messageAndResult, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
 
                         if (System.currentTimeMillis() - startTime > ERROR_INJECTION_MESSAGE_EFFECT_TIMEOUT_MILLISECONDS)
                         {
