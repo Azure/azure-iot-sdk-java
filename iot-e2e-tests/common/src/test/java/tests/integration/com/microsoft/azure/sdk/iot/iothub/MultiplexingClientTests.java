@@ -1563,7 +1563,6 @@ public class MultiplexingClientTests extends IntegrationTest
             for (int i = 1; i < DEVICE_MULTIPLEX_COUNT; i++)
             {
                 assertFalse(connectionStatusChangeTrackers[i].clientClosedUnexpectedly);
-                assertTrue(connectionStatusChangeTrackers[i].isOpen);
             }
 
             // Verify that the multiplexed connection itself was unaffected

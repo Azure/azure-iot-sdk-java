@@ -75,6 +75,11 @@ public class ReactorRunner
 
     public void stop(int timeoutMilliseconds) throws InterruptedException
     {
+        if (timeoutMilliseconds < 0)
+        {
+            throw new IllegalArgumentException("timeoutMilliseconds must greater than or equal to 0");
+        }
+
         try
         {
             final CountDownLatch onReactorClosedLatch = new CountDownLatch(1);
