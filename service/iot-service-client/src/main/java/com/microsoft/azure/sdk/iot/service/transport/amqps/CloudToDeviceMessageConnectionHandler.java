@@ -124,15 +124,13 @@ public class CloudToDeviceMessageConnectionHandler extends AmqpConnectionHandler
     @Override
     public void onSenderLinkRemoteOpen()
     {
-        this.linkOpenedRemotely = true; //TODO get rid of this wonky thing
-
         this.onConnectionOpenedCallback.run();
     }
 
     @Override
     public void onReceiverLinkRemoteOpen()
     {
-        //TODO nothing needed, right?
+        // no action needed. This connection doesn't open any receiver links other than the CBS link which is handled elsewhere.
     }
 
     public boolean isOpen()

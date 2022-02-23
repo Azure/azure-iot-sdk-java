@@ -161,15 +161,16 @@ public class EventReceivingConnectionHandler extends AmqpConnectionHandler imple
     @Override
     public void onSenderLinkRemoteOpen()
     {
-        //TODO nothing needed, right?
+        // no action needed. This connection doesn't open any sender links other than the CBS link which is handled elsewhere.
     }
 
     @Override
     public void onReceiverLinkRemoteOpen()
     {
-        this.linkOpenedRemotely = true; //TODO get rid of this wonky thing
-
-        this.onConnectionOpenedCallback.run();
+        if (this.onConnectionOpenedCallback != null)
+        {
+            this.onConnectionOpenedCallback.run();
+        }
     }
 
     @Override

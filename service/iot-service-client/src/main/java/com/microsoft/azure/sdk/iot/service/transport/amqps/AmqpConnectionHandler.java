@@ -46,9 +46,6 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
     private static final String WEB_SOCKET_QUERY = "iothub-no-client-cert=true";
     private static final int MAX_MESSAGE_PAYLOAD_SIZE = 65 * 1024; //max IoT Hub cloud to device message size is 65 kb, so amqp websocket layer should buffer at most that much space
 
-    private boolean connectionOpenedRemotely;
-    private boolean sessionOpenedRemotely;
-    protected boolean linkOpenedRemotely;
     private String connectionId;
     private final int keepAliveIntervalSeconds;
 
@@ -148,9 +145,6 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         this.proxyOptions = proxyOptions;
         this.sslContext = sslContext; // if null, a default SSLContext will be generated for the user
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
-        this.connectionOpenedRemotely = false;
-        this.sessionOpenedRemotely = false;
-        this.linkOpenedRemotely = false;
         this.connectionId = UUID.randomUUID().toString();
 
         if (keepAliveIntervalSeconds <= 0)
@@ -237,14 +231,12 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
     public void onLinkRemoteOpen(Event event)
     {
         super.onLinkRemoteOpen(event);
-        this.linkOpenedRemotely = true;
     }
 
     @Override
     public void onSessionRemoteOpen(Event event)
     {
         super.onSessionRemoteOpen(event);
-        this.sessionOpenedRemotely = true;
     }
 
     @Override
@@ -252,8 +244,6 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
     {
         super.onConnectionRemoteOpen(event);
         this.connection = event.getConnection();
-
-        this.connectionOpenedRemotely = true;
 
         // Once the connection opens, get that connection and make it create a new session that will serve as the CBS
         // session where authentication will take place.
@@ -306,11 +296,6 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
             {
                 throw this.protonJExceptionParser.getNetworkException();
             }
-        }
-
-        if (!this.connectionOpenedRemotely || !this.sessionOpenedRemotely || !this.linkOpenedRemotely)
-        {
-            throw new IOException("Amqp connection timed out waiting for service to respond");
         }
     }
 
