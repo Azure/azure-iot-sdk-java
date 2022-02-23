@@ -10,13 +10,13 @@ import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient.ServiceClientTests;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient.MessagingClientTests;
 
 @TestGroup13
 @RunWith(Parameterized.class)
-public class ServiceClientAndroidRunner extends ServiceClientTests
+public class MessagingClientAndroidRunner extends MessagingClientTests
 {
-    public ServiceClientAndroidRunner(IotHubServiceClientProtocol protocol)
+    public MessagingClientAndroidRunner(IotHubServiceClientProtocol protocol)
     {
         super(protocol);
     }
