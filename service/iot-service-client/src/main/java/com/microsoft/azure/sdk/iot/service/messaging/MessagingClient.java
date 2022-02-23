@@ -328,8 +328,13 @@ public final class MessagingClient
 
         Consumer<SendResult> onMessageAcknowledgedCallback = sendResult ->
         {
-            if (!sendResult.wasSentSuccessfully())
+            if (sendResult.wasSentSuccessfully())
             {
+                log.trace("Message acknowledged callback executed for cloud to device message with correlation id {} that was successfully sent.");
+            }
+            else
+            {
+                log.trace("Message acknowledged callback executed for cloud to device message with correlation id {} that failed to send.");
                 exception.set(sendResult.getException());
             }
 

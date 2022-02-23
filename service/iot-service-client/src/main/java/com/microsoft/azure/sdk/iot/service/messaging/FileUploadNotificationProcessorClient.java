@@ -6,7 +6,7 @@ package com.microsoft.azure.sdk.iot.service.messaging;
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpEventProcessorHandler;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.EventReceivingConnectionHandler;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.ReactorRunner;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,7 +24,7 @@ public class FileUploadNotificationProcessorClient
     private static final int START_REACTOR_TIMEOUT_MILLISECONDS = 60 * 1000; // 60 seconds
     private static final int STOP_REACTOR_TIMEOUT_MILLISECONDS = 60 * 1000; // 60 seconds
 
-    private final AmqpEventProcessorHandler amqpEventProcessorHandler;
+    private final EventReceivingConnectionHandler eventReceivingConnectionHandler;
     private final Consumer<ErrorContext> errorProcessor; // may be null if user doesn't provide one
 
     private ReactorRunner reactorRunner;
@@ -48,8 +48,8 @@ public class FileUploadNotificationProcessorClient
         Objects.requireNonNull(options, "Options cannot be null");
 
         this.errorProcessor = options.getErrorProcessor();
-        this.amqpEventProcessorHandler =
-            new AmqpEventProcessorHandler(
+        this.eventReceivingConnectionHandler =
+            new EventReceivingConnectionHandler(
                 hostName,
                 credential,
                 protocol,
@@ -80,8 +80,8 @@ public class FileUploadNotificationProcessorClient
         Objects.requireNonNull(options, "Options cannot be null");
 
         this.errorProcessor = options.getErrorProcessor();
-        this.amqpEventProcessorHandler =
-            new AmqpEventProcessorHandler(
+        this.eventReceivingConnectionHandler =
+            new EventReceivingConnectionHandler(
                 hostName,
                 sasTokenProvider,
                 protocol,
@@ -110,8 +110,8 @@ public class FileUploadNotificationProcessorClient
         Objects.requireNonNull(options, "Options cannot be null");
 
         this.errorProcessor = options.getErrorProcessor();
-        this.amqpEventProcessorHandler =
-            new AmqpEventProcessorHandler(
+        this.eventReceivingConnectionHandler =
+            new EventReceivingConnectionHandler(
                 connectionString,
                 protocol,
                 fileUploadNotificationProcessor,
@@ -129,7 +129,7 @@ public class FileUploadNotificationProcessorClient
 
     public synchronized void start(int timeoutMilliseconds) throws IotHubException, IOException, InterruptedException
     {
-        if (this.reactorRunner != null && this.amqpEventProcessorHandler != null && this.amqpEventProcessorHandler.isOpen())
+        if (this.reactorRunner != null && this.eventReceivingConnectionHandler != null && this.eventReceivingConnectionHandler.isOpen())
         {
             //already open
             return;
@@ -146,12 +146,12 @@ public class FileUploadNotificationProcessorClient
         log.debug("Opening FileUploadNotificationProcessorClient");
 
         this.reactorRunner = new ReactorRunner(
-            this.amqpEventProcessorHandler.getHostName(),
+            this.eventReceivingConnectionHandler.getHostName(),
             "FileUploadNotificationProcessor",
-            this.amqpEventProcessorHandler);
+            this.eventReceivingConnectionHandler);
 
         final CountDownLatch openLatch = new CountDownLatch(1);
-        this.amqpEventProcessorHandler.setOnConnectionOpenedCallback(() -> openLatch.countDown());
+        this.eventReceivingConnectionHandler.setOnConnectionOpenedCallback(() -> openLatch.countDown());
 
         new Thread(() ->
         {
@@ -160,7 +160,7 @@ public class FileUploadNotificationProcessorClient
                 reactorRunner.run();
 
                 log.trace("FileUploadNotificationProcessorClient Amqp reactor stopped, checking that the connection was opened");
-                this.amqpEventProcessorHandler.verifyConnectionWasOpened();
+                this.eventReceivingConnectionHandler.verifyConnectionWasOpened();
 
                 log.trace("FileUploadNotificationProcessorClient  reactor did successfully open the connection, returning without exception");
             }

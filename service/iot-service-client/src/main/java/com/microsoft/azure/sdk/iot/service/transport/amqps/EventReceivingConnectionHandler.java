@@ -18,7 +18,6 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.Source;
-import org.apache.qpid.proton.engine.EndpointState;
 import org.apache.qpid.proton.engine.Event;
 import org.apache.qpid.proton.engine.Receiver;
 import org.apache.qpid.proton.engine.Session;
@@ -37,12 +36,12 @@ import java.util.function.Function;
  * Creates and sets SASL authentication for transport
  */
 @Slf4j
-public class AmqpEventProcessorHandler extends AmqpConnectionHandler implements LinkStateCallback
+public class EventReceivingConnectionHandler extends AmqpConnectionHandler implements LinkStateCallback
 {
     private static final String FILE_NOTIFICATION_RECEIVE_TAG = "fileUploadNotificationReceiver";
     private static final String FILENOTIFICATION_ENDPOINT = "/messages/serviceBound/filenotifications";
-    private static final String ENDPOINT = "/messages/servicebound/feedback";
-    public static final String RECEIVE_TAG = "cloudToDeviceMessageFeedbackReceiver";
+    public static final String MESSAGE_FEEDBACK_RECEIVE_TAG = "cloudToDeviceMessageFeedbackReceiver";
+    private static final String MESSAGE_FEEDBACK_ENDPOINT = "/messages/servicebound/feedback";
 
     private FileUploadNotificationReceiverLinkHandler fileUploadNotificationReceiverLinkHandler;
     private MessageFeedbackReceiverLinkHandler messageFeedbackReceiverLinkHandler;
@@ -54,7 +53,7 @@ public class AmqpEventProcessorHandler extends AmqpConnectionHandler implements 
     private final Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationReceivedCallback;
     private final Function<FeedbackBatch, AcknowledgementType> messageFeedbackReceivedCallback;
 
-    public AmqpEventProcessorHandler(
+    public EventReceivingConnectionHandler(
             String connectionString,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationReceivedCallback,
@@ -69,7 +68,7 @@ public class AmqpEventProcessorHandler extends AmqpConnectionHandler implements 
         this.messageFeedbackReceivedCallback = messageFeedbackReceivedCallback;
     }
 
-    public AmqpEventProcessorHandler(
+    public EventReceivingConnectionHandler(
             String hostName,
             TokenCredential credential,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
@@ -85,7 +84,7 @@ public class AmqpEventProcessorHandler extends AmqpConnectionHandler implements 
         this.messageFeedbackReceivedCallback = messageFeedbackReceivedCallback;
     }
 
-    public AmqpEventProcessorHandler(
+    public EventReceivingConnectionHandler(
             String hostName,
             AzureSasCredential sasTokenProvider,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
@@ -141,13 +140,13 @@ public class AmqpEventProcessorHandler extends AmqpConnectionHandler implements 
 
             if (this.messageFeedbackReceivedCallback != null)
             {
-                Receiver feedbackReceiverLink = this.session.receiver(RECEIVE_TAG);
+                Receiver feedbackReceiverLink = this.session.receiver(MESSAGE_FEEDBACK_RECEIVE_TAG);
                 feedbackReceiverLink.setProperties(properties);
 
                 log.debug("Opening connection, session and link for amqp feedback receiver");
                 feedbackReceiverLink.open();
                 Source source = new Source();
-                source.setAddress(ENDPOINT);
+                source.setAddress(MESSAGE_FEEDBACK_ENDPOINT);
                 feedbackReceiverLink.setSource(source);
 
                 // We only want to receive, at most, one feedback message since each receive call the user makes can only return

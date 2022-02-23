@@ -21,8 +21,6 @@ import mockit.integration.junit4.JMockit;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.UnsignedLong;
-import org.apache.qpid.proton.amqp.messaging.Accepted;
-import org.apache.qpid.proton.amqp.messaging.Data;
 import org.apache.qpid.proton.amqp.messaging.Source;
 import org.apache.qpid.proton.amqp.messaging.Target;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
@@ -57,7 +55,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Map;
@@ -66,9 +63,9 @@ import java.util.function.Function;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-/** Unit tests for AmqpEventProcessorHandler */
+/** Unit tests for EventReceivingConnectionHandler */
 @RunWith(JMockit.class)
-public class AmqpEventProcessorHandlerTest
+public class EventReceivingConnectionHandlerTest
 {
     @Mocked Handshaker handshaker;
     @Mocked FlowController flowcontroller;
@@ -108,7 +105,7 @@ public class AmqpEventProcessorHandlerTest
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
 
         // Act
-        Object amqpReceiveHandler = Deencapsulation.newInstance(AmqpEventProcessorHandler.class, String.class, userName, sasToken, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, mockedProxyOptions, mockedSslContext, 230);
+        Object amqpReceiveHandler = Deencapsulation.newInstance(EventReceivingConnectionHandler.class, String.class, userName, sasToken, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, mockedProxyOptions, mockedSslContext, 230);
     }
 
     @Test (expected = IllegalArgumentException.class)
@@ -121,7 +118,7 @@ public class AmqpEventProcessorHandlerTest
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
 
         // Act
-        Object amqpReceiveHandler = Deencapsulation.newInstance(AmqpEventProcessorHandler.class, hostName, userName, String.class, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, mockedProxyOptions, mockedSslContext, 230);
+        Object amqpReceiveHandler = Deencapsulation.newInstance(EventReceivingConnectionHandler.class, hostName, userName, String.class, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, mockedProxyOptions, mockedSslContext, 230);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_009: [The event handler shall set the SASL PLAIN authentication on the Transport using the given user name and sas token]
@@ -133,7 +130,7 @@ public class AmqpEventProcessorHandlerTest
         // Arrange
         final String connectionString = "aaa";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS_WS;
-        Object amqpReceiveHandler = new AmqpEventProcessorHandler(connectionString, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, null, null, mockedProxyOptions, mockedSslContext, 230);
+        Object amqpReceiveHandler = new EventReceivingConnectionHandler(connectionString, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, null, null, mockedProxyOptions, mockedSslContext, 230);
 
         // Assert
         new Expectations()
@@ -171,7 +168,7 @@ public class AmqpEventProcessorHandlerTest
         // Arrange
         String connectionString = "aaa";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS_WS;
-        AmqpEventProcessorHandler amqpReceiveHandler = new AmqpEventProcessorHandler(connectionString, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, null, null, mockedProxyOptions, mockedSslContext, 230);
+        EventReceivingConnectionHandler amqpReceiveHandler = new EventReceivingConnectionHandler(connectionString, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, null, null, mockedProxyOptions, mockedSslContext, 230);
 
         // Act
         amqpReceiveHandler.onLinkRemoteOpen(mockEvent);
@@ -187,7 +184,7 @@ public class AmqpEventProcessorHandlerTest
         // Arrange
         String connectionString = "aaa";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS_WS;
-        AmqpEventProcessorHandler amqpReceiveHandler = new AmqpEventProcessorHandler(connectionString, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, null, null, mockedProxyOptions, mockedSslContext, 230);
+        EventReceivingConnectionHandler amqpReceiveHandler = new EventReceivingConnectionHandler(connectionString, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, null, null, mockedProxyOptions, mockedSslContext, 230);
 
         Deencapsulation.setField(amqpReceiveHandler, "connectionOpenedRemotely", false);
         Deencapsulation.setField(amqpReceiveHandler, "sessionOpenedRemotely", true);
