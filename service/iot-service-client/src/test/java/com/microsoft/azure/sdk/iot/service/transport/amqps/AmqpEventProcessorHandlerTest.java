@@ -182,24 +182,6 @@ public class AmqpEventProcessorHandlerTest
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_34_023: [if 'connectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
     @Test (expected = IOException.class)
-    public void verifyConnectionOpenedChecksForSavedException() throws IOException, IotHubException
-    {
-        // Arrange
-        String connectionString = "aaa";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS_WS;
-        AmqpEventProcessorHandler amqpReceiveHandler = new AmqpEventProcessorHandler(connectionString, iotHubServiceClientProtocol, fileUploadNotificationReceivedCallback, null, null, mockedProxyOptions, mockedSslContext, 230);
-
-        Deencapsulation.setField(amqpReceiveHandler, "connectionOpenedRemotely", true);
-        Deencapsulation.setField(amqpReceiveHandler, "sessionOpenedRemotely", true);
-        Deencapsulation.setField(amqpReceiveHandler, "linkOpenedRemotely", true);
-        Deencapsulation.setField(amqpReceiveHandler, "savedException", new SSLHandshakeException("some nonsense exception"));
-
-        // Act
-        Deencapsulation.invoke(amqpReceiveHandler, "verifyConnectionWasOpened");
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_34_023: [if 'connectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
-    @Test (expected = IOException.class)
     public void verifyConnectionOpenedChecksThatConnectionWasOpened() throws IOException, IotHubException
     {
         // Arrange
@@ -210,7 +192,6 @@ public class AmqpEventProcessorHandlerTest
         Deencapsulation.setField(amqpReceiveHandler, "connectionOpenedRemotely", false);
         Deencapsulation.setField(amqpReceiveHandler, "sessionOpenedRemotely", true);
         Deencapsulation.setField(amqpReceiveHandler, "linkOpenedRemotely", true);
-        Deencapsulation.setField(amqpReceiveHandler, "savedException", null);
 
         // Act
         Deencapsulation.invoke(amqpReceiveHandler, "verifyConnectionWasOpened");
