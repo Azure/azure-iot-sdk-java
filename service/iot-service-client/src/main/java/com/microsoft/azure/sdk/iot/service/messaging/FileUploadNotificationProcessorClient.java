@@ -207,7 +207,7 @@ public class FileUploadNotificationProcessorClient
             throw iotHubException.get();
         }
 
-        log.debug("Opened FileUploadNotificationProcessorClient");
+        log.info("Started FileUploadNotificationProcessorClient");
     }
 
     public synchronized boolean isRunning()
@@ -227,11 +227,9 @@ public class FileUploadNotificationProcessorClient
             return;
         }
 
-        log.debug("Closing FileUploadNotificationProcessorClient");
-
         this.reactorRunner.stop(timeoutMilliseconds);
         this.reactorRunner = null;
 
-        log.debug("Closed FileUploadNotificationProcessorClient");
+        log.info("Stopped FileUploadNotificationProcessorClient");
     }
 }

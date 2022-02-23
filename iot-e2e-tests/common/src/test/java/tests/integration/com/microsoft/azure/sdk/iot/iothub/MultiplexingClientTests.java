@@ -103,7 +103,6 @@ public class MultiplexingClientTests extends IntegrationTest
 
     protected static String iotHubConnectionString = "";
 
-    private static MessagingClient messagingClient;
     private static RegistryClient registryClient;
 
     protected static HttpProxyServer proxyServer;
@@ -125,7 +124,6 @@ public class MultiplexingClientTests extends IntegrationTest
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
         registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
-        messagingClient = new MessagingClient(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
 
         return Arrays.asList(
                 new Object[][]
@@ -604,6 +602,7 @@ public class MultiplexingClientTests extends IntegrationTest
     {
         com.microsoft.azure.sdk.iot.service.messaging.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.messaging.Message("some payload");
         serviceMessage.setCorrelationId(expectedMessageCorrelationId);
+        MessagingClient messagingClient = new MessagingClient(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
         messagingClient.open();
         messagingClient.send(deviceId, serviceMessage);
         messagingClient.close();

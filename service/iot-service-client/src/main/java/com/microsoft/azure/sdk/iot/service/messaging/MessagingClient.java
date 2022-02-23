@@ -277,7 +277,7 @@ public final class MessagingClient
             throw iotHubException.get();
         }
 
-        log.debug("Opened MessagingClient");
+        log.info("Opened MessagingClient");
     }
 
     public synchronized void close() throws InterruptedException
@@ -299,6 +299,7 @@ public final class MessagingClient
 
         this.reactorRunner.stop(timeoutMilliseconds);
         this.reactorRunner = null;
+        log.info("Closed MessagingClient");
     }
 
     public void send(String deviceId, Message message) throws IOException, IotHubException, InterruptedException
@@ -330,11 +331,11 @@ public final class MessagingClient
         {
             if (sendResult.wasSentSuccessfully())
             {
-                log.trace("Message acknowledged callback executed for cloud to device message with correlation id {} that was successfully sent.");
+                log.trace("Message acknowledged callback executed for cloud to device message with correlation id {} that was successfully sent.", sendResult.getCorrelationId());
             }
             else
             {
-                log.trace("Message acknowledged callback executed for cloud to device message with correlation id {} that failed to send.");
+                log.trace("Message acknowledged callback executed for cloud to device message with correlation id {} that failed to send.", sendResult.getCorrelationId());
                 exception.set(sendResult.getException());
             }
 

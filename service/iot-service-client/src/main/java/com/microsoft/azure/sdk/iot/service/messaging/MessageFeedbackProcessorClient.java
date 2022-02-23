@@ -207,7 +207,7 @@ public class MessageFeedbackProcessorClient
             throw iotHubException.get();
         }
 
-        log.debug("Opened MessageFeedbackProcessorClient");
+        log.info("Started MessageFeedbackProcessorClient");
     }
 
     public synchronized void stop() throws InterruptedException
@@ -227,7 +227,7 @@ public class MessageFeedbackProcessorClient
         this.reactorRunner.stop(timeoutMilliseconds);
         this.reactorRunner = null;
 
-        log.debug("Closed MessageFeedbackProcessorClient");
+        log.info("Stopped MessageFeedbackProcessorClient");
     }
 
     public synchronized boolean isRunning()
