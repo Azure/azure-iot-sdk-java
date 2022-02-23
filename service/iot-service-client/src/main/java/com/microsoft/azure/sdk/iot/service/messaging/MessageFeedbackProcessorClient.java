@@ -21,8 +21,8 @@ import java.util.function.Function;
 @Slf4j
 public class MessageFeedbackProcessorClient
 {
-    private static final int START_REACTOR_TIMEOUT_MILLISECONDS = 10 * 1000; // 10 seconds
-    private static final int STOP_REACTOR_TIMEOUT_MILLISECONDS = 10 * 1000; // 10 seconds
+    private static final int START_REACTOR_TIMEOUT_MILLISECONDS = 60 * 1000; // 60 seconds
+    private static final int STOP_REACTOR_TIMEOUT_MILLISECONDS = 60 * 1000; // 60 seconds
 
     private final AmqpEventProcessorHandler amqpEventProcessorHandler;
     private final Consumer<ErrorContext> errorProcessor; // may be null if user doesn't provide one

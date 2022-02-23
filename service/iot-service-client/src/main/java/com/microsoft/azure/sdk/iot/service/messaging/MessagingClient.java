@@ -28,9 +28,9 @@ import java.util.function.Consumer;
 @Slf4j
 public final class MessagingClient
 {
-    private static final int START_REACTOR_TIMEOUT_MILLISECONDS = 10 * 1000; // 10 seconds
-    private static final int STOP_REACTOR_TIMEOUT_MILLISECONDS = 10 * 1000; // 10 seconds
-    private static final int MESSAGE_SEND_TIMEOUT_MILLISECONDS = 30 * 1000;
+    private static final int START_REACTOR_TIMEOUT_MILLISECONDS = 60 * 1000; // 60 seconds
+    private static final int STOP_REACTOR_TIMEOUT_MILLISECONDS = 60 * 1000; // 60 seconds
+    private static final int MESSAGE_SEND_TIMEOUT_MILLISECONDS = 60 * 1000; // 60 seconds
 
     private final Consumer<ErrorContext> errorProcessor; // may be null if user doesn't provide one
     private final CloudToDeviceMessageConnectionHandler cloudToDeviceMessageConnectionHandler;
