@@ -32,10 +32,12 @@ import com.microsoft.azure.sdk.iot.service.query.RawQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.TwinQueryResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.FlakeyTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 
 import java.io.IOException;
@@ -133,6 +135,8 @@ public class QueryClientTests extends IntegrationTest
         }
     }
 
+    @Ignore
+    @FlakeyTest
     @Test
     public void testQueryJobs() throws IOException, IotHubException, InterruptedException
     {
