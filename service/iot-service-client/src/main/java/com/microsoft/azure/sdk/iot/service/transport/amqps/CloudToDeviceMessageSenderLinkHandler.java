@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.messaging.SendResult;
 import lombok.extern.slf4j.Slf4j;
@@ -99,6 +100,7 @@ public class CloudToDeviceMessageSenderLinkHandler extends SenderLinkHandler
         {
             properties.setUserId(new Binary(message.getUserId().getBytes(StandardCharsets.UTF_8)));
         }
+
         protonMessage.setProperties(properties);
 
         if (message.getProperties() != null && message.getProperties().size() > 0)
@@ -108,6 +110,7 @@ public class CloudToDeviceMessageSenderLinkHandler extends SenderLinkHandler
             {
                 applicationPropertiesMap.put(entry.getKey(), entry.getValue());
             }
+
             ApplicationProperties applicationProperties = new ApplicationProperties(applicationPropertiesMap);
             protonMessage.setApplicationProperties(applicationProperties);
         }
@@ -216,12 +219,32 @@ public class CloudToDeviceMessageSenderLinkHandler extends SenderLinkHandler
 
         for (org.apache.qpid.proton.message.Message unsentMessage : outgoingMessageQueue)
         {
-            //TODO
+            Message unsentIotHubMessage = protonMessageToIotHubMessageMap.get(unsentMessage);
+            if (unsentIotHubMessage != null)
+            {
+                IotHubException exception = new IotHubException("Message failed to send because the client was closed while it was still queued.");
+                Consumer<SendResult> callback = iotHubMessageToCallbackMap.get(unsentIotHubMessage);
+                if (callback != null)
+                {
+                    Object context = iotHubMessageToCallbackContextMap.get(unsentIotHubMessage); // may be null if no context was set
+                    callback.accept(new SendResult(false, unsentIotHubMessage.getCorrelationId(), context, exception));
+                }
+            }
         }
 
         for (org.apache.qpid.proton.message.Message unacknowledgedMessages : unacknowledgedMessages.values())
         {
-            //TODO
+            Message unacknowledgedIotHubMessage = protonMessageToIotHubMessageMap.get(unacknowledgedMessages);
+            if (unacknowledgedIotHubMessage != null)
+            {
+                IotHubException exception = new IotHubException("Message failed to send because the client was closed after it was sent, but before it was acknowledged by the service.");
+                Consumer<SendResult> callback = iotHubMessageToCallbackMap.get(unacknowledgedIotHubMessage);
+                if (callback != null)
+                {
+                    Object context = iotHubMessageToCallbackContextMap.get(unacknowledgedIotHubMessage); // may be null if no context was set
+                    callback.accept(new SendResult(false, unacknowledgedIotHubMessage.getCorrelationId(), context, exception));
+                }
+            }
         }
 
         protonMessageToIotHubMessageMap.clear();
