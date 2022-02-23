@@ -24,4 +24,6 @@ public class IotHubMessageTooLargeException extends IotHubException
     {
         super(message, errorCode, errorCodeDescription);
     }
+
+    public static final String amqpErrorCode = "amqp:link:message-size-exceeded";
 }

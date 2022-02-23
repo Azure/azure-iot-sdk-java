@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -53,8 +54,10 @@ public class MessageFeedbackProcessorClient
                 protocol,
                 null,
                 feedbackMessageProcessor,
+                this.errorProcessor,
                 options.getProxyOptions(),
-                options.getSslContext());
+                options.getSslContext(),
+                options.getKeepAliveInterval());
     }
 
     public MessageFeedbackProcessorClient(
@@ -83,8 +86,10 @@ public class MessageFeedbackProcessorClient
                 protocol,
                 null,
                 feedbackMessageProcessor,
+                this.errorProcessor,
                 options.getProxyOptions(),
-                options.getSslContext());
+                options.getSslContext(),
+                options.getKeepAliveInterval());
     }
 
     public MessageFeedbackProcessorClient(
@@ -110,8 +115,10 @@ public class MessageFeedbackProcessorClient
                 protocol,
                 null,
                 feedbackMessageProcessor,
+                this.errorProcessor,
                 options.getProxyOptions(),
-                options.getSslContext());
+                options.getSslContext(),
+                options.getKeepAliveInterval());
     }
 
     public synchronized void start() throws IotHubException, IOException, InterruptedException
@@ -122,6 +129,9 @@ public class MessageFeedbackProcessorClient
             return;
         }
 
+        AtomicReference<IotHubException> iotHubException = new AtomicReference<>(null);
+        AtomicReference<IOException> ioException = new AtomicReference<>(null);
+
         log.debug("Opening MessageFeedbackProcessorClient");
 
         this.reactorRunner = new ReactorRunner(
@@ -130,12 +140,7 @@ public class MessageFeedbackProcessorClient
             this.amqpEventProcessorHandler);
 
         final CountDownLatch openLatch = new CountDownLatch(1);
-        this.amqpEventProcessorHandler.setOnConnectionOpenedCallback(e ->
-        {
-            //TODO check for exception?
-
-            openLatch.countDown();
-        });
+        this.amqpEventProcessorHandler.setOnConnectionOpenedCallback(() -> openLatch.countDown());
 
         new Thread(() ->
         {
@@ -143,19 +148,24 @@ public class MessageFeedbackProcessorClient
             {
                 reactorRunner.run();
 
-                log.trace("EventProcessorClient Amqp reactor stopped, checking that the connection was opened");
+                log.trace("MessageFeedbackProcessorClient Amqp reactor stopped, checking that the connection was opened");
                 this.amqpEventProcessorHandler.verifyConnectionWasOpened();
 
-                log.trace("EventProcessorClient  reactor did successfully open the connection, returning without exception");
+                log.trace("MessageFeedbackProcessorClient reactor did successfully open the connection, returning without exception");
             }
-            catch (IOException | IotHubException e)
+            catch (IOException e)
             {
-                log.warn("EventProcessorClient Amqp connection encountered an exception", e);
+                log.debug("MessageFeedbackProcessorClient Amqp connection encountered an exception", e);
 
-                if (this.errorProcessor != null)
-                {
-                    this.errorProcessor.accept(new ErrorContext(e));
-                }
+                ioException.set(e);
+                openLatch.countDown();
+            }
+            catch (IotHubException e)
+            {
+                log.debug("MessageFeedbackProcessorClient Amqp connection encountered an exception", e);
+
+                iotHubException.set(e);
+                openLatch.countDown();
             }
         }).start();
 
@@ -163,7 +173,17 @@ public class MessageFeedbackProcessorClient
 
         if (timedOut)
         {
-            //TODO
+            throw new IOException("Timed out waiting for the connection to the service to open");
+        }
+
+        if (ioException.get() != null)
+        {
+            throw ioException.get();
+        }
+
+        if (iotHubException.get() != null)
+        {
+            throw iotHubException.get();
         }
 
         log.debug("Opened MessageFeedbackProcessorClient");
@@ -191,7 +211,6 @@ public class MessageFeedbackProcessorClient
 
     public synchronized boolean isRunning()
     {
-        //TODO
-        return true;
+        return this.reactorRunner != null && this.reactorRunner.isRunning();
     }
 }

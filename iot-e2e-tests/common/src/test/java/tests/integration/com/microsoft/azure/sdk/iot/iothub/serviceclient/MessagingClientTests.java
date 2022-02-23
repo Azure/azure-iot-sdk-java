@@ -50,6 +50,7 @@ import java.util.Collection;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 
 /**
@@ -72,20 +73,20 @@ public class MessagingClientTests extends IntegrationTest
 
     public MessagingClientTests(IotHubServiceClientProtocol protocol)
     {
-        this.testInstance = new ServiceClientITRunner(protocol);
+        this.testInstance = new MessagingClientITRunner(protocol);
     }
 
-    private static class ServiceClientITRunner
+    private static class MessagingClientITRunner
     {
         private final IotHubServiceClientProtocol protocol;
 
-        public ServiceClientITRunner(IotHubServiceClientProtocol protocol)
+        public MessagingClientITRunner(IotHubServiceClientProtocol protocol)
         {
             this.protocol = protocol;
         }
     }
 
-    private final ServiceClientITRunner testInstance;
+    private final MessagingClientITRunner testInstance;
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection inputs()
@@ -137,11 +138,8 @@ public class MessagingClientTests extends IntegrationTest
     @StandardTierHubOnlyTest
     public void cloudToDeviceTelemetryWithProxy() throws Exception
     {
-        if (testInstance.protocol != IotHubServiceClientProtocol.AMQPS_WS)
-        {
-            //Proxy support only exists for AMQPS_WS currently
-            return;
-        }
+        //Proxy support only exists for AMQPS_WS currently
+        assumeTrue(testInstance.protocol == IotHubServiceClientProtocol.AMQPS_WS);
 
         cloudToDeviceTelemetry(true, true, false, false, false);
     }
@@ -150,11 +148,8 @@ public class MessagingClientTests extends IntegrationTest
     @StandardTierHubOnlyTest
     public void cloudToDeviceTelemetryWithProxyAndCustomSSLContext() throws Exception
     {
-        if (testInstance.protocol != IotHubServiceClientProtocol.AMQPS_WS)
-        {
-            //Proxy support only exists for AMQPS_WS currently
-            return;
-        }
+        //Proxy support only exists for AMQPS_WS currently
+        assumeTrue(testInstance.protocol == IotHubServiceClientProtocol.AMQPS_WS);
 
         cloudToDeviceTelemetry(true, true, false, true, false);
     }
@@ -187,11 +182,8 @@ public class MessagingClientTests extends IntegrationTest
     @StandardTierHubOnlyTest
     public void cloudToDeviceTelemetryWithMaxPayloadSizeAndProxy() throws Exception
     {
-        if (testInstance.protocol != IotHubServiceClientProtocol.AMQPS_WS)
-        {
-            //Proxy support only exists for AMQPS_WS currently
-            return;
-        }
+        //Proxy support only exists for AMQPS_WS currently
+        assumeTrue(testInstance.protocol == IotHubServiceClientProtocol.AMQPS_WS);
 
         cloudToDeviceTelemetry(true, true, true, false, false);
     }
@@ -245,7 +237,7 @@ public class MessagingClientTests extends IntegrationTest
         MessagingClient messagingClient;
         if (withAzureSasCredential)
         {
-            messagingClient = buildServiceClientWithAzureSasCredential(testInstance.protocol, messagingClientOptions);
+            messagingClient = buildMessagingClientWithAzureSasCredential(testInstance.protocol, messagingClientOptions);
         }
         else
         {
@@ -287,14 +279,8 @@ public class MessagingClientTests extends IntegrationTest
 
     @Test
     @StandardTierHubOnlyTest
-    public void serviceClientTokenRenewalWithAzureSasCredential() throws Exception
+    public void messagingClientTokenRenewalWithAzureSasCredential() throws Exception
     {
-        RegistryClient registryClient = new RegistryClient(
-            iotHubConnectionString,
-            RegistryClientOptions.builder()
-                .httpReadTimeoutSeconds(HTTP_READ_TIMEOUT)
-                .build());
-
         TestDeviceIdentity testDeviceIdentity =
             Tools.getTestDevice(
                 iotHubConnectionString,
@@ -320,22 +306,16 @@ public class MessagingClientTests extends IntegrationTest
         // access signature that is set here.
         sasCredential.update(SasTokenTools.makeSasTokenExpired(serviceSasToken.toString()));
 
+        messagingClient.close();
+
         try
         {
-            messagingClient.send(device.getDeviceId(), message);
-            fail("Expected sending cloud to device message to throw unauthorized exception since an expired SAS token was used, but no exception was thrown");
+            messagingClient.open();
+            fail("Expected opening messagingClient to throw unauthorized exception since an expired SAS token was used, but no exception was thrown");
         }
-        catch (IOException e)
+        catch (IotHubUnathorizedException e)
         {
-            // For service client, the unauthorized exception is wrapped by an IOException, so we need to unwrap it here
-            if (e.getCause() instanceof IotHubUnathorizedException)
-            {
-                log.debug("IotHubUnauthorizedException was thrown as expected, continuing test");
-            }
-            else
-            {
-                throw e;
-            }
+            log.debug("IotHubUnauthorizedException was thrown as expected, continuing test");
         }
 
         // Renew the expired shared access signature
@@ -343,6 +323,7 @@ public class MessagingClientTests extends IntegrationTest
         sasCredential.update(serviceSasToken.toString());
 
         // The final c2d send should succeed since the shared access signature has been renewed
+        messagingClient.open();
         messagingClient.send(device.getDeviceId(), message);
 
         messagingClient.close();
@@ -353,7 +334,7 @@ public class MessagingClientTests extends IntegrationTest
     @Ignore // The IoT Hub instance we use for this test is currently offline, so this test cannot be run
     @Test
     @ContinuousIntegrationTest
-    public void serviceClientValidatesRemoteCertificateWhenSendingTelemetry() throws IOException, InterruptedException, IotHubException
+    public void messagingClientValidatesRemoteCertificateWhenSendingTelemetry() throws IOException, InterruptedException, IotHubException
     {
         boolean expectedExceptionWasCaught = false;
 
@@ -381,7 +362,7 @@ public class MessagingClientTests extends IntegrationTest
         assertTrue(buildExceptionMessage("Expected an exception due to service presenting invalid certificate", hostName), expectedExceptionWasCaught);
     }
 
-    private static MessagingClient buildServiceClientWithAzureSasCredential(IotHubServiceClientProtocol protocol, MessagingClientOptions options)
+    private static MessagingClient buildMessagingClientWithAzureSasCredential(IotHubServiceClientProtocol protocol, MessagingClientOptions options)
     {
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
         IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);

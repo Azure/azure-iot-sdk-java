@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.service.transport.amqps;
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
+import com.microsoft.azure.sdk.iot.service.messaging.ErrorContext;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.messaging.SendResult;
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.Target;
 import org.apache.qpid.proton.engine.EndpointState;
+import org.apache.qpid.proton.engine.Event;
 import org.apache.qpid.proton.engine.Sender;
 import org.apache.qpid.proton.engine.Session;
 
@@ -43,35 +45,41 @@ public class CloudToDeviceMessageConnectionHandler extends AmqpConnectionHandler
     private CloudToDeviceMessageSenderLinkHandler cloudToDeviceMessageSenderLinkHandler;
 
     @Setter
-    private Consumer<Exception> onConnectionOpenedCallback;
+    private Runnable onConnectionOpenedCallback;
 
     public CloudToDeviceMessageConnectionHandler(
             String connectionString,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            Consumer<ErrorContext> errorProcessor,
             ProxyOptions proxyOptions,
-            SSLContext sslContext)
+            SSLContext sslContext,
+            int keepAliveIntervalSeconds)
     {
-        super(connectionString, iotHubServiceClientProtocol, proxyOptions, sslContext);
+        super(connectionString, iotHubServiceClientProtocol, errorProcessor, proxyOptions, sslContext, keepAliveIntervalSeconds);
     }
 
     public CloudToDeviceMessageConnectionHandler(
             String hostName,
             TokenCredential credential,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            Consumer<ErrorContext> errorProcessor,
             ProxyOptions proxyOptions,
-            SSLContext sslContext)
+            SSLContext sslContext,
+            int keepAliveIntervalSeconds)
     {
-        super(hostName, credential, iotHubServiceClientProtocol, proxyOptions, sslContext);
+        super(hostName, credential, iotHubServiceClientProtocol, errorProcessor, proxyOptions, sslContext, keepAliveIntervalSeconds);
     }
 
     public CloudToDeviceMessageConnectionHandler(
             String hostName,
             AzureSasCredential sasTokenProvider,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            Consumer<ErrorContext> errorProcessor,
             ProxyOptions proxyOptions,
-            SSLContext sslContext)
+            SSLContext sslContext,
+            int keepAliveIntervalSeconds)
     {
-        super(hostName, sasTokenProvider, iotHubServiceClientProtocol, proxyOptions, sslContext);
+        super(hostName, sasTokenProvider, iotHubServiceClientProtocol, errorProcessor, proxyOptions, sslContext, keepAliveIntervalSeconds);
     }
 
     @Override
@@ -118,7 +126,7 @@ public class CloudToDeviceMessageConnectionHandler extends AmqpConnectionHandler
     {
         this.linkOpenedRemotely = true; //TODO get rid of this wonky thing
 
-        this.onConnectionOpenedCallback.accept(null);
+        this.onConnectionOpenedCallback.run();
     }
 
     @Override
@@ -148,7 +156,7 @@ public class CloudToDeviceMessageConnectionHandler extends AmqpConnectionHandler
     }
 
     @Override
-    public void closeAsync()
+    public void closeAsync(Runnable onReactorClosedCallback)
     {
         if (this.cloudToDeviceMessageSenderLinkHandler != null)
         {
@@ -162,6 +170,12 @@ public class CloudToDeviceMessageConnectionHandler extends AmqpConnectionHandler
             this.session.close();
         }
 
-        super.closeAsync();
+        super.closeAsync(onReactorClosedCallback);
+    }
+
+    @Override
+    public void onReactorFinal(Event event)
+    {
+        this.cloudToDeviceMessageSenderLinkHandler = null;
     }
 }

@@ -24,6 +24,7 @@ import com.microsoft.azure.sdk.iot.service.messaging.MessageFeedbackProcessorCli
 import com.microsoft.azure.sdk.iot.service.messaging.MessageFeedbackProcessorClientOptions;
 import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
 import com.microsoft.azure.sdk.iot.service.messaging.MessagingClientOptions;
+import com.microsoft.azure.sdk.iot.service.messaging.SendResult;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.sun.jna.platform.unix.X11;
@@ -34,34 +35,41 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class MessagingClientSample
+/**
+ * This sample demonstrates the way to send cloud to device messages with the highest possible throughput by utilizing
+ * the asynchronous send operation. This asynchronous send operation allows for many messages to be sent at once and for
+ * the service to acknowledge these messages in bulk.
+ */
+public class MessagingClientPerformanceSample
 {
     private static final String connectionString = System.getenv("IOTHUB_CONNECTION_STRING");
     private static final String deviceId = UUID.randomUUID().toString();
+    private static final int numberOfMessagesToSend = 50; // a single device can only have up to 50 cloud to device messages queued at a time
+    private static int numberOfMessagesSentSuccessfully = 0;
+    private static int numberOfMessagesFailedToSend = 0;
 
     /** Choose iotHubServiceClientProtocol */
     private static final IotHubServiceClientProtocol protocol = IotHubServiceClientProtocol.AMQPS;
 //  private static final IotHubServiceClientProtocol protocol = IotHubServiceClientProtocol.AMQPS_WS;
-
-    private static boolean sampleEnded = false;
 
     public static void main(String[] args) throws InterruptedException
     {
         // TODO delete
         String deviceId = UUID.randomUUID().toString();
         RegistryClient registryClient = new RegistryClient(connectionString);
-        /*try
+        try
         {
             registryClient.addDevice(new Device(deviceId));
         }
         catch (IOException | IotHubException e)
         {
             e.printStackTrace();
-        }*/
+        }
         // TODO delete
 
         final Object connectionEventLock = new Object();
@@ -69,7 +77,8 @@ public class MessagingClientSample
         {
             if (errorContext.getIotHubException() != null)
             {
-                System.out.println("Encountered an IoT hub level error while sending events " + errorContext.getIotHubException().getMessage());
+                IotHubException messageException = errorContext.getIotHubException();
+                System.out.println("Encountered an IoT hub level error while sending events " + messageException.getMessage());
             }
             else
             {
@@ -82,6 +91,41 @@ public class MessagingClientSample
             }
         };
 
+        final CountDownLatch messagesSentLatch = new CountDownLatch(numberOfMessagesToSend);
+        Consumer<SendResult> sendResultCallback = sendResult ->
+        {
+            if (sendResult.wasSentSuccessfully())
+            {
+                System.out.println("Successfully sent message with correlation id " + sendResult.getCorrelationId());
+                numberOfMessagesSentSuccessfully++;
+            }
+            else
+            {
+                IotHubException messageException = sendResult.getException();
+
+                if (messageException instanceof IotHubNotFoundException)
+                {
+                    System.out.println("Failed to send message with correlation id " + sendResult.getCorrelationId() + " because the device it was sent to does not exist");
+                }
+                else if (messageException instanceof IotHubDeviceMaximumQueueDepthExceededException)
+                {
+                    System.out.println("Failed to send message with correlation id " + sendResult.getCorrelationId() + " because the device it was sent to has a full queue of cloud to device messages already");
+                }
+                else if (messageException instanceof IotHubMessageTooLargeException)
+                {
+                    System.out.println("Failed to send message with correlation id " + sendResult.getCorrelationId() + " because the message was too large");
+                }
+                else
+                {
+                    System.out.println("Encountered an IoT hub level error while sending events " + messageException.getMessage());
+                }
+
+                numberOfMessagesFailedToSend++;
+            }
+
+            messagesSentLatch.countDown();
+        };
+
         MessagingClientOptions messagingClientOptions =
             MessagingClientOptions.builder()
                 .errorProcessor(errorProcessor)
@@ -89,76 +133,31 @@ public class MessagingClientSample
 
         MessagingClient messagingClient = new MessagingClient(connectionString, protocol, messagingClientOptions);
 
-        // Run a thread in the background to pick up on user input so they can exit the sample at any time
-        new Thread(() ->
-        {
-            System.out.println("Enter any key to exit");
-            new Scanner(System.in).nextLine();
-            sampleEnded = true;
-            synchronized (connectionEventLock)
-            {
-                connectionEventLock.notify();
-            }
-        }).start();
-
         int messageCount = 0;
 
-        try
+        while (messageCount < numberOfMessagesToSend)
         {
-            while (!sampleEnded)
+            if (!openMessagingClientWithRetry(messagingClient))
             {
-                if (!openMessagingClientWithRetry(messagingClient))
-                {
-                    // exit the sample, but close the connection in the finally block first
-                    return;
-                }
+                // exit the sample, but close the connection in the finally block first
+                return;
+            }
 
-                while (!sampleEnded && messagingClient.isOpen())
-                {
-                    try
-                    {
-                        Message messageToSend = new Message(String.valueOf(messageCount));
-
-                        // This is a synchronous method that is used here for simplicity. For higher throughput solutions, see
-                        // the use of the async version of this send operation in the MessagingClientPerformanceSample in this repo.
-                        messagingClient.send(deviceId, messageToSend);
-                        messageCount++;
-                    }
-                    catch (IotHubNotFoundException e)
-                    {
-                        System.out.println("Attempted to send a cloud to device message to a device that does not exist");
-                        return;
-                    }
-                    catch (IotHubDeviceMaximumQueueDepthExceededException e)
-                    {
-                        System.out.println("Cloud to device message queue limit has been reached, so the new message was rejected");
-                    }
-                    catch (IotHubMessageTooLargeException e)
-                    {
-                        System.out.println("Cloud to device message was too large");
-                    }
-                    catch (IOException | IotHubException | InterruptedException e)
-                    {
-                        //TODO can be more specific for certain errors here.
-                        break;
-                    }
-
-                    try
-                    {
-                        Thread.sleep(10000);
-                    }
-                    catch (InterruptedException e)
-                    {
-                        System.out.println("Interrupted while waiting to send next message. Exiting sample");
-                        System.exit(-1);
-                    }
-                }
+            while (messagingClient.isOpen() && messageCount < numberOfMessagesToSend)
+            {
+                Message messageToSend = new Message(String.valueOf(messageCount));
+                messagingClient.sendAsync(deviceId, messageToSend, sendResultCallback, null);
+                messageCount++;
             }
         }
-        finally
-        {
-            messagingClient.close();
-        }
+
+        // wait for all messages to have been sent (successfully or otherwise)
+        messagesSentLatch.await();
+
+        messagingClient.close();
+
+        System.out.println("Successfully sent " + numberOfMessagesSentSuccessfully + " messages");
+        System.out.println("Failed to send " + numberOfMessagesFailedToSend + " messages");
     }
 
     // return true if the client was opened successfully, false if the client encountered a terminal exception and the sample should stop

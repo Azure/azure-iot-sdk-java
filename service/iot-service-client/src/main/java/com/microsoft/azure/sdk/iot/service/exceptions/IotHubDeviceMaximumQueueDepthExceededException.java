@@ -24,4 +24,6 @@ public class IotHubDeviceMaximumQueueDepthExceededException extends IotHubExcept
     {
         super(message, errorCode, errorCodeDescription);
     }
+
+    public static final String amqpErrorCode = "amqp:resource-limit-exceeded";
 }

@@ -7,6 +7,7 @@ package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
+import com.microsoft.azure.sdk.iot.service.messaging.ErrorContext;
 import com.microsoft.azure.sdk.iot.service.messaging.FeedbackBatch;
 import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotification;
 import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
@@ -48,7 +49,7 @@ public class AmqpEventProcessorHandler extends AmqpConnectionHandler implements 
     private Session session;
 
     @Setter
-    private Consumer<Exception> onConnectionOpenedCallback;
+    private Runnable onConnectionOpenedCallback;
 
     private final Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationReceivedCallback;
     private final Function<FeedbackBatch, AcknowledgementType> messageFeedbackReceivedCallback;
@@ -58,10 +59,12 @@ public class AmqpEventProcessorHandler extends AmqpConnectionHandler implements 
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationReceivedCallback,
             Function<FeedbackBatch, AcknowledgementType> messageFeedbackReceivedCallback,
+            Consumer<ErrorContext> errorProcessor,
             ProxyOptions proxyOptions,
-            SSLContext sslContext)
+            SSLContext sslContext,
+            int keepAliveIntervalSeconds)
     {
-        super(connectionString, iotHubServiceClientProtocol, proxyOptions, sslContext);
+        super(connectionString, iotHubServiceClientProtocol, errorProcessor, proxyOptions, sslContext, keepAliveIntervalSeconds);
         this.fileUploadNotificationReceivedCallback = fileUploadNotificationReceivedCallback;
         this.messageFeedbackReceivedCallback = messageFeedbackReceivedCallback;
     }
@@ -72,10 +75,12 @@ public class AmqpEventProcessorHandler extends AmqpConnectionHandler implements 
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationReceivedCallback,
             Function<FeedbackBatch, AcknowledgementType> messageFeedbackReceivedCallback,
+            Consumer<ErrorContext> errorProcessor,
             ProxyOptions proxyOptions,
-            SSLContext sslContext)
+            SSLContext sslContext,
+            int keepAliveIntervalSeconds)
     {
-        super(hostName, credential, iotHubServiceClientProtocol, proxyOptions, sslContext);
+        super(hostName, credential, iotHubServiceClientProtocol, errorProcessor, proxyOptions, sslContext, keepAliveIntervalSeconds);
         this.fileUploadNotificationReceivedCallback = fileUploadNotificationReceivedCallback;
         this.messageFeedbackReceivedCallback = messageFeedbackReceivedCallback;
     }
@@ -86,10 +91,12 @@ public class AmqpEventProcessorHandler extends AmqpConnectionHandler implements 
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationReceivedCallback,
             Function<FeedbackBatch, AcknowledgementType> messageFeedbackReceivedCallback,
+            Consumer<ErrorContext> errorProcessor,
             ProxyOptions proxyOptions,
-            SSLContext sslContext)
+            SSLContext sslContext,
+            int keepAliveIntervalSeconds)
     {
-        super(hostName, sasTokenProvider, iotHubServiceClientProtocol, proxyOptions, sslContext);
+        super(hostName, sasTokenProvider, iotHubServiceClientProtocol, errorProcessor, proxyOptions, sslContext, keepAliveIntervalSeconds);
         this.fileUploadNotificationReceivedCallback = fileUploadNotificationReceivedCallback;
         this.messageFeedbackReceivedCallback = messageFeedbackReceivedCallback;
     }
@@ -163,11 +170,11 @@ public class AmqpEventProcessorHandler extends AmqpConnectionHandler implements 
     {
         this.linkOpenedRemotely = true; //TODO get rid of this wonky thing
 
-        this.onConnectionOpenedCallback.accept(null);
+        this.onConnectionOpenedCallback.run();
     }
 
     @Override
-    public void closeAsync()
+    public void closeAsync(Runnable onReactorClosedCallback)
     {
         if (this.session != null)
         {
@@ -187,6 +194,13 @@ public class AmqpEventProcessorHandler extends AmqpConnectionHandler implements 
             this.messageFeedbackReceiverLinkHandler.close();
         }
 
-        super.closeAsync();
+        super.closeAsync(onReactorClosedCallback);
+    }
+
+    @Override
+    public void onReactorFinal(Event event)
+    {
+        this.messageFeedbackReceiverLinkHandler = null;
+        this.fileUploadNotificationReceiverLinkHandler = null;
     }
 }

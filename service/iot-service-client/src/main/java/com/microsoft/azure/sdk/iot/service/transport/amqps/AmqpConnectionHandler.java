@@ -13,6 +13,7 @@ import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
 import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.messaging.ErrorContext;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubSSLContext;
@@ -46,11 +47,11 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
     private static final String WEB_SOCKET_QUERY = "iothub-no-client-cert=true";
     private static final int MAX_MESSAGE_PAYLOAD_SIZE = 65 * 1024; //max IoT Hub cloud to device message size is 65 kb, so amqp websocket layer should buffer at most that much space
 
-    private Exception savedException;
     private boolean connectionOpenedRemotely;
     private boolean sessionOpenedRemotely;
     protected boolean linkOpenedRemotely;
     private String connectionId;
+    private final int keepAliveIntervalSeconds;
 
     @Getter
     protected final String hostName;
@@ -63,12 +64,15 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
 
     Connection connection;
     private CbsSessionHandler cbsSessionHandler;
+    private Runnable onReactorClosedCallback;
 
     AmqpConnectionHandler(
         String connectionString,
         IotHubServiceClientProtocol iotHubServiceClientProtocol,
+        Consumer<ErrorContext> errorProcessor,
         ProxyOptions proxyOptions,
-        SSLContext sslContext)
+        SSLContext sslContext,
+        int keepAliveIntervalSeconds)
     {
         if (connectionString == null || connectionString.isEmpty())
         {
@@ -80,6 +84,8 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         this.proxyOptions = proxyOptions;
         this.hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString).getHostName();
         this.connectionString = connectionString;
+        this.errorProcessor = errorProcessor;
+        this.keepAliveIntervalSeconds = keepAliveIntervalSeconds;
 
         commonConstructorSetup(iotHubServiceClientProtocol, proxyOptions, sslContext);
     }
@@ -88,8 +94,10 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         String hostName,
         AzureSasCredential sasTokenProvider,
         IotHubServiceClientProtocol iotHubServiceClientProtocol,
+        Consumer<ErrorContext> errorProcessor,
         ProxyOptions proxyOptions,
-        SSLContext sslContext)
+        SSLContext sslContext,
+        int keepAliveIntervalSeconds)
     {
         if (hostName == null || hostName.isEmpty())
         {
@@ -101,6 +109,8 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
 
         this.hostName = hostName;
         this.sasTokenProvider = sasTokenProvider;
+        this.errorProcessor = errorProcessor;
+        this.keepAliveIntervalSeconds = keepAliveIntervalSeconds;
 
         commonConstructorSetup(iotHubServiceClientProtocol, proxyOptions, sslContext);
     }
@@ -109,8 +119,10 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         String hostName,
         TokenCredential credential,
         IotHubServiceClientProtocol iotHubServiceClientProtocol,
+        Consumer<ErrorContext> errorProcessor,
         ProxyOptions proxyOptions,
-        SSLContext sslContext)
+        SSLContext sslContext,
+        int keepAliveIntervalSeconds)
     {
         if (hostName == null || hostName.isEmpty())
         {
@@ -122,6 +134,8 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
 
         this.hostName = hostName;
         this.credential = credential;
+        this.errorProcessor = errorProcessor;
+        this.keepAliveIntervalSeconds = keepAliveIntervalSeconds;
 
         commonConstructorSetup(iotHubServiceClientProtocol, proxyOptions, sslContext);
     }
@@ -134,7 +148,6 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         this.proxyOptions = proxyOptions;
         this.sslContext = sslContext; // if null, a default SSLContext will be generated for the user
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
-        this.savedException = null;
         this.connectionOpenedRemotely = false;
         this.sessionOpenedRemotely = false;
         this.linkOpenedRemotely = false;
@@ -180,28 +193,29 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
     public void onConnectionBound(Event event)
     {
         Transport transport = event.getConnection().getTransport();
-        if (transport != null)
+
+        // Convert from seconds to milliseconds since this proton-j API only accepts keep alive in milliseconds
+        transport.setIdleTimeout(this.keepAliveIntervalSeconds * 1000);
+
+        if (this.iotHubServiceClientProtocol == IotHubServiceClientProtocol.AMQPS_WS)
         {
-            if (this.iotHubServiceClientProtocol == IotHubServiceClientProtocol.AMQPS_WS)
-            {
-                WebSocketImpl webSocket = new WebSocketImpl(MAX_MESSAGE_PAYLOAD_SIZE);
-                webSocket.configure(this.hostName, WEB_SOCKET_PATH, WEB_SOCKET_QUERY, AMQPS_WS_PORT, WEB_SOCKET_SUB_PROTOCOL, null, null);
-                ((TransportInternal) transport).addTransportLayer(webSocket);
-            }
+            WebSocketImpl webSocket = new WebSocketImpl(MAX_MESSAGE_PAYLOAD_SIZE);
+            webSocket.configure(this.hostName, WEB_SOCKET_PATH, WEB_SOCKET_QUERY, AMQPS_WS_PORT, WEB_SOCKET_SUB_PROTOCOL, null, null);
+            ((TransportInternal) transport).addTransportLayer(webSocket);
+        }
 
-            // Note that this does not mean that the connection will not be authenticated. This simply defers authentication
-            // to the claims based security model that IoT Hub implements wherein the client sends the authentication token
-            // over the CBS link rather than doing a sasl.plain(username, password) call at this point.
-            transport.sasl().setMechanisms("ANONYMOUS");
+        // Note that this does not mean that the connection will not be authenticated. This simply defers authentication
+        // to the claims based security model that IoT Hub implements wherein the client sends the authentication token
+        // over the CBS link rather than doing a sasl.plain(username, password) call at this point.
+        transport.sasl().setMechanisms("ANONYMOUS");
 
-            SslDomain domain = makeDomain();
-            domain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
-            transport.ssl(domain);
+        SslDomain domain = makeDomain();
+        domain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
+        transport.ssl(domain);
 
-            if (this.proxyOptions != null)
-            {
-                addProxyLayer(transport, this.hostName);
-            }
+        if (this.proxyOptions != null)
+        {
+            addProxyLayer(transport, this.hostName);
         }
     }
 
@@ -254,6 +268,12 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         }
     }
 
+    @Override
+    public void onReactorFinal(Event event)
+    {
+        this.onReactorClosedCallback.run();
+    }
+
     public String getConnectionId()
     {
         return this.connectionId;
@@ -278,11 +298,6 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
             }
         }
 
-        if (this.savedException != null)
-        {
-            throw new IOException("Connection failed to be established", this.savedException);
-        }
-
         if (!this.connectionOpenedRemotely || !this.sessionOpenedRemotely || !this.linkOpenedRemotely)
         {
             throw new IOException("Amqp connection timed out waiting for service to respond");
@@ -297,22 +312,15 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
     {
         SslDomain domain = Proton.sslDomain();
 
-        try
+        if (this.sslContext == null)
         {
-            if (this.sslContext == null)
-            {
-                // Need the base trusted certs for IotHub in our ssl context. IotHubSSLContext handles that
-                domain.setSslContext(new IotHubSSLContext().getSSLContext());
-            }
-            else
-            {
-                // Custom SSLContext set by user from service client options
-                domain.setSslContext(this.sslContext);
-            }
+            // Need the base trusted certs for IotHub in our ssl context. IotHubSSLContext handles that
+            domain.setSslContext(new IotHubSSLContext().getSSLContext());
         }
-        catch (Exception e)
+        else
         {
-            this.savedException = e;
+            // Custom SSLContext set by user from service client options
+            domain.setSslContext(this.sslContext);
         }
 
         domain.init(SslDomain.Mode.CLIENT);
@@ -332,7 +340,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
     @Override
     public void onAuthenticationFailed(IotHubException e)
     {
-        this.savedException = e;
+        this.protonJExceptionParser = new ProtonJExceptionParser(e);
     }
 
     public boolean isOpen()
@@ -343,7 +351,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
             && this.cbsSessionHandler.isOpen();
     }
 
-    public void closeAsync()
+    public void closeAsync(Runnable onReactorClosedCallback)
     {
         if (this.connection != null)
         {
@@ -356,5 +364,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
             log.debug("Shutdown event occurred, closing file upload notification receiver link");
             this.cbsSessionHandler.close();
         }
+
+        this.onReactorClosedCallback = onReactorClosedCallback;
     }
 }

@@ -71,8 +71,10 @@ public final class MessagingClient
             new CloudToDeviceMessageConnectionHandler(
                 connectionString,
                 protocol,
+                this.errorProcessor,
                 options.getProxyOptions(),
-                options.getSslContext());
+                options.getSslContext(),
+                options.getKeepAliveInterval());
 
         commonConstructorSetup();
     }
@@ -133,8 +135,10 @@ public final class MessagingClient
                 hostName,
                 credential,
                 protocol,
+                this.errorProcessor,
                 options.getProxyOptions(),
-                options.getSslContext());
+                options.getSslContext(),
+                options.getKeepAliveInterval());
 
         commonConstructorSetup();
     }
@@ -182,8 +186,10 @@ public final class MessagingClient
                 hostName,
                 azureSasCredential,
                 protocol,
+                this.errorProcessor,
                 options.getProxyOptions(),
-                options.getSslContext());
+                options.getSslContext(),
+                options.getKeepAliveInterval());
 
         commonConstructorSetup();
     }
@@ -201,6 +207,9 @@ public final class MessagingClient
             return;
         }
 
+        AtomicReference<IotHubException> iotHubException = new AtomicReference<>(null);
+        AtomicReference<IOException> ioException = new AtomicReference<>(null);
+
         log.debug("Opening MessagingClient");
 
         this.reactorRunner = new ReactorRunner(
@@ -209,12 +218,7 @@ public final class MessagingClient
             this.cloudToDeviceMessageConnectionHandler);
 
         final CountDownLatch openLatch = new CountDownLatch(1);
-        this.cloudToDeviceMessageConnectionHandler.setOnConnectionOpenedCallback(e ->
-        {
-            //TODO check for exception?
-
-            openLatch.countDown();
-        });
+        this.cloudToDeviceMessageConnectionHandler.setOnConnectionOpenedCallback(() -> openLatch.countDown());
 
         new Thread(() ->
         {
@@ -222,19 +226,24 @@ public final class MessagingClient
             {
                 reactorRunner.run();
 
-                log.trace("EventProcessorClient Amqp reactor stopped, checking that the connection was opened");
+                log.trace("MessagingClient Amqp reactor stopped, checking that the connection was opened");
                 this.cloudToDeviceMessageConnectionHandler.verifyConnectionWasOpened();
 
-                log.trace("EventProcessorClient  reactor did successfully open the connection, returning without exception");
+                log.trace("MessagingClient reactor did successfully open the connection, returning without exception");
             }
-            catch (IOException | IotHubException e)
+            catch (IOException e)
             {
-                log.warn("EventProcessorClient Amqp connection encountered an exception", e);
+                log.debug("MessagingClient Amqp connection encountered an exception", e);
 
-                if (this.errorProcessor != null)
-                {
-                    this.errorProcessor.accept(new ErrorContext(e));
-                }
+                ioException.set(e);
+                openLatch.countDown();
+            }
+            catch (IotHubException e)
+            {
+                log.debug("MessagingClient Amqp connection encountered an exception", e);
+
+                iotHubException.set(e);
+                openLatch.countDown();
             }
         }).start();
 
@@ -242,7 +251,17 @@ public final class MessagingClient
 
         if (timedOut)
         {
-            //TODO
+            throw new IOException("Timed out waiting for the connection to the service to open");
+        }
+
+        if (ioException.get() != null)
+        {
+            throw ioException.get();
+        }
+
+        if (iotHubException.get() != null)
+        {
+            throw iotHubException.get();
         }
 
         log.debug("Opened MessagingClient");
@@ -315,6 +334,11 @@ public final class MessagingClient
                 throw new IotHubException("Timed out waiting for message to be acknowledged");
             }
         }
+
+        if (exception.get() != null)
+        {
+            throw exception.get();
+        }
     }
 
     public void sendAsync(String deviceId, Message message, Consumer<SendResult> onMessageSentCallback, Object context)
@@ -325,5 +349,10 @@ public final class MessagingClient
     public void sendAsync(String deviceId, String moduleId, Message message, Consumer<SendResult> onMessageSentCallback, Object context)
     {
         this.cloudToDeviceMessageConnectionHandler.sendAsync(deviceId, moduleId, message, onMessageSentCallback, context);
+    }
+
+    public boolean isOpen()
+    {
+        return this.reactorRunner != null && this.reactorRunner.isRunning();
     }
 }

@@ -5,15 +5,20 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
+import com.microsoft.azure.sdk.iot.service.messaging.ErrorContext;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.engine.BaseHandler;
 import org.apache.qpid.proton.engine.EndpointState;
 import org.apache.qpid.proton.engine.Event;
 
+import java.util.function.Consumer;
+
 @Slf4j
 public class ErrorLoggingBaseHandler extends BaseHandler
 {
     protected ProtonJExceptionParser protonJExceptionParser;
+    protected Consumer<ErrorContext> errorProcessor;
 
     @Override
     public void onLinkRemoteClose(Event event)
@@ -36,6 +41,8 @@ public class ErrorLoggingBaseHandler extends BaseHandler
                     log.error("Unknown amqp link was closed remotely with exception {} with description {}", protonJExceptionParser.getError(), protonJExceptionParser.getErrorDescription());
                 }
             }
+
+            this.processError();
         }
         else
         {
@@ -58,6 +65,8 @@ public class ErrorLoggingBaseHandler extends BaseHandler
             {
                 log.error("Amqp session was closed remotely with exception {} with description {}", protonJExceptionParser.getError(), protonJExceptionParser.getErrorDescription());
             }
+
+            this.processError();
         }
         else
         {
@@ -80,6 +89,8 @@ public class ErrorLoggingBaseHandler extends BaseHandler
             {
                 log.error("Amqp connection was closed remotely with exception {} with description {}", protonJExceptionParser.getError(), protonJExceptionParser.getErrorDescription());
             }
+
+            this.processError();
         }
         else
         {
@@ -99,6 +110,23 @@ public class ErrorLoggingBaseHandler extends BaseHandler
         else
         {
             log.error("Amqp transport threw exception {} with description {}", protonJExceptionParser.getError(), protonJExceptionParser.getErrorDescription());
+        }
+
+        this.processError();
+    }
+
+    private void processError()
+    {
+        if (this.errorProcessor != null)
+        {
+            if (this.protonJExceptionParser.getIotHubException() != null)
+            {
+                this.errorProcessor.accept(new ErrorContext(this.protonJExceptionParser.getIotHubException()));
+            }
+            else if (this.protonJExceptionParser.getNetworkException() != null)
+            {
+                this.errorProcessor.accept(new ErrorContext(this.protonJExceptionParser.getNetworkException()));
+            }
         }
     }
 }

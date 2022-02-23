@@ -202,7 +202,14 @@ public class AzureSasCredentialSample
 
             Consumer<ErrorContext> errorProcessor = errorContext ->
             {
-                System.out.println("Lost connection to service: " + errorContext.getException().getMessage());
+                if (errorContext.getIotHubException() != null)
+                {
+                    System.out.println("Encountered an IoT hub level error while receiving events " + errorContext.getIotHubException().getMessage());
+                }
+                else
+                {
+                    System.out.println("Encountered a network error while receiving events " + errorContext.getNetworkException().getMessage());
+                }
             };
 
             FileUploadNotificationProcessorClientOptions fileUploadNotificationProcessorClientOptions =

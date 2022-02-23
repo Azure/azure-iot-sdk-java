@@ -24,4 +24,6 @@ public class IotHubUnathorizedException extends IotHubException
     {
         super(message, errorCode, errorCodeDescription);
     }
+
+    public static final String amqpErrorCode = "amqp:unauthorized-access";
 }

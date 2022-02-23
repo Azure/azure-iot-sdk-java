@@ -5,18 +5,16 @@ package com.microsoft.azure.sdk.iot.service.messaging;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
-import com.microsoft.azure.sdk.iot.service.ProxyOptions;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpEventProcessorHandler;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.ReactorRunner;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -56,8 +54,10 @@ public class FileUploadNotificationProcessorClient
                 protocol,
                 fileUploadNotificationProcessor,
                 null,
+                this.errorProcessor,
                 options.getProxyOptions(),
-                options.getSslContext());
+                options.getSslContext(),
+                options.getKeepAliveInterval());
     }
 
     public FileUploadNotificationProcessorClient(
@@ -86,8 +86,10 @@ public class FileUploadNotificationProcessorClient
                 protocol,
                 fileUploadNotificationProcessor,
                 null,
+                this.errorProcessor,
                 options.getProxyOptions(),
-                options.getSslContext());
+                options.getSslContext(),
+                options.getKeepAliveInterval());
     }
 
     public FileUploadNotificationProcessorClient(
@@ -113,8 +115,10 @@ public class FileUploadNotificationProcessorClient
                 protocol,
                 fileUploadNotificationProcessor,
                 null,
+                this.errorProcessor,
                 options.getProxyOptions(),
-                options.getSslContext());
+                options.getSslContext(),
+                options.getKeepAliveInterval());
     }
 
     public synchronized void start() throws IotHubException, IOException, InterruptedException
@@ -125,6 +129,9 @@ public class FileUploadNotificationProcessorClient
             return;
         }
 
+        AtomicReference<IotHubException> iotHubException = new AtomicReference<>(null);
+        AtomicReference<IOException> ioException = new AtomicReference<>(null);
+
         log.debug("Opening FileUploadNotificationProcessorClient");
 
         this.reactorRunner = new ReactorRunner(
@@ -133,12 +140,7 @@ public class FileUploadNotificationProcessorClient
             this.amqpEventProcessorHandler);
 
         final CountDownLatch openLatch = new CountDownLatch(1);
-        this.amqpEventProcessorHandler.setOnConnectionOpenedCallback(e ->
-        {
-            //TODO check for exception?
-
-            openLatch.countDown();
-        });
+        this.amqpEventProcessorHandler.setOnConnectionOpenedCallback(() -> openLatch.countDown());
 
         new Thread(() ->
         {
@@ -146,27 +148,42 @@ public class FileUploadNotificationProcessorClient
             {
                 reactorRunner.run();
 
-                log.trace("EventProcessorClient Amqp reactor stopped, checking that the connection was opened");
+                log.trace("FileUploadNotificationProcessorClient Amqp reactor stopped, checking that the connection was opened");
                 this.amqpEventProcessorHandler.verifyConnectionWasOpened();
 
-                log.trace("EventProcessorClient  reactor did successfully open the connection, returning without exception");
+                log.trace("FileUploadNotificationProcessorClient  reactor did successfully open the connection, returning without exception");
             }
-            catch (IOException | IotHubException e)
+            catch (IOException e)
             {
-                log.warn("EventProcessorClient Amqp connection encountered an exception", e);
+                log.debug("FileUploadNotificationProcessorClient Amqp connection encountered an exception", e);
 
-                if (this.errorProcessor != null)
-                {
-                    this.errorProcessor.accept(new ErrorContext(e));
-                }
+                ioException.set(e);
+                openLatch.countDown();
+            }
+            catch (IotHubException e)
+            {
+                log.debug("FileUploadNotificationProcessorClient Amqp connection encountered an exception", e);
+
+                iotHubException.set(e);
+                openLatch.countDown();
             }
         }).start();
 
         boolean timedOut = !openLatch.await(10 * 1000, TimeUnit.MILLISECONDS);
 
+        if (ioException.get() != null)
+        {
+            throw ioException.get();
+        }
+
+        if (iotHubException.get() != null)
+        {
+            throw iotHubException.get();
+        }
+
         if (timedOut)
         {
-            //TODO
+            throw new IOException("Timed out waiting for the connection to the service to open");
         }
 
         log.debug("Opened FileUploadNotificationProcessorClient");
@@ -174,8 +191,7 @@ public class FileUploadNotificationProcessorClient
 
     public synchronized boolean isRunning()
     {
-        //TODO
-        return true;
+        return this.reactorRunner != null && this.reactorRunner.isRunning();
     }
 
     public synchronized void stop() throws InterruptedException

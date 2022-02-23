@@ -24,4 +24,6 @@ public class IotHubInvalidOperationException extends IotHubException
     {
         super(message, errorCode, errorCodeDescription);
     }
+
+    public static final String amqpErrorCode = "amqp:not-allowed";
 }

@@ -11,8 +11,11 @@ import org.apache.qpid.proton.engine.BaseHandler;
 import org.apache.qpid.proton.engine.HandlerException;
 import org.apache.qpid.proton.reactor.Reactor;
 import org.apache.qpid.proton.reactor.ReactorOptions;
+import org.omg.CORBA.CurrentOperations;
 
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class ReactorRunner
@@ -74,24 +77,25 @@ public class ReactorRunner
     {
         try
         {
-            this.handler.closeAsync();
+            final CountDownLatch onReactorClosedLatch = new CountDownLatch(1);
+            this.handler.closeAsync(() -> onReactorClosedLatch.countDown());
 
-            long startTime = System.currentTimeMillis();
-            while (this.handler.isOpen())
+            boolean timedOut = !onReactorClosedLatch.await(timeoutMilliseconds, TimeUnit.MILLISECONDS);
+
+            if (timedOut)
             {
-                Thread.sleep(300); // TODO switch to countdown latch
-
-                if (System.currentTimeMillis() - startTime > timeoutMilliseconds)
-                {
-                    log.debug("Timed out waiting for amqp connection to close gracefully. Closing forcefully now.");
-                    break;
-                }
+                log.debug("Timed out waiting for amqp connection to close gracefully. Closing forcefully now.");
             }
         }
         finally
         {
             this.reactor.stop();
         }
+    }
+
+    public boolean isRunning()
+    {
+        return this.reactor != null && this.handler != null && this.handler.isOpen();
     }
 }
 

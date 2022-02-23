@@ -24,4 +24,6 @@ public class IotHubNotSupportedException extends IotHubException
     {
         super(message, errorCode, errorCodeDescription);
     }
+
+    public static final String amqpErrorCode = "amqp:not-implemented";
 }

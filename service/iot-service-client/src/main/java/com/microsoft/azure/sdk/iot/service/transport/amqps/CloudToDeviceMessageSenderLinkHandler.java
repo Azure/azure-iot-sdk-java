@@ -176,7 +176,8 @@ public class CloudToDeviceMessageSenderLinkHandler extends SenderLinkHandler
             Message iotHubMessage = this.protonMessageToIotHubMessageMap.remove(protonMessage);
             if (iotHubMessage != null)
             {
-                log.trace("Acknowledgement arrived for sent cloud to device message with correlation id {}", iotHubMessage.getCorrelationId());
+                String correlationId = iotHubMessage.getCorrelationId();
+                log.trace("Acknowledgement arrived for sent cloud to device message with correlation id {}", correlationId);
                 AmqpResponseVerification amqpResponse = new AmqpResponseVerification(remoteState);
 
                 Consumer<SendResult> onMessageSentCallback = this.iotHubMessageToCallbackMap.remove(iotHubMessage);
@@ -184,7 +185,7 @@ public class CloudToDeviceMessageSenderLinkHandler extends SenderLinkHandler
 
                 if (onMessageSentCallback != null)
                 {
-                    SendResult sendResult = new SendResult(amqpResponse.getException() != null, context, amqpResponse.getException());
+                    SendResult sendResult = new SendResult(amqpResponse.getException() == null, correlationId, context, amqpResponse.getException());
                     onMessageSentCallback.accept(sendResult);
                 }
             }

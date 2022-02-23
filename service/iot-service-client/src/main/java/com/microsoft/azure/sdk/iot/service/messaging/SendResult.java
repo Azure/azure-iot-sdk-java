@@ -10,7 +10,10 @@ import lombok.Getter;
 @AllArgsConstructor
 public class SendResult
 {
-    private final boolean sentSuccessfully;
+    private final boolean sentSuccessfully; //TODO test out case where this is false
+
+    @Getter
+    private final String correlationId;
 
     @Getter
     private final Object context;

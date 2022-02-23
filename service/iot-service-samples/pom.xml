@@ -29,6 +29,7 @@
         <module>role-based-authorization-sample</module>
         <module>azure-sas-credential-sample</module>
         <module>messaging-client-sample</module>
+        <module>messaging-client-performance-sample</module>
     </modules>
     <dependencies>
         <dependency>

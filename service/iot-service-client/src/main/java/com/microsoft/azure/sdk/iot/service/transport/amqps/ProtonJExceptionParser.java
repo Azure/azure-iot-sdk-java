@@ -5,7 +5,14 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubDeviceMaximumQueueDepthExceededException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubInternalServerErrorException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubInvalidOperationException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubMessageTooLargeException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotSupportedException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubPreconditionFailedException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
 import lombok.Getter;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
@@ -20,28 +27,65 @@ public class ProtonJExceptionParser
     private String error;
     private String errorDescription;
 
+    private final IotHubException iotHubException;
+    private final IOException networkException;
+
     private static final String DEFAULT_ERROR_DESCRIPTION = "NoErrorDescription";
 
     public ProtonJExceptionParser(Event event)
     {
-        getTransportExceptionFromProtonEndpoints(event.getSender(), event.getReceiver(), event.getConnection(), event.getTransport(), event.getSession(), event.getLink());
+        getErrorFromEndpoints(event.getSender(), event.getReceiver(), event.getConnection(), event.getTransport(), event.getSession(), event.getLink());
+
+        this.iotHubException = getIotHubException(this.error, this.errorDescription);
+        this.networkException = getNetworkException(this.error, this.errorDescription);
     }
 
-    public IotHubException getIotHubException()
+    public ProtonJExceptionParser(IotHubException iotHubException)
     {
-        if (error.equals("amqp:unauthorized-access"))
+        this.iotHubException = iotHubException;
+        this.networkException = null;
+    }
+
+    private static IotHubException getIotHubException(String error, String errorDescription)
+    {
+        switch (error)
         {
-            return new IotHubUnathorizedException(errorDescription);
+            case IotHubUnathorizedException.amqpErrorCode:
+                return new IotHubUnathorizedException(errorDescription);
+            case IotHubNotFoundException.amqpErrorCode:
+                return new IotHubNotFoundException(errorDescription);
+            case IotHubDeviceMaximumQueueDepthExceededException.amqpErrorCode:
+                return new IotHubDeviceMaximumQueueDepthExceededException(errorDescription);
+            case IotHubMessageTooLargeException.amqpErrorCode:
+                return new IotHubMessageTooLargeException(errorDescription);
+            case IotHubInternalServerErrorException.amqpErrorCode:
+                return new IotHubInternalServerErrorException(errorDescription);
+            case IotHubInvalidOperationException.amqpErrorCode:
+                return new IotHubInvalidOperationException(errorDescription);
+            case IotHubNotSupportedException.amqpErrorCode:
+                return new IotHubNotSupportedException(errorDescription);
+            case IotHubPreconditionFailedException.amqpErrorCode:
+                return new IotHubPreconditionFailedException(errorDescription);
         }
 
-        //TODO all the other possible exceptions?
+        if (getNetworkException(error, errorDescription) == null)
+        {
+            // by default, must return at least the error code and description to the user
+            return new IotHubException(error + ":" + errorDescription);
+        }
+
         return null;
     }
 
-    public IOException getNetworkException()
+    private static IOException getNetworkException(String error, String errorDescription)
     {
-        //TODO all the other possible exceptions?
-        return new IOException(errorDescription);
+        // all proton IO exceptions use this error code. If it isn't present, then it is likely an IoT Hub level error code instead
+        if (error.equals("proton:io"))
+        {
+            return new IOException(errorDescription);
+        }
+
+        return null;
     }
 
     private ErrorCondition getErrorConditionFromEndpoint(Endpoint endpoint)
@@ -49,7 +93,7 @@ public class ProtonJExceptionParser
         return endpoint.getCondition() != null && endpoint.getCondition().getCondition() != null ? endpoint.getCondition() : endpoint.getRemoteCondition();
     }
 
-    private void getTransportExceptionFromProtonEndpoints(Endpoint... endpoints)
+    private void getErrorFromEndpoints(Endpoint... endpoints)
     {
         for (Endpoint endpoint : endpoints)
         {
