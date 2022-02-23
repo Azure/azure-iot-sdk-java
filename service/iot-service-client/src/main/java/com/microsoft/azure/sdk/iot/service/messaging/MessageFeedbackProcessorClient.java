@@ -169,13 +169,15 @@ public class MessageFeedbackProcessorClient
                 log.debug("MessageFeedbackProcessorClient Amqp connection encountered an exception", e);
 
                 ioException.set(e);
-                openLatch.countDown();
             }
             catch (IotHubException e)
             {
                 log.debug("MessageFeedbackProcessorClient Amqp connection encountered an exception", e);
 
                 iotHubException.set(e);
+            }
+            finally
+            {
                 openLatch.countDown();
             }
         }).start();
