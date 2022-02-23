@@ -174,7 +174,7 @@ public class AmqpEventProcessorHandler extends AmqpConnectionHandler implements 
     }
 
     @Override
-    public void closeAsync(Runnable onReactorClosedCallback)
+    public void closeAsync(Runnable onConnectionClosedCallback)
     {
         if (this.session != null)
         {
@@ -194,7 +194,7 @@ public class AmqpEventProcessorHandler extends AmqpConnectionHandler implements 
             this.messageFeedbackReceiverLinkHandler.close();
         }
 
-        super.closeAsync(onReactorClosedCallback);
+        super.closeAsync(onConnectionClosedCallback);
     }
 
     @Override

@@ -11,7 +11,6 @@ import com.microsoft.azure.proton.transport.proxy.ProxyHandler;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyHandlerImpl;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
 import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.messaging.ErrorContext;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
@@ -64,7 +63,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
 
     Connection connection;
     private CbsSessionHandler cbsSessionHandler;
-    private Runnable onReactorClosedCallback;
+    private Runnable onConnectionClosedCallback;
 
     AmqpConnectionHandler(
         String connectionString,
@@ -275,9 +274,12 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
     }
 
     @Override
-    public void onReactorFinal(Event event)
+    public void onConnectionRemoteClose(Event event)
     {
-        this.onReactorClosedCallback.run();
+        if (this.onConnectionClosedCallback != null)
+        {
+            this.onConnectionClosedCallback.run();
+        }
     }
 
     public String getConnectionId()
@@ -357,7 +359,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
             && this.cbsSessionHandler.isOpen();
     }
 
-    public void closeAsync(Runnable onReactorClosedCallback)
+    public void closeAsync(Runnable onConnectionClosedCallback)
     {
         if (this.connection != null)
         {
@@ -371,6 +373,6 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
             this.cbsSessionHandler.close();
         }
 
-        this.onReactorClosedCallback = onReactorClosedCallback;
+        this.onConnectionClosedCallback = onConnectionClosedCallback;
     }
 }

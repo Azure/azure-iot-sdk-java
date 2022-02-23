@@ -156,7 +156,7 @@ public class CloudToDeviceMessageConnectionHandler extends AmqpConnectionHandler
     }
 
     @Override
-    public void closeAsync(Runnable onReactorClosedCallback)
+    public void closeAsync(Runnable onConnectionClosedCallback)
     {
         if (this.cloudToDeviceMessageSenderLinkHandler != null)
         {
@@ -170,7 +170,7 @@ public class CloudToDeviceMessageConnectionHandler extends AmqpConnectionHandler
             this.session.close();
         }
 
-        super.closeAsync(onReactorClosedCallback);
+        super.closeAsync(onConnectionClosedCallback);
     }
 
     @Override
