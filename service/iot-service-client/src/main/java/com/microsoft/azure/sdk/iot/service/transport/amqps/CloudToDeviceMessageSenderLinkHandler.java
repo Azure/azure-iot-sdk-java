@@ -39,15 +39,8 @@ import java.util.function.Consumer;
 @Slf4j
 public class CloudToDeviceMessageSenderLinkHandler extends SenderLinkHandler
 {
-    private static final String DEVICE_PATH_FORMAT = "/devices/%s/messages/devicebound";
-    private static final String MODULE_PATH_FORMAT = "/devices/%s/modules/%s/messages/devicebound";
-
-    //TODO can this be simplified? This is a lot of state
-    private final Queue<org.apache.qpid.proton.message.Message> outgoingMessageQueue = new ConcurrentLinkedQueue<>();
-    private final Map<Integer, org.apache.qpid.proton.message.Message> unacknowledgedMessages = new ConcurrentHashMap<>();
-    private final Map<org.apache.qpid.proton.message.Message, Message> protonMessageToIotHubMessageMap = new ConcurrentHashMap<>();
-    private final Map<Message, Consumer<SendResult>> iotHubMessageToCallbackMap = new ConcurrentHashMap<>();
-    private final Map<Message, Object> iotHubMessageToCallbackContextMap = new ConcurrentHashMap<>();
+    private final Queue<CloudToDeviceMessage> outgoingMessageQueue = new ConcurrentLinkedQueue<>();
+    private final Map<Integer, CloudToDeviceMessage> unacknowledgedMessages = new ConcurrentHashMap<>();
 
     public CloudToDeviceMessageSenderLinkHandler(Sender sender, String linkCorrelationId, LinkStateCallback linkStateCallback)
     {
@@ -56,79 +49,16 @@ public class CloudToDeviceMessageSenderLinkHandler extends SenderLinkHandler
 
     public void sendAsync(String deviceId, String moduleId, Message iotHubMessage, Consumer<SendResult> callback, Object context)
     {
-        org.apache.qpid.proton.message.Message protonMessageToQueue;
         if (moduleId == null)
         {
-            protonMessageToQueue = createProtonMessage(deviceId, iotHubMessage);
-            log.debug("Queueing cloud to device message with correlation id {}", iotHubMessage.getCorrelationId());
+            log.trace("Queueing cloud to device message with correlation id {}", iotHubMessage.getCorrelationId());
         }
         else
         {
-            protonMessageToQueue = createProtonMessage(deviceId, moduleId, iotHubMessage);
-            log.debug("Queueing cloud to module message with correlation id {}", iotHubMessage.getCorrelationId());
+            log.trace("Queueing cloud to module message with correlation id {}", iotHubMessage.getCorrelationId());
         }
 
-        outgoingMessageQueue.add(protonMessageToQueue);
-        protonMessageToIotHubMessageMap.put(protonMessageToQueue, iotHubMessage);
-        iotHubMessageToCallbackMap.put(iotHubMessage, callback);
-
-        if (context != null)
-        {
-            iotHubMessageToCallbackContextMap.put(iotHubMessage, context);
-        }
-    }
-
-    static org.apache.qpid.proton.message.Message createProtonMessage(String deviceId, Message message)
-    {
-        return populateProtonMessage(String.format(DEVICE_PATH_FORMAT, deviceId), message);
-    }
-
-    static org.apache.qpid.proton.message.Message createProtonMessage(String deviceId, String moduleId, Message message)
-    {
-        return populateProtonMessage(String.format(MODULE_PATH_FORMAT, deviceId, moduleId), message);
-    }
-
-    static org.apache.qpid.proton.message.Message populateProtonMessage(String targetPath, Message message)
-    {
-        org.apache.qpid.proton.message.Message protonMessage = Proton.message();
-
-        Properties properties = new Properties();
-        properties.setMessageId(message.getMessageId());
-        properties.setTo(targetPath);
-        properties.setCorrelationId(message.getCorrelationId());
-        if (message.getUserId() != null)
-        {
-            properties.setUserId(new Binary(message.getUserId().getBytes(StandardCharsets.UTF_8)));
-        }
-
-        protonMessage.setProperties(properties);
-
-        if (message.getProperties() != null && message.getProperties().size() > 0)
-        {
-            Map<String, Object> applicationPropertiesMap = new HashMap<>(message.getProperties().size());
-            for (Map.Entry<String, String> entry : message.getProperties().entrySet())
-            {
-                applicationPropertiesMap.put(entry.getKey(), entry.getValue());
-            }
-
-            ApplicationProperties applicationProperties = new ApplicationProperties(applicationPropertiesMap);
-            protonMessage.setApplicationProperties(applicationProperties);
-        }
-
-        Binary binary;
-        //Messages may have no payload, so check that the message has a payload before giving message.getBytes(StandardCharsets.UTF_8) as the payload
-        if (message.getBytes() != null)
-        {
-            binary = new Binary(message.getBytes());
-        }
-        else
-        {
-            binary = new Binary(new byte[0]);
-        }
-
-        Section section = new Data(binary);
-        protonMessage.setBody(section);
-        return protonMessage;
+        outgoingMessageQueue.add(new CloudToDeviceMessage(deviceId, moduleId, iotHubMessage, callback, context));
     }
 
     /**
@@ -154,10 +84,10 @@ public class CloudToDeviceMessageSenderLinkHandler extends SenderLinkHandler
 
     private void sendQueuedMessages()
     {
-        org.apache.qpid.proton.message.Message outgoingMessage = this.outgoingMessageQueue.poll();
+        CloudToDeviceMessage outgoingMessage = this.outgoingMessageQueue.poll();
         while (outgoingMessage != null)
         {
-            int deliveryTag = this.sendMessageAndGetDeliveryTag(outgoingMessage);
+            int deliveryTag = this.sendMessageAndGetDeliveryTag(outgoingMessage.getProtonMessage());
             this.unacknowledgedMessages.put(deliveryTag, outgoingMessage);
             outgoingMessage = this.outgoingMessageQueue.poll();
         }
@@ -172,29 +102,26 @@ public class CloudToDeviceMessageSenderLinkHandler extends SenderLinkHandler
 
         int deliveryTag = Integer.parseInt(new String(delivery.getTag(), StandardCharsets.UTF_8));
 
-        org.apache.qpid.proton.message.Message protonMessage = unacknowledgedMessages.remove(deliveryTag);
+        CloudToDeviceMessage message = unacknowledgedMessages.remove(deliveryTag);
 
-        if (protonMessage != null)
+        if (message != null)
         {
-            Message iotHubMessage = this.protonMessageToIotHubMessageMap.remove(protonMessage);
-            if (iotHubMessage != null)
-            {
-                String correlationId = iotHubMessage.getCorrelationId();
-                log.trace("Acknowledgement arrived for sent cloud to device message with correlation id {}", correlationId);
-                AmqpResponseVerification amqpResponse = new AmqpResponseVerification(remoteState);
+            String correlationId = message.getCorrelationId();
+            log.trace("Acknowledgement arrived for sent cloud to device message with correlation id {}", correlationId);
+            AmqpResponseVerification amqpResponse = new AmqpResponseVerification(remoteState);
 
-                Consumer<SendResult> onMessageSentCallback = this.iotHubMessageToCallbackMap.remove(iotHubMessage);
-                Object context = this.iotHubMessageToCallbackContextMap.remove(iotHubMessage);
+            Consumer<SendResult> onMessageSentCallback = message.getOnMessageSentCallback();
 
-                if (onMessageSentCallback != null)
-                {
-                    SendResult sendResult = new SendResult(amqpResponse.getException() == null, correlationId, context, amqpResponse.getException());
-                    onMessageSentCallback.accept(sendResult);
-                }
-            }
-            else
+            if (onMessageSentCallback != null)
             {
-                log.debug("Received an acknowledgement for a cloud to device message that this client sent, but has no record of being asked to send");
+                SendResult sendResult =
+                    new SendResult(
+                        amqpResponse.getException() == null,
+                        correlationId,
+                        message.getOnMessageSentCallbackContext(),
+                        amqpResponse.getException());
+
+                onMessageSentCallback.accept(sendResult);
             }
         }
         else
@@ -217,39 +144,38 @@ public class CloudToDeviceMessageSenderLinkHandler extends SenderLinkHandler
     {
         super.close();
 
-        for (org.apache.qpid.proton.message.Message unsentMessage : outgoingMessageQueue)
+        for (CloudToDeviceMessage unsentMessage : outgoingMessageQueue)
         {
-            Message unsentIotHubMessage = protonMessageToIotHubMessageMap.get(unsentMessage);
-            if (unsentIotHubMessage != null)
+            IotHubException exception = new IotHubException("Message failed to send because the client was closed while it was still queued.");
+            Consumer<SendResult> callback = unsentMessage.getOnMessageSentCallback();
+            if (callback != null)
             {
-                IotHubException exception = new IotHubException("Message failed to send because the client was closed while it was still queued.");
-                Consumer<SendResult> callback = iotHubMessageToCallbackMap.get(unsentIotHubMessage);
-                if (callback != null)
-                {
-                    Object context = iotHubMessageToCallbackContextMap.get(unsentIotHubMessage); // may be null if no context was set
-                    callback.accept(new SendResult(false, unsentIotHubMessage.getCorrelationId(), context, exception));
-                }
+                callback.accept(
+                    new SendResult(
+                        false,
+                        unsentMessage.getCorrelationId(),
+                        unsentMessage.getOnMessageSentCallbackContext(),
+                        exception));
             }
         }
 
-        for (org.apache.qpid.proton.message.Message unacknowledgedMessages : unacknowledgedMessages.values())
+        for (CloudToDeviceMessage unacknowledgedMessage : unacknowledgedMessages.values())
         {
-            Message unacknowledgedIotHubMessage = protonMessageToIotHubMessageMap.get(unacknowledgedMessages);
-            if (unacknowledgedIotHubMessage != null)
+            IotHubException exception = new IotHubException("Message failed to send because the client was closed after it was sent, but before it was acknowledged by the service.");
+            Consumer<SendResult> callback = unacknowledgedMessage.getOnMessageSentCallback();
+            if (callback != null)
             {
-                IotHubException exception = new IotHubException("Message failed to send because the client was closed after it was sent, but before it was acknowledged by the service.");
-                Consumer<SendResult> callback = iotHubMessageToCallbackMap.get(unacknowledgedIotHubMessage);
-                if (callback != null)
-                {
-                    Object context = iotHubMessageToCallbackContextMap.get(unacknowledgedIotHubMessage); // may be null if no context was set
-                    callback.accept(new SendResult(false, unacknowledgedIotHubMessage.getCorrelationId(), context, exception));
-                }
+                callback.accept(
+                    new SendResult(
+                        false,
+                        unacknowledgedMessage.getCorrelationId(),
+                        unacknowledgedMessage.getOnMessageSentCallbackContext(),
+                        exception));
             }
         }
 
-        protonMessageToIotHubMessageMap.clear();
-        iotHubMessageToCallbackMap.clear();
-        iotHubMessageToCallbackContextMap.clear();
+        outgoingMessageQueue.clear();
+        unacknowledgedMessages.clear();
     }
 
     @Override
