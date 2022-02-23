@@ -28,6 +28,7 @@ import java.util.function.Consumer;
 @Slf4j
 public final class MessagingClient
 {
+    private static final int START_REACTOR_TIMEOUT_MILLISECONDS = 10 * 1000; // 10 seconds
     private static final int STOP_REACTOR_TIMEOUT_MILLISECONDS = 10 * 1000; // 10 seconds
     private static final int MESSAGE_SEND_TIMEOUT_MILLISECONDS = 30 * 1000;
 
@@ -201,10 +202,20 @@ public final class MessagingClient
 
     public synchronized void open() throws IotHubException, IOException, InterruptedException
     {
+        open(START_REACTOR_TIMEOUT_MILLISECONDS);
+    }
+
+    public synchronized void open(int timeoutMilliseconds) throws IotHubException, IOException, InterruptedException
+    {
         if (this.reactorRunner != null && this.cloudToDeviceMessageConnectionHandler != null && this.cloudToDeviceMessageConnectionHandler.isOpen())
         {
             //already open
             return;
+        }
+
+        if (timeoutMilliseconds < 0)
+        {
+            throw new IllegalArgumentException("timeoutMilliseconds must be greater than or equal to 0");
         }
 
         AtomicReference<IotHubException> iotHubException = new AtomicReference<>(null);
@@ -247,7 +258,7 @@ public final class MessagingClient
             }
         }).start();
 
-        boolean timedOut = !openLatch.await(10 * 1000, TimeUnit.MILLISECONDS);
+        boolean timedOut = !openLatch.await(timeoutMilliseconds, TimeUnit.MILLISECONDS);
 
         if (timedOut)
         {
@@ -279,6 +290,11 @@ public final class MessagingClient
             return;
         }
 
+        if (timeoutMilliseconds < 0)
+        {
+            throw new IllegalArgumentException("timeoutMilliseconds must be greater than or equal to 0");
+        }
+
         this.reactorRunner.stop(timeoutMilliseconds);
         this.reactorRunner = null;
     }
@@ -306,7 +322,7 @@ public final class MessagingClient
         }
 
         AtomicReference<IotHubException> exception = new AtomicReference<>();
-        final CountDownLatch messageSentLock = new CountDownLatch(1);
+        final CountDownLatch messageSentLatch = new CountDownLatch(1);
 
         Consumer<SendResult> onMessageAcknowledgedCallback = sendResult ->
         {
@@ -315,7 +331,7 @@ public final class MessagingClient
                 exception.set(sendResult.getException());
             }
 
-            messageSentLock.countDown();
+            messageSentLatch.countDown();
         };
 
         this.sendAsync(deviceId, moduleId, message, onMessageAcknowledgedCallback, null);
@@ -323,11 +339,11 @@ public final class MessagingClient
         if (timeoutMilliseconds == 0)
         {
             // wait indefinitely
-            messageSentLock.await();
+            messageSentLatch.await();
         }
         else
         {
-            boolean timedOut = !messageSentLock.await(timeoutMilliseconds, TimeUnit.MILLISECONDS);
+            boolean timedOut = !messageSentLatch.await(timeoutMilliseconds, TimeUnit.MILLISECONDS);
 
             if (timedOut)
             {

@@ -21,6 +21,7 @@ import java.util.function.Function;
 @Slf4j
 public class MessageFeedbackProcessorClient
 {
+    private static final int START_REACTOR_TIMEOUT_MILLISECONDS = 10 * 1000; // 10 seconds
     private static final int STOP_REACTOR_TIMEOUT_MILLISECONDS = 10 * 1000; // 10 seconds
 
     private final AmqpEventProcessorHandler amqpEventProcessorHandler;
@@ -123,10 +124,20 @@ public class MessageFeedbackProcessorClient
 
     public synchronized void start() throws IotHubException, IOException, InterruptedException
     {
+        start(START_REACTOR_TIMEOUT_MILLISECONDS);
+    }
+
+    public synchronized void start(int timeoutMilliseconds) throws IotHubException, IOException, InterruptedException
+    {
         if (this.reactorRunner != null && this.amqpEventProcessorHandler != null && this.amqpEventProcessorHandler.isOpen())
         {
             //already open
             return;
+        }
+
+        if (timeoutMilliseconds < 0)
+        {
+            throw new IllegalArgumentException("timeoutMilliseconds must be greater than or equal to 0");
         }
 
         AtomicReference<IotHubException> iotHubException = new AtomicReference<>(null);
@@ -169,11 +180,19 @@ public class MessageFeedbackProcessorClient
             }
         }).start();
 
-        boolean timedOut = !openLatch.await(10 * 1000, TimeUnit.MILLISECONDS);
-
-        if (timedOut)
+        if (timeoutMilliseconds == 0)
         {
-            throw new IOException("Timed out waiting for the connection to the service to open");
+            // wait indefinitely
+            openLatch.await();
+        }
+        else
+        {
+            boolean timedOut = !openLatch.await(timeoutMilliseconds, TimeUnit.MILLISECONDS);
+
+            if (timedOut)
+            {
+                throw new IOException("Timed out waiting for the connection to the service to open");
+            }
         }
 
         if (ioException.get() != null)

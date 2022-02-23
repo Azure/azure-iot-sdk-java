@@ -80,11 +80,18 @@ public class ReactorRunner
             final CountDownLatch onReactorClosedLatch = new CountDownLatch(1);
             this.handler.closeAsync(() -> onReactorClosedLatch.countDown());
 
-            boolean timedOut = !onReactorClosedLatch.await(timeoutMilliseconds, TimeUnit.MILLISECONDS);
-
-            if (timedOut)
+            if (timeoutMilliseconds > 0)
             {
-                log.debug("Timed out waiting for amqp connection to close gracefully. Closing forcefully now.");
+                boolean timedOut = !onReactorClosedLatch.await(timeoutMilliseconds, TimeUnit.MILLISECONDS);
+
+                if (timedOut)
+                {
+                    log.debug("Timed out waiting for amqp connection to close gracefully. Closing forcefully now.");
+                }
+            }
+            else
+            {
+                onReactorClosedLatch.await(); // wait indefinitely
             }
         }
         finally
