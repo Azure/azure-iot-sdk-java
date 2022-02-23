@@ -87,7 +87,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         this.errorProcessor = errorProcessor;
         this.keepAliveIntervalSeconds = keepAliveIntervalSeconds;
 
-        commonConstructorSetup(iotHubServiceClientProtocol, proxyOptions, sslContext);
+        commonConstructorSetup(iotHubServiceClientProtocol, proxyOptions, sslContext, keepAliveIntervalSeconds);
     }
 
     AmqpConnectionHandler(
@@ -112,7 +112,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         this.errorProcessor = errorProcessor;
         this.keepAliveIntervalSeconds = keepAliveIntervalSeconds;
 
-        commonConstructorSetup(iotHubServiceClientProtocol, proxyOptions, sslContext);
+        commonConstructorSetup(iotHubServiceClientProtocol, proxyOptions, sslContext, keepAliveIntervalSeconds);
     }
 
     AmqpConnectionHandler(
@@ -137,13 +137,14 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         this.errorProcessor = errorProcessor;
         this.keepAliveIntervalSeconds = keepAliveIntervalSeconds;
 
-        commonConstructorSetup(iotHubServiceClientProtocol, proxyOptions, sslContext);
+        commonConstructorSetup(iotHubServiceClientProtocol, proxyOptions, sslContext, keepAliveIntervalSeconds);
     }
 
     private void commonConstructorSetup(
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             ProxyOptions proxyOptions,
-            SSLContext sslContext)
+            SSLContext sslContext,
+            int keepAliveIntervalSeconds)
     {
         this.proxyOptions = proxyOptions;
         this.sslContext = sslContext; // if null, a default SSLContext will be generated for the user
@@ -152,6 +153,11 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         this.sessionOpenedRemotely = false;
         this.linkOpenedRemotely = false;
         this.connectionId = UUID.randomUUID().toString();
+
+        if (keepAliveIntervalSeconds <= 0)
+        {
+            throw new IllegalArgumentException("Keep alive interval must be greater than 0 milliseconds");
+        }
 
         if (proxyOptions != null && this.iotHubServiceClientProtocol != IotHubServiceClientProtocol.AMQPS_WS)
         {

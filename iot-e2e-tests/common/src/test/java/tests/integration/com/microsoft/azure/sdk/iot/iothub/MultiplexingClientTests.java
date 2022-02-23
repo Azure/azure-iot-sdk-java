@@ -1132,7 +1132,7 @@ public class MultiplexingClientTests extends IntegrationTest
             for (int j = i + 1; j < DEVICE_MULTIPLEX_COUNT; j++)
             {
                 // devices above index i have not been deliberately faulted yet, so make sure they haven't seen a DISCONNECTED_RETRYING event yet.
-                assertFalse("Multiplexed device that hasn't been deliberately faulted yet saw an unexpected DISCONNECTED_RETRYING connection status callback", connectionStatusChangeTrackers[j].wentDisconnectedRetrying);
+                assertFalse("Multiplexed device that hasn't been deliberately faulted yet saw an unexpected DISCONNECTED connection status callback", connectionStatusChangeTrackers[j].clientClosedUnexpectedly);
             }
 
             // Try to send a message over the now-recovered device session
@@ -1563,7 +1563,7 @@ public class MultiplexingClientTests extends IntegrationTest
             // Verify that the other devices on the multiplexed connection were unaffected
             for (int i = 1; i < DEVICE_MULTIPLEX_COUNT; i++)
             {
-                assertFalse(connectionStatusChangeTrackers[i].wentDisconnectedRetrying);
+                assertFalse(connectionStatusChangeTrackers[i].clientClosedUnexpectedly);
                 assertTrue(connectionStatusChangeTrackers[i].isOpen);
             }
 
@@ -1711,7 +1711,7 @@ public class MultiplexingClientTests extends IntegrationTest
             // Verify that the other devices on the multiplexed connection were unaffected
             for (int i = 1; i < DEVICE_MULTIPLEX_COUNT; i++)
             {
-                assertFalse(connectionStatusChangeTrackers[i].wentDisconnectedRetrying);
+                assertFalse(connectionStatusChangeTrackers[i].clientClosedUnexpectedly);
                 assertTrue(connectionStatusChangeTrackers[i].isOpen);
             }
 
