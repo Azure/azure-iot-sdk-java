@@ -1141,7 +1141,7 @@ public class MultiplexingClientTests extends IntegrationTest
         // double check that the recovery of any particular device did not cause a device earlier in the array to lose connection
         testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray);
 
-        assertFalse("MultiplexingClient briefly lost connectivity unexpectedly", multiplexedConnectionStatusChangeTracker.wentDisconnectedRetrying);
+        assertFalse("MultiplexingClient briefly lost connectivity unexpectedly", multiplexedConnectionStatusChangeTracker.clientClosedUnexpectedly);
 
         testInstance.multiplexingClient.close();
 
@@ -1566,8 +1566,7 @@ public class MultiplexingClientTests extends IntegrationTest
             }
 
             // Verify that the multiplexed connection itself was unaffected
-            assertFalse("The multiplexed client briefly lost connectivity unexpectedly", multiplexedConnectionStatusChangeTracker.wentDisconnectedRetrying);
-            assertTrue("The multiplexed client closed unexpectedly", multiplexedConnectionStatusChangeTracker.isOpen);
+            assertFalse("MultiplexingClient lost connectivity unexpectedly", multiplexedConnectionStatusChangeTracker.clientClosedUnexpectedly);
 
             // Verify that the other devices can still send telemetry
             testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray.subList(1, DEVICE_MULTIPLEX_COUNT));
@@ -1630,8 +1629,7 @@ public class MultiplexingClientTests extends IntegrationTest
             }
 
             // Verify that the multiplexed connection itself was unaffected
-            assertFalse("The multiplexed client briefly lost connectivity unexpectedly", multiplexedConnectionStatusChangeTracker.wentDisconnectedRetrying);
-            assertTrue("The multiplexed client closed unexpectedly", multiplexedConnectionStatusChangeTracker.isOpen);
+            assertFalse("MultiplexingClient lost connectivity unexpectedly", multiplexedConnectionStatusChangeTracker.clientClosedUnexpectedly);
 
             // Verify that the other devices can still send telemetry
             testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray.subList(1, DEVICE_MULTIPLEX_COUNT));
@@ -1714,8 +1712,7 @@ public class MultiplexingClientTests extends IntegrationTest
             }
 
             // Verify that the multiplexed connection itself was unaffected
-            assertFalse("The multiplexed client briefly lost connectivity unexpectedly", multiplexedConnectionStatusChangeTracker.wentDisconnectedRetrying);
-            assertTrue("The multiplexed client closed unexpectedly", multiplexedConnectionStatusChangeTracker.isOpen);
+            assertFalse("MultiplexingClient lost connectivity unexpectedly", multiplexedConnectionStatusChangeTracker.clientClosedUnexpectedly);
 
             // Verify that the other devices can still send telemetry
             testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray.subList(1, DEVICE_MULTIPLEX_COUNT));
@@ -1891,7 +1888,7 @@ public class MultiplexingClientTests extends IntegrationTest
             testReceivingCloudToDeviceMessage(testInstance.deviceIdentityArray.get(i).getDeviceId(), messageCallbacks[i], expectedMessageCorrelationIds[i]);
         }
 
-        assertFalse(multiplexedConnectionStatusChangeTracker.wentDisconnectedRetrying);
+        assertFalse("MultiplexingClient lost connectivity unexpectedly", multiplexedConnectionStatusChangeTracker.clientClosedUnexpectedly);
 
         testInstance.multiplexingClient.close();
 
