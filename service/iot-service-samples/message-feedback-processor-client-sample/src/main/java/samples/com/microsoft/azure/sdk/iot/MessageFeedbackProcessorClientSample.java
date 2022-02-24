@@ -10,10 +10,10 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubInternalServerErrorE
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
 import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
 import com.microsoft.azure.sdk.iot.service.messaging.ErrorContext;
-import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotification;
-import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationProcessorClient;
-import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationProcessorClientOptions;
+import com.microsoft.azure.sdk.iot.service.messaging.FeedbackBatch;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.messaging.MessageFeedbackProcessorClient;
+import com.microsoft.azure.sdk.iot.service.messaging.MessageFeedbackProcessorClientOptions;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -22,11 +22,11 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * Sample code that demonstrates how to start processing file upload notifications from your IoT Hub. For more details
- * on file upload notifications, see <a href="https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-file-upload#service-file-upload-notifications">this document</a>.
+ * Sample code that demonstrates how to start processing cloud to device message feedback. For more details on cloud to
+ * device message feedback, see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-messages-c2d#message-feedback">this document</a>.
  * This sample also demonstrates best practices for reacting to network instability issues when using this client.
  */
-public class FileUploadNotificationProcessorClientSample
+public class MessageFeedbackProcessorClientSample
 {
     private static final String connectionString = "";
 
@@ -43,52 +43,52 @@ public class FileUploadNotificationProcessorClientSample
             throw new IllegalArgumentException("Must provide your IoT Hub's connection string");
         }
 
-
         final Object connectionEventLock = new Object();
         Consumer<ErrorContext> errorProcessor = errorContext ->
         {
             if (errorContext.getIotHubException() != null)
             {
-                System.out.println("Encountered an IoT hub level error while receiving events " + errorContext.getIotHubException().getMessage());
+                System.out.println("Encountered an IoT hub level error while receiving message feedback " + errorContext.getIotHubException().getMessage());
             }
             else
             {
-                System.out.println("Encountered a network error while receiving events " + errorContext.getNetworkException().getMessage());
+                System.out.println("Encountered a network error while receiving message feedback " + errorContext.getNetworkException().getMessage());
             }
 
             synchronized (connectionEventLock)
             {
-                // wake up the thread that owns the FileUploadNotificationProcessorClient so that it can restart the processing
+                // wake up the thread that owns the MessageFeedbackProcessorClient so that it can restart the processing
                 connectionEventLock.notify();
             }
         };
 
-        Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationProcessor = notification ->
+        Function<FeedbackBatch, AcknowledgementType> messageFeedbackProcessor = feedbackBatch ->
         {
-            System.out.println("File Upload notification received");
-            System.out.println("Device Id : " + notification.getDeviceId());
-            System.out.println("Blob Uri: " + notification.getBlobUri());
-            System.out.println("Blob Name: " + notification.getBlobName());
-            System.out.println("Last Updated : " + notification.getLastUpdatedTimeDate());
-            System.out.println("Blob Size (Bytes): " + notification.getBlobSizeInBytes());
-            System.out.println("Enqueued Time: " + notification.getEnqueuedTimeUtcDate());
+            System.out.println(" Feedback received, feedback time: " + feedbackBatch.getEnqueuedTimeUtc());
+            System.out.println(" Record size: " + feedbackBatch.getRecords().size());
 
-            // The delivered file upload notification will no longer be sent to this or any other file upload
-            // notification processor
+            for (int i = 0; i < feedbackBatch.getRecords().size(); i++)
+            {
+                System.out.println(" Message Id : " + feedbackBatch.getRecords().get(i).getOriginalMessageId());
+                System.out.println(" Device Id : " + feedbackBatch.getRecords().get(i).getDeviceId());
+                System.out.println(" Status description : " + feedbackBatch.getRecords().get(i).getDescription());
+            }
+
+            // The delivered feedback will no longer be sent to this or any other message feedback notification processor
             return AcknowledgementType.COMPLETE;
 
-            // The delivered file upload notification is made available for re-delivery and can be sent again to this
-            // or any other file upload notification processor
+            // The delivered message feedback is made available for re-delivery and can be sent again to this
+            // or any other message feedback processor
             // return AcknowledgementType.ABANDON;
         };
 
-        FileUploadNotificationProcessorClientOptions clientOptions =
-            FileUploadNotificationProcessorClientOptions.builder()
+        MessageFeedbackProcessorClientOptions clientOptions =
+            MessageFeedbackProcessorClientOptions.builder()
                 .errorProcessor(errorProcessor)
                 .build();
 
-        FileUploadNotificationProcessorClient fileUploadNotificationProcessorClient =
-            new FileUploadNotificationProcessorClient(connectionString, protocol, fileUploadNotificationProcessor, clientOptions);
+        MessageFeedbackProcessorClient messageFeedbackProcessorClient =
+            new MessageFeedbackProcessorClient(connectionString, protocol, messageFeedbackProcessor, clientOptions);
 
         // Run a thread in the background to pick up on user input so they can exit the sample at any time
         new Thread(() ->
@@ -106,7 +106,7 @@ public class FileUploadNotificationProcessorClientSample
         {
             while (!sampleEnded)
             {
-                if (!startFileUploadNotificationProcessorClientWithRetry(fileUploadNotificationProcessorClient))
+                if (!startMessageFeedbackProcessorClientWithRetry(messageFeedbackProcessorClient))
                 {
                     // exit the sample, but close the connection in the finally block first
                     return;
@@ -116,7 +116,7 @@ public class FileUploadNotificationProcessorClientSample
                 {
                     synchronized (connectionEventLock)
                     {
-                        connectionEventLock.wait(); // do nothing on this thread until some error occurs within the file upload notification processor client
+                        connectionEventLock.wait(); // do nothing on this thread until some error occurs within the message feedback processor client
                     }
                 }
                 catch (InterruptedException e)
@@ -128,40 +128,40 @@ public class FileUploadNotificationProcessorClientSample
         }
         finally
         {
-            fileUploadNotificationProcessorClient.stop();
+            messageFeedbackProcessorClient.stop();
         }
     }
 
     // return true if the client was started successfully, false if the client encountered a terminal exception and the sample should stop
-    private static boolean startFileUploadNotificationProcessorClientWithRetry(FileUploadNotificationProcessorClient fileUploadNotificationProcessorClient) throws InterruptedException
+    private static boolean startMessageFeedbackProcessorClientWithRetry(MessageFeedbackProcessorClient messageFeedbackProcessorClient) throws InterruptedException
     {
         while (true)
         {
             try
             {
-                fileUploadNotificationProcessorClient.start();
-                System.out.println("Successfully started the file upload notification processing client");
+                messageFeedbackProcessorClient.start();
+                System.out.println("Successfully started the message feedback processing client");
                 return true;
             }
             catch (IotHubUnathorizedException e)
             {
-                System.out.println("Failed to start file upload notification processing client due to invalid or out of date credentials: " + e.getMessage());
+                System.out.println("Failed to start message feedback processing client due to invalid or out of date credentials: " + e.getMessage());
                 return false;
             }
             catch (IotHubInternalServerErrorException e)
             {
-                System.out.println("Failed to start file upload notification processing client due to internal server error: " + e.getMessage());
+                System.out.println("Failed to start message feedback processing client due to internal server error: " + e.getMessage());
             }
             catch (IotHubException e)
             {
-                System.out.println("Failed to start file upload notification processing client due to hub level issue: " + e.getMessage());
+                System.out.println("Failed to start message feedback processing client due to hub level issue: " + e.getMessage());
             }
             catch (IOException e)
             {
-                System.out.println("Failed to start file upload notification processing client due to network issue: " + e.getMessage());
+                System.out.println("Failed to start message feedback processing client due to network issue: " + e.getMessage());
             }
 
-            System.out.println("Retrying to start file upload notification processing client");
+            System.out.println("Retrying to start message feedback processing client");
             Thread.sleep(1000);
         }
     }

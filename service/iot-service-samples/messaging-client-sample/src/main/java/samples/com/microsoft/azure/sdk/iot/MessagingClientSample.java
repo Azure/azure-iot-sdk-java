@@ -16,17 +16,15 @@ import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol
 import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
 import com.microsoft.azure.sdk.iot.service.messaging.MessagingClientOptions;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
-import java.util.UUID;
 import java.util.function.Consumer;
 
 public class MessagingClientSample
 {
-    private static final String connectionString = System.getenv("IOTHUB_CONNECTION_STRING");
+    private static final String connectionString = "";
     private static final String deviceId = "";
 
     /** Choose iotHubServiceClientProtocol */
@@ -37,6 +35,16 @@ public class MessagingClientSample
 
     public static void main(String[] args) throws InterruptedException
     {
+        if (connectionString == null || connectionString.isEmpty())
+        {
+            throw new IllegalArgumentException("Must provide your IoT Hub's connection string");
+        }
+
+        if (deviceId == null || deviceId.isEmpty())
+        {
+            throw new IllegalArgumentException("Must provide a deviceId");
+        }
+
         final Object connectionEventLock = new Object();
         Consumer<ErrorContext> errorProcessor = errorContext ->
         {
@@ -108,12 +116,15 @@ public class MessagingClientSample
                     }
                     catch (IotHubMessageTooLargeException e)
                     {
-                        System.out.println("Cloud to device message was too large");
+                        System.out.println("Cloud to device message was too large so it was not sent");
                     }
-                    catch (IOException | IotHubException | InterruptedException e)
+                    catch (IOException e)
                     {
-                        //TODO can be more specific for certain errors here.
-                        break;
+                        System.out.println("Cloud to device message failed to send due to network issues");
+                    }
+                    catch (IotHubException e)
+                    {
+                        System.out.println("Cloud to device message failed to send due to an IoT hub issue. See error message for more details");
                     }
 
                     try

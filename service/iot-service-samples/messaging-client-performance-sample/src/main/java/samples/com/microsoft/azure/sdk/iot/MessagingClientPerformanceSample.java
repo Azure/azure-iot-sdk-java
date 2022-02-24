@@ -17,8 +17,6 @@ import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
 import com.microsoft.azure.sdk.iot.service.messaging.MessagingClientOptions;
 import com.microsoft.azure.sdk.iot.service.messaging.SendResult;
-import com.microsoft.azure.sdk.iot.service.registry.Device;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -32,8 +30,8 @@ import java.util.function.Consumer;
  */
 public class MessagingClientPerformanceSample
 {
-    private static final String connectionString = System.getenv("IOTHUB_CONNECTION_STRING");
-    private static final String deviceId = UUID.randomUUID().toString();
+    private static final String connectionString = "";
+    private static final String deviceId = "";
     private static final int numberOfMessagesToSend = 50; // a single device can only have up to 50 cloud to device messages queued at a time
     private static int numberOfMessagesSentSuccessfully = 0;
     private static int numberOfMessagesFailedToSend = 0;
@@ -44,18 +42,15 @@ public class MessagingClientPerformanceSample
 
     public static void main(String[] args) throws InterruptedException
     {
-        // TODO delete
-        String deviceId = UUID.randomUUID().toString();
-        RegistryClient registryClient = new RegistryClient(connectionString);
-        try
+        if (connectionString == null || connectionString.isEmpty())
         {
-            registryClient.addDevice(new Device(deviceId));
+            throw new IllegalArgumentException("Must provide your IoT Hub's connection string");
         }
-        catch (IOException | IotHubException e)
+
+        if (deviceId == null || deviceId.isEmpty())
         {
-            e.printStackTrace();
+            throw new IllegalArgumentException("Must provide a deviceId");
         }
-        // TODO delete
 
         final Object connectionEventLock = new Object();
         Consumer<ErrorContext> errorProcessor = errorContext ->
