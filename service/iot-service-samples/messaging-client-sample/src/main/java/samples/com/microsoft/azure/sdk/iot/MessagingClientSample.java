@@ -27,7 +27,7 @@ import java.util.function.Consumer;
 public class MessagingClientSample
 {
     private static final String connectionString = System.getenv("IOTHUB_CONNECTION_STRING");
-    private static final String deviceId = UUID.randomUUID().toString();
+    private static final String deviceId = "";
 
     /** Choose iotHubServiceClientProtocol */
     private static final IotHubServiceClientProtocol protocol = IotHubServiceClientProtocol.AMQPS;
@@ -37,19 +37,6 @@ public class MessagingClientSample
 
     public static void main(String[] args) throws InterruptedException
     {
-        // TODO delete
-        String deviceId = UUID.randomUUID().toString();
-        RegistryClient registryClient = new RegistryClient(connectionString);
-        /*try
-        {
-            registryClient.addDevice(new Device(deviceId));
-        }
-        catch (IOException | IotHubException e)
-        {
-            e.printStackTrace();
-        }*/
-        // TODO delete
-
         final Object connectionEventLock = new Object();
         Consumer<ErrorContext> errorProcessor = errorContext ->
         {
@@ -131,6 +118,7 @@ public class MessagingClientSample
 
                     try
                     {
+                        //noinspection BusyWait
                         Thread.sleep(10000);
                     }
                     catch (InterruptedException e)
@@ -176,6 +164,7 @@ public class MessagingClientSample
             }
 
             System.out.println("Retrying to open messaging client");
+            //noinspection BusyWait
             Thread.sleep(1000);
         }
     }
