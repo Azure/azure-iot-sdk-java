@@ -11,32 +11,18 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubInternalServerErrorE
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubMessageTooLargeException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
-import com.microsoft.azure.sdk.iot.service.messaging.DeliveryAcknowledgement;
 import com.microsoft.azure.sdk.iot.service.messaging.ErrorContext;
-import com.microsoft.azure.sdk.iot.service.messaging.FeedbackBatch;
-import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotification;
-import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
-import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationProcessorClient;
-import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationProcessorClientOptions;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.messaging.Message;
-import com.microsoft.azure.sdk.iot.service.messaging.MessageFeedbackProcessorClient;
-import com.microsoft.azure.sdk.iot.service.messaging.MessageFeedbackProcessorClientOptions;
 import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
 import com.microsoft.azure.sdk.iot.service.messaging.MessagingClientOptions;
-import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
-import com.sun.jna.platform.unix.X11;
-import org.apache.logging.log4j.util.SystemPropertiesPropertySource;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class MessagingClientSample
 {
@@ -93,7 +79,7 @@ public class MessagingClientSample
         new Thread(() ->
         {
             System.out.println("Enter any key to exit");
-            new Scanner(System.in).nextLine();
+            new Scanner(System.in, StandardCharsets.UTF_8.name()).nextLine();
             sampleEnded = true;
             synchronized (connectionEventLock)
             {

@@ -34,6 +34,7 @@ public class RerunFailedTestRule implements TestRule
                 try
                 {
                     base.evaluate();
+                    return; // if the test passes, no need to rerun the test
                 }
                 catch (Throwable e)
                 {
