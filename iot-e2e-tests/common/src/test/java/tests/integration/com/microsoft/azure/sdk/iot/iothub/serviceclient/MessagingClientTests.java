@@ -334,17 +334,15 @@ public class MessagingClientTests extends IntegrationTest
     @Ignore // The IoT Hub instance we use for this test is currently offline, so this test cannot be run
     @Test
     @ContinuousIntegrationTest
-    public void messagingClientValidatesRemoteCertificateWhenSendingTelemetry() throws IOException, InterruptedException, IotHubException
+    public void messagingClientValidatesRemoteCertificateWhenSendingTelemetry() throws InterruptedException
     {
         boolean expectedExceptionWasCaught = false;
 
         MessagingClient messagingClient = new MessagingClient(invalidCertificateServerConnectionString, testInstance.protocol);
-        messagingClient.open();
 
         try
         {
-            // don't need a real device Id since the request is sent to a fake service
-            messagingClient.send("some deviceId", new Message("some message"));
+            messagingClient.open();
         }
         catch (IOException e)
         {
