@@ -20,6 +20,7 @@ import com.microsoft.azure.sdk.iot.service.messaging.MessagingClientOptions;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 public class MessagingClientSample
@@ -122,6 +123,10 @@ public class MessagingClientSample
                     {
                         System.out.println("Cloud to device message failed to send due to an IoT hub issue. See error message for more details");
                     }
+                    catch (TimeoutException e)
+                    {
+                        System.out.println("Cloud to device message failed to send because the service did not acknowledge it within the expected amount of time.");
+                    }
 
                     try
                     {
@@ -168,6 +173,10 @@ public class MessagingClientSample
             catch (IOException e)
             {
                 System.out.println("Failed to open messaging client due to network issue: " + e.getMessage());
+            }
+            catch (TimeoutException e)
+            {
+                System.out.println("Failed to open messaging client due to service taking too long to respond.");
             }
 
             System.out.println("Retrying to open messaging client");

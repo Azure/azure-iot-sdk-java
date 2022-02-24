@@ -49,6 +49,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
 import static com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol.AMQPS_WS;
@@ -202,7 +203,7 @@ public class FileUploadTests extends IntegrationTest
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void getAndCompleteSasUriWithUpload() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException, StorageException
+    public void getAndCompleteSasUriWithUpload() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException, StorageException, TimeoutException
     {
         // Android has some compatibility issues with the azure storage SDK
         assumeFalse(Tools.isAndroid());
@@ -236,7 +237,7 @@ public class FileUploadTests extends IntegrationTest
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void getAndCompleteSasUriWithMultipleUploads() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException, StorageException
+    public void getAndCompleteSasUriWithMultipleUploads() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException, StorageException, TimeoutException
     {
         // Android has some compatibility issues with the azure storage SDK
         assumeFalse(Tools.isAndroid());
@@ -277,7 +278,7 @@ public class FileUploadTests extends IntegrationTest
         tearDownDeviceClient(deviceClient);
     }
 
-    private void waitForFileUploadNotifications(String expectedDeviceId, List<String> expectedBlobNames) throws InterruptedException, IOException, IotHubException
+    private void waitForFileUploadNotifications(String expectedDeviceId, List<String> expectedBlobNames) throws InterruptedException, IOException, IotHubException, TimeoutException
     {
         Function<FileUploadNotification, AcknowledgementType> notificationProcessor = notification ->
         {

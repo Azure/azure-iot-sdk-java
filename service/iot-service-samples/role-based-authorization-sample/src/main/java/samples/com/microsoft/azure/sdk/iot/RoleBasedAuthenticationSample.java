@@ -41,6 +41,7 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -165,7 +166,7 @@ public class RoleBasedAuthenticationSample
             System.out.println("Successfully sent cloud to device message to the new device");
             messagingClient.close();
         }
-        catch (IOException | IotHubException e)
+        catch (IOException | IotHubException | TimeoutException e)
         {
             System.err.println("Failed to send a cloud to device message to the new device");
             e.printStackTrace();
@@ -230,7 +231,7 @@ public class RoleBasedAuthenticationSample
             fileUploadNotificationProcessorClient.stop();
             messageFeedbackProcessorClient.stop();
         }
-        catch (IOException | IotHubException e)
+        catch (IOException | IotHubException | TimeoutException e)
         {
             System.err.println("Failed to listen for feedback messages");
             e.printStackTrace();

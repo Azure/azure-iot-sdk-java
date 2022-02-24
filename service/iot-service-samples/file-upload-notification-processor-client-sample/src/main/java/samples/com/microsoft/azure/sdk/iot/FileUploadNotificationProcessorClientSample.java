@@ -18,6 +18,7 @@ import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -159,6 +160,10 @@ public class FileUploadNotificationProcessorClientSample
             catch (IOException e)
             {
                 System.out.println("Failed to start file upload notification processing client due to network issue: " + e.getMessage());
+            }
+            catch (TimeoutException e)
+            {
+                System.out.println("Failed to start file upload notification processing client due to service taking too long to respond.");
             }
 
             System.out.println("Retrying to start file upload notification processing client");

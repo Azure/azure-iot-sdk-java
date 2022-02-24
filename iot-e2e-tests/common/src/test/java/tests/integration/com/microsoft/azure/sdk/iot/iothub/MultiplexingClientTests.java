@@ -75,6 +75,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static junit.framework.TestCase.*;
@@ -598,7 +599,7 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.multiplexingClient.close();
     }
 
-    private static void testReceivingCloudToDeviceMessage(String deviceId, MessageCallback messageCallback, String expectedMessageCorrelationId) throws IOException, IotHubException, InterruptedException
+    private static void testReceivingCloudToDeviceMessage(String deviceId, MessageCallback messageCallback, String expectedMessageCorrelationId) throws IOException, IotHubException, InterruptedException, TimeoutException
     {
         com.microsoft.azure.sdk.iot.service.messaging.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.messaging.Message("some payload");
         serviceMessage.setCorrelationId(expectedMessageCorrelationId);

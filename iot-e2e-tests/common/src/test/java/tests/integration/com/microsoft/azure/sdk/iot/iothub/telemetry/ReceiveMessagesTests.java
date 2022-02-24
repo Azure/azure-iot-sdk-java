@@ -32,6 +32,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.ReceiveMessage
 
 import java.io.IOException;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
@@ -118,7 +119,7 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
         testInstance.identity.getClient().close();
     }
 
-    private void waitForFeedbackMessage(String expectedMessageId) throws InterruptedException, IOException, IotHubException
+    private void waitForFeedbackMessage(String expectedMessageId) throws InterruptedException, IOException, IotHubException, TimeoutException
     {
         final Success feedbackReceived = new Success();
 

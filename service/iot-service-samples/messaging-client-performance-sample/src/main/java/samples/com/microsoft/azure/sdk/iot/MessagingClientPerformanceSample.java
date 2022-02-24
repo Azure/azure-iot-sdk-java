@@ -20,6 +20,7 @@ import com.microsoft.azure.sdk.iot.service.messaging.SendResult;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 /**
@@ -165,6 +166,10 @@ public class MessagingClientPerformanceSample
             catch (IOException e)
             {
                 System.out.println("Failed to open messaging client due to network issue: " + e.getMessage());
+            }
+            catch (TimeoutException e)
+            {
+                System.out.println("Failed to open messaging client due to service taking too long to respond.");
             }
 
             System.out.println("Retrying to open messaging client");
