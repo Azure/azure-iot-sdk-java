@@ -65,6 +65,9 @@ public abstract class IntegrationTest
     @Rule
     public ErrInjTestRule errInjTestRule = new ErrInjTestRule();
 
+    @Rule
+    public RerunFailedTestRule rerunFailedTestRule = new RerunFailedTestRule();
+
     int E2E_TEST_TIMEOUT_MILLISECONDS = 5 * 60 * 1000;
 
     // Each test must finish in under 5 minutes. Only the token renewal test should last longer,

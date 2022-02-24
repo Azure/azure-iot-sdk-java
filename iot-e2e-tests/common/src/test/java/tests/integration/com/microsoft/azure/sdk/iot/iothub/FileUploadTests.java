@@ -113,7 +113,7 @@ public class FileUploadTests extends IntegrationTest
     {
         public IotHubClientProtocol protocol;
         public AuthenticationType authenticationType;
-        private FileUploadState fileUploadState;
+        private final FileUploadState fileUploadState;
         private final boolean withProxy;
 
         public FileUploadTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean withProxy)
