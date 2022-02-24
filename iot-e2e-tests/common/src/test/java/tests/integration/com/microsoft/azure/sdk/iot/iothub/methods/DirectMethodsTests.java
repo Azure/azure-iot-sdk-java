@@ -14,13 +14,13 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnauthorizedException;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodRequestOptions;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClientOptions;
 import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubGatewayTimeoutException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Test;
@@ -111,7 +111,7 @@ public class DirectMethodsTests extends DirectMethodsCommon
             super.invokeMethodSucceed();
             fail("Expected invoke method call to throw unauthorized exception since an expired SAS token was used, but no exception was thrown");
         }
-        catch (IotHubUnathorizedException e)
+        catch (IotHubUnauthorizedException e)
         {
             log.debug("IotHubUnauthorizedException was thrown as expected, continuing test");
         }

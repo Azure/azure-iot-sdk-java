@@ -7,7 +7,6 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
@@ -19,7 +18,7 @@ import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.messaging.MessagingClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnauthorizedException;
 import lombok.extern.slf4j.Slf4j;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
@@ -313,7 +312,7 @@ public class MessagingClientTests extends IntegrationTest
             messagingClient.open();
             fail("Expected opening messagingClient to throw unauthorized exception since an expired SAS token was used, but no exception was thrown");
         }
-        catch (IotHubUnathorizedException e)
+        catch (IotHubUnauthorizedException e)
         {
             log.debug("IotHubUnauthorizedException was thrown as expected, continuing test");
         }

@@ -16,7 +16,7 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnauthorizedException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assume;
 import org.junit.Before;
@@ -108,7 +108,7 @@ public class GetTwinTests extends TwinCommon
             super.testGetDeviceTwin();
             fail("Expected get twin call to throw unauthorized exception since an expired SAS token was used, but no exception was thrown");
         }
-        catch (IotHubUnathorizedException e)
+        catch (IotHubUnauthorizedException e)
         {
             log.debug("IotHubUnauthorizedException was thrown as expected, continuing test");
         }

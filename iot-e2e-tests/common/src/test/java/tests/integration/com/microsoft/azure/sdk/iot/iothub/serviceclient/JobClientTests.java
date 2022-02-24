@@ -27,7 +27,7 @@ import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
 import com.microsoft.azure.sdk.iot.service.twin.Pair;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnauthorizedException;
 import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobsClientOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
@@ -330,7 +330,7 @@ public class JobClientTests extends IntegrationTest
             scheduleDeviceMethod(jobClientWithSasCredential);
             fail("Expected scheduling a job to throw unauthorized exception since an expired SAS token was used, but no exception was thrown");
         }
-        catch (IotHubUnathorizedException e)
+        catch (IotHubUnauthorizedException e)
         {
             log.debug("IotHubUnauthorizedException was thrown as expected, continuing test");
         }

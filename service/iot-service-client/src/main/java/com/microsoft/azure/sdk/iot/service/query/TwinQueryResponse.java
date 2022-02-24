@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnauthorizedException;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.AccessLevel;
@@ -72,7 +73,7 @@ public class TwinQueryResponse
      * Return the next Twin from the query. If the previous page of query results has been exhausted, then this method
      * will make a request to the service to get the next page of results using the default paging options.
      * @return the next Twin from the query.
-     * @throws IotHubException If any IoT Hub level errors occur such as an {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException}.
+     * @throws IotHubException If any IoT Hub level errors occur such as an {@link IotHubUnauthorizedException}.
      * @throws IOException If any network level errors occur.
      * @throws NoSuchElementException If there is no next Twin to return anymore.
      */
@@ -87,7 +88,7 @@ public class TwinQueryResponse
      * @param pageOptions the options for the next page of results if the next page is retrieved to fulfil this request
      * for the next Twin. May not be null.
      * @return the next Twin from the query.
-     * @throws IotHubException If any IoT Hub level errors occur such as an {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException}.
+     * @throws IotHubException If any IoT Hub level errors occur such as an {@link IotHubUnauthorizedException}.
      * @throws IOException If any network level errors occur.
      * @throws NoSuchElementException If there is no next Twin to return anymore.
      */

@@ -55,7 +55,7 @@ public class EventReceivingConnectionHandler extends AmqpConnectionHandler imple
 
     public EventReceivingConnectionHandler(
             String connectionString,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            IotHubServiceClientProtocol protocol,
             Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationReceivedCallback,
             Function<FeedbackBatch, AcknowledgementType> messageFeedbackReceivedCallback,
             Consumer<ErrorContext> errorProcessor,
@@ -63,7 +63,7 @@ public class EventReceivingConnectionHandler extends AmqpConnectionHandler imple
             SSLContext sslContext,
             int keepAliveIntervalSeconds)
     {
-        super(connectionString, iotHubServiceClientProtocol, errorProcessor, proxyOptions, sslContext, keepAliveIntervalSeconds);
+        super(connectionString, protocol, errorProcessor, proxyOptions, sslContext, keepAliveIntervalSeconds);
         this.fileUploadNotificationReceivedCallback = fileUploadNotificationReceivedCallback;
         this.messageFeedbackReceivedCallback = messageFeedbackReceivedCallback;
     }
@@ -71,7 +71,7 @@ public class EventReceivingConnectionHandler extends AmqpConnectionHandler imple
     public EventReceivingConnectionHandler(
             String hostName,
             TokenCredential credential,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            IotHubServiceClientProtocol protocol,
             Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationReceivedCallback,
             Function<FeedbackBatch, AcknowledgementType> messageFeedbackReceivedCallback,
             Consumer<ErrorContext> errorProcessor,
@@ -79,15 +79,15 @@ public class EventReceivingConnectionHandler extends AmqpConnectionHandler imple
             SSLContext sslContext,
             int keepAliveIntervalSeconds)
     {
-        super(hostName, credential, iotHubServiceClientProtocol, errorProcessor, proxyOptions, sslContext, keepAliveIntervalSeconds);
+        super(hostName, credential, protocol, errorProcessor, proxyOptions, sslContext, keepAliveIntervalSeconds);
         this.fileUploadNotificationReceivedCallback = fileUploadNotificationReceivedCallback;
         this.messageFeedbackReceivedCallback = messageFeedbackReceivedCallback;
     }
 
     public EventReceivingConnectionHandler(
             String hostName,
-            AzureSasCredential sasTokenProvider,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            AzureSasCredential azureSasCredential,
+            IotHubServiceClientProtocol protocol,
             Function<FileUploadNotification, AcknowledgementType> fileUploadNotificationReceivedCallback,
             Function<FeedbackBatch, AcknowledgementType> messageFeedbackReceivedCallback,
             Consumer<ErrorContext> errorProcessor,
@@ -95,7 +95,7 @@ public class EventReceivingConnectionHandler extends AmqpConnectionHandler imple
             SSLContext sslContext,
             int keepAliveIntervalSeconds)
     {
-        super(hostName, sasTokenProvider, iotHubServiceClientProtocol, errorProcessor, proxyOptions, sslContext, keepAliveIntervalSeconds);
+        super(hostName, azureSasCredential, protocol, errorProcessor, proxyOptions, sslContext, keepAliveIntervalSeconds);
         this.fileUploadNotificationReceivedCallback = fileUploadNotificationReceivedCallback;
         this.messageFeedbackReceivedCallback = messageFeedbackReceivedCallback;
     }

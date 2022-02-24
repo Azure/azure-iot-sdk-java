@@ -69,7 +69,7 @@ class AmqpResponseVerification implements AmqpError
         }
         else if (this.errorCondition.equals(UNAUTHORIZED_ACCESS))
         {
-            this.exception = new IotHubUnathorizedException(errorDescription);
+            this.exception = new IotHubUnauthorizedException(errorDescription);
         }
         else if (this.errorCondition.equals(RESOURCE_LIMIT_EXCEEDED))
         {

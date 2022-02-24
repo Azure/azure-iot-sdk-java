@@ -7,6 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 
 import com.azure.core.credential.AzureSasCredential;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnauthorizedException;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.twin.DeviceCapabilities;
@@ -21,7 +22,6 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubBadFormatException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -188,7 +188,7 @@ public class RegistryClientTests extends IntegrationTest
             testInstance.registryClient.addDevice(device2);
             fail("Expected adding a device to throw unauthorized exception since an expired SAS token was used, but no exception was thrown");
         }
-        catch (IotHubUnathorizedException e)
+        catch (IotHubUnauthorizedException e)
         {
             log.debug("IotHubUnauthorizedException was thrown as expected, continuing test");
         }

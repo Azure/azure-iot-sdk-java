@@ -19,7 +19,7 @@ public class IotHubExceptionManager
      *
      * @param httpResponse Http response object to verify
      * @throws IotHubBadFormatException This exception is thrown if the response status equal 400
-     * @throws IotHubUnathorizedException This exception is thrown if the response status equal 401
+     * @throws IotHubUnauthorizedException This exception is thrown if the response status equal 401
      * @throws IotHubTooManyDevicesException This exception is thrown if the response status equal 403
      * @throws IotHubNotFoundException This exception is thrown if the response status equal 404
      * @throws IotHubPreconditionFailedException This exception is thrown if the response status equal 412
@@ -32,8 +32,8 @@ public class IotHubExceptionManager
      */
     public static void httpResponseVerification(HttpResponse httpResponse)
             throws 
-            IotHubBadFormatException, 
-            IotHubUnathorizedException, 
+            IotHubBadFormatException,
+            IotHubUnauthorizedException,
             IotHubTooManyDevicesException,
             IotHubPreconditionFailedException,
             IotHubTooManyRequestsException,
@@ -64,7 +64,7 @@ public class IotHubExceptionManager
         }
         else if (401 == responseStatus)
         {
-            throw new IotHubUnathorizedException(errorMessage, errorCode, errorCodeDescription);
+            throw new IotHubUnauthorizedException(errorMessage, errorCode, errorCodeDescription);
         }
         else if (403 == responseStatus)
         {
@@ -131,7 +131,7 @@ public class IotHubExceptionManager
         }
         else if (401 == responseStatus)
         {
-            return new IotHubUnathorizedException(description, responseStatus, errorCodeDescription);
+            return new IotHubUnauthorizedException(description, responseStatus, errorCodeDescription);
         }
         else if (403 == responseStatus)
         {

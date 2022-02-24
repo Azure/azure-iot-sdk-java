@@ -54,7 +54,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
     private TokenCredential credential;
     private AzureSasCredential sasTokenProvider;
     private String connectionString;
-    private IotHubServiceClientProtocol iotHubServiceClientProtocol;
+    private IotHubServiceClientProtocol protocol;
     private ProxyOptions proxyOptions;
     private SSLContext sslContext;
 
@@ -64,7 +64,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
 
     AmqpConnectionHandler(
         String connectionString,
-        IotHubServiceClientProtocol iotHubServiceClientProtocol,
+        IotHubServiceClientProtocol protocol,
         Consumer<ErrorContext> errorProcessor,
         ProxyOptions proxyOptions,
         SSLContext sslContext,
@@ -75,7 +75,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
             throw new IllegalArgumentException("connectionString can not be null or empty");
         }
 
-        Objects.requireNonNull(iotHubServiceClientProtocol);
+        Objects.requireNonNull(protocol);
 
         this.proxyOptions = proxyOptions;
         this.hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString).getHostName();
@@ -83,13 +83,13 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         this.errorProcessor = errorProcessor;
         this.keepAliveIntervalSeconds = keepAliveIntervalSeconds;
 
-        commonConstructorSetup(iotHubServiceClientProtocol, proxyOptions, sslContext, keepAliveIntervalSeconds);
+        commonConstructorSetup(protocol, proxyOptions, sslContext, keepAliveIntervalSeconds);
     }
 
     AmqpConnectionHandler(
         String hostName,
-        AzureSasCredential sasTokenProvider,
-        IotHubServiceClientProtocol iotHubServiceClientProtocol,
+        AzureSasCredential azureSasCredential,
+        IotHubServiceClientProtocol protocol,
         Consumer<ErrorContext> errorProcessor,
         ProxyOptions proxyOptions,
         SSLContext sslContext,
@@ -100,7 +100,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
             throw new IllegalArgumentException("hostName can not be null or empty");
         }
 
-        Objects.requireNonNull(iotHubServiceClientProtocol);
+        Objects.requireNonNull(protocol);
         Objects.requireNonNull(sasTokenProvider);
 
         this.hostName = hostName;
@@ -108,13 +108,13 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         this.errorProcessor = errorProcessor;
         this.keepAliveIntervalSeconds = keepAliveIntervalSeconds;
 
-        commonConstructorSetup(iotHubServiceClientProtocol, proxyOptions, sslContext, keepAliveIntervalSeconds);
+        commonConstructorSetup(protocol, proxyOptions, sslContext, keepAliveIntervalSeconds);
     }
 
     AmqpConnectionHandler(
         String hostName,
         TokenCredential credential,
-        IotHubServiceClientProtocol iotHubServiceClientProtocol,
+        IotHubServiceClientProtocol protocol,
         Consumer<ErrorContext> errorProcessor,
         ProxyOptions proxyOptions,
         SSLContext sslContext,
@@ -125,7 +125,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
             throw new IllegalArgumentException("hostName can not be null or empty");
         }
 
-        Objects.requireNonNull(iotHubServiceClientProtocol);
+        Objects.requireNonNull(protocol);
         Objects.requireNonNull(credential);
 
         this.hostName = hostName;
@@ -133,18 +133,18 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         this.errorProcessor = errorProcessor;
         this.keepAliveIntervalSeconds = keepAliveIntervalSeconds;
 
-        commonConstructorSetup(iotHubServiceClientProtocol, proxyOptions, sslContext, keepAliveIntervalSeconds);
+        commonConstructorSetup(protocol, proxyOptions, sslContext, keepAliveIntervalSeconds);
     }
 
     private void commonConstructorSetup(
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            IotHubServiceClientProtocol protocol,
             ProxyOptions proxyOptions,
             SSLContext sslContext,
             int keepAliveIntervalSeconds)
     {
         this.proxyOptions = proxyOptions;
         this.sslContext = sslContext; // if null, a default SSLContext will be generated for the user
-        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
+        this.protocol = protocol;
         this.connectionId = UUID.randomUUID().toString();
 
         if (keepAliveIntervalSeconds <= 0)
@@ -152,7 +152,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
             throw new IllegalArgumentException("Keep alive interval must be greater than 0 milliseconds");
         }
 
-        if (proxyOptions != null && this.iotHubServiceClientProtocol != IotHubServiceClientProtocol.AMQPS_WS)
+        if (proxyOptions != null && this.protocol != IotHubServiceClientProtocol.AMQPS_WS)
         {
             throw new UnsupportedOperationException("Proxies are only supported over AMQPS_WS");
         }
@@ -167,7 +167,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
     {
         Reactor reactor = event.getReactor();
 
-        if (this.iotHubServiceClientProtocol == IotHubServiceClientProtocol.AMQPS_WS)
+        if (this.protocol == IotHubServiceClientProtocol.AMQPS_WS)
         {
             if (proxyOptions != null)
             {
@@ -196,7 +196,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         // Convert from seconds to milliseconds since this proton-j API only accepts keep alive in milliseconds
         transport.setIdleTimeout(this.keepAliveIntervalSeconds * 1000);
 
-        if (this.iotHubServiceClientProtocol == IotHubServiceClientProtocol.AMQPS_WS)
+        if (this.protocol == IotHubServiceClientProtocol.AMQPS_WS)
         {
             WebSocketImpl webSocket = new WebSocketImpl(MAX_MESSAGE_PAYLOAD_SIZE);
             webSocket.configure(this.hostName, WEB_SOCKET_PATH, WEB_SOCKET_QUERY, AMQPS_WS_PORT, WEB_SOCKET_SUB_PROTOCOL, null, null);

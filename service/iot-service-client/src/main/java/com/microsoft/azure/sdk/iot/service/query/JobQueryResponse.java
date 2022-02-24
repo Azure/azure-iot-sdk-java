@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnauthorizedException;
 import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJob;
 import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobStatus;
 import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobType;
@@ -89,7 +90,7 @@ public class JobQueryResponse
      * Return the next job from the query. If the previous page of query results has been exhausted, then this method
      * will make a request to the service to get the next page of results using the default paging options.
      * @return the next job from the query.
-     * @throws IotHubException If any IoT Hub level errors occur such as an {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException}.
+     * @throws IotHubException If any IoT Hub level errors occur such as an {@link IotHubUnauthorizedException}.
      * @throws IOException If any network level errors occur.
      * @throws NoSuchElementException If there is no next ScheduledJob to return anymore.
      */
@@ -104,7 +105,7 @@ public class JobQueryResponse
      * @return the next job from the query.
      * @param pageOptions the options for the next page of results if the next page is retrieved to fulfil this request
      * for the next job. May not be null.
-     * @throws IotHubException If any IoT Hub level errors occur such as an {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException}.
+     * @throws IotHubException If any IoT Hub level errors occur such as an {@link IotHubUnauthorizedException}.
      * @throws IOException If any network level errors occur.
      * @throws NoSuchElementException If there is no next ScheduledJob to return anymore.
      */

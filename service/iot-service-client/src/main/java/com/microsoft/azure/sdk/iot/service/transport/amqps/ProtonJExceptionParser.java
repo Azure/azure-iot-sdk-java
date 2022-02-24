@@ -13,7 +13,7 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubMessageTooLargeExcep
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotSupportedException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubPreconditionFailedException;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnauthorizedException;
 import lombok.Getter;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 import org.apache.qpid.proton.engine.Endpoint;
@@ -50,8 +50,8 @@ public class ProtonJExceptionParser
     {
         switch (error)
         {
-            case IotHubUnathorizedException.amqpErrorCode:
-                return new IotHubUnathorizedException(errorDescription);
+            case IotHubUnauthorizedException.amqpErrorCode:
+                return new IotHubUnauthorizedException(errorDescription);
             case IotHubNotFoundException.amqpErrorCode:
                 return new IotHubNotFoundException(errorDescription);
             case IotHubDeviceMaximumQueueDepthExceededException.amqpErrorCode:

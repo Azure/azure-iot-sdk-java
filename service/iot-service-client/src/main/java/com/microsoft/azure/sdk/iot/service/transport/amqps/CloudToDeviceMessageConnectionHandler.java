@@ -49,37 +49,37 @@ public class CloudToDeviceMessageConnectionHandler extends AmqpConnectionHandler
 
     public CloudToDeviceMessageConnectionHandler(
             String connectionString,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            IotHubServiceClientProtocol protocol,
             Consumer<ErrorContext> errorProcessor,
             ProxyOptions proxyOptions,
             SSLContext sslContext,
             int keepAliveIntervalSeconds)
     {
-        super(connectionString, iotHubServiceClientProtocol, errorProcessor, proxyOptions, sslContext, keepAliveIntervalSeconds);
+        super(connectionString, protocol, errorProcessor, proxyOptions, sslContext, keepAliveIntervalSeconds);
     }
 
     public CloudToDeviceMessageConnectionHandler(
             String hostName,
             TokenCredential credential,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            IotHubServiceClientProtocol protocol,
             Consumer<ErrorContext> errorProcessor,
             ProxyOptions proxyOptions,
             SSLContext sslContext,
             int keepAliveIntervalSeconds)
     {
-        super(hostName, credential, iotHubServiceClientProtocol, errorProcessor, proxyOptions, sslContext, keepAliveIntervalSeconds);
+        super(hostName, credential, protocol, errorProcessor, proxyOptions, sslContext, keepAliveIntervalSeconds);
     }
 
     public CloudToDeviceMessageConnectionHandler(
             String hostName,
-            AzureSasCredential sasTokenProvider,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            AzureSasCredential azureSasCredential,
+            IotHubServiceClientProtocol protocol,
             Consumer<ErrorContext> errorProcessor,
             ProxyOptions proxyOptions,
             SSLContext sslContext,
             int keepAliveIntervalSeconds)
     {
-        super(hostName, sasTokenProvider, iotHubServiceClientProtocol, errorProcessor, proxyOptions, sslContext, keepAliveIntervalSeconds);
+        super(hostName, azureSasCredential, protocol, errorProcessor, proxyOptions, sslContext, keepAliveIntervalSeconds);
     }
 
     @Override

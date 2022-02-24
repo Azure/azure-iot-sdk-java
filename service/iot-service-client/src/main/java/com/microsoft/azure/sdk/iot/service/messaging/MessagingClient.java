@@ -7,7 +7,9 @@ package com.microsoft.azure.sdk.iot.service.messaging;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnauthorizedException;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.CloudToDeviceMessageConnectionHandler;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.ReactorRunner;
@@ -17,7 +19,7 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -25,13 +27,13 @@ import java.util.function.Consumer;
  * A client for sending cloud to device and cloud to module messages. For more details on what cloud to device messages
  * are, see <a href="https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-messages-c2d#message-feedback">this document</a>.
  *
- *<p>
+ * <p>
  *     This client relies on a persistent amqp/amqp_ws connection to IoT Hub that may break due to network instability.
  *     While optional to monitor, users are highly encouraged to utilize the errorProcessorHandler defined in the
  *     {@link MessagingClientOptions} when constructing this client in order to monitor the connection state and to re-open
  *     the connection when needed. See the messaging client sample in this repo for best practices for monitoring and handling
  *     disconnection events.
- *</p>
+ * </p>
  */
 @Slf4j
 public final class MessagingClient
@@ -43,6 +45,7 @@ public final class MessagingClient
     private final Consumer<ErrorContext> errorProcessor; // may be null if user doesn't provide one
     private final CloudToDeviceMessageConnectionHandler cloudToDeviceMessageConnectionHandler;
     private ReactorRunner reactorRunner;
+    private final String hostName;
 
     /**
      * Construct a MessagingClient from the specified connection string
@@ -76,6 +79,7 @@ public final class MessagingClient
         }
 
         this.errorProcessor = options.getErrorProcessor();
+        this.hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString).getHostName();
         this.cloudToDeviceMessageConnectionHandler =
             new CloudToDeviceMessageConnectionHandler(
                 connectionString,
@@ -139,6 +143,7 @@ public final class MessagingClient
         }
 
         this.errorProcessor = options.getErrorProcessor();
+        this.hostName = hostName;
         this.cloudToDeviceMessageConnectionHandler =
             new CloudToDeviceMessageConnectionHandler(
                 hostName,
@@ -190,6 +195,7 @@ public final class MessagingClient
         }
 
         this.errorProcessor = options.getErrorProcessor();
+        this.hostName = hostName;
         this.cloudToDeviceMessageConnectionHandler =
             new CloudToDeviceMessageConnectionHandler(
                 hostName,
@@ -209,15 +215,16 @@ public final class MessagingClient
     }
 
     /**
-     * Open this client so that it can begin sending cloud to device and/or cloud to module messages. Once opened, this
-     * client should call {@link #close()} once no more messages will be sent in order to free up network resources. If this
+     * Open this client so that it can begin sending cloud to device and/or cloud to module messages. Once opened, you should
+     * call {@link #close()} once no more messages will be sent in order to free up network resources. If this
      * client is already open, then this function will do nothing.
      *
-     * @throws IotHubException If any IoT Hub level exceptions occur such as an {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException}.
+     * @throws IotHubException If any IoT Hub level exceptions occur such as an {@link IotHubUnauthorizedException}.
      * @throws IOException If any network level exceptions occur such as the connection timing out.
      * @throws InterruptedException If this thread is interrupted while waiting for the connection to the service to open.
+     * @throws TimeoutException If the connection is not established before the default timeout.
      */
-    public synchronized void open() throws IotHubException, IOException, InterruptedException
+    public synchronized void open() throws IotHubException, IOException, InterruptedException, TimeoutException
     {
         open(START_REACTOR_TIMEOUT_MILLISECONDS);
     }
@@ -229,11 +236,12 @@ public final class MessagingClient
      *
      * @param timeoutMilliseconds the maximum number of milliseconds to wait for the underlying amqp connection to open.
      * If this value is 0, it will have an infinite timeout.
-     * @throws IotHubException If any IoT Hub level exceptions occur such as an {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException}.
+     * @throws IotHubException If any IoT Hub level exceptions occur such as an {@link IotHubUnauthorizedException}.
      * @throws IOException If any network level exceptions occur such as the connection timing out.
      * @throws InterruptedException If this thread is interrupted while waiting for the connection to the service to open.
+     * @throws TimeoutException If the connection is not established before the provided timeout.
      */
-    public synchronized void open(int timeoutMilliseconds) throws IotHubException, IOException, InterruptedException
+    public synchronized void open(int timeoutMilliseconds) throws IotHubException, IOException, InterruptedException, TimeoutException
     {
         if (this.reactorRunner != null && this.cloudToDeviceMessageConnectionHandler != null && this.cloudToDeviceMessageConnectionHandler.isOpen())
         {
@@ -252,12 +260,12 @@ public final class MessagingClient
         log.debug("Opening MessagingClient");
 
         this.reactorRunner = new ReactorRunner(
-            this.cloudToDeviceMessageConnectionHandler.getHostName(),
+            this.hostName,
             "MessagingClient",
             this.cloudToDeviceMessageConnectionHandler);
 
         final CountDownLatch openLatch = new CountDownLatch(1);
-        this.cloudToDeviceMessageConnectionHandler.setOnConnectionOpenedCallback(() -> openLatch.countDown());
+        this.cloudToDeviceMessageConnectionHandler.setOnConnectionOpenedCallback(openLatch::countDown);
 
         new Thread(() ->
         {
@@ -292,9 +300,10 @@ public final class MessagingClient
 
         if (timedOut)
         {
-            throw new IOException("Timed out waiting for the connection to the service to open");
+            throw new TimeoutException("Timed out waiting for the connection to the service to open");
         }
 
+        // if an IOException or IotHubException was encountered in the reactor thread, throw it here
         if (ioException.get() != null)
         {
             throw ioException.get();
@@ -325,7 +334,8 @@ public final class MessagingClient
      * calling {@link #open()}. If this client is already closed, this function will do nothing.
      *
      * @param timeoutMilliseconds the maximum number of milliseconds to wait for the underlying amqp connection to close.
-     * If this value is 0, it will have an infinite timeout.
+     * If this value is 0, it will have an infinite timeout. If the provided timeout has passed and the connection has
+     * not closed gracefully, then the connection will be forcefully closed and no exception will be thrown.
      * @throws InterruptedException if this function is interrupted while waiting for the connection to close down all
      * network resources.
      */
@@ -361,8 +371,9 @@ public final class MessagingClient
      * the IoT Hub message size limit, {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubMessageTooLargeException} will be thrown.
      * @throws InterruptedException If this function is interrupted while waiting for the cloud to device message to be acknowledged
      * by the service.
+     * @throws TimeoutException If the sent message isn't acknowledged by the service within the default timeout.
      */
-    public void send(String deviceId, Message message) throws IotHubException, InterruptedException
+    public void send(String deviceId, Message message) throws IotHubException, InterruptedException, TimeoutException
     {
         this.send(deviceId, null, message, MESSAGE_SEND_TIMEOUT_MILLISECONDS);
     }
@@ -383,8 +394,9 @@ public final class MessagingClient
      * the IoT Hub message size limit, {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubMessageTooLargeException} will be thrown.
      * @throws InterruptedException If this function is interrupted while waiting for the cloud to device message to be acknowledged
      * by the service.
+     * @throws TimeoutException If the sent message isn't acknowledged by the service within the provided timeout.
      */
-    public void send(String deviceId, Message message, int timeoutMilliseconds) throws IotHubException, InterruptedException
+    public void send(String deviceId, Message message, int timeoutMilliseconds) throws IotHubException, InterruptedException, TimeoutException
     {
         this.send(deviceId, null, message, timeoutMilliseconds);
     }
@@ -405,8 +417,9 @@ public final class MessagingClient
      * the IoT Hub message size limit, {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubMessageTooLargeException} will be thrown.
      * @throws InterruptedException If this function is interrupted while waiting for the cloud to device message to be acknowledged
      * by the service.
+     * @throws TimeoutException If the sent message isn't acknowledged by the service within the default timeout.
      */
-    public void send(String deviceId, String moduleId, Message message) throws IotHubException, InterruptedException
+    public void send(String deviceId, String moduleId, Message message) throws IotHubException, InterruptedException, TimeoutException
     {
         this.send(deviceId, moduleId, message, MESSAGE_SEND_TIMEOUT_MILLISECONDS);
     }
@@ -428,8 +441,9 @@ public final class MessagingClient
      * the IoT Hub message size limit, {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubMessageTooLargeException} will be thrown.
      * @throws InterruptedException If this function is interrupted while waiting for the cloud to device message to be acknowledged
      * by the service.
+     * @throws TimeoutException If the sent message isn't acknowledged by the service within the provided timeout.
      */
-    public void send(String deviceId, String moduleId, Message message, int timeoutMilliseconds) throws IotHubException, InterruptedException
+    public void send(String deviceId, String moduleId, Message message, int timeoutMilliseconds) throws IotHubException, InterruptedException, TimeoutException
     {
         if (timeoutMilliseconds < 0)
         {
@@ -467,7 +481,7 @@ public final class MessagingClient
 
             if (timedOut)
             {
-                throw new IotHubException("Timed out waiting for message to be acknowledged");
+                throw new TimeoutException("Timed out waiting for message to be acknowledged");
             }
         }
 
@@ -515,6 +529,11 @@ public final class MessagingClient
     }
 
     /**
+     * Returns true if this client is currently open and false otherwise. This client may lose connectivity due to network issues,
+     * so this value may be false even if you have not closed the client yourself. Monitoring the optional errorProcessor
+     * that can be set in {@link MessagingClientOptions} will provide the context on when connection loss events occur, and
+     * why they occurred.
+     *
      * @return true if this client is currently open and false otherwise.
      */
     public boolean isOpen()

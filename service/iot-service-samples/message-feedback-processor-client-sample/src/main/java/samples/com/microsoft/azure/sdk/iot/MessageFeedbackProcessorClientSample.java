@@ -7,7 +7,7 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubInternalServerErrorException;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnauthorizedException;
 import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
 import com.microsoft.azure.sdk.iot.service.messaging.ErrorContext;
 import com.microsoft.azure.sdk.iot.service.messaging.FeedbackBatch;
@@ -143,7 +143,7 @@ public class MessageFeedbackProcessorClientSample
                 System.out.println("Successfully started the message feedback processing client");
                 return true;
             }
-            catch (IotHubUnathorizedException e)
+            catch (IotHubUnauthorizedException e)
             {
                 System.out.println("Failed to start message feedback processing client due to invalid or out of date credentials: " + e.getMessage());
                 return false;

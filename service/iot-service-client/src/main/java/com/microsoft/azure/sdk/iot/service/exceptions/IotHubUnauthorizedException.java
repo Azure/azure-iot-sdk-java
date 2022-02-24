@@ -8,19 +8,19 @@ package com.microsoft.azure.sdk.iot.service.exceptions;
 /**
  * Create unauthorized exception
  */
-public class IotHubUnathorizedException extends IotHubException
+public class IotHubUnauthorizedException extends IotHubException
 {
-    public IotHubUnathorizedException()
+    public IotHubUnauthorizedException()
     {
         this(null);
     }
 
-    public IotHubUnathorizedException(String message)
+    public IotHubUnauthorizedException(String message)
     {
         super(message);
     }
 
-    IotHubUnathorizedException(String message, int errorCode, ErrorCodeDescription errorCodeDescription)
+    IotHubUnauthorizedException(String message, int errorCode, ErrorCodeDescription errorCodeDescription)
     {
         super(message, errorCode, errorCodeDescription);
     }

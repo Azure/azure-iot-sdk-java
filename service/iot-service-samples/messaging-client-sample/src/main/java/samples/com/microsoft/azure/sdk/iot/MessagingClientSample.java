@@ -10,7 +10,7 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubInternalServerErrorException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubMessageTooLargeException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnauthorizedException;
 import com.microsoft.azure.sdk.iot.service.messaging.ErrorContext;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.messaging.Message;
@@ -152,7 +152,7 @@ public class MessagingClientSample
                 messagingClient.open();
                 return true;
             }
-            catch (IotHubUnathorizedException e)
+            catch (IotHubUnauthorizedException e)
             {
                 System.out.println("Failed to open messaging client due to invalid or out of date credentials: " + e.getMessage());
                 return false;

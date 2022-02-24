@@ -1,7 +1,6 @@
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.service.exceptions.*;
-import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpResponseVerification;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
@@ -157,7 +156,7 @@ public class AmqpResponseVerificationTest
         };
     }
 
-    //Tests_SRS_SERVICE_SDK_JAVA_AMQPRESPONSEVERIFICATION_25_004: [** The function shall save IotHubUnathorizedException if the amqp delivery state is rejected and error condition is amqp error code amqp:unauthorized-access **]**
+    //Tests_SRS_SERVICE_SDK_JAVA_AMQPRESPONSEVERIFICATION_25_004: [** The function shall save IotHubUnauthorizedException if the amqp delivery state is rejected and error condition is amqp error code amqp:unauthorized-access **]**
     @Test
     public void constructor_saves_UNAUTHORIZED_ACCESS_exception()
     {
@@ -183,7 +182,7 @@ public class AmqpResponseVerificationTest
         new Verifications()
         {
             {
-                assertTrue(testVerification.getException() instanceof IotHubUnathorizedException);
+                assertTrue(testVerification.getException() instanceof IotHubUnauthorizedException);
             }
         };
     }
