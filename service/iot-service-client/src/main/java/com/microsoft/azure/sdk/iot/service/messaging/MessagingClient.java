@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 
 /**
  * A client for sending cloud to device and cloud to module messages. For more details on what cloud to device messages
- * are, see <a href="https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-messages-c2d#message-feedback">this document</>.
+ * are, see <a href="https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-messages-c2d#message-feedback">this document</a>.
  *
  *<p>
  *     This client relies on a persistent amqp/amqp_ws connection to IoT Hub that may break due to network instability.

@@ -85,6 +85,7 @@ public class Device extends RegistryIdentity
      * Creates a device using the given id. The device will use Symmetric Key for authentication.
      *
      * @param deviceId String containing the device name.
+     * @param authenticationType the type of authentication that this device will use.
      */
     public Device(String deviceId, AuthenticationType authenticationType)
     {

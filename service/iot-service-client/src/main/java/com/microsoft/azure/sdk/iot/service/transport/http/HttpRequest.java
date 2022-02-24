@@ -47,6 +47,7 @@ public class HttpRequest
      * @param url The URL for the request.
      * @param method The HTTPS request method (i.e. GET).
      * @param body The request body. Must be an array of size 0 if the request method is GET or DELETE.
+     * @param authorizationToken The header value for the Authorization header.
      *
      * @throws IOException This exception thrown if an IOException occurs
      * in setting up the HTTPS connection.
@@ -65,6 +66,7 @@ public class HttpRequest
      * @param url The URL for the request.
      * @param method The HTTPS request method (i.e. GET).
      * @param body The request body. Must be an array of size 0 if the request method is GET or DELETE.
+     * @param authorizationToken The header value for the Authorization header.
      * @param proxy The proxy to send the request through. May be null if no proxy should be used
      *
      * @throws IOException This exception thrown if an IOException occurs
@@ -123,6 +125,7 @@ public class HttpRequest
      *
      * @throws IOException This exception thrown if the connection could not be
      * established, or the input/output streams could not be accessed.
+     * @throws IotHubException if the http request was successful, but IoT hub responded with an error code
      */
     public HttpResponse send() throws IotHubException, IOException
     {

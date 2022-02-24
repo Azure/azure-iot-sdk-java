@@ -20,7 +20,7 @@ import java.util.function.Function;
 
 /**
  * A client for handling file upload notifications. For more details on what file upload notifications are, see
- * <a href="https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-file-upload#service-file-upload-notifications">this document</>.
+ * <a href="https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-file-upload#service-file-upload-notifications">this document</a>.
  */
 @Slf4j
 public class FileUploadNotificationProcessorClient
