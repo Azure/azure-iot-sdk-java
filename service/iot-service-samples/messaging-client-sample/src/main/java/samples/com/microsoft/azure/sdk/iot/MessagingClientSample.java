@@ -118,10 +118,6 @@ public class MessagingClientSample
                     {
                         System.out.println("Cloud to device message was too large so it was not sent");
                     }
-                    catch (IOException e)
-                    {
-                        System.out.println("Cloud to device message failed to send due to network issues");
-                    }
                     catch (IotHubException e)
                     {
                         System.out.println("Cloud to device message failed to send due to an IoT hub issue. See error message for more details");

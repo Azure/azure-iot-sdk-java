@@ -22,8 +22,16 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
- * Use the MessagingClient to send and monitor messages to devices in IoT hubs.
- * It can also be used to know when files have been uploaded by devices.
+ * A client for sending cloud to device and cloud to module messages. For more details on what cloud to device messages
+ * are, see <a href="https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-messages-c2d#message-feedback">this document</>.
+ *
+ *<p>
+ *     This client relies on a persistent amqp/amqp_ws connection to IoT Hub that may break due to network instability.
+ *     While optional to monitor, users are highly encouraged to utilize the errorProcessorHandler defined in the
+ *     {@link MessagingClientOptions} when constructing this client in order to monitor the connection state and to re-open
+ *     the connection when needed. See the messaging client sample in this repo for best practices for monitoring and handling
+ *     disconnection events.
+ *</p>
  */
 @Slf4j
 public final class MessagingClient
@@ -37,9 +45,9 @@ public final class MessagingClient
     private ReactorRunner reactorRunner;
 
     /**
-     * Create MessagingClient from the specified connection string
-     * @param protocol  protocol to use
+     * Construct a MessagingClient from the specified connection string
      * @param connectionString The connection string for the IotHub
+     * @param protocol The protocol that the client will communicate to IoT Hub over.
      */
     public MessagingClient(String connectionString, IotHubServiceClientProtocol protocol)
     {
@@ -47,10 +55,10 @@ public final class MessagingClient
     }
 
     /**
-     * Create MessagingClient from the specified connection string
-     * @param protocol  protocol to use
+     * Construct a MessagingClient from the specified connection string
      * @param connectionString The connection string for the IotHub
-     * @param options The connection options to use when connecting to the service.
+     * @param protocol The protocol that the client will communicate to IoT Hub over.
+     * @param options The connection options to use when connecting to the service. May not be null.
      */
     public MessagingClient(
             String connectionString,
@@ -87,7 +95,7 @@ public final class MessagingClient
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
-     * @param protocol The protocol to open the connection with.
+     * @param protocol The protocol that the client will communicate to IoT Hub over.
      */
     public MessagingClient(
             String hostName,
@@ -104,8 +112,8 @@ public final class MessagingClient
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
-     * @param protocol The protocol to open the connection with.
-     * @param options The connection options to use when connecting to the service.
+     * @param protocol The protocol that the client will communicate to IoT Hub over.
+     * @param options The connection options to use when connecting to the service. May not be null.
      */
     public MessagingClient(
             String hostName,
@@ -149,7 +157,7 @@ public final class MessagingClient
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
-     * @param protocol The protocol to open the connection with.
+     * @param protocol The protocol that the client will communicate to IoT Hub over.
      */
     public MessagingClient(
             String hostName,
@@ -164,8 +172,8 @@ public final class MessagingClient
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
-     * @param protocol The protocol to open the connection with.
-     * @param options The connection options to use when connecting to the service.
+     * @param protocol The protocol that the client will communicate to IoT Hub over.
+     * @param options The connection options to use when connecting to the service. May not be null.
      */
     public MessagingClient(
             String hostName,
@@ -200,11 +208,31 @@ public final class MessagingClient
         log.debug("Initialized a MessagingClient instance using SDK version {}", TransportUtils.serviceVersion);
     }
 
+    /**
+     * Open this client so that it can begin sending cloud to device and/or cloud to module messages. Once opened, this
+     * client should call {@link #close()} once no more messages will be sent in order to free up network resources. If this
+     * client is already open, then this function will do nothing.
+     *
+     * @throws IotHubException If any IoT Hub level exceptions occur such as an {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException}.
+     * @throws IOException If any network level exceptions occur such as the connection timing out.
+     * @throws InterruptedException If this thread is interrupted while waiting for the connection to the service to open.
+     */
     public synchronized void open() throws IotHubException, IOException, InterruptedException
     {
         open(START_REACTOR_TIMEOUT_MILLISECONDS);
     }
 
+    /**
+     * Open this client so that it can begin sending cloud to device and/or cloud to module messages. Once opened, this
+     * client should call {@link #close()} once no more messages will be sent in order to free up network resources. If this
+     * client is already open, then this function will do nothing.
+     *
+     * @param timeoutMilliseconds the maximum number of milliseconds to wait for the underlying amqp connection to open.
+     * If this value is 0, it will have an infinite timeout.
+     * @throws IotHubException If any IoT Hub level exceptions occur such as an {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException}.
+     * @throws IOException If any network level exceptions occur such as the connection timing out.
+     * @throws InterruptedException If this thread is interrupted while waiting for the connection to the service to open.
+     */
     public synchronized void open(int timeoutMilliseconds) throws IotHubException, IOException, InterruptedException
     {
         if (this.reactorRunner != null && this.cloudToDeviceMessageConnectionHandler != null && this.cloudToDeviceMessageConnectionHandler.isOpen())
@@ -280,11 +308,27 @@ public final class MessagingClient
         log.info("Opened MessagingClient");
     }
 
+    /**
+     * Close this client and release all network resources tied to it. Once closed, this client can be re-opened by
+     * calling {@link #open()}. If this client is already closed, this function will do nothing.
+     *
+     * @throws InterruptedException if this function is interrupted while waiting for the connection to close down all
+     * network resources.
+     */
     public synchronized void close() throws InterruptedException
     {
         this.close(STOP_REACTOR_TIMEOUT_MILLISECONDS);
     }
 
+    /**
+     * Close this client and release all network resources tied to it. Once closed, this client can be re-opened by
+     * calling {@link #open()}. If this client is already closed, this function will do nothing.
+     *
+     * @param timeoutMilliseconds the maximum number of milliseconds to wait for the underlying amqp connection to close.
+     * If this value is 0, it will have an infinite timeout.
+     * @throws InterruptedException if this function is interrupted while waiting for the connection to close down all
+     * network resources.
+     */
     public synchronized void close(int timeoutMilliseconds) throws InterruptedException
     {
         if (this.reactorRunner == null)
@@ -302,22 +346,90 @@ public final class MessagingClient
         log.info("Closed MessagingClient");
     }
 
-    public void send(String deviceId, Message message) throws IOException, IotHubException, InterruptedException
+    /**
+     * Send a cloud to device message to the device with the provided device id.
+     *
+     * <p>
+     *     This method is a blocking call that will wait for the sent message to be acknowledged by the service before returning.
+     *     This is provided for simplicity and for applications that aren't concerned with throughput. For applications that
+     *     need to provided higher throughput of sent cloud to device messages, users should use {@link #sendAsync(String, Message, Consumer, Object)}
+     *     as demonstrated in the messaging client performance sample in this repo.
+     * </p>
+     * @param deviceId the Id of the device to send the cloud to device message to.
+     * @param message the message to send to the device.
+     * @throws IotHubException If any IoT Hub level exception is thrown. For instance, if the provided message exceeds
+     * the IoT Hub message size limit, {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubMessageTooLargeException} will be thrown.
+     * @throws InterruptedException If this function is interrupted while waiting for the cloud to device message to be acknowledged
+     * by the service.
+     */
+    public void send(String deviceId, Message message) throws IotHubException, InterruptedException
     {
         this.send(deviceId, null, message, MESSAGE_SEND_TIMEOUT_MILLISECONDS);
     }
 
-    public void send(String deviceId, Message message, int timeoutMilliseconds) throws IOException, IotHubException, InterruptedException
+    /**
+     * Send a cloud to device message to the device with the provided device id.
+     *
+     * <p>
+     *     This method is a blocking call that will wait for the sent message to be acknowledged by the service before returning.
+     *     This is provided for simplicity and for applications that aren't concerned with throughput. For applications that
+     *     need to provided higher throughput of sent cloud to device messages, users should use {@link #sendAsync(String, Message, Consumer, Object)}
+     *     as demonstrated in the messaging client performance sample in this repo.
+     * </p>
+     * @param deviceId the Id of the device to send the cloud to device message to.
+     * @param message the message to send to the device.
+     * @param timeoutMilliseconds the maximum number of milliseconds to wait for the message to be sent before timing out and throwing an {@link IotHubException}.
+     * @throws IotHubException If any IoT Hub level exception is thrown. For instance, if the provided message exceeds
+     * the IoT Hub message size limit, {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubMessageTooLargeException} will be thrown.
+     * @throws InterruptedException If this function is interrupted while waiting for the cloud to device message to be acknowledged
+     * by the service.
+     */
+    public void send(String deviceId, Message message, int timeoutMilliseconds) throws IotHubException, InterruptedException
     {
         this.send(deviceId, null, message, timeoutMilliseconds);
     }
 
-    public void send(String deviceId, String moduleId, Message message) throws IOException, IotHubException, InterruptedException
+    /**
+     * Send a cloud to device message to the module with the provided module id on the device with the provided device Id.
+     *
+     * <p>
+     *     This method is a blocking call that will wait for the sent message to be acknowledged by the service before returning.
+     *     This is provided for simplicity and for applications that aren't concerned with throughput. For applications that
+     *     need to provided higher throughput of sent cloud to device messages, users should use {@link #sendAsync(String, String, Message, Consumer, Object)}
+     *     as demonstrated in the messaging client performance sample in this repo.
+     * </p>
+     * @param deviceId the Id of the device that contains the module that the message is being sent to.
+     * @param moduleId the Id of the module to send the cloud to device message to.
+     * @param message the message to send to the device.
+     * @throws IotHubException If any IoT Hub level exception is thrown. For instance, if the provided message exceeds
+     * the IoT Hub message size limit, {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubMessageTooLargeException} will be thrown.
+     * @throws InterruptedException If this function is interrupted while waiting for the cloud to device message to be acknowledged
+     * by the service.
+     */
+    public void send(String deviceId, String moduleId, Message message) throws IotHubException, InterruptedException
     {
         this.send(deviceId, moduleId, message, MESSAGE_SEND_TIMEOUT_MILLISECONDS);
     }
 
-    public void send(String deviceId, String moduleId, Message message, int timeoutMilliseconds) throws IOException, IotHubException, InterruptedException
+    /**
+     * Send a cloud to device message to the module with the provided module id on the device with the provided device Id.
+     *
+     * <p>
+     *     This method is a blocking call that will wait for the sent message to be acknowledged by the service before returning.
+     *     This is provided for simplicity and for applications that aren't concerned with throughput. For applications that
+     *     need to provided higher throughput of sent cloud to device messages, users should use {@link #sendAsync(String, String, Message, Consumer, Object)}
+     *     as demonstrated in the messaging client performance sample in this repo.
+     * </p>
+     * @param deviceId the Id of the device that contains the module that the message is being sent to.
+     * @param moduleId the Id of the module to send the cloud to device message to.
+     * @param message the message to send to the device.
+     * @param timeoutMilliseconds the maximum number of milliseconds to wait for the message to be sent before timing out and throwing an {@link IotHubException}.
+     * @throws IotHubException If any IoT Hub level exception is thrown. For instance, if the provided message exceeds
+     * the IoT Hub message size limit, {@link com.microsoft.azure.sdk.iot.service.exceptions.IotHubMessageTooLargeException} will be thrown.
+     * @throws InterruptedException If this function is interrupted while waiting for the cloud to device message to be acknowledged
+     * by the service.
+     */
+    public void send(String deviceId, String moduleId, Message message, int timeoutMilliseconds) throws IotHubException, InterruptedException
     {
         if (timeoutMilliseconds < 0)
         {
@@ -365,16 +477,46 @@ public final class MessagingClient
         }
     }
 
+    /**
+     * Asynchronously send a cloud to device message to the device with the provided device Id.
+     * <p>
+     *     Unlike the synchronous version of this function, this function does not throw any exceptions. Instead, any exception
+     *     encountered while sending the message will be provided in the {@link SendResult} provided in the onMessageSentCallback.
+     *     To see an example of how this looks, see the messaging client performance sample in this repo.
+     * </p>
+     * @param deviceId the Id of the device to send the cloud to device message to.
+     * @param message the message to send to the device.
+     * @param onMessageSentCallback the callback that will be executed when the message has either successfully been
+     * sent, or has failed to send. May be null if you don't care if the sent message is acknowledged by the service.
+     * @param context user defined context that will be provided in the onMessageSentCallback callback when it executes. May be null.
+     */
     public void sendAsync(String deviceId, Message message, Consumer<SendResult> onMessageSentCallback, Object context)
     {
         this.sendAsync(deviceId, null, message, onMessageSentCallback, context);
     }
 
+    /**
+     * Asynchronously send a cloud to device message to the module with the provided module id on the device with the provided device Id.
+     * <p>
+     *     Unlike the synchronous version of this function, this function does not throw any exceptions. Instead, any exception
+     *     encountered while sending the message will be provided in the {@link SendResult} provided in the onMessageSentCallback.
+     *     To see an example of how this looks, see the messaging client performance sample in this repo.
+     * </p>
+     * @param deviceId the Id of the device that contains the module that the message is being sent to.
+     * @param moduleId the Id of the module to send the cloud to device message to.
+     * @param message the message to send to the device.
+     * @param onMessageSentCallback the callback that will be executed when the message has either successfully been
+     * sent, or has failed to send. May be null if you don't care if the sent message is acknowledged by the service.
+     * @param context user defined context that will be provided in the onMessageSentCallback callback when it executes. May be null.
+     */
     public void sendAsync(String deviceId, String moduleId, Message message, Consumer<SendResult> onMessageSentCallback, Object context)
     {
         this.cloudToDeviceMessageConnectionHandler.sendAsync(deviceId, moduleId, message, onMessageSentCallback, context);
     }
 
+    /**
+     * @return true if this client is currently open and false otherwise.
+     */
     public boolean isOpen()
     {
         return this.reactorRunner != null && this.reactorRunner.isRunning();

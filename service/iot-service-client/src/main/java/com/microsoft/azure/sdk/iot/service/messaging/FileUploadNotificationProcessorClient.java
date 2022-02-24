@@ -18,6 +18,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+/**
+ * A client for handling file upload notifications. For more details on what file upload notifications are, see
+ * <a href="https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-file-upload#service-file-upload-notifications">this document</>.
+ */
 @Slf4j
 public class FileUploadNotificationProcessorClient
 {

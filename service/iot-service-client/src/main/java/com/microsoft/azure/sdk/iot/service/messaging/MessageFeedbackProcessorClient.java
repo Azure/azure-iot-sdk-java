@@ -18,6 +18,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+/**
+ * A client for handling cloud to device message feedback. For more details on what cloud to device message feedback
+ * is, see <a href="https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-messages-c2d#message-feedback">this document</>.
+ */
 @Slf4j
 public class MessageFeedbackProcessorClient
 {
