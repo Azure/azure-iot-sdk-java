@@ -40,6 +40,14 @@ public class ProtonJExceptionParser
         this.networkException = getNetworkException(this.error, this.errorDescription);
     }
 
+    public ProtonJExceptionParser(String error, String errorDescription)
+    {
+        this.error = error;
+        this.errorDescription = errorDescription;
+        this.iotHubException = getIotHubException(this.error, this.errorDescription);
+        this.networkException = getNetworkException(this.error, this.errorDescription);
+    }
+
     public ProtonJExceptionParser(IotHubException iotHubException)
     {
         this.iotHubException = iotHubException;

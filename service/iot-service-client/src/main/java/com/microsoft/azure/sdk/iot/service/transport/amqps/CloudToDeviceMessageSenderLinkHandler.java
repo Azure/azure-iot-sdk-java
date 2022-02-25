@@ -14,6 +14,7 @@ import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
 import org.apache.qpid.proton.amqp.messaging.Data;
 import org.apache.qpid.proton.amqp.messaging.Properties;
+import org.apache.qpid.proton.amqp.messaging.Rejected;
 import org.apache.qpid.proton.amqp.messaging.Section;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.engine.Delivery;
@@ -68,7 +69,6 @@ public class CloudToDeviceMessageSenderLinkHandler extends SenderLinkHandler
     @Override
     public void onLinkFlow(Event event)
     {
-        //TODO log
         event.getReactor().schedule(200, this);
     }
 
@@ -108,7 +108,14 @@ public class CloudToDeviceMessageSenderLinkHandler extends SenderLinkHandler
         {
             String correlationId = message.getCorrelationId();
             log.trace("Acknowledgement arrived for sent cloud to device message with correlation id {}", correlationId);
-            AmqpResponseVerification amqpResponse = new AmqpResponseVerification(remoteState);
+
+            IotHubException messageException = null;
+            if (remoteState instanceof Rejected)
+            {
+                String error = ((Rejected) remoteState).getError().getCondition().toString();
+                String errorDescription = ((Rejected) remoteState).getError().getDescription();
+                messageException = new ProtonJExceptionParser(error, errorDescription).getIotHubException();
+            }
 
             Consumer<SendResult> onMessageSentCallback = message.getOnMessageSentCallback();
 
@@ -116,10 +123,10 @@ public class CloudToDeviceMessageSenderLinkHandler extends SenderLinkHandler
             {
                 SendResult sendResult =
                     new SendResult(
-                        amqpResponse.getException() == null,
+                        messageException == null,
                         correlationId,
                         message.getOnMessageSentCallbackContext(),
-                        amqpResponse.getException());
+                        messageException);
 
                 onMessageSentCallback.accept(sendResult);
             }
