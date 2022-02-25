@@ -12,11 +12,13 @@ import org.apache.qpid.proton.engine.BaseHandler;
 import org.apache.qpid.proton.engine.Delivery;
 import org.apache.qpid.proton.engine.EndpointState;
 import org.apache.qpid.proton.engine.Event;
+import org.apache.qpid.proton.engine.Handler;
 import org.apache.qpid.proton.engine.Link;
 import org.apache.qpid.proton.engine.Receiver;
 import org.apache.qpid.proton.reactor.FlowController;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 @Slf4j
@@ -52,7 +54,7 @@ abstract class ReceiverLinkHandler extends BaseHandler
         BaseHandler.setHandler(receiver, this);
 
         //This flow controller handles all link credit handling on our behalf
-        add(new FlowController());
+        add(new LoggingFlowController(this.linkCorrelationId));
     }
 
     @Override
@@ -60,6 +62,19 @@ abstract class ReceiverLinkHandler extends BaseHandler
     {
         log.debug("{} receiver link with link correlation id {} was successfully opened", getLinkInstanceType(), this.linkCorrelationId);
         this.linkStateCallback.onReceiverLinkRemoteOpen();
+
+        boolean hasFlowController = false;
+        Iterator<Handler> children = children();
+        while (children.hasNext())
+        {
+            hasFlowController |= children.next() instanceof LoggingFlowController;
+        }
+
+        if (!hasFlowController)
+        {
+            log.trace("No flow controller detected in {} link with address {} and link correlation id {}. Adding a new flow controller.", getLinkInstanceType(), this.receiverLinkAddress, this.linkCorrelationId);
+            add(new LoggingFlowController(this.linkCorrelationId));
+        }
     }
 
     @Override

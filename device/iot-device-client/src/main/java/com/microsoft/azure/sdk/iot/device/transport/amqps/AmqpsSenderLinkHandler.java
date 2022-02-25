@@ -73,19 +73,6 @@ abstract class AmqpsSenderLinkHandler extends BaseHandler
     {
         log.debug("{} sender link with address {} and link correlation id {} was successfully opened", getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId);
         this.amqpsLinkStateCallback.onLinkOpened(this);
-
-        boolean hasFlowController = false;
-        Iterator<Handler> children = children();
-        while (children.hasNext())
-        {
-            hasFlowController |= children.next() instanceof LoggingFlowController;
-        }
-
-        if (!hasFlowController)
-        {
-            log.warn("No flow controller detected in {} link with address {} and link correlation id {}. Adding a new flow controller.", getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId);
-            add(new LoggingFlowController(this.linkCorrelationId));
-        }
     }
 
     @Override
