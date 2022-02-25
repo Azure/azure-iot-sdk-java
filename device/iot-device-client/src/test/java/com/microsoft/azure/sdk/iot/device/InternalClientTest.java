@@ -515,7 +515,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockedDeviceTwin.getDeviceTwin();
+                mockedDeviceTwin.getDeviceTwinAsync();
                 times = 1;
             }
         };
@@ -550,7 +550,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockedDeviceTwin.getDeviceTwin();
+                mockedDeviceTwin.getDeviceTwinAsync();
                 times = 0;
             }
         };
@@ -622,7 +622,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockedDeviceTwin.getDeviceTwin();
+                mockedDeviceTwin.getDeviceTwinAsync();
                 times = 1;
             }
         };
@@ -809,7 +809,7 @@ public class InternalClientTest
 
     }
     /*
-     **Tests_SRS_INTERNALCLIENT_25_035: [**This method shall send to reported properties by calling updateReportedProperties on the twin object.**]**
+     **Tests_SRS_INTERNALCLIENT_25_035: [**This method shall send to reported properties by calling updateReportedPropertiesAsync on the twin object.**]**
      */
     @Test
     public void sendRPSucceeds(@Mocked final DeviceTwin mockedDeviceTwin,
@@ -838,7 +838,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockedDeviceTwin.updateReportedProperties(mockSet, null, null, null, null, null);
+                mockedDeviceTwin.updateReportedPropertiesAsync(mockSet, null, null, null, null, null);
                 times = 1;
             }
         };
@@ -871,7 +871,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockedDeviceTwin.updateReportedProperties(mockSet, 10, null, null, null, null);
+                mockedDeviceTwin.updateReportedPropertiesAsync(mockSet, 10, null, null, null, null);
                 times = 1;
             }
         };
@@ -911,7 +911,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockedDeviceTwin.updateReportedProperties(mockSet);
+                mockedDeviceTwin.updateReportedPropertiesAsync(mockSet);
                 times = 0;
             }
         };
@@ -948,7 +948,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockedDeviceTwin.updateReportedProperties(mockSet, 10);
+                mockedDeviceTwin.updateReportedPropertiesAsync(mockSet, 10);
                 times = 0;
             }
         };
@@ -989,7 +989,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockedDeviceTwin.updateReportedProperties(mockSet);
+                mockedDeviceTwin.updateReportedPropertiesAsync(mockSet);
                 times = 0;
             }
         };
@@ -1027,7 +1027,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockedDeviceTwin.updateReportedProperties(mockSet, 10);
+                mockedDeviceTwin.updateReportedPropertiesAsync(mockSet, 10);
                 times = 0;
             }
         };
@@ -1069,7 +1069,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockedDeviceTwin.updateReportedProperties((Set)any);
+                mockedDeviceTwin.updateReportedPropertiesAsync((Set)any);
                 times = 0;
             }
         };
@@ -1108,7 +1108,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockedDeviceTwin.updateReportedProperties((Set)any, 10);
+                mockedDeviceTwin.updateReportedPropertiesAsync((Set)any, 10);
                 times = 0;
             }
         };
@@ -1151,7 +1151,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockedDeviceTwin.updateReportedProperties((Set)any, -1);
+                mockedDeviceTwin.updateReportedPropertiesAsync((Set)any, -1);
                 times = 0;
             }
         };
@@ -1515,7 +1515,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockedDeviceTwin.getDeviceTwin();
+                mockedDeviceTwin.getDeviceTwinAsync();
                 times = 1;
             }
         };
@@ -1603,7 +1603,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockedDeviceTwin.getDeviceTwin();
+                mockedDeviceTwin.getDeviceTwinAsync();
                 times = 1;
             }
         };

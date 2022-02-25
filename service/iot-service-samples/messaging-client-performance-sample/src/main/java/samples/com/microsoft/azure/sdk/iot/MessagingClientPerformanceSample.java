@@ -5,7 +5,6 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.service.exceptions.ClientNotOpenException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubDeviceMaximumQueueDepthExceededException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubInternalServerErrorException;
@@ -139,7 +138,7 @@ public class MessagingClientPerformanceSample
                         messageCount++;
                         messageSent = true;
                     }
-                    catch (ClientNotOpenException e)
+                    catch (IllegalStateException e)
                     {
                         System.out.println("Client was closed when attempting to send a message. Re-opening the client and trying again");
                         if (!openMessagingClientWithRetry(messagingClient))

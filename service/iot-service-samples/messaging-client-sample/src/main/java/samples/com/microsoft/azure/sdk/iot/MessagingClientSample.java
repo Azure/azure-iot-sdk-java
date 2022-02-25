@@ -5,7 +5,6 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.service.exceptions.ClientNotOpenException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubDeviceMaximumQueueDepthExceededException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubInternalServerErrorException;
@@ -17,13 +16,8 @@ import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol
 import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
 import com.microsoft.azure.sdk.iot.service.messaging.MessagingClientOptions;
-import com.microsoft.azure.sdk.iot.service.registry.Device;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Scanner;
-import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
@@ -102,7 +96,7 @@ public class MessagingClientSample
                         messageCount++;
                         messageSent = true;
                     }
-                    catch (ClientNotOpenException e)
+                    catch (IllegalStateException e)
                     {
                         System.out.println("Client was closed when attempting to send a message. Re-opening the client and trying again");
                         openMessagingClientWithRetry(messagingClient);

@@ -7,7 +7,6 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
@@ -299,7 +298,7 @@ public class DeviceTwin
         this.deviceTwinGenericPropertyChangeCallbackContext = genericPropertyCallbackContext;
     }
 
-    public void getDeviceTwin()
+    public void getDeviceTwinAsync()
     {
         checkSubscription();
 
@@ -310,17 +309,17 @@ public class DeviceTwin
         this.client.sendEventAsync(getTwinRequestMessage, new deviceTwinRequestMessageCallback(), null);
     }
 
-    public synchronized void updateReportedProperties(Set<Property> reportedProperties) throws IOException
+    public synchronized void updateReportedPropertiesAsync(Set<Property> reportedProperties) throws IllegalStateException
     {
-        this.updateReportedProperties(reportedProperties, null, null, null, new deviceTwinRequestMessageCallback(), null);
+        this.updateReportedPropertiesAsync(reportedProperties, null, null, null, new deviceTwinRequestMessageCallback(), null);
     }
 
-    public synchronized void updateReportedProperties(Set<Property> reportedProperties, Integer version) throws IOException
+    public synchronized void updateReportedPropertiesAsync(Set<Property> reportedProperties, Integer version) throws IllegalStateException
     {
-        this.updateReportedProperties(reportedProperties, version, null, null, new deviceTwinRequestMessageCallback(), null);
+        this.updateReportedPropertiesAsync(reportedProperties, version, null, null, new deviceTwinRequestMessageCallback(), null);
     }
 
-    public synchronized void updateReportedProperties(Set<Property> reportedProperties, Integer version, CorrelatingMessageCallback correlatingMessageCallback, Object correlatingMessageCallbackContext, IotHubEventCallback reportedPropertiesCallback, Object callbackContext) throws IOException
+    public synchronized void updateReportedPropertiesAsync(Set<Property> reportedProperties, Integer version, CorrelatingMessageCallback correlatingMessageCallback, Object correlatingMessageCallbackContext, IotHubEventCallback reportedPropertiesCallback, Object callbackContext)
     {
         if (reportedProperties == null)
         {
@@ -332,7 +331,7 @@ public class DeviceTwin
         {
             if (reportedPropertiesMap.containsKey(p.getKey()))
             {
-                throw new IOException("Duplicate keys found in reported properties: " + p.getKey());
+                throw new IllegalStateException("Duplicate keys found in reported properties: " + p.getKey());
             }
 
             reportedPropertiesMap.put(p.getKey(), p.getValue());

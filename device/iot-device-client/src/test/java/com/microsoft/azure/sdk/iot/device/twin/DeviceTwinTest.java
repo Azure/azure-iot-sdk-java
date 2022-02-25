@@ -120,7 +120,7 @@ public class DeviceTwinTest
         };
 
         //act
-        testTwin.getDeviceTwin();
+        testTwin.getDeviceTwinAsync();
 
         //assert
         new Verifications()
@@ -156,7 +156,7 @@ public class DeviceTwinTest
             }
         };
 
-        testTwin.getDeviceTwin();
+        testTwin.getDeviceTwinAsync();
 
         new Verifications()
         {
@@ -192,7 +192,7 @@ public class DeviceTwinTest
             }
         };
 
-        testTwin.getDeviceTwin();
+        testTwin.getDeviceTwinAsync();
 
         new Verifications()
         {
@@ -343,7 +343,7 @@ public class DeviceTwinTest
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
 
         // act - assert
-        testTwin.updateReportedProperties(null);
+        testTwin.updateReportedPropertiesAsync(null);
     }
 
     /*
@@ -388,7 +388,7 @@ public class DeviceTwinTest
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
 
         // act
-        testTwin.updateReportedProperties(reportedProp);
+        testTwin.updateReportedPropertiesAsync(reportedProp);
 
         // assert
         new Verifications()
@@ -431,7 +431,7 @@ public class DeviceTwinTest
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
 
         // act
-        testTwin.updateReportedProperties(reportedProp);
+        testTwin.updateReportedPropertiesAsync(reportedProp);
     }
 
     /*
@@ -468,7 +468,7 @@ public class DeviceTwinTest
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
 
         // act
-        testTwin.updateReportedProperties(reportedProp, 10);
+        testTwin.updateReportedPropertiesAsync(reportedProp, 10);
 
         // assert
         new Verifications()
@@ -517,7 +517,7 @@ public class DeviceTwinTest
                 mockedStatusCB, null, mockedGenericPropertyCB, null);
 
         // act
-        testTwin.updateReportedProperties(reportedProp, null);
+        testTwin.updateReportedPropertiesAsync(reportedProp, null);
 
         // assert
         new Verifications()

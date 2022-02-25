@@ -7,7 +7,6 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.service.exceptions.ClientNotOpenException;
 import com.microsoft.azure.sdk.iot.service.messaging.DeliveryAcknowledgement;
 import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
@@ -314,12 +313,12 @@ public class ReceiveMessagesCommon extends IntegrationTest
         return serviceMessage;
     }
 
-    protected void sendMessageToDevice(String deviceId, int messageSize) throws IotHubException, IOException, InterruptedException, TimeoutException, ClientNotOpenException
+    protected void sendMessageToDevice(String deviceId, int messageSize) throws IotHubException, IOException, InterruptedException, TimeoutException
     {
         testInstance.messagingClient.send(deviceId, createCloudToDeviceMessage(messageSize));
     }
 
-    protected void sendMessageToModule(String deviceId, String moduleId, int messageSize) throws IotHubException, IOException, InterruptedException, TimeoutException, ClientNotOpenException
+    protected void sendMessageToModule(String deviceId, String moduleId, int messageSize) throws IotHubException, IOException, InterruptedException, TimeoutException
     {
         testInstance.messagingClient.send(deviceId, moduleId, createCloudToDeviceMessage(messageSize));
     }

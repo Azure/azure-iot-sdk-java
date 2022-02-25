@@ -129,7 +129,7 @@ public class InternalClient
             {
                 if (this.isMultiplexed)
                 {
-                    throw new IllegalStateException(
+                    throw new UnsupportedOperationException(
                         "Cannot set the proxy settings of a multiplexed device. " +
                             "Proxy settings for the multiplexed connection can only be set at multiplexing client constructor time.");
                 }
@@ -191,8 +191,7 @@ public class InternalClient
      * {@code null} if no callback is provided.
      *
      * @throws IllegalArgumentException if the message provided is {@code null}.
-     * @throws IllegalStateException if the client has not been opened yet or is
-     * already closed.
+     * @throws IllegalStateException if the client has not been opened yet or is already closed.
      */
     public void sendEventAsync(Message message, IotHubEventCallback callback, Object callbackContext)
     {
@@ -214,8 +213,7 @@ public class InternalClient
      * {@code null} if no callback is provided.
      *
      * @throws IllegalArgumentException if the message provided is {@code null}.
-     * @throws IllegalStateException if the client has not been opened yet or is
-     * already closed.
+     * @throws IllegalStateException if the client has not been opened yet or is already closed.
      */
     public void sendEventBatchAsync(List<Message> messages, IotHubEventCallback callback, Object callbackContext)
     {
@@ -248,21 +246,21 @@ public class InternalClient
      *
      * @param onDesiredPropertyChange the Map for desired properties and their corresponding callback and context. Can be {@code null}.
      *
-     * @throws IOException if called when client is not opened or called before starting twin.
+     * @throws IllegalStateException if called when client is not opened or called before starting twin.
      */
-    public void subscribeToDesiredPropertiesAsync(Map<Property, Pair<PropertyCallback<String, Object>, Object>> onDesiredPropertyChange) throws IOException
+    public void subscribeToDesiredPropertiesAsync(Map<Property, Pair<PropertyCallback<String, Object>, Object>> onDesiredPropertyChange) throws IllegalStateException
     {
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
 
         if (this.twin == null)
         {
-            throw new IOException("Start twin before using it");
+            throw new IllegalStateException("Start twin before doing any other twin operations");
         }
 
         if (!this.deviceIO.isOpen())
         {
-            throw new IOException("Open the client connection before using it.");
+            throw new IllegalStateException("Open the client connection before using it");
         }
 
         this.twin.subscribeDesiredPropertiesNotification(onDesiredPropertyChange);
@@ -273,21 +271,21 @@ public class InternalClient
      *
      * @param onDesiredPropertyChange the Map for desired properties and their corresponding callback and context. Can be {@code null}.
      *
-     * @throws IOException if called when client is not opened or called before starting twin.
+     * @throws IllegalStateException if called when client is not opened or called before starting twin.
      */
-    public void subscribeToTwinDesiredPropertiesAsync(Map<Property, Pair<TwinPropertyCallback, Object>> onDesiredPropertyChange) throws IOException
+    public void subscribeToTwinDesiredPropertiesAsync(Map<Property, Pair<TwinPropertyCallback, Object>> onDesiredPropertyChange) throws IllegalStateException
     {
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
 
         if (this.twin == null)
         {
-            throw new IOException("Start twin before using it");
+            throw new IllegalStateException("Start twin before doing any other twin operations");
         }
 
         if (!this.deviceIO.isOpen())
         {
-            throw new IOException("Open the client connection before using it.");
+            throw new IllegalStateException("Open the client connection before using it");
         }
 
         this.twin.subscribeDesiredPropertiesTwinPropertyNotification(onDesiredPropertyChange);
@@ -298,10 +296,10 @@ public class InternalClient
      *
      * @param reportedProperties the Set for desired properties and their corresponding callback and context. Cannot be {@code null}.
      *
-     * @throws IOException if called when client is not opened or called before starting twin.
+     * @throws IllegalStateException if called when client is not opened or called before starting twin.
      * @throws IllegalArgumentException if reportedProperties is null or empty.
      */
-    public void sendReportedPropertiesAsync(Set<Property> reportedProperties) throws IOException, IllegalArgumentException
+    public void sendReportedPropertiesAsync(Set<Property> reportedProperties) throws IllegalStateException, IllegalArgumentException
     {
         this.sendReportedPropertiesAsync(reportedProperties, null, null, null, null, null);
     }
@@ -312,10 +310,10 @@ public class InternalClient
      * @param reportedProperties the Set for desired properties and their corresponding callback and context. Cannot be {@code null}.
      * @param version the Reported property version. Cannot be negative.
      *
-     * @throws IOException if called when client is not opened or called before starting twin.
+     * @throws IllegalStateException if called when client is not opened or called before starting twin.
      * @throws IllegalArgumentException if reportedProperties is null or empty or if version is negative
      */
-    public void sendReportedPropertiesAsync(Set<Property> reportedProperties, int version) throws IOException, IllegalArgumentException
+    public void sendReportedPropertiesAsync(Set<Property> reportedProperties, int version) throws IllegalStateException, IllegalArgumentException
     {
         if (version < 0)
         {
@@ -327,10 +325,10 @@ public class InternalClient
     /**
      * Sends reported properties
      * @param reportedPropertiesParameters Container for the reported properties parameters
-     * @throws IOException if called when client is not opened or called before starting twin.
+     * @throws IllegalStateException if called when client is not opened or called before starting twin.
      * @throws IllegalArgumentException if reportedProperties is null or empty or if version specified in {#reportedPropertiesParameters} is negative
      */
-    public void sendReportedPropertiesAsync(ReportedPropertiesParameters reportedPropertiesParameters) throws IOException, IllegalArgumentException
+    public void sendReportedPropertiesAsync(ReportedPropertiesParameters reportedPropertiesParameters) throws IllegalStateException, IllegalArgumentException
     {
         this.sendReportedPropertiesAsync(reportedPropertiesParameters.getReportedProperties(), reportedPropertiesParameters.getVersion(), reportedPropertiesParameters.getCorrelatingMessageCallback(), reportedPropertiesParameters.getCorrelatingMessageCallbackContext(), reportedPropertiesParameters.getReportedPropertiesCallback(), reportedPropertiesParameters.getReportedPropertiesCallbackContext());
     }
@@ -344,17 +342,17 @@ public class InternalClient
      * @param reportedPropertiesCallbackContext the Reported property callback context to be set for this message.
      * @param correlatingMessageCallback the correlation callback for this message.
      * @param correlatingMessageCallbackContext the correlation callback context for this message.
-     * @throws IOException if called when client is not opened or called before starting twin.
+     * @throws IllegalStateException if called when client is not opened or called before starting twin.
      * @throws IllegalArgumentException if reportedProperties is null or empty or if version is negative
      */
-    public void sendReportedPropertiesAsync(Set<Property> reportedProperties, Integer version, CorrelatingMessageCallback correlatingMessageCallback, Object correlatingMessageCallbackContext, IotHubEventCallback reportedPropertiesCallback, Object reportedPropertiesCallbackContext) throws IOException, IllegalArgumentException
+    public void sendReportedPropertiesAsync(Set<Property> reportedProperties, Integer version, CorrelatingMessageCallback correlatingMessageCallback, Object correlatingMessageCallbackContext, IotHubEventCallback reportedPropertiesCallback, Object reportedPropertiesCallbackContext) throws IllegalStateException, IllegalArgumentException
     {
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
 
         verifyReportedProperties(reportedProperties);
 
-        this.twin.updateReportedProperties(reportedProperties, version, correlatingMessageCallback, correlatingMessageCallbackContext, reportedPropertiesCallback, reportedPropertiesCallbackContext);
+        this.twin.updateReportedPropertiesAsync(reportedProperties, version, correlatingMessageCallback, correlatingMessageCallbackContext, reportedPropertiesCallback, reportedPropertiesCallbackContext);
     }
 
     /**
@@ -447,18 +445,18 @@ public class InternalClient
      *
      * @throws IllegalArgumentException if the callback is {@code null}
      * @throws UnsupportedOperationException if called more than once on the same device
-     * @throws IOException if called when client is not opened
+     * @throws IllegalStateException if called when client is not opened
      */
     public <Type1, Type2> void startTwinAsync(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
                                  PropertyCallback<Type1, Type2> genericPropertyCallback, Object genericPropertyCallbackContext)
-            throws IOException, IllegalArgumentException, UnsupportedOperationException
+            throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException
     {
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
 
         if (!this.deviceIO.isOpen())
         {
-            throw new IOException("Open the client connection before using it.");
+            throw new IllegalStateException("Open the client connection before using it");
         }
 
         if (twinStatusCallback == null || genericPropertyCallback == null)
@@ -474,7 +472,7 @@ public class InternalClient
                     genericPropertyCallback,
                     genericPropertyCallbackContext);
 
-            twin.getDeviceTwin();
+            twin.getDeviceTwinAsync();
         }
         else
         {
@@ -504,18 +502,18 @@ public class InternalClient
      *
      * @throws IllegalArgumentException if the callback is {@code null}
      * @throws UnsupportedOperationException if called more than once on the same device
-     * @throws IOException if called when client is not opened
+     * @throws IllegalStateException if called when client is not opened
      */
     public void startTwinAsync(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
                                TwinPropertyCallback genericPropertyCallback, Object genericPropertyCallbackContext)
-            throws IOException, IllegalArgumentException, UnsupportedOperationException
+            throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException
     {
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
 
         if (!this.deviceIO.isOpen())
         {
-            throw new IOException("Open the client connection before using it.");
+            throw new IllegalStateException("Open the client connection before using it");
         }
 
         if (twinStatusCallback == null || genericPropertyCallback == null)
@@ -526,7 +524,7 @@ public class InternalClient
         {
             twin = new DeviceTwin(this, twinStatusCallback, twinStatusCallbackContext,
                     genericPropertyCallback, genericPropertyCallbackContext);
-            twin.getDeviceTwin();
+            twin.getDeviceTwinAsync();
         }
         else
         {
@@ -556,18 +554,18 @@ public class InternalClient
      *
      * @throws IllegalArgumentException if the callback is {@code null}
      * @throws UnsupportedOperationException if called more than once on the same device
-     * @throws IOException if called when client is not opened
+     * @throws IllegalStateException if called when client is not opened
      */
     public void startTwinAsync(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
                            TwinPropertiesCallback genericPropertiesCallback, Object genericPropertyCallbackContext)
-            throws IOException, IllegalArgumentException, UnsupportedOperationException
+            throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException
     {
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
 
         if (!this.deviceIO.isOpen())
         {
-            throw new IOException("Open the client connection before using it.");
+            throw new IllegalStateException("Open the client connection before using it");
         }
 
         if (twinStatusCallback == null || genericPropertiesCallback == null)
@@ -583,7 +581,7 @@ public class InternalClient
                     twinStatusCallbackContext,
                     genericPropertiesCallback,
                     genericPropertyCallbackContext);
-            twin.getDeviceTwin();
+            twin.getDeviceTwinAsync();
         }
         else
         {
@@ -596,24 +594,24 @@ public class InternalClient
      * provide the retrieved twin to the callback provided in {@link #startTwinAsync(IotHubEventCallback, Object, TwinPropertyCallback, Object)}.
      *
      * Users must call {@link #startTwinAsync(IotHubEventCallback, Object, TwinPropertyCallback, Object)} before using this method.
-     * @throws IOException if the iot hub cannot be reached.
+     * @throws IllegalStateException if the client is not open or twin has not been started yet.
      */
-    public void getTwinAsync() throws IOException
+    public void getTwinAsync() throws IllegalStateException
     {
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
 
         if (this.twin == null)
         {
-            throw new IOException("Start twin before using it");
+            throw new IllegalStateException("Start twin before doing any other twin operations");
         }
 
         if (!this.deviceIO.isOpen())
         {
-            throw new IOException("Open the client connection before using it.");
+            throw new IllegalStateException("Open the client connection before using it");
         }
 
-        this.twin.getDeviceTwin();
+        this.twin.getDeviceTwinAsync();
     }
 
     /**
@@ -624,19 +622,19 @@ public class InternalClient
      * @param methodStatusCallback Callback for providing IotHub status for direct methods. Cannot be {@code null}.
      * @param methodStatusCallbackContext Context for device method status callback. Can be {@code null}.
      *
-     * @throws IOException if called when client is not opened.
+     * @throws IllegalStateException if called when client is not opened.
      * @throws IllegalArgumentException if either callback are null.
      */
     public void subscribeToMethodsAsync(MethodCallback methodCallback, Object methodCallbackContext,
                                         IotHubEventCallback methodStatusCallback, Object methodStatusCallbackContext)
-            throws IOException
+            throws IllegalStateException
     {
         verifyRegisteredIfMultiplexing();
         verifyMethodsAreSupported();
 
         if (!this.deviceIO.isOpen())
         {
-            throw new IOException("Open the client connection before using it.");
+            throw new IllegalStateException("Open the client connection before using it");
         }
 
         if (methodCallback == null || methodStatusCallback == null)
@@ -674,8 +672,6 @@ public class InternalClient
      *
      * @throws IllegalArgumentException if the callback is {@code null} but a context is
      * passed in.
-     * @throws IllegalStateException if the callback is set after the client is
-     * closed.
      */
     void setMessageCallbackInternal(MessageCallback callback, Object context)
     {
@@ -751,16 +747,16 @@ public class InternalClient
         }
     }
 
-    private void verifyReportedProperties(Set<Property> reportedProperties) throws IOException
+    private void verifyReportedProperties(Set<Property> reportedProperties)
     {
         if (this.twin == null)
         {
-            throw new IOException("Start twin before using it");
+            throw new IllegalStateException("Start twin before doing any other twin operations");
         }
 
         if (!this.deviceIO.isOpen())
         {
-            throw new IOException("Open the client connection before using it.");
+            throw new IllegalStateException("Open the client connection before using it");
         }
 
         if (reportedProperties == null || reportedProperties.isEmpty())

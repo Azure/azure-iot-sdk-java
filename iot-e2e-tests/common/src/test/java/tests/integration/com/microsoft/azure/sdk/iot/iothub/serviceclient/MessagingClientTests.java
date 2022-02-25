@@ -7,7 +7,6 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
-import com.microsoft.azure.sdk.iot.service.exceptions.ClientNotOpenException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubMessageTooLargeException;
 import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
@@ -368,7 +367,7 @@ public class MessagingClientTests extends IntegrationTest
 
     @Test
     @ContinuousIntegrationTest
-    public void cloudToDeviceTelemetryWithTooLargeMessageThrows() throws IOException, GeneralSecurityException, IotHubException, URISyntaxException, TimeoutException, InterruptedException, ClientNotOpenException
+    public void cloudToDeviceTelemetryWithTooLargeMessageThrows() throws IOException, GeneralSecurityException, IotHubException, URISyntaxException, TimeoutException, InterruptedException
     {
         // We remove and recreate the device for a clean start
         RegistryClient registryClient =

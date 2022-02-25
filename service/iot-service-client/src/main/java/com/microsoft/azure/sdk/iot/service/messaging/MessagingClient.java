@@ -8,7 +8,6 @@ package com.microsoft.azure.sdk.iot.service.messaging;
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.exceptions.ClientNotOpenException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnauthorizedException;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
@@ -369,9 +368,9 @@ public final class MessagingClient
      * @throws InterruptedException If this function is interrupted while waiting for the cloud to device message to be acknowledged
      * by the service.
      * @throws TimeoutException If the sent message isn't acknowledged by the service within the default timeout.
-     * @throws ClientNotOpenException if the client has not been opened yet, or is closed for any other reason such as connectivity loss.
+     * @throws IllegalStateException if the client has not been opened yet, or is closed for any other reason such as connectivity loss.
      */
-    public void send(String deviceId, Message message) throws IotHubException, InterruptedException, TimeoutException, ClientNotOpenException
+    public void send(String deviceId, Message message) throws IotHubException, InterruptedException, TimeoutException, IllegalStateException
     {
         this.send(deviceId, null, message, MESSAGE_SEND_TIMEOUT_MILLISECONDS);
     }
@@ -393,9 +392,9 @@ public final class MessagingClient
      * @throws InterruptedException If this function is interrupted while waiting for the cloud to device message to be acknowledged
      * by the service.
      * @throws TimeoutException If the sent message isn't acknowledged by the service within the provided timeout.
-     * @throws ClientNotOpenException if the client has not been opened yet, or is closed for any other reason such as connectivity loss.
+     * @throws IllegalStateException if the client has not been opened yet, or is closed for any other reason such as connectivity loss.
      */
-    public void send(String deviceId, Message message, int timeoutMilliseconds) throws IotHubException, InterruptedException, TimeoutException, ClientNotOpenException
+    public void send(String deviceId, Message message, int timeoutMilliseconds) throws IotHubException, InterruptedException, TimeoutException, IllegalStateException
     {
         this.send(deviceId, null, message, timeoutMilliseconds);
     }
@@ -417,9 +416,9 @@ public final class MessagingClient
      * @throws InterruptedException If this function is interrupted while waiting for the cloud to device message to be acknowledged
      * by the service.
      * @throws TimeoutException If the sent message isn't acknowledged by the service within the default timeout.
-     * @throws ClientNotOpenException if the client has not been opened yet, or is closed for any other reason such as connectivity loss.
+     * @throws IllegalStateException if the client has not been opened yet, or is closed for any other reason such as connectivity loss.
      */
-    public void send(String deviceId, String moduleId, Message message) throws IotHubException, InterruptedException, TimeoutException, ClientNotOpenException
+    public void send(String deviceId, String moduleId, Message message) throws IotHubException, InterruptedException, TimeoutException, IllegalStateException
     {
         this.send(deviceId, moduleId, message, MESSAGE_SEND_TIMEOUT_MILLISECONDS);
     }
@@ -442,9 +441,9 @@ public final class MessagingClient
      * @throws InterruptedException If this function is interrupted while waiting for the cloud to device message to be acknowledged
      * by the service.
      * @throws TimeoutException If the sent message isn't acknowledged by the service within the provided timeout.
-     * @throws ClientNotOpenException if the client has not been opened yet, or is closed for any other reason such as connectivity loss.
+     * @throws IllegalStateException if the client has not been opened yet, or is closed for any other reason such as connectivity loss.
      */
-    public void send(String deviceId, String moduleId, Message message, int timeoutMilliseconds) throws IotHubException, InterruptedException, TimeoutException, ClientNotOpenException
+    public void send(String deviceId, String moduleId, Message message, int timeoutMilliseconds) throws IotHubException, InterruptedException, TimeoutException, IllegalStateException
     {
         if (timeoutMilliseconds < 0)
         {
@@ -504,9 +503,9 @@ public final class MessagingClient
      * @param onMessageSentCallback the callback that will be executed when the message has either successfully been
      * sent, or has failed to send. May be null if you don't care if the sent message is acknowledged by the service.
      * @param context user defined context that will be provided in the onMessageSentCallback callback when it executes. May be null.
-     * @throws ClientNotOpenException if the client has not been opened yet, or is closed for any other reason such as connectivity loss.
+     * @throws IllegalStateException if the client has not been opened yet, or is closed for any other reason such as connectivity loss.
      */
-    public void sendAsync(String deviceId, Message message, Consumer<SendResult> onMessageSentCallback, Object context) throws ClientNotOpenException
+    public void sendAsync(String deviceId, Message message, Consumer<SendResult> onMessageSentCallback, Object context) throws IllegalStateException
     {
         this.sendAsync(deviceId, null, message, onMessageSentCallback, context);
     }
@@ -524,13 +523,13 @@ public final class MessagingClient
      * @param onMessageSentCallback the callback that will be executed when the message has either successfully been
      * sent, or has failed to send. May be null if you don't care if the sent message is acknowledged by the service.
      * @param context user defined context that will be provided in the onMessageSentCallback callback when it executes. May be null.
-     * @throws ClientNotOpenException if the client has not been opened yet, or is closed for any other reason such as connectivity loss.
+     * @throws IllegalStateException if the client has not been opened yet, or is closed for any other reason such as connectivity loss.
      */
-    public void sendAsync(String deviceId, String moduleId, Message message, Consumer<SendResult> onMessageSentCallback, Object context) throws ClientNotOpenException
+    public void sendAsync(String deviceId, String moduleId, Message message, Consumer<SendResult> onMessageSentCallback, Object context) throws IllegalStateException
     {
         if (!this.isOpen())
         {
-            throw new ClientNotOpenException();
+            throw new IllegalStateException("Client must be opened before any message can be sent");
         }
 
         if (moduleId == null)

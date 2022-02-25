@@ -6,7 +6,6 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.azure.core.credential.AzureSasCredential;
-import com.microsoft.azure.sdk.iot.service.exceptions.ClientNotOpenException;
 import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJob;
 import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
 import com.microsoft.azure.sdk.iot.service.messaging.ErrorContext;
@@ -174,7 +173,7 @@ public class AzureSasCredentialSample
             System.out.println("Successfully sent cloud to device message to the new device");
             messagingClient.close();
         }
-        catch (IOException | IotHubException | InterruptedException | TimeoutException | ClientNotOpenException e)
+        catch (IOException | IotHubException | InterruptedException | TimeoutException e)
         {
             System.err.println("Failed to send a cloud to device message to the new device");
             e.printStackTrace();
