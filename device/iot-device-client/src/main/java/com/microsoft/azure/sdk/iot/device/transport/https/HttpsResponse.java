@@ -77,23 +77,11 @@ public class HttpsResponse
      *
      * @return the header field value. If multiple values are present, they are
      * returned as a comma-separated list according to RFC2616.
-     *
-     * @throws IllegalArgumentException if no value exists for the given field
-     * name.
      */
-    public String getHeaderField(String field) throws IllegalArgumentException
+    public String getHeaderField(String field)
     {
         String canonicalizedField = canonicalizeFieldName(field);
-        String values = this.headerFields.get(canonicalizedField);
-        if (values == null)
-        {
-            String errMsg = String.format("Could not find a value "
-                    + "associated with the header field name '%s'.%n", field);
-
-            throw new IllegalArgumentException(errMsg);
-        }
-
-        return values;
+        return this.headerFields.get(canonicalizedField);
     }
 
     /**

@@ -6,6 +6,9 @@
 package tests.integration.com.microsoft.azure.sdk.iot.provisioning;
 
 
+import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesUpdate;
+import com.microsoft.azure.sdk.iot.device.twin.SendReportedPropertiesResponse;
+import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
@@ -47,6 +50,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol.*;
 import static junit.framework.TestCase.assertNotNull;
@@ -428,19 +432,22 @@ public class ProvisioningTests extends ProvisioningCommon
 
     private void sendReportedPropertyUpdate(String expectedReportedPropertyName, String expectedReportedPropertyValue, String iothubUri, String deviceId) throws InterruptedException, IOException, URISyntaxException
     {
-        /*
         //hardcoded AMQP here only because we aren't testing this connection. We just need to open a connection to send a twin update so that
         // we can test if the twin updates carry over after reprovisioning
         DeviceClient deviceClient = new DeviceClient(iothubUri, deviceId, testInstance.securityProvider, IotHubClientProtocol.AMQPS);
         deviceClient.open(false);
         CountDownLatch twinLock = new CountDownLatch(2);
-        deviceClient.startTwinAsync(new StubTwinCallback(twinLock), null, new StubTwinCallback(twinLock), null);
-        Set<Property> reportedProperties = new HashSet<>();
-        reportedProperties.add(new Property(expectedReportedPropertyName, expectedReportedPropertyValue));
-        deviceClient.sendReportedPropertiesAsync(reportedProperties);
+        deviceClient.subscribeToDesiredPropertiesAsync(
+            desiredPropertiesUpdate ->
+            {
+                // don't care about handling desired properties for this test
+            },
+            (responseStatus, callbackContext) -> twinLock.countDown());
+        TwinCollection twinCollection = new TwinCollection();
+        twinCollection.put(expectedReportedPropertyName, expectedReportedPropertyValue);
+        deviceClient.updateReportedPropertiesAsync(twinCollection, sendReportedPropertiesResponse -> twinLock.countDown());
         twinLock.await(MAX_TWIN_PROPAGATION_WAIT_SECONDS, TimeUnit.SECONDS);
         deviceClient.close();
-        */
     }
 
     private void updateEnrollmentToForceReprovisioning(EnrollmentType enrollmentType, List<String> iothubsToFinishAt) throws ProvisioningServiceClientException

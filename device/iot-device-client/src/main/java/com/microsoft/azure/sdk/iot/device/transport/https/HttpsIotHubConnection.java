@@ -230,8 +230,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
             HttpsResponse response = this.sendRequest(request);
 
             IotHubTransportMessage transportMessage = null;
-            IotHubStatusCode messageStatus = IotHubStatusCode.getIotHubStatusCode(response.getStatus());
-            if (messageStatus == IotHubStatusCode.OK)
+            if (response.getStatus() == 200)
             {
                 String messageEtag = sanitizeEtag(response.getHeaderField(HTTPS_PROPERTY_ETAG_TAG));
 

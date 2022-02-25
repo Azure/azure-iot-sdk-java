@@ -8,6 +8,10 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
+import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
@@ -31,8 +35,10 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestModuleIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.CountDownLatch;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
@@ -177,26 +183,70 @@ public class DirectMethodsCommon extends IntegrationTest
         }
     }
 
+    private String loopback(Object methodData)
+    {
+        String payload = new String((byte[])methodData, StandardCharsets.UTF_8).replace("\"", "");
+        return METHOD_LOOPBACK + ":" + payload;
+    }
+
+    private String delayInMilliseconds(Object methodData) throws InterruptedException
+    {
+        String payload = new String((byte[])methodData, StandardCharsets.UTF_8).replace("\"", "");
+        long delay = Long.parseLong(payload);
+        Thread.sleep(delay);
+        return METHOD_DELAY_IN_MILLISECONDS + ":succeed";
+    }
+
     public void openDeviceClientAndSubscribeToMethods() throws Exception
     {
         testInstance.setup();
         this.testInstance.identity.getClient().open(true);
-/*
-        try
-        {
-            //TODO rework this a bit?
-            this.testInstance.identity.getClient().subscribeToMethodsAsync();
-        }
-        catch (IOException | InterruptedException e)
-        {
-            e.printStackTrace();
-            fail(buildExceptionMessage("Unexpected exception occurred during subscribe: " + Tools.getStackTraceFromThrowable(e), this.testInstance.identity.getClient()));
-        }
-        catch (UnsupportedOperationException e)
-        {
-            //Only thrown when twin was already initialized. Safe to ignore
-        }
-        */
+
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        this.testInstance.identity.getClient().subscribeToMethodsAsync(
+            (methodName, methodData, context) ->
+            {
+                System.out.println("Device invoked " + methodName);
+                DirectMethodResponse deviceMethodData;
+                int status;
+                String result;
+                try
+                {
+                    switch (methodName)
+                    {
+                        case METHOD_RESET:
+                            result = METHOD_RESET + ":succeed";
+                            status = METHOD_SUCCESS;
+                            this.testInstance.identity.getClient().close();
+                            break;
+                        case METHOD_LOOPBACK:
+                            result = loopback(methodData);
+                            status = METHOD_SUCCESS;
+                            break;
+                        case METHOD_DELAY_IN_MILLISECONDS:
+                            result = delayInMilliseconds(methodData);
+                            status = METHOD_SUCCESS;
+                            break;
+                        default:
+                            result = "unknown:" + methodName;
+                            status = METHOD_NOT_DEFINED;
+                            break;
+                    }
+                }
+                catch (Exception e)
+                {
+                    result = e.toString();
+                    status = METHOD_THROWS;
+                }
+                deviceMethodData = new DirectMethodResponse(status, result);
+
+                return deviceMethodData;
+            },
+            null,
+            (responseStatus, callbackContext) -> countDownLatch.countDown(),
+            null);
+
+        countDownLatch.await();
     }
 
     @After
