@@ -160,16 +160,8 @@ public class InternalClient
      *
      * @throws IOException if a connection to an IoT hub cannot be established.
      */
-    // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
-    // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
-    @SuppressWarnings("ConstantConditions")
     public void open(boolean withRetry) throws IOException
     {
-        if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN && this.config.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary())
-        {
-            throw new SecurityException("Your SasToken is expired");
-        }
-
         this.deviceIO.open(withRetry);
     }
 
@@ -248,7 +240,8 @@ public class InternalClient
      *
      * @throws IllegalStateException if called when client is not opened or called before starting twin.
      */
-    public void subscribeToDesiredPropertiesAsync(Map<Property, Pair<PropertyCallback<String, Object>, Object>> onDesiredPropertyChange) throws IllegalStateException
+    public void subscribeToDesiredPropertiesAsync(Map<Property, Pair<PropertyCallback<String, Object>, Object>> onDesiredPropertyChange)
+        throws IllegalStateException
     {
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
@@ -273,7 +266,8 @@ public class InternalClient
      *
      * @throws IllegalStateException if called when client is not opened or called before starting twin.
      */
-    public void subscribeToTwinDesiredPropertiesAsync(Map<Property, Pair<TwinPropertyCallback, Object>> onDesiredPropertyChange) throws IllegalStateException
+    public void subscribeToTwinDesiredPropertiesAsync(Map<Property, Pair<TwinPropertyCallback, Object>> onDesiredPropertyChange)
+        throws IllegalStateException
     {
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
@@ -301,7 +295,13 @@ public class InternalClient
      */
     public void sendReportedPropertiesAsync(Set<Property> reportedProperties) throws IllegalStateException, IllegalArgumentException
     {
-        this.sendReportedPropertiesAsync(reportedProperties, null, null, null, null, null);
+        this.sendReportedPropertiesAsync(
+            reportedProperties,
+            null,
+            null,
+            null,
+            null,
+            null);
     }
 
     /**
@@ -313,13 +313,16 @@ public class InternalClient
      * @throws IllegalStateException if called when client is not opened or called before starting twin.
      * @throws IllegalArgumentException if reportedProperties is null or empty or if version is negative
      */
-    public void sendReportedPropertiesAsync(Set<Property> reportedProperties, int version) throws IllegalStateException, IllegalArgumentException
+    public void sendReportedPropertiesAsync(Set<Property> reportedProperties, int version)
+        throws IllegalStateException, IllegalArgumentException
     {
-        if (version < 0)
-        {
-            throw new IllegalArgumentException("Version cannot be negative.");
-        }
-        this.sendReportedPropertiesAsync(reportedProperties, version, null, null, null, null);
+        this.sendReportedPropertiesAsync(
+            reportedProperties,
+            version,
+            null,
+            null,
+            null,
+            null);
     }
 
     /**
@@ -328,9 +331,16 @@ public class InternalClient
      * @throws IllegalStateException if called when client is not opened or called before starting twin.
      * @throws IllegalArgumentException if reportedProperties is null or empty or if version specified in {#reportedPropertiesParameters} is negative
      */
-    public void sendReportedPropertiesAsync(ReportedPropertiesParameters reportedPropertiesParameters) throws IllegalStateException, IllegalArgumentException
+    public void sendReportedPropertiesAsync(ReportedPropertiesParameters reportedPropertiesParameters)
+        throws IllegalStateException, IllegalArgumentException
     {
-        this.sendReportedPropertiesAsync(reportedPropertiesParameters.getReportedProperties(), reportedPropertiesParameters.getVersion(), reportedPropertiesParameters.getCorrelatingMessageCallback(), reportedPropertiesParameters.getCorrelatingMessageCallbackContext(), reportedPropertiesParameters.getReportedPropertiesCallback(), reportedPropertiesParameters.getReportedPropertiesCallbackContext());
+        this.sendReportedPropertiesAsync(
+            reportedPropertiesParameters.getReportedProperties(),
+            reportedPropertiesParameters.getVersion(),
+            reportedPropertiesParameters.getCorrelatingMessageCallback(),
+            reportedPropertiesParameters.getCorrelatingMessageCallbackContext(),
+            reportedPropertiesParameters.getReportedPropertiesCallback(),
+            reportedPropertiesParameters.getReportedPropertiesCallbackContext());
     }
 
     /**
@@ -345,7 +355,14 @@ public class InternalClient
      * @throws IllegalStateException if called when client is not opened or called before starting twin.
      * @throws IllegalArgumentException if reportedProperties is null or empty or if version is negative
      */
-    public void sendReportedPropertiesAsync(Set<Property> reportedProperties, Integer version, CorrelatingMessageCallback correlatingMessageCallback, Object correlatingMessageCallbackContext, IotHubEventCallback reportedPropertiesCallback, Object reportedPropertiesCallbackContext) throws IllegalStateException, IllegalArgumentException
+    public void sendReportedPropertiesAsync(
+        Set<Property> reportedProperties,
+        Integer version,
+        CorrelatingMessageCallback correlatingMessageCallback,
+        Object correlatingMessageCallbackContext,
+        IotHubEventCallback reportedPropertiesCallback,
+        Object reportedPropertiesCallbackContext)
+            throws IllegalStateException, IllegalArgumentException
     {
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
@@ -371,9 +388,8 @@ public class InternalClient
      * @param callback The callback to be fired when the connection status of the device changes. Can be null to
      *                 unset this listener as long as the provided callbackContext is also null.
      * @param callbackContext a context to be passed to the callback. Can be {@code null}.
-     * @throws IllegalArgumentException if provided callback is null
      */
-    public void setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext) throws IllegalArgumentException
+    public void setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext)
     {
         this.connectionStatusChangeCallback = callback;
         this.connectionStatusChangeCallbackContext = callbackContext;
@@ -447,8 +463,11 @@ public class InternalClient
      * @throws UnsupportedOperationException if called more than once on the same device
      * @throws IllegalStateException if called when client is not opened
      */
-    public <Type1, Type2> void startTwinAsync(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
-                                 PropertyCallback<Type1, Type2> genericPropertyCallback, Object genericPropertyCallbackContext)
+    public <Type1, Type2> void startTwinAsync(
+        IotHubEventCallback twinStatusCallback,
+        Object twinStatusCallbackContext,
+        PropertyCallback<Type1, Type2> genericPropertyCallback,
+        Object genericPropertyCallbackContext)
             throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException
     {
         verifyRegisteredIfMultiplexing();
@@ -504,8 +523,11 @@ public class InternalClient
      * @throws UnsupportedOperationException if called more than once on the same device
      * @throws IllegalStateException if called when client is not opened
      */
-    public void startTwinAsync(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
-                               TwinPropertyCallback genericPropertyCallback, Object genericPropertyCallbackContext)
+    public void startTwinAsync(
+        IotHubEventCallback twinStatusCallback,
+        Object twinStatusCallbackContext,
+        TwinPropertyCallback genericPropertyCallback,
+        Object genericPropertyCallbackContext)
             throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException
     {
         verifyRegisteredIfMultiplexing();
@@ -556,8 +578,11 @@ public class InternalClient
      * @throws UnsupportedOperationException if called more than once on the same device
      * @throws IllegalStateException if called when client is not opened
      */
-    public void startTwinAsync(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
-                           TwinPropertiesCallback genericPropertiesCallback, Object genericPropertyCallbackContext)
+    public void startTwinAsync(
+        IotHubEventCallback twinStatusCallback,
+        Object twinStatusCallbackContext,
+        TwinPropertiesCallback genericPropertiesCallback,
+        Object genericPropertyCallbackContext)
             throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException
     {
         verifyRegisteredIfMultiplexing();

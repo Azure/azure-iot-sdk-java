@@ -54,10 +54,9 @@ public class IotHubConnectionString
      *
      * @param connectionString is the iothub connection string to parse.
      * @throws IllegalArgumentException if the provided connectionString is {@code null}, empty, or not valid or if the hostName in the connection string is not a valid URI.
-     * @throws SecurityException if the provided connection string contains an expired sas token
      * @throws URISyntaxException if the hostname is not a valid URI
      */
-    public IotHubConnectionString(String connectionString) throws IllegalArgumentException, SecurityException, URISyntaxException
+    public IotHubConnectionString(String connectionString) throws IllegalArgumentException, URISyntaxException
     {
         /* Codes_SRS_IOTHUB_CONNECTIONSTRING_21_016: [If the connection string is null or empty, the constructor shall throw an IllegalArgumentException.] */
         if ((connectionString == null) || connectionString.isEmpty())
@@ -97,12 +96,6 @@ public class IotHubConnectionString
             else if (attr.toLowerCase().startsWith(SHARED_ACCESS_TOKEN_ATTRIBUTE.toLowerCase()))
             {
                 this.sharedAccessToken = attr.substring(SHARED_ACCESS_TOKEN_ATTRIBUTE.length());
-
-                /* Codes_SRS_IOTHUB_CONNECTIONSTRING_34_035: [If the connection string contains an expired SAS Token, throw a SecurityException] */
-                if (IotHubSasToken.isExpired(this.sharedAccessToken))
-                {
-                    throw new SecurityException("Your SAS Token has expired");
-                }
             }
             else if (attr.toLowerCase().startsWith(MODULE_ID_ATTRIBUTE.toLowerCase()))
             {
@@ -131,15 +124,22 @@ public class IotHubConnectionString
      * a valid IoT Hub name as its prefix or if the IoT Hub hostname does not conform to RFC 3986.
      * @throws URISyntaxException if the hostname is not a valid URI
      */
-    public IotHubConnectionString(String hostName, String deviceId,
-                                  String sharedAccessKey, String sharedAccessToken)
+    public IotHubConnectionString(
+        String hostName,
+        String deviceId,
+        String sharedAccessKey,
+        String sharedAccessToken)
             throws IllegalArgumentException, URISyntaxException
     {
         this(hostName, deviceId, sharedAccessKey, sharedAccessToken, null);
     }
 
-    private IotHubConnectionString(String hostName, String deviceId,
-                                   String sharedAccessKey, String sharedAccessToken, String gatewayHostName)
+    private IotHubConnectionString(
+        String hostName,
+        String deviceId,
+        String sharedAccessKey,
+        String sharedAccessToken,
+        String gatewayHostName)
             throws IllegalArgumentException, URISyntaxException
     {
         this.isUsingX509 = (sharedAccessKey == null && sharedAccessToken == null);
@@ -151,10 +151,6 @@ public class IotHubConnectionString
         this.deviceId = deviceId;
         this.sharedAccessKey = sharedAccessKey;
         this.sharedAccessToken = sharedAccessToken;
-        if (this.sharedAccessToken != null && IotHubSasToken.isExpired(this.sharedAccessToken))
-        {
-            throw new SecurityException("Your SAS Token has expired");
-        }
 
         this.gatewayHostName = gatewayHostName;
 

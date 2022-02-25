@@ -409,7 +409,7 @@ public class DeviceTwinTest
     }
 
     //Tests_SRS_DEVICETWIN_34_032: [If the provided set of properties contains two keys with the same name, this function shall throw an IOException.]                 
-    @Test (expected = IOException.class)
+    @Test (expected = IllegalStateException.class)
     public void updateReportedPropThrowsForDuplicateKeys(
             @Mocked final IotHubTransportMessage mockedDeviceTwinMessage) throws IOException
     {

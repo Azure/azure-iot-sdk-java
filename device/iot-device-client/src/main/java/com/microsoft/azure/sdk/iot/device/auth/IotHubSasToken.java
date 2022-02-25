@@ -90,11 +90,6 @@ public final class IotHubSasToken
             {
                 throw new IllegalArgumentException("SasToken format is invalid");
             }
-
-            if (isExpired(this.sasToken))
-            {
-                throw new SecurityException("Your SasToken has expired");
-            }
         }
         else
         {

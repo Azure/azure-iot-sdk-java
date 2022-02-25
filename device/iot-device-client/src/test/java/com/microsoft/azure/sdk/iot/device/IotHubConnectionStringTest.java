@@ -575,47 +575,6 @@ public class IotHubConnectionStringTest
         assertEquals(VALID_SHARED_ACCESS_TOKEN, Deencapsulation.invoke(iotHubConnectionString, "getSharedAccessToken"));
     }
 
-    /* Tests_SRS_IOTHUB_CONNECTIONSTRING_34_035: [If the connection string contains an expired SAS Token, throw a SecurityException] */
-    @Test (expected = SecurityException.class)
-    public void IotHubConnectionStringExpiredConnectionStringThrowsSecurityException(@Mocked final IotHubSasToken iotHubSasToken) throws SecurityException, ClassNotFoundException
-    {
-        // arrange
-        final String connString =
-                "HostName=" + VALID_HOSTNAME + ";CredentialType=SharedAccessKey;CredentialScope=Device;" +
-                        "DeviceId=" + VALID_DEVICEID + ";SharedAccessSignature=" + EXPIRED_SHARED_ACCESS_TOKEN + ";";
-
-        new NonStrictExpectations()
-        {
-            {
-                IotHubSasToken.isExpired(anyString);
-                result = true;
-            }
-        };
-
-        // act
-        Object iotHubConnectionString = Deencapsulation.newInstance(Class.forName(IOTHUB_CONNECTION_STRING_CLASS),
-                new Class[] {String.class}, connString);
-    }
-
-    /* Tests_SRS_IOTHUB_CONNECTIONSTRING_34_036: [If the SAS Token has expired, throw a SecurityException.] */
-    @Test (expected = SecurityException.class)
-    public void IotHubConnectionStringExpiredSharedAccessTokenThrowsSecurityException(@Mocked final IotHubSasToken iotHubSasToken) throws SecurityException, ClassNotFoundException
-    {
-        // arrange
-        new NonStrictExpectations()
-        {
-            {
-                IotHubSasToken.isExpired(anyString);
-                result = true;
-            }
-        };
-
-        // act
-        Object iotHubConnectionString = Deencapsulation.newInstance(Class.forName(IOTHUB_CONNECTION_STRING_CLASS),
-                new Class[]{String.class, String.class, String.class, String.class},
-                VALID_HOSTNAME, "test;device", null, EXPIRED_SHARED_ACCESS_TOKEN);
-    }
-
     //Tests_SRS_IOTHUB_CONNECTIONSTRING_34_038: [This function shall set the value of this object's shared access token to the provided value.]
     @Test
     public void sharedAccessTokenSetterWorks() throws ClassNotFoundException

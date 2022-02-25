@@ -538,36 +538,6 @@ public class IotHubTransportTest
         transport.open(false);
     }
 
-
-    //Tests_SRS_IOTHUBTRANSPORT_34_018: [If the saved SAS token has expired, this function shall throw a SecurityException.]
-    @Test (expected = SecurityException.class)
-    public void openThrowsIfSasTokenExpired() throws DeviceClientException
-    {
-        //arrange
-        new MockUp<IotHubTransport>()
-        {
-            @Mock boolean isAuthenticationProviderExpired()
-            {
-                return true;
-            }
-        };
-
-        new Expectations()
-        {
-            {
-                mockedConfig.getDeviceId();
-                result = "someDeviceId";
-            }
-        };
-        final IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
-        Deencapsulation.setField(transport, "connectionStatus", DISCONNECTED);
-        Collection<DeviceClientConfig> configs = new ArrayList<>();
-        configs.add(mockedConfig);
-
-        //act
-        transport.open(false);
-    }
-
     //Tests_SRS_IOTHUBTRANSPORT_34_019: [This function shall open the invoke the method openConnection.]
     @Test
     public void openCallsOpenConnection() throws DeviceClientException
@@ -2413,68 +2383,6 @@ public class IotHubTransportTest
         };
     }
 
-    //Tests_SRS_IOTHUBTRANSPORT_28_010:[This function shall set the packet status to UNAUTHORIZED if sas token has expired.]
-    //Tests_SRS_IOTHUBTRANSPORT_28_011:[This function shall add the packet which sas token has expired to the Callback Queue.]
-    @Test
-    public void isMessageValidWithMessageNotExpiredSasTokenExpired()
-    {
-        //arrange
-        final StringBuilder methodsCalled = new StringBuilder();
-        new MockUp<IotHubTransport>()
-        {
-            @Mock void addToCallbackQueue(IotHubTransportPacket packet)
-            {
-                methodsCalled.append("addToCallbackQueue");
-            }
-
-            @Mock boolean isAuthenticationProviderExpired()
-            {
-                return true;
-            }
-
-            @Mock void updateStatus(IotHubConnectionStatus newConnectionStatus, IotHubConnectionStatusChangeReason reason, Throwable throwable, String deviceId)
-            {
-                if (newConnectionStatus == DISCONNECTED && reason == EXPIRED_SAS_TOKEN)
-                {
-                    methodsCalled.append("updateStatus");
-                }
-            }
-        };
-        new Expectations()
-        {
-            {
-                mockedConfig.getDeviceId();
-                result = "someDeviceId";
-            }
-        };
-        final IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
-        new NonStrictExpectations()
-        {
-            {
-                mockedPacket.getMessage();
-                result = mockedMessage;
-                mockedMessage.isExpired();
-                result = false;
-            }
-        };
-
-        //act
-        boolean ret = Deencapsulation.invoke(transport, "isMessageValid", new Class[] {IotHubTransportPacket.class}, mockedPacket);
-
-        //assert
-        assertFalse(ret);
-        new Verifications()
-        {
-            {
-                mockedPacket.setStatus(IotHubStatusCode.UNAUTHORIZED);
-                times = 1;
-            }
-        };
-        assertTrue(methodsCalled.toString().contains("addToCallbackQueue"));
-        assertTrue(methodsCalled.toString().contains("updateStatus"));
-    }
-
-    //Tests_SRS_IOTHUBTRANSPORT_28_005:[This function shall updated the saved connection status if the connection status has changed.]
     //Tests_SRS_IOTHUBTRANSPORT_28_006:[This function shall invoke all callbacks listening for the state change if the connection status has changed.]
     //Tests_SRS_IOTHUBTRANSPORT_28_007: [This function shall reset currentReconnectionAttempt and reconnectionAttemptStartTimeMillis if connection status is changed to CONNECTED.]
     @Test

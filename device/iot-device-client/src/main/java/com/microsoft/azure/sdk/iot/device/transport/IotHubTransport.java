@@ -420,16 +420,6 @@ public class IotHubTransport implements IotHubListener
 
         this.isClosing = false;
 
-        // The default config is only null when someone creates a multiplexing client and opens it before
-        // registering any devices to it. No need to check for SAS token expiry if no devices are registered yet.
-        if (this.getDefaultConfig() != null)
-        {
-            if (this.isAuthenticationProviderExpired())
-            {
-                throw new SecurityException("Your sas token has expired");
-            }
-        }
-
         this.taskScheduler = Executors.newScheduledThreadPool(1);
 
         if (withRetry)
@@ -1515,20 +1505,6 @@ public class IotHubTransport implements IotHubListener
             log.warn("Message with has expired, adding to callbacks queue with MESSAGE_EXPIRED ({})", message);
             packet.setStatus(IotHubStatusCode.MESSAGE_EXPIRED);
             this.addToCallbackQueue(packet);
-            return false;
-        }
-
-        if (isAuthenticationProviderExpired())
-        {
-            log.debug("Creating a callback for the message with expired sas token with UNAUTHORIZED status");
-            packet.setStatus(IotHubStatusCode.UNAUTHORIZED);
-            this.addToCallbackQueue(packet);
-            this.updateStatus(
-                    IotHubConnectionStatus.DISCONNECTED,
-                    IotHubConnectionStatusChangeReason.EXPIRED_SAS_TOKEN,
-                    new SecurityException("Your sas token has expired"),
-                    packet.getMessage().getConnectionDeviceId());
-
             return false;
         }
 

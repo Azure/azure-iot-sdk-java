@@ -631,7 +631,7 @@ public class InternalClientTest
     /*
      **Tests_SRS_INTERNALCLIENT_25_027: [**If the client has not been open, the function shall throw an IOException.**]**
      */
-    @Test (expected = IOException.class)
+    @Test (expected = IllegalStateException.class)
     public void startDeviceTwinThrowsIfCalledWhenClientNotOpen(@Mocked final IotHubEventCallback mockedStatusCB,
                                                                @Mocked final PropertyCallback mockedPropertyCB) throws IOException, URISyntaxException
 
@@ -1196,7 +1196,7 @@ public class InternalClientTest
     /*
     Tests_SRS_INTERNALCLIENT_25_036: [**If the client has not been open, the function shall throw an IOException.**]**
      */
-    @Test (expected = IOException.class)
+    @Test (expected = IllegalStateException.class)
     public void subscribeToDeviceMethodThrowsIfClientNotOpen(@Mocked final IotHubEventCallback mockedStatusCB,
                                                              @Mocked final MethodCallback mockedDeviceMethodCB)
             throws IOException, URISyntaxException
@@ -1294,27 +1294,6 @@ public class InternalClientTest
                 times = 2;
             }
         };
-    }
-
-    //Tests_SRS_INTERNALCLIENT_34_044: [**If the SAS token has expired before this call, throw a Security Exception**]
-    @Test (expected = SecurityException.class)
-    public void tokenExpiresAfterDeviceClientInitializedBeforeOpen() throws SecurityException, URISyntaxException, IOException
-    {
-        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
-        new NonStrictExpectations()
-        {
-            {
-                mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
-
-                mockConfig.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary();
-                result = true;
-            }
-        };
-
-        // act
-        client.open(false);
     }
 
     //Tests_SRS_INTERNALCLIENT_99_003: [If the callback is null the method shall throw an IllegalArgument exception.]
@@ -1458,7 +1437,7 @@ public class InternalClientTest
     }
 
     //Tests_SRS_INTERNALCLIENT_21_040: [If the client has not started twin before calling this method, the function shall throw an IOException.]
-    @Test (expected = IOException.class)
+    @Test (expected = IllegalStateException.class)
     public void getDeviceTwinThrowsIfNotStartedYet() throws URISyntaxException, IOException
     {
         //arrange
@@ -1469,7 +1448,7 @@ public class InternalClientTest
     }
 
     //Tests_SRS_INTERNALCLIENT_21_041: [If the client has not been open, the function shall throw an IOException.]
-    @Test (expected = IOException.class)
+    @Test (expected = IllegalStateException.class)
     public void getDeviceTwinThrowsIfNotOpen(@Mocked DeviceTwin mockedDeviceTwin) throws URISyntaxException, IOException
     {
         //arrange
@@ -1522,7 +1501,7 @@ public class InternalClientTest
     }
 
     //Tests_SRS_INTERNALCLIENT_34_081: [If device io has not been opened yet, this function shall throw an IOException.]
-    @Test (expected = IOException.class)
+    @Test (expected = IllegalStateException.class)
     public void startDeviceTwinThrowsIfClientNotOpen() throws IOException
     {
         //arrange
@@ -1610,7 +1589,7 @@ public class InternalClientTest
     }
 
     //Tests_SRS_INTERNALCLIENT_34_087: [If the client has not started twin before calling this method, the function shall throw an IOException.]
-    @Test (expected = IOException.class)
+    @Test (expected = IllegalStateException.class)
     public void subscribeToTwinDesiredPropertiesThrowsIfTwinNotStarted() throws IOException
     {
         //arrange
@@ -1625,7 +1604,7 @@ public class InternalClientTest
     }
 
     //Tests_SRS_INTERNALCLIENT_34_086: [If the client has not been open, the function shall throw an IOException.]
-    @Test (expected = IOException.class)
+    @Test (expected = IllegalStateException.class)
     public void subscribeToTwinDesiredPropertiesThrowsIfClientNotOpen(final @Mocked DeviceTwin mockedDeviceTwin) throws IOException
     {
         //arrange

@@ -22,16 +22,11 @@ public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasToken
      * @param sharedAccessToken the sas token string for accessing the device. Must be null if the provided deviceKey is not.
      * @param tokenValidSecs the number of seconds that the token will be valid for
      * @param timeBufferPercentage the percent of the sas token's life that will be exhausted before renewal is attempted
-     * @throws SecurityException if the provided sas token has expired
      */
-    public IotHubSasTokenSoftwareAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, String deviceKey, String sharedAccessToken, int tokenValidSecs, int timeBufferPercentage) throws SecurityException
+    public IotHubSasTokenSoftwareAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, String deviceKey, String sharedAccessToken, int tokenValidSecs, int timeBufferPercentage)
     {
         super(hostname, gatewayHostname, deviceId, moduleId, tokenValidSecs, timeBufferPercentage);
-
         this.deviceKey = deviceKey;
-
-
-        //Codes_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_002: [This constructor shall save the provided hostname, device id, module id, deviceKey, and sharedAccessToken.]
         this.sasToken = new IotHubSasToken(hostname, deviceId, deviceKey, sharedAccessToken, moduleId, getExpiryTimeInSeconds());
     }
 
@@ -43,15 +38,11 @@ public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasToken
      * @param moduleId the module id. May be null if not using a module
      * @param deviceKey the device key for the device. Must be null if the provided sharedAccessToken is not
      * @param sharedAccessToken the sas token string for accessing the device. Must be null if the provided deviceKey is not.
-     * @throws SecurityException if the provided sas token has expired
      */
-    public IotHubSasTokenSoftwareAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, String deviceKey, String sharedAccessToken) throws SecurityException
+    public IotHubSasTokenSoftwareAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, String deviceKey, String sharedAccessToken)
     {
         super(hostname, gatewayHostname, deviceId, moduleId);
-
         this.deviceKey = deviceKey;
-
-        //Codes_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_003: [This constructor shall save the provided hostname, device id, module id, deviceKey, and sharedAccessToken.]
         this.sasToken = new IotHubSasToken(hostname, deviceId, deviceKey, sharedAccessToken, moduleId, getExpiryTimeInSeconds());
     }
 
@@ -64,15 +55,11 @@ public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasToken
      * @param deviceKey the device key for the device. Must be null if the provided sharedAccessToken is not
      * @param sharedAccessToken the sas token string for accessing the device. Must be null if the provided deviceKey is not.
      * @param sslContext the sslContext to use for SSL negotiation
-     * @throws SecurityException if the provided sas token has expired
      */
-    public IotHubSasTokenSoftwareAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, String deviceKey, String sharedAccessToken, SSLContext sslContext) throws SecurityException
+    public IotHubSasTokenSoftwareAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, String deviceKey, String sharedAccessToken, SSLContext sslContext)
     {
         super(hostname, gatewayHostname, deviceId, moduleId, sslContext);
-
         this.deviceKey = deviceKey;
-
-        //Codes_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_003: [This constructor shall save the provided hostname, device id, module id, deviceKey, and sharedAccessToken.]
         this.sasToken = new IotHubSasToken(hostname, deviceId, deviceKey, sharedAccessToken, moduleId, getExpiryTimeInSeconds());
     }
 
