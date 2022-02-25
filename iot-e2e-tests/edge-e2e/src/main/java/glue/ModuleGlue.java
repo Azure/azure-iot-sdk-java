@@ -353,37 +353,31 @@ public class ModuleGlue
         }
         else
         {
-            try
-            {
-                // After we start the twin, we want to subscribe to twin properties.  This lambda will do that for us.
-                this._deviceTwinStatusCallback.setHandler(res -> {
-                    System.out.printf("startTwinAsync completed - failed = %s%n", (res.failed() ? "true" : "false"));
+            // After we start the twin, we want to subscribe to twin properties.  This lambda will do that for us.
+            this._deviceTwinStatusCallback.setHandler(res -> {
+                System.out.printf("startTwinAsync completed - failed = %s%n", (res.failed() ? "true" : "false"));
 
-                    if (res.failed())
+                if (res.failed())
+                {
+                    handler.handle(res);
+                }
+                else
+                {
+                    try
                     {
-                        handler.handle(res);
-                    }
-                    else
+                        client.subscribeToTwinDesiredPropertiesAsync(null);
+                    } catch (IllegalStateException e)
                     {
-                        try
-                        {
-                            client.subscribeToTwinDesiredPropertiesAsync(null);
-                        } catch (IOException e)
-                        {
-                            this._deviceTwinStatusCallback.setHandler(null);
-                            handler.handle(Future.failedFuture(e));
-                            return;
-                        }
-                        handler.handle(Future.succeededFuture());
+                        this._deviceTwinStatusCallback.setHandler(null);
+                        handler.handle(Future.failedFuture(e));
+                        return;
                     }
-                    this._deviceTwinStatusCallback.setHandler(null);
-                });
-                System.out.println("calling startTwinAsync");
-                client.startTwinAsync(this._deviceTwinStatusCallback, null, this._deviceTwinPropertyCallback, null);
-            } catch (IOException e)
-            {
-                handler.handle(Future.failedFuture((e)));
-            }
+                    handler.handle(Future.succeededFuture());
+                }
+                this._deviceTwinStatusCallback.setHandler(null);
+            });
+            System.out.println("calling startTwinAsync");
+            client.startTwinAsync(this._deviceTwinStatusCallback, null, this._deviceTwinPropertyCallback, null);
         }
     }
 
@@ -552,7 +546,7 @@ public class ModuleGlue
             try
             {
                 client.subscribeToMethodsAsync(this._methodCallback, null, callback, null);
-            } catch (IOException e)
+            } catch (IllegalStateException e)
             {
                 handler.handle(Future.failedFuture(e));
             }
@@ -668,7 +662,7 @@ public class ModuleGlue
             try
             {
                 client.getTwinAsync();
-            } catch (IOException e)
+            } catch (IllegalStateException e)
             {
                 this._deviceTwinPropertyCallback.setHandler(null);
                 handler.handle(Future.failedFuture(e));
@@ -704,7 +698,8 @@ public class ModuleGlue
             try
             {
                 client.sendReportedPropertiesAsync(propSet);
-            } catch (IOException e)
+            }
+            catch (IllegalStateException e)
             {
                 this._deviceTwinStatusCallback.setHandler(null);
                 handler.handle(Future.failedFuture(e));

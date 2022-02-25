@@ -391,10 +391,7 @@ public class DigitalTwinClientTests extends IntegrationTest
         TwinPropertyCallback twinPropertyCallback = (property, context) -> {
             Set<Property> properties = new HashSet<>();
             properties.add(property);
-            try {
-                deviceClient.sendReportedPropertiesAsync(properties);
-            } catch (IOException e) {
-            }
+            deviceClient.sendReportedPropertiesAsync(properties);
         };
 
         // IotHub event callback

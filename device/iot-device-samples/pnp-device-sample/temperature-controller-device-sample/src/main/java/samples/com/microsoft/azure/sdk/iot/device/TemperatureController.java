@@ -365,7 +365,7 @@ public class TemperatureController {
 
         final String propertyName = "targetTemperature";
 
-        @SneakyThrows({IOException.class, InterruptedException.class})
+        @SneakyThrows(InterruptedException.class)
         @Override
         public void onPropertyChanged(Property property, Object context) {
             String componentName = (String) context;

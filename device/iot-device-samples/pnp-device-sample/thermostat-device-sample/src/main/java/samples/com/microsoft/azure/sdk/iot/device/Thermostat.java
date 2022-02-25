@@ -252,7 +252,7 @@ public class Thermostat {
 
         final String propertyName = "targetTemperature";
 
-        @SneakyThrows({InterruptedException.class, IOException.class})
+        @SneakyThrows(InterruptedException.class)
         @Override
         public void onPropertyChanged(Property property, Object context) {
             if (property.getKey().equalsIgnoreCase(propertyName)) {
@@ -261,11 +261,7 @@ public class Thermostat {
 
                 EmbeddedPropertyUpdate pendingUpdate = new EmbeddedPropertyUpdate(targetTemperature, StatusCode.IN_PROGRESS.value, property.getVersion(), null);
                 Property reportedPropertyPending = new Property(propertyName, pendingUpdate);
-                try {
-                    deviceClient.sendReportedPropertiesAsync(Collections.singleton(reportedPropertyPending));
-                } catch (IOException e) {
-                    throw new RuntimeException("IOException when sending reported property update: ", e);
-                }
+                deviceClient.sendReportedPropertiesAsync(Collections.singleton(reportedPropertyPending));
                 log.debug("Property: Update - {\"{}\": {}°C} is {}", propertyName, targetTemperature, StatusCode.IN_PROGRESS);
 
                 // Update temperature in 2 steps
