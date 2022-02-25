@@ -27,6 +27,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceReg
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.UnauthorizedException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
+import com.microsoft.azure.sdk.iot.service.exceptions.ClientNotOpenException;
 import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
@@ -599,7 +600,7 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.multiplexingClient.close();
     }
 
-    private static void testReceivingCloudToDeviceMessage(String deviceId, MessageCallback messageCallback, String expectedMessageCorrelationId) throws IOException, IotHubException, InterruptedException, TimeoutException
+    private static void testReceivingCloudToDeviceMessage(String deviceId, MessageCallback messageCallback, String expectedMessageCorrelationId) throws IOException, IotHubException, InterruptedException, TimeoutException, ClientNotOpenException
     {
         com.microsoft.azure.sdk.iot.service.messaging.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.messaging.Message("some payload");
         serviceMessage.setCorrelationId(expectedMessageCorrelationId);

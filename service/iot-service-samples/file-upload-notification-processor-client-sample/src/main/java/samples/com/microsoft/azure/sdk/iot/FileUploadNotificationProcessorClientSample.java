@@ -29,13 +29,13 @@ import java.util.function.Function;
  */
 public class FileUploadNotificationProcessorClientSample
 {
-    private static final String connectionString = "";
+    private static final String connectionString = System.getenv("IOTHUB_CONNECTION_STRING");
+
+    private static final int OPERATION_TIMEOUT_MILLISECONDS = 1000; // timeout for each start/stop operation
 
     /** Choose iotHubServiceClientProtocol */
     private static final IotHubServiceClientProtocol protocol = IotHubServiceClientProtocol.AMQPS;
 //  private static final IotHubServiceClientProtocol protocol = IotHubServiceClientProtocol.AMQPS_WS;
-
-    private static boolean sampleEnded = false;
 
     public static void main(String[] args) throws InterruptedException
     {
@@ -43,7 +43,6 @@ public class FileUploadNotificationProcessorClientSample
         {
             throw new IllegalArgumentException("Must provide your IoT Hub's connection string");
         }
-
 
         final Object connectionEventLock = new Object();
         Consumer<ErrorContext> errorProcessor = errorContext ->
@@ -91,25 +90,13 @@ public class FileUploadNotificationProcessorClientSample
         FileUploadNotificationProcessorClient fileUploadNotificationProcessorClient =
             new FileUploadNotificationProcessorClient(connectionString, protocol, fileUploadNotificationProcessor, clientOptions);
 
-        // Run a thread in the background to pick up on user input so they can exit the sample at any time
-        new Thread(() ->
-        {
-            System.out.println("Enter any key to exit");
-            new Scanner(System.in, StandardCharsets.UTF_8.name()).nextLine();
-            sampleEnded = true;
-            synchronized (connectionEventLock)
-            {
-                connectionEventLock.notify();
-            }
-        }).start();
-
         try
         {
-            while (!sampleEnded)
+            while (true)
             {
                 if (!startFileUploadNotificationProcessorClientWithRetry(fileUploadNotificationProcessorClient))
                 {
-                    // exit the sample, but close the connection in the finally block first
+                    // Fatal error encountered. Exit the sample, but stop the client in the finally block first
                     return;
                 }
 
@@ -123,13 +110,13 @@ public class FileUploadNotificationProcessorClientSample
                 catch (InterruptedException e)
                 {
                     System.out.println("Interrupted, exiting sample");
-                    System.exit(-1);
+                    return;
                 }
             }
         }
         finally
         {
-            fileUploadNotificationProcessorClient.stop();
+            fileUploadNotificationProcessorClient.stop(OPERATION_TIMEOUT_MILLISECONDS);
         }
     }
 
@@ -140,7 +127,8 @@ public class FileUploadNotificationProcessorClientSample
         {
             try
             {
-                fileUploadNotificationProcessorClient.start();
+                System.out.println("Attempting to start the file upload notification processing client");
+                fileUploadNotificationProcessorClient.start(OPERATION_TIMEOUT_MILLISECONDS);
                 System.out.println("Successfully started the file upload notification processing client");
                 return true;
             }

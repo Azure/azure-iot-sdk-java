@@ -5,6 +5,7 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
+import com.microsoft.azure.sdk.iot.service.exceptions.ClientNotOpenException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubDeviceMaximumQueueDepthExceededException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubInternalServerErrorException;
@@ -30,11 +31,13 @@ import java.util.function.Consumer;
  */
 public class MessagingClientPerformanceSample
 {
-    private static final String connectionString = "";
-    private static final String deviceId = "";
+    private static final String connectionString = System.getenv("IOTHUB_CONNECTION_STRING");
+    private static final String deviceId = System.getenv("IOTHUB_DEVICE_ID");
+
     private static final int numberOfMessagesToSend = 50; // a single device can only have up to 50 cloud to device messages queued at a time
     private static int numberOfMessagesSentSuccessfully = 0;
     private static int numberOfMessagesFailedToSend = 0;
+    private static final int OPERATION_TIMEOUT_MILLISECONDS = 1000; // timeout for each open/close/send operation
 
     /** Choose iotHubServiceClientProtocol */
     private static final IotHubServiceClientProtocol protocol = IotHubServiceClientProtocol.AMQPS;
@@ -113,28 +116,48 @@ public class MessagingClientPerformanceSample
 
         MessagingClient messagingClient = new MessagingClient(connectionString, protocol, messagingClientOptions);
 
-        int messageCount = 0;
-
-        while (messageCount < numberOfMessagesToSend)
+        try
         {
+            int messageCount = 0;
+
             if (!openMessagingClientWithRetry(messagingClient))
             {
                 // exit the sample, but close the connection in the finally block first
                 return;
             }
 
-            while (messagingClient.isOpen() && messageCount < numberOfMessagesToSend)
+            while (messageCount < numberOfMessagesToSend)
             {
                 Message messageToSend = new Message(String.valueOf(messageCount));
-                messagingClient.sendAsync(deviceId, messageToSend, sendResultCallback, null);
-                messageCount++;
+
+                boolean messageSent = false;
+                while (!messageSent)
+                {
+                    try
+                    {
+                        messagingClient.sendAsync(deviceId, messageToSend, sendResultCallback, null);
+                        messageCount++;
+                        messageSent = true;
+                    }
+                    catch (ClientNotOpenException e)
+                    {
+                        System.out.println("Client was closed when attempting to send a message. Re-opening the client and trying again");
+                        if (!openMessagingClientWithRetry(messagingClient))
+                        {
+                            // exit the sample, but close the connection in the finally block first
+                            return;
+                        }
+                    }
+                }
             }
+
+            // wait for all messages to have been sent (successfully or otherwise)
+            messagesSentLatch.await();
         }
-
-        // wait for all messages to have been sent (successfully or otherwise)
-        messagesSentLatch.await();
-
-        messagingClient.close();
+        finally
+        {
+            messagingClient.close(OPERATION_TIMEOUT_MILLISECONDS);
+        }
 
         System.out.println("Successfully sent " + numberOfMessagesSentSuccessfully + " messages");
         System.out.println("Failed to send " + numberOfMessagesFailedToSend + " messages");
@@ -147,7 +170,9 @@ public class MessagingClientPerformanceSample
         {
             try
             {
-                messagingClient.open();
+                System.out.println("Attempting to open the messaging client");
+                messagingClient.open(OPERATION_TIMEOUT_MILLISECONDS);
+                System.out.println("Successfully opened the messaging client");
                 return true;
             }
             catch (IotHubUnauthorizedException e)

@@ -37,7 +37,7 @@ import java.util.function.Function;
 public class MessageFeedbackProcessorClient
 {
     private static final int START_REACTOR_TIMEOUT_MILLISECONDS = 60 * 1000; // 60 seconds
-    private static final int STOP_REACTOR_TIMEOUT_MILLISECONDS = 60 * 1000; // 60 seconds
+    private static final int STOP_REACTOR_TIMEOUT_MILLISECONDS = 5 * 1000; // 5 seconds
 
     private final EventReceivingConnectionHandler eventReceivingConnectionHandler;
     private final Consumer<ErrorContext> errorProcessor; // may be null if user doesn't provide one
@@ -229,7 +229,7 @@ public class MessageFeedbackProcessorClient
      */
     public synchronized void start(int timeoutMilliseconds) throws IotHubException, IOException, InterruptedException, TimeoutException
     {
-        if (this.reactorRunner != null && this.eventReceivingConnectionHandler != null && this.eventReceivingConnectionHandler.isOpen())
+        if (this.isRunning())
         {
             //already open
             return;
@@ -266,14 +266,10 @@ public class MessageFeedbackProcessorClient
             }
             catch (IOException e)
             {
-                log.debug("MessageFeedbackProcessorClient Amqp connection encountered an exception", e);
-
                 ioException.set(e);
             }
             catch (IotHubException e)
             {
-                log.debug("MessageFeedbackProcessorClient Amqp connection encountered an exception", e);
-
                 iotHubException.set(e);
             }
             finally

@@ -29,13 +29,13 @@ import java.util.function.Function;
  */
 public class MessageFeedbackProcessorClientSample
 {
-    private static final String connectionString = "";
+    private static final String connectionString = System.getenv("IOTHUB_CONNECTION_STRING");
+
+    private static final int OPERATION_TIMEOUT_MILLISECONDS = 1000; // timeout for each start/stop operation
 
     /** Choose iotHubServiceClientProtocol */
     private static final IotHubServiceClientProtocol protocol = IotHubServiceClientProtocol.AMQPS;
 //  private static final IotHubServiceClientProtocol protocol = IotHubServiceClientProtocol.AMQPS_WS;
-
-    private static boolean sampleEnded = false;
 
     public static void main(String[] args) throws InterruptedException
     {
@@ -91,25 +91,13 @@ public class MessageFeedbackProcessorClientSample
         MessageFeedbackProcessorClient messageFeedbackProcessorClient =
             new MessageFeedbackProcessorClient(connectionString, protocol, messageFeedbackProcessor, clientOptions);
 
-        // Run a thread in the background to pick up on user input so they can exit the sample at any time
-        new Thread(() ->
-        {
-            System.out.println("Enter any key to exit");
-            new Scanner(System.in, StandardCharsets.UTF_8.name()).nextLine();
-            sampleEnded = true;
-            synchronized (connectionEventLock)
-            {
-                connectionEventLock.notify();
-            }
-        }).start();
-
         try
         {
-            while (!sampleEnded)
+            while (true)
             {
                 if (!startMessageFeedbackProcessorClientWithRetry(messageFeedbackProcessorClient))
                 {
-                    // exit the sample, but close the connection in the finally block first
+                    // Fatal error encountered. Exit the sample, but stop the client in the finally block first
                     return;
                 }
 
@@ -123,13 +111,13 @@ public class MessageFeedbackProcessorClientSample
                 catch (InterruptedException e)
                 {
                     System.out.println("Interrupted, exiting sample");
-                    System.exit(-1);
+                    return;
                 }
             }
         }
         finally
         {
-            messageFeedbackProcessorClient.stop();
+            messageFeedbackProcessorClient.stop(OPERATION_TIMEOUT_MILLISECONDS);
         }
     }
 
@@ -140,7 +128,8 @@ public class MessageFeedbackProcessorClientSample
         {
             try
             {
-                messageFeedbackProcessorClient.start();
+                System.out.println("Attempting to start the message feedback processing client");
+                messageFeedbackProcessorClient.start(OPERATION_TIMEOUT_MILLISECONDS);
                 System.out.println("Successfully started the message feedback processing client");
                 return true;
             }

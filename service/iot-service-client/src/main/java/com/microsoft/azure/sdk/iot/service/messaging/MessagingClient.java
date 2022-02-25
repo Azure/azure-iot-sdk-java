@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.service.messaging;
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.exceptions.ClientNotOpenException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnauthorizedException;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
@@ -39,7 +40,7 @@ import java.util.function.Consumer;
 public final class MessagingClient
 {
     private static final int START_REACTOR_TIMEOUT_MILLISECONDS = 60 * 1000; // 60 seconds
-    private static final int STOP_REACTOR_TIMEOUT_MILLISECONDS = 60 * 1000; // 60 seconds
+    private static final int STOP_REACTOR_TIMEOUT_MILLISECONDS = 5 * 1000; // 5 seconds
     private static final int MESSAGE_SEND_TIMEOUT_MILLISECONDS = 60 * 1000; // 60 seconds
 
     private final Consumer<ErrorContext> errorProcessor; // may be null if user doesn't provide one
@@ -243,7 +244,7 @@ public final class MessagingClient
      */
     public synchronized void open(int timeoutMilliseconds) throws IotHubException, IOException, InterruptedException, TimeoutException
     {
-        if (this.reactorRunner != null && this.cloudToDeviceMessageConnectionHandler != null && this.cloudToDeviceMessageConnectionHandler.isOpen())
+        if (this.isOpen())
         {
             //already open
             return;
@@ -280,14 +281,10 @@ public final class MessagingClient
             }
             catch (IOException e)
             {
-                log.debug("MessagingClient Amqp connection encountered an exception", e);
-
                 ioException.set(e);
             }
             catch (IotHubException e)
             {
-                log.debug("MessagingClient Amqp connection encountered an exception", e);
-
                 iotHubException.set(e);
             }
             finally
@@ -372,8 +369,9 @@ public final class MessagingClient
      * @throws InterruptedException If this function is interrupted while waiting for the cloud to device message to be acknowledged
      * by the service.
      * @throws TimeoutException If the sent message isn't acknowledged by the service within the default timeout.
+     * @throws ClientNotOpenException if the client has not been opened yet, or is closed for any other reason such as connectivity loss.
      */
-    public void send(String deviceId, Message message) throws IotHubException, InterruptedException, TimeoutException
+    public void send(String deviceId, Message message) throws IotHubException, InterruptedException, TimeoutException, ClientNotOpenException
     {
         this.send(deviceId, null, message, MESSAGE_SEND_TIMEOUT_MILLISECONDS);
     }
@@ -395,8 +393,9 @@ public final class MessagingClient
      * @throws InterruptedException If this function is interrupted while waiting for the cloud to device message to be acknowledged
      * by the service.
      * @throws TimeoutException If the sent message isn't acknowledged by the service within the provided timeout.
+     * @throws ClientNotOpenException if the client has not been opened yet, or is closed for any other reason such as connectivity loss.
      */
-    public void send(String deviceId, Message message, int timeoutMilliseconds) throws IotHubException, InterruptedException, TimeoutException
+    public void send(String deviceId, Message message, int timeoutMilliseconds) throws IotHubException, InterruptedException, TimeoutException, ClientNotOpenException
     {
         this.send(deviceId, null, message, timeoutMilliseconds);
     }
@@ -418,8 +417,9 @@ public final class MessagingClient
      * @throws InterruptedException If this function is interrupted while waiting for the cloud to device message to be acknowledged
      * by the service.
      * @throws TimeoutException If the sent message isn't acknowledged by the service within the default timeout.
+     * @throws ClientNotOpenException if the client has not been opened yet, or is closed for any other reason such as connectivity loss.
      */
-    public void send(String deviceId, String moduleId, Message message) throws IotHubException, InterruptedException, TimeoutException
+    public void send(String deviceId, String moduleId, Message message) throws IotHubException, InterruptedException, TimeoutException, ClientNotOpenException
     {
         this.send(deviceId, moduleId, message, MESSAGE_SEND_TIMEOUT_MILLISECONDS);
     }
@@ -442,8 +442,9 @@ public final class MessagingClient
      * @throws InterruptedException If this function is interrupted while waiting for the cloud to device message to be acknowledged
      * by the service.
      * @throws TimeoutException If the sent message isn't acknowledged by the service within the provided timeout.
+     * @throws ClientNotOpenException if the client has not been opened yet, or is closed for any other reason such as connectivity loss.
      */
-    public void send(String deviceId, String moduleId, Message message, int timeoutMilliseconds) throws IotHubException, InterruptedException, TimeoutException
+    public void send(String deviceId, String moduleId, Message message, int timeoutMilliseconds) throws IotHubException, InterruptedException, TimeoutException, ClientNotOpenException
     {
         if (timeoutMilliseconds < 0)
         {
@@ -503,8 +504,9 @@ public final class MessagingClient
      * @param onMessageSentCallback the callback that will be executed when the message has either successfully been
      * sent, or has failed to send. May be null if you don't care if the sent message is acknowledged by the service.
      * @param context user defined context that will be provided in the onMessageSentCallback callback when it executes. May be null.
+     * @throws ClientNotOpenException if the client has not been opened yet, or is closed for any other reason such as connectivity loss.
      */
-    public void sendAsync(String deviceId, Message message, Consumer<SendResult> onMessageSentCallback, Object context)
+    public void sendAsync(String deviceId, Message message, Consumer<SendResult> onMessageSentCallback, Object context) throws ClientNotOpenException
     {
         this.sendAsync(deviceId, null, message, onMessageSentCallback, context);
     }
@@ -522,9 +524,24 @@ public final class MessagingClient
      * @param onMessageSentCallback the callback that will be executed when the message has either successfully been
      * sent, or has failed to send. May be null if you don't care if the sent message is acknowledged by the service.
      * @param context user defined context that will be provided in the onMessageSentCallback callback when it executes. May be null.
+     * @throws ClientNotOpenException if the client has not been opened yet, or is closed for any other reason such as connectivity loss.
      */
-    public void sendAsync(String deviceId, String moduleId, Message message, Consumer<SendResult> onMessageSentCallback, Object context)
+    public void sendAsync(String deviceId, String moduleId, Message message, Consumer<SendResult> onMessageSentCallback, Object context) throws ClientNotOpenException
     {
+        if (!this.isOpen())
+        {
+            throw new ClientNotOpenException();
+        }
+
+        if (moduleId == null)
+        {
+            log.info("Sending cloud to device message with correlation id {}", message.getCorrelationId());
+        }
+        else
+        {
+            log.info("Sending cloud to module message with correlation id {}", message.getCorrelationId());
+        }
+
         this.cloudToDeviceMessageConnectionHandler.sendAsync(deviceId, moduleId, message, onMessageSentCallback, context);
     }
 

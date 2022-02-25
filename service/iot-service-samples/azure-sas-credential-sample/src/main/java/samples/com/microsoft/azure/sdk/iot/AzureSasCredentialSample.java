@@ -6,6 +6,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.azure.core.credential.AzureSasCredential;
+import com.microsoft.azure.sdk.iot.service.exceptions.ClientNotOpenException;
 import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJob;
 import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
 import com.microsoft.azure.sdk.iot.service.messaging.ErrorContext;
@@ -52,9 +53,6 @@ import java.util.function.Function;
 @Slf4j
 public class AzureSasCredentialSample
 {
-    private static final int FILE_UPLOAD_NOTIFICATION_LISTEN_SECONDS = 5 * 1000; // 5 seconds
-    private static final int FEEDBACK_MESSAGE_LISTEN_SECONDS = 5 * 1000; // 5 seconds
-
     public static void main(String[] args)
     {
         SamplesArguments parsedArguments = new SamplesArguments(args);
@@ -176,7 +174,7 @@ public class AzureSasCredentialSample
             System.out.println("Successfully sent cloud to device message to the new device");
             messagingClient.close();
         }
-        catch (IOException | IotHubException | InterruptedException | TimeoutException e)
+        catch (IOException | IotHubException | InterruptedException | TimeoutException | ClientNotOpenException e)
         {
             System.err.println("Failed to send a cloud to device message to the new device");
             e.printStackTrace();

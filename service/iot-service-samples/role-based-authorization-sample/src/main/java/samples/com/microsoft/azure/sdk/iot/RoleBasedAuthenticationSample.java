@@ -7,6 +7,7 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.identity.ClientSecretCredentialBuilder;
+import com.microsoft.azure.sdk.iot.service.exceptions.ClientNotOpenException;
 import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJob;
 import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
 import com.microsoft.azure.sdk.iot.service.messaging.ErrorContext;
@@ -166,7 +167,7 @@ public class RoleBasedAuthenticationSample
             System.out.println("Successfully sent cloud to device message to the new device");
             messagingClient.close();
         }
-        catch (IOException | IotHubException | TimeoutException e)
+        catch (IOException | IotHubException | TimeoutException | ClientNotOpenException e)
         {
             System.err.println("Failed to send a cloud to device message to the new device");
             e.printStackTrace();

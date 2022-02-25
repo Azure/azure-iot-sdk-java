@@ -52,7 +52,7 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
     @Getter
     protected final String hostName;
     private TokenCredential credential;
-    private AzureSasCredential sasTokenProvider;
+    private AzureSasCredential azureSasCredential;
     private String connectionString;
     private IotHubServiceClientProtocol protocol;
     private ProxyOptions proxyOptions;
@@ -101,10 +101,10 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         }
 
         Objects.requireNonNull(protocol);
-        Objects.requireNonNull(sasTokenProvider);
+        Objects.requireNonNull(azureSasCredential);
 
         this.hostName = hostName;
-        this.sasTokenProvider = sasTokenProvider;
+        this.azureSasCredential = azureSasCredential;
         this.errorProcessor = errorProcessor;
         this.keepAliveIntervalSeconds = keepAliveIntervalSeconds;
 
@@ -253,9 +253,9 @@ abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup 
         {
             this.cbsSessionHandler = new CbsSessionHandler(cbsSession, this, this.credential);
         }
-        else if (this.sasTokenProvider != null)
+        else if (this.azureSasCredential != null)
         {
-            this.cbsSessionHandler = new CbsSessionHandler(cbsSession, this, this.sasTokenProvider);
+            this.cbsSessionHandler = new CbsSessionHandler(cbsSession, this, this.azureSasCredential);
         }
         else
         {
