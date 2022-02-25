@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 @AllArgsConstructor
 public class SendResult
 {
-    private final boolean sentSuccessfully; //TODO test out case where this is false
+    private final boolean sentSuccessfully;
 
     /**
      * The correlationId of the message that this send result is for.
