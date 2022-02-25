@@ -7,6 +7,9 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
+import com.microsoft.azure.sdk.iot.service.exceptions.ClientNotOpenException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubMessageTooLargeException;
 import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
@@ -43,8 +46,11 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.net.URISyntaxException;
+import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.concurrent.TimeoutException;
 
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
@@ -64,6 +70,7 @@ public class MessagingClientTests extends IntegrationTest
     protected static String invalidCertificateServerConnectionString = "";
     private static final byte[] SMALL_PAYLOAD = new byte[1024];
     private static final byte[] LARGEST_PAYLOAD = new byte[65000]; // IoT Hub allows a max of 65 kb per message
+    private static final byte[] TOO_LARGE_PAYLOAD = new byte[256000]; // IoT Hub allows a max of 65 kb per message
     private static String hostName;
 
     protected static HttpProxyServer proxyServer;
@@ -357,6 +364,54 @@ public class MessagingClientTests extends IntegrationTest
         }
 
         assertTrue(buildExceptionMessage("Expected an exception due to service presenting invalid certificate", hostName), expectedExceptionWasCaught);
+    }
+
+    @Test
+    @ContinuousIntegrationTest
+    public void cloudToDeviceTelemetryWithTooLargeMessageThrows() throws IOException, GeneralSecurityException, IotHubException, URISyntaxException, TimeoutException, InterruptedException, ClientNotOpenException
+    {
+        // We remove and recreate the device for a clean start
+        RegistryClient registryClient =
+            new RegistryClient(
+                iotHubConnectionString,
+                RegistryClientOptions.builder()
+                    .httpReadTimeoutSeconds(HTTP_READ_TIMEOUT)
+                    .build());
+
+        TestDeviceIdentity testDeviceIdentity =
+            Tools.getTestDevice(
+                iotHubConnectionString,
+                IotHubClientProtocol.AMQPS,
+                AuthenticationType.SAS,
+                false);
+
+        Device device = testDeviceIdentity.getDevice();
+
+        Device deviceGetBefore = registryClient.getDevice(device.getDeviceId());
+
+        MessagingClientOptions messagingClientOptions =
+            MessagingClientOptions.builder()
+                .build();
+
+        MessagingClient messagingClient = new MessagingClient(iotHubConnectionString, testInstance.protocol, messagingClientOptions);
+
+        messagingClient.open();
+
+        Message message = new Message(TOO_LARGE_PAYLOAD);
+
+        try
+        {
+            messagingClient.send(device.getDeviceId(), message);
+            fail("Expected an exception to be thrown for sending a message with too large of a payload");
+        }
+        catch (IotHubMessageTooLargeException e)
+        {
+            // expected error thrown, ignore it.
+        }
+
+        messagingClient.close();
+
+        Tools.disposeTestIdentity(testDeviceIdentity, iotHubConnectionString);
     }
 
     private static MessagingClient buildMessagingClientWithAzureSasCredential(IotHubServiceClientProtocol protocol, MessagingClientOptions options)
