@@ -257,7 +257,7 @@ public class MultiplexingClientTests extends IntegrationTest
     @Test
     public void connectionStatusCallbackExecutedWithNoDevices() throws Exception
     {
-        // Even with no devices registered to a multiplexed connection, the connection status callback should execute
+        // Even with no devices registered to a multiplexed connection, the connection status callback should onStatusChanged
         // when the multiplexed connection opens and closes.
         testInstance.setup(0);
         ConnectionStatusChangeTracker connectionStatusChangeTracker = new ConnectionStatusChangeTracker();
@@ -995,7 +995,7 @@ public class MultiplexingClientTests extends IntegrationTest
         public boolean clientClosedUnexpectedly = false;
 
         @Override
-        public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+        public void onStatusChanged(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
         {
             if (status == IotHubConnectionStatus.CONNECTED)
             {
@@ -1111,7 +1111,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
-            assertTrue("Multiplexing client opened successfully, but connection status change callback didn't execute.", connectionStatusChangeTrackers[i].isOpen);
+            assertTrue("Multiplexing client opened successfully, but connection status change callback didn't onStatusChanged.", connectionStatusChangeTrackers[i].isOpen);
         }
 
         // For each multiplexed device, use fault injection to drop the session and see if it can recover, one device at a time
@@ -1168,7 +1168,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
-            assertTrue("Multiplexing client opened successfully, but connection status change callback didn't execute.", connectionStatusChangeTrackers[i].isOpen);
+            assertTrue("Multiplexing client opened successfully, but connection status change callback didn't onStatusChanged.", connectionStatusChangeTrackers[i].isOpen);
         }
 
         // For each multiplexed device, use fault injection to drop the session and see if it can recover, one device at a time
@@ -1226,7 +1226,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
-            assertTrue("Multiplexing client opened successfully, but connection status change callback didn't execute.", connectionStatusChangeTrackers[i].isOpen);
+            assertTrue("Multiplexing client opened successfully, but connection status change callback didn't onStatusChanged.", connectionStatusChangeTrackers[i].isOpen);
         }
 
         Message errorInjectionMessage = ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(1, 10);

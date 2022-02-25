@@ -106,7 +106,7 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
     }
 
     @Override
-    public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+    public void onStatusChanged(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
     {
         if (throwable == null)
         {

@@ -1449,7 +1449,7 @@ public class IotHubTransportTest
         assertEquals(1, waitingPacketsQueue.size());
     }
 
-    //Tests_SRS_IOTHUBTRANSPORT_34_045: [This function shall dequeue each packet in the callback queue and execute
+    //Tests_SRS_IOTHUBTRANSPORT_34_045: [This function shall dequeue each packet in the callback queue and onStatusChanged
     // their saved callback with their saved status and context]
     @Test
     public void invokeCallbacksInvokesAllCallbacks(final @Mocked IotHubStatusCode mockedStatus)
@@ -1657,7 +1657,7 @@ public class IotHubTransportTest
         transport.setConnectionStatusChangeCallback(null, null, "someDeviceId");
     }
 
-    //Tests_SRS_IOTHUBTRANSPORT_34_053: [This function shall execute the callback associate with the provided
+    //Tests_SRS_IOTHUBTRANSPORT_34_053: [This function shall onStatusChanged the callback associate with the provided
     // transport message with the provided message and its saved callback context.]
     //Tests_SRS_IOTHUBTRANSPORT_34_054: [This function shall send the message callback result along the
     // connection as the ack to the service.]
@@ -2608,7 +2608,7 @@ public class IotHubTransportTest
         new Verifications()
         {
             {
-                mockedIotHubConnectionStatusChangeCallback.execute(
+                mockedIotHubConnectionStatusChangeCallback.onStatusChanged(
                         (IotHubConnectionStatus)any,
                         (IotHubConnectionStatusChangeReason)any,
                         (Throwable)any,
@@ -2644,7 +2644,7 @@ public class IotHubTransportTest
         new Verifications()
         {
             {
-                mockedIotHubConnectionStatusChangeCallback.execute(
+                mockedIotHubConnectionStatusChangeCallback.onStatusChanged(
                         (IotHubConnectionStatus)any,
                         (IotHubConnectionStatusChangeReason)any,
                         (Throwable)any,

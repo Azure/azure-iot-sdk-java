@@ -136,7 +136,7 @@ public class DeviceTwin
             if (desiredPropertyMap != null)
             {
                 // If any desired properties are present, and the user has subscribed to receive the generic twin
-                // properties callback, then execute the callback so that they receive the full twin payload.
+                // properties callback, then onStatusChanged the callback so that they receive the full twin payload.
                 if (!desiredPropertyMap.isEmpty() && this.deviceTwinGenericTwinPropertiesChangeCallback != null)
                 {
                     deviceTwinGenericTwinPropertiesChangeCallback.onPropertiesChanged(desiredPropertyMap, deviceTwinGenericPropertyChangeCallbackContext);

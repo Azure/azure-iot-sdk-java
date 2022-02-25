@@ -362,7 +362,7 @@ public class InternalClient
      *
      * This connection status callback is not triggered by any upstream connection change events. For example, if
      * if the connection status callback is set for a module on an IoT Edge device and that IoT Edge device
-     * loses connection to the cloud, this connection status callback won't execute since the connection
+     * loses connection to the cloud, this connection status callback won't onStatusChanged since the connection
      * between the module and the IoT Edge device hasn't changed.
      *
      * <p>Note that the thread used to deliver this callback should not be used to call open()/closeNow() on the client

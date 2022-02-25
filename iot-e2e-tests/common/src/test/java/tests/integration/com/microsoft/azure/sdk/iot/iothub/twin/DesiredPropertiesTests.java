@@ -472,7 +472,7 @@ public class DesiredPropertiesTests extends TwinCommon
 
             if (System.currentTimeMillis() - startTime > DESIRED_PROPERTIES_PROPAGATION_TIME_MILLISECONDS)
             {
-                fail("Timed out waiting for desired properties callback to execute");
+                fail("Timed out waiting for desired properties callback to onStatusChanged");
             }
         }
 

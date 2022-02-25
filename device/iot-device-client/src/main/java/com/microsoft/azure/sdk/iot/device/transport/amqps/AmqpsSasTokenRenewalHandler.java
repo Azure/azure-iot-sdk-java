@@ -11,7 +11,7 @@ import org.apache.qpid.proton.reactor.Reactor;
 
 /**
  * This class is responsible for proactively renewing sas tokens for a single device. When multiplexing, there will
- * be one instance of this class per device. It will periodically execute the onTimerTask logic to send a renewed sas token,
+ * be one instance of this class per device. It will periodically onStatusChanged the onTimerTask logic to send a renewed sas token,
  * and then will schedule the next timer task appropriately.
  */
 @Slf4j

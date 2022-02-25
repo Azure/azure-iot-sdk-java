@@ -22,7 +22,7 @@ public class SasTokenTools
         String expiryTimeSubstring = sasToken.substring(sasToken.indexOf(EXPIRY_TIME_KEY) + EXPIRY_TIME_KEY.length());
 
         // Shared access signatures are a set of key value pairs that can be in any order. If the expiry time key value pair
-        // is the final key value pair, then the below if block won't execute.
+        // is the final key value pair, then the below if block won't onStatusChanged.
         //
         // For instance, given "SharedAccessSignature sr=<hostname>&sig=<signature>&se=<expiryTime>&skn=<keyName>", the
         // above would set expiryTimeSubstring = "<expiryTime>&skn=<keyName>", so we still need to remove any remaining

@@ -105,17 +105,17 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
     }
 
     @Override
-    public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext) {
+    public void onStatusChanged(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext) {
         Pair<IotHubConnectionStatusChangeCallback, Object> suppliedCallbackPair = this.suppliedConnectionStatusChangeCallback;
 
         if (shouldDeviceReconnect(status, statusChangeReason, throwable)) {
             if (suppliedCallbackPair != null) {
-                suppliedCallbackPair.getKey().execute(DISCONNECTED_RETRYING, NO_NETWORK, throwable, suppliedCallbackPair.getValue());
+                suppliedCallbackPair.getKey().onStatusChanged(DISCONNECTED_RETRYING, NO_NETWORK, throwable, suppliedCallbackPair.getValue());
             }
 
             handleRecoverableDisconnection();
         } else if (suppliedCallbackPair != null) {
-            suppliedCallbackPair.getKey().execute(status, statusChangeReason, throwable, suppliedCallbackPair.getValue());
+            suppliedCallbackPair.getKey().onStatusChanged(status, statusChangeReason, throwable, suppliedCallbackPair.getValue());
         }
     }
 

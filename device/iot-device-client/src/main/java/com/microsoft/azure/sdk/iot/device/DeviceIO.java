@@ -405,7 +405,7 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
      * the send/receive threads accordingly
      */
     @Override
-    public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+    public void onStatusChanged(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
     {
         log.trace("DeviceIO notified of status {} with reason {}", status, statusChangeReason);
 

@@ -86,7 +86,7 @@ public class ModuleTwinSample
     protected static class IotHubConnectionStatusChangeCallbackLogger implements IotHubConnectionStatusChangeCallback
     {
         @Override
-        public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+        public void onStatusChanged(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
         {
             System.out.println();
             System.out.println("CONNECTION STATUS UPDATE: " + status);

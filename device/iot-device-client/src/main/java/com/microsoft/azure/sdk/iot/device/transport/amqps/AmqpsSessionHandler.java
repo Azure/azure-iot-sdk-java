@@ -499,7 +499,7 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
     }
 
     // This opens the telemetry links locally, but the service still needs to open them remotely as well. The
-    // "onLinkOpened()" event will execute when that happens.
+    // "onLinkOpened()" event will onStatusChanged when that happens.
     private void createTelemetryLinksAsync()
     {
         String telemetryLinkCorrelationId = UUID.randomUUID().toString();
@@ -513,7 +513,7 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
     }
 
     // This opens the methods links locally, but the service still needs to open them remotely as well. The
-    // "onLinkOpened()" event will execute when that happens.
+    // "onLinkOpened()" event will onStatusChanged when that happens.
     private void createMethodLinksAsync()
     {
         log.debug("Creating direct method links");
@@ -530,7 +530,7 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
     }
 
     // This opens the twin links locally, but the service still needs to open them remotely as well. The
-    // "onLinkOpened()" event will execute when that happens.
+    // "onLinkOpened()" event will onStatusChanged when that happens.
     private void createTwinLinksAsync()
     {
         log.debug("Creating twin links");

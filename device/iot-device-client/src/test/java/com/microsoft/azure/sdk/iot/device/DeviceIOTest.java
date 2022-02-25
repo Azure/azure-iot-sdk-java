@@ -282,7 +282,7 @@ public class DeviceIOTest
         final Map<String, Object> context = new HashMap<>();
         final DeviceIO deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
-        Deencapsulation.invoke(deviceIO, "execute", IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
+        Deencapsulation.invoke(deviceIO, "onStatusChanged", IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
 
         // act
         Deencapsulation.invoke(deviceIO, "sendEventAsync",
@@ -498,7 +498,7 @@ public class DeviceIOTest
         // arrange
         final DeviceIO deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
-        Deencapsulation.invoke(deviceIO, "execute", IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
+        Deencapsulation.invoke(deviceIO, "onStatusChanged", IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
 
         // act
         boolean isOpen = Deencapsulation.invoke(deviceIO, "isOpen" );
@@ -529,7 +529,7 @@ public class DeviceIOTest
         // arrange
         final DeviceIO deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
-        Deencapsulation.invoke(deviceIO, "execute", IotHubConnectionStatus.DISCONNECTED_RETRYING, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
+        Deencapsulation.invoke(deviceIO, "onStatusChanged", IotHubConnectionStatus.DISCONNECTED_RETRYING, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
 
         // act
         boolean isOpen = Deencapsulation.invoke(deviceIO, "isOpen" );
@@ -547,7 +547,7 @@ public class DeviceIOTest
         Deencapsulation.setField(deviceIO, "receiveTaskScheduler", mockScheduler);
 
         // act
-        Deencapsulation.invoke(deviceIO, "execute", IotHubConnectionStatus.DISCONNECTED_RETRYING, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
+        Deencapsulation.invoke(deviceIO, "onStatusChanged", IotHubConnectionStatus.DISCONNECTED_RETRYING, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
 
         // assert
         new Verifications()
@@ -567,7 +567,7 @@ public class DeviceIOTest
         Deencapsulation.setField(deviceIO, "sendTaskScheduler", mockScheduler);
 
         // act
-        Deencapsulation.invoke(deviceIO, "execute", IotHubConnectionStatus.DISCONNECTED_RETRYING, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
+        Deencapsulation.invoke(deviceIO, "onStatusChanged", IotHubConnectionStatus.DISCONNECTED_RETRYING, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
 
         // assert
         new Verifications()
@@ -587,7 +587,7 @@ public class DeviceIOTest
         Deencapsulation.setField(deviceIO, "receiveTaskScheduler", mockScheduler);
 
         // act
-        Deencapsulation.invoke(deviceIO, "execute", IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
+        Deencapsulation.invoke(deviceIO, "onStatusChanged", IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
 
         // assert
         new Verifications()
@@ -609,7 +609,7 @@ public class DeviceIOTest
         Deencapsulation.setField(deviceIO, "sendTaskScheduler", mockScheduler);
 
         // act
-        Deencapsulation.invoke(deviceIO, "execute", IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
+        Deencapsulation.invoke(deviceIO, "onStatusChanged", IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
 
         // assert
         new Verifications()
