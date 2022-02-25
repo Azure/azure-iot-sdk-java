@@ -7,6 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryStatistics;
 import com.microsoft.azure.sdk.iot.service.registry.serializers.AuthenticationParser;
 import com.microsoft.azure.sdk.iot.service.registry.serializers.AuthenticationTypeParser;
 import com.microsoft.azure.sdk.iot.service.registry.serializers.ExportImportDeviceParser;
@@ -53,6 +54,8 @@ import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.assertTrue;
 import static tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest.*;
 
 @Slf4j
@@ -872,7 +875,9 @@ public class Tools
         {
             try
             {
-                registryClient.getStatistics();
+                RegistryStatistics statistics = registryClient.getStatistics();
+                assertNotNull(statistics);
+                assertTrue(statistics.getTotalDeviceCount() >= 0);
                 break;
             }
             catch (UnknownHostException | SocketException e)

@@ -320,7 +320,6 @@ public class RegistryClientTests extends IntegrationTest
         assertTrue(buildExceptionMessage("", hostName), deviceWasDeletedSuccessfully(testInstance.registryClient, testInstance.deviceId));
     }
 
-    //TODO what is this testing?
     @Test
     @ContinuousIntegrationTest
     public void getDeviceStatisticsTest() throws Exception
