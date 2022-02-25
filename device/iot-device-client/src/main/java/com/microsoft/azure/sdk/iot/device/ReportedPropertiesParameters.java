@@ -42,20 +42,20 @@ public class ReportedPropertiesParameters {
     /**
      * Set the correlation callback for the sendReportedPropertiesAsync method
      *
-     * @param correlatingMessageCallback A callback that will monitor the message lifecycle. Value can be {@code null}.
+     * @param twinMessageStatusCallback A callback that will monitor the message lifecycle. Value can be {@code null}.
      */
-    public void setCorrelationCallback(CorrelatingMessageCallback correlatingMessageCallback) {
-        this.setCorrelationCallback(correlatingMessageCallback, null);
+    public void setCorrelationCallback(TwinMessageStatusCallback twinMessageStatusCallback) {
+        this.setCorrelationCallback(twinMessageStatusCallback, null);
     }
 
     /**
      * Set the correlation callback for the sendReportedPropertiesAsync method
      *
-     * @param correlatingMessageCallback A callback that will monitor the message lifecycle. Value can be {@code null}.
+     * @param twinMessageStatusCallback A callback that will monitor the message lifecycle. Value can be {@code null}.
      * @param correlatingMessageCallbackContext The context for the callback. Value can be {@code null}.
      */
-    public void setCorrelationCallback(CorrelatingMessageCallback correlatingMessageCallback, Object correlatingMessageCallbackContext) {
-        this.correlatingMessageCallback = correlatingMessageCallback;
+    public void setCorrelationCallback(TwinMessageStatusCallback twinMessageStatusCallback, Object correlatingMessageCallbackContext) {
+        this.twinMessageStatusCallback = twinMessageStatusCallback;
         this.correlatingMessageCallbackContext = correlatingMessageCallbackContext;
     }
 
@@ -87,8 +87,8 @@ public class ReportedPropertiesParameters {
         return version;
     }
 
-    CorrelatingMessageCallback getCorrelatingMessageCallback() {
-        return correlatingMessageCallback;
+    TwinMessageStatusCallback getTwinMessageStatusCallback() {
+        return twinMessageStatusCallback;
     }
 
     IotHubEventCallback getReportedPropertiesCallback() {
@@ -114,7 +114,7 @@ public class ReportedPropertiesParameters {
     /**
      * A correlation callback to monitor the message lifecycle
      */
-    private CorrelatingMessageCallback correlatingMessageCallback = null;
+    private TwinMessageStatusCallback twinMessageStatusCallback = null;
     /**
      * The correlation callback context
      */

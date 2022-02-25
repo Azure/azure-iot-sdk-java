@@ -36,6 +36,9 @@ public class IotHubServicesCommon
             + "\"TimestampUTC\" : \"2012-04-23T18:25:43.511Z\" }, "
             + "\"Payload\": { \"data\": \"test\" } } }";
 
+    private static final int TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
+    private static final int CHECK_INTERVAL_MILLISECONDS = 300;
+
     /*
      * method to send message over given DeviceClient
      */
@@ -65,7 +68,7 @@ public class IotHubServicesCommon
                     messageAndResult.statusCode = null;
                 }
 
-                sendMessageAndWaitForResponse(client, messageAndResult, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
+                sendMessageAndWaitForResponse(client, messageAndResult, protocol);
 
                 if (isErrorInjectionMessage(messageAndResult))
                 {
@@ -76,7 +79,7 @@ public class IotHubServicesCommon
                         Thread.sleep(1000);
 
                         // send the fault injection message again in case it wasn't sent successfully before
-                        sendMessageAndWaitForResponse(client, messageAndResult, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
+                        sendMessageAndWaitForResponse(client, messageAndResult, protocol);
 
                         if (System.currentTimeMillis() - startTime > ERROR_INJECTION_MESSAGE_EFFECT_TIMEOUT_MILLISECONDS)
                         {
@@ -122,7 +125,7 @@ public class IotHubServicesCommon
                 bulkMessages.add(mar.message);
             }
 
-            BulkMessagesAndResult bulkMessagesAndResult = new BulkMessagesAndResult(bulkMessages, IotHubStatusCode.OK_EMPTY);
+            BulkMessagesAndResult bulkMessagesAndResult = new BulkMessagesAndResult(bulkMessages, IotHubStatusCode.OK);
             sendBulkMessagesAndWaitForResponse(client, bulkMessagesAndResult, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
         }
         finally
@@ -131,25 +134,21 @@ public class IotHubServicesCommon
         }
     }
 
-    public static void sendSecurityMessages(InternalClient client,
-                                            IotHubClientProtocol protocol,
-                                            final long RETRY_MILLISECONDS,
-                                            final long SEND_TIMEOUT_MILLISECONDS,
-                                            List<Pair<IotHubConnectionStatus, Throwable>> statusUpdates) throws IOException
+    public static void sendSecurityMessages(InternalClient client, IotHubClientProtocol protocol, List<Pair<IotHubConnectionStatus, Throwable>> statusUpdates) throws IOException
     {
         try
         {
             client.open(false);
 
             // Send the initial message
-            MessageAndResult messageToSend = new MessageAndResult(new Message("test message"), IotHubStatusCode.OK_EMPTY);
-            sendMessageAndWaitForResponse(client, messageToSend, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
+            MessageAndResult messageToSend = new MessageAndResult(new Message("test message"), IotHubStatusCode.OK);
+            sendMessageAndWaitForResponse(client, messageToSend, protocol);
 
             // Send the security message
             String event_uuid = UUID.randomUUID().toString();
-            MessageAndResult securityMessage = new MessageAndResult(new Message(String.format(TEST_ASC_SECURITY_MESSAGE, event_uuid)), IotHubStatusCode.OK_EMPTY);
+            MessageAndResult securityMessage = new MessageAndResult(new Message(String.format(TEST_ASC_SECURITY_MESSAGE, event_uuid)), IotHubStatusCode.OK);
             securityMessage.message.setAsSecurityMessage();
-            sendSecurityMessageAndCheckResponse(client, securityMessage, event_uuid, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
+            sendSecurityMessageAndCheckResponse(client, securityMessage, event_uuid, protocol);
         }
         finally
         {
@@ -191,7 +190,7 @@ public class IotHubServicesCommon
             try
             {
                 Success messageSent = new Success();
-                EventCallback callback = new EventCallback(IotHubStatusCode.OK_EMPTY);
+                EventCallback callback = new EventCallback(IotHubStatusCode.OK);
                 client.sendEventAsync(msg, callback, messageSent);
 
                 long startTime = System.currentTimeMillis();
@@ -204,9 +203,9 @@ public class IotHubServicesCommon
                     }
                 }
 
-                if (messageSent.getCallbackStatusCode() != IotHubStatusCode.OK_EMPTY)
+                if (messageSent.getCallbackStatusCode() != IotHubStatusCode.OK)
                 {
-                    Assert.fail(buildExceptionMessage("Sending message over " + protocol + " protocol failed: expected status code OK_EMPTY but received: " + messageSent.getCallbackStatusCode(), client));
+                    Assert.fail(buildExceptionMessage("Sending message over " + protocol + " protocol failed: expected status code OK but received: " + messageSent.getCallbackStatusCode(), client));
                 }
             }
             catch (Exception e)
@@ -284,7 +283,7 @@ public class IotHubServicesCommon
         client.close();
     }
 
-    public static void sendErrorInjectionMessageAndWaitForResponse(InternalClient client, MessageAndResult messageAndResult, long RETRY_MILLISECONDS, long SEND_TIMEOUT_MILLISECONDS, IotHubClientProtocol protocol)
+    public static void sendErrorInjectionMessageAndWaitForResponse(InternalClient client, MessageAndResult messageAndResult, IotHubClientProtocol protocol)
     {
         if (protocol == IotHubClientProtocol.MQTT || protocol == IotHubClientProtocol.MQTT_WS)
         {
@@ -298,10 +297,10 @@ public class IotHubServicesCommon
             messageAndResult.statusCode = null;
         }
 
-        sendMessageAndWaitForResponse(client, messageAndResult, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
+        sendMessageAndWaitForResponse(client, messageAndResult, protocol);
     }
 
-    public static void sendMessageAndWaitForResponse(InternalClient client, MessageAndResult messageAndResult, long RETRY_MILLISECONDS, long SEND_TIMEOUT_MILLISECONDS, IotHubClientProtocol protocol)
+    public static void sendMessageAndWaitForResponse(InternalClient client, MessageAndResult messageAndResult, IotHubClientProtocol protocol)
     {
         try
         {
@@ -312,8 +311,8 @@ public class IotHubServicesCommon
             long startTime = System.currentTimeMillis();
             while (!messageSent.wasCallbackFired())
             {
-                Thread.sleep(RETRY_MILLISECONDS);
-                if (System.currentTimeMillis() - startTime > SEND_TIMEOUT_MILLISECONDS)
+                Thread.sleep(CHECK_INTERVAL_MILLISECONDS);
+                if (System.currentTimeMillis() - startTime > TIMEOUT_MILLISECONDS)
                 {
                     Assert.fail(buildExceptionMessage("Timed out waiting for a message callback", client));
                     break;
@@ -361,7 +360,7 @@ public class IotHubServicesCommon
         }
     }
 
-    public static void sendSecurityMessageAndCheckResponse(InternalClient client, MessageAndResult messageAndResult, String eventId, long RETRY_MILLISECONDS, long TIMEOUT_MILLISECONDS, IotHubClientProtocol protocol)
+    public static void sendSecurityMessageAndCheckResponse(InternalClient client, MessageAndResult messageAndResult, String eventId, IotHubClientProtocol protocol)
     {
         try
         {
@@ -378,7 +377,7 @@ public class IotHubServicesCommon
                     Assert.fail(buildExceptionMessage("Security message was received by IoTHub and should have been routed to ASC", client));
                     break;
                 }
-                Thread.sleep(RETRY_MILLISECONDS);
+                Thread.sleep(CHECK_INTERVAL_MILLISECONDS);
             }
         }
         catch (Exception e)
@@ -392,7 +391,7 @@ public class IotHubServicesCommon
         MessageProperty[] properties = messageAndResult.message.getProperties();
         for (MessageProperty property : properties)
         {
-            if (property.getValue().equals(ErrorInjectionHelper.FaultCloseReason_Boom.toString()) || property.getValue().equals(ErrorInjectionHelper.FaultCloseReason_Bye.toString()))
+            if (property.getValue().equals(ErrorInjectionHelper.FaultCloseReason_Boom) || property.getValue().equals(ErrorInjectionHelper.FaultCloseReason_Bye))
             {
                 return true;
             }
@@ -401,7 +400,7 @@ public class IotHubServicesCommon
         return false;
     }
 
-    public static void waitForStabilizedConnection(List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates, long timeout, InternalClient client) throws InterruptedException
+    public static void waitForStabilizedConnection(List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates, InternalClient client) throws InterruptedException
     {
         //Wait until error injection takes effect
         long startTime = System.currentTimeMillis();
@@ -409,7 +408,7 @@ public class IotHubServicesCommon
         {
             Thread.sleep(200);
             long timeElapsed = System.currentTimeMillis() - startTime;
-            if (timeElapsed > timeout)
+            if (timeElapsed > TIMEOUT_MILLISECONDS)
             {
                 Assert.fail(buildExceptionMessage("Timed out waiting for error injection message to take effect", client));
             }
@@ -429,10 +428,10 @@ public class IotHubServicesCommon
             }
         }
 
-        confirmOpenStabilized(actualStatusUpdates, timeout, client);
+        confirmOpenStabilized(actualStatusUpdates, client);
     }
 
-    public static void confirmOpenStabilized(List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates, long timeout, InternalClient client) throws InterruptedException
+    public static void confirmOpenStabilized(List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates, InternalClient client) throws InterruptedException
     {
         long startTime = System.currentTimeMillis();
         long timeElapsed;
@@ -448,7 +447,7 @@ public class IotHubServicesCommon
                 Thread.sleep(1000);
                 timeElapsed = System.currentTimeMillis() - startTime;
 
-                if (timeElapsed > timeout)
+                if (timeElapsed > TIMEOUT_MILLISECONDS)
                 {
                     Assert.fail(buildExceptionMessage("Timed out waiting for a stable connection on first open", client));
                 }

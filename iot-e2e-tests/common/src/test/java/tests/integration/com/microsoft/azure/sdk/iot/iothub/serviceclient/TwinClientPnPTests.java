@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package tests.integration.com.microsoft.azure.sdk.iot.iothub.twin;
+package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
@@ -48,7 +48,7 @@ import static org.junit.Assert.fail;
 @IotHubTest
 @StandardTierHubOnlyTest
 @RunWith(Parameterized.class)
-public class TwinPnPTests extends IntegrationTest
+public class TwinClientPnPTests extends IntegrationTest
 {
     private static final int MODEL_ID_PROPAGATION_TIMEOUT_MILLIS = 60 * 1000; // 1 minute
     protected static String iotHubConnectionString = "";
@@ -107,9 +107,9 @@ public class TwinPnPTests extends IntegrationTest
         return inputs;
     }
 
-    public TwinPnPTests.TwinPnPTestInstance testInstance;
+    public TwinClientPnPTests.TwinPnPTestInstance testInstance;
 
-    public TwinPnPTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType)
+    public TwinClientPnPTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType)
     {
         this.testInstance = new TwinPnPTestInstance(protocol, authenticationType, clientType);
     }

@@ -153,7 +153,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
             log.trace("Iot Hub responded to http message for iot hub message ({}) with status code {}", message, status);
 
             IotHubTransportMessage transportMessage = new IotHubTransportMessage(httpsMessage.getBody(), message.getMessageType(), message.getMessageId(), message.getCorrelationId(), message.getProperties());
-            if (status == IotHubStatusCode.OK || status == IotHubStatusCode.OK_EMPTY)
+            if (status == IotHubStatusCode.OK)
             {
                 this.listener.onMessageSent(transportMessage, this.config.getDeviceId(), null);
             }
@@ -367,7 +367,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
 
             IotHubStatusCode resultStatus = IotHubStatusCode.getIotHubStatusCode(response.getStatus());
 
-            if (resultStatus != IotHubStatusCode.OK_EMPTY && resultStatus != IotHubStatusCode.OK)
+            if (resultStatus != IotHubStatusCode.OK)
             {
                 String errMsg = String.format(
                         "Sending message result failed with status %s.%n",

@@ -108,7 +108,7 @@ public class IotHubTransport implements IotHubListener
     private boolean isClosing;
 
     // Used to store the CorrelationCallbackMessage for a correlationId
-    private final Map<String, CorrelatingMessageCallback> correlationCallbacks = new ConcurrentHashMap<>();
+    private final Map<String, TwinMessageStatusCallback> correlationCallbacks = new ConcurrentHashMap<>();
     private final Map<String, Object> correlationCallbackContexts = new ConcurrentHashMap<>();
 
     /**
@@ -220,8 +220,8 @@ public class IotHubTransport implements IotHubListener
         {
             if (e == null)
             {
-                log.trace("Message was sent by this client, adding it to callbacks queue with OK_EMPTY ({})", message);
-                packet.setStatus(IotHubStatusCode.OK_EMPTY);
+                log.trace("Message was sent by this client, adding it to callbacks queue with OK ({})", message);
+                packet.setStatus(IotHubStatusCode.OK);
                 this.addToCallbackQueue(packet);
             }
             else
@@ -1462,7 +1462,7 @@ public class IotHubTransport implements IotHubListener
             IotHubStatusCode statusCode = this.iotHubTransportConnection.sendMessage(message);
             log.trace("Sent message ({}) to protocol level, returned status code was {}", message, statusCode);
 
-            if (statusCode != IotHubStatusCode.OK_EMPTY && statusCode != IotHubStatusCode.OK)
+            if (statusCode != IotHubStatusCode.OK)
             {
                 this.inProgressPackets.remove(message.getMessageId());
                 this.handleMessageException(packet, IotHubStatusCode.getConnectionStatusException(statusCode, ""));
@@ -1715,7 +1715,7 @@ public class IotHubTransport implements IotHubListener
                 if (message != null)
                 {
                     String correlationId = message.getCorrelationId();
-                    CorrelatingMessageCallback correlationCallback = message.getCorrelatingMessageCallback();
+                    TwinMessageStatusCallback correlationCallback = message.getTwinMessageStatusCallback();
                     if (!correlationId.isEmpty() && correlationCallback != null)
                     {
                         correlationCallbacks.put(correlationId, correlationCallback);

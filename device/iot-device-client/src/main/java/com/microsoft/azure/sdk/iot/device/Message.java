@@ -76,7 +76,7 @@ public class Message
     /**
      * [Optional] Used to correlate the message across the send/receive lifecycle
      */
-    private CorrelatingMessageCallback correlatingMessageCallback;
+    private TwinMessageStatusCallback twinMessageStatusCallback;
 
     /**
      * [Optional] Used to specify the sender device client for multiplexing scenarios
@@ -598,12 +598,12 @@ public class Message
         return s.toString();
     }
 
-    public void setCorrelatingMessageCallback(CorrelatingMessageCallback correlatingMessageCallback) {
-        this.correlatingMessageCallback = correlatingMessageCallback;
+    public void setTwinMessageStatusCallback(TwinMessageStatusCallback twinMessageStatusCallback) {
+        this.twinMessageStatusCallback = twinMessageStatusCallback;
     }
 
-    public CorrelatingMessageCallback getCorrelatingMessageCallback() {
-        return correlatingMessageCallback;
+    public TwinMessageStatusCallback getTwinMessageStatusCallback() {
+        return twinMessageStatusCallback;
     }
 
     public void setCorrelatingMessageCallbackContext(Object correlatingMessageCallbackContext) {

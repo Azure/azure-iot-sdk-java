@@ -3,13 +3,17 @@ package glue;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.hsm.UnixDomainSocketChannel;
+import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesUpdate;
 import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
+import com.microsoft.azure.sdk.iot.device.twin.GetTwinResponse;
 import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
-import com.microsoft.azure.sdk.iot.device.twin.TwinPropertyCallback;
 import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
 import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
+import com.microsoft.azure.sdk.iot.device.twin.SendReportedPropertiesResponse;
+import com.microsoft.azure.sdk.iot.device.twin.Twin;
+import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
 import io.swagger.server.api.model.Certificate;
 import io.swagger.server.api.model.ConnectResponse;
 import io.swagger.server.api.MainApiException;
@@ -29,6 +33,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.function.Consumer;
 
 
 @SuppressWarnings("ALL")
@@ -194,8 +200,6 @@ public class ModuleGlue
         ModuleClient client = getClient(connectionId);
         if (client != null)
         {
-            this._deviceTwinPropertyCallback.setHandler(null);
-            this._deviceTwinStatusCallback.setHandler(null);
             client.close();
             this._map.remove(connectionId);
         }
@@ -220,97 +224,91 @@ public class ModuleGlue
         }
     }
 
-    private static class ModuleTwinPropertyCallback implements TwinPropertyCallback
+    private JsonObject _props = null;
+    private Handler<AsyncResult<Object>> _handler;
+    private Timer _timer = null;
+
+    public void setHandler(Handler<AsyncResult<Object>> handler)
     {
-        private JsonObject _props = null;
-        private Handler<AsyncResult<Object>> _handler;
-        private Timer _timer = null;
-
-        public void setHandler(Handler<AsyncResult<Object>> handler)
+        if (handler == null)
         {
-            if (handler == null)
+            this._props = null;
+        }
+        else
+        {
+            this._props = new JsonObject()
             {
-                this._props = null;
+                {
+                    put("desired", new JsonObject());
+                    put("reported", new JsonObject());
+                }
+            };
+        }
+        this._handler = handler;
+    }
+
+    public void onPropertyChanged(Property property, Object context)
+    {
+        System.out.println(
+            "onProperty callback for " + (property.getIsReported() ? "reported" : "desired") +
+                " property " + property.getKey() +
+                " to " + property.getValue() +
+                ", Properties version:" + property.getVersion());
+        if (this._props == null)
+        {
+            System.out.println("nobody is listening for desired properties.  ignoring.");
+        }
+        else
+        {
+            if (property.getIsReported())
+            {
+                this._props.getJsonObject("reported").getMap().put(property.getKey(), property.getValue());
             }
             else
             {
-                this._props = new JsonObject()
-                {
-                    {
-                        put("desired", new JsonObject());
-                        put("reported", new JsonObject());
-                    }
-                };
+                this._props.getJsonObject("desired").getMap().put(property.getKey(), property.getValue());
             }
-            this._handler = handler;
-        }
-
-        @Override
-        public void onPropertyChanged(Property property, Object context)
-        {
-            System.out.println(
-                    "onProperty callback for " + (property.getIsReported() ? "reported" : "desired") +
-                            " property " + property.getKey() +
-                            " to " + property.getValue() +
-                            ", Properties version:" + property.getVersion());
-            if (this._props == null)
-            {
-                System.out.println("nobody is listening for desired properties.  ignoring.");
-            }
-            else
-            {
-                if (property.getIsReported())
-                {
-                    this._props.getJsonObject("reported").getMap().put(property.getKey(), property.getValue());
-                }
-                else
-                {
-                    this._props.getJsonObject("desired").getMap().put(property.getKey(), property.getValue());
-                }
-                System.out.println(this._props.toString());
-                System.out.println("scheduling timer");
-                this.rescheduleHandler();
-            }
-        }
-
-        private void rescheduleHandler()
-        {
-            if (_handler == null)
-            {
-                return;
-            }
-            // call _handler 2 seconds after the last designed property change
-            if (this._timer != null)
-            {
-                this._timer.cancel();
-                this._timer = null;
-            }
-            this._timer = new Timer();
-            this._timer.schedule(new TimerTask()
-            {
-                @Override
-                public void run()
-                {
-                    _timer = null;
-                    if (_handler != null && _props != null)
-                    {
-                        System.out.println("It's been 2 seconds since last desired property arrived.  Calling handler");
-                        JsonObject twin = new JsonObject()
-                        {
-                            {
-                                put("properties", _props);
-                            }
-                        };
-                        System.out.println(twin.toString());
-                        _handler.handle(Future.succeededFuture(twin));
-                        _handler = null;
-                    }
-                }
-            }, 2000);
+            System.out.println(this._props.toString());
+            System.out.println("scheduling timer");
+            this.rescheduleHandler();
         }
     }
 
-    private final ModuleTwinPropertyCallback _deviceTwinPropertyCallback = new ModuleTwinPropertyCallback();
+    private void rescheduleHandler()
+    {
+        if (_handler == null)
+        {
+            return;
+        }
+        // call _handler 2 seconds after the last designed property change
+        if (this._timer != null)
+        {
+            this._timer.cancel();
+            this._timer = null;
+        }
+        this._timer = new Timer();
+        this._timer.schedule(new TimerTask()
+        {
+            @Override
+            public void run()
+            {
+                _timer = null;
+                if (_handler != null && _props != null)
+                {
+                    System.out.println("It's been 2 seconds since last desired property arrived.  Calling handler");
+                    JsonObject twin = new JsonObject()
+                    {
+                        {
+                            put("properties", _props);
+                        }
+                    };
+                    System.out.println(twin.toString());
+                    _handler.handle(Future.succeededFuture(twin));
+                    _handler = null;
+                }
+            }
+        }, 2000);
+    }
 
     private static class IotHubEventCallbackImpl implements IotHubEventCallback
     {
@@ -329,7 +327,7 @@ public class ModuleGlue
             this._handler = null;
             if (handler != null)
             {
-                if ((status == IotHubStatusCode.OK) || (status == IotHubStatusCode.OK_EMPTY))
+                if (status == IotHubStatusCode.OK)
                 {
                     handler.handle(Future.succeededFuture());
                 }
@@ -342,7 +340,6 @@ public class ModuleGlue
     }
 
     private final IotHubEventCallbackImpl _deviceTwinStatusCallback = new IotHubEventCallbackImpl();
-
 
     public void enableTwin(String connectionId, final Handler<AsyncResult<Void>> handler)
     {
@@ -363,21 +360,32 @@ public class ModuleGlue
                 }
                 else
                 {
-                    try
-                    {
-                        client.subscribeToTwinDesiredPropertiesAsync(null);
-                    } catch (IllegalStateException e)
-                    {
-                        this._deviceTwinStatusCallback.setHandler(null);
-                        handler.handle(Future.failedFuture(e));
-                        return;
-                    }
-                    handler.handle(Future.succeededFuture());
                 }
                 this._deviceTwinStatusCallback.setHandler(null);
             });
-            System.out.println("calling startTwinAsync");
-            client.startTwinAsync(this._deviceTwinStatusCallback, null, this._deviceTwinPropertyCallback, null);
+            System.out.println("calling subscribeToDesiredPropertiesAsync");
+            client.subscribeToDesiredPropertiesAsync(
+                new Consumer<DesiredPropertiesUpdate>()
+                {
+                    @Override
+                    public void accept(DesiredPropertiesUpdate desiredPropertiesUpdate)
+                    {
+                        Twin twin = desiredPropertiesUpdate.getTwin();
+                        TwinCollection desiredProperties = twin.getDesiredProperties();
+                        for (String key : desiredProperties.keySet())
+                        {
+                            onPropertyChanged(new Property(key, desiredProperties.get(key)), null);
+                        }
+                    }
+                },
+                new IotHubEventCallback()
+                {
+                    @Override
+                    public void execute(IotHubStatusCode responseStatus, Object callbackContext)
+                    {
+                        handler.handle(Future.succeededFuture());
+                    }
+                });
         }
     }
 
@@ -472,65 +480,59 @@ public class ModuleGlue
         }
     }
 
-    private static class MethodCallbackImpl implements MethodCallback
+    public Handler<AsyncResult<Void>> _methodHandler;
+    public String _methodRequestBody;
+    public String _methodResponseBody;
+    public String _methodName;
+    public int _methodStatusCode;
+    public ModuleClient _client;
+
+    public void reset()
     {
-        public Handler<AsyncResult<Void>> _handler;
-        public String _requestBody;
-        public String _responseBody;
-        public String _methodName;
-        public int _statusCode;
-        public ModuleClient _client;
+        this._methodName = null;
+        this._handler = null;
+    }
 
-        public void reset()
+    public DirectMethodResponse handleMethodInvocation(String methodName, Object methodData, Object context)
+    {
+        System.out.printf("method %s called%n", methodName);
+        if (methodName.equals(this._methodName))
         {
-            this._methodName = null;
-            this._handler = null;
-        }
-
-        @Override
-        public DirectMethodResponse call(String methodName, Object methodData, Object context)
-        {
-            System.out.printf("method %s called%n", methodName);
-            if (methodName.equals(this._methodName))
+            String methodDataString;
+            try
             {
-                String methodDataString;
-                try
-                {
-                    methodDataString = Json.mapper.readValue(new String((byte[]) methodData, StandardCharsets.UTF_8), String.class);
-                } catch (IOException e)
-                {
-                    this._handler.handle(Future.failedFuture(e));
-                    this.reset();
-                    return new DirectMethodResponse(500, "exception parsing methodData");
-                }
-                System.out.printf("methodData: %s%n", methodDataString);
+                methodDataString = Json.mapper.readValue(new String((byte[]) methodData, StandardCharsets.UTF_8), String.class);
+            } catch (IOException e)
+            {
+                this._handler.handle(Future.failedFuture(e));
+                this.reset();
+                return new DirectMethodResponse(500, "exception parsing methodData");
+            }
+            System.out.printf("methodData: %s%n", methodDataString);
 
-                if (methodDataString.equals(this._requestBody) ||
-                    Json.encode(methodDataString).equals(this._requestBody))
-                {
-                    System.out.printf("Method data looks correct.  Returning result: %s%n", _responseBody);
-                    this._handler.handle(Future.succeededFuture());
-                    this.reset();
-                    return new DirectMethodResponse(this._statusCode, this._responseBody);
-                }
-                else
-                {
-                    System.out.printf("method data does not match.  Expected %s%n", this._requestBody);
-                    this._handler.handle(Future.failedFuture("methodData does not match"));
-                    this.reset();
-                    return new DirectMethodResponse(500, "methodData not received as expected");
-                }
+            if (methodDataString.equals(this._methodRequestBody) ||
+                Json.encode(methodDataString).equals(this._methodRequestBody))
+            {
+                System.out.printf("Method data looks correct.  Returning result: %s%n", _methodResponseBody);
+                this._handler.handle(Future.succeededFuture());
+                this.reset();
+                return new DirectMethodResponse(this._methodStatusCode, this._methodResponseBody);
             }
             else
             {
-                this._handler.handle(Future.failedFuture("unexpected call: " + methodName));
+                System.out.printf("method data does not match.  Expected %s%n", this._methodRequestBody);
+                this._handler.handle(Future.failedFuture("methodData does not match"));
                 this.reset();
-                return new DirectMethodResponse(404, "method " + methodName + " not handled");
+                return new DirectMethodResponse(500, "methodData not received as expected");
             }
         }
+        else
+        {
+            this._handler.handle(Future.failedFuture("unexpected call: " + methodName));
+            this.reset();
+            return new DirectMethodResponse(404, "method " + methodName + " not handled");
+        }
     }
-
-    MethodCallbackImpl _methodCallback = new MethodCallbackImpl();
 
     public void enableMethods(String connectionId, Handler<AsyncResult<Void>> handler)
     {
@@ -545,8 +547,16 @@ public class ModuleGlue
             callback.setHandler(handler);
             try
             {
-                client.subscribeToMethodsAsync(this._methodCallback, null, callback, null);
-            } catch (IllegalStateException e)
+                client.subscribeToMethodsAsync(new MethodCallback()
+                {
+                    @Override
+                    public DirectMethodResponse call(String methodName, Object methodData, Object context)
+                    {
+                        return handleMethodInvocation(methodName, methodData, context);
+                    }
+                }, null, callback, null);
+            }
+            catch (IllegalStateException e)
             {
                 handler.handle(Future.failedFuture(e));
             }
@@ -563,12 +573,12 @@ public class ModuleGlue
         }
         else
         {
-            _methodCallback._handler = handler;
-            _methodCallback._requestBody = (String) (((LinkedHashMap) requestAndResponse.getRequestPayload()).get("payload"));
-            _methodCallback._responseBody = Json.encode(requestAndResponse.getResponsePayload());
-            _methodCallback._statusCode = requestAndResponse.getStatusCode();
-            _methodCallback._client = client;
-            _methodCallback._methodName = methodName;
+            _methodHandler = handler;
+            _methodRequestBody = (String) (((LinkedHashMap) requestAndResponse.getRequestPayload()).get("payload"));
+            _methodResponseBody = Json.encode(requestAndResponse.getResponsePayload());
+            _methodStatusCode = requestAndResponse.getStatusCode();
+            _client = client;
+            _methodName = methodName;
         }
     }
 
@@ -631,7 +641,7 @@ public class ModuleGlue
         }
         else
         {
-            this._deviceTwinPropertyCallback.setHandler(res -> {
+            this._handler = res -> {
                 if (res.succeeded())
                 {
                     JsonObject obj = (JsonObject) res.result();
@@ -642,8 +652,7 @@ public class ModuleGlue
                 {
                     handler.handle(res);
                 }
-            });
-
+            };
         }
     }
 
@@ -658,13 +667,25 @@ public class ModuleGlue
         }
         else
         {
-            this._deviceTwinPropertyCallback.setHandler(handler);
+            this._handler = handler;
             try
             {
-                client.getTwinAsync();
-            } catch (IllegalStateException e)
+                client.getTwinAsync(new Consumer<GetTwinResponse>()
+                {
+                    @Override
+                    public void accept(GetTwinResponse getTwinResponse)
+                    {
+                        Twin twin = getTwinResponse.getTwin();
+                        TwinCollection desiredProperties = twin.getDesiredProperties();
+                        for (String key : desiredProperties.keySet())
+                        {
+                            onPropertyChanged(new Property(key, desiredProperties.get(key)), null);
+                        }
+                    }
+                });
+            }
+            catch (IllegalStateException e)
             {
-                this._deviceTwinPropertyCallback.setHandler(null);
                 handler.handle(Future.failedFuture(e));
             }
         }
@@ -693,13 +714,29 @@ public class ModuleGlue
         }
         else
         {
+            TwinCollection reportedProperties = new TwinCollection();
             Set<Property> propSet = objectToPropSet((JsonObject) props);
+            for (Property property : propSet)
+            {
+                reportedProperties.put(property.getKey(), property.getValue());
+            }
             this._deviceTwinStatusCallback.setHandler(handler);
             try
             {
-                client.sendReportedPropertiesAsync(propSet);
+                final CountDownLatch sendReportedPropertiesLatch = new CountDownLatch(1);
+                Consumer<SendReportedPropertiesResponse> sendReportedPropertiesResponseCallback = new Consumer<SendReportedPropertiesResponse>()
+                {
+                    @Override
+                    public void accept(SendReportedPropertiesResponse sendReportedPropertiesResponse)
+                    {
+                        sendReportedPropertiesLatch.countDown();
+                    }
+                };
+
+                client.updateReportedPropertiesAsync(reportedProperties, sendReportedPropertiesResponseCallback);
+                sendReportedPropertiesLatch.await();
             }
-            catch (IllegalStateException e)
+            catch (IllegalStateException | InterruptedException e)
             {
                 this._deviceTwinStatusCallback.setHandler(null);
                 handler.handle(Future.failedFuture(e));

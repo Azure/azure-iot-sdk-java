@@ -6,6 +6,7 @@ package samples.com.microsoft.azure.sdk.iot.device;
 import com.google.gson.Gson;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
 import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
 import lombok.NonNull;
 
 import java.nio.charset.StandardCharsets;
@@ -80,8 +81,10 @@ public class PnpConvention {
      *     "samplePropertyName": 20
      * }
      */
-    public static Set<Property> createPropertyPatch(@NonNull String propertyName, @NonNull Object propertyValue) {
-        return singleton(new Property(propertyName, propertyValue));
+    public static TwinCollection createPropertyPatch(@NonNull String propertyName, @NonNull Object propertyValue) {
+        TwinCollection twinCollection = new TwinCollection();
+        twinCollection.put(propertyName, propertyValue);
+        return twinCollection;
     }
 
     /**
@@ -99,7 +102,7 @@ public class PnpConvention {
      *     }
      * }
      */
-    public static Set<Property> createComponentPropertyPatch(@NonNull final String propertyName, @NonNull final Object propertyValue, @NonNull String componentName) {
+    public static TwinCollection createComponentPropertyPatch(@NonNull final String propertyName, @NonNull final Object propertyValue, @NonNull String componentName) {
 
         return createComponentPropertyPatch(componentName, new HashMap<String, Object>()
         {{
@@ -121,13 +124,15 @@ public class PnpConvention {
      *     }
      * }
      */
-    public static Set<Property> createComponentPropertyPatch(@NonNull String componentName, @NonNull HashMap<String, Object> propertyKeyValuePairs) {
+    public static TwinCollection createComponentPropertyPatch(@NonNull String componentName, @NonNull HashMap<String, Object> propertyKeyValuePairs) {
         Map<String, Object> componentProperty = new HashMap<String, Object>() {{
             put(PROPERTY_COMPONENT_IDENTIFIER_KEY, PROPERTY_COMPONENT_IDENTIFIER_VALUE);
             putAll(propertyKeyValuePairs);
         }};
 
-        return singleton(new Property(componentName, componentProperty));
+        TwinCollection twinCollection = new TwinCollection();
+        twinCollection.put(componentName, componentProperty);
+        return twinCollection;
     }
 
     /**
@@ -230,7 +235,7 @@ public class PnpConvention {
      *     }
      * }
      */
-    public static Set<Property> createComponentWritablePropertyResponse(
+    public static TwinCollection createComponentWritablePropertyResponse(
             @NonNull final String propertyName,
             @NonNull final Object propertyValue,
             @NonNull String componentName,
@@ -266,7 +271,7 @@ public class PnpConvention {
      *     }
      * }
      */
-    public static Set<Property> createComponentWritablePropertyResponse(
+    public static TwinCollection createComponentWritablePropertyResponse(
             @NonNull HashMap<String, Object> propertyPairs,
             @NonNull String componentName,
             @NonNull final Integer ackCode,
@@ -296,6 +301,8 @@ public class PnpConvention {
             putAll(propertyMap);
         }};
 
-        return singleton(new Property(componentName, componentProperty));
+        TwinCollection twinCollection = new TwinCollection();
+        twinCollection.put(componentName, componentProperty);
+        return twinCollection;
     }
 }

@@ -5,26 +5,26 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.twin.DirectMethod;
-import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
-import com.microsoft.azure.sdk.iot.device.twin.DeviceTwin;
-import com.microsoft.azure.sdk.iot.device.twin.Pair;
-import com.microsoft.azure.sdk.iot.device.twin.Property;
-import com.microsoft.azure.sdk.iot.device.twin.PropertyCallback;
-import com.microsoft.azure.sdk.iot.device.twin.TwinPropertiesCallback;
-import com.microsoft.azure.sdk.iot.device.twin.TwinPropertyCallback;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
+import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesUpdate;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceTwin;
+import com.microsoft.azure.sdk.iot.device.twin.DirectMethod;
+import com.microsoft.azure.sdk.iot.device.twin.GetTwinResponse;
+import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
+import com.microsoft.azure.sdk.iot.device.twin.Property;
+import com.microsoft.azure.sdk.iot.device.twin.SendReportedPropertiesResponse;
+import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
-import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
+import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.HTTPS;
 
 @Slf4j
 public class InternalClient
@@ -221,155 +221,67 @@ public class InternalClient
         deviceIO.sendEventAsync(message, callback, callbackContext, this.config.getDeviceId());
     }
 
-    /**
-     * Subscribes to desired properties.
-     *
-     * This client will receive a callback each time a desired property is updated. That callback will either contain
-     * the full desired properties set, or only the updated desired property depending on how the desired property was changed.
-     * IoT hub supports a PUT and a PATCH on the twin. The PUT will cause this client to receive the full desired properties set, and the PATCH
-     * will cause this client to only receive the updated desired properties. Similarly, the version
-     * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
-     * have its version incremented from a PATCH call. The java service client library uses the PATCH call when updated desired properties,
-     * but it builds the patch such that all properties are included in the patch. As a result, the device side will receive full twin
-     * updates, not partial updates.
-     *
-     * See <a href="https://docs.microsoft.com/rest/api/iothub/service/twin/replacedevicetwin">PUT</a> and
-     * <a href="https://docs.microsoft.com/rest/api/iothub/service/twin/updatedevicetwin">PATCH</a>
-     *
-     * @param onDesiredPropertyChange the Map for desired properties and their corresponding callback and context. Can be {@code null}.
-     *
-     * @throws IllegalStateException if called when client is not opened or called before starting twin.
-     */
-    public void subscribeToDesiredPropertiesAsync(Map<Property, Pair<PropertyCallback<String, Object>, Object>> onDesiredPropertyChange)
+    public void subscribeToDesiredPropertiesAsync(Consumer<DesiredPropertiesUpdate> desiredPropertiesUpdateCallback, IotHubEventCallback onDesiredPropertiesSubscribedCallback)
         throws IllegalStateException
     {
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
-
-        if (this.twin == null)
-        {
-            throw new IllegalStateException("Start twin before doing any other twin operations");
-        }
 
         if (!this.deviceIO.isOpen())
         {
             throw new IllegalStateException("Open the client connection before using it");
         }
 
-        this.twin.subscribeDesiredPropertiesNotification(onDesiredPropertyChange);
+        if (this.twin == null)
+        {
+            this.twin = new DeviceTwin(this);
+        }
+
+        this.twin.subscribeToDesiredPropertiesAsync(desiredPropertiesUpdateCallback, onDesiredPropertiesSubscribedCallback);
     }
 
-    /**
-     * Subscribes to desired properties
-     *
-     * @param onDesiredPropertyChange the Map for desired properties and their corresponding callback and context. Can be {@code null}.
-     *
-     * @throws IllegalStateException if called when client is not opened or called before starting twin.
-     */
-    public void subscribeToTwinDesiredPropertiesAsync(Map<Property, Pair<TwinPropertyCallback, Object>> onDesiredPropertyChange)
-        throws IllegalStateException
+    public void updateReportedPropertiesAsync(TwinCollection reportedProperties,
+                                              Consumer<SendReportedPropertiesResponse> sendReportedPropertiesResponseCallback)
+        throws IllegalStateException, IllegalArgumentException
+    {
+        this.updateReportedPropertiesAsync(reportedProperties, sendReportedPropertiesResponseCallback, null, null);
+    }
+
+    public void updateReportedPropertiesAsync(TwinCollection reportedProperties,
+                                              Consumer<SendReportedPropertiesResponse> sendReportedPropertiesResponseCallback,
+                                              Runnable onReportedPropertiesMessageAcknowledgedCallback,
+                                              Object callbackContext)
+        throws IllegalStateException, IllegalArgumentException
+    {
+        if (this.twin == null)
+        {
+            this.twin = new DeviceTwin(this);
+        }
+
+        this.twin.updateReportedPropertiesAsync(reportedProperties, sendReportedPropertiesResponseCallback, onReportedPropertiesMessageAcknowledgedCallback, callbackContext);
+    }
+
+    public void getTwinAsync(Consumer<GetTwinResponse> getTwinCallback) throws IllegalStateException
+    {
+        this.getTwinAsync(getTwinCallback, null);
+    }
+
+    public void getTwinAsync(Consumer<GetTwinResponse> getTwinCallback, Runnable onGetTwinMessageAcknowledgedCallback) throws IllegalStateException
     {
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
-
-        if (this.twin == null)
-        {
-            throw new IllegalStateException("Start twin before doing any other twin operations");
-        }
 
         if (!this.deviceIO.isOpen())
         {
             throw new IllegalStateException("Open the client connection before using it");
         }
 
-        this.twin.subscribeDesiredPropertiesTwinPropertyNotification(onDesiredPropertyChange);
-    }
+        if (this.twin == null)
+        {
+            this.twin = new DeviceTwin(this);
+        }
 
-    /**
-     * Sends reported properties
-     *
-     * @param reportedProperties the Set for desired properties and their corresponding callback and context. Cannot be {@code null}.
-     *
-     * @throws IllegalStateException if called when client is not opened or called before starting twin.
-     * @throws IllegalArgumentException if reportedProperties is null or empty.
-     */
-    public void sendReportedPropertiesAsync(Set<Property> reportedProperties) throws IllegalStateException, IllegalArgumentException
-    {
-        this.sendReportedPropertiesAsync(
-            reportedProperties,
-            null,
-            null,
-            null,
-            null,
-            null);
-    }
-
-    /**
-     * Sends reported properties
-     *
-     * @param reportedProperties the Set for desired properties and their corresponding callback and context. Cannot be {@code null}.
-     * @param version the Reported property version. Cannot be negative.
-     *
-     * @throws IllegalStateException if called when client is not opened or called before starting twin.
-     * @throws IllegalArgumentException if reportedProperties is null or empty or if version is negative
-     */
-    public void sendReportedPropertiesAsync(Set<Property> reportedProperties, int version)
-        throws IllegalStateException, IllegalArgumentException
-    {
-        this.sendReportedPropertiesAsync(
-            reportedProperties,
-            version,
-            null,
-            null,
-            null,
-            null);
-    }
-
-    /**
-     * Sends reported properties
-     * @param reportedPropertiesParameters Container for the reported properties parameters
-     * @throws IllegalStateException if called when client is not opened or called before starting twin.
-     * @throws IllegalArgumentException if reportedProperties is null or empty or if version specified in {#reportedPropertiesParameters} is negative
-     */
-    public void sendReportedPropertiesAsync(ReportedPropertiesParameters reportedPropertiesParameters)
-        throws IllegalStateException, IllegalArgumentException
-    {
-        this.sendReportedPropertiesAsync(
-            reportedPropertiesParameters.getReportedProperties(),
-            reportedPropertiesParameters.getVersion(),
-            reportedPropertiesParameters.getCorrelatingMessageCallback(),
-            reportedPropertiesParameters.getCorrelatingMessageCallbackContext(),
-            reportedPropertiesParameters.getReportedPropertiesCallback(),
-            reportedPropertiesParameters.getReportedPropertiesCallbackContext());
-    }
-
-    /**
-     * Sends reported properties
-     *
-     * @param reportedProperties the Set for desired properties and their corresponding callback and context. Cannot be {@code null}.
-     * @param version the Reported property version. Cannot be negative.
-     * @param reportedPropertiesCallback the Reported property callback to be set for this message. If set to {@code null} it will fall back to {@link #sendReportedPropertiesAsync(Set, int)}.
-     * @param reportedPropertiesCallbackContext the Reported property callback context to be set for this message.
-     * @param correlatingMessageCallback the correlation callback for this message.
-     * @param correlatingMessageCallbackContext the correlation callback context for this message.
-     * @throws IllegalStateException if called when client is not opened or called before starting twin.
-     * @throws IllegalArgumentException if reportedProperties is null or empty or if version is negative
-     */
-    public void sendReportedPropertiesAsync(
-        Set<Property> reportedProperties,
-        Integer version,
-        CorrelatingMessageCallback correlatingMessageCallback,
-        Object correlatingMessageCallbackContext,
-        IotHubEventCallback reportedPropertiesCallback,
-        Object reportedPropertiesCallbackContext)
-            throws IllegalStateException, IllegalArgumentException
-    {
-        verifyRegisteredIfMultiplexing();
-        verifyTwinOperationsAreSupported();
-
-        verifyReportedProperties(reportedProperties);
-
-        this.twin.updateReportedPropertiesAsync(reportedProperties, version, correlatingMessageCallback, correlatingMessageCallbackContext, reportedPropertiesCallback, reportedPropertiesCallbackContext);
+        this.twin.getDeviceTwinAsync(getTwinCallback, onGetTwinMessageAcknowledgedCallback);
     }
 
     /**
@@ -435,205 +347,6 @@ public class InternalClient
     public DeviceClientConfig getConfig()
     {
         return this.config;
-    }
-
-    /**
-     * Starts the twin for this client. This client will receive a callback with the current state of the full twin, including
-     * reported properties and desired properties. After that callback is received, this client will receive a callback
-     * each time a desired property is updated. That callback will either contain the full desired properties set, or
-     * only the updated desired property depending on how the desired property was changed. IoT hub supports a PUT and a PATCH
-     * on the twin. The PUT will cause this client to receive the full desired properties set, and the PATCH
-     * will cause this client to only receive the updated desired properties. Similarly, the version
-     * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
-     * have its version incremented from a PATCH call. The java service client library uses the PATCH call when updated desired properties,
-     * but it builds the patch such that all properties are included in the patch. As a result, the device side will receive full twin
-     * updates, not partial updates.
-     *
-     * See <a href="https://docs.microsoft.com/rest/api/iothub/service/twin/replacedevicetwin">PUT</a> and
-     * <a href="https://docs.microsoft.com/rest/api/iothub/service/twin/updatedevicetwin">PATCH</a>
-     *
-     * @param twinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
-     * @param twinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
-     * @param genericPropertyCallback the PropertyCallback callback for providing any changes in desired properties. Cannot be {@code null}.
-     * @param genericPropertyCallbackContext the context to be passed to the property callback. Can be {@code null}.
-     * @param <Type1> The type of the desired property key. Since the twin is a json object, the key will always be a String.
-     * @param <Type2> The type of the desired property value.
-     *
-     * @throws IllegalArgumentException if the callback is {@code null}
-     * @throws IllegalStateException if called when client is not opened or if called when twin has already started
-     */
-    public <Type1, Type2> void startTwinAsync(
-        IotHubEventCallback twinStatusCallback,
-        Object twinStatusCallbackContext,
-        PropertyCallback<Type1, Type2> genericPropertyCallback,
-        Object genericPropertyCallbackContext)
-            throws IllegalStateException, IllegalArgumentException
-    {
-        verifyRegisteredIfMultiplexing();
-        verifyTwinOperationsAreSupported();
-
-        if (!this.deviceIO.isOpen())
-        {
-            throw new IllegalStateException("Open the client connection before using it");
-        }
-
-        if (twinStatusCallback == null || genericPropertyCallback == null)
-        {
-            throw new IllegalArgumentException("Callback cannot be null");
-        }
-        if (this.twin == null)
-        {
-            twin = new DeviceTwin(
-                    this,
-                    twinStatusCallback,
-                    twinStatusCallbackContext,
-                    genericPropertyCallback,
-                    genericPropertyCallbackContext);
-
-            twin.getDeviceTwinAsync();
-        }
-        else
-        {
-            throw new IllegalStateException("You have already initialised twin");
-        }
-    }
-
-    /**
-     * Starts the twin for this client. This client will receive a callback with the current state of the full twin, including
-     * reported properties and desired properties. After that callback is received, this client will receive a callback
-     * each time a desired property is updated. That callback will either contain the full desired properties set, or
-     * only the updated desired property depending on how the desired property was changed. IoT hub supports a PUT and a PATCH
-     * on the twin. The PUT will cause this client to receive the full desired properties set, and the PATCH
-     * will cause this client to only receive the updated desired properties. Similarly, the version
-     * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
-     * have its version incremented from a PATCH call. The java service client library uses the PATCH call when updated desired properties,
-     * but it builds the patch such that all properties are included in the patch. As a result, the device side will receive full twin
-     * updates, not partial updates.
-     *
-     * See <a href="https://docs.microsoft.com/rest/api/iothub/service/twin/replacedevicetwin">PUT</a> and
-     * <a href="https://docs.microsoft.com/rest/api/iothub/service/twin/updatedevicetwin">PATCH</a>
-     *
-     * @param twinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
-     * @param twinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
-     * @param genericPropertyCallback the TwinPropertyCallback callback for providing any changes in desired properties. Cannot be {@code null}.
-     * @param genericPropertyCallbackContext the context to be passed to the property callback. Can be {@code null}.     *
-     *
-     * @throws IllegalArgumentException if the callback is {@code null}
-     * @throws IllegalStateException if called when client is not opened or if called when twin has already started
-     */
-    public void startTwinAsync(
-        IotHubEventCallback twinStatusCallback,
-        Object twinStatusCallbackContext,
-        TwinPropertyCallback genericPropertyCallback,
-        Object genericPropertyCallbackContext)
-            throws IllegalStateException, IllegalArgumentException
-    {
-        verifyRegisteredIfMultiplexing();
-        verifyTwinOperationsAreSupported();
-
-        if (!this.deviceIO.isOpen())
-        {
-            throw new IllegalStateException("Open the client connection before using it");
-        }
-
-        if (twinStatusCallback == null || genericPropertyCallback == null)
-        {
-            throw new IllegalArgumentException("Callback cannot be null");
-        }
-        if (this.twin == null)
-        {
-            twin = new DeviceTwin(this, twinStatusCallback, twinStatusCallbackContext,
-                    genericPropertyCallback, genericPropertyCallbackContext);
-            twin.getDeviceTwinAsync();
-        }
-        else
-        {
-            throw new IllegalStateException("You have already initialised twin");
-        }
-    }
-
-    /**
-     * Starts the twin. This client will receive a callback with the current state of the full twin, including
-     * reported properties and desired properties. After that callback is received, this client will receive a callback
-     * each time a desired property is updated. That callback will either contain the full desired properties set, or
-     * only the updated desired property depending on how the desired property was changed. IoT hub supports a PUT and a PATCH
-     * on the twin. The PUT will cause this client to receive the full desired properties set, and the PATCH
-     * will cause this client to only receive the updated desired properties. Similarly, the version
-     * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
-     * have its version incremented from a PATCH call. The java service client library uses the PATCH call when updated desired properties,
-     * but it builds the patch such that all properties are included in the patch. As a result, the device side will receive full twin
-     * updates, not partial updates.
-     *
-     * See <a href="https://docs.microsoft.com/rest/api/iothub/service/twin/replacedevicetwin">PUT</a> and
-     * <a href="https://docs.microsoft.com/rest/api/iothub/service/twin/updatedevicetwin">PATCH</a>
-     *
-     * @param twinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
-     * @param twinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
-     * @param genericPropertiesCallback the TwinPropertyCallback callback for providing any changes in desired properties. Cannot be {@code null}.
-     * @param genericPropertyCallbackContext the context to be passed to the property callback. Can be {@code null}.
-     *
-     * @throws IllegalArgumentException if the callback is {@code null}
-     * @throws IllegalStateException if called when client is not opened or if called when twin has already started
-     */
-    public void startTwinAsync(
-        IotHubEventCallback twinStatusCallback,
-        Object twinStatusCallbackContext,
-        TwinPropertiesCallback genericPropertiesCallback,
-        Object genericPropertyCallbackContext)
-            throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException
-    {
-        verifyRegisteredIfMultiplexing();
-        verifyTwinOperationsAreSupported();
-
-        if (!this.deviceIO.isOpen())
-        {
-            throw new IllegalStateException("Open the client connection before using it");
-        }
-
-        if (twinStatusCallback == null || genericPropertiesCallback == null)
-        {
-            throw new IllegalArgumentException("Callback cannot be null");
-        }
-
-        if (this.twin == null)
-        {
-            twin = new DeviceTwin(
-                    this,
-                    twinStatusCallback,
-                    twinStatusCallbackContext,
-                    genericPropertiesCallback,
-                    genericPropertyCallbackContext);
-            twin.getDeviceTwinAsync();
-        }
-        else
-        {
-            throw new IllegalStateException("You have already initialised twin");
-        }
-    }
-
-    /**
-     * Get the twin for this client. This method sends a request for the twin to the service and will asynchronously
-     * provide the retrieved twin to the callback provided in {@link #startTwinAsync(IotHubEventCallback, Object, TwinPropertyCallback, Object)}.
-     *
-     * Users must call {@link #startTwinAsync(IotHubEventCallback, Object, TwinPropertyCallback, Object)} before using this method.
-     * @throws IllegalStateException if the client is not open or twin has not been started yet.
-     */
-    public void getTwinAsync() throws IllegalStateException
-    {
-        verifyRegisteredIfMultiplexing();
-        verifyTwinOperationsAreSupported();
-
-        if (this.twin == null)
-        {
-            throw new IllegalStateException("Start twin before doing any other twin operations");
-        }
-
-        if (!this.deviceIO.isOpen())
-        {
-            throw new IllegalStateException("Open the client connection before using it");
-        }
-
-        this.twin.getDeviceTwinAsync();
     }
 
     /**

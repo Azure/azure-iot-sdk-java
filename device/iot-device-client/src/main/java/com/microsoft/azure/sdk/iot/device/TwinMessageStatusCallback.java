@@ -14,8 +14,11 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportPacket;
  *     An example of this implementation and usage can be found in the DeviceTwinSample.
  * </p>
  */
-public interface CorrelatingMessageCallback
+//TODO split this into one for getTwin and one for updateReportedProperties. They are too different for this to be one.
+// updateReportedProperties waits for a response with 200 and no body whereas getTwin waits for a 200 with a body
+public interface TwinMessageStatusCallback
 {
+    //TODO isn't this immediately called when the customer sends the request?
     /**
      * Called when the message has been queued to the transport.
      *
@@ -61,6 +64,7 @@ public interface CorrelatingMessageCallback
      */
     void onResponseReceived(Message message, Object callbackContext, Throwable e);
 
+    //TODO get rid of this
     /**
      * Called when the response message has been sent by IoT hub and has been acknowledged by the transport; however the message is unknown to the transport.
      *

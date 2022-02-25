@@ -13,7 +13,7 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Representation of a single Twin.
  *
- * <p> The TwinState can contain one {@link TwinCollection} of <b>Tags</b>, and one
+ * <p> The Twin can contain one {@link TwinCollection} of <b>Tags</b>, and one
  *     {@link TwinCollection} of <b>properties.desired</b>.
  *
  * <p> Each entity in the collections can contain a associated {@link TwinMetadata}.
@@ -21,7 +21,7 @@ import com.google.gson.annotations.SerializedName;
  * <p> These metadata are provided by the Service and contains information about the last
  *     updated date time, and version.
  *
- * <p> For instance, the following is a valid TwinState, represented as
+ * <p> For instance, the following is a valid Twin, represented as
  *     {@code initialTwin} in the rest API.
  * <pre>
  *     {@code
@@ -96,7 +96,7 @@ import com.google.gson.annotations.SerializedName;
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iothub/devicetwinapi">Device Twin Api</a>
  */
 @SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
-public class TwinState
+public class Twin
 {
     // the twin tags
     private static final String TAGS_TAG = "tags";
@@ -113,7 +113,7 @@ public class TwinState
     /**
      * CONSTRUCTOR
      *
-     * <p> This constructor creates an instance of the TwinState with the provided {@link TwinCollection}
+     * <p> This constructor creates an instance of the Twin with the provided {@link TwinCollection}
      *     tags and desired properties.
      *
      * <p> When serialized, this class will looks like the following example:
@@ -142,7 +142,7 @@ public class TwinState
      * @param desiredProperty the {@link TwinCollection} with the desired properties. It can be {@code null}.
      * @param reportedProperty the {@link TwinCollection} with the reported properties. It can be {@code null}.
      */
-    public TwinState(TwinCollection tags, TwinCollection desiredProperty, TwinCollection reportedProperty)
+    public Twin(TwinCollection tags, TwinCollection desiredProperty, TwinCollection reportedProperty)
     {
         if (tags != null)
         {
@@ -199,9 +199,9 @@ public class TwinState
      *
      * @return The {@code TwinCollection} with the desired property content. It can be {@code null}.
      */
-    public TwinCollection getDesiredProperty()
+    public TwinCollection getDesiredProperties()
     {
-        /* SRS_TWIN_STATE_21_006: [The getDesiredProperty shall return a TwinCollection with the stored desired property.] */
+        /* SRS_TWIN_STATE_21_006: [The getTwin shall return a TwinCollection with the stored desired property.] */
         if (this.properties == null)
         {
             return null;
@@ -214,9 +214,9 @@ public class TwinState
      *
      * @return The {@code TwinCollection} with the reported property content. It can be {@code null}.
      */
-    public TwinCollection getReportedProperty()
+    public TwinCollection getReportedProperties()
     {
-        /* SRS_TWIN_STATE_21_007: [The getReportedProperty shall return a TwinCollection with the stored reported property.] */
+        /* SRS_TWIN_STATE_21_007: [The getReportedProperties shall return a TwinCollection with the stored reported property.] */
         if (this.properties == null)
         {
             return null;
@@ -254,12 +254,12 @@ public class TwinState
     /**
      * Factory
      *
-     * <p> Create a new instance of the TwinState parsing the provided string as a JSON with the full Twin information.
+     * <p> Create a new instance of the Twin parsing the provided string as a JSON with the full Twin information.
      *
      * @param json the {@code String} with the JSON received from the service. It cannot be {@code null} or empty.
-     * @return The new instance of the {@code TwinState}.
+     * @return The new instance of the {@code Twin}.
      */
-    public static TwinState createFromTwinJson(String json)
+    public static Twin createFromTwinJson(String json)
     {
         /* SRS_TWIN_STATE_21_011: [The factory shall throw IllegalArgumentException if the JSON is null or empty.] */
         if (Tools.isNullOrEmpty(json))
@@ -270,7 +270,7 @@ public class TwinState
         /* SRS_TWIN_STATE_21_012: [The factory shall throw JsonSyntaxException if the JSON is invalid.] */
         /* SRS_TWIN_STATE_21_013: [The factory shall deserialize the provided JSON for the twin class and subclasses.] */
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
-        TwinState result = gson.fromJson(json, TwinState.class);
+        Twin result = gson.fromJson(json, Twin.class);
 
         /*
          * During the deserialization process, the GSON will convert both tags and
@@ -290,12 +290,12 @@ public class TwinState
     /**
      * Factory
      *
-     * <p> Create a new instance of the TwinState parsing the provided string as a JSON with only desired properties information.
+     * <p> Create a new instance of the Twin parsing the provided string as a JSON with only desired properties information.
      *
      * @param json the {@code String} with the JSON received from the service. It cannot be {@code null} or empty.
-     * @return The new instance of the {@code TwinState}.
+     * @return The new instance of the {@code Twin}.
      */
-    public static TwinState createFromDesiredPropertyJson(String json)
+    public static Twin createFromDesiredPropertyJson(String json)
     {
         /* SRS_TWIN_STATE_21_014: [The factory shall throw IllegalArgumentException if the JSON is null or empty.] */
         if (Tools.isNullOrEmpty(json))
@@ -308,18 +308,18 @@ public class TwinState
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
         TwinCollection result = gson.fromJson(json, TwinCollection.class);
 
-        return new TwinState(null, result, null);
+        return new Twin(null, result, null);
     }
 
     /**
      * Factory
      *
-     * <p> Create a new instance of the TwinState parsing the provided string as a JSON with only reported properties information.
+     * <p> Create a new instance of the Twin parsing the provided string as a JSON with only reported properties information.
      *
      * @param json the {@code String} with the JSON received from the service. It cannot be {@code null} or empty.
-     * @return The new instance of the {@code TwinState}.
+     * @return The new instance of the {@code Twin}.
      */
-    public static TwinState createFromReportedPropertyJson(String json)
+    public static Twin createFromReportedPropertyJson(String json)
     {
         /* SRS_TWIN_STATE_21_017: [The factory shall throw IllegalArgumentException if the JSON is null or empty.] */
         if (Tools.isNullOrEmpty(json))
@@ -332,18 +332,18 @@ public class TwinState
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
         TwinCollection result = gson.fromJson(json, TwinCollection.class);
 
-        return new TwinState(null, null, result);
+        return new Twin(null, null, result);
     }
 
     /**
      * Factory
      *
-     * <p> Create a new instance of the TwinState parsing the provided string as a JSON with only desired properties information.
+     * <p> Create a new instance of the Twin parsing the provided string as a JSON with only desired properties information.
      *
      * @param json the {@code String} with the JSON received from the service. It cannot be {@code null} or empty.
-     * @return The new instance of the {@code TwinState}.
+     * @return The new instance of the {@code Twin}.
      */
-    public static TwinState createFromPropertiesJson(String json)
+    public static Twin createFromPropertiesJson(String json)
     {
         /* SRS_TWIN_STATE_21_020: [The factory shall throw IllegalArgumentException if the JSON is null or empty.] */
         if (Tools.isNullOrEmpty(json))
@@ -356,7 +356,7 @@ public class TwinState
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
         TwinProperties result = gson.fromJson(json, TwinProperties.class);
 
-        return new TwinState(null, result.getDesired(), result.getReported());
+        return new Twin(null, result.getDesired(), result.getReported());
     }
 
     /**
@@ -367,8 +367,8 @@ public class TwinState
      * </p>
      */
     @SuppressWarnings("unused")
-    TwinState()
+    Twin()
     {
-        /* SRS_TWIN_STATE_21_023: [The TwinState shall provide an empty constructor to make GSON happy.] */
+        /* SRS_TWIN_STATE_21_023: [The Twin shall provide an empty constructor to make GSON happy.] */
     }
 }

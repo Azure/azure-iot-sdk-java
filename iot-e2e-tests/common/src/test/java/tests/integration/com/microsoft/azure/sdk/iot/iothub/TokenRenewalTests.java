@@ -276,7 +276,7 @@ public class TokenRenewalTests extends IntegrationTest
         for (InternalClient client : clients)
         {
             System.out.println("Sending test message for client " + client.getConfig().getDeviceId());
-            IotHubServicesCommon.sendMessageAndWaitForResponse(client, new MessageAndResult(new Message("some message"), IotHubStatusCode.OK_EMPTY), RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, client.getConfig().getProtocol());
+            IotHubServicesCommon.sendMessageAndWaitForResponse(client, new MessageAndResult(new Message("some message"), IotHubStatusCode.OK), client.getConfig().getProtocol());
         }
     }
 

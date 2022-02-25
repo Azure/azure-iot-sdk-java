@@ -29,8 +29,6 @@ import org.junit.runners.Parameterized;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceEmulator;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceTestManager;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenTools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestModuleIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
@@ -127,39 +125,10 @@ public class DirectMethodsTests extends DirectMethodsCommon
     @Test
     @StandardTierHubOnlyTest
     @ContinuousIntegrationTest
-    public void invokeMethodNullPayloadSucceed() throws Exception
-    {
-        // Arrange
-        super.openDeviceClientAndSubscribeToMethods();
-        DeviceTestManager deviceTestManger = this.testInstance.deviceTestManager;
-
-        // Act
-        MethodResult result;
-        if (testInstance.identity instanceof TestModuleIdentity)
-        {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_LOOPBACK);
-        }
-        else
-        {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_LOOPBACK);
-        }
-        deviceTestManger.waitIotHub(1, 10);
-
-        // Assert
-        assertNotNull(buildExceptionMessage("method result was null", testInstance.deviceTestManager.client), result);
-        assertEquals(buildExceptionMessage("Expected SUCCESS but got " + result.getStatus(), testInstance.deviceTestManager.client), (long)DeviceEmulator.METHOD_SUCCESS, (long)result.getStatus());
-        assertEquals(buildExceptionMessage("Expected " + DeviceEmulator.METHOD_LOOPBACK + ":null" + " but got " + result.getPayload(), deviceTestManger.client), DeviceEmulator.METHOD_LOOPBACK + ":null", result.getPayload());
-        Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    @ContinuousIntegrationTest
     public void invokeMethodRecoverFromTimeoutSucceed() throws Exception
     {
         // Arrange
         super.openDeviceClientAndSubscribeToMethods();
-        DeviceTestManager deviceTestManger = this.testInstance.deviceTestManager;
 
         try
         {
@@ -172,15 +141,15 @@ public class DirectMethodsTests extends DirectMethodsCommon
 
             if (testInstance.identity instanceof TestModuleIdentity)
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, options);
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), METHOD_DELAY_IN_MILLISECONDS, options);
             }
             else
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, options);
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_DELAY_IN_MILLISECONDS, options);
             }
             assert true;
         }
-        catch(IotHubGatewayTimeoutException expected)
+        catch (IotHubGatewayTimeoutException expected)
         {
             //Don't do anything. Expected throw.
         }
@@ -196,19 +165,17 @@ public class DirectMethodsTests extends DirectMethodsCommon
         MethodResult result;
         if (testInstance.identity instanceof TestModuleIdentity)
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, options);
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), METHOD_DELAY_IN_MILLISECONDS, options);
         }
         else
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, options);
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_DELAY_IN_MILLISECONDS, options);
         }
-        deviceTestManger.waitIotHub(1, 10);
 
         // Assert
-        assertNotNull(buildExceptionMessage("method result was null", testInstance.deviceTestManager.client), result);
-        assertEquals(buildExceptionMessage("Expected SUCCESS but got " + result.getStatus(), testInstance.deviceTestManager.client), (long)DeviceEmulator.METHOD_SUCCESS, (long)result.getStatus());
-        assertEquals(buildExceptionMessage("Expected " + DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS + ":succeed" + " But got " + result.getPayload(), testInstance.deviceTestManager.client), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS + ":succeed", result.getPayload());
-        Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
+        assertNotNull(buildExceptionMessage("method result was null", testInstance.identity.getClient()), result);
+        assertEquals(buildExceptionMessage("Expected SUCCESS but got " + result.getStatus(), testInstance.identity.getClient()), (long)METHOD_SUCCESS, (long)result.getStatus());
+        assertEquals(buildExceptionMessage("Expected " + METHOD_DELAY_IN_MILLISECONDS + ":succeed" + " But got " + result.getPayload(), testInstance.identity.getClient()), METHOD_DELAY_IN_MILLISECONDS + ":succeed", result.getPayload());
     }
 
     @Test
@@ -232,11 +199,11 @@ public class DirectMethodsTests extends DirectMethodsCommon
 
             if (testInstance.identity instanceof TestModuleIdentity)
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, options);
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), METHOD_DELAY_IN_MILLISECONDS, options);
             }
             else
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, options);
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_DELAY_IN_MILLISECONDS, options);
             }
         }
         catch (IotHubGatewayTimeoutException e)
@@ -244,7 +211,7 @@ public class DirectMethodsTests extends DirectMethodsCommon
             expectedExceptionCaught = true;
         }
 
-        assertTrue(buildExceptionMessage("Iot Hub did not throw the expected gateway timeout exception", testInstance.deviceTestManager.client), expectedExceptionCaught);
+        assertTrue(buildExceptionMessage("Iot Hub did not throw the expected gateway timeout exception", testInstance.identity.getClient()), expectedExceptionCaught);
     }
 
     @Test
@@ -262,7 +229,7 @@ public class DirectMethodsTests extends DirectMethodsCommon
         try
         {
             //force the device offline
-            testInstance.deviceTestManager.client.close();
+            testInstance.identity.getClient().close();
 
             DirectMethodRequestOptions options =
                 DirectMethodRequestOptions.builder()
@@ -272,14 +239,14 @@ public class DirectMethodsTests extends DirectMethodsCommon
 
             if (testInstance.identity instanceof TestModuleIdentity)
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_LOOPBACK, options);
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), METHOD_LOOPBACK, options);
             }
             else
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_LOOPBACK, options);
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_LOOPBACK, options);
             }
 
-            Assert.fail(buildExceptionMessage("Invoking method on device or module that wasn't online should have thrown an exception", testInstance.deviceTestManager.client));
+            Assert.fail(buildExceptionMessage("Invoking method on device or module that wasn't online should have thrown an exception", testInstance.identity.getClient()));
         }
         catch (IotHubNotFoundException actualException)
         {
@@ -304,14 +271,14 @@ public class DirectMethodsTests extends DirectMethodsCommon
         {
             if (testInstance.identity instanceof TestModuleIdentity)
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), "ThisModuleDoesNotExist", DeviceEmulator.METHOD_LOOPBACK);
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), "ThisModuleDoesNotExist", METHOD_LOOPBACK);
             }
             else
             {
-                testInstance.methodServiceClient.invoke("ThisDeviceDoesNotExist", DeviceEmulator.METHOD_LOOPBACK);
+                testInstance.methodServiceClient.invoke("ThisDeviceDoesNotExist", METHOD_LOOPBACK);
             }
 
-            Assert.fail(buildExceptionMessage("Invoking method on device or module that doesn't exist should have thrown an exception", testInstance.deviceTestManager.client));
+            Assert.fail(buildExceptionMessage("Invoking method on device or module that doesn't exist should have thrown an exception", testInstance.identity.getClient()));
         }
         catch (IotHubNotFoundException actualException)
         {

@@ -186,7 +186,7 @@ public class IotHubTransportTest
         };
     }
 
-    //Tests_SRS_IOTHUBTRANSPORT_34_005: [If there was a packet in the inProgressPackets queue tied to the provided message, and the provided throwable is null, this function shall set the status of that packet to OK_EMPTY and add it to the callbacks queue.]
+    //Tests_SRS_IOTHUBTRANSPORT_34_005: [If there was a packet in the inProgressPackets queue tied to the provided message, and the provided throwable is null, this function shall set the status of that packet to OK and add it to the callbacks queue.]
     @Test
     public void onMessageSentRetrievesFromInProgressAndAddsToCallbackForNoException()
     {
@@ -222,7 +222,7 @@ public class IotHubTransportTest
         new Verifications()
         {
             {
-                mockedPacket.setStatus(IotHubStatusCode.OK_EMPTY);
+                mockedPacket.setStatus(IotHubStatusCode.OK);
                 times = 1;
             }
         };
@@ -2928,7 +2928,7 @@ public class IotHubTransportTest
                 result = true;
 
                 mockedHttpsIotHubConnection.sendMessage((Message) any);
-                result = IotHubStatusCode.OK_EMPTY;
+                result = IotHubStatusCode.OK;
             }
         };
 
@@ -2940,7 +2940,7 @@ public class IotHubTransportTest
     }
 
 
-    //Tests_SRS_IOTHUBTRANSPORT_34_074: [If the response from sending is not OK or OK_EMPTY, this function
+    //Tests_SRS_IOTHUBTRANSPORT_34_074: [If the response from sending is not OK or OK, this function
     // shall invoke handleMessageException with that message.]
     @Test
     public void sendPacketReceivesStatusThatIsNotOkOrOkEmpty() throws TransportException
@@ -2990,7 +2990,7 @@ public class IotHubTransportTest
         assertEquals("handleMessageException", methodsCalled.toString());
     }
 
-    //Tests_SRS_IOTHUBTRANSPORT_34_075: [If the response from sending is OK or OK_EMPTY and no ack is expected,
+    //Tests_SRS_IOTHUBTRANSPORT_34_075: [If the response from sending is OK or OK and no ack is expected,
     // this function shall put that set that status in the sent packet and add that packet to the callbacks queue.]
     @Test
     public void sendPacketHappyPathWithoutAck() throws TransportException
@@ -3019,7 +3019,7 @@ public class IotHubTransportTest
                 result = false;
 
                 mockedHttpsIotHubConnection.sendMessage((Message) any);
-                result = IotHubStatusCode.OK_EMPTY;
+                result = IotHubStatusCode.OK;
             }
         };
 
@@ -3032,7 +3032,7 @@ public class IotHubTransportTest
         new Verifications()
         {
             {
-                mockedPacket.setStatus(IotHubStatusCode.OK_EMPTY);
+                mockedPacket.setStatus(IotHubStatusCode.OK);
                 times = 1;
             }
         };

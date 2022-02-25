@@ -219,7 +219,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         {
             testInstance.identity.getClient().open(false);
 
-            IotHubStatusCode expectedStatusCode = IotHubStatusCode.OK_EMPTY;
+            IotHubStatusCode expectedStatusCode = IotHubStatusCode.OK;
 
             if (testInstance.protocol == MQTT || testInstance.protocol == MQTT_WS)
             {
@@ -237,7 +237,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
 
             //wait to send the message because we want to ensure that the tcp connection drop happens beforehand and we
             // want the connection to be re-established before sending anything from service client
-            IotHubServicesCommon.waitForStabilizedConnection(connectionStatusUpdates, ERROR_INJECTION_RECOVERY_TIMEOUT_MILLISECONDS, testInstance.identity.getClient());
+            IotHubServicesCommon.waitForStabilizedConnection(connectionStatusUpdates, testInstance.identity.getClient());
 
             if (testInstance.identity.getClient() instanceof DeviceClient)
             {

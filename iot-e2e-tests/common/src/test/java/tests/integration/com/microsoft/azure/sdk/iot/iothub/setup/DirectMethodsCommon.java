@@ -23,8 +23,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceEmulator;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceTestManager;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestDeviceIdentity;
@@ -51,6 +49,18 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
 @Slf4j
 public class DirectMethodsCommon extends IntegrationTest
 {
+    public static final String METHOD_RESET = "reset";
+    public static final String METHOD_LOOPBACK = "loopback";
+    public static final String METHOD_DELAY_IN_MILLISECONDS = "delayInMilliseconds";
+    public static final String METHOD_UNKNOWN = "unknown";
+
+    public static final int METHOD_SUCCESS = 200;
+    public static final int METHOD_THROWS = 403;
+    public static final int METHOD_NOT_DEFINED = 404;
+
+    private static final int DEVICE_METHOD_SUBSCRIBE_TIMEOUT_MILLISECONDS = 60 * 1000;
+    private static final int METHOD_SUBSCRIBE_CHECK_PERIOD_MILLISECONDS = 1000;
+
     @Parameterized.Parameters(name = "{0}_{1}_{2}")
     public static Collection inputs()
     {
@@ -122,7 +132,6 @@ public class DirectMethodsCommon extends IntegrationTest
 
     public static class DeviceMethodTestInstance
     {
-        public DeviceTestManager deviceTestManager;
         public IotHubClientProtocol protocol;
         public AuthenticationType authenticationType;
         public ClientType clientType;
@@ -150,27 +159,18 @@ public class DirectMethodsCommon extends IntegrationTest
             if (clientType == ClientType.DEVICE_CLIENT)
             {
                 this.identity = Tools.getTestDevice(iotHubConnectionString, this.protocol, this.authenticationType, false);
-                this.deviceTestManager = new DeviceTestManager(((TestDeviceIdentity) this.identity).getDeviceClient());
             }
             else if (clientType == ClientType.MODULE_CLIENT)
             {
                 this.identity = Tools.getTestModule(iotHubConnectionString, this.protocol, this.authenticationType, false);
-                this.deviceTestManager = new DeviceTestManager(((TestModuleIdentity) this.identity).getModuleClient());
             }
         }
 
         public void dispose()
         {
-            try
+            if (this.identity != null && this.identity.getClient() != null)
             {
-                if (this.deviceTestManager != null)
-                {
-                    this.deviceTestManager.tearDown();
-                }
-            }
-            catch (IOException e)
-            {
-                log.error("Failed to close clients during cleanup", e);
+                this.identity.getClient().close();
             }
 
             Tools.disposeTestIdentity(this.identity, iotHubConnectionString);
@@ -180,21 +180,23 @@ public class DirectMethodsCommon extends IntegrationTest
     public void openDeviceClientAndSubscribeToMethods() throws Exception
     {
         testInstance.setup();
-        testInstance.deviceTestManager.client.open(false);
-
+        this.testInstance.identity.getClient().open(true);
+/*
         try
         {
-            this.testInstance.deviceTestManager.subscribe(true, false);
+            //TODO rework this a bit?
+            this.testInstance.identity.getClient().subscribeToMethodsAsync();
         }
         catch (IOException | InterruptedException e)
         {
             e.printStackTrace();
-            fail(buildExceptionMessage("Unexpected exception occurred during subscribe: " + Tools.getStackTraceFromThrowable(e), this.testInstance.deviceTestManager.client));
+            fail(buildExceptionMessage("Unexpected exception occurred during subscribe: " + Tools.getStackTraceFromThrowable(e), this.testInstance.identity.getClient()));
         }
         catch (UnsupportedOperationException e)
         {
             //Only thrown when twin was already initialized. Safe to ignore
         }
+        */
     }
 
     @After
@@ -205,9 +207,6 @@ public class DirectMethodsCommon extends IntegrationTest
 
     protected void invokeMethodSucceed() throws Exception
     {
-        // Arrange
-        DeviceTestManager deviceTestManger = this.testInstance.deviceTestManager;
-
         // Act
         DirectMethodRequestOptions options =
             DirectMethodRequestOptions.builder()
@@ -217,20 +216,17 @@ public class DirectMethodsCommon extends IntegrationTest
         MethodResult result;
         if (testInstance.identity instanceof TestModuleIdentity)
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity)testInstance.identity).getModule().getId(), DeviceEmulator.METHOD_LOOPBACK, options);
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity)testInstance.identity).getModule().getId(), METHOD_LOOPBACK, options);
         }
         else
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_LOOPBACK, options);
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_LOOPBACK, options);
         }
-
-        deviceTestManger.waitIotHub(1, 10);
 
         // Assert
         assertNotNull(result);
-        assertEquals((long)DeviceEmulator.METHOD_SUCCESS, (long)result.getStatus());
-        assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, result.getPayload());
-        Assert.assertEquals(0, deviceTestManger.getStatusError());
+        assertEquals((long)METHOD_SUCCESS, (long)result.getStatus());
+        assertEquals(METHOD_LOOPBACK + ":" + PAYLOAD_STRING, result.getPayload());
     }
 
     protected static DirectMethodsClient buildDeviceMethodClientWithAzureSasCredential()

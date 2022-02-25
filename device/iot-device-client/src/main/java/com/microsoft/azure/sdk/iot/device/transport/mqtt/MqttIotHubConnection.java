@@ -352,7 +352,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             throw new IllegalStateException("Cannot send event using a closed MQTT connection");
         }
 
-        IotHubStatusCode result = IotHubStatusCode.OK_EMPTY;
+        IotHubStatusCode result = IotHubStatusCode.OK;
 
         if (message.getMessageType() == DEVICE_METHODS)
         {

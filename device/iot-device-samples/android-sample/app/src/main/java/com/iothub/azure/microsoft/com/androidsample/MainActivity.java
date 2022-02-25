@@ -13,7 +13,6 @@ import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
-import com.microsoft.azure.sdk.iot.device.twin.TwinPropertyCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
@@ -126,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void execute(IotHubStatusCode status, Object context)
         {
-            if((status == IotHubStatusCode.OK) || (status == IotHubStatusCode.OK_EMPTY))
+            if((status == IotHubStatusCode.OK) || (status == IotHubStatusCode.OK))
             {
                 Succeed.set(true);
             }

@@ -249,15 +249,15 @@ public class DirectMethodsErrInjTests extends DirectMethodsCommon
         // Arrange
         List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates = new ArrayList<>();
         IotHubConnectionStatusChangeCallback connectionStatusUpdateCallback = (status, statusChangeReason, throwable, callbackContext) -> actualStatusUpdates.add(new Pair<>(status, throwable));
-        this.testInstance.deviceTestManager.client.setConnectionStatusChangeCallback(connectionStatusUpdateCallback, null);
+        this.testInstance.identity.getClient().setConnectionStatusChangeCallback(connectionStatusUpdateCallback, null);
         invokeMethodSucceed();
 
         // Act
-        MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage, IotHubStatusCode.OK_EMPTY);
-        IotHubServicesCommon.sendErrorInjectionMessageAndWaitForResponse(this.testInstance.deviceTestManager.client, errorInjectionMsgAndRet, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, this.testInstance.protocol);
+        MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage, IotHubStatusCode.OK);
+        IotHubServicesCommon.sendErrorInjectionMessageAndWaitForResponse(this.testInstance.identity.getClient(), errorInjectionMsgAndRet, this.testInstance.protocol);
 
         // Assert
-        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS, this.testInstance.deviceTestManager.client);
+        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, this.testInstance.identity.getClient());
         invokeMethodSucceed();
     }
 }

@@ -22,6 +22,9 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Consumer;
+
+import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 
 @Slf4j
 public class Thermostat {
@@ -36,6 +39,19 @@ public class Thermostat {
             this.value = value;
         }
     }
+
+    private static final Consumer<SendReportedPropertiesResponse> sendReportedPropertiesResponseCallback = sendReportedPropertiesResponse ->
+    {
+        IotHubStatusCode statusCode = sendReportedPropertiesResponse.getStatus();
+        if (statusCode == OK)
+        {
+            System.out.println("Reported properties updated successfully");
+        }
+        else
+        {
+            System.out.println("Reported properties failed to be updated. Status code: " + statusCode);
+        }
+    };
 
     // DTDL interface used: https://github.com/Azure/iot-plugandplay-models/blob/main/dtmi/com/example/thermostat-1.json
     private static final String deviceConnectionString = System.getenv("IOTHUB_DEVICE_CONNECTION_STRING");
@@ -140,12 +156,34 @@ public class Thermostat {
         }
 
         log.debug("Start twin and set handler to receive \"targetTemperature\" updates.");
-        deviceClient.startTwinAsync(new TwinIotHubEventCallback(), null, new TargetTemperatureUpdateCallback(), null);
-        Map<Property, Pair<TwinPropertyCallback, Object>> desiredPropertyUpdateCallback =
-                Collections.singletonMap(
-                        new Property("targetTemperature", null),
-                        new Pair<>(new TargetTemperatureUpdateCallback(), null));
-        deviceClient.subscribeToTwinDesiredPropertiesAsync(desiredPropertyUpdateCallback);
+
+
+        deviceClient.subscribeToDesiredPropertiesAsync(
+            desiredPropertiesUpdate ->
+            {
+                TwinCollection desiredProperties = desiredPropertiesUpdate.getTwin().getDesiredProperties();
+                for (String desiredPropertyKey : desiredProperties.keySet())
+                {
+                    TargetTemperatureUpdateCallback.onPropertyChanged(new Property(desiredPropertyKey, desiredProperties.get(desiredPropertyKey)), null); //TODO context
+                }
+            },
+            (responseStatus, callbackContext) ->
+            {
+                if (responseStatus == OK)
+                {
+                    log.info("Successfully subscribed to desired properties. Getting initial state");
+                    deviceClient.getTwinAsync(getTwinResponse ->
+                    {
+                        log.info("Initial twin state received");
+                        log.info(getTwinResponse.getTwin().toString());
+                    });
+                }
+                else
+                {
+                    log.info("Failed to subscribe to desired properties. Error code {}", responseStatus);
+                    System.exit(-1);
+                }
+            });
 
         log.debug("Set handler to receive \"getMaxMinReport\" command.");
         String methodName = "getMaxMinReport";
@@ -247,21 +285,20 @@ public class Thermostat {
      * The desired property update callback, which receives the target temperature as a desired property update,
      * and updates the current temperature value over telemetry and reported property update.
      */
-    private static class TargetTemperatureUpdateCallback implements TwinPropertyCallback
+    private static class TargetTemperatureUpdateCallback
     {
-
-        final String propertyName = "targetTemperature";
+        final static String propertyName = "targetTemperature";
 
         @SneakyThrows(InterruptedException.class)
-        @Override
-        public void onPropertyChanged(Property property, Object context) {
+        public static void onPropertyChanged(Property property, Object context) {
             if (property.getKey().equalsIgnoreCase(propertyName)) {
                 double targetTemperature = ((Number)property.getValue()).doubleValue();
                 log.debug("Property: Received - {\"{}\": {}°C}.", propertyName, targetTemperature);
 
                 EmbeddedPropertyUpdate pendingUpdate = new EmbeddedPropertyUpdate(targetTemperature, StatusCode.IN_PROGRESS.value, property.getVersion(), null);
-                Property reportedPropertyPending = new Property(propertyName, pendingUpdate);
-                deviceClient.sendReportedPropertiesAsync(Collections.singleton(reportedPropertyPending));
+                TwinCollection reportedPropertyPending = new TwinCollection();
+                reportedPropertyPending.put(propertyName, pendingUpdate);
+                deviceClient.updateReportedPropertiesAsync(reportedPropertyPending, sendReportedPropertiesResponseCallback);
                 log.debug("Property: Update - {\"{}\": {}°C} is {}", propertyName, targetTemperature, StatusCode.IN_PROGRESS);
 
                 // Update temperature in 2 steps
@@ -272,8 +309,10 @@ public class Thermostat {
                 }
 
                 EmbeddedPropertyUpdate completedUpdate = new EmbeddedPropertyUpdate(temperature, StatusCode.COMPLETED.value, property.getVersion(), "Successfully updated target temperature");
-                Property reportedPropertyCompleted = new Property(propertyName, completedUpdate);
-                deviceClient.sendReportedPropertiesAsync(Collections.singleton(reportedPropertyCompleted));
+                TwinCollection reportedProperties = new TwinCollection();
+                reportedProperties.put(propertyName, completedUpdate);
+                deviceClient.updateReportedPropertiesAsync(reportedProperties, sendReportedPropertiesResponseCallback);
+
                 log.debug("Property: Update - {\"{}\": {}°C} is {}", propertyName, temperature, StatusCode.COMPLETED);
             } else {
                 log.debug("Property: Received an unrecognized property update from service.");
@@ -359,17 +398,6 @@ public class Thermostat {
     }
 
     /**
-     * The callback to be invoked in response to device twin operations in IoT Hub.
-     */
-    private static class TwinIotHubEventCallback implements IotHubEventCallback {
-
-        @Override
-        public void execute(IotHubStatusCode responseStatus, Object callbackContext) {
-            log.debug("Property - Response from IoT Hub: {}", responseStatus.name());
-        }
-    }
-
-    /**
      * The callback to be invoked in response to command invocation from IoT Hub.
      */
     private static class MethodIotHubEventCallback implements IotHubEventCallback {
@@ -418,9 +446,9 @@ public class Thermostat {
 
     private static void updateMaxTemperatureSinceLastReboot() throws IOException {
         String propertyName = "maxTempSinceLastReboot";
-        Property reportedProperty = new Property(propertyName, maxTemperature);
-
-        deviceClient.sendReportedPropertiesAsync(Collections.singleton(reportedProperty));
+        TwinCollection reportedProperties = new TwinCollection();
+        reportedProperties.put(propertyName, maxTemperature);
+        deviceClient.updateReportedPropertiesAsync(reportedProperties, sendReportedPropertiesResponseCallback);
         log.debug("Property: Update - {\"{}\": {}°C} is {}.", propertyName, maxTemperature, StatusCode.COMPLETED);
     }
 

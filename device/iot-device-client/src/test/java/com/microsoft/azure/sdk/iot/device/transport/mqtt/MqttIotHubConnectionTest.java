@@ -447,7 +447,7 @@ public class MqttIotHubConnectionTest
     // given in the configuration.]
     // Tests_SRS_MQTTIOTHUBCONNECTION_15_009: [The function shall send the message payload.]
     // Tests_SRS_MQTTIOTHUBCONNECTION_15_011: [If the message was successfully received by the service,
-    // the function shall return status code OK_EMPTY.]
+    // the function shall return status code OK.]
     @Test
     public void sendEventSendsMessageCorrectlyToIotHub() throws IOException, TransportException, MqttException
     {
@@ -469,7 +469,7 @@ public class MqttIotHubConnectionTest
         connection.open();
         IotHubStatusCode result = connection.sendMessage(mockedMessage);
 
-        assertEquals(IotHubStatusCode.OK_EMPTY, result);
+        assertEquals(IotHubStatusCode.OK, result);
 
         new Verifications()
         {
@@ -610,7 +610,7 @@ public class MqttIotHubConnectionTest
         connection.open();
         IotHubStatusCode result = connection.sendMessage(mockDeviceTwinMsg);
 
-        assertEquals(IotHubStatusCode.OK_EMPTY, result);
+        assertEquals(IotHubStatusCode.OK, result);
 
         new Verifications()
         {
@@ -650,7 +650,7 @@ public class MqttIotHubConnectionTest
         connection.open();
         IotHubStatusCode result = connection.sendMessage(mockDeviceMethodMsg);
 
-        assertEquals(IotHubStatusCode.OK_EMPTY, result);
+        assertEquals(IotHubStatusCode.OK, result);
 
         new Verifications()
         {

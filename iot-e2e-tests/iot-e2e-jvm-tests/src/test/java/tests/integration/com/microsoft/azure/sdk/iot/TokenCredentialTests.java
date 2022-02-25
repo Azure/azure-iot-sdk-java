@@ -157,7 +157,7 @@ public class TokenCredentialTests
             null,
             (responseStatus, callbackContext) ->
             {
-                if (responseStatus == IotHubStatusCode.OK_EMPTY || responseStatus == IotHubStatusCode.OK)
+                if (responseStatus == IotHubStatusCode.OK)
                 {
                     methodsSubscribedSuccessfully.set(true);
                 }

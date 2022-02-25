@@ -66,7 +66,7 @@ public final class DeviceClient extends InternalClient
     public void sendReportedPropertiesAsync(
         Set<Property> reportedProperties, 
         Integer version, 
-        CorrelatingMessageCallback correlatingMessageCallback, 
+        CorrelatingMessageCallback twinMessageStatusCallback, 
         Object correlatingMessageCallbackContext, 
         IotHubEventCallback reportedPropertiesCallback, 
         Object reportedPropertiesCallbackContext) 
@@ -158,7 +158,7 @@ public final class ModuleClient extends InternalClient
     public void sendReportedPropertiesAsync(
         Set<Property> reportedProperties, 
         Integer version, 
-        CorrelatingMessageCallback correlatingMessageCallback, 
+        CorrelatingMessageCallback twinMessageStatusCallback, 
         Object correlatingMessageCallbackContext, 
         IotHubEventCallback reportedPropertiesCallback, 
         Object reportedPropertiesCallbackContext) 

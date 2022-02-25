@@ -9,9 +9,9 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * Representation of a single Twin Properties for the {@link TwinState}.
+ * Representation of a single Twin Properties for the {@link Twin}.
  *
- * <p> The Properties on the TwinState shall contains one {@link TwinCollection} of <b>desired</b> property.
+ * <p> The Properties on the Twin shall contains one {@link TwinCollection} of <b>desired</b> property.
  *
  * <p> The desired property is a collection that can contain a associated {@link TwinMetadata}.
  *
