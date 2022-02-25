@@ -460,15 +460,14 @@ public class InternalClient
      * @param <Type2> The type of the desired property value.
      *
      * @throws IllegalArgumentException if the callback is {@code null}
-     * @throws UnsupportedOperationException if called more than once on the same device
-     * @throws IllegalStateException if called when client is not opened
+     * @throws IllegalStateException if called when client is not opened or if called when twin has already started
      */
     public <Type1, Type2> void startTwinAsync(
         IotHubEventCallback twinStatusCallback,
         Object twinStatusCallbackContext,
         PropertyCallback<Type1, Type2> genericPropertyCallback,
         Object genericPropertyCallbackContext)
-            throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException
+            throws IllegalStateException, IllegalArgumentException
     {
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
@@ -495,7 +494,7 @@ public class InternalClient
         }
         else
         {
-            throw new UnsupportedOperationException("You have already initialised twin");
+            throw new IllegalStateException("You have already initialised twin");
         }
     }
 
@@ -520,15 +519,14 @@ public class InternalClient
      * @param genericPropertyCallbackContext the context to be passed to the property callback. Can be {@code null}.     *
      *
      * @throws IllegalArgumentException if the callback is {@code null}
-     * @throws UnsupportedOperationException if called more than once on the same device
-     * @throws IllegalStateException if called when client is not opened
+     * @throws IllegalStateException if called when client is not opened or if called when twin has already started
      */
     public void startTwinAsync(
         IotHubEventCallback twinStatusCallback,
         Object twinStatusCallbackContext,
         TwinPropertyCallback genericPropertyCallback,
         Object genericPropertyCallbackContext)
-            throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException
+            throws IllegalStateException, IllegalArgumentException
     {
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
@@ -550,7 +548,7 @@ public class InternalClient
         }
         else
         {
-            throw new UnsupportedOperationException("You have already initialised twin");
+            throw new IllegalStateException("You have already initialised twin");
         }
     }
 
@@ -575,8 +573,7 @@ public class InternalClient
      * @param genericPropertyCallbackContext the context to be passed to the property callback. Can be {@code null}.
      *
      * @throws IllegalArgumentException if the callback is {@code null}
-     * @throws UnsupportedOperationException if called more than once on the same device
-     * @throws IllegalStateException if called when client is not opened
+     * @throws IllegalStateException if called when client is not opened or if called when twin has already started
      */
     public void startTwinAsync(
         IotHubEventCallback twinStatusCallback,
@@ -610,7 +607,7 @@ public class InternalClient
         }
         else
         {
-            throw new UnsupportedOperationException("You have already initialised twin");
+            throw new IllegalStateException("You have already initialised twin");
         }
     }
 
