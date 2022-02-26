@@ -1,6 +1,6 @@
 package com.microsoft.azure.sdk.iot.android.iothub;
 
-import com.microsoft.azure.sdk.iot.android.helper.TestGroup12;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup10;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryIdentity;
@@ -11,7 +11,7 @@ import org.junit.runners.Parameterized;
 
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.HubTierConnectionTests;
 
-@TestGroup12
+@TestGroup10
 @RunWith(Parameterized.class)
 public class HubTierConnectionAndroidRunner extends HubTierConnectionTests
 {

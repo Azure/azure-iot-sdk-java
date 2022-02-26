@@ -15,7 +15,7 @@ import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.methods.DirectMethodsTests;
 
-@TestGroup10
+@TestGroup9
 @RunWith(Parameterized.class)
 public class DirectMethodsAndroidRunner extends DirectMethodsTests
 {

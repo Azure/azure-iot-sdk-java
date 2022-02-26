@@ -4,7 +4,7 @@
  */
 package com.microsoft.azure.sdk.iot.android.iothub.serviceclient;
 
-import com.microsoft.azure.sdk.iot.android.helper.TestGroup12;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup10;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 
 import org.junit.runner.RunWith;
@@ -12,7 +12,7 @@ import org.junit.runners.Parameterized;
 
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient.MessagingClientTests;
 
-@TestGroup12
+@TestGroup10
 @RunWith(Parameterized.class)
 public class MessagingClientAndroidRunner extends MessagingClientTests
 {

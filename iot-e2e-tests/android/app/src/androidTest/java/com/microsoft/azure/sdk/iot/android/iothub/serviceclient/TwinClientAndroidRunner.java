@@ -5,10 +5,10 @@
 
 package com.microsoft.azure.sdk.iot.android.iothub.serviceclient;
 
-import com.microsoft.azure.sdk.iot.android.helper.TestGroup7;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup6;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient.TwinClientTests;
 
-@TestGroup7
+@TestGroup6
 public class TwinClientAndroidRunner extends TwinClientTests
 {
 }

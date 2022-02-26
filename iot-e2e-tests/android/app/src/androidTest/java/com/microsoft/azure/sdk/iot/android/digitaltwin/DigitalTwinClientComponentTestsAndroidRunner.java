@@ -5,11 +5,11 @@
 
 package com.microsoft.azure.sdk.iot.android.digitaltwin;
 
-import com.microsoft.azure.sdk.iot.android.helper.TestGroup11;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup10;
 
 import tests.integration.com.microsoft.azure.sdk.iot.digitaltwin.DigitalTwinClientComponentTests;
 
-@TestGroup11
+@TestGroup10
 public class DigitalTwinClientComponentTestsAndroidRunner extends DigitalTwinClientComponentTests
 {
     // Intentionally empty class. The important part of this file is that the class inherits tests

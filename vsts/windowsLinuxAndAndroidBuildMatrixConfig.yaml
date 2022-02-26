@@ -267,10 +267,6 @@ jobs:
           ANDROID_TEST_GROUP_ID: TestGroup12
         TestGroup13:
           ANDROID_TEST_GROUP_ID: TestGroup13
-        TestGroup14:
-          ANDROID_TEST_GROUP_ID: TestGroup14
-        TestGroup15:
-          ANDROID_TEST_GROUP_ID: TestGroup15
 
     displayName: Android Test
     dependsOn: AndroidBuild

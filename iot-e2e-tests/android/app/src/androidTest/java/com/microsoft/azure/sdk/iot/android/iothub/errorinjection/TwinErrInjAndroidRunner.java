@@ -5,7 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.android.iothub.errorinjection;
 
-import com.microsoft.azure.sdk.iot.android.helper.TestGroup8;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup7;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
@@ -21,7 +21,7 @@ import java.security.GeneralSecurityException;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.errorinjection.TwinErrInjTests;
 
-@TestGroup8
+@TestGroup7
 @RunWith(Parameterized.class)
 public class TwinErrInjAndroidRunner extends TwinErrInjTests
 {
