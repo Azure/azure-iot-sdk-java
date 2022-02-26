@@ -5,7 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.android.iothub.methods;
 
-import com.microsoft.azure.sdk.iot.android.helper.TestGroup10;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup9;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 
