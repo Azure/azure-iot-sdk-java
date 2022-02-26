@@ -19,7 +19,6 @@ import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
-import tests.integration.com.microsoft.azure.sdk.iot.iothub.twin.GetTwinTests;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.twin.TwinTests;
 
 @TestGroup11
