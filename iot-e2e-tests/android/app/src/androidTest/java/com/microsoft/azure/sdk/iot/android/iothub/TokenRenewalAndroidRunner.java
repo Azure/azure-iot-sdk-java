@@ -5,11 +5,11 @@
 
 package com.microsoft.azure.sdk.iot.android.iothub;
 
-import com.microsoft.azure.sdk.iot.android.helper.TestGroup17;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup15;
 
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.TokenRenewalTests;
 
-@TestGroup17
+@TestGroup15
 public class TokenRenewalAndroidRunner extends TokenRenewalTests
 {
 }
