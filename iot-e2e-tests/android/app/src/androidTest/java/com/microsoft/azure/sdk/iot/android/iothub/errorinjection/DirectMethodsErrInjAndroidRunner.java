@@ -3,26 +3,25 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.android.iothub.errorinjection.twin;
+package com.microsoft.azure.sdk.iot.android.iothub.errorinjection;
 
-import com.microsoft.azure.sdk.iot.android.helper.TestGroup6;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup5;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.io.IOException;
-
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
-import tests.integration.com.microsoft.azure.sdk.iot.iothub.errorinjection.DesiredPropertiesErrInjTests;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.errorinjection.DirectMethodsErrInjTests;
 
-@TestGroup6
+@TestGroup5
 @RunWith(Parameterized.class)
-public class DesiredPropertiesErrInjAndroidRunner extends DesiredPropertiesErrInjTests
+public class DirectMethodsErrInjAndroidRunner extends DirectMethodsErrInjTests
 {
-    public DesiredPropertiesErrInjAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
+    public DirectMethodsErrInjAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {
         super(protocol, authenticationType, clientType);
     }
 }
+

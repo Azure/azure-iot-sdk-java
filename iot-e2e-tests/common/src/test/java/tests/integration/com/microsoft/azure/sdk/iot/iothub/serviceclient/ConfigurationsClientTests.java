@@ -65,8 +65,8 @@ public class ConfigurationsClientTests extends IntegrationTest
         public String deviceId;
         public String moduleId;
         public String configId;
-        private ConfigurationsClient configurationsClient;
-        private RegistryClient registryClient;
+        private final ConfigurationsClient configurationsClient;
+        private final RegistryClient registryClient;
 
         public ConfigurationsClientTestInstance()
         {

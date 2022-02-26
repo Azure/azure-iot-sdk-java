@@ -183,7 +183,7 @@ public class Twin
      * @return The {@code Integer} with the tags collection version.
      * @throws IllegalArgumentException If the tags is {@code null}.
      */
-    public int getTagsVersion()
+    public Integer getTagsVersion()
     {
         if (this.tags == null)
         {
@@ -231,7 +231,7 @@ public class Twin
      * @return The desired properties collection version.
      * @throws IllegalArgumentException If the desired properties is {@code null}.
      */
-    public int getDesiredPropertiesVersion()
+    public Integer getDesiredPropertiesVersion()
     {
         if (this.desiredProperties == null)
         {
@@ -265,7 +265,7 @@ public class Twin
      * @return The desired properties collection version.
      * @throws IllegalArgumentException if the reported properties is {@code null}.
      */
-    public int getReportedPropertiesVersion()
+    public Integer getReportedPropertiesVersion()
     {
         if (this.reportedProperties == null)
         {

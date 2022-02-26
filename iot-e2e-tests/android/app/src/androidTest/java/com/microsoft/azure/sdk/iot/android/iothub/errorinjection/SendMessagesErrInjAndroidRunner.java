@@ -3,7 +3,7 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.android.iothub.errorinjection.messaging;
+package com.microsoft.azure.sdk.iot.android.iothub.errorinjection;
 
 import com.microsoft.azure.sdk.iot.android.helper.TestGroup4;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;

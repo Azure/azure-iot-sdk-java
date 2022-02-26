@@ -5,7 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.android.iothub.serviceclient;
 
-import com.microsoft.azure.sdk.iot.android.helper.TestGroup14;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup6;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 
@@ -14,7 +14,7 @@ import java.io.IOException;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient.QueryClientTests;
 
-@TestGroup14
+@TestGroup6
 public class QueryTwinAndroidRunner extends QueryClientTests
 {
 }
