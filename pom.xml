@@ -180,6 +180,12 @@
         <dice-provider-emulator-version>2.0.0</dice-provider-emulator-version>
         <dice-provider-version>2.0.0</dice-provider-version>
         <x509-provider-version>2.0.0</x509-provider-version>
+
+        <!-- Properties to consolidate slf4j versions -->
+        <slf4j-version>1.7.32</slf4j-version>
+        <azure-core-version>1.12.0</azure-core-version>
+        <lombok-version>1.18.8</lombok-version>
+        <azure-storage-blob-version>12.8.0</azure-storage-blob-version>
     </properties>
     <reporting>
         <plugins>
