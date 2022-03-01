@@ -186,7 +186,8 @@ public class InternalClient
      *
      * @param message the message to be sent.
      *
-     * @throws IllegalArgumentException if the message provided is {@code null}.
+     * @return The service's response code for this operation. If it is {@link IotHubStatusCode#OK} then the message was delivered successfully.
+     * @throws InterruptedException if the operation is interrupted while waiting on the telemetry to be acknowledged by the service.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
      * @throws TimeoutException if the service fails to acknowledge the telemetry message within the default timeout.
      */
@@ -202,7 +203,8 @@ public class InternalClient
      * @param timeoutMilliseconds The maximum number of milliseconds to wait for the service to acknowledge this message.
      * If 0, then it will wait indefinitely.
      *
-     * @throws IllegalArgumentException if the message provided is {@code null}.
+     * @return The service's response code for this operation. If it is {@link IotHubStatusCode#OK} then the message was delivered successfully.
+     * @throws InterruptedException if the operation is interrupted while waiting on the telemetry to be acknowledged by the service.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
      * @throws TimeoutException if the service fails to acknowledge the telemetry message within the provided timeout.
      */
@@ -247,13 +249,14 @@ public class InternalClient
      *
      * @param messages the messages to be sent.
      *
-     * @throws IllegalArgumentException if the message provided is {@code null}.
+     * @return The service's response code for this operation. If it is {@link IotHubStatusCode#OK} then the message was delivered successfully.
+     * @throws InterruptedException if the operation is interrupted while waiting on the telemetry to be acknowledged by the service.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
      * @throws TimeoutException if the service fails to acknowledge the batch telemetry message within the default timeout.
      */
-    public void sendTelemetry(List<Message> messages) throws InterruptedException, TimeoutException
+    public IotHubStatusCode sendTelemetry(List<Message> messages) throws InterruptedException, TimeoutException
     {
-        this.sendTelemetry(messages, DEFAULT_TIMEOUT_MILLISECONDS);
+        return this.sendTelemetry(messages, DEFAULT_TIMEOUT_MILLISECONDS);
     }
 
     /**
@@ -267,11 +270,12 @@ public class InternalClient
      * @param timeoutMilliseconds The maximum number of milliseconds to wait for the service to acknowledge this batch message.
      * If 0, then it will wait indefinitely.
      *
-     * @throws IllegalArgumentException if the message provided is {@code null}.
+     * @return The service's response code for this operation. If it is {@link IotHubStatusCode#OK} then the message was delivered successfully.
+     * @throws InterruptedException if the operation is interrupted while waiting on the telemetry to be acknowledged by the service.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
      * @throws TimeoutException if the service fails to acknowledge the batch telemetry message within the provided timeout.
      */
-    public void sendTelemetry(List<Message> messages, int timeoutMilliseconds) throws InterruptedException, TimeoutException
+    public IotHubStatusCode sendTelemetry(List<Message> messages, int timeoutMilliseconds) throws InterruptedException, TimeoutException
     {
         final CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<IotHubStatusCode> statusCodeReference = new AtomicReference<>();
@@ -296,6 +300,8 @@ public class InternalClient
                 throw new TimeoutException("Timed out waiting for service to acknowledge telemetry");
             }
         }
+
+        return statusCodeReference.get();
     }
 
     /**
@@ -471,6 +477,64 @@ public class InternalClient
         }
 
         return twinAtomicReference.get();
+    }
+
+    /**
+     * Subscribes to direct methods
+     *
+     * @param methodCallback Callback on which direct methods shall be invoked. Cannot be {@code null}.
+     * @param methodCallbackContext Context for device method callback. Can be {@code null}.
+     * @throws TimeoutException if the service fails to acknowledge the subscription request within the default timeout.
+     * @throws InterruptedException if the operation is interrupted while waiting on the subscription request to be acknowledged by the service.
+     * @throws IllegalStateException if this client is not open.
+     */
+    public IotHubStatusCode subscribeToMethods(MethodCallback methodCallback, Object methodCallbackContext)
+        throws IllegalStateException, InterruptedException, TimeoutException
+    {
+        return this.subscribeToMethods(methodCallback, methodCallbackContext, DEFAULT_TIMEOUT_MILLISECONDS);
+    }
+
+    /**
+     * Subscribes to direct methods
+     *
+     * @param methodCallback Callback on which direct methods shall be invoked. Cannot be {@code null}.
+     * @param methodCallbackContext Context for device method callback. Can be {@code null}.
+     * @param timeoutMilliseconds The maximum number of milliseconds this call will wait for the service to return the twin.
+     * If 0, then it will wait indefinitely.
+     * @throws TimeoutException if the service fails to acknowledge the subscription request within the provided timeout.
+     * @throws InterruptedException if the operation is interrupted while waiting on the subscription request to be acknowledged by the service.
+     * @throws IllegalStateException if this client is not open.
+     */
+    public IotHubStatusCode subscribeToMethods(MethodCallback methodCallback, Object methodCallbackContext, int timeoutMilliseconds)
+        throws IllegalStateException, InterruptedException, TimeoutException
+    {
+        final CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<IotHubStatusCode> iotHubStatusCodeAtomicReference = new AtomicReference<>();
+        subscribeToMethodsAsync(
+            methodCallback,
+            methodCallbackContext,
+            (responseStatus, callbackContext) ->
+            {
+                iotHubStatusCodeAtomicReference.set(responseStatus);
+                latch.countDown();
+            },
+    null);
+
+        if (timeoutMilliseconds == 0)
+        {
+            latch.await();
+        }
+        else
+        {
+            boolean timedOut = !latch.await(timeoutMilliseconds, TimeUnit.MILLISECONDS);
+
+            if (timedOut)
+            {
+                throw new TimeoutException("Timed out waiting for service to respond to direct method subscription request");
+            }
+        }
+
+        return iotHubStatusCodeAtomicReference.get();
     }
 
     /**
@@ -782,8 +846,6 @@ public class InternalClient
     {
         return this.config;
     }
-
-    //TODO sync version of subscribeToMethods
 
     /**
      * Subscribes to direct methods

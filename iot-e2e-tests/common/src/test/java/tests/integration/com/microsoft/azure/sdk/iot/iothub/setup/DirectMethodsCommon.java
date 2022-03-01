@@ -196,8 +196,7 @@ public class DirectMethodsCommon extends IntegrationTest
         testInstance.setup();
         this.testInstance.identity.getClient().open(true);
 
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        this.testInstance.identity.getClient().subscribeToMethodsAsync(
+        this.testInstance.identity.getClient().subscribeToMethods(
             (methodName, methodData, context) ->
             {
                 System.out.println("Device invoked " + methodName);
@@ -236,11 +235,7 @@ public class DirectMethodsCommon extends IntegrationTest
 
                 return deviceMethodData;
             },
-            null,
-            (responseStatus, callbackContext) -> countDownLatch.countDown(),
             null);
-
-        countDownLatch.await();
     }
 
     @After

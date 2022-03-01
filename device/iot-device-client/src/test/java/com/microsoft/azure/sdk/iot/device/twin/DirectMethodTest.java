@@ -191,7 +191,7 @@ public class DirectMethodTest
 
         final DirectMethodResponse testUserData = new DirectMethodResponse(100, "Some test message");
 
-        MessageCallback testDeviceMethodResponseMessageCallback = Deencapsulation.newInnerInstance("deviceMethodResponseCallback", testMethod);
+        MessageCallback testDeviceMethodResponseMessageCallback = Deencapsulation.newInnerInstance("DirectMethodResponseCallback", testMethod);
         new NonStrictExpectations()
         {
             {
@@ -246,7 +246,7 @@ public class DirectMethodTest
 
         final DirectMethodResponse testUserData = new DirectMethodResponse(100, "Some test message");
 
-        MessageCallback testDeviceMethodResponseMessageCallback = Deencapsulation.newInnerInstance("deviceMethodResponseCallback", testMethod);
+        MessageCallback testDeviceMethodResponseMessageCallback = Deencapsulation.newInnerInstance("DirectMethodResponseCallback", testMethod);
         new NonStrictExpectations()
         {
             {
@@ -285,7 +285,7 @@ public class DirectMethodTest
 
         final DirectMethodResponse testUserData = null;
 
-        MessageCallback testDeviceMethodResponseMessageCallback = Deencapsulation.newInnerInstance("deviceMethodResponseCallback", testMethod);
+        MessageCallback testDeviceMethodResponseMessageCallback = Deencapsulation.newInnerInstance("DirectMethodResponseCallback", testMethod);
         new NonStrictExpectations()
         {
             {
@@ -326,7 +326,7 @@ public class DirectMethodTest
 
         final DirectMethodResponse testUserData = new DirectMethodResponse(100, null);
 
-        MessageCallback testDeviceMethodResponseMessageCallback = Deencapsulation.newInnerInstance("deviceMethodResponseCallback", testMethod);
+        MessageCallback testDeviceMethodResponseMessageCallback = Deencapsulation.newInnerInstance("DirectMethodResponseCallback", testMethod);
         new NonStrictExpectations()
         {
             {
@@ -362,7 +362,7 @@ public class DirectMethodTest
         IotHubTransportMessage testMessage = new IotHubTransportMessage(testPayload, DEVICE_METHODS);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
 
-        MessageCallback testDeviceMethodResponseMessageCallback = Deencapsulation.newInnerInstance("deviceMethodResponseCallback", testMethod);
+        MessageCallback testDeviceMethodResponseMessageCallback = Deencapsulation.newInnerInstance("DirectMethodResponseCallback", testMethod);
         new NonStrictExpectations()
         {
             {
@@ -393,7 +393,7 @@ public class DirectMethodTest
         //arrange
         DirectMethod testMethod = new DirectMethod(mockedInternalClient, mockedStatusCB, null);
 
-        IotHubEventCallback testDeviceMethodRequestMessageCallback = Deencapsulation.newInnerInstance("deviceMethodRequestMessageCallback", testMethod);
+        IotHubEventCallback testDeviceMethodRequestMessageCallback = Deencapsulation.newInnerInstance("DirectMethodRequestMessageCallback", testMethod);
 
         //act
         testDeviceMethodRequestMessageCallback.execute(IotHubStatusCode.ERROR, null);
