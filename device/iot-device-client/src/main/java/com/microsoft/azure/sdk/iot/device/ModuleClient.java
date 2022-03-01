@@ -70,9 +70,8 @@ public class ModuleClient extends InternalClient
      * @throws UnsupportedOperationException if using any protocol besides MQTT, if the connection string is missing
      * the "moduleId" field, or if the connection string uses x509
      * @throws IllegalArgumentException if the provided connection string is null or empty, or if the provided protocol is null
-     * @throws URISyntaxException if the connection string cannot be parsed for a valid hostname
      */
-    public ModuleClient(String connectionString, IotHubClientProtocol protocol) throws IllegalArgumentException, UnsupportedOperationException, URISyntaxException
+    public ModuleClient(String connectionString, IotHubClientProtocol protocol) throws IllegalArgumentException, UnsupportedOperationException
     {
         super(new IotHubConnectionString(connectionString), protocol, null);
 
@@ -95,9 +94,8 @@ public class ModuleClient extends InternalClient
      * @throws UnsupportedOperationException if using any protocol besides MQTT, if the connection string is missing
      * the "moduleId" field, or if the connection string uses x509
      * @throws IllegalArgumentException if the provided connection string is null or empty, or if the provided protocol is null
-     * @throws URISyntaxException if the connection string cannot be parsed for a valid hostname
      */
-    public ModuleClient(String connectionString, IotHubClientProtocol protocol, ClientOptions clientOptions) throws IllegalArgumentException, UnsupportedOperationException, URISyntaxException
+    public ModuleClient(String connectionString, IotHubClientProtocol protocol, ClientOptions clientOptions) throws IllegalArgumentException, UnsupportedOperationException
     {
         super(new IotHubConnectionString(connectionString), protocol, clientOptions);
         commonConstructorVerifications(protocol, this.config);
@@ -236,17 +234,7 @@ public class ModuleClient extends InternalClient
                 log.debug("Ignoring trusted certs saved in {} environment variable because custom SSLContext was provided in client options.", EdgeCaCertificateFileVariableName);
             }
 
-            ModuleClient moduleClient;
-            try
-            {
-                moduleClient = new ModuleClient(connectionString, protocol, clientOptions);
-            }
-            catch (URISyntaxException e)
-            {
-                throw new ModuleClientException("Could not create module client", e);
-            }
-
-            return moduleClient;
+            return new ModuleClient(connectionString, protocol, clientOptions);
         }
         else
         {

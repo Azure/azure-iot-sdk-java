@@ -68,7 +68,7 @@ public class InternalClient
         this.deviceIO = new DeviceIO(this.config);
     }
 
-    InternalClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol, ClientOptions clientOptions) throws URISyntaxException, IOException
+    InternalClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol, ClientOptions clientOptions) throws IOException
     {
         if (protocol == null)
         {

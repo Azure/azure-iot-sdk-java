@@ -54,9 +54,8 @@ public class IotHubConnectionString
      *
      * @param connectionString is the iothub connection string to parse.
      * @throws IllegalArgumentException if the provided connectionString is {@code null}, empty, or not valid or if the hostName in the connection string is not a valid URI.
-     * @throws URISyntaxException if the hostname is not a valid URI
      */
-    public IotHubConnectionString(String connectionString) throws IllegalArgumentException, URISyntaxException
+    public IotHubConnectionString(String connectionString) throws IllegalArgumentException
     {
         /* Codes_SRS_IOTHUB_CONNECTIONSTRING_21_016: [If the connection string is null or empty, the constructor shall throw an IllegalArgumentException.] */
         if ((connectionString == null) || connectionString.isEmpty())
@@ -122,14 +121,13 @@ public class IotHubConnectionString
      * @param sharedAccessToken the shared access token.
      * @throws IllegalArgumentException if the IoT Hub hostname does not contain
      * a valid IoT Hub name as its prefix or if the IoT Hub hostname does not conform to RFC 3986.
-     * @throws URISyntaxException if the hostname is not a valid URI
      */
     public IotHubConnectionString(
         String hostName,
         String deviceId,
         String sharedAccessKey,
         String sharedAccessToken)
-            throws IllegalArgumentException, URISyntaxException
+            throws IllegalArgumentException
     {
         this(hostName, deviceId, sharedAccessKey, sharedAccessToken, null);
     }
@@ -140,7 +138,7 @@ public class IotHubConnectionString
         String sharedAccessKey,
         String sharedAccessToken,
         String gatewayHostName)
-            throws IllegalArgumentException, URISyntaxException
+            throws IllegalArgumentException
     {
         this.isUsingX509 = (sharedAccessKey == null && sharedAccessToken == null);
 
@@ -243,14 +241,21 @@ public class IotHubConnectionString
 
     private static void validateTerms(String hostName, String deviceId,
                                       String sharedAccessKey, String sharedAccessToken, boolean usingX509)
-            throws IllegalArgumentException, URISyntaxException
+            throws IllegalArgumentException
     {
         if ((hostName == null) || hostName.isEmpty())
         {
             throw new IllegalArgumentException("IoT Hub hostName cannot be null.");
         }
 
-        new URI(hostName);
+        try
+        {
+            new URI(hostName);
+        }
+        catch (URISyntaxException e)
+        {
+            throw new IllegalArgumentException("Host name did not contain a valid URI", e);
+        }
 
         parseHubName(hostName);
 

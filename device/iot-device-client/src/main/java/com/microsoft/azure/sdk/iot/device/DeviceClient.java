@@ -54,9 +54,8 @@ public final class DeviceClient extends InternalClient
      * one of the following attributes:{@code HostName}, {@code DeviceId}, or
      * {@code SharedAccessKey} or if the IoT hub hostname does not conform to
      * RFC 3986 or if the provided {@code connectionString} is for an x509 authenticated device
-     * @throws URISyntaxException if the hostname in the connection string is not a valid URI
      */
-    public DeviceClient(String connectionString, IotHubClientProtocol protocol) throws URISyntaxException, IllegalArgumentException
+    public DeviceClient(String connectionString, IotHubClientProtocol protocol) throws IllegalArgumentException
     {
         this(connectionString, protocol, null);
     }
@@ -76,9 +75,8 @@ public final class DeviceClient extends InternalClient
      * one of the following attributes:{@code HostName}, {@code DeviceId}, or
      * {@code SharedAccessKey} or if the IoT hub hostname does not conform to
      * RFC 3986 or if the provided {@code connectionString} is for an x509 authenticated device
-     * @throws URISyntaxException if the hostname in the connection string is not a valid URI
      */
-    public DeviceClient(String connectionString, IotHubClientProtocol protocol, ClientOptions clientOptions) throws URISyntaxException, IllegalArgumentException
+    public DeviceClient(String connectionString, IotHubClientProtocol protocol, ClientOptions clientOptions) throws IllegalArgumentException
     {
         super(new IotHubConnectionString(connectionString), protocol, clientOptions);
         commonConstructorVerifications();
@@ -123,10 +121,9 @@ public final class DeviceClient extends InternalClient
      * @param deviceId The id for the device to use
      * @param securityProvider The security provider for the device
      * @param protocol The protocol the device shall use for communication to the IoT Hub
-     * @throws URISyntaxException If the provided connectionString could not be parsed.
      * @throws IOException If the SecurityProvider throws any exception while authenticating
      */
-    public DeviceClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol) throws URISyntaxException, IOException
+    public DeviceClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol) throws IOException
     {
         this(uri, deviceId, securityProvider, protocol, null);
     }
@@ -139,10 +136,9 @@ public final class DeviceClient extends InternalClient
      * @param securityProvider The security provider for the device
      * @param protocol The protocol the device shall use for communication to the IoT Hub
      * @param clientOptions The options that allow configuration of the device client instance during initialization
-     * @throws URISyntaxException If the provided connectionString could not be parsed.
      * @throws IOException If the SecurityProvider throws any exception while authenticating
      */
-    public DeviceClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol, ClientOptions clientOptions) throws URISyntaxException, IOException
+    public DeviceClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol, ClientOptions clientOptions) throws IOException
     {
         super(uri, deviceId, securityProvider, protocol, clientOptions);
         commonConstructorSetup();

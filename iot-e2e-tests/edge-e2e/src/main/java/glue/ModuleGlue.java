@@ -174,7 +174,7 @@ public class ModuleGlue
             cr.setConnectionId(connectionId);
             handler.handle(Future.succeededFuture(cr));
         }
-        catch (URISyntaxException | IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException e)
+        catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException e)
         {
             handler.handle(Future.failedFuture(e));
         }
