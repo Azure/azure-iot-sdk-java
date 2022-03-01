@@ -484,6 +484,8 @@ public class InternalClient
      *
      * @param methodCallback Callback on which direct methods shall be invoked. Cannot be {@code null}.
      * @param methodCallbackContext Context for device method callback. Can be {@code null}.
+     *
+     * @return The service's response code for this operation. If it is {@link IotHubStatusCode#OK} then this client has subscribed successfully.
      * @throws TimeoutException if the service fails to acknowledge the subscription request within the default timeout.
      * @throws InterruptedException if the operation is interrupted while waiting on the subscription request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open.
@@ -501,6 +503,8 @@ public class InternalClient
      * @param methodCallbackContext Context for device method callback. Can be {@code null}.
      * @param timeoutMilliseconds The maximum number of milliseconds this call will wait for the service to return the twin.
      * If 0, then it will wait indefinitely.
+     *
+     * @return The service's response code for this operation. If it is {@link IotHubStatusCode#OK} then this client has subscribed successfully.
      * @throws TimeoutException if the service fails to acknowledge the subscription request within the provided timeout.
      * @throws InterruptedException if the operation is interrupted while waiting on the subscription request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open.

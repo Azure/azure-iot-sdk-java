@@ -287,7 +287,6 @@ public abstract class Mqtt implements MqttCallback
      * Method to receive messages on mqtt broker connection.
      *
      * @return a received message. It can be {@code null}
-     * @throws TransportException if failed to receive mqtt message.
      */
     public IotHubTransportMessage receive()
     {
