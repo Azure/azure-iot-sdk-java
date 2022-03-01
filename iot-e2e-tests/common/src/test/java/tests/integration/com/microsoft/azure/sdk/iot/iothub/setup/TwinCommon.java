@@ -106,14 +106,14 @@ public class TwinCommon extends IntegrationTest
 
     protected static String iotHubConnectionString = "";
 
-    protected DeviceTwinTestInstance testInstance;
+    protected TwinTestInstance testInstance;
 
     public TwinCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException, InterruptedException, IotHubException, ModuleClientException, GeneralSecurityException, URISyntaxException
     {
-        this.testInstance = new DeviceTwinTestInstance(protocol, authenticationType, clientType);
+        this.testInstance = new TwinTestInstance(protocol, authenticationType, clientType);
     }
 
-    public static class DeviceTwinTestInstance
+    public static class TwinTestInstance
     {
         public IotHubClientProtocol protocol;
         public AuthenticationType authenticationType;
@@ -127,7 +127,7 @@ public class TwinCommon extends IntegrationTest
         public TestIdentity testIdentity;
         public Twin serviceTwin;
 
-        public DeviceTwinTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException, InterruptedException
+        public TwinTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException, InterruptedException
         {
             this.protocol = protocol;
             this.authenticationType = authenticationType;

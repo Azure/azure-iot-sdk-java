@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.UUID;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubMessageResult.ABANDON;
@@ -44,16 +45,10 @@ public class DeviceTwin implements MessageCallback
 
         IotHubTransportMessage dtMessage = (IotHubTransportMessage) message;
 
-        switch (dtMessage.getDeviceOperationType())
+        if (dtMessage.getDeviceOperationType() == DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE)
         {
-            case DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE:
-            {
-                Twin twin = Twin.createFromDesiredPropertyJson(new String(dtMessage.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
-                this.desiredPropertiesUpdateCallback.onDesiredPropertiesUpdate(twin, desiredPropertiesUpdateCallbackContext);
-                break;
-            }
-            default:
-                break;
+            Twin twin = Twin.createFromDesiredPropertyJson(new String(dtMessage.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
+            this.desiredPropertiesUpdateCallback.onDesiredPropertiesUpdate(twin, desiredPropertiesUpdateCallbackContext);
         }
 
         return COMPLETE;
@@ -67,6 +62,8 @@ public class DeviceTwin implements MessageCallback
         {
             throw new IllegalStateException("Must subscribe to desired properties before getting twin.");
         }
+
+        Objects.requireNonNull(twinCallback, "Must provide a non-null callback for receiving the twin");
 
         IotHubTransportMessage getTwinRequestMessage = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_TWIN);
         getTwinRequestMessage.setRequestId(UUID.randomUUID().toString());
@@ -126,10 +123,7 @@ public class DeviceTwin implements MessageCallback
             throw new IllegalStateException("Must subscribe to desired properties before sending reported properties.");
         }
 
-        if (reportedProperties == null)
-        {
-            throw new IllegalArgumentException("Reported properties cannot be null");
-        }
+        Objects.requireNonNull(reportedProperties, "Reported properties cannot be null");
 
         String serializedReportedProperties = reportedProperties.toJsonElement().toString();
 
@@ -222,6 +216,8 @@ public class DeviceTwin implements MessageCallback
         DesiredPropertiesUpdateCallback desiredPropertiesUpdateCallback,
         Object desiredPropertiesUpdateCallbackContext)
     {
+        Objects.requireNonNull(desiredPropertiesUpdateCallback, "Must set a non-null handler for desired property updates");
+
         this.desiredPropertiesUpdateCallback = desiredPropertiesUpdateCallback;
         this.desiredPropertiesUpdateCallbackContext = desiredPropertiesUpdateCallbackContext;
 

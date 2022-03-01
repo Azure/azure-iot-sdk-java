@@ -23,7 +23,7 @@ public final class DirectMethod
     private final InternalClient client;
     private final DeviceClientConfig config;
 
-    private final class deviceMethodResponseCallback implements MessageCallback
+    private final class DirectMethodResponseCallback implements MessageCallback
     {
         final DeviceClientConfig nestedConfig = config;
 
@@ -83,7 +83,7 @@ public final class DirectMethod
                                 responseMessage.setStatus(String.valueOf(responseData.getStatus()));
                                 responseMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_SEND_RESPONSE);
 
-                                client.sendTelemetryAsync(responseMessage, new deviceMethodRequestMessageCallback(), null);
+                                client.sendTelemetryAsync(responseMessage, new DirectMethodRequestMessageCallback(), null);
                                 result = IotHubMessageResult.COMPLETE;
                             }
                             else
@@ -117,7 +117,7 @@ public final class DirectMethod
         }
     }
 
-    private final class deviceMethodRequestMessageCallback implements IotHubEventCallback
+    private final class DirectMethodRequestMessageCallback implements IotHubEventCallback
     {
         @Override
         public void execute(IotHubStatusCode responseStatus, Object callbackContext)
@@ -150,7 +150,7 @@ public final class DirectMethod
         this.config = client.getConfig();
         this.deviceMethodStatusCallback = deviceMethodStatusCallback;
         this.deviceMethodStatusCallbackContext = deviceMethodStatusCallbackContext;
-        this.config.setDirectMethodsMessageCallback(new deviceMethodResponseCallback(), null);
+        this.config.setDirectMethodsMessageCallback(new DirectMethodResponseCallback(), null);
     }
 
     /**
@@ -176,7 +176,7 @@ public final class DirectMethod
             IotHubTransportMessage subscribeMessage = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_METHODS);
             subscribeMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
             subscribeMessage.setConnectionDeviceId(this.config.getDeviceId());
-            this.client.sendTelemetryAsync(subscribeMessage, new deviceMethodRequestMessageCallback(), null);
+            this.client.sendTelemetryAsync(subscribeMessage, new DirectMethodRequestMessageCallback(), null);
         }
     }
 }

@@ -8,10 +8,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
-import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
-import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
@@ -24,17 +21,14 @@ import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClientOptions;
 import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestDeviceIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestModuleIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -88,7 +82,7 @@ public class DirectMethodsCommon extends IntegrationTest
     //How many milliseconds between retry
     protected static final Integer RETRY_MILLISECONDS = 100;
 
-    protected DeviceMethodTestInstance testInstance;
+    protected DirectMethodTestInstance testInstance;
     protected static final long ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
 
     protected static Collection inputsCommon()
@@ -133,10 +127,10 @@ public class DirectMethodsCommon extends IntegrationTest
 
     protected DirectMethodsCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {
-        this.testInstance = new DeviceMethodTestInstance(protocol, authenticationType, clientType);
+        this.testInstance = new DirectMethodTestInstance(protocol, authenticationType, clientType);
     }
 
-    public static class DeviceMethodTestInstance
+    public static class DirectMethodTestInstance
     {
         public IotHubClientProtocol protocol;
         public AuthenticationType authenticationType;
@@ -148,7 +142,7 @@ public class DirectMethodsCommon extends IntegrationTest
         public DirectMethodsClient methodServiceClient;
         public RegistryClient registryClient;
 
-        protected DeviceMethodTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
+        protected DirectMethodTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
         {
             this.protocol = protocol;
             this.authenticationType = authenticationType;

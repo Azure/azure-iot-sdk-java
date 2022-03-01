@@ -39,7 +39,7 @@ public class DirectMethodSample
         return METHOD_NOT_DEFINED;
     }
 
-    protected static class DeviceMethodStatusCallback implements IotHubEventCallback
+    protected static class DirectMethodStatusCallback implements IotHubEventCallback
     {
         public void execute(IotHubStatusCode status, Object context)
         {
@@ -178,7 +178,7 @@ public class DirectMethodSample
 
             System.out.println("Opened connection to IoT Hub.");
 
-            client.subscribeToMethodsAsync(new SampleMethodCallback(), null, new DeviceMethodStatusCallback(), null);
+            client.subscribeToMethodsAsync(new SampleMethodCallback(), null, new DirectMethodStatusCallback(), null);
 
             System.out.println("Subscribed to device method");
 
