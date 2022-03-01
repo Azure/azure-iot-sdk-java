@@ -315,41 +315,6 @@ public class MqttDirectMethodTest
         assertNull(actualMessage);
     }
 
-    // Tests_SRS_MQTTDEVICEMETHOD_25_029: [**If method name not found or is null then receive shall throw TransportException **]**
-    @Test (expected = TransportException.class)
-    public void receiveThrowsIfMethodNameCouldNotBeParsed() throws TransportException
-    {
-        //arrange
-        String topic = "$iothub/methods/POST/";
-        byte[] actualPayload = "TestPayload".getBytes(StandardCharsets.UTF_8);
-        testreceivedMessages.add(new MutablePair<>(topic, actualPayload));
-        MqttDirectMethod testMethod = new MqttDirectMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
-        Deencapsulation.setField(testMethod, "receivedMessages", testreceivedMessages);
-        testMethod.start();
-
-        //act
-        testMethod.receive();
-    }
-
-    /*
-    Tests_SRS_MqttDeviceMethod_25_031: [**If request id is not found or is null then receive shall throw TransportException **]**
-     */
-    @Test (expected = TransportException.class)
-    public void receiveThrowsIfRIDCouldNotBeParsed() throws TransportException
-    {
-        //arrange
-        String topic = "$iothub/methods/POST/testMethod/";
-        byte[] actualPayload = "TestPayload".getBytes(StandardCharsets.UTF_8);
-        testreceivedMessages.add(new MutablePair<>(topic, actualPayload));
-        MqttDirectMethod testMethod = new MqttDirectMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
-        Deencapsulation.setField(testMethod, "receivedMessages", testreceivedMessages);
-
-        testMethod.start();
-
-        //act
-        testMethod.receive();
-    }
-
     @Test
     public void receiveReturnsEmptyPayLoadIfNullPayloadParsed() throws TransportException
     {

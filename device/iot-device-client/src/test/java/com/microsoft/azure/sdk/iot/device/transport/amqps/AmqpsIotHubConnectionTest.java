@@ -1069,7 +1069,7 @@ public class AmqpsIotHubConnectionTest {
         final StringBuilder methodsCalled = new StringBuilder();
         new MockUp<AmqpsIotHubConnection>()
         {
-            @Mock void scheduleReconnection(Throwable throwable)
+            @Mock void scheduleReconnection(TransportException throwable)
             {
                 methodsCalled.append("scheduleReconnection");
             }
@@ -1088,7 +1088,7 @@ public class AmqpsIotHubConnectionTest {
                 result = mockedSymbol;
                 mockedSymbol.toString();
                 result = AmqpSessionWindowViolationException.errorCode;
-                Deencapsulation.invoke(connection, "scheduleReconnection", new Class[] {Throwable.class}, (Throwable) any);
+                Deencapsulation.invoke(connection, "scheduleReconnection", new Class[] {TransportException.class}, (TransportException) any);
             }
         };
 

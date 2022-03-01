@@ -711,21 +711,6 @@ public class MqttTest
         assertNull(receivedMessage);
     }
 
-    // Tests_SRS_Mqtt_34_025: [If the call to peekMessage returns null when topic is non-null then this method will throw a TransportException]
-    @Test(expected = TransportException.class)
-    public void receiveThrowsIotHubServiceExceptionWhenParsePayloadReturnsNull() throws TransportException
-    {
-        //arrange
-        final Mqtt mockMqtt = new MqttMessaging(CLIENT_ID, null, "", false, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
-
-        Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
-        Deencapsulation.setField(mockMqtt, "receivedMessages", testreceivedMessages);
-        testreceivedMessages.add(new MutablePair<>(MOCK_PARSE_TOPIC, (byte[]) null));
-
-        //act
-        mockMqtt.receive();
-    }
-
     //Tests_SRS_Mqtt_25_030: [The payload of the message and the topic is added to the received messages queue .]
     //Tests_SRS_Mqtt_34_045: [If there is a saved listener, this function shall notify that listener that a message arrived.]
     @Test

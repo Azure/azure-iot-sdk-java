@@ -576,7 +576,7 @@ public class MqttTwinTest
     /*
     **SRS_MQTTDEVICETWIN_25_039: [If the topic is of type response topic and if status is either a non 3 digit number or not found then receive shall throw TransportException ]
      */
-    @Test (expected = TransportException.class)
+    @Test (expected = IllegalArgumentException.class)
     public void receiveParsesResponseTopicMandatoryStatusNotFoundException() throws TransportException
     {
         final byte[] actualPayload = "GetTwinResponseDataContainingDesiredAndReportedPropertiesDocument".getBytes(StandardCharsets.UTF_8);
@@ -603,7 +603,7 @@ public class MqttTwinTest
     /*
     **Tests_SRS_MQTTDEVICETWIN_25_039: [If the topic is of type response topic and if status is either a non 3 digit number or not found then receive shall throw TransportException ]
      */
-    @Test (expected = TransportException.class)
+    @Test (expected = IllegalArgumentException.class)
     public void receiveParsesResponseTopicInvalidStatusThrowsException() throws TransportException
     {
         final byte[] actualPayload = "GetTwinResponseDataContainingDesiredAndReportedPropertiesDocument".getBytes(StandardCharsets.UTF_8);
@@ -980,62 +980,6 @@ public class MqttTwinTest
             {
                 assertEquals(receivedMessageBytes[i], actualPayload[i]);
             }
-        }
-    }
-
-    /*
-    **Tests_SRS_MQTTDEVICETWIN_25_043: [If the topic is not of type response for desired properties then this method shall throw TransportException]
-     */
-    @Test (expected = TransportException.class)
-    public void receiveThrowsTransportExceptionOnAnythingOtherThenPatchDesiredProp() throws TransportException
-    {
-        final byte[] actualPayload = "NotificationResponseDataContainingDesiredPropertiesDocument".getBytes(StandardCharsets.UTF_8);
-        final String expectedTopic = "$iothub/twin/PATCH/properties/" + "?$version=" + mockVersion ;
-        IotHubTransportMessage receivedMessage = null;
-        try
-        {
-            //arrange
-            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
-            Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
-            testreceivedMessages.add(new MutablePair<>(expectedTopic, actualPayload));
-            Deencapsulation.setField(testTwin, "receivedMessages", testreceivedMessages);
-            Deencapsulation.setField(testTwin, "stateLock", new Object());
-
-            //act
-            receivedMessage = testTwin.receive();
-        }
-        finally
-        {
-            //assert
-            assertNull(receivedMessage);
-        }
-    }
-
-    /*
-    **Tests_SRS_MQTTDEVICETWIN_25_037: [This method shall parse topic to look for only either twin response topic or twin patch topic and thorw TransportException other wise.]
-     */
-    @Test (expected = TransportException.class)
-    public void receiveThrowsTransportExceptionOnAnythingOtherThenPatchOrResTopic() throws TransportException
-    {
-        final byte[] actualPayload = "NotificationResponseDataContainingDesiredPropertiesDocument".getBytes(StandardCharsets.UTF_8);
-        final String expectedTopic = "$iothub/twin/NOTPATCH_NOTRES/properties/" + "?$version=" + mockVersion ;
-        IotHubTransportMessage receivedMessage = null;
-        try
-        {
-            //arrange
-            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
-            Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
-            testreceivedMessages.add(new MutablePair<>(expectedTopic, actualPayload));
-            Deencapsulation.setField(testTwin, "receivedMessages", testreceivedMessages);
-            Deencapsulation.setField(testTwin, "stateLock", new Object());
-
-            //act
-            receivedMessage = testTwin.receive();
-        }
-        finally
-        {
-            //assert
-            assertNull(receivedMessage);
         }
     }
 

@@ -34,7 +34,7 @@ public class TopicParserTest
     /*
     Tests_SRS_TopicParser_25_002: [**The constructor shall throw TransportException if topic is null or empty.**]**
      */
-    @Test (expected = TransportException.class)
+    @Test (expected = IllegalArgumentException.class)
     public void constructorFailsInvalidTopic() throws TransportException
     {
         //arrange
@@ -156,7 +156,7 @@ public class TopicParserTest
     /*
     Tests_SRS_TopicParser_25_006: [**If tokenIndexReqID is not valid i.e less than or equal to zero or greater then token length then getRequestId shall throw TransportException.**]**
      */
-    @Test (expected = TransportException.class)
+    @Test (expected = IllegalArgumentException.class)
     public void getRequestIdInvalidTokenThrows() throws TransportException
     {
         //arrange
@@ -188,41 +188,5 @@ public class TopicParserTest
         assertEquals("methodName", methodName);
 
 
-    }
-
-    /*
-    Tests_SRS_TopicParser_25_012: [**If tokenIndexMethod is not valid i.e less than or equal to zero or greater then token length then getMethodName shall throw  TransportException.**]**
-     */
-    @Test (expected = TransportException.class)
-    public void getMethodNameInvalidTokenThrows() throws TransportException
-    {
-        //arrange
-        String validString = "$iothub/methods/res/methodName";
-        TopicParser testParser = new TopicParser(validString);
-
-        //act
-        String methodName = Deencapsulation.invoke(testParser, "getMethodName", 4);
-    }
-
-    @Test (expected = TransportException.class)
-    public void getMethodNameInvalidTokenThrows_1() throws TransportException
-    {
-        //arrange
-        String validString = "$iothub/methods/res/";
-        TopicParser testParser = new TopicParser(validString);
-
-        //act
-        String methodName = Deencapsulation.invoke(testParser, "getMethodName", 3);
-    }
-
-    @Test (expected = TransportException.class)
-    public void getMethodNameInvalidTokenThrows_2() throws TransportException
-    {
-        //arrange
-        String validString = "$iothub/methods/res//";
-        TopicParser testParser = new TopicParser(validString);
-
-        //act
-        String methodName = Deencapsulation.invoke(testParser, "getMethodName", 3);
     }
 }
