@@ -925,7 +925,9 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 if (reconnectingDeviceSessionHandler != null)
                 {
                     log.trace("Amqp message failed to send because its AMQP session is currently reconnecting. Adding it back to messages to send queue ({})", message);
-                    messagesToSend.add(message);
+                    TransportException transportException = new TransportException("Amqp message failed to send because its AMQP session is currently reconnecting");
+                    transportException.setRetryable(true);
+                    this.listener.onMessageSent(message, message.getConnectionDeviceId(), transportException);
                 }
                 else
                 {
@@ -944,19 +946,25 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 // Proton-j doesn't handle the scenario of sending twin/method messages on links that haven't been opened remotely yet, so hold
                 // off on sending them until the subscription has finished.
                 log.trace("Attempted to send twin/method message while the twin/method subscription was in progress. Adding it back to messages to send queue to try again after the subscription has finished ({})", message);
-                messagesToSend.add(message);
+                TransportException transportException = new TransportException("Subscription in progress needs to be completed before this message can be sent");
+                transportException.setRetryable(true);
+                this.listener.onMessageSent(message, message.getConnectionDeviceId(), transportException);
             }
             else if (sendResult == SendResult.LINKS_NOT_OPEN)
             {
                 // Shouldn't happen. If it does, it signals that we have a bug in this SDK.
                 log.warn("Failed to send a message because its AMQP links were not open yet. Adding it back to messages to send queue ({})", message);
-                messagesToSend.add(message);
+                TransportException transportException = new TransportException("Amqp links not open for this message");
+                transportException.setRetryable(true);
+                this.listener.onMessageSent(message, message.getConnectionDeviceId(), transportException);
             }
             else if (sendResult == SendResult.UNKNOWN_FAILURE)
             {
                 // Shouldn't happen. If it does, it signals that we have a bug in this SDK.
                 log.warn("Unknown failure occurred while attempting to send. Adding it back to messages to send queue ({})", message);
-                messagesToSend.add(message);
+                TransportException transportException = new TransportException("Unknown failure");
+                transportException.setRetryable(true);
+                this.listener.onMessageSent(message, message.getConnectionDeviceId(), transportException);
             }
 
             message = messagesToSend.poll();
