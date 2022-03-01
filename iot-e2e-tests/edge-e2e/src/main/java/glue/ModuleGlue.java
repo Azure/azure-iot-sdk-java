@@ -31,6 +31,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
+import jnr.ffi.annotations.In;
 import samples.com.microsoft.azure.sdk.iot.UnixDomainSocketSample;
 
 import java.io.IOException;
@@ -40,6 +41,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.sql.Time;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -47,6 +49,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeoutException;
 
 
 @SuppressWarnings("ALL")
@@ -375,30 +378,31 @@ public class ModuleGlue
                 }
                 this._deviceTwinStatusCallback.setHandler(null);
             });
-            System.out.println("calling subscribeToDesiredPropertiesAsync");
-            client.subscribeToDesiredPropertiesAsync(
-                new DesiredPropertiesSubscriptionCallback()
-                {
-                    @Override
-                    public void onSubscriptionAcknowledged(IotHubStatusCode statusCode, Object context)
+            System.out.println("calling subscribeToDesiredProperties");
+
+            try
+            {
+                client.subscribeToDesiredProperties(
+                    new DesiredPropertiesCallback()
                     {
-                        handler.handle(Future.succeededFuture());
-                    }
-                },
-                null,
-                new DesiredPropertiesCallback()
-                {
-                    @Override
-                    public void onDesiredPropertiesUpdated(Twin twin, Object context)
-                    {
-                        TwinCollection desiredProperties = twin.getDesiredProperties();
-                        for (String key : desiredProperties.keySet())
+                        @Override
+                        public void onDesiredPropertiesUpdated(Twin twin, Object context)
                         {
-                            onPropertyChanged(new Property(key, desiredProperties.get(key)), null);
+                            TwinCollection desiredProperties = twin.getDesiredProperties();
+                            for (String key : desiredProperties.keySet())
+                            {
+                                onPropertyChanged(new Property(key, desiredProperties.get(key)), null);
+                            }
                         }
-                    }
-                },
-                null);
+                    },
+                    null);
+
+                handler.handle(Future.succeededFuture());
+            }
+            catch (TimeoutException | InterruptedException e)
+            {
+                handler.handle(Future.failedFuture(e));
+            }
         }
     }
 
@@ -431,7 +435,14 @@ public class ModuleGlue
         {
             EventCallback callback = new EventCallback(handler);
             System.out.printf("calling sendTelemetryAsync%n");
-            client.sendTelemetryAsync(msg, callback, null);
+            try
+            {
+                client.sendTelemetry(msg);
+            }
+            catch (InterruptedException | TimeoutException e)
+            {
+                handler.handle(Future.failedFuture(e));
+            }
         }
     }
 
@@ -560,16 +571,20 @@ public class ModuleGlue
             callback.setHandler(handler);
             try
             {
-                client.subscribeToMethodsAsync(new MethodCallback()
-                {
-                    @Override
-                    public DirectMethodResponse onMethodInvoked(String methodName, Object methodData, Object context)
+                IotHubStatusCode statusCode = client.subscribeToMethods(
+                    new MethodCallback()
                     {
-                        return handleMethodInvocation(methodName, methodData, context);
-                    }
-                }, null, callback, null);
+                        @Override
+                        public DirectMethodResponse onMethodInvoked(String methodName, Object methodData, Object context)
+                        {
+                            return handleMethodInvocation(methodName, methodData, context);
+                        }
+                    },
+                    null);
+
+                callback.execute(statusCode, null);
             }
-            catch (IllegalStateException e)
+            catch (IllegalStateException | InterruptedException | TimeoutException e)
             {
                 handler.handle(Future.failedFuture(e));
             }
@@ -683,22 +698,14 @@ public class ModuleGlue
             this._handler = handler;
             try
             {
-                client.getTwinAsync(
-                    new GetTwinCallback()
-                    {
-                        @Override
-                        public void onTwinReceived(Twin twin, Object callbackContext)
-                        {
-                            TwinCollection desiredProperties = twin.getDesiredProperties();
-                            for (String key : desiredProperties.keySet())
-                            {
-                                onPropertyChanged(new Property(key, desiredProperties.get(key)), null);
-                            }
-                        }
-                    },
-                    null);
+                Twin twin = client.getTwin();
+                TwinCollection desiredProperties = twin.getDesiredProperties();
+                for (String key : desiredProperties.keySet())
+                {
+                    onPropertyChanged(new Property(key, desiredProperties.get(key)), null);
+                }
             }
-            catch (IllegalStateException e)
+            catch (IllegalStateException | InterruptedException | TimeoutException e)
             {
                 handler.handle(Future.failedFuture(e));
             }
@@ -737,20 +744,9 @@ public class ModuleGlue
             this._deviceTwinStatusCallback.setHandler(handler);
             try
             {
-                final CountDownLatch sendReportedPropertiesLatch = new CountDownLatch(1);
-                ReportedPropertiesCallback sendReportedPropertiesResponseCallback = new ReportedPropertiesCallback()
-                {
-                    @Override
-                    public void onReportedPropertiesUpdateAcknowledged(IotHubStatusCode statusCode, TransportException e, Object callbackContext)
-                    {
-                        sendReportedPropertiesLatch.countDown();
-                    }
-                };
-
-                client.updateReportedPropertiesAsync(reportedProperties, sendReportedPropertiesResponseCallback, null);
-                sendReportedPropertiesLatch.await();
+                client.updateReportedProperties(reportedProperties);
             }
-            catch (IllegalStateException | InterruptedException e)
+            catch (IllegalStateException | InterruptedException | TimeoutException e)
             {
                 this._deviceTwinStatusCallback.setHandler(null);
                 handler.handle(Future.failedFuture(e));
