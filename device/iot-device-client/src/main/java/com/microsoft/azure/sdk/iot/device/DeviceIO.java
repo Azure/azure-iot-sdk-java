@@ -42,7 +42,7 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
  *     # DeviceIO                                                                          #         |
  *     #  +----------------+    +-------------------------------------+    +------------+  #         |
  *     #  |                |    |                open                 |    |            |  #         |
- *     #  | sendEventAsync |    |                   +---------------+ |    |   close    |  #         |
+ *     #  | sendTelemetryAsync |    |                   +---------------+ |    |   close    |  #         |
  *     #  |                |    |                   | taskScheduler | |    |            |  #         |
  *     #  +--------+-------+    +--+----------------+--+---------+--+-+    +--------+---+  #         |
  *     ############|###############|###################|#########|##################|#######         |
@@ -287,10 +287,10 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
      * @throws IllegalArgumentException if the message provided is {@code null}.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
      */
-    void sendEventAsync(Message message,
-                               IotHubEventCallback callback,
-                               Object callbackContext,
-                               String deviceId)
+    void sendTelemetryAsync(Message message,
+                            IotHubEventCallback callback,
+                            Object callbackContext,
+                            String deviceId)
     {
         if (!this.isOpen())
         {

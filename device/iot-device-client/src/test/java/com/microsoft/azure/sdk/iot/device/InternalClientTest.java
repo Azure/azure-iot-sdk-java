@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -340,7 +339,7 @@ public class InternalClientTest
         };
     }
 
-    /* Tests_SRS_INTERNALCLIENT_21_010: [The sendEventAsync shall asynchronously send the message using the deviceIO connection.] */
+    /* Tests_SRS_INTERNALCLIENT_21_010: [The sendTelemetryAsync shall asynchronously send the message using the deviceIO connection.] */
     @Test
     public void sendEventAsyncSendsSuccess(
             @Mocked final Message mockMessage,
@@ -355,13 +354,13 @@ public class InternalClientTest
         client.open(false);
 
         // act
-        Deencapsulation.invoke(client, "sendEventAsync", mockMessage, mockCallback, context);
+        Deencapsulation.invoke(client, "sendTelemetryAsync", mockMessage, mockCallback, context);
 
         // assert
         new Verifications()
         {
             {
-                mockDeviceIO.sendEventAsync(mockMessage, mockCallback, context, mockConfig.getDeviceId());
+                mockDeviceIO.sendTelemetryAsync(mockMessage, mockCallback, context, mockConfig.getDeviceId());
                 times = 1;
             }
         };
@@ -390,7 +389,7 @@ public class InternalClientTest
         };
 
         // act
-        Deencapsulation.invoke(client, "sendEventAsync", mockMessage, mockCallback, context);
+        Deencapsulation.invoke(client, "sendTelemetryAsync", mockMessage, mockCallback, context);
 
         // assert
         new Verifications()
@@ -402,8 +401,8 @@ public class InternalClientTest
         };
     }
 
-    /* Tests_SRS_INTERNALCLIENT_21_011: [If starting to send via deviceIO is not successful, the sendEventAsync shall bypass the threw exception.] */
-    // Tests_SRS_INTERNALCLIENT_12_001: [The function shall call deviceIO.sendEventAsync with the client's config parameter to enable multiplexing.]
+    /* Tests_SRS_INTERNALCLIENT_21_011: [If starting to send via deviceIO is not successful, the sendTelemetryAsync shall bypass the threw exception.] */
+    // Tests_SRS_INTERNALCLIENT_12_001: [The function shall call deviceIO.sendTelemetryAsync with the client's config parameter to enable multiplexing.]
     @Test
     public void sendEventAsyncBadSendThrows(
             @Mocked final Message mockMessage,
@@ -416,7 +415,7 @@ public class InternalClientTest
         new NonStrictExpectations()
         {
             {
-                mockDeviceIO.sendEventAsync(mockMessage, mockCallback, context, null);
+                mockDeviceIO.sendTelemetryAsync(mockMessage, mockCallback, context, null);
                 result = new IllegalStateException();
             }
         };
@@ -427,7 +426,7 @@ public class InternalClientTest
         // act
         try
         {
-            Deencapsulation.invoke(client, "sendEventAsync", mockMessage, mockCallback, context);
+            Deencapsulation.invoke(client, "sendTelemetryAsync", mockMessage, mockCallback, context);
         }
         catch (IllegalStateException expected)
         {
@@ -438,14 +437,14 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockDeviceIO.sendEventAsync(mockMessage, mockCallback, context, mockConfig.getDeviceId());
+                mockDeviceIO.sendTelemetryAsync(mockMessage, mockCallback, context, mockConfig.getDeviceId());
                 times = 1;
             }
         };
     }
 
     // Tests_SRS_INTERNALCLIENT_11_013: [The function shall set the message callback, with its associated context.]
-    // Tests_SRS_INTERNALCLIENT_12_001: [The function shall call deviceIO.sendEventAsync with the client's config parameter to enable multiplexing.]
+    // Tests_SRS_INTERNALCLIENT_12_001: [The function shall call deviceIO.sendTelemetryAsync with the client's config parameter to enable multiplexing.]
     @Test
     public void setMessageCallbackSetsMessageCallback(
             @Mocked final MessageCallback mockCallback)

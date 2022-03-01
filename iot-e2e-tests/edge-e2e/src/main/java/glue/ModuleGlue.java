@@ -431,8 +431,8 @@ public class ModuleGlue
         else
         {
             EventCallback callback = new EventCallback(handler);
-            System.out.printf("calling sendEventAsync%n");
-            client.sendEventAsync(msg, callback, null);
+            System.out.printf("calling sendTelemetryAsync%n");
+            client.sendTelemetryAsync(msg, callback, null);
         }
     }
 

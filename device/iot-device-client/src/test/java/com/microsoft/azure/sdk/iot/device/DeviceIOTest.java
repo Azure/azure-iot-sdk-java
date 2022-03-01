@@ -270,7 +270,7 @@ public class DeviceIOTest
     }
 
 
-    /* Tests_SRS_DEVICE_IO_21_022: [The sendEventAsync shall add the message, with its associated callback and callback context, to the transport.] */
+    /* Tests_SRS_DEVICE_IO_21_022: [The sendTelemetryAsync shall add the message, with its associated callback and callback context, to the transport.] */
     // Tests_SRS_DEVICE_IO_12_001: [The function shall set the deviceId on the message if the deviceId parameter is not null.]
     @Test
     public void sendEventAsyncAddsMessageToTransportSuccess(
@@ -285,7 +285,7 @@ public class DeviceIOTest
         Deencapsulation.invoke(deviceIO, "onStatusChanged", IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
 
         // act
-        Deencapsulation.invoke(deviceIO, "sendEventAsync",
+        Deencapsulation.invoke(deviceIO, "sendTelemetryAsync",
                 new Class[] {Message.class, IotHubEventCallback.class, Object.class, String.class},
                 mockMsg, mockCallback, context, "someDeviceId");
 
@@ -301,7 +301,7 @@ public class DeviceIOTest
         };
     }
 
-    /* Tests_SRS_DEVICE_IO_21_023: [If the message given is null, the sendEventAsync shall throw an IllegalArgumentException.] */
+    /* Tests_SRS_DEVICE_IO_21_023: [If the message given is null, the sendTelemetryAsync shall throw an IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void sendEventAsyncRejectsNullMessageThrows(
             @Mocked final IotHubEventCallback mockCallback)
@@ -313,12 +313,12 @@ public class DeviceIOTest
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
 
         // act
-        Deencapsulation.invoke(deviceIO, "sendEventAsync",
+        Deencapsulation.invoke(deviceIO, "sendTelemetryAsync",
                 new Class[] {Message.class, IotHubEventCallback.class, Object.class, IotHubConnectionString.class},
                 null, mockCallback, context, mockConfig.getDeviceId());
     }
 
-    /* Tests_SRS_DEVICE_IO_21_024: [If the client is closed, the sendEventAsync shall throw an IllegalStateException.] */
+    /* Tests_SRS_DEVICE_IO_21_024: [If the client is closed, the sendTelemetryAsync shall throw an IllegalStateException.] */
     @Test (expected = IllegalStateException.class)
     public void sendEventAsyncClientNotOpenedThrows(
             @Mocked final Message mockMsg,
@@ -329,12 +329,12 @@ public class DeviceIOTest
         final Object deviceIO = newDeviceIO();
 
         // act
-        Deencapsulation.invoke(deviceIO, "sendEventAsync",
+        Deencapsulation.invoke(deviceIO, "sendTelemetryAsync",
                 new Class[] {Message.class, IotHubEventCallback.class, Object.class, String.class},
                 mockMsg, mockCallback, context, mockConfig.getDeviceId());
     }
 
-    /* Tests_SRS_DEVICE_IO_21_024: [If the client is closed, the sendEventAsync shall throw an IllegalStateException.] */
+    /* Tests_SRS_DEVICE_IO_21_024: [If the client is closed, the sendTelemetryAsync shall throw an IllegalStateException.] */
     @Test (expected = IllegalStateException.class)
     public void sendEventAsyncClientAlreadyClosedThrows(
             @Mocked final Message mockMsg,
@@ -349,7 +349,7 @@ public class DeviceIOTest
         assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
 
         // act
-        Deencapsulation.invoke(deviceIO, "sendEventAsync", new Class[] {Message.class, IotHubEventCallback.class, Object.class, String.class}, mockMsg, mockCallback, context, mockConfig.getDeviceId());
+        Deencapsulation.invoke(deviceIO, "sendTelemetryAsync", new Class[] {Message.class, IotHubEventCallback.class, Object.class, String.class}, mockMsg, mockCallback, context, mockConfig.getDeviceId());
     }
 
     @Test

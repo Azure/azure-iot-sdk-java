@@ -178,7 +178,7 @@ public class SendSerializedEvent
 
                 CountDownLatch messageSentLatch = new CountDownLatch(1);
                 EventCallback callback = new EventCallback();
-                client.sendEventAsync(msg, callback, messageSentLatch);
+                client.sendTelemetryAsync(msg, callback, messageSentLatch);
 
                 messageSentLatch.await();
             }

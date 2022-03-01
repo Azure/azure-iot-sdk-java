@@ -182,56 +182,121 @@ public class InternalClient
     }
 
     /**
-     * Asynchronously sends an event message to the IoT hub.
+     * Synchronously sends a message to IoT hub.
      *
      * @param message the message to be sent.
-     * @param callback the callback to be invoked when a response is received.
-     * Can be {@code null}.
-     * @param callbackContext a context to be passed to the callback. Can be
-     * {@code null} if no callback is provided.
      *
      * @throws IllegalArgumentException if the message provided is {@code null}.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
+     * @throws TimeoutException if the service fails to acknowledge the telemetry message within the default timeout.
      */
-    public void sendEventAsync(Message message, IotHubEventCallback callback, Object callbackContext)
+    public IotHubStatusCode sendTelemetry(Message message) throws InterruptedException, TimeoutException
+    {
+        return sendTelemetry(message, DEFAULT_TIMEOUT_MILLISECONDS);
+    }
+
+    /**
+     * Synchronously sends a message to IoT hub.
+     *
+     * @param message the message to be sent.
+     * @param timeoutMilliseconds The maximum number of milliseconds to wait for the service to acknowledge this message.
+     * If 0, then it will wait indefinitely.
+     *
+     * @throws IllegalArgumentException if the message provided is {@code null}.
+     * @throws IllegalStateException if the client has not been opened yet or is already closed.
+     * @throws TimeoutException if the service fails to acknowledge the telemetry message within the provided timeout.
+     */
+    public IotHubStatusCode sendTelemetry(Message message, int timeoutMilliseconds) throws InterruptedException, TimeoutException
     {
         verifyRegisteredIfMultiplexing();
         message.setConnectionDeviceId(this.config.getDeviceId());
-        deviceIO.sendEventAsync(message, callback, callbackContext, this.config.getDeviceId());
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<IotHubStatusCode> statusCodeReference = new AtomicReference<>();
+        IotHubEventCallback eventCallback = (responseStatus, callbackContext) ->
+        {
+            statusCodeReference.set(responseStatus);
+            latch.countDown();
+        };
+
+        this.sendTelemetryAsync(message, eventCallback, null);
+
+        if (timeoutMilliseconds == 0)
+        {
+            latch.await();
+        }
+        else
+        {
+            boolean timedOut = !latch.await(timeoutMilliseconds, TimeUnit.MILLISECONDS);
+
+            if (timedOut)
+            {
+                throw new TimeoutException("Timed out waiting for service to acknowledge telemetry");
+            }
+        }
+
+        return statusCodeReference.get();
     }
 
-    //TODO sync version of sendEventAsync (rename to telemetry for PnP?)
-
     /**
-     * Asynchronously sends a batch of messages to the IoT hub
+     * Synchronously sends a batch of messages to IoT hub
+     *
      * HTTPS messages will be sent in a single batch and MQTT and AMQP messages will be sent individually.
      * In case of HTTPS, This API call is an all-or-nothing single HTTPS message and the callback will be triggered only once.
      * Maximum payload size for HTTPS is 255KB
      *
-     * @param messages the list of message to be sent.
-     * @param callback the callback to be invoked when a response is received.
-     * Can be {@code null}.
-     * @param callbackContext a context to be passed to the callback. Can be
-     * {@code null} if no callback is provided.
+     * @param messages the messages to be sent.
      *
      * @throws IllegalArgumentException if the message provided is {@code null}.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
+     * @throws TimeoutException if the service fails to acknowledge the batch telemetry message within the default timeout.
      */
-    public void sendEventBatchAsync(List<Message> messages, IotHubEventCallback callback, Object callbackContext)
+    public void sendTelemetry(List<Message> messages) throws InterruptedException, TimeoutException
     {
-        verifyRegisteredIfMultiplexing();
-
-        for (Message message: messages)
-        {
-            message.setConnectionDeviceId(this.config.getDeviceId());
-        }
-
-        Message message = new BatchMessage(messages);
-
-        deviceIO.sendEventAsync(message, callback, callbackContext, this.config.getDeviceId());
+        this.sendTelemetry(messages, DEFAULT_TIMEOUT_MILLISECONDS);
     }
 
-    //TODO sync version of sendEventBatchAsync (rename to telemetry for PnP?)
+    /**
+     * Synchronously sends a batch of messages to IoT hub
+     *
+     * HTTPS messages will be sent in a single batch and MQTT and AMQP messages will be sent individually.
+     * In case of HTTPS, This API call is an all-or-nothing single HTTPS message and the callback will be triggered only once.
+     * Maximum payload size for HTTPS is 255KB
+     *
+     * @param messages the messages to be sent.
+     * @param timeoutMilliseconds The maximum number of milliseconds to wait for the service to acknowledge this batch message.
+     * If 0, then it will wait indefinitely.
+     *
+     * @throws IllegalArgumentException if the message provided is {@code null}.
+     * @throws IllegalStateException if the client has not been opened yet or is already closed.
+     * @throws TimeoutException if the service fails to acknowledge the batch telemetry message within the provided timeout.
+     */
+    public void sendTelemetry(List<Message> messages, int timeoutMilliseconds) throws InterruptedException, TimeoutException
+    {
+        final CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<IotHubStatusCode> statusCodeReference = new AtomicReference<>();
+        IotHubEventCallback eventCallback = (responseStatus, callbackContext) ->
+        {
+            statusCodeReference.set(responseStatus);
+            latch.countDown();
+        };
+
+        this.sendTelemetryAsync(messages, eventCallback, null);
+
+        if (timeoutMilliseconds == 0)
+        {
+            latch.await();
+        }
+        else
+        {
+            boolean timedOut = !latch.await(timeoutMilliseconds, TimeUnit.MILLISECONDS);
+
+            if (timedOut)
+            {
+                throw new TimeoutException("Timed out waiting for service to acknowledge telemetry");
+            }
+        }
+    }
 
     /**
      * Start receiving desired property updates for this client. After subscribing to desired properties, this client can
@@ -298,44 +363,6 @@ public class InternalClient
     }
 
     /**
-     * Start receiving desired property updates for this client asynchronously. After subscribing to desired properties, this client can
-     * freely send reported property updates and make getTwin calls.
-     *
-     * @param subscribeToDesiredPropertiesCallback The callback to execute once the service has acknowledged the subscription request.
-     * @param subscribeToDesiredPropertiesCallbackContext The context that will be included in the callback of subscribeToDesiredPropertiesCallback. May be null.
-     * @param desiredPropertiesUpdateCallback The callback to execute each time a desired property update message is received
-     * from the service. This will contain one or many properties updated at once.
-     * @param desiredPropertiesUpdateCallbackContext The context that will be included in each callback of desiredPropertiesUpdateCallback. May be null.
-     * @throws IllegalStateException if this client is not open.
-     */
-    public void subscribeToDesiredPropertiesAsync(
-        SubscribeToDesiredPropertiesCallback subscribeToDesiredPropertiesCallback,
-        Object subscribeToDesiredPropertiesCallbackContext,
-        DesiredPropertiesUpdateCallback desiredPropertiesUpdateCallback,
-        Object desiredPropertiesUpdateCallbackContext)
-            throws IllegalStateException
-    {
-        verifyRegisteredIfMultiplexing();
-        verifyTwinOperationsAreSupported();
-
-        if (!this.deviceIO.isOpen())
-        {
-            throw new IllegalStateException("Open the client connection before using it");
-        }
-
-        if (this.twin == null)
-        {
-            this.twin = new DeviceTwin(this);
-        }
-
-        this.twin.subscribeToDesiredPropertiesAsync(
-            subscribeToDesiredPropertiesCallback,
-            subscribeToDesiredPropertiesCallbackContext,
-            desiredPropertiesUpdateCallback,
-            desiredPropertiesUpdateCallbackContext);
-    }
-
-    /**
      * Patch this client's twin with the provided reported properties.
      *
      * @param reportedProperties The reported property key/value pairs to add/update in the twin.
@@ -392,6 +419,144 @@ public class InternalClient
         }
 
         return statusCodeAtomicReference.get();
+    }
+
+    /**
+     * Get the twin for this client
+     *
+     * @return The twin for this client
+     * @throws TimeoutException if the service fails to acknowledge the getTwin request within the default timeout.
+     * @throws InterruptedException if the operation is interrupted while waiting on the getTwin request to be acknowledged by the service.
+     * @throws IllegalStateException if this client is not open or if this client has not subscribed to desired properties yet.
+     */
+    public Twin getTwin() throws InterruptedException, TimeoutException, IllegalStateException
+    {
+        return getTwin(DEFAULT_TIMEOUT_MILLISECONDS);
+    }
+
+    /**
+     * Get the twin for this client
+     *
+     * @param timeoutMilliseconds The maximum number of milliseconds this call will wait for the service to return the twin.
+     * If 0, then it will wait indefinitely.
+     * @return The twin for this client
+     * @throws TimeoutException if the service fails to acknowledge the getTwin request within the provided timeout.
+     * @throws InterruptedException if the operation is interrupted while waiting on the getTwin request to be acknowledged by the service.
+     * @throws IllegalStateException if this client is not open or if this client has not subscribed to desired properties yet.
+     */
+    public Twin getTwin(int timeoutMilliseconds) throws InterruptedException, TimeoutException, IllegalStateException
+    {
+        final CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<com.microsoft.azure.sdk.iot.device.twin.Twin> twinAtomicReference = new AtomicReference<>();
+        getTwinAsync(
+            (twin, callbackContext) ->
+            {
+                twinAtomicReference.set(twin);
+                latch.countDown();
+            },
+            null);
+
+        if (timeoutMilliseconds == 0)
+        {
+            latch.await();
+        }
+        else
+        {
+            boolean timedOut = !latch.await(timeoutMilliseconds, TimeUnit.MILLISECONDS);
+
+            if (timedOut)
+            {
+                throw new TimeoutException("Timed out waiting for service to respond to getTwin request");
+            }
+        }
+
+        return twinAtomicReference.get();
+    }
+
+    /**
+     * Asynchronously sends a message to IoT hub.
+     *
+     * @param message the message to be sent.
+     * @param callback the callback to be invoked when a response is received.
+     * Can be {@code null}.
+     * @param callbackContext a context to be passed to the callback. Can be
+     * {@code null} if no callback is provided.
+     *
+     * @throws IllegalArgumentException if the message provided is {@code null}.
+     * @throws IllegalStateException if the client has not been opened yet or is already closed.
+     */
+    public void sendTelemetryAsync(Message message, IotHubEventCallback callback, Object callbackContext)
+    {
+        verifyRegisteredIfMultiplexing();
+        message.setConnectionDeviceId(this.config.getDeviceId());
+        deviceIO.sendTelemetryAsync(message, callback, callbackContext, this.config.getDeviceId());
+    }
+
+    /**
+     * Asynchronously sends a batch of messages to the IoT hub
+     * HTTPS messages will be sent in a single batch and MQTT and AMQP messages will be sent individually.
+     * In case of HTTPS, This API call is an all-or-nothing single HTTPS message and the callback will be triggered only once.
+     * Maximum payload size for HTTPS is 255KB
+     *
+     * @param messages the list of message to be sent.
+     * @param callback the callback to be invoked when a response is received.
+     * Can be {@code null}.
+     * @param callbackContext a context to be passed to the callback. Can be
+     * {@code null} if no callback is provided.
+     *
+     * @throws IllegalArgumentException if the message provided is {@code null}.
+     * @throws IllegalStateException if the client has not been opened yet or is already closed.
+     */
+    public void sendTelemetryAsync(List<Message> messages, IotHubEventCallback callback, Object callbackContext)
+    {
+        verifyRegisteredIfMultiplexing();
+
+        for (Message message: messages)
+        {
+            message.setConnectionDeviceId(this.config.getDeviceId());
+        }
+
+        Message message = new BatchMessage(messages);
+
+        deviceIO.sendTelemetryAsync(message, callback, callbackContext, this.config.getDeviceId());
+    }
+
+    /**
+     * Start receiving desired property updates for this client asynchronously. After subscribing to desired properties, this client can
+     * freely send reported property updates and make getTwin calls.
+     *
+     * @param subscribeToDesiredPropertiesCallback The callback to execute once the service has acknowledged the subscription request.
+     * @param subscribeToDesiredPropertiesCallbackContext The context that will be included in the callback of subscribeToDesiredPropertiesCallback. May be null.
+     * @param desiredPropertiesUpdateCallback The callback to execute each time a desired property update message is received
+     * from the service. This will contain one or many properties updated at once.
+     * @param desiredPropertiesUpdateCallbackContext The context that will be included in each callback of desiredPropertiesUpdateCallback. May be null.
+     * @throws IllegalStateException if this client is not open.
+     */
+    public void subscribeToDesiredPropertiesAsync(
+        SubscribeToDesiredPropertiesCallback subscribeToDesiredPropertiesCallback,
+        Object subscribeToDesiredPropertiesCallbackContext,
+        DesiredPropertiesUpdateCallback desiredPropertiesUpdateCallback,
+        Object desiredPropertiesUpdateCallbackContext)
+            throws IllegalStateException
+    {
+        verifyRegisteredIfMultiplexing();
+        verifyTwinOperationsAreSupported();
+
+        if (!this.deviceIO.isOpen())
+        {
+            throw new IllegalStateException("Open the client connection before using it");
+        }
+
+        if (this.twin == null)
+        {
+            this.twin = new DeviceTwin(this);
+        }
+
+        this.twin.subscribeToDesiredPropertiesAsync(
+            subscribeToDesiredPropertiesCallback,
+            subscribeToDesiredPropertiesCallbackContext,
+            desiredPropertiesUpdateCallback,
+            desiredPropertiesUpdateCallbackContext);
     }
 
     /**
@@ -472,58 +637,6 @@ public class InternalClient
         }
 
         this.twin.updateReportedPropertiesAsync(reportedProperties, updateReportedPropertiesCorrelatingMessageCallback, callbackContext);
-    }
-
-    /**
-     * Get the twin for this client
-     * 
-     * @return The twin for this client
-     * @throws TimeoutException if the service fails to acknowledge the getTwin request within the default timeout.
-     * @throws InterruptedException if the operation is interrupted while waiting on the getTwin request to be acknowledged by the service.
-     * @throws IllegalStateException if this client is not open or if this client has not subscribed to desired properties yet.
-     */
-    public Twin getTwin() throws InterruptedException, TimeoutException, IllegalStateException
-    {
-        return getTwin(DEFAULT_TIMEOUT_MILLISECONDS);
-    }
-
-    /**
-     * Get the twin for this client
-     *
-     * @param timeoutMilliseconds The maximum number of milliseconds this call will wait for the service to return the twin.
-     * If 0, then it will wait indefinitely.
-     * @return The twin for this client
-     * @throws TimeoutException if the service fails to acknowledge the getTwin request within the provided timeout.
-     * @throws InterruptedException if the operation is interrupted while waiting on the getTwin request to be acknowledged by the service.
-     * @throws IllegalStateException if this client is not open or if this client has not subscribed to desired properties yet.
-     */
-    public Twin getTwin(int timeoutMilliseconds) throws InterruptedException, TimeoutException, IllegalStateException
-    {
-        final CountDownLatch latch = new CountDownLatch(1);
-        AtomicReference<com.microsoft.azure.sdk.iot.device.twin.Twin> twinAtomicReference = new AtomicReference<>();
-        getTwinAsync(
-            (twin, callbackContext) ->
-            {
-                twinAtomicReference.set(twin);
-                latch.countDown();
-            },
-            null);
-
-        if (timeoutMilliseconds == 0)
-        {
-            latch.await();
-        }
-        else
-        {
-            boolean timedOut = !latch.await(timeoutMilliseconds, TimeUnit.MILLISECONDS);
-
-            if (timedOut)
-            {
-                throw new TimeoutException("Timed out waiting for service to respond to getTwin request");
-            }
-        }
-
-        return twinAtomicReference.get();
     }
 
     /**

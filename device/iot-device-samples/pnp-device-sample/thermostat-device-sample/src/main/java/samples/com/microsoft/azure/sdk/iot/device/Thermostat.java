@@ -442,7 +442,7 @@ public class Thermostat {
         message.setContentEncoding(StandardCharsets.UTF_8.name());
         message.setContentType("application/json");
 
-        deviceClient.sendEventAsync(message, new MessageIotHubEventCallback(), message);
+        deviceClient.sendTelemetryAsync(message, new MessageIotHubEventCallback(), message);
         log.debug("Telemetry: Sent - {\"{}\": {}°C} with message Id {}.", telemetryName, temperature, message.getMessageId());
         temperatureReadings.put(new Date(), temperature);
     }

@@ -191,7 +191,7 @@ public class IotHubServicesCommon
             {
                 Success messageSent = new Success();
                 EventCallback callback = new EventCallback(IotHubStatusCode.OK);
-                client.sendEventAsync(msg, callback, messageSent);
+                client.sendTelemetryAsync(msg, callback, messageSent);
 
                 long startTime = System.currentTimeMillis();
                 while (!messageSent.wasCallbackFired())
@@ -228,7 +228,7 @@ public class IotHubServicesCommon
             Success messageSentExpiredCallback = new Success();
 
             client.open(false);
-            client.sendEventAsync(expiredMessage, new EventCallback(IotHubStatusCode.MESSAGE_EXPIRED), messageSentExpiredCallback);
+            client.sendTelemetryAsync(expiredMessage, new EventCallback(IotHubStatusCode.MESSAGE_EXPIRED), messageSentExpiredCallback);
 
             long startTime = System.currentTimeMillis();
             while (!messageSentExpiredCallback.wasCallbackFired())
@@ -264,7 +264,7 @@ public class IotHubServicesCommon
 
         client.open(false);
 
-        client.sendEventAsync(errorInjectionMessage, new EventCallback(null), new Success());
+        client.sendTelemetryAsync(errorInjectionMessage, new EventCallback(null), new Success());
 
         long startTime = System.currentTimeMillis();
         while (!(actualStatusUpdatesContainsStatus(statusUpdates, IotHubConnectionStatus.DISCONNECTED_RETRYING) && actualStatusUpdatesContainsStatus(statusUpdates, IotHubConnectionStatus.DISCONNECTED)))
@@ -306,7 +306,7 @@ public class IotHubServicesCommon
         {
             Success messageSent = new Success();
             EventCallback callback = new EventCallback(messageAndResult.statusCode);
-            client.sendEventAsync(messageAndResult.message, callback, messageSent);
+            client.sendTelemetryAsync(messageAndResult.message, callback, messageSent);
 
             long startTime = System.currentTimeMillis();
             while (!messageSent.wasCallbackFired())
@@ -336,7 +336,7 @@ public class IotHubServicesCommon
         {
             Success messageSent = new Success();
             EventCallback callback = new EventCallback(messagesAndResults.statusCode);
-            client.sendEventBatchAsync(messagesAndResults.messages, callback, messageSent);
+            client.sendTelemetryAsync(messagesAndResults.messages, callback, messageSent);
 
             long startTime = System.currentTimeMillis();
             while (!messageSent.wasCallbackFired())
@@ -366,7 +366,7 @@ public class IotHubServicesCommon
         {
             Success messageSent = new Success();
             EventCallback callback = new EventCallback(messageAndResult.statusCode);
-            client.sendEventAsync(messageAndResult.message, callback, messageSent);
+            client.sendTelemetryAsync(messageAndResult.message, callback, messageSent);
 
             boolean messageFound = true;
             long startTime = System.currentTimeMillis();

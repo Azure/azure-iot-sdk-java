@@ -9,10 +9,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubMessageResult.ABANDON;
 import static com.microsoft.azure.sdk.iot.device.IotHubMessageResult.COMPLETE;
@@ -116,7 +113,7 @@ public class DeviceTwin implements MessageCallback
             // no action needed here. The correlating message callback will handle the various message state callbacks including this one
         };
 
-        this.client.sendEventAsync(getTwinRequestMessage, onMessageAcknowledgedCallback,null);
+        this.client.sendTelemetryAsync(getTwinRequestMessage, onMessageAcknowledgedCallback,null);
     }
 
     public void updateReportedPropertiesAsync(
@@ -216,7 +213,7 @@ public class DeviceTwin implements MessageCallback
 
         updateReportedPropertiesRequest.setCorrelatingMessageCallbackContext(callbackContext);
 
-        this.client.sendEventAsync(updateReportedPropertiesRequest, iotHubEventCallback, callbackContext);
+        this.client.sendTelemetryAsync(updateReportedPropertiesRequest, iotHubEventCallback, callbackContext);
     }
 
     public void subscribeToDesiredPropertiesAsync(
@@ -239,6 +236,6 @@ public class DeviceTwin implements MessageCallback
             }
         };
 
-        this.client.sendEventAsync(desiredPropertiesNotificationRequest, eventCallback, subscribeToDesiredPropertiesCallbackContext);
+        this.client.sendTelemetryAsync(desiredPropertiesNotificationRequest, eventCallback, subscribeToDesiredPropertiesCallbackContext);
     }
 }

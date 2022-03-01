@@ -169,7 +169,7 @@ public class SendEventX509
                 System.out.println(msgStr);
 
                 EventCallback callback = new EventCallback();
-                client.sendEventAsync(msg, callback, msg);
+                client.sendTelemetryAsync(msg, callback, msg);
             }
             catch (Exception e)
             {

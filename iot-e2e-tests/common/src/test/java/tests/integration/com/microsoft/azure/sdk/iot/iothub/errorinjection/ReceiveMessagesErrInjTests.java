@@ -233,7 +233,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
                 expectedStatusCode = null;
             }
 
-            testInstance.identity.getClient().sendEventAsync(errorInjectionMessage, new EventCallback(expectedStatusCode), null);
+            testInstance.identity.getClient().sendTelemetryAsync(errorInjectionMessage, new EventCallback(expectedStatusCode), null);
 
             //wait to send the message because we want to ensure that the tcp connection drop happens beforehand and we
             // want the connection to be re-established before sending anything from service client

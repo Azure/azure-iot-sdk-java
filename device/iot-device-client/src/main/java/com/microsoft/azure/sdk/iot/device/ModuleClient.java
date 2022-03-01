@@ -363,14 +363,14 @@ public class ModuleClient extends InternalClient
         }
 
         message.setOutputName(outputName);
-        this.sendEventAsync(message, callback, callbackContext);
+        this.sendTelemetryAsync(message, callback, callbackContext);
     }
 
     @Override
-    public void sendEventAsync(Message message, IotHubEventCallback callback, Object callbackContext) throws IllegalArgumentException
+    public void sendTelemetryAsync(Message message, IotHubEventCallback callback, Object callbackContext) throws IllegalArgumentException
     {
         message.setConnectionModuleId(this.config.getModuleId());
-        super.sendEventAsync(message, callback, callbackContext);
+        super.sendTelemetryAsync(message, callback, callbackContext);
     }
 
     /**

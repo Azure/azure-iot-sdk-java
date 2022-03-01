@@ -146,7 +146,7 @@ public class MultiplexingSample
         {
             System.out.printf("Sending message from device %s%n", deviceId);
             Message message = new Message("some payload");
-            multiplexedDeviceClients.get(deviceId).sendEventAsync(message, new TelemetryAcknowledgedEventCallback(), message.getMessageId());
+            multiplexedDeviceClients.get(deviceId).sendTelemetryAsync(message, new TelemetryAcknowledgedEventCallback(), message.getMessageId());
         }
 
         System.out.println("Waiting while messages get sent asynchronously...");

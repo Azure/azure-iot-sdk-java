@@ -78,7 +78,7 @@ public class SendMessagesTests extends SendMessagesCommon
             {
                 try
                 {
-                    testInstance.identity.getClient().sendEventAsync(
+                    testInstance.identity.getClient().sendTelemetryAsync(
                         new Message("test message"),
                         (responseStatus, callbackContext1) ->
                         {

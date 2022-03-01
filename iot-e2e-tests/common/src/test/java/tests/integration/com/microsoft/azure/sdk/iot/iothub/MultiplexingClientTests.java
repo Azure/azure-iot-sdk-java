@@ -10,12 +10,9 @@ import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
-import com.microsoft.azure.sdk.iot.device.twin.Pair;
-import com.microsoft.azure.sdk.iot.device.twin.Property;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
-import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
@@ -35,10 +32,6 @@ import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
-import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClientOptions;
-import com.microsoft.azure.sdk.iot.service.twin.Twin;
-import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
-import com.microsoft.azure.sdk.iot.service.twin.TwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
@@ -68,11 +61,8 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -522,7 +512,7 @@ public class MultiplexingClientTests extends IntegrationTest
     {
         Success messageSendSuccess = new Success();
         EventCallback messageSentCallback = new EventCallback(IotHubStatusCode.OK);
-        multiplexedClient.sendEventAsync(message, messageSentCallback, messageSendSuccess);
+        multiplexedClient.sendTelemetryAsync(message, messageSentCallback, messageSendSuccess);
         return messageSendSuccess;
     }
 
@@ -1043,7 +1033,7 @@ public class MultiplexingClientTests extends IntegrationTest
         boolean exceptionThrown;
         try
         {
-            testInstance.deviceClientArray.get(0).sendEventAsync(new Message("This message shouldn't be sent"), new EventCallback(IotHubStatusCode.OK), null);
+            testInstance.deviceClientArray.get(0).sendTelemetryAsync(new Message("This message shouldn't be sent"), new EventCallback(IotHubStatusCode.OK), null);
             exceptionThrown = false;
         }
         catch (UnsupportedOperationException e)
