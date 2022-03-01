@@ -83,7 +83,7 @@ public class DeviceClientManagerSample {
 
         // close the connection
         log.info("Closing");
-        deviceClientManager.closeNow();
+        deviceClientManager.close();
 
         if (! failedMessageListOnClose.isEmpty()) {
             log.error("List of messages that were cancelled on close:");
@@ -99,7 +99,7 @@ public class DeviceClientManagerSample {
             Message msg = composeMessage(i);
             SampleMessageSendCallback callback = new SampleMessageSendCallback();
             try {
-                deviceClientManager.sendEventAsync(msg, callback, msg);
+                deviceClientManager.sendTelemetryAsync(msg, callback, msg);
             } catch (Exception e) {
                 failedMessageListOnClose.add(msg.getMessageId());
                 log.error("Exception thrown while sending telemetry: ", e);

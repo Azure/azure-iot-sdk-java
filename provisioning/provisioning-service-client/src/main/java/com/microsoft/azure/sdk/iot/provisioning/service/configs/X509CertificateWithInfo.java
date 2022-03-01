@@ -5,7 +5,7 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
+import lombok.Getter;
 
 import java.io.Serializable;
 
@@ -67,12 +67,14 @@ public class X509CertificateWithInfo implements Serializable
     private static final String CERTIFICATE_TAG = "certificate";
     @Expose
     @SerializedName(CERTIFICATE_TAG)
+    @Getter
     private String certificate;
 
     // the X509 certificate info
     private static final String CERTIFICATE_INFO_TAG = "info";
     @Expose
     @SerializedName(CERTIFICATE_INFO_TAG)
+    @Getter
     private X509CertificateInfo info;
 
     /**
@@ -106,7 +108,7 @@ public class X509CertificateWithInfo implements Serializable
     X509CertificateWithInfo(String certificate)
     {
         /* SRS_X509_CERTIFICATE_WITH_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided certificate is null or empty.] */
-        if(Tools.isNullOrEmpty(certificate))
+        if (certificate == null || certificate.isEmpty())
         {
             throw new IllegalArgumentException("certificate cannot be null or empty.");
         }
@@ -126,7 +128,7 @@ public class X509CertificateWithInfo implements Serializable
     public X509CertificateWithInfo(X509CertificateWithInfo x509CertificateWithInfo)
     {
         /* SRS_X509_CERTIFICATE_WITH_INFO_21_003: [The constructor shall throw IllegalArgumentException if the provided x509CertificateWithInfo is null.] */
-        if(x509CertificateWithInfo == null)
+        if (x509CertificateWithInfo == null)
         {
             throw new IllegalArgumentException("x509CertificateWithInfo cannot be null");
         }
@@ -134,32 +136,10 @@ public class X509CertificateWithInfo implements Serializable
         this.certificate = x509CertificateWithInfo.certificate;
 
         /* SRS_X509_CERTIFICATE_WITH_INFO_21_005: [If the provide x509CertificateWithInfo contains `info`, the constructor shall create a new instance of the X509CertificateInfo with the provided `info`.] */
-        if(x509CertificateWithInfo.info != null)
+        if (x509CertificateWithInfo.info != null)
         {
             this.info = new X509CertificateInfo(x509CertificateWithInfo.info);
         }
-    }
-
-    /**
-     * Getter for the certificate.
-     *
-     * @return the {@code String} with the stored certificate. It can be {@code null}.
-     */
-    public String getCertificate()
-    {
-        /* SRS_X509_CERTIFICATE_WITH_INFO_21_006: [The getCertificate shall return the stored certificate.] */
-        return this.certificate;
-    }
-
-    /**
-     * Getter for the info.
-     *
-     * @return the {@code String} with the stored info. It can be {@code null}.
-     */
-    public X509CertificateInfo getInfo()
-    {
-        /* SRS_X509_CERTIFICATE_WITH_INFO_21_007: [The getInfo shall return the stored info.] */
-        return this.info;
     }
 
     /**

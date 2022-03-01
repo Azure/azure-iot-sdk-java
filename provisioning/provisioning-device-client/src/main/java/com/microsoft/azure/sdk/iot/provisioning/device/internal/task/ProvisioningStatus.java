@@ -7,7 +7,7 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.task;
 
-public enum ProvisioningStatus
+enum ProvisioningStatus
 {
     UNASSIGNED("unassigned"),
     ASSIGNING("assigning"),

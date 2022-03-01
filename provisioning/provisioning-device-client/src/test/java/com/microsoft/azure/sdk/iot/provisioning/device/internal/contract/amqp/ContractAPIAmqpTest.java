@@ -7,14 +7,11 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp;
 
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpDeviceOperations;
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.SaslHandler;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.amqp.AmqpDeviceOperations;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.amqp.SaslHandler;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp.AmqpsProvisioningSymmetricKeySaslHandler;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp.ProvisioningAmqpOperations;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp.ContractAPIAmqp;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceConnectionException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.DeviceRegistrationParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;

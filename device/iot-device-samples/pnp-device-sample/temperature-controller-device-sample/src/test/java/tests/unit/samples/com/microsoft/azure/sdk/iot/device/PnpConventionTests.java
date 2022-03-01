@@ -4,8 +4,9 @@
 package tests.unit.samples.com.microsoft.azure.sdk.iot.device;
 
 import com.google.gson.Gson;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
+import com.microsoft.azure.sdk.iot.device.twin.Property;
 import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
 import org.junit.Test;
 import samples.com.microsoft.azure.sdk.iot.device.PnpConvention;
 import samples.com.microsoft.azure.sdk.iot.device.WritablePropertyResponse;
@@ -52,7 +53,7 @@ public class PnpConventionTests
         String actualString = gson.toJson(testProperty);
 
         // act
-        Set<Property> propertyPatch = PnpConvention.createPropertyPatch(propertyName, propertyValue);
+        TwinCollection propertyPatch = PnpConvention.createPropertyPatch(propertyName, propertyValue);
         String patchString= gson.toJson(propertyPatch);
 
         // assert
@@ -76,7 +77,7 @@ public class PnpConventionTests
         String actualProperty = gson.toJson(testProperty);
 
         // act
-        Set<Property> propertyPatch = PnpConvention.createComponentPropertyPatch(propertyName, propertyValue, componentName);
+        TwinCollection propertyPatch = PnpConvention.createComponentPropertyPatch(propertyName, propertyValue, componentName);
         String patchString= gson.toJson(propertyPatch);
 
         // assert
@@ -138,7 +139,7 @@ public class PnpConventionTests
         String actualProperty = gson.toJson(property);
 
         // act
-        Set<Property> writablePropertyResponse = PnpConvention.createComponentWritablePropertyResponse(propertyName, propertyValue, componentName, ackCode, ackVersion, ackDescription);
+        TwinCollection writablePropertyResponse = PnpConvention.createComponentWritablePropertyResponse(propertyName, propertyValue, componentName, ackCode, ackVersion, ackDescription);
         String writablePropertyString = gson.toJson(writablePropertyResponse);
 
         // assert

@@ -5,8 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
-
 /**
  * Create iot hub Message too large exception
  */
@@ -26,4 +24,6 @@ public class IotHubMessageTooLargeException extends IotHubException
     {
         super(message, errorCode, errorCodeDescription);
     }
+
+    public static final String amqpErrorCode = "amqp:link:message-size-exceeded";
 }

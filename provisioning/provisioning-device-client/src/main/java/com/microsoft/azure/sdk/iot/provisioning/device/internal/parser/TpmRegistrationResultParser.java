@@ -11,6 +11,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
 
 /**
  *  Class for the representation of TpmRegistration
@@ -21,21 +22,12 @@ public class TpmRegistrationResultParser
 {
     private static final String AUTHENTICATION_KEY = "authenticationKey";
     @SerializedName(AUTHENTICATION_KEY)
+    @Getter
     private String authenticationKey;
 
     //empty constructor for Gson
     TpmRegistrationResultParser()
     {
-    }
-
-    /**
-     * Getter for the Authentication Key
-     * @return Getter for the Authentication Key
-     */
-    public String getAuthenticationKey()
-    {
-        //SRS_TpmRegistrationResultParser_25_001: [ This method returns the authentication key. ]
-        return authenticationKey;
     }
 
     /**
@@ -46,7 +38,7 @@ public class TpmRegistrationResultParser
      */
     static public TpmRegistrationResultParser createFromJson(String json) throws IllegalArgumentException
     {
-        if((json == null) || json.isEmpty())
+        if ((json == null) || json.isEmpty())
         {
             //SRS_TpmRegistrationResultParser_25_002: [ The constructor shall throw IllegalArgumentException if the provided Json is null or empty. ]
             throw new IllegalArgumentException("JSON is null or empty");

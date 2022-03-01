@@ -7,7 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.errorinjection;
 
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
+import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -24,6 +24,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.ReceiveMessage
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.*;
@@ -192,10 +193,10 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         this.errorInjectionTestFlow(ErrorInjectionHelper.mqttGracefulShutdownErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    public void errorInjectionTestFlow(com.microsoft.azure.sdk.iot.device.Message errorInjectionMessage) throws IOException, IotHubException, InterruptedException
+    public void errorInjectionTestFlow(com.microsoft.azure.sdk.iot.device.Message errorInjectionMessage) throws IOException, IotHubException, InterruptedException, TimeoutException
     {
         List<Pair<IotHubConnectionStatus, Throwable>> connectionStatusUpdates = new ArrayList<>();
-        testInstance.identity.getClient().registerConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> connectionStatusUpdates.add(new Pair<>(status, throwable)), null);
+        testInstance.identity.getClient().setConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> connectionStatusUpdates.add(new Pair<>(status, throwable)), null);
 
         com.microsoft.azure.sdk.iot.device.MessageCallback callback = new MessageCallback();
 
@@ -216,9 +217,9 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
 
         try
         {
-            testInstance.identity.getClient().open();
+            testInstance.identity.getClient().open(false);
 
-            IotHubStatusCode expectedStatusCode = IotHubStatusCode.OK_EMPTY;
+            IotHubStatusCode expectedStatusCode = IotHubStatusCode.OK;
 
             if (testInstance.protocol == MQTT || testInstance.protocol == MQTT_WS)
             {
@@ -232,11 +233,11 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
                 expectedStatusCode = null;
             }
 
-            testInstance.identity.getClient().sendEventAsync(errorInjectionMessage, new EventCallback(expectedStatusCode), null);
+            testInstance.identity.getClient().sendTelemetryAsync(errorInjectionMessage, new EventCallback(expectedStatusCode), null);
 
             //wait to send the message because we want to ensure that the tcp connection drop happens beforehand and we
             // want the connection to be re-established before sending anything from service client
-            IotHubServicesCommon.waitForStabilizedConnection(connectionStatusUpdates, ERROR_INJECTION_RECOVERY_TIMEOUT_MILLISECONDS, testInstance.identity.getClient());
+            IotHubServicesCommon.waitForStabilizedConnection(connectionStatusUpdates, testInstance.identity.getClient());
 
             if (testInstance.identity.getClient() instanceof DeviceClient)
             {
@@ -253,7 +254,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         }
         finally
         {
-            testInstance.identity.getClient().closeNow();
+            testInstance.identity.getClient().close();
         }
 
         assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Error Injection message did not cause service to drop TCP connection", testInstance.identity.getClient()), IotHubServicesCommon.actualStatusUpdatesContainsStatus(connectionStatusUpdates, IotHubConnectionStatus.DISCONNECTED_RETRYING));

@@ -36,7 +36,7 @@ public class ServiceBulkOperationSample
 
         // *********************************** Create a Provisioning Service Client ************************************
         ProvisioningServiceClient provisioningServiceClient =
-                ProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+                new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
 
         // ******************************** Create a new bulk of individual enrollment *********************************
         System.out.println("\nCreate a new set of individualEnrollments...");

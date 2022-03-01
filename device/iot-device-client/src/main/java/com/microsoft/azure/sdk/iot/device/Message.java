@@ -73,9 +73,6 @@ public class Message
      */
     private IotHubConnectionString iotHubConnectionString;
 
-    /**
-     * [Optional] Used to correlate the message across the send/receive lifecycle
-     */
     private CorrelatingMessageCallback correlatingMessageCallback;
 
     /**
@@ -111,7 +108,7 @@ public class Message
     /**
      * Security Client flag
      */
-    boolean isSecurityClient;
+    private boolean isSecurityClient;
 
     /**
      * The DTDL component name from where the telemetry message has originated. This field is only relevant
@@ -137,7 +134,7 @@ public class Message
      * Constructor.
      * @param stream A stream to provide the body of the new Message instance.
      */
-    public Message(ByteArrayInputStream stream)
+    private Message(ByteArrayInputStream stream)
     {
         initialize();
     }
@@ -148,7 +145,6 @@ public class Message
      */
     public Message(byte[] body)
     {
-        // Codes_SRS_MESSAGE_11_025: [If the message body is null, the constructor shall throw an IllegalArgumentException.]
         if (body == null)
         {
             throw new IllegalArgumentException("Message body cannot be 'null'.");
@@ -156,7 +152,6 @@ public class Message
 
         initialize();
 
-        // Codes_SRS_MESSAGE_11_024: [The constructor shall save the message body.]
         this.body = body;
     }
 
@@ -174,7 +169,7 @@ public class Message
         initialize();
 
         this.body = body.getBytes(DEFAULT_IOTHUB_MESSAGE_CHARSET);
-        this.setContentTypeFinal(DEFAULT_IOTHUB_MESSAGE_CHARSET.name());
+        this.setContentType(DEFAULT_IOTHUB_MESSAGE_CHARSET.name());
     }
 
     
@@ -196,7 +191,6 @@ public class Message
      */
     public byte[] getBytes()
     {
-        // Codes_SRS_MESSAGE_11_002: [The function shall return the message body.]
         byte[] bodyClone = null;
 
         if (this.body != null) {
@@ -224,12 +218,11 @@ public class Message
             }
         }
 
-        // Codes_SRS_MESSAGE_11_034: [If no value associated with the property name is found, the function shall return null.]
-        if (messageProperty == null) {
+        if (messageProperty == null)
+        {
             return null;
         }
 
-        // Codes_SRS_MESSAGE_11_032: [The function shall return the value associated with the message property name, where the name can be either the HTTPS or AMQPS property name.]
         return messageProperty.getValue();
     }
 
@@ -241,19 +234,16 @@ public class Message
      */
     public void setProperty(String name, String value)
     {
-        // Codes_SRS_MESSAGE_11_028: [If name is null, the function shall throw an IllegalArgumentException.]
         if (name == null)
         {
             throw new IllegalArgumentException("Property name cannot be 'null'.");
         }
 
-        // Codes_SRS_MESSAGE_11_029: [If value is null, the function shall throw an IllegalArgumentException.]
         if (value == null)
         {
             throw new IllegalArgumentException("Property value cannot be 'null'.");
         }
 
-        // Codes_SRS_MESSAGE_11_026: [The function shall set the message property to the given value.]
         MessageProperty messageProperty = null;
 
         for (MessageProperty currentMessageProperty: this.properties)
@@ -280,7 +270,6 @@ public class Message
      */
     public MessageProperty[] getProperties()
     {
-        // Codes_SRS_MESSAGE_11_033: [The function shall return a copy of the message properties.]
         return properties.toArray(new MessageProperty[this.properties.size()]);
     }
 
@@ -305,14 +294,12 @@ public class Message
     {
         boolean messageExpired;
 
-        // Codes_SRS_MESSAGE_15_035: [The function shall return false if the expiryTime is set to 0.]
         if (this.expiryTime == 0)
         {
             messageExpired = false;
         }
         else
         {
-            // Codes_SRS_MESSAGE_15_036: [The function shall return true if the current time is greater than the expiry time and false otherwise.]
             long currentTime = System.currentTimeMillis();
             if (currentTime > expiryTime)
             {
@@ -334,7 +321,6 @@ public class Message
      */
     public String getMessageId()
     {
-        // Codes_SRS_MESSAGE_34_043: [The function shall return the message's message Id.]
         return messageId;
     }
 
@@ -344,13 +330,11 @@ public class Message
      */
     public void setMessageId(String messageId)
     {
-        // Codes_SRS_MESSAGE_34_044: [The function shall set the message's message ID to the provided value.]
         this.messageId = messageId;
     }
 
     public void setUserId(String userId)
     {
-        // Codes_SRS_MESSAGE_34_050: [The function shall set the message's user ID to the provided value.]
         this.userId = userId;
     }
 
@@ -360,7 +344,6 @@ public class Message
      */
     public String getCorrelationId()
     {
-        // Codes_SRS_MESSAGE_34_045: [The function shall return the message's correlation ID.]
         if (correlationId == null)
         {
             return "";
@@ -375,7 +358,6 @@ public class Message
      */
     public void setCorrelationId(String correlationId)
     {
-        // Codes_SRS_MESSAGE_34_046: [The function shall set the message's correlation ID to the provided value.]
         this.correlationId = correlationId;
     }
 
@@ -385,7 +367,6 @@ public class Message
      */
     public void setExpiryTime(long timeOut)
     {
-        // Codes_SRS_MESSAGE_34_047: [The function shall set the message's expiry time.]
         long currentTime = System.currentTimeMillis();
         this.expiryTime = currentTime + timeOut;
         log.trace("The message with messageid {} has expiry time in {} milliseconds and the message will expire on {}", this.getMessageId(), timeOut, new Date(this.expiryTime));
@@ -397,13 +378,11 @@ public class Message
      */
     public void setAbsoluteExpiryTime(long absoluteTimeout)
     {
-        // Codes_SRS_MESSAGE_34_038: [If the provided absolute expiry time is negative, an IllegalArgumentException shall be thrown.]
         if (absoluteTimeout < 0)
         {
             throw new IllegalArgumentException("ExpiryTime may not be negative");
         }
 
-        // Codes_SRS_MESSAGE_34_037: [The function shall set the message's expiry time to be the number of milliseconds since the epoch provided in absoluteTimeout.]
         this.expiryTime = absoluteTimeout;
     }
 
@@ -413,19 +392,16 @@ public class Message
      */
     public MessageType getMessageType()
     {
-        // Codes_SRS_MESSAGE_34_049: [The function shall return the message's message type.]
         return this.messageType;
     }
 
     public void setConnectionDeviceId(String connectionDeviceId)
     {
-        // Codes_SRS_MESSAGE_34_051: [The function shall set the message's connection device id to the provided value.]
         this.connectionDeviceId = connectionDeviceId;
     }
 
     public void setConnectionModuleId(String connectionModuleId)
     {
-        // Codes_SRS_MESSAGE_34_052: [The function shall set the message's connection module id to the provided value.]
         this.connectionModuleId = connectionModuleId;
     }
 
@@ -435,7 +411,6 @@ public class Message
      */
     public void setOutputName(String outputName)
     {
-        // Codes_SRS_MESSAGE_34_053: [The function shall set the message's output name to the provided value.]
         this.outputName = outputName;
     }
 
@@ -445,7 +420,6 @@ public class Message
      */
     public void setInputName(String inputName)
     {
-        // Codes_SRS_MESSAGE_34_058: [The function shall set the message's input name to the provided value.]
         this.inputName = inputName;
     }
 
@@ -455,7 +429,6 @@ public class Message
      */
     public void setMessageType(MessageType type)
     {
-        // Codes_SRS_MESSAGE_34_048: [The function shall set the message's message type.]
         this.messageType = type;
     }
 
@@ -465,31 +438,26 @@ public class Message
      */
     public String getTo()
     {
-        // Codes_SRS_MESSAGE_34_041: [The function shall return the message's To value.]
         return this.to;
     }
 
     public String getConnectionDeviceId()
     {
-        // Codes_SRS_MESSAGE_34_054: [The function shall return the message's connection device id value.]
         return connectionDeviceId;
     }
 
     public String getConnectionModuleId()
     {
-        // Codes_SRS_MESSAGE_34_055: [The function shall return the message's connection module id value.]
         return connectionModuleId;
     }
 
     public String getInputName()
     {
-        // Codes_SRS_MESSAGE_34_056: [The function shall return the message's input name value.]
         return inputName;
     }
 
     public String getOutputName()
     {
-        // Codes_SRS_MESSAGE_34_057: [The function shall return the message's output name value.]
         return outputName;
     }
 
@@ -499,7 +467,6 @@ public class Message
      */
     public String getDeliveryAcknowledgement()
     {
-        // Codes_SRS_MESSAGE_34_039: [The function shall return the message's DeliveryAcknowledgement.]
         return this.deliveryAcknowledgement;
     }
 
@@ -509,7 +476,6 @@ public class Message
      */
     public String getUserId ()
     {
-        // Codes_SRS_MESSAGE_34_037: [The function shall return the message's user ID.]
         return this.userId;
     }
 
@@ -519,7 +485,6 @@ public class Message
      */
     public IotHubConnectionString getIotHubConnectionString()
     {
-        // Codes_SRS_MESSAGE_12_001: [The function shall return the message's iotHubConnectionString object.]
         return iotHubConnectionString;
     }
 
@@ -529,7 +494,6 @@ public class Message
      */
     public void setIotHubConnectionString(IotHubConnectionString iotHubConnectionString)
     {
-        // Codes_SRS_MESSAGE_12_002: [The function shall set the message's iotHubConnectionString object to the provided value.]
         this.iotHubConnectionString = iotHubConnectionString;
     }
 
@@ -539,31 +503,16 @@ public class Message
      */
     public String getContentType()
     {
-        // Codes_SRS_MESSAGE_34_059: [The function shall return the message's content type.]
         return this.contentType;
     }
 
     /**
      * Set the content type of this message. Used in message routing.
      *
-     * @deprecated as of device-client version 1.14.1, please use {@link #setContentTypeFinal(String)}
-     *
-     *  @param contentType the content type of the message. May be null if you don't want to specify a content type.
-     */
-    @Deprecated
-    public void setContentType(String contentType)
-    {
-        // Codes_SRS_MESSAGE_34_060: [The function shall save the provided content type.]
-        this.contentType = contentType;
-    }
-
-    /**
-     * Set the content type of this message. Used in message routing.
      * @param contentType the content type of the message. May be null if you don't want to specify a content type.
      */
-    public final void setContentTypeFinal(String contentType)
+    public final void setContentType(String contentType)
     {
-        // Codes_SRS_MESSAGE_34_060: [The function shall save the provided content type.]
         this.contentType = contentType;
     }
 
@@ -573,7 +522,6 @@ public class Message
      */
     public String getContentEncoding()
     {
-        // Codes_SRS_MESSAGE_34_061: [The function shall return the message's content encoding.]
         return this.contentEncoding;
     }
 
@@ -583,13 +531,11 @@ public class Message
      */
     public void setContentEncoding(String contentEncoding)
     {
-        // Codes_SRS_MESSAGE_34_062: [The function shall save the provided content encoding.]
         this.contentEncoding = contentEncoding;
     }
 
     public Date getCreationTimeUTC()
     {
-        // Codes_SRS_MESSAGE_34_063: [The function shall return the saved creationTimeUTC.]
         return this.creationTimeUTC;
     }
 
@@ -609,7 +555,6 @@ public class Message
             return null;
         }
 
-        // Codes_SRS_MESSAGE_34_064: [The function shall return the saved creationTimeUTC as a string in the format "yyyy-MM-dd_HH:mm:ss.SSSSSSSZ".]
         SimpleDateFormat sdf = new SimpleDateFormat(DATE_TIME_FORMAT);
         sdf.setTimeZone(TimeZone.getTimeZone(UTC_TIMEZONE));
         return sdf.format(this.creationTimeUTC).replace("_", "T") + "Z";
@@ -617,7 +562,6 @@ public class Message
 
     public final void setCreationTimeUTC(Date creationTimeUTC)
     {
-        // Codes_SRS_MESSAGE_34_065: [The function shall save the provided creationTimeUTC.]
         this.creationTimeUTC = creationTimeUTC;
     }
 

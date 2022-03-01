@@ -5,14 +5,14 @@
 
 package com.microsoft.azure.sdk.iot.android.iothub.serviceclient;
 
-import com.microsoft.azure.sdk.iot.android.helper.TestGroup11;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup10;
 
 import org.junit.Ignore;
 
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient.JobClientTests;
 
 @Ignore
-@TestGroup11
+@TestGroup10
 public class JobClientAndroidRunner extends JobClientTests
 {
 }

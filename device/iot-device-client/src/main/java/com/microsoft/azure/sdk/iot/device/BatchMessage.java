@@ -3,7 +3,7 @@ package com.microsoft.azure.sdk.iot.device;
 import java.util.List;
 
 /**
- * Used to construct batch messages to be sent to the IoT Hub {@link com.microsoft.azure.sdk.iot.device.InternalClient#sendEventBatchAsync(List, IotHubEventCallback, Object)}
+ * Used to construct batch messages to be sent to the IoT Hub {@link com.microsoft.azure.sdk.iot.device.InternalClient#sendTelemetryAsync(List, IotHubEventCallback, Object)}
  */
 public class BatchMessage extends Message
 {

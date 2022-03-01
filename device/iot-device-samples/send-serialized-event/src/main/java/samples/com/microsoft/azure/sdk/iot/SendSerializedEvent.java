@@ -156,7 +156,7 @@ public class SendSerializedEvent
 
             System.out.println("Successfully created an IoT Hub client.");
 
-            client.open();
+            client.open(false);
 
             System.out.println("Opened connection to IoT Hub.");
 
@@ -178,12 +178,12 @@ public class SendSerializedEvent
 
                 CountDownLatch messageSentLatch = new CountDownLatch(1);
                 EventCallback callback = new EventCallback();
-                client.sendEventAsync(msg, callback, messageSentLatch);
+                client.sendTelemetryAsync(msg, callback, messageSentLatch);
 
                 messageSentLatch.await();
             }
 
-            client.closeNow();
+            client.close();
         }
         catch (Exception e)
         {

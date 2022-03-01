@@ -34,6 +34,12 @@
         </dependency>
 
         <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-web</artifactId>
+            <version>3.9.4</version>
+        </dependency>
+
+        <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-parser</artifactId>
             <version>1.0.56</version>
@@ -48,7 +54,6 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>1.7.25</version>
         </dependency>
 
         <dependency>
@@ -61,6 +66,12 @@
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>${iot-service-client-artifact-id}</artifactId>
             <version>${iot-service-client-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot.samples.device</groupId>
+            <artifactId>unix-domain-socket-sample</artifactId>
+            <version>1.18.0</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

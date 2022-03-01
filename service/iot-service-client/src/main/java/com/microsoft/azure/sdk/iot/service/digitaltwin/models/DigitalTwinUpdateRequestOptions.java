@@ -4,7 +4,7 @@
 package com.microsoft.azure.sdk.iot.service.digitaltwin.models;
 
 public final class DigitalTwinUpdateRequestOptions {
-    String ifMatch;
+    private String ifMatch;
 
     /**
      * Gets a string representing a weak ETag for the entity that this request performs an operation against, as per RFC7232.

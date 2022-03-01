@@ -6,12 +6,9 @@
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.security.GeneralSecurityException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 
@@ -59,13 +56,13 @@ public class DeviceTestManager
     {
         if (enableMethod)
         {
-            /* Enable DeviceMethod on the device client using the callbacks from the DeviceEmulator */
-            deviceEmulator.subscribeToDeviceMethod();
+            /* Enable DirectMethodsClient on the device client using the callbacks from the DeviceEmulator */
+            deviceEmulator.subscribeToDirectMethod();
         }
 
         if (enableTwin)
         {
-            /* Enable DeviceTwin on the device client using the callbacks from the DeviceEmulator */
+            /* Enable TwinClient on the device client using the callbacks from the DeviceEmulator */
             deviceEmulator.subscribeToDeviceTwin();
         }
     }
@@ -76,46 +73,6 @@ public class DeviceTestManager
         {
             deviceEmulator.tearDown();
         }
-    }
-
-    public void restartDevice(String connectionString, IotHubClientProtocol protocol, String publicCert, String privateKey) throws InterruptedException, IOException, URISyntaxException, ModuleClientException, GeneralSecurityException
-    {
-        deviceEmulator.tearDown();
-
-        if (this.client instanceof DeviceClient)
-        {
-            if (this.client.getConfig().getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
-            {
-                this.client = new DeviceClient(connectionString, protocol);
-            }
-            else
-            {
-                SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicCert, privateKey);
-                this.client = new DeviceClient(connectionString, protocol, sslContext);
-            }
-        }
-        else if (this.client instanceof ModuleClient)
-        {
-            if (this.client.getConfig().getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
-            {
-                this.client = new ModuleClient(connectionString, protocol);
-            }
-            else
-            {
-                this.client = new ModuleClient(connectionString, protocol, publicCert, false, privateKey, false);
-            }
-        }
-
-        /* Create a emulator for the device client, and connect it to the IoTHub */
-        deviceEmulator = new DeviceEmulator(this.client);
-
-        deviceEmulator.open();
-
-        /* Enable DeviceMethod on the device client using the callbacks from the DeviceEmulator */
-        deviceEmulator.subscribeToDeviceMethod();
-
-        /* Enable DeviceTwin on the device client using the callbacks from the DeviceEmulator */
-        deviceEmulator.subscribeToDeviceTwin();
     }
 
     public int getStatusOk()

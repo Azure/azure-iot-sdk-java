@@ -36,7 +36,6 @@ public class ErrorResponse
      */
     public String getMessage()
     {
-        // Codes_SRS_HTTPHSMERRORRESPONSE_34_001: [This function shall return the saved message.]
         return this.message;
     }
 }

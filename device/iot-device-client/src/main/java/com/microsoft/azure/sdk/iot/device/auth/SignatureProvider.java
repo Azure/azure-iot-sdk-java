@@ -9,7 +9,6 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.hsm.HsmException;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 /**
  * Interface for a valid signature provider
@@ -24,8 +23,7 @@ public interface SignatureProvider
      * @return the signed data
      * @throws IOException If the http client cannot reach the signing party
      * @throws TransportException If the http client cannot reach the signing party
-     * @throws URISyntaxException If the url for the signing party cannot be parsed
      * @throws HsmException if the hsm raises an exception
      */
-    String sign(String keyName, String data, String generationId) throws IOException, TransportException, URISyntaxException, HsmException;
+    String sign(String keyName, String data, String generationId) throws IOException, TransportException, HsmException;
 }

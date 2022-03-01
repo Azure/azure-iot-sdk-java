@@ -32,7 +32,7 @@ public class IotHubStatusCodeTest
         IotHubStatusCode testStatus =
                 IotHubStatusCode.getIotHubStatusCode(httpsStatus);
 
-        final IotHubStatusCode expectedStatus = IotHubStatusCode.OK_EMPTY;
+        final IotHubStatusCode expectedStatus = IotHubStatusCode.OK;
         assertThat(testStatus, is(expectedStatus));
     }
 

@@ -358,7 +358,7 @@ public class MessageTest
         msg.setOutputName(outputName);
         msg.setInputName(inputName);
         msg.setContentEncoding(contentEncoding);
-        msg.setContentTypeFinal(contentType);
+        msg.setContentType(contentType);
         msg.setCreationTimeUTC(date);
 
         //assert
@@ -377,31 +377,6 @@ public class MessageTest
 
         assertNull(msg.getTo());
         assertNull(msg.getDeliveryAcknowledgement());
-    }
-
-    //This test occasionally fails in linux environments with exception:
-    //java.lang.NoClassDefFoundError: Could not initialize class sun.util.calendar.ZoneInfoFile
-    //	at MessageTest.creationTimeUTCFormatWorks(MessageTest.java:389)
-    //
-    // This is due to an issue with the JDK used in that linux environment. Disabling this test until that issue is fixed
-    @Ignore
-    @Test
-    public void creationTimeUTCFormatWorks()
-    {
-        //arrange
-        final Date testTime = new Date();
-        final String DATE_TIME_FORMAT = Deencapsulation.getField(Message.class, "DATE_TIME_FORMAT");
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_TIME_FORMAT);
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        String expectedCreationTimeUtcString = sdf.format(testTime).replace("_", "T") + "Z";
-        Message message = new Message();
-        message.setCreationTimeUTC(testTime);
-
-        //act
-        String creationTimeUtcString = message.getCreationTimeUTCString();
-
-        //assert
-        assertEquals(expectedCreationTimeUtcString, creationTimeUtcString);
     }
 
     @Test

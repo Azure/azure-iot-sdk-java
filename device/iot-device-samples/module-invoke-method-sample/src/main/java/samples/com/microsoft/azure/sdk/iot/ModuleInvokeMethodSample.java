@@ -79,8 +79,8 @@ public class ModuleInvokeMethodSample
         String deviceIdToInvokeOn = args[3];
         String moduleIdToInvokeOn = args.length > 4 ? args[4] : null;
 
-        ModuleClient client = ModuleClient.createFromEnvironment(protocol);
-        client.open();
+        ModuleClient client = ModuleClient.createFromEnvironment(new UnixDomainSocketSample.UnixDomainSocketChannelImpl(), protocol);
+        client.open(false);
 
         MethodRequest methodRequest = new MethodRequest(methodName, methodPayload);
         MethodResult result;
@@ -105,11 +105,11 @@ public class ModuleInvokeMethodSample
         }
         finally
         {
-            client.closeNow();
+            client.close();
         }
     }
 
-    private static MethodResult invokeMethodOnDevice(String methodName, String deviceIdToInvokeOn, ModuleClient client, MethodRequest methodRequest) throws ModuleClientException, URISyntaxException, IOException
+    private static MethodResult invokeMethodOnDevice(String methodName, String deviceIdToInvokeOn, ModuleClient client, MethodRequest methodRequest) throws ModuleClientException
     {
         System.out.println("Invoking method \"" + methodName + "\" on device \"" + deviceIdToInvokeOn + "\"");
         MethodResult result = client.invokeMethod(deviceIdToInvokeOn, methodRequest);
@@ -117,7 +117,7 @@ public class ModuleInvokeMethodSample
         return result;
     }
 
-    private static MethodResult invokeMethodOnModule(String methodName, String deviceIdToInvokeOn, String moduleIdToInvokeOn, ModuleClient client, MethodRequest methodRequest) throws ModuleClientException, URISyntaxException, IOException
+    private static MethodResult invokeMethodOnModule(String methodName, String deviceIdToInvokeOn, String moduleIdToInvokeOn, ModuleClient client, MethodRequest methodRequest) throws ModuleClientException
     {
         System.out.println("Invoking method \"" + methodName + "\" on module \"" + moduleIdToInvokeOn + "\"");
         MethodResult result = client.invokeMethod(deviceIdToInvokeOn, moduleIdToInvokeOn, methodRequest);

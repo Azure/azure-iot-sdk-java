@@ -33,7 +33,7 @@ import java.util.Map;
  * 2. {@link ConnectionStatusTracker} which allows for a dependent connection check the underlying connection status before attempting a reconnection.
  *
  * Both {@link DeviceClientManager} and {@link MultiplexingClientManager} classes delegate all but 3 API calls to their underlying SDK client (MultiplexingClient or DeviceClient) they are wrapping around.
- * open(), close(), registerConnectionStatusChangeCallback() are the 3 APIs that are handled by the ClientManager instance to allow for dynamic reconnection logic.
+ * open(), close(), setConnectionStatusChangeCallback() are the 3 APIs that are handled by the ClientManager instance to allow for dynamic reconnection logic.
  *
  * These client managers are in charge of handling the reconnection logic since they are the connection status callback handler.
  *
@@ -146,7 +146,7 @@ public class MultiplexingSample
         {
             System.out.printf("Sending message from device %s%n", deviceId);
             Message message = new Message("some payload");
-            multiplexedDeviceClients.get(deviceId).sendEventAsync(message, new TelemetryAcknowledgedEventCallback(), message.getMessageId());
+            multiplexedDeviceClients.get(deviceId).sendTelemetryAsync(message, new TelemetryAcknowledgedEventCallback(), message.getMessageId());
         }
 
         System.out.println("Waiting while messages get sent asynchronously...");

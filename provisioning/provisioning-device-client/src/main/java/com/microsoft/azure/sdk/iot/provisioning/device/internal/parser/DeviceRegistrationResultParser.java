@@ -9,6 +9,7 @@ package com.microsoft.azure.sdk.iot.provisioning.device.internal.parser;
 
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
 
 /**
  * Class that represents the REST API format for DeviceRegistrationResult
@@ -19,180 +20,72 @@ public class DeviceRegistrationResultParser
 {
     private static final String REGISTRATION_ID = "registrationId";
     @SerializedName(REGISTRATION_ID)
+    @Getter
     private String registrationId;
 
     private static final String CREATED_DATE_TIME_UTC = "createdDateTimeUtc";
     @SerializedName(CREATED_DATE_TIME_UTC)
+    @Getter
     private String createdDateTimeUtc;
 
     private static final String ASSIGNED_HUB = "assignedHub";
     @SerializedName(ASSIGNED_HUB)
+    @Getter
     private String assignedHub;
 
     private static final String DEVICE_ID = "deviceId";
     @SerializedName(DEVICE_ID)
+    @Getter
     private String deviceId;
 
     private static final String STATUS = "status";
     @SerializedName(STATUS)
+    @Getter
     private String status;
 
     private static final String SUBSTATUS = "substatus";
     @SerializedName(SUBSTATUS)
+    @Getter
     private String substatus;
 
     private static final String ETAG = "etag";
     @SerializedName(ETAG)
+    @Getter
     private String eTag;
 
     private static final String LAST_UPDATES_DATE_TIME_UTC = "lastUpdatedDateTimeUtc";
     @SerializedName(LAST_UPDATES_DATE_TIME_UTC)
+    @Getter
     private String lastUpdatesDateTimeUtc;
 
     private static final String ERROR_CODE = "errorCode";
     @SerializedName(ERROR_CODE)
+    @Getter
     private Integer errorCode;
 
     private static final String ERROR_MESSAGE = "errorMessage";
     @SerializedName(ERROR_MESSAGE)
+    @Getter
     private String errorMessage;
 
     private static final String TPM = "tpm";
     @SerializedName(TPM)
+    @Getter
     private TpmRegistrationResultParser tpm;
 
     private static final String X509 = "x509";
     @SerializedName(X509)
+    @Getter
     private X509RegistrationResultParser x509;
 
     private static final String PAYLOAD = "payload";
     @SerializedName(PAYLOAD)
+    @Getter
     private JsonObject jsonPayload;
 
     //empty constructor for Gson
     DeviceRegistrationResultParser()
     {
-    }
-
-    /**
-     * Getter for Registration Id
-     * @return Getter for Registration Id
-     */
-    public String getRegistrationId()
-    {
-        //SRS_DeviceRegistrationResultParser_25_001: [ This method shall return the parsed registrationId. ]
-        return registrationId;
-    }
-
-    /**
-     * Getter for CreatedDateTimeUtc
-     * @return Getter for CreatedDateTimeUtc
-     */
-    public String getCreatedDateTimeUtc()
-    {
-        //SRS_DeviceRegistrationResultParser_25_002: [ This method shall return the parsed createdDateTimeUtc. ]
-        return createdDateTimeUtc;
-    }
-
-    /**
-     * Getter for Assigned Iot Hub
-     * @return Getter for Assigned Iot Hub
-     */
-    public String getAssignedHub()
-    {
-        //SRS_DeviceRegistrationResultParser_25_003: [ This method shall return the parsed assignedHub. ]
-        return assignedHub;
-    }
-
-    /**
-     * Getter for Device Id
-     * @return Getter for Device Id
-     */
-    public String getDeviceId()
-    {
-        //SRS_DeviceRegistrationResultParser_25_004: [ This method shall return the parsed deviceId. ]
-        return deviceId;
-    }
-
-    /**
-     * Getter for Status
-     * @return Getter for Status
-     */
-    public String getStatus()
-    {
-        //SRS_DeviceRegistrationResultParser_25_005: [ This method shall return the parsed status. ]
-        return status;
-    }
-
-    /**
-     * Getter for Substatus
-     * @return Getter for Substatus
-     */
-    public String getSubstatus()
-    {
-        return substatus;
-    }
-
-    /**
-     * Getter for Etag
-     * @return Getter for Etag
-     */
-    public String getEtag()
-    {
-        //SRS_DeviceRegistrationResultParser_25_006: [ This method shall return the parsed eTag. ]
-        return eTag;
-    }
-
-    /**
-     * Getter for LastUpdatesDateTimeUtc
-     * @return Getter for LastUpdatesDateTimeUtc
-     */
-    public String getLastUpdatesDateTimeUtc()
-    {
-        //SRS_DeviceRegistrationResultParser_25_007: [ This method shall return the parsed lastUpdatesDateTimeUtc. ]
-        return lastUpdatesDateTimeUtc;
-    }
-
-    /**
-     * Getter for the object TpmRegistrationResultParser
-     * https://docs.microsoft.com/en-us/rest/api/iot-dps/RuntimeRegistration/RegisterDevice#definitions_tpmregistrationresult
-     * @return Getter for the object TpmRegistrationResultParser
-     */
-    public TpmRegistrationResultParser getTpm()
-    {
-        //SRS_DeviceRegistrationResultParser_25_008: [ This method shall return the parsed TpmRegistrationResultParser Object. ]
-        return tpm;
-    }
-
-    /**
-     * Getter for the object X509RegistrationResultParser
-     * https://docs.microsoft.com/en-us/rest/api/iot-dps/RuntimeRegistration/RegisterDevice#definitions_x509registrationresult
-     * @return   Getter for the object X509RegistrationResultParser
-     */
-    public X509RegistrationResultParser getX509()
-    {
-        //SRS_DeviceRegistrationResultParser_25_009: [ This method shall return the parsed X509RegistrationResultParser object. ]
-        return x509;
-    }
-
-    /**
-     * Getter for Error Code
-     * @return Getter for Error Code
-     */
-    public Integer getErrorCode()
-    {
-        //SRS_DeviceRegistrationResultParser_25_010: [ This method shall return the parsed errorCode. ]
-        return errorCode;
-    }
-
-    /**
-     * Getter for Error Message
-     * @return Getter for Error Message
-     */
-    public String getErrorMessage()
-    {
-        //SRS_DeviceRegistrationResultParser_25_011: [ This method shall return the parsed errorMessage. ]
-        return errorMessage;
     }
 
     public String getPayload()

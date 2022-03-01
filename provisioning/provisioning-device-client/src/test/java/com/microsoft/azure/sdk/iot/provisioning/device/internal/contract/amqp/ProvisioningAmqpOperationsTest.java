@@ -7,13 +7,12 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp;
 
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpListener;
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpMessage;
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpsConnection;
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.SaslHandler;
-import com.microsoft.azure.sdk.iot.deps.util.ObjectLock;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.amqp.AmqpListener;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.amqp.AmqpMessage;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.amqp.AmqpsConnection;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.amqp.SaslHandler;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.ObjectLock;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp.ProvisioningAmqpOperations;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceConnectionException;
 import mockit.Deencapsulation;

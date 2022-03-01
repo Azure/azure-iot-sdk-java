@@ -6,7 +6,7 @@ package samples.com.microsoft.azure.sdk.iot.service;
 import com.google.gson.JsonObject;
 import java.util.Set;
 
-import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
+import com.microsoft.azure.sdk.iot.service.twin.Pair;
 
 import lombok.NonNull;
 import static java.util.Collections.singleton;

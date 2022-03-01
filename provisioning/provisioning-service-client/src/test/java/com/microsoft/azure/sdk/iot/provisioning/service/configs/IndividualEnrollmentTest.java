@@ -4,8 +4,6 @@
 package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.*;
-import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
-import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 import mockit.*;
 import org.junit.Test;
@@ -79,21 +77,9 @@ public class IndividualEnrollmentTest
         }
 
         @Mock
-        public void setProvisioningStatus(ProvisioningStatus provisioningStatus)
-        {
-            mockedProvisioningStatus = provisioningStatus;
-        }
-
-        @Mock
         public void setInitialTwin(TwinState initialTwin)
         {
             mockedInitialTwin = initialTwin;
-        }
-
-        @Mock
-        public void setEtag(String etag)
-        {
-            mockedEtag = etag;
         }
 
         @Mock
@@ -111,9 +97,9 @@ public class IndividualEnrollmentTest
         IndividualEnrollment individualEnrollment = new IndividualEnrollment(
                 VALID_REGISTRATION_ID,
                 new TpmAttestation(VALID_ENDORSEMENT_KEY, VALID_STORAGE_ROOT_KEY));
-        individualEnrollment.setDeviceIdFinal(VALID_DEVICE_ID);
-        individualEnrollment.setIotHubHostNameFinal(VALID_IOTHUB_HOST_NAME);
-        individualEnrollment.setProvisioningStatusFinal(ProvisioningStatus.ENABLED);
+        individualEnrollment.setDeviceId(VALID_DEVICE_ID);
+        individualEnrollment.setIotHubHostName(VALID_IOTHUB_HOST_NAME);
+        individualEnrollment.setProvisioningStatus(ProvisioningStatus.ENABLED);
 
         return individualEnrollment;
     }
@@ -207,7 +193,7 @@ public class IndividualEnrollmentTest
         assertNotNull(enrollment.getAttestation());
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_006: [If the `deviceId`, `iotHubHostName`, `provisioningStatus`, or `registrationState` is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_21_006: [If the `deviceId`, `iotHubHostName`, `provisioningStatus`, or `deviceRegistrationState` is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
     @Test
     public void constructorWithJsonSetsOptionalParametersUsesSetters()
     {
@@ -240,12 +226,12 @@ public class IndividualEnrollmentTest
 
         // assert
         assertEquals(VALID_DEVICE_ID, Deencapsulation.getField(enrollment, "deviceId"));
-        assertNotNull(Deencapsulation.getField(enrollment, "registrationState"));
+        assertNotNull(enrollment.getDeviceRegistrationState());
         assertEquals(VALID_IOTHUB_HOST_NAME, Deencapsulation.getField(enrollment, "iotHubHostName"));
         assertEquals(ProvisioningStatus.ENABLED, Deencapsulation.getField(enrollment, "provisioningStatus"));
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_006: [If the `deviceId`, `iotHubHostName`, `provisioningStatus`, or `registrationState` is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_21_006: [If the `deviceId`, `iotHubHostName`, `provisioningStatus`, or `deviceRegistrationState` is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
     @Test
     public void constructorWithJsonWithOptionalParametersSucceedOnNull()
     {
@@ -414,7 +400,7 @@ public class IndividualEnrollmentTest
         MockIndividualEnrollment enrollment = new MockIndividualEnrollment(json);
 
         // assert
-        assertEquals(VALID_DATE.toString(), Deencapsulation.getField(enrollment, "createdDateTimeUtcDate").toString());
+        assertEquals(VALID_DATE.toString(), Deencapsulation.getField(enrollment, "createdDateTimeUtc").toString());
     }
 
     /* SRS_INDIVIDUAL_ENROLLMENT_21_009: [If the createdDateTimeUtc is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
@@ -467,7 +453,7 @@ public class IndividualEnrollmentTest
         MockIndividualEnrollment enrollment = new MockIndividualEnrollment(json);
 
         // assert
-        assertEquals(VALID_DATE.toString(), Deencapsulation.getField(enrollment, "lastUpdatedDateTimeUtcDate").toString());
+        assertEquals(VALID_DATE.toString(), Deencapsulation.getField(enrollment, "lastUpdatedDateTimeUtc").toString());
     }
 
     /* SRS_INDIVIDUAL_ENROLLMENT_21_010: [If the lastUpdatedDateTimeUtc is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
@@ -703,13 +689,13 @@ public class IndividualEnrollmentTest
 
     /* SRS_INDIVIDUAL_ENROLLMENT_21_016: [The getRegistrationId shall return a String with the stored registrationId.] */
     /* SRS_INDIVIDUAL_ENROLLMENT_21_019: [The getDeviceId shall return a String with the stored deviceId.] */
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_022: [The getDeviceRegistrationState shall return a DeviceRegistrationState with the stored registrationState.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_21_022: [The getDeviceRegistrationState shall return a DeviceRegistrationState with the stored deviceRegistrationState.] */
     /* SRS_INDIVIDUAL_ENROLLMENT_21_025: [The getAttestation shall return a AttestationMechanism with the stored attestation.] */
     /* SRS_INDIVIDUAL_ENROLLMENT_21_028: [The getIotHubHostName shall return a String with the stored iotHubHostName.] */
     /* SRS_INDIVIDUAL_ENROLLMENT_21_031: [The getInitialTwin shall return a TwinState with the stored initialTwin.] */
     /* SRS_INDIVIDUAL_ENROLLMENT_21_034: [The getProvisioningStatus shall return a TwinState with the stored provisioningStatus.] */
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_037: [The getCreatedDateTimeUtc shall return a Date with the stored createdDateTimeUtcDate.] */
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_040: [The getLastUpdatedDateTimeUtc shall return a Date with the stored lastUpdatedDateTimeUtcDate.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_21_037: [The getCreatedDateTimeUtc shall return a Date with the stored createdDateTimeUtc.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_21_040: [The getLastUpdatedDateTimeUtc shall return a Date with the stored lastUpdatedDateTimeUtc.] */
     /* SRS_INDIVIDUAL_ENROLLMENT_21_046: [The getEtag shall return a String with the stored etag.] */
     /* SRS_INDIVIDUAL_ENROLLMENT_34_052: [If the device capabilities is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
     /* SRS_INDIVIDUAL_ENROLLMENT_34_053: [This function shall save the provided capabilities.] */
@@ -803,19 +789,19 @@ public class IndividualEnrollmentTest
         assertEquals(newDeviceId, Deencapsulation.getField(individualEnrollment, "deviceId"));
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_024: [The setRegistrationState shall store the provided registrationState.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_21_024: [The setDeviceRegistrationState shall store the provided deviceRegistrationState.] */
     @Test
     public void setRegistrationStateSucceed(@Mocked final DeviceRegistrationState mockedDeviceRegistrationState)
     {
         // arrange
         IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-        assertNotEquals(mockedDeviceRegistrationState, Deencapsulation.getField(individualEnrollment, "registrationState"));
+        assertNotEquals(mockedDeviceRegistrationState, Deencapsulation.getField(individualEnrollment, "deviceRegistrationState"));
 
         // act
-        Deencapsulation.invoke(individualEnrollment, "setRegistrationState", new Class[] {DeviceRegistrationState.class}, mockedDeviceRegistrationState);
+        Deencapsulation.invoke(individualEnrollment, "setDeviceRegistrationState", new Class[] {DeviceRegistrationState.class}, mockedDeviceRegistrationState);
 
         // assert
-        assertEquals(mockedDeviceRegistrationState, Deencapsulation.getField(individualEnrollment, "registrationState"));
+        assertEquals(mockedDeviceRegistrationState, Deencapsulation.getField(individualEnrollment, "deviceRegistrationState"));
     }
 
     /* SRS_INDIVIDUAL_ENROLLMENT_21_027: [The setAttestation shall store the provided attestation.] */
@@ -888,7 +874,7 @@ public class IndividualEnrollmentTest
         assertNotEquals(newHostName, Deencapsulation.getField(individualEnrollment, "iotHubHostName"));
 
         // act
-        individualEnrollment.setIotHubHostNameFinal(newHostName);
+        individualEnrollment.setIotHubHostName(newHostName);
 
         // assert
         assertEquals(newHostName, Deencapsulation.getField(individualEnrollment, "iotHubHostName"));
@@ -918,62 +904,62 @@ public class IndividualEnrollmentTest
         assertNotEquals(ProvisioningStatus.DISABLED, Deencapsulation.getField(individualEnrollment, "provisioningStatus"));
 
         // act
-        individualEnrollment.setProvisioningStatusFinal(ProvisioningStatus.DISABLED);
+        individualEnrollment.setProvisioningStatus(ProvisioningStatus.DISABLED);
 
         // assert
         assertEquals(ProvisioningStatus.DISABLED, Deencapsulation.getField(individualEnrollment, "provisioningStatus"));
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_038: [The setCreatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_21_038: [The setCreatedDateTimeUtcString shall parse the provided String as a Data and Time UTC.] */
     @Test
-    public void setCreatedDateTimeUtcSucceed()
+    public void setCreatedDateTimeUtcStringSucceed()
     {
         // arrange
         IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-        assertNull(Deencapsulation.getField(individualEnrollment, "createdDateTimeUtcDate"));
+        assertNull(Deencapsulation.getField(individualEnrollment, "createdDateTimeUtc"));
 
         // act
-        Deencapsulation.invoke(individualEnrollment,"setCreatedDateTimeUtc", new Class[] {String.class}, VALID_DATE_AS_STRING);
+        Deencapsulation.invoke(individualEnrollment,"setCreatedDateTimeUtcString", new Class[] {String.class}, VALID_DATE_AS_STRING);
 
         // assert
-        Helpers.assertDateWithError((Date)Deencapsulation.getField(individualEnrollment, "createdDateTimeUtcDate"), VALID_DATE_AS_STRING);
+        Helpers.assertDateWithError((Date)Deencapsulation.getField(individualEnrollment, "createdDateTimeUtc"), VALID_DATE_AS_STRING);
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_039: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_21_039: [The setCreatedDateTimeUtcString shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
-    public void setCreatedDateTimeUtcThrowsOnNull()
+    public void setCreatedDateTimeUtcStringThrowsOnNull()
     {
         // arrange
         IndividualEnrollment individualEnrollment = makeStandardEnrollment();
 
         // act
-        Deencapsulation.invoke(individualEnrollment,"setCreatedDateTimeUtc", new Class[] {String.class}, (String)null);
-
-        // assert
-    }
-
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_039: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setCreatedDateTimeUtcThrowsOnEmpty()
-    {
-        // arrange
-        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-
-        // act
-        Deencapsulation.invoke(individualEnrollment,"setCreatedDateTimeUtc", new Class[] {String.class}, (String)"");
+        Deencapsulation.invoke(individualEnrollment,"setCreatedDateTimeUtcString", new Class[] {String.class}, (String)null);
 
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_039: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
+    /* SRS_INDIVIDUAL_ENROLLMENT_21_039: [The setCreatedDateTimeUtcString shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
-    public void setCreatedDateTimeUtcThrowsOnInvalid()
+    public void setCreatedDateTimeUtcStringThrowsOnEmpty()
     {
         // arrange
         IndividualEnrollment individualEnrollment = makeStandardEnrollment();
 
         // act
-        Deencapsulation.invoke(individualEnrollment,"setCreatedDateTimeUtc", new Class[] {String.class}, (String)"0000-00-00 00:00:00");
+        Deencapsulation.invoke(individualEnrollment,"setCreatedDateTimeUtcString", new Class[] {String.class}, (String)"");
+
+        // assert
+    }
+
+    /* SRS_INDIVIDUAL_ENROLLMENT_21_039: [The setCreatedDateTimeUtcString shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
+    @Test (expected = IllegalArgumentException.class)
+    public void setCreatedDateTimeUtcStringThrowsOnInvalid()
+    {
+        // arrange
+        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
+
+        // act
+        Deencapsulation.invoke(individualEnrollment,"setCreatedDateTimeUtcString", new Class[] {String.class}, (String)"0000-00-00 00:00:00");
 
         // assert
     }
@@ -984,13 +970,13 @@ public class IndividualEnrollmentTest
     {
         // arrange
         IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-        assertNull(Deencapsulation.getField(individualEnrollment, "lastUpdatedDateTimeUtcDate"));
+        assertNull(Deencapsulation.getField(individualEnrollment, "lastUpdatedDateTimeUtc"));
 
         // act
-        Deencapsulation.invoke(individualEnrollment,"setLastUpdatedDateTimeUtc", new Class[] {String.class}, VALID_DATE_AS_STRING);
+        Deencapsulation.invoke(individualEnrollment,"setLastUpdatedDateTimeUtcString", new Class[] {String.class}, VALID_DATE_AS_STRING);
 
         // assert
-        Helpers.assertDateWithError((Date)Deencapsulation.getField(individualEnrollment, "lastUpdatedDateTimeUtcDate"), VALID_DATE_AS_STRING);
+        Helpers.assertDateWithError((Date)Deencapsulation.getField(individualEnrollment, "lastUpdatedDateTimeUtc"), VALID_DATE_AS_STRING);
     }
 
     /* SRS_INDIVIDUAL_ENROLLMENT_21_042: [The setLastUpdatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
@@ -1001,7 +987,7 @@ public class IndividualEnrollmentTest
         IndividualEnrollment individualEnrollment = makeStandardEnrollment();
 
         // act
-        Deencapsulation.invoke(individualEnrollment,"setLastUpdatedDateTimeUtc", new Class[] {String.class}, (String)null);
+        Deencapsulation.invoke(individualEnrollment,"setLastUpdatedDateTimeUtcString", new Class[] {String.class}, (String)null);
 
         // assert
     }
@@ -1014,7 +1000,7 @@ public class IndividualEnrollmentTest
         IndividualEnrollment individualEnrollment = makeStandardEnrollment();
 
         // act
-        Deencapsulation.invoke(individualEnrollment,"setLastUpdatedDateTimeUtc", new Class[] {String.class}, (String)"");
+        Deencapsulation.invoke(individualEnrollment,"setLastUpdatedDateTimeUtcString", new Class[] {String.class}, (String)"");
 
         // assert
     }
@@ -1027,7 +1013,7 @@ public class IndividualEnrollmentTest
         IndividualEnrollment individualEnrollment = makeStandardEnrollment();
 
         // act
-        Deencapsulation.invoke(individualEnrollment,"setLastUpdatedDateTimeUtc", new Class[] {String.class}, (String)"0000-00-00 00:00:00");
+        Deencapsulation.invoke(individualEnrollment,"setLastUpdatedDateTimeUtcString", new Class[] {String.class}, (String)"0000-00-00 00:00:00");
 
         // assert
     }
