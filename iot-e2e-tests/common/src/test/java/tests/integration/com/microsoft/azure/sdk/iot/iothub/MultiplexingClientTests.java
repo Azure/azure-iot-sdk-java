@@ -9,6 +9,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesCallback;
 import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
@@ -23,7 +24,9 @@ import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceReg
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.UnauthorizedException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
+import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClientOptions;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
@@ -33,6 +36,10 @@ import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.twin.Pair;
+import com.microsoft.azure.sdk.iot.service.twin.Twin;
+import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
+import com.microsoft.azure.sdk.iot.service.twin.TwinClientOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -52,6 +59,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestDeviceIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.*;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.TwinCommon;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -61,13 +69,18 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static junit.framework.TestCase.*;
+import static tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.TwinCommon.isPropertyInTwinCollection;
 
 /**
  * Test class containing all tests to be run on JVM and android pertaining to multiplexing with the MultiplexingClient class
@@ -767,7 +780,7 @@ public class MultiplexingClientTests extends IntegrationTest
         }
     }
 
-    /*
+
     @Test
     @StandardTierHubOnlyTest
     public void testTwin() throws Exception
@@ -776,26 +789,34 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.multiplexingClient.open(false);
 
         TwinClient twinClientServiceClient = new TwinClient(iotHubConnectionString, TwinClientOptions.builder().httpReadTimeoutSeconds(0).build());
+        CountDownLatch[] desiredPropertyUpdateLatches = new CountDownLatch[DEVICE_MULTIPLEX_COUNT];
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             // The twin for this test identity is about to be modified. Set this flag so that the test identity recycler re-uses this identity only for tests
             // that don't care about the initial twin state of an identity
             testInstance.testDevicesArrayIdentity.get(i).twinUpdated = true;
-            String expectedPropertyKey = UUID.randomUUID().toString();
-            String expectedPropertyValue = UUID.randomUUID().toString();
-            TwinPropertyCallbackImpl twinPropertyCallback = new TwinPropertyCallbackImpl(expectedPropertyKey, expectedPropertyValue);
-            startTwin(testInstance.deviceClientArray.get(i), new EventCallback(IotHubStatusCode.OK), twinPropertyCallback);
+            final String expectedPropertyKey = UUID.randomUUID().toString();
+            final String expectedPropertyValue = UUID.randomUUID().toString();
 
             // Testing subscribing to desired properties
-            Map<Property, Pair<TwinPropertyCallback, Object>> onDesiredPropertyChange = new HashMap<>();
-            onDesiredPropertyChange.put(new Property(expectedPropertyKey, null), new Pair<>(twinPropertyCallback, null));
-            testInstance.deviceClientArray.get(i).subscribeToTwinDesiredPropertiesAsync(onDesiredPropertyChange);
+            desiredPropertyUpdateLatches[i] = new CountDownLatch(1);
+            int finalI = i;
+            testInstance.deviceClientArray.get(i).subscribeToDesiredProperties(
+                (twin, context) ->
+                {
+                    boolean receivedExpectedDesiredPropertyUpdate =
+                        isPropertyInTwinCollection(twin.getDesiredProperties(), expectedPropertyKey, expectedPropertyValue);
 
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_DESIRED_PROPERTY_SUBSCRIPTION_ACKNOWLEDGEMENT);
+                    if (receivedExpectedDesiredPropertyUpdate)
+                    {
+                        desiredPropertyUpdateLatches[finalI].countDown();
+                    }
+                },
+                null);
 
             // Send desired property update to multiplexed device
-            testDesiredPropertiesFlow(testInstance.deviceClientArray.get(i), twinClientServiceClient, twinPropertyCallback, expectedPropertyKey, expectedPropertyValue);
+            testDesiredPropertiesFlow(testInstance.deviceClientArray.get(i), twinClientServiceClient, desiredPropertyUpdateLatches[i], expectedPropertyKey, expectedPropertyValue);
 
             // Testing sending reported properties
             testReportedPropertiesFlow(testInstance.deviceClientArray.get(i), twinClientServiceClient, expectedPropertyKey, expectedPropertyValue);
@@ -812,23 +833,34 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.multiplexingClient.open(false);
 
         TwinClient twinClientServiceClient = new TwinClient(iotHubConnectionString, TwinClientOptions.builder().httpReadTimeoutSeconds(0).build());
-        String expectedPropertyKey = UUID.randomUUID().toString();
-        String expectedPropertyValue = UUID.randomUUID().toString();
-        List<TwinPropertyCallbackImpl> twinPropertyCallbacks = new ArrayList<>();
+        final String expectedPropertyKey = UUID.randomUUID().toString();
+        final String expectedPropertyValue = UUID.randomUUID().toString();
+        CountDownLatch[] desiredPropertyUpdateLatches = new CountDownLatch[DEVICE_MULTIPLEX_COUNT];
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             // The twin for this test identity is about to be modified. Set this flag so that the test identity recycler re-uses this identity only for tests
             // that don't care about the initial twin state of an identity
             testInstance.testDevicesArrayIdentity.get(i).twinUpdated = true;
-            TwinPropertyCallbackImpl twinPropertyCallback = new TwinPropertyCallbackImpl(expectedPropertyKey, expectedPropertyValue);
-            twinPropertyCallbacks.add(twinPropertyCallback);
-            startTwin(testInstance.deviceClientArray.get(i), new EventCallback(IotHubStatusCode.OK), twinPropertyCallback);
+            desiredPropertyUpdateLatches[i] = new CountDownLatch(1);
+            int finalI = i;
+            testInstance.deviceClientArray.get(i).subscribeToDesiredProperties(
+                (twin, context) ->
+                {
+                    boolean receivedExpectedDesiredPropertyUpdate =
+                        isPropertyInTwinCollection(twin.getDesiredProperties(), expectedPropertyKey, expectedPropertyValue);
+
+                    if (receivedExpectedDesiredPropertyUpdate)
+                    {
+                        desiredPropertyUpdateLatches[finalI].countDown();
+                    }
+                },
+                null);
         }
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             // Testing subscribing to desired properties
-            testDesiredPropertiesFlow(testInstance.deviceClientArray.get(i), twinClientServiceClient, twinPropertyCallbacks.get(i), expectedPropertyKey, expectedPropertyValue);
+            testDesiredPropertiesFlow(testInstance.deviceClientArray.get(i), twinClientServiceClient, desiredPropertyUpdateLatches[i], expectedPropertyKey, expectedPropertyValue);
 
             // Testing sending reported properties
             testReportedPropertiesFlow(testInstance.deviceClientArray.get(i), twinClientServiceClient, expectedPropertyKey, expectedPropertyValue);
@@ -846,11 +878,10 @@ public class MultiplexingClientTests extends IntegrationTest
                 // Testing sending reported properties
                 testReportedPropertiesFlow(testInstance.deviceClientArray.get(i), twinClientServiceClient, expectedPropertyKey, expectedPropertyValue);
             }
-            catch (IOException e)
+            catch (IllegalStateException e)
             {
-                // IOException seems odd here, since we are testing what should be an IllegalStateException or UnsupportedOperationException,
-                // but it would be a breaking change to modify the device clien to throw that exception when a twin method is
-                // called without first starting twin.
+                // a given client is expected to throw this exception when a twin operation is performed before subscribing
+                // to desired property updates
                 expectedExceptionThrown = true;
             }
 
@@ -862,68 +893,53 @@ public class MultiplexingClientTests extends IntegrationTest
             // The twin for this test identity is about to be modified. Set this flag so that the test identity recycler re-uses this identity only for tests
             // that don't care about the initial twin state of an identity
             testInstance.testDevicesArrayIdentity.get(i).twinUpdated = true;
-            TwinPropertyCallbackImpl twinPropertyCallback = new TwinPropertyCallbackImpl(expectedPropertyKey, expectedPropertyValue);
-            twinPropertyCallbacks.add(twinPropertyCallback);
-            startTwin(testInstance.deviceClientArray.get(i), new EventCallback(IotHubStatusCode.OK), twinPropertyCallback);
+            desiredPropertyUpdateLatches[i] = new CountDownLatch(1);
+            int finalI = i;
+            testInstance.deviceClientArray.get(i).subscribeToDesiredProperties(
+                (twin, context) ->
+                {
+                    boolean receivedExpectedDesiredPropertyUpdate =
+                        isPropertyInTwinCollection(twin.getDesiredProperties(), expectedPropertyKey, expectedPropertyValue);
+
+                    if (receivedExpectedDesiredPropertyUpdate)
+                    {
+                        desiredPropertyUpdateLatches[finalI].countDown();
+                    }
+                },
+                null);
         }
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             // Testing subscribing to desired properties
-            testDesiredPropertiesFlow(testInstance.deviceClientArray.get(i), twinClientServiceClient, twinPropertyCallbacks.get(i), expectedPropertyKey, expectedPropertyValue);
+            testDesiredPropertiesFlow(testInstance.deviceClientArray.get(i), twinClientServiceClient, desiredPropertyUpdateLatches[i], expectedPropertyKey, expectedPropertyValue);
 
             // Testing sending reported properties
             testReportedPropertiesFlow(testInstance.deviceClientArray.get(i), twinClientServiceClient, expectedPropertyKey, expectedPropertyValue);
         }
     }
 
-    private static void startTwin(DeviceClient deviceClient, IotHubEventCallback twinEventCallback, TwinPropertyCallback twinPropertyCallback) throws IOException, InterruptedException {
-        Success twinStarted = new Success();
-        deviceClient.startTwinAsync(twinEventCallback, twinStarted, twinPropertyCallback, null);
-
-        long startTime = System.currentTimeMillis();
-        while (!twinStarted.wasCallbackFired())
-        {
-            Thread.sleep(200);
-
-            if (System.currentTimeMillis() - startTime > TWIN_SUBSCRIBE_TIMEOUT_MILLIS)
-            {
-                fail("Timed out waiting for twin to start");
-            }
-        }
-
-        assertTrue("Failed to start twin. Unexpected status code " + twinStarted.getCallbackStatusCode(), twinStarted.getResult());
-    }
-
-    private static void testDesiredPropertiesFlow(DeviceClient deviceClient, TwinClient twinClientServiceClient, TwinPropertyCallbackImpl twinPropertyCallback, String expectedPropertyKey, String expectedPropertyValue) throws IOException, IotHubException, InterruptedException {
+    private static void testDesiredPropertiesFlow(DeviceClient deviceClient, TwinClient twinClientServiceClient, CountDownLatch twinPropertyReceivedLatch, String expectedPropertyKey, String expectedPropertyValue) throws IOException, IotHubException, InterruptedException {
         Twin serviceClientTwin = new Twin(deviceClient.getConfig().getDeviceId());
-        Set<com.microsoft.azure.sdk.iot.service.twin.Pair> desiredProperties = new HashSet<>();
+        Set<Pair> desiredProperties = new HashSet<>();
         desiredProperties.add(new com.microsoft.azure.sdk.iot.service.twin.Pair(expectedPropertyKey, expectedPropertyValue));
         serviceClientTwin.setDesiredProperties(desiredProperties);
         twinClientServiceClient.patch(serviceClientTwin);
 
-        long startTime = System.currentTimeMillis();
-        while (!twinPropertyCallback.receivedCallback)
+        boolean timedOut = !twinPropertyReceivedLatch.await(DESIRED_PROPERTY_CALLBACK_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+
+        if (timedOut)
         {
-            Thread.sleep(200);
-
-            if (System.currentTimeMillis() - startTime > DESIRED_PROPERTY_CALLBACK_TIMEOUT_MILLIS)
-            {
-                fail("Timed out waiting for desired property callback to fire");
-            }
+            fail("Timed out waiting for desired property callback to fire");
         }
-
-        assertTrue("Desired property callback fired with unexpected key. Expected " + expectedPropertyKey + " but was " + twinPropertyCallback.actualKey, twinPropertyCallback.receivedExpectedKey);
-        assertTrue("Desired property callback fired with unexpected value. Expected " + expectedPropertyValue + " but was " + twinPropertyCallback.actualValue, twinPropertyCallback.receivedExpectedValue);
     }
 
-    private static void testReportedPropertiesFlow(DeviceClient deviceClient, TwinClient twinClientServiceClient, String expectedPropertyKey, String expectedPropertyValue) throws IOException, IotHubException, InterruptedException {
+    private static void testReportedPropertiesFlow(DeviceClient deviceClient, TwinClient twinClientServiceClient, String expectedPropertyKey, String expectedPropertyValue) throws IOException, IotHubException, InterruptedException, TimeoutException
+    {
         String expectedReportedPropertyValue = expectedPropertyValue + "-reported";
-        Set<Property> reportedProperties = new HashSet<>();
-        reportedProperties.add(new Property(expectedPropertyKey, expectedReportedPropertyValue));
-        deviceClient.sendReportedPropertiesAsync(reportedProperties);
-
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_REPORTED_PROPERTY_ACKNOWLEDGEMENT);
+        TwinCollection reportedProperties = new TwinCollection();
+        reportedProperties.put(expectedPropertyKey, expectedReportedPropertyValue);
+        deviceClient.updateReportedProperties(reportedProperties);
 
         // Verify that the new reported property value can be seen from the service client
         Twin serviceClientTwin = twinClientServiceClient.get(deviceClient.getConfig().getDeviceId());
@@ -935,8 +951,6 @@ public class MultiplexingClientTests extends IntegrationTest
         String actualReportedPropertyValue = retrievedReportedPropertyPair.getValue().toString();
         assertEquals(expectedReportedPropertyValue, actualReportedPropertyValue);
     }
-
-     */
 
     static class ConnectionStatusChangeTracker implements IotHubConnectionStatusChangeCallback
     {
@@ -1741,7 +1755,7 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.multiplexingClient.close();
     }
 
-    /*
+
     // If a multiplexed device is subscribed to twin and/or methods and/or cloud to device messages, then loses its
     // session due to network issues, it should still be subscribed to twin and/or methods and/or cloud to device messages
     // after it finishes reconnection
@@ -1784,7 +1798,7 @@ public class MultiplexingClientTests extends IntegrationTest
         // Start twin for all multiplexed clients
         String[] expectedPropertyKeys = new String[DEVICE_MULTIPLEX_COUNT];
         String[] expectedPropertyValues = new String[DEVICE_MULTIPLEX_COUNT];
-        TwinPropertyCallbackImpl[] twinPropertyCallbacks = new TwinPropertyCallbackImpl[DEVICE_MULTIPLEX_COUNT];
+        CountDownLatch[] desiredPropertyUpdateLatches = new CountDownLatch[DEVICE_MULTIPLEX_COUNT];
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             // The twin for this test identity is about to be modified. Set this flag so that the test identity recycler re-uses this identity only for tests
@@ -1792,8 +1806,20 @@ public class MultiplexingClientTests extends IntegrationTest
             testInstance.testDevicesArrayIdentity.get(i).twinUpdated = true;
             expectedPropertyKeys[i] = UUID.randomUUID().toString();
             expectedPropertyValues[i] = UUID.randomUUID().toString();
-            twinPropertyCallbacks[i] = new TwinPropertyCallbackImpl(expectedPropertyKeys[i], expectedPropertyValues[i]);
-            startTwin(testInstance.deviceClientArray.get(i), new EventCallback(IotHubStatusCode.OK), twinPropertyCallbacks[i]);
+            desiredPropertyUpdateLatches[i] = new CountDownLatch(1);
+            int finalI = i;
+            testInstance.deviceClientArray.get(i).subscribeToDesiredProperties(
+                (twin, context) ->
+                {
+                    boolean receivedExpectedDesiredPropertyUpdate =
+                        isPropertyInTwinCollection(twin.getDesiredProperties(), expectedPropertyKeys[finalI], expectedPropertyValues[finalI]);
+
+                    if (receivedExpectedDesiredPropertyUpdate)
+                    {
+                        desiredPropertyUpdateLatches[finalI].countDown();
+                    }
+                },
+                null);
         }
 
         // Subscribe to cloud to device messages for all multiplexed clients
@@ -1837,7 +1863,7 @@ public class MultiplexingClientTests extends IntegrationTest
             testDirectMethods(directMethodServiceClientClient, testInstance.deviceIdentityArray.get(i).getDeviceId(), expectedMethodNames[i], deviceDirectMethodCallbacks[i]);
 
             // Send desired property update to multiplexed device
-            testDesiredPropertiesFlow(testInstance.deviceClientArray.get(i), twinClientServiceClient, twinPropertyCallbacks[i], expectedPropertyKeys[i], expectedPropertyValues[i]);
+            testDesiredPropertiesFlow(testInstance.deviceClientArray.get(i), twinClientServiceClient, desiredPropertyUpdateLatches[i], expectedPropertyKeys[i], expectedPropertyValues[i]);
 
             // Testing sending reported properties
             testReportedPropertiesFlow(testInstance.deviceClientArray.get(i), twinClientServiceClient, expectedPropertyKeys[i], expectedPropertyValues[i]);
@@ -1851,7 +1877,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
         assertMultiplexedDevicesClosedGracefully(connectionStatusChangeTrackers);
     }
-*/
+
     private static void assertMultiplexedDevicesClosedGracefully(ConnectionStatusChangeTracker[] connectionStatusChangeTrackers)
     {
         for (ConnectionStatusChangeTracker connectionStatusChangeTracker : connectionStatusChangeTrackers)
