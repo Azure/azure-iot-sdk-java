@@ -268,7 +268,7 @@ public class IotHubConnectionStringTest
 
     /* Tests_SRS_IOTHUB_CONNECTIONSTRING_21_017: [If the connection string is not valid, the constructor shall throw an IllegalArgumentException.] */
     /* Tests_SRS_IOTHUB_CONNECTIONSTRING_21_002: [A valid `hostName` shall be a valid URI.] */
-    @Test (expected = URISyntaxException.class)
+    @Test (expected = IllegalArgumentException.class)
     public void IotHubConnectionStringHostNameNotURIThrows() throws ClassNotFoundException
     {
         // arrange
@@ -283,7 +283,7 @@ public class IotHubConnectionStringTest
 
     /* Tests_SRS_IOTHUB_CONNECTIONSTRING_21_025: [If the parameters for the connection string is not valid, the constructor shall throw an IllegalArgumentException.] */
     /* Tests_SRS_IOTHUB_CONNECTIONSTRING_21_002: [A valid `hostName` shall be a valid URI.] */
-    @Test (expected = URISyntaxException.class)
+    @Test (expected = IllegalArgumentException.class)
     public void IotHubConnectionStringParametersHostNameNotURIThrows() throws ClassNotFoundException
     {
         // act
