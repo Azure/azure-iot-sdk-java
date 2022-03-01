@@ -235,11 +235,11 @@ jobs:
           targetPath: 'iot-e2e-tests/android/app/build/outputs/apk'
 
   - job: AndroidTest
-    timeoutInMinutes: 80
+    timeoutInMinutes: 50
     pool:
       vmImage: 'macOS-latest'
     strategy:
-      maxParallel: 15
+      maxParallel: 12
       matrix:
         TestGroup1:
           ANDROID_TEST_GROUP_ID: TestGroup1
@@ -265,8 +265,6 @@ jobs:
           ANDROID_TEST_GROUP_ID: TestGroup11
         TestGroup12:
           ANDROID_TEST_GROUP_ID: TestGroup12
-        TestGroup13:
-          ANDROID_TEST_GROUP_ID: TestGroup13
 
     displayName: Android Test
     dependsOn: AndroidBuild
