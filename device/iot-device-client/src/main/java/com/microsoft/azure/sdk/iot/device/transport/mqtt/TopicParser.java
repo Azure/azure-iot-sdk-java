@@ -14,24 +14,24 @@ class TopicParser
     private static final String REQ_ID = "$rid=";
     private static final String VERSION = "$version=";
 
-    public TopicParser(String topic) throws TransportException
+    public TopicParser(String topic)
     {
         if (topic == null || topic.length() == 0)
         {
-            throw new TransportException(new IllegalArgumentException("topic cannot be null or empty"));
+            throw new IllegalArgumentException("Unexpected topic");
         }
 
         this.topicTokens = topic.split("/");
     }
 
     @SuppressWarnings("SameParameterValue") // Method is designed to be generic, with any acceptable value for "tokenIndexReqID".
-    String getRequestId(int tokenIndexReqID) throws TransportException
+    String getRequestId(int tokenIndexReqID)
     {
         String reqId = null;
 
         if (tokenIndexReqID <= 0 || tokenIndexReqID >= topicTokens.length)
         {
-            throw new TransportException(new IllegalArgumentException("Invalid token Index for request id"));
+            throw new IllegalArgumentException("Invalid token Index for request id");
         }
 
         String token = topicTokens[tokenIndexReqID];
@@ -54,13 +54,13 @@ class TopicParser
     }
 
     @SuppressWarnings("SameParameterValue") // Method is designed to be generic, with any acceptable value for "tokenIndexMethod"
-    String getMethodName(int tokenIndexMethod) throws TransportException
+    String getMethodName(int tokenIndexMethod)
     {
         String methodName;
 
         if (tokenIndexMethod <= 0 || tokenIndexMethod >= topicTokens.length)
         {
-            throw new TransportException(new IllegalArgumentException("Invalid token Index for Method Name"));
+            throw new IllegalArgumentException("Invalid token Index for Method Name");
         }
 
         String token = topicTokens[tokenIndexMethod];
@@ -71,7 +71,7 @@ class TopicParser
         }
         else
         {
-            throw new TransportException(new IllegalArgumentException("method name could not be parsed"));
+            throw new IllegalArgumentException("method name could not be parsed");
         }
 
         return methodName;

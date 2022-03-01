@@ -73,10 +73,7 @@ public class Message
      */
     private IotHubConnectionString iotHubConnectionString;
 
-    /**
-     * [Optional] Used to correlate the message across the send/receive lifecycle
-     */
-    private TwinMessageStatusCallback twinMessageStatusCallback;
+    private CorrelatingMessageCallback correlatingMessageCallback;
 
     /**
      * [Optional] Used to specify the sender device client for multiplexing scenarios
@@ -598,12 +595,12 @@ public class Message
         return s.toString();
     }
 
-    public void setTwinMessageStatusCallback(TwinMessageStatusCallback twinMessageStatusCallback) {
-        this.twinMessageStatusCallback = twinMessageStatusCallback;
+    public void setCorrelatingMessageCallback(CorrelatingMessageCallback correlatingMessageCallback) {
+        this.correlatingMessageCallback = correlatingMessageCallback;
     }
 
-    public TwinMessageStatusCallback getTwinMessageStatusCallback() {
-        return twinMessageStatusCallback;
+    public CorrelatingMessageCallback getCorrelatingMessageCallback() {
+        return correlatingMessageCallback;
     }
 
     public void setCorrelatingMessageCallbackContext(Object correlatingMessageCallbackContext) {

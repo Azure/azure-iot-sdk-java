@@ -434,35 +434,26 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     @Override
     public void onMessageArrived(int messageId)
     {
-        IotHubTransportMessage transportMessage = null;
-        try
+        IotHubTransportMessage transportMessage = this.directMethod.receive();
+        if (transportMessage != null)
         {
-            transportMessage = this.directMethod.receive();
+            log.trace("Received MQTT device method message ({})", transportMessage);
+        }
+        else
+        {
+            transportMessage = deviceTwin.receive();
             if (transportMessage != null)
             {
-                log.trace("Received MQTT device method message ({})", transportMessage);
+                log.trace("Received MQTT device twin message ({})", transportMessage);
             }
             else
             {
-                transportMessage = deviceTwin.receive();
+                transportMessage = deviceMessaging.receive();
                 if (transportMessage != null)
                 {
-                    log.trace("Received MQTT device twin message ({})", transportMessage);
-                }
-                else
-                {
-                    transportMessage = deviceMessaging.receive();
-                    if (transportMessage != null)
-                    {
-                        log.trace("Received MQTT device messaging message ({})", transportMessage);
-                    }
+                    log.trace("Received MQTT device messaging message ({})", transportMessage);
                 }
             }
-        }
-        catch (TransportException e)
-        {
-            this.listener.onMessageReceived(null, new TransportException("Failed to receive message from service", e));
-            log.error("Encountered exception while receiving message over MQTT", e);
         }
 
         if (transportMessage == null)

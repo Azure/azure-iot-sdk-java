@@ -4,6 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.twin.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
@@ -137,19 +138,9 @@ public class DeviceTwinSample
             System.out.println("Start device Twin and get remaining properties...");
             CountDownLatch twinInitializedLatch = new CountDownLatch(1);
             client.subscribeToDesiredPropertiesAsync(
-                desiredPropertiesUpdate ->
+                (statusCode, context) ->
                 {
-                    Twin twin = desiredPropertiesUpdate.getTwin();
-
-                    for (String propertyKey : twin.getDesiredProperties().keySet())
-                    {
-                        Object propertyValue = twin.getDesiredProperties().get(propertyKey);
-                        System.out.println("Received desired property update with property key " + propertyKey + " and value " + propertyValue);
-                    }
-                },
-                (responseStatus, callbackContext) ->
-                {
-                    if (responseStatus == OK)
+                    if (statusCode == OK)
                     {
                         System.out.println("Successfully subscribed to desired properties. Getting initial twin state");
 
@@ -157,19 +148,34 @@ public class DeviceTwinSample
                         // properties, but is not mandatory. The benefit is that you are up to date on any twin updates
                         // your client may have missed while not being subscribed, but the cost is that the get twin request
                         // may not provide any new twin updates while still requiring some messaging between the client and service.
-                        client.getTwinAsync(getTwinResponse ->
-                        {
-                            System.out.println("Received initial twin state");
-                            System.out.println(getTwinResponse.getTwin().toString());
-                            twinInitializedLatch.countDown();
-                        });
+                        client.getTwinAsync(
+                            (twin, callbackContext) ->
+                            {
+                                System.out.println("Received initial twin state");
+                                System.out.println(twin.toString());
+                                twinInitializedLatch.countDown();
+
+                            },
+                            null);
                     }
                     else
                     {
-                        System.out.println("Failed to subscribe to desired properties with status code " + responseStatus);
+                        System.out.println("Failed to subscribe to desired properties with status code " + statusCode);
                         System.exit(-1);
                     }
-                });
+                },
+                null,
+                (twin, context) ->
+                {
+                    for (String propertyKey : twin.getDesiredProperties().keySet())
+                    {
+                        Object propertyValue = twin.getDesiredProperties().get(propertyKey);
+                        System.out.println("Received desired property update with property key " + propertyKey + " and value " + propertyValue);
+                    }
+                },
+                null);
+
+            twinInitializedLatch.await();
 
             System.out.println("Update reported properties...");
             TwinCollection reportedProperties = new TwinCollection();
@@ -177,21 +183,23 @@ public class DeviceTwinSample
             reportedProperties.put("LivingRoomLights", LIGHTS.ON);
             reportedProperties.put("BedroomRoomLights", LIGHTS.OFF);
             CountDownLatch twinReportedPropertiesSentLatch = new CountDownLatch(1);
-            client.updateReportedPropertiesAsync(reportedProperties, sendReportedPropertiesResponse ->
-            {
-                IotHubStatusCode statusCode = sendReportedPropertiesResponse.getStatus();
-
-                if (statusCode == OK)
+            client.updateReportedPropertiesAsync(
+                reportedProperties,
+                (statusCode, e, callbackContext) ->
                 {
-                    System.out.println("Reported properties updated successfully");
-                }
-                else
-                {
-                    System.out.println("Reported properties failed to be updated. Status code: " + statusCode);
-                }
+                    if (statusCode == OK)
+                    {
+                        System.out.println("Reported properties updated successfully");
+                    }
+                    else
+                    {
+                        System.out.println("Reported properties failed to be updated. Status code: " + statusCode);
+                        e.printStackTrace();
+                    }
 
-                twinReportedPropertiesSentLatch.countDown();
-            });
+                    twinReportedPropertiesSentLatch.countDown();
+                },
+                null);
 
             twinReportedPropertiesSentLatch.await();
         }

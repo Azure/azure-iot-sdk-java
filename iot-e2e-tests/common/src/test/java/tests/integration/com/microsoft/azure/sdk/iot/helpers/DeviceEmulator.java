@@ -6,11 +6,8 @@
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesUpdate;
 import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
-import com.microsoft.azure.sdk.iot.device.twin.Property;
-import com.microsoft.azure.sdk.iot.device.twin.Twin;
 import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
 
 import java.io.IOException;
@@ -19,7 +16,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
-import java.util.function.Consumer;
 
 /**
  * Implement a fake device to the end to end test.
@@ -130,16 +126,18 @@ public class DeviceEmulator
     void subscribeToDeviceTwin() throws IOException
     {
         CountDownLatch subscribedLatch = new CountDownLatch(1);
-        client.subscribeToDesiredPropertiesAsync(desiredPropertiesUpdate ->
+        client.subscribeToDesiredPropertiesAsync(
+            (statusCode, context) -> subscribedLatch.countDown(),
+            null,
+            (twin, context) ->
             {
-                Twin twin = desiredPropertiesUpdate.getTwin();
                 TwinCollection desiredProperties = twin.getDesiredProperties();
                 for (String key : desiredProperties.keySet())
                 {
                     DeviceTwinProperty.onPropertyChanged(key, desiredProperties.get(key), null);
                 }
             },
-            (responseStatus, callbackContext) -> subscribedLatch.countDown());
+            null);
     }
 
     /**

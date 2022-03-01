@@ -21,9 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 import static java.util.Map.Entry;
@@ -42,9 +40,8 @@ public class TemperatureController {
         }
     }
 
-    private static final Consumer<SendReportedPropertiesResponse> sendReportedPropertiesResponseCallback = sendReportedPropertiesResponse ->
+    private static final UpdateReportedPropertiesCallback sendReportedPropertiesResponseCallback = (statusCode, e, callbackContext) ->
     {
-        IotHubStatusCode statusCode = sendReportedPropertiesResponse.getStatus();
         if (statusCode == OK)
         {
             System.out.println("Reported properties updated successfully");
@@ -52,6 +49,7 @@ public class TemperatureController {
         else
         {
             System.out.println("Reported properties failed to be updated. Status code: " + statusCode);
+            e.printStackTrace();
         }
     };
 
@@ -173,31 +171,35 @@ public class TemperatureController {
 
         log.debug("Set handler to receive \"targetTemperature\" updates.");
         deviceClient.subscribeToDesiredPropertiesAsync(
-            desiredPropertiesUpdate ->
+            (statusCode, context) ->
             {
-                TwinCollection desiredProperties = desiredPropertiesUpdate.getTwin().getDesiredProperties();
+                if (statusCode == OK)
+                {
+                    log.info("Successfully subscribed to desired properties. Getting initial state");
+                    deviceClient.getTwinAsync(
+                        (twin, getTwinContext) ->
+                        {
+                            log.info("Initial twin state received");
+                            log.info(twin.toString());
+                        },
+                        null);
+                }
+                else
+                {
+                    log.info("Failed to subscribe to desired properties. Error code {}", statusCode);
+                    System.exit(-1);
+                }
+            },
+            null,
+            (twin, context) ->
+            {
+                TwinCollection desiredProperties = twin.getDesiredProperties();
                 for (String desiredPropertyKey : desiredProperties.keySet())
                 {
                     TargetTemperatureUpdateCallback.onPropertyChanged(new Property(desiredPropertyKey, desiredProperties.get(desiredPropertyKey)), null); //TODO context
                 }
             },
-            (responseStatus, callbackContext) ->
-            {
-                if (responseStatus == OK)
-                {
-                    log.info("Successfully subscribed to desired properties. Getting initial state");
-                    deviceClient.getTwinAsync(getTwinResponse ->
-                    {
-                        log.info("Initial twin state received");
-                        log.info(getTwinResponse.getTwin().toString());
-                    });
-                }
-                else
-                {
-                    log.info("Failed to subscribe to desired properties. Error code {}", responseStatus);
-                    System.exit(-1);
-                }
-            });
+            null);
 
         updateDeviceInformation();
         sendDeviceMemory();
@@ -409,7 +411,7 @@ public class TemperatureController {
                         StatusCode.IN_PROGRESS.value,
                         property.getVersion().longValue(),
                         null);
-                deviceClient.updateReportedPropertiesAsync(pendingPropertyPatch, sendReportedPropertiesResponseCallback);
+                deviceClient.updateReportedPropertiesAsync(pendingPropertyPatch, sendReportedPropertiesResponseCallback, null);
                 log.debug("Property: Update - component=\"{}\", {\"{}\": {}°C} is {}", componentName, propertyName, targetTemperature, StatusCode.IN_PROGRESS);
 
                 // Update temperature in 2 steps
@@ -426,7 +428,7 @@ public class TemperatureController {
                         StatusCode.COMPLETED.value,
                         property.getVersion().longValue(),
                         "Successfully updated target temperature.");
-                deviceClient.updateReportedPropertiesAsync(completedPropertyPatch, sendReportedPropertiesResponseCallback);
+                deviceClient.updateReportedPropertiesAsync(completedPropertyPatch, sendReportedPropertiesResponseCallback, null);
                 log.debug("Property: Update - {\"{}\": {}°C} is {}", propertyName, temperature.get(componentName), StatusCode.COMPLETED);
             } else {
                 log.debug("Property: Received an unrecognized property update from service.");
@@ -450,7 +452,7 @@ public class TemperatureController {
             put("totalMemory", 1024);
         }});
 
-        deviceClient.updateReportedPropertiesAsync(deviceInfoPatch, sendReportedPropertiesResponseCallback);
+        deviceClient.updateReportedPropertiesAsync(deviceInfoPatch, sendReportedPropertiesResponseCallback, null);
         log.debug("Property: Update - component = \"{}\" is {}.", componentName, StatusCode.COMPLETED);
     }
     
@@ -469,7 +471,7 @@ public class TemperatureController {
         String propertyName = "serialNumber";
         TwinCollection propertyPatch = PnpConvention.createPropertyPatch(propertyName, SERIAL_NO);
 
-        deviceClient.updateReportedPropertiesAsync(propertyPatch, sendReportedPropertiesResponseCallback);
+        deviceClient.updateReportedPropertiesAsync(propertyPatch, sendReportedPropertiesResponseCallback, null);
         log.debug("Property: Update - {\"{}\": {}} is {}", propertyName, SERIAL_NO, StatusCode.COMPLETED);
     }
 
@@ -507,7 +509,7 @@ public class TemperatureController {
         double maxTemp = maxTemperature.get(componentName);
 
         TwinCollection reportedProperty = PnpConvention.createComponentPropertyPatch(propertyName, maxTemp, componentName);
-        deviceClient.updateReportedPropertiesAsync(reportedProperty, sendReportedPropertiesResponseCallback);
+        deviceClient.updateReportedPropertiesAsync(reportedProperty, sendReportedPropertiesResponseCallback, null);
         log.debug("Property: Update - {\"{}\": {}°C} is {}.", propertyName, maxTemp, StatusCode.COMPLETED);
     }
 

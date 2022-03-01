@@ -206,20 +206,16 @@ class MqttTwin extends Mqtt
         }
     }
 
-    private String getStatus(String token) throws TransportException
+    private String getStatus(String token)
     {
-        String status = null;
-
         if (token != null && token.matches("\\d{3}")) // 3 digit number
         {
-            status = token;
+            return token;
         }
         else
         {
-            this.throwDeviceTwinTransportException("Status could not be parsed");
+            throw new IllegalArgumentException("Status could not be parsed");
         }
-
-        return status;
     }
 
     private String getRequestId(String token)
@@ -258,7 +254,7 @@ class MqttTwin extends Mqtt
     }
 
     @Override
-    public IotHubTransportMessage receive() throws TransportException
+    public IotHubTransportMessage receive()
     {
         synchronized (this.receivedMessagesLock)
         {
@@ -302,7 +298,7 @@ class MqttTwin extends Mqtt
                             }
                             else
                             {
-                                this.throwDeviceTwinTransportException(new IotHubServiceException("Message received without status"));
+                                log.warn("Message received without status");
                             }
 
                             if (topicTokens.length > REQID_TOKEN)
@@ -329,7 +325,7 @@ class MqttTwin extends Mqtt
                                 }
                                 else
                                 {
-                                    this.throwDeviceTwinTransportException(new UnsupportedOperationException("Request Id is mandatory"));
+                                    log.warn("Request ID cannot be null");
                                 }
                             }
 
@@ -347,11 +343,6 @@ class MqttTwin extends Mqtt
                                     message = new IotHubTransportMessage(data, MessageType.DEVICE_TWIN);
                                     message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
                                 }
-                                else
-                                {
-
-                                    this.throwDeviceTwinTransportException(new UnsupportedOperationException());
-                                }
 
                                 // Case for $iothub/twin/PATCH/properties/desired/?$version={new version}
                                 // Tokenize on backslash
@@ -364,14 +355,6 @@ class MqttTwin extends Mqtt
                                     }
                                 }
                             }
-                            else
-                            {
-                                this.throwDeviceTwinTransportException(new UnsupportedOperationException());
-                            }
-                        }
-                        else
-                        {
-                            this.throwDeviceTwinTransportException(new UnsupportedOperationException());
                         }
                     }
                 }

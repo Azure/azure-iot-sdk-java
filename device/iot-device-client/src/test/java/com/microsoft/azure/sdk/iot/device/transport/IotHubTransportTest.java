@@ -228,51 +228,6 @@ public class IotHubTransportTest
         };
     }
 
-    //Tests_SRS_IOTHUBTRANSPORT_34_007: [If there was a packet in the inProgressPackets queue tied to the provided message, and the provided throwable is not a TransportException, this function shall call "handleMessageException" with the provided packet and a new transport exception with the provided exception as the inner exception.]
-    @Test
-    public void onMessageSentRetrievesFromInProgressAndCallsHandleMessageExceptionForNonTransportException()
-    {
-        //arrange
-        new Expectations()
-        {
-            {
-                mockedConfig.getDeviceId();
-                result = "someDeviceId";
-            }
-        };
-        final IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
-        final String messageId = "1234";
-        final IOException nonTransportException = new IOException();
-        final Map<String, IotHubTransportPacket> inProgressPackets = new ConcurrentHashMap<>();
-        inProgressPackets.put(messageId, mockedPacket);
-        Deencapsulation.setField(transport, "connectionStatus", CONNECTED);
-        Deencapsulation.setField(transport, "inProgressPackets", inProgressPackets);
-        new Expectations(IotHubTransport.class)
-        {
-            {
-                mockedMessage.getMessageId();
-                result = messageId;
-
-                new TransportException(nonTransportException);
-                result = mockedTransportException;
-
-                Deencapsulation.invoke(transport, "handleMessageException", new Class[] {IotHubTransportPacket.class, TransportException.class}, mockedPacket, mockedTransportException);
-            }
-        };
-
-        //act
-        transport.onMessageSent(mockedMessage, null, nonTransportException);
-
-        //assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(transport, "handleMessageException", new Class[] {IotHubTransportPacket.class, TransportException.class}, mockedPacket, mockedTransportException);
-                times = 1;
-            }
-        };
-    }
-
     //Tests_SRS_IOTHUBTRANSPORT_34_009: [If this function is called with a non-null message and a null exception, this function shall add that message to the receivedMessagesQueue.]
     @Test
     public void onMessageReceivedWithMessageAndNoExceptionAddsToQueue()
@@ -421,55 +376,6 @@ public class IotHubTransportTest
 
         //act
         transport.onConnectionLost(mockedTransportException, expectedConnectionId);
-
-        //assert
-        assertEquals("handleDisconnection", methodsCalled.toString());
-    }
-
-    //Tests_SRS_IOTHUBTRANSPORT_34_013: [If this function is called with any other type of exception, this function shall call handleDisconnection with that exception as the inner exception in a new TransportException.]
-    @Test
-    public void onConnectionLostWithOtherExceptionType()
-    {
-        //arrange
-        final StringBuilder methodsCalled = new StringBuilder();
-        new MockUp<IotHubTransport>()
-        {
-            @Mock void handleDisconnection(TransportException exception)
-            {
-                if (exception.equals(mockedTransportException))
-                {
-                    methodsCalled.append("handleDisconnection");
-                }
-            }
-        };
-        new Expectations()
-        {
-            {
-                mockedConfig.getDeviceId();
-                result = "someDeviceId";
-            }
-        };
-        final IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
-        final IOException nonTransportException = new IOException();
-        Deencapsulation.setField(transport, "connectionStatus", IotHubConnectionStatus.CONNECTED);
-        Deencapsulation.setField(transport, "iotHubTransportConnection", mockedIotHubTransportConnection);
-        final String expectedConnectionId = "1234";
-
-        new Expectations()
-        {
-            {
-                new TransportException(nonTransportException);
-                result = mockedTransportException;
-
-                Deencapsulation.invoke(transport, "handleDisconnection", new Class[] {TransportException.class}, mockedTransportException);
-
-                mockedIotHubTransportConnection.getConnectionId();
-                result = expectedConnectionId;
-            }
-        };
-
-        //act
-        transport.onConnectionLost(nonTransportException, expectedConnectionId);
 
         //assert
         assertEquals("handleDisconnection", methodsCalled.toString());

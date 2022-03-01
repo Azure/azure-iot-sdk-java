@@ -1010,27 +1010,27 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
     }
 
-    private void scheduleReconnection(Throwable throwable)
+    private void scheduleReconnection(TransportException exception)
     {
         if (!reconnectionScheduled)
         {
             reconnectionScheduled = true;
-            log.warn("Amqp connection was closed, creating a thread to notify transport layer", throwable);
+            log.warn("Amqp connection was closed, creating a thread to notify transport layer", exception);
 
             // preserve the session handlers through the reconnection attempts
             this.reconnectingDeviceSessionHandlers.putAll(this.sessionHandlers);
 
-            ReconnectionNotifier.notifyDisconnectAsync(throwable, this.listener, this.connectionId);
+            ReconnectionNotifier.notifyDisconnectAsync(exception, this.listener, this.connectionId);
         }
     }
 
-    private void scheduleDeviceSessionReconnection(Throwable throwable, String deviceId)
+    private void scheduleDeviceSessionReconnection(TransportException exception, String deviceId)
     {
         if (this.reconnectionsScheduled.get(deviceId) == null || !this.reconnectionsScheduled.get(deviceId))
         {
             this.reconnectionsScheduled.put(deviceId, true);
-            log.warn("Amqp session for device {} was closed, creating a thread to notify transport layer", deviceId, throwable);
-            ReconnectionNotifier.notifyDeviceDisconnectAsync(throwable, this.listener, this.connectionId, deviceId);
+            log.warn("Amqp session for device {} was closed, creating a thread to notify transport layer", deviceId, exception);
+            ReconnectionNotifier.notifyDeviceDisconnectAsync(exception, this.listener, this.connectionId, deviceId);
         }
     }
 

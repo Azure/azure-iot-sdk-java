@@ -21,11 +21,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.rules.RuleChain;
 import org.junit.rules.Timeout;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.rules.RerunFailedTestRule;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.rules.ThrottleResistantTestRule;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -61,9 +64,6 @@ public class TokenRenewalTests extends IntegrationTest
     final long EXPIRED_SAS_TOKEN_GRACE_PERIOD_SECONDS = 600; //service extends 10 minute grace period after a token has expired
     final long EXTRA_BUFFER_TO_ENSURE_TOKEN_EXPIRED_SECONDS = 120; //wait time beyond the expected grace period, just in case
 
-    private static final Integer SEND_TIMEOUT_MILLISECONDS = 60000;
-    private static final Integer RETRY_MILLISECONDS = 100;
-
     private final List<TestIdentity> testIdentities = new ArrayList<>();
 
     private static final int MULTIPLEX_COUNT = 5; // number of multiplexed devices to have per multiplexed connection
@@ -72,8 +72,10 @@ public class TokenRenewalTests extends IntegrationTest
 
     public TokenRenewalTests()
     {
-        // This overrides the IntegrationTest level timeout that is too restrictive for this particular test
-        timeout = new Timeout(TOKEN_RENEWAL_TEST_TIMEOUT_MILLISECONDS);
+        // This overrides the IntegrationTest level timeout that is too short for this particular test
+        testRerunRuleChain = RuleChain.outerRule(new RerunFailedTestRule())
+            .around(new ThrottleResistantTestRule())
+            .around(new Timeout(TOKEN_RENEWAL_TEST_TIMEOUT_MILLISECONDS));
     }
 
     @BeforeClass

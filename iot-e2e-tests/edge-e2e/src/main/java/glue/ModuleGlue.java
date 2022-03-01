@@ -1,22 +1,30 @@
 package glue;
 
-import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.ClientOptions;
+import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
+import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.ModuleClient;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
-import com.microsoft.azure.sdk.iot.device.hsm.UnixDomainSocketChannel;
-import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesUpdate;
-import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
-import com.microsoft.azure.sdk.iot.device.twin.GetTwinResponse;
-import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
-import com.microsoft.azure.sdk.iot.device.twin.Property;
 import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
 import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
-import com.microsoft.azure.sdk.iot.device.twin.SendReportedPropertiesResponse;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.hsm.UnixDomainSocketChannel;
+import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesUpdateCallback;
+import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
+import com.microsoft.azure.sdk.iot.device.twin.GetTwinCallback;
+import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
+import com.microsoft.azure.sdk.iot.device.twin.Property;
+import com.microsoft.azure.sdk.iot.device.twin.SubscribeToDesiredPropertiesCallback;
 import com.microsoft.azure.sdk.iot.device.twin.Twin;
 import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
+import com.microsoft.azure.sdk.iot.device.twin.UpdateReportedPropertiesCallback;
+import io.swagger.server.api.MainApiException;
 import io.swagger.server.api.model.Certificate;
 import io.swagger.server.api.model.ConnectResponse;
-import io.swagger.server.api.MainApiException;
 import io.swagger.server.api.model.RoundtripMethodCallBody;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -26,15 +34,20 @@ import io.vertx.core.json.JsonObject;
 import samples.com.microsoft.azure.sdk.iot.UnixDomainSocketSample;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.URISyntaxException;
+import java.net.URLStreamHandlerFactory;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
-import java.util.function.Consumer;
 
 
 @SuppressWarnings("ALL")
@@ -365,12 +378,20 @@ public class ModuleGlue
             });
             System.out.println("calling subscribeToDesiredPropertiesAsync");
             client.subscribeToDesiredPropertiesAsync(
-                new Consumer<DesiredPropertiesUpdate>()
+                new SubscribeToDesiredPropertiesCallback()
                 {
                     @Override
-                    public void accept(DesiredPropertiesUpdate desiredPropertiesUpdate)
+                    public void onSubscriptionAcknowledged(IotHubStatusCode statusCode, Object context)
                     {
-                        Twin twin = desiredPropertiesUpdate.getTwin();
+                        handler.handle(Future.succeededFuture());
+                    }
+                },
+                null,
+                new DesiredPropertiesUpdateCallback()
+                {
+                    @Override
+                    public void onDesiredPropertiesUpdate(Twin twin, Object context)
+                    {
                         TwinCollection desiredProperties = twin.getDesiredProperties();
                         for (String key : desiredProperties.keySet())
                         {
@@ -378,14 +399,7 @@ public class ModuleGlue
                         }
                     }
                 },
-                new IotHubEventCallback()
-                {
-                    @Override
-                    public void execute(IotHubStatusCode responseStatus, Object callbackContext)
-                    {
-                        handler.handle(Future.succeededFuture());
-                    }
-                });
+                null);
         }
     }
 
@@ -670,19 +684,20 @@ public class ModuleGlue
             this._handler = handler;
             try
             {
-                client.getTwinAsync(new Consumer<GetTwinResponse>()
-                {
-                    @Override
-                    public void accept(GetTwinResponse getTwinResponse)
+                client.getTwinAsync(
+                    new GetTwinCallback()
                     {
-                        Twin twin = getTwinResponse.getTwin();
-                        TwinCollection desiredProperties = twin.getDesiredProperties();
-                        for (String key : desiredProperties.keySet())
+                        @Override
+                        public void onTwinReceived(Twin twin, Object callbackContext)
                         {
-                            onPropertyChanged(new Property(key, desiredProperties.get(key)), null);
+                            TwinCollection desiredProperties = twin.getDesiredProperties();
+                            for (String key : desiredProperties.keySet())
+                            {
+                                onPropertyChanged(new Property(key, desiredProperties.get(key)), null);
+                            }
                         }
-                    }
-                });
+                    },
+                    null);
             }
             catch (IllegalStateException e)
             {
@@ -724,16 +739,16 @@ public class ModuleGlue
             try
             {
                 final CountDownLatch sendReportedPropertiesLatch = new CountDownLatch(1);
-                Consumer<SendReportedPropertiesResponse> sendReportedPropertiesResponseCallback = new Consumer<SendReportedPropertiesResponse>()
+                UpdateReportedPropertiesCallback sendReportedPropertiesResponseCallback = new UpdateReportedPropertiesCallback()
                 {
                     @Override
-                    public void accept(SendReportedPropertiesResponse sendReportedPropertiesResponse)
+                    public void onPropertiesUpdated(IotHubStatusCode statusCode, TransportException e, Object callbackContext)
                     {
                         sendReportedPropertiesLatch.countDown();
                     }
                 };
 
-                client.updateReportedPropertiesAsync(reportedProperties, sendReportedPropertiesResponseCallback);
+                client.updateReportedPropertiesAsync(reportedProperties, sendReportedPropertiesResponseCallback, null);
                 sendReportedPropertiesLatch.await();
             }
             catch (IllegalStateException | InterruptedException e)

@@ -238,6 +238,8 @@ public class TwinErrInjTests extends TwinCommon
     public void errorInjectionGetDeviceTwinFlow(Message errorInjectionMessage) throws Exception
     {
         // Arrange
+        this.testInstance.setup();
+
         List<com.microsoft.azure.sdk.iot.device.twin.Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates = new ArrayList<>();
 
         IotHubConnectionStatusChangeCallback connectionStatusUpdateCallback = (status, statusChangeReason, throwable, callbackContext) -> actualStatusUpdates.add(new Pair<>(status, throwable));
@@ -253,6 +255,7 @@ public class TwinErrInjTests extends TwinCommon
         // Assert
         IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, testInstance.testIdentity.getClient());
 
+        //TODO how does subscribing again affect the connection?
         super.testBasicTwinFlow();
     }
 }

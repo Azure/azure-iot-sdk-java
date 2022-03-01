@@ -116,7 +116,7 @@ class MqttDirectMethod extends Mqtt
     }
 
     @Override
-    public IotHubTransportMessage receive() throws TransportException
+    public IotHubTransportMessage receive()
     {
         synchronized (this.receivedMessagesLock)
         {
@@ -165,7 +165,7 @@ class MqttDirectMethod extends Mqtt
                             }
                             else
                             {
-                                throwMethodsTransportException("Request ID cannot be null");
+                                log.warn("Request ID cannot be null");
                             }
                         }
                     }

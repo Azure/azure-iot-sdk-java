@@ -6,15 +6,10 @@
 package tests.integration.com.microsoft.azure.sdk.iot.provisioning;
 
 
-import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesUpdate;
-import com.microsoft.azure.sdk.iot.device.twin.SendReportedPropertiesResponse;
 import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.twin.Property;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
-import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
@@ -45,12 +40,9 @@ import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol.*;
 import static junit.framework.TestCase.assertNotNull;
@@ -438,14 +430,20 @@ public class ProvisioningTests extends ProvisioningCommon
         deviceClient.open(false);
         CountDownLatch twinLock = new CountDownLatch(2);
         deviceClient.subscribeToDesiredPropertiesAsync(
-            desiredPropertiesUpdate ->
+            (statusCode, context) -> twinLock.countDown(),
+            null,
+            (twin, context) ->
             {
                 // don't care about handling desired properties for this test
             },
-            (responseStatus, callbackContext) -> twinLock.countDown());
+            null);
+
         TwinCollection twinCollection = new TwinCollection();
         twinCollection.put(expectedReportedPropertyName, expectedReportedPropertyValue);
-        deviceClient.updateReportedPropertiesAsync(twinCollection, sendReportedPropertiesResponse -> twinLock.countDown());
+        deviceClient.updateReportedPropertiesAsync(
+            twinCollection,
+            (statusCode, e, callbackContext) -> twinLock.countDown(),
+            null);
         twinLock.await(MAX_TWIN_PROPAGATION_WAIT_SECONDS, TimeUnit.SECONDS);
         deviceClient.close();
     }

@@ -39,13 +39,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Utility functions, setup and teardown for all device twin integration tests. This class should not contain any tests,
@@ -139,16 +139,33 @@ public class TwinCommon extends IntegrationTest
             this.twinServiceClient = new TwinClient(iotHubConnectionString, TwinClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
             this.registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
             this.queryClient = new QueryClient(iotHubConnectionString);
+        }
 
+        public void setup() throws IOException, GeneralSecurityException, IotHubException, URISyntaxException, ModuleClientException, InterruptedException
+        {
             if (clientType == ClientType.DEVICE_CLIENT)
             {
-                testIdentity = Tools.getTestDevice(iotHubConnectionString, protocol, authenticationType, true);
+                this.testIdentity = Tools.getTestDevice(iotHubConnectionString, protocol, authenticationType, true);
                 this.serviceTwin = new Twin(testIdentity.getDeviceId());
             }
             else
             {
-                testIdentity = Tools.getTestModule(iotHubConnectionString, protocol, authenticationType, true);
+                this.testIdentity = Tools.getTestModule(iotHubConnectionString, protocol, authenticationType, true);
                 this.serviceTwin = new Twin(testIdentity.getDeviceId(), ((TestModuleIdentity) testIdentity).getModuleId());
+            }
+
+            testIdentity.getClient().open(true);
+        }
+
+        public Twin getServiceClientTwin() throws IOException, IotHubException
+        {
+            if (this.clientType == ClientType.DEVICE_CLIENT)
+            {
+                return this.twinServiceClient.get(this.testIdentity.getDeviceId());
+            }
+            else
+            {
+                return this.twinServiceClient.get(this.testIdentity.getDeviceId(), ((TestModuleIdentity) this.testIdentity).getModuleId());
             }
         }
     }
@@ -169,51 +186,33 @@ public class TwinCommon extends IntegrationTest
 
     // a function that tests both reported and desired property functionality for a test instance. Can be called multiple
     // times and does not require a clean twin
-    public void testBasicTwinFlow() throws InterruptedException, IOException, IotHubException
+    public void testBasicTwinFlow() throws InterruptedException, IOException, IotHubException, TimeoutException
     {
         final String desiredPropertyKey = UUID.randomUUID().toString();
         final String desiredPropertyValue = UUID.randomUUID().toString();
 
-        Set<Pair> desiredProperties = new HashSet<>();
-        desiredProperties.add(new Pair(desiredPropertyKey, desiredPropertyValue));
-        testInstance.serviceTwin.setDesiredProperties(desiredProperties);
-
-        testInstance.testIdentity.getClient().open(true);
-
         // subscribe to desired properties
-        final CountDownLatch twinSubscribedLatch = new CountDownLatch(1);
         final CountDownLatch desiredPropertyUpdatedLatch = new CountDownLatch(1);
         AtomicReference<com.microsoft.azure.sdk.iot.device.twin.Twin> desiredPropertyUpdateAtomicReference = new AtomicReference<>();
-        testInstance.testIdentity.getClient().subscribeToDesiredPropertiesAsync(
-            desiredPropertiesUpdate ->
-            {
-                desiredPropertyUpdateAtomicReference.set(desiredPropertiesUpdate.getTwin());
-                desiredPropertyUpdatedLatch.countDown();
-            },
-            (statusCode, context) -> twinSubscribedLatch.countDown());
-
-        twinSubscribedLatch.await();
+        testInstance.testIdentity.getClient().subscribeToDesiredProperties((twin, context) ->
+        {
+            desiredPropertyUpdateAtomicReference.set(twin);
+            desiredPropertyUpdatedLatch.countDown();
+        });
 
         // after subscribing to desired properties, call getTwin to get the initial state
-        final CountDownLatch getTwinLatch = new CountDownLatch(1);
-        AtomicReference<com.microsoft.azure.sdk.iot.device.twin.Twin> twinAtomicReference = new AtomicReference<>();
-        testInstance.testIdentity.getClient().getTwinAsync(
-            getTwinResponse ->
-            {
-                twinAtomicReference.set(getTwinResponse.getTwin());
-                getTwinLatch.countDown();
-            });
-
-        getTwinLatch.await();
+        com.microsoft.azure.sdk.iot.device.twin.Twin twin = testInstance.testIdentity.getClient().getTwin();
 
         // a twin should have no the desired property yet
-        com.microsoft.azure.sdk.iot.device.twin.Twin twin = twinAtomicReference.get();
         assertNotNull(twin);
         assertNotNull(twin.getReportedProperties());
         assertNotNull(twin.getDesiredProperties());
         assertFalse(twin.getDesiredProperties().containsKey(desiredPropertyKey));
 
         // send a desired property update and wait for it to be received by the device/module
+        Set<Pair> desiredProperties = new HashSet<>();
+        desiredProperties.add(new Pair(desiredPropertyKey, desiredPropertyValue));
+        testInstance.serviceTwin.setDesiredProperties(desiredProperties);
         testInstance.twinServiceClient.patch(testInstance.serviceTwin);
 
         desiredPropertyUpdatedLatch.await();
@@ -231,48 +230,42 @@ public class TwinCommon extends IntegrationTest
         reportedProperties.put(reportedPropertyKey, reportedPropertyValue);
 
         // send the reported properties and wait for the service to have acknowledged them
-        final CountDownLatch reportedPropertiesSentLatch = new CountDownLatch(1);
-        AtomicReference<IotHubStatusCode> statusCodeAtomicReference = new AtomicReference<>();
-        testInstance.testIdentity.getClient().updateReportedPropertiesAsync(
-            reportedProperties,
-            sendReportedPropertiesResponse ->
-            {
-                statusCodeAtomicReference.set(sendReportedPropertiesResponse.getStatus());
-                reportedPropertiesSentLatch.countDown();
-            });
-
-        reportedPropertiesSentLatch.await();
+        IotHubStatusCode statusCode = testInstance.testIdentity.getClient().updateReportedProperties(reportedProperties);
 
         // the reported properties request should have been ack'd with OK from the service
-        IotHubStatusCode statusCode = statusCodeAtomicReference.get();
         assertEquals(IotHubStatusCode.OK, statusCode);
 
         // get the twin from the service client to check if the reported property is now present
-        if (testInstance.clientType == ClientType.DEVICE_CLIENT)
-        {
-            testInstance.serviceTwin = testInstance.twinServiceClient.get(testInstance.testIdentity.getDeviceId());
-        }
-        else
-        {
-            testInstance.serviceTwin = testInstance.twinServiceClient.get(testInstance.testIdentity.getDeviceId(), ((TestModuleIdentity) testInstance.testIdentity).getModuleId());
-        }
+        testInstance.serviceTwin = testInstance.getServiceClientTwin();
 
         Set<Pair> reportedPropertiesSet = testInstance.serviceTwin.getReportedProperties();
         assertTrue(reportedPropertiesSet.size() > 0);
-        boolean expectedKeyValuePairFound = false;
-        for (Pair pair : reportedPropertiesSet)
+        assertTrue("Did not find expected reported property key and/or value after the device reported it", isPropertyInSet(reportedPropertiesSet, reportedPropertyKey, reportedPropertyValue));
+    }
+
+    public static boolean isPropertyInSet(Set<Pair> reportedProperties, String key, String value)
+    {
+        for (Pair reportedProperty : reportedProperties)
         {
-            String actualReportedPropertyKey = pair.getKey();
-            String actualReportedPropertyValue = (String) pair.getValue();
-
-            expectedKeyValuePairFound = reportedPropertyKey.equals(actualReportedPropertyKey) && reportedPropertyValue.equals(actualReportedPropertyValue);
-
-            if (expectedKeyValuePairFound)
+            if (reportedProperty.getKey().equals(key) && reportedProperty.getValue().equals(value))
             {
-                break;
+                return true;
             }
         }
 
-        assertTrue("Did not find expected reported property key and/or value after the device reported it", expectedKeyValuePairFound);
+        return false;
+    }
+
+    public static boolean isPropertyInTwinCollection(TwinCollection desiredProperties, String expectedKey, String expectedValue)
+    {
+        for (String key : desiredProperties.keySet())
+        {
+            if (key.equals(expectedKey) && desiredProperties.get(key).equals(expectedValue))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

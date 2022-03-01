@@ -63,21 +63,20 @@ public abstract class IntegrationTest
     @Rule
     public ErrInjTestRule errInjTestRule = new ErrInjTestRule();
 
+    int E2E_TEST_TIMEOUT_MILLISECONDS = 5 * 60 * 1000;
+
     // The order of these two rules matters since the throttle resistant test rule will rerun tests "for free" if they
     // encounter a throttling exception, but the RerurnFailedTestRule will rerun a failed test only up to X times if it encounters
     // any exception. With the below order, a test can fail any number of times due to throttling without it counting
     // towards the X allowed retries defined in the RerunFailedTestRule. The overall test timeout rule will prevent
     // a test from infinitely retrying on throttling errors.
-    @Rule
-    public RuleChain testRerunRuleChain = RuleChain.outerRule(new RerunFailedTestRule())
-        .around(new ThrottleResistantTestRule());
-
-    int E2E_TEST_TIMEOUT_MILLISECONDS = 5 * 60 * 1000;
-
+    //
     // Each test must finish in under 5 minutes. Only the token renewal test should last longer,
     // but that test overrides this value to fit its needs as a very long test.
     @Rule
-    public Timeout timeout = new Timeout(E2E_TEST_TIMEOUT_MILLISECONDS);
+    public RuleChain testRerunRuleChain = RuleChain.outerRule(new RerunFailedTestRule())
+        .around(new ThrottleResistantTestRule())
+        .around(new Timeout(E2E_TEST_TIMEOUT_MILLISECONDS));
 
     public static boolean isBasicTierHub;
     public static boolean isPullRequest;
