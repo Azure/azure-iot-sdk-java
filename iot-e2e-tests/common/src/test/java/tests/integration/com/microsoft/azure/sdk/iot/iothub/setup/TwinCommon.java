@@ -100,8 +100,7 @@ public class TwinCommon extends IntegrationTest
     }
 
     // Max time to wait to see it on Hub
-    public static final long START_TWIN_TIMEOUT_MILLISECONDS = 30 * 1000; // 30 seconds
-
+    public static final long TWIN_TIMEOUT_MILLISECONDS = 30 * 1000; // 30 seconds
     public static final long DESIRED_PROPERTIES_PROPAGATION_TIME_MILLISECONDS = 5 * 1000; //5 seconds
 
     protected static String iotHubConnectionString = "";
@@ -126,6 +125,7 @@ public class TwinCommon extends IntegrationTest
         public QueryClient queryClient;
         public TestIdentity testIdentity;
         public Twin serviceTwin;
+        public com.microsoft.azure.sdk.iot.device.twin.Twin lastDesiredPropertyUpdate;
 
         public TwinTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException, InterruptedException
         {
@@ -153,6 +153,8 @@ public class TwinCommon extends IntegrationTest
                 this.testIdentity = Tools.getTestModule(iotHubConnectionString, protocol, authenticationType, true);
                 this.serviceTwin = new Twin(testIdentity.getDeviceId(), ((TestModuleIdentity) testIdentity).getModuleId());
             }
+
+            this.lastDesiredPropertyUpdate = new com.microsoft.azure.sdk.iot.device.twin.Twin(new TwinCollection(), new TwinCollection());
 
             testIdentity.getClient().open(true);
         }
@@ -186,21 +188,18 @@ public class TwinCommon extends IntegrationTest
 
     // a function that tests both reported and desired property functionality for a test instance. Can be called multiple
     // times and does not require a clean twin
-    public void testBasicTwinFlow() throws InterruptedException, IOException, IotHubException, TimeoutException
+    public void testBasicTwinFlow(boolean subscribe) throws InterruptedException, IOException, IotHubException, TimeoutException
     {
         final String desiredPropertyKey = UUID.randomUUID().toString();
         final String desiredPropertyValue = UUID.randomUUID().toString();
 
         // subscribe to desired properties
-        final CountDownLatch desiredPropertyUpdatedLatch = new CountDownLatch(1);
-        AtomicReference<com.microsoft.azure.sdk.iot.device.twin.Twin> desiredPropertyUpdateAtomicReference = new AtomicReference<>();
-        testInstance.testIdentity.getClient().subscribeToDesiredProperties(
-            (twin, context) ->
-            {
-                desiredPropertyUpdateAtomicReference.set(twin);
-                desiredPropertyUpdatedLatch.countDown();
-            },
-            null);
+        if (subscribe)
+        {
+            testInstance.testIdentity.getClient().subscribeToDesiredProperties(
+                (twin, context) -> testInstance.lastDesiredPropertyUpdate = twin,
+                null);
+        }
 
         // after subscribing to desired properties, onMethodInvoked getTwin to get the initial state
         com.microsoft.azure.sdk.iot.device.twin.Twin twin = testInstance.testIdentity.getClient().getTwin();
@@ -217,13 +216,15 @@ public class TwinCommon extends IntegrationTest
         testInstance.serviceTwin.setDesiredProperties(desiredProperties);
         testInstance.twinServiceClient.patch(testInstance.serviceTwin);
 
-        desiredPropertyUpdatedLatch.await();
-        com.microsoft.azure.sdk.iot.device.twin.Twin desiredPropertyUpdate = desiredPropertyUpdateAtomicReference.get();
-
         // the desired property update received by the device must match the key/value pair sent by the service client
-        assertTrue(desiredPropertyUpdate.getDesiredProperties().containsKey(desiredPropertyKey));
-        String value = (String) desiredPropertyUpdate.getDesiredProperties().get(desiredPropertyKey);
-        assertEquals(desiredPropertyValue, value);
+        long startTime = System.currentTimeMillis();
+        while (!isPropertyInTwinCollection(testInstance.lastDesiredPropertyUpdate.getDesiredProperties(), desiredPropertyKey, desiredPropertyValue))
+        {
+            if (System.currentTimeMillis() - startTime > TWIN_TIMEOUT_MILLISECONDS)
+            {
+                fail("Timed out waiting for expected desired property update on device client");
+            }
+        }
 
         // create some reported properties
         final String reportedPropertyKey = UUID.randomUUID().toString();

@@ -56,7 +56,7 @@ public class TwinTests extends TwinCommon
     @Test
     public void testBasicTwinFlow() throws InterruptedException, IOException, IotHubException, TimeoutException
     {
-        super.testBasicTwinFlow();
+        super.testBasicTwinFlow(true);
     }
 
     @Test

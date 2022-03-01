@@ -98,12 +98,6 @@ import com.google.gson.annotations.SerializedName;
 @SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
 public class Twin
 {
-    // the twin tags
-    private static final String TAGS_TAG = "tags";
-    @Expose(serialize = false)
-    @SerializedName(TAGS_TAG)
-    private TwinCollection tags;
-
     // the twin desired properties
     private static final String PROPERTIES_TAG = "properties";
     @Expose(serialize = false)
@@ -138,16 +132,11 @@ public class Twin
      *     }
      * </pre>
      *
-     * @param tags the {@link TwinCollection} with the initial tags state. It can be {@code null}.
      * @param desiredProperty the {@link TwinCollection} with the desired properties. It can be {@code null}.
      * @param reportedProperty the {@link TwinCollection} with the reported properties. It can be {@code null}.
      */
-    public Twin(TwinCollection tags, TwinCollection desiredProperty, TwinCollection reportedProperty)
+    public Twin(TwinCollection desiredProperty, TwinCollection reportedProperty)
     {
-        if (tags != null)
-        {
-            this.tags = TwinCollection.createFromRawCollection(tags);
-        }
         if (desiredProperty != null || reportedProperty != null)
         {
             this.properties = new TwinProperties(desiredProperty, reportedProperty);
@@ -181,17 +170,6 @@ public class Twin
         }
 
         return json;
-    }
-
-    /**
-     * Getter for the tags.
-     *
-     * @return The {@code TwinCollection} with the tags content. It can be {@code null}.
-     */
-    public TwinCollection getTags()
-    {
-        /* SRS_TWIN_STATE_21_005: [The getTags shall return a TwinCollection with the stored tags.] */
-        return new TwinCollection(this.tags);
     }
 
     /**
@@ -236,12 +214,6 @@ public class Twin
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().setPrettyPrinting().disableHtmlEscaping().create();
         JsonObject jsonObject = gson.toJsonTree(this).getAsJsonObject();
 
-        /* SRS_TWIN_STATE_21_009: [If the tags is null, the JSON shall not include the `tags`.] */
-        if (this.tags != null)
-        {
-            jsonObject.add(TAGS_TAG, this.tags.toJsonElementWithMetadata());
-        }
-
         /* SRS_TWIN_STATE_21_010: [If the properties is null, the JSON shall not include the `properties`.] */
         if (this.properties != null)
         {
@@ -278,7 +250,6 @@ public class Twin
          * as part of the collection. So, we need to reorganize this map using the
          * TwinCollection format. This constructor will do that.
          */
-        result.tags = new TwinCollection(result.getTags());
         if (result.properties != null)
         {
             result.properties = new TwinProperties(result.properties.getDesired(), result.properties.getReported());
@@ -308,7 +279,7 @@ public class Twin
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
         TwinCollection result = gson.fromJson(json, TwinCollection.class);
 
-        return new Twin(null, result, null);
+        return new Twin(result, null);
     }
 
     /**
@@ -332,7 +303,7 @@ public class Twin
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
         TwinCollection result = gson.fromJson(json, TwinCollection.class);
 
-        return new Twin(null, null, result);
+        return new Twin(null, result);
     }
 
     /**
@@ -356,7 +327,7 @@ public class Twin
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
         TwinProperties result = gson.fromJson(json, TwinProperties.class);
 
-        return new Twin(null, result.getDesired(), result.getReported());
+        return new Twin(result.getDesired(), result.getReported());
     }
 
     /**

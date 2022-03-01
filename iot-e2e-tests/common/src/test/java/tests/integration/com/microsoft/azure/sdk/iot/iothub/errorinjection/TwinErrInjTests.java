@@ -246,7 +246,7 @@ public class TwinErrInjTests extends TwinCommon
 
         this.testInstance.testIdentity.getClient().setConnectionStatusChangeCallback(connectionStatusUpdateCallback, null);
 
-        super.testBasicTwinFlow();
+        super.testBasicTwinFlow(true);
 
         // Act
         MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage, IotHubStatusCode.OK);
@@ -255,7 +255,7 @@ public class TwinErrInjTests extends TwinCommon
         // Assert
         IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, testInstance.testIdentity.getClient());
 
-        //TODO how does subscribing again affect the connection?
-        super.testBasicTwinFlow();
+        // user isn't expected to call client.subscribeToDesiredProperties again since the connection was only temporarily lost
+        super.testBasicTwinFlow(false);
     }
 }
