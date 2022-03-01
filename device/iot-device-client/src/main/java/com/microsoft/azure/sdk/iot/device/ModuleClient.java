@@ -343,7 +343,7 @@ public class ModuleClient extends InternalClient
      * @param callbackContext the context to be included in the callback when fired
      * @throws IllegalArgumentException if the provided outputName is null or empty
      */
-    public void sendEventAsync(Message message, IotHubEventCallback callback, Object callbackContext, String outputName) throws IllegalArgumentException
+    public void sendTelemetryAsync(Message message, IotHubEventCallback callback, Object callbackContext, String outputName) throws IllegalArgumentException
     {
         if (outputName == null || outputName.isEmpty())
         {
