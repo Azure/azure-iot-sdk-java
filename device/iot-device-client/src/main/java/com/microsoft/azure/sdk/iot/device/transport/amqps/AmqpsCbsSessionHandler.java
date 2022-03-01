@@ -5,7 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
+import com.microsoft.azure.sdk.iot.device.ClientConfiguration;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
@@ -92,10 +92,10 @@ class AmqpsCbsSessionHandler extends BaseHandler implements AmqpsLinkStateCallba
         }
     }
 
-    public void sendAuthenticationMessage(DeviceClientConfig deviceClientConfig, AuthenticationMessageCallback authenticationMessageCallback) throws TransportException
+    public void sendAuthenticationMessage(ClientConfiguration clientConfiguration, AuthenticationMessageCallback authenticationMessageCallback) throws TransportException
     {
         //Sender link attaches a correlation id to the authentication message and returns it here.
-        UUID correlationId = this.cbsSenderLinkHandler.sendAuthenticationMessage(deviceClientConfig);
+        UUID correlationId = this.cbsSenderLinkHandler.sendAuthenticationMessage(clientConfiguration);
 
         //Receiver link will get a delivery with the same correlation id containing the authentication status at some point.
         this.cbsReceiverLinkHandler.addAuthenticationMessageCorrelation(correlationId, authenticationMessageCallback);

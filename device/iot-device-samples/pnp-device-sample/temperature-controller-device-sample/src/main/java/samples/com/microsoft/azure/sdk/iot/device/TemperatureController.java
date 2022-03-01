@@ -40,7 +40,7 @@ public class TemperatureController {
         }
     }
 
-    private static final UpdateReportedPropertiesCallback sendReportedPropertiesResponseCallback = (statusCode, e, callbackContext) ->
+    private static final ReportedPropertiesCallback sendReportedPropertiesResponseCallback = (statusCode, e, callbackContext) ->
     {
         if (statusCode == OK)
         {
@@ -196,7 +196,7 @@ public class TemperatureController {
                 TwinCollection desiredProperties = twin.getDesiredProperties();
                 for (String desiredPropertyKey : desiredProperties.keySet())
                 {
-                    TargetTemperatureUpdateCallback.onPropertyChanged(new Property(desiredPropertyKey, desiredProperties.get(desiredPropertyKey)), null); //TODO context
+                    TargetTemperatureUpdateCallback.onPropertyChanged(new Property(desiredPropertyKey, desiredProperties.get(desiredPropertyKey)), null);
                 }
             },
             null);
@@ -315,7 +315,7 @@ public class TemperatureController {
 
         @SneakyThrows(InterruptedException.class)
         @Override
-        public DirectMethodResponse call(String methodName, Object methodData, Object context) {
+        public DirectMethodResponse onMethodInvoked(String methodName, Object methodData, Object context) {
             String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
 
             switch (methodName) {

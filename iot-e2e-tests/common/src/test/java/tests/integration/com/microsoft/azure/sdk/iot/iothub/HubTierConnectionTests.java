@@ -172,7 +172,7 @@ public class HubTierConnectionTests extends IntegrationTest
     protected static class MethodCallback implements com.microsoft.azure.sdk.iot.device.twin.MethodCallback
     {
         @Override
-        public DirectMethodResponse call(String methodName, Object methodData, Object context)
+        public DirectMethodResponse onMethodInvoked(String methodName, Object methodData, Object context)
         {
             return new DirectMethodResponse(200, "payload");
         }

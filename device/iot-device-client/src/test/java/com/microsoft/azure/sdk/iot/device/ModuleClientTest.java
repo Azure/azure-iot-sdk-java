@@ -42,7 +42,7 @@ import static junit.framework.TestCase.assertNotNull;
 public class ModuleClientTest
 {
     @Mocked
-    DeviceClientConfig mockedDeviceClientConfig;
+    ClientConfiguration mockedClientConfiguration;
 
     @Mocked
     IotHubConnectionString mockedIotHubConnectionString;
@@ -97,7 +97,7 @@ public class ModuleClientTest
                 mockedIotHubConnectionString.getModuleId();
                 result = "someModuleId";
 
-                mockedDeviceClientConfig.getModuleId();
+                mockedClientConfiguration.getModuleId();
                 result = "someModuleId";
             }
         };
@@ -164,7 +164,7 @@ public class ModuleClientTest
                 System.getenv();
                 result = mockedSystemVariables;
 
-                mockedDeviceClientConfig.getModuleId();
+                mockedClientConfiguration.getModuleId();
                 result = "someModuleId";
             }
         };
@@ -214,7 +214,7 @@ public class ModuleClientTest
                 new IotHubConnectionString(connString);
                 result = mockedIotHubConnectionString;
 
-                mockedDeviceClientConfig.getModuleId();
+                mockedClientConfiguration.getModuleId();
                 result = "some module id";
             }
         };
@@ -256,7 +256,7 @@ public class ModuleClientTest
         baseExpectations();
         ModuleClient client = new ModuleClient("some connection string", IotHubClientProtocol.MQTT);
         final String expectedOutputName = "some output name";
-        Deencapsulation.setField(client, "config", mockedDeviceClientConfig);
+        Deencapsulation.setField(client, "config", mockedClientConfiguration);
 
         //act
         client.sendEventAsync(mockedMessage, mockedIotHubEventCallback, new Object(), expectedOutputName);
@@ -284,15 +284,15 @@ public class ModuleClientTest
         ModuleClient client = new ModuleClient("some connection string", IotHubClientProtocol.MQTT);
         final String expectedDeviceId = "1234";
         final String expectedModuleId = "5678";
-        Deencapsulation.setField(client, "config", mockedDeviceClientConfig);
+        Deencapsulation.setField(client, "config", mockedClientConfiguration);
 
         new NonStrictExpectations()
         {
             {
-                mockedDeviceClientConfig.getDeviceId();
+                mockedClientConfiguration.getDeviceId();
                 result = expectedDeviceId;
 
-                mockedDeviceClientConfig.getModuleId();
+                mockedClientConfiguration.getModuleId();
                 result = expectedModuleId;
             }
         };
@@ -365,7 +365,7 @@ public class ModuleClientTest
         new Verifications()
         {
             {
-                mockedDeviceClientConfig.setMessageCallback(expectedInputName, mockedMessageCallback, any);
+                mockedClientConfiguration.setMessageCallback(expectedInputName, mockedMessageCallback, any);
                 times = 1;
             }
         };
@@ -719,7 +719,7 @@ public class ModuleClientTest
                 new IotHubConnectionString(expectedEdgeHubConnectionString);
                 result = mockedIotHubConnectionString;
 
-                mockedDeviceClientConfig.getModuleId();
+                mockedClientConfiguration.getModuleId();
                 result = "someModuleId";
             }
         };
@@ -760,7 +760,7 @@ public class ModuleClientTest
 
                 new IotHubConnectionString(expectedIotHubConnectionString);
                 result = mockedIotHubConnectionString;
-                mockedDeviceClientConfig.getModuleId();
+                mockedClientConfiguration.getModuleId();
                 result = "someModuleId";
             }
         };
@@ -781,7 +781,7 @@ public class ModuleClientTest
         new NonStrictExpectations()
         {
             {
-                new HttpsTransportManager((DeviceClientConfig) any);
+                new HttpsTransportManager((ClientConfiguration) any);
                 result = mockedHttpsTransportManager;
 
                 mockedHttpsTransportManager.invokeMethod(mockedMethodRequest, expectedDeviceId, "");
@@ -818,7 +818,7 @@ public class ModuleClientTest
         new NonStrictExpectations()
         {
             {
-                new HttpsTransportManager((DeviceClientConfig) any);
+                new HttpsTransportManager((ClientConfiguration) any);
                 result = mockedHttpsTransportManager;
 
                 mockedHttpsTransportManager.invokeMethod(mockedMethodRequest, expectedDeviceId, "");
@@ -843,7 +843,7 @@ public class ModuleClientTest
         new NonStrictExpectations()
         {
             {
-                new HttpsTransportManager((DeviceClientConfig) any);
+                new HttpsTransportManager((ClientConfiguration) any);
                 result = mockedHttpsTransportManager;
 
                 mockedHttpsTransportManager.invokeMethod(mockedMethodRequest, expectedDeviceId, expectedModuleId);
@@ -881,7 +881,7 @@ public class ModuleClientTest
         new NonStrictExpectations()
         {
             {
-                new HttpsTransportManager((DeviceClientConfig) any);
+                new HttpsTransportManager((ClientConfiguration) any);
                 result = mockedHttpsTransportManager;
 
                 mockedHttpsTransportManager.invokeMethod(mockedMethodRequest, expectedDeviceId, expectedModuleId);

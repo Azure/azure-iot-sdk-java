@@ -9,14 +9,14 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 
 /**
  * Detailed state notification callback for tracking a particular
- * {@link com.microsoft.azure.sdk.iot.device.InternalClient#updateReportedPropertiesAsync(TwinCollection, UpdateReportedPropertiesCorrelatingMessageCallback, Object)}
+ * {@link com.microsoft.azure.sdk.iot.device.InternalClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesUpdateCorrelatingMessageCallback, Object)}
  * request.
  *
  * Users who don't need all this information are advised to use
- * {@link com.microsoft.azure.sdk.iot.device.InternalClient#updateReportedPropertiesAsync(TwinCollection, UpdateReportedPropertiesCallback, Object)}
+ * {@link com.microsoft.azure.sdk.iot.device.InternalClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesCallback, Object)}
  * instead.
  */
-public interface UpdateReportedPropertiesCorrelatingMessageCallback
+public interface ReportedPropertiesUpdateCorrelatingMessageCallback
 {
     /**
      * Called when the message has been queued to the transport.
@@ -48,7 +48,7 @@ public interface UpdateReportedPropertiesCorrelatingMessageCallback
      *
      * @param message The response message received by the transport.
      * @param callbackContext The context sent with the message.
-     * @param statusCode The status of the update reported properties call as a whole.
+     * @param statusCode The status of the update reported properties onMethodInvoked as a whole.
      * @param e The error or exception given by the transport. If there are no errors this will be {@code null}.
      */
     void onResponseReceived(Message message, Object callbackContext, IotHubStatusCode statusCode, TransportException e);

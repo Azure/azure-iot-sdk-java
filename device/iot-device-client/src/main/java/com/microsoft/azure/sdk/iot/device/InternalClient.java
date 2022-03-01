@@ -8,22 +8,21 @@ package com.microsoft.azure.sdk.iot.device;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
-import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesUpdateCallback;
+import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesCallback;
 import com.microsoft.azure.sdk.iot.device.twin.DeviceTwin;
 import com.microsoft.azure.sdk.iot.device.twin.DirectMethod;
 import com.microsoft.azure.sdk.iot.device.twin.GetTwinCallback;
 import com.microsoft.azure.sdk.iot.device.twin.GetTwinCorrelatingMessageCallback;
 import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
-import com.microsoft.azure.sdk.iot.device.twin.SubscribeToDesiredPropertiesCallback;
+import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesCallback;
+import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesSubscriptionCallback;
+import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesUpdateCorrelatingMessageCallback;
 import com.microsoft.azure.sdk.iot.device.twin.Twin;
 import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
-import com.microsoft.azure.sdk.iot.device.twin.UpdateReportedPropertiesCallback;
-import com.microsoft.azure.sdk.iot.device.twin.UpdateReportedPropertiesCorrelatingMessageCallback;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -43,7 +42,7 @@ public class InternalClient
 
     private static final int DEFAULT_TIMEOUT_MILLISECONDS = 60 * 1000;
 
-    DeviceClientConfig config;
+    ClientConfiguration config;
     private DeviceIO deviceIO;
 
     boolean isMultiplexed = false;
@@ -57,14 +56,14 @@ public class InternalClient
     InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, ClientOptions clientOptions)
     {
         commonConstructorVerification(iotHubConnectionString, protocol);
-        this.config = new DeviceClientConfig(iotHubConnectionString, protocol, clientOptions);
+        this.config = new ClientConfiguration(iotHubConnectionString, protocol, clientOptions);
         this.deviceIO = new DeviceIO(this.config);
         setClientOptionValues(clientOptions);
     }
 
     InternalClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol)
     {
-        this.config = new DeviceClientConfig(iotHubAuthenticationProvider, protocol);
+        this.config = new ClientConfiguration(iotHubAuthenticationProvider, protocol);
         this.deviceIO = new DeviceIO(this.config);
     }
 
@@ -92,7 +91,7 @@ public class InternalClient
 
         IotHubConnectionString connectionString = new IotHubConnectionString(uri, deviceId, null, null);
 
-        this.config = new DeviceClientConfig(connectionString, securityProvider, protocol, clientOptions);
+        this.config = new ClientConfiguration(connectionString, securityProvider, protocol, clientOptions);
         this.deviceIO = new DeviceIO(this.config);
         setClientOptionValues(clientOptions);
     }
@@ -109,7 +108,7 @@ public class InternalClient
             throw new IllegalArgumentException("Protocol cannot be null.");
         }
 
-        this.config = new DeviceClientConfig(hostName, sasTokenProvider, protocol, clientOptions, deviceId, moduleId);
+        this.config = new ClientConfiguration(hostName, sasTokenProvider, protocol, clientOptions, deviceId, moduleId);
         this.deviceIO = new DeviceIO(this.config);
         setClientOptionValues(clientOptions);
     }
@@ -308,26 +307,28 @@ public class InternalClient
      * Start receiving desired property updates for this client. After subscribing to desired properties, this client can
      * freely send reported property updates and make getTwin calls.
      *
-     * @param desiredPropertiesUpdateCallback The callback to execute each time a desired property update message is received
+     * @param desiredPropertiesCallback The callback to execute each time a desired property update message is received
      * from the service. This will contain one or many properties updated at once.
+     * @param desiredPropertiesCallbackContext The context that will be included in the callback of desiredPropertiesCallback. May be null.
      * @return The status code returned by the service in response to subscribing to desired properties. If this value is
      * {@link IotHubStatusCode#OK} then the subscription was successfull. Otherwise, the subscription failed.
      * @throws TimeoutException if the service fails to acknowledge the subscription request within the default timeout.
      * @throws InterruptedException if the operation is interrupted while waiting on the subscription request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open.
      */
-    public IotHubStatusCode subscribeToDesiredProperties(DesiredPropertiesUpdateCallback desiredPropertiesUpdateCallback)
+    public IotHubStatusCode subscribeToDesiredProperties(DesiredPropertiesCallback desiredPropertiesCallback, Object desiredPropertiesCallbackContext)
         throws TimeoutException, InterruptedException, IllegalStateException
     {
-        return subscribeToDesiredProperties(desiredPropertiesUpdateCallback, DEFAULT_TIMEOUT_MILLISECONDS);
+        return subscribeToDesiredProperties(desiredPropertiesCallback, desiredPropertiesCallbackContext, DEFAULT_TIMEOUT_MILLISECONDS);
     }
 
     /**
      * Start receiving desired property updates for this client. After subscribing to desired properties, this client can
      * freely send reported property updates and make getTwin calls.
      *
-     * @param desiredPropertiesUpdateCallback The callback to execute each time a desired property update message is received
+     * @param desiredPropertiesCallback The callback to execute each time a desired property update message is received
      * from the service. This will contain one or many properties updated at once.
+     * @param desiredPropertiesCallbackContext The context that will be included in the callback of desiredPropertiesCallback. May be null.
      * @param timeoutMilliseconds The maximum number of milliseconds this call will wait for the service to acknowledge the subscription request. If 0,
      * then it will wait indefinitely.
      * @return The status code returned by the service in response to subscribing to desired properties. If this value is
@@ -336,7 +337,7 @@ public class InternalClient
      * @throws InterruptedException if the operation is interrupted while waiting on the subscription request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open.
      */
-    public IotHubStatusCode subscribeToDesiredProperties(DesiredPropertiesUpdateCallback desiredPropertiesUpdateCallback, int timeoutMilliseconds)
+    public IotHubStatusCode subscribeToDesiredProperties(DesiredPropertiesCallback desiredPropertiesCallback, Object desiredPropertiesCallbackContext, int timeoutMilliseconds)
         throws InterruptedException, TimeoutException, IllegalStateException
     {
         AtomicReference<IotHubStatusCode> statusCodeAtomicReference = new AtomicReference<>();
@@ -348,8 +349,8 @@ public class InternalClient
                 latch.countDown();
             },
             null,
-            desiredPropertiesUpdateCallback,
-            null);
+            desiredPropertiesCallback,
+            desiredPropertiesCallbackContext);
 
         if (timeoutMilliseconds == 0)
         {
@@ -554,6 +555,7 @@ public class InternalClient
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
      */
     public void sendTelemetryAsync(Message message, IotHubEventCallback callback, Object callbackContext)
+        throws IllegalStateException
     {
         verifyRegisteredIfMultiplexing();
         message.setConnectionDeviceId(this.config.getDeviceId());
@@ -576,6 +578,7 @@ public class InternalClient
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
      */
     public void sendTelemetryAsync(List<Message> messages, IotHubEventCallback callback, Object callbackContext)
+        throws IllegalStateException
     {
         verifyRegisteredIfMultiplexing();
 
@@ -593,18 +596,18 @@ public class InternalClient
      * Start receiving desired property updates for this client asynchronously. After subscribing to desired properties, this client can
      * freely send reported property updates and make getTwin calls.
      *
-     * @param subscribeToDesiredPropertiesCallback The callback to execute once the service has acknowledged the subscription request.
-     * @param subscribeToDesiredPropertiesCallbackContext The context that will be included in the callback of subscribeToDesiredPropertiesCallback. May be null.
-     * @param desiredPropertiesUpdateCallback The callback to execute each time a desired property update message is received
+     * @param desiredPropertiesSubscriptionCallback The callback to execute once the service has acknowledged the subscription request.
+     * @param desiredPropertiesSubscriptionCallbackContext The context that will be included in the callback of desiredPropertiesSubscriptionCallback. May be null.
+     * @param desiredPropertiesCallback The callback to execute each time a desired property update message is received
      * from the service. This will contain one or many properties updated at once.
-     * @param desiredPropertiesUpdateCallbackContext The context that will be included in each callback of desiredPropertiesUpdateCallback. May be null.
+     * @param desiredPropertiesCallbackContext The context that will be included in each callback of desiredPropertiesCallback. May be null.
      * @throws IllegalStateException if this client is not open.
      */
     public void subscribeToDesiredPropertiesAsync(
-        SubscribeToDesiredPropertiesCallback subscribeToDesiredPropertiesCallback,
-        Object subscribeToDesiredPropertiesCallbackContext,
-        DesiredPropertiesUpdateCallback desiredPropertiesUpdateCallback,
-        Object desiredPropertiesUpdateCallbackContext)
+        DesiredPropertiesSubscriptionCallback desiredPropertiesSubscriptionCallback,
+        Object desiredPropertiesSubscriptionCallbackContext,
+        DesiredPropertiesCallback desiredPropertiesCallback,
+        Object desiredPropertiesCallbackContext)
             throws IllegalStateException
     {
         verifyRegisteredIfMultiplexing();
@@ -621,30 +624,30 @@ public class InternalClient
         }
 
         this.twin.subscribeToDesiredPropertiesAsync(
-            subscribeToDesiredPropertiesCallback,
-            subscribeToDesiredPropertiesCallbackContext,
-            desiredPropertiesUpdateCallback,
-            desiredPropertiesUpdateCallbackContext);
+            desiredPropertiesSubscriptionCallback,
+            desiredPropertiesSubscriptionCallbackContext,
+            desiredPropertiesCallback,
+            desiredPropertiesCallbackContext);
     }
 
     /**
      * Patch this client's twin with the provided reported properties asynchronously.
      *
      * @param reportedProperties The reported property key/value pairs to add/update in the twin.
-     * @param updateReportedPropertiesCallback The callback to be executed once the reported properties update request
+     * @param reportedPropertiesCallback The callback to be executed once the reported properties update request
      * has been acknowledged by the service.
-     * @param callbackContext The context that will be included in the callback of updateReportedPropertiesCallback. May be null.
+     * @param callbackContext The context that will be included in the callback of reportedPropertiesCallback. May be null.
      * @throws IllegalStateException if this client is not open or if this client has not subscribed to desired properties yet.
      */
     public void updateReportedPropertiesAsync(
         TwinCollection reportedProperties,
-        UpdateReportedPropertiesCallback updateReportedPropertiesCallback,
+        ReportedPropertiesCallback reportedPropertiesCallback,
         Object callbackContext)
             throws IllegalStateException
     {
         this.updateReportedPropertiesAsync(
             reportedProperties,
-            new UpdateReportedPropertiesCorrelatingMessageCallback()
+            new ReportedPropertiesUpdateCorrelatingMessageCallback()
             {
                 @Override
                 public void onRequestQueued(Message message, Object callbackContext)
@@ -667,7 +670,7 @@ public class InternalClient
                 @Override
                 public void onResponseReceived(Message message, Object callbackContext, IotHubStatusCode statusCode, TransportException e)
                 {
-                    updateReportedPropertiesCallback.onPropertiesUpdated(statusCode, e, callbackContext);
+                    reportedPropertiesCallback.onReportedPropertiesUpdateAcknowledged(statusCode, e, callbackContext);
                 }
 
                 @Override
@@ -683,19 +686,19 @@ public class InternalClient
      * Patch this client's twin with the provided reported properties asynchronously.
      *
      * <p>
-     * This overload utilizes a more verbose callback than {@link #updateReportedPropertiesAsync(TwinCollection, UpdateReportedPropertiesCallback, Object)}
+     * This overload utilizes a more verbose callback than {@link #updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesCallback, Object)}
      * and is only intended for users who need insight on the state of this process every step of the way.
      * </p>
      *
      * @param reportedProperties The reported property key/value pairs to add/update in the twin.
-     * @param updateReportedPropertiesCorrelatingMessageCallback The callback to be executed once the state of the reported
+     * @param reportedPropertiesUpdateCorrelatingMessageCallback The callback to be executed once the state of the reported
      * properties update request message has changed. This provides context on when the message is queued, sent, acknowledged, etc.
      * @param callbackContext The context that will be included in each callback of updateReportedPropertiesCallback. May be null.
      * @throws IllegalStateException if this client is not open or if this client has not subscribed to desired properties yet.
      */
     public void updateReportedPropertiesAsync(
         TwinCollection reportedProperties,
-        UpdateReportedPropertiesCorrelatingMessageCallback updateReportedPropertiesCorrelatingMessageCallback,
+        ReportedPropertiesUpdateCorrelatingMessageCallback reportedPropertiesUpdateCorrelatingMessageCallback,
         Object callbackContext)
             throws IllegalStateException
     {
@@ -704,7 +707,7 @@ public class InternalClient
             this.twin = new DeviceTwin(this);
         }
 
-        this.twin.updateReportedPropertiesAsync(reportedProperties, updateReportedPropertiesCorrelatingMessageCallback, callbackContext);
+        this.twin.updateReportedPropertiesAsync(reportedProperties, reportedPropertiesUpdateCorrelatingMessageCallback, callbackContext);
     }
 
     /**
@@ -787,6 +790,45 @@ public class InternalClient
     }
 
     /**
+     * Subscribes to direct methods
+     *
+     * @param methodCallback Callback on which direct methods shall be invoked. Cannot be {@code null}.
+     * @param methodCallbackContext Context for device method callback. Can be {@code null}.
+     * @param methodStatusCallback Callback for providing IotHub status for direct methods. Cannot be {@code null}.
+     * @param methodStatusCallbackContext Context for device method status callback. Can be {@code null}.
+     *
+     * @throws IllegalStateException if called when client is not opened.
+     * @throws IllegalArgumentException if either callback are null.
+     */
+    public void subscribeToMethodsAsync(
+        MethodCallback methodCallback,
+        Object methodCallbackContext,
+        IotHubEventCallback methodStatusCallback,
+        Object methodStatusCallbackContext)
+        throws IllegalStateException
+    {
+        verifyRegisteredIfMultiplexing();
+        verifyMethodsAreSupported();
+
+        if (!this.deviceIO.isOpen())
+        {
+            throw new IllegalStateException("Open the client connection before using it");
+        }
+
+        if (methodCallback == null || methodStatusCallback == null)
+        {
+            throw new IllegalArgumentException("Callback cannot be null");
+        }
+
+        if (this.method == null)
+        {
+            this.method = new DirectMethod(this, methodStatusCallback, methodStatusCallbackContext);
+        }
+
+        this.method.subscribeToDirectMethods(methodCallback, methodCallbackContext);
+    }
+
+    /**
      * Sets the callback to be executed when the connection status of the device changes. The callback will be fired
      * with a status and a reason why the device's status changed. When the callback is fired, the provided context will
      * be provided alongside the status and reason.
@@ -846,45 +888,9 @@ public class InternalClient
      *
      * @return the value of the config.
      */
-    public DeviceClientConfig getConfig()
+    public ClientConfiguration getConfig()
     {
         return this.config;
-    }
-
-    /**
-     * Subscribes to direct methods
-     *
-     * @param methodCallback Callback on which direct methods shall be invoked. Cannot be {@code null}.
-     * @param methodCallbackContext Context for device method callback. Can be {@code null}.
-     * @param methodStatusCallback Callback for providing IotHub status for direct methods. Cannot be {@code null}.
-     * @param methodStatusCallbackContext Context for device method status callback. Can be {@code null}.
-     *
-     * @throws IllegalStateException if called when client is not opened.
-     * @throws IllegalArgumentException if either callback are null.
-     */
-    public void subscribeToMethodsAsync(MethodCallback methodCallback, Object methodCallbackContext,
-                                        IotHubEventCallback methodStatusCallback, Object methodStatusCallbackContext)
-            throws IllegalStateException
-    {
-        verifyRegisteredIfMultiplexing();
-        verifyMethodsAreSupported();
-
-        if (!this.deviceIO.isOpen())
-        {
-            throw new IllegalStateException("Open the client connection before using it");
-        }
-
-        if (methodCallback == null || methodStatusCallback == null)
-        {
-            throw new IllegalArgumentException("Callback cannot be null");
-        }
-
-        if (this.method == null)
-        {
-            this.method = new DirectMethod(this, methodStatusCallback, methodStatusCallbackContext);
-        }
-
-        this.method.subscribeToDirectMethods(methodCallback, methodCallbackContext);
     }
 
     // only used by the MultiplexingClient class to signal to this client that it needs to re-register twin

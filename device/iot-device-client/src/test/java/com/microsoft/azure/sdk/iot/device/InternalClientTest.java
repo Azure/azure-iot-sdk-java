@@ -35,7 +35,7 @@ public class InternalClientTest
     IotHubEventCallback mockedIotHubEventCallback;
 
     @Mocked
-    DeviceClientConfig mockConfig;
+    ClientConfiguration mockConfig;
 
     @Mocked
     IotHubConnectionString mockIotHubConnectionString;
@@ -101,11 +101,11 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityProvider.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, mockSecurityProvider, (IotHubClientProtocol) any, null);
+                Deencapsulation.newInstance(ClientConfiguration.class, new Class[] {IotHubConnectionString.class, SecurityProvider.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, mockSecurityProvider, (IotHubClientProtocol) any, null);
                 times = 1;
 
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                        new Class[] {DeviceClientConfig.class},
+                        new Class[] {ClientConfiguration.class},
                         any);
                 times = 1;
             }
@@ -137,7 +137,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, SecurityProvider.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, mockSecurityProvider, (IotHubClientProtocol) any, clientOptions);
+                Deencapsulation.newInstance(ClientConfiguration.class, new Class[] {IotHubConnectionString.class, SecurityProvider.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, mockSecurityProvider, (IotHubClientProtocol) any, clientOptions);
                 times = 1;
             }
         };
@@ -221,17 +221,17 @@ public class InternalClientTest
             {
                 Deencapsulation.newInstance(IotHubConnectionString.class, mockIotHubConnectionString);
                 times = 1;
-                Deencapsulation.newInstance(DeviceClientConfig.class, any, DeviceClientConfig.AuthType.SAS_TOKEN);
+                Deencapsulation.newInstance(ClientConfiguration.class, any, ClientConfiguration.AuthType.SAS_TOKEN);
                 times = 1;
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                        new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class},
+                        new Class[] {ClientConfiguration.class, IotHubClientProtocol.class},
                         any, protocol);
                 times = 1;
             }
         };
     }
 
-    /* Tests_SRS_INTERNALCLIENT_21_003: [The constructor shall save the connection configuration using the object DeviceClientConfig.] */
+    /* Tests_SRS_INTERNALCLIENT_21_003: [The constructor shall save the connection configuration using the object ClientConfiguration.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorBadDeviceClientConfigThrows() throws URISyntaxException, IOException
     {
@@ -245,10 +245,10 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                Deencapsulation.newInstance(DeviceClientConfig.class, any, DeviceClientConfig.AuthType.SAS_TOKEN);
+                Deencapsulation.newInstance(ClientConfiguration.class, any, ClientConfiguration.AuthType.SAS_TOKEN);
                 times = 1;
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                        new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class},
+                        new Class[] {ClientConfiguration.class, IotHubClientProtocol.class},
                         any, protocol);
                 times = 0;
             }
@@ -271,7 +271,7 @@ public class InternalClientTest
         {
             {
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                        new Class[] {DeviceClientConfig.class},
+                        new Class[] {ClientConfiguration.class},
                         any);
                 times = 1;
 

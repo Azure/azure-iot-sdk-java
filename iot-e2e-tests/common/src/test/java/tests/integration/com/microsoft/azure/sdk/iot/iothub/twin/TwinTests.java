@@ -11,7 +11,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.twin.GetTwinCorrelatingMessageCallback;
 import com.microsoft.azure.sdk.iot.device.twin.Twin;
 import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
-import com.microsoft.azure.sdk.iot.device.twin.UpdateReportedPropertiesCorrelatingMessageCallback;
+import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesUpdateCorrelatingMessageCallback;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.twin.Pair;
@@ -71,11 +71,13 @@ public class TwinTests extends TwinCommon
         // subscribe to desired properties
         final CountDownLatch desiredPropertyUpdatedLatch = new CountDownLatch(1);
         AtomicReference<Twin> desiredPropertyUpdateAtomicReference = new AtomicReference<>();
-        testInstance.testIdentity.getClient().subscribeToDesiredProperties((twin, context) ->
-        {
-            desiredPropertyUpdateAtomicReference.set(twin);
-            desiredPropertyUpdatedLatch.countDown();
-        });
+        testInstance.testIdentity.getClient().subscribeToDesiredProperties(
+            (twin, context) ->
+            {
+                desiredPropertyUpdateAtomicReference.set(twin);
+                desiredPropertyUpdatedLatch.countDown();
+            },
+            null);
 
         // send a desired property update and wait for it to be received by the device/module
         Set<Pair> desiredProperties = new HashSet<>();
@@ -105,20 +107,22 @@ public class TwinTests extends TwinCommon
         final CountDownLatch desiredProperty1UpdatedLatch = new CountDownLatch(1);
         final CountDownLatch desiredProperty2UpdatedLatch = new CountDownLatch(1);
         AtomicReference<Twin> desiredPropertyUpdateAtomicReference = new AtomicReference<>();
-        testInstance.testIdentity.getClient().subscribeToDesiredProperties((twin, context) ->
-        {
-            desiredPropertyUpdateAtomicReference.set(twin);
-
-            if (twin.getDesiredProperties().containsKey(desiredPropertyKey1))
+        testInstance.testIdentity.getClient().subscribeToDesiredProperties(
+            (twin, context) ->
             {
-                desiredProperty1UpdatedLatch.countDown();
-            }
+                desiredPropertyUpdateAtomicReference.set(twin);
 
-            if (twin.getDesiredProperties().containsKey(desiredPropertyKey2))
-            {
-                desiredProperty2UpdatedLatch.countDown();
-            }
-        });
+                if (twin.getDesiredProperties().containsKey(desiredPropertyKey1))
+                {
+                    desiredProperty1UpdatedLatch.countDown();
+                }
+
+                if (twin.getDesiredProperties().containsKey(desiredPropertyKey2))
+                {
+                    desiredProperty2UpdatedLatch.countDown();
+                }
+            },
+            null);
 
         // send a desired property update and wait for it to be received by the device/module
         Set<Pair> desiredProperties = new HashSet<>();
@@ -152,10 +156,12 @@ public class TwinTests extends TwinCommon
         final String reportedPropertyKey2 = UUID.randomUUID().toString();
         final String reportedPropertyValue2 = UUID.randomUUID().toString();
 
-        testInstance.testIdentity.getClient().subscribeToDesiredProperties((twin, context) ->
-        {
-            // don't care about desired properties for this test. Just need to open twin links
-        });
+        testInstance.testIdentity.getClient().subscribeToDesiredProperties(
+            (twin, context) ->
+            {
+                // don't care about desired properties for this test. Just need to open twin links
+            },
+            null);
 
         com.microsoft.azure.sdk.iot.device.twin.TwinCollection twinCollection = new com.microsoft.azure.sdk.iot.device.twin.TwinCollection();
         twinCollection.put(reportedPropertyKey1, reportedPropertyValue1);
@@ -178,10 +184,12 @@ public class TwinTests extends TwinCommon
         final String reportedPropertyKey2 = UUID.randomUUID().toString();
         final String reportedPropertyValue2 = UUID.randomUUID().toString();
 
-        testInstance.testIdentity.getClient().subscribeToDesiredProperties((twin, context) ->
-        {
-            // don't care about desired properties for this test. Just need to open twin links
-        });
+        testInstance.testIdentity.getClient().subscribeToDesiredProperties(
+            (twin, context) ->
+            {
+                // don't care about desired properties for this test. Just need to open twin links
+            },
+            null);
 
         // send one reported property
         com.microsoft.azure.sdk.iot.device.twin.TwinCollection twinCollection = new com.microsoft.azure.sdk.iot.device.twin.TwinCollection();
@@ -212,13 +220,15 @@ public class TwinTests extends TwinCommon
         // subscribe to desired properties
         final CountDownLatch desiredPropertyUpdatedLatch = new CountDownLatch(1);
         AtomicReference<com.microsoft.azure.sdk.iot.device.twin.Twin> desiredPropertyUpdateAtomicReference = new AtomicReference<>();
-        testInstance.testIdentity.getClient().subscribeToDesiredProperties((twin, context) ->
-        {
-            desiredPropertyUpdateAtomicReference.set(twin);
-            desiredPropertyUpdatedLatch.countDown();
-        });
+        testInstance.testIdentity.getClient().subscribeToDesiredProperties(
+            (twin, context) ->
+            {
+                desiredPropertyUpdateAtomicReference.set(twin);
+                desiredPropertyUpdatedLatch.countDown();
+            },
+            null);
 
-        // after subscribing to desired properties, call getTwin to get the initial state
+        // after subscribing to desired properties, onMethodInvoked getTwin to get the initial state
         AtomicReference<com.microsoft.azure.sdk.iot.device.twin.Twin> twinAtomicReference = new AtomicReference<>();
 
         final Object expectedGetTwinContext = new Object();
@@ -324,7 +334,7 @@ public class TwinTests extends TwinCommon
         AtomicReference<IotHubStatusCode> iotHubStatusCodeAtomicReference = new AtomicReference<>();
         testInstance.testIdentity.getClient().updateReportedPropertiesAsync(
             reportedProperties,
-            new UpdateReportedPropertiesCorrelatingMessageCallback()
+            new ReportedPropertiesUpdateCorrelatingMessageCallback()
             {
                 @Override
                 public void onRequestQueued(Message message, Object callbackContext)

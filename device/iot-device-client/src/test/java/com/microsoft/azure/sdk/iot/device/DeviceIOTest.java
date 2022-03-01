@@ -3,7 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubReceiveTask;
@@ -43,8 +42,8 @@ public class DeviceIOTest
     @Mocked
     IotHubTransport mockedTransport;
 
-    @Mocked 
-    DeviceClientConfig mockConfig;
+    @Mocked
+    ClientConfiguration mockConfig;
 
     @Mocked
     Executors mockExecutors;
@@ -52,7 +51,7 @@ public class DeviceIOTest
     @Mocked
     ScheduledExecutorService mockScheduler;
 
-    private final static Collection<DeviceClientConfig> configs = new ArrayList<>();
+    private final static Collection<ClientConfiguration> configs = new ArrayList<>();
 
     @Mocked
     IotHubEventCallback mockedIotHubEventCallback;
@@ -72,7 +71,7 @@ public class DeviceIOTest
         };
 
         final DeviceIO deviceIO = Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                new Class[] {DeviceClientConfig.class},
+                new Class[] {ClientConfiguration.class},
                 mockConfig);
 
         assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
@@ -109,7 +108,7 @@ public class DeviceIOTest
 
         // act
         Object deviceIO = Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                new Class[] {DeviceClientConfig.class},
+                new Class[] {ClientConfiguration.class},
                 mockConfig);
 
         // assert
@@ -119,14 +118,14 @@ public class DeviceIOTest
     /* Tests_SRS_DEVICE_IO_21_003: [The constructor shall initialize the IoT Hub transport that uses the `protocol` specified.] */
     @Test
     public void constructorMqttSuccess(
-            @Mocked final DeviceClientConfig mockConfig)
+            @Mocked final ClientConfiguration mockConfig)
     {
         // arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
 
         // act
         Object deviceIO = Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                new Class[] {DeviceClientConfig.class},
+                new Class[] {ClientConfiguration.class},
                 mockConfig);
 
 
@@ -140,7 +139,7 @@ public class DeviceIOTest
     {
         // arrange
         DeviceIO deviceIO = Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                new Class[] {DeviceClientConfig.class},
+                new Class[] {ClientConfiguration.class},
                 mockConfig);
 
         // assert
@@ -420,7 +419,7 @@ public class DeviceIOTest
     @Test (expected = IllegalArgumentException.class)
     public void setReceivePeriodInMillisecondsNegativeIntervalThrows(
             @Mocked final IotHubTransport mockedTransport,
-            @Mocked final DeviceClientConfig mockConfig)
+            @Mocked final ClientConfiguration mockConfig)
             throws URISyntaxException, IOException, InterruptedException
     {
         // arrange

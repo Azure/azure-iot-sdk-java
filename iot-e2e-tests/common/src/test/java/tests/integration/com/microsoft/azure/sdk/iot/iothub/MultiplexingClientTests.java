@@ -750,7 +750,7 @@ public class MultiplexingClientTests extends IntegrationTest
         }
 
         @Override
-        public DirectMethodResponse call(String methodName, Object methodData, Object context) {
+        public DirectMethodResponse onMethodInvoked(String methodName, Object methodData, Object context) {
             directMethodCallbackFired = true;
             if (methodName.equals(expectedMethodName))
             {

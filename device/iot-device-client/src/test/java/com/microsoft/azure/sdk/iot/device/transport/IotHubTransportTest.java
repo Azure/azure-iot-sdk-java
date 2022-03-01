@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
+import com.microsoft.azure.sdk.iot.device.ClientConfiguration;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
@@ -55,7 +55,7 @@ import static junit.framework.TestCase.*;
 public class IotHubTransportTest
 {
     @Mocked
-    DeviceClientConfig mockedConfig;
+    ClientConfiguration mockedConfig;
 
     @Mocked
     Message mockedMessage;
@@ -131,7 +131,7 @@ public class IotHubTransportTest
 
         //assert
         assertEquals(DISCONNECTED, Deencapsulation.getField(transport, "connectionStatus"));
-        Map<String, DeviceClientConfig> configs = Deencapsulation.getField(transport, "deviceClientConfigs");
+        Map<String, ClientConfiguration> configs = Deencapsulation.getField(transport, "deviceClientConfigs");
         assertEquals(1, configs.size());
         assertEquals(configs.values().iterator().next(), mockedConfig);
     }
@@ -437,7 +437,7 @@ public class IotHubTransportTest
         };
         IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
         Deencapsulation.setField(transport, "connectionStatus", DISCONNECTED_RETRYING);
-        Collection<DeviceClientConfig> configs = new ArrayList<>();
+        Collection<ClientConfiguration> configs = new ArrayList<>();
         configs.add(mockedConfig);
 
         //act
@@ -460,7 +460,7 @@ public class IotHubTransportTest
 
         final IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
         Deencapsulation.setField(transport, "connectionStatus", DISCONNECTED);
-        Collection<DeviceClientConfig> configs = new ArrayList<>();
+        Collection<ClientConfiguration> configs = new ArrayList<>();
         configs.add(mockedConfig);
 
         new MockUp<IotHubTransport>()
@@ -506,7 +506,7 @@ public class IotHubTransportTest
 
         final IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
         Deencapsulation.setField(transport, "connectionStatus", CONNECTED);
-        Collection<DeviceClientConfig> configs = new ArrayList<>();
+        Collection<ClientConfiguration> configs = new ArrayList<>();
         configs.add(mockedConfig);
 
         //act
@@ -813,7 +813,7 @@ public class IotHubTransportTest
         };
 
         final IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
-        ((Map<String, DeviceClientConfig>) Deencapsulation.getField(transport, "deviceClientConfigs")).put("someDeviceId", mockedConfig);
+        ((Map<String, ClientConfiguration>) Deencapsulation.getField(transport, "deviceClientConfigs")).put("someDeviceId", mockedConfig);
         Deencapsulation.setField(transport, "iotHubTransportConnection", null);
 
         //act
@@ -861,7 +861,7 @@ public class IotHubTransportTest
         };
 
         final IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
-        ((Map<String, DeviceClientConfig>) Deencapsulation.getField(transport, "deviceClientConfigs")).put("someDeviceId", mockedConfig);
+        ((Map<String, ClientConfiguration>) Deencapsulation.getField(transport, "deviceClientConfigs")).put("someDeviceId", mockedConfig);
 
         //act
         Deencapsulation.invoke(transport, "openConnection");
@@ -904,7 +904,7 @@ public class IotHubTransportTest
         };
 
         final IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
-        ((Map<String, DeviceClientConfig>) Deencapsulation.getField(transport, "deviceClientConfigs")).put("someDeviceId", mockedConfig);
+        ((Map<String, ClientConfiguration>) Deencapsulation.getField(transport, "deviceClientConfigs")).put("someDeviceId", mockedConfig);
 
         //act
         Deencapsulation.invoke(transport, "openConnection");
@@ -946,7 +946,7 @@ public class IotHubTransportTest
         };
 
         final IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
-        ((Map<String, DeviceClientConfig>) Deencapsulation.getField(transport, "deviceClientConfigs")).put("someDeviceId", mockedConfig);
+        ((Map<String, ClientConfiguration>) Deencapsulation.getField(transport, "deviceClientConfigs")).put("someDeviceId", mockedConfig);
 
         //act
         Deencapsulation.invoke(transport, "openConnection");
@@ -986,7 +986,7 @@ public class IotHubTransportTest
             }
         };
         final IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
-        ((Map<String, DeviceClientConfig>) Deencapsulation.getField(transport, "deviceClientConfigs")).put("someDeviceId", mockedConfig);
+        ((Map<String, ClientConfiguration>) Deencapsulation.getField(transport, "deviceClientConfigs")).put("someDeviceId", mockedConfig);
 
         //act
         Deencapsulation.invoke(transport, "openConnection");
@@ -2485,7 +2485,7 @@ public class IotHubTransportTest
         {
             {
                 mockedConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = ClientConfiguration.AuthType.SAS_TOKEN;
                 mockedConfig.getSasTokenAuthentication().isSasTokenExpired();
                 result = true;
             }
@@ -2515,7 +2515,7 @@ public class IotHubTransportTest
         {
             {
                 mockedConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = ClientConfiguration.AuthType.SAS_TOKEN;
                 mockedConfig.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary();
                 result = false;
             }
@@ -2545,7 +2545,7 @@ public class IotHubTransportTest
         {
             {
                 mockedConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
+                result = ClientConfiguration.AuthType.X509_CERTIFICATE;
                 mockedConfig.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary();
                 result = true;
             }

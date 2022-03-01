@@ -57,7 +57,7 @@ class AmqpsSasTokenRenewalHandler extends BaseHandler implements AuthenticationM
         if (!isClosed)
         {
             log.debug("Sending authentication message for device {}", amqpsSessionHandler.getDeviceId());
-            amqpsCbsSessionHandler.sendAuthenticationMessage(amqpsSessionHandler.getDeviceClientConfig(), this);
+            amqpsCbsSessionHandler.sendAuthenticationMessage(amqpsSessionHandler.getClientConfiguration(), this);
 
             scheduleRenewal(reactor);
         }
@@ -104,7 +104,7 @@ class AmqpsSasTokenRenewalHandler extends BaseHandler implements AuthenticationM
     @SuppressWarnings("ConstantConditions")
     private void scheduleRenewal(Reactor reactor)
     {
-        int sasTokenRenewalPeriod = this.amqpsSessionHandler.getDeviceClientConfig().getSasTokenAuthentication().getMillisecondsBeforeProactiveRenewal();
+        int sasTokenRenewalPeriod = this.amqpsSessionHandler.getClientConfiguration().getSasTokenAuthentication().getMillisecondsBeforeProactiveRenewal();
 
         log.trace("Scheduling proactive sas token renewal for device {} in {} milliseconds", this.amqpsSessionHandler.getDeviceId(), sasTokenRenewalPeriod);
 

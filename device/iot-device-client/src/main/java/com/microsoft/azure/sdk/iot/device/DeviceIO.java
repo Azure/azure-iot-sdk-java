@@ -22,54 +22,6 @@ import java.util.concurrent.TimeUnit;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
 
-/*
- *     +-------------------------------------+                  +-----------------------------------+
- *     |                                     |                  |                                   |
- *     |             DeviceClient            |------------------+        DeviceClientConfig         |
- *     |                                     |                  |                                   |
- *     +-------------------------------------+                  +-----------------------------------+
- *        |                        |
- *        |                       \/
- *        |  +---------------------------------------------------------------------------------------------+
- *        |  | Services                                                                                    |
- *        |  |  +-----------+    +------------+    +--------------+                        +------------+  |
- *        |  |  | Telemetry |    | DeviceTwin |    | DirectMethod |                        | FileUpload |  |
- *        |  |  +-----------+    +------------+    +--------------+                        +---------+--+  |
- *        |  +---------------------------------------------------------------------------------------|-----+
- *        |                                    |                                                     |
- *       \/                                   \/                                                     |
- *     #####################################################################################         |
- *     # DeviceIO                                                                          #         |
- *     #  +----------------+    +-------------------------------------+    +------------+  #         |
- *     #  |                |    |                open                 |    |            |  #         |
- *     #  | sendTelemetryAsync |    |                   +---------------+ |    |   close    |  #         |
- *     #  |                |    |                   | taskScheduler | |    |            |  #         |
- *     #  +--------+-------+    +--+----------------+--+---------+--+-+    +--------+---+  #         |
- *     ############|###############|###################|#########|##################|#######         |
- *                 |               |                   |         |                  |                |
- *                 |               |                  \/        \/                  |                |
- *                 |               |    +----------------+   +-------------------+  |                |
- *                 |               |    | IoTHubSendTask |   | IoTHubReceiveTask |  |                |
- *                 |               |    |   +--------+   |   |    +---------+    |  |                |
- *                 |               |    |   |   Run  |   |   |    |   Run   |    |  |                |
- *                 |               |    +---+---+----+---+   +----+----+----+----+  |                |
- * IotHubTransport |               |            |                      |            |                |
- *       +---------|---------------|------------|----------------------|------------|--------+   +----------------------------------------------+
- *       |        \/              \/           \/                     \/           \/        |   | IoTHubTransportManager                       |
- *       |  +------------+  +------------+  +--------------+  +---------------+  +---------+ |   |  +------+  +-------+  +------+  +---------+  |
- *       |  | addMessage |  |    Open    |  | sendMessages |  | handleMessage |  |  Close  | |   |  | Open |  | Close |  | send |  | receive |  |
- *       |  +------------+  +------------+  +--------------+  +---------------+  +---------+ |   |  +------+  +-------+  +------+  +---------+  |
- *       +----------+--------------------------------+-------------------------+-------------+   +---+------------------------------------------+
- *                  |                                |                         |                     |
- *                 \/                               \/                        \/                    \/
- *      +-------------------------+    +-------------------------+    +------------------+  +-----------------------+
- *      |      AmqpsTransport     |    |      MqttTransport      |    |  HttpsTransport  |  | HttpsTransportManager |
- *      +-------------------------+    +-------------------------+    +---------------------------------------------+
- *      |  AmqpsIotHubConnection  |    |  MqttIotHubConnection   |    |             HttpsIotHubConnection           |
- *      +-------------------------+    +-------------------------+    +---------------------------------------------+
- *
- */
-
 /**
  * The task scheduler for sending and receiving messages for the Device Client
  */
@@ -102,7 +54,7 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
      * @throws IllegalArgumentException if any of {@code config} or
      * {@code protocol} are {@code null}.
      */
-    DeviceIO(DeviceClientConfig config)
+    DeviceIO(ClientConfiguration config)
     {
         if (config == null)
         {
@@ -185,12 +137,12 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
         }
     }
 
-    void registerMultiplexedDeviceClient(List<DeviceClientConfig> configs, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
+    void registerMultiplexedDeviceClient(List<ClientConfiguration> configs, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
     {
         this.transport.registerMultiplexedDeviceClient(configs, timeoutMilliseconds);
     }
 
-    void unregisterMultiplexedDeviceClient(List<DeviceClientConfig> configs, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
+    void unregisterMultiplexedDeviceClient(List<ClientConfiguration> configs, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
     {
         this.transport.unregisterMultiplexedDeviceClient(configs, timeoutMilliseconds);
     }

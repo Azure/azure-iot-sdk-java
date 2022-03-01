@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
+import com.microsoft.azure.sdk.iot.device.ClientConfiguration;
 import com.microsoft.azure.sdk.iot.device.twin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
@@ -51,15 +51,15 @@ final class AmqpsTwinSenderLinkHandler extends AmqpsSenderLinkHandler
     // response each message received is.
     private final Map<String, DeviceOperations> twinOperationCorrelationMap;
 
-    AmqpsTwinSenderLinkHandler(Sender sender, AmqpsLinkStateCallback amqpsLinkStateCallback, DeviceClientConfig deviceClientConfig, String linkCorrelationId, Map<String, DeviceOperations> twinOperationCorrelationMap)
+    AmqpsTwinSenderLinkHandler(Sender sender, AmqpsLinkStateCallback amqpsLinkStateCallback, ClientConfiguration clientConfiguration, String linkCorrelationId, Map<String, DeviceOperations> twinOperationCorrelationMap)
     {
-        super(sender, amqpsLinkStateCallback, linkCorrelationId, deviceClientConfig.getModelId());
+        super(sender, amqpsLinkStateCallback, linkCorrelationId, clientConfiguration.getModelId());
 
-        this.senderLinkAddress = getAddress(deviceClientConfig);
+        this.senderLinkAddress = getAddress(clientConfiguration);
 
         //Note that this correlation id value must be equivalent to the correlation id in the twin receiver link that it is paired with
         this.amqpProperties.put(Symbol.getSymbol(CORRELATION_ID_KEY), Symbol.getSymbol(CORRELATION_ID_KEY_PREFIX + this.linkCorrelationId));
-        this.amqpProperties.put(Symbol.getSymbol(VERSION_IDENTIFIER_KEY), deviceClientConfig.getProductInfo().getUserAgentString());
+        this.amqpProperties.put(Symbol.getSymbol(VERSION_IDENTIFIER_KEY), clientConfiguration.getProductInfo().getUserAgentString());
 
         this.twinOperationCorrelationMap = twinOperationCorrelationMap;
     }
@@ -136,10 +136,10 @@ final class AmqpsTwinSenderLinkHandler extends AmqpsSenderLinkHandler
         protonMessage.setMessageAnnotations(messageAnnotations);
     }
 
-    static String getTag(DeviceClientConfig deviceClientConfig, String linkCorrelationId)
+    static String getTag(ClientConfiguration clientConfiguration, String linkCorrelationId)
     {
-        String moduleId = deviceClientConfig.getModuleId();
-        String deviceId = deviceClientConfig.getDeviceId();
+        String moduleId = clientConfiguration.getModuleId();
+        String deviceId = clientConfiguration.getDeviceId();
         if (moduleId != null && !moduleId.isEmpty())
         {
             return SENDER_LINK_TAG_PREFIX + deviceId + "/" + moduleId + "-" + linkCorrelationId;
@@ -150,10 +150,10 @@ final class AmqpsTwinSenderLinkHandler extends AmqpsSenderLinkHandler
         }
     }
 
-    private static String getAddress(DeviceClientConfig deviceClientConfig)
+    private static String getAddress(ClientConfiguration clientConfiguration)
     {
-        String moduleId = deviceClientConfig.getModuleId();
-        String deviceId = deviceClientConfig.getDeviceId();
+        String moduleId = clientConfiguration.getModuleId();
+        String deviceId = clientConfiguration.getDeviceId();
         if (moduleId != null && !moduleId.isEmpty())
         {
             return String.format(MODULE_SENDER_LINK_ENDPOINT_PATH, deviceId, moduleId);

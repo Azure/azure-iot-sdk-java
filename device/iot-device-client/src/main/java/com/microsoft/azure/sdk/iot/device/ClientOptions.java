@@ -8,7 +8,7 @@ import lombok.Getter;
 
 import javax.net.ssl.SSLContext;
 
-import static com.microsoft.azure.sdk.iot.device.DeviceClientConfig.DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
+import static com.microsoft.azure.sdk.iot.device.ClientConfiguration.DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
 
 /**
  * Options that allow configuration of the device client instance during initialization.
@@ -96,7 +96,7 @@ public final class ClientOptions
      */
     @Getter
     @Builder.Default
-    private final int amqpAuthenticationSessionTimeout = DeviceClientConfig.DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT_IN_SECONDS;
+    private final int amqpAuthenticationSessionTimeout = ClientConfiguration.DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT_IN_SECONDS;
 
     /**
      * This option is applicable for AMQP.
@@ -105,7 +105,7 @@ public final class ClientOptions
      */
     @Getter
     @Builder.Default
-    private final int amqpDeviceSessionTimeout = DeviceClientConfig.DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS;
+    private final int amqpDeviceSessionTimeout = ClientConfiguration.DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS;
 
     /**
      * This option is applicable to all protocols.

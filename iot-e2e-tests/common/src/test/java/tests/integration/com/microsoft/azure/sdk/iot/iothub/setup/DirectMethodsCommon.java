@@ -58,9 +58,6 @@ public class DirectMethodsCommon extends IntegrationTest
     public static final int METHOD_THROWS = 403;
     public static final int METHOD_NOT_DEFINED = 404;
 
-    private static final int DEVICE_METHOD_SUBSCRIBE_TIMEOUT_MILLISECONDS = 60 * 1000;
-    private static final int METHOD_SUBSCRIBE_CHECK_PERIOD_MILLISECONDS = 1000;
-
     @Parameterized.Parameters(name = "{0}_{1}_{2}")
     public static Collection inputs()
     {
@@ -76,14 +73,7 @@ public class DirectMethodsCommon extends IntegrationTest
     protected static final int CONNECTION_TIMEOUT = 5;
     protected static final String PAYLOAD_STRING = "This is a valid payload";
 
-    // How much to wait until a message makes it to the server, in milliseconds
-    protected static final Integer SEND_TIMEOUT_MILLISECONDS = 60000;
-
-    //How many milliseconds between retry
-    protected static final Integer RETRY_MILLISECONDS = 100;
-
     protected DirectMethodTestInstance testInstance;
-    protected static final long ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
 
     protected static Collection inputsCommon()
     {

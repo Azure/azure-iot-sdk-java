@@ -194,13 +194,15 @@ public class TwinCommon extends IntegrationTest
         // subscribe to desired properties
         final CountDownLatch desiredPropertyUpdatedLatch = new CountDownLatch(1);
         AtomicReference<com.microsoft.azure.sdk.iot.device.twin.Twin> desiredPropertyUpdateAtomicReference = new AtomicReference<>();
-        testInstance.testIdentity.getClient().subscribeToDesiredProperties((twin, context) ->
-        {
-            desiredPropertyUpdateAtomicReference.set(twin);
-            desiredPropertyUpdatedLatch.countDown();
-        });
+        testInstance.testIdentity.getClient().subscribeToDesiredProperties(
+            (twin, context) ->
+            {
+                desiredPropertyUpdateAtomicReference.set(twin);
+                desiredPropertyUpdatedLatch.countDown();
+            },
+            null);
 
-        // after subscribing to desired properties, call getTwin to get the initial state
+        // after subscribing to desired properties, onMethodInvoked getTwin to get the initial state
         com.microsoft.azure.sdk.iot.device.twin.Twin twin = testInstance.testIdentity.getClient().getTwin();
 
         // a twin should have no the desired property yet

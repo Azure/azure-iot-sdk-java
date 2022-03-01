@@ -4,14 +4,12 @@
 package com.microsoft.azure.sdk.iot.device.twin;
 
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
-import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import lombok.Getter;
 
 /**
  * Callback to be executed when a reported properties update request has completed.
  */
-public interface UpdateReportedPropertiesCallback
+public interface ReportedPropertiesCallback
 {
     /**
      * The callback that is executed when the reported properties update request has completed.
@@ -19,7 +17,7 @@ public interface UpdateReportedPropertiesCallback
      * processed succesfully.
      * @param e The exception that was encountered if any exception was encountered.
      * @param context The context that was provided for this callback in
-     * {@link com.microsoft.azure.sdk.iot.device.InternalClient#updateReportedPropertiesAsync(TwinCollection, UpdateReportedPropertiesCallback, Object)}
+     * {@link com.microsoft.azure.sdk.iot.device.InternalClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesCallback, Object)}
      */
-    void onPropertiesUpdated(IotHubStatusCode statusCode, TransportException e, Object context);
+    void onReportedPropertiesUpdateAcknowledged(IotHubStatusCode statusCode, TransportException e, Object context);
 }

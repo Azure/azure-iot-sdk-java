@@ -23,7 +23,7 @@ import java.util.Map;
  */
 public class HttpsTransportManager
 {
-    private final DeviceClientConfig config;
+    private final ClientConfiguration config;
     private HttpsIotHubConnection httpsIotHubConnection;
 
     private static final String MODULE_ID = "x-ms-edge-moduleId";
@@ -39,7 +39,7 @@ public class HttpsTransportManager
      * @param config is the set of device configurations.
      * @throws IllegalArgumentException is the config is null.
      */
-    public HttpsTransportManager(DeviceClientConfig config) throws IllegalArgumentException
+    public HttpsTransportManager(ClientConfiguration config) throws IllegalArgumentException
     {
         if (config == null)
         {

@@ -51,7 +51,7 @@ public class ModuleMethodSample
     protected static class SampleMethodCallback implements MethodCallback
     {
         @Override
-        public DirectMethodResponse call(String methodName, Object methodData, Object context)
+        public DirectMethodResponse onMethodInvoked(String methodName, Object methodData, Object context)
         {
             DirectMethodResponse deviceDirectMethodResponse;
             int status = method_default(methodData);

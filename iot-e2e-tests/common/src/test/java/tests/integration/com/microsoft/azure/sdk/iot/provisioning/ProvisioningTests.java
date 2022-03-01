@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol.*;
 import static junit.framework.TestCase.assertNotNull;
@@ -422,16 +423,13 @@ public class ProvisioningTests extends ProvisioningCommon
         return iotHubsToReprovisionTo;
     }
 
-    private void sendReportedPropertyUpdate(String expectedReportedPropertyName, String expectedReportedPropertyValue, String iothubUri, String deviceId) throws InterruptedException, IOException, URISyntaxException
+    private void sendReportedPropertyUpdate(String expectedReportedPropertyName, String expectedReportedPropertyValue, String iothubUri, String deviceId) throws InterruptedException, IOException, URISyntaxException, TimeoutException
     {
         //hardcoded AMQP here only because we aren't testing this connection. We just need to open a connection to send a twin update so that
         // we can test if the twin updates carry over after reprovisioning
         DeviceClient deviceClient = new DeviceClient(iothubUri, deviceId, testInstance.securityProvider, IotHubClientProtocol.AMQPS);
         deviceClient.open(false);
-        CountDownLatch twinLock = new CountDownLatch(2);
-        deviceClient.subscribeToDesiredPropertiesAsync(
-            (statusCode, context) -> twinLock.countDown(),
-            null,
+        deviceClient.subscribeToDesiredProperties(
             (twin, context) ->
             {
                 // don't care about handling desired properties for this test
@@ -440,11 +438,7 @@ public class ProvisioningTests extends ProvisioningCommon
 
         TwinCollection twinCollection = new TwinCollection();
         twinCollection.put(expectedReportedPropertyName, expectedReportedPropertyValue);
-        deviceClient.updateReportedPropertiesAsync(
-            twinCollection,
-            (statusCode, e, callbackContext) -> twinLock.countDown(),
-            null);
-        twinLock.await(MAX_TWIN_PROPAGATION_WAIT_SECONDS, TimeUnit.SECONDS);
+        deviceClient.updateReportedProperties(twinCollection);
         deviceClient.close();
     }
 

@@ -1,6 +1,6 @@
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
+import com.microsoft.azure.sdk.iot.device.ClientConfiguration;
 import com.microsoft.azure.sdk.iot.device.twin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
@@ -22,7 +22,7 @@ import static com.microsoft.azure.sdk.iot.device.MessageType.*;
 class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
 {
     @Getter
-    private final DeviceClientConfig deviceClientConfig;
+    private final ClientConfiguration clientConfiguration;
 
     // "Explicit" vs "Implicit" here refers to actions that the user initiated ("Explicit"ly calling startTwin)
     // vs actions the SDK initiated ("Implicit"ly opening twin links after reconnecting because they were open previously)
@@ -57,9 +57,9 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
     private boolean sessionHandlerClosedBeforeRemoteSessionOpened;
     private boolean isClosing;
 
-    AmqpsSessionHandler(final DeviceClientConfig deviceClientConfig, AmqpsSessionStateCallback amqpsSessionStateCallback)
+    AmqpsSessionHandler(final ClientConfiguration clientConfiguration, AmqpsSessionStateCallback amqpsSessionStateCallback)
     {
-        this.deviceClientConfig = deviceClientConfig;
+        this.clientConfiguration = clientConfiguration;
         this.amqpsSessionStateCallback = amqpsSessionStateCallback;
     }
 
@@ -130,7 +130,7 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
 
     public String getDeviceId()
     {
-        return this.deviceClientConfig.getDeviceId();
+        return this.clientConfiguration.getDeviceId();
     }
 
     @Override
@@ -151,7 +151,7 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
             log.trace("Closing an out of date session now that the service has opened the session remotely.");
             this.session.close();
         }
-        else if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
+        else if (this.clientConfiguration.getAuthenticationType() == ClientConfiguration.AuthType.X509_CERTIFICATE)
         {
             log.trace("Opening worker links for device {}", this.getDeviceId());
             openLinks();
@@ -346,7 +346,7 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
 
     SendResult sendMessage(Message message)
     {
-        if (!this.deviceClientConfig.getDeviceId().equals(message.getConnectionDeviceId()))
+        if (!this.clientConfiguration.getDeviceId().equals(message.getConnectionDeviceId()))
         {
             // This should never happen since this session handler was chosen from a map of device Id -> session handler
             // so it should have the same device Id as in the map it was grabbed from.
@@ -504,11 +504,11 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
     {
         String telemetryLinkCorrelationId = UUID.randomUUID().toString();
 
-        Sender sender = session.sender(AmqpsTelemetrySenderLinkHandler.getTag(deviceClientConfig, telemetryLinkCorrelationId));
-        this.senderLinkHandlers.put(DEVICE_TELEMETRY, new AmqpsTelemetrySenderLinkHandler(sender, this, this.deviceClientConfig, telemetryLinkCorrelationId));
+        Sender sender = session.sender(AmqpsTelemetrySenderLinkHandler.getTag(clientConfiguration, telemetryLinkCorrelationId));
+        this.senderLinkHandlers.put(DEVICE_TELEMETRY, new AmqpsTelemetrySenderLinkHandler(sender, this, this.clientConfiguration, telemetryLinkCorrelationId));
 
-        Receiver receiver = session.receiver(AmqpsTelemetryReceiverLinkHandler.getTag(deviceClientConfig, telemetryLinkCorrelationId));
-        this.receiverLinkHandlers.put(DEVICE_TELEMETRY, new AmqpsTelemetryReceiverLinkHandler(receiver, this, this.deviceClientConfig, telemetryLinkCorrelationId));
+        Receiver receiver = session.receiver(AmqpsTelemetryReceiverLinkHandler.getTag(clientConfiguration, telemetryLinkCorrelationId));
+        this.receiverLinkHandlers.put(DEVICE_TELEMETRY, new AmqpsTelemetryReceiverLinkHandler(receiver, this, this.clientConfiguration, telemetryLinkCorrelationId));
         this.alreadyCreatedTelemetryLinks = true;
     }
 
@@ -519,11 +519,11 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
         log.debug("Creating direct method links");
         String methodsLinkCorrelationId = UUID.randomUUID().toString();
 
-        Sender sender = session.sender(AmqpsMethodsSenderLinkHandler.getTag(deviceClientConfig, methodsLinkCorrelationId));
-        this.senderLinkHandlers.put(DEVICE_METHODS, new AmqpsMethodsSenderLinkHandler(sender, this, this.deviceClientConfig, methodsLinkCorrelationId));
+        Sender sender = session.sender(AmqpsMethodsSenderLinkHandler.getTag(clientConfiguration, methodsLinkCorrelationId));
+        this.senderLinkHandlers.put(DEVICE_METHODS, new AmqpsMethodsSenderLinkHandler(sender, this, this.clientConfiguration, methodsLinkCorrelationId));
 
-        Receiver receiver = session.receiver(AmqpsMethodsReceiverLinkHandler.getTag(deviceClientConfig, methodsLinkCorrelationId));
-        this.receiverLinkHandlers.put(DEVICE_METHODS, new AmqpsMethodsReceiverLinkHandler(receiver, this, this.deviceClientConfig, methodsLinkCorrelationId));
+        Receiver receiver = session.receiver(AmqpsMethodsReceiverLinkHandler.getTag(clientConfiguration, methodsLinkCorrelationId));
+        this.receiverLinkHandlers.put(DEVICE_METHODS, new AmqpsMethodsReceiverLinkHandler(receiver, this, this.clientConfiguration, methodsLinkCorrelationId));
 
         this.subscribeToMethodsOnReconnection = true;
         this.alreadyCreatedMethodLinks = true;
@@ -540,11 +540,11 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
         //This map allows the sender link to know how to handle a message that is received with a correlation id
         Map<String, DeviceOperations> twinOperationCorrelationMap = new HashMap<>();
 
-        Sender sender = session.sender(AmqpsTwinSenderLinkHandler.getTag(deviceClientConfig, twinLinkCorrelationId));
-        this.senderLinkHandlers.put(DEVICE_TWIN, new AmqpsTwinSenderLinkHandler(sender, this, this.deviceClientConfig, twinLinkCorrelationId, twinOperationCorrelationMap));
+        Sender sender = session.sender(AmqpsTwinSenderLinkHandler.getTag(clientConfiguration, twinLinkCorrelationId));
+        this.senderLinkHandlers.put(DEVICE_TWIN, new AmqpsTwinSenderLinkHandler(sender, this, this.clientConfiguration, twinLinkCorrelationId, twinOperationCorrelationMap));
 
-        Receiver receiver = session.receiver(AmqpsTwinReceiverLinkHandler.getTag(deviceClientConfig, twinLinkCorrelationId));
-        this.receiverLinkHandlers.put(DEVICE_TWIN, new AmqpsTwinReceiverLinkHandler(receiver, this, this.deviceClientConfig, twinLinkCorrelationId, twinOperationCorrelationMap));
+        Receiver receiver = session.receiver(AmqpsTwinReceiverLinkHandler.getTag(clientConfiguration, twinLinkCorrelationId));
+        this.receiverLinkHandlers.put(DEVICE_TWIN, new AmqpsTwinReceiverLinkHandler(receiver, this, this.clientConfiguration, twinLinkCorrelationId, twinOperationCorrelationMap));
 
         this.subscribeToTwinOnReconnection = true;
         this.alreadyCreatedTwinLinks = true;

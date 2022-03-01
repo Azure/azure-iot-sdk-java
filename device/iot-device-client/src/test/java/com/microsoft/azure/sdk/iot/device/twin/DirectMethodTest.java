@@ -27,7 +27,7 @@ public class DirectMethodTest
     InternalClient mockedInternalClient;
 
     @Mocked
-    DeviceClientConfig mockedConfig;
+    ClientConfiguration mockedConfig;
 
     @Mocked
     IotHubEventCallback mockedStatusCB;
@@ -60,7 +60,7 @@ public class DirectMethodTest
         };
 
         InternalClient testClient = Deencapsulation.getField(testMethod, "client");
-        DeviceClientConfig testConfig = Deencapsulation.getField(testMethod, "config");
+        ClientConfiguration testConfig = Deencapsulation.getField(testMethod, "config");
         IotHubEventCallback testStatusCallback = Deencapsulation.getField(testMethod, "deviceMethodStatusCallback");
 
         assertNotNull(testClient);
@@ -195,7 +195,7 @@ public class DirectMethodTest
         new NonStrictExpectations()
         {
             {
-                mockedDeviceMethodCB.call(anyString, any, any);
+                mockedDeviceMethodCB.onMethodInvoked(anyString, any, any);
                 result = testUserData;
 
                 new IotHubTransportMessage((byte[]) any, DEVICE_METHODS);
@@ -250,7 +250,7 @@ public class DirectMethodTest
         new NonStrictExpectations()
         {
             {
-                mockedDeviceMethodCB.call(anyString, any, any);
+                mockedDeviceMethodCB.onMethodInvoked(anyString, any, any);
                 result = testUserData;
             }
         };
@@ -289,7 +289,7 @@ public class DirectMethodTest
         new NonStrictExpectations()
         {
             {
-                mockedDeviceMethodCB.call(anyString, any, any);
+                mockedDeviceMethodCB.onMethodInvoked(anyString, any, any);
                 result = testUserData;
             }
         };
@@ -330,7 +330,7 @@ public class DirectMethodTest
         new NonStrictExpectations()
         {
             {
-                mockedDeviceMethodCB.call(anyString, any, any);
+                mockedDeviceMethodCB.onMethodInvoked(anyString, any, any);
                 result = testUserData;
             }
         };
@@ -366,7 +366,7 @@ public class DirectMethodTest
         new NonStrictExpectations()
         {
             {
-                mockedDeviceMethodCB.call(anyString, any, any);
+                mockedDeviceMethodCB.onMethodInvoked(anyString, any, any);
                 result = new Exception("Test Exception");
             }
         };

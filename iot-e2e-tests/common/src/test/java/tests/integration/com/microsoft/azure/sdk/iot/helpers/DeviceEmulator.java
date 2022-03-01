@@ -217,7 +217,7 @@ public class DeviceEmulator
     protected class MethodInvokeCallback implements MethodCallback
     {
         @Override
-        public synchronized DirectMethodResponse call(String methodName, Object methodData, Object context)
+        public synchronized DirectMethodResponse onMethodInvoked(String methodName, Object methodData, Object context)
         {
             System.out.println("Device invoked " + methodName);
             DirectMethodResponse directMethodResponse;

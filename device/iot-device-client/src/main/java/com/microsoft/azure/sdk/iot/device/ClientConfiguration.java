@@ -3,9 +3,10 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
+import com.microsoft.azure.sdk.iot.device.transport.NoRetry;
 import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.auth.*;
-import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
@@ -31,7 +32,7 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
  * settings.
  */
 @Slf4j
-public final class DeviceClientConfig
+public final class ClientConfiguration
 {
     private static final int DEFAULT_HTTPS_READ_TIMEOUT_MILLIS = 240000;
     private static final int DEFAULT_HTTPS_CONNECT_TIMEOUT_MILLIS = 0; //no connect timeout
@@ -134,7 +135,7 @@ public final class DeviceClientConfig
      * @throws IllegalArgumentException if the IoT Hub hostname does not contain
      * a valid IoT Hub name as its prefix.
      */
-    DeviceClientConfig(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol) throws IllegalArgumentException
+    ClientConfiguration(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol) throws IllegalArgumentException
     {
         this.protocol = protocol;
         configSasAuth(iotHubConnectionString);
@@ -155,7 +156,7 @@ public final class DeviceClientConfig
         log.debug("Device configured to use software based SAS authentication provider");
     }
 
-    DeviceClientConfig(IotHubAuthenticationProvider authenticationProvider, IotHubClientProtocol protocol) throws IllegalArgumentException
+    ClientConfiguration(IotHubAuthenticationProvider authenticationProvider, IotHubClientProtocol protocol) throws IllegalArgumentException
     {
         if (!(authenticationProvider instanceof IotHubSasTokenAuthenticationProvider))
         {
@@ -168,7 +169,7 @@ public final class DeviceClientConfig
         this.productInfo = new ProductInfo();
     }
 
-    DeviceClientConfig(String hostName, SasTokenProvider sasTokenProvider, IotHubClientProtocol protocol, ClientOptions clientOptions, String deviceId, String moduleId)
+    ClientConfiguration(String hostName, SasTokenProvider sasTokenProvider, IotHubClientProtocol protocol, ClientOptions clientOptions, String deviceId, String moduleId)
     {
         SSLContext sslContext = clientOptions != null ? clientOptions.getSslContext() : null;
         this.protocol = protocol;
@@ -182,7 +183,7 @@ public final class DeviceClientConfig
         log.debug("Device configured to use SAS token provided authentication provider");
     }
 
-    DeviceClientConfig(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, ClientOptions clientOptions)
+    ClientConfiguration(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, ClientOptions clientOptions)
     {
         this.protocol = protocol;
 
@@ -254,7 +255,7 @@ public final class DeviceClientConfig
         }
     }
 
-    DeviceClientConfig(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, SSLContext sslContext)
+    ClientConfiguration(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, SSLContext sslContext)
     {
         this.protocol = protocol;
         configSsl(iotHubConnectionString, sslContext);
@@ -295,7 +296,7 @@ public final class DeviceClientConfig
      * @param securityProvider The security provider instance to be used for authentication of this device
      * @throws IOException if the provided security provider throws an exception while authenticating
      */
-    DeviceClientConfig(IotHubConnectionString connectionString, SecurityProvider securityProvider, IotHubClientProtocol protocol) throws IOException
+    ClientConfiguration(IotHubConnectionString connectionString, SecurityProvider securityProvider, IotHubClientProtocol protocol) throws IOException
     {
         commonConstructorSetup(connectionString);
 
@@ -347,7 +348,7 @@ public final class DeviceClientConfig
      * @param clientOptions The client options that will be used to set the keep alive
      * @throws IOException if the provided security provider throws an exception while authenticating
      */
-    DeviceClientConfig(IotHubConnectionString connectionString, SecurityProvider securityProvider, IotHubClientProtocol protocol, ClientOptions clientOptions) throws IOException
+    ClientConfiguration(IotHubConnectionString connectionString, SecurityProvider securityProvider, IotHubClientProtocol protocol, ClientOptions clientOptions) throws IOException
     {
         // When setting the ClientOptions and a SecurityProvider, the SecurityProvider is responsible for setting the sslContext
         // we do not need to set the context in this constructor.
@@ -640,7 +641,7 @@ public final class DeviceClientConfig
     }
 
     @SuppressWarnings("unused")
-    protected DeviceClientConfig()
+    protected ClientConfiguration()
     {
         this.authenticationProvider = null;
         this.directMethodsMessageCallback = null;

@@ -20,7 +20,7 @@ public class DeviceTwin implements MessageCallback
 {
     private final InternalClient client;
 
-    private DesiredPropertiesUpdateCallback desiredPropertiesUpdateCallback;
+    private DesiredPropertiesCallback desiredPropertiesCallback;
     private Object desiredPropertiesUpdateCallbackContext; // may be null
 
     public DeviceTwin(InternalClient client)
@@ -48,7 +48,7 @@ public class DeviceTwin implements MessageCallback
         if (dtMessage.getDeviceOperationType() == DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE)
         {
             Twin twin = Twin.createFromDesiredPropertyJson(new String(dtMessage.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
-            this.desiredPropertiesUpdateCallback.onDesiredPropertiesUpdate(twin, desiredPropertiesUpdateCallbackContext);
+            this.desiredPropertiesCallback.onDesiredPropertiesUpdated(twin, desiredPropertiesUpdateCallbackContext);
         }
 
         return COMPLETE;
@@ -58,7 +58,7 @@ public class DeviceTwin implements MessageCallback
         GetTwinCorrelatingMessageCallback twinCallback,
         Object callbackContext)
     {
-        if (desiredPropertiesUpdateCallback == null) //TODO what about open/close/open cases?
+        if (desiredPropertiesCallback == null)
         {
             throw new IllegalStateException("Must subscribe to desired properties before getting twin.");
         }
@@ -115,10 +115,10 @@ public class DeviceTwin implements MessageCallback
 
     public void updateReportedPropertiesAsync(
         TwinCollection reportedProperties,
-        UpdateReportedPropertiesCorrelatingMessageCallback updateReportedPropertiesCorrelatingMessageCallback,
+        ReportedPropertiesUpdateCorrelatingMessageCallback reportedPropertiesUpdateCorrelatingMessageCallback,
         Object callbackContext)
     {
-        if (desiredPropertiesUpdateCallback == null)
+        if (desiredPropertiesCallback == null)
         {
             throw new IllegalStateException("Must subscribe to desired properties before sending reported properties.");
         }
@@ -153,27 +153,27 @@ public class DeviceTwin implements MessageCallback
             @Override
             public void onRequestQueued(Message message, Object callbackContext)
             {
-                if (updateReportedPropertiesCorrelatingMessageCallback != null)
+                if (reportedPropertiesUpdateCorrelatingMessageCallback != null)
                 {
-                    updateReportedPropertiesCorrelatingMessageCallback.onRequestQueued(message, callbackContext);
+                    reportedPropertiesUpdateCorrelatingMessageCallback.onRequestQueued(message, callbackContext);
                 }
             }
 
             @Override
             public void onRequestSent(Message message, Object callbackContext)
             {
-                if (updateReportedPropertiesCorrelatingMessageCallback != null)
+                if (reportedPropertiesUpdateCorrelatingMessageCallback != null)
                 {
-                    updateReportedPropertiesCorrelatingMessageCallback.onRequestSent(message, callbackContext);
+                    reportedPropertiesUpdateCorrelatingMessageCallback.onRequestSent(message, callbackContext);
                 }
             }
 
             @Override
             public void onRequestAcknowledged(Message message, Object callbackContext, TransportException e)
             {
-                if (updateReportedPropertiesCorrelatingMessageCallback != null)
+                if (reportedPropertiesUpdateCorrelatingMessageCallback != null)
                 {
-                    updateReportedPropertiesCorrelatingMessageCallback.onRequestAcknowledged(message, callbackContext, e);
+                    reportedPropertiesUpdateCorrelatingMessageCallback.onRequestAcknowledged(message, callbackContext, e);
                 }
             }
 
@@ -188,19 +188,19 @@ public class DeviceTwin implements MessageCallback
                     iotHubStatus = IotHubStatusCode.getIotHubStatusCode(Integer.parseInt(status));
                 }
 
-                if (updateReportedPropertiesCorrelatingMessageCallback != null)
+                if (reportedPropertiesUpdateCorrelatingMessageCallback != null)
                 {
                     log.trace("Executing twin status callback for device operation twin update reported properties response with status " + iotHubStatus);
-                    updateReportedPropertiesCorrelatingMessageCallback.onResponseReceived(message, callbackContext, iotHubStatus, e);
+                    reportedPropertiesUpdateCorrelatingMessageCallback.onResponseReceived(message, callbackContext, iotHubStatus, e);
                 }
             }
 
             @Override
             public void onResponseAcknowledged(Message message, Object callbackContext)
             {
-                if (updateReportedPropertiesCorrelatingMessageCallback != null)
+                if (reportedPropertiesUpdateCorrelatingMessageCallback != null)
                 {
-                    updateReportedPropertiesCorrelatingMessageCallback.onResponseAcknowledged(message, callbackContext);
+                    reportedPropertiesUpdateCorrelatingMessageCallback.onResponseAcknowledged(message, callbackContext);
                 }
             }
         });
@@ -211,14 +211,14 @@ public class DeviceTwin implements MessageCallback
     }
 
     public void subscribeToDesiredPropertiesAsync(
-        SubscribeToDesiredPropertiesCallback subscribeToDesiredPropertiesCallback,
+        DesiredPropertiesSubscriptionCallback desiredPropertiesSubscriptionCallback,
         Object subscribeToDesiredPropertiesCallbackContext,
-        DesiredPropertiesUpdateCallback desiredPropertiesUpdateCallback,
+        DesiredPropertiesCallback desiredPropertiesCallback,
         Object desiredPropertiesUpdateCallbackContext)
     {
-        Objects.requireNonNull(desiredPropertiesUpdateCallback, "Must set a non-null handler for desired property updates");
+        Objects.requireNonNull(desiredPropertiesCallback, "Must set a non-null handler for desired property updates");
 
-        this.desiredPropertiesUpdateCallback = desiredPropertiesUpdateCallback;
+        this.desiredPropertiesCallback = desiredPropertiesCallback;
         this.desiredPropertiesUpdateCallbackContext = desiredPropertiesUpdateCallbackContext;
 
         IotHubTransportMessage desiredPropertiesNotificationRequest = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_TWIN);
@@ -226,9 +226,9 @@ public class DeviceTwin implements MessageCallback
 
         IotHubEventCallback eventCallback = (responseStatus, callbackContext) ->
         {
-            if (subscribeToDesiredPropertiesCallback != null)
+            if (desiredPropertiesSubscriptionCallback != null)
             {
-                subscribeToDesiredPropertiesCallback.onSubscriptionAcknowledged(responseStatus, callbackContext);
+                desiredPropertiesSubscriptionCallback.onSubscriptionAcknowledged(responseStatus, callbackContext);
             }
         };
 

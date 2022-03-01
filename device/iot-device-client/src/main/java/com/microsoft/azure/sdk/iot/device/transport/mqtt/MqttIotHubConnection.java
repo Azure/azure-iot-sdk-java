@@ -51,7 +51,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private String connectionId;
     private String webSocketQueryString;
     private final Object mqttConnectionStateLock = new Object(); // lock for preventing simultaneous open and close calls
-    private final DeviceClientConfig config;
+    private final ClientConfiguration config;
     private IotHubConnectionStatus state = IotHubConnectionStatus.DISCONNECTED;
     private IotHubListener listener;
     private final String clientId;
@@ -65,7 +65,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private final Map<IotHubTransportMessage, Integer> receivedMessagesToAcknowledge = new ConcurrentHashMap<>();
 
     /**
-     * Constructs an instance from the given {@link DeviceClientConfig}
+     * Constructs an instance from the given {@link ClientConfiguration}
      * object.
      *
      * @param config the client configuration.
@@ -73,11 +73,11 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
      */
     // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
     // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
-    public MqttIotHubConnection(DeviceClientConfig config) throws TransportException
+    public MqttIotHubConnection(ClientConfiguration config) throws TransportException
     {
         if (config == null)
         {
-            throw new IllegalArgumentException("The DeviceClientConfig cannot be null.");
+            throw new IllegalArgumentException("The ClientConfiguration cannot be null.");
         }
         if (config.getIotHubHostname() == null || config.getIotHubHostname().length() == 0)
         {
@@ -100,12 +100,12 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             throw new TransportException("Failed to get SSLContext", e);
         }
 
-        if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
+        if (this.config.getAuthenticationType() == ClientConfiguration.AuthType.SAS_TOKEN)
         {
             log.trace("MQTT connection will use sas token based auth");
             this.webSocketQueryString = NO_CLIENT_CERT_QUERY_STRING;
         }
-        else if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
+        else if (this.config.getAuthenticationType() == ClientConfiguration.AuthType.X509_CERTIFICATE)
         {
             log.trace("MQTT connection will use X509 certificate based auth");
         }

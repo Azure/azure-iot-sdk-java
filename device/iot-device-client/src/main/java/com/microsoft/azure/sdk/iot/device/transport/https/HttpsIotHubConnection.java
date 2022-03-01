@@ -42,7 +42,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
     private final Object HTTPS_CONNECTION_LOCK = new Object();
 
     /** The client configuration. */
-    private final DeviceClientConfig config;
+    private final ClientConfiguration config;
 
     /**
      * Message e-tag is obtained when the device receives a
@@ -52,12 +52,12 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
     private final Map<Message, String> messageToETagMap = new HashMap<>();
 
     /**
-     * Constructs an instance from the given {@link DeviceClientConfig}
+     * Constructs an instance from the given {@link ClientConfiguration}
      * object.
      *
      * @param config the client configuration.
      */
-    public HttpsIotHubConnection(DeviceClientConfig config)
+    public HttpsIotHubConnection(ClientConfiguration config)
     {
         synchronized (HTTPS_CONNECTION_LOCK)
         {
@@ -394,7 +394,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
         request.setReadTimeout(this.config.getHttpsReadTimeout());
         request.setConnectTimeout(this.config.getHttpsConnectTimeout());
 
-        if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
+        if (this.config.getAuthenticationType() == ClientConfiguration.AuthType.SAS_TOKEN)
         {
             request.setHeaderField(HTTPS_PROPERTY_AUTHORIZATION_TAG, this.getSasToken());
         }

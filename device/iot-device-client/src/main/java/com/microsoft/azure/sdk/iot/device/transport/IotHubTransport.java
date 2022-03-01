@@ -80,7 +80,7 @@ public class IotHubTransport implements IotHubListener
     final private Object multiplexingDeviceStateLock = new Object();
 
     // Keys are deviceIds. Helps with getting configs based on deviceIds
-    private final Map<String, DeviceClientConfig> deviceClientConfigs = new ConcurrentHashMap<>();
+    private final Map<String, ClientConfiguration> deviceClientConfigs = new ConcurrentHashMap<>();
 
     private final String transportUniqueIdentifier = UUID.randomUUID().toString().substring(0, 8);
 
@@ -120,7 +120,7 @@ public class IotHubTransport implements IotHubListener
      * @param isMultiplexing true if this connection will multiplex. False otherwise.
      * @throws IllegalArgumentException if defaultConfig is null
      */
-    public IotHubTransport(DeviceClientConfig defaultConfig, IotHubConnectionStatusChangeCallback deviceIOConnectionStatusChangeCallback, boolean isMultiplexing) throws IllegalArgumentException
+    public IotHubTransport(ClientConfiguration defaultConfig, IotHubConnectionStatusChangeCallback deviceIOConnectionStatusChangeCallback, boolean isMultiplexing) throws IllegalArgumentException
     {
         if (defaultConfig == null)
         {
@@ -773,7 +773,7 @@ public class IotHubTransport implements IotHubListener
         this.multiplexingStateCallbackContext = callbackContext;
     }
 
-    public void registerMultiplexedDeviceClient(List<DeviceClientConfig> configs, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
+    public void registerMultiplexedDeviceClient(List<ClientConfiguration> configs, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
     {
         if (getProtocol() != IotHubClientProtocol.AMQPS && getProtocol() != IotHubClientProtocol.AMQPS_WS)
         {
@@ -782,7 +782,7 @@ public class IotHubTransport implements IotHubListener
 
         multiplexingDeviceRegistrationFailures.clear();
 
-        for (DeviceClientConfig configToRegister : configs)
+        for (ClientConfiguration configToRegister : configs)
         {
             this.deviceClientConfigs.put(configToRegister.getDeviceId(), configToRegister);
 
@@ -799,7 +799,7 @@ public class IotHubTransport implements IotHubListener
         MultiplexingClientDeviceRegistrationAuthenticationException registrationException = null;
         if (this.connectionStatus != IotHubConnectionStatus.DISCONNECTED)
         {
-            for (DeviceClientConfig newlyRegisteredConfig : configs)
+            for (ClientConfiguration newlyRegisteredConfig : configs)
             {
                 String deviceId = newlyRegisteredConfig.getDeviceId();
                 boolean deviceIsNotConnected = deviceConnectionStates.get(deviceId) != IotHubConnectionStatus.CONNECTED;
@@ -827,7 +827,7 @@ public class IotHubTransport implements IotHubListener
                     registrationException.addRegistrationException(deviceId, deviceRegistrationException);
 
                     // Since the registration failed, need to remove the device from the list of multiplexed devices
-                    DeviceClientConfig configThatFailedToRegister = this.deviceClientConfigs.remove(deviceId);
+                    ClientConfiguration configThatFailedToRegister = this.deviceClientConfigs.remove(deviceId);
                     ((AmqpsIotHubConnection) this.iotHubTransportConnection).unregisterMultiplexedDevice(configThatFailedToRegister, false);
                 }
             }
@@ -839,14 +839,14 @@ public class IotHubTransport implements IotHubListener
         }
     }
 
-    public void unregisterMultiplexedDeviceClient(List<DeviceClientConfig> configs, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
+    public void unregisterMultiplexedDeviceClient(List<ClientConfiguration> configs, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
     {
         if (getProtocol() != IotHubClientProtocol.AMQPS && getProtocol() != IotHubClientProtocol.AMQPS_WS)
         {
             throw new UnsupportedOperationException("Cannot add a multiplexed device unless connection is over AMQPS or AMQPS_WS.");
         }
 
-        for (DeviceClientConfig configToRegister : configs)
+        for (ClientConfiguration configToRegister : configs)
         {
             if (this.iotHubTransportConnection != null)
             {
@@ -865,7 +865,7 @@ public class IotHubTransport implements IotHubListener
         long timeoutTime = System.currentTimeMillis() + timeoutMilliseconds;
         if (this.connectionStatus != IotHubConnectionStatus.DISCONNECTED)
         {
-            for (DeviceClientConfig newlyUnregisteredConfig : configs)
+            for (ClientConfiguration newlyUnregisteredConfig : configs)
             {
                 while (deviceConnectionStates.get(newlyUnregisteredConfig.getDeviceId()) != IotHubConnectionStatus.DISCONNECTED)
                 {
@@ -1086,7 +1086,7 @@ public class IotHubTransport implements IotHubListener
                                 this.proxySettings,
                                 this.keepAliveInterval);
 
-                        for (DeviceClientConfig config : this.deviceClientConfigs.values())
+                        for (ClientConfiguration config : this.deviceClientConfigs.values())
                         {
                             ((AmqpsIotHubConnection) this.iotHubTransportConnection).registerMultiplexedDevice(config);
                         }
@@ -1149,7 +1149,7 @@ public class IotHubTransport implements IotHubListener
         {
             reconnectionAttempts++;
 
-            DeviceClientConfig config = this.getConfig(deviceId);
+            ClientConfiguration config = this.getConfig(deviceId);
 
             if (config == null)
             {
@@ -1280,7 +1280,7 @@ public class IotHubTransport implements IotHubListener
     // Still need to check the device connection status before you can report the device to be re-connected.
     private void singleDeviceReconnectAttemptAsync(String deviceId)
     {
-        DeviceClientConfig config = this.getConfig(deviceId);
+        ClientConfiguration config = this.getConfig(deviceId);
 
         if (config == null)
         {
@@ -1292,7 +1292,7 @@ public class IotHubTransport implements IotHubListener
         ((AmqpsIotHubConnection) this.iotHubTransportConnection).registerMultiplexedDevice(config);
     }
 
-    private DeviceClientConfig getConfig(String deviceId)
+    private ClientConfiguration getConfig(String deviceId)
     {
         // if the map doesn't contain this deviceId as a key, then it is because the device was unregistered from
         // the multiplexed connection. Methods that call this method should assume that the return value from this
@@ -1370,7 +1370,7 @@ public class IotHubTransport implements IotHubListener
             String deviceId = packet.getDeviceId();
             if (transportException.isRetryable())
             {
-                DeviceClientConfig config = this.getConfig(deviceId);
+                ClientConfiguration config = this.getConfig(deviceId);
                 if (config == null)
                 {
                     log.debug("Abandoning handling the message exception since the device it was associated with has been unregistered.");
@@ -1513,7 +1513,7 @@ public class IotHubTransport implements IotHubListener
                 // callback should be fired
                 invokeConnectionStatusChangeCallback(newConnectionStatus, reason, throwable);
 
-                for (DeviceClientConfig config : deviceClientConfigs.values())
+                for (ClientConfiguration config : deviceClientConfigs.values())
                 {
                     deviceConnectionStates.put(config.getDeviceId(), newConnectionStatus);
                 }
@@ -1592,7 +1592,7 @@ public class IotHubTransport implements IotHubListener
             return false;
         }
 
-        return this.getDefaultConfig().getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN
+        return this.getDefaultConfig().getAuthenticationType() == ClientConfiguration.AuthType.SAS_TOKEN
                 && this.getDefaultConfig().getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary();
     }
 
@@ -1607,7 +1607,7 @@ public class IotHubTransport implements IotHubListener
             return false;
         }
 
-        return this.getDefaultConfig().getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN
+        return this.getDefaultConfig().getAuthenticationType() == ClientConfiguration.AuthType.SAS_TOKEN
             && this.getDefaultConfig().getSasTokenAuthentication().isSasTokenExpired();
     }
 
@@ -1639,7 +1639,7 @@ public class IotHubTransport implements IotHubListener
             return false;
         }
 
-        DeviceClientConfig config = this.getConfig(deviceId);
+        ClientConfiguration config = this.getConfig(deviceId);
         if (config == null)
         {
             log.debug("Operation has not timed out since the device it was associated with has been unregistered already.");
@@ -1668,9 +1668,9 @@ public class IotHubTransport implements IotHubListener
         }
     }
 
-    private DeviceClientConfig getDefaultConfig()
+    private ClientConfiguration getDefaultConfig()
     {
-        for (DeviceClientConfig config : this.deviceClientConfigs.values())
+        for (ClientConfiguration config : this.deviceClientConfigs.values())
         {
             // just return the first entry in the list.
             return config;

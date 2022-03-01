@@ -28,7 +28,7 @@ import static org.junit.Assert.assertNull;
 public class DeviceClientTest
 {
     @Mocked
-    DeviceClientConfig mockConfig;
+    ClientConfiguration mockConfig;
 
     @Mocked
     IotHubConnectionString mockIotHubConnectionString;
@@ -85,7 +85,7 @@ public class DeviceClientTest
                 DeviceClientType deviceClientType = Deencapsulation.getField(client, "deviceClientType");
                 assertEquals(SINGLE_CLIENT, deviceClientType);
 
-                new DeviceClientConfig(mockIotHubConnectionString, protocol, options);
+                new ClientConfiguration(mockIotHubConnectionString, protocol, options);
             }
         };
     }
@@ -145,10 +145,10 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class}, (IotHubConnectionString) any, (IotHubClientProtocol) any);
+                Deencapsulation.newInstance(ClientConfiguration.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class}, (IotHubConnectionString) any, (IotHubClientProtocol) any);
                 times = 0;
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                        new Class[] {DeviceClientConfig.class},
+                        new Class[] {ClientConfiguration.class},
                         any);
                 times = 0;
             }
@@ -173,17 +173,17 @@ public class DeviceClientTest
             {
                 Deencapsulation.newInstance(IotHubConnectionString.class, connString);
                 times = 1;
-                Deencapsulation.newInstance(DeviceClientConfig.class, (IotHubConnectionString)any, DeviceClientConfig.AuthType.SAS_TOKEN);
+                Deencapsulation.newInstance(ClientConfiguration.class, (IotHubConnectionString)any, ClientConfiguration.AuthType.SAS_TOKEN);
                 times = 1;
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                        new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
-                        (DeviceClientConfig)any, protocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
+                        new Class[] {ClientConfiguration.class, IotHubClientProtocol.class, long.class, long.class},
+                        (ClientConfiguration)any, protocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
                 times = 1;
             }
         };
     }
 
-    /* Tests_SRS_DEVICECLIENT_21_003: [The constructor shall save the connection configuration using the object DeviceClientConfig.] */
+    /* Tests_SRS_DEVICECLIENT_21_003: [The constructor shall save the connection configuration using the object ClientConfiguration.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorBadDeviceClientConfigThrows() throws URISyntaxException, IOException
     {
@@ -199,11 +199,11 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                Deencapsulation.newInstance(DeviceClientConfig.class, (IotHubConnectionString)any, DeviceClientConfig.AuthType.SAS_TOKEN);
+                Deencapsulation.newInstance(ClientConfiguration.class, (IotHubConnectionString)any, ClientConfiguration.AuthType.SAS_TOKEN);
                 times = 1;
                 Deencapsulation.newInstance("com.microsoft.azure.sdk.iot.device.DeviceIO",
-                        new Class[] {DeviceClientConfig.class, IotHubClientProtocol.class, long.class, long.class},
-                        (DeviceClientConfig)any, protocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
+                        new Class[] {ClientConfiguration.class, IotHubClientProtocol.class, long.class, long.class},
+                        (ClientConfiguration)any, protocol, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
                 times = 0;
             }
         };
@@ -271,7 +271,7 @@ public class DeviceClientTest
                 mockDeviceIO.getProtocol();
                 result = IotHubClientProtocol.HTTPS;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
+                result = ClientConfiguration.AuthType.X509_CERTIFICATE;
                 mockConfig.getModuleId();
                 result = "any module id";
             }

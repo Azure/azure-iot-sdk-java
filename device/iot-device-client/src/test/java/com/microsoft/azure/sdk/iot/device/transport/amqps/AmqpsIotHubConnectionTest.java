@@ -9,7 +9,7 @@ import com.microsoft.azure.proton.transport.proxy.impl.ProxyHandlerImpl;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
 import com.microsoft.azure.proton.transport.ws.WebSocketHandler;
 import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
+import com.microsoft.azure.sdk.iot.device.ClientConfiguration;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
 import com.microsoft.azure.sdk.iot.device.ProxySettings;
@@ -123,7 +123,7 @@ public class AmqpsIotHubConnectionTest {
     protected Reactor mockReactor;
 
     @Mocked
-    protected DeviceClientConfig mockConfig;
+    protected ClientConfiguration mockConfig;
 
     @Mocked
     protected IotHubUri mockIotHubUri;
@@ -225,7 +225,7 @@ public class AmqpsIotHubConnectionTest {
     ApplicationProperties mockedApplicationProperties;
 
     @Mocked
-    Queue<DeviceClientConfig> mockedQueue;
+    Queue<ClientConfiguration> mockedQueue;
 
     @Mocked
     Rejected mockedRejected;
@@ -264,8 +264,8 @@ public class AmqpsIotHubConnectionTest {
 
         AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, "");
 
-        Set<DeviceClientConfig> deviceClientConfigs = Deencapsulation.getField(connection, "deviceClientConfigs");
-        DeviceClientConfig actualConfig = deviceClientConfigs.iterator().next();
+        Set<ClientConfiguration> clientConfigurations = Deencapsulation.getField(connection, "clientConfigurations");
+        ClientConfiguration actualConfig = clientConfigurations.iterator().next();
         String actualHostName = Deencapsulation.getField(connection, "hostName");
 
         assertEquals(mockConfig, actualConfig);
@@ -1270,7 +1270,7 @@ public class AmqpsIotHubConnectionTest {
         new NonStrictExpectations() {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = ClientConfiguration.AuthType.SAS_TOKEN;
                 mockConfig.getIotHubHostname();
                 result = hostName;
                 mockConfig.getIotHubName();

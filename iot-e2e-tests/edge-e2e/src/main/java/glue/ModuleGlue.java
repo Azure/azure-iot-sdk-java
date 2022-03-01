@@ -13,15 +13,15 @@ import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.hsm.UnixDomainSocketChannel;
-import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesUpdateCallback;
+import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesSubscriptionCallback;
+import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesCallback;
 import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.twin.GetTwinCallback;
 import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
-import com.microsoft.azure.sdk.iot.device.twin.SubscribeToDesiredPropertiesCallback;
+import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesCallback;
 import com.microsoft.azure.sdk.iot.device.twin.Twin;
 import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
-import com.microsoft.azure.sdk.iot.device.twin.UpdateReportedPropertiesCallback;
 import io.swagger.server.api.MainApiException;
 import io.swagger.server.api.model.Certificate;
 import io.swagger.server.api.model.ConnectResponse;
@@ -34,7 +34,6 @@ import io.vertx.core.json.JsonObject;
 import samples.com.microsoft.azure.sdk.iot.UnixDomainSocketSample;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URLStreamHandlerFactory;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
@@ -378,7 +377,7 @@ public class ModuleGlue
             });
             System.out.println("calling subscribeToDesiredPropertiesAsync");
             client.subscribeToDesiredPropertiesAsync(
-                new SubscribeToDesiredPropertiesCallback()
+                new DesiredPropertiesSubscriptionCallback()
                 {
                     @Override
                     public void onSubscriptionAcknowledged(IotHubStatusCode statusCode, Object context)
@@ -387,10 +386,10 @@ public class ModuleGlue
                     }
                 },
                 null,
-                new DesiredPropertiesUpdateCallback()
+                new DesiredPropertiesCallback()
                 {
                     @Override
-                    public void onDesiredPropertiesUpdate(Twin twin, Object context)
+                    public void onDesiredPropertiesUpdated(Twin twin, Object context)
                     {
                         TwinCollection desiredProperties = twin.getDesiredProperties();
                         for (String key : desiredProperties.keySet())
@@ -564,7 +563,7 @@ public class ModuleGlue
                 client.subscribeToMethodsAsync(new MethodCallback()
                 {
                     @Override
-                    public DirectMethodResponse call(String methodName, Object methodData, Object context)
+                    public DirectMethodResponse onMethodInvoked(String methodName, Object methodData, Object context)
                     {
                         return handleMethodInvocation(methodName, methodData, context);
                     }
@@ -739,10 +738,10 @@ public class ModuleGlue
             try
             {
                 final CountDownLatch sendReportedPropertiesLatch = new CountDownLatch(1);
-                UpdateReportedPropertiesCallback sendReportedPropertiesResponseCallback = new UpdateReportedPropertiesCallback()
+                ReportedPropertiesCallback sendReportedPropertiesResponseCallback = new ReportedPropertiesCallback()
                 {
                     @Override
-                    public void onPropertiesUpdated(IotHubStatusCode statusCode, TransportException e, Object callbackContext)
+                    public void onReportedPropertiesUpdateAcknowledged(IotHubStatusCode statusCode, TransportException e, Object callbackContext)
                     {
                         sendReportedPropertiesLatch.countDown();
                     }

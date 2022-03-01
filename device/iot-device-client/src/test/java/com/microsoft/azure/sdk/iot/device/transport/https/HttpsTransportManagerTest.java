@@ -9,10 +9,6 @@ import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
 import com.microsoft.azure.sdk.iot.device.exceptions.HubOrDeviceIdNotFoundException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
-import com.microsoft.azure.sdk.iot.device.transport.https.HttpsIotHubConnection;
-import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
-import com.microsoft.azure.sdk.iot.device.transport.https.HttpsSingleMessage;
-import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import mockit.*;
 import org.junit.Test;
 
@@ -32,7 +28,7 @@ import static org.junit.Assert.*;
 public class HttpsTransportManagerTest
 {
     @Mocked
-    private DeviceClientConfig mockConfig;
+    private ClientConfiguration mockConfig;
     @Mocked
     private HttpsIotHubConnection mockConn;
     @Mocked
@@ -56,10 +52,10 @@ public class HttpsTransportManagerTest
     public void constructorSucceed()
     {
         // arrange
-        final DeviceClientConfig config = mockConfig;
+        final ClientConfiguration config = mockConfig;
 
         // act
-        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {DeviceClientConfig.class}, config);
+        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, config);
 
         // assert
         assertEquals(config, Deencapsulation.getField(httpsTransportManager, "config"));
@@ -70,10 +66,10 @@ public class HttpsTransportManagerTest
     public void constructorNullConfig()
     {
         // arrange
-        final DeviceClientConfig config = null;
+        final ClientConfiguration config = null;
 
         // act
-        Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {DeviceClientConfig.class}, config);
+        Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, config);
     }
 
     /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_003: [The open shall create and store a new transport connection `HttpsIotHubConnection`.] */
@@ -82,11 +78,11 @@ public class HttpsTransportManagerTest
     {
         // arrange
         final HttpsIotHubConnection httpsIotHubConnection = mockConn;
-        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {DeviceClientConfig.class}, mockConfig);
+        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, mockConfig);
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {DeviceClientConfig.class}, mockConfig);
+                Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {ClientConfiguration.class}, mockConfig);
                 result = httpsIotHubConnection;
                 times = 1;
             }
@@ -107,11 +103,11 @@ public class HttpsTransportManagerTest
         // arrange
         final HttpsIotHubConnection httpsIotHubConnection = mockConn;
         final String[] topics = new String[]{ "a", "b"};
-        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {DeviceClientConfig.class}, mockConfig);
+        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, mockConfig);
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {DeviceClientConfig.class}, mockConfig);
+                Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {ClientConfiguration.class}, mockConfig);
                 result = httpsIotHubConnection;
                 times = 1;
             }
@@ -130,7 +126,7 @@ public class HttpsTransportManagerTest
     {
         // arrange
         final HttpsIotHubConnection httpsIotHubConnection = mockConn;
-        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {DeviceClientConfig.class}, mockConfig);
+        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, mockConfig);
 
         // act
         Deencapsulation.invoke(httpsTransportManager, "close");
@@ -150,7 +146,7 @@ public class HttpsTransportManagerTest
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {DeviceClientConfig.class}, mockConfig);
+                Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {ClientConfiguration.class}, mockConfig);
                 result = httpsIotHubConnection;
                 Deencapsulation.invoke(HttpsSingleMessage.class, "parseHttpsJsonMessage", new Class[] {Message.class}, mockTransportMsg);
                 result = mockHttpsMessage;
@@ -162,7 +158,7 @@ public class HttpsTransportManagerTest
                 result = mockResponseMessage;
             }
         };
-        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {DeviceClientConfig.class}, mockConfig);
+        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, mockConfig);
         Deencapsulation.invoke(httpsTransportManager, "open");
 
         // act
@@ -188,13 +184,13 @@ public class HttpsTransportManagerTest
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {DeviceClientConfig.class}, mockConfig);
+                Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {ClientConfiguration.class}, mockConfig);
                 result = httpsIotHubConnection;
                 Deencapsulation.invoke(HttpsSingleMessage.class, "parseHttpsJsonMessage", new Class[] {Message.class}, mockTransportMsg);
                 result = new IllegalArgumentException();
             }
         };
-        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {DeviceClientConfig.class}, mockConfig);
+        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, mockConfig);
         Deencapsulation.invoke(httpsTransportManager, "open");
 
         // act
@@ -211,7 +207,7 @@ public class HttpsTransportManagerTest
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {DeviceClientConfig.class}, mockConfig);
+                Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {ClientConfiguration.class}, mockConfig);
                 result = httpsIotHubConnection;
                 Deencapsulation.invoke(HttpsSingleMessage.class, "parseHttpsJsonMessage", new Class[] {Message.class}, mockTransportMsg);
                 result = mockHttpsMessage;
@@ -223,7 +219,7 @@ public class HttpsTransportManagerTest
                 result = mockResponseMessage;
             }
         };
-        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {DeviceClientConfig.class}, mockConfig);
+        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, mockConfig);
         Deencapsulation.invoke(httpsTransportManager, "open");
 
         // act
@@ -249,7 +245,7 @@ public class HttpsTransportManagerTest
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {DeviceClientConfig.class}, mockConfig);
+                Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {ClientConfiguration.class}, mockConfig);
                 result = httpsIotHubConnection;
                 Deencapsulation.invoke(HttpsSingleMessage.class, "parseHttpsJsonMessage", new Class[] {Message.class}, mockTransportMsg);
                 result = mockHttpsMessage;
@@ -261,7 +257,7 @@ public class HttpsTransportManagerTest
                 result = mockResponseMessage;
             }
         };
-        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {DeviceClientConfig.class}, mockConfig);
+        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, mockConfig);
         Deencapsulation.invoke(httpsTransportManager, "open");
 
         // act
@@ -287,7 +283,7 @@ public class HttpsTransportManagerTest
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {DeviceClientConfig.class}, mockConfig);
+                Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {ClientConfiguration.class}, mockConfig);
                 result = httpsIotHubConnection;
                 Deencapsulation.invoke(HttpsSingleMessage.class, "parseHttpsJsonMessage", new Class[] {Message.class}, mockTransportMsg);
                 result = mockHttpsMessage;
@@ -295,7 +291,7 @@ public class HttpsTransportManagerTest
                 result = null;
             }
         };
-        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {DeviceClientConfig.class}, mockConfig);
+        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, mockConfig);
         Deencapsulation.invoke(httpsTransportManager, "open");
 
         // act
@@ -313,7 +309,7 @@ public class HttpsTransportManagerTest
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {DeviceClientConfig.class}, mockConfig);
+                Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {ClientConfiguration.class}, mockConfig);
                 result = httpsIotHubConnection;
                 Deencapsulation.invoke(HttpsSingleMessage.class, "parseHttpsJsonMessage", new Class[] {Message.class}, mockTransportMsg);
                 result = mockHttpsMessage;
@@ -325,7 +321,7 @@ public class HttpsTransportManagerTest
                 result = mockResponseMessage;
             }
         };
-        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {DeviceClientConfig.class}, mockConfig);
+        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, mockConfig);
         Deencapsulation.invoke(httpsTransportManager, "open");
 
         // act
@@ -351,7 +347,7 @@ public class HttpsTransportManagerTest
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {DeviceClientConfig.class}, mockConfig);
+                Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {ClientConfiguration.class}, mockConfig);
                 result = httpsIotHubConnection;
                 Deencapsulation.invoke(HttpsSingleMessage.class, "parseHttpsJsonMessage", new Class[] {Message.class}, mockTransportMsg);
                 result = mockHttpsMessage;
@@ -363,7 +359,7 @@ public class HttpsTransportManagerTest
                 result = new IOException();
             }
         };
-        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {DeviceClientConfig.class}, mockConfig);
+        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, mockConfig);
         Deencapsulation.invoke(httpsTransportManager, "open");
 
         // act
@@ -380,13 +376,13 @@ public class HttpsTransportManagerTest
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {DeviceClientConfig.class}, mockConfig);
+                Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {ClientConfiguration.class}, mockConfig);
                 result = httpsIotHubConnection;
                 httpsIotHubConnection.receiveMessage();
                 result = mockedTransportMessage;
             }
         };
-        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {DeviceClientConfig.class}, mockConfig);
+        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, mockConfig);
         Deencapsulation.invoke(httpsTransportManager, "open");
 
         // act
@@ -412,13 +408,13 @@ public class HttpsTransportManagerTest
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {DeviceClientConfig.class}, mockConfig);
+                Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {ClientConfiguration.class}, mockConfig);
                 result = httpsIotHubConnection;
                 httpsIotHubConnection.receiveMessage();
                 result = new IOException();
             }
         };
-        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {DeviceClientConfig.class}, mockConfig);
+        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, mockConfig);
         Deencapsulation.invoke(httpsTransportManager, "open");
 
         // act

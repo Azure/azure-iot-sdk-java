@@ -158,7 +158,7 @@ public class IotHubSasTokenTest
         assertThat(testSignature, is(signature));
     }
 
-    // Tests_SRS_IOTHUBSASTOKEN_11_013: [**The token generated from DeviceClientConfig shall use correct expiry time (seconds rather than milliseconds)]
+    // Tests_SRS_IOTHUBSASTOKEN_11_013: [**The token generated from ClientConfiguration shall use correct expiry time (seconds rather than milliseconds)]
     @Test
     public void constructorSetsExpiryTimeCorrectly() throws URISyntaxException
     {

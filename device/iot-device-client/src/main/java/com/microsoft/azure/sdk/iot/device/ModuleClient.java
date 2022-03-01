@@ -467,7 +467,7 @@ public class ModuleClient extends InternalClient
         return this;
     }
 
-    private static void commonConstructorVerifications(IotHubClientProtocol protocol, DeviceClientConfig config)
+    private static void commonConstructorVerifications(IotHubClientProtocol protocol, ClientConfiguration config)
     {
         if (protocol == IotHubClientProtocol.HTTPS)
         {

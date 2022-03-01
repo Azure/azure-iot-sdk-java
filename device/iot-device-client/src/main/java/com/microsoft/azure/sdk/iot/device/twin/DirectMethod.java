@@ -21,11 +21,11 @@ public final class DirectMethod
     private boolean isSubscribed = false;
 
     private final InternalClient client;
-    private final DeviceClientConfig config;
+    private final ClientConfiguration config;
 
     private final class DirectMethodResponseCallback implements MessageCallback
     {
-        final DeviceClientConfig nestedConfig = config;
+        final ClientConfiguration nestedConfig = config;
 
         /*
         **Codes_SRS_DEVICEMETHOD_25_007: [**On receiving a message from IOTHub with for method invoke, the callback DeviceMethodResponseMessageCallback is triggered.**]**
@@ -64,7 +64,7 @@ public final class DirectMethod
                              **Codes_SRS_DEVICEMETHOD_25_008: [**If the message is of type DirectMethod and DEVICE_OPERATION_METHOD_RECEIVE_REQUEST then user registered device method callback gets invoked providing the user with method name and payload along with the user context. **]**
                              */
                             log.trace("Executing method invocation callback for method name {} for message {}", methodMessage.getMethodName(), methodMessage);
-                            DirectMethodResponse responseData = methodCallback.call(methodMessage.getMethodName(), methodMessage.getBytes(), deviceMethodCallbackContext);
+                            DirectMethodResponse responseData = methodCallback.onMethodInvoked(methodMessage.getMethodName(), methodMessage.getBytes(), deviceMethodCallbackContext);
                             log.trace("Method invocation callback returned for method name {} for message {}", methodMessage.getMethodName(), methodMessage);
 
                             /*

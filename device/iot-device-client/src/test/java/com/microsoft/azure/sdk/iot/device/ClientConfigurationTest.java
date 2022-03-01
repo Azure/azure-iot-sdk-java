@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
  * Lines: 91%
  * (Untested lines and method are the unused default constructor)
  */
-public class DeviceClientConfigTest
+public class ClientConfigurationTest
 {
     @Mocked
     IotHubAuthenticationProvider mockedIotHubAuthenticationProvider;
@@ -82,7 +82,7 @@ public class DeviceClientConfigTest
             }
         };
 
-        DeviceClientConfig config = new DeviceClientConfig(mockSasTokenSoftwareAuthentication, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockSasTokenSoftwareAuthentication, IotHubClientProtocol.AMQPS);
 
         String testIotHubHostname = config.getIotHubHostname();
 
@@ -102,7 +102,7 @@ public class DeviceClientConfigTest
             }
         };
 
-        DeviceClientConfig config = new DeviceClientConfig(mockSasTokenSoftwareAuthentication, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockSasTokenSoftwareAuthentication, IotHubClientProtocol.AMQPS);
 
         //act
         String testIotHubHostname = config.getGatewayHostname();
@@ -128,7 +128,7 @@ public class DeviceClientConfigTest
             }
         };
 
-        DeviceClientConfig config = new DeviceClientConfig(mockSasTokenSoftwareAuthentication, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockSasTokenSoftwareAuthentication, IotHubClientProtocol.AMQPS);
 
         final String testIotHubName = config.getIotHubName();
 
@@ -154,7 +154,7 @@ public class DeviceClientConfigTest
             }
         };
 
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
 
         String testDeviceId = config.getDeviceId();
 
@@ -166,7 +166,7 @@ public class DeviceClientConfigTest
     public void getProtocolReturnsProtocol()
     {
         //arrange
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
 
         //act
         IotHubClientProtocol actualProtocol = config.getProtocol();
@@ -180,7 +180,7 @@ public class DeviceClientConfigTest
     public void getAuthenticationProviderGetsAuthenticationProvider()
     {
         //arrange
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
         Deencapsulation.setField(config, "authenticationProvider", mockedIotHubAuthenticationProvider);
 
         //act
@@ -195,7 +195,7 @@ public class DeviceClientConfigTest
     public void getModuleIdGetsModuleId()
     {
         //arrange
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
         Deencapsulation.setField(config, "authenticationProvider", mockedIotHubAuthenticationProvider);
         new NonStrictExpectations()
         {
@@ -217,14 +217,14 @@ public class DeviceClientConfigTest
     public void getAuthTypeReturnsSasTokenAuth()
     {
         //arrange
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
         Deencapsulation.setField(config, "authenticationProvider", mockSasTokenSoftwareAuthentication);
 
         //act
-        DeviceClientConfig.AuthType actualAuthType = config.getAuthenticationType();
+        ClientConfiguration.AuthType actualAuthType = config.getAuthenticationType();
 
         //assert
-        assertEquals(DeviceClientConfig.AuthType.SAS_TOKEN, actualAuthType);
+        assertEquals(ClientConfiguration.AuthType.SAS_TOKEN, actualAuthType);
     }
 
     // Tests_SRS_DEVICECLIENTCONFIG_34_052: [If the saved authentication provider uses x509, this function return AuthType.X509_CERTIFICATE.]
@@ -232,14 +232,14 @@ public class DeviceClientConfigTest
     public void getAuthTypeReturnsX509Auth()
     {
         //arrange
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
         Deencapsulation.setField(config, "authenticationProvider", mockAuthentication);
 
         //act
-        DeviceClientConfig.AuthType actualAuthType = config.getAuthenticationType();
+        ClientConfiguration.AuthType actualAuthType = config.getAuthenticationType();
 
         //assert
-        assertEquals(DeviceClientConfig.AuthType.X509_CERTIFICATE, actualAuthType);
+        assertEquals(ClientConfiguration.AuthType.X509_CERTIFICATE, actualAuthType);
     }
 
     // Tests_SRS_DEVICECLIENTCONFIG_34_055: [If the saved authentication provider uses sas tokens, this function return the saved authentication provider.]
@@ -247,7 +247,7 @@ public class DeviceClientConfigTest
     public void getSasAuthProviderReturnsSasAuth()
     {
         //arrange
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
         Deencapsulation.setField(config, "authenticationProvider", mockSasTokenSoftwareAuthentication);
 
         //act
@@ -262,7 +262,7 @@ public class DeviceClientConfigTest
     public void getSasAuthProviderReturnsNull()
     {
         //arrange
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
         Deencapsulation.setField(config, "authenticationProvider", mockAuthentication);
 
         //act
@@ -291,7 +291,7 @@ public class DeviceClientConfigTest
                         deviceKey,
                         sharedAccessToken);
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(iotHubConnectionString, IotHubClientProtocol.AMQPS);
         Object context = new Object();
         config.setMessageCallback(mockCallback, context);
         MessageCallback testCallback = config.getDeviceTelemetryMessageCallback(null);
@@ -318,7 +318,7 @@ public class DeviceClientConfigTest
                         deviceKey,
                         sharedAccessToken);
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(iotHubConnectionString, IotHubClientProtocol.AMQPS);
         Object context = new Object();
         config.setMessageCallback(mockCallback, context);
         Object testContext = config.getDeviceTelemetryMessageContext(null);
@@ -346,7 +346,7 @@ public class DeviceClientConfigTest
                         deviceKey,
                         sharedAccessToken);
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(iotHubConnectionString, IotHubClientProtocol.AMQPS);
         Object context = new Object();
         config.setMessageCallback(inputName, mockedMessageCallback, context);
 
@@ -378,7 +378,7 @@ public class DeviceClientConfigTest
                         deviceKey,
                         sharedAccessToken);
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(iotHubConnectionString, IotHubClientProtocol.AMQPS);
         Object context = new Object();
         config.setMessageCallback(inputName, mockCallback, context);
 
@@ -412,7 +412,7 @@ public class DeviceClientConfigTest
                         deviceKey,
                         sharedAccessToken);
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(iotHubConnectionString, IotHubClientProtocol.AMQPS);
         Object context = new Object();
         config.setDeviceTwinMessageCallback(mockCallback, context);
         Object testContext = config.getDeviceTwinMessageContext();
@@ -444,7 +444,7 @@ public class DeviceClientConfigTest
                         deviceKey,
                         sharedAccessToken);
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(iotHubConnectionString, IotHubClientProtocol.AMQPS);
         Object context = new Object();
         config.setDirectMethodsMessageCallback(mockCallback, context);
         Object testContext = config.getDirectMethodsMessageContext();
@@ -471,7 +471,7 @@ public class DeviceClientConfigTest
                         deviceKey,
                         sharedAccessToken);
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(iotHubConnectionString, IotHubClientProtocol.AMQPS);
         Object dMContext = new Object();
         config.setDirectMethodsMessageCallback(mockCallback, dMContext);
         Object testContextDM = config.getDirectMethodsMessageContext();
@@ -503,7 +503,7 @@ public class DeviceClientConfigTest
                         deviceKey,
                         sharedAccessToken);
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(iotHubConnectionString, IotHubClientProtocol.AMQPS);
         int testReadTimeoutMillis = config.getHttpsReadTimeout();
 
         final int expectedDefaultReadTimeoutMillis = 240000;
@@ -530,7 +530,7 @@ public class DeviceClientConfigTest
                         deviceKey,
                         sharedAccessToken);
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(iotHubConnectionString, IotHubClientProtocol.AMQPS);
         int testConnectTimeoutMillis = config.getHttpsConnectTimeout();
 
         final int expectedDefaultConnectTimeoutMillis = 0;
@@ -558,7 +558,7 @@ public class DeviceClientConfigTest
                         deviceKey,
                         sharedAccessToken);
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(iotHubConnectionString, IotHubClientProtocol.AMQPS);
         config.setUseWebsocket(true);
         assertTrue(config.isUsingWebsocket());
     }
@@ -579,7 +579,7 @@ public class DeviceClientConfigTest
                         deviceKey,
                         sharedAccessToken);
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(iotHubConnectionString, IotHubClientProtocol.AMQPS);
         config.setUseWebsocket(true);
         assertTrue(config.isUsingWebsocket());
     }
@@ -601,7 +601,7 @@ public class DeviceClientConfigTest
                         deviceKey,
                         sharedAccessToken);
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(iotHubConnectionString, IotHubClientProtocol.AMQPS);
         int testMessageLockTimeoutSecs = config.getMessageLockTimeoutSecs();
 
         final int expectedMessageLockTimeoutSecs = 180;
@@ -614,7 +614,7 @@ public class DeviceClientConfigTest
     @Test(expected = IllegalArgumentException.class)
     public void constructorFailsNullConnectionString()
     {
-        DeviceClientConfig config = new DeviceClientConfig((IotHubConnectionString) null, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration((IotHubConnectionString) null, IotHubClientProtocol.AMQPS);
     }
 
     //Tests_SRS_DEVICECLIENTCONFIG_34_039: [This function shall return the type of authentication that the config is set up to use.]
@@ -622,12 +622,12 @@ public class DeviceClientConfigTest
     public void getAuthenticationTypeWorks() throws IOException
     {
         //arrange
-        DeviceClientConfig config = new DeviceClientConfig(mockSasTokenSoftwareAuthentication, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockSasTokenSoftwareAuthentication, IotHubClientProtocol.AMQPS);
 
-        DeviceClientConfig.AuthType expectedAuthType = DeviceClientConfig.AuthType.SAS_TOKEN;
+        ClientConfiguration.AuthType expectedAuthType = ClientConfiguration.AuthType.SAS_TOKEN;
 
         //act
-        DeviceClientConfig.AuthType actualAuthType = config.getAuthenticationType();
+        ClientConfiguration.AuthType actualAuthType = config.getAuthenticationType();
 
         //assert
         assertEquals(expectedAuthType, actualAuthType);
@@ -662,7 +662,7 @@ public class DeviceClientConfigTest
             }
         };
 
-        new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS, mockSSLContext);
+        new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS, mockSSLContext);
     }
 
     @Test
@@ -702,7 +702,7 @@ public class DeviceClientConfigTest
             }
         };
 
-        new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS, mockSSLContext);
+        new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS, mockSSLContext);
     }
 
     // Tests_SRS_DEVICECLIENTCONFIG_12_002: [If the authentication type is X509 the constructor shall throw an IllegalArgumentException.]
@@ -710,7 +710,7 @@ public class DeviceClientConfigTest
     public void constructorWithX509AuthThrows(@Mocked final IotHubConnectionString mockIotHubConnectionString) throws IOException
     {
         //act
-        new DeviceClientConfig((IotHubConnectionString) null, IotHubClientProtocol.AMQPS);
+        new ClientConfiguration((IotHubConnectionString) null, IotHubClientProtocol.AMQPS);
     }
 
     //Tests_SRS_DEVICECLIENTCONFIG_34_076: [If the provided `iotHubConnectionString` uses x509 authentication, the constructor shall throw an IllegalArgumentException.]
@@ -727,7 +727,7 @@ public class DeviceClientConfigTest
         };
 
         //act
-        new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
+        new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
     }
 
     // Tests_SRS_DEVICECLIENTCONFIG_34_078: [This function shall return the saved IotHubSasTokenAuthenticationProvider object.]
@@ -743,7 +743,7 @@ public class DeviceClientConfigTest
                 result = false;
             }
         };
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
         Deencapsulation.setField(config, "authenticationProvider", mockSasTokenAuthentication);
 
         //act
@@ -758,7 +758,7 @@ public class DeviceClientConfigTest
     public void securityProviderConstructorThrowsForNullConnectionString() throws IOException
     {
         //act
-        new DeviceClientConfig(null, mockSecurityProvider, IotHubClientProtocol.AMQPS);
+        new ClientConfiguration(null, mockSecurityProvider, IotHubClientProtocol.AMQPS);
     }
 
     //Tests_SRS_DEVICECLIENTCONFIG_34_080: [If the provided connectionString or security provider is null, an IllegalArgumentException shall be thrown.]
@@ -766,7 +766,7 @@ public class DeviceClientConfigTest
     public void securityProviderConstructorThrowsForNullSecurityProvider() throws IOException
     {
         //act
-        new DeviceClientConfig(mockIotHubConnectionString, null, IotHubClientProtocol.AMQPS);
+        new ClientConfiguration(mockIotHubConnectionString, null, IotHubClientProtocol.AMQPS);
     }
 
     //Tests_SRS_DEVICECLIENTCONFIG_34_082: [If the provided security provider is a SecurityProviderX509 instance, this function shall set its auth type to X509 and create its IotHubX509AuthenticationProvider instance using the security provider's ssl context.]
@@ -795,7 +795,7 @@ public class DeviceClientConfigTest
         };
 
         //act
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, mockSecurityProviderX509, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, mockSecurityProviderX509, IotHubClientProtocol.AMQPS);
 
         //assert
         new Verifications()
@@ -827,7 +827,7 @@ public class DeviceClientConfigTest
         };
 
         //act
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, mockSecurityProviderTpm, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, mockSecurityProviderTpm, IotHubClientProtocol.AMQPS);
 
         //assert
         new Verifications()
@@ -858,7 +858,7 @@ public class DeviceClientConfigTest
         };
 
         //act
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, mockSecurityProviderSymKey, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, mockSecurityProviderSymKey, IotHubClientProtocol.AMQPS);
 
         //assert
         new Verifications()
@@ -887,7 +887,7 @@ public class DeviceClientConfigTest
         };
 
         //act
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, mockSecurityProvider, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, mockSecurityProvider, IotHubClientProtocol.AMQPS);
     }
 
     //Tests_SRS_DEVICECLIENTCONFIG_28_001: [The class shall have ExponentialBackOff as the default retryPolicy.]
@@ -895,7 +895,7 @@ public class DeviceClientConfigTest
     public void constructorWithExponentialBackOffAsDefaultPolicy()
     {
         //act
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
 
         //assert
         assertEquals(Deencapsulation.getField(config, "retryPolicy").getClass(), ExponentialBackoffWithJitter.class);
@@ -906,7 +906,7 @@ public class DeviceClientConfigTest
     public void setRetryPolicyThrowsIfNull()
     {
         //arrange
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
 
         //act
         config.setRetryPolicy(null);
@@ -917,7 +917,7 @@ public class DeviceClientConfigTest
     public void setRetryPolicySetPolicy()
     {
         //arrange
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
 
         //act
         config.setRetryPolicy(mockRetryPolicy);
@@ -931,7 +931,7 @@ public class DeviceClientConfigTest
     public void getRetryPolicyReturnsSavedPolicy()
     {
         //arrange
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
         Deencapsulation.setField(config, "retryPolicy", mockRetryPolicy);
 
         //act
@@ -946,7 +946,7 @@ public class DeviceClientConfigTest
     public void setOperationTimeoutThrowsForNegativeTimeout()
     {
         //arrange
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
 
         //act
         Deencapsulation.invoke(config, "setOperationTimeout", new Class[] {long.class}, -1);
@@ -957,7 +957,7 @@ public class DeviceClientConfigTest
     public void setOperationTimeoutThrowsForZeroTimeout()
     {
         //arrange
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
 
         //act
         Deencapsulation.invoke(config, "setOperationTimeout", new Class[] {long.class}, 0);
@@ -970,7 +970,7 @@ public class DeviceClientConfigTest
     {
         //arrange
         final long expectedOperationTimeout = 1234;
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
 
         //act
         Deencapsulation.invoke(config, "setOperationTimeout", new Class[] {long.class}, expectedOperationTimeout);
@@ -986,7 +986,7 @@ public class DeviceClientConfigTest
     {
         //arrange
         final long expectedOperationTimeout = 1234;
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
         Deencapsulation.setField(config, "operationTimeout", expectedOperationTimeout);
 
         //act
@@ -1001,7 +1001,7 @@ public class DeviceClientConfigTest
     public void getProductInfoReturnsSavedProductInfo()
     {
         //arrange
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
         Deencapsulation.setField(config, "productInfo", mockedProductInfo);
 
         //act
@@ -1016,7 +1016,7 @@ public class DeviceClientConfigTest
     public void ConstructorSavesNewProductInfo()
     {
         //act
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
 
         //assert
         assertNotNull(Deencapsulation.getField(config, "productInfo"));
@@ -1034,7 +1034,7 @@ public class DeviceClientConfigTest
     public void ConstructorSecurityProviderSavesNewProductInfo() throws IOException
     {
         //act
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, mockSecurityProviderTpm, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, mockSecurityProviderTpm, IotHubClientProtocol.AMQPS);
 
         //assert
         assertNotNull(Deencapsulation.getField(config, "productInfo"));
@@ -1054,7 +1054,7 @@ public class DeviceClientConfigTest
         //arrange
         final String inputName = "someInputName";
         final Object context = new Object();
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
 
         //act
         config.setMessageCallback(inputName, mockedMessageCallback, context);
@@ -1075,7 +1075,7 @@ public class DeviceClientConfigTest
         //arrange
         final String inputName = "someInputName";
         final Object context = new Object();
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
         config.setMessageCallback(inputName, mockedMessageCallback, context);
 
         //act
@@ -1091,7 +1091,7 @@ public class DeviceClientConfigTest
     public void setProxySettingsSets(@Mocked final ProxySettings mockedProxySettings)
     {
         //arrange
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
 
         //act
         config.setProxySettings(mockedProxySettings);
@@ -1105,7 +1105,7 @@ public class DeviceClientConfigTest
     public void getProxyHostnameGets(@Mocked final ProxySettings mockedProxySettings)
     {
         //arrange
-        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.AMQPS);
         Deencapsulation.setField(config, "proxySettings", mockedProxySettings);
 
         //act

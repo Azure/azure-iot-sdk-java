@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.microsoft.azure.sdk.iot.device.DeviceClientConfig.DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
+import static com.microsoft.azure.sdk.iot.device.ClientConfiguration.DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
 
 /**
  * A client for creating multiplexed connections to IoT hub. A multiplexed connection allows for multiple device clients
@@ -433,18 +433,18 @@ public class MultiplexingClient
 
         synchronized (this.operationLock)
         {
-            List<DeviceClientConfig> deviceClientConfigsToRegister = new ArrayList<>();
+            List<ClientConfiguration> clientConfigsToRegister = new ArrayList<>();
 
             Map<String, DeviceClient> devicesToRegisterMap = new HashMap<>();
             for (DeviceClient deviceClientToRegister : deviceClients)
             {
                 devicesToRegisterMap.put(deviceClientToRegister.getConfig().getDeviceId(), deviceClientToRegister);
-                DeviceClientConfig configToAdd = deviceClientToRegister.getConfig();
+                ClientConfiguration configToAdd = deviceClientToRegister.getConfig();
 
                 // Overwrite the proxy settings of the new client to match the multiplexing client settings
                 configToAdd.setProxySettings(this.proxySettings);
 
-                if (configToAdd.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN)
+                if (configToAdd.getAuthenticationType() != ClientConfiguration.AuthType.SAS_TOKEN)
                 {
                     throw new UnsupportedOperationException("Can only register to multiplex a device client that uses SAS token based authentication");
                 }
@@ -488,19 +488,19 @@ public class MultiplexingClient
                 }
                 else
                 {
-                    deviceClientConfigsToRegister.add(configToAdd);
+                    clientConfigsToRegister.add(configToAdd);
                 }
             }
 
             // if the device IO hasn't been created yet, then this client will be registered once it is created.
-            for (DeviceClientConfig configBeingRegistered : deviceClientConfigsToRegister)
+            for (ClientConfiguration configBeingRegistered : clientConfigsToRegister)
             {
                 log.info("Registering device {} to multiplexing client", configBeingRegistered.getDeviceId());
             }
 
             try
             {
-                this.deviceIO.registerMultiplexedDeviceClient(deviceClientConfigsToRegister, timeoutMilliseconds);
+                this.deviceIO.registerMultiplexedDeviceClient(clientConfigsToRegister, timeoutMilliseconds);
 
                 // Only update the local state map once the register call has succeeded
                 this.multiplexedDeviceClients.putAll(devicesToRegisterMap);
@@ -653,11 +653,11 @@ public class MultiplexingClient
 
         synchronized (this.operationLock)
         {
-            List<DeviceClientConfig> deviceClientConfigsToRegister = new ArrayList<>();
+            List<ClientConfiguration> clientConfigsToRegister = new ArrayList<>();
             for (DeviceClient deviceClientToUnregister : deviceClients)
             {
-                DeviceClientConfig configToUnregister = deviceClientToUnregister.getConfig();
-                deviceClientConfigsToRegister.add(configToUnregister);
+                ClientConfiguration configToUnregister = deviceClientToUnregister.getConfig();
+                clientConfigsToRegister.add(configToUnregister);
                 log.info("Unregistering device {} from multiplexing client", deviceClientToUnregister.getConfig().getDeviceId());
                 this.multiplexedDeviceClients.remove(deviceClientToUnregister.getConfig().getDeviceId());
                 deviceClientToUnregister.setDeviceIO(null);
@@ -669,7 +669,7 @@ public class MultiplexingClient
                 deviceClientToUnregister.setMessageCallback(null, null);
             }
 
-            this.deviceIO.unregisterMultiplexedDeviceClient(deviceClientConfigsToRegister, timeoutMilliseconds);
+            this.deviceIO.unregisterMultiplexedDeviceClient(clientConfigsToRegister, timeoutMilliseconds);
         }
     }
 

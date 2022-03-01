@@ -20,74 +20,85 @@ public final class DeviceClient extends InternalClient
 
     public void close();
 
-    public FileUploadSasUriResponse getFileUploadSasUri(FileUploadSasUriRequest request) throws IOException;
+    public IotHubStatusCode sendTelemetry(Message message) throws InterruptedException, TimeoutException;
 
-    public void completeFileUpload(FileUploadCompletionNotification notification) throws IOException;
-    
-    public void sendEventAsync(Message message, IotHubEventCallback callback, Object callbackContext);
+    public IotHubStatusCode sendTelemetry(Message message, int timeoutMilliseconds) throws InterruptedException, TimeoutException;
 
-    public void sendEventBatchAsync(List<Message> messages, IotHubEventCallback callback, Object callbackContext);
+    public IotHubStatusCode sendTelemetry(List<Message> messages) throws InterruptedException, TimeoutException;
 
-    public DeviceClient setMessageCallback(MessageCallback callback, Object context);
+    public IotHubStatusCode sendTelemetry(List<Message> messages, int timeoutMilliseconds) throws InterruptedException, TimeoutException;
 
-    public void getTwinAsync() throws IOException;
+    public IotHubStatusCode subscribeToDesiredProperties(DesiredPropertiesUpdateCallback desiredPropertiesCallback)
+        throws TimeoutException, InterruptedException, IllegalStateException;
 
-    public <Type1, Type2> void startTwinAsync(
-        IotHubEventCallback twinStatusCallback, 
-        Object twinStatusCallbackContext,
-        PropertyCallback<Type1, Type2> genericPropertyCallback, 
-        Object genericPropertyCallbackContext)
-            throws IOException;
+    public IotHubStatusCode subscribeToDesiredProperties(DesiredPropertiesUpdateCallback desiredPropertiesCallback, int timeoutMilliseconds)
+        throws InterruptedException, TimeoutException, IllegalStateException;
 
-    public void startTwinAsync(
-        IotHubEventCallback twinStatusCallback, 
-        Object twinStatusCallbackContext,
-        TwinPropertyCallback genericPropertyCallback, 
-        Object genericPropertyCallbackContext)
-            throws IOException;
+    public IotHubStatusCode updateReportedProperties(TwinCollection reportedProperties)
+        throws TimeoutException, InterruptedException, IllegalStateException;
 
-    public void startTwinAsync(
-        IotHubEventCallback twinStatusCallback, 
-        Object twinStatusCallbackContext,
-        TwinPropertiesCallback genericPropertiesCallback, 
-        Object genericPropertyCallbackContext)
-            throws IOException;
+    public IotHubStatusCode updateReportedProperties(TwinCollection reportedProperties, int timeoutMilliseconds)
+        throws InterruptedException, TimeoutException, IllegalStateException;
 
-    public void subscribeToDesiredPropertiesAsync(Map<Property, Pair<PropertyCallback<String, Object>, Object>> onDesiredPropertyChange) throws IOException;
+    public Twin getTwin() 
+        throws InterruptedException, TimeoutException, IllegalStateException;
 
-    public void subscribeToTwinDesiredPropertiesAsync(Map<Property, Pair<TwinPropertyCallback, Object>> onDesiredPropertyChange) throws IOException;
+    public Twin getTwin(int timeoutMilliseconds) 
+        throws InterruptedException, TimeoutException, IllegalStateException;
 
-    public void sendReportedPropertiesAsync(Set<Property> reportedProperties) throws IOException;
+    public IotHubStatusCode subscribeToMethods(MethodCallback methodCallback, Object methodCallbackContext)
+        throws IllegalStateException, InterruptedException, TimeoutException;
 
-    public void sendReportedPropertiesAsync(Set<Property> reportedProperties, int version) throws IOException;
+    public IotHubStatusCode subscribeToMethods(MethodCallback methodCallback, Object methodCallbackContext, int timeoutMilliseconds)
+        throws IllegalStateException, InterruptedException, TimeoutException;
 
-    public void sendReportedPropertiesAsync(ReportedPropertiesParameters reportedPropertiesParameters) throws IOException;
+    public void sendTelemetryAsync(Message message, IotHubEventCallback callback, Object callbackContext)
+        throws IllegalStateException;
 
-    public void sendReportedPropertiesAsync(
-        Set<Property> reportedProperties, 
-        Integer version, 
-        CorrelatingMessageCallback twinMessageStatusCallback, 
-        Object correlatingMessageCallbackContext, 
-        IotHubEventCallback reportedPropertiesCallback, 
-        Object reportedPropertiesCallbackContext) 
-            throws IOException;
+    public void sendTelemetryAsync(List<Message> messages, IotHubEventCallback callback, Object callbackContext)
+        throws IllegalStateException;
+
+    public void subscribeToDesiredPropertiesAsync(
+        DesiredPropertiesSubscriptionCallback desiredPropertiesSubscriptionCallback,
+        Object subscribeToDesiredPropertiesCallbackContext,
+        DesiredPropertiesCallback desiredPropertiesCallback,
+        Object desiredPropertiesUpdateCallbackContext)
+            throws IllegalStateException;
+
+    public void updateReportedPropertiesAsync(
+        TwinCollection reportedProperties,
+        ReportedPropertiesUpdateAcknowledgedCallback reportedPropertiesCallback,
+        Object callbackContext)
+            throws IllegalStateException;
+
+    public void updateReportedPropertiesAsync(
+        TwinCollection reportedProperties,
+        UpdateReportedPropertiesCorrelatingMessageCallback reportedPropertiesUpdateCorrelatingMessageCallback,
+        Object callbackContext)
+            throws IllegalStateException;
+
+    public void getTwinAsync(GetTwinCallback twinCallback, Object callbackContext)
+        throws IllegalStateException;
+
+    public void getTwinAsync(GetTwinCorrelatingMessageCallback twinCallback, Object callbackContext)
+        throws IllegalStateException;
 
     public void subscribeToMethodsAsync(
-        DeviceMethodCallback methodCallback, 
+        MethodCallback methodCallback, 
         Object methodCallbackContext,
         IotHubEventCallback methodStatusCallback, 
         Object methodStatusCallbackContext)
-            throws IOException;
-    
+            throws IllegalStateException;
+
     public void setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext);
 
     public void setRetryPolicy(RetryPolicy retryPolicy);
 
-    public void setOperationTimeout(long timeout);
+    public void setOperationTimeout(long timeout) throws IllegalArgumentException;
 
     public ProductInfo getProductInfo();
 
-    public DeviceClientConfig getConfig();
+    public ClientConfiguration getConfig();
        
     public boolean isMultiplexed();
 }

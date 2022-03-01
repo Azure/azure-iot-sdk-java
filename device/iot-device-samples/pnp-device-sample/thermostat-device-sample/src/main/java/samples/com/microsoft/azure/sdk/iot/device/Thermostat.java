@@ -39,7 +39,7 @@ public class Thermostat {
         }
     }
 
-    private static final UpdateReportedPropertiesCallback sendReportedPropertiesResponseCallback = (statusCode, e, callbackContext) ->
+    private static final ReportedPropertiesCallback sendReportedPropertiesResponseCallback = (statusCode, e, callbackContext) ->
     {
         if (statusCode == OK)
         {
@@ -348,7 +348,7 @@ public class Thermostat {
 
         @SneakyThrows
         @Override
-        public DirectMethodResponse call(String methodName, Object methodData, Object context) {
+        public DirectMethodResponse onMethodInvoked(String methodName, Object methodData, Object context) {
             if (methodName.equalsIgnoreCase(commandName)) {
 
                 String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);

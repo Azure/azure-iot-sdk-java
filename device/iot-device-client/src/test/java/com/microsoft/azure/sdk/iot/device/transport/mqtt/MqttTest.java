@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
+import com.microsoft.azure.sdk.iot.device.ClientConfiguration;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
@@ -67,7 +67,7 @@ public class MqttTest
     private IotHubSasToken mockSASToken;
 
     @Mocked
-    private DeviceClientConfig mockDeviceClientConfig;
+    private ClientConfiguration mockClientConfiguration;
 
     @Mocked
     private IotHubListener mockedIotHubListener;

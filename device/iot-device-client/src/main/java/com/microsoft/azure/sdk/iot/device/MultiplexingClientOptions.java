@@ -5,11 +5,10 @@ package com.microsoft.azure.sdk.iot.device;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 import javax.net.ssl.SSLContext;
 
-import static com.microsoft.azure.sdk.iot.device.DeviceClientConfig.DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
+import static com.microsoft.azure.sdk.iot.device.ClientConfiguration.DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
 import static com.microsoft.azure.sdk.iot.device.MultiplexingClient.*;
 
 /**

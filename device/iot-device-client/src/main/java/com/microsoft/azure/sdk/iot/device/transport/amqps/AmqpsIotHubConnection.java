@@ -68,8 +68,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     private final String hostName;
     private SSLContext sslContext;
     private final boolean isWebsocketConnection;
-    private final DeviceClientConfig.AuthType authenticationType;
-    private final Set<DeviceClientConfig> deviceClientConfigs;
+    private final ClientConfiguration.AuthType authenticationType;
+    private final Set<ClientConfiguration> clientConfigurations;
     private IotHubListener listener;
     private TransportException savedException;
     private boolean reconnectionScheduled = false;
@@ -99,13 +99,13 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
     // Multiplexed device registrations and un-registrations come from a non-reactor thread, so they get queued into these
     // queues and are executed when onTimerTask checks them.
-    private final Set<DeviceClientConfig> multiplexingClientsToRegister;
+    private final Set<ClientConfiguration> multiplexingClientsToRegister;
 
     // keys are the configs of the clients to unregister, values are the flag that determines if the session should be cached locally for re-use upon reconnection
-    private final Map<DeviceClientConfig, Boolean> multiplexingClientsToUnregister;
+    private final Map<ClientConfiguration, Boolean> multiplexingClientsToUnregister;
 
     // Only set when the connection is for single device and not the multiplexing client.
-    private DeviceClientConfig deviceClientConfig = null;
+    private ClientConfiguration clientConfiguration = null;
 
     private final boolean isMultiplexing;
 
@@ -113,16 +113,16 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
     private final Map<IotHubTransportMessage, IotHubMessageResult> queuedAcknowledgements = new ConcurrentHashMap<>();
 
-    public AmqpsIotHubConnection(DeviceClientConfig config, String transportUniqueIdentifier)
+    public AmqpsIotHubConnection(ClientConfiguration config, String transportUniqueIdentifier)
     {
         // This allows us to create thread safe sets despite there being no such type default in Java 7 or 8
-        this.deviceClientConfigs = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        this.clientConfigurations = Collections.newSetFromMap(new ConcurrentHashMap<>());
         this.multiplexingClientsToRegister = Collections.newSetFromMap(new ConcurrentHashMap<>());
         this.multiplexingClientsToUnregister = new ConcurrentHashMap<>();
 
-        this.deviceClientConfigs.add(config);
+        this.clientConfigurations.add(config);
 
-        this.deviceClientConfig = config;
+        this.clientConfiguration = config;
         this.transportUniqueIdentifier = transportUniqueIdentifier;
         this.isWebsocketConnection = config.isUsingWebsocket();
         this.authenticationType = config.getAuthenticationType();
@@ -153,14 +153,14 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     public AmqpsIotHubConnection(String hostName, String transportUniqueIdentifier, boolean isWebsocketConnection, SSLContext sslContext, ProxySettings proxySettings, int keepAliveInterval)
     {
         // This allows us to create thread safe sets despite there being no such type default in Java 7 or 8
-        this.deviceClientConfigs = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        this.clientConfigurations = Collections.newSetFromMap(new ConcurrentHashMap<>());
         this.multiplexingClientsToRegister = Collections.newSetFromMap(new ConcurrentHashMap<>());
         this.multiplexingClientsToUnregister = new ConcurrentHashMap<>();
 
         this.isWebsocketConnection = isWebsocketConnection;
 
         // This constructor is only called when multiplexing, and multiplexing only supports SAS auth
-        this.authenticationType = DeviceClientConfig.AuthType.SAS_TOKEN;
+        this.authenticationType = ClientConfiguration.AuthType.SAS_TOKEN;
 
         this.hostName = hostName;
         this.transportUniqueIdentifier = transportUniqueIdentifier;
@@ -177,7 +177,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         this.keepAliveInterval = keepAliveInterval;
     }
 
-    public void registerMultiplexedDevice(DeviceClientConfig config)
+    public void registerMultiplexedDevice(ClientConfiguration config)
     {
         if (this.state == IotHubConnectionStatus.CONNECTED)
         {
@@ -188,7 +188,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             this.multiplexingClientsToRegister.add(config);
         }
 
-        deviceClientConfigs.add(config);
+        clientConfigurations.add(config);
     }
 
     /**
@@ -197,7 +197,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
      * @param config the config of the device that should be unregistered.
      * @param willReconnect true if the device will be re-registered soon because it is reconnecting.
      */
-    public void unregisterMultiplexedDevice(DeviceClientConfig config, boolean willReconnect)
+    public void unregisterMultiplexedDevice(ClientConfiguration config, boolean willReconnect)
     {
         if (this.state == IotHubConnectionStatus.CONNECTED)
         {
@@ -215,7 +215,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             this.multiplexingClientsToUnregister.put(config, willReconnect);
         }
 
-        deviceClientConfigs.remove(config);
+        clientConfigurations.remove(config);
     }
 
     public void open() throws TransportException
@@ -228,7 +228,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
         if (this.state == IotHubConnectionStatus.DISCONNECTED)
         {
-            for (DeviceClientConfig clientConfig : deviceClientConfigs)
+            for (ClientConfiguration clientConfig : clientConfigurations)
             {
                 this.addSessionHandler(clientConfig);
             }
@@ -239,15 +239,15 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             {
                 this.openAsync();
 
-                if (this.authenticationType == DeviceClientConfig.AuthType.SAS_TOKEN)
+                if (this.authenticationType == ClientConfiguration.AuthType.SAS_TOKEN)
                 {
                     // x509 authenticated connections don't open authentication links since the SSL handshake does all the authentication
                     log.trace("Waiting for authentication links to open...");
                 }
 
-                Iterator<DeviceClientConfig> configsIterator = this.deviceClientConfigs.iterator();
-                DeviceClientConfig defaultConfig = configsIterator.hasNext() ? configsIterator.next() : null;
-                int timeoutSeconds = DeviceClientConfig.DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT_IN_SECONDS;
+                Iterator<ClientConfiguration> configsIterator = this.clientConfigurations.iterator();
+                ClientConfiguration defaultConfig = configsIterator.hasNext() ? configsIterator.next() : null;
+                int timeoutSeconds = ClientConfiguration.DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT_IN_SECONDS;
                 if (defaultConfig != null)
                 {
                     timeoutSeconds = defaultConfig.getAmqpOpenAuthenticationSessionTimeout();
@@ -266,7 +266,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
                 log.trace("Waiting for device sessions to open...");
                 boolean deviceSessionsOpenTimedOut = false;
-                for (DeviceClientConfig config : this.deviceClientConfigs)
+                for (ClientConfiguration config : this.clientConfigurations)
                 {
                     //Each device has its own worker session timeout according to its config settings
                     deviceSessionsOpenTimedOut = !this.deviceSessionsOpenedLatches.get(config.getDeviceId()).await(config.getAmqpOpenDeviceSessionsTimeout(), TimeUnit.SECONDS);
@@ -427,8 +427,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
         try
         {
-            Iterator<DeviceClientConfig> configsIterator = this.deviceClientConfigs.iterator();
-            DeviceClientConfig defaultConfig = configsIterator.hasNext() ? configsIterator.next() : null;
+            Iterator<ClientConfiguration> configsIterator = this.clientConfigurations.iterator();
+            ClientConfiguration defaultConfig = configsIterator.hasNext() ? configsIterator.next() : null;
             SSLContext sslContext;
             if (defaultConfig != null)
             {
@@ -447,7 +447,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 sslContext = new IotHubSSLContext().getSSLContext();
             }
 
-            if (this.authenticationType == DeviceClientConfig.AuthType.SAS_TOKEN)
+            if (this.authenticationType == ClientConfiguration.AuthType.SAS_TOKEN)
             {
                 Sasl sasl = transport.sasl();
                 sasl.setMechanisms("ANONYMOUS");
@@ -480,7 +480,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         log.trace("Amqp connection opened locally");
 
         //Create one session per multiplexed device, or just one session if not multiplexing
-        if (this.authenticationType == DeviceClientConfig.AuthType.SAS_TOKEN)
+        if (this.authenticationType == ClientConfiguration.AuthType.SAS_TOKEN)
         {
             // The CBS ("Claims-Based-Security") session is dedicated to sending SAS tokens to the service to authenticate
             // all of the device sessions in this AMQP connection.
@@ -702,7 +702,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         log.trace("Authentication session opened, counting down the authentication session opening latch");
         this.authenticationSessionOpenedLatch.countDown();
 
-        if (this.authenticationType == DeviceClientConfig.AuthType.SAS_TOKEN)
+        if (this.authenticationType == ClientConfiguration.AuthType.SAS_TOKEN)
         {
             if (this.isWebsocketConnection)
             {
@@ -1004,7 +1004,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             // expected 256 * 1024 bytes. For more context, see https://github.com/Azure/azure-iot-sdk-java/issues/742
             options.setMaxFrameSize(MAX_FRAME_SIZE);
 
-            if (this.authenticationType == DeviceClientConfig.AuthType.X509_CERTIFICATE)
+            if (this.authenticationType == ClientConfiguration.AuthType.X509_CERTIFICATE)
             {
                 // x509 authentication does not use SASL, so disable it
                 options.setEnableSaslByDefault(false);
@@ -1058,9 +1058,9 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
     }
 
-    private AmqpsSessionHandler addSessionHandler(DeviceClientConfig deviceClientConfig)
+    private AmqpsSessionHandler addSessionHandler(ClientConfiguration clientConfiguration)
     {
-        String deviceId = deviceClientConfig.getDeviceId();
+        String deviceId = clientConfiguration.getDeviceId();
 
         // Check if the device session still exists from a previous connection
         AmqpsSessionHandler amqpsSessionHandler = this.sessionHandlers.get(deviceId);
@@ -1081,7 +1081,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         {
             // If the device session did not exist in the previous connection, or if there was no previous connection,
             // create a new session
-            amqpsSessionHandler = new AmqpsSessionHandler(deviceClientConfig, this);
+            amqpsSessionHandler = new AmqpsSessionHandler(clientConfiguration, this);
         }
 
         this.sessionHandlers.put(deviceId, amqpsSessionHandler);
@@ -1093,9 +1093,9 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     // can be opened on a reactor thread instead of from one of our threads.
     private void checkForNewlyRegisteredMultiplexedClientsToStart()
     {
-        Iterator<DeviceClientConfig> configsToRegisterIterator = this.multiplexingClientsToRegister.iterator();
-        DeviceClientConfig configToRegister = configsToRegisterIterator.hasNext() ? configsToRegisterIterator.next() : null;
-        Set<DeviceClientConfig> configsRegisteredSuccessfully = new HashSet<>();
+        Iterator<ClientConfiguration> configsToRegisterIterator = this.multiplexingClientsToRegister.iterator();
+        ClientConfiguration configToRegister = configsToRegisterIterator.hasNext() ? configsToRegisterIterator.next() : null;
+        Set<ClientConfiguration> configsRegisteredSuccessfully = new HashSet<>();
         while (configToRegister != null)
         {
             AmqpsSessionHandler amqpsSessionHandler = addSessionHandler(configToRegister);
@@ -1131,9 +1131,9 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     // can be opened on a reactor thread instead of from one of our threads.
     private void checkForNewlyUnregisteredMultiplexedClientsToStop()
     {
-        Iterator<DeviceClientConfig> configsToUnregisterIterator = this.multiplexingClientsToUnregister.keySet().iterator();
-        DeviceClientConfig configToUnregister = configsToUnregisterIterator.hasNext() ? configsToUnregisterIterator.next() : null;
-        Set<DeviceClientConfig> configsUnregisteredSuccessfully = new HashSet<>();
+        Iterator<ClientConfiguration> configsToUnregisterIterator = this.multiplexingClientsToUnregister.keySet().iterator();
+        ClientConfiguration configToUnregister = configsToUnregisterIterator.hasNext() ? configsToUnregisterIterator.next() : null;
+        Set<ClientConfiguration> configsUnregisteredSuccessfully = new HashSet<>();
         while (configToUnregister != null)
         {
             String deviceId = configToUnregister.getDeviceId();
@@ -1194,19 +1194,19 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             configToUnregister = configsToUnregisterIterator.hasNext() ? configsToUnregisterIterator.next() : null;
         }
 
-        for (DeviceClientConfig successfullyUnregisteredConfig : configsUnregisteredSuccessfully)
+        for (ClientConfiguration successfullyUnregisteredConfig : configsUnregisteredSuccessfully)
         {
             this.multiplexingClientsToUnregister.remove(successfullyUnregisteredConfig);
         }
 
-        this.deviceClientConfigs.removeAll(configsUnregisteredSuccessfully);
+        this.clientConfigurations.removeAll(configsUnregisteredSuccessfully);
     }
 
     private void initializeStateLatches()
     {
         this.closeReactorLatch = new CountDownLatch(REACTOR_COUNT);
 
-        if (this.authenticationType == DeviceClientConfig.AuthType.SAS_TOKEN)
+        if (this.authenticationType == ClientConfiguration.AuthType.SAS_TOKEN)
         {
             log.trace("Initializing authentication link latch count to {}", CBS_SESSION_COUNT);
             this.authenticationSessionOpenedLatch = new CountDownLatch(CBS_SESSION_COUNT);
@@ -1254,7 +1254,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
         String runnerUniqueIdentifier = this.isMultiplexing
                 ? "Multiplexed-" + this.transportUniqueIdentifier
-                : this.deviceClientConfig.getDeviceClientUniqueIdentifier();
+                : this.clientConfiguration.getDeviceClientUniqueIdentifier();
 
         String reactorRunnerPrefix = this.hostName + "-" + runnerUniqueIdentifier + "-" + "Cnx" + this.connectionId;
         ReactorRunner reactorRunner = new ReactorRunner(
