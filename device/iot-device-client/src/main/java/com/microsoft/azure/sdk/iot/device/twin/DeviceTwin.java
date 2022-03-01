@@ -23,7 +23,7 @@ public class DeviceTwin implements MessageCallback
     private final InternalClient client;
 
     private DesiredPropertiesUpdateCallback desiredPropertiesUpdateCallback;
-    private Object desiredPropertiesUpdateCallbackContext;
+    private Object desiredPropertiesUpdateCallbackContext; // may be null
 
     public DeviceTwin(InternalClient client)
     {
@@ -124,7 +124,7 @@ public class DeviceTwin implements MessageCallback
         UpdateReportedPropertiesCorrelatingMessageCallback updateReportedPropertiesCorrelatingMessageCallback,
         Object callbackContext)
     {
-        if (desiredPropertiesUpdateCallback == null) //TODO what about open/close/open cases?
+        if (desiredPropertiesUpdateCallback == null)
         {
             throw new IllegalStateException("Must subscribe to desired properties before sending reported properties.");
         }
@@ -225,11 +225,6 @@ public class DeviceTwin implements MessageCallback
         DesiredPropertiesUpdateCallback desiredPropertiesUpdateCallback,
         Object desiredPropertiesUpdateCallbackContext)
     {
-        if (this.desiredPropertiesUpdateCallback != null)
-        {
-            //TODO what to do if called multiple times? Maybe just override the callback handler but don't send subscribe message?
-        }
-
         this.desiredPropertiesUpdateCallback = desiredPropertiesUpdateCallback;
         this.desiredPropertiesUpdateCallbackContext = desiredPropertiesUpdateCallbackContext;
 
