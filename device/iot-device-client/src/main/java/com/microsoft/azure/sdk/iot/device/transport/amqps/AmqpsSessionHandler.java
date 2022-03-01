@@ -244,21 +244,17 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
         {
             this.twinSenderLinkOpened = true;
 
-            if (this.twinReceiverLinkOpened && this.explicitInProgressTwinSubscriptionMessage != null)
-            {
-                this.amqpsSessionStateCallback.onMessageAcknowledged(this.explicitInProgressTwinSubscriptionMessage, Accepted.getInstance(), this.getDeviceId());
-                this.explicitInProgressTwinSubscriptionMessage = null; //By setting this to null, this session can handle another twin subscription message
-            }
+            // not acknowledging the explicit twin subsription message yet since the implicit twin desired properties
+            // subscription message has not been acknowledged yet. See onMessageAcknowledged for the code path that
+            // acknowledges the twin subscription message.
         }
         else if (linkHandler instanceof AmqpsTwinReceiverLinkHandler)
         {
             this.twinReceiverLinkOpened = true;
 
-            if (this.twinSenderLinkOpened && this.explicitInProgressTwinSubscriptionMessage != null)
-            {
-                this.amqpsSessionStateCallback.onMessageAcknowledged(this.explicitInProgressTwinSubscriptionMessage, Accepted.getInstance(), this.getDeviceId());
-                this.explicitInProgressTwinSubscriptionMessage = null; //By setting this to null, this session can handle another twin subscription message
-            }
+            // not acknowledging the explicit twin subsription message yet since the implicit twin desired properties
+            // subscription message has not been acknowledged yet. See onMessageAcknowledged for the code path that
+            // acknowledges the twin subscription message.
         }
         else if (linkHandler instanceof AmqpsMethodsSenderLinkHandler)
         {
@@ -289,6 +285,11 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
         {
             this.implicitInProgressSubscriptionMessages.remove(deliveryTag);
             log.trace("The acknowledged message was the desired properties subscription message");
+
+            // Now that both the twin links have opened, and the desired property subscription message has been ack'd, twin
+            // has successfully been subscribed to.
+            this.amqpsSessionStateCallback.onMessageAcknowledged(this.explicitInProgressTwinSubscriptionMessage, Accepted.getInstance(), this.getDeviceId());
+            this.explicitInProgressTwinSubscriptionMessage = null; //By setting this to null, this session can handle another twin subscription message
         }
         else
         {
