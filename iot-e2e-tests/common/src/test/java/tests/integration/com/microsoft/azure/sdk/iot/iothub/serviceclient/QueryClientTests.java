@@ -39,6 +39,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.FlakeyTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -79,6 +80,7 @@ public class QueryClientTests extends IntegrationTest
     }
 
     @Test
+    @StandardTierHubOnlyTest
     public void testQueryTwins() throws IOException, IotHubException, InterruptedException
     {
         String deviceId1 = UUID.randomUUID().toString();
@@ -138,6 +140,7 @@ public class QueryClientTests extends IntegrationTest
     @Ignore
     @FlakeyTest
     @Test
+    @StandardTierHubOnlyTest
     public void testQueryJobs() throws IOException, IotHubException, InterruptedException
     {
         // Needs investigation on why this fails consistently on android
@@ -197,6 +200,7 @@ public class QueryClientTests extends IntegrationTest
         }
     }
 
+    @StandardTierHubOnlyTest
     @Test
     public void testQueryJobsByType() throws IOException, IotHubException, InterruptedException
     {
@@ -266,6 +270,7 @@ public class QueryClientTests extends IntegrationTest
         }
     }
 
+    @StandardTierHubOnlyTest
     @Test
     public void testRawQuery() throws InterruptedException, IOException, IotHubException
     {

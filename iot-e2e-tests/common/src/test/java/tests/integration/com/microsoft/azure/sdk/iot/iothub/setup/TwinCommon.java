@@ -246,11 +246,11 @@ public class TwinCommon extends IntegrationTest
         assertTrue("Did not find expected reported property key and/or value after the device reported it", isPropertyInSet(reportedPropertiesSet, reportedPropertyKey, reportedPropertyValue));
     }
 
-    public static boolean isPropertyInSet(Set<Pair> reportedProperties, String key, String value)
+    public static boolean isPropertyInSet(Set<Pair> properties, String key, String value)
     {
-        for (Pair reportedProperty : reportedProperties)
+        for (Pair property : properties)
         {
-            if (reportedProperty.getKey().equals(key) && reportedProperty.getValue().equals(value))
+            if (property.getKey().equals(key) && property.getValue().equals(value))
             {
                 return true;
             }
@@ -259,11 +259,11 @@ public class TwinCommon extends IntegrationTest
         return false;
     }
 
-    public static boolean isPropertyInTwinCollection(TwinCollection desiredProperties, String expectedKey, String expectedValue)
+    public static boolean isPropertyInTwinCollection(TwinCollection properties, String expectedKey, String expectedValue)
     {
-        for (String key : desiredProperties.keySet())
+        for (String key : properties.keySet())
         {
-            if (key.equals(expectedKey) && desiredProperties.get(key).equals(expectedValue))
+            if (key.equals(expectedKey) && properties.get(key).equals(expectedValue))
             {
                 return true;
             }

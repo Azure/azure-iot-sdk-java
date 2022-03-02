@@ -18,6 +18,8 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestDeviceIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.TwinCommon;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -31,6 +33,7 @@ import static junit.framework.TestCase.*;
 
 @Slf4j
 @IotHubTest
+@StandardTierHubOnlyTest
 public class TwinClientTests extends IntegrationTest
 {
     protected static String iotHubConnectionString = "";
@@ -74,5 +77,62 @@ public class TwinClientTests extends IntegrationTest
             assertEquals(expectedTagKey, actualTagKey);
             assertEquals(expectedTagValue, actualTagValue);
         }
+    }
+
+    @Test
+    public void testPatchTwin() throws IOException, GeneralSecurityException, IotHubException, URISyntaxException
+    {
+        TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, IotHubClientProtocol.AMQPS, AuthenticationType.SAS, true);
+        TwinClient twinClient = new TwinClient(iotHubConnectionString, twinClientOptions);
+        Twin twin = twinClient.get(testDeviceIdentity.getDeviceId());
+
+        String expectedDesiredPropertyKey = UUID.randomUUID().toString();
+        String expectedDesiredPropertyValue = UUID.randomUUID().toString();
+
+        Set<Pair> desiredProperties = new HashSet<>();
+        desiredProperties.add(new Pair(expectedDesiredPropertyKey, expectedDesiredPropertyValue));
+        twin.setDesiredProperties(desiredProperties);
+
+        // act
+        twinClient.patch(twin);
+
+        // assert
+        twin = twinClient.get(testDeviceIdentity.getDeviceId());
+        assertTrue(TwinCommon.isPropertyInSet(twin.getDesiredProperties(), expectedDesiredPropertyKey, expectedDesiredPropertyValue));
+    }
+
+    @Test
+    public void testReplaceTwin() throws IOException, GeneralSecurityException, IotHubException, URISyntaxException
+    {
+        TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, IotHubClientProtocol.AMQPS, AuthenticationType.SAS, true);
+        TwinClient twinClient = new TwinClient(iotHubConnectionString, twinClientOptions);
+        Twin twin = twinClient.get(testDeviceIdentity.getDeviceId());
+
+        String desiredPropertyToBeReplacedKey = UUID.randomUUID().toString();
+        String desiredPropertyToBeReplacedValue = UUID.randomUUID().toString();
+
+        Set<Pair> desiredProperties = new HashSet<>();
+        desiredProperties.add(new Pair(desiredPropertyToBeReplacedKey, desiredPropertyToBeReplacedValue));
+        twin.setDesiredProperties(desiredProperties);
+
+        // add some properties to the twin that will be removed when the twinClient.replace call executes
+        twinClient.patch(twin);
+
+        twin = twinClient.get(testDeviceIdentity.getDeviceId());
+        assertTrue(TwinCommon.isPropertyInSet(twin.getDesiredProperties(), desiredPropertyToBeReplacedKey, desiredPropertyToBeReplacedValue));
+
+        String expectedDesiredPropertyKey = UUID.randomUUID().toString();
+        String expectedDesiredPropertyValue = UUID.randomUUID().toString();
+
+        desiredProperties.clear();
+        desiredProperties.add(new Pair(expectedDesiredPropertyKey, expectedDesiredPropertyValue));
+        twin.setDesiredProperties(desiredProperties);
+
+        // act
+        twin = twinClient.replace(twin);
+
+        // assert
+        assertFalse("old twin property was not deleted when twin client replaced it", TwinCommon.isPropertyInSet(twin.getDesiredProperties(), desiredPropertyToBeReplacedKey, desiredPropertyToBeReplacedValue));
+        assertTrue("new twin property was not saved when twin client added it using twinClient.replace", TwinCommon.isPropertyInSet(twin.getDesiredProperties(), expectedDesiredPropertyKey, expectedDesiredPropertyValue));
     }
 }

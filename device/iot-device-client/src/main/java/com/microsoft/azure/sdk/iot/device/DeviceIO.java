@@ -246,9 +246,7 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
     {
         if (!this.isOpen())
         {
-            throw new IllegalStateException(
-                    "Cannot send event from "
-                            + "an IoT Hub client that is closed.");
+            throw new IllegalStateException("Cannot send event from a client that is closed.");
         }
 
         if (message == null)
