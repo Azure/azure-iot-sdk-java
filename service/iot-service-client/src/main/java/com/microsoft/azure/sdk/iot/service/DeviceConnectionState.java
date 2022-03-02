@@ -11,11 +11,7 @@ package com.microsoft.azure.sdk.iot.service;
 public enum DeviceConnectionState
 {
     Disconnected("Disconnected"),
-    Connected("Connected"),
-
-    // For some reason, preview hubs send this value with a lower case "disconnected" vs "Disconnected" and "connected" vs "Connected"
-    disconnected("disconnected"),
-    connected("connected");
+    Connected("Connected");
 
     private final String connectionState;
 
