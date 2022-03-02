@@ -42,7 +42,8 @@ public class ECCX509CertificateGenerator
     /**
      * Create a new self signed ECC x509 certificate with the specified common name
      */
-    public static ECCX509Certificate generateCertificate(String commonName, ECCX509Certificate issuer) throws OperatorCreationException, CertificateException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+    public static ECCX509Certificate generateCertificate(String commonName, ECCX509Certificate issuer) throws OperatorCreationException, CertificateException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, NoSuchProviderException, SignatureException
+    {
         BouncyCastleProvider prov = new BouncyCastleProvider();
         Security.addProvider(prov);
 
@@ -80,7 +81,7 @@ public class ECCX509CertificateGenerator
         X509CertificateHolder certHldr = v3Bldr.build(new JcaContentSignerBuilder(SIGNATURE_ALGORITHM).build(issuerKey));
         X509Certificate cert = new JcaX509CertificateConverter().getCertificate(certHldr);
         cert.checkValidity(new Date());
-        //cert.verify(keypair.getPublic());
+        cert.verify(keypair.getPublic());
         return new ECCX509Certificate(keypair.getPrivate(), cert);
     }
 }

@@ -29,6 +29,12 @@
             <artifactId>slf4j-log4j12</artifactId>
             <version>1.7.29</version>
         </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot</groupId>
+            <artifactId>iot-service-client</artifactId>
+            <version>${iot-service-client-version}</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

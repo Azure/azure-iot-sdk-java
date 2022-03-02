@@ -46,8 +46,6 @@ public class SendEventX509ECC
     private static final String PRIVATE_KEY_ALIAS = "key-alias";
     private static final String DEFAULT_CERT_INSTANCE = "X.509";
 
-    // Set VM options to "-Djdk.tls.client.cipherSuites="TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"
-    // in order to force the SDK to only use ECC certificate cipher suites
     public static void main(String[] args) throws IOException, URISyntaxException, GeneralSecurityException, SecurityProviderException, OperatorCreationException, InterruptedException, com.microsoft.azure.sdk.iot.service.exceptions.IotHubException
     {
         if (args.length == 0)
@@ -57,11 +55,6 @@ public class SendEventX509ECC
 
         String connectionString = args[0];
 
-        // HTTPS - Works as expected
-        // MQTT - Works as expected
-        // MQTT_WS - Service fails to send "sec-websocket-protocol" websocket response header, but this fails in non ECC cert authenticated connections, too
-        // AMQPS - Worker links never open, but this fails in non ECC cert authenticated connections, too
-        // AMQPS_WS - Worker links never open, but this fails in non ECC cert authenticated connections, too
         IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
 
         // Call method that returns generatedcert and create a collection of these certs
