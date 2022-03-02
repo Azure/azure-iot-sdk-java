@@ -110,7 +110,7 @@ public class DeviceTwin implements MessageCallback
             // no action needed here. The correlating message callback will handle the various message state callbacks including this one
         };
 
-        this.client.sendTelemetryAsync(getTwinRequestMessage, onMessageAcknowledgedCallback,null);
+        this.client.sendEventAsync(getTwinRequestMessage, onMessageAcknowledgedCallback,null);
     }
 
     public void updateReportedPropertiesAsync(
@@ -207,7 +207,7 @@ public class DeviceTwin implements MessageCallback
 
         updateReportedPropertiesRequest.setCorrelatingMessageCallbackContext(callbackContext);
 
-        this.client.sendTelemetryAsync(updateReportedPropertiesRequest, iotHubEventCallback, callbackContext);
+        this.client.sendEventAsync(updateReportedPropertiesRequest, iotHubEventCallback, callbackContext);
     }
 
     public void subscribeToDesiredPropertiesAsync(
@@ -232,6 +232,6 @@ public class DeviceTwin implements MessageCallback
             }
         };
 
-        this.client.sendTelemetryAsync(desiredPropertiesNotificationRequest, eventCallback, subscribeToDesiredPropertiesCallbackContext);
+        this.client.sendEventAsync(desiredPropertiesNotificationRequest, eventCallback, subscribeToDesiredPropertiesCallbackContext);
     }
 }

@@ -92,7 +92,7 @@ public class DirectMethodTest
 
     /*
      **Tests_SRS_DEVICEMETHOD_25_005: [**If not already subscribed then this method shall create a device method message with empty payload and set its type as DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST, and set it's connection id to the sending device's id.**]**
-     **Tests_SRS_DEVICEMETHOD_25_006: [**If not already subscribed then this method shall send the message using sendTelemetryAsync.**]**
+     **Tests_SRS_DEVICEMETHOD_25_006: [**If not already subscribed then this method shall send the message using sendEventAsync.**]**
      */
     @Test
     public void subscribeToMethodsSucceeds(@Mocked final IotHubTransportMessage mockedMessage) throws IllegalArgumentException
@@ -121,7 +121,7 @@ public class DirectMethodTest
                 mockedMessage.setConnectionDeviceId(expectedDeviceId);
                 mockedMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
                 times = 1;
-                mockedInternalClient.sendTelemetryAsync((Message)any, (IotHubEventCallback)any, null);
+                mockedInternalClient.sendEventAsync((Message)any, (IotHubEventCallback)any, null);
                 times = 1;
             }
         };
@@ -166,7 +166,7 @@ public class DirectMethodTest
             {
                 mockedMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
                 maxTimes = 1;
-                mockedInternalClient.sendTelemetryAsync((Message)any, (IotHubEventCallback)any, null);
+                mockedInternalClient.sendEventAsync((Message)any, (IotHubEventCallback)any, null);
                 maxTimes = 1;
             }
         };
@@ -222,7 +222,7 @@ public class DirectMethodTest
                 mockedTransportMessage.setConnectionDeviceId(expectedDeviceId);
                 times = 1;
 
-                mockedInternalClient.sendTelemetryAsync((Message)any, (IotHubEventCallback)any, null);
+                mockedInternalClient.sendEventAsync((Message)any, (IotHubEventCallback)any, null);
                 maxTimes = 1;
             }
         };

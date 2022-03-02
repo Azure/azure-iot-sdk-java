@@ -192,7 +192,7 @@ public class SendBatchEvents
         try
         {
             EventCallback callback = new EventCallback();
-            client.sendTelemetryAsync(messageList, callback, messageList);
+            client.sendEventAsync(messageList, callback, messageList);
         }
         catch (Exception e)
         {

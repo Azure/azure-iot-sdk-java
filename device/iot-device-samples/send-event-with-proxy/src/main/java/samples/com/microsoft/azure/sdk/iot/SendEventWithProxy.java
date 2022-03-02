@@ -208,7 +208,7 @@ public class SendEventWithProxy
                 System.out.println(msgStr);
 
                 EventCallback callback = new EventCallback();
-                client.sendTelemetryAsync(msg, callback, msg);
+                client.sendEventAsync(msg, callback, msg);
             }
             catch (Exception e)
             {

@@ -99,7 +99,7 @@ public class DeviceClientManagerSample {
             Message msg = composeMessage(i);
             SampleMessageSendCallback callback = new SampleMessageSendCallback();
             try {
-                deviceClientManager.sendTelemetryAsync(msg, callback, msg);
+                deviceClientManager.sendEventAsync(msg, callback, msg);
             } catch (Exception e) {
                 failedMessageListOnClose.add(msg.getMessageId());
                 log.error("Exception thrown while sending telemetry: ", e);

@@ -352,7 +352,7 @@ public class SendMessagesCommon extends IntegrationTest
 
                     Success messageSent = new Success();
                     EventCallback callback = new EventCallback(IotHubStatusCode.OK);
-                    client.sendTelemetryAsync(msgSend, callback, messageSent);
+                    client.sendEventAsync(msgSend, callback, messageSent);
 
                     long startTime = System.currentTimeMillis();
                     while(!messageSent.wasCallbackFired())

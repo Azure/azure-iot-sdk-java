@@ -135,7 +135,7 @@ public class ProvisioningSymmetricKeyEnrollmentGroupSample
                     Message messageToSendFromDeviceToHub =  new Message("Whatever message you would like to send");
 
                     System.out.println("Sending message from device to IoT Hub...");
-                    deviceClient.sendTelemetryAsync(messageToSendFromDeviceToHub, new IotHubEventCallbackImpl(), null);
+                    deviceClient.sendEventAsync(messageToSendFromDeviceToHub, new IotHubEventCallbackImpl(), null);
                 }
                 catch (IOException e)
                 {

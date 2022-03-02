@@ -463,7 +463,7 @@ public class TemperatureController {
         double workingSet = 1024;
 
         Message message = PnpConvention.createIotHubMessageUtf8(telemetryName, workingSet);
-        deviceClient.sendTelemetryAsync(message, new MessageIotHubEventCallback(), message);
+        deviceClient.sendEventAsync(message, new MessageIotHubEventCallback(), message);
         log.debug("Telemetry: Sent - {\"{}\": {}KiB }", telemetryName, workingSet);
     }
 
@@ -490,7 +490,7 @@ public class TemperatureController {
         double currentTemperature = temperature.get(componentName);
 
         Message message = PnpConvention.createIotHubMessageUtf8(telemetryName, currentTemperature, componentName);
-        deviceClient.sendTelemetryAsync(message, new MessageIotHubEventCallback(), message);
+        deviceClient.sendEventAsync(message, new MessageIotHubEventCallback(), message);
         log.debug("Telemetry: Sent - {\"{}\": {}°C} with message Id {}.", telemetryName, currentTemperature, message.getMessageId());
 
         // Add the current temperature entry to the list of temperature readings.

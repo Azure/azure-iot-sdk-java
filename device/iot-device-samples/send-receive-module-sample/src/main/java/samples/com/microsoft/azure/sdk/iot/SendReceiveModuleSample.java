@@ -287,7 +287,7 @@ public class SendReceiveModuleSample
                 msg.setExpiryTime(D2C_MESSAGE_TIMEOUT);
                 System.out.println(msgStr);
                 EventCallback eventCallback = new EventCallback();
-                client.sendTelemetryAsync(msg, eventCallback, msg);
+                client.sendEventAsync(msg, eventCallback, msg);
             }
             catch (Exception e)
             {

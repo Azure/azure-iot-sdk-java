@@ -83,7 +83,7 @@ public final class DirectMethod
                                 responseMessage.setStatus(String.valueOf(responseData.getStatus()));
                                 responseMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_SEND_RESPONSE);
 
-                                client.sendTelemetryAsync(responseMessage, new DirectMethodRequestMessageCallback(), null);
+                                client.sendEventAsync(responseMessage, new DirectMethodRequestMessageCallback(), null);
                                 result = IotHubMessageResult.COMPLETE;
                             }
                             else
@@ -176,7 +176,7 @@ public final class DirectMethod
             IotHubTransportMessage subscribeMessage = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_METHODS);
             subscribeMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
             subscribeMessage.setConnectionDeviceId(this.config.getDeviceId());
-            this.client.sendTelemetryAsync(subscribeMessage, new DirectMethodRequestMessageCallback(), null);
+            this.client.sendEventAsync(subscribeMessage, new DirectMethodRequestMessageCallback(), null);
         }
     }
 }

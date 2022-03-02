@@ -190,9 +190,9 @@ public class InternalClient
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
      * @throws TimeoutException if the service fails to acknowledge the telemetry message within the default timeout.
      */
-    public IotHubStatusCode sendTelemetry(Message message) throws InterruptedException, TimeoutException
+    public IotHubStatusCode sendEvent(Message message) throws InterruptedException, TimeoutException
     {
-        return sendTelemetry(message, DEFAULT_TIMEOUT_MILLISECONDS);
+        return sendEvent(message, DEFAULT_TIMEOUT_MILLISECONDS);
     }
 
     /**
@@ -207,7 +207,7 @@ public class InternalClient
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
      * @throws TimeoutException if the service fails to acknowledge the telemetry message within the provided timeout.
      */
-    public IotHubStatusCode sendTelemetry(Message message, int timeoutMilliseconds) throws InterruptedException, TimeoutException
+    public IotHubStatusCode sendEvent(Message message, int timeoutMilliseconds) throws InterruptedException, TimeoutException
     {
         verifyRegisteredIfMultiplexing();
         message.setConnectionDeviceId(this.config.getDeviceId());
@@ -220,7 +220,7 @@ public class InternalClient
             latch.countDown();
         };
 
-        this.sendTelemetryAsync(message, eventCallback, null);
+        this.sendEventAsync(message, eventCallback, null);
 
         if (timeoutMilliseconds == 0)
         {
@@ -253,9 +253,9 @@ public class InternalClient
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
      * @throws TimeoutException if the service fails to acknowledge the batch telemetry message within the default timeout.
      */
-    public IotHubStatusCode sendTelemetry(List<Message> messages) throws InterruptedException, TimeoutException
+    public IotHubStatusCode sendEvent(List<Message> messages) throws InterruptedException, TimeoutException
     {
-        return this.sendTelemetry(messages, DEFAULT_TIMEOUT_MILLISECONDS);
+        return this.sendEvent(messages, DEFAULT_TIMEOUT_MILLISECONDS);
     }
 
     /**
@@ -274,7 +274,7 @@ public class InternalClient
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
      * @throws TimeoutException if the service fails to acknowledge the batch telemetry message within the provided timeout.
      */
-    public IotHubStatusCode sendTelemetry(List<Message> messages, int timeoutMilliseconds) throws InterruptedException, TimeoutException
+    public IotHubStatusCode sendEvent(List<Message> messages, int timeoutMilliseconds) throws InterruptedException, TimeoutException
     {
         final CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<IotHubStatusCode> statusCodeReference = new AtomicReference<>();
@@ -284,7 +284,7 @@ public class InternalClient
             latch.countDown();
         };
 
-        this.sendTelemetryAsync(messages, eventCallback, null);
+        this.sendEventAsync(messages, eventCallback, null);
 
         if (timeoutMilliseconds == 0)
         {
@@ -554,12 +554,12 @@ public class InternalClient
      * @throws IllegalArgumentException if the message provided is {@code null}.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
      */
-    public void sendTelemetryAsync(Message message, IotHubEventCallback callback, Object callbackContext)
+    public void sendEventAsync(Message message, IotHubEventCallback callback, Object callbackContext)
         throws IllegalStateException
     {
         verifyRegisteredIfMultiplexing();
         message.setConnectionDeviceId(this.config.getDeviceId());
-        deviceIO.sendTelemetryAsync(message, callback, callbackContext, this.config.getDeviceId());
+        deviceIO.sendEventAsync(message, callback, callbackContext, this.config.getDeviceId());
     }
 
     /**
@@ -577,7 +577,7 @@ public class InternalClient
      * @throws IllegalArgumentException if the message provided is {@code null}.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
      */
-    public void sendTelemetryAsync(List<Message> messages, IotHubEventCallback callback, Object callbackContext)
+    public void sendEventAsync(List<Message> messages, IotHubEventCallback callback, Object callbackContext)
         throws IllegalStateException
     {
         verifyRegisteredIfMultiplexing();
@@ -589,7 +589,7 @@ public class InternalClient
 
         Message message = new BatchMessage(messages);
 
-        deviceIO.sendTelemetryAsync(message, callback, callbackContext, this.config.getDeviceId());
+        deviceIO.sendEventAsync(message, callback, callbackContext, this.config.getDeviceId());
     }
 
     /**

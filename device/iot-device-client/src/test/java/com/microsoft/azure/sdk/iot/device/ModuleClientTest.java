@@ -232,7 +232,7 @@ public class ModuleClientTest
         ModuleClient client = new ModuleClient("some connection string", IotHubClientProtocol.MQTT);
 
         //act
-        client.sendTelemetryAsync(mockedMessage, mockedIotHubEventCallback, new Object(), "");
+        client.sendEventAsync(mockedMessage, mockedIotHubEventCallback, new Object(), "");
     }
 
     //Tests_SRS_MODULECLIENT_34_001: [If the provided outputName is null or empty, this function shall throw an IllegalArgumentException.]
@@ -244,11 +244,11 @@ public class ModuleClientTest
         ModuleClient client = new ModuleClient("some connection string", IotHubClientProtocol.MQTT);
 
         //act
-        client.sendTelemetryAsync(mockedMessage, mockedIotHubEventCallback, new Object(), null);
+        client.sendEventAsync(mockedMessage, mockedIotHubEventCallback, new Object(), null);
     }
 
     //Tests_SRS_MODULECLIENT_34_002: [This function shall set the provided message with the provided outputName, device id, and module id properties.]
-    //Tests_SRS_MODULECLIENT_34_003: [This function shall invoke super.sendTelemetryAsync(message, callback, callbackContext).]
+    //Tests_SRS_MODULECLIENT_34_003: [This function shall invoke super.sendEventAsync(message, callback, callbackContext).]
     @Test
     public void sendEventAsyncToOutputSuccess() throws URISyntaxException, ModuleClientException
     {
@@ -259,7 +259,7 @@ public class ModuleClientTest
         Deencapsulation.setField(client, "config", mockedClientConfiguration);
 
         //act
-        client.sendTelemetryAsync(mockedMessage, mockedIotHubEventCallback, new Object(), expectedOutputName);
+        client.sendEventAsync(mockedMessage, mockedIotHubEventCallback, new Object(), expectedOutputName);
 
         //assert
         new Verifications()
@@ -268,14 +268,14 @@ public class ModuleClientTest
                 mockedMessage.setOutputName(expectedOutputName);
                 times = 1;
 
-                mockedDeviceIO.sendTelemetryAsync(mockedMessage, mockedIotHubEventCallback, any, anyString);
+                mockedDeviceIO.sendEventAsync(mockedMessage, mockedIotHubEventCallback, any, anyString);
                 times = 1;
             }
         };
     }
 
     //Tests_SRS_MODULECLIENT_34_040: [This function shall set the message's connection moduleId to the config's saved module id.]
-    //Tests_SRS_MODULECLIENT_34_041: [This function shall invoke super.sendTelemetryAsync(message, callback, callbackContext).]
+    //Tests_SRS_MODULECLIENT_34_041: [This function shall invoke super.sendEventAsync(message, callback, callbackContext).]
     @Test
     public void sendEventAsyncSuccess() throws URISyntaxException, ModuleClientException
     {
@@ -298,7 +298,7 @@ public class ModuleClientTest
         };
 
         //act
-        client.sendTelemetryAsync(mockedMessage, mockedIotHubEventCallback, new Object());
+        client.sendEventAsync(mockedMessage, mockedIotHubEventCallback, new Object());
 
         //assert
         new Verifications()
@@ -307,7 +307,7 @@ public class ModuleClientTest
                 mockedMessage.setConnectionDeviceId(expectedDeviceId);
                 mockedMessage.setConnectionModuleId(expectedModuleId);
 
-                mockedDeviceIO.sendTelemetryAsync(mockedMessage, mockedIotHubEventCallback, any, expectedDeviceId);
+                mockedDeviceIO.sendEventAsync(mockedMessage, mockedIotHubEventCallback, any, expectedDeviceId);
                 times = 1;
             }
         };

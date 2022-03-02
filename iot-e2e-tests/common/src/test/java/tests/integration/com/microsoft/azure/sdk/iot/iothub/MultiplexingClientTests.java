@@ -525,7 +525,7 @@ public class MultiplexingClientTests extends IntegrationTest
     {
         Success messageSendSuccess = new Success();
         EventCallback messageSentCallback = new EventCallback(IotHubStatusCode.OK);
-        multiplexedClient.sendTelemetryAsync(message, messageSentCallback, messageSendSuccess);
+        multiplexedClient.sendEventAsync(message, messageSentCallback, messageSendSuccess);
         return messageSendSuccess;
     }
 
@@ -1047,7 +1047,7 @@ public class MultiplexingClientTests extends IntegrationTest
         boolean exceptionThrown;
         try
         {
-            testInstance.deviceClientArray.get(0).sendTelemetryAsync(new Message("This message shouldn't be sent"), new EventCallback(IotHubStatusCode.OK), null);
+            testInstance.deviceClientArray.get(0).sendEventAsync(new Message("This message shouldn't be sent"), new EventCallback(IotHubStatusCode.OK), null);
             exceptionThrown = false;
         }
         catch (UnsupportedOperationException e)

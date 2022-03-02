@@ -343,7 +343,7 @@ public class ModuleClient extends InternalClient
      * @param callbackContext the context to be included in the callback when fired
      * @throws IllegalArgumentException if the provided outputName is null or empty
      */
-    public void sendTelemetryAsync(Message message, IotHubEventCallback callback, Object callbackContext, String outputName) throws IllegalArgumentException
+    public void sendEventAsync(Message message, IotHubEventCallback callback, Object callbackContext, String outputName) throws IllegalArgumentException
     {
         if (outputName == null || outputName.isEmpty())
         {
@@ -351,14 +351,14 @@ public class ModuleClient extends InternalClient
         }
 
         message.setOutputName(outputName);
-        this.sendTelemetryAsync(message, callback, callbackContext);
+        this.sendEventAsync(message, callback, callbackContext);
     }
 
     @Override
-    public void sendTelemetryAsync(Message message, IotHubEventCallback callback, Object callbackContext) throws IllegalArgumentException
+    public void sendEventAsync(Message message, IotHubEventCallback callback, Object callbackContext) throws IllegalArgumentException
     {
         message.setConnectionModuleId(this.config.getModuleId());
-        super.sendTelemetryAsync(message, callback, callbackContext);
+        super.sendEventAsync(message, callback, callbackContext);
     }
 
     /**
