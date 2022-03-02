@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_METHODS;
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_TWIN;
+import static com.microsoft.azure.sdk.iot.device.transport.mqtt.Mqtt.MAX_IN_FLIGHT_COUNT;
 
 @Slf4j
 public class MqttIotHubConnection implements IotHubTransportConnection, MqttMessageListener
@@ -42,7 +43,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private static final String SSL_PREFIX = "ssl://";
     private static final String SSL_PORT_SUFFIX = ":8883";
 
-    private static final int KEEP_ALIVE_INTERVAL = 230;
     private static final int MQTT_VERSION = 4;
     private static final boolean SET_CLEAN_SESSION = false;
 
@@ -69,10 +69,11 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
      * object.
      *
      * @param config the client configuration.
+     * @throws TransportException if the mqtt connection configuration cannot be constructed.
      */
     // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
     // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
-    public MqttIotHubConnection(DeviceClientConfig config) throws IllegalArgumentException, TransportException
+    public MqttIotHubConnection(DeviceClientConfig config) throws TransportException
     {
         if (config == null)
         {
@@ -178,10 +179,11 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         }
 
         MqttConnectOptions connectOptions = new MqttConnectOptions();
-        connectOptions.setKeepAliveInterval(KEEP_ALIVE_INTERVAL);
+        connectOptions.setKeepAliveInterval(config.getKeepAliveInterval());
         connectOptions.setCleanSession(SET_CLEAN_SESSION);
         connectOptions.setMqttVersion(MQTT_VERSION);
         connectOptions.setUserName(iotHubUserName);
+        connectOptions.setMaxInflight(MAX_IN_FLIGHT_COUNT);
         ProxySettings proxySettings = config.getProxySettings();
         if (proxySettings != null)
         {
@@ -293,7 +295,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
      * Closes the connection. After the connection is closed, it is no longer usable.
      * If the connection is already closed, the function shall do nothing.
      */
-    public void close() throws TransportException
+    public void close()
     {
         synchronized (this.mqttConnectionStateLock)
         {

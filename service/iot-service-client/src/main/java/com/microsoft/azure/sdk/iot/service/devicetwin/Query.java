@@ -6,8 +6,6 @@
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.azure.core.credential.AzureSasCredential;
-import com.azure.core.credential.TokenCredential;
-import com.azure.core.credential.TokenRequestContext;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.deps.serializer.QueryRequestParser;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
@@ -20,6 +18,7 @@ import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 import java.io.IOException;
 import java.net.Proxy;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -33,7 +32,7 @@ public class Query
     private static final String ITEM_TYPE_KEY = "x-ms-item-type";
     private static final String PAGE_SIZE_KEY = "x-ms-max-item-count";
 
-    private int pageSize;
+    private final int pageSize;
     private final String query;
     private final boolean isSqlQuery;
 
@@ -185,7 +184,7 @@ public class Query
         if (isSqlQuery)
         {
             QueryRequestParser requestParser = new QueryRequestParser(this.query);
-            payload = requestParser.toJson().getBytes();
+            payload = requestParser.toJson().getBytes(StandardCharsets.UTF_8);
         }
         else
         {
@@ -230,7 +229,7 @@ public class Query
             throw new IotHubException("Query response does not match query request");
         }
 
-        this.queryResponse = new QueryResponse(new String(httpResponse.getBody()));
+        this.queryResponse = new QueryResponse(new String(httpResponse.getBody(), StandardCharsets.UTF_8));
         return this.queryResponse;
     }
 
@@ -283,7 +282,7 @@ public class Query
         if (isSqlQuery)
         {
             QueryRequestParser requestParser = new QueryRequestParser(this.query);
-            payload = requestParser.toJson().getBytes();
+            payload = requestParser.toJson().getBytes(StandardCharsets.UTF_8);
         }
         else
         {
@@ -328,7 +327,7 @@ public class Query
             throw new IotHubException("Query response does not match query request");
         }
 
-        this.queryResponse = new QueryResponse(new String(httpResponse.getBody()));
+        this.queryResponse = new QueryResponse(new String(httpResponse.getBody(), StandardCharsets.UTF_8));
         return this.queryResponse;
     }
 
@@ -383,7 +382,7 @@ public class Query
         if (isSqlQuery)
         {
             QueryRequestParser requestParser = new QueryRequestParser(this.query);
-            payload = requestParser.toJson().getBytes();
+            payload = requestParser.toJson().getBytes(StandardCharsets.UTF_8);
         }
         else
         {
@@ -442,7 +441,7 @@ public class Query
             throw new IotHubException("Query response does not match query request");
         }
 
-        this.queryResponse = new QueryResponse(new String(httpResponse.getBody()));
+        this.queryResponse = new QueryResponse(new String(httpResponse.getBody(), StandardCharsets.UTF_8));
         return this.queryResponse;
     }
 

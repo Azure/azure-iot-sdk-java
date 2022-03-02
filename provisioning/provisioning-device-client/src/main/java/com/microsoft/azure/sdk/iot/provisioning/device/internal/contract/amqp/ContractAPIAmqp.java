@@ -16,6 +16,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class ContractAPIAmqp extends ProvisioningDeviceClientContract
@@ -24,6 +25,7 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
     private final boolean useWebSockets;
 
     private final String idScope;
+    private final String hostName;
     private SaslHandler amqpSaslHandler;
 
     private void processRetryAfterValue(Map<String, Object> appProperties)
@@ -62,6 +64,8 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
         {
             throw new ProvisioningDeviceClientException("The hostName cannot be null or empty.");
         }
+
+        this.hostName = hostName;
 
         this.useWebSockets = provisioningDeviceClientConfig.getUseWebSockets();
 
@@ -180,7 +184,7 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
             this.amqpSaslHandler.setSasToken(requestData.getSasToken());
         }
 
-        byte[] payload = new DeviceRegistrationParser(requestData.getRegistrationId(), requestData.getPayload()).toJson().getBytes();
+        byte[] payload = new DeviceRegistrationParser(requestData.getRegistrationId(), requestData.getPayload()).toJson().getBytes(StandardCharsets.UTF_8);
 
         // SRS_ContractAPIAmqp_07_005: [This method shall send an AMQP message with the property of iotdps-register.]
         this.provisioningAmqpOperations.sendRegisterMessage(responseCallback, callbackContext, payload);
@@ -247,5 +251,21 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
         {
             throw new ProvisioningDeviceConnectionException("Closing amqp failed", ex);
         }
+    }
+
+    @Override
+    public String getConnectionId()
+    {
+        if (this.provisioningAmqpOperations != null) {
+            return this.provisioningAmqpOperations.getConnectionId();
+        }
+
+        return null;
+    }
+
+    @Override
+    public String getHostName()
+    {
+        return this.hostName;
     }
 }

@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 /**
@@ -191,7 +192,7 @@ public class DeviceMethodSample
 
         System.out.println("Press any key to exit...");
 
-        Scanner scanner = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
         scanner.nextLine();
         client.closeNow();
         System.out.println("Shutting down...");

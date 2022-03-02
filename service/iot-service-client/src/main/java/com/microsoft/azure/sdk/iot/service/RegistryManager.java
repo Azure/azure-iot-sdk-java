@@ -16,9 +16,11 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
+import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -40,6 +42,7 @@ import java.util.concurrent.Executors;
  * Use the RegistryManager client to manage the identity registry in IoT hubs.
  * To access twins, use the {@link com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin} client.
  */
+@Slf4j
 public class RegistryManager
 {
     private static final int EXECUTOR_THREAD_POOL_SIZE = 10;
@@ -49,7 +52,7 @@ public class RegistryManager
     private AzureSasCredential azureSasCredential;
     private IotHubConnectionString iotHubConnectionString;
 
-    private RegistryManagerOptions options;
+    private final RegistryManagerOptions options;
 
     /**
      * Previously was the java default constructor, should not be used.
@@ -137,6 +140,7 @@ public class RegistryManager
         this.hostName = iotHubConnectionString.getHostName();
         this.options = options;
         this.executor = Executors.newFixedThreadPool(EXECUTOR_THREAD_POOL_SIZE);
+        commonConstructorSetup();
     }
 
     /**
@@ -172,6 +176,7 @@ public class RegistryManager
         this.options = options;
         this.credentialCache = new TokenCredentialCache(credential);
         this.hostName = hostName;
+        commonConstructorSetup();
     }
 
     /**
@@ -205,6 +210,12 @@ public class RegistryManager
         this.options = options;
         this.azureSasCredential = azureSasCredential;
         this.hostName = hostName;
+        commonConstructorSetup();
+    }
+
+    private static void commonConstructorSetup()
+    {
+        log.debug("Initialized a RegistryManager instance client using SDK version {}", TransportUtils.serviceVersion);
     }
 
     /**
@@ -247,7 +258,7 @@ public class RegistryManager
         String deviceJson = device.toDeviceParser().toJson();
 
         URL url = IotHubConnectionString.getUrlDevice(this.hostName, device.getDeviceId());
-        HttpRequest request = CreateRequest(url, HttpMethod.PUT, deviceJson.getBytes());
+        HttpRequest request = CreateRequest(url, HttpMethod.PUT, deviceJson.getBytes(StandardCharsets.UTF_8));
 
         HttpResponse response = request.send();
 
@@ -265,7 +276,11 @@ public class RegistryManager
      * @return The future object for the requested operation
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
+     * @deprecated Use the synchronous version of this API {@link #addDevice(Device)}. This asynchronous
+     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
+     * in order to have control over the spawned threads.
      */
+    @Deprecated
     public CompletableFuture<Device> addDeviceAsync(Device device) throws IOException, IotHubException
     {
         if (device == null)
@@ -324,7 +339,11 @@ public class RegistryManager
      * @return The future object for the requested operation
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
+     * @deprecated Use the synchronous version of this API {@link #getDevice(String)}. This asynchronous
+     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
+     * in order to have control over the spawned threads.
      */
+    @Deprecated
     public CompletableFuture<Device> getDeviceAsync(String deviceId) throws IOException, IotHubException
     {
         if (Tools.isNullOrEmpty(deviceId))
@@ -499,7 +518,7 @@ public class RegistryManager
         device.setForceUpdate(forceUpdate);
 
         URL url = IotHubConnectionString.getUrlDevice(this.hostName, device.getDeviceId());
-        HttpRequest request = CreateRequest(url, HttpMethod.PUT, device.toDeviceParser().toJson().getBytes());
+        HttpRequest request = CreateRequest(url, HttpMethod.PUT, device.toDeviceParser().toJson().getBytes(StandardCharsets.UTF_8));
 
         request.setHeaderField("If-Match", "*");
 
@@ -519,7 +538,11 @@ public class RegistryManager
      * @return The future object for the requested operation
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
+     * @deprecated Use the synchronous version of this API {@link #updateDevice(Device)}. This asynchronous
+     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
+     * in order to have control over the spawned threads.
      */
+    @Deprecated
     public CompletableFuture<Device> updateDeviceAsync(Device device) throws IOException, IotHubException
     {
         if (device == null)
@@ -642,7 +665,11 @@ public class RegistryManager
      * @return The future object for the requested operation
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
+     * @deprecated Use the synchronous version of this API {@link #removeDevice(Device)}. This asynchronous
+     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
+     * in order to have control over the spawned threads.
      */
+    @Deprecated
     public CompletableFuture<Boolean> removeDeviceAsync(String deviceId) throws IOException, IotHubException
     {
 
@@ -694,7 +721,11 @@ public class RegistryManager
      * @return The future object for the requested operation
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
+     * @deprecated Use the synchronous version of this API {@link #getStatistics()}. This asynchronous
+     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
+     * in order to have control over the spawned threads.
      */
+    @Deprecated
     public CompletableFuture<RegistryStatistics> getStatisticsAsync() throws IOException, IotHubException
     {
         final CompletableFuture<RegistryStatistics> future = new CompletableFuture<>();
@@ -736,7 +767,7 @@ public class RegistryManager
         URL url = IotHubConnectionString.getUrlCreateExportImportJob(this.hostName);
 
         String jobPropertiesJson = CreateExportJobPropertiesJson(exportBlobContainerUri, excludeKeys);
-        HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes());
+        HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(StandardCharsets.UTF_8));
 
         HttpResponse response = request.send();
 
@@ -752,7 +783,11 @@ public class RegistryManager
      * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
+     * @deprecated Use the synchronous version of this API {@link #exportDevices(String, Boolean)}. This asynchronous
+     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
+     * in order to have control over the spawned threads.
      */
+    @Deprecated
     public CompletableFuture<JobProperties> exportDevicesAsync(String exportBlobContainerUri, Boolean excludeKeys)
             throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException
     {
@@ -795,7 +830,7 @@ public class RegistryManager
 
         exportDevicesParameters.setType(JobProperties.JobType.EXPORT);
         String jobPropertiesJson = exportDevicesParameters.toJobPropertiesParser().toJson();
-        HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes());
+        HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(StandardCharsets.UTF_8));
 
         HttpResponse response = request.send();
 
@@ -815,7 +850,11 @@ public class RegistryManager
      * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
+     * @deprecated Use the synchronous version of this API {@link #exportDevices(JobProperties)}. This asynchronous
+     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
+     * in order to have control over the spawned threads.
      */
+    @Deprecated
     public CompletableFuture<JobProperties> exportDevicesAsync(JobProperties exportDevicesParameters)
             throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException
     {
@@ -858,7 +897,7 @@ public class RegistryManager
         URL url = IotHubConnectionString.getUrlCreateExportImportJob(this.hostName);
 
         String jobPropertiesJson = CreateImportJobPropertiesJson(importBlobContainerUri, outputBlobContainerUri);
-        HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes());
+        HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(StandardCharsets.UTF_8));
 
         HttpResponse response = request.send();
 
@@ -875,7 +914,11 @@ public class RegistryManager
      * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
+     * @deprecated Use the synchronous version of this API {@link #importDevices(String, String)}. This asynchronous
+     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
+     * in order to have control over the spawned threads.
      */
+    @Deprecated
     public CompletableFuture<JobProperties> importDevicesAsync(String importBlobContainerUri, String outputBlobContainerUri)
             throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException
     {
@@ -918,7 +961,7 @@ public class RegistryManager
 
         importDevicesParameters.setType(JobProperties.JobType.IMPORT);
         String jobPropertiesJson = importDevicesParameters.toJobPropertiesParser().toJson();
-        HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes());
+        HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(StandardCharsets.UTF_8));
 
         HttpResponse response = request.send();
 
@@ -939,7 +982,11 @@ public class RegistryManager
      * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
+     * @deprecated Use the synchronous version of this API {@link #importDevices(JobProperties)}. This asynchronous
+     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
+     * in order to have control over the spawned threads.
      */
+    @Deprecated
     public CompletableFuture<JobProperties> importDevicesAsync(JobProperties importParameters)
             throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException
     {
@@ -995,7 +1042,11 @@ public class RegistryManager
      * @throws IllegalArgumentException This exception is thrown if the jobId parameter is null
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
+     * @deprecated Use the synchronous version of this API {@link #getJob(String)}. This asynchronous
+     * API only spawned a thread to run the synchronous API, so users are advised to do this themselves
+     * in order to have control over the spawned threads.
      */
+    @Deprecated
     public CompletableFuture<JobProperties> getJobAsync(String jobId)
             throws IllegalArgumentException, IOException, IotHubException
     {
@@ -1035,7 +1086,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlModule(this.hostName, module.getDeviceId(), module.getId());
 
-        HttpRequest request = CreateRequest(url, HttpMethod.PUT, moduleJson.getBytes());
+        HttpRequest request = CreateRequest(url, HttpMethod.PUT, moduleJson.getBytes(StandardCharsets.UTF_8));
 
         HttpResponse response = request.send();
 
@@ -1159,7 +1210,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlModule(this.hostName, module.getDeviceId(), module.getId());
 
-        HttpRequest request = CreateRequest(url, HttpMethod.PUT, module.toDeviceParser().toJson().getBytes());
+        HttpRequest request = CreateRequest(url, HttpMethod.PUT, module.toDeviceParser().toJson().getBytes(StandardCharsets.UTF_8));
         request.setHeaderField("If-Match", "*");
 
         HttpResponse response = request.send();
@@ -1260,7 +1311,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlConfiguration(this.hostName, configuration.getId());
 
-        HttpRequest request = CreateRequest(url, HttpMethod.PUT, configurationJson.getBytes());
+        HttpRequest request = CreateRequest(url, HttpMethod.PUT, configurationJson.getBytes(StandardCharsets.UTF_8));
 
         HttpResponse response = request.send();
 
@@ -1380,7 +1431,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlConfiguration(this.hostName, configuration.getId());
 
-        HttpRequest request = CreateRequest(url, HttpMethod.PUT, configuration.toConfigurationParser().toJson().getBytes());
+        HttpRequest request = CreateRequest(url, HttpMethod.PUT, configuration.toConfigurationParser().toJson().getBytes(StandardCharsets.UTF_8));
 
         request.setHeaderField("If-Match", "*");
 
@@ -1470,7 +1521,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlApplyConfigurationContent(this.hostName, deviceId);
 
-        HttpRequest request = CreateRequest(url, HttpMethod.POST, content.toConfigurationContentParser().toJson().getBytes());
+        HttpRequest request = CreateRequest(url, HttpMethod.POST, content.toConfigurationContentParser().toJson().getBytes(StandardCharsets.UTF_8));
 
         HttpResponse response = request.send();
 

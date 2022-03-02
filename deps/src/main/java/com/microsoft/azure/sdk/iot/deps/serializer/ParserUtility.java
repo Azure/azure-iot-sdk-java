@@ -210,7 +210,7 @@ public class ParserUtility
         }
 
         /* Codes_SRS_PARSER_UTILITY_21_029: [The validateId shall throw IllegalArgumentException if the provided string contains an illegal character.] */
-        byte[] chars = id.getBytes();
+        byte[] chars = id.getBytes(StandardCharsets.UTF_8);
         for (byte c:chars)
         {
             if(!(((c>='A') && (c<='Z')) || ((c>='a') && (c<='z')) || ((c>='0') && (c<='9')) ||

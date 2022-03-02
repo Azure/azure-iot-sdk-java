@@ -9,21 +9,20 @@ import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
+
+import static com.microsoft.azure.sdk.iot.device.DeviceClientConfig.DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
 
 /**
- * A client for creating multiplexed connections to IoT Hub. A multiplexed connection allows for multiple device clients
+ * A client for creating multiplexed connections to IoT hub. A multiplexed connection allows for multiple device clients
  * to communicate to the service through a single AMQPS connection.
  * <p>
  * A given AMQPS connection requires a TLS connection, so multiplexing may be worthwhile if you want to limit the number
- * of TLS connections needed to connect multiple device clients to IoT Hub.
+ * of TLS connections needed to connect multiple device clients to IoT hub.
  * <p>
  * A given multiplexing client also has a fixed amount of worker threads regardless of how many device clients are
  * being multiplexed. Comparatively, every non-multiplexed device client instance has its own set of worker
@@ -38,6 +37,7 @@ public class MultiplexingClient
 {
     public static final long DEFAULT_SEND_PERIOD_MILLIS = 10L;
     public static final long DEFAULT_RECEIVE_PERIOD_MILLIS = 10L;
+    public static final int DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD = 10;
     static final long DEFAULT_REGISTRATION_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
     static final long DEFAULT_UNREGISTRATION_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
     private static final String OPEN_ERROR_MESSAGE = "Failed to open the multiplexing connection";
@@ -68,6 +68,7 @@ public class MultiplexingClient
     /**
      * Instantiate a new MultiplexingClient that will establish a multiplexed connection through a proxy.
      *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param protocol The transport protocol that this client will build the multiplexed connection on. Must be either
      *                 {@link IotHubClientProtocol#AMQPS} or {@link IotHubClientProtocol#AMQPS_WS}.
      */
@@ -79,6 +80,7 @@ public class MultiplexingClient
     /**
      * Instantiate a new MultiplexingClient that will establish a multiplexed connection through a proxy.
      *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param protocol The transport protocol that this client will build the multiplexed connection on. Must be
      * {@link IotHubClientProtocol#AMQPS_WS} since using {@link IotHubClientProtocol#AMQPS} does not support proxies.
      * @param options The optional parameters to configure this client to use.
@@ -105,10 +107,12 @@ public class MultiplexingClient
         this.proxySettings = options != null ? options.getProxySettings() : null;
         long sendPeriod = options != null ? options.getSendPeriod() : DEFAULT_SEND_PERIOD_MILLIS;
         long receivePeriod = options != null ? options.getReceivePeriod() : DEFAULT_RECEIVE_PERIOD_MILLIS;
+        int sendMessagesPerThread = options != null ? options.getMaxMessagesSentPerSendThread() : DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD;
+        int keepAliveInterval = options != null ? options.getKeepAliveInterval() : DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
 
         if (sendPeriod < 0)
         {
-            throw new IllegalArgumentException("send period can not be negative");
+            throw new IllegalArgumentException("Send period cannot be negative");
         }
         else if (sendPeriod == 0) //default builder value for this option, signals that user didn't set a value
         {
@@ -117,15 +121,21 @@ public class MultiplexingClient
 
         if (receivePeriod < 0)
         {
-            throw new IllegalArgumentException("receive period can not be negative");
+            throw new IllegalArgumentException("Receive period cannot be negative");
         }
         else if (receivePeriod == 0) //default builder value for this option, signals that user didn't set a value
         {
             receivePeriod = DEFAULT_RECEIVE_PERIOD_MILLIS;
         }
 
+        if (sendMessagesPerThread == 0) //default builder value for this option, signals that user didn't set a value
+        {
+            sendMessagesPerThread = DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD;
+        }
+
         this.sslContext = options != null ? options.getSslContext() : null;
-        this.deviceIO = new DeviceIO(hostName, protocol, sslContext, proxySettings, sendPeriod, receivePeriod);
+        this.deviceIO = new DeviceIO(hostName, protocol, sslContext, proxySettings, sendPeriod, receivePeriod, keepAliveInterval);
+        this.deviceIO.setMaxNumberOfMessagesSentPerSendThread(sendMessagesPerThread);
     }
 
     /**
@@ -144,12 +154,34 @@ public class MultiplexingClient
      */
     public void open() throws MultiplexingClientException
     {
+        this.open(false);
+    }
+
+    /**
+     * Opens this multiplexing client. This may be done before or after registering any number of device clients.
+     * <p>
+     * This call behaves synchronously, so if it returns without throwing, then all registered device clients were
+     * successfully opened.
+     * <p>
+     * If this client is already open, then this method will do nothing.
+     * <p>
+     * @param withRetry if true, this open call will apply the current retry policy to allow for the open call to be
+     * retried if it fails.
+     *
+     * @throws MultiplexingClientException If any IO or authentication errors occur while opening the multiplexed connection.
+     * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or many of the registered devices failed to authenticate.
+     * Any devices not found in the map of registration exceptions provided by
+     * {@link MultiplexingClientDeviceRegistrationAuthenticationException#getRegistrationExceptions()} have registered successfully.
+     * Even when this is thrown, the AMQPS/AMQPS_WS connection is still open, and other clients may be registered to it.
+     */
+    public void open(boolean withRetry) throws MultiplexingClientException
+    {
         synchronized (this.operationLock)
         {
             log.info("Opening multiplexing client");
             try
             {
-                this.deviceIO.openWithoutWrappingException();
+                this.deviceIO.openWithoutWrappingException(withRetry);
             }
             catch (TransportException e)
             {
@@ -181,7 +213,7 @@ public class MultiplexingClient
      * <p>
      * Once closed, this client can be re-opened. It will preserve all previously registered device clients.
      * <p>
-     * @throws MultiplexingClientException If any IO errors occur when fulfilling this request.
+     * @throws MultiplexingClientException This exception is not thrown by this method anymore.
      */
     public void close() throws MultiplexingClientException
     {
@@ -189,19 +221,12 @@ public class MultiplexingClient
         {
             log.info("Closing multiplexing client");
 
-            try
+            for (DeviceClient deviceClient : this.multiplexedDeviceClients.values())
             {
-                for (DeviceClient deviceClient : this.multiplexedDeviceClients.values())
-                {
-                    deviceClient.closeFileUpload();
-                }
+                deviceClient.closeFileUpload();
+            }
 
-                this.deviceIO.closeWithoutWrappingException();
-            }
-            catch (TransportException | IOException e)
-            {
-                throw new MultiplexingClientException("Failed to close the multiplexing client", e);
-            }
+            this.deviceIO.close();
 
             // Note that this method does not close each of the registered device client instances. This is intentional
             // as the calls to deviceClient.close() do nothing besides close the deviceIO layer, which is already closed
@@ -242,7 +267,7 @@ public class MultiplexingClient
      * <p>
      * The registered device client must use symmetric key based authentication.
      * <p>
-     * The registered device client must belong to the same IoT Hub as all previously registered device clients.
+     * The registered device client must belong to the same IoT hub as all previously registered device clients.
      * <p>
      * If the provided device client is already registered to this multiplexing client, then then this method will do nothing.
      * <p>
@@ -294,7 +319,7 @@ public class MultiplexingClient
      * <p>
      * The registered device client must use symmetric key based authentication.
      * <p>
-     * The registered device client must belong to the same IoT Hub as all previously registered device clients.
+     * The registered device client must belong to the same IoT hub as all previously registered device clients.
      * <p>
      * If the provided device client is already registered to this multiplexing client, then then this method will do nothing.
      * <p>
@@ -346,7 +371,7 @@ public class MultiplexingClient
      * <p>
      * The registered device clients must use symmetric key based authentication.
      * <p>
-     * The registered device clients must belong to the same IoT Hub as all previously registered device clients.
+     * The registered device clients must belong to the same IoT hub as all previously registered device clients.
      * <p>
      * If any of these device clients are already registered to this multiplexing client, then then this method will
      * not do anything to that particular device client. All other provided device clients will still be registered though.
@@ -398,7 +423,7 @@ public class MultiplexingClient
      * <p>
      * The registered device clients must use symmetric key based authentication.
      * <p>
-     * The registered device clients must belong to the same IoT Hub as all previously registered device clients.
+     * The registered device clients must belong to the same IoT hub as all previously registered device clients.
      * <p>
      * If any of these device clients are already registered to this multiplexing client, then then this method will
      * not do anything to that particular device client. All other provided device clients will still be registered though.
@@ -463,7 +488,7 @@ public class MultiplexingClient
                     throw new UnsupportedOperationException(String.format("Multiplexed connections over AMQPS only support up to %d devices", MAX_MULTIPLEX_DEVICE_COUNT_AMQPS));
                 }
 
-                // Typically client side validation is duplicate work, but IoT Hub doesn't give a good error message when closing the
+                // Typically client side validation is duplicate work, but IoT hub doesn't give a good error message when closing the
                 // AMQPS_WS connection so this is the only way that users will know about this limit
                 if (this.protocol == IotHubClientProtocol.AMQPS_WS && this.multiplexedDeviceClients.size() > MAX_MULTIPLEX_DEVICE_COUNT_AMQPS_WS)
                 {
@@ -519,7 +544,7 @@ public class MultiplexingClient
                     // Only update the local state map once the register call has succeeded
                     String deviceIdThatAttemptedToRegister = clientsThatAttemptedToRegister.getConfig().getDeviceId();
 
-                    if (!e.getRegistrationExceptions().keySet().contains(deviceIdThatAttemptedToRegister))
+                    if (!e.getRegistrationExceptions().containsKey(deviceIdThatAttemptedToRegister))
                     {
                         this.multiplexedDeviceClients.put(deviceIdThatAttemptedToRegister, clientsThatAttemptedToRegister);
                     }
@@ -734,7 +759,7 @@ public class MultiplexingClient
 
     /**
      * Sets the given retry policy for the multiplexing client level connection management.
-     * <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-client/devdoc/requirement_docs/com/microsoft/azure/iothub/retryPolicy.md">
+     * <a href="https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-client/devdoc/requirement_docs/com/microsoft/azure/iothub/retryPolicy.md">
      *     See more details about the default retry policy and about using custom retry policies here</a>
      * @param retryPolicy The policy that the multiplexing client will use when reconnecting.
      */

@@ -70,7 +70,7 @@ public class MqttMessaging extends Mqtt
         }
     }
 
-    public void stop() throws TransportException
+    public void stop()
     {
         this.disconnect();
     }
@@ -106,6 +106,11 @@ public class MqttMessaging extends Mqtt
         if (message.isSecurityMessage())
         {
             separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, MQTT_SECURITY_INTERFACE_ID, MessageProperty.IOTHUB_SECURITY_INTERFACE_ID_VALUE, false);
+        }
+
+        if (message.getComponentName() != null && !message.getComponentName().isEmpty())
+        {
+            separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, COMPONENT_ID, message.getComponentName(), false);
         }
 
         for (MessageProperty property : message.getProperties())

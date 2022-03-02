@@ -27,6 +27,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -45,6 +46,7 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -63,7 +65,8 @@ public class ServiceClientTests extends IntegrationTest
 {
     protected static String iotHubConnectionString = "";
     protected static String invalidCertificateServerConnectionString = "";
-    private static final String content = "abcdefghijklmnopqrstuvwxyz1234567890";
+    private static final byte[] SMALL_PAYLOAD = new byte[1024];
+    private static final byte[] LARGEST_PAYLOAD = new byte[65000]; // IoT Hub allows a max of 65 kb per message
     private static String hostName;
 
     protected static HttpProxyServer proxyServer;
@@ -123,14 +126,14 @@ public class ServiceClientTests extends IntegrationTest
     @StandardTierHubOnlyTest
     public void cloudToDeviceTelemetry() throws Exception
     {
-        cloudToDeviceTelemetry(false, true, false, false);
+        cloudToDeviceTelemetry(false, true, false, false, false);
     }
 
     @Test
     @StandardTierHubOnlyTest
     public void cloudToDeviceTelemetryWithCustomSSLContext() throws Exception
     {
-        cloudToDeviceTelemetry(false, true, true, false);
+        cloudToDeviceTelemetry(false, true, false, true, false);
     }
 
     @Test
@@ -143,7 +146,7 @@ public class ServiceClientTests extends IntegrationTest
             return;
         }
 
-        cloudToDeviceTelemetry(true, true, false, false);
+        cloudToDeviceTelemetry(true, true, false, false, false);
     }
 
     @Test
@@ -156,7 +159,7 @@ public class ServiceClientTests extends IntegrationTest
             return;
         }
 
-        cloudToDeviceTelemetry(true, true, true, false);
+        cloudToDeviceTelemetry(true, true, false, true, false);
     }
 
     @Test
@@ -164,19 +167,42 @@ public class ServiceClientTests extends IntegrationTest
     @ContinuousIntegrationTest
     public void cloudToDeviceTelemetryWithNoPayload() throws Exception
     {
-        cloudToDeviceTelemetry(false, false, false, false);
+        cloudToDeviceTelemetry(false, false, false, false, false);
     }
 
     @Test
     @StandardTierHubOnlyTest
     public void cloudToDeviceTelemetryWithAzureSasCredential() throws Exception
     {
-        cloudToDeviceTelemetry(false, true, false, true);
+        cloudToDeviceTelemetry(false, true, false, false, true);
+    }
+
+    @Test
+    @ContinuousIntegrationTest
+    @StandardTierHubOnlyTest
+    public void cloudToDeviceTelemetryWithMaxPayloadSize() throws Exception
+    {
+        cloudToDeviceTelemetry(false, true, true, false, false);
+    }
+
+    @Test
+    @ContinuousIntegrationTest
+    @StandardTierHubOnlyTest
+    public void cloudToDeviceTelemetryWithMaxPayloadSizeAndProxy() throws Exception
+    {
+        if (testInstance.protocol != IotHubServiceClientProtocol.AMQPS_WS)
+        {
+            //Proxy support only exists for AMQPS_WS currently
+            return;
+        }
+
+        cloudToDeviceTelemetry(true, true, true, false, false);
     }
 
     public void cloudToDeviceTelemetry(
             boolean withProxy,
             boolean withPayload,
+            boolean withLargestPayload,
             boolean withCustomSSLContext,
             boolean withAzureSasCredential) throws Exception
     {
@@ -234,7 +260,14 @@ public class ServiceClientTests extends IntegrationTest
         Message message;
         if (withPayload)
         {
-            message = new Message(content.getBytes());
+            if (withLargestPayload)
+            {
+                message = new Message(LARGEST_PAYLOAD);
+            }
+            else
+            {
+                message = new Message(SMALL_PAYLOAD);
+            }
         }
         else
         {
@@ -284,7 +317,7 @@ public class ServiceClientTests extends IntegrationTest
         serviceClient = new ServiceClient(iotHubConnectionStringObj.getHostName(), sasCredential, testInstance.protocol);
         serviceClient.open();
 
-        Message message = new Message(content.getBytes());
+        Message message = new Message(SMALL_PAYLOAD);
         serviceClient.send(device.getDeviceId(), message);
 
         // deliberately expire the SAS token to provoke a 401 to ensure that the registry manager is using the shared
@@ -387,6 +420,7 @@ public class ServiceClientTests extends IntegrationTest
         registryManager.close();
     }
 
+    @Ignore // The IoT Hub instance we use for this test is currently offline, so this test cannot be run
     @Test
     @ContinuousIntegrationTest
     public void serviceClientValidatesRemoteCertificateWhenSendingTelemetry() throws IOException
@@ -413,6 +447,7 @@ public class ServiceClientTests extends IntegrationTest
         assertTrue(buildExceptionMessage("Expected an exception due to service presenting invalid certificate", hostName), expectedExceptionWasCaught);
     }
 
+    @Ignore // The IoT Hub instance we use for this test is currently offline, so this test cannot be run
     @Test
     @ContinuousIntegrationTest
     public void serviceClientValidatesRemoteCertificateWhenGettingFeedbackReceiver() throws IOException
@@ -440,6 +475,7 @@ public class ServiceClientTests extends IntegrationTest
         assertTrue(buildExceptionMessage("Expected an exception due to service presenting invalid certificate", hostName), expectedExceptionWasCaught);
     }
 
+    @Ignore // The IoT Hub instance we use for this test is currently offline, so this test cannot be run
     @Test
     @ContinuousIntegrationTest
     public void serviceClientValidatesRemoteCertificateWhenGettingFileUploadFeedbackReceiver() throws IOException

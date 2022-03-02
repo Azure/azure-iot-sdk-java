@@ -6,8 +6,6 @@
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.azure.core.credential.AzureSasCredential;
-import com.azure.core.credential.TokenCredential;
-import com.azure.core.credential.TokenRequestContext;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.deps.serializer.QueryRequestParser;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
@@ -15,7 +13,6 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
-import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 
 import java.io.IOException;
@@ -290,7 +287,7 @@ public class QueryCollection
         if (isSqlQuery)
         {
             QueryRequestParser requestParser = new QueryRequestParser(this.query);
-            payload = requestParser.toJson().getBytes();
+            payload = requestParser.toJson().getBytes(StandardCharsets.UTF_8);
         }
         else
         {
@@ -351,6 +348,7 @@ public class QueryCollection
      * @throws IOException If an IOException occurs when calling the Service API, or if the results of that call are unexpected.
      * @throws IotHubException If an IotHubException occurs when calling the Service API.
      */
+    @SuppressWarnings("unused") // Used by reflection in tests
     protected QueryCollectionResponse<String> next() throws IOException, IotHubException
     {
         QueryOptions options = new QueryOptions();

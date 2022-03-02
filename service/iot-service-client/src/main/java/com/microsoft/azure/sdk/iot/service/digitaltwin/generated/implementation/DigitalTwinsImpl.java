@@ -27,6 +27,7 @@ import java.util.List;
  * An instance of this class provides access to all the operations defined
  * in DigitalTwins.
  */
+@SuppressWarnings("UnstableApiUsage")
 public class DigitalTwinsImpl implements DigitalTwins {
     /** The Retrofit service to perform REST calls. */
     private final DigitalTwinsService service;
@@ -370,7 +371,6 @@ public class DigitalTwinsImpl implements DigitalTwins {
             throw new IllegalArgumentException("Parameter commandName is required and cannot be null.");
         }
         final String apiVersion = "2020-09-30";
-        final Object payload = null;
         return service.invokeRootLevelCommand(id, commandName, null, apiVersion, null, null)
             .flatMap(new Func1<Response<ResponseBody>, Observable<ServiceResponseWithHeaders<Object, DigitalTwinInvokeRootLevelCommandHeaders>>>() {
                 @Override

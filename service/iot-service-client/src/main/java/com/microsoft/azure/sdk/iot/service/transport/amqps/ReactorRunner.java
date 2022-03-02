@@ -10,22 +10,32 @@ import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.engine.BaseHandler;
 import org.apache.qpid.proton.engine.HandlerException;
 import org.apache.qpid.proton.reactor.Reactor;
+import org.apache.qpid.proton.reactor.ReactorOptions;
 
 import java.io.IOException;
 
 @Slf4j
 public class ReactorRunner
 {
-    private final static String THREAD_NAME_PREFIX = "azure-iot-sdk-ReactorRunner-";
+    private final static String THREAD_NAME = "azure-iot-sdk-ReactorRunner";
     private final String threadName;
     private final Reactor reactor;
     public static final int REACTOR_TIMEOUT = 3141; // reactor timeout in milliseconds
     public static final int CLOSE_REACTOR_GRACEFULLY_TIMEOUT = 10 * 1000;
+    private static final int MAX_FRAME_SIZE = 4 * 1024;
 
-    public ReactorRunner(BaseHandler baseHandler, String threadNamePostfix) throws IOException
+    public ReactorRunner(BaseHandler baseHandler, String threadNamePrefix, String threadNamePostfix) throws IOException
     {
-        this.reactor = Proton.reactor(baseHandler);
-        this.threadName = THREAD_NAME_PREFIX + threadNamePostfix;
+        ReactorOptions options = new ReactorOptions();
+
+        // If this option isn't set, proton defaults to 16 * 1024 max frame size. This used to default to 4 * 1024,
+        // and this change to 16 * 1024 broke the websocket implementation that we layer on top of proton-j.
+        // By setting this frame size back to 4 * 1024, AMQPS_WS clients can send messages with payloads up to the
+        // expected 64 * 1024 bytes. For more context, see https://github.com/Azure/azure-iot-sdk-java/issues/742
+        options.setMaxFrameSize(MAX_FRAME_SIZE);
+
+        this.reactor = Proton.reactor(options, baseHandler);
+        this.threadName = threadNamePrefix + "-" + THREAD_NAME + "-" + threadNamePostfix;
     }
 
     public void run(long timeoutMs)

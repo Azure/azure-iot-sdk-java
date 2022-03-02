@@ -14,6 +14,7 @@ import com.google.gson.annotations.SerializedName;
  * Class that represents the REST API format for DeviceRegistrationResult
  * Format : https://docs.microsoft.com/en-us/rest/api/iot-dps/RuntimeRegistration/RegisterDevice#definitions_deviceregistrationresult
  */
+@SuppressWarnings("unused") // A number of private fields are unused but may be filled in by serialization
 public class DeviceRegistrationResultParser
 {
     private static final String REGISTRATION_ID = "registrationId";
@@ -35,6 +36,10 @@ public class DeviceRegistrationResultParser
     private static final String STATUS = "status";
     @SerializedName(STATUS)
     private String status;
+
+    private static final String SUBSTATUS = "substatus";
+    @SerializedName(SUBSTATUS)
+    private String substatus;
 
     private static final String ETAG = "etag";
     @SerializedName(ETAG)
@@ -117,6 +122,15 @@ public class DeviceRegistrationResultParser
     {
         //SRS_DeviceRegistrationResultParser_25_005: [ This method shall return the parsed status. ]
         return status;
+    }
+
+    /**
+     * Getter for Substatus
+     * @return Getter for Substatus
+     */
+    public String getSubstatus()
+    {
+        return substatus;
     }
 
     /**

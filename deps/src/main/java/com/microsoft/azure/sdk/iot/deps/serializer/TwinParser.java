@@ -21,7 +21,7 @@ public class TwinParser
 
     private TwinChangedCallback onDesiredCallback = null;
     private TwinChangedCallback onReportedCallback = null;
-    private static TwinChangedCallback onTagsCallback = null;
+    private TwinChangedCallback onTagsCallback = null;
 
     private static final String TAGS_TAG = "tags";
     private static final String PROPERTIES_TAG = "properties";
@@ -107,7 +107,7 @@ public class TwinParser
      */
     public void setTagsCallback(TwinChangedCallback onTagsCallback)
     {
-        TwinParser.onTagsCallback = onTagsCallback;
+        this.onTagsCallback = onTagsCallback;
     }
 
     /**

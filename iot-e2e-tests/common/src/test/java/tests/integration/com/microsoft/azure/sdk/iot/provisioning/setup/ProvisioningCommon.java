@@ -67,6 +67,7 @@ public class ProvisioningCommon extends IntegrationTest
         customAllocationWebhookUrl = Tools.retrieveEnvironmentVariableValue(CUSTOM_ALLOCATION_WEBHOOK_URL_VAR_NAME);
         provisioningServiceGlobalEndpointWithInvalidCert = Tools.retrieveEnvironmentVariableValue(DPS_GLOBAL_ENDPOINT_WITH_INVALID_CERT_ENV_VAR_NAME);
         provisioningServiceWithInvalidCertConnectionString = Tools.retrieveEnvironmentVariableValue(DPS_CONNECTION_STRING_WITH_INVALID_CERT_ENV_VAR_NAME);
+        provisioningServiceGlobalEndpoint = Tools.retrieveEnvironmentVariableValue(DPS_GLOBAL_ENDPOINT_ENV_VAR_NAME, "global.azure-devices-provisioning.net");
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
     }
 
@@ -105,7 +106,8 @@ public class ProvisioningCommon extends IntegrationTest
     public static final String DPS_CONNECTION_STRING_WITH_INVALID_CERT_ENV_VAR_NAME = "PROVISIONING_CONNECTION_STRING_INVALIDCERT";
     public static String provisioningServiceWithInvalidCertConnectionString = "";
 
-    public static String provisioningServiceGlobalEndpoint = "global.azure-devices-provisioning.net";
+    public static final String DPS_GLOBAL_ENDPOINT_ENV_VAR_NAME = "DPS_GLOBALDEVICEENDPOINT";
+    public static String provisioningServiceGlobalEndpoint = "";
 
     public static final String DPS_GLOBAL_ENDPOINT_WITH_INVALID_CERT_ENV_VAR_NAME = "DPS_GLOBALDEVICEENDPOINT_INVALIDCERT";
     public static String provisioningServiceGlobalEndpointWithInvalidCert = "";
@@ -304,6 +306,14 @@ public class ProvisioningCommon extends IntegrationTest
         Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Unexpected status", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), PROVISIONING_DEVICE_STATUS_ASSIGNED, provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus());
         testInstance.provisionedDeviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
         testInstance.provisionedIotHubUri = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri();
+
+        assertEquals(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus(), PROVISIONING_DEVICE_STATUS_ASSIGNED);
+        assertEquals(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getRegistrationId(), testInstance.registrationId);
+        assertNotNull(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getCreatedDateTimeUtc());
+        assertNotNull(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getLastUpdatesDateTimeUtc());
+        assertNotNull(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getLastUpdatesDateTimeUtc());
+        assertNotNull(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getSubstatus());
+
         assertNotNull(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Expected a device id", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), testInstance.provisionedDeviceId);
         assertFalse(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Expected a device id", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), testInstance.provisionedDeviceId.isEmpty());
         assertNotNull(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Expected uri", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), testInstance.provisionedIotHubUri);
@@ -546,7 +556,7 @@ public class ProvisioningCommon extends IntegrationTest
                 createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, twinState, deviceCapabilities);
                 assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Expected symmetric key attestation", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), testInstance.individualEnrollment.getAttestation() instanceof  SymmetricKeyAttestation);
                 SymmetricKeyAttestation symmetricKeyAttestation = (SymmetricKeyAttestation) testInstance.individualEnrollment.getAttestation();
-                securityProvider = new SecurityProviderSymmetricKey(symmetricKeyAttestation.getPrimaryKey().getBytes(), testInstance.registrationId);
+                securityProvider = new SecurityProviderSymmetricKey(symmetricKeyAttestation.getPrimaryKey().getBytes(StandardCharsets.UTF_8), testInstance.registrationId);
             }
 
             Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Unexpected device id assigned", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), testInstance.provisionedDeviceId, testInstance.individualEnrollment.getDeviceId());

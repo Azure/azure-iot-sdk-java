@@ -8,19 +8,15 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.Message;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.*;
+
 
 @Slf4j
 public class DeviceClientManagerSample {
-    private static final String deviceConnectionString = System.getenv("DEVICE_CONNECTION_STRING");
-    // Can be configured to use any protocol from HTTPS, AMQPS, MQTT, AMQPS_WS, MQTT_WS. Note: HTTPS does not support status callback, device methods and device twins.
-    private static final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-    private static final int DEVICE_OPERATION_TIMEOUT_IN_MINUTES = 2;
-    private static final int NUM_REQUESTS = 20;
-    private static final int SLEEP_DURATION_IN_SECS = 60;
 
     final static List<String> failedMessageListOnClose = new ArrayList<>(); // List of messages that failed on close
     private static DeviceClientManager deviceClientManager;
@@ -30,38 +26,76 @@ public class DeviceClientManagerSample {
      */
     public static void main(String[] args)
             throws URISyntaxException, IOException {
-        log.debug("Starting the sample...");
-        log.debug("Using communication protocol: {}", protocol.name());
 
-        DeviceClient client = new DeviceClient(deviceConnectionString, protocol);
-        log.debug("Successfully created an IoT Hub client.");
+        SampleParameters params = new SampleParameters(args);
+
+        log.info("Starting...");
+        log.info("Setup parameters...");
+
+        String argDeviceConnectionString = (params.getConnectionStrings())[0];
+
+        IotHubClientProtocol argProtocol;
+        String protocol = params.getTransport().toLowerCase();
+
+        switch (protocol)
+        {
+            case "https":
+                argProtocol = IotHubClientProtocol.HTTPS;
+                break;
+            case "amqps":
+                argProtocol = IotHubClientProtocol.AMQPS;
+                break;
+            case "amqps_ws":
+                argProtocol = IotHubClientProtocol.AMQPS_WS;
+                break;
+            case "mqtt":
+                argProtocol = IotHubClientProtocol.MQTT;
+                break;
+            case "mqtt_ws":
+                argProtocol = IotHubClientProtocol.MQTT_WS;
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported protocol: [" + protocol + "]");
+        }
+        log.debug("Setup parameter: Protocol = [{}]", protocol);
+
+        int argNumRequest = Integer.parseInt(params.getNumRequests());
+        log.debug("Setup parameter: Requests = [{}]", argNumRequest);
+        int argSleepDuration = Integer.parseInt(params.getSleepDuration());
+        log.debug("Setup parameter: Sleep Duration = [{}]", argSleepDuration);
+        int argTimeout = Integer.parseInt(params.getTimeout());
+        log.debug("Setup parameter: Timeout = [{}]", argTimeout);
+
+        DeviceClient client = new DeviceClient(argDeviceConnectionString, argProtocol);
+        log.info("Successfully created an IoT Hub client.");
 
         deviceClientManager = new DeviceClientManager(client);
-        deviceClientManager.setOperationTimeout(DEVICE_OPERATION_TIMEOUT_IN_MINUTES);
+        deviceClientManager.setOperationTimeout(argTimeout);
 
         deviceClientManager.open();
-        log.debug("Opened connection to IoT Hub.");
+        log.info("Opened connection to IoT Hub.");
 
         log.debug("Setting C2D message handler...");
         deviceClientManager.setMessageCallback(new SampleMessageReceiveCallback(), new Object());
 
         log.debug("Start sending telemetry ...");
-        startSendingTelemetry();
+        startSendingTelemetry(argNumRequest, argSleepDuration);
 
         // close the connection
-        log.debug("Closing");
+        log.info("Closing");
         deviceClientManager.closeNow();
 
         if (! failedMessageListOnClose.isEmpty()) {
-            log.debug("List of messages that were cancelled on close: {}", failedMessageListOnClose.toString());
+            log.error("List of messages that were cancelled on close:");
+            log.error(failedMessageListOnClose.toString());
         }
 
-        log.debug("Shutting down...");
+        log.info("Shutting down...");
     }
 
-    private static void startSendingTelemetry() {
+    private static void startSendingTelemetry(int numRequest, int sleepTime) {
         log.debug("Sending the following event messages:");
-        for (int i = 0; i < NUM_REQUESTS; ++i) {
+        for (int i = 0; i < numRequest; ++i) {
             Message msg = composeMessage(i);
             SampleMessageSendCallback callback = new SampleMessageSendCallback();
             try {
@@ -71,8 +105,8 @@ public class DeviceClientManagerSample {
                 log.error("Exception thrown while sending telemetry: ", e);
             }
             try {
-                log.debug("Sleeping for {} secs before sending next message.", SLEEP_DURATION_IN_SECS);
-                Thread.sleep(SLEEP_DURATION_IN_SECS * 1000);
+                log.debug("Sleeping for {} secs before sending next message.", sleepTime);
+                TimeUnit.SECONDS.sleep(sleepTime);
             } catch (InterruptedException e) {
                 log.error("Exception thrown while sleeping: ", e);
             }

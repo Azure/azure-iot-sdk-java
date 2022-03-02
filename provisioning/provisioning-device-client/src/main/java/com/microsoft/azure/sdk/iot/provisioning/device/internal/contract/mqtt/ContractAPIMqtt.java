@@ -17,6 +17,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseDat
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -40,6 +41,20 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
     private final Queue<MqttMessage> receivedMessages = new LinkedBlockingQueue<>();
 
     private Throwable lostConnection = null;
+
+    @Override
+    public String getConnectionId() {
+        if (this.mqttConnection != null) {
+            return this.mqttConnection.getConnectionId();
+        }
+
+        return null;
+    }
+
+    @Override
+    public String getHostName() {
+        return this.hostname;
+    }
 
     /**
      * This constructor creates an instance of Mqtt class and initializes member variables
@@ -238,7 +253,7 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
             String topic = String.format(MQTT_REGISTER_MESSAGE_FMT, this.packetId++);
 
             //SRS_ContractAPIMqtt_07_026: [ This method shall build the required Json input using parser. ]
-            byte[] payload = new DeviceRegistrationParser(requestData.getRegistrationId(), requestData.getPayload()).toJson().getBytes();
+            byte[] payload = new DeviceRegistrationParser(requestData.getRegistrationId(), requestData.getPayload()).toJson().getBytes(StandardCharsets.UTF_8);
 
             // SRS_ContractAPIMqtt_07_005: [This method shall send an MQTT message with the property of iotdps-register.]
             this.executeProvisioningMessage(topic, payload, responseCallback, callbackContext);

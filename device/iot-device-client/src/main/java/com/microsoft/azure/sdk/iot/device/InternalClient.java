@@ -30,6 +30,7 @@ public class InternalClient
     // SET_RECEIVE_INTERVAL is used for setting the interval for handling MQTT and AMQP messages.
     static final String SET_RECEIVE_INTERVAL = "SetReceiveInterval";
     static final String SET_SEND_INTERVAL = "SetSendInterval";
+    static final String SET_MAX_MESSAGES_SENT_PER_THREAD = "SetMaxMessagesSentPerThread";
     static final String SET_CERTIFICATE_PATH = "SetCertificatePath";
 	static final String SET_CERTIFICATE_AUTHORITY = "SetCertificateAuthority";
     static final String SET_SAS_TOKEN_EXPIRY_TIME = "SetSASTokenExpiryTime";
@@ -129,13 +130,13 @@ public class InternalClient
         IotHubConnectionString connectionString = new IotHubConnectionString(uri, deviceId, null, null);
 
         //Codes_SRS_INTERNALCLIENT_34_066: [The provided security provider will be saved in config.]
-        this.config = new DeviceClientConfig(connectionString, securityProvider);
+        this.config = new DeviceClientConfig(connectionString, securityProvider, clientOptions);
         this.config.setProtocol(protocol);
         if (clientOptions != null) {
             this.config.modelId = clientOptions.getModelId();
         }
 
-        //Codes_SRS_INTERNALCLIENT_34_067: [The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.]
+        //Codes_SRS_INTERNALCLIENT_34_067: [The constructor shall initialize the IoT hub transport for the protocol specified, creating a instance of the deviceIO.]
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
     }
 
@@ -169,19 +170,45 @@ public class InternalClient
         this.deviceIO = null;
     }
 
+    /**
+     * Starts asynchronously sending and receiving messages from an IoT hub. If
+     * the client is already open, the function shall do nothing.
+     *
+     * @throws IOException if a connection to an IoT hub cannot be established.
+     */
+    public void open() throws IOException
+    {
+        this.open(false);
+    }
+
+    /**
+     * Starts asynchronously sending and receiving messages from an IoT hub. If
+     * the client is already open, the function shall do nothing.
+     *
+     * @param withRetry if true, this open call will apply the retry policy to allow for the open call to be retried if
+     * it fails. Both the operation timeout set in {@link #setOperationTimeout(long)} and the retry policy set in
+     * {{@link #setRetryPolicy(RetryPolicy)}} will be respected while retrying to open the connection.
+     *
+     * @throws IOException if a connection to an IoT hub cannot be established.
+     */
     // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
     // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
     @SuppressWarnings("ConstantConditions")
-    public void open() throws IOException
+    public void open(boolean withRetry) throws IOException
     {
         if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN && this.config.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary())
         {
             throw new SecurityException("Your SasToken is expired");
         }
 
-        this.deviceIO.open();
+        this.deviceIO.open(withRetry);
     }
 
+    /**
+     * Close the client.
+     *
+     * @throws IOException This exception is no longer thrown by this method.
+     */
     public void close() throws IOException
     {
         //noinspection StatementWithEmptyBody
@@ -193,13 +220,18 @@ public class InternalClient
         this.deviceIO.close();
     }
 
+    /**
+     * Close the client.
+     *
+     * @throws IOException This exception is no longer thrown by this method.
+     */
     public void closeNow() throws IOException
     {
         this.deviceIO.close();
     }
 
     /**
-     * Asynchronously sends an event message to the IoT Hub.
+     * Asynchronously sends an event message to the IoT hub.
      *
      * @param message the message to be sent.
      * @param callback the callback to be invoked when a response is received.
@@ -223,7 +255,7 @@ public class InternalClient
     }
 
     /**
-     * Asynchronously sends a batch of messages to the IoT Hub
+     * Asynchronously sends a batch of messages to the IoT hub
      * HTTPS messages will be sent in a single batch and MQTT and AMQP messages will be sent individually.
      * In case of HTTPS, This API call is an all-or-nothing single HTTPS message and the callback will be triggered only once.
      * Maximum payload size for HTTPS is 255KB
@@ -257,7 +289,7 @@ public class InternalClient
      *
      * This client will receive a callback each time a desired property is updated. That callback will either contain
      * the full desired properties set, or only the updated desired property depending on how the desired property was changed.
-     * IoT Hub supports a PUT and a PATCH on the twin. The PUT will cause this device client to receive the full desired properties set, and the PATCH
+     * IoT hub supports a PUT and a PATCH on the twin. The PUT will cause this device client to receive the full desired properties set, and the PATCH
      * will cause this device client to only receive the updated desired properties. Similarly, the version
      * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
      * have its version incremented from a PATCH call. The java service client library uses the PATCH call when updated desired properties,
@@ -344,6 +376,9 @@ public class InternalClient
      */
     public void sendReportedProperties(Set<Property> reportedProperties, int version) throws IOException, IllegalArgumentException
     {
+        if (version < 0) {
+            throw new IllegalArgumentException("Version cannot be negative.");
+        }
         this.sendReportedProperties(reportedProperties, version, null, null, null, null);
     }
 
@@ -385,6 +420,11 @@ public class InternalClient
      * with a status and a reason why the device's status changed. When the callback is fired, the provided context will
      * be provided alongside the status and reason.
      *
+     * This connection status callback is not triggered by any upstream connection change events. For example, if
+     * if the connection status callback is set for a module on an IoT Edge device and that IoT Edge device
+     * loses connection to the cloud, this connection status callback won't execute since the connection
+     * between the module and the IoT Edge device hasn't changed.
+     *
      * <p>Note that the thread used to deliver this callback should not be used to call open()/closeNow() on the client
      * that this callback belongs to. All open()/closeNow() operations should be done on a separate thread</p>
      *
@@ -406,7 +446,7 @@ public class InternalClient
 
     /**
      * Sets the given retry policy on the underlying transport
-     * <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-client/devdoc/requirement_docs/com/microsoft/azure/iothub/retryPolicy.md">
+     * <a href="https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-client/devdoc/requirement_docs/com/microsoft/azure/iothub/retryPolicy.md">
      *     See more details about the default retry policy and about using custom retry policies here</a>
      * @param retryPolicy the new interval in milliseconds
      */
@@ -463,6 +503,12 @@ public class InternalClient
      *	      in case of HTTPS protocol, this option acts the same as {@code SetMinimumPollingInterval}
      *	      in case of MQTT and AMQP protocols, this option specifies the interval in milliseconds
      *	      between spawning a thread that dequeues a message from the SDK's queue of received messages.
+     *
+     *	    - <b>SetMaxMessagesSentPerThread</b> - this option is applicable to all protocols.
+     *	      This option specifies how many messages a given send thread should attempt to send before exiting.
+     *	      This option can be used in conjunction with "SetSendInterval" to control the how frequently and in what
+     *	      batch size messages are sent. By default, this client sends 10 messages per send thread, and spawns
+     *	      a send thread every 10 milliseconds. This gives a theoretical throughput of 1000 messages per second.
      *
      *	    - <b>SetCertificatePath</b> - this option is applicable only
      *	      when the transport configured with this client is AMQP. This
@@ -538,6 +584,11 @@ public class InternalClient
                 case SET_SEND_INTERVAL:
                 {
                     setOption_SetSendInterval(value);
+                    break;
+                }
+                case SET_MAX_MESSAGES_SENT_PER_THREAD:
+                {
+                    setOption_SetMaxMessagesSentPerThread(value);
                     break;
                 }
                 case SET_CERTIFICATE_PATH:
@@ -887,6 +938,7 @@ public class InternalClient
     {
         if (value != null)
         {
+            log.info("Setting path to trusted certificate");
             this.config.getAuthenticationProvider().setPathToIotHubTrustedCert((String) value);
         }
     }
@@ -902,6 +954,7 @@ public class InternalClient
 
             if (value instanceof Integer)
             {
+                log.info("Setting HTTPS connect timeout to {} milliseconds", value);
                 this.config.setHttpsConnectTimeout((int) value);
             }
             else
@@ -922,6 +975,7 @@ public class InternalClient
 
             if (value instanceof Integer)
             {
+                log.info("Setting HTTPS read timeout to {} milliseconds", value);
                 this.config.setHttpsReadTimeout((int) value);
             }
             else
@@ -946,6 +1000,7 @@ public class InternalClient
                 try
                 {
                     verifyRegisteredIfMultiplexing();
+                    log.info("Setting send period to {} milliseconds", value);
                     this.deviceIO.setSendPeriodInMilliseconds((long) value);
                 }
                 catch (IOException e)
@@ -970,6 +1025,7 @@ public class InternalClient
                 try
                 {
                     verifyRegisteredIfMultiplexing();
+                    log.info("Setting receive period to {} milliseconds", value);
                     this.deviceIO.setReceivePeriodInMilliseconds((long) value);
                 }
                 catch (IOException e)
@@ -1007,6 +1063,7 @@ public class InternalClient
                 throw new IllegalArgumentException("value is not long = " + value);
             }
 
+            log.info("Setting generated SAS token lifespans to {} seconds", validTimeInSeconds);
             this.config.getSasTokenAuthentication().setTokenValidSecs(validTimeInSeconds);
 
             if (this.deviceIO != null)
@@ -1023,7 +1080,7 @@ public class InternalClient
                         if (this.config.getSasTokenAuthentication().canRefreshToken())
                         {
                             this.deviceIO.close();
-                            this.deviceIO.open();
+                            this.deviceIO.open(false);
                         }
                     }
                     catch (IOException e)
@@ -1052,6 +1109,7 @@ public class InternalClient
 
             if (value instanceof Integer)
             {
+                log.info("Setting generated AMQP authentication session timeout to {} seconds", value);
                 this.config.setAmqpOpenAuthenticationSessionTimeout((int) value);
             }
             else
@@ -1072,12 +1130,32 @@ public class InternalClient
 
             if (value instanceof Integer)
             {
+                log.info("Setting generated AMQP device session timeout to {} seconds", value);
                 this.config.setAmqpOpenDeviceSessionsTimeout((int) value);
             }
             else
             {
                 throw new IllegalArgumentException("value is not int = " + value);
             }
+        }
+    }
+
+    void setOption_SetMaxMessagesSentPerThread(Object value)
+    {
+        if (value == null)
+        {
+            throw new IllegalArgumentException("Value cannot be null");
+        }
+
+
+        if (value instanceof Integer)
+        {
+            log.info("Setting maximum number of messages sent per send thread {} messages", value);
+            this.deviceIO.setMaxNumberOfMessagesSentPerSendThread((int) value);
+        }
+        else
+        {
+            throw new IllegalArgumentException("value is not int = " + value);
         }
     }
 

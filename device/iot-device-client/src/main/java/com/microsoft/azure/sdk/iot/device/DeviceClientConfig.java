@@ -18,8 +18,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Configuration settings for an IoT Hub client. Validates all user-defined
@@ -30,6 +32,8 @@ public final class DeviceClientConfig
 {
     private static final int DEFAULT_HTTPS_READ_TIMEOUT_MILLIS = 240000;
     private static final int DEFAULT_HTTPS_CONNECT_TIMEOUT_MILLIS = 0; //no connect timeout
+
+    public static final int DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS = 230;
 
     // authentication session timeout is public because a multiplexed connection needs this default if no devices
     // were registered prior to opening the connection. No device sessions would be opened in that case though, so
@@ -44,6 +48,8 @@ public final class DeviceClientConfig
 
     private boolean useWebsocket;
     private ProxySettings proxySettings;
+
+    private String deviceClientUniqueIdentifier = UUID.randomUUID().toString().substring(0,8);
 
     @Getter
     @Setter(AccessLevel.PROTECTED)
@@ -65,6 +71,10 @@ public final class DeviceClientConfig
     @Getter
     @Setter
     private int amqpOpenDeviceSessionsTimeout = DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS;
+
+    @Getter
+    @Setter
+    private int keepAliveInterval = DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
 
     private IotHubAuthenticationProvider authenticationProvider;
 
@@ -151,6 +161,7 @@ public final class DeviceClientConfig
     public DeviceClientConfig(String hostName, SasTokenProvider sasTokenProvider, ClientOptions clientOptions, String deviceId, String moduleId)
     {
         SSLContext sslContext = clientOptions != null ? clientOptions.sslContext : null;
+        setKeepAliveInterval(clientOptions);
         this.authenticationProvider =
                 new IotHubSasTokenProvidedAuthenticationProvider(hostName, deviceId, moduleId, sasTokenProvider, sslContext);
 
@@ -195,6 +206,13 @@ public final class DeviceClientConfig
         {
             configSasAuth(iotHubConnectionString);
         }
+
+        setKeepAliveInterval(clientOptions);
+    }
+
+    private void setKeepAliveInterval(ClientOptions clientOptions)
+    {
+        this.keepAliveInterval = clientOptions != null && clientOptions.getKeepAliveInterval() != 0 ? clientOptions.getKeepAliveInterval() : DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
     }
 
     public DeviceClientConfig(IotHubConnectionString iotHubConnectionString, SSLContext sslContext)
@@ -264,7 +282,7 @@ public final class DeviceClientConfig
                     connectionString.getGatewayHostName(),
                     connectionString.getDeviceId(),
                     connectionString.getModuleId(),
-                    new String(((SecurityProviderSymmetricKey) securityProvider).getSymmetricKey()),
+                    new String(((SecurityProviderSymmetricKey) securityProvider).getSymmetricKey(), StandardCharsets.UTF_8),
                     null);
         }
         else if (securityProvider instanceof SecurityProviderX509)
@@ -282,6 +300,21 @@ public final class DeviceClientConfig
             //Codes_SRS_DEVICECLIENTCONFIG_34_084: [If the provided security provider is neither a SecurityProviderX509 instance nor a SecurityProviderTpm instance, this function shall throw an UnsupportedOperationException.]
             throw new UnsupportedOperationException("The provided security provider is not supported.");
         }
+    }
+
+    /**
+     * Constructor for a device client config that retrieves the authentication method from a security provider instance and sets the keep alive interval
+     * @param connectionString The connection string for the iot hub to connect with
+     * @param securityProvider The security provider instance to be used for authentication of this device
+     * @param clientOptions The client options that will be used to set the keep alive
+     * @throws IOException if the provided security provider throws an exception while authenticating
+     */
+    DeviceClientConfig(IotHubConnectionString connectionString, SecurityProvider securityProvider, ClientOptions clientOptions) throws IOException
+    {
+        // When setting the ClientOptions and a SecurityProvider, the SecurityProvider is responsible for setting the sslContext
+        // we do not need to set the context in this constructor.
+        this(connectionString, securityProvider);
+        setKeepAliveInterval(clientOptions);
     }
 
     private void commonConstructorSetup(IotHubConnectionString iotHubConnectionString)
@@ -467,6 +500,23 @@ public final class DeviceClientConfig
     {
         // Codes_SRS_DEVICECLIENTCONFIG_34_050: [This function return the saved moduleId.]
         return this.authenticationProvider.getModuleId();
+    }
+
+    public String getDeviceClientUniqueIdentifier()
+    {
+        // Use device Id if present, use module Id if no device Id is present, use a unique Identifier if neither was set.
+        String identifierPrefix = getDeviceId();
+        if (identifierPrefix == null || identifierPrefix.isEmpty())
+        {
+            identifierPrefix = getModuleId();
+            if (identifierPrefix == null || identifierPrefix.isEmpty())
+            {
+                // If there is no device Id or module Id, set the identifier prefix to be
+                identifierPrefix = UUID.randomUUID().toString().substring(0, 8);
+            }
+        }
+
+        return identifierPrefix + "-" + this.deviceClientUniqueIdentifier;
     }
 
     /**

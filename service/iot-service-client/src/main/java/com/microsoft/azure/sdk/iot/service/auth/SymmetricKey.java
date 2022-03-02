@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.service.auth;
 
 import com.microsoft.azure.sdk.iot.service.Tools;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import javax.crypto.KeyGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -19,9 +20,6 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64String;
  */
 public class SymmetricKey
 {
-    private static final int MinKeyLengthInBytes = 16;
-    private static final int MaxKeyLengthInBytes = 64;
-    private static final String DeviceKeyLengthInvalid = "DeviceKeyLengthInvalid";
     private static final String EncryptionMethod = "AES";
 
     private String primaryKey;
@@ -65,9 +63,6 @@ public class SymmetricKey
     @Deprecated
     public void setPrimaryKey(String primaryKey)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_SYMMETRICKEY_12_001: [The function shall throw IllegalArgumentException if the length of the key less than 16 or greater than 64]
-        validateDeviceAuthenticationKey(primaryKey);
-        // Codes_SRS_SERVICE_SDK_JAVA_SYMMETRICKEY_12_002: [The function shall set the private primaryKey member to the given value if the length validation passed]
         this.primaryKey = primaryKey;
     }
 
@@ -79,9 +74,6 @@ public class SymmetricKey
      */
     public final void setPrimaryKeyFinal(String primaryKey)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_SYMMETRICKEY_12_001: [The function shall throw IllegalArgumentException if the length of the key less than 16 or greater than 64]
-        validateDeviceAuthenticationKey(primaryKey);
-        // Codes_SRS_SERVICE_SDK_JAVA_SYMMETRICKEY_12_002: [The function shall set the private primaryKey member to the given value if the length validation passed]
         this.primaryKey = primaryKey;
     }
 
@@ -105,9 +97,6 @@ public class SymmetricKey
     @Deprecated
     public void setSecondaryKey(String secondaryKey)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_SYMMETRICKEY_12_003: [The function shall throw IllegalArgumentException if the length of the key less than 16 or greater than 64]
-        validateDeviceAuthenticationKey(secondaryKey);
-        // Codes_SRS_SERVICE_SDK_JAVA_SYMMETRICKEY_12_003: [The function shall throw IllegalArgumentException if the length of the key less than 16 or greater than 64]
         this.secondaryKey = secondaryKey;
     }
 
@@ -119,28 +108,10 @@ public class SymmetricKey
      */
     public final void setSecondaryKeyFinal(String secondaryKey)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_SYMMETRICKEY_12_003: [The function shall throw IllegalArgumentException if the length of the key less than 16 or greater than 64]
-        validateDeviceAuthenticationKey(secondaryKey);
-        // Codes_SRS_SERVICE_SDK_JAVA_SYMMETRICKEY_12_003: [The function shall throw IllegalArgumentException if the length of the key less than 16 or greater than 64]
         this.secondaryKey = secondaryKey;
     }
 
-    /**
-     * Validate the length of the key
-     * @param key The key to validate
-     * @throws IllegalArgumentException if the key has an invalid length
-     */
-    private void validateDeviceAuthenticationKey(String key) throws IllegalArgumentException
-    {
-        if (key != null)
-        {
-            if ((key.length() < MinKeyLengthInBytes) || (key.length() > MaxKeyLengthInBytes))
-            {
-                throw new IllegalArgumentException(DeviceKeyLengthInvalid);
-            }
-        }
-    }
-
+    @SuppressFBWarnings("HE_EQUALS_USE_HASHCODE") // Can't integrate hashcode into this function without breaking changes
     @Override
     public boolean equals(Object other)
     {

@@ -19,6 +19,7 @@ import org.apache.qpid.proton.reactor.FlowController;
 
 import java.io.IOException;
 import java.nio.BufferOverflowException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,11 +27,12 @@ import java.util.Map;
 public abstract class SenderLinkHandler extends BaseHandler
 {
     private static final String API_VERSION_KEY = "com.microsoft:api-version";
-    Map<Symbol, Object> amqpProperties;
+    final Map<Symbol, Object> amqpProperties;
+    @SuppressWarnings("unused") // protected member may be used for expansion
     String senderLinkTag;
-    String linkCorrelationId;
+    final String linkCorrelationId;
     String senderLinkAddress;
-    Sender senderLink;
+    final Sender senderLink;
     private long nextTag = 0;
 
     protected final LinkStateCallback linkStateCallback;
@@ -155,7 +157,7 @@ public abstract class SenderLinkHandler extends BaseHandler
             }
         }
 
-        byte[] deliveryTag = String.valueOf(this.nextTag).getBytes();
+        byte[] deliveryTag = String.valueOf(this.nextTag).getBytes(StandardCharsets.UTF_8);
 
         Delivery delivery = this.senderLink.delivery(deliveryTag);
         try
@@ -176,8 +178,9 @@ public abstract class SenderLinkHandler extends BaseHandler
                 throw new IOException(String.format("Failed to advance the senderLink after sending a message on %s sender link with link correlation id %s, retrying to send the message", getLinkInstanceType(), this.linkCorrelationId));
             }
 
-            log.trace("Message was sent over {} sender link with delivery tag {} and hash {}", getLinkInstanceType(), new String(deliveryTag), delivery.hashCode());
-            return Integer.parseInt(new String(deliveryTag));
+            String deliveryTagString = new String(deliveryTag, StandardCharsets.UTF_8);
+            log.trace("Message was sent over {} sender link with delivery tag {} and hash {}", getLinkInstanceType(), deliveryTagString, delivery.hashCode());
+            return Integer.parseInt(deliveryTagString);
         }
         catch (Exception e)
         {

@@ -29,11 +29,13 @@ import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinUpdateR
 import com.microsoft.azure.sdk.iot.service.digitaltwin.serialization.DeserializationHelpers;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.serialization.DigitalTwinStringSerializer;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.rest.RestClient;
 import com.microsoft.rest.ServiceResponse;
 import com.microsoft.rest.ServiceResponseBuilder;
 import com.microsoft.rest.ServiceResponseWithHeaders;
 import com.microsoft.rest.serializer.JacksonAdapter;
+import lombok.extern.slf4j.Slf4j;
 import rx.Observable;
 import rx.schedulers.Schedulers;
 
@@ -50,6 +52,7 @@ import static com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.Tools.*;
  * The Digital Twins Service Client contains asynchronous methods to retrieve and update digital twin information, and invoke commands on a digital twin device.
  * </p>
  */
+@Slf4j
 public class DigitalTwinAsyncClient {
     private final DigitalTwinsImpl _protocolLayer;
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -100,6 +103,7 @@ public class DigitalTwinAsyncClient {
 
         IotHubGatewayServiceAPIsImpl protocolLayerClient = new IotHubGatewayServiceAPIsImpl(simpleRestClient);
         _protocolLayer = new DigitalTwinsImpl(simpleRestClient.retrofit(), protocolLayerClient);
+        commonConstructorSetup();
     }
 
     /**
@@ -150,6 +154,7 @@ public class DigitalTwinAsyncClient {
 
         IotHubGatewayServiceAPIsImpl protocolLayerClient = new IotHubGatewayServiceAPIsImpl(simpleRestClient);
         _protocolLayer = new DigitalTwinsImpl(simpleRestClient.retrofit(), protocolLayerClient);
+        commonConstructorSetup();
     }
 
 
@@ -198,6 +203,7 @@ public class DigitalTwinAsyncClient {
 
         IotHubGatewayServiceAPIsImpl protocolLayerClient = new IotHubGatewayServiceAPIsImpl(simpleRestClient);
         _protocolLayer = new DigitalTwinsImpl(simpleRestClient.retrofit(), protocolLayerClient);
+        commonConstructorSetup();
     }
 
     /**
@@ -208,6 +214,10 @@ public class DigitalTwinAsyncClient {
      */
     public static DigitalTwinAsyncClient createFromConnectionString(String connectionString) {
         return new DigitalTwinAsyncClient(connectionString);
+    }
+
+    private static void commonConstructorSetup() {
+        log.debug("Initialized a digital twin client instance using SDK version {}", TransportUtils.serviceVersion);
     }
 
     /**

@@ -16,6 +16,7 @@ import com.google.gson.annotations.SerializedName;
  * Parses JSON which represent the RegistrationOperationStatus object.
  * Format : https://docs.microsoft.com/en-us/rest/api/iot-dps/RuntimeRegistration/RegisterDevice#definitions_registrationoperationstatus
  */
+@SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
 public class RegistrationOperationStatusParser
 {
     private static final String OPERATION_ID = "operationId";

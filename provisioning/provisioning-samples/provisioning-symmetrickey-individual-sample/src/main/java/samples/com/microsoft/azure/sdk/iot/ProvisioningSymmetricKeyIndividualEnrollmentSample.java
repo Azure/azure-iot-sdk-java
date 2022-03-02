@@ -13,6 +13,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.Provi
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 /**
@@ -84,10 +85,10 @@ public class ProvisioningSymmetricKeyIndividualEnrollmentSample
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
         SecurityProviderSymmetricKey securityClientSymmetricKey;
-        Scanner scanner = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
         DeviceClient deviceClient = null;
 
-        securityClientSymmetricKey = new SecurityProviderSymmetricKey(SYMMETRIC_KEY.getBytes(), REGISTRATION_ID);
+        securityClientSymmetricKey = new SecurityProviderSymmetricKey(SYMMETRIC_KEY.getBytes(StandardCharsets.UTF_8), REGISTRATION_ID);
 
         ProvisioningDeviceClient provisioningDeviceClient = null;
         try

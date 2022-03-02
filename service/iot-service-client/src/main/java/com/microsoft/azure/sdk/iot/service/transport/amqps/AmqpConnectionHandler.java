@@ -10,9 +10,9 @@ import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.proton.transport.proxy.ProxyHandler;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyHandlerImpl;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
+import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.ErrorLoggingBaseHandlerWithCleanup;
-import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.Tools;
@@ -32,22 +32,27 @@ import org.apache.qpid.proton.reactor.Reactor;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.Objects;
+import java.util.UUID;
 
 @Slf4j
 public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup implements CbsSessionStateCallback
 {
-    private static final String WEBSOCKET_PATH = "/$iothub/websocket";
-    private static final String WEBSOCKET_SUB_PROTOCOL = "AMQPWSB10";
     private static final int AMQPS_PORT = 5671;
     private static final int AMQPS_WS_PORT = 443;
+    private static final String WEB_SOCKET_PATH = "/$iothub/websocket";
+    private static final String WEB_SOCKET_SUB_PROTOCOL = "AMQPWSB10";
+    private static final String WEB_SOCKET_QUERY = "iothub-no-client-cert=true";
+    private static final int MAX_MESSAGE_PAYLOAD_SIZE = 65 * 1024; //max IoT Hub cloud to device message size is 65 kb, so amqp websocket layer should buffer at most that much space
 
     private Exception savedException;
     private boolean connectionOpenedRemotely;
     private boolean sessionOpenedRemotely;
     private boolean linkOpenedRemotely;
+    private String connectionId;
 
     protected final String hostName;
-    protected String userName;
+    @SuppressWarnings("unused") // Leaving for future use
+    protected String userName = null;
     protected String sasToken;
     private TokenCredential credential;
     private AzureSasCredential sasTokenProvider;
@@ -80,6 +85,7 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
         this.proxyOptions = proxyOptions;
         this.hostName = hostName;
         this.sasToken = sasToken;
+        this.userName = userName;
 
         commonConstructorSetup(iotHubServiceClientProtocol, proxyOptions, sslContext);
     }
@@ -138,14 +144,11 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
         this.connectionOpenedRemotely = false;
         this.sessionOpenedRemotely = false;
         this.linkOpenedRemotely = false;
+        this.connectionId = UUID.randomUUID().toString();
 
         // Enables proton-j to automatically mirror the local state of the client with the remote state. For instance,
         // if the service closes a session, this handshaker will automatically close the session locally as well.
         add(new Handshaker());
-
-        // Enables proton-j to automatically give link credit back to the service on all the client side receiver links
-        // after successfully processing a message.
-        add(new FlowController());
     }
 
     @Override
@@ -182,9 +185,9 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
         {
             if (this.iotHubServiceClientProtocol == IotHubServiceClientProtocol.AMQPS_WS)
             {
-                WebSocketImpl webSocket = new WebSocketImpl();
-                webSocket.configure(this.hostName, WEBSOCKET_PATH, AMQPS_WS_PORT, WEBSOCKET_SUB_PROTOCOL, null, null);
-                ((TransportInternal)transport).addTransportLayer(webSocket);
+                WebSocketImpl webSocket = new WebSocketImpl(MAX_MESSAGE_PAYLOAD_SIZE);
+                webSocket.configure(this.hostName, WEB_SOCKET_PATH, WEB_SOCKET_QUERY, AMQPS_WS_PORT, WEB_SOCKET_SUB_PROTOCOL, null, null);
+                ((TransportInternal) transport).addTransportLayer(webSocket);
             }
 
             // Note that this does not mean that the connection will not be authenticated. This simply defers authentication
@@ -231,6 +234,7 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
     {
         super.onConnectionRemoteOpen(event);
         this.connection = event.getConnection();
+
         this.connectionOpenedRemotely = true;
 
         // Once the connection opens, get that connection and make it create a new session that will serve as the CBS
@@ -249,6 +253,10 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
         {
             new CbsSessionHandler(cbsSession, this, this.sasToken);
         }
+    }
+
+    protected String getConnectionId() {
+        return this.connectionId;
     }
 
     /**

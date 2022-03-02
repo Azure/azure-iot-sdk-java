@@ -462,8 +462,8 @@ This part of the tutorial builds on top of the code you wrote in the previous se
 
 
 [azure-portal]: https://www.portal.azure.com
-[povisioning-device-client]:https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-device-client
-[povisioning-service-client]:https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-service-client
-[povisioning-single-enrollment-sample]:https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-samples/service-enrollment-sample
-[povisioning-group-enrollment-sample]:https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-samples/service-enrollment-group-sample
+[povisioning-device-client]:https://github.com/Azure/azure-iot-sdk-java/tree/main/provisioning/provisioning-device-client
+[povisioning-service-client]:https://github.com/Azure/azure-iot-sdk-java/tree/main/provisioning/provisioning-service-client
+[povisioning-single-enrollment-sample]:https://github.com/Azure/azure-iot-sdk-java/tree/main/provisioning/provisioning-samples/service-enrollment-sample
+[povisioning-group-enrollment-sample]:https://github.com/Azure/azure-iot-sdk-java/tree/main/provisioning/provisioning-samples/service-enrollment-group-sample
 [tpm-simulator]:../../provisioning-tools/tpm-simulator/Simulator.exe

@@ -8,6 +8,8 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import lombok.extern.slf4j.Slf4j;
 
+import java.nio.charset.StandardCharsets;
+
 @Slf4j
 public final class DeviceMethod
 {
@@ -76,7 +78,7 @@ public final class DeviceMethod
                                  **Codes_SRS_DEVICEMETHOD_25_015: [**User can provide null response message upon invoking the device method callback which will be serialized as is, before sending it to IotHub.**]**
                                  */
                                 MethodParser methodParserObject = new MethodParser(responseData.getResponseMessage());
-                                IotHubTransportMessage responseMessage = new IotHubTransportMessage(methodParserObject.toJson().getBytes(), MessageType.DEVICE_METHODS);
+                                IotHubTransportMessage responseMessage = new IotHubTransportMessage(methodParserObject.toJson().getBytes(StandardCharsets.UTF_8), MessageType.DEVICE_METHODS);
                                 /*
                                  **Codes_SRS_DEVICEMETHOD_25_012: [**The device method message sent to IotHub shall have same the request id as the invoking message.**]**
                                  */

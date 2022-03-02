@@ -2,6 +2,7 @@ package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -35,8 +36,10 @@ public class TransportClient
     }
 
     @SuppressWarnings("CanBeFinal") // Public member can be changed
+    @SuppressFBWarnings("MS_SHOULD_BE_FINAL") // Marking this as final would be a breaking change
     public static long SEND_PERIOD_MILLIS = 10L;
     @SuppressWarnings("CanBeFinal") // Public member can be changed
+    @SuppressFBWarnings("MS_SHOULD_BE_FINAL") // Marking this as final would be a breaking change
     public static long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
 
     private final IotHubClientProtocol iotHubClientProtocol;
@@ -129,7 +132,7 @@ public class TransportClient
             // Codes_SRS_TRANSPORTCLIENT_12_013: [The function shall open the transport in multiplexing mode.]
             //this.deviceIO.multiplexOpen(deviceClientList);
             // if client is added just open to get rid of multiplex open.
-            this.deviceIO.open();
+            this.deviceIO.open(false);
         }
 
         this.transportClientState = TransportClientState.OPENED;
@@ -192,7 +195,7 @@ public class TransportClient
     /**
      * Sets the given retry policy on the underlying transport
      * Sets the given retry policy on the underlying transport
-     * <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-client/devdoc/requirement_docs/com/microsoft/azure/iothub/retryPolicy.md">
+     * <a href="https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-client/devdoc/requirement_docs/com/microsoft/azure/iothub/retryPolicy.md">
      *     See more details about the default retry policy and about using custom retry policies here</a>
      * @param retryPolicy the new interval in milliseconds
      * @throws UnsupportedOperationException if no device client has been registered yet.

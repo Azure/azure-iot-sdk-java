@@ -4,6 +4,7 @@
 package com.microsoft.azure.sdk.iot.service.auth;
 
 import com.microsoft.azure.sdk.iot.service.Tools;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.security.SecureRandom;
 
@@ -97,6 +98,8 @@ public class X509Thumbprint
         this.secondaryThumbprint = secondaryThumbprint;
     }
 
+
+    @SuppressFBWarnings("HE_EQUALS_USE_HASHCODE") // Can't integrate hashcode into this function without breaking changes
     @Override
     public boolean equals(Object other)
     {

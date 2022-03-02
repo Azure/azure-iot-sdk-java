@@ -157,6 +157,7 @@ public class AmqpSend
     /**
      * Create AmqpsSendHandler and store it in a member variable
      */
+    @SuppressWarnings("EmptyMethod")
     public void open()
     {
     }
@@ -164,6 +165,7 @@ public class AmqpSend
     /**
      * Invalidate AmqpsSendHandler member variable
      */
+    @SuppressWarnings("EmptyMethod")
     public void close()
     {
     }
@@ -225,7 +227,8 @@ public class AmqpSend
                 log.info("Sending cloud to device module message");
             }
 
-            new ReactorRunner(amqpSendHandler, "AmqpSend").run();
+            String reactorRunnerPrefix = this.hostName + "-" + "Cxn" + this.amqpSendHandler.getConnectionId();
+            new ReactorRunner(amqpSendHandler, reactorRunnerPrefix,"AmqpSend").run();
 
             log.trace("Amqp send reactor stopped, checking that the connection opened, and that the message was sent");
 

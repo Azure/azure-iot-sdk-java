@@ -95,7 +95,7 @@ public class ProxiedSSLSocket extends SSLSocket
         String proxyConnectMessage = String.format("CONNECT %s %s\r\nHost: %s\r\nUser-Agent: %s\r\n", hostWithPort, HTTP_VERSION_1_1, hostWithPort, TransportUtils.USER_AGENT_STRING);
         if (this.proxyUsername != null && this.proxyPassword != null)
         {
-            String base64EncodedCredentials = new String(Base64.encodeBase64(String.format("%s:%s", this.proxyUsername, new String(this.proxyPassword)).getBytes(byteEncoding)));
+            String base64EncodedCredentials = new String(Base64.encodeBase64(String.format("%s:%s", this.proxyUsername, new String(this.proxyPassword)).getBytes(byteEncoding)), byteEncoding);
             proxyConnectMessage += String.format("Proxy-Authorization: Basic %s\r\nUser-Agent: %s\r\n", base64EncodedCredentials, TransportUtils.USER_AGENT_STRING);
         }
 
@@ -154,6 +154,7 @@ public class ProxiedSSLSocket extends SSLSocket
         log.trace("HTTP proxy responded to connect request with status {}, so the proxy connect was successful", connectResponseStatusCode);
     }
 
+    @SuppressWarnings("unused") // Interface should not change
     private interface ProxiedSSLSocketNonDelegatedFunctions
     {
         void connect(SocketAddress socketAddress, int timeout) throws IOException;
@@ -198,6 +199,8 @@ public class ProxiedSSLSocket extends SSLSocket
                 mostRecentFourCharacters.offer(i);
             }
 
+            // Suppressed inspection because the suggestion is only valid for Java10+
+            //noinspection StringOperationCanBeSimplified
             String httpHeaderLine = new String(httpLineOutputStream.toByteArray(), byteEncoding);
             httpLineOutputStream.close();
             alreadyRead = true;

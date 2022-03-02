@@ -5,12 +5,14 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
 /**
  * The Device Provisioning Service enrollment status.
  *
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
  */
-public enum EnrollmentStatus
+public enum EnrollmentStatus implements Serializable
 {
     @SerializedName("unassigned")
     UNASSIGNED,

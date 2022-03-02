@@ -16,6 +16,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ErrInjTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.ReceiveMessagesCommon;
@@ -31,6 +32,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Test class containing all error injection tests to be run on JVM and android pertaining to receiving messages.
  */
+@ErrInjTest
 @IotHubTest
 @RunWith(Parameterized.class)
 public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
@@ -238,11 +240,11 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
 
             if (testInstance.identity.getClient() instanceof DeviceClient)
             {
-                sendMessageToDevice(testInstance.identity.getDeviceId(), testInstance.protocol.toString());
+                sendMessageToDevice(testInstance.identity.getDeviceId(), MESSAGE_SIZE_IN_BYTES);
             }
             else if (testInstance.identity.getClient() instanceof ModuleClient)
             {
-                sendMessageToModule(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), testInstance.protocol.toString());
+                sendMessageToModule(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), MESSAGE_SIZE_IN_BYTES);
             }
 
             waitForMessageToBeReceived(messageReceived, testInstance.protocol.toString());

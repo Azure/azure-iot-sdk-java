@@ -16,8 +16,10 @@ import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -34,13 +36,14 @@ import java.util.Objects;
 /**
  * Use the DeviceTwin class to manage the device twins in IoT hubs.
  */
+@Slf4j
 public class DeviceTwin
 {
     private int requestId = 0;
     private final int DEFAULT_PAGE_SIZE = 100;
 
-    private DeviceTwinClientOptions options;
-    private String hostName;
+    private final DeviceTwinClientOptions options;
+    private final String hostName;
     private TokenCredentialCache credentialCache;
     private AzureSasCredential azureSasCredential;
     private IotHubConnectionString iotHubConnectionString;
@@ -106,6 +109,7 @@ public class DeviceTwin
         this.options = options;
         this.iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         this.hostName = this.iotHubConnectionString.getHostName();
+        commonConstructorSetup();
     }
 
     /**
@@ -140,6 +144,7 @@ public class DeviceTwin
         this.options = options;
         this.credentialCache = new TokenCredentialCache(credential);
         this.hostName = hostName;
+        commonConstructorSetup();
     }
 
     /**
@@ -172,6 +177,12 @@ public class DeviceTwin
         this.options = options;
         this.azureSasCredential = azureSasCredential;
         this.hostName = hostName;
+        commonConstructorSetup();
+    }
+
+    private static void commonConstructorSetup()
+    {
+        log.debug("Initialized a DeviceTwin client instance using SDK version {}", TransportUtils.serviceVersion);
     }
 
     /**

@@ -31,7 +31,7 @@ public class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implem
     private Session session;
     private CbsSenderLinkHandler cbsSenderLinkHandler;
     private CbsReceiverLinkHandler cbsReceiverLinkHandler;
-    private CbsSessionStateCallback cbsSessionStateCallback;
+    private final CbsSessionStateCallback cbsSessionStateCallback;
     private TokenCredential credential;
     private String sasToken;
     private AzureSasCredential sasTokenProvider;

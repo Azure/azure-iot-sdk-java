@@ -7,16 +7,18 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.task;
 
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceSecurityException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.ProvisioningErrorParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.RegistrationOperationStatusParser;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceSecurityException;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 
 import javax.net.ssl.SSLContext;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 
 public class StatusTask implements Callable<RegistrationOperationStatusParser>
@@ -24,10 +26,12 @@ public class StatusTask implements Callable<RegistrationOperationStatusParser>
     private static final int MAX_WAIT_FOR_STATUS_RESPONSE = 100;
     private static final String THREAD_NAME = "azure-iot-sdk-StatusTask";
     private final ProvisioningDeviceClientContract provisioningDeviceClientContract;
+    private final ProvisioningDeviceClientConfig provisioningDeviceClientConfig;
     private final SecurityProvider securityProvider;
     private final String operationId;
     private final Authorization authorization;
 
+    @SuppressWarnings("unused") // Called in a factory
     private static class ResponseCallbackImpl implements ResponseCallback
     {
         @Override
@@ -55,13 +59,22 @@ public class StatusTask implements Callable<RegistrationOperationStatusParser>
      * @param authorization Object holding auth info.  Cannot be {@code null}
      * @throws ProvisioningDeviceClientException is thrown if any of the parameters are invalid.
      */
-    StatusTask(SecurityProvider securityProvider, ProvisioningDeviceClientContract provisioningDeviceClientContract,
-               String operationId, Authorization authorization) throws ProvisioningDeviceClientException
+    StatusTask(
+            SecurityProvider securityProvider,
+            ProvisioningDeviceClientContract provisioningDeviceClientContract,
+            ProvisioningDeviceClientConfig provisioningDeviceClientConfig,
+            String operationId,
+            Authorization authorization) throws ProvisioningDeviceClientException
     {
         //SRS_StatusTask_25_002: [ Constructor shall throw ProvisioningDeviceClientException if operationId , securityProvider, authorization or provisioningDeviceClientContract is null. ]
         if (provisioningDeviceClientContract == null)
         {
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("provisioningDeviceClientContract cannot be null"));
+        }
+
+        if (provisioningDeviceClientConfig == null)
+        {
+            throw new ProvisioningDeviceClientException(new IllegalArgumentException("Config cannot be null"));
         }
 
         if (securityProvider == null)
@@ -82,6 +95,7 @@ public class StatusTask implements Callable<RegistrationOperationStatusParser>
         //SRS_StatusTask_25_001: [ Constructor shall save operationId , securityProvider, provisioningDeviceClientContract and authorization. ]
         this.securityProvider = securityProvider;
         this.provisioningDeviceClientContract = provisioningDeviceClientContract;
+        this.provisioningDeviceClientConfig = provisioningDeviceClientConfig;
         this.operationId = operationId;
         this.authorization = authorization;
     }
@@ -114,7 +128,7 @@ public class StatusTask implements Callable<RegistrationOperationStatusParser>
             }
             if (responseData.getResponseData() != null && responseData.getContractState() == ContractState.DPS_REGISTRATION_RECEIVED)
             {
-                String jsonBody = new String(responseData.getResponseData());
+                String jsonBody = new String(responseData.getResponseData(), StandardCharsets.UTF_8);
                 try
                 {
                     return RegistrationOperationStatusParser.createFromJson(jsonBody);
@@ -148,7 +162,15 @@ public class StatusTask implements Callable<RegistrationOperationStatusParser>
     @Override
     public RegistrationOperationStatusParser call() throws Exception
     {
-        Thread.currentThread().setName(THREAD_NAME);
+        String threadName = this.provisioningDeviceClientContract.getHostName()
+                + "-"
+                + this.provisioningDeviceClientConfig.getUniqueIdentifier()
+                + "-Cxn"
+                + this.provisioningDeviceClientContract.getConnectionId()
+                + "-"
+                + THREAD_NAME;
+
+        Thread.currentThread().setName(threadName);
         return this.getRegistrationStatus(this.operationId, this.authorization);
     }
 }

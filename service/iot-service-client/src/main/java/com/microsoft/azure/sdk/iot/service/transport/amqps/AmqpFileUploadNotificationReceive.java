@@ -189,14 +189,19 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
      */
     public synchronized FileUploadNotification receive(long timeoutMs) throws IOException, InterruptedException
     {
-        if  (isOpen)
+        // This value is set in the reactor thread once we receive the file upload notification from the service over AMQP.
+        // It's important to set this to null since receive may be called multiple times in a row. Otherwise, a single
+        // notification could be returned to the user multiple times if nothing overwrote a previous value.
+        fileUploadNotification = null;
+
+        if (isOpen)
         {
             // instantiating the amqp handler each receive call because each receive call opens a new AMQP connection
             initializeHandler();
 
             log.info("Receiving on file upload notification receiver for up to {} milliseconds", timeoutMs);
 
-            new ReactorRunner(amqpReceiveHandler, "AmqpFileUploadNotificationReceiver").run(timeoutMs);
+            new ReactorRunner(amqpReceiveHandler, this.hostName, "AmqpFileUploadNotificationReceiver").run(timeoutMs);
 
             log.trace("Amqp receive reactor stopped, checking that the connection was opened");
             this.amqpReceiveHandler.verifyConnectionWasOpened();

@@ -13,6 +13,7 @@ import com.google.gson.annotations.SerializedName;
  * Class representing  X509RegistrationResult
  * https://docs.microsoft.com/en-us/rest/api/iot-dps/RuntimeRegistration/RegisterDevice#definitions_x509registrationresult
  */
+@SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
 public class X509RegistrationResultParser
 {
     //empty constructor for Gson

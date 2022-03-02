@@ -8,6 +8,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
 /**
  * Representation of a single Twin Properties for the Device Provisioning Service.
  *
@@ -55,7 +57,7 @@ import com.google.gson.annotations.SerializedName;
  * @see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-device-twins">Understand and use device twins in IoT Hub</a>
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iothub/devicetwinapi">Device Twin Api</a>
  */
-public class TwinProperties
+public class TwinProperties implements Serializable
 {
     // the twin desired properties
     private static final String DESIRED_PROPERTIES_TAG = "desired";

@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayInputStream;
@@ -38,6 +40,7 @@ public class Message
     /**
      * Destination of the message
      */
+    @SuppressWarnings("unused") // Used in getter, leaving for future expansion
     private String to;
 
     /**
@@ -54,11 +57,6 @@ public class Message
      * [Required in feedback messages] Used to specify the entity creating the message.
      */
     private String userId;
-
-    /**
-     * [Optional] Used when batching on HTTP Default: false.
-     */
-    private Boolean httpBatchSerializeAsString;
 
     /**
      * [Stamped on servicebound messages by IoT Hub] The authenticated id used to send this message.
@@ -89,6 +87,7 @@ public class Message
     private String inputName;
     private String outputName;
 
+    @SuppressWarnings("unused") // This is not set anywhere but is used in a method
     private String deliveryAcknowledgement;
 
     /**
@@ -110,14 +109,19 @@ public class Message
     private Date creationTimeUTC;
 
     /**
-     * Stream that will provide the bytes for the body of the
-     */
-    private ByteArrayInputStream bodyStream;
-
-    /**
      * Security Client flag
      */
     boolean isSecurityClient;
+
+    /**
+     * The DTDL component name from where the telemetry message has originated. This field is only relevant
+     * for Plug and Play certified devices.
+     *
+     * @see <a href="https://docs.microsoft.com/en-us/azure/iot-develop/overview-iot-plug-and-play">What is IoT Plug and Play?</a>
+     */
+    @Getter
+    @Setter
+    String componentName;
 
     // ----- Constructors -----
 

@@ -21,6 +21,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.hsm.HsmException;
 import com.microsoft.azure.sdk.iot.device.hsm.HttpHsmSignatureProvider;
 import com.microsoft.azure.sdk.iot.device.hsm.IotHubSasTokenHsmAuthenticationProvider;
+import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import lombok.extern.slf4j.Slf4j;
 
@@ -85,6 +86,7 @@ public class ModuleClient extends InternalClient
         //Codes_SRS_MODULECLIENT_34_007: [If the provided protocol is not MQTT, AMQPS, MQTT_WS, or AMQPS_WS, this function shall throw an UnsupportedOperationException.]
         //Codes_SRS_MODULECLIENT_34_004: [If the provided connection string does not contain a module id, this function shall throw an IllegalArgumentException.]
         commonConstructorVerifications(protocol, this.config);
+        commonConstructorSetup();
     }
 
     /**
@@ -109,6 +111,7 @@ public class ModuleClient extends InternalClient
     {
         super(new IotHubConnectionString(connectionString), protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), clientOptions);
         commonConstructorVerifications(protocol, this.config);
+        commonConstructorSetup();
     }
 
     /**
@@ -136,10 +139,10 @@ public class ModuleClient extends InternalClient
      * @throws URISyntaxException if the hostname in the connection string is not a valid URI
      * @deprecated For x509 authentication, use {@link #ModuleClient(String, IotHubClientProtocol, ClientOptions)} and provide
      * an SSLContext instance in the {@link ClientOptions} instance. For a sample on how to build this SSLContext,
-     * see <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-samples/send-event-x509/src/main/java/samples/com/microsoft/azure/sdk/iot/SendEventX509.java">this code</a> which references
+     * see <a href="https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-samples/send-event-x509/src/main/java/samples/com/microsoft/azure/sdk/iot/SendEventX509.java">this code</a> which references
      * a helper class for building SSLContext objects for x509 authentication as well as for SAS based authentication.
      * When not using this deprecated constructor, you can safely exclude the Bouncycastle dependencies that this library declares.
-     * See <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-samples/send-event-x509/pom.xml">this pom.xml</a> for an example of how to do this.
+     * See <a href="https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-samples/send-event-x509/pom.xml">this pom.xml</a> for an example of how to do this.
      */
     @Deprecated
     public ModuleClient(String connectionString, IotHubClientProtocol protocol, String publicKeyCertificate, boolean isCertificatePath, String privateKey, boolean isPrivateKeyPath) throws ModuleClientException, URISyntaxException
@@ -149,6 +152,7 @@ public class ModuleClient extends InternalClient
         //Codes_SRS_MODULECLIENT_34_008: [If the provided protocol is not MQTT, AMQPS, MQTT_WS, or AMQPS_WS, this function shall throw an UnsupportedOperationException.]
         //Codes_SRS_MODULECLIENT_34_009: [If the provided connection string does not contain a module id, this function shall throw an IllegalArgumentException.]
         commonConstructorVerifications(protocol, this.getConfig());
+        commonConstructorSetup();
     }
 
     /**
@@ -164,16 +168,17 @@ public class ModuleClient extends InternalClient
      * @throws URISyntaxException if the hostname in the connection string is not a valid URI
      * @deprecated For x509 authentication, use {@link #ModuleClient(String, IotHubClientProtocol, ClientOptions)} and provide
      * an SSLContext instance in the {@link ClientOptions} instance. For a sample on how to build this SSLContext,
-     * see <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-samples/send-event-x509/src/main/java/samples/com/microsoft/azure/sdk/iot/SendEventX509.java">this code</a> which references
+     * see <a href="https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-samples/send-event-x509/src/main/java/samples/com/microsoft/azure/sdk/iot/SendEventX509.java">this code</a> which references
      * a helper class for building SSLContext objects for x509 authentication as well as for SAS based authentication.
      * When not using this deprecated constructor, you can safely exclude the Bouncycastle dependencies that this library declares.
-     * See <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-samples/send-event-x509/pom.xml">this pom.xml</a> for an example of how to do this.
+     * See <a href="https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-samples/send-event-x509/pom.xml">this pom.xml</a> for an example of how to do this.
      */
     @Deprecated
     public ModuleClient(String connectionString, IotHubClientProtocol protocol, SSLContext sslContext) throws ModuleClientException, URISyntaxException
     {
         super(new IotHubConnectionString(connectionString), protocol, sslContext, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
         commonConstructorVerifications(protocol, this.getConfig());
+        commonConstructorSetup();
     }
 
     /**
@@ -181,7 +186,7 @@ public class ModuleClient extends InternalClient
      * this client such as setting the SAS token expiry time will throw {@link UnsupportedOperationException} since
      * the SDK no longer controls that when this constructor is used.
      *
-     * @param hostName The host name of the IoT Hub that this client will connect to.
+     * @param hostName The host name of the IoT hub that this client will connect to.
      * @param deviceId The Id of the device containing the module that the connection will identify as.
      * @param moduleId The Id of the module that the connection will identify as.
      * @param sasTokenProvider The provider of all SAS tokens that are used during authentication.
@@ -197,7 +202,7 @@ public class ModuleClient extends InternalClient
      * this client such as setting the SAS token expiry time will throw {@link UnsupportedOperationException} since
      * the SDK no longer controls that when this constructor is used.
      *
-     * @param hostName The host name of the IoT Hub that this client will connect to.
+     * @param hostName The host name of the IoT hub that this client will connect to.
      * @param deviceId The Id of the device containing the module that the connection will identify as.
      * @param moduleId The Id of the module that the connection will identify as.
      * @param sasTokenProvider The provider of all SAS tokens that are used during authentication.
@@ -208,6 +213,7 @@ public class ModuleClient extends InternalClient
     {
         super(hostName, deviceId, moduleId, sasTokenProvider, protocol, clientOptions, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
         commonConstructorVerifications(protocol, this.getConfig());
+        commonConstructorSetup();
     }
 
     /**
@@ -372,6 +378,8 @@ public class ModuleClient extends InternalClient
     private ModuleClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis) throws IOException, TransportException
     {
         super(iotHubAuthenticationProvider, protocol, sendPeriodMillis, receivePeriodMillis);
+
+        commonConstructorSetup();
     }
 
     /**
@@ -489,7 +497,7 @@ public class ModuleClient extends InternalClient
      * Starts the module twin. This module client will receive a callback with the current state of the full twin, including
      * reported properties and desired properties. After that callback is received, this module client will receive a callback
      * each time a desired property is updated. That callback will either contain the full desired properties set, or
-     * only the updated desired property depending on how the desired property was changed. IoT Hub supports a PUT and a PATCH
+     * only the updated desired property depending on how the desired property was changed. IoT hub supports a PUT and a PATCH
      * on the twin. The PUT will cause this module client to receive the full desired properties set, and the PATCH
      * will cause this module client to only receive the updated desired properties. Similarly, the version
      * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
@@ -522,7 +530,7 @@ public class ModuleClient extends InternalClient
      * Starts the module twin. This module client will receive a callback with the current state of the full twin, including
      * reported properties and desired properties. After that callback is received, this module client will receive a callback
      * each time a desired property is updated. That callback will either contain the full desired properties set, or
-     * only the updated desired property depending on how the desired property was changed. IoT Hub supports a PUT and a PATCH
+     * only the updated desired property depending on how the desired property was changed. IoT hub supports a PUT and a PATCH
      * on the twin. The PUT will cause this module client to receive the full desired properties set, and the PATCH
      * will cause this module client to only receive the updated desired properties. Similarly, the version
      * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
@@ -553,7 +561,7 @@ public class ModuleClient extends InternalClient
      * Starts the module twin. This module client will receive a callback with the current state of the full twin, including
      * reported properties and desired properties. After that callback is received, this module client will receive a callback
      * each time a desired property is updated. That callback will either contain the full desired properties set, or
-     * only the updated desired property depending on how the desired property was changed. IoT Hub supports a PUT and a PATCH
+     * only the updated desired property depending on how the desired property was changed. IoT hub supports a PUT and a PATCH
      * on the twin. The PUT will cause this module client to receive the full desired properties set, and the PATCH
      * will cause this module client to only receive the updated desired properties. Similarly, the version
      * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
@@ -677,5 +685,10 @@ public class ModuleClient extends InternalClient
         {
             throw new IllegalArgumentException("Connection string must contain field for ModuleId");
         }
+    }
+
+    private static void commonConstructorSetup()
+    {
+        log.debug("Initialized a ModuleClient instance using SDK version {}", TransportUtils.CLIENT_VERSION);
     }
 }

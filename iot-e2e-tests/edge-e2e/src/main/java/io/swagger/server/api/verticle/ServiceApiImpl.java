@@ -9,7 +9,7 @@ import io.vertx.core.Handler;
 @SuppressWarnings("ALL")
 public class ServiceApiImpl implements ServiceApi
 {
-    public static ServiceGlue _serviceGlue = new ServiceGlue();
+    public static final ServiceGlue _serviceGlue = new ServiceGlue();
 
     @Override
     public void serviceConnectPut(String connectionString, Handler<AsyncResult<ConnectResponse>> handler)

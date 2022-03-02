@@ -14,6 +14,7 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import static org.apache.commons.codec.binary.Base64.encodeBase64;
 
@@ -142,7 +143,7 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
             }
 
             Long expiryTimeUTC = (System.currentTimeMillis() / 1000) + secondsToLive;
-            byte[] token = this.securityProvider.signWithIdentity(encodedTokenScope.concat("\n" + expiryTimeUTC).getBytes());
+            byte[] token = this.securityProvider.signWithIdentity(encodedTokenScope.concat("\n" + expiryTimeUTC).getBytes(StandardCharsets.UTF_8));
             if (token == null || token.length == 0)
             {
                 //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_010: [If the call for the saved security provider to sign with identity returns null or empty bytes, this function shall throw an IOException.]
@@ -150,7 +151,7 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
             }
 
             byte[] base64Signature = encodeBase64(token);
-            String base64UrlEncodedSignature = URLEncoder.encode(new String(base64Signature), ENCODING_FORMAT_NAME);
+            String base64UrlEncodedSignature = URLEncoder.encode(new String(base64Signature, StandardCharsets.UTF_8), ENCODING_FORMAT_NAME);
             return String.format(SASTOKEN_FORMAT, encodedTokenScope, base64UrlEncodedSignature, expiryTimeUTC);
         }
         catch (UnsupportedEncodingException | SecurityProviderException e)

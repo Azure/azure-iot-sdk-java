@@ -21,8 +21,10 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
 import com.microsoft.azure.sdk.iot.service.devicetwin.QueryType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -37,11 +39,12 @@ import java.util.Set;
 /**
  * Use the JobClient to schedule and cancel jobs for a group of devices using IoT hub.
  */
+@Slf4j
 public class JobClient
 {
     private final static Integer DEFAULT_PAGE_SIZE = 100;
 
-    private final static byte[] EMPTY_JSON = "{}".getBytes();
+    private final static byte[] EMPTY_JSON = "{}".getBytes(StandardCharsets.UTF_8);
 
     private String hostName;
     private TokenCredentialCache credentialCache;
@@ -94,6 +97,7 @@ public class JobClient
         this.iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         this.hostName = this.iotHubConnectionString.getHostName();
         this.options = options;
+        commonConstructorSetup();
     }
 
     /**
@@ -129,6 +133,7 @@ public class JobClient
         this.hostName = hostName;
         this.credentialCache = new TokenCredentialCache(credential);
         this.options = options;
+        commonConstructorSetup();
     }
 
     /**
@@ -162,6 +167,12 @@ public class JobClient
         this.hostName = hostName;
         this.azureSasCredential = azureSasCredential;
         this.options = options;
+        commonConstructorSetup();
+    }
+
+    private static void commonConstructorSetup()
+    {
+        log.debug("Initialized a JobClient instance using SDK version {}", TransportUtils.serviceVersion);
     }
 
     /**
@@ -177,7 +188,6 @@ public class JobClient
      * @throws IOException if the function cannot create a URL for the job
      * @throws IotHubException if the http request failed
      */
-    @SuppressWarnings("deprecation")
     public synchronized JobResult scheduleUpdateTwin(
         String jobId,
         String queryCondition,
@@ -258,7 +268,6 @@ public class JobClient
      * @throws IOException if the function cannot create a URL for the job, or the IO failed on request
      * @throws IotHubException if the http request failed
      */
-    @SuppressWarnings("deprecation")
     public synchronized JobResult scheduleDeviceMethod(
         String jobId,
         String queryCondition,
@@ -342,7 +351,6 @@ public class JobClient
      * @throws IOException if the function cannot create a URL for the job, or the IO failed on request
      * @throws IotHubException if the http request failed
      */
-    @SuppressWarnings("deprecation")
     public synchronized JobResult getJob(String jobId)
         throws IllegalArgumentException, IOException, IotHubException
     {
@@ -386,7 +394,6 @@ public class JobClient
      * @throws IOException if the function cannot create a URL for the job, or the IO failed on request
      * @throws IotHubException if the http request failed
      */
-    @SuppressWarnings("deprecation")
     public synchronized JobResult cancelJob(String jobId)
         throws IllegalArgumentException, IOException, IotHubException
     {
@@ -483,7 +490,6 @@ public class JobClient
      * @throws IotHubException When IotHub fails to respond
      * @throws IOException When any of the parameters are incorrect
      */
-    @SuppressWarnings("deprecation")
     public synchronized Query queryDeviceJob(String sqlQuery, Integer pageSize) throws IotHubException, IOException
     {
         if (sqlQuery == null || sqlQuery.length() == 0)
@@ -565,7 +571,7 @@ public class JobClient
         if (nextObject instanceof String)
         {
             String deviceJobJson = (String) nextObject;
-            return new JobResult(deviceJobJson.getBytes());
+            return new JobResult(deviceJobJson.getBytes(StandardCharsets.UTF_8));
         }
         else
         {
@@ -583,7 +589,6 @@ public class JobClient
      * @throws IOException If any of the input parameters are incorrect
      * @throws IotHubException If IotHub failed to respond
      */
-    @SuppressWarnings("deprecation")
     public synchronized Query queryJobResponse(JobType jobType, JobStatus jobStatus, Integer pageSize)
         throws IOException, IotHubException
     {

@@ -340,6 +340,7 @@ public class ExportImportDevice
      * Converts this into a ExportImportDeviceParser object. To serialize a ExportImportDevice object, it must first be converted to a ExportImportDeviceParser object.
      * @return the ExportImportDeviceParser object that can be serialized.
      */
+    @SuppressWarnings("unused") //Unknown if this is actually used outside of a test.
     ExportImportDeviceParser toExportImportDeviceParser()
     {
         //Codes_SRS_SERVICE_SDK_JAVA_IMPORT_EXPORT_DEVICE_34_054: [This method shall convert this into an ExportImportDeviceParser object and return it.]

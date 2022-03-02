@@ -157,7 +157,7 @@ public class HttpsRequestResponseSerializer
 
         Map<String, List<String>> headerFields = readHeaderFields(bufferedReader);
         byte[] body = readBody(bufferedReader);
-        byte[] errorReason = statusLineParts[2].getBytes();
+        byte[] errorReason = statusLineParts[2].getBytes(StandardCharsets.UTF_8);
 
         bufferedReader.close();
 
@@ -220,6 +220,6 @@ public class HttpsRequestResponseSerializer
             next = bufferedReader.readLine();
         }
 
-        return bodyString.toString().getBytes();
+        return bodyString.toString().getBytes(StandardCharsets.UTF_8);
     }
 }

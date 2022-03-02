@@ -5,8 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.deps.transport.amqp;
 
+import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.deps.util.ObjectLock;
-import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
@@ -21,6 +21,8 @@ import org.apache.qpid.proton.reactor.ReactorOptions;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 import java.util.concurrent.*;
 
 @Slf4j
@@ -29,11 +31,13 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
     private static final int MAX_WAIT_TO_OPEN_CLOSE_CONNECTION = 60 * 1000; // 1 minute timeout
     private static final int MAX_WAIT_TO_TERMINATE_EXECUTOR = 30;
 
-    private static final String WEB_SOCKET_PATH = "/$iothub/websocket";
-    private static final String WEB_SOCKET_SUB_PROTOCOL = "AMQPWSB10";
     private static final int AMQP_PORT = 5671;
     private static final int AMQP_WEB_SOCKET_PORT = 443;
     private static final int THREAD_POOL_MAX_NUMBER = 1;
+    private static final String WEB_SOCKET_PATH = "/$iothub/websocket";
+    private static final String WEB_SOCKET_SUB_PROTOCOL = "AMQPWSB10";
+    private static final String WEB_SOCKET_QUERY = "iothub-no-client-cert=true";
+    private static final int MAX_MESSAGE_PAYLOAD_SIZE = 256 * 1024; //max message size is 256 kb, so amqp websocket layer should buffer at most that much space
 
     private int linkCredit;
 
@@ -62,6 +66,17 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
 
     private final SSLContext sslContext;
 
+    // This field is used to uniquely identify a connection.
+    private final String connectionId;
+
+    public String getConnectionId() {
+        return this.connectionId;
+    }
+
+    public String getHostName() {
+        return this.hostName;
+    }
+
     /**
      * Constructor for the Amqp library
      * @param hostName Name of the AMQP Endpoint
@@ -79,6 +94,7 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
             throw new IllegalArgumentException("The hostname cannot be null or empty.");
         }
 
+        this.connectionId = UUID.randomUUID().toString();
         this.linkCredit = -1;
         this.nextTag = 0;
 
@@ -199,7 +215,10 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
 
         log.debug("Starting amqp reactor thread...");
         AmqpReactor amqpReactor = new AmqpReactor(this.reactor);
-        ReactorRunner reactorRunner = new ReactorRunner(amqpReactor);
+
+        String reactorRunnerPrefix = this.hostName + "-Cxn" + this.connectionId;
+
+        ReactorRunner reactorRunner = new ReactorRunner(amqpReactor, reactorRunnerPrefix, "ConnectionOwner");
         executorService.submit(reactorRunner);
     }
 
@@ -334,9 +353,9 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
             if (this.useWebSockets)
             {
                 log.debug("Adding websocket layer");
-                WebSocketImpl webSocket = new WebSocketImpl();
-                webSocket.configure(this.hostName, WEB_SOCKET_PATH, 0, WEB_SOCKET_SUB_PROTOCOL, null, null);
-                ((TransportInternal)transport).addTransportLayer(webSocket);
+                WebSocketImpl webSocket = new WebSocketImpl(MAX_MESSAGE_PAYLOAD_SIZE);
+                webSocket.configure(this.hostName, WEB_SOCKET_PATH, WEB_SOCKET_QUERY, AMQP_WEB_SOCKET_PORT, WEB_SOCKET_SUB_PROTOCOL, null, null);
+                ((TransportInternal) transport).addTransportLayer(webSocket);
             }
 
             SslDomain domain = makeDomain();
@@ -418,7 +437,7 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
 
             if (length > 0)
             {
-                byte[] tag = String.valueOf(this.nextTag).getBytes();
+                byte[] tag = String.valueOf(this.nextTag).getBytes(StandardCharsets.UTF_8);
 
                 //want to avoid negative delivery tags since -1 is the designated failure value
                 if (this.nextTag == Integer.MAX_VALUE || this.nextTag < 0)
@@ -524,17 +543,22 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
     {
         private final static String THREAD_NAME = "azure-iot-sdk-ReactorRunner";
         private final AmqpReactor amqpReactor;
+        private final String threadPostFix;
+        private final String threadPreFix;
 
-        ReactorRunner(AmqpReactor reactor)
+        ReactorRunner(AmqpReactor reactor, String threadPrefix, String threadPostFix)
         {
             this.amqpReactor = reactor;
+            this.threadPostFix = threadPostFix;
+            this.threadPreFix = threadPrefix;
         }
 
         @Override
         public Object call()
         {
-            Thread.currentThread().setName(THREAD_NAME);
-            log.trace("Amqp reactor thread {} has started", THREAD_NAME);
+            String threadName = threadPreFix + "-" + THREAD_NAME + "-" + this.threadPostFix;
+            Thread.currentThread().setName(threadName);
+            log.trace("Amqp reactor thread {} has started", threadName);
 
             try
             {
@@ -546,7 +570,7 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
                 throw e;
             }
 
-            log.trace("Amqp reactor thread {} has finished", THREAD_NAME);
+            log.trace("Amqp reactor thread {} has finished", threadName);
 
             return null;
         }

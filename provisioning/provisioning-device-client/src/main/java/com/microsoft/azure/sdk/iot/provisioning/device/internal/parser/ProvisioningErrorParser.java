@@ -10,6 +10,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.Map;
 
+@SuppressWarnings("unused") // Used in serialization
 public class ProvisioningErrorParser
 {
     private static final String ERROR_CODE = "errorCode";

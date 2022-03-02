@@ -7,6 +7,8 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 
+import java.io.Serializable;
+
 /**
  * Representation of a single Device Provisioning Service TPM Attestation.
  *
@@ -16,7 +18,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
  * @see <a href="https://trustedcomputinggroup.org/work-groups/trusted-platform-module">Trusted Platform Module</a>
  */
-public class TpmAttestation extends Attestation
+public class TpmAttestation extends Attestation implements Serializable
 {
     // the endorsement key for TPM [mandatory]
     private static final String ENDORSEMENT_KEY_TAG = "endorsementKey";

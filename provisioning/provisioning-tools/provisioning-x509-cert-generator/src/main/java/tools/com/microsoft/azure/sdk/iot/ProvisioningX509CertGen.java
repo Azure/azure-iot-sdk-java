@@ -6,6 +6,7 @@ package tools.com.microsoft.azure.sdk.iot;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderDiceEmulator;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 /**
@@ -19,7 +20,7 @@ public class ProvisioningX509CertGen
         {
             String aliasCertCnName, rootCertCnName, signerCertCnName;
             SecurityProviderDiceEmulator securityClient;
-            Scanner scanner = new Scanner(System.in);
+            Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
             System.out.println("Do you want to input common name : Y/N(use default)");
             String isCnName = scanner.next();
             if (isCnName.equalsIgnoreCase("Y"))
@@ -56,7 +57,7 @@ public class ProvisioningX509CertGen
                 if (isVerify.equalsIgnoreCase("Y"))
                 {
                     System.out.println("Input Verification Code");
-                    scanner = new Scanner(System.in);
+                    scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
                     {
                         String verificationCode = scanner.next();
                         if (verificationCode != null)

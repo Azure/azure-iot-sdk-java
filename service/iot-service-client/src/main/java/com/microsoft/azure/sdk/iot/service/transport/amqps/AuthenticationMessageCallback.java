@@ -1,7 +1,6 @@
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
-import org.apache.qpid.proton.reactor.Reactor;
 
 /**
  * Interface that defines the callback used by the CBS receiver link to notify the CBS session when an authentication

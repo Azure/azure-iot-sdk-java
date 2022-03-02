@@ -91,6 +91,7 @@ import java.util.Date;
  *
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollmentgroup">Device Enrollment Group</a>
  */
+@SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
 public class EnrollmentGroup extends Serializable
 {
     // the enrollment group identifier
@@ -295,6 +296,7 @@ public class EnrollmentGroup extends Serializable
         this.setAllocationPolicy(result.getAllocationPolicy());
         this.setCustomAllocationDefinition(result.getCustomAllocationDefinition());
         this.setReprovisionPolicy(result.getReprovisionPolicy());
+        this.setCapabilities(result.getCapabilities());
     }
 
     /**
@@ -419,14 +421,6 @@ public class EnrollmentGroup extends Serializable
         else if (!(attestation instanceof X509Attestation) && !(attestation instanceof SymmetricKeyAttestation))
         {
             throw new IllegalArgumentException("attestation for EnrollmentGroup shall be X509 or SymmetricKey");
-        }
-
-        if (attestation instanceof X509Attestation)
-        {
-            if (((X509Attestation)attestation).getRootCertificatesFinal() == null)
-            {
-                throw new IllegalArgumentException("X509 attestation for EnrollmentGroup does not contains a valid certificate.");
-            }
         }
 
         this.attestation = new AttestationMechanism(attestation);

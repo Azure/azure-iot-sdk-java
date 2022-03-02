@@ -18,6 +18,7 @@ import java.util.Map;
 /**
  * Representation of a single Jobs response collection with a Json deserializer.
  */
+@SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
 public class JobsResponseParser
 {
     // Job identifier

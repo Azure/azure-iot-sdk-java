@@ -139,7 +139,7 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
     {
         if (credential != null)
         {
-            amqpReceiveHandler = new AmqpFeedbackReceivedHandler(
+            this.amqpReceiveHandler = new AmqpFeedbackReceivedHandler(
                 this.hostName,
                 this.credential,
                 this.iotHubServiceClientProtocol,
@@ -149,7 +149,7 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
         }
         else if (sasTokenProvider != null)
         {
-            amqpReceiveHandler = new AmqpFeedbackReceivedHandler(
+            this.amqpReceiveHandler = new AmqpFeedbackReceivedHandler(
                 this.hostName,
                 this.sasTokenProvider,
                 this.iotHubServiceClientProtocol,
@@ -159,7 +159,7 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
         }
         else
         {
-            amqpReceiveHandler = new AmqpFeedbackReceivedHandler(
+            this.amqpReceiveHandler = new AmqpFeedbackReceivedHandler(
                 this.hostName,
                 this.userName,
                 this.sasToken,
@@ -188,15 +188,20 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
      */
     public synchronized FeedbackBatch receive(long timeoutMs) throws IOException, InterruptedException
     {
+        // This value is set in the reactor thread once we receive the file upload notification from the service over AMQP.
+        // It's important to set this to null since receive may be called multiple times in a row. Otherwise, a single
+        // notification could be returned to the user multiple times if nothing overwrote a previous value.
         feedbackBatch = null;
-        if  (isOpen)
+        
+        if (isOpen)
         {
             // instantiating the amqp handler each receive call because each receive call opens a new AMQP connection
             initializeHandler();
 
             log.info("Receiving on feedback receiver for up to {} milliseconds", timeoutMs);
 
-            new ReactorRunner(this.amqpReceiveHandler, "AmqpFeedbackReceiver").run(timeoutMs);
+            String reactorRunnerPrefix = this.hostName + "-" + "Cxn" + this.amqpReceiveHandler.getConnectionId();
+            new ReactorRunner(this.amqpReceiveHandler, reactorRunnerPrefix, "AmqpFeedbackReceiver").run(timeoutMs);
 
             log.trace("Feedback receiver reactor finished running, verifying that the connection opened correctly");
             this.amqpReceiveHandler.verifyConnectionWasOpened();
@@ -206,6 +211,7 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
         {
             throw new IOException("receive handler is not initialized. call open before receive");
         }
+
         return feedbackBatch;
     }
 

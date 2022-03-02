@@ -1,42 +1,77 @@
 # Microsoft Azure IoT SDKs for Java
 
-### Build status
+## Preview V2 clients notice
+
+[A preview release](https://github.com/Azure/azure-iot-sdk-java/releases/tag/2021-08-30) has been published that 
+contains a preview of the new 2.X.X clients that we plan on bringing into main in the near future. This release 
+contains many breaking changes, but is substantially more future proof than the 1.X.X clients. Please try it out and 
+let us know on our [discussions page](https://github.com/Azure/azure-iot-sdk-java/discussions) if you have any concerns, 
+questions, or further changes you'd like to see!
+
+If you need any help migrating your code to try out the new 2.X.X clients, please see this [migration guide](https://github.com/Azure/azure-iot-sdk-java/blob/preview/major%20version%20upgrade%20migration%20guide.md).
+
+## Critical upcoming change notice
+
+All Azure IoT SDK users are advised to be aware of upcoming TLS certificate changes for Azure IoT hub and Device Provisioning Service 
+that will impact the SDK's ability to connect. In October 2022, both services will migrate from the current 
+[Baltimore CyberTrust CA Root](https://baltimore-cybertrust-root.chain-demos.digicert.com/info/index.html) to the 
+[DigiCert Global G2 CA root](https://global-root-g2.chain-demos.digicert.com/info/index.html). There will be a 
+transition period beforehand where your IoT devices must have both the Baltimore and Digicert public certificates 
+installed in their certificate store in order to prevent connectivity issues. 
+
+For a more in depth explanation as to why the IoT services are doing this, please see
+[this article](https://techcommunity.microsoft.com/t5/internet-of-things/azure-iot-tls-critical-changes-are-almost-here-and-why-you/ba-p/2393169).
+
+Users of this Java IoT SDK in particular will need to follow slightly different instructions in order to handle this 
+upcoming change. See [this document](./upcoming_certificate_changes_readme.md) for a more in depth explanation of how 
+to prepare your devices for this certificate migration.
+
+**Users who don't follow these instructions will begin experiencing unrecoverable, consistent connection failures from 
+their devices starting June 2022.**
+
+If you have any questions, comments, or concerns about this upcoming change, please let us know on our [discussions page](https://github.com/Azure/azure-iot-sdk-java/discussions).
+
+## Build status
+
 Due to security considerations, build logs are not publicly available.
 
 | Service Environment      | Status |
 | ---                      | ---    |
-| Master                   | [![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/java/pull_request_validation/Java%20Prod?branchName=master)](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=252&branchName=master)|
+| Main                     | [![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/java/pull_request_validation/Java%20Prod?branchName=main)](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=252&branchName=main)|
 | Preview                  | [![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/java/pull_request_validation/Java%20Canary?branchName=preview)](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=245&branchName=preview)|
 
 This repository contains the following:
-* **Azure IoT Hub device SDK for Java**: connect client devices to Azure IoT Hub (supports Java 7+)
-* **Azure IoT Hub service SDK for Java**: enables developing back-end applications for Azure IoT (supports Java 8+)
+
+* **Azure IoT Hub device SDK for Java**: connect client devices to Azure IoT Hub
+* **Azure IoT Hub service SDK for Java**: enables developing back-end applications for Azure IoT
 * **Azure IoT Device Provisioning device SDK for Java**: provision devices to Azure IoT Hub using Azure IoT Device Provisioning
 * **Azure IoT Device Provisioning service SDK for Java**: manage your Provisioning service instance from a back-end Java application
 
 To find SDKs in other languages for Azure IoT, please refer to the [azure-iot-sdks][azure-iot-sdks] repository
 
 ## Developing applications for Azure IoT
+
 Visit [Azure IoT Dev Center](http://azure.com/iotdev) to learn more about developing applications for Azure IoT.
 
 ## How to use the Azure IoT SDKs for Java
 
 Devices and data sources in an IoT solution can range from a simple network-connected sensor to a powerful, standalone computing device. Devices may have limited processing capability, memory, communication bandwidth, and communication protocol support. The IoT device SDKs enable you to implement client applications for a wide variety of devices.
+
 * On Linux and Windows:
-   * **Using Maven**: the simplest way to use the Azure IoT SDKs for Java to develop apps is to leverage Maven packages:
-      * [Device SDK][device-maven]
-      * [Service SDK][service-maven]
-   * **Clone the repository**: 
-   ```
-    git clone  https://github.com/Azure/azure-iot-sdk-java.git  
-   ```
-   * **Working with the SDKs code**: if you are working with the SDKs code to modify it or contribute changes, then you can clone the repository and build the libraries:
-      * [Build Device SDK from code][device-code]
-      * [Build Service SDK from code][service-code]
-* On Android: our Java device SDK can be used on Android using the API version 17 and higher:
-   * [Device SDK][device-android]
+  * **Using Maven**: the simplest way to use the Azure IoT SDKs for Java to develop apps is to leverage Maven packages:
+    * [Device SDK][device-maven]
+    * [Service SDK][service-maven]
+  * **Clone the repository**: `git clone https://github.com/Azure/azure-iot-sdk-java.git`
+  * **Working with the SDKs code**: if you are working with the SDKs code to modify it or contribute changes, then you can clone the repository and build the libraries:
+    * [Build Device SDK from code][device-code]
+    * [Build Service SDK from code][service-code]
+* On Android: our Java device SDK can be used on Android:
+  * [Device SDK][device-android]
+
+For more details on what platforms this SDK supports, see [this document](./supported_platforms.md).
 
 ## API reference
+
 * [Azure IoT Hub device SDK][java-api-reference-device]
 * [Azure IoT Hub service SDK][java-api-reference-service]
 * [Azure IoT Hub Device Provisioning device SDK][java-api-reference-device-dps]
@@ -44,7 +79,8 @@ Devices and data sources in an IoT solution can range from a simple network-conn
 
 ## Key features and roadmap
 
-### Device client SDK
+## Device client SDK
+
 :heavy_check_mark: feature available  :heavy_multiplication_x: feature planned but not supported  :heavy_minus_sign: no support planned
 
 | Features                                                                                                         | mqtt                     | mqtt-ws                  | amqp                     | amqp-ws                  | https                    | Description                                                                                                                                                                                                                                                                                                                                 |
@@ -56,11 +92,12 @@ Devices and data sources in an IoT solution can range from a simple network-conn
 | [Direct Methods](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-direct-methods)                 | :heavy_check_mark:      | :heavy_check_mark:      | :heavy_check_mark:      | :heavy_check_mark:      | :heavy_minus_sign:       | IoT Hub gives you the ability to invoke direct methods on devices from the cloud.  The SDK supports handler for generic operation.                                                                                                                                                                                                          |
 | [Upload file to Blob](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-file-upload)               | :heavy_minus_sign:       | :heavy_minus_sign:       | :heavy_minus_sign:       | :heavy_minus_sign:       | :heavy_check_mark:      | A device can initiate a file upload and notifies IoT Hub when the upload is complete.   File upload requires HTTPS connection, but can be initiated from client using any protocol for other operations such as telemetry.                                                                        |
 | [Connection Status and Error reporting](https://docs.microsoft.com/en-us/rest/api/iothub/common-error-codes)     | :heavy_multiplication_x: | :heavy_multiplication_x: | :heavy_multiplication_x: | :heavy_multiplication_x: | :heavy_multiplication_x: | Error reporting for IoT Hub supported error code.                                                                                                                                                                                                                                                                                           |
-| Retry policies                                                                                                   | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | Retry policy for unsuccessful device-to-cloud messages have three options: no try, exponential backoff with jitter (default) and custom.  Detail implementation is documented [here](https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-client/devdoc/requirement_docs/com/microsoft/azure/iothub/retryPolicy.md).                                                                                                                                                                                                    |
+| Retry policies                                                                                                   | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | Retry policy for unsuccessful device-to-cloud messages have three options: no try, exponential backoff with jitter (default) and custom.  Detail implementation is documented [here](https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-client/devdoc/requirement_docs/com/microsoft/azure/iothub/retryPolicy.md).                                                                                                                                                                                                    |
 | Devices multiplexing over single connection                                                                      | :heavy_minus_sign:       | :heavy_minus_sign:       | :heavy_check_mark: | :heavy_check_mark: | :heavy_multiplication_x: |                                                                                                                                                                                                                                                                                                                                             |
-| Connection Pooling - Specifying number of connections                                                            | :heavy_minus_sign:       | :heavy_minus_sign:       | :heavy_multiplication_x:       | :heavy_multiplication_x:       | :heavy_multiplication_x:       |                                                                                                                                                                                                                                                                                                                                             |
-    
-### Service client SDK
+| Connection Pooling * Specifying number of connections                                                            | :heavy_minus_sign:       | :heavy_minus_sign:       | :heavy_multiplication_x:       | :heavy_multiplication_x:       | :heavy_multiplication_x:       |                                                                                                                                                                                                                                                                                                                                             |
+
+## Service client SDK
+
 :heavy_check_mark: feature available  :heavy_multiplication_x: feature planned but not supported  :heavy_minus_sign: no support planned
 
 | Features                                                                                                      | Support             | Description                                                                                                                        |
@@ -74,7 +111,8 @@ Devices and data sources in an IoT solution can range from a simple network-conn
 | [File Upload](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-file-upload)                    | :heavy_check_mark:  | Set up your backend app to send file upload notification receiver.                                                                 |
 | [Digital Twin Client](https://docs.microsoft.com/en-us/azure/iot-pnp/overview-iot-plug-and-play)              | :heavy_check_mark:  | Set up your backend app to perform operations on plug and play devices.                                                                 |
 
-### Provisioning client SDK
+## Provisioning client SDK
+
 :heavy_check_mark: feature available  :heavy_multiplication_x: feature planned but not supported  :heavy_minus_sign: no support planned
 This repository contains [provisioning device client SDK](./provisioning/provisioning-device-client) for the [Device Provisioning Service](https://docs.microsoft.com/en-us/azure/iot-dps/). 
 
@@ -84,9 +122,8 @@ This repository contains [provisioning device client SDK](./provisioning/provisi
 | X.509 Individual Enrollment | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | This SDK supports connecting your device to the Device Provisioning Service via [individual enrollment](https://docs.microsoft.com/en-us/azure/iot-dps/concepts-service#enrollment) using [X.509 leaf certificate](https://docs.microsoft.com/en-us/azure/iot-dps/concepts-security#leaf-certificate).   Please visit the [samples folder](./provisioning/provisioning-samples) and this [quickstart](https://docs.microsoft.com/en-us/azure/iot-dps/quick-create-simulated-device-x509-java) on how to create a device client. |
 | X.509 Enrollment Group      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | This SDK supports connecting your device to the Device Provisioning Service via [enrollment group](https://docs.microsoft.com/en-us/azure/iot-dps/concepts-service#enrollment) using [X.509 root certificate](https://docs.microsoft.com/en-us/azure/iot-dps/concepts-security#root-certificate).   Please visit the [samples folder](./provisioning/provisioning-samples) to learn more about this feature.                                                                                                                                                                                            |
 
+## Provisioning service client SDK
 
-
-### Provisioning service client SDK
 This repository contains [provisioning service client SDK](./provisioning/provisioning-service-client) for the Device Provisioning Service to [programmatically enroll devices](https://docs.microsoft.com/en-us/azure/iot-dps/how-to-manage-enrollments-sdks).
 
 | Feature                                            | Support            | Description                                                                                                                                                                                                                                            |
@@ -98,30 +135,36 @@ This repository contains [provisioning service client SDK](./provisioning/provis
 | Query enrollments                                  | :heavy_check_mark: | Programmatically query registration states with the service SDK.  Please visit the [samples folder](./provisioning/provisioning-samples) to learn more about this feature.                                                                            |
 
 ## Samples
+
 Within the repository, you can find various types of simple samples that can help you get started.
+
 * [Device SDK Samples](./device/iot-device-samples)
 * [Service SDK Samples](./service/iot-service-samples)
 * [Provisioning SDK Samples](./provisioning/provisioning-samples)
 
 ## Logging
-In order to learn more about logging within this SDK and how to capture its logs, see [here](./logging.md)
+
+In order to learn more about logging within this SDK and how to capture its logs, see [here](./logging.md).
 
 ## Contribution, feedback and issues
+
 If you encounter any bugs, have suggestions for new features or if you would like to become an active contributor to this project please follow the instructions provided in the [contribution guidelines](.github/CONTRIBUTING.md).
 
-## Need Support?
-* Have a feature request for SDKs? Please post it on [User Voice](https://feedback.azure.com/forums/321918-azure-iot) to help us prioritize.
+## Need support?
+
 * Have a technical question? Ask on [Stack Overflow](https://stackoverflow.com/questions/tagged/azure-iot-hub) with tag “azure-iot-hub”
 * Need Support? Every customer with an active Azure subscription has access to support with guaranteed response time.  Consider submitting a ticket and get assistance from Microsoft support team
 * Found a bug? Please help us fix it by thoroughly documenting it and filing an issue on GitHub (C, Java, .NET, Node.js, Python).
 
 Here is what you can expect Microsoft Support to be able to help with:
+
 * **Client SDKs issues**: If you are trying to compile and run the libraries on a supported platform, the Support team will be able to assist with troubleshooting or questions related to compiler issues and communications to and from the IoT Hub.  They will also try to assist with questions related to porting to an unsupported platform, but will be limited in how much assistance can be provided.  The team will be limited with trouble-shooting the hardware device itself or drivers and or specific properties on that device. 
 * **IoT Hub / Connectivity Issues**: Communication from the device client to the Azure IoT Hub service and communication from the Azure IoT Hub service to the client.  Or any other issues specifically related to the Azure IoT Hub.
 * **Portal Issues**: Issues related to the portal, that includes access, security, dashboard, devices, Alarms, Usage, Settings and Actions.
 * **REST/API Issues**: Using the IoT Hub REST/APIs that are documented in the [documentation]( https://msdn.microsoft.com/library/mt548492.aspx).
 
 ## Read more
+
 * [Azure IoT Hub documentation][iot-hub-documentation]
 * [Prepare your development environment to use the Azure IoT device SDK for Java][devbox-setup]
 * [Setup IoT Hub][setup-iothub]
@@ -154,36 +197,33 @@ This folder contains scripts to build and run Java SDK provided proper environme
 
 Contains libraries that enable interactions with the IoT Hub service to perform operations such as sending messages to devices and managing the device identity registry. Refer to API documentation and samples for more details.
 
-## Certificates -  Important to know
+## Certificates - Important to know
 
-For guidance and important information about certificates, please refer to [this blog post](https://techcommunity.microsoft.com/t5/internet-of-things/azure-iot-tls-changes-are-coming-and-why-you-should-care/ba-p/1658456) from the security team. 
+For guidance and important information about certificates, please refer to [this blog post](https://techcommunity.microsoft.com/t5/internet-of-things/azure-iot-tls-changes-are-coming-and-why-you-should-care/ba-p/1658456) from the security team.
 
-# Long Term Support
+## Long-term support
 
-The project offers a Long Term Support (LTS) version to allow users that do not need the latest features to be shielded from unwanted changes.
+The project offers a Long-Term Support (LTS) releases to allow users that do not need the latest features to be shielded from unwanted changes.
 
-A new LTS version will be created every 6 months. The lifetime of an LTS branch is currently planned for one year. LTS branches receive all bug fixes that fall in one of these categories:
+Going forward, LTS repo tags are to be named lts_*yyyy*-*mm*-*dd*, where *yyyy*, *mm*, and *dd* are the year, month, and day when the tag was created. An example of such a tag is *lts_2021-03-18*.
 
-- security bugfixes
-- critical bugfixes (crashes, memory leaks, etc.)
+The lifetime of an LTS release is 12 months. During this time, LTS releases may receive bug fixes that fall in these categories:
 
-No new features or improvements will be picked up in an LTS branch.
+* security bug fixes
+* critical bug fixes (e.g., unavoidable/unrecoverable crashes, significant memory leaks)
 
-LTS branches are named lts_*mm*_*yyyy*, where *mm* and *yyyy* are the month and year when the branch was created. An example of such a branch is *lts_07_2017*.
+> No new features or improvements are in scope to be picked up in an LTS branch. A patch will not extend the maintenance or expiry date.
 
-## Schedule<sup>1</sup>
+LTS releases may include additional extended support for security bug fixes as listed in the LTS schedule.
 
-Below is a table showing the mapping of the LTS branches to the packages released
+### Schedule
 
-| Maven Package | Github Branch | LTS Status | LTS Start Date | Maintenance End Date | Removed Date |
-| :-----------: | :-----------: | :--------: | :------------: | :------------------: | :----------: |
-| [2020-7-7](https://github.com/Azure/azure-iot-sdk-java/releases/tag/lts_7_2020) | lts_07_2020   | Active     | 2020-7-7     | 2020-12-31            | 2021-6-30   |
-| [2020-01-27](https://github.com/Azure/azure-iot-sdk-java/releases/tag/LTS_01_2020) | lts_01_2020   | Deprecated     | 2020-01-27     | 2020-06-30            | 2020-12-31   |
+This table shows previous LTS releases and end dates.
 
-* <sup>1</sup> All scheduled dates are subject to change by the Azure IoT SDK team.
-
-### Planned Release Schedule
-![](./lts_branches.png)
+| Release Link                                                                      | GitHub Tag  | LTS Start Date | Maintenance End Date | LTS End Date |
+| :-------------------------------------------------------------------------------: | :---------: | :------------: | :------------------: | :----------: |
+| [2021-06-17](https://github.com/Azure/azure-iot-sdk-java/releases/tag/lts_7_2021) | lts_06_2021 | 2020-06-17     | 2021-12-31           | 2022-06-30   |
+| [2020-07-07](https://github.com/Azure/azure-iot-sdk-java/releases/tag/lts_7_2020) | lts_07_2020 | 2020-07-07     | 2020-12-31           | 2021-06-30   |
 
 ---
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
@@ -204,4 +244,3 @@ Microsoft collects performance and usage information which may be used to provid
 [setup-iothub]: https://aka.ms/howtocreateazureiothub
 [java-api-reference-device-dps]: https://docs.microsoft.com/java/api/com.microsoft.azure.sdk.iot.provisioning.device
 [java-api-reference-service-dps]: https://docs.microsoft.com/java/api/com.microsoft.azure.sdk.iot.provisioning.service
-
