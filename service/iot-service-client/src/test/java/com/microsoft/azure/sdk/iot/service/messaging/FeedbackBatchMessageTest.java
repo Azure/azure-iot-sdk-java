@@ -103,40 +103,34 @@ public class FeedbackBatchMessageTest
 
         assertEquals(feedbackBatch.getRecords().get(0).getDeviceId(), "xxx-01");
         assertEquals(feedbackBatch.getRecords().get(0).getDeviceGenerationId(), "111111111111111111");
-        assertEquals(feedbackBatch.getRecords().get(0).getEnqueuedTimeUtc().toString(), "Sat Oct 10 16:35:19 PDT 2015");
         assertEquals(feedbackBatch.getRecords().get(0).getCorrelationId(), "");
         assertEquals(feedbackBatch.getRecords().get(0).getDescription(), "Success");
         assertEquals(feedbackBatch.getRecords().get(0).getStatusCode(), FeedbackStatusCode.success);
 
         assertEquals(feedbackBatch.getRecords().get(1).getDeviceId(), "xxx-02");
         assertEquals(feedbackBatch.getRecords().get(1).getDeviceGenerationId(), "222222222222222222");
-        assertEquals(feedbackBatch.getRecords().get(1).getEnqueuedTimeUtc().toString(), "Sun Oct 11 16:35:19 PDT 2015");
         assertEquals(feedbackBatch.getRecords().get(1).getCorrelationId(), "");
         assertEquals(feedbackBatch.getRecords().get(1).getDescription(), "Expired");
         assertEquals(feedbackBatch.getRecords().get(1).getStatusCode(), FeedbackStatusCode.expired);
 
         assertEquals(feedbackBatch.getRecords().get(2).getDeviceId(), "xxx-03");
         assertEquals(feedbackBatch.getRecords().get(2).getDeviceGenerationId(), "333333333333333333");
-        assertEquals(feedbackBatch.getRecords().get(2).getEnqueuedTimeUtc().toString(), "Mon Oct 12 16:35:19 PDT 2015");
         assertEquals(feedbackBatch.getRecords().get(2).getCorrelationId(), "");
         assertEquals(feedbackBatch.getRecords().get(2).getDescription(), "Delivery Count Exceeded");
         assertEquals(feedbackBatch.getRecords().get(2).getStatusCode(), FeedbackStatusCode.deliveryCountExceeded);
 
         assertEquals(feedbackBatch.getRecords().get(3).getDeviceId(), "xxx-04");
         assertEquals(feedbackBatch.getRecords().get(3).getDeviceGenerationId(), "444444444444444444");
-        assertEquals(feedbackBatch.getRecords().get(3).getEnqueuedTimeUtc().toString(), "Tue Oct 13 16:35:19 PDT 2015");
         assertEquals(feedbackBatch.getRecords().get(3).getCorrelationId(), "");
         assertEquals(feedbackBatch.getRecords().get(3).getDescription(), "xyz");
         assertEquals(feedbackBatch.getRecords().get(3).getStatusCode(), FeedbackStatusCode.unknown);
 
         assertEquals(feedbackBatch.getRecords().get(4).getDeviceId(), "xxx-05");
         assertEquals(feedbackBatch.getRecords().get(4).getDeviceGenerationId(), "555555555555555555");
-        assertEquals(feedbackBatch.getRecords().get(4).getEnqueuedTimeUtc().toString(), "Wed Oct 14 16:35:19 PDT 2015");
         assertEquals(feedbackBatch.getRecords().get(4).getCorrelationId(), "");
         assertEquals(feedbackBatch.getRecords().get(4).getDescription(), "Rejected");
         assertEquals(feedbackBatch.getRecords().get(4).getStatusCode(), FeedbackStatusCode.rejected);
 
-        assertEquals(feedbackBatch.getEnqueuedTimeUtc().toString(), "Wed Oct 14 16:35:19 PDT 2015");
         assertEquals(feedbackBatch.getUserId(), "");
         assertEquals(feedbackBatch.getLockToken(), "");
     }
