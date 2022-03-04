@@ -5,17 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service.messaging;
 
-import com.microsoft.azure.sdk.iot.service.messaging.Tools;
 import mockit.Expectations;
 import org.junit.Test;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.JsonString;
-import java.io.StringReader;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -132,120 +123,6 @@ public class ToolsTest
         };
         // Act
         Boolean result = Tools.isNullOrWhiteSpace(value);
-        // Assert
-        assertEquals(expResult, result);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_TOOLS_12_010: [The function shall return empty string if any of the input is null]
-    @Test
-    public void getValueFromJsonObject_input_object_null()
-    {
-        // Arrange
-        String key = "key";
-        String expResult = "";
-        // Act
-        String result = Tools.getValueFromJsonObject(null, key);
-        // Assert
-        assertEquals(expResult, result);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_TOOLS_12_010: [The function shall return empty string if any of the input is null]
-    @Test
-    public void getValueFromJsonObject_input_key_null()
-    {
-        // Arrange
-        String jsonString = "{\"deviceId\":\"xxx-device\",\"generationId\":\"111111111111111111\",\"etag\":\"MA==\",\"connectionState\":\"Disconnected\",\"status\":\"Disabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"cloudToDeviceMessageCount\":0,\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"AAABBBCCC111222333444000\",\"secondaryKey\":\"111222333444555AAABBBCCC\"}}}";
-        StringReader stringReader = new StringReader(jsonString);
-        JsonReader jsonReader = Json.createReader(stringReader);
-        JsonObject jsonObject = jsonReader.readObject();
-        String key = null;
-        String expResult = "";
-        // Act
-        String result = Tools.getValueFromJsonObject(jsonObject, key);
-        // Assert
-        assertEquals(expResult, result);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_TOOLS_12_010: [The function shall return empty string if any of the input is null]
-    @Test
-    public void getValueFromJsonObject_input_key_empty()
-    {
-        // Arrange
-        String jsonString = "{\"deviceId\":\"xxx-device\",\"generationId\":\"111111111111111111\",\"etag\":\"MA==\",\"connectionState\":\"Disconnected\",\"status\":\"Disabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"cloudToDeviceMessageCount\":0,\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"AAABBBCCC111222333444000\",\"secondaryKey\":\"111222333444555AAABBBCCC\"}}}";
-        StringReader stringReader = new StringReader(jsonString);
-        JsonReader jsonReader = Json.createReader(stringReader);
-        JsonObject jsonObject = jsonReader.readObject();
-        String key = "";
-        String expResult = "";
-        // Act
-        String result = Tools.getValueFromJsonObject(jsonObject, key);
-        // Assert
-        assertEquals(expResult, result);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_TOOLS_12_011: [The function shall get the JsonValue of the key]
-    // Tests_SRS_SERVICE_SDK_JAVA_TOOLS_12_012: [The function shall get the JsonString from the JsonValue if the JsonValue is not null]
-    // Tests_SRS_SERVICE_SDK_JAVA_TOOLS_12_013: [The function shall return the string value from the JsonString calling the getValueFromJsonString function]
-    @Test
-    public void getValueFromJsonObject_good_case()
-    {
-        // Arrange
-        String jsonString = "{\"deviceId\":\"xxx-device\",\"generationId\":\"111111111111111111\",\"etag\":\"MA==\",\"connectionState\":\"Disconnected\",\"status\":\"Disabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"cloudToDeviceMessageCount\":0,\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"AAABBBCCC111222333444000\",\"secondaryKey\":\"111222333444555AAABBBCCC\"}}}";
-        StringReader stringReader = new StringReader(jsonString);
-        JsonReader jsonReader = Json.createReader(stringReader);
-        JsonObject jsonObject = jsonReader.readObject();
-        String key = "generationId";
-        String expResult = "111111111111111111";
-        // Act
-        String result = Tools.getValueFromJsonObject(jsonObject, key);
-        // Assert
-        assertEquals(expResult, result);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_TOOLS_12_014: [The function shall return empty string if the JsonValue is null]
-    @Test
-    public void getValueFromJsonObject_value_null()
-    {
-        // Arrange
-        String jsonString = "{\"deviceId\":\"xxx-device\",\"generationId\":null,\"etag\":\"MA==\",\"connectionState\":\"Disconnected\",\"status\":\"Disabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"cloudToDeviceMessageCount\":0,\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"AAABBBCCC111222333444000\",\"secondaryKey\":\"111222333444555AAABBBCCC\"}}}";
-        StringReader stringReader = new StringReader(jsonString);
-        JsonReader jsonReader = Json.createReader(stringReader);
-        JsonObject jsonObject = jsonReader.readObject();
-        String key = "generationId";
-        String expResult = "";
-        // Act
-        String result = Tools.getValueFromJsonObject(jsonObject, key);
-        // Assert
-        assertEquals(expResult, result);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_TOOLS_12_015: [The function shall return empty string if the input is null]
-    @Test
-    public void getValueFromJsonString_input_null()
-    {
-        // Arrange
-        String expResult = "";
-        // Act
-        String result = Tools.getValueFromJsonString(null);
-        // Assert
-        assertEquals(expResult, result);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_TOOLS_12_016: [The function shall get the string value from JsonString]
-    // Tests_SRS_SERVICE_SDK_JAVA_TOOLS_12_017: [The function shall trim the leading and trailing parenthesis from the string and return with it]
-    @Test
-    public void getValueFromJsonString_good_case()
-    {
-        // Arrange
-        String jsonString = "{\"deviceId\":\"xxx-device\",\"generationId\":\"111111111111111111\",\"etag\":\"MA==\",\"connectionState\":\"Disconnected\",\"status\":\"Disabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"cloudToDeviceMessageCount\":0,\"authentication\":{\"symmetricKey\":{\"primaryKey\":\"AAABBBCCC111222333444000\",\"secondaryKey\":\"111222333444555AAABBBCCC\"}}}";
-        StringReader stringReader = new StringReader(jsonString);
-        JsonReader jsonReader = Json.createReader(stringReader);
-        JsonObject jsonObject = jsonReader.readObject();
-        String key = "generationId";
-        JsonString jsonStringObject = jsonObject.getJsonString(key);
-        String expResult = "111111111111111111";
-        // Act
-        String result = Tools.getValueFromJsonString(jsonStringObject);
         // Assert
         assertEquals(expResult, result);
     }

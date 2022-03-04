@@ -434,10 +434,10 @@ public class ModuleGlue
         else
         {
             EventCallback callback = new EventCallback(handler);
-            System.out.printf("calling sendTelemetryAsync%n");
+            System.out.printf("calling sendEvent%n");
             try
             {
-                client.sendTelemetry(msg);
+                client.sendEvent(msg);
             }
             catch (InterruptedException | TimeoutException e)
             {

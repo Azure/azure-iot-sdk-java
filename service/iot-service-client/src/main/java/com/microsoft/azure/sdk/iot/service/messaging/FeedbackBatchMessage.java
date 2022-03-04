@@ -5,14 +5,11 @@
 
 package com.microsoft.azure.sdk.iot.service.messaging;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.JsonValue;
-import java.io.StringReader;
-import java.time.Instant;
+import com.google.gson.Gson;
+import com.microsoft.azure.sdk.iot.service.messaging.serializers.FeedbackRecordParser;
+
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Provide static function to parse Json string to FeedbackBatch object.
@@ -38,59 +35,22 @@ public class FeedbackBatchMessage
 
             if (!jsonString.equals(""))
             {
-                try (JsonReader jsonReader = Json.createReader(new StringReader(jsonString)))
+                Gson gson = new Gson();
+                FeedbackRecordParser[] feedbackRecordParsers = gson.fromJson(jsonString, FeedbackRecordParser[].class);
+
+                if (feedbackRecordParsers.length > 0)
                 {
-                    JsonArray jsonArray = jsonReader.readArray();
-                    ArrayList<FeedbackRecord> records = new ArrayList<>();
-
-                    for (JsonValue aJsonArray : jsonArray)
+                    List<FeedbackRecord> feedbackRecords = new ArrayList<>();
+                    for (int i = 0; i < feedbackRecordParsers.length; i++)
                     {
-                        JsonObject jsonObject = (JsonObject) aJsonArray;
-
-                        FeedbackRecord feedbackRecord = new FeedbackRecord();
-
-                        feedbackRecord.setEnqueuedTimeUtc(Instant.parse(Tools.getValueFromJsonObject(jsonObject, "enqueuedTimeUtc")));
-
-                        String originalMessageId = Tools.getValueFromJsonObject(jsonObject, "originalMessageId");
-                        feedbackRecord.setOriginalMessageId(originalMessageId);
-                        feedbackRecord.setCorrelationId("");
-
-                        String description = Tools.getValueFromJsonObject(jsonObject, "description");
-                        feedbackRecord.setDescription(description);
-                        String statusCode = Tools.getValueFromJsonObject(jsonObject, "statusCode");
-                        if (statusCode.equalsIgnoreCase("success"))
-                        {
-                            feedbackRecord.setStatusCode(FeedbackStatusCode.success);
-                        }
-                        else if (statusCode.equalsIgnoreCase("expired"))
-                        {
-                            feedbackRecord.setStatusCode(FeedbackStatusCode.expired);
-                        }
-                        else if (statusCode.equalsIgnoreCase("deliverycountexceeded"))
-                        {
-                            feedbackRecord.setStatusCode(FeedbackStatusCode.deliveryCountExceeded);
-                        }
-                        else if (statusCode.equalsIgnoreCase("rejected"))
-                        {
-                            feedbackRecord.setStatusCode(FeedbackStatusCode.rejected);
-                        }
-                        else
-                        {
-                            feedbackRecord.setStatusCode(FeedbackStatusCode.unknown);
-                        }
-                        feedbackRecord.setDeviceId(Tools.getValueFromJsonObject(jsonObject, "deviceId"));
-                        feedbackRecord.setDeviceGenerationId(Tools.getValueFromJsonObject(jsonObject, "deviceGenerationId"));
-
-                        records.add(feedbackRecord);
+                        feedbackRecords.add(new FeedbackRecord(feedbackRecordParsers[i]));
                     }
 
-                    if (records.size() > 0)
-                    {
-                        returnFeedbackBatch.setEnqueuedTimeUtc(records.get(records.size() - 1).getEnqueuedTimeUtc());
-                        returnFeedbackBatch.setUserId("");
-                        returnFeedbackBatch.setLockToken("");
-                        returnFeedbackBatch.setRecords(records);
-                    }
+                    returnFeedbackBatch.setRecords(feedbackRecords);
+                    returnFeedbackBatch.setEnqueuedTimeUtc(feedbackRecords.get(feedbackRecords.size() - 1).getEnqueuedTimeUtc());
+                    returnFeedbackBatch.setUserId("");
+                    returnFeedbackBatch.setLockToken("");
+                    returnFeedbackBatch.setRecords(feedbackRecords);
                 }
             }
         }

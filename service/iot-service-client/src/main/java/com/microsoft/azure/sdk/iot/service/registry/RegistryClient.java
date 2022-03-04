@@ -7,6 +7,7 @@ package com.microsoft.azure.sdk.iot.service.registry;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
+import com.google.gson.Gson;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
@@ -23,12 +24,7 @@ import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.Proxy;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -415,19 +411,17 @@ public final class RegistryClient
         IotHubExceptionManager.httpResponseVerification(response);
 
         String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
-        try (JsonReader jsonReader = Json.createReader(new StringReader(bodyStr)))
-        {
-            List<Module> moduleList = new ArrayList<>();
-            JsonArray deviceArray = jsonReader.readArray();
 
-            for (int i = 0; i < deviceArray.size(); i++)
-            {
-                JsonObject jsonObject = deviceArray.getJsonObject(i);
-                Module iotHubModule = new Module(new RegistryIdentityParser(jsonObject.toString()));
-                moduleList.add(iotHubModule);
-            }
-            return moduleList;
+        Gson gson = new Gson();
+        RegistryIdentityParser[] registryIdentityParsers = gson.fromJson(bodyStr, RegistryIdentityParser[].class);
+
+        List<Module> moduleList = new ArrayList<>();
+        for (int i = 0; i < registryIdentityParsers.length; i++)
+        {
+            moduleList.add(new Module(registryIdentityParsers[i]));
         }
+
+        return moduleList;
     }
 
     /**
