@@ -18,6 +18,7 @@
         <module>service</module>
         <module>iot-e2e-tests</module>
         <module>provisioning</module>
+        <module>deps</module>
     </modules>
     <properties>
         <iot-device-client-artifact-id>iot-device-client</iot-device-client-artifact-id>
