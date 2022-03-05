@@ -437,7 +437,7 @@ public class ModuleGlue
             System.out.printf("calling sendEvent%n");
             try
             {
-                client.sendEvent(msg);
+                client.sendEventAsync(msg, callback, null);
             }
             catch (InterruptedException | TimeoutException e)
             {
