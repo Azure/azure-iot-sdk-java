@@ -255,7 +255,6 @@ public class QueryClientTests extends IntegrationTest
             assertNotNull(job.getMaxExecutionTimeInSeconds());
             assertNotNull(job.getJobStatus());
             assertNotNull(job.getJobStatistics());
-            assertTrue(job.getJobStatistics().getDeviceCount() > 0);
         }
         finally
         {
