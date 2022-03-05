@@ -439,7 +439,7 @@ public class ModuleGlue
             {
                 client.sendEventAsync(msg, callback, null);
             }
-            catch (InterruptedException | TimeoutException e)
+            catch (IllegalStateException e)
             {
                 handler.handle(Future.failedFuture(e));
             }
