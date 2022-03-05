@@ -125,7 +125,7 @@ class HttpsRequestResponseSerializer
         String[] statusLineParts = statusLine.split(SP);
         if (statusLineParts.length != 3)
         {
-            throw new IOException("Status line is not valid.");
+            throw new IOException("Status line is not valid: " + statusLine);
         }
 
         String[] httpVersion = statusLineParts[0].split(ProtocolVersionSeparator);
