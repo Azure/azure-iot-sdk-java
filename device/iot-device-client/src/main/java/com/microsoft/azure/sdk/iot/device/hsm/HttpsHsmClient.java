@@ -241,14 +241,16 @@ public class HttpsHsmClient
             if (httpsRequest.getBody() != null)
             {
                 //append http request body to the request bytes
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                 outputStream.write(requestBytes);
                 outputStream.write(httpsRequest.getBody());
 
+                log.trace("Writing {} bytes to unix domain socket", outputStream.size());
                 unixDomainSocketChannel.write(outputStream.toByteArray());
             }
             else
             {
+                log.trace("Writing {} bytes to unix domain socket", requestBytes.length);
                 unixDomainSocketChannel.write(requestBytes);
             }
 
@@ -274,8 +276,12 @@ public class HttpsHsmClient
         int numRead = channel.read(buf);
         while (numRead >= 0)
         {
+            log.trace("Read {} bytes from unix domain socket", numRead);
+
             // buf may not be filled completely, so take the subArray of bytes sized equal to numRead
             String readChunk = new String(Arrays.copyOfRange(buf, 0, numRead - 1), StandardCharsets.US_ASCII);
+            log.trace("Read chunk of data from unix domain socket:");
+            log.trace("{}", readChunk);
             responseStringBuilder.append(readChunk);
 
             // Read bytes from the channel
