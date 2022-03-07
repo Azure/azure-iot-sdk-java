@@ -141,11 +141,11 @@ public class DirectMethodsTests extends DirectMethodsCommon
 
             if (testInstance.identity instanceof TestModuleIdentity)
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), METHOD_DELAY_IN_MILLISECONDS, options);
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), METHOD_DELAY_IN_MILLISECONDS, options, "String");
             }
             else
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_DELAY_IN_MILLISECONDS, options);
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_DELAY_IN_MILLISECONDS, options, "String");
             }
             assert true;
         }
@@ -165,11 +165,11 @@ public class DirectMethodsTests extends DirectMethodsCommon
         MethodResult result;
         if (testInstance.identity instanceof TestModuleIdentity)
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), METHOD_DELAY_IN_MILLISECONDS, options);
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), METHOD_DELAY_IN_MILLISECONDS, options, "String");
         }
         else
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_DELAY_IN_MILLISECONDS, options);
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_DELAY_IN_MILLISECONDS, options, "String");
         }
 
         // Assert
@@ -199,11 +199,11 @@ public class DirectMethodsTests extends DirectMethodsCommon
 
             if (testInstance.identity instanceof TestModuleIdentity)
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), METHOD_DELAY_IN_MILLISECONDS, options);
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), METHOD_DELAY_IN_MILLISECONDS, options, "");
             }
             else
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_DELAY_IN_MILLISECONDS, options);
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_DELAY_IN_MILLISECONDS, options, "");
             }
         }
         catch (IotHubGatewayTimeoutException e)
@@ -239,11 +239,11 @@ public class DirectMethodsTests extends DirectMethodsCommon
 
             if (testInstance.identity instanceof TestModuleIdentity)
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), METHOD_LOOPBACK, options);
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), METHOD_LOOPBACK, options, "");
             }
             else
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_LOOPBACK, options);
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_LOOPBACK, options, "");
             }
 
             Assert.fail(buildExceptionMessage("Invoking method on device or module that wasn't online should have thrown an exception", testInstance.identity.getClient()));
@@ -329,5 +329,13 @@ public class DirectMethodsTests extends DirectMethodsCommon
         {
             proxyServer.stop();
         }
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void invokeMethodWithDifferentPayloadType() throws Exception
+    {
+        super.openDeviceClientAndMakeEchoCall();
+        super.invokeMethodWithDifferentPayloadType();
     }
 }

@@ -137,7 +137,7 @@ public class MethodParser
      *                  - Otherwise, it is only `payload`.
      * @throws IllegalArgumentException This exception is thrown if the one of the provided information do not fits the requirements.
      */
-    public synchronized void fromJson(String json) throws IllegalArgumentException
+    public synchronized void fromJson(String json, String payloadType) throws IllegalArgumentException
     {
 
         if ((json == null) || json.isEmpty())
@@ -161,7 +161,7 @@ public class MethodParser
                        2.6
                  */
                 this.operation = Operation.payload;
-                this.payload = resolveJsonElement(jsonElement);
+                this.payload = resolveJsonElement(jsonElement, payloadType);
             }
             else if (jsonElement instanceof JsonObject)
             {
@@ -201,7 +201,7 @@ public class MethodParser
                         JsonElement payloadNode = jsonObject.get(PAYLOAD_TAG);
                         if (payloadNode != null)
                         {
-                            payload = resolveJsonElement(payloadNode);
+                            payload = resolveJsonElement(payloadNode, payloadType);
                         }
                     }
                 }
@@ -239,7 +239,7 @@ public class MethodParser
                         JsonElement payloadNode = jsonObject.get(PAYLOAD_TAG);
                         if (payloadNode != null)
                         {
-                            payload = resolveJsonElement(payloadNode);
+                            payload = resolveJsonElement(payloadNode, payloadType);
                         }
                     }
                     else

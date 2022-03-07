@@ -63,8 +63,13 @@ public final class DirectMethod
                             /*
                              **Codes_SRS_DEVICEMETHOD_25_008: [**If the message is of type DirectMethod and DEVICE_OPERATION_METHOD_RECEIVE_REQUEST then user registered device method callback gets invoked providing the user with method name and payload along with the user context. **]**
                              */
+
+                            MethodParser methodParser = new MethodParser();
+                            methodParser.fromJson(new String(methodMessage.getBytes()));
+
                             log.trace("Executing method invocation callback for method name {} for message {}", methodMessage.getMethodName(), methodMessage);
-                            DirectMethodResponse responseData = methodCallback.onMethodInvoked(methodMessage.getMethodName(), methodMessage.getBytes(), deviceMethodCallbackContext);
+//                            DirectMethodResponse responseData = methodCallback.onMethodInvoked(methodMessage.getMethodName(), methodMessage.getBytes(), deviceMethodCallbackContext);
+                            DirectMethodResponse responseData = methodCallback.onMethodInvoked(methodMessage.getMethodName(), methodParser.getPayload(), deviceMethodCallbackContext);
                             log.trace("Method invocation callback returned for method name {} for message {}", methodMessage.getMethodName(), methodMessage);
 
                             /*

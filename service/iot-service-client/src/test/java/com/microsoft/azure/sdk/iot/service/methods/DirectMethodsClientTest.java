@@ -245,7 +245,7 @@ public class DirectMethodsClientTest
                         .methodResponseTimeoutSeconds(testCase.responseTimeoutInSeconds)
                         .build();
 
-                testMethod.invoke(testCase.deviceId, testCase.methodName, options);
+                testMethod.invoke(testCase.deviceId, testCase.methodName, options, "");
                 assertTrue(
                         "Negative case> DeviceId=" + testCase.deviceId +
                         " MethodName=" + testCase.methodName +
@@ -283,7 +283,7 @@ public class DirectMethodsClientTest
                         .methodResponseTimeoutSeconds(testCase.responseTimeoutInSeconds)
                         .build();
 
-                testMethod.invoke(testCase.deviceId, testCase.moduleId, testCase.methodName, options);
+                testMethod.invoke(testCase.deviceId, testCase.moduleId, testCase.methodName, options, "");
                 assertTrue(
                         "Negative case> DeviceId=" + testCase.deviceId +
                                 " ModuleName=" + testCase.moduleId +

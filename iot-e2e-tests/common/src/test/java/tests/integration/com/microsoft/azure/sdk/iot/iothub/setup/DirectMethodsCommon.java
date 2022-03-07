@@ -7,6 +7,10 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 
 import com.azure.core.credential.AzureSasCredential;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
@@ -32,6 +36,8 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
@@ -52,6 +58,7 @@ public class DirectMethodsCommon extends IntegrationTest
     public static final String METHOD_RESET = "reset";
     public static final String METHOD_LOOPBACK = "loopback";
     public static final String METHOD_DELAY_IN_MILLISECONDS = "delayInMilliseconds";
+    public static final String METHOD_ECHO = "echo";
     public static final String METHOD_UNKNOWN = "unknown";
 
     public static final int METHOD_SUCCESS = 200;
@@ -169,16 +176,23 @@ public class DirectMethodsCommon extends IntegrationTest
 
     private String loopback(Object methodData)
     {
-        String payload = new String((byte[])methodData, StandardCharsets.UTF_8).replace("\"", "");
+//        String payload = new String((byte[])methodData, StandardCharsets.UTF_8).replace("\"", "");
+        String payload = new String(methodData.toString().getBytes(StandardCharsets.UTF_8)).replace("\"", "");
         return METHOD_LOOPBACK + ":" + payload;
     }
 
     private String delayInMilliseconds(Object methodData) throws InterruptedException
     {
-        String payload = new String((byte[])methodData, StandardCharsets.UTF_8).replace("\"", "");
+//        String payload = new String((byte[])methodData, StandardCharsets.UTF_8).replace("\"", "");
+        String payload = new String(methodData.toString().getBytes(StandardCharsets.UTF_8)).replace("\"", "");
         long delay = Long.parseLong(payload);
         Thread.sleep(delay);
         return METHOD_DELAY_IN_MILLISECONDS + ":succeed";
+    }
+
+    private Object echo(Object methodData)
+    {
+        return methodData;
     }
 
     public void openDeviceClientAndSubscribeToMethods() throws Exception
@@ -210,6 +224,10 @@ public class DirectMethodsCommon extends IntegrationTest
                             result = delayInMilliseconds(methodData);
                             status = METHOD_SUCCESS;
                             break;
+                        case METHOD_ECHO:
+                            result = (String) echo(methodData);
+                            status = METHOD_SUCCESS;
+                            break;
                         default:
                             result = "unknown:" + methodName;
                             status = METHOD_NOT_DEFINED;
@@ -228,6 +246,44 @@ public class DirectMethodsCommon extends IntegrationTest
             null);
     }
 
+    public void openDeviceClientAndMakeEchoCall() throws Exception
+    {
+        testInstance.setup();
+        this.testInstance.identity.getClient().open(true);
+
+        this.testInstance.identity.getClient().subscribeToMethods(
+                (methodName, methodData, context) ->
+                {
+                    System.out.println("Device invoked " + methodName);
+                    DirectMethodResponse deviceMethodData;
+                    int status;
+                    Object result;
+                    try
+                    {
+                        switch (methodName)
+                        {
+                            case METHOD_ECHO:
+                                result = echo(methodData);
+                                status = METHOD_SUCCESS;
+                                break;
+                            default:
+                                result = "unknown:" + methodName;
+                                status = METHOD_NOT_DEFINED;
+                                break;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        result = e.toString();
+                        status = METHOD_THROWS;
+                    }
+                    deviceMethodData = new DirectMethodResponse(status, result);
+
+                    return deviceMethodData;
+                },
+                null);
+    }
+
     @After
     public void afterTest()
     {
@@ -242,20 +298,69 @@ public class DirectMethodsCommon extends IntegrationTest
                 .payload(PAYLOAD_STRING)
                 .build();
 
+        String payloadType = "String";
         MethodResult result;
         if (testInstance.identity instanceof TestModuleIdentity)
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity)testInstance.identity).getModule().getId(), METHOD_LOOPBACK, options);
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity)testInstance.identity).getModule().getId(), METHOD_LOOPBACK, options, payloadType);
         }
         else
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_LOOPBACK, options);
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_LOOPBACK, options, payloadType);
         }
 
         // Assert
         assertNotNull(result);
         assertEquals((long)METHOD_SUCCESS, (long)result.getStatus());
         assertEquals(METHOD_LOOPBACK + ":" + PAYLOAD_STRING, result.getPayload());
+    }
+
+    protected void invokeMethodWithDifferentPayloadType() throws Exception
+    {
+        // Payload in type of string
+        String payloadString = PAYLOAD_STRING;
+        helper(payloadString);
+
+        // Payload in type of Map
+        Map<String, String> payloadMap = new HashMap<>();
+        payloadMap.put("mapKey", "mapVal");
+        helper(payloadMap);
+
+        // Payload in type of JsonObject
+        JsonObject payloadJsonObject = new JsonObject();
+        payloadJsonObject.addProperty("key", "value");
+
+        JsonParser parser = new JsonParser();
+        JsonElement jsonElement = parser.parse("{\"message\":\"Hi\",\"place\":{\"name\":\"World!\"}}");
+        JsonObject rootObject = jsonElement.getAsJsonObject();
+        payloadJsonObject.add("new", jsonElement);
+        helper(payloadJsonObject);
+    }
+
+    private void helper(Object payload) throws Exception
+    {
+        DirectMethodRequestOptions options =
+                DirectMethodRequestOptions.builder()
+                        .payload(payload)
+                        .build();
+
+        String payloadType = payload.getClass().getSimpleName();
+        MethodResult result;
+        if (testInstance.identity instanceof TestModuleIdentity)
+        {
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity)testInstance.identity).getModule().getId(), METHOD_ECHO, options, payloadType);
+        }
+        else
+        {
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_ECHO, options,payloadType);
+        }
+
+        // Assert
+        assertNotNull(result);
+        assertEquals((long)METHOD_SUCCESS, (long)result.getStatus());
+        assertEquals(options.getPayload().getClass(), result.getPayload().getClass());
+        assertEquals(options.getPayload(), result.getPayload());
+//        System.out.println(result.getPayload());
     }
 
     protected static DirectMethodsClient buildDeviceMethodClientWithAzureSasCredential()
