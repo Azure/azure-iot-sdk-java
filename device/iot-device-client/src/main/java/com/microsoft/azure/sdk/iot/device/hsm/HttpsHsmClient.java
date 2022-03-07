@@ -14,6 +14,7 @@ import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsRequest;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.qpid.proton.reactor.impl.IO;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -215,7 +216,7 @@ public class HttpsHsmClient
         }
         else
         {
-            throw new UnsupportedOperationException("unrecognized URI scheme. Only HTTPS, HTTP and UNIX are supported");
+            throw new UnsupportedOperationException("unrecognized URI scheme \"" + this.scheme + "\". Only HTTPS, HTTP and UNIX are supported");
         }
 
         return response;
@@ -274,6 +275,14 @@ public class HttpsHsmClient
         byte[] buf = new byte[400];
         StringBuilder responseStringBuilder = new StringBuilder();
         int numRead = channel.read(buf);
+
+        // The first read must have at least one byte read, otherwise it is a networking issue
+        if (numRead <= 0)
+        {
+            throw new IOException("Failed to read response from unix domain socket.");
+        }
+
+        // keep reading from the unix domain socket in chunks until no more bytes are read
         while (numRead >= 0)
         {
             log.trace("Read {} bytes from unix domain socket", numRead);
