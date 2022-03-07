@@ -288,7 +288,7 @@ public class HttpsHsmClient
             log.trace("Read {} bytes from unix domain socket", numRead);
 
             // buf may not be filled completely, so take the subArray of bytes sized equal to numRead
-            String readChunk = new String(Arrays.copyOfRange(buf, 0, numRead - 1), StandardCharsets.US_ASCII);
+            String readChunk = new String(Arrays.copyOfRange(buf, 0, numRead), StandardCharsets.US_ASCII);
             log.trace("Read chunk of data from unix domain socket:");
             log.trace("{}", readChunk);
             responseStringBuilder.append(readChunk);
