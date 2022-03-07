@@ -3,8 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpsMessage;
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 import com.microsoft.azure.sdk.iot.device.MessageType;
@@ -19,7 +17,6 @@ import org.apache.qpid.proton.amqp.messaging.Source;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.amqp.transport.ReceiverSettleMode;
 import org.apache.qpid.proton.engine.*;
-import org.apache.qpid.proton.reactor.FlowController;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -28,7 +25,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-public abstract class AmqpsReceiverLinkHandler extends BaseHandler
+abstract class AmqpsReceiverLinkHandler extends BaseHandler
 {
     static final String VERSION_IDENTIFIER_KEY = "com.microsoft:client-version";
     private static final String API_VERSION_KEY = "com.microsoft:api-version";
@@ -272,7 +269,7 @@ public abstract class AmqpsReceiverLinkHandler extends BaseHandler
 
             if (properties.getContentType() != null)
             {
-                iotHubTransportMessage.setContentTypeFinal(properties.getContentType().toString());
+                iotHubTransportMessage.setContentType(properties.getContentType().toString());
             }
         }
 

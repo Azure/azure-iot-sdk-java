@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
+import com.microsoft.azure.sdk.iot.device.ClientConfiguration;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 import com.microsoft.azure.sdk.iot.device.MessageType;
@@ -26,16 +26,16 @@ final class AmqpsTelemetrySenderLinkHandler extends AmqpsSenderLinkHandler
 
     private static final String LINK_TYPE = "telemetry";
 
-    AmqpsTelemetrySenderLinkHandler(Sender sender, AmqpsLinkStateCallback amqpsLinkStateCallback, DeviceClientConfig deviceClientConfig, String linkCorrelationId)
+    AmqpsTelemetrySenderLinkHandler(Sender sender, AmqpsLinkStateCallback amqpsLinkStateCallback, ClientConfiguration clientConfiguration, String linkCorrelationId)
     {
-        super(sender, amqpsLinkStateCallback, linkCorrelationId, deviceClientConfig.getModelId());
+        super(sender, amqpsLinkStateCallback, linkCorrelationId, clientConfiguration.getModelId());
 
-        this.senderLinkAddress = getAddress(deviceClientConfig);
+        this.senderLinkAddress = getAddress(clientConfiguration);
 
-        this.amqpProperties.put(Symbol.getSymbol(VERSION_IDENTIFIER_KEY), deviceClientConfig.getProductInfo().getUserAgentString());
+        this.amqpProperties.put(Symbol.getSymbol(VERSION_IDENTIFIER_KEY), clientConfiguration.getProductInfo().getUserAgentString());
 
-        String deviceId = deviceClientConfig.getDeviceId();
-        String moduleId = deviceClientConfig.getModuleId();
+        String deviceId = clientConfiguration.getDeviceId();
+        String moduleId = clientConfiguration.getModuleId();
         if (moduleId != null && !moduleId.isEmpty())
         {
             this.amqpProperties.put(Symbol.getSymbol(CORRELATION_ID_KEY), Symbol.getSymbol(deviceId + "/" + moduleId));
@@ -46,7 +46,7 @@ final class AmqpsTelemetrySenderLinkHandler extends AmqpsSenderLinkHandler
         }
     }
 
-    static String getTag(DeviceClientConfig clientConfig, String linkCorrelationId)
+    static String getTag(ClientConfiguration clientConfig, String linkCorrelationId)
     {
         String moduleId = clientConfig.getModuleId();
         String deviceId = clientConfig.getDeviceId();
@@ -60,10 +60,10 @@ final class AmqpsTelemetrySenderLinkHandler extends AmqpsSenderLinkHandler
         }
     }
 
-    private static String getAddress(DeviceClientConfig deviceClientConfig)
+    private static String getAddress(ClientConfiguration clientConfiguration)
     {
-        String moduleId = deviceClientConfig.getModuleId();
-        String deviceId = deviceClientConfig.getDeviceId();
+        String moduleId = clientConfiguration.getModuleId();
+        String deviceId = clientConfiguration.getDeviceId();
         if (moduleId != null && !moduleId.isEmpty())
         {
             return String.format(MODULE_SENDER_LINK_ENDPOINT_PATH, deviceId, moduleId);

@@ -4,10 +4,8 @@
 package com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
-import com.microsoft.azure.sdk.iot.device.IotHubResponseCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportPacket;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import org.junit.Test;
@@ -33,8 +31,6 @@ public class IotHubTransportPacketTest
     Message mockMsg;
     @Mocked
     IotHubEventCallback mockCallback;
-    @Mocked
-    IotHubResponseCallback mockResponseCallback;
 
     // Tests_SRS_IOTHUBTRANSPORTPACKET_11_001: [The constructor shall save the message, callback, status, startTimeMillis, and callback context.]
     // Tests_SRS_IOTHUBTRANSPORTPACKET_11_002: [The function shall return the message given in the constructor.]
@@ -45,7 +41,7 @@ public class IotHubTransportPacketTest
         final Map<String, Object> context = new HashMap<>();
 
         //act
-        IotHubTransportPacket packet = new IotHubTransportPacket(mockMsg, mockCallback, context, IotHubStatusCode.OK_EMPTY, 10, null);
+        IotHubTransportPacket packet = new IotHubTransportPacket(mockMsg, mockCallback, context, IotHubStatusCode.OK, 10, null);
         Message testMsg = packet.getMessage();
 
         //assert
@@ -104,7 +100,7 @@ public class IotHubTransportPacketTest
         context.put(key, value);
 
         //act
-        IotHubTransportPacket packet = new IotHubTransportPacket(mockMsg, mockCallback, context, IotHubStatusCode.OK_EMPTY, 10, null);
+        IotHubTransportPacket packet = new IotHubTransportPacket(mockMsg, mockCallback, context, IotHubStatusCode.OK, 10, null);
         Map<String, Object> testContext = (Map<String, Object>) packet.getContext();
 
         //assert
@@ -137,7 +133,7 @@ public class IotHubTransportPacketTest
         long expectedStartTime = 1230;
 
         //act
-        IotHubTransportPacket packet = new IotHubTransportPacket(mockMsg, mockCallback, new Object(), IotHubStatusCode.OK_EMPTY, expectedStartTime, null);
+        IotHubTransportPacket packet = new IotHubTransportPacket(mockMsg, mockCallback, new Object(), IotHubStatusCode.OK, expectedStartTime, null);
         long actualStartTime = packet.getStartTimeMillis();
 
         //assert
@@ -150,7 +146,7 @@ public class IotHubTransportPacketTest
     {
         //arrange
         final int expectedRetryAttempt = 123;
-        IotHubTransportPacket packet = new IotHubTransportPacket(mockMsg, mockCallback, new Object(), IotHubStatusCode.OK_EMPTY, 10, null);
+        IotHubTransportPacket packet = new IotHubTransportPacket(mockMsg, mockCallback, new Object(), IotHubStatusCode.OK, 10, null);
         Deencapsulation.setField(packet, "currentRetryAttempt", expectedRetryAttempt);
 
         //act
@@ -182,7 +178,7 @@ public class IotHubTransportPacketTest
     public void constructorThrowsForNullMessage()
     {
         //act
-        new IotHubTransportPacket(null, mockCallback, new Object(), IotHubStatusCode.OK_EMPTY, 1, null);
+        new IotHubTransportPacket(null, mockCallback, new Object(), IotHubStatusCode.OK, 1, null);
     }
 
     // Tests_SRS_IOTHUBTRANSPORTPACKET_34_010: [If startTimeMillis is 0 or negative, this function shall throw an IllegalArgumentException.]
@@ -190,7 +186,7 @@ public class IotHubTransportPacketTest
     public void constructorThrowsForZeroMillisecondsStartTime()
     {
         //act
-        new IotHubTransportPacket(mockMsg, mockCallback, new Object(), IotHubStatusCode.OK_EMPTY, 0, null);
+        new IotHubTransportPacket(mockMsg, mockCallback, new Object(), IotHubStatusCode.OK, 0, null);
     }
 
     // Tests_SRS_IOTHUBTRANSPORTPACKET_34_010: [If startTimeMillis is 0 or negative, this function shall throw an IllegalArgumentException.]
@@ -198,6 +194,6 @@ public class IotHubTransportPacketTest
     public void constructorThrowsForNegativeMillisecondsStartTime()
     {
         //act
-        new IotHubTransportPacket(mockMsg, mockCallback, new Object(), IotHubStatusCode.OK_EMPTY, -1, null);
+        new IotHubTransportPacket(mockMsg, mockCallback, new Object(), IotHubStatusCode.OK, -1, null);
     }
 }

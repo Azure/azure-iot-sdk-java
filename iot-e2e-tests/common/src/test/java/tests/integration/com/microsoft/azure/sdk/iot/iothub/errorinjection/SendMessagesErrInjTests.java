@@ -182,7 +182,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
 
         errorInjectionTestFlowNoDisconnect(
                 ErrorInjectionHelper.throttledConnectionErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec),
-                IotHubStatusCode.OK_EMPTY,
+                IotHubStatusCode.OK,
                 false);
 
     }
@@ -301,15 +301,13 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         {
             testInstance.identity.getClient().setRetryPolicy(new NoRetry());
         }
-        testInstance.identity.getClient().open();
+        testInstance.identity.getClient().open(false);
 
         // Act
-        MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage,IotHubStatusCode.OK_EMPTY);
+        MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage,IotHubStatusCode.OK);
         IotHubServicesCommon.sendMessageAndWaitForResponse(
                 testInstance.identity.getClient(),
                 errorInjectionMsgAndRet,
-                RETRY_MILLISECONDS,
-                SEND_TIMEOUT_MILLISECONDS,
                 this.testInstance.protocol);
 
         // time for the error injection to take effect on the service side
@@ -319,10 +317,8 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         IotHubServicesCommon.sendMessageAndWaitForResponse(
                 testInstance.identity.getClient(),
                 normalMessageAndExpectedResult,
-                RETRY_MILLISECONDS,
-                SEND_TIMEOUT_MILLISECONDS,
                 this.testInstance.protocol);
 
-        testInstance.identity.getClient().closeNow();
+        testInstance.identity.getClient().close();
     }
 }

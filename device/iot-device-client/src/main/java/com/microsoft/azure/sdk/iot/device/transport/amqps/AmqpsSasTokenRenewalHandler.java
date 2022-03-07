@@ -11,16 +11,16 @@ import org.apache.qpid.proton.reactor.Reactor;
 
 /**
  * This class is responsible for proactively renewing sas tokens for a single device. When multiplexing, there will
- * be one instance of this class per device. It will periodically execute the onTimerTask logic to send a renewed sas token,
+ * be one instance of this class per device. It will periodically onStatusChanged the onTimerTask logic to send a renewed sas token,
  * and then will schedule the next timer task appropriately.
  */
 @Slf4j
-public class AmqpsSasTokenRenewalHandler extends BaseHandler implements AuthenticationMessageCallback
+class AmqpsSasTokenRenewalHandler extends BaseHandler implements AuthenticationMessageCallback
 {
     //If the sas token renewal cannot be sent, try again in this many milliseconds
     private static final int RETRY_INTERVAL_MILLISECONDS = 5000;
 
-    final AmqpsCbsSessionHandler amqpsCbsSessionHandler;
+    private final AmqpsCbsSessionHandler amqpsCbsSessionHandler;
     final AmqpsSessionHandler amqpsSessionHandler;
     private boolean isClosed;
     private AmqpsSasTokenRenewalHandler nextToAuthenticate;
@@ -57,7 +57,7 @@ public class AmqpsSasTokenRenewalHandler extends BaseHandler implements Authenti
         if (!isClosed)
         {
             log.debug("Sending authentication message for device {}", amqpsSessionHandler.getDeviceId());
-            amqpsCbsSessionHandler.sendAuthenticationMessage(amqpsSessionHandler.getDeviceClientConfig(), this);
+            amqpsCbsSessionHandler.sendAuthenticationMessage(amqpsSessionHandler.getClientConfiguration(), this);
 
             scheduleRenewal(reactor);
         }
@@ -104,7 +104,7 @@ public class AmqpsSasTokenRenewalHandler extends BaseHandler implements Authenti
     @SuppressWarnings("ConstantConditions")
     private void scheduleRenewal(Reactor reactor)
     {
-        int sasTokenRenewalPeriod = this.amqpsSessionHandler.getDeviceClientConfig().getSasTokenAuthentication().getMillisecondsBeforeProactiveRenewal();
+        int sasTokenRenewalPeriod = this.amqpsSessionHandler.getClientConfiguration().getSasTokenAuthentication().getMillisecondsBeforeProactiveRenewal();
 
         log.trace("Scheduling proactive sas token renewal for device {} in {} milliseconds", this.amqpsSessionHandler.getDeviceId(), sasTokenRenewalPeriod);
 

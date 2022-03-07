@@ -5,14 +5,12 @@
 
 package com.microsoft.azure.sdk.iot.device.auth;
 
-import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import mockit.*;
 import org.junit.Test;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import java.security.cert.CertificateException;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
@@ -75,7 +73,6 @@ public class IotHubAuthenticationProviderTest
         IotHubAuthenticationProvider iotHubAuthenticationProvider = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, mockedSSLContext);
 
         //assert
-        assertFalse((boolean) Deencapsulation.getField(iotHubAuthenticationProvider, "sslContextNeedsUpdate"));
         assertEquals(expectedHostname, Deencapsulation.getField(iotHubAuthenticationProvider, "hostname"));
         assertEquals(expectedGatewayHostname, Deencapsulation.getField(iotHubAuthenticationProvider, "gatewayHostname"));
         assertEquals(expectedDeviceId, Deencapsulation.getField(iotHubAuthenticationProvider, "deviceId"));
@@ -92,31 +89,23 @@ public class IotHubAuthenticationProviderTest
     public void gettersWork()
     {
         //arrange
-        String expectedCert = "some cert";
-        String expectedCertPath = "some/path";
         IotHubAuthenticationProvider iotHubAuthenticationProvider = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId);
-        Deencapsulation.setField(iotHubAuthenticationProvider, "iotHubTrustedCert", expectedCert);
-        Deencapsulation.setField(iotHubAuthenticationProvider, "pathToIotHubTrustedCert", expectedCertPath);
 
         //act
         String actualHostName = iotHubAuthenticationProvider.getHostname();
         String actualGatewayHostname = iotHubAuthenticationProvider.getGatewayHostname();
         String actualDeviceId = iotHubAuthenticationProvider.getDeviceId();
         String actualModuleId = iotHubAuthenticationProvider.getModuleId();
-        String actualCert = iotHubAuthenticationProvider.getIotHubTrustedCert();
-        String actualCertPath = iotHubAuthenticationProvider.getPathToIotHubTrustedCert();
 
         //assert
         assertEquals(expectedHostname, actualHostName);
         assertEquals(expectedGatewayHostname, actualGatewayHostname);
         assertEquals(expectedDeviceId, actualDeviceId);
         assertEquals(expectedModuleId, actualModuleId);
-        assertEquals(expectedCert, actualCert);
-        assertEquals(expectedCertPath, actualCertPath);
     }
 
     // Tests_SRS_AUTHENTICATIONPROVIDER_34_006: [If the provided hostname is null, this function shall throw an IllegalArgumentException.]
-    @Test (expected = IllegalArgumentException.class)
+    @Test (expected = NullPointerException.class)
     public void constructorThrowsForNullHostname()
     {
         //act
@@ -124,7 +113,7 @@ public class IotHubAuthenticationProviderTest
     }
 
     // Tests_SRS_AUTHENTICATIONPROVIDER_34_007: [If the provided device id is null, this function shall throw an IllegalArgumentException.]
-    @Test (expected = IllegalArgumentException.class)
+    @Test (expected = NullPointerException.class)
     public void constructorThrowsForNullDeviceId()
     {
         //act
@@ -133,19 +122,19 @@ public class IotHubAuthenticationProviderTest
 
     //Codes_SRS_AUTHENTICATIONPROVIDER_34_012: [If a CertificateException, NoSuchAlgorithmException, KeyManagementException, or KeyStoreException is thrown during this function, this function shall throw an IOException.]
     //Codes_SRS_AUTHENTICATIONPROVIDER_34_010: [If this object's ssl context has not been generated yet or if it needs to be re-generated, this function shall regenerate the ssl context.]
-    @Test (expected = IOException.class)
+    @Test (expected = SecurityProviderException.class)
     public void getSSLContextWrapsExceptions() throws IOException
     {
         //arrange
-        IotHubAuthenticationProvider sasAuth = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId);
-
         new NonStrictExpectations()
         {
             {
                 Deencapsulation.newInstance(IotHubSSLContext.class);
-                result = new CertificateException();
+                result = new SecurityProviderException("");
             }
         };
+
+        IotHubAuthenticationProvider sasAuth = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId);
 
         //act
         sasAuth.getSSLContext();
@@ -156,8 +145,6 @@ public class IotHubAuthenticationProviderTest
     public void getSSLContextSuccess() throws IOException
     {
         //arrange
-        IotHubAuthenticationProvider sasAuth = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId);
-
         new NonStrictExpectations()
         {
             {
@@ -169,112 +156,12 @@ public class IotHubAuthenticationProviderTest
             }
         };
 
+        IotHubAuthenticationProvider sasAuth = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId);
+
         //act
         SSLContext actualSSLContext = sasAuth.getSSLContext();
 
         //assert
         assertEquals(mockedSSLContext, actualSSLContext);
-    }
-
-    //Tests_SRS_AUTHENTICATIONPROVIDER_34_059: [This function shall save the provided pathToCertificate.]
-    //Tests_SRS_AUTHENTICATIONPROVIDER_34_030: [If the provided pathToCertificate is different than the saved path, this function shall set sslContextNeedsRenewal to true.]
-    @Test
-    public void setPathToCertificateWorks() throws IOException
-    {
-        //arrange
-        IotHubAuthenticationProvider auth = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId);
-        String pathToCert = "somePath";
-
-        //act
-        auth.setPathToIotHubTrustedCert(pathToCert);
-
-        //assert
-        String actualPathToCert = auth.getPathToIotHubTrustedCert();
-        assertEquals(pathToCert, actualPathToCert);
-        boolean sslContextNeedsRenewal = Deencapsulation.getField(auth, "sslContextNeedsUpdate");
-        assertTrue(sslContextNeedsRenewal);
-    }
-
-    //Tests_SRS_AUTHENTICATIONPROVIDER_34_064: [This function shall save the provided userCertificateString.]
-    //Tests_SRS_AUTHENTICATIONPROVIDER_34_031: [If the provided certificate is different than the saved certificate, this function shall set sslContextNeedsRenewal to true.]
-    @Test
-    public void setCertificateWorks() throws IOException
-    {
-        //arrange
-        IotHubAuthenticationProvider auth = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId);
-        String cert = "somePath";
-
-        //act
-        auth.setIotHubTrustedCert(cert);
-
-        //assert
-        String actualCert = auth.getIotHubTrustedCert();
-        assertEquals(cert, actualCert);
-        boolean sslContextNeedsRenewal = Deencapsulation.getField(auth, "sslContextNeedsUpdate");
-        assertTrue(sslContextNeedsRenewal);
-    }
-
-    // Tests_SRS_AUTHENTICATIONPROVIDER_34_019: [If this has a saved iotHubTrustedCert, this function shall generate a new IotHubSSLContext object with that saved cert as the trusted cert.]
-    @Test
-    public void generateSSLContextUsesSavedTrustedCert()
-    {
-        //arrange
-        final String expectedCert = "someTrustedCert";
-        IotHubAuthenticationProvider auth = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId);
-        auth.setIotHubTrustedCert(expectedCert);
-
-        //act
-        Deencapsulation.invoke(auth, "generateSSLContext");
-
-        //assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.newInstance(IotHubSSLContext.class, new Class[] {String.class, boolean.class}, expectedCert, false);
-                times = 1;
-            }
-        };
-    }
-
-    // Tests_SRS_AUTHENTICATIONPROVIDER_34_020: [If this has a saved path to a iotHubTrustedCert, this function shall generate a new IotHubSSLContext object with that saved cert path as the trusted cert.]
-    @Test
-    public void generateSSLContextUsesSavedTrustedCertPath()
-    {
-        //arrange
-        final String expectedCertPath = "someTrustedCertPath";
-        IotHubAuthenticationProvider auth = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId);
-        auth.setPathToIotHubTrustedCert(expectedCertPath);
-
-        //act
-        Deencapsulation.invoke(auth, "generateSSLContext");
-
-        //assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.newInstance(IotHubSSLContext.class, new Class[] {String.class, boolean.class}, expectedCertPath, true);
-                times = 1;
-            }
-        };
-    }
-    
-    // Tests_SRS_AUTHENTICATIONPROVIDER_34_021: [If this has no saved iotHubTrustedCert or path, This function shall create and save a new default IotHubSSLContext object.]
-    @Test
-    public void generateSSLContextGeneratesDefaultIotHubSSLContext()
-    {
-        //arrange
-        IotHubAuthenticationProvider auth = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId);
-
-        //act
-        Deencapsulation.invoke(auth, "generateSSLContext");
-
-        //assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.newInstance(IotHubSSLContext.class);
-                times = 1;
-            }
-        };
     }
 }

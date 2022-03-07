@@ -11,7 +11,6 @@ import com.microsoft.azure.sdk.iot.device.exceptions.*;
 public enum IotHubStatusCode
 {
     OK,
-    OK_EMPTY,
     BAD_FORMAT,
     UNAUTHORIZED,
     TOO_MANY_DEVICES,
@@ -31,7 +30,6 @@ public enum IotHubStatusCode
         switch (statusCode)
         {
             case OK:
-            case OK_EMPTY:
             case MESSAGE_CANCELLED_ONCLOSE:
             case MESSAGE_EXPIRED:
                 transportException = null;
@@ -85,15 +83,12 @@ public enum IotHubStatusCode
      */
     public static IotHubStatusCode getIotHubStatusCode(int httpsStatus)
     {
-        // Codes_SRS_IOTHUBSTATUSCODE_11_001: [The function shall convert the given HTTPS status code to the corresponding IoT Hub status code.]
         IotHubStatusCode iotHubStatus;
         switch (httpsStatus)
         {
             case 200:
-                iotHubStatus = OK;
-                break;
             case 204:
-                iotHubStatus = OK_EMPTY;
+                iotHubStatus = OK;
                 break;
             case 400:
                 iotHubStatus = BAD_FORMAT;
@@ -123,7 +118,6 @@ public enum IotHubStatusCode
                 iotHubStatus = SERVER_BUSY;
                 break;
             default:
-                // Codes_SRS_IOTHUBSTATUSCODE_11_002: [If the given HTTPS status code does not map to an IoT Hub status code, the function return status code ERROR.]
                 iotHubStatus = ERROR;
         }
 

@@ -6,16 +6,17 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 
+import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.ProxySettings;
 import com.microsoft.azure.sdk.iot.device.SasTokenProvider;
-import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
@@ -72,8 +73,8 @@ public class SendMessagesCommon extends IntegrationTest
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-        hostName = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString).getHostName();
+        registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
+        hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString).getHostName();
 
         List inputs = new ArrayList(Arrays.asList(
                 new Object[][]
@@ -124,15 +125,6 @@ public class SendMessagesCommon extends IntegrationTest
         return inputs;
     }
 
-    //How much sequential connections each device will open and close in the multithreaded test.
-    protected static final Integer NUM_CONNECTIONS_PER_DEVICE = 5;
-
-    //How much devices the multithreaded test will create in parallel.
-    protected static final Integer MAX_DEVICE_PARALLEL = 3;
-
-    //How many keys each message will cary.
-    protected static final Integer NUM_KEYS_PER_MESSAGE = 3;
-
     protected static final Integer NUM_SMALL_MESSAGES = 50;
 
     // Max IoT Hub message size is 256 kb, but that includes headers, not just payload
@@ -171,7 +163,7 @@ public class SendMessagesCommon extends IntegrationTest
     //How much messages each device will send to the hub for each connection.
     protected static final Integer NUM_MESSAGES_PER_CONNECTION = 6;
 
-    protected static RegistryManager registryManager;
+    protected static RegistryClient registryClient;
     protected static HttpProxyServer proxyServer;
     protected static String testProxyHostname = "127.0.0.1";
     protected static int testProxyPort = 8899;
@@ -191,15 +183,7 @@ public class SendMessagesCommon extends IntegrationTest
     @BeforeClass
     public static void classSetup()
     {
-        try
-        {
-            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-            fail("Unexpected exception encountered");
-        }
+        registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
     }
 
     @BeforeClass
@@ -223,8 +207,6 @@ public class SendMessagesCommon extends IntegrationTest
         public TestIdentity identity;
         public AuthenticationType authenticationType;
         public ClientType clientType;
-        public String publicKeyCert;
-        public String privateKey;
         public String x509Thumbprint;
         public boolean useHttpProxy;
 
@@ -233,15 +215,13 @@ public class SendMessagesCommon extends IntegrationTest
             this.protocol = protocol;
             this.authenticationType = authenticationType;
             this.clientType = clientType;
-            this.publicKeyCert = x509CertificateGenerator.getPublicCertificate();
-            this.privateKey = x509CertificateGenerator.getPrivateKey();
             this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
             this.useHttpProxy = useHttpProxy;
         }
 
         public void setup() throws Exception
         {
-            SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCert, privateKey);
+            SSLContext sslContext = SSLContextBuilder.buildSSLContext(x509CertificateGenerator.getX509Certificate(), x509CertificateGenerator.getPrivateKey());
             setup(sslContext);
         }
 
@@ -255,38 +235,33 @@ public class SendMessagesCommon extends IntegrationTest
 
         public void setup(SSLContext customSSLContext, boolean useCustomSasTokenProvider) throws Exception
         {
+            ClientOptions.ClientOptionsBuilder optionsBuilder = ClientOptions.builder();
+            if (this.useHttpProxy)
+            {
+                Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
+                optionsBuilder.proxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass));
+            }
+
             if (clientType == ClientType.DEVICE_CLIENT)
             {
-                this.identity = Tools.getTestDevice(iotHubConnectionString, this.protocol, this.authenticationType, false);
+                this.identity = Tools.getTestDevice(iotHubConnectionString, this.protocol, this.authenticationType, false, optionsBuilder);
 
                 if (customSSLContext != null)
                 {
-                    DeviceClient clientWithCustomSSLContext = new DeviceClient(registryManager.getDeviceConnectionString(testInstance.identity.getDevice()), protocol, customSSLContext);
+                    ClientOptions options = ClientOptions.builder().sslContext(customSSLContext).build();
+                    DeviceClient clientWithCustomSSLContext = new DeviceClient(Tools.getDeviceConnectionString(iotHubConnectionString, testInstance.identity.getDevice()), protocol, options);
                     ((TestDeviceIdentity)this.identity).setDeviceClient(clientWithCustomSSLContext);
                 }
                 else if (useCustomSasTokenProvider)
                 {
-                    SasTokenProvider sasTokenProvider = new SasTokenProviderImpl(registryManager.getDeviceConnectionString(this.identity.getDevice()));
+                    SasTokenProvider sasTokenProvider = new SasTokenProviderImpl(Tools.getDeviceConnectionString(iotHubConnectionString, this.identity.getDevice()));
                     DeviceClient clientWithCustomSasTokenProvider = new DeviceClient(hostName, testInstance.identity.getDeviceId(), sasTokenProvider, protocol, null);
                     ((TestDeviceIdentity)this.identity).setDeviceClient(clientWithCustomSasTokenProvider);
                 }
             }
             else if (clientType == ClientType.MODULE_CLIENT)
             {
-                this.identity = Tools.getTestModule(iotHubConnectionString, this.protocol, this.authenticationType , false);
-            }
-
-            if ((this.protocol == AMQPS || this.protocol == AMQPS_WS) && this.authenticationType == SAS)
-            {
-                this.identity.getClient().setOption("SetAmqpOpenAuthenticationSessionTimeout", AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS);
-                this.identity.getClient().setOption("SetAmqpOpenDeviceSessionsTimeout", AMQP_DEVICE_SESSION_TIMEOUT_SECONDS);
-            }
-
-            if (this.useHttpProxy)
-            {
-                Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-                ProxySettings proxySettings = new ProxySettings(testProxy, testProxyUser, testProxyPass);
-                this.identity.getClient().setProxySettings(proxySettings);
+                this.identity = Tools.getTestModule(iotHubConnectionString, this.protocol, this.authenticationType , false, optionsBuilder);
             }
 
             buildMessageLists();
@@ -294,16 +269,9 @@ public class SendMessagesCommon extends IntegrationTest
 
         public void dispose()
         {
-            try
+            if (this.identity != null && this.identity.getClient() != null)
             {
-                if (this.identity != null && this.identity.getClient() != null)
-                {
-                    this.identity.getClient().closeNow();
-                }
-            }
-            catch (IOException e)
-            {
-                log.error("Failed to close client during tear down", e);
+                this.identity.getClient().close();
             }
 
             Tools.disposeTestIdentity(this.identity, iotHubConnectionString);
@@ -366,7 +334,7 @@ public class SendMessagesCommon extends IntegrationTest
         public void openConnection() throws IOException, URISyntaxException
         {
             client = new DeviceClient(connString, protocol);
-            client.open();
+            client.open(false);
         }
 
         public void sendMessages()
@@ -383,7 +351,7 @@ public class SendMessagesCommon extends IntegrationTest
                     }
 
                     Success messageSent = new Success();
-                    EventCallback callback = new EventCallback(IotHubStatusCode.OK_EMPTY);
+                    EventCallback callback = new EventCallback(IotHubStatusCode.OK);
                     client.sendEventAsync(msgSend, callback, messageSent);
 
                     long startTime = System.currentTimeMillis();
@@ -396,9 +364,9 @@ public class SendMessagesCommon extends IntegrationTest
                         }
                     }
 
-                    if (messageSent.getCallbackStatusCode() != IotHubStatusCode.OK_EMPTY)
+                    if (messageSent.getCallbackStatusCode() != IotHubStatusCode.OK)
                     {
-                        Assert.fail("Sending message over AMQPS protocol failed: expected OK_EMPTY but received " + messageSent.getCallbackStatusCode());
+                        Assert.fail("Sending message over AMQPS protocol failed: expected OK but received " + messageSent.getCallbackStatusCode());
                     }
                 }
                 catch (Exception e)
@@ -410,7 +378,7 @@ public class SendMessagesCommon extends IntegrationTest
 
         public void closeConnection() throws IOException
         {
-            client.closeNow();
+            client.close();
         }
     }
 
@@ -436,7 +404,7 @@ public class SendMessagesCommon extends IntegrationTest
         LARGE_MESSAGES_TO_SEND = new ArrayList<>();
         MULTIPLE_SMALL_MESSAGES_TO_SEND = new ArrayList<>();
 
-        MessageAndResult normalMessageAndExpectedResult = new MessageAndResult(new Message("test message"), IotHubStatusCode.OK_EMPTY);
+        MessageAndResult normalMessageAndExpectedResult = new MessageAndResult(new Message("test message"), IotHubStatusCode.OK);
         for (int i = 0; i < NUM_MESSAGES_PER_CONNECTION; i++)
         {
             //error injection should take place in the middle of normal communications
@@ -444,43 +412,43 @@ public class SendMessagesCommon extends IntegrationTest
             {
                 //messages that tests should recover from
                 Message tcpConnectionDropErrorInjectionMessage = ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec);
-                TCP_CONNECTION_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(tcpConnectionDropErrorInjectionMessage, IotHubStatusCode.OK_EMPTY));
+                TCP_CONNECTION_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(tcpConnectionDropErrorInjectionMessage, IotHubStatusCode.OK));
 
                 Message amqpConnectionDropErrorInjectionMessage = ErrorInjectionHelper.amqpsConnectionDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec);
-                AMQP_CONNECTION_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpConnectionDropErrorInjectionMessage, IotHubStatusCode.OK_EMPTY));
+                AMQP_CONNECTION_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpConnectionDropErrorInjectionMessage, IotHubStatusCode.OK));
 
                 Message amqpSessionDropErrorInjectionMessage = ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec);
-                AMQP_SESSION_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpSessionDropErrorInjectionMessage, IotHubStatusCode.OK_EMPTY));
+                AMQP_SESSION_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpSessionDropErrorInjectionMessage, IotHubStatusCode.OK));
 
                 Message amqpCbsRequestLinkDropErrorInjectionMessage = ErrorInjectionHelper.amqpsCBSReqLinkDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec);
-                AMQP_CBS_REQUEST_LINK_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpCbsRequestLinkDropErrorInjectionMessage, IotHubStatusCode.OK_EMPTY));
+                AMQP_CBS_REQUEST_LINK_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpCbsRequestLinkDropErrorInjectionMessage, IotHubStatusCode.OK));
 
                 Message amqpCbsResponseLinkDropErrorInjectionMessage = ErrorInjectionHelper.amqpsCBSRespLinkDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec);
-                AMQP_CBS_RESPONSE_LINK_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpCbsResponseLinkDropErrorInjectionMessage, IotHubStatusCode.OK_EMPTY));
+                AMQP_CBS_RESPONSE_LINK_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpCbsResponseLinkDropErrorInjectionMessage, IotHubStatusCode.OK));
 
                 Message amqpC2DLinkDropErrorInjectionMessage = ErrorInjectionHelper.amqpsC2DLinkDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec);
-                AMQP_C2D_LINK_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpC2DLinkDropErrorInjectionMessage, IotHubStatusCode.OK_EMPTY));
+                AMQP_C2D_LINK_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpC2DLinkDropErrorInjectionMessage, IotHubStatusCode.OK));
 
                 Message amqpD2CLinkDropErrorInjectionMessage = ErrorInjectionHelper.amqpsD2CTelemetryLinkDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec);
-                AMQP_D2C_LINK_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpD2CLinkDropErrorInjectionMessage, IotHubStatusCode.OK_EMPTY));
+                AMQP_D2C_LINK_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpD2CLinkDropErrorInjectionMessage, IotHubStatusCode.OK));
 
                 Message amqpMethodReqLinkDropErrorInjectionMessage = ErrorInjectionHelper.amqpsMethodReqLinkDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec);
-                AMQP_METHOD_REQ_LINK_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpMethodReqLinkDropErrorInjectionMessage, IotHubStatusCode.OK_EMPTY));
+                AMQP_METHOD_REQ_LINK_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpMethodReqLinkDropErrorInjectionMessage, IotHubStatusCode.OK));
 
                 Message amqpMethodRespLinkDropErrorInjectionMessage = ErrorInjectionHelper.amqpsMethodRespLinkDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec);
-                AMQP_METHOD_RESP_LINK_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpMethodRespLinkDropErrorInjectionMessage, IotHubStatusCode.OK_EMPTY));
+                AMQP_METHOD_RESP_LINK_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpMethodRespLinkDropErrorInjectionMessage, IotHubStatusCode.OK));
 
                 Message amqpTwinReqLinkDropErrorInjectionMessage = ErrorInjectionHelper.amqpsTwinReqLinkDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec);
-                AMQP_TWIN_REQ_LINK_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpTwinReqLinkDropErrorInjectionMessage, IotHubStatusCode.OK_EMPTY));
+                AMQP_TWIN_REQ_LINK_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpTwinReqLinkDropErrorInjectionMessage, IotHubStatusCode.OK));
 
                 Message amqpTwinRespLinkDropErrorInjectionMessage = ErrorInjectionHelper.amqpsTwinRespLinkDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec);
-                AMQP_TWIN_RESP_LINK_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpTwinRespLinkDropErrorInjectionMessage, IotHubStatusCode.OK_EMPTY));
+                AMQP_TWIN_RESP_LINK_DROP_MESSAGES_TO_SEND.add(new MessageAndResult(amqpTwinRespLinkDropErrorInjectionMessage, IotHubStatusCode.OK));
 
                 Message amqpGracefulShutdownErrorInjectionMessage = ErrorInjectionHelper.amqpsGracefulShutdownErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec);
-                AMQP_GRACEFUL_SHUTDOWN_MESSAGES_TO_SEND.add(new MessageAndResult(amqpGracefulShutdownErrorInjectionMessage, IotHubStatusCode.OK_EMPTY));
+                AMQP_GRACEFUL_SHUTDOWN_MESSAGES_TO_SEND.add(new MessageAndResult(amqpGracefulShutdownErrorInjectionMessage, IotHubStatusCode.OK));
 
                 Message mqttGracefulShutdownErrorInjectionMessage = ErrorInjectionHelper.mqttGracefulShutdownErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec);
-                MQTT_GRACEFUL_SHUTDOWN_MESSAGES_TO_SEND.add(new MessageAndResult(mqttGracefulShutdownErrorInjectionMessage, IotHubStatusCode.OK_EMPTY));
+                MQTT_GRACEFUL_SHUTDOWN_MESSAGES_TO_SEND.add(new MessageAndResult(mqttGracefulShutdownErrorInjectionMessage, IotHubStatusCode.OK));
             }
             else
             {
@@ -499,12 +467,12 @@ public class SendMessagesCommon extends IntegrationTest
                 MQTT_GRACEFUL_SHUTDOWN_MESSAGES_TO_SEND.add(normalMessageAndExpectedResult);
             }
 
-            NORMAL_MESSAGES_TO_SEND.add(new MessageAndResult(new Message("test message" + UUID.randomUUID() ), IotHubStatusCode.OK_EMPTY));
-            LARGE_MESSAGES_TO_SEND.add(new MessageAndResult(new Message(new byte[MAX_MESSAGE_PAYLOAD_SIZE]), IotHubStatusCode.OK_EMPTY));
+            NORMAL_MESSAGES_TO_SEND.add(new MessageAndResult(new Message("test message" + UUID.randomUUID() ), IotHubStatusCode.OK));
+            LARGE_MESSAGES_TO_SEND.add(new MessageAndResult(new Message(new byte[MAX_MESSAGE_PAYLOAD_SIZE]), IotHubStatusCode.OK));
         }
 
         for (int i = 0 ; i < NUM_SMALL_MESSAGES; i++){
-            MULTIPLE_SMALL_MESSAGES_TO_SEND.add(new MessageAndResult(new Message("test message" + UUID.randomUUID() ), IotHubStatusCode.OK_EMPTY));
+            MULTIPLE_SMALL_MESSAGES_TO_SEND.add(new MessageAndResult(new Message("test message" + UUID.randomUUID() ), IotHubStatusCode.OK));
         }
     }
 

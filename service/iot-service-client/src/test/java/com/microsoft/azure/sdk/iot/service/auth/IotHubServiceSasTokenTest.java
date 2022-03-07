@@ -5,9 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service.auth;
 
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import mockit.Deencapsulation;
 import mockit.Expectations;
 import org.junit.Test;
@@ -55,7 +52,7 @@ public class IotHubServiceSasTokenTest
         String sharedAccessKey = encodeBase64String("1234567890abcdefghijklmnopqrstvwxyz=".getBytes(StandardCharsets.UTF_8));
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
 
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
 
         // Assert
         new Expectations()
@@ -95,7 +92,7 @@ public class IotHubServiceSasTokenTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = encodeBase64String("1234567890abcdefghijklmnopqrstvwxyz=".getBytes(StandardCharsets.UTF_8));
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
 
         // Act
         IotHubServiceSasToken iotHubServiceSasToken = new IotHubServiceSasToken(iotHubConnectionString);
@@ -121,7 +118,7 @@ public class IotHubServiceSasTokenTest
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
 
         // Act
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         Deencapsulation.setField(iotHubConnectionString, "hostName", null);
         IotHubServiceSasToken iotHubServiceSasToken = new IotHubServiceSasToken(iotHubConnectionString);
     }

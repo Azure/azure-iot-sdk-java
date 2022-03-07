@@ -5,7 +5,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.InternalClient;
-import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

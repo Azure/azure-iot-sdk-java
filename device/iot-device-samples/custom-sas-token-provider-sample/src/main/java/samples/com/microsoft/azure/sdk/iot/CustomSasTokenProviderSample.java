@@ -206,7 +206,7 @@ public class CustomSasTokenProviderSample
     protected static class IotHubConnectionStatusChangeCallbackLogger implements IotHubConnectionStatusChangeCallback
     {
         @Override
-        public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+        public void onStatusChanged(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
         {
             System.out.println();
             System.out.println("CONNECTION STATUS UPDATE: " + status);
@@ -317,9 +317,9 @@ public class CustomSasTokenProviderSample
 
         System.out.println("Successfully created an IoT Hub client.");
 
-        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
+        client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
-        client.open();
+        client.open(false);
 
         System.out.println("Opened connection to IoT Hub.");
         System.out.println("Sending telemetry...");
@@ -331,7 +331,7 @@ public class CustomSasTokenProviderSample
         try
         {
             Message msg = new Message(msgStr);
-            msg.setContentTypeFinal("application/json");
+            msg.setContentType("application/json");
             msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
             msg.setMessageId(java.util.UUID.randomUUID().toString());
             msg.setExpiryTime(D2C_MESSAGE_TIMEOUT);
@@ -359,7 +359,7 @@ public class CustomSasTokenProviderSample
 
         // close the connection
         System.out.println("Closing");
-        client.closeNow();
+        client.close();
 
         if (!failedMessageListOnClose.isEmpty())
         {

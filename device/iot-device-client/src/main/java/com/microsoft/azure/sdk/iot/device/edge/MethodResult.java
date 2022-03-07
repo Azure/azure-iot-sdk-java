@@ -24,14 +24,13 @@ public class MethodResult
     private Object payload;
 
     //empty constructor for gson
-    MethodResult()
+    private MethodResult()
     {
 
     }
 
     public MethodResult(String json)
     {
-        // Codes_SRS_DIRECTMETHODRESULT_34_003: [This constructor shall retrieve the payload and status from the provided json.]
         MethodResult result = new GsonBuilder().create().fromJson(json, MethodResult.class);
 
         this.payload = result.payload;
@@ -40,7 +39,6 @@ public class MethodResult
 
     public int getStatus()
     {
-        // Codes_SRS_DIRECTMETHODRESULT_34_001: [This function shall return the saved status.]
         return this.status;
     }
 
@@ -51,7 +49,6 @@ public class MethodResult
 
     public String getPayload()
     {
-        // Codes_SRS_DIRECTMETHODRESULT_34_002: [This function shall return the saved status.]
         if (this.payload instanceof String)
         {
             return (String) this.payload;

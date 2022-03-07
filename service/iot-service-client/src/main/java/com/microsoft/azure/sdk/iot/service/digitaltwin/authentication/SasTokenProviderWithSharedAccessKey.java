@@ -41,7 +41,7 @@ public class SasTokenProviderWithSharedAccessKey implements SasTokenProvider {
     private long tokenExpiryTimeInMilliSecs;
 
     @Builder
-    SasTokenProviderWithSharedAccessKey(@NonNull String hostName, @NonNull String sharedAccessKeyName, @NonNull String sharedAccessKey, Integer timeToLiveInSecs) {
+    private SasTokenProviderWithSharedAccessKey(@NonNull String hostName, @NonNull String sharedAccessKeyName, @NonNull String sharedAccessKey, Integer timeToLiveInSecs) {
         if (timeToLiveInSecs == null) {
             timeToLiveInSecs = DEFAULT_TOKEN_TIME_TO_LIVE_IN_SECS;
         }

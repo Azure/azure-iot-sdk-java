@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Queue;
 
 @Slf4j
-abstract public class Mqtt implements MqttCallback
+public abstract class Mqtt implements MqttCallback
 {
     private static final int CONNECTION_TIMEOUT = 60 * 1000;
     private static final int DISCONNECTION_TIMEOUT = 60 * 1000;
@@ -287,9 +287,8 @@ abstract public class Mqtt implements MqttCallback
      * Method to receive messages on mqtt broker connection.
      *
      * @return a received message. It can be {@code null}
-     * @throws TransportException if failed to receive mqtt message.
      */
-    public IotHubTransportMessage receive() throws TransportException
+    public IotHubTransportMessage receive()
     {
         synchronized (this.receivedMessagesLock)
         {
@@ -309,7 +308,7 @@ abstract public class Mqtt implements MqttCallback
                     }
                     else
                     {
-                        throw new TransportException("Data cannot be null when topic is non-null");
+                        log.warn("Data cannot be null when topic is non-null");
                     }
                 }
                 else
@@ -335,17 +334,18 @@ abstract public class Mqtt implements MqttCallback
 
         if (this.listener != null)
         {
+            TransportException transportException;
             if (throwable instanceof MqttException)
             {
-                throwable = PahoExceptionTranslator.convertToMqttException((MqttException) throwable, "Mqtt connection lost");
+                transportException = PahoExceptionTranslator.convertToMqttException((MqttException) throwable, "Mqtt connection lost");
                 log.trace("Mqtt connection loss interpreted into transport exception", throwable);
             }
             else
             {
-                throwable = new TransportException(throwable);
+                transportException = new TransportException(throwable);
             }
 
-            ReconnectionNotifier.notifyDisconnectAsync(throwable, this.listener, this.connectionId);
+            ReconnectionNotifier.notifyDisconnectAsync(transportException, this.listener, this.connectionId);
         }
     }
 
@@ -512,7 +512,7 @@ abstract public class Mqtt implements MqttCallback
                         message.setContentEncoding(value);
                         break;
                     case CONTENT_TYPE:
-                        message.setContentTypeFinal(value);
+                        message.setContentType(value);
                         break;
                     default:
                         message.setProperty(key, value);

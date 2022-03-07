@@ -3,7 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpsMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.amqp.messaging.Properties;
 import org.apache.qpid.proton.amqp.messaging.Released;
@@ -21,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * class defines the receiver link which receives authentication status codes corresponding to each authentication attempt.
  */
 @Slf4j
-public final class AmqpsCbsReceiverLinkHandler extends AmqpsReceiverLinkHandler
+final class AmqpsCbsReceiverLinkHandler extends AmqpsReceiverLinkHandler
 {
     private final static String APPLICATION_PROPERTY_STATUS_CODE = "status-code";
     private final static String APPLICATION_PROPERTY_STATUS_DESCRIPTION = "status-description";

@@ -25,15 +25,15 @@ public class MultiplexingClientManager extends ClientManagerBase
     {
         void open();
         void close();
-        void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext);
-        void registerDeviceClients(Iterable<DeviceClient> deviceClients) throws InterruptedException, MultiplexingClientException;
-        void registerDeviceClient(DeviceClient deviceClient) throws InterruptedException, MultiplexingClientException;
-        void registerDeviceClients(Iterable<DeviceClient> deviceClients, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException;
-        void registerDeviceClient(DeviceClient deviceClient, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException;
-        void unregisterDeviceClients(Iterable<DeviceClient> deviceClients) throws InterruptedException, MultiplexingClientException;
-        void unregisterDeviceClient(DeviceClient deviceClient) throws InterruptedException, MultiplexingClientException;
-        void unregisterDeviceClients(Iterable<DeviceClient> deviceClients, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException;
-        void unregisterDeviceClient(DeviceClient deviceClient, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException;
+        void setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext);
+        void registerDeviceClients(Iterable<DeviceClient> deviceClients);
+        void registerDeviceClient(DeviceClient deviceClient);
+        void registerDeviceClients(Iterable<DeviceClient> deviceClients, long timeoutMilliseconds);
+        void registerDeviceClient(DeviceClient deviceClient, long timeoutMilliseconds);
+        void unregisterDeviceClients(Iterable<DeviceClient> deviceClients);
+        void unregisterDeviceClient(DeviceClient deviceClient);
+        void unregisterDeviceClients(Iterable<DeviceClient> deviceClients, long timeoutMilliseconds);
+        void unregisterDeviceClient(DeviceClient deviceClient, long timeoutMilliseconds);
     }
 
     /**
@@ -57,7 +57,7 @@ public class MultiplexingClientManager extends ClientManagerBase
     {
         this.multiplexingClient = multiplexingClient;
         this.multiplexClientId = multiplexClientId;
-        this.multiplexingClient.registerConnectionStatusChangeCallback(this, this);
+        this.multiplexingClient.setConnectionStatusChangeCallback(this, this);
     }
 
     /**
@@ -66,7 +66,7 @@ public class MultiplexingClientManager extends ClientManagerBase
     @Override
     protected void openClient() throws MultiplexingClientException
     {
-        this.multiplexingClient.open();
+        this.multiplexingClient.open(false);
     }
 
     /**

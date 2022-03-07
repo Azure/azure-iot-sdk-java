@@ -7,6 +7,9 @@ import com.azure.core.credential.AccessToken;
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.credential.TokenRequestContext;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.messaging.AmqpValue;
@@ -31,7 +34,7 @@ import static com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache.IOTH
  * class defines the sender link which proactively sends renewed sas tokens to keep the device sessions authenticated.
  */
 @Slf4j
-public final class CbsSenderLinkHandler extends SenderLinkHandler
+final class CbsSenderLinkHandler extends SenderLinkHandler
 {
     private static final String SENDER_LINK_ENDPOINT_PATH = "$cbs";
 
@@ -49,7 +52,7 @@ public final class CbsSenderLinkHandler extends SenderLinkHandler
 
     private TokenCredential credential;
     private AccessToken currentAccessToken;
-    private String sasToken;
+    private String connectionString;
     private AzureSasCredential sasTokenProvider;
 
     private static final String BEARER = "Bearer";
@@ -74,13 +77,13 @@ public final class CbsSenderLinkHandler extends SenderLinkHandler
         this.sasTokenProvider = sasTokenProvider;
     }
 
-    CbsSenderLinkHandler(Sender sender, LinkStateCallback linkStateCallback, String sasToken)
+    CbsSenderLinkHandler(Sender sender, LinkStateCallback linkStateCallback, String connectionString)
     {
         super(sender, UUID.randomUUID().toString(), linkStateCallback);
 
         this.senderLinkTag = SENDER_LINK_TAG_PREFIX;
         this.senderLinkAddress = SENDER_LINK_ENDPOINT_PATH;
-        this.sasToken = sasToken;
+        this.connectionString = connectionString;
     }
 
     static String getCbsTag()
@@ -137,9 +140,11 @@ public final class CbsSenderLinkHandler extends SenderLinkHandler
         }
         else
         {
-            this.currentAccessToken = getAccessTokenFromSasToken(this.sasToken);
+            IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
+            String sasToken = new IotHubServiceSasToken(iotHubConnectionString).toString();
+            this.currentAccessToken = getAccessTokenFromSasToken(sasToken);
             applicationProperties.put(PUT_TOKEN_TYPE, SAS_TOKEN);
-            Section section = new AmqpValue(this.sasToken);
+            Section section = new AmqpValue(sasToken);
             outgoingMessage.setBody(section);
         }
 

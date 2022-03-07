@@ -75,62 +75,6 @@ public class BulkEnrollmentOperationErrorTest
         assertEquals(VALID_ERROR_STATUS_1, result);
     }
 
-    /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_004: [The validateError shall throw IllegalArgumentException if the registrationId is null, empty or not a valid id.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void validateErrorThrowsOnNullRegistrationId()
-    {
-        // arrange
-        final String json =
-                "      {\n" +
-                "        \"errorCode\": " + VALID_ERROR_CODE_1 + ",\n" +
-                "        \"errorStatus\": \"" + VALID_ERROR_STATUS_1 + "\"\n" +
-                "      }\n";
-        BulkEnrollmentOperationError bulkEnrollmentOperationError = makeBulkEnrollmentOperationError(json);
-
-        // act
-        Deencapsulation.invoke(bulkEnrollmentOperationError, "validateError");
-
-        // assert
-    }
-
-    /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_004: [The validateError shall throw IllegalArgumentException if the registrationId is null, empty or not a valid id.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void validateErrorThrowsOnEmptyRegistrationId()
-    {
-        // arrange
-        final String json =
-                "      {\n" +
-                "        \"registrationId\": \"\",\n" +
-                "        \"errorCode\": " + VALID_ERROR_CODE_1 + ",\n" +
-                "        \"errorStatus\": \"" + VALID_ERROR_STATUS_1 + "\"\n" +
-                "      }\n";
-        BulkEnrollmentOperationError bulkEnrollmentOperationError = makeBulkEnrollmentOperationError(json);
-
-        // act
-        Deencapsulation.invoke(bulkEnrollmentOperationError, "validateError");
-
-        // assert
-    }
-
-    /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_004: [The validateError shall throw IllegalArgumentException if the registrationId is null, empty or not a valid id.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void validateErrorThrowsOnInvalidRegistrationId()
-    {
-        // arrange
-        final String json =
-                "      {\n" +
-                "        \"registrationId\": \"&InvalidId\",\n" +
-                "        \"errorCode\": " + VALID_ERROR_CODE_1 + ",\n" +
-                "        \"errorStatus\": \"" + VALID_ERROR_STATUS_1 + "\"\n" +
-                "      }\n";
-        BulkEnrollmentOperationError bulkEnrollmentOperationError = makeBulkEnrollmentOperationError(json);
-
-        // act
-        Deencapsulation.invoke(bulkEnrollmentOperationError, "validateError");
-
-        // assert
-    }
-
     /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_005: [The validateError shall throw IllegalArgumentException if the errorCode is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void validateErrorThrowsOnNullErrorCode()

@@ -87,13 +87,11 @@ public final class MessageProperty {
             throw new IllegalArgumentException("Property argument 'value' cannot be null.");
         }
 
-        // Codes_SRS_MESSAGEPROPERTY_11_008: [If the name is a reserved property name, the function shall throw an IllegalArgumentException.]
         if (RESERVED_PROPERTY_NAMES.contains(name)) {
             String errMsg = String.format("%s is a reserved IoT Hub message property name.%n", name);
             throw new IllegalArgumentException(errMsg);
         }
 
-        // Codes_SRS_MESSAGEPROPERTY_11_001: [The constructor shall save the property name and value.]
         this.name = name;
         this.value = value;
     }
@@ -104,7 +102,6 @@ public final class MessageProperty {
      * @return the property name.
      */
     public String getName() {
-        // Codes_SRS_MESSAGEPROPERTY_11_004: [The function shall return the property name.]
         return this.name;
     }
 
@@ -114,7 +111,6 @@ public final class MessageProperty {
      * @return the property value.
      */
     public String getValue() {
-        // Codes_SRS_MESSAGEPROPERTY_11_005: [The function shall return the property value.]
         return this.value;
     }
 
@@ -128,7 +124,6 @@ public final class MessageProperty {
     public boolean hasSameName(String name) {
         boolean nameMatches = false;
 
-        // Codes_SRS_MESSAGEPROPERTY_11_006: [The function shall return true if and only if the property has the given name, where the names are compared in a case-insensitive manner.]
         if (this.getName().equalsIgnoreCase(name)) {
             nameMatches = true;
         }

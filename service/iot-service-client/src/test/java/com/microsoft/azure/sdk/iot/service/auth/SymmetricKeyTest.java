@@ -29,7 +29,7 @@ public class SymmetricKeyTest
         String key = "0123456789012345";
         SymmetricKey symmetricKey = new SymmetricKey();
         // Act
-        symmetricKey.setPrimaryKeyFinal(key);
+        symmetricKey.setPrimaryKey(key);
         // Assert
         assertEquals(key, Deencapsulation.getField(symmetricKey, "primaryKey"));
     }
@@ -42,7 +42,7 @@ public class SymmetricKeyTest
         String key = "0123456789012345678901234567890123456789012345678901234567890123";
         SymmetricKey symmetricKey = new SymmetricKey();
         // Act
-        symmetricKey.setPrimaryKeyFinal(key);
+        symmetricKey.setPrimaryKey(key);
         // Assert
         assertEquals(key, Deencapsulation.getField(symmetricKey, "primaryKey"));
     }
@@ -55,7 +55,7 @@ public class SymmetricKeyTest
         String key = "0123456789012345";
         SymmetricKey symmetricKey = new SymmetricKey();
         // Act
-        symmetricKey.setSecondaryKeyFinal(key);
+        symmetricKey.setSecondaryKey(key);
         // Assert
         assertEquals(key, Deencapsulation.getField(symmetricKey, "secondaryKey"));
     }
@@ -68,62 +68,9 @@ public class SymmetricKeyTest
         String key = "0123456789012345678901234567890123456789012345678901234567890123";
         SymmetricKey symmetricKey = new SymmetricKey();
         // Act
-        symmetricKey.setSecondaryKeyFinal(key);
+        symmetricKey.setSecondaryKey(key);
         // Assert
         assertEquals(key, Deencapsulation.getField(symmetricKey, "secondaryKey"));
-    }
-
-    @Test
-    public void equalsWorks()
-    {
-        // Arrange
-        SymmetricKey s1 = createTestSymmetricKey(null, null);
-        SymmetricKey s2 = createTestSymmetricKey("", null);
-        SymmetricKey s3 = createTestSymmetricKey(null, "");
-        SymmetricKey s4 = createTestSymmetricKey("", "");
-        SymmetricKey s5 = createTestSymmetricKey("", "secondaryKey");
-        SymmetricKey s6 = createTestSymmetricKey("primaryKey", "secondaryKey2");
-        SymmetricKey s7 = createTestSymmetricKey("primaryKey2", "secondaryKey");
-        SymmetricKey s8 = createTestSymmetricKey("primaryKey", "secondaryKey");
-        SymmetricKey s9 = createTestSymmetricKey("primaryKey", "secondaryKey");
-
-        // Assert
-        assertNotEquals(s1, s2);
-        assertNotEquals(s1, s3);
-        assertNotEquals(s1, s4);
-        assertNotEquals(s1, s5);
-        assertNotEquals(s1, s6);
-        assertNotEquals(s1, s7);
-        assertNotEquals(s1, s8);
-
-        assertNotEquals(s2, s3);
-        assertNotEquals(s2, s4);
-        assertNotEquals(s2, s5);
-        assertNotEquals(s2, s6);
-        assertNotEquals(s2, s7);
-        assertNotEquals(s2, s8);
-
-        assertNotEquals(s3, s4);
-        assertNotEquals(s3, s5);
-        assertNotEquals(s3, s6);
-        assertNotEquals(s3, s7);
-        assertNotEquals(s3, s8);
-
-        assertNotEquals(s4, s5);
-        assertNotEquals(s4, s6);
-        assertNotEquals(s4, s7);
-        assertNotEquals(s4, s8);
-
-        assertNotEquals(s5, s6);
-        assertNotEquals(s5, s7);
-        assertNotEquals(s5, s8);
-
-        assertNotEquals(s6, s7);
-        assertNotEquals(s6, s8);
-
-        assertNotEquals(s7, s8);
-
-        assertEquals(s8, s9);
     }
 
     /**
