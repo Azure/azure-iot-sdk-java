@@ -271,15 +271,15 @@ public class HttpsHsmClient
 
         byte[] buf = new byte[400];
         StringBuilder responseStringBuilder = new StringBuilder();
-        int numRead = 0;
+        int numRead = channel.read(buf);
         while (numRead >= 0)
         {
-            // Read bytes from the channel
-            numRead = channel.read(buf);
-
             // buf may not be filled completely, so take the subArray of bytes sized equal to numRead
             String readChunk = new String(Arrays.copyOfRange(buf, 0, numRead - 1), StandardCharsets.US_ASCII);
             responseStringBuilder.append(readChunk);
+
+            // Read bytes from the channel
+            numRead = channel.read(buf);
         }
 
         String response = responseStringBuilder.toString();
