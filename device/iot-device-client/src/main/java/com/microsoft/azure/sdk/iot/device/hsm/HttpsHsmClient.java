@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 @Slf4j
 public class HttpsHsmClient
@@ -268,22 +269,23 @@ public class HttpsHsmClient
     {
         log.debug("Reading response from unix domain socket");
 
-        byte[] buf = new byte[10];
-        StringBuilder response = new StringBuilder();
+        byte[] buf = new byte[400];
+        StringBuilder responseStringBuilder = new StringBuilder();
         int numRead = 0;
         while (numRead >= 0)
         {
             // Read bytes from the channel
             numRead = channel.read(buf);
 
-            // Read bytes from ByteBuffer; see also
-            // e159 Getting Bytes from a ByteBuffer
-            for (int i = 0; i < numRead; i++)
-            {
-                response.append(new String(buf, StandardCharsets.US_ASCII));
-            }
+            // buf may not be filled completely, so take the subArray of bytes sized equal to numRead
+            String readChunk = new String(Arrays.copyOfRange(buf, 0, numRead - 1), StandardCharsets.US_ASCII);
+            responseStringBuilder.append(readChunk);
         }
 
-        return response.toString();
+        String response = responseStringBuilder.toString();
+        log.debug("Read response from unix domain socket channel");
+        log.debug("{}", response);
+
+        return response;
     }
 }
