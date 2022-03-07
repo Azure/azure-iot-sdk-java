@@ -370,7 +370,8 @@ public class InternalClient
     }
 
     /**
-     * Patch this client's twin with the provided reported properties.
+     * Patch this client's twin with the provided reported properties. This client must have subscribed to desired
+     * properties before this method can be called.
      *
      * @param reportedProperties The reported property key/value pairs to add/update in the twin.
      * @return The status code returned by the service for this operation. If this value is {@link IotHubStatusCode#OK} then
@@ -386,7 +387,9 @@ public class InternalClient
     }
 
     /**
-     * Patch this client's twin with the provided reported properties.
+     * Patch this client's twin with the provided reported properties. This client must have subscribed to desired
+     * properties before this method can be called. This client must have subscribed to desired
+     * properties before this method can be called.
      *
      * @param reportedProperties The reported property key/value pairs to add/update in the twin.
      * @param timeoutMilliseconds The maximum number of milliseconds this call will wait for the service to acknowledge the reported properties update request. If 0,
@@ -429,7 +432,7 @@ public class InternalClient
     }
 
     /**
-     * Get the twin for this client
+     * Get the twin for this client. This client must have subscribed to desired properties before this method can be called.
      *
      * @return The twin for this client
      * @throws TimeoutException if the service fails to acknowledge the getTwin request within the default timeout.
@@ -442,7 +445,7 @@ public class InternalClient
     }
 
     /**
-     * Get the twin for this client
+     * Get the twin for this client. This client must have subscribed to desired properties before this method can be called.
      *
      * @param timeoutMilliseconds The maximum number of milliseconds this call will wait for the service to return the twin.
      * If 0, then it will wait indefinitely.
@@ -631,7 +634,8 @@ public class InternalClient
     }
 
     /**
-     * Patch this client's twin with the provided reported properties asynchronously.
+     * Patch this client's twin with the provided reported properties asynchronously. This client must have subscribed
+     * to desired properties before this method can be called.
      *
      * @param reportedProperties The reported property key/value pairs to add/update in the twin.
      * @param reportedPropertiesCallback The callback to be executed once the reported properties update request
@@ -683,7 +687,8 @@ public class InternalClient
     }
 
     /**
-     * Patch this client's twin with the provided reported properties asynchronously.
+     * Patch this client's twin with the provided reported properties asynchronously. This client must have subscribed
+     * to desired properties before this method can be called.
      *
      * <p>
      * This overload utilizes a more verbose callback than {@link #updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesCallback, Object)}
@@ -711,7 +716,8 @@ public class InternalClient
     }
 
     /**
-     * Get the twin for this client asynchronously.
+     * Get the twin for this client asynchronously. This client must have subscribed to desired properties before this
+     * method can be called.
      * 
      * @param twinCallback The callback to be executed once the twin is received from the service.
      * @param callbackContext The context that will be included in the callback of twinCallback. May be null.
@@ -761,7 +767,8 @@ public class InternalClient
     }
 
     /**
-     * Get the twin for this client asynchronously.
+     * Get the twin for this client asynchronously. This client must have subscribed to desired properties before this
+     * method can be called.
      *
      * <p>
      * This overload utilizes a more verbose callback than {@link #getTwinAsync(GetTwinCallback, Object)}
