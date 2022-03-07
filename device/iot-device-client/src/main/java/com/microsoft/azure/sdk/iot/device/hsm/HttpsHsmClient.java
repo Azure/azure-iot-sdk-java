@@ -276,12 +276,6 @@ public class HttpsHsmClient
         StringBuilder responseStringBuilder = new StringBuilder();
         int numRead = channel.read(buf);
 
-        // The first read must have at least one byte read, otherwise it is a networking issue
-        if (numRead <= 0)
-        {
-            throw new IOException("Failed to read response from unix domain socket.");
-        }
-
         // keep reading from the unix domain socket in chunks until no more bytes are read
         while (numRead >= 0)
         {
