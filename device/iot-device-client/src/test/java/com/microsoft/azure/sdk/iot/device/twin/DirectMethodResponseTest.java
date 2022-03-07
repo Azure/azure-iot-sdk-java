@@ -20,7 +20,7 @@ public class DirectMethodResponseTest
 
         //assert
         int testStatus = testData.getStatus();
-        String testResponse = testData.getResponseMessage();
+        Object testResponse = testData.getResponseMessage();
 
         assertEquals(0, testStatus);
         assertEquals(testResponse, "testMessage");
@@ -53,7 +53,7 @@ public class DirectMethodResponseTest
         DirectMethodResponse testData = new DirectMethodResponse(0, "testMessage");
 
         //act
-        String testResponse = testData.getResponseMessage();
+        Object testResponse = testData.getResponseMessage();
 
         //assert
         assertEquals(testResponse, "testMessage");
@@ -90,7 +90,7 @@ public class DirectMethodResponseTest
         testData.setResponseMessage("testMessage");
 
         //assert
-        String testResponse = testData.getResponseMessage();
+        Object testResponse = testData.getResponseMessage();
         assertEquals(testResponse, "testMessage");
 
     }

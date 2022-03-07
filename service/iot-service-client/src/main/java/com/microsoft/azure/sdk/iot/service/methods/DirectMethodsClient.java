@@ -155,7 +155,7 @@ public final class DirectMethodsClient
      */
     public MethodResult invoke(String deviceId, String methodName) throws IotHubException, IOException
     {
-        return invoke(deviceId, methodName, DirectMethodRequestOptions.builder().build());
+        return invoke(deviceId, methodName, DirectMethodRequestOptions.builder().build(), "");
     }
 
     /**
@@ -168,7 +168,7 @@ public final class DirectMethodsClient
      * @throws IotHubException This exception is thrown if the response verification failed.
      * @throws IOException This exception is thrown if the IO operation failed.
      */
-    public MethodResult invoke(String deviceId, String methodName, DirectMethodRequestOptions options) throws IotHubException, IOException
+    public MethodResult invoke(String deviceId, String methodName, DirectMethodRequestOptions options, String payloadType) throws IotHubException, IOException
     {
         if (deviceId == null || deviceId.isEmpty())
         {
@@ -183,7 +183,7 @@ public final class DirectMethodsClient
         Objects.requireNonNull(options);
 
         URL url = IotHubConnectionString.getUrlMethod(this.hostName, deviceId);
-        return invokeMethod(url, methodName, options);
+        return invokeMethod(url, methodName, options, payloadType);
     }
 
     /**
@@ -198,7 +198,7 @@ public final class DirectMethodsClient
      */
     public MethodResult invoke(String deviceId, String moduleId, String methodName) throws IotHubException, IOException
     {
-        return invoke(deviceId, moduleId, methodName, DirectMethodRequestOptions.builder().build());
+        return invoke(deviceId, moduleId, methodName, DirectMethodRequestOptions.builder().build(), "");
     }
 
     /**
@@ -212,7 +212,7 @@ public final class DirectMethodsClient
      * @throws IotHubException This exception is thrown if the response verification failed.
      * @throws IOException This exception is thrown if the IO operation failed.
      */
-    public MethodResult invoke(String deviceId, String moduleId, String methodName, DirectMethodRequestOptions options)
+    public MethodResult invoke(String deviceId, String moduleId, String methodName, DirectMethodRequestOptions options, String payloadType)
         throws IotHubException, IOException
     {
         if (deviceId == null || deviceId.isEmpty())
@@ -234,10 +234,10 @@ public final class DirectMethodsClient
 
         URL url = IotHubConnectionString.getUrlModuleMethod(this.hostName, deviceId, moduleId);
 
-        return invokeMethod(url, methodName, options);
+        return invokeMethod(url, methodName, options, payloadType);
     }
 
-    private MethodResult invokeMethod(URL url, String methodName, DirectMethodRequestOptions options)
+    private MethodResult invokeMethod(URL url, String methodName, DirectMethodRequestOptions options, String payloadType)
             throws IotHubException, IOException
     {
         MethodParser methodParser =
@@ -269,7 +269,7 @@ public final class DirectMethodsClient
         HttpResponse response = httpRequest.send();
 
         MethodParser methodParserResponse = new MethodParser();
-        methodParserResponse.fromJson(new String(response.getBody(), StandardCharsets.UTF_8));
+        methodParserResponse.fromJson(new String(response.getBody(), StandardCharsets.UTF_8), payloadType);
 
         return new MethodResult(methodParserResponse.getStatus(), methodParserResponse.getPayload());
     }

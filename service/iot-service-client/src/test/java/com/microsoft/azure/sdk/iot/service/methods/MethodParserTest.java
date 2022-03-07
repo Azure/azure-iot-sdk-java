@@ -313,7 +313,7 @@ public class MethodParserTest
             MethodParser methodParser = new MethodParser();
 
             // Act
-            methodParser.fromJson(testCase.json);
+            methodParser.fromJson(testCase.json, "");
 
             // Assert
             assertMethod(methodParser, null, null, testCase.payload, "payload"
@@ -340,7 +340,7 @@ public class MethodParserTest
             // Arrange
             MethodParser methodParser = new MethodParser();
             // Act
-            methodParser.fromJson(testCase.jsonResult);
+            methodParser.fromJson(testCase.jsonResult, "");
 
             // Assert
             assertMethod(methodParser, null, testCase.status, testCase.payload, "response"
@@ -373,7 +373,7 @@ public class MethodParserTest
             // Arrange
             MethodParser methodParser = new MethodParser();
             // Act
-            methodParser.fromJson(testCase.json);
+            methodParser.fromJson(testCase.json, "");
 
             // Assert
             assertMethod(methodParser, testCase.name, testCase.responseTimeout, testCase.connectTimeout,
@@ -394,7 +394,7 @@ public class MethodParserTest
             // Act
             try
             {
-                methodParser.fromJson(testCase.json);
+                methodParser.fromJson(testCase.json, "");
                 assert true;
             }
             catch (IllegalArgumentException expected)
@@ -481,7 +481,7 @@ public class MethodParserTest
             // Arrange
             MethodParser methodParser = new MethodParser();
             // Arrange
-            methodParser.fromJson(testCase.jsonResult);
+            methodParser.fromJson(testCase.jsonResult, "");
 
             // Act
             String json = methodParser.toJsonElement().toString();

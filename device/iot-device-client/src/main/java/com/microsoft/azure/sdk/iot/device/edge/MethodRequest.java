@@ -34,7 +34,7 @@ public class MethodRequest
     private static final String PAYLOAD_KEY_NAME = "payload";
     @Expose(deserialize = false)
     @SerializedName(PAYLOAD_KEY_NAME)
-    private String payload;
+    private Object payload;
 
     /**
      * Constructor for a MethodRequest. Uses default responseTimeout and connectionTimeout which is to never timeout
@@ -42,7 +42,7 @@ public class MethodRequest
      * @param payload the payload attached to that method
      * @throws IllegalArgumentException if the provided methodName is null or empty
      */
-    public MethodRequest(String methodName, String payload) throws IllegalArgumentException
+    public MethodRequest(String methodName, Object payload) throws IllegalArgumentException
     {
         this(methodName, payload, null, null);
     }
@@ -55,7 +55,7 @@ public class MethodRequest
      * @param connectionTimeout the timeout in seconds for the connection to be established
      * @throws IllegalArgumentException if the provided methodName is null or empty
      */
-    public MethodRequest(String methodName, String payload, Integer responseTimeout, Integer connectionTimeout) throws IllegalArgumentException
+    public MethodRequest(String methodName, Object payload, Integer responseTimeout, Integer connectionTimeout) throws IllegalArgumentException
     {
         if (methodName == null || methodName.isEmpty())
         {

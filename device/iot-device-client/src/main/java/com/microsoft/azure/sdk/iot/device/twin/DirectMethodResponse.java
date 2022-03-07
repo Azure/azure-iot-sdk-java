@@ -6,9 +6,10 @@ package com.microsoft.azure.sdk.iot.device.twin;
 public class DirectMethodResponse
 {
     private int status;
-    private String responseMessage;
 
-    public DirectMethodResponse(int status, String responseMessage)
+    private Object responseMessage;
+
+    public DirectMethodResponse(int status, Object responseMessage)
     {
         this.status = status;
         this.responseMessage = responseMessage;
@@ -19,7 +20,7 @@ public class DirectMethodResponse
         return status;
     }
 
-    public String getResponseMessage()
+    public Object getResponseMessage()
     {
         return responseMessage;
     }
