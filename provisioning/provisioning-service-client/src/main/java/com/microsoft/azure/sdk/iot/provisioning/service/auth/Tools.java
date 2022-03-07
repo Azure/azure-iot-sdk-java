@@ -5,9 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service.auth;
 
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import javax.json.JsonValue;
 import java.util.Map;
 
 /**

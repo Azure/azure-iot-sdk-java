@@ -9,7 +9,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Data structure for feedback messages received in Json array
@@ -19,7 +20,7 @@ public class FeedbackBatch
 {
     @Getter
     @Setter
-    private Instant enqueuedTimeUtc;
+    private Date enqueuedTimeUtc;
 
     @Getter
     @Setter
@@ -31,5 +32,5 @@ public class FeedbackBatch
 
     @Getter
     @Setter
-    private ArrayList<FeedbackRecord> records;
+    private List<FeedbackRecord> records;
 }

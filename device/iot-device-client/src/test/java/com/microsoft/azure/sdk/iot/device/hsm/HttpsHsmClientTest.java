@@ -242,10 +242,16 @@ public class HttpsHsmClientTest
                 HttpsRequestResponseSerializer.serializeRequest(mockedHttpsRequest, anyString, anyString, anyString);
                 result = expectedMetaData;
 
+                mockedHttpsRequest.setHeaderField(anyString, anyString);
+                times = 2;
+
                 mockedHttpsRequest.getBody();
                 result = expectedBody;
 
                 mockedUnixDomainSocketChannel.open(anyString);
+
+                mockedUnixDomainSocketChannel.read((byte[]) any);
+                result = 100;
 
                 mockedUnixDomainSocketChannel.read((byte[]) any);
                 result = -1;

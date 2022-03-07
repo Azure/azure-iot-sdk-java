@@ -23,14 +23,12 @@ public class UnixDomainSocketSample
 {
     public static class UnixDomainSocketChannelImpl implements UnixDomainSocketChannel
     {
-        UnixSocketAddress unixSocketAddress;
         UnixSocketChannel channel;
 
         @Override
         public void open(String address) throws IOException
         {
-            this.unixSocketAddress = new UnixSocketAddress(address);
-            this.channel = UnixSocketChannel.open(this.unixSocketAddress);
+            this.channel = UnixSocketChannel.open(new UnixSocketAddress(address));
         }
 
         @Override
@@ -55,8 +53,7 @@ public class UnixDomainSocketSample
         }
     }
 
-    public static void main(String[] args)
-        throws IOException, URISyntaxException, ModuleClientException
+    public static void main(String[] args) throws IOException, URISyntaxException, ModuleClientException
     {
         UnixDomainSocketChannel unixDomainSocketChannel = new UnixDomainSocketChannelImpl();
 

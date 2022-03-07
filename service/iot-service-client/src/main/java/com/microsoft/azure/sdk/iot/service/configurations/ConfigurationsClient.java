@@ -5,24 +5,22 @@ package com.microsoft.azure.sdk.iot.service.configurations;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
+import com.google.gson.Gson;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.configurations.serializers.ConfigurationParser;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.registry.Module;
+import com.microsoft.azure.sdk.iot.service.registry.serializers.RegistryIdentityParser;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.Proxy;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -231,21 +229,18 @@ public class ConfigurationsClient
         HttpResponse response = request.send();
 
         String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
-        try (JsonReader jsonReader = Json.createReader(new StringReader(bodyStr)))
+        List<Configuration> configurationList = new ArrayList<>();
+
+        Gson gson = new Gson();
+        ConfigurationParser[] configurationParsers = gson.fromJson(bodyStr, ConfigurationParser[].class);
+
+        for (int i = 0; i < configurationParsers.length; i++)
         {
-            List<Configuration> configurationList = new ArrayList<>();
-            JsonArray deviceArray = jsonReader.readArray();
-
-            for (int i = 0; i < deviceArray.size(); i++)
-            {
-                JsonObject jsonObject = deviceArray.getJsonObject(i);
-                Configuration iotHubConfiguration = new Configuration(new ConfigurationParser(jsonObject.toString()));
-                configurationList.add(iotHubConfiguration);
-            }
-
-            return configurationList;
+            configurationList.add(new Configuration(configurationParsers[i]));
         }
-    }
+
+        return configurationList;
+}
 
     /**
      * Update configuration not forced

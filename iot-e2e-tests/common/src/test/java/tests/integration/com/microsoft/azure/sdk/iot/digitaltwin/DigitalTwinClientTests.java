@@ -6,6 +6,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.digitaltwin;
 import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesCallback;
 import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
 import com.microsoft.azure.sdk.iot.device.twin.Pair;
@@ -14,6 +15,8 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.MultiplexingClient;
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
+import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesCallback;
+import com.microsoft.azure.sdk.iot.device.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
@@ -72,6 +75,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static junit.framework.TestCase.fail;
@@ -380,30 +384,17 @@ public class DigitalTwinClientTests extends IntegrationTest
 
     @Test
     @StandardTierHubOnlyTest
-    public void updateDigitalTwin() throws IOException {
+    public void updateDigitalTwin() throws IOException, TimeoutException, InterruptedException
+    {
         // arrange
-        /*
+
         String newProperty = "currentTemperature";
         String newPropertyPath = "/currentTemperature";
         Integer newPropertyValue = 35;
 
-        // Property update callback
-        TwinPropertyCallback twinPropertyCallback = (property, context) -> {
-            Set<Property> properties = new HashSet<>();
-            properties.add(property);
-            deviceClient.sendReportedPropertiesAsync(properties);
-        };
-
-        // IotHub event callback
-        IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) -> {};
-
         // start device twin and setup handler for property updates in device
-        deviceClient.startTwinAsync(iotHubEventCallback, null, twinPropertyCallback, null);
-        Map<Property, Pair<TwinPropertyCallback, Object>> desiredPropertyUpdateCallback =
-                Collections.singletonMap(
-                        new Property(newProperty, null),
-                        new Pair<>(twinPropertyCallback, null));
-        deviceClient.subscribeToTwinDesiredPropertiesAsync(desiredPropertyUpdateCallback);
+        deviceClient.subscribeToDesiredProperties((twin, context)
+            -> deviceClient.updateReportedPropertiesAsync(twin.getDesiredProperties(), (ReportedPropertiesCallback) null, null), null);
 
         DigitalTwinUpdateRequestOptions optionsWithoutEtag = new DigitalTwinUpdateRequestOptions();
         optionsWithoutEtag.setIfMatch("*");
@@ -434,7 +425,6 @@ public class DigitalTwinClientTests extends IntegrationTest
         }
 
         fail("Timed out waiting for the model id to be present in the twin service");
-        */
     }
 
     @Test

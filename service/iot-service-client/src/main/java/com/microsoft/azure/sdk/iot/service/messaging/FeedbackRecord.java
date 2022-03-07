@@ -5,11 +5,13 @@
 
 package com.microsoft.azure.sdk.iot.service.messaging;
 
+import com.microsoft.azure.sdk.iot.service.messaging.serializers.FeedbackRecordParser;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.Date;
 
 /**
  * Data structure for feedback record received
@@ -19,7 +21,7 @@ public class FeedbackRecord
 {
     @Getter
     @Setter(AccessLevel.PACKAGE)
-    private Instant enqueuedTimeUtc;
+    private Date enqueuedTimeUtc;
 
     @Getter
     @Setter(AccessLevel.PACKAGE)
@@ -44,4 +46,23 @@ public class FeedbackRecord
     @Getter
     @Setter(AccessLevel.PACKAGE)
     private String deviceId;
+
+    protected FeedbackRecord(FeedbackRecordParser parser)
+    {
+        this.correlationId = "";
+        this.description = parser.getDescription();
+        this.deviceGenerationId = parser.getDeviceGenerationId();
+        this.deviceId = parser.getDeviceId();
+        this.enqueuedTimeUtc =  parser.getEnqueuedTimeUtcDate();
+        this.originalMessageId = parser.getOriginalMessageId();
+
+        if (parser.getStatusCode() == null)
+        {
+            this.statusCode = FeedbackStatusCode.unknown;
+        }
+        else
+        {
+            this.statusCode = parser.getStatusCode();
+        }
+    }
 }

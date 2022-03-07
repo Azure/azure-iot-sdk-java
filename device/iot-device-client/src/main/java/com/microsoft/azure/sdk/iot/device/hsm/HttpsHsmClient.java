@@ -14,6 +14,7 @@ import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsRequest;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.qpid.proton.reactor.impl.IO;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 @Slf4j
 public class HttpsHsmClient
@@ -214,7 +216,7 @@ public class HttpsHsmClient
         }
         else
         {
-            throw new UnsupportedOperationException("unrecognized URI scheme. Only HTTPS, HTTP and UNIX are supported");
+            throw new UnsupportedOperationException("unrecognized URI scheme \"" + this.scheme + "\". Only HTTPS, HTTP and UNIX are supported");
         }
 
         return response;
@@ -240,14 +242,16 @@ public class HttpsHsmClient
             if (httpsRequest.getBody() != null)
             {
                 //append http request body to the request bytes
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                 outputStream.write(requestBytes);
                 outputStream.write(httpsRequest.getBody());
 
+                log.trace("Writing {} bytes to unix domain socket", outputStream.size());
                 unixDomainSocketChannel.write(outputStream.toByteArray());
             }
             else
             {
+                log.trace("Writing {} bytes to unix domain socket", requestBytes.length);
                 unixDomainSocketChannel.write(requestBytes);
             }
 
@@ -268,22 +272,29 @@ public class HttpsHsmClient
     {
         log.debug("Reading response from unix domain socket");
 
-        byte[] buf = new byte[10];
-        StringBuilder response = new StringBuilder();
-        int numRead = 0;
+        byte[] buf = new byte[400];
+        StringBuilder responseStringBuilder = new StringBuilder();
+        int numRead = channel.read(buf);
+
+        // keep reading from the unix domain socket in chunks until no more bytes are read
         while (numRead >= 0)
         {
+            log.trace("Read {} bytes from unix domain socket", numRead);
+
+            // buf may not be filled completely, so take the subArray of bytes sized equal to numRead
+            String readChunk = new String(Arrays.copyOfRange(buf, 0, numRead), StandardCharsets.US_ASCII);
+            log.trace("Read chunk of data from unix domain socket:");
+            log.trace("{}", readChunk);
+            responseStringBuilder.append(readChunk);
+
             // Read bytes from the channel
             numRead = channel.read(buf);
-
-            // Read bytes from ByteBuffer; see also
-            // e159 Getting Bytes from a ByteBuffer
-            for (int i = 0; i < numRead; i++)
-            {
-                response.append(new String(buf, StandardCharsets.US_ASCII));
-            }
         }
 
-        return response.toString();
+        String response = responseStringBuilder.toString();
+        log.debug("Read response from unix domain socket channel");
+        log.debug("{}", response);
+
+        return response;
     }
 }

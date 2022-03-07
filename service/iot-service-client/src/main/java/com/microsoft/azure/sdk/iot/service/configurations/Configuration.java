@@ -197,15 +197,8 @@ public class Configuration
             this.content.modulesContent = parser.getContent().getModulesContent();
         }
 
-        if (parser.getCreatedTimeUtc() != null)
-        {
-            this.createdTimeUtc = ParserUtility.getUTCDateStringFromDate(parser.getCreatedTimeUtc());
-        }
-
-        if (parser.getLastUpdatedTimeUtc() != null)
-        {
-            this.lastUpdatedTimeUtc = ParserUtility.getUTCDateStringFromDate(parser.getLastUpdatedTimeUtc());
-        }
+        this.createdTimeUtc = parser.getCreatedTimeUtcString();
+        this.lastUpdatedTimeUtc = parser.getLastUpdatedTimeUtcString();
 
         if (parser.getSystemMetrics() != null)
         {

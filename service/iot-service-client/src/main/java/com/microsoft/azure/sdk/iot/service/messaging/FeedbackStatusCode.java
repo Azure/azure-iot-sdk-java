@@ -5,14 +5,24 @@
 
 package com.microsoft.azure.sdk.iot.service.messaging;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Enum for feedback status codes
  */
 public enum FeedbackStatusCode
 {
+    @SerializedName("Success")
     success,
+
+    @SerializedName("Expired")
     expired,
+
+    @SerializedName("DeliveryCountExceeded")
     deliveryCountExceeded,
+
+    @SerializedName("Rejected")
     rejected,
+
     unknown
 }

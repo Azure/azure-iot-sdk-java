@@ -60,12 +60,14 @@ public class ConfigurationParser
     private static final String CREATED_TIME_UTC_NAME = "createdTimeUtc";
     @Expose(deserialize = false)
     @SerializedName(CREATED_TIME_UTC_NAME)
+    @Getter
     private String createdTimeUtcString;
     private transient Date createdTimeUtc;
 
     private static final String LAST_UPDATED_TIME_UTC_NAME = "lastUpdatedTimeUtc";
     @Expose(deserialize = false)
     @SerializedName(LAST_UPDATED_TIME_UTC_NAME)
+    @Getter
     private String lastUpdatedTimeUtcString;
     private transient Date lastUpdatedTimeUtc;
 

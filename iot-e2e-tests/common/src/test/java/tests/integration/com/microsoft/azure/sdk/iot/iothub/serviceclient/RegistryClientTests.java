@@ -79,21 +79,21 @@ public class RegistryClientTests extends IntegrationTest
         hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString).getHostName();
     }
 
-    public RegistryClientTests.RegistryManagerTestInstance testInstance;
+    public RegistryClientTestInstance testInstance;
 
-    public static class RegistryManagerTestInstance
+    public static class RegistryClientTestInstance
     {
         public String deviceId;
         public String moduleId;
         public String configId;
         private RegistryClient registryClient;
 
-        public RegistryManagerTestInstance()
+        public RegistryClientTestInstance()
         {
             this(RegistryClientOptions.builder().build());
         }
 
-        public RegistryManagerTestInstance(RegistryClient registryClient)
+        public RegistryClientTestInstance(RegistryClient registryClient)
         {
             String uuid = UUID.randomUUID().toString();
             this.deviceId = deviceIdPrefix + uuid;
@@ -102,7 +102,7 @@ public class RegistryClientTests extends IntegrationTest
             this.registryClient = registryClient;
         }
 
-        public RegistryManagerTestInstance(RegistryClientOptions options)
+        public RegistryClientTestInstance(RegistryClientOptions options)
         {
             String uuid = UUID.randomUUID().toString();
             this.deviceId = deviceIdPrefix + uuid;
@@ -129,14 +129,14 @@ public class RegistryClientTests extends IntegrationTest
     @Test
     public void deviceLifecycleWithConnectionString() throws Exception
     {
-        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
+        RegistryClientTestInstance testInstance = new RegistryClientTestInstance();
         deviceLifecycle(testInstance);
     }
 
     @Test
     public void serviceValidatesSymmetricKey() throws IOException, IotHubException
     {
-        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
+        RegistryClientTestInstance testInstance = new RegistryClientTestInstance();
         Device device = new Device(testInstance.deviceId, AuthenticationType.SAS);
         SymmetricKey symmetricKey = new SymmetricKey();
         symmetricKey.setPrimaryKey("1");
@@ -156,7 +156,7 @@ public class RegistryClientTests extends IntegrationTest
     @Test
     public void deviceLifecycleWithAzureSasCredential() throws Exception
     {
-        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance(buildRegistryManagerWithAzureSasCredential());
+        RegistryClientTestInstance testInstance = new RegistryClientTestInstance(buildRegistryManagerWithAzureSasCredential());
         deviceLifecycle(testInstance);
     }
 
@@ -168,7 +168,7 @@ public class RegistryClientTests extends IntegrationTest
         AzureSasCredential azureSasCredential = new AzureSasCredential(serviceSasToken.toString());
         RegistryClient registryClient = new RegistryClient(iotHubConnectionStringObj.getHostName(), azureSasCredential);
 
-        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance(registryClient);
+        RegistryClientTestInstance testInstance = new RegistryClientTestInstance(registryClient);
 
         Device device1 = new Device(testInstance.deviceId + "-1", AuthenticationType.SAS);
         Device device2 = new Device(testInstance.deviceId + "-2", AuthenticationType.SAS);
@@ -201,7 +201,7 @@ public class RegistryClientTests extends IntegrationTest
         testInstance.registryClient.addDevice(device3);
     }
 
-    public static void deviceLifecycle(RegistryManagerTestInstance testInstance) throws Exception
+    public static void deviceLifecycle(RegistryClientTestInstance testInstance) throws Exception
     {
         //-Create-//
         Device deviceAdded = new Device(testInstance.deviceId);
@@ -231,7 +231,7 @@ public class RegistryClientTests extends IntegrationTest
         Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
         ProxyOptions proxyOptions = new ProxyOptions(testProxy);
         RegistryClientOptions registryClientOptions = RegistryClientOptions.builder().proxyOptions(proxyOptions).build();
-        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance(registryClientOptions);
+        RegistryClientTestInstance testInstance = new RegistryClientTestInstance(registryClientOptions);
 
         //-Create-//
         Device deviceAdded = new Device(testInstance.deviceId);
@@ -259,7 +259,7 @@ public class RegistryClientTests extends IntegrationTest
     public void crud_device_e2e_X509_CA_signed() throws Exception
     {
         //-Create-//
-        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
+        RegistryClientTestInstance testInstance = new RegistryClientTestInstance();
         Device deviceAdded = new Device(testInstance.deviceId, AuthenticationType.CERTIFICATE_AUTHORITY);
         Tools.addDeviceWithRetry(testInstance.registryClient, deviceAdded);
 
@@ -290,7 +290,7 @@ public class RegistryClientTests extends IntegrationTest
     public void crud_device_e2e_X509_self_signed() throws Exception
     {
         //-Create-//
-        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
+        RegistryClientTestInstance testInstance = new RegistryClientTestInstance();
         Device deviceAdded = new Device(testInstance.deviceId, AuthenticationType.SELF_SIGNED);
         deviceAdded.setThumbprint(primaryThumbprint, secondaryThumbprint);
         Tools.addDeviceWithRetry(testInstance.registryClient, deviceAdded);
@@ -333,7 +333,7 @@ public class RegistryClientTests extends IntegrationTest
     public void crud_module_e2e() throws Exception
     {
         // Arrange
-        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
+        RegistryClientTestInstance testInstance = new RegistryClientTestInstance();
         SymmetricKey expectedSymmetricKey = new SymmetricKey();
 
         Device deviceSetup = new Device(testInstance.deviceId);
@@ -346,6 +346,8 @@ public class RegistryClientTests extends IntegrationTest
 
         //-Read-//
         Module moduleRetrieved = testInstance.registryClient.getModule(testInstance.deviceId, testInstance.moduleId);
+
+        assertEquals(1, testInstance.registryClient.getModulesOnDevice(testInstance.deviceId).size());
 
         //-Update-//
         Module moduleUpdated = testInstance.registryClient.getModule(testInstance.deviceId, testInstance.moduleId);
@@ -371,7 +373,7 @@ public class RegistryClientTests extends IntegrationTest
     public void crud_module_e2e_X509_CA_signed() throws Exception
     {
         // Arrange
-        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
+        RegistryClientTestInstance testInstance = new RegistryClientTestInstance();
         deleteModuleIfItExistsAlready(testInstance.registryClient, testInstance.deviceId, testInstance.moduleId);
         Device deviceSetup = new Device(testInstance.deviceId);
         Tools.addDeviceWithRetry(testInstance.registryClient, deviceSetup);
@@ -406,7 +408,7 @@ public class RegistryClientTests extends IntegrationTest
     public void crud_module_e2e_X509_self_signed() throws Exception
     {
         // Arrange
-        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
+        RegistryClientTestInstance testInstance = new RegistryClientTestInstance();
         Device deviceSetup = new Device(testInstance.deviceId);
         Tools.addDeviceWithRetry(testInstance.registryClient, deviceSetup);
         deleteModuleIfItExistsAlready(testInstance.registryClient, testInstance.deviceId, testInstance.moduleId);
@@ -449,7 +451,7 @@ public class RegistryClientTests extends IntegrationTest
     public void deviceCreationWithDeviceScope() throws IOException, InterruptedException, IotHubException, URISyntaxException
     {
         // Arrange
-        this.testInstance = new RegistryManagerTestInstance();
+        this.testInstance = new RegistryClientTestInstance();
         String edge1Id = deviceIdPrefix + UUID.randomUUID().toString();
         String edge2Id = deviceIdPrefix + UUID.randomUUID().toString();
         String deviceId = this.testInstance.deviceId;
