@@ -4,7 +4,18 @@ This document outlines the changes made from this library's 1.X.X releases to it
 a major version upgrade, there are a number of breaking changes that will affect your ability to compile. This
 document will be split into a section per package for simplicity.
 
-## IoT hub Device Client
+## Why is v1 being replaced?
+
+There are a number of reasons why the Azure IoT SDK team chose to do a major version revision
+  - [Upcoming certificate changes](./upcoming_certificate_changes_readme.md) dictated that the SDK needed to stop pinning on a specific IoT Hub public certificate and start reading certificates from the device certificate store.
+  - Several 3rd party dependencies (Bouncycastle, JNR Unixsocket, Azure Storage SDK) were becoming harder to carry due to security concerns and they could only be removed by making breaking changes.
+  - Many existing client classes (RegistryManager, DeviceTwin, DeviceMethod, ServiceClient, etc.) were confusingly named and contained methods that weren't always consistent with the client's assumed responsibilities.
+  - Many existing client's had a mix of standard constructors (```new DeviceClient(...)```) and static builder constructors (```DeviceClient.createFromSecurityProvider(...)```) that caused some confusion among users.
+  - ```DeviceClient``` and ```ModuleClient``` had unneccessarily different method names for the same operations (```deviceClient.startDeviceTwin(...)``` vs ```moduleClient.startTwin(...)```) that could be easily unified for consistency.
+
+## Breaking changes overview by package
+
+### IoT hub Device Client
 
 Breaking changes:
 - Trust certificates are read from the physical device's trusted root certification authorities certificate store rather than from source.
@@ -33,7 +44,7 @@ Breaking changes:
 - ```open()``` has been removed from DeviceClient, ModuleClient and MultiplexingClient in favor of ```open(boolean withRetry)```
 - ```DeviceClient.createFromSecurityProvider(...)``` has been replaced with a normal constructor with the same arguments.
 
-## IoT hub Service Client
+### IoT hub Service Client
  
 Breaking changes:
 - Trust certificates are read from the physical device's trusted root certification authorities certificate store rather than from source.
@@ -53,11 +64,11 @@ Breaking changes:
 - Removed ```open()``` and ```close()``` APIs for registryClient since they do nothing anymore
 - Fixed a bug where dates retrieved by the client were converted to local time zone rather than keeping them in UTC time.  
 
-## Device Provisioning Service Device Client
+### Device Provisioning Service Device Client
 
 No notable changes, but the security providers that are used in conjunction with this client have changed. See [this section](#security-provider-clients) for more details.
 
-## Device Provisioning Service Service Client
+### Device Provisioning Service Service Client
 
 Breaking changes:
 - Trust certificates are read from the physical device's trusted root certification authorities certificate store rather than from source.
@@ -68,7 +79,7 @@ Breaking changes:
 - Reduced access levels to classes and methods that were never intended to be public where possible
 - Reduce default SAS token time to live from 1 year to 1 hour for security purposes
 
-## Security Provider Clients
+### Security Provider Clients
 
 Breaking changes:
 - Trust certificates are read from the physical device's trusted root certification authorities certificate store rather than from source.
@@ -77,11 +88,79 @@ Breaking changes:
   - Users of the X509 SecurityProvider are expected to pass in the parsed certificates and keys as Java security primitives rather than as strings
     - See [this sample](./provisioning/provisioning-samples/provisioning-X509-sample) for a demonstration on how to create these Java security primitives from strings
   
-## Deps
+### Deps
 
 Breaking changes:
 - The deps package has been removed from the v2 SDK and its classes have been copied to the respective client libraries that used them
-  
+
+## Migrating from v1 to v2
+
+### IoT hub Device Client
+
+### IoT hub Service Client
+ 
+| V1 class  | Equivalent V2 Class(es)|
+|---:|---:|
+| RegistryManager   | RegistryClient, ConfigurationsClient,  |
+| DeviceTwin   | TwinClient  |
+| DeviceMethod |  DirectMethodsClient | 
+| ServiceClient   | MessagingClient, FileUploadNotificationProcessorClient, MessageFeedbackProcessorClient   |   
+| JobClient  |  BlockBlobClient, RegistryClient  |  
+
+#### RegistryManager
+
+v1
+
+| V1 class#method  | Equivalent V2 class#method|
+|---:|---:|
+| RegistryManager#open(); | no equivalent method, this concept was removed as it was unneccessary  |
+| RegistryManager#close(); | no equivalent method, this concept was removed as it was unneccessary  |
+| RegistryManager#(); | RegistryClient#();  |
+| RegistryManager#(); | RegistryClient#();  |
+| RegistryManager#(); | RegistryClient#();  |
+| RegistryManager#(); | RegistryClient#();  |
+| RegistryManager#(); | RegistryClient#();  |
+| RegistryManager#(); | RegistryClient#();  |
+| RegistryManager#(); | RegistryClient#();  |
+| RegistryManager#(); | RegistryClient#();  |
+| RegistryManager#(); | RegistryClient#();  |
+| RegistryManager#(); | RegistryClient#();  |
+| RegistryManager#(); | RegistryClient#();  |
+| RegistryManager#(); | RegistryClient#();  |
+| RegistryManager#(); | RegistryClient#();  |
+| RegistryManager#(); | RegistryClient#();  |
+
+
+```java
+
+// Device Create + Update + Get + Delete
+RegistryManager#addDevice(Device);
+RegistryManager#getDevice(String);
+RegistryManager#updateDevice(Device);
+RegistryManager#removeDevice(String);
+
+// v2
+RegistryClient#addDevice(Device);
+registryClient.getDevice(String);
+registryClient.updateDevice(Device);
+registryClient.removeDevice(String);
+
+
+
+
+```
+
+v2 equivalent
+```java
+```
+ 
+### Device Provisioning Service Device Client
+
+### Device Provisioning Service Service Client
+
+### Security Provider Clients
+
+
 ## Frequently Asked Questions
 
 Question:
