@@ -211,50 +211,50 @@ public class TokenCredentialTests
 //        assertEquals((long) successStatusCode, (long) result.getStatus());
 //    }
 
-    @Test
-    public void createIndividualEnrollmentWithTokenCredentialSucceeds() throws ProvisioningServiceClientException
-    {
-        ProvisioningConnectionString connectionString = ProvisioningConnectionStringBuilder.createConnectionString(provisioningConnectionString);
-        TokenCredential credential = buildTokenCredentialFromEnvironment();
-        ProvisioningServiceClient provisioningServiceClient1 = new ProvisioningServiceClient(connectionString.getHostName(), credential);
-
-        String registrationId = testPrefix + UUID.randomUUID();
-        Attestation attestation = new SymmetricKeyAttestation("", "");
-        IndividualEnrollment enrollment = new IndividualEnrollment(registrationId, attestation);
-        enrollment.setAllocationPolicy(AllocationPolicy.GEOLATENCY);
-        ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
-        reprovisionPolicy.setUpdateHubAssignment(true);
-        reprovisionPolicy.setMigrateDeviceData(true);
-        enrollment.setReprovisionPolicy(reprovisionPolicy);
-        DeviceCapabilities capabilities = new DeviceCapabilities();
-        capabilities.setIotEdge(true);
-        enrollment.setCapabilities(capabilities);
-        IndividualEnrollment returnedEnrollment = provisioningServiceClient1.createOrUpdateIndividualEnrollment(enrollment);
-
-        assertEquals(enrollment.getRegistrationId(), returnedEnrollment.getRegistrationId());
-        assertEquals(enrollment.getReprovisionPolicy().getMigrateDeviceData(), returnedEnrollment.getReprovisionPolicy().getMigrateDeviceData());
-        assertEquals(enrollment.getReprovisionPolicy().getUpdateHubAssignment(), returnedEnrollment.getReprovisionPolicy().getUpdateHubAssignment());
-        assertEquals(enrollment.getCapabilities().isIotEdge(), returnedEnrollment.getCapabilities().isIotEdge());
-        assertEquals(enrollment.getAttestation().getClass(), returnedEnrollment.getAttestation().getClass());
-        assertEquals(enrollment.getAllocationPolicy(), returnedEnrollment.getAllocationPolicy());
-    }
-
-    @Test
-    public void testGetDeviceTwinWithTokenCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
-    {
-        Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
-
-        DeviceTwin twinServiceClient = buildDeviceTwinClientWithTokenCredential();
-
-        RegistryManager registryManager = new RegistryManager(iotHubConnectionString);
-        Device device = Device.createDevice("some-device-" + UUID.randomUUID(), AuthenticationType.SAS);
-        registryManager.addDevice(device);
-
-        DeviceTwinDevice twin = new DeviceTwinDevice(device.getDeviceId());
-        twinServiceClient.getTwin(twin);
-
-        assertNotNull(twin.getETag());
-    }
+//    @Test
+//    public void createIndividualEnrollmentWithTokenCredentialSucceeds() throws ProvisioningServiceClientException
+//    {
+//        ProvisioningConnectionString connectionString = ProvisioningConnectionStringBuilder.createConnectionString(provisioningConnectionString);
+//        TokenCredential credential = buildTokenCredentialFromEnvironment();
+//        ProvisioningServiceClient provisioningServiceClient1 = new ProvisioningServiceClient(connectionString.getHostName(), credential);
+//
+//        String registrationId = testPrefix + UUID.randomUUID();
+//        Attestation attestation = new SymmetricKeyAttestation("", "");
+//        IndividualEnrollment enrollment = new IndividualEnrollment(registrationId, attestation);
+//        enrollment.setAllocationPolicy(AllocationPolicy.GEOLATENCY);
+//        ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
+//        reprovisionPolicy.setUpdateHubAssignment(true);
+//        reprovisionPolicy.setMigrateDeviceData(true);
+//        enrollment.setReprovisionPolicy(reprovisionPolicy);
+//        DeviceCapabilities capabilities = new DeviceCapabilities();
+//        capabilities.setIotEdge(true);
+//        enrollment.setCapabilities(capabilities);
+//        IndividualEnrollment returnedEnrollment = provisioningServiceClient1.createOrUpdateIndividualEnrollment(enrollment);
+//
+//        assertEquals(enrollment.getRegistrationId(), returnedEnrollment.getRegistrationId());
+//        assertEquals(enrollment.getReprovisionPolicy().getMigrateDeviceData(), returnedEnrollment.getReprovisionPolicy().getMigrateDeviceData());
+//        assertEquals(enrollment.getReprovisionPolicy().getUpdateHubAssignment(), returnedEnrollment.getReprovisionPolicy().getUpdateHubAssignment());
+//        assertEquals(enrollment.getCapabilities().isIotEdge(), returnedEnrollment.getCapabilities().isIotEdge());
+//        assertEquals(enrollment.getAttestation().getClass(), returnedEnrollment.getAttestation().getClass());
+//        assertEquals(enrollment.getAllocationPolicy(), returnedEnrollment.getAllocationPolicy());
+//    }
+//
+//    @Test
+//    public void testGetDeviceTwinWithTokenCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
+//    {
+//        Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
+//
+//        DeviceTwin twinServiceClient = buildDeviceTwinClientWithTokenCredential();
+//
+//        RegistryManager registryManager = new RegistryManager(iotHubConnectionString);
+//        Device device = Device.createDevice("some-device-" + UUID.randomUUID(), AuthenticationType.SAS);
+//        registryManager.addDevice(device);
+//
+//        DeviceTwinDevice twin = new DeviceTwinDevice(device.getDeviceId());
+//        twinServiceClient.getTwin(twin);
+//
+//        assertNotNull(twin.getETag());
+//    }
 
     private DeviceClient createDeviceClient(IotHubClientProtocol protocol, RegistryManager registryManager) throws IOException, IotHubException, URISyntaxException
     {
