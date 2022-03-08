@@ -101,59 +101,58 @@ Breaking changes:
  
 | V1 class  | Equivalent V2 Class(es)|
 |---:|---:|
-| RegistryManager   | RegistryClient, ConfigurationsClient,  |
+| RegistryManager   | RegistryClient, ConfigurationsClient  |
 | DeviceTwin   | TwinClient  |
 | DeviceMethod |  DirectMethodsClient | 
 | ServiceClient   | MessagingClient, FileUploadNotificationProcessorClient, MessageFeedbackProcessorClient   |   
 | JobClient  |  BlockBlobClient, RegistryClient  |  
 
+For v1 classes with more than one equivalent v2 classes, the methods that were in the v1 class have been split up to 
+create clients with more cohesive capabilities. For instance, configurations CRUD was in the v1 RegistryManager, but has 
+been moved to a new ConfigurationsClient in v2.
+
 #### RegistryManager
 
-v1
-
-| V1 class#method  | Equivalent V2 class#method|
+| V1 class#method  | Equivalent V2 class#method |
 |---:|---:|
 | RegistryManager#open(); | no equivalent method, this concept was removed as it was unneccessary  |
 | RegistryManager#close(); | no equivalent method, this concept was removed as it was unneccessary  |
-| RegistryManager#(); | RegistryClient#();  |
-| RegistryManager#(); | RegistryClient#();  |
-| RegistryManager#(); | RegistryClient#();  |
-| RegistryManager#(); | RegistryClient#();  |
-| RegistryManager#(); | RegistryClient#();  |
-| RegistryManager#(); | RegistryClient#();  |
-| RegistryManager#(); | RegistryClient#();  |
-| RegistryManager#(); | RegistryClient#();  |
-| RegistryManager#(); | RegistryClient#();  |
-| RegistryManager#(); | RegistryClient#();  |
-| RegistryManager#(); | RegistryClient#();  |
-| RegistryManager#(); | RegistryClient#();  |
-| RegistryManager#(); | RegistryClient#();  |
-| RegistryManager#(); | RegistryClient#();  |
+| RegistryManager#addDevice(Device); | RegistryClient#addDevice(Device);  |
+| RegistryManager#addDeviceAsync(); | no equivalent method. Users can write an async wrapper on the sync equivalent to replace this  |
+| RegistryManager#getDevice(String); | RegistryClient#getDevice(String);  |
+| RegistryManager#getDeviceAsync(); | no equivalent method. Users can write an async wrapper on the sync equivalent to replace this  |
+| RegistryManager#updateDevice(); | RegistryClient#updateDevice();  |
+| RegistryManager#updateDeviceAsync(); | no equivalent method. Users can write an async wrapper on the sync equivalent to replace this  |
+| RegistryManager#removeDevice(); | RegistryClient#removeDevice();  |
+| RegistryManager#removeDeviceAsync(); | no equivalent method. Users can write an async wrapper on the sync equivalent to replace this  |
+| RegistryManager#getDevices(Integer); | no equivalent method. Iot Hub does not have a useable "list devices" operation |
+| RegistryManager#getDevicesAsync(Integer); | no equivalent method. Iot Hub does not have a useable "list devices" operation |
+| RegistryManager#getDeviceConnectionString(); | no equivalent method. Removed since this was not a service call.  |
+| RegistryManager#getStatistics(); | RegistryClient#getStatistics();  |
+| RegistryManager#getStatisticsAsync(); | no equivalent method. Users can write an async wrapper on the sync equivalent to replace this  |
+| RegistryManager#exportDevices(String, Boolean); | RegistryClient#exportDevices(String, boolean);  |
+| RegistryManager#exportDevicesAsync(String, Boolean); | no equivalent method. Users can write an async wrapper on the sync equivalent to replace this  |
+| RegistryManager#exportDevices(JobProperties); | RegistryClient#exportDevices(RegistryJob);  |
+| RegistryManager#exportDevicesAsync(JobProperties); | no equivalent method. Users can write an async wrapper on the sync equivalent to replace this  |
+| RegistryManager#importDevices(String, String); | RegistryClient#importDevices(String, String);  |
+| RegistryManager#importDevicesAsync(String, String); | no equivalent method. Users can write an async wrapper on the sync equivalent to replace this  |
+| RegistryManager#importDevices(JobProperties); | RegistryClient#importDevices(JobProperties);  |
+| RegistryManager#importDevicesAsync(JobProperties); | no equivalent method. Users can write an async wrapper on the sync equivalent to replace this  |
+| RegistryManager#getJob(String); | RegistryClient#getJob(String);  |
+| RegistryManager#addModule(Module); | RegistryClient#addModule(Module);  |
+| RegistryManager#getModule(String); | RegistryClient#getModule(String);  |
+| RegistryManager#getModulesOnDevice(String); | RegistryClient#getModulesOnDevice(String);  |
+| RegistryManager#updateModule(Module); | RegistryClient#updateModule(Module);  |
+| RegistryManager#updateModule(Module, Boolean); | no equivalent method. Users should use the overload that just takes a module  |
+| RegistryManager#removeModule(String, String); | RegistryClient#removeModule(String, String);  |
+| RegistryManager#addConfiguration(Configuration); | ConfigurationsClient#create(Configuration);  |
+| RegistryManager#getConfiguration(String); | ConfigurationsClient#get(String);  |
+| RegistryManager#getConfigurations(int); | ConfigurationsClient#getConfigurations(int);  |
+| RegistryManager#updateConfiguration(Configuration); | ConfigurationsClient#replace(Configuration);  |
+| RegistryManager#updateConfiguration(Configuration, Boolean); | no equivalent method. Users should use the overload that just takes a configuration  |
+| RegistryManager#removeConfiguration(String); | ConfigurationsClient#delete(String);  |
+| RegistryManager#applyConfigurationContentOnDevice(String, ConfigurationContent); | ConfigurationsClient#applyConfigurationContentOnDevice(String, ConfigurationContent);  |
 
-
-```java
-
-// Device Create + Update + Get + Delete
-RegistryManager#addDevice(Device);
-RegistryManager#getDevice(String);
-RegistryManager#updateDevice(Device);
-RegistryManager#removeDevice(String);
-
-// v2
-RegistryClient#addDevice(Device);
-registryClient.getDevice(String);
-registryClient.updateDevice(Device);
-registryClient.removeDevice(String);
-
-
-
-
-```
-
-v2 equivalent
-```java
-```
- 
 ### Device Provisioning Service Device Client
 
 ### Device Provisioning Service Service Client
