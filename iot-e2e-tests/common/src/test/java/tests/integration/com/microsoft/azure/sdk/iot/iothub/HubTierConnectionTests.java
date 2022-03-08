@@ -19,6 +19,7 @@ import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.BasicTierHubOnlyTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 
 import javax.net.ssl.SSLContext;
@@ -188,6 +189,7 @@ public class HubTierConnectionTests extends IntegrationTest
 
     @Test
     @BasicTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void enableMethodFailedWithBasicTier() throws IOException, InterruptedException
     {
         //arrange
