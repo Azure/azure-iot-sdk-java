@@ -76,140 +76,140 @@ public class TokenCredentialTests
 
     private static final String testPrefix = "provisioningservicecliente2etests-";
 
-    @Test
-    public void cloudToDeviceTelemetryWithTokenCredential() throws Exception
-    {
-        Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
-
-        // We remove and recreate the device for a clean start
-        RegistryManager registryManager = new RegistryManager(iotHubConnectionString);
-
-        Device device = Device.createDevice("some-device-" + UUID.randomUUID(), AuthenticationType.SAS);
-        registryManager.addDevice(device);
-
-        Device deviceGetBefore = registryManager.getDevice(device.getDeviceId());
-
-        // Create service client
-        ServiceClient serviceClient = buildServiceClientWithTokenCredential(IotHubServiceClientProtocol.AMQPS);
-        serviceClient.open();
-
-        Message message = new Message("some message".getBytes(StandardCharsets.UTF_8));
-
-        serviceClient.send(device.getDeviceId(), message);
-
-        Device deviceGetAfter = registryManager.getDevice(device.getDeviceId());
-        serviceClient.close();
-
-        registryManager.removeDevice(device.getDeviceId());
-
-        // Assert
-        assertEquals(0, deviceGetBefore.getCloudToDeviceMessageCount());
-        assertEquals(1, deviceGetAfter.getCloudToDeviceMessageCount());
-
-        registryManager.close();
-    }
-
-    @Test
-    public void getDigitalTwinWithTokenCredential() throws IOException, IotHubException, URISyntaxException
-    {
-        Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
-
-        RegistryManager registryManager = new RegistryManager(iotHubConnectionString);
-        DeviceClient deviceClient = createDeviceClient(MQTT, registryManager);
-        deviceClient.open();
-
-        // arrange
-        DigitalTwinClient digitalTwinClient = buildDigitalTwinClientWithTokenCredential();
-
-        // act
-        BasicDigitalTwin response = digitalTwinClient.getDigitalTwin(deviceClient.getConfig().getDeviceId(), BasicDigitalTwin.class);
-        ServiceResponseWithHeaders<BasicDigitalTwin, DigitalTwinGetHeaders> responseWithHeaders =
-            digitalTwinClient.getDigitalTwinWithResponse(deviceClient.getConfig().getDeviceId(), BasicDigitalTwin.class);
-
-        // assert
-        assertEquals(response.getMetadata().getModelId(), THERMOSTAT_MODEL_ID);
-        assertEquals(responseWithHeaders.body().getMetadata().getModelId(), THERMOSTAT_MODEL_ID);
-    }
-
-    @Test
-    public void deviceLifecycleWithTokenCredential() throws Exception
-    {
-        //-Create-//
-        RegistryManager registryManager = new RegistryManager(iotHubConnectionString);
-        String deviceId = "some-device-" + UUID.randomUUID();
-        Device deviceAdded = Device.createFromId(deviceId, DeviceStatus.Enabled, null);
-        registryManager.addDevice(deviceAdded);
-
-        //-Read-//
-        Device deviceRetrieved = registryManager.getDevice(deviceId);
-
-        //-Update-//
-        Device deviceUpdated = registryManager.getDevice(deviceId);
-        deviceUpdated.setStatus(DeviceStatus.Disabled);
-        deviceUpdated = registryManager.updateDevice(deviceUpdated);
-
-        //-Delete-//
-        registryManager.removeDevice(deviceId);
-
-        // Assert
-        assertEquals(deviceId, deviceAdded.getDeviceId());
-        assertEquals(deviceId, deviceRetrieved.getDeviceId());
-        assertEquals(DeviceStatus.Disabled, deviceUpdated.getStatus());
-    }
-
-    @Test
-    public void invokeMethodSucceedWithTokenCredential() throws Exception
-    {
-        Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
-
-        DeviceMethod methodServiceClient = buildDeviceMethodClientWithTokenCredential();
-
-        RegistryManager registryManager = new RegistryManager(iotHubConnectionString);
-        Device device = Device.createDevice("some-device-" + UUID.randomUUID(), AuthenticationType.SAS);
-        registryManager.addDevice(device);
-
-        DeviceClient deviceClient = new DeviceClient(registryManager.getDeviceConnectionString(device), MQTT);
-        deviceClient.open();
-        final int successStatusCode = 200;
-        final AtomicBoolean methodsSubscriptionComplete = new AtomicBoolean(false);
-        final AtomicBoolean methodsSubscribedSuccessfully = new AtomicBoolean(false);
-        deviceClient.subscribeToDeviceMethod(
-            (methodName, methodData, context) -> new DeviceMethodData(successStatusCode, "success"),
-            null,
-            (responseStatus, callbackContext) ->
-            {
-                if (responseStatus == IotHubStatusCode.OK_EMPTY || responseStatus == IotHubStatusCode.OK)
-                {
-                    methodsSubscribedSuccessfully.set(true);
-                }
-
-                methodsSubscriptionComplete.set(true);
-            },
-            null
-        );
-
-        long startTime = System.currentTimeMillis();
-        while (!methodsSubscriptionComplete.get())
-        {
-            Thread.sleep(200);
-
-            if (System.currentTimeMillis() - startTime > METHOD_SUBSCRIPTION_TIMEOUT_MILLISECONDS)
-            {
-                fail("Timed out waiting for device registration to complete.");
-            }
-        }
-
-        assertTrue("Method subscription callback fired with non 200 status code", methodsSubscribedSuccessfully.get());
-
-        MethodResult result = methodServiceClient.invoke(
-            device.getDeviceId(),
-            "someMethod",
-            5l,
-            5l,
-            null);
-
-        assertEquals((long) successStatusCode, (long) result.getStatus());
-    }
+//    @Test
+//    public void cloudToDeviceTelemetryWithTokenCredential() throws Exception
+//    {
+//        Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
+//
+//        // We remove and recreate the device for a clean start
+//        RegistryManager registryManager = new RegistryManager(iotHubConnectionString);
+//
+//        Device device = Device.createDevice("some-device-" + UUID.randomUUID(), AuthenticationType.SAS);
+//        registryManager.addDevice(device);
+//
+//        Device deviceGetBefore = registryManager.getDevice(device.getDeviceId());
+//
+//        // Create service client
+//        ServiceClient serviceClient = buildServiceClientWithTokenCredential(IotHubServiceClientProtocol.AMQPS);
+//        serviceClient.open();
+//
+//        Message message = new Message("some message".getBytes(StandardCharsets.UTF_8));
+//
+//        serviceClient.send(device.getDeviceId(), message);
+//
+//        Device deviceGetAfter = registryManager.getDevice(device.getDeviceId());
+//        serviceClient.close();
+//
+//        registryManager.removeDevice(device.getDeviceId());
+//
+//        // Assert
+//        assertEquals(0, deviceGetBefore.getCloudToDeviceMessageCount());
+//        assertEquals(1, deviceGetAfter.getCloudToDeviceMessageCount());
+//
+//        registryManager.close();
+//    }
+//
+//    @Test
+//    public void getDigitalTwinWithTokenCredential() throws IOException, IotHubException, URISyntaxException
+//    {
+//        Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
+//
+//        RegistryManager registryManager = new RegistryManager(iotHubConnectionString);
+//        DeviceClient deviceClient = createDeviceClient(MQTT, registryManager);
+//        deviceClient.open();
+//
+//        // arrange
+//        DigitalTwinClient digitalTwinClient = buildDigitalTwinClientWithTokenCredential();
+//
+//        // act
+//        BasicDigitalTwin response = digitalTwinClient.getDigitalTwin(deviceClient.getConfig().getDeviceId(), BasicDigitalTwin.class);
+//        ServiceResponseWithHeaders<BasicDigitalTwin, DigitalTwinGetHeaders> responseWithHeaders =
+//            digitalTwinClient.getDigitalTwinWithResponse(deviceClient.getConfig().getDeviceId(), BasicDigitalTwin.class);
+//
+//        // assert
+//        assertEquals(response.getMetadata().getModelId(), THERMOSTAT_MODEL_ID);
+//        assertEquals(responseWithHeaders.body().getMetadata().getModelId(), THERMOSTAT_MODEL_ID);
+//    }
+//
+//    @Test
+//    public void deviceLifecycleWithTokenCredential() throws Exception
+//    {
+//        //-Create-//
+//        RegistryManager registryManager = new RegistryManager(iotHubConnectionString);
+//        String deviceId = "some-device-" + UUID.randomUUID();
+//        Device deviceAdded = Device.createFromId(deviceId, DeviceStatus.Enabled, null);
+//        registryManager.addDevice(deviceAdded);
+//
+//        //-Read-//
+//        Device deviceRetrieved = registryManager.getDevice(deviceId);
+//
+//        //-Update-//
+//        Device deviceUpdated = registryManager.getDevice(deviceId);
+//        deviceUpdated.setStatus(DeviceStatus.Disabled);
+//        deviceUpdated = registryManager.updateDevice(deviceUpdated);
+//
+//        //-Delete-//
+//        registryManager.removeDevice(deviceId);
+//
+//        // Assert
+//        assertEquals(deviceId, deviceAdded.getDeviceId());
+//        assertEquals(deviceId, deviceRetrieved.getDeviceId());
+//        assertEquals(DeviceStatus.Disabled, deviceUpdated.getStatus());
+//    }
+//
+//    @Test
+//    public void invokeMethodSucceedWithTokenCredential() throws Exception
+//    {
+//        Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
+//
+//        DeviceMethod methodServiceClient = buildDeviceMethodClientWithTokenCredential();
+//
+//        RegistryManager registryManager = new RegistryManager(iotHubConnectionString);
+//        Device device = Device.createDevice("some-device-" + UUID.randomUUID(), AuthenticationType.SAS);
+//        registryManager.addDevice(device);
+//
+//        DeviceClient deviceClient = new DeviceClient(registryManager.getDeviceConnectionString(device), MQTT);
+//        deviceClient.open();
+//        final int successStatusCode = 200;
+//        final AtomicBoolean methodsSubscriptionComplete = new AtomicBoolean(false);
+//        final AtomicBoolean methodsSubscribedSuccessfully = new AtomicBoolean(false);
+//        deviceClient.subscribeToDeviceMethod(
+//            (methodName, methodData, context) -> new DeviceMethodData(successStatusCode, "success"),
+//            null,
+//            (responseStatus, callbackContext) ->
+//            {
+//                if (responseStatus == IotHubStatusCode.OK_EMPTY || responseStatus == IotHubStatusCode.OK)
+//                {
+//                    methodsSubscribedSuccessfully.set(true);
+//                }
+//
+//                methodsSubscriptionComplete.set(true);
+//            },
+//            null
+//        );
+//
+//        long startTime = System.currentTimeMillis();
+//        while (!methodsSubscriptionComplete.get())
+//        {
+//            Thread.sleep(200);
+//
+//            if (System.currentTimeMillis() - startTime > METHOD_SUBSCRIPTION_TIMEOUT_MILLISECONDS)
+//            {
+//                fail("Timed out waiting for device registration to complete.");
+//            }
+//        }
+//
+//        assertTrue("Method subscription callback fired with non 200 status code", methodsSubscribedSuccessfully.get());
+//
+//        MethodResult result = methodServiceClient.invoke(
+//            device.getDeviceId(),
+//            "someMethod",
+//            5l,
+//            5l,
+//            null);
+//
+//        assertEquals((long) successStatusCode, (long) result.getStatus());
+//    }
 
     @Test
     public void createIndividualEnrollmentWithTokenCredentialSucceeds() throws ProvisioningServiceClientException
