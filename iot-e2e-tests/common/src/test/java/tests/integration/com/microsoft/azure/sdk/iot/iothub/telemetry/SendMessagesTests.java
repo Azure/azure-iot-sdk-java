@@ -133,6 +133,7 @@ public class SendMessagesTests extends SendMessagesCommon
         IotHubServicesCommon.sendMessages(testInstance.identity.getClient(), testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
     }
 
+    @ContinuousIntegrationTest
     @Test
     public void sendBulkMessages() throws Exception
     {

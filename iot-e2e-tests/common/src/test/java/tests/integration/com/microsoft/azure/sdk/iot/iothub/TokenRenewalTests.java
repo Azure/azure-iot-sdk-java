@@ -26,6 +26,7 @@ import org.junit.rules.Timeout;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.rules.RerunFailedTestRule;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.rules.ThrottleResistantTestRule;
@@ -112,9 +113,7 @@ public class TokenRenewalTests extends IntegrationTest
      * @throws Exception if the test fails in any way
      */
     @Test
-    // While this test is long enough to be considered a continuous integration test, it is the only test that truly validates
-    // that the device client's token renewal logic works. Because of that, it needs to be run at the gate.
-    //@ContinuousIntegrationTest
+    @ContinuousIntegrationTest
     public void tokenRenewalWorks() throws Exception
     {
         List<InternalClient> clients = createClientsToTest();
