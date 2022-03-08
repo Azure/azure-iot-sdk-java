@@ -57,6 +57,7 @@ public class TokenCredentialTests
 
     private static final int METHOD_SUBSCRIPTION_TIMEOUT_MILLISECONDS = 60 * 1000;
 
+    @Ignore // TODO the service throws a 500 error in Canary environments
     @Test
     public void cloudToDeviceTelemetryWithTokenCredential() throws Exception
     {
