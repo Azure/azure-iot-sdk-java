@@ -302,8 +302,9 @@ Breaking changes:
 - Trust certificates are read from the physical device's trusted root certification authorities certificate store rather than from source.
   - Users are expected to install the required public certificates into this certificate store if they are not present already.
   - See [this document](./upcoming_certificate_changes_readme.md) for additional context on which certificates need to be installed.
-  - Users of the X509 SecurityProvider are expected to pass in the parsed certificates and keys as Java security primitives rather than as strings.
-    - See [this sample](./provisioning/provisioning-samples/provisioning-X509-sample) for a demonstration on how to create these Java security primitives from strings.
+  - For most users, no action is needed here since IoT Hub uses the [DigiCert Global G2 CA root](https://global-root-g2.chain-demos.digicert.com/info/index.html) certificate which is already installed on most devices.
+- Users of the X509 SecurityProvider are expected to pass in the parsed certificates and keys as Java security primitives rather than as strings.
+  - See [this sample](./provisioning/provisioning-samples/provisioning-X509-sample) for a demonstration on how to create these Java security primitives from strings.
 
 
 ### Deps
