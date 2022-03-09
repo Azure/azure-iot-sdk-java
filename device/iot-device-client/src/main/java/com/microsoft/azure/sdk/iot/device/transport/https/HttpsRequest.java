@@ -55,7 +55,6 @@ public class HttpsRequest
      */
     public HttpsRequest(URL url, HttpsMethod method, byte[] body, String userAgentString, ProxySettings proxySettings)
     {
-        // Codes_SRS_HTTPSREQUEST_34_031: [The function shall save the provided arguments to be used when the http connection is built during the call to send().]
         this.url = url;
         this.method = method;
         this.body = body;
@@ -160,7 +159,6 @@ public class HttpsRequest
         byte[] errorReason = new byte[0];
         Map<String, List<String>> headerFields;
 
-        // Codes_SRS_HTTPSREQUEST_11_008: [The function shall send an HTTPS request as formatted in the constructor.]
         connection.connect();
 
         responseStatus = connection.getResponseStatus();
@@ -171,7 +169,6 @@ public class HttpsRequest
             responseBody = connection.readInput();
         }
 
-        // Codes_SRS_HTTPSREQUEST_11_009: [The function shall return the HTTPS response received, including the status code, body (if 200 status code), header fields, and error reason (if any).]
         return new HttpsResponse(responseStatus, responseBody, headerFields, errorReason);
     }
 
@@ -185,7 +182,6 @@ public class HttpsRequest
      */
     public HttpsRequest setHeaderField(String field, String value)
     {
-        // Codes_SRS_HTTPSREQUEST_11_013: [The function shall set the header field with the given name to the given value.]
         if (this.headers.containsKey(field))
         {
             this.headers.get(field).add(value);
@@ -211,7 +207,6 @@ public class HttpsRequest
      */
     public HttpsRequest setReadTimeout(int timeout)
     {
-        // Codes_SRS_HTTPSREQUEST_11_014: [The function shall set the read timeout for the request to the given value.]
         this.readTimeout = timeout;
         return this;
     }
@@ -239,7 +234,6 @@ public class HttpsRequest
     {
         if (sslContext == null)
         {
-            //Codes_SRS_HTTPSREQUEST_25_015: [The function shall throw IllegalArgumentException if argument is null .]
             throw new IllegalArgumentException("Context cannot be null");
         }
 
@@ -250,19 +244,16 @@ public class HttpsRequest
 
     public byte[] getBody()
     {
-        // Codes_SRS_HTTPSREQUEST_34_017: [The function shall return the body saved in this object's connection instance.]
         return this.body;
     }
 
     public URL getRequestUrl()
     {
-        // Codes_SRS_HTTPSREQUEST_34_018: [The function shall return the request url saved in this object's connection instance.]
         return this.url;
     }
 
     public String getHttpMethod()
     {
-        // Codes_SRS_HTTPSREQUEST_34_019: [The function shall return the http method saved in this object's connection instance.]
         return this.method.toString();
     }
 
@@ -285,7 +276,6 @@ public class HttpsRequest
             headerString.append("\r\n");
         }
 
-        //Codes_SRS_HTTPSCONNECTION_34_030: [The function shall return all the request headers in the format "<key>: <value1>; <value2>\r\n <key>: <value1>\r\n...".]
         return headerString.toString();
     }
 

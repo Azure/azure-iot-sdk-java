@@ -5,9 +5,9 @@ package com.microsoft.azure.sdk.iot.provisioning.service.contract;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpRequest;
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
+import com.microsoft.azure.sdk.iot.provisioning.service.transport.https.HttpMethod;
+import com.microsoft.azure.sdk.iot.provisioning.service.transport.https.HttpRequest;
+import com.microsoft.azure.sdk.iot.provisioning.service.transport.https.HttpResponse;
 import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningConnectionString;
 import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningSasToken;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;

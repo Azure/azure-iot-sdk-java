@@ -5,7 +5,7 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
+import lombok.Getter;
 
 import java.io.Serializable;
 
@@ -36,12 +36,14 @@ public class X509CAReferences implements Serializable
     private static final String PRIMARY_TAG = "primary";
     @Expose
     @SerializedName(PRIMARY_TAG)
+    @Getter
     private String primary;
 
     // the secondary X509 CA reference
     private static final String SECONDARY_TAG = "secondary";
     @Expose
     @SerializedName(SECONDARY_TAG)
+    @Getter
     private String secondary;
 
     /**
@@ -71,51 +73,6 @@ public class X509CAReferences implements Serializable
     {
         this.primary = x509CAReferences.primary;
         this.secondary = x509CAReferences.secondary;
-    }
-
-    /**
-     * Getter for the primary.
-     *
-     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #getPrimaryFinal()}
-     *
-     * @return the {@code String} with the stored primary. It cannot be {@code null}.
-     */
-    @Deprecated
-    public String getPrimary()
-    {
-        return this.primary;
-    }
-
-    /**
-     * Getter for the primary.
-     *
-     * @return the {@code String} with the stored primary. It cannot be {@code null}.
-     */
-    public final String getPrimaryFinal()
-    {
-        return this.primary;
-    }
-
-    /**
-     * Getter for the secondary.
-     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #getSecondaryFinal()}
-     *
-     * @return the {@code String} with the stored secondary. It can be {@code null}.
-     */
-    @Deprecated
-    public String getSecondary()
-    {
-        return this.secondary;
-    }
-
-    /**
-     * Getter for the secondary.
-     *
-     * @return the {@code String} with the stored secondary. It can be {@code null}.
-     */
-    public final String getSecondaryFinal()
-    {
-        return this.secondary;
     }
 
     /**

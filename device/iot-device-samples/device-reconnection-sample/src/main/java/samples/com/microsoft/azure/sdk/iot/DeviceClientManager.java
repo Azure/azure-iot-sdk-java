@@ -1,7 +1,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
+import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
 import com.microsoft.azure.sdk.iot.device.exceptions.DeviceOperationTimeoutException;
@@ -30,8 +30,8 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
 
     private interface DeviceClientNonDelegatedFunction {
         void open();
-        void closeNow();
-        void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext);
+        void close();
+        void setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext);
     }
 
     // The methods defined in the interface DeviceClientNonDelegatedFunction will be called on DeviceClientManager, and not on DeviceClient.
@@ -41,10 +41,10 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
     DeviceClientManager(DeviceClient deviceClient) {
         this.connectionStatus = ConnectionStatus.DISCONNECTED;
         this.client = deviceClient;
-        this.client.registerConnectionStatusChangeCallback(this, this);
+        this.client.setConnectionStatusChangeCallback(this, this);
     }
 
-    public void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext) {
+    public void setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext) {
         if (callback != null) {
             this.suppliedConnectionStatusChangeCallback = new Pair<>(callback, callbackContext);
         } else {
@@ -70,7 +70,7 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
                 if(connectionStatus == ConnectionStatus.CONNECTING) {
                     try {
                         log.debug("Opening the device client instance...");
-                        client.open();
+                        client.open(false);
                         connectionStatus = ConnectionStatus.CONNECTED;
                         break;
                     }
@@ -96,33 +96,26 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
         }
     }
 
-    public void closeNow() {
+    public void close() {
         synchronized (lock) {
-            try {
-                log.debug("Closing the device client instance...");
-                client.closeNow();
-            }
-            catch (IOException e) {
-                log.error("Exception thrown while closing DeviceClient instance: ", e);
-            } finally {
-                connectionStatus = ConnectionStatus.DISCONNECTED;
-            }
+            log.debug("Closing the device client instance...");
+            client.close();
+            connectionStatus = ConnectionStatus.DISCONNECTED;
         }
-
     }
 
     @Override
-    public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext) {
+    public void onStatusChanged(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext) {
         Pair<IotHubConnectionStatusChangeCallback, Object> suppliedCallbackPair = this.suppliedConnectionStatusChangeCallback;
 
         if (shouldDeviceReconnect(status, statusChangeReason, throwable)) {
             if (suppliedCallbackPair != null) {
-                suppliedCallbackPair.getKey().execute(DISCONNECTED_RETRYING, NO_NETWORK, throwable, suppliedCallbackPair.getValue());
+                suppliedCallbackPair.getKey().onStatusChanged(DISCONNECTED_RETRYING, NO_NETWORK, throwable, suppliedCallbackPair.getValue());
             }
 
             handleRecoverableDisconnection();
         } else if (suppliedCallbackPair != null) {
-            suppliedCallbackPair.getKey().execute(status, statusChangeReason, throwable, suppliedCallbackPair.getValue());
+            suppliedCallbackPair.getKey().onStatusChanged(status, statusChangeReason, throwable, suppliedCallbackPair.getValue());
         }
     }
 
@@ -141,9 +134,9 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
                         synchronized (lock) {
                             if (connectionStatus == ConnectionStatus.CONNECTED) {
                                 try {
-                                    client.closeNow();
+                                    client.close();
                                 } catch (Exception e) {
-                                    log.warn("DeviceClient closeNow failed.", e);
+                                    log.warn("DeviceClient close failed.", e);
                                 } finally {
                                     connectionStatus = ConnectionStatus.CONNECTING;
                                 }

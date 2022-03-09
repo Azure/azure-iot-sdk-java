@@ -235,11 +235,11 @@ jobs:
           targetPath: 'iot-e2e-tests/android/app/build/outputs/apk'
 
   - job: AndroidTest
-    timeoutInMinutes: 80
+    timeoutInMinutes: 50
     pool:
       vmImage: 'macOS-latest'
     strategy:
-      maxParallel: 17
+      maxParallel: 12
       matrix:
         TestGroup1:
           ANDROID_TEST_GROUP_ID: TestGroup1
@@ -265,16 +265,6 @@ jobs:
           ANDROID_TEST_GROUP_ID: TestGroup11
         TestGroup12:
           ANDROID_TEST_GROUP_ID: TestGroup12
-        TestGroup13:
-          ANDROID_TEST_GROUP_ID: TestGroup13
-        TestGroup14:
-          ANDROID_TEST_GROUP_ID: TestGroup14
-        TestGroup15:
-          ANDROID_TEST_GROUP_ID: TestGroup15
-        TestGroup16:
-          ANDROID_TEST_GROUP_ID: TestGroup16
-        TestGroup17:
-          ANDROID_TEST_GROUP_ID: TestGroup17
 
     displayName: Android Test
     dependsOn: AndroidBuild
@@ -299,7 +289,7 @@ jobs:
       - task: Bash@3
         condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
         displayName: 'Start Android Emulator'
-        timeoutInMinutes: 30
+        timeoutInMinutes: 15
         continueOnError: false
         inputs:
           targetType: 'filePath'

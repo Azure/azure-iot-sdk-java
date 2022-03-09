@@ -3,9 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.service.auth;
 
-import com.microsoft.azure.sdk.iot.service.Tools;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 import java.security.SecureRandom;
 
 public class X509Thumbprint
@@ -96,22 +93,6 @@ public class X509Thumbprint
 
         //Codes_SRS_X509THUMBPRINT_34_004: [The function shall set the secondary thumbprint to the given value.]
         this.secondaryThumbprint = secondaryThumbprint;
-    }
-
-
-    @SuppressFBWarnings("HE_EQUALS_USE_HASHCODE") // Can't integrate hashcode into this function without breaking changes
-    @Override
-    public boolean equals(Object other)
-    {
-        if (other instanceof X509Thumbprint)
-        {
-            X509Thumbprint otherThumbprint = (X509Thumbprint) other;
-
-            return (Tools.areEqual(this.getPrimaryThumbprint(), otherThumbprint.getPrimaryThumbprint())
-                && Tools.areEqual(this.getSecondaryThumbprint(), otherThumbprint.getSecondaryThumbprint()));
-        }
-
-        return false;
     }
 
     /**

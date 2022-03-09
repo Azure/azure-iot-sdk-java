@@ -4,8 +4,6 @@
 package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.*;
-import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
-import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 import mockit.*;
 import org.junit.Test;
@@ -79,21 +77,9 @@ public class IndividualEnrollmentTest
         }
 
         @Mock
-        public void setProvisioningStatus(ProvisioningStatus provisioningStatus)
-        {
-            mockedProvisioningStatus = provisioningStatus;
-        }
-
-        @Mock
         public void setInitialTwin(TwinState initialTwin)
         {
             mockedInitialTwin = initialTwin;
-        }
-
-        @Mock
-        public void setEtag(String etag)
-        {
-            mockedEtag = etag;
         }
 
         @Mock
@@ -111,9 +97,9 @@ public class IndividualEnrollmentTest
         IndividualEnrollment individualEnrollment = new IndividualEnrollment(
                 VALID_REGISTRATION_ID,
                 new TpmAttestation(VALID_ENDORSEMENT_KEY, VALID_STORAGE_ROOT_KEY));
-        individualEnrollment.setDeviceIdFinal(VALID_DEVICE_ID);
-        individualEnrollment.setIotHubHostNameFinal(VALID_IOTHUB_HOST_NAME);
-        individualEnrollment.setProvisioningStatusFinal(ProvisioningStatus.ENABLED);
+        individualEnrollment.setDeviceId(VALID_DEVICE_ID);
+        individualEnrollment.setIotHubHostName(VALID_IOTHUB_HOST_NAME);
+        individualEnrollment.setProvisioningStatus(ProvisioningStatus.ENABLED);
 
         return individualEnrollment;
     }
@@ -233,7 +219,7 @@ public class IndividualEnrollmentTest
 
         // assert
         assertEquals(VALID_DEVICE_ID, Deencapsulation.getField(enrollment, "deviceId"));
-        assertNotNull(Deencapsulation.getField(enrollment, "registrationState"));
+        assertNotNull(enrollment.getDeviceRegistrationState());
         assertEquals(VALID_IOTHUB_HOST_NAME, Deencapsulation.getField(enrollment, "iotHubHostName"));
         assertEquals(ProvisioningStatus.ENABLED, Deencapsulation.getField(enrollment, "provisioningStatus"));
     }
@@ -434,7 +420,7 @@ public class IndividualEnrollmentTest
         MockIndividualEnrollment enrollment = new MockIndividualEnrollment(json);
 
         // assert
-        assertEquals(VALID_DATE.toString(), Deencapsulation.getField(enrollment, "createdDateTimeUtcDate").toString());
+        assertEquals(VALID_DATE.toString(), Deencapsulation.getField(enrollment, "createdDateTimeUtc").toString());
     }
 
     @Test
@@ -485,7 +471,7 @@ public class IndividualEnrollmentTest
         MockIndividualEnrollment enrollment = new MockIndividualEnrollment(json);
 
         // assert
-        assertEquals(VALID_DATE.toString(), Deencapsulation.getField(enrollment, "lastUpdatedDateTimeUtcDate").toString());
+        assertEquals(VALID_DATE.toString(), Deencapsulation.getField(enrollment, "lastUpdatedDateTimeUtc").toString());
     }
 
     @Test
@@ -809,13 +795,13 @@ public class IndividualEnrollmentTest
     {
         // arrange
         IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-        assertNotEquals(mockedDeviceRegistrationState, Deencapsulation.getField(individualEnrollment, "registrationState"));
+        assertNotEquals(mockedDeviceRegistrationState, Deencapsulation.getField(individualEnrollment, "deviceRegistrationState"));
 
         // act
-        Deencapsulation.invoke(individualEnrollment, "setRegistrationState", new Class[] {DeviceRegistrationState.class}, mockedDeviceRegistrationState);
+        Deencapsulation.invoke(individualEnrollment, "setDeviceRegistrationState", new Class[] {DeviceRegistrationState.class}, mockedDeviceRegistrationState);
 
         // assert
-        assertEquals(mockedDeviceRegistrationState, Deencapsulation.getField(individualEnrollment, "registrationState"));
+        assertEquals(mockedDeviceRegistrationState, Deencapsulation.getField(individualEnrollment, "deviceRegistrationState"));
     }
 
     @Test
@@ -908,7 +894,7 @@ public class IndividualEnrollmentTest
         assertNotEquals(newHostName, Deencapsulation.getField(individualEnrollment, "iotHubHostName"));
 
         // act
-        individualEnrollment.setIotHubHostNameFinal(newHostName);
+        individualEnrollment.setIotHubHostName(newHostName);
 
         // assert
         assertEquals(newHostName, Deencapsulation.getField(individualEnrollment, "iotHubHostName"));
@@ -936,58 +922,58 @@ public class IndividualEnrollmentTest
         assertNotEquals(ProvisioningStatus.DISABLED, Deencapsulation.getField(individualEnrollment, "provisioningStatus"));
 
         // act
-        individualEnrollment.setProvisioningStatusFinal(ProvisioningStatus.DISABLED);
+        individualEnrollment.setProvisioningStatus(ProvisioningStatus.DISABLED);
 
         // assert
         assertEquals(ProvisioningStatus.DISABLED, Deencapsulation.getField(individualEnrollment, "provisioningStatus"));
     }
 
     @Test
-    public void setCreatedDateTimeUtcSucceed()
+    public void setCreatedDateTimeUtcStringSucceed()
     {
         // arrange
         IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-        assertNull(Deencapsulation.getField(individualEnrollment, "createdDateTimeUtcDate"));
+        assertNull(Deencapsulation.getField(individualEnrollment, "createdDateTimeUtc"));
 
         // act
-        Deencapsulation.invoke(individualEnrollment,"setCreatedDateTimeUtc", new Class[] {String.class}, VALID_DATE_AS_STRING);
+        Deencapsulation.invoke(individualEnrollment,"setCreatedDateTimeUtcString", new Class[] {String.class}, VALID_DATE_AS_STRING);
 
         // assert
-        Helpers.assertDateWithError((Date)Deencapsulation.getField(individualEnrollment, "createdDateTimeUtcDate"), VALID_DATE_AS_STRING);
+        Helpers.assertDateWithError((Date)Deencapsulation.getField(individualEnrollment, "createdDateTimeUtc"), VALID_DATE_AS_STRING);
     }
 
     @Test (expected = IllegalArgumentException.class)
-    public void setCreatedDateTimeUtcThrowsOnNull()
+    public void setCreatedDateTimeUtcStringThrowsOnNull()
     {
         // arrange
         IndividualEnrollment individualEnrollment = makeStandardEnrollment();
 
         // act
-        Deencapsulation.invoke(individualEnrollment,"setCreatedDateTimeUtc", new Class[] {String.class}, (String)null);
-
-        // assert
-    }
-
-    @Test (expected = IllegalArgumentException.class)
-    public void setCreatedDateTimeUtcThrowsOnEmpty()
-    {
-        // arrange
-        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-
-        // act
-        Deencapsulation.invoke(individualEnrollment,"setCreatedDateTimeUtc", new Class[] {String.class}, (String)"");
+        Deencapsulation.invoke(individualEnrollment,"setCreatedDateTimeUtcString", new Class[] {String.class}, (String)null);
 
         // assert
     }
 
     @Test (expected = IllegalArgumentException.class)
-    public void setCreatedDateTimeUtcThrowsOnInvalid()
+    public void setCreatedDateTimeUtcStringThrowsOnEmpty()
     {
         // arrange
         IndividualEnrollment individualEnrollment = makeStandardEnrollment();
 
         // act
-        Deencapsulation.invoke(individualEnrollment,"setCreatedDateTimeUtc", new Class[] {String.class}, (String)"0000-00-00 00:00:00");
+        Deencapsulation.invoke(individualEnrollment,"setCreatedDateTimeUtcString", new Class[] {String.class}, (String)"");
+
+        // assert
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void setCreatedDateTimeUtcStringThrowsOnInvalid()
+    {
+        // arrange
+        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
+
+        // act
+        Deencapsulation.invoke(individualEnrollment,"setCreatedDateTimeUtcString", new Class[] {String.class}, (String)"0000-00-00 00:00:00");
 
         // assert
     }
@@ -997,13 +983,13 @@ public class IndividualEnrollmentTest
     {
         // arrange
         IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-        assertNull(Deencapsulation.getField(individualEnrollment, "lastUpdatedDateTimeUtcDate"));
+        assertNull(Deencapsulation.getField(individualEnrollment, "lastUpdatedDateTimeUtc"));
 
         // act
-        Deencapsulation.invoke(individualEnrollment,"setLastUpdatedDateTimeUtc", new Class[] {String.class}, VALID_DATE_AS_STRING);
+        Deencapsulation.invoke(individualEnrollment,"setLastUpdatedDateTimeUtcString", new Class[] {String.class}, VALID_DATE_AS_STRING);
 
         // assert
-        Helpers.assertDateWithError((Date)Deencapsulation.getField(individualEnrollment, "lastUpdatedDateTimeUtcDate"), VALID_DATE_AS_STRING);
+        Helpers.assertDateWithError((Date)Deencapsulation.getField(individualEnrollment, "lastUpdatedDateTimeUtc"), VALID_DATE_AS_STRING);
     }
 
     @Test (expected = IllegalArgumentException.class)
@@ -1013,7 +999,7 @@ public class IndividualEnrollmentTest
         IndividualEnrollment individualEnrollment = makeStandardEnrollment();
 
         // act
-        Deencapsulation.invoke(individualEnrollment,"setLastUpdatedDateTimeUtc", new Class[] {String.class}, (String)null);
+        Deencapsulation.invoke(individualEnrollment,"setLastUpdatedDateTimeUtcString", new Class[] {String.class}, (String)null);
 
         // assert
     }
@@ -1025,7 +1011,7 @@ public class IndividualEnrollmentTest
         IndividualEnrollment individualEnrollment = makeStandardEnrollment();
 
         // act
-        Deencapsulation.invoke(individualEnrollment,"setLastUpdatedDateTimeUtc", new Class[] {String.class}, (String)"");
+        Deencapsulation.invoke(individualEnrollment,"setLastUpdatedDateTimeUtcString", new Class[] {String.class}, (String)"");
 
         // assert
     }
@@ -1037,7 +1023,7 @@ public class IndividualEnrollmentTest
         IndividualEnrollment individualEnrollment = makeStandardEnrollment();
 
         // act
-        Deencapsulation.invoke(individualEnrollment,"setLastUpdatedDateTimeUtc", new Class[] {String.class}, (String)"0000-00-00 00:00:00");
+        Deencapsulation.invoke(individualEnrollment,"setLastUpdatedDateTimeUtcString", new Class[] {String.class}, (String)"0000-00-00 00:00:00");
 
         // assert
     }

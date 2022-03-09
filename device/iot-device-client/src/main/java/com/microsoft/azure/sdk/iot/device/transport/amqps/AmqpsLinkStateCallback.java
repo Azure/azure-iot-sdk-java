@@ -10,7 +10,7 @@ import org.apache.qpid.proton.engine.BaseHandler;
  * Status callbacks to be executed to notify the session level when something happened to one of its links. Should
  * only be implemented by session handler objects.
  */
-public interface AmqpsLinkStateCallback
+interface AmqpsLinkStateCallback
 {
     /**
      * Executed when a link has finished opening

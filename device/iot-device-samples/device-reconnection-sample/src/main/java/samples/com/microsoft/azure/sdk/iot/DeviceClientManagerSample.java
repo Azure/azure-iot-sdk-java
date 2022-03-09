@@ -83,7 +83,7 @@ public class DeviceClientManagerSample {
 
         // close the connection
         log.info("Closing");
-        deviceClientManager.closeNow();
+        deviceClientManager.close();
 
         if (! failedMessageListOnClose.isEmpty()) {
             log.error("List of messages that were cancelled on close:");

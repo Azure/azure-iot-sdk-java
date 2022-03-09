@@ -158,7 +158,7 @@ public class IotHubSasTokenTest
         assertThat(testSignature, is(signature));
     }
 
-    // Tests_SRS_IOTHUBSASTOKEN_11_013: [**The token generated from DeviceClientConfig shall use correct expiry time (seconds rather than milliseconds)]
+    // Tests_SRS_IOTHUBSASTOKEN_11_013: [**The token generated from ClientConfiguration shall use correct expiry time (seconds rather than milliseconds)]
     @Test
     public void constructorSetsExpiryTimeCorrectly() throws URISyntaxException
     {
@@ -307,56 +307,6 @@ public class IotHubSasTokenTest
                 iotHubConnectionString.getDeviceId(),
                 iotHubConnectionString.getSharedAccessKey(),
                 iotHubConnectionString.getSharedAccessToken(),
-                0);
-    }
-
-    // Tests_SRS_IOTHUBSASTOKEN_34_009: [**The SAS Token shall be checked to see if it has expired and a SecurityException will be thrown if it is expired.**]**
-    @Test (expected = SecurityException.class)
-    public void expiredTokenCausesSecurityException(@Mocked final IotHubConnectionString mockIotHubConnectionString) throws SecurityException
-    {
-        //This expiryTime does not expire for a few billion years
-        Long expiredExpiryTime = 0L;
-        final String sasTokenExpired = "SharedAccessSignature sr=srValue&sig=sigValue&se=" + expiredExpiryTime;
-
-        new NonStrictExpectations()
-        {
-            {
-                mockIotHubConnectionString.getSharedAccessToken();
-                result = sasTokenExpired;
-            }
-        };
-
-        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, String.class, long.class},
-                mockIotHubConnectionString.getHostName(),
-                mockIotHubConnectionString.getDeviceId(),
-                mockIotHubConnectionString.getSharedAccessKey(),
-                mockIotHubConnectionString.getSharedAccessToken(),
-                mockIotHubConnectionString.getModuleId(),
-                0);
-    }
-
-    // Tests_SRS_IOTHUBSASTOKEN_34_009: [**The SAS Token shall be checked to see if it has expired and a SecurityException will be thrown if it is expired.**]**
-    @Test
-    public void nonExpiredTokenDoesNotThrowSecurityException(@Mocked final IotHubConnectionString mockIotHubConnectionString)
-    {
-        //This expiryTime does not expire for a few billion years
-        Long expiryTime = Long.MAX_VALUE;
-        final String sasTokenNotExpired = "SharedAccessSignature sr=srValue&sig=sigValue&se=" + expiryTime;
-
-        new NonStrictExpectations()
-        {
-            {
-                mockIotHubConnectionString.getSharedAccessToken();
-                result = sasTokenNotExpired;
-            }
-        };
-
-        IotHubSasToken token = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, String.class, long.class},
-                mockIotHubConnectionString.getHostName(),
-                mockIotHubConnectionString.getDeviceId(),
-                mockIotHubConnectionString.getSharedAccessKey(),
-                mockIotHubConnectionString.getSharedAccessToken(),
-                mockIotHubConnectionString.getModuleId(),
                 0);
     }
 

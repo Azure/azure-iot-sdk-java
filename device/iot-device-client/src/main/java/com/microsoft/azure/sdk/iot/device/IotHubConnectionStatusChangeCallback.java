@@ -18,5 +18,5 @@ public interface IotHubConnectionStatusChangeCallback
      * @param throwable The throwable that caused the change in status. May be null if there wasn't an associated throwable
      * @param callbackContext the context for this callback that was registered by the user
      */
-    void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext);
+    void onStatusChanged(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext);
 }

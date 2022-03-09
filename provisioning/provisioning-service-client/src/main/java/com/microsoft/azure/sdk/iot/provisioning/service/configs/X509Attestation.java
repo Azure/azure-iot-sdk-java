@@ -5,7 +5,6 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 
 import java.io.Serializable;
 
@@ -99,14 +98,14 @@ public class X509Attestation extends Attestation implements Serializable
     public X509Attestation(X509Attestation x509Attestation)
     {
         /* SRS_X509_ATTESTATION_21_004: [The constructor shall throw IllegalArgumentException if the provided x509Attestation is null.] */
-        if(x509Attestation == null)
+        if (x509Attestation == null)
         {
             throw new IllegalArgumentException("x509Attestation cannot be null");
         }
 
-        X509Certificates clientCertificates = x509Attestation.getClientCertificatesFinal();
-        X509Certificates rootCertificates = x509Attestation.getRootCertificatesFinal();
-        X509CAReferences caReferences = x509Attestation.getCAReferencesFinal();
+        X509Certificates clientCertificates = x509Attestation.getClientCertificates();
+        X509Certificates rootCertificates = x509Attestation.getRootCertificates();
+        X509CAReferences caReferences = x509Attestation.getCAReferences();
 
         /* SRS_X509_ATTESTATION_21_005: [The constructor shall throw IllegalArgumentException if `clientCertificates`, `rootCertificates`, and `caReferences` are null.] */
         /* SRS_X509_ATTESTATION_21_006: [The constructor shall throw IllegalArgumentException if more than one certificate type are not null.] */
@@ -146,7 +145,7 @@ public class X509Attestation extends Attestation implements Serializable
     public static X509Attestation createFromClientCertificates(String primary, String secondary)
     {
         /* SRS_X509_ATTESTATION_21_009: [The factory shall throw IllegalArgumentException if the primary certificate is null or empty.] */
-        if(Tools.isNullOrEmpty(primary))
+        if (primary == null || primary.isEmpty())
         {
             throw new IllegalArgumentException("primary certificate cannot be null or empty");
         }
@@ -186,7 +185,7 @@ public class X509Attestation extends Attestation implements Serializable
     public static X509Attestation createFromRootCertificates(String primary, String secondary)
     {
         /* SRS_X509_ATTESTATION_21_013: [The factory shall throw IllegalArgumentException if the primary certificate is null or empty.] */
-        if(Tools.isNullOrEmpty(primary))
+        if (primary == null || primary.isEmpty())
         {
             throw new IllegalArgumentException("primary certificate cannot be null or empty");
         }
@@ -226,7 +225,7 @@ public class X509Attestation extends Attestation implements Serializable
     public static X509Attestation createFromCAReferences(String primary, String secondary)
     {
         /* SRS_X509_ATTESTATION_21_026: [The factory shall throw IllegalArgumentException if the primary CA reference is null or empty.] */
-        if(Tools.isNullOrEmpty(primary))
+        if (primary == null || primary.isEmpty())
         {
             throw new IllegalArgumentException("primary CA reference cannot be null or empty");
         }
@@ -241,30 +240,12 @@ public class X509Attestation extends Attestation implements Serializable
     /**
      * Getter for the clientCertificates.
      *
-     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #getClientCertificatesFinal()}
-     *
      * @return the {@link X509Certificates} with the stored clientCertificates. it can be {@code null}.
      */
-    @Deprecated
-    public X509Certificates getClientCertificates()
+    public final X509Certificates getClientCertificates()
     {
         /* SRS_X509_ATTESTATION_21_016: [The getClientCertificates shall return the stored clientCertificates.] */
-        if(this.clientCertificates == null)
-        {
-            return null;
-        }
-        return new X509Certificates(this.clientCertificates);
-    }
-
-    /**
-     * Getter for the clientCertificates.
-     *
-     * @return the {@link X509Certificates} with the stored clientCertificates. it can be {@code null}.
-     */
-    public final X509Certificates getClientCertificatesFinal()
-    {
-        /* SRS_X509_ATTESTATION_21_016: [The getClientCertificates shall return the stored clientCertificates.] */
-        if(this.clientCertificates == null)
+        if (this.clientCertificates == null)
         {
             return null;
         }
@@ -274,30 +255,12 @@ public class X509Attestation extends Attestation implements Serializable
     /**
      * Getter for the rootCertificates.
      *
-     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #getRootCertificatesFinal()}
-     *
      * @return the {@link X509Certificates} with the stored rootCertificates. it can be {@code null}.
      */
-    @Deprecated
-    public X509Certificates getRootCertificates()
+    public final X509Certificates getRootCertificates()
     {
         /* SRS_X509_ATTESTATION_21_017: [The getRootCertificates shall return the stored rootCertificates.] */
-        if(this.rootCertificates == null)
-        {
-            return null;
-        }
-        return new X509Certificates(this.rootCertificates);
-    }
-
-    /**
-     * Getter for the rootCertificates.
-     *
-     * @return the {@link X509Certificates} with the stored rootCertificates. it can be {@code null}.
-     */
-    public final X509Certificates getRootCertificatesFinal()
-    {
-        /* SRS_X509_ATTESTATION_21_017: [The getRootCertificates shall return the stored rootCertificates.] */
-        if(this.rootCertificates == null)
+        if (this.rootCertificates == null)
         {
             return null;
         }
@@ -307,30 +270,12 @@ public class X509Attestation extends Attestation implements Serializable
     /**
      * Getter for the caReferences.
      *
-     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #getCAReferencesFinal()}
-     *
      * @return the {@link X509CAReferences} with the stored caReferences. it can be {@code null}.
      */
-    @Deprecated
-    public X509CAReferences getCAReferences()
+    public final X509CAReferences getCAReferences()
     {
         /* SRS_X509_ATTESTATION_21_024: [The getCAReferences shall return the stored caReferences.] */
-        if(this.caReferences == null)
-        {
-            return null;
-        }
-        return new X509CAReferences(this.caReferences);
-    }
-
-    /**
-     * Getter for the caReferences.
-     *
-     * @return the {@link X509CAReferences} with the stored caReferences. it can be {@code null}.
-     */
-    public final X509CAReferences getCAReferencesFinal()
-    {
-        /* SRS_X509_ATTESTATION_21_024: [The getCAReferences shall return the stored caReferences.] */
-        if(this.caReferences == null)
+        if (this.caReferences == null)
         {
             return null;
         }
@@ -348,14 +293,14 @@ public class X509Attestation extends Attestation implements Serializable
     public X509CertificateInfo getPrimaryX509CertificateInfo()
     {
         /* SRS_X509_ATTESTATION_21_018: [If the clientCertificates is not null, the getPrimaryX509CertificateInfo shall return the info in the primary key of the clientCertificates.] */
-        if(this.clientCertificates != null)
+        if (this.clientCertificates != null)
         {
-            return this.clientCertificates.getPrimaryFinal().getInfo();
+            return this.clientCertificates.getPrimary().getInfo();
         }
         /* SRS_X509_ATTESTATION_21_019: [If the rootCertificates is not null, the getPrimaryX509CertificateInfo shall return the info in the primary key of the rootCertificates.] */
-        if(this.rootCertificates != null)
+        if (this.rootCertificates != null)
         {
-            return this.rootCertificates.getPrimaryFinal().getInfo();
+            return this.rootCertificates.getPrimary().getInfo();
         }
         /* SRS_X509_ATTESTATION_21_020: [If both clientCertificates and rootCertificates are null, the getPrimaryX509CertificateInfo shall throw IllegalArgumentException.] */
         throw new IllegalArgumentException("There is no valid certificate information.");
@@ -373,17 +318,17 @@ public class X509Attestation extends Attestation implements Serializable
     {
         X509CertificateWithInfo secondaryCertificate = null;
         /* SRS_X509_ATTESTATION_21_021: [If the clientCertificates is not null, and it contains secondary key, the getSecondaryX509CertificateInfo shall return the info in the secondary key of the rootCertificates.] */
-        if(this.clientCertificates != null)
+        if (this.clientCertificates != null)
         {
-            secondaryCertificate = this.clientCertificates.getSecondaryFinal();
+            secondaryCertificate = this.clientCertificates.getSecondary();
         }
         /* SRS_X509_ATTESTATION_21_022: [If the rootCertificates is not null, and it contains secondary key, the getSecondaryX509CertificateInfo shall return the info in the secondary key of the rootCertificates.] */
-        if(this.rootCertificates != null)
+        if (this.rootCertificates != null)
         {
-            secondaryCertificate = this.rootCertificates.getSecondaryFinal();
+            secondaryCertificate = this.rootCertificates.getSecondary();
         }
 
-        if(secondaryCertificate != null)
+        if (secondaryCertificate != null)
         {
             return secondaryCertificate.getInfo();
         }
@@ -392,11 +337,11 @@ public class X509Attestation extends Attestation implements Serializable
 
     private void validateCertificates(X509Certificates clientCertificates, X509Certificates rootCertificates, X509CAReferences caReferences)
     {
-        if((clientCertificates == null) && (rootCertificates == null) && (caReferences == null))
+        if ((clientCertificates == null) && (rootCertificates == null) && (caReferences == null))
         {
             throw new IllegalArgumentException("Attestation shall receive one no null Certificate");
         }
-        if(((clientCertificates != null) && ((rootCertificates != null) || (caReferences != null))) || ((rootCertificates != null) && (caReferences != null)))
+        if (((clientCertificates != null) && ((rootCertificates != null) || (caReferences != null))) || ((rootCertificates != null) && (caReferences != null)))
         {
             throw new IllegalArgumentException("Attestation cannot receive more than one certificate together");
         }

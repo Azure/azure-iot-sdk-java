@@ -4,24 +4,25 @@
 package tests.integration.com.microsoft.azure.sdk.iot.digitaltwin;
 
 import com.azure.core.credential.AzureSasCredential;
-import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesCallback;
+import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
+import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
+import com.microsoft.azure.sdk.iot.device.twin.Pair;
+import com.microsoft.azure.sdk.iot.device.twin.Property;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.MultiplexingClient;
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
-import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesCallback;
+import com.microsoft.azure.sdk.iot.device.twin.Twin;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
@@ -41,7 +42,6 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
@@ -73,6 +73,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static junit.framework.TestCase.fail;
@@ -84,8 +87,9 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Parameterized.class)
 public class DigitalTwinClientTests extends IntegrationTest
 {
+    private static final int TWIN_PROPAGATION_TIMEOUT_MILLIS = 60 * 1000;
     private static final String IOTHUB_CONNECTION_STRING = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.IOTHUB_CONNECTION_STRING_ENV_VAR_NAME);
-    private static RegistryManager registryManager;
+    private static RegistryClient registryClient;
     private String deviceId;
     private DeviceClient deviceClient;
     private DigitalTwinClient digitalTwinClient = null;
@@ -112,31 +116,31 @@ public class DigitalTwinClientTests extends IntegrationTest
 
     @BeforeClass
     public static void setUpBeforeClass() {
-        registryManager =
-            new RegistryManager(
+        registryClient =
+            new RegistryClient(
                 IOTHUB_CONNECTION_STRING,
-                RegistryManagerOptions.builder()
-                    .httpReadTimeout(0)
+                RegistryClientOptions.builder()
+                    .httpReadTimeoutSeconds(0)
                     .build());
     }
 
     @Before
     public void setUp() throws URISyntaxException, IOException, IotHubException {
         this.deviceClient = createDeviceClient(protocol);
-        deviceClient.open();
+        deviceClient.open(false);
         digitalTwinClient =
             new DigitalTwinClient(
                 IOTHUB_CONNECTION_STRING,
                 DigitalTwinClientOptions.builder()
-                    .httpReadTimeout(0)
+                    .httpReadTimeoutSeconds(0)
                     .build());
     }
 
     @After
     public void cleanUp() {
         try {
-            deviceClient.closeNow();
-            registryManager.removeDevice(deviceId);
+            deviceClient.close();
+            registryClient.removeDevice(deviceId);
         } catch (Exception ex) {
             log.error("An exception occurred while closing/ deleting the device {}: {}", deviceId, ex);
         }
@@ -147,20 +151,13 @@ public class DigitalTwinClientTests extends IntegrationTest
     }
 
     private DeviceClient createDeviceClient(IotHubClientProtocol protocol, String modelId) throws IOException, IotHubException, URISyntaxException {
-        ClientOptions options = new ClientOptions();
-        options.setModelId(modelId);
+        ClientOptions options = ClientOptions.builder().modelId(modelId).build();
 
         this.deviceId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        Device device = Device.createDevice(deviceId, AuthenticationType.SAS);
-        Device registeredDevice = registryManager.addDevice(device);
-        String deviceConnectionString = registryManager.getDeviceConnectionString(registeredDevice);
+        Device device = new Device(deviceId, AuthenticationType.SAS);
+        Device registeredDevice = registryClient.addDevice(device);
+        String deviceConnectionString = Tools.getDeviceConnectionString(IOTHUB_CONNECTION_STRING, registeredDevice);
         return new DeviceClient(deviceConnectionString, protocol, options);
-    }
-
-    @AfterClass
-    public static void cleanUpAfterClass()
-    {
-        registryManager.close();
     }
 
     @BeforeClass
@@ -207,7 +204,7 @@ public class DigitalTwinClientTests extends IntegrationTest
         // register the devices before the multiplexing client has been opened
         multiplexingClient.registerDeviceClients(multiplexedDeviceClients);
 
-        multiplexingClient.open();
+        multiplexingClient.open(false);
 
         // act
         String thermostatDeviceId = multiplexedDeviceClients.get(0).getConfig().getDeviceId();
@@ -241,7 +238,7 @@ public class DigitalTwinClientTests extends IntegrationTest
         multiplexedDeviceClients.add(createDeviceClient(protocol, E2ETestConstants.THERMOSTAT_MODEL_ID));
         multiplexedDeviceClients.add(createDeviceClient(protocol, E2ETestConstants.TEMPERATURE_CONTROLLER_MODEL_ID));
 
-        multiplexingClient.open();
+        multiplexingClient.open(false);
 
         // register the devices after the multiplexing client has been opened
         multiplexingClient.registerDeviceClients(multiplexedDeviceClients);
@@ -273,7 +270,7 @@ public class DigitalTwinClientTests extends IntegrationTest
         DigitalTwinClientOptions clientOptions =
             DigitalTwinClientOptions.builder()
                 .proxyOptions(proxyOptions)
-                .httpReadTimeout(0)
+                .httpReadTimeoutSeconds(0)
                 .build();
 
         digitalTwinClient = new DigitalTwinClient(IOTHUB_CONNECTION_STRING, clientOptions);
@@ -294,7 +291,7 @@ public class DigitalTwinClientTests extends IntegrationTest
         // arrange
         DigitalTwinClientOptions clientOptions =
             DigitalTwinClientOptions.builder()
-                .httpConnectTimeout(-1)
+                .httpConnectTimeoutSeconds(-1)
                 .build();
 
         digitalTwinClient = new DigitalTwinClient(IOTHUB_CONNECTION_STRING, clientOptions);
@@ -306,7 +303,7 @@ public class DigitalTwinClientTests extends IntegrationTest
         // arrange
         DigitalTwinClientOptions clientOptions =
             DigitalTwinClientOptions.builder()
-                .httpReadTimeout(-1)
+                .httpReadTimeoutSeconds(-1)
                 .build();
 
         digitalTwinClient = new DigitalTwinClient(IOTHUB_CONNECTION_STRING, clientOptions);
@@ -387,32 +384,17 @@ public class DigitalTwinClientTests extends IntegrationTest
 
     @Test
     @StandardTierHubOnlyTest
-    public void updateDigitalTwin() throws IOException {
+    public void updateDigitalTwin() throws IOException, TimeoutException, InterruptedException
+    {
         // arrange
+
         String newProperty = "currentTemperature";
         String newPropertyPath = "/currentTemperature";
         Integer newPropertyValue = 35;
 
-        // Property update callback
-        TwinPropertyCallBack twinPropertyCallBack = (property, context) -> {
-            Set<Property> properties = new HashSet<>();
-            properties.add(property);
-            try {
-                deviceClient.sendReportedProperties(properties);
-            } catch (IOException e) {
-            }
-        };
-
-        // IotHub event callback
-        IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) -> {};
-
         // start device twin and setup handler for property updates in device
-        deviceClient.startDeviceTwin(iotHubEventCallback, null, twinPropertyCallBack, null);
-        Map<Property, Pair<TwinPropertyCallBack, Object>> desiredPropertyUpdateCallback =
-                Collections.singletonMap(
-                        new Property(newProperty, null),
-                        new Pair<>(twinPropertyCallBack, null));
-        deviceClient.subscribeToTwinDesiredProperties(desiredPropertyUpdateCallback);
+        deviceClient.subscribeToDesiredProperties((twin, context)
+            -> deviceClient.updateReportedPropertiesAsync(twin.getDesiredProperties(), (ReportedPropertiesCallback) null, null), null);
 
         DigitalTwinUpdateRequestOptions optionsWithoutEtag = new DigitalTwinUpdateRequestOptions();
         optionsWithoutEtag.setIfMatch("*");
@@ -427,17 +409,28 @@ public class DigitalTwinClientTests extends IntegrationTest
         // Add properties at root level - conditional update with max overload
         UpdateOperationUtility updateOperationUtility = new UpdateOperationUtility().appendAddPropertyOperation(newPropertyPath, newPropertyValue);
         digitalTwinClient.updateDigitalTwinWithResponse(deviceId, updateOperationUtility.getUpdateOperations(), optionsWithEtag);
-        BasicDigitalTwin digitalTwin = digitalTwinClient.getDigitalTwinWithResponse(deviceId, BasicDigitalTwin.class).body();
 
-        // assert
-        assertEquals(E2ETestConstants.THERMOSTAT_MODEL_ID, digitalTwin.getMetadata().getModelId());
-        assertTrue(digitalTwin.getMetadata().getWriteableProperties().containsKey(newProperty));
-        assertEquals(newPropertyValue, digitalTwin.getMetadata().getWriteableProperties().get(newProperty).getDesiredValue());
+        long startTime = System.currentTimeMillis();
+        while (System.currentTimeMillis() - startTime <= TWIN_PROPAGATION_TIMEOUT_MILLIS)
+        {
+            BasicDigitalTwin digitalTwin = digitalTwinClient.getDigitalTwinWithResponse(deviceId, BasicDigitalTwin.class).body();
+
+            // assert
+            if (E2ETestConstants.THERMOSTAT_MODEL_ID.equals(digitalTwin.getMetadata().getModelId())
+                && digitalTwin.getMetadata().getWriteableProperties().containsKey(newProperty)
+                && newPropertyValue.equals(digitalTwin.getMetadata().getWriteableProperties().get(newProperty).getDesiredValue()))
+            {
+                return; // conditions met, exit test successfully
+            }
+        }
+
+        fail("Timed out waiting for the model id to be present in the twin service");
     }
 
     @Test
     @StandardTierHubOnlyTest
-    public void invokeRootLevelCommand() throws IOException {
+    public void invokeRootLevelCommand() throws IOException, InterruptedException
+    {
         // arrange
         String commandName = "getMaxMinReport";
         String commandInput = "\"" +ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(5).format(DateTimeFormatter.ISO_DATE_TIME) + "\"";
@@ -451,20 +444,28 @@ public class DigitalTwinClientTests extends IntegrationTest
         Integer deviceFailureResponseStatus = 500;
 
         // Device method callback
-        DeviceMethodCallback deviceMethodCallback = (methodName, methodData, context) -> {
+        MethodCallback methodCallback = (methodName, methodData, context) -> {
             String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
             if(methodName.equalsIgnoreCase(commandName)) {
-                return new DeviceMethodData(deviceSuccessResponseStatus, jsonRequest);
+                return new DirectMethodResponse(deviceSuccessResponseStatus, jsonRequest);
             }
             else {
-                return new DeviceMethodData(deviceFailureResponseStatus, jsonRequest);
+                return new DirectMethodResponse(deviceFailureResponseStatus, jsonRequest);
             }
         };
 
         // IotHub event callback
-        IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) -> {};
+        final CountDownLatch subscribedToMethodsLatch = new CountDownLatch(1);
+        IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) ->
+        {
+            subscribedToMethodsLatch.countDown();
+        };
 
-        deviceClient.subscribeToDeviceMethod(deviceMethodCallback, commandName, iotHubEventCallback, commandName);
+        deviceClient.subscribeToMethodsAsync(methodCallback, commandName, iotHubEventCallback, commandName);
+
+        assertTrue("Timed out waiting for client to subscribe to methods", subscribedToMethodsLatch.await(1, TimeUnit.MINUTES));
+
+        deviceClient.subscribeToMethodsAsync(methodCallback, commandName, iotHubEventCallback, commandName);
 
         // act
         DigitalTwinCommandResponse responseWithNoPayload = this.digitalTwinClient.invokeCommand(deviceId, commandName, null);
@@ -488,7 +489,7 @@ public class DigitalTwinClientTests extends IntegrationTest
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(IOTHUB_CONNECTION_STRING);
         IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
         AzureSasCredential azureSasCredential = new AzureSasCredential(serviceSasToken.toString());
-        DigitalTwinClientOptions options = DigitalTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
+        DigitalTwinClientOptions options = DigitalTwinClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build();
         return new DigitalTwinClient(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
     }
 }

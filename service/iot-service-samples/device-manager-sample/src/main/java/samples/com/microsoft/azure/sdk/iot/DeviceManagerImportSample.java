@@ -7,8 +7,13 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
+import com.microsoft.azure.sdk.iot.service.registry.ExportImportDevice;
+import com.microsoft.azure.sdk.iot.service.registry.ImportMode;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryJob;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
+import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.blob.*;
 
@@ -40,7 +45,7 @@ public class DeviceManagerImportSample
         for (int i = 0; i < 1; i++)
         {
             String deviceId = UUID.randomUUID().toString();
-            Device device = Device.createFromId(deviceId, null, null);
+            Device device = new Device(deviceId);
             AuthenticationMechanism authentication = new AuthenticationMechanism(device.getSymmetricKey());
 
             ExportImportDevice deviceToAdd = new ExportImportDevice();
@@ -67,15 +72,15 @@ public class DeviceManagerImportSample
         importBlob.upload(stream, blobToImport.length);
 
         // Starting the import job
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
-        JobProperties importJob = registryManager.importDevices(containerSasUri, containerSasUri);
+        RegistryClient registryClient = new RegistryClient(SampleUtils.iotHubConnectionString);
+        RegistryJob importJob = registryClient.importDevices(containerSasUri, containerSasUri);
 
         // Waiting for the import job to complete
         while(true)
         {
-            importJob = registryManager.getJob(importJob.getJobId());
-            if (importJob.getStatus() == JobProperties.JobStatus.COMPLETED
-                    || importJob.getStatus() == JobProperties.JobStatus.FAILED)
+            importJob = registryClient.getJob(importJob.getJobId());
+            if (importJob.getStatus() == RegistryJob.JobStatus.COMPLETED
+                    || importJob.getStatus() == RegistryJob.JobStatus.FAILED)
             {
                 break;
             }
@@ -83,7 +88,7 @@ public class DeviceManagerImportSample
         }
 
         // Checking the result of the import job
-        if (importJob.getStatus() == JobProperties.JobStatus.COMPLETED)
+        if (importJob.getStatus() == RegistryJob.JobStatus.COMPLETED)
         {
             System.out.println("Import job completed. The new devices are now added to the hub.");
         }
@@ -101,7 +106,5 @@ public class DeviceManagerImportSample
                 blob.deleteIfExists();
             }
         }
-
-        registryManager.close();
     }
 }

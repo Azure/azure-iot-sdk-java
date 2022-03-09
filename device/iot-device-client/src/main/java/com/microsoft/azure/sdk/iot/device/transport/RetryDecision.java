@@ -26,7 +26,6 @@ public class RetryDecision
      */
     public RetryDecision(boolean shouldRetry, long duration)
     {
-        // Codes_SRS_RETRYDECISION_28_001: [The constructor shall save the duration and getRetryDecision]
         this.duration = duration;
         this.shouldRetry = shouldRetry;
 
@@ -44,7 +43,6 @@ public class RetryDecision
      */
     public boolean shouldRetry()
     {
-        // Codes_SRS_RETRYDECISION_28_002: [The function shall return the value of getRetryDecision]
         return this.shouldRetry;
     }
 
@@ -54,7 +52,6 @@ public class RetryDecision
      */
     public long getDuration()
     {
-        // Codes_SRS_RETRYDECISION_28_003: [The function shall return the value of duration]
         return this.duration;
     }
 }

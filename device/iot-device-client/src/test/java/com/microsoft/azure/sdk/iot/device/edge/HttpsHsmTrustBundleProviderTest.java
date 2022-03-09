@@ -5,11 +5,11 @@
 
 package com.microsoft.azure.sdk.iot.device.edge;
 
+import com.microsoft.azure.sdk.iot.device.hsm.UnixDomainSocketChannel;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.TrustBundleResponse;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.hsm.HsmException;
 import com.microsoft.azure.sdk.iot.device.hsm.HttpsHsmClient;
-import com.microsoft.azure.sdk.iot.device.edge.HttpsHsmTrustBundleProvider;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import org.junit.Test;
@@ -23,6 +23,9 @@ public class HttpsHsmTrustBundleProviderTest
 {
     @Mocked
     HttpsHsmClient mockedHttpsHsmClient;
+
+    @Mocked
+    UnixDomainSocketChannel mockedUnixDomainSocketChannel;
 
     @Mocked
     TrustBundleResponse mockedTrustBundleResponse;
@@ -51,7 +54,7 @@ public class HttpsHsmTrustBundleProviderTest
         };
 
         //act
-        String actualCertificatesString = provider.getTrustBundleCerts(expectedUri, expectedAPIVersion);
+        String actualCertificatesString = provider.getTrustBundleCerts(expectedUri, expectedAPIVersion, mockedUnixDomainSocketChannel);
 
         //assert
         assertEquals(expectedCertificatesString, actualCertificatesString);

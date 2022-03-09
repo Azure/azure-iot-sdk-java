@@ -10,7 +10,7 @@ public class SDKUtils
 {
     private static final String SERVICE_API_VERSION = "2021-10-01";
     private static final String PROVISIONING_SERVICE_CLIENT = "com.microsoft.azure.sdk.iot.provisioning.service.provisioning-service-client/";
-    private static final String PROVISIONING_SERVICE_CLIENT_VERSION = "1.9.3";
+    private static final String PROVISIONING_SERVICE_CLIENT_VERSION = "2.0.0";
 
     private static final String JAVA_RUNTIME = System.getProperty("java.version");
     private static final String OPERATING_SYSTEM = System.getProperty("java.runtime.name").toLowerCase().contains("android") ? "Android" : System.getProperty("os.name");
@@ -32,7 +32,7 @@ public class SDKUtils
      *
      * @return A {@code String} with the SDK package name and version
      */
-    public static String getUserAgentString()
+    static String getUserAgentString()
     {
         /* SRS_SDK_UTILS_21_002: [The getUserAgentString shall return a string with the SDK name and version separated by `/`.] */
         return PROVISIONING_SERVICE_CLIENT + PROVISIONING_SERVICE_CLIENT_VERSION + " (" + JAVA_RUNTIME + "; " + OPERATING_SYSTEM +"; " + PROCESSOR_ARCHITECTURE + ")";

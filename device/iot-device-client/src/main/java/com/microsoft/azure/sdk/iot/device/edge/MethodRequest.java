@@ -44,7 +44,6 @@ public class MethodRequest
      */
     public MethodRequest(String methodName, String payload) throws IllegalArgumentException
     {
-        // Codes_SRS_DIRECTMETHODREQUEST_34_001: [This constructor shall invoke the overloaded constructor with default values of responseTimeout=0 and connectionTimeout=0.]
         this(methodName, payload, null, null);
     }
 
@@ -60,11 +59,9 @@ public class MethodRequest
     {
         if (methodName == null || methodName.isEmpty())
         {
-            // Codes_SRS_DIRECTMETHODREQUEST_34_002: [If the provided methodName is null or empty, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("MethodName cannot be null or empty");
         }
 
-        // Codes_SRS_DIRECTMETHODREQUEST_34_003: [This constructor shall save the provided payload, methodname, and timeouts.]
         this.payload = payload;
         this.methodName = methodName;
         this.responseTimeoutInSeconds = responseTimeout;

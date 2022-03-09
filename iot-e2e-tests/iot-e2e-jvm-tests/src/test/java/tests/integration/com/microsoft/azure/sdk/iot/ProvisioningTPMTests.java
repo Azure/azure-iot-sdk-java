@@ -43,7 +43,7 @@ public class ProvisioningTPMTests
     @Test
     public void provisioningTpmFlow() throws SecurityProviderException, ProvisioningServiceClientException, ProvisioningDeviceClientException, InterruptedException
     {
-        ProvisioningServiceClient provisioningServiceClient = ProvisioningServiceClient.createFromConnectionString(provisioningServiceConnectionString);
+        ProvisioningServiceClient provisioningServiceClient = new ProvisioningServiceClient(provisioningServiceConnectionString);
 
         String registrationId = UUID.randomUUID().toString();
         String provisionedDeviceId = "Some-Provisioned-Device-" + TPM + "-" + UUID.randomUUID().toString();
@@ -51,7 +51,7 @@ public class ProvisioningTPMTests
         Attestation attestation = new TpmAttestation(new String(encodeBase64(((SecurityProviderTpm) securityProvider).getEndorsementKey())));
 
         IndividualEnrollment individualEnrollment = new IndividualEnrollment(registrationId, attestation);
-        individualEnrollment.setDeviceIdFinal(provisionedDeviceId);
+        individualEnrollment.setDeviceId(provisionedDeviceId);
         provisioningServiceClient.createOrUpdateIndividualEnrollment(individualEnrollment);
 
         ProvisioningDeviceClient provisioningDeviceClient =
@@ -94,6 +94,6 @@ public class ProvisioningTPMTests
         }
 
         assertTrue("Registration completed, but not successfully", registrationCompletedSuccessfully.get());
-        provisioningDeviceClient.closeNow();
+        provisioningDeviceClient.close();
     }
 }

@@ -18,8 +18,8 @@ public class SamplesArguments
     private final String IOTHUB_HOSTNAME = "IotHubHostName";
     private final String IOTHUB_SHARED_ACCESS_SIGNATURE = "SharedAccessSignature";
 
-    private String iotHubHostName;
-    private String sharedAccessSignature;
+    private final String iotHubHostName;
+    private final String sharedAccessSignature;
 
     public SamplesArguments(String[] args)
     {

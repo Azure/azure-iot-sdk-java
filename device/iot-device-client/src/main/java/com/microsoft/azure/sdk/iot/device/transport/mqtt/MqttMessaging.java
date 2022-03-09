@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Queue;
 
-public class MqttMessaging extends Mqtt
+class MqttMessaging extends Mqtt
 {
     private final String moduleId;
     private final String eventsSubscribeTopic;

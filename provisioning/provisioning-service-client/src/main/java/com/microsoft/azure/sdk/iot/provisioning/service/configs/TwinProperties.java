@@ -7,6 +7,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
 
 import java.io.Serializable;
 
@@ -63,6 +64,7 @@ public class TwinProperties implements Serializable
     private static final String DESIRED_PROPERTIES_TAG = "desired";
     @Expose
     @SerializedName(DESIRED_PROPERTIES_TAG)
+    @Getter
     private TwinCollection desired;
 
     /**
@@ -89,7 +91,7 @@ public class TwinProperties implements Serializable
     TwinProperties(TwinCollection desired)
     {
         /* SRS_TWIN_PROPERTIES_21_001: [The constructor shall throw IllegalArgumentException if the provided desired property is null.] */
-        if(desired == null)
+        if (desired == null)
         {
             throw new IllegalArgumentException("Desired property cannot be null.");
         }
@@ -117,7 +119,7 @@ public class TwinProperties implements Serializable
         JsonObject twinJson = new JsonObject();
 
         /* SRS_TWIN_PROPERTIES_21_004: [If the desired property is null, the toJsonElement shall not include the `desired` in the final JSON.] */
-        if(this.desired != null)
+        if (this.desired != null)
         {
             twinJson.add(DESIRED_PROPERTIES_TAG, this.desired.toJsonElement());
         }
@@ -147,23 +149,12 @@ public class TwinProperties implements Serializable
         JsonObject twinJson = new JsonObject();
 
         /* SRS_TWIN_PROPERTIES_21_006: [If the desired property is null, the toJsonElementWithMetadata shall not include the `desired` in the final JSON.] */
-        if(this.desired != null)
+        if (this.desired != null)
         {
             twinJson.add(DESIRED_PROPERTIES_TAG, this.desired.toJsonElementWithMetadata());
         }
 
         return twinJson;
-    }
-
-    /**
-     * Getter for the desired property.
-     *
-     * @return The {@code TwinCollection} with the desired property content. It can be {@code null}.
-     */
-    public TwinCollection getDesired()
-    {
-        /* SRS_TWIN_PROPERTIES_21_007: [The getDesired shall return a TwinCollection with the stored desired property.] */
-        return this.desired;
     }
 
     /**

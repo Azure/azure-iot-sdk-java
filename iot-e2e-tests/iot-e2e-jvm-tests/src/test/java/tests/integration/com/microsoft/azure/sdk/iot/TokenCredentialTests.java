@@ -8,10 +8,8 @@ import com.azure.identity.ClientSecretCredentialBuilder;
 import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
+import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
@@ -27,36 +25,37 @@ import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.Message;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
+import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
+import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
+import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.messaging.Message;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethodClientOptions;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
-import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
+import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
+import com.microsoft.azure.sdk.iot.service.twin.Twin;
+import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.customized.DigitalTwinGetHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.serialization.BasicDigitalTwin;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.query.QueryClient;
+import com.microsoft.azure.sdk.iot.service.query.TwinQueryResponse;
 import com.microsoft.rest.ServiceResponseWithHeaders;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assume;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
-import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
 import static tests.integration.com.microsoft.azure.sdk.iot.Tools.*;
@@ -256,15 +255,27 @@ public class TokenCredentialTests
 //        assertNotNull(twin.getETag());
 //    }
 
-    private DeviceClient createDeviceClient(IotHubClientProtocol protocol, RegistryManager registryManager) throws IOException, IotHubException, URISyntaxException
+    @Ignore // TODO the service throws a 500 error in Canary environments
+    @Test
+    public void testQueryTwinWithTokenCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
     {
-        ClientOptions options = new ClientOptions();
-        options.setModelId(THERMOSTAT_MODEL_ID);
+        Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
 
+        QueryClient queryClient = buildQueryClientWithTokenCredential();
+
+        TwinQueryResponse twinQueryResponse = queryClient.queryTwins("SELECT * FROM devices");
+
+        // only testing that authentication works, so no need to delve deeper into what the query response contents are
+        assertNotNull(twinQueryResponse);
+    }
+
+    private DeviceClient createDeviceClient(IotHubClientProtocol protocol, RegistryClient registryClient) throws IOException, IotHubException, URISyntaxException
+    {
+        ClientOptions options = ClientOptions.builder().modelId(THERMOSTAT_MODEL_ID).build();
         String deviceId = "some-device-" + UUID.randomUUID();
-        Device device = Device.createDevice(deviceId, AuthenticationType.SAS);
-        Device registeredDevice = registryManager.addDevice(device);
-        String deviceConnectionString = registryManager.getDeviceConnectionString(registeredDevice);
+        Device device = new Device(deviceId, AuthenticationType.SAS);
+        Device registeredDevice = registryClient.addDevice(device);
+        String deviceConnectionString = Tools.getDeviceConnectionString(iotHubConnectionString, registeredDevice);
         return new DeviceClient(deviceConnectionString, protocol, options);
     }
 }

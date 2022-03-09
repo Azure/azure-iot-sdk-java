@@ -52,16 +52,11 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
      * @param callback The callback function.
      * @param callbackContext The callback context
      */
-    public void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext)
+    public void setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext)
     {
     }
 
     public void close()
-    {
-        closeNow();
-    }
-
-    public void closeNow()
     {
         synchronized (lastKnownConnectionStatusLock)
         {
@@ -111,7 +106,7 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
     }
 
     @Override
-    public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+    public void onStatusChanged(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
     {
         if (throwable == null)
         {
@@ -165,7 +160,7 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
                             }
                             catch (Exception ex)
                             {
-                                log.warn("Client " + getClientId() + " closeNow failed.", ex);
+                                log.warn("Client " + getClientId() + " close failed.", ex);
                             }
                             finally
                             {

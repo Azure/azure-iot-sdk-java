@@ -5,7 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.android.iothub;
 
-import com.microsoft.azure.sdk.iot.android.helper.TestGroup16;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup6;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 
 import org.junit.Ignore;
@@ -15,7 +15,7 @@ import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.FlakeyTest;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.MultiplexingClientTests;
 
-@TestGroup16
+@TestGroup6
 @RunWith(Parameterized.class)
 public class MultiplexingClientAndroidRunner extends MultiplexingClientTests
 {

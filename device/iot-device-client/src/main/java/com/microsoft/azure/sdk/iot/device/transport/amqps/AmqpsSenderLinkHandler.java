@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-public abstract class AmqpsSenderLinkHandler extends BaseHandler
+abstract class AmqpsSenderLinkHandler extends BaseHandler
 {
     static final String VERSION_IDENTIFIER_KEY = "com.microsoft:client-version";
     private static final String API_VERSION_KEY = "com.microsoft:api-version";
@@ -73,19 +73,6 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
     {
         log.debug("{} sender link with address {} and link correlation id {} was successfully opened", getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId);
         this.amqpsLinkStateCallback.onLinkOpened(this);
-
-        boolean hasFlowController = false;
-        Iterator<Handler> children = children();
-        while (children.hasNext())
-        {
-            hasFlowController |= children.next() instanceof LoggingFlowController;
-        }
-
-        if (!hasFlowController)
-        {
-            log.warn("No flow controller detected in {} link with address {} and link correlation id {}. Adding a new flow controller.", getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId);
-            add(new LoggingFlowController(this.linkCorrelationId));
-        }
     }
 
     @Override
@@ -224,7 +211,7 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
         Delivery delivery = this.senderLink.delivery(deliveryTag);
         try
         {
-            log.trace("Sending {} bytes over the amqp {} sender link with address {} and link correlation id {} with link credit", length, getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId, this.senderLink.getCredit());
+            log.trace("Sending {} bytes over the amqp {} sender link with address {} and link correlation id {} with link credit {}", length, getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId, this.senderLink.getCredit());
             int bytesSent = this.senderLink.send(msgData, 0, length);
 
             if (bytesSent != length)

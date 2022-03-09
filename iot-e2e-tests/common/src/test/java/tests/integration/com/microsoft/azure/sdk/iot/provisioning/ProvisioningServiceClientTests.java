@@ -1,7 +1,7 @@
 package tests.integration.com.microsoft.azure.sdk.iot.provisioning;
 
 import com.azure.core.credential.AzureSasCredential;
-import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
+import com.microsoft.azure.sdk.iot.provisioning.service.configs.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
 import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningConnectionString;
 import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningConnectionStringBuilder;
@@ -34,7 +34,7 @@ public class ProvisioningServiceClientTests
     @Before
     public void setUp()
     {
-        provisioningServiceClient = ProvisioningServiceClient.createFromConnectionString(provisioningServiceConnectionString);
+        provisioningServiceClient = new ProvisioningServiceClient(provisioningServiceConnectionString);
     }
 
     @Test
@@ -60,7 +60,7 @@ public class ProvisioningServiceClientTests
     {
         String registrationId = testPrefix + UUID.randomUUID();
         X509CertificateGenerator certificateGenerator = new X509CertificateGenerator(registrationId);
-        String leafPublicPem = certificateGenerator.getPublicCertificate();
+        String leafPublicPem = certificateGenerator.getPublicCertificatePEM();
         Attestation attestation = X509Attestation.createFromClientCertificates(leafPublicPem);
         IndividualEnrollment individualEnrollment = new IndividualEnrollment(registrationId, attestation);
         provisioningServiceClient.createOrUpdateIndividualEnrollment(individualEnrollment);
@@ -69,11 +69,11 @@ public class ProvisioningServiceClientTests
         assertEquals(retrievedAttestationMechanism.getType(), AttestationMechanismType.X509);
         assertTrue(retrievedAttestationMechanism.getAttestation() instanceof X509Attestation);
         X509Attestation retrievedX509Attestation = (X509Attestation) retrievedAttestationMechanism.getAttestation();
-        assertNotNull(retrievedX509Attestation.getClientCertificatesFinal());
-        assertNotNull(retrievedX509Attestation.getClientCertificatesFinal().getPrimaryFinal());
-        assertNotNull(retrievedX509Attestation.getClientCertificatesFinal().getPrimaryFinal().getInfo());
-        assertNotNull(retrievedX509Attestation.getClientCertificatesFinal().getPrimaryFinal().getInfo().getSubjectName());
-        assertTrue(retrievedX509Attestation.getClientCertificatesFinal().getPrimaryFinal().getInfo().getSubjectName().contains(registrationId));
+        assertNotNull(retrievedX509Attestation.getClientCertificates());
+        assertNotNull(retrievedX509Attestation.getClientCertificates().getPrimary());
+        assertNotNull(retrievedX509Attestation.getClientCertificates().getPrimary().getInfo());
+        assertNotNull(retrievedX509Attestation.getClientCertificates().getPrimary().getInfo().getSubjectName());
+        assertTrue(retrievedX509Attestation.getClientCertificates().getPrimary().getInfo().getSubjectName().contains(registrationId));
     }
 
     @Test

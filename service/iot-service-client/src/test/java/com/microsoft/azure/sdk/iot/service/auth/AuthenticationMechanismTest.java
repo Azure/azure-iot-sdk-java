@@ -218,41 +218,4 @@ public class AuthenticationMechanismTest
         assertNull(sasAuth.getPrimaryThumbprint());
         assertNull(sasAuth.getSecondaryThumbprint());
     }
-
-    @Test
-    public void equalsWorks()
-    {
-        //arrange
-        AuthenticationMechanism auth1 = new AuthenticationMechanism(AuthenticationType.CERTIFICATE_AUTHORITY);
-        AuthenticationMechanism auth2 = new AuthenticationMechanism(AuthenticationType.SELF_SIGNED);
-        AuthenticationMechanism auth3 = new AuthenticationMechanism(AuthenticationType.SAS);
-        AuthenticationMechanism auth4 = new AuthenticationMechanism("0000000000000000000000000000000000000000", "0000000000000000000000000000000000000000");
-        AuthenticationMechanism auth5 = new AuthenticationMechanism(new SymmetricKey());
-        AuthenticationMechanism auth6 = new AuthenticationMechanism(new SymmetricKey());
-        AuthenticationMechanism auth7 = new AuthenticationMechanism(AuthenticationType.CERTIFICATE_AUTHORITY);
-
-        //assert
-        assertNotEquals(auth1, auth2);
-        assertNotEquals(auth1, auth3);
-        assertNotEquals(auth1, auth4);
-        assertNotEquals(auth1, auth5);
-        assertNotEquals(auth1, auth6);
-        assertEquals(auth1, auth7);
-
-        assertNotEquals(auth2, auth3);
-        assertNotEquals(auth2, auth4);
-        assertNotEquals(auth2, auth5);
-        assertNotEquals(auth2, auth6);
-
-        assertNotEquals(auth3, auth4);
-        assertNotEquals(auth3, auth5);
-        assertNotEquals(auth3, auth6);
-
-        assertNotEquals(auth4, auth5);
-        assertNotEquals(auth4, auth6);
-
-        assertNotEquals(auth5, auth6);
-
-        assertNotEquals(auth1, "not an authentication object");
-    }
 }

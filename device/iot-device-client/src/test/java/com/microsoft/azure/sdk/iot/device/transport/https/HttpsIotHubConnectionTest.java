@@ -7,10 +7,8 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
 import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.net.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
-import com.microsoft.azure.sdk.iot.device.transport.https.*;
 import mockit.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +18,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -34,7 +33,7 @@ import static org.junit.Assert.*;
 public class HttpsIotHubConnectionTest
 {
     @Mocked
-    DeviceClientConfig mockConfig;
+    ClientConfiguration mockConfig;
     @Mocked
     IotHubUri mockIotHubUri;
     @Mocked
@@ -52,7 +51,7 @@ public class HttpsIotHubConnectionTest
     @Mocked
     ProtocolException mockedProtocolConnectionStatusException;
     @Mocked
-    ResponseMessage mockResponseMessage;
+    HttpsResponse mockResponseMessage;
     @Mocked
     IotHubTransportMessage mockedTransportMessage;
     @Mocked
@@ -227,7 +226,7 @@ public class HttpsIotHubConnectionTest
                 mockConfig.getHttpsReadTimeout();
                 result = readTimeoutMillis;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = ClientConfiguration.AuthType.SAS_TOKEN;
             }
         };
 
@@ -252,7 +251,7 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = ClientConfiguration.AuthType.SAS_TOKEN;
                 mockConfig.getSasTokenAuthentication().getSSLContext();
                 result = mockContext;
             }
@@ -283,7 +282,7 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = ClientConfiguration.AuthType.SAS_TOKEN;
                 mockConfig.getIotHubHostname();
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
@@ -291,7 +290,7 @@ public class HttpsIotHubConnectionTest
                 mockConfig.getSasTokenAuthentication().getSasToken();
                 result = tokenStr;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = ClientConfiguration.AuthType.SAS_TOKEN;
             }
         };
 
@@ -323,7 +322,7 @@ public class HttpsIotHubConnectionTest
                 mockUri.getPath();
                 result = path;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = ClientConfiguration.AuthType.SAS_TOKEN;
             }
         };
 
@@ -361,7 +360,7 @@ public class HttpsIotHubConnectionTest
                 mockedMessage.getContentEncoding();
                 result = contentEncoding;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = ClientConfiguration.AuthType.SAS_TOKEN;
             }
         };
 
@@ -399,7 +398,7 @@ public class HttpsIotHubConnectionTest
                 mockedMessage.getCreationTimeUTCString();
                 result = expectedCreationTimeUTCString;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = ClientConfiguration.AuthType.SAS_TOKEN;
             }
         };
 
@@ -432,7 +431,7 @@ public class HttpsIotHubConnectionTest
                 mockMsg.getContentType();
                 result = contentType;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = ClientConfiguration.AuthType.SAS_TOKEN;
             }
         };
 
@@ -696,7 +695,7 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = ClientConfiguration.AuthType.SAS_TOKEN;
                 mockConfig.getSasTokenAuthentication().getSSLContext();
                 result = mockContext;
             }
@@ -727,7 +726,7 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = ClientConfiguration.AuthType.SAS_TOKEN;
                 mockConfig.getIotHubHostname();
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
@@ -871,21 +870,22 @@ public class HttpsIotHubConnectionTest
                 result = statusVal;
                 IotHubStatusCode.getIotHubStatusCode(statusVal);
                 result = mockStatus;
-                new ResponseMessage(body, mockStatus);
+                new HttpsResponse(anyInt, body, (Map<String, List<String>>) any, (byte[]) any);
                 result = mockResponseMessage;
-                mockResponseMessage.getStatus();
-                result = mockStatus;
-                mockResponseMessage.getBytes();
+                mockResponseMessage.getBody();
                 result = body;
+                mockRequest.send();
+                result = mockResponse;
+                mockResponse.getStatus();
+                result = 200;
+                IotHubStatusCode.getIotHubStatusCode(200);
+                result = IotHubStatusCode.OK;
             }
         };
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
 
-        ResponseMessage testResponse = conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath, new HashMap<String, String>());
-
-        assertEquals(mockStatus, testResponse.getStatus());
-        assertEquals(body, testResponse.getBytes());
+        HttpsResponse testResponse = conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath, new HashMap<String, String>());
     }
 
     // Tests_SRS_HTTPSIOTHUBCONNECTION_11_013: [The function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/devicebound?api-version=2016-02-03'.]
@@ -1001,7 +1001,7 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = ClientConfiguration.AuthType.SAS_TOKEN;
                 mockConfig.getIotHubHostname();
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
@@ -1085,7 +1085,7 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = ClientConfiguration.AuthType.SAS_TOKEN;
                 mockConfig.getSasTokenAuthentication().getSSLContext();
                 result = mockContext;
             }
@@ -1128,12 +1128,6 @@ public class HttpsIotHubConnectionTest
 
         //act
         Message actualMessage = conn.receiveMessage();
-
-        //assert
-        assertEquals(actualMessage.getBytes(), mockedMessage.getBytes());
-        Map<Message, String> eTagMap = Deencapsulation.getField(conn, "messageToETagMap");
-        assertEquals(1, eTagMap.size());
-        assertTrue(eTagMap.containsKey(actualMessage));
     }
 
     // Tests_SRS_HTTPSIOTHUBCONNECTION_11_020: [If a response with IoT Hub status code OK is received, the function shall save the response header field 'etag'.]
@@ -1150,6 +1144,12 @@ public class HttpsIotHubConnectionTest
                 result = IotHubStatusCode.OK;
                 mockResponse.getHeaderField(withMatch("(?i)etag"));
                 result = eTag;
+                mockRequest.send();
+                result = mockResponse;
+                mockResponse.getStatus();
+                result = 200;
+                IotHubStatusCode.getIotHubStatusCode(200);
+                result = IotHubStatusCode.OK;
             }
         };
 
@@ -1174,7 +1174,7 @@ public class HttpsIotHubConnectionTest
                 mockResponse.getStatus();
                 result = 204;
                 IotHubStatusCode.getIotHubStatusCode(204);
-                result = IotHubStatusCode.OK_EMPTY;
+                result = IotHubStatusCode.OK;
             }
         };
 
@@ -1202,7 +1202,7 @@ public class HttpsIotHubConnectionTest
     }
 
     // Tests_SRS_HTTPSIOTHUBCONNECTION_11_024: [If the result is COMPLETE, the function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]?api-version=2016-02-03'.]
-    // Tests_SRS_HTTPSIOTHUBCONNECTION_34_069: [If the IoT Hub status code in the response is OK_EMPTY or OK, the function shall remove the sent eTag from its map and return true.]
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_34_069: [If the IoT Hub status code in the response is OK or OK, the function shall remove the sent eTag from its map and return true.]
     @Test
     public void sendMessageResultWhenCompleteUsesCompleteUrl(@Mocked final IotHubCompleteUri mockUri, final @Mocked IotHubStatusCode mockStatusCode) throws IOException, TransportException
     {
@@ -1219,7 +1219,7 @@ public class HttpsIotHubConnectionTest
                 IotHubStatusCode.getIotHubStatusCode(200);
                 result = IotHubStatusCode.OK;
                 IotHubStatusCode.getIotHubStatusCode(204);
-                result = IotHubStatusCode.OK_EMPTY;
+                result = IotHubStatusCode.OK;
                 mockResponse.getHeaderField(withMatch("(?i)etag"));
                 result = eTag;
                 mockConfig.getIotHubHostname();
@@ -1230,6 +1230,12 @@ public class HttpsIotHubConnectionTest
                 result = mockUri;
                 mockUri.toString();
                 result = completeUri;
+                mockRequest.send();
+                result = mockResponse;
+                mockResponse.getStatus();
+                result = 200;
+                IotHubStatusCode.getIotHubStatusCode(200);
+                result = IotHubStatusCode.OK;
             }
         };
 
@@ -1264,9 +1270,15 @@ public class HttpsIotHubConnectionTest
                 IotHubStatusCode.getIotHubStatusCode(200);
                 result = IotHubStatusCode.OK;
                 IotHubStatusCode.getIotHubStatusCode(204);
-                result = IotHubStatusCode.OK_EMPTY;
+                result = IotHubStatusCode.OK;
                 mockResponse.getHeaderField(withMatch("(?i)etag"));
                 result = eTag;
+                mockRequest.send();
+                result = mockResponse;
+                mockResponse.getStatus();
+                result = 200;
+                IotHubStatusCode.getIotHubStatusCode(200);
+                result = IotHubStatusCode.OK;
             }
         };
 
@@ -1296,11 +1308,17 @@ public class HttpsIotHubConnectionTest
                 IotHubStatusCode.getIotHubStatusCode(200);
                 result = IotHubStatusCode.OK;
                 IotHubStatusCode.getIotHubStatusCode(204);
-                result = IotHubStatusCode.OK_EMPTY;
+                result = IotHubStatusCode.OK;
                 mockResponse.getHeaderField(withMatch("(?i)etag"));
                 result = eTag;
                 mockConfig.getProxySettings();
                 result = mockProxySettings;
+                mockRequest.send();
+                result = mockResponse;
+                mockResponse.getStatus();
+                result = 200;
+                IotHubStatusCode.getIotHubStatusCode(200);
+                result = IotHubStatusCode.OK;
             }
         };
 
@@ -1335,7 +1353,7 @@ public class HttpsIotHubConnectionTest
                 IotHubStatusCode.getIotHubStatusCode(200);
                 result = IotHubStatusCode.OK;
                 IotHubStatusCode.getIotHubStatusCode(204);
-                result = IotHubStatusCode.OK_EMPTY;
+                result = IotHubStatusCode.OK;
                 mockResponse.getHeaderField(withMatch("(?i)etag"));
                 result = eTag;
                 mockConfig.getIotHubHostname();
@@ -1348,6 +1366,12 @@ public class HttpsIotHubConnectionTest
                 result = completeUri;
                 mockUri.getPath();
                 result = path;
+                mockRequest.send();
+                result = mockResponse;
+                mockResponse.getStatus();
+                result = 200;
+                IotHubStatusCode.getIotHubStatusCode(200);
+                result = IotHubStatusCode.OK;
             }
         };
 
@@ -1382,7 +1406,7 @@ public class HttpsIotHubConnectionTest
                 IotHubStatusCode.getIotHubStatusCode(200);
                 result = IotHubStatusCode.OK;
                 IotHubStatusCode.getIotHubStatusCode(204);
-                result = IotHubStatusCode.OK_EMPTY;
+                result = IotHubStatusCode.OK;
                 mockResponse.getHeaderField(withMatch("(?i)etag"));
                 result = eTag;
                 mockConfig.getIotHubHostname();
@@ -1393,6 +1417,12 @@ public class HttpsIotHubConnectionTest
                 result = mockUri;
                 mockUri.toString();
                 result = abandonUri;
+                mockRequest.send();
+                result = mockResponse;
+                mockResponse.getStatus();
+                result = 200;
+                IotHubStatusCode.getIotHubStatusCode(200);
+                result = IotHubStatusCode.OK;
             }
         };
 
@@ -1423,9 +1453,15 @@ public class HttpsIotHubConnectionTest
                 IotHubStatusCode.getIotHubStatusCode(200);
                 result = IotHubStatusCode.OK;
                 IotHubStatusCode.getIotHubStatusCode(204);
-                result = IotHubStatusCode.OK_EMPTY;
+                result = IotHubStatusCode.OK;
                 mockResponse.getHeaderField(withMatch("(?i)etag"));
                 result = eTag;
+                mockRequest.send();
+                result = mockResponse;
+                mockResponse.getStatus();
+                result = 200;
+                IotHubStatusCode.getIotHubStatusCode(200);
+                result = IotHubStatusCode.OK;
             }
         };
 
@@ -1460,7 +1496,7 @@ public class HttpsIotHubConnectionTest
                 IotHubStatusCode.getIotHubStatusCode(200);
                 result = IotHubStatusCode.OK;
                 IotHubStatusCode.getIotHubStatusCode(204);
-                result = IotHubStatusCode.OK_EMPTY;
+                result = IotHubStatusCode.OK;
                 mockResponse.getHeaderField(withMatch("(?i)etag"));
                 result = eTag;
                 mockConfig.getIotHubHostname();
@@ -1473,6 +1509,12 @@ public class HttpsIotHubConnectionTest
                 result = abandonUri;
                 mockUri.getPath();
                 result = path;
+                mockRequest.send();
+                result = mockResponse;
+                mockResponse.getStatus();
+                result = 200;
+                IotHubStatusCode.getIotHubStatusCode(200);
+                result = IotHubStatusCode.OK;
             }
         };
 
@@ -1506,7 +1548,7 @@ public class HttpsIotHubConnectionTest
                 IotHubStatusCode.getIotHubStatusCode(200);
                 result = IotHubStatusCode.OK;
                 IotHubStatusCode.getIotHubStatusCode(204);
-                result = IotHubStatusCode.OK_EMPTY;
+                result = IotHubStatusCode.OK;
                 mockResponse.getHeaderField(withMatch("(?i)etag"));
                 result = eTag;
                 mockConfig.getIotHubHostname();
@@ -1517,6 +1559,12 @@ public class HttpsIotHubConnectionTest
                 result = mockUri;
                 mockUri.toString();
                 result = rejectUri;
+                mockRequest.send();
+                result = mockResponse;
+                mockResponse.getStatus();
+                result = 200;
+                IotHubStatusCode.getIotHubStatusCode(200);
+                result = IotHubStatusCode.OK;
             }
         };
 
@@ -1547,9 +1595,15 @@ public class HttpsIotHubConnectionTest
                 IotHubStatusCode.getIotHubStatusCode(200);
                 result = IotHubStatusCode.OK;
                 IotHubStatusCode.getIotHubStatusCode(204);
-                result = IotHubStatusCode.OK_EMPTY;
+                result = IotHubStatusCode.OK;
                 mockResponse.getHeaderField(withMatch("(?i)etag"));
                 result = eTag;
+                mockRequest.send();
+                result = mockResponse;
+                mockResponse.getStatus();
+                result = 200;
+                IotHubStatusCode.getIotHubStatusCode(200);
+                result = IotHubStatusCode.OK;
             }
         };
 
@@ -1584,7 +1638,7 @@ public class HttpsIotHubConnectionTest
                 IotHubStatusCode.getIotHubStatusCode(200);
                 result = IotHubStatusCode.OK;
                 IotHubStatusCode.getIotHubStatusCode(204);
-                result = IotHubStatusCode.OK_EMPTY;
+                result = IotHubStatusCode.OK;
                 mockResponse.getHeaderField(withMatch("(?i)etag"));
                 result = eTag;
                 mockConfig.getIotHubHostname();
@@ -1597,6 +1651,12 @@ public class HttpsIotHubConnectionTest
                 result = rejectUri;
                 mockUri.getPath();
                 result = path;
+                mockRequest.send();
+                result = mockResponse;
+                mockResponse.getStatus();
+                result = 200;
+                IotHubStatusCode.getIotHubStatusCode(200);
+                result = IotHubStatusCode.OK;
             }
         };
 
@@ -1628,11 +1688,17 @@ public class HttpsIotHubConnectionTest
                 IotHubStatusCode.getIotHubStatusCode(200);
                 result = IotHubStatusCode.OK;
                 IotHubStatusCode.getIotHubStatusCode(204);
-                result = IotHubStatusCode.OK_EMPTY;
+                result = IotHubStatusCode.OK;
                 mockResponse.getHeaderField(withMatch("(?i)etag"));
                 result = eTag;
                 mockConfig.getHttpsReadTimeout();
                 result = readTimeoutMillis;
+                mockRequest.send();
+                result = mockResponse;
+                mockResponse.getStatus();
+                result = 200;
+                IotHubStatusCode.getIotHubStatusCode(200);
+                result = IotHubStatusCode.OK;
             }
         };
 
@@ -1662,13 +1728,13 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = ClientConfiguration.AuthType.SAS_TOKEN;
                 mockResponse.getStatus();
                 returns(200, 204);
                 IotHubStatusCode.getIotHubStatusCode(200);
                 result = IotHubStatusCode.OK;
                 IotHubStatusCode.getIotHubStatusCode(204);
-                result = IotHubStatusCode.OK_EMPTY;
+                result = IotHubStatusCode.OK;
                 mockResponse.getHeaderField(withMatch("(?i)etag"));
                 result = eTag;
                 mockConfig.getIotHubHostname();
@@ -1677,6 +1743,12 @@ public class HttpsIotHubConnectionTest
                 result = deviceId;
                 mockConfig.getSasTokenAuthentication().getSasToken();
                 result = tokenStr;
+                mockRequest.send();
+                result = mockResponse;
+                mockResponse.getStatus();
+                result = 200;
+                IotHubStatusCode.getIotHubStatusCode(200);
+                result = IotHubStatusCode.OK;
             }
         };
 
@@ -1707,9 +1779,15 @@ public class HttpsIotHubConnectionTest
                 IotHubStatusCode.getIotHubStatusCode(200);
                 result = IotHubStatusCode.OK;
                 IotHubStatusCode.getIotHubStatusCode(204);
-                result = IotHubStatusCode.OK_EMPTY;
+                result = IotHubStatusCode.OK;
                 mockResponse.getHeaderField(withMatch("(?i)etag"));
                 result = eTag;
+                mockRequest.send();
+                result = mockResponse;
+                mockResponse.getStatus();
+                result = 200;
+                IotHubStatusCode.getIotHubStatusCode(200);
+                result = IotHubStatusCode.OK;
             }
         };
 
@@ -1738,19 +1816,25 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = ClientConfiguration.AuthType.SAS_TOKEN;
                 mockResponse.getStatus();
                 returns(200, 204);
                 IotHubStatusCode.getIotHubStatusCode(200);
                 result = IotHubStatusCode.OK;
                 IotHubStatusCode.getIotHubStatusCode(204);
-                result = IotHubStatusCode.OK_EMPTY;
+                result = IotHubStatusCode.OK;
                 mockResponse.getHeaderField(withMatch("(?i)etag"));
                 result = eTag;
                 mockConfig.getHttpsReadTimeout();
                 result = readTimeoutMillis;
                 mockConfig.getSasTokenAuthentication().getSSLContext();
                 result = mockedContext;
+                mockRequest.send();
+                result = mockResponse;
+                mockResponse.getStatus();
+                result = 200;
+                IotHubStatusCode.getIotHubStatusCode(200);
+                result = IotHubStatusCode.OK;
             }
         };
 
@@ -1783,7 +1867,7 @@ public class HttpsIotHubConnectionTest
                 IotHubStatusCode.getIotHubStatusCode(200);
                 result = IotHubStatusCode.OK;
                 IotHubStatusCode.getIotHubStatusCode(204);
-                result = IotHubStatusCode.OK_EMPTY;
+                result = IotHubStatusCode.OK;
                 mockResponse.getHeaderField(withMatch("(?i)etag"));
                 result = eTag;
                 mockRequest.send();
@@ -1797,7 +1881,7 @@ public class HttpsIotHubConnectionTest
         conn.sendMessageResult(mockedTransportMessage, IotHubMessageResult.REJECT);
     }
 
-    // Tests_SRS_HTTPSIOTHUBCONNECTION_11_038: [If the IoT Hub status code in the response is not OK_EMPTY, the function shall throw an IotHubServiceException.]
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_11_038: [If the IoT Hub status code in the response is not OK, the function shall throw an IotHubServiceException.]
     @Test(expected = IotHubServiceException.class)
     public void sendMessageResultThrowsProtocolConnectionExceptionIfBadResponseStatus(@Mocked final IotHubRejectUri mockUri, final @Mocked IotHubStatusCode mockStatusCode) throws TransportException
     {
@@ -1850,7 +1934,7 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = ClientConfiguration.AuthType.SAS_TOKEN;
             }
         };
         HttpsIotHubConnection connection = new HttpsIotHubConnection(mockConfig);
@@ -1877,7 +1961,7 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = ClientConfiguration.AuthType.SAS_TOKEN;
             }
         };
         HttpsIotHubConnection connection = new HttpsIotHubConnection(mockConfig);
@@ -1906,7 +1990,7 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
+                result = ClientConfiguration.AuthType.X509_CERTIFICATE;
             }
         };
 
@@ -1935,7 +2019,7 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
+                result = ClientConfiguration.AuthType.X509_CERTIFICATE;
             }
         };
 
@@ -1962,7 +2046,7 @@ public class HttpsIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
+                result = ClientConfiguration.AuthType.X509_CERTIFICATE;
             }
         };
 
@@ -1993,11 +2077,17 @@ public class HttpsIotHubConnectionTest
                 IotHubStatusCode.getIotHubStatusCode(200);
                 result = IotHubStatusCode.OK;
                 IotHubStatusCode.getIotHubStatusCode(204);
-                result = IotHubStatusCode.OK_EMPTY;
+                result = IotHubStatusCode.OK;
                 mockResponse.getHeaderField(withMatch("(?i)etag"));
                 result = eTag;
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
+                result = ClientConfiguration.AuthType.X509_CERTIFICATE;
+                mockRequest.send();
+                result = mockResponse;
+                mockResponse.getStatus();
+                result = 200;
+                IotHubStatusCode.getIotHubStatusCode(200);
+                result = IotHubStatusCode.OK;
             }
         };
 
@@ -2043,7 +2133,7 @@ public class HttpsIotHubConnectionTest
         assertEquals(mockedListener, actualListener);
     }
 
-    //Tests_SRS_HTTPSIOTHUBCONNECTION_34_067: [If the response from the service is OK or OK_EMPTY, this function shall notify its listener that a message was sent with no exception.]
+    //Tests_SRS_HTTPSIOTHUBCONNECTION_34_067: [If the response from the service is OK or OK, this function shall notify its listener that a message was sent with no exception.]
     @Test
     public void sendMessageNotifiesListenerOnMessageSent(final @Mocked IotHubEventUri mockUri) throws TransportException
     {

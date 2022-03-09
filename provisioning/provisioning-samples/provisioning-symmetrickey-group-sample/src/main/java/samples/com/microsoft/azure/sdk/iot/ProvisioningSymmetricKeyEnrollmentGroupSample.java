@@ -130,8 +130,8 @@ public class ProvisioningSymmetricKeyEnrollmentGroupSample
                 String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
                 try
                 {
-                    deviceClient = DeviceClient.createFromSecurityProvider(iotHubUri, deviceId, securityClientSymmetricKey, IotHubClientProtocol.MQTT);
-                    deviceClient.open();
+                    deviceClient = new DeviceClient(iotHubUri, deviceId, securityClientSymmetricKey, IotHubClientProtocol.MQTT);
+                    deviceClient.open(false);
                     Message messageToSendFromDeviceToHub =  new Message("Whatever message you would like to send");
 
                     System.out.println("Sending message from device to IoT Hub...");
@@ -142,7 +142,7 @@ public class ProvisioningSymmetricKeyEnrollmentGroupSample
                     System.out.println("Device client threw an exception: " + e.getMessage());
                     if (deviceClient != null)
                     {
-                        deviceClient.closeNow();
+                        deviceClient.close();
                     }
                 }
             }
@@ -152,7 +152,7 @@ public class ProvisioningSymmetricKeyEnrollmentGroupSample
             System.out.println("Provisioning Device Client threw an exception" + e.getMessage());
             if (provisioningDeviceClient != null)
             {
-                provisioningDeviceClient.closeNow();
+                provisioningDeviceClient.close();
             }
         }
 
@@ -161,11 +161,11 @@ public class ProvisioningSymmetricKeyEnrollmentGroupSample
         scanner.nextLine();
         if (provisioningDeviceClient != null)
         {
-            provisioningDeviceClient.closeNow();
+            provisioningDeviceClient.close();
         }
         if (deviceClient != null)
         {
-            deviceClient.closeNow();
+            deviceClient.close();
         }
 
         System.out.println("Shutting down...");

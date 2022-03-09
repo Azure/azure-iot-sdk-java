@@ -5,8 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service.auth;
 
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
-
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.net.URLEncoder;
@@ -20,7 +18,7 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64String;
  */
 public final class IotHubServiceSasToken
 {
-    private static final long DEFAULT_TOKEN_LIFESPAN_SECONDS = 365*24*60*60; // 1 year
+    private static final long DEFAULT_TOKEN_LIFESPAN_SECONDS = 60*60; // 1 hour
 
     /**
      * The SAS token format. The parameters to be interpolated are, in order:
@@ -30,20 +28,20 @@ public final class IotHubServiceSasToken
      * the key name
      * Example: {@code SharedAccessSignature sr=IOTHUBURI&sig=SIGNATURE&se=EXPIRY&skn=SHAREDACCESSKEYNAME}
      */
-    public static final String TOKEN_FORMAT = "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=%s";
+    private static final String TOKEN_FORMAT = "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=%s";
 
     /* The URI for a connection to an IoT Hub */
-    protected final String resourceUri;
+    private final String resourceUri;
     /* The value of the SharedAccessKey */
-    protected final String keyValue;
+    private final String keyValue;
     /* The time, as a UNIX timestamp, before which the token is valid. */
-    protected final long expiryTimeSeconds;
+    private final long expiryTimeSeconds;
     /* The value of SharedAccessKeyName */
-    protected final String keyName;
+    private final String keyName;
     /* The SAS token that grants access. */
-    protected final String token;
+    private final String token;
 
-    protected final long tokenLifespanSeconds;
+    private final long tokenLifespanSeconds;
 
     /**
      * Constructor. Generates a SAS token that grants access to an IoT Hub for
@@ -63,7 +61,7 @@ public final class IotHubServiceSasToken
      * @param iotHubConnectionString Connection string object containing the connection parameters.
      * @param tokenLifespanSeconds The number of seconds that the created SAS token will be valid for.
      */
-    public IotHubServiceSasToken(IotHubConnectionString iotHubConnectionString, long tokenLifespanSeconds)
+    private IotHubServiceSasToken(IotHubConnectionString iotHubConnectionString, long tokenLifespanSeconds)
     {
         if (iotHubConnectionString == null)
         {

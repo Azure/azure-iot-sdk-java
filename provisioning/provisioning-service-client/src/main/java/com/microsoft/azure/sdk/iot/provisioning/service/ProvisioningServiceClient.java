@@ -98,7 +98,10 @@ public final class ProvisioningServiceClient
      * @param connectionString the {@code String} that cares the connection string of the Device Provisioning Service.
      * @return The {@code ProvisioningServiceClient} with the new instance of this object.
      * @throws IllegalArgumentException if the connectionString is {@code null} or empty.
+     * @deprecated This static constructor works exactly the same as {@link #ProvisioningServiceClient(String)}
+     * so it has been deprecated.
      */
+    @Deprecated
     public static ProvisioningServiceClient createFromConnectionString(String connectionString)
     {
         return new ProvisioningServiceClient(connectionString);
@@ -156,13 +159,20 @@ public final class ProvisioningServiceClient
 
     /**
      * PRIVATE CONSTRUCTOR
+     * Create a new instance of the {@code DeviceProvisioningServiceClient} that exposes
+     * the API to the Device Provisioning Service.
      *
-     * @param connectionString the {@code String} that contains the connection string for the Provisioning service.
-     * @throws IllegalArgumentException if the connectionString is {@code null}, empty, or invalid.
+     * <p> The Device Provisioning Service Client is created based on a <b>Provisioning Connection String</b>.
+     * <p> Once you create a Device Provisioning Service on Azure, you can get the connection string on the Azure portal.
+     *
+     * @see <a href="http://portal.azure.com/">Azure portal</a>
+     *
+     * @param connectionString the {@code String} that cares the connection string of the Device Provisioning Service.
+     * @throws IllegalArgumentException if the connectionString is {@code null} or empty.
      */
-    private ProvisioningServiceClient(String connectionString)
+    public ProvisioningServiceClient(String connectionString)
     {
-        if(Tools.isNullOrEmpty(connectionString))
+        if (Tools.isNullOrEmpty(connectionString))
         {
             throw new IllegalArgumentException("connectionString cannot be null or empty");
         }
@@ -211,7 +221,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Create a new individualEnrollment configurations.
      *     Attestation attestation = new TpmAttestation(TPM_ENDORSEMENT_KEY);
@@ -245,7 +255,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Get the content of the previous individualEnrollment.
      *     IndividualEnrollment individualEnrollment =  deviceProvisioningServiceClient.getIndividualEnrollment(REGISTRATION_ID);
@@ -310,7 +320,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Create two new individualEnrollment configurations.
      *     Attestation attestation = new TpmAttestation(TPM_ENDORSEMENT_KEY);
@@ -384,7 +394,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Get the individualEnrollment information.
      *     IndividualEnrollment enrollmentResult =  deviceProvisioningServiceClient.getIndividualEnrollment(REGISTRATION_ID);
@@ -445,7 +455,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Get the individualEnrollment information.
      *     IndividualEnrollment enrollmentResult =  deviceProvisioningServiceClient.getIndividualEnrollment(REGISTRATION_ID);
@@ -494,7 +504,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Delete the individualEnrollment information.
      *     deviceProvisioningServiceClient.deleteIndividualEnrollment(REGISTRATION_ID);
@@ -542,7 +552,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Delete the individualEnrollment information.
      *     deviceProvisioningServiceClient.deleteIndividualEnrollment(REGISTRATION_ID, ANY_ETAG);
@@ -648,7 +658,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Create a new enrollmentGroup configurations.
      *     Attestation attestation = X509Attestation.createFromSigningCertificates(PUBLIC_KEY_CERTIFICATE_STRING);
@@ -703,7 +713,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Get the individualEnrollment information.
      *     EnrollmentGroup enrollmentGroupResult =  deviceProvisioningServiceClient.getEnrollmentGroup(ENROLLMENT_GROUP_ID);
@@ -719,7 +729,7 @@ public final class ProvisioningServiceClient
      */
     public EnrollmentGroup getEnrollmentGroup(String enrollmentGroupId) throws ProvisioningServiceClientException
     {
-                return enrollmentGroupManager.get(enrollmentGroupId);
+        return enrollmentGroupManager.get(enrollmentGroupId);
     }
 
     /**
@@ -763,7 +773,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Get the enrollmentGroup information.
      *     EnrollmentGroup enrollmentGroupResult =  deviceProvisioningServiceClient.getEnrollmentGroup(ENROLLMENT_GROUP_ID);
@@ -811,7 +821,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Delete the enrollmentGroup information.
      *     deviceProvisioningServiceClient.deleteEnrollmentGroup(ENROLLMENT_GROUP_ID);
@@ -858,7 +868,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Delete the enrollmentGroup information.
      *     deviceProvisioningServiceClient.deleteEnrollmentGroup(ENROLLMENT_GROUP_ID, ANY_ETAG);
@@ -944,7 +954,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Get the deviceRegistrationState information.
      *     DeviceRegistrationState registrationStateResult =  deviceProvisioningServiceClient.getDeviceRegistrationState(REGISTRATION_ID);
@@ -990,7 +1000,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Get the registration status information.
      *     DeviceRegistrationState registrationStateResult =  deviceProvisioningServiceClient.getDeviceRegistrationState(REGISTRATION_ID);
@@ -1006,18 +1016,6 @@ public final class ProvisioningServiceClient
      *                                            registration status information for the provided DeviceRegistrationState.
      */
     public void deleteDeviceRegistrationState(DeviceRegistrationState deviceRegistrationState) throws ProvisioningServiceClientException
-    {
-        registrationStatusManager.delete(deviceRegistrationState);
-    }
-
-    /**
-     * @deprecated As of release 1.0.0, replaced by {@link #deleteDeviceRegistrationState(DeviceRegistrationState)} ()}
-     * @param deviceRegistrationState the {@link DeviceRegistrationState} that identifies the deviceRegistrationState. It cannot be {@code null}.
-     * @throws ProvisioningServiceClientException if the Provisioning Device Service was not able to delete the
-     *                                            registration status information for the provided DeviceRegistrationState.
-     */
-    @Deprecated
-    public void deleteDeviceRegistrationStatus(DeviceRegistrationState deviceRegistrationState) throws ProvisioningServiceClientException
     {
         registrationStatusManager.delete(deviceRegistrationState);
     }
@@ -1048,7 +1046,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Delete the registration status information.
      *     deviceProvisioningServiceClient.deleteDeviceRegistrationState(REGISTRATION_ID);
@@ -1061,18 +1059,6 @@ public final class ProvisioningServiceClient
      *                                            deviceRegistrationState information for the provided registrationId.
      */
     public void deleteDeviceRegistrationState(String id) throws ProvisioningServiceClientException
-    {
-        registrationStatusManager.delete(id, null);
-    }
-
-    /**
-     * @deprecated As of release 1.0.0, replaced by {@link #deleteDeviceRegistrationState(String)} ()}
-     * @param id the {@code String} that identifies the deviceRegistrationState. It cannot be {@code null} or empty.
-     * @throws ProvisioningServiceClientException if the Provisioning Device Service was not able to delete the
-     *                                            deviceRegistrationState information for the provided registrationId.
-     */
-    @Deprecated
-    public void deleteDeviceRegistrationStatus(String id) throws ProvisioningServiceClientException
     {
         registrationStatusManager.delete(id, null);
     }
@@ -1105,7 +1091,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         DeviceProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Delete the deviceRegistrationState information.
      *     deviceProvisioningServiceClient.deleteDeviceRegistrationState(REGISTRATION_ID, ANY_ETAG);
@@ -1125,20 +1111,6 @@ public final class ProvisioningServiceClient
     }
 
     /**
-     * @deprecated As of release 1.0.0, replaced by {@link #deleteDeviceRegistrationState(String, String)} ()}
-     * @param id the {@code String} that identifies the deviceRegistrationState. It cannot be {@code null} or empty.
-     * @param eTag the {@code String} with the deviceRegistrationState eTag. It can be {@code null} or empty.
-     *             The Device Provisioning Service will ignore it in all of these cases.
-     * @throws ProvisioningServiceClientException if the Provisioning Device Service was not able to delete the
-     *                                            deviceRegistrationState information for the provided registrationId and eTag.
-     */
-    @Deprecated
-    public void deleteDeviceRegistrationStatus(String id, String eTag) throws ProvisioningServiceClientException
-    {
-        registrationStatusManager.delete(id, eTag);
-    }
-
-    /**
      * Factory to create a registration status query.
      *
      * <p> This method will create a new registration status query for a specific enrollment group on the Device
@@ -1152,18 +1124,6 @@ public final class ProvisioningServiceClient
      * @return The {@link Query} iterator.
      */
     public Query createEnrollmentGroupRegistrationStateQuery(QuerySpecification querySpecification, String enrollmentGroupId)
-    {
-        return registrationStatusManager.createEnrollmentGroupQuery(querySpecification, enrollmentGroupId,0);
-    }
-
-    /**
-     * @deprecated As of release 1.0.0, replaced by {@link #createEnrollmentGroupRegistrationStateQuery(QuerySpecification, String)} ()}
-     * @param querySpecification the {@link QuerySpecification} with the SQL query. It cannot be {@code null}.
-     * @param enrollmentGroupId the {@code String} that identifies the enrollmentGroup. It cannot be {@code null} or empty.
-     * @return The {@link Query} iterator.
-     */
-    @Deprecated
-    public Query createEnrollmentGroupRegistrationStatusQuery(QuerySpecification querySpecification, String enrollmentGroupId)
     {
         return registrationStatusManager.createEnrollmentGroupQuery(querySpecification, enrollmentGroupId,0);
     }
@@ -1188,20 +1148,6 @@ public final class ProvisioningServiceClient
      * @throws IllegalArgumentException if the provided parameters are not correct.
      */
     public Query createEnrollmentGroupRegistrationStateQuery(QuerySpecification querySpecification, String enrollmentGroupId, int pageSize)
-    {
-        return registrationStatusManager.createEnrollmentGroupQuery(querySpecification, enrollmentGroupId, pageSize);
-    }
-
-    /**
-     * @deprecated As of release 1.0.0, replaced by {@link #createEnrollmentGroupRegistrationStateQuery(QuerySpecification, String, int)} ()}
-     * @param querySpecification the {@link QuerySpecification} with the SQL query. It cannot be {@code null}.
-     * @param enrollmentGroupId the {@code String} that identifies the enrollmentGroup. It cannot be {@code null} or empty.
-     * @param pageSize the {@code int} with the maximum number of items per iteration. It can be 0 for default, but not negative.
-     * @return The {@link Query} iterator.
-     * @throws IllegalArgumentException if the provided parameters are not correct.
-     */
-    @Deprecated
-    public Query createEnrollmentGroupRegistrationStatusQuery(QuerySpecification querySpecification, String enrollmentGroupId, int pageSize)
     {
         return registrationStatusManager.createEnrollmentGroupQuery(querySpecification, enrollmentGroupId, pageSize);
     }

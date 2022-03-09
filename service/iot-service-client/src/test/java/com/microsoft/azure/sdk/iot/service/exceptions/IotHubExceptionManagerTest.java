@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
-import com.microsoft.azure.sdk.iot.service.exceptions.*;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 import mockit.integration.junit4.JMockit;
 import org.junit.Test;
@@ -42,9 +41,9 @@ public class IotHubExceptionManagerTest
         IotHubExceptionManager.httpResponseVerification(response);
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_002: [The function shall throw IotHubUnathorizedException if the Http response status equal 401]
+    // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_002: [The function shall throw IotHubUnauthorizedException if the Http response status equal 401]
     // Assert
-    @Test (expected = IotHubUnathorizedException.class)
+    @Test (expected = IotHubUnauthorizedException.class)
     public void httpResponseVerification401() throws IotHubException
     {
         // Arrange

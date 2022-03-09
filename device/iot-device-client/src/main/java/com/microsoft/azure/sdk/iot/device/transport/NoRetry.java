@@ -16,7 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class NoRetry implements RetryPolicy
 {
-    public NoRetry() {
+    public NoRetry()
+    {
         log.info("NOTE: A new instance of NoRetry has been created, the client will not perform any retries on disconnect.");
     }
     /**
@@ -28,7 +29,6 @@ public class NoRetry implements RetryPolicy
      */
     public RetryDecision getRetryDecision(int currentRetryCount, TransportException lastException)
     {
-        // Codes_SRS_NORETRY_28_001: [The function shall return the false and 0 as the RetryDecision despite on inputs.]
         return new RetryDecision(false, 0);
     }
 }

@@ -5,6 +5,9 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 
@@ -23,12 +26,16 @@ public class SymmetricKeyAttestation extends Attestation implements Serializable
     private static final String PRIMARY_KEY_TAG = "primaryKey";
     @Expose
     @SerializedName(PRIMARY_KEY_TAG)
+    @Getter
+    @Setter(AccessLevel.PRIVATE)
     private String primaryKey;
 
     // the secondary key for attestation [mandatory]
     private static final String SECONDARY_KEY_TAG = "secondaryKey";
     @Expose
     @SerializedName(SECONDARY_KEY_TAG)
+    @Getter
+    @Setter(AccessLevel.PRIVATE)
     private String secondaryKey;
 
     private static final String EMPTY_STRING = "";
@@ -64,7 +71,7 @@ public class SymmetricKeyAttestation extends Attestation implements Serializable
     {
         /* SRS_SYMMETRIC_KEY_ATTESTATION_44_003: [The service will generate symmetric keys if the symmetricKeyAttestation supplied is null or empty.] */
         /* SRS_SYMMETRIC_KEY_ATTESTATION_44_004: [The constructor shall store the primaryKey and secondaryKey provided in the symmetricKey.] */
-        if(symmetricKeyAttestation == null)
+        if (symmetricKeyAttestation == null)
         {
             this.setPrimaryKey(EMPTY_STRING);
             this.setSecondaryKey(EMPTY_STRING);
@@ -74,38 +81,6 @@ public class SymmetricKeyAttestation extends Attestation implements Serializable
             this.setPrimaryKey(symmetricKeyAttestation.primaryKey);
             this.setSecondaryKey(symmetricKeyAttestation.secondaryKey);
         }
-    }
-
-    /**
-     * Getter for the primaryKey.
-     *
-     * @return The {@code String} with the stored primaryKey.
-     */
-    public String getPrimaryKey()
-    {
-        /* SRS_SYMMETRIC_KEY_ATTESTATION_44_005: [The getPrimaryKey shall return the stored primary key.] */
-        return this.primaryKey;
-    }
-
-    /**
-     * Getter for the secondaryKey.
-     *
-     * @return The {@code String} with the stored secondaryKey.
-     */
-    public String getSecondaryKey()
-    {
-        /* SRS_SYMMETRIC_KEY_ATTESTATION_44_006: [The getSecondaryKey shall return the stored secondary key.] */
-        return this.secondaryKey;
-    }
-
-    private void setPrimaryKey(String primaryKey)
-    {
-        this.primaryKey = primaryKey;
-    }
-
-    private void setSecondaryKey(String secondaryKey)
-    {
-        this.secondaryKey = secondaryKey;
     }
 
     /**

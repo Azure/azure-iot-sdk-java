@@ -66,7 +66,7 @@ public class IotHubGatewayServiceAPIsImpl extends ServiceClient implements IotHu
      *
      * @param baseUrl the base URL of the host
      */
-    public IotHubGatewayServiceAPIsImpl(String baseUrl) {
+    private IotHubGatewayServiceAPIsImpl(String baseUrl) {
         super(baseUrl);
         initialize();
     }
@@ -89,7 +89,7 @@ public class IotHubGatewayServiceAPIsImpl extends ServiceClient implements IotHu
      * @param clientBuilder the builder for building an OkHttp client, bundled with user configurations
      * @param restBuilder the builder for building an Retrofit client, bundled with user configurations
      */
-    public IotHubGatewayServiceAPIsImpl(String baseUrl, OkHttpClient.Builder clientBuilder, Retrofit.Builder restBuilder) {
+    private IotHubGatewayServiceAPIsImpl(String baseUrl, OkHttpClient.Builder clientBuilder, Retrofit.Builder restBuilder) {
         super(baseUrl, clientBuilder, restBuilder);
         initialize();
     }
