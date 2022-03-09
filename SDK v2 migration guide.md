@@ -131,6 +131,7 @@ This client has been removed in v2. It is replaced by the MultiplexingClient. Se
 - Trust certificates are read from the physical device's trusted root certification authorities certificate store rather than from source.
   - Users are expected to install the required public certificates into this certificate store if they are not present already.
   - See [this document](./upcoming_certificate_changes_readme.md) for additional context on which certificates need to be installed.
+  - For most users, no action is needed here since IoT Hub uses the [DigiCert Global G2 CA root](https://global-root-g2.chain-demos.digicert.com/info/index.html) certificate which is already installed on most devices.
 - DeviceClient and ModuleClient constructors that take public certificates and private keys as strings have been removed.
   - Users must provide an instance of SSLContext that has their public certificates and private keys loaded into it instead.
   - See [this sample](./device/iot-device-samples/send-event-x509) for the recommended way to create this SSLContext and how to construct your DeviceClient and/or ModuleClient with it.
@@ -266,6 +267,7 @@ been moved to a new ConfigurationsClient in v2.
 - Trust certificates are read from the physical device's trusted root certification authorities certificate store rather than from source.
   - Users are expected to install the required public certificates into this certificate store if they are not present already.
   - See [this document](./upcoming_certificate_changes_readme.md) for additional context on which certificates need to be installed.
+  - For most users, no action is needed here since IoT Hub uses the [DigiCert Global G2 CA root](https://global-root-g2.chain-demos.digicert.com/info/index.html) certificate which is already installed on most devices.
 - The Bouncycastle dependencies have been removed.
   - The Bouncycastle dependencies were used for some certificate parsing logic that has been removed from the SDK.
 - Reduced access levels to classes and methods that were never intended to be public where possible .
@@ -289,6 +291,7 @@ No client APIs have changed for this package, but there are a few notable breaki
 - Trust certificates are read from the physical device's trusted root certification authorities certificate store rather than from source.
   - Users are expected to install the required public certificates into this certificate store if they are not present already.
   - See [this document](./upcoming_certificate_changes_readme.md) for additional context on which certificates need to be installed.
+  - For most users, no action is needed here since IoT Hub uses the [DigiCert Global G2 CA root](https://global-root-g2.chain-demos.digicert.com/info/index.html) certificate which is already installed on most devices.
 - Reduced access levels to classes and methods that were never intended to be public where possible.
 - Reduce default SAS token time to live from 1 year to 1 hour for security purposes.
 
