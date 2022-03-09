@@ -12,7 +12,7 @@ There are a number of reasons why the Azure IoT SDK team chose to do a major ver
   - Many existing client classes (RegistryManager, DeviceTwin, DeviceMethod, ServiceClient, etc.) were confusingly named and contained methods that weren't always consistent with the client's assumed responsibilities.
   - Many existing client's had a mix of standard constructors (```new DeviceClient(...)```) and static builder constructors (```DeviceClient.createFromSecurityProvider(...)```) that caused some confusion among users.
   - ```DeviceClient``` and ```ModuleClient``` had unneccessarily different method names for the same operations (```deviceClient.startDeviceTwin(...)``` vs ```moduleClient.startTwin(...)```) that could be easily unified for consistency.
-
+  - ```DeviceClient``` and ```ModuleClient``` had many asynchronous methods whose naming did not reflect that they were asynchronous. This led to some users calling these methods as though they were synchronous.
 ## Breaking changes overview by package
 
 ### IoT hub Device Client
@@ -97,6 +97,77 @@ Breaking changes:
 
 ### IoT hub Device Client
 
+#### DeviceClient
+
+| V1 class#method  | Equivalent V2 class#method |
+|---:|---:|
+| DeviceClient#setMessageCallback(MessageCallback, Object); | DeviceClient#setMessageCallback(MessageCallback, Object);  |
+| DeviceClient#open(); | DeviceClient#open(boolean);  |
+| DeviceClient#open(boolean); | DeviceClient#open(boolean);  |
+| DeviceClient#getFileUploadSasUri(FileUploadSasUriRequest); | DeviceClient#getFileUploadSasUri(FileUploadSasUriRequest);  |
+| DeviceClient#completeFileUpload(FileUploadCompletionNotification); | DeviceClient#completeFileUpload(FileUploadCompletionNotification);  |
+| DeviceClient#uploadToBlobAsync(String, InputStream, long, IotHubEventCallback, Object); | no equivalent method**  |
+| DeviceClient#isMultiplexed(); | DeviceClient#isMultiplexed();  |
+| DeviceClient#sendEventAsync(Message, IotHubEventCallback, Object); | DeviceClient#sendEventAsync(Message, IotHubEventCallback, Object);  |
+| DeviceClient#registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback, Object); | DeviceClient#setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback, Object);  |
+| DeviceClient#setRetryPolicy(RetryPolicy); | DeviceClient#setRetryPolicy(RetryPolicy);  |
+| DeviceClient#getProductInfo(); | DeviceClient#getProductInfo();  |
+| DeviceClient#subscribeToDeviceMethod(DeviceMethodCallback , Object, IotHubEventCallback, Object); | DeviceClient#subscribeToMethodsAsync(MethodCallback, Object, IotHubEventCallback, Object);  |
+| DeviceClient#startDeviceTwin(IotHubEventCallback, Object, TwinPropertyCallback, Object); | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
+| DeviceClient#startDeviceTwin(IotHubEventCallback, Object, TwinPropertiesCallback, Object); | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
+| DeviceClient#startDeviceTwin(IotHubEventCallback, Object, PropertyCallBack<Type1, Type2>, Object); | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
+| DeviceClient#getDeviceTwin(); | DeviceClient#getTwinAsync();  |
+| DeviceClient#subscribeToDesiredProperties(Map<Property, Pair<PropertyCallBack<String, Object>, Object>>); | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
+| DeviceClient#subscribeToTwinDesiredProperties(Map<Property, Pair<TwinPropertyCallBack, Object>>(); | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
+| DeviceClient#sendReportedProperties(Set<Property>); | DeviceClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesCallback, Object);  |
+| DeviceClient#sendReportedProperties(Set<Property>, int); | DeviceClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesCallback, Object);  |
+| DeviceClient#sendReportedProperties(ReportedPropertiesParameters); | DeviceClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesUpdateCorrelatingMessageCallback, Object);  |
+| DeviceClient#sendReportedProperties(Set<Property>, Integer, CorrelatingMessageCallback, Object, IotHubEventCallback, Object); | DeviceClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesUpdateCorrelatingMessageCallback, Object);  |
+| DeviceClient#setOption(String, Object); | no equivalent method***  |
+
+** This method has been split into the three individual steps that this method used to take. See the file upload samples within this repo for an example of how to do file upload using these discrete steps.
+*** The options that were previously set in this method are now set at DeviceClient constructor time in the optional ClientOptions parameter.
+
+#### ModuleClient
+
+| V1 class#method  | Equivalent V2 class#method |
+|---:|---:|
+| ModuleClient#createFromEnvironment(); | ModuleClient#createFromEnvironment(UnixDomainSocketChannel);  |
+| ModuleClient#sendEventAsync(Message, IotHubEventCallback, Object); | ModuleClient#sendEventAsync(Message, IotHubEventCallback, Object);  |
+| ModuleClient#sendEventAsync(Message, IotHubEventCallback, Object, String); | ModuleClient#sendEventAsync(Message, IotHubEventCallback, Object, String);  |
+| ModuleClient#setMessageCallback(MessageCallback, Object); | ModuleClient#setMessageCallback(MessageCallback, Object);  |
+| ModuleClient#setMessageCallback(String, MessageCallback, Object); | ModuleClient#setMessageCallback(String, MessageCallback, Object);  |
+| ModuleClient#invokeMethod(String, MethodRequest); | ModuleClient#invokeMethod(String, MethodRequest);  |
+| ModuleClient#invokeMethod(String, String, MethodRequest); | ModuleClient#invokeMethod(String, String, MethodRequest);  |
+| ModuleClient#open(); | ModuleClient#open(boolean);  |
+| ModuleClient#open(boolean); | ModuleClient#open(boolean);  |
+| ModuleClient#registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback, Object); | ModuleClient#setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback, Object);  |
+| ModuleClient#setRetryPolicy(RetryPolicy); | ModuleClient#setRetryPolicy(RetryPolicy);  |
+| ModuleClient#setOperationTimeout(long); | ModuleClient#setOperationTimeout(long);  |
+| ModuleClient#getProductInfo(); | ModuleClient#getProductInfo();  |
+| ModuleClient#subscribeToMethod(DeviceMethodCallback , Object, IotHubEventCallback, Object);(); | ModuleClient#subscribeToMethodsAsync(MethodCallback, Object, IotHubEventCallback, Object);  |
+| ModuleClient#startTwin(IotHubEventCallback, Object, TwinPropertyCallback, Object); | ModuleClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
+| ModuleClient#startTwin(IotHubEventCallback, Object, TwinPropertiesCallback, Object); | ModuleClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
+| ModuleClient#startTwin(IotHubEventCallback, Object, PropertyCallBack<Type1, Type2>, Object); | ModuleClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
+| ModuleClient#subscribeToDesiredProperties(Map<Property, Pair<PropertyCallBack<String, Object>, Object>>); | ModuleClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
+| ModuleClient#subscribeToTwinDesiredProperties(Map<Property, Pair<TwinPropertyCallBack, Object>>(); | ModuleClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
+| ModuleClient#sendReportedProperties(Set<Property>); | ModuleClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesCallback, Object);  |
+| ModuleClient#sendReportedProperties(Set<Property>, int); | ModuleClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesCallback, Object);  |
+| ModuleClient#sendReportedProperties(ReportedPropertiesParameters); | ModuleClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesUpdateCorrelatingMessageCallback, Object);  |
+| ModuleClient#sendReportedProperties(Set<Property>, Integer, CorrelatingMessageCallback, Object, IotHubEventCallback, Object); | ModuleClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesUpdateCorrelatingMessageCallback, Object);  |
+| ModuleClient#setOption(String, Object); | no equivalent method***  |
+
+*** The options that were previously set in this method are now set at ModuleClient constructor time in the optional ClientOptions parameter.
+
+
+#### MultiplexingClient
+
+No API surface changes have been made to the MultiplexingClient class
+
+#### TransportClient
+
+This client has been removed in v2. It is replaced by the MultiplexingClient. See this repo's multiplexing client sample for more information.
+
 ### IoT hub Service Client
  
 | V1 class  | Equivalent V2 Class(es)|
@@ -125,8 +196,8 @@ been moved to a new ConfigurationsClient in v2.
 | RegistryManager#updateDeviceAsync(); | no equivalent method*** |
 | RegistryManager#removeDevice(); | RegistryClient#removeDevice();  |
 | RegistryManager#removeDeviceAsync(); | no equivalent method*** |
-| RegistryManager#getDevices(Integer); | no equivalent method. Iot Hub does not have a useable "list devices" operation |
-| RegistryManager#getDevicesAsync(Integer); | no equivalent method. Iot Hub does not have a useable "list devices" operation |
+| RegistryManager#getDevices(Integer); | no equivalent method**** |
+| RegistryManager#getDevicesAsync(Integer); | no equivalent method**** |
 | RegistryManager#getDeviceConnectionString(); | no equivalent method. Removed since this was not a service call.  |
 | RegistryManager#getStatistics(); | RegistryClient#getStatistics();  |
 | RegistryManager#getStatisticsAsync(); | no equivalent method*** |
@@ -143,18 +214,73 @@ been moved to a new ConfigurationsClient in v2.
 | RegistryManager#getModule(String); | RegistryClient#getModule(String);  |
 | RegistryManager#getModulesOnDevice(String); | RegistryClient#getModulesOnDevice(String);  |
 | RegistryManager#updateModule(Module); | RegistryClient#updateModule(Module);  |
-| RegistryManager#updateModule(Module, Boolean); | no equivalent method. Users should use the overload that just takes a module  |
+| RegistryManager#updateModule(Module, Boolean); | RegistryClient#updateModule(Module);  |
 | RegistryManager#removeModule(String, String); | RegistryClient#removeModule(String, String);  |
 | RegistryManager#addConfiguration(Configuration); | ConfigurationsClient#create(Configuration);  |
 | RegistryManager#getConfiguration(String); | ConfigurationsClient#get(String);  |
 | RegistryManager#getConfigurations(int); | ConfigurationsClient#getConfigurations(int);  |
 | RegistryManager#updateConfiguration(Configuration); | ConfigurationsClient#replace(Configuration);  |
-| RegistryManager#updateConfiguration(Configuration, Boolean); | no equivalent method. Users should use the overload that just takes a configuration  |
+| RegistryManager#updateConfiguration(Configuration, Boolean); |  ConfigurationsClient#updateConfiguration(Configuration); |
 | RegistryManager#removeConfiguration(String); | ConfigurationsClient#delete(String);  |
 | RegistryManager#applyConfigurationContentOnDevice(String, ConfigurationContent); | ConfigurationsClient#applyConfigurationContentOnDevice(String, ConfigurationContent);  |
 
 ** This method did nothing so it didn't need a v2 equivalent
 *** This method was a wrapper on the synchronous version of the method. Users can write their own wrapper instead
+**** Iot Hub does not have a useable "list devices" operation
+
+#### DeviceTwin
+
+| V1 class#method  | Equivalent V2 class#method |
+|---:|---:|
+| DeviceTwin#getTwin(DeviceTwinDevice); | TwinClient#get(String), TwinClient#get(String, String);  |
+| DeviceTwin#updateTwin(DeviceTwinDevice); | TwinClient#patch(Twin);  |
+| DeviceTwin#replaceTwin(DeviceTwinDevice); | TwinClient#replace(Twin);  |
+| DeviceTwin#queryTwin(String); | TwinClient#query(String), QueryClient.queryTwins(String)  |
+| DeviceTwin#scheduleUpdateTwin(String, DeviceTwinDevice, Date, long); | ScheduledJobsClient#scheduleUpdateTwin(String, String, Twin, Date, long);  |
+
+
+#### DeviceMethod
+
+| V1 class#method  | Equivalent V2 class#method |
+|---:|---:|
+| DeviceMethod#invoke(String, String, Long, Long, Object); | DirectMethodsClient#invoke(String, String, DirectMethodRequestOptions);  |
+| DeviceMethod#invoke(String, String, String, Long, Long, Object); | DirectMethodsClient#invoke(String, String, String, DirectMethodRequestOptions);  |
+| DeviceMethod#scheduleDeviceMethod(String, String, Long, Long, Object, Date, long); | ScheduledJobsClient#scheduleDirectMethod(String, String, String, Date, DirectMethodsJobOptions);  |
+
+
+#### JobClient
+
+| V1 class#method  | Equivalent V2 class#method |
+|---:|---:|
+| JobClient#scheduleUpdateTwin(String, String, DeviceTwinDevice, Date, long); | ScheduledJobsClient#scheduleUpdateTwin(String, String, Twin, Date, long);  |
+| JobClient#scheduleDeviceMethod(String, String, Long, Long, Object, Date, long); | ScheduledJobsClient#scheduleDirectMethod(String, String, String, Date, DirectMethodsJobOptions);  |
+| JobClient#getJob(String); | ScheduledJobsClient#getJob(String);  |
+| JobClient#cancelJob(String); | ScheduledJobsClient#cancelJob(String);  |
+| JobClient#queryDeviceJob(String); | ScheduledJobsClient#query(String), QueryClient#queryJobs(String);  |
+| JobClient#(); | ScheduledJobsClient#();  |
+| JobClient#(); | ScheduledJobsClient#();  |
+
+#### ServiceClient
+
+| V1 class#method  | Equivalent V2 class#method |
+|---:|---:|
+| ServiceClient#open(); | MessagingClient#open();  |
+| ServiceClient#close(); | MessagingClient#close();  |
+| ServiceClient#send(String, Message); | MessagingClient#send(String, Message);  |
+| ServiceClient#send(String, String, Message); | MessagingClient#send(String, String, Message);  |
+| ServiceClient#getFileUploadNotificationReceiver(); | new FileUploadNotificationProcessorClient(String, IotHubServiceClientProtocol, Function<FeedbackBatch, AcknowledgementType>);  |
+| FileUploadNotificationReceiver#open(); | FileUploadNotificationProcessorClient#start();  |
+| FileUploadNotificationReceiver#close(); | FileUploadNotificationProcessorClient#stop();  |
+| FileUploadNotificationReceiver#receive(); | no equivalent method**  |
+| FileUploadNotificationReceiver#receive(int); | no equivalent method**  |
+| ServiceClient#getFeedbackReceiver(); | new MessageFeedbackProcessorClient(String, IotHubServiceClientProtocol, Function<FileUploadNotification, AcknowledgementType>);  |
+| FeedbackReceiver#open(); | MessageFeedbackProcessorClient#start();  |
+| FeedbackReceiver#close(); | MessageFeedbackProcessorClient#stop();  |
+| FeedbackReceiver#receive(); | no equivalent method**  |
+| FeedbackReceiver#receive(int); | no equivalent method**  |
+
+** Your FileUploadNotificationProcessorClient and MessageFeedbackProcessorClient will start receiving as soon as the client is started
+
 
 ### Device Provisioning Service Device Client
 
