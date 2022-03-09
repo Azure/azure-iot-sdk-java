@@ -13,7 +13,6 @@ are outlines of the notable breaking changes as well as a mapping from v1 APIs t
    - [IoT Hub Service Client](#iot-hub-service-client)
    - [DPS Device Client](#dps-device-client)
    - [DPS Service Client](#dps-service-client)
-   - [IoT Hub Device Client](#iot-hub-device-client)
    - [Security Provider Clients](#security-provider-clients)
    - [Deps](#deps)
  - [Frequently asked questions](#frequently-asked-questions)
@@ -24,7 +23,7 @@ There are a number of reasons why the Azure IoT SDK team chose to do a major ver
   - [Upcoming certificate changes](./upcoming_certificate_changes_readme.md) dictated that the SDK needed to stop pinning on a specific IoT Hub public certificate and start reading certificates from the device certificate store.
   - Several 3rd party dependencies (Bouncycastle, JNR Unixsocket, Azure Storage SDK) were becoming harder to carry due to security concerns and they could only be removed by removing or alterring existing APIs.
   - Many existing client classes (RegistryManager, DeviceTwin, DeviceMethod, ServiceClient, etc.) were confusingly named and contained methods that weren't always consistent with the client's assumed responsibilities.
-  - Many existing client's had a mix of standard constructors (```new DeviceClient(...)```) and static builder constructors (```DeviceClient.createFromSecurityProvider(...)```) that caused some confusion among users.
+  - Many existing clients had a mix of standard constructors (```new DeviceClient(...)```) and static builder constructors (```DeviceClient.createFromSecurityProvider(...)```) that caused some confusion among users.
   - ```DeviceClient``` and ```ModuleClient``` had unneccessarily different method names for the same operations (```deviceClient.startDeviceTwin(...)``` vs ```moduleClient.startTwin(...)```) that could be easily unified for consistency.
   - ```DeviceClient``` and ```ModuleClient``` had many asynchronous methods whose naming did not reflect that they were asynchronous. This led to some users calling these methods as though they were synchronous.
 
@@ -32,7 +31,7 @@ There are a number of reasons why the Azure IoT SDK team chose to do a major ver
 
 We have released [one final LTS version](https://github.com/Azure/azure-iot-sdk-java/releases/tag/2022-03-04) of the v1 SDK that
 we will support like any other LTS release (security bug fixes, some non-security bug fixes as needed), but users are still encouraged
-to migrate to v2 when they have the chance.
+to migrate to v2 when they have the chance. For more details on LTS releases, see [this document](./readme.md#long-term-support).
 
 ## Migration Guide
 
@@ -42,8 +41,8 @@ to migrate to v2 when they have the chance.
 
 | V1 class#method  | Equivalent V2 class#method |
 |:---|:---|
-| DeviceClient#createFromSecurityProvider(String, String, SecurityProvider, IotHubClientProtocol); | nwe DeviceClient(String, String, SecurityProvider, IotHubClientProtocol);  |
-| DeviceClient#createFromSecurityProvider(String, String, SecurityProvider, IotHubClientProtocol, ClientOptions); | nwe DeviceClient(String, String, SecurityProvider, IotHubClientProtocol, ClientOptions);  |
+| DeviceClient#createFromSecurityProvider(String, String, SecurityProvider, IotHubClientProtocol); | new DeviceClient(String, String, SecurityProvider, IotHubClientProtocol);  |
+| DeviceClient#createFromSecurityProvider(String, String, SecurityProvider, IotHubClientProtocol, ClientOptions); | new DeviceClient(String, String, SecurityProvider, IotHubClientProtocol, ClientOptions);  |
 | DeviceClient#setMessageCallback(MessageCallback, Object); | DeviceClient#setMessageCallback(MessageCallback, Object);  |
 | DeviceClient#open(); | DeviceClient#open(boolean);  |
 | DeviceClient#open(boolean); | DeviceClient#open(boolean);  |
@@ -71,11 +70,11 @@ to migrate to v2 when they have the chance.
 | DeviceClient#setOption(String, Object); | no equivalent method***  |
 | DeviceClient#setProxySettings(ProxySettings); | no equivalent method****  |
 
-** This method has been split into the three individual steps that this method used to take. See the file upload samples within this repo for an example of how to do file upload using these discrete steps.
+** This method has been split into the three individual steps that this method used to take. See [this file upload sample](file-upload-sample) for an example of how to do file upload using these discrete steps.
 
 *** The options that were previously set in this method are now set at DeviceClient constructor time in the optional ClientOptions parameter.
 
-**** Proxy settings are now set at ModuleClient constructor time in the optional ClientOptions parameter,
+**** Proxy settings are now set at DeviceClient constructor time in the optional ClientOptions parameter,
 
 #### ModuleClient
 
@@ -119,7 +118,7 @@ No API surface changes have been made to the MultiplexingClient class
 
 #### TransportClient
 
-This client has been removed in v2. It is replaced by the MultiplexingClient. See this repo's multiplexing client sample for more information.
+This client has been removed in v2. It is replaced by the MultiplexingClient. See [this sample](mux-sample) for more information.
 
 #### Other notable breaking changes
 
@@ -397,3 +396,7 @@ Question:
 
 Answer:
 > Yes, this library still supports multiplexing. The MultiplexingClient has replaced the TransportClient here. See [this sample](./device/iot-device-samples/multiplexing-sample) for reference.
+
+
+[file-upload-sample]: https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-samples/file-upload-sample/src/main/java/samples/com/microsoft/azure/sdk/iot/FileUploadSample.java
+[mux-sample]: https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-samples/multiplexing-sample/src/main/java/samples/com/microsoft/azure/sdk/iot/MultiplexingSample.java
