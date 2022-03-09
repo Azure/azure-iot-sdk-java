@@ -8,7 +8,7 @@ package com.microsoft.azure.sdk.iot.provisioning.service;
 /**
  * Collection of static helper functions
  */
-class Tools
+public class Tools
 {
     /**
      * Helper function to check if the input string is null or empty
@@ -16,7 +16,7 @@ class Tools
      * @param value The string to check
      * @return The value true if the input string is empty or null
      */
-    static Boolean isNullOrEmpty(String value)
+    public static Boolean isNullOrEmpty(String value)
     {
         boolean retVal;
 

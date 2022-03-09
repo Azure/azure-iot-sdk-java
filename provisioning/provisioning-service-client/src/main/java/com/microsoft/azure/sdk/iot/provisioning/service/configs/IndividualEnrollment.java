@@ -327,10 +327,6 @@ public class IndividualEnrollment extends Serializable
         {
             this.setDeviceRegistrationState(result.deviceRegistrationState);
         }
-        if (result.optionalDeviceInformation != null)
-        {
-            this.setOptionalDeviceInformation(result.optionalDeviceInformation);
-        }
 
         if (result.initialTwin != null)
         {
