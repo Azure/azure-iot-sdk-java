@@ -8,6 +8,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Rule;
+import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.rules.Timeout;
@@ -57,20 +58,23 @@ public abstract class IntegrationTest
     public FlakeyTestRule flakeyTestRule = new FlakeyTestRule();
 
     @Rule
-    public ThrottleResistantTestRule throttleResistantTestRule = new ThrottleResistantTestRule();
-
-    @Rule
     public MultiplexingClientTestRule multiplexingClientTestRule = new MultiplexingClientTestRule();
 
     @Rule
     public ErrInjTestRule errInjTestRule = new ErrInjTestRule();
 
-    int E2E_TEST_TIMEOUT_MILLISECONDS = 5 * 60 * 1000;
-
-    // Each test must finish in under 5 minutes. Only the token renewal test should last longer,
+    // Each test must finish in under 2 minutes. Only the token renewal test should last longer,
     // but that test overrides this value to fit its needs as a very long test.
+    int E2E_TEST_TIMEOUT_MILLISECONDS = 2 * 60 * 1000;
+
+    // The order of these rules matters since the throttle resistant test rule will rerun tests "for free" if they
+    // encounter a throttling exception, but the RerurnFailedTestRule will rerun a failed test only up to X times if it encounters
+    // any exception. With the below order, a test can fail any number of times due to throttling without it counting
+    // towards the X allowed retries defined in the RerunFailedTestRule.
     @Rule
-    public Timeout timeout = new Timeout(E2E_TEST_TIMEOUT_MILLISECONDS);
+    public RuleChain testRerunRuleChain = RuleChain.outerRule(new RerunFailedTestRule())
+        .around(new ThrottleResistantTestRule())
+        .around(new Timeout(E2E_TEST_TIMEOUT_MILLISECONDS));
 
     public static boolean isBasicTierHub;
     public static boolean isPullRequest;

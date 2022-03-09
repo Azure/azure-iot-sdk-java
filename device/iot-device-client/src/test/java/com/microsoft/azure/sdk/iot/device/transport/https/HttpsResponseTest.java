@@ -105,21 +105,6 @@ public class HttpsResponseTest
         assertThat(testValues, is(expectedValues));
     }
 
-    // Tests_SRS_HTTPSRESPONSE_11_006: [If a value could not be found for the given header field name, the function shall throw an IllegalArgumentException.]
-    @Test(expected = IllegalArgumentException.class)
-    public void getHeaderFieldRejectsInvalidFieldName() throws IllegalArgumentException
-    {
-        final int status = 200;
-        final byte[] body = { 1 };
-        final byte[] errorReason = {};
-        final Map<String, List<String>> headerFields = new HashMap<>();
-        final String field = "test-field";
-
-        HttpsResponse response =
-                new HttpsResponse(status, body, headerFields, errorReason);
-        response.getHeaderField(field);
-    }
-
     // Tests_SRS_HTTPSRESPONSE_11_001: [The constructor shall store the input arguments so that the getters can return them later.]
     // Tests_SRS_HTTPSRESPONSE_11_007: [The function shall return the error reason given in the constructor.]
     @Test

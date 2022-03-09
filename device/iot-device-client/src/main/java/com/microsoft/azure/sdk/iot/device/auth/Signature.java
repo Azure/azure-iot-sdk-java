@@ -6,7 +6,7 @@ package com.microsoft.azure.sdk.iot.device.auth;
 /**
  * A signature that is used in the SAS token to authenticate the client.
  */
-public final class Signature
+final class Signature
 {
     private final String sig;
 

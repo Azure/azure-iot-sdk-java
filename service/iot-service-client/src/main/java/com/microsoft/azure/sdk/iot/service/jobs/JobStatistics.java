@@ -3,26 +3,42 @@
 
 package com.microsoft.azure.sdk.iot.service.jobs;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.JobsStatisticsParser;
+import com.microsoft.azure.sdk.iot.service.jobs.serializers.JobsStatisticsParser;
+import lombok.Getter;
 
 /**
  * Collection of jobs statistics.
  */
 public class JobStatistics
 {
-    // Number of devices in the job
+    /**
+     * Number of devices in the job.
+     */
+    @Getter
     private final int deviceCount;
 
-    // The number of failed jobs
+    /**
+     * The number of failed jobs.
+     */
+    @Getter
     private final int failedCount;
 
-    // The number of Succeeded jobs
+    /**
+     * The number of successfully completed jobs.
+     */
+    @Getter
     private final int succeededCount;
 
-    // The number of running jobs
+    /**
+     * The number of running jobs.
+     */
+    @Getter
     private final int runningCount;
 
-    // The number of pending (scheduled) jobs
+    /**
+     * The number of pending (scheduled) jobs.
+     */
+    @Getter
     private final int pendingCount;
 
 
@@ -35,7 +51,7 @@ public class JobStatistics
     JobStatistics(JobsStatisticsParser jobsStatisticsParser) throws IllegalArgumentException
     {
         /* Codes_SRS_JOBSTATISTICS_21_001: [The constructor shall throw IllegalArgumentException if the input jobsStatisticsParser is null.] */
-        if(jobsStatisticsParser == null)
+        if (jobsStatisticsParser == null)
         {
             throw new IllegalArgumentException("null jobsStatisticsParser");
         }
@@ -46,55 +62,5 @@ public class JobStatistics
         this.succeededCount = jobsStatisticsParser.getSucceededCount();
         this.runningCount = jobsStatisticsParser.getRunningCount();
         this.pendingCount = jobsStatisticsParser.getPendingCount();
-    }
-
-    /**
-     * Getter for device counter
-     * @return the number of devices in the job
-     */
-    public int getDeviceCount()
-    {
-        /* Codes_SRS_JOBSTATISTICS_21_003: [The getDeviceCount shall return the stored device count.] */
-        return this.deviceCount;
-    }
-
-    /**
-     * Getter for the failed counter
-     * @return the number of failed jobs
-     */
-    public int getFailedCount()
-    {
-        /* Codes_SRS_JOBSTATISTICS_21_004: [The getFailedCount shall return the stored failed count.] */
-        return this.failedCount;
-    }
-
-    /**
-     * Getter for succeeded counter
-     * @return number of succeeded jobs
-     */
-    public int getSucceededCount()
-    {
-        /* Codes_SRS_JOBSTATISTICS_21_005: [The getSucceededCount shall return the stored succeeded count.] */
-        return this.succeededCount;
-    }
-
-    /**
-     * Getter for running counter
-     * @return the number of running jobs
-     */
-    public int getRunningCount()
-    {
-        /* Codes_SRS_JOBSTATISTICS_21_006: [The getRunningCount shall return the stored running count.] */
-        return this.runningCount;
-    }
-
-    /**
-     * Getter for pending counter
-     * @return the number of pending jobs
-     */
-    public int getPendingCount()
-    {
-        /* Codes_SRS_JOBSTATISTICS_21_007: [The getPendingCount shall return the stored pending count.] */
-        return this.pendingCount;
     }
 }

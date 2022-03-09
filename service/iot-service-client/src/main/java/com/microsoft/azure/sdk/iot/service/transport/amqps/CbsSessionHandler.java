@@ -6,7 +6,6 @@ package com.microsoft.azure.sdk.iot.service.transport.amqps;
 import com.azure.core.credential.AccessToken;
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.ErrorLoggingBaseHandlerWithCleanup;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +23,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Slf4j
-public class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implements AuthenticationMessageCallback, LinkStateCallback
+class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implements AuthenticationMessageCallback, LinkStateCallback
 {
     // Token's should be proactively renewed at 85% of the lifespan of the previous token
     private static final double TOKEN_RENEWAL_PERCENT = .85;
@@ -33,7 +32,7 @@ public class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implem
     private CbsReceiverLinkHandler cbsReceiverLinkHandler;
     private final CbsSessionStateCallback cbsSessionStateCallback;
     private TokenCredential credential;
-    private String sasToken;
+    private String connectionString;
     private AzureSasCredential sasTokenProvider;
     private boolean senderLinkOpened = false;
     private boolean receiverLinkOpened = false;
@@ -50,10 +49,10 @@ public class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implem
         this.sasTokenProvider = sasTokenProvider;
     }
 
-    CbsSessionHandler(Session session, CbsSessionStateCallback cbsSessionStateCallback, String sasToken)
+    CbsSessionHandler(Session session, CbsSessionStateCallback cbsSessionStateCallback, String connectionString)
     {
         this(session, cbsSessionStateCallback);
-        this.sasToken = sasToken;
+        this.connectionString = connectionString;
     }
 
     private CbsSessionHandler(Session session, CbsSessionStateCallback cbsSessionStateCallback)
@@ -83,7 +82,7 @@ public class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implem
         }
         else
         {
-            this.cbsSenderLinkHandler = new CbsSenderLinkHandler(cbsSender, this, this.sasToken);
+            this.cbsSenderLinkHandler = new CbsSenderLinkHandler(cbsSender, this, this.connectionString);
         }
 
         Receiver cbsReceiver = this.session.receiver(CbsReceiverLinkHandler.getCbsTag());
@@ -116,10 +115,12 @@ public class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implem
         }
     }
 
-    public void close()
+    void close()
     {
         log.trace("Closing this CBS session");
         this.session.close();
+        this.cbsSenderLinkHandler.close();
+        this.cbsReceiverLinkHandler.close();
     }
 
     @Override
@@ -170,6 +171,15 @@ public class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implem
         // Timer task is executed periodically to send a proactively renewed authentication token in order to keep the connection alive
         log.debug("Proactively renewing AMQPS connection by sending a new authentication message");
         authenticate();
+    }
+
+    boolean isOpen()
+    {
+        return this.session != null
+            && this.session.getLocalState() == EndpointState.ACTIVE
+            && this.session.getRemoteState() == EndpointState.ACTIVE
+            && this.cbsSenderLinkHandler != null
+            && this.cbsSenderLinkHandler.isOpen();
     }
 
     private void authenticate()

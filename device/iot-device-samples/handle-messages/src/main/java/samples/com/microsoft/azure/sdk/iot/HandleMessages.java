@@ -100,7 +100,7 @@ public class HandleMessages
     protected static class IotHubConnectionStatusChangeCallbackLogger implements IotHubConnectionStatusChangeCallback
     {
         @Override
-        public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+        public void onStatusChanged(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
         {
             System.out.println();
             System.out.println("CONNECTION STATUS UPDATE: " + status);
@@ -218,9 +218,9 @@ public class HandleMessages
 
         System.out.println("Successfully set message callback.");
 
-        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
+        client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
-        client.open();
+        client.open(false);
 
         System.out.println("Opened connection to IoT Hub.");
 
@@ -230,7 +230,7 @@ public class HandleMessages
         Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
         scanner.nextLine();
 
-        client.closeNow();
+        client.close();
 
         System.out.println("Shutting down...");
     }

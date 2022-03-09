@@ -32,11 +32,11 @@ public class SendEventX509
 
     //PEM encoded representation of the private key
     private static final String privateKeyString =
-            "-----BEGIN EC PRIVATE KEY-----\n" +
+            "-----BEGIN PRIVATE KEY-----\n" +
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
-            "-----END EC PRIVATE KEY-----\n";
+            "-----END PRIVATE KEY-----\n";
 
     private  static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds
     private  static final List<String> failedMessageListOnClose = new ArrayList<>(); // List of messages that failed on close
@@ -138,13 +138,12 @@ public class SendEventX509
         System.out.format("Using communication protocol %s.\n", protocol.name());
 
         SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCertificateString, privateKeyString);
-        ClientOptions clientOptions = new ClientOptions();
-        clientOptions.setSslContext(sslContext);
+        ClientOptions clientOptions = ClientOptions.builder().sslContext(sslContext).build();
         DeviceClient client = new DeviceClient(connectionString, protocol, clientOptions);
 
         System.out.println("Successfully created an IoT Hub client.");
 
-        client.open();
+        client.open(false);
 
         System.out.println("Opened connection to IoT Hub.");
         System.out.println("Sending the following event messages:");
@@ -163,7 +162,7 @@ public class SendEventX509
             try
             {
                 Message msg = new Message(msgStr);
-                msg.setContentTypeFinal("application/json");
+                msg.setContentType("application/json");
                 msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
                 msg.setMessageId(java.util.UUID.randomUUID().toString());
                 msg.setExpiryTime(D2C_MESSAGE_TIMEOUT);
@@ -192,7 +191,7 @@ public class SendEventX509
 
         // close the connection        
         System.out.println("Closing"); 
-        client.closeNow();
+        client.close();
         
         if (!failedMessageListOnClose.isEmpty())
         {

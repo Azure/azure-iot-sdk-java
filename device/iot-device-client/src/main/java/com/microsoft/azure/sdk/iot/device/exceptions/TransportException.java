@@ -20,7 +20,7 @@ public class TransportException extends DeviceClientException
         NOT_APPLICABLE
     }
 
-    protected IotHubService iotHubService = NOT_APPLICABLE;
+    private IotHubService iotHubService = NOT_APPLICABLE;
 
     public TransportException()
     {

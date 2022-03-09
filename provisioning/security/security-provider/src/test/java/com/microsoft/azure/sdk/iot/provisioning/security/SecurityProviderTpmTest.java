@@ -9,6 +9,7 @@ package com.microsoft.azure.sdk.iot.provisioning.security;
 
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
+import mockit.Expectations;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
@@ -148,38 +149,20 @@ public class SecurityProviderTpmTest
     //SRS_SecurityClient_25_002: [ This method shall retrieve the default CertificateFactory instance. ]
     //SRS_SecurityClient_25_003: [ This method shall load all the trusted certificates to the keystore. ]
     @Test
-    public void getSSLContextSucceeds() throws SecurityProviderException, KeyManagementException, KeyStoreException, CertificateException
+    public void getSSLContextSucceeds() throws SecurityProviderException, KeyManagementException, KeyStoreException, CertificateException, NoSuchAlgorithmException
     {
         //arrange
-        SecurityProviderTpm securityClientTpm = new SecurityProviderTPMTestImpl(ENROLLMENT_KEY);
-
-        //act
-        securityClientTpm.getSSLContext();
-
-        new Verifications()
+        new Expectations()
         {
             {
-                mockedKeyStore.setCertificateEntry(anyString, (Certificate) any);
-                times = 4;
-                mockedSslContext.init((KeyManager[]) any, (TrustManager[]) any, (SecureRandom) any);
-                times = 1;
-            }
-        };
-    }
+                SSLContext.getInstance("TLSv1.2");
+                result = mockedSslContext;
 
-    //SRS_SecurityClientTpm_25_005: [ This method shall throw SecurityProviderException if any of the underlying API's in generating SSL context fails. ]
-    @Test (expected = SecurityProviderException.class)
-    public void getSSLContextThrowsUnderlyingException() throws SecurityProviderException, KeyStoreException
-    {
-        //arrange
-        SecurityProviderTpm securityClientTpm = new SecurityProviderTPMTestImpl(ENROLLMENT_KEY);
-        new NonStrictExpectations()
-        {
-            {
-                mockedKeyStore.setCertificateEntry(anyString, (Certificate) any);
-                result = new KeyStoreException();
+                mockedSslContext.init(null, null, (SecureRandom) any);
             }
         };
+
+        SecurityProviderTpm securityClientTpm = new SecurityProviderTPMTestImpl(ENROLLMENT_KEY);
 
         //act
         securityClientTpm.getSSLContext();

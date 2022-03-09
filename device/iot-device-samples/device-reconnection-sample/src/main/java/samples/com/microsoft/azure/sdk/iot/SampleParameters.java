@@ -11,7 +11,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import java.net.URISyntaxException;
-import java.io.*;
 
 
 public class SampleParameters {
@@ -26,11 +25,11 @@ public class SampleParameters {
     private static final String APPEXE = "java -jar ";
 
     private static CommandLine cmd = null;
-    private static String[] connections = new String[2];
+    private static final String[] connections = new String[2];
 
     /**
      * Setup parameters from command line arguments
-     * @param string array from main()
+     * @param args string array from main()
      */
     public SampleParameters(String[] args) {
 

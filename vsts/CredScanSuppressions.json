@@ -14,7 +14,7 @@
           "_justification": "Fake credential for test purposes"
         },
         {
-          "file": "RegistryManagerTest.java",
+          "file": "RegistryClientTest.java",
           "_justification": "Fake credentials for test purposes"
         }
     ]

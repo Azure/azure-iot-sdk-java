@@ -50,7 +50,7 @@ public class ServiceEnrollmentGroupSample
 
         // *********************************** Create a Provisioning Service Client ************************************
         ProvisioningServiceClient provisioningServiceClient =
-                ProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+                new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
 
         // *************************************** Create a new enrollmentGroup ****************************************
         System.out.println("\nCreate a new enrollmentGroup...");
@@ -59,8 +59,8 @@ public class ServiceEnrollmentGroupSample
                 new EnrollmentGroup(
                         enrollmentGroupId,
                         attestation);
-        enrollmentGroup.setIotHubHostNameFinal(IOTHUB_HOST_NAME);                // Optional parameter.
-        enrollmentGroup.setProvisioningStatusFinal(ProvisioningStatus.ENABLED);  // Optional parameter.
+        enrollmentGroup.setIotHubHostName(IOTHUB_HOST_NAME);                // Optional parameter.
+        enrollmentGroup.setProvisioningStatus(ProvisioningStatus.ENABLED);  // Optional parameter.
         System.out.println("\nAdd new enrollmentGroup...");
         EnrollmentGroup enrollmentGroupResult =  provisioningServiceClient.createOrUpdateEnrollmentGroup(enrollmentGroup);
         System.out.println("\nEnrollmentGroup created with success...");

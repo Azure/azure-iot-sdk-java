@@ -61,7 +61,7 @@ public class ProvisioningServiceClientTest
             }
         };
 
-        return ProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+        return new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
     }
 
     private static final String PROVISIONING_CONNECTION_STRING = "HostName=valid-host-name.azure-devices-provisioning.net;SharedAccessKeyName=valid-key-name;SharedAccessKey=0000000000000000000000000000000000000000000=";
@@ -97,7 +97,7 @@ public class ProvisioningServiceClientTest
         };
 
         // act
-        ProvisioningServiceClient provisioningServiceClient = ProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+        ProvisioningServiceClient provisioningServiceClient = new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
 
         // assert
         assertNotNull(provisioningServiceClient);
@@ -109,7 +109,7 @@ public class ProvisioningServiceClientTest
     {
         // arrange
         // act
-        ProvisioningServiceClient.createFromConnectionString(null);
+        new ProvisioningServiceClient(null);
 
         // assert
     }
@@ -120,7 +120,7 @@ public class ProvisioningServiceClientTest
     {
         // arrange
         // act
-        ProvisioningServiceClient.createFromConnectionString("");
+        new ProvisioningServiceClient("");
 
         // assert
     }
@@ -140,7 +140,7 @@ public class ProvisioningServiceClientTest
         };
 
         // act
-        ProvisioningServiceClient provisioningServiceClient = ProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+        ProvisioningServiceClient provisioningServiceClient = new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
 
         // assert
         assertNotNull(provisioningServiceClient);
@@ -164,7 +164,7 @@ public class ProvisioningServiceClientTest
         };
 
         // act
-        ProvisioningServiceClient provisioningServiceClient = ProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+        ProvisioningServiceClient provisioningServiceClient = new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
 
         // assert
         assertNotNull(provisioningServiceClient);
@@ -191,7 +191,7 @@ public class ProvisioningServiceClientTest
         };
 
         // act
-        ProvisioningServiceClient provisioningServiceClient = ProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+        ProvisioningServiceClient provisioningServiceClient = new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
 
         // assert
         assertNotNull(provisioningServiceClient);
@@ -221,7 +221,7 @@ public class ProvisioningServiceClientTest
         };
 
         // act
-        ProvisioningServiceClient provisioningServiceClient = ProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+        ProvisioningServiceClient provisioningServiceClient = new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
 
         // assert
         assertNotNull(provisioningServiceClient);
@@ -254,7 +254,7 @@ public class ProvisioningServiceClientTest
         };
 
         // act
-        ProvisioningServiceClient provisioningServiceClient = ProvisioningServiceClient.createFromConnectionString(PROVISIONING_CONNECTION_STRING);
+        ProvisioningServiceClient provisioningServiceClient = new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
 
         // assert
         assertNotNull(provisioningServiceClient);

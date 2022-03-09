@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
+import com.microsoft.azure.sdk.iot.device.ClientConfiguration;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ import java.util.UUID;
  * class defines the sender link which proactively sends renewed sas tokens to keep the device sessions authenticated.
  */
 @Slf4j
-public final class AmqpsCbsSenderLinkHandler extends AmqpsSenderLinkHandler
+final class AmqpsCbsSenderLinkHandler extends AmqpsSenderLinkHandler
 {
     private static final String SENDER_LINK_ENDPOINT_PATH = "$cbs";
 
@@ -64,10 +64,10 @@ public final class AmqpsCbsSenderLinkHandler extends AmqpsSenderLinkHandler
         return LINK_TYPE;
     }
 
-    UUID sendAuthenticationMessage(DeviceClientConfig deviceClientConfig) throws TransportException
+    UUID sendAuthenticationMessage(ClientConfiguration clientConfiguration) throws TransportException
     {
         UUID correlationId = UUID.randomUUID();
-        MessageImpl outgoingMessage = createCBSAuthenticationMessage(deviceClientConfig, correlationId);
+        MessageImpl outgoingMessage = createCBSAuthenticationMessage(clientConfiguration, correlationId);
 
         AmqpsSendResult sendResult = this.sendMessageAndGetDeliveryTag(outgoingMessage);
 
@@ -80,7 +80,7 @@ public final class AmqpsCbsSenderLinkHandler extends AmqpsSenderLinkHandler
     // The warning is for how getSasTokenAuthentication() may return null, but this code only executes when our config
     // uses SAS_TOKEN auth, and that is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
     @SuppressWarnings("ConstantConditions")
-    private MessageImpl createCBSAuthenticationMessage(DeviceClientConfig deviceClientConfig, UUID correlationId) throws TransportException
+    private MessageImpl createCBSAuthenticationMessage(ClientConfiguration clientConfiguration, UUID correlationId) throws TransportException
     {
         MessageImpl outgoingMessage = (MessageImpl) Proton.message();
 
@@ -98,20 +98,20 @@ public final class AmqpsCbsSenderLinkHandler extends AmqpsSenderLinkHandler
         userProperties.put(OPERATION_KEY, OPERATION_VALUE);
         userProperties.put(TYPE_KEY, TYPE_VALUE);
 
-        String host = deviceClientConfig.getGatewayHostname();
+        String host = clientConfiguration.getGatewayHostname();
         if (host == null || host.isEmpty())
         {
-            host = deviceClientConfig.getIotHubHostname();
+            host = clientConfiguration.getIotHubHostname();
         }
 
-        userProperties.put(NAME_KEY, host + DEVICES_PATH + deviceClientConfig.getDeviceId());
+        userProperties.put(NAME_KEY, host + DEVICES_PATH + clientConfiguration.getDeviceId());
         ApplicationProperties applicationProperties = new ApplicationProperties(userProperties);
         outgoingMessage.setApplicationProperties(applicationProperties);
 
         Section section;
         try
         {
-            section = new AmqpValue(String.valueOf(deviceClientConfig.getSasTokenAuthentication().getSasToken()));
+            section = new AmqpValue(String.valueOf(clientConfiguration.getSasTokenAuthentication().getSasToken()));
             outgoingMessage.setBody(section);
         }
         catch (IOException e)

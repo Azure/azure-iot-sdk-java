@@ -4,15 +4,17 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.twin.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportPacket;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.CountDownLatch;
+
+import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 
 /**
  * Device Twin Sample for an IoT Hub. Default protocol is to use
@@ -21,188 +23,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class DeviceTwinSample
 {
     private enum LIGHTS{ ON, OFF }
-    private enum CAMERA{ DETECTED_BURGLAR, SAFELY_WORKING }
-    private static final int MAX_EVENTS_TO_REPORT = 5;
-
-    private static final AtomicBoolean Succeed = new AtomicBoolean(false);
-
-    protected static class ReportedPropertiesCorrelation implements CorrelatingMessageCallback {
-
-        private String _message = "";
-        public ReportedPropertiesCorrelation(String message) {
-            _message = message;
-        }
-        @Override
-        public void onRequestQueued(Message message, IotHubTransportPacket packet, Object callbackContext)
-        {
-            String messageId = message.getCorrelationId();
-
-            if (message != null)
-            {
-                System.out.println("CORRELATIONCALLBACK["+ messageId+ "] onRequestQueued (" + _message + ") CorrelationId: " + message.getCorrelationId());
-            }
-            if (callbackContext instanceof ReportedPropertiesContext) {
-
-                ((ReportedPropertiesContext) callbackContext).setCorrelationId(messageId);
-            }
-        }
-
-        @Override
-        public void onRequestSent(Message message, IotHubTransportPacket packet, Object callbackContext)
-        {
-            String messageId = message.getCorrelationId();
-
-            if (message != null)
-            {
-                System.out.println("CORRELATIONCALLBACK["+messageId+"] onRequestSent (" + _message + ") CorrelationId: " + message.getCorrelationId());
-            }
-        }
-
-        @Override
-        public void onRequestAcknowledged(IotHubTransportPacket packet, Object callbackContext, Throwable e) {
-            Message message = packet.getMessage();
-            String messageId = message.getCorrelationId();
-
-            if (message != null)
-            {
-                System.out.println("CORRELATIONCALLBACK["+messageId+"] onRequestAcknowledged (" + _message + ") CorrelationId: " + message.getCorrelationId());
-            }
-            if (e != null) {
-                System.out.println("CORRELATIONCALLBACK["+messageId+"] onRequestAcknowledged (" + _message + ") ERROR: " + e.getMessage());
-            }
-        }
-
-        @Override
-        public void onResponseAcknowledged(Message message, Object callbackContext, Throwable e) {
-            String messageId = message.getCorrelationId();
-
-            if (message != null)
-            {
-                System.out.println("CORRELATIONCALLBACK["+messageId+"] onResponseAcknowledged (" + _message + ") CorrelationId: " + message.getCorrelationId());
-            }
-            if (e != null) {
-                System.out.println("CORRELATIONCALLBACK["+messageId+"] onResponseAcknowledged (" + _message + ") ERROR: " + e.getMessage());
-            }
-        }
-
-        @Override
-        public void onResponseReceived(Message message, Object callbackContext, Throwable e) {
-            String messageId = message.getCorrelationId();
-
-            if (message != null)
-            {
-                System.out.println("CORRELATIONCALLBACK["+messageId+"] onResponseReceived (" + _message + ") CorrelationId: " + message.getCorrelationId());
-            }
-        }
-
-        @Override
-        public void onUnknownMessageAcknowledged(Message message, Object callbackContext, Throwable e) {
-            String messageId = message.getCorrelationId();
-
-            if (message != null)
-            {
-                System.out.println("CORRELATIONCALLBACK["+messageId+"] onUnknownMessageAcknowledged (" + _message + ") CorrelationId: " + message.getCorrelationId());
-            }
-            if (e != null) {
-                System.out.println("CORRELATIONCALLBACK["+messageId+"] onUnknownMessageAcknowledged (" + _message + ") ERROR: " + e.getMessage());
-            }
-        }
-    }
-
-
-    protected static class DeviceTwinStatusCallBack implements IotHubEventCallback
-    {
-        @Override
-        public void execute(IotHubStatusCode status, Object context)
-        {
-            if (context == null) {
-                System.out.println("DEVICETWINCALLBACK context null");
-            }
-            Succeed.set((status == IotHubStatusCode.OK) || (status == IotHubStatusCode.OK_EMPTY));
-            System.out.println("DEVICETWINCALLBACK IoT Hub responded to device twin operation with status " + status.name());
-        }
-    }
-
-    protected static class ReportedPropertiesContext
-    {
-        private boolean calledFromEvent = false;
-        private String _correlationId = "";
-        private String _message = "";
-
-        public ReportedPropertiesContext(String message) { this._message = message;}
-        public void setCorrelationId(String message) { _correlationId = message; }
-        public String getcorrelationId() { return _correlationId; }
-        public String getMessageOfContext() { return _message; }
-    }
-
-    protected static class ReportedPropertiesCallback implements IotHubEventCallback
-    {
-        private String _message = "";
-        public ReportedPropertiesCallback(String message) {
-            this._message = message;
-        }
-
-        @Override
-        public void execute(IotHubStatusCode status, Object context)
-        {
-            if (context instanceof ReportedPropertiesContext)
-            {
-                ReportedPropertiesContext myContext = (ReportedPropertiesContext)context;
-                String messageId = myContext.getcorrelationId();
-                System.out.println("REPORTEDPROPERTYCALLBACK["+messageId+"] Executing reported properties callback for " + _message);
-                System.out.println("REPORTEDPROPERTYCALLBACK["+messageId+"] Found ReportedPropertiesContext with message " + myContext.getMessageOfContext());
-                System.out.println("REPORTEDPROPERTYCALLBACK["+messageId+"] Found ReportedPropertiesContext with correlationId " + myContext.getcorrelationId());
-                System.out.println("REPORTEDPROPERTYCALLBACK["+messageId+"] This context was set by ReportedPropertiesCallback " + status.name());
-                System.out.println("REPORTEDPROPERTYCALLBACK["+messageId+"] IoT Hub responded to device twin reported properties with status " + status.name());
-            }
-
-        }
-    }
-
-    /*
-     * If you don't care about version, you can use the PropertyCallBack.
-     */
-    protected static class onHomeTempChange implements TwinPropertyCallBack
-    {
-        @Override
-        public void TwinPropertyCallBack(Property property, Object context)
-        {
-            System.out.println(
-                    "onHomeTempChange change " + property.getKey() +
-                            " to " + property.getValue() +
-                            ", Properties version:" + property.getVersion());
-        }
-    }
-
-    protected static class onCameraActivity implements TwinPropertyCallBack
-    {
-        @Override
-        public void TwinPropertyCallBack(Property property, Object context)
-        {
-            System.out.println(
-                    "onCameraActivity change " + property.getKey() +
-                            " to " + property.getValue() +
-                            ", Properties version:" + property.getVersion());
-        }
-    }
-
-    protected static class onProperty implements TwinPropertyCallBack
-    {
-        @Override
-        public void TwinPropertyCallBack(Property property, Object context)
-        {
-            System.out.println(
-                    "onProperty callback for " + (property.getIsReported()?"reported": "desired") +
-                            " property " + property.getKey() +
-                            " to " + property.getValue() +
-                            ", Properties version:" + property.getVersion());
-        }
-    }
 
     protected static class IotHubConnectionStatusChangeCallbackLogger implements IotHubConnectionStatusChangeCallback
     {
         @Override
-        public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+        public void onStatusChanged(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
         {
             System.out.println();
             System.out.println("CONNECTION STATUS UPDATE: " + status);
@@ -303,96 +128,85 @@ public class DeviceTwinSample
         DeviceClient client = new DeviceClient(connString, protocol);
         System.out.println("Successfully created an IoT Hub client.");
 
-        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
+        client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
         try
         {
             System.out.println("Open connection to IoT Hub.");
-            client.open();
+            client.open(false);
 
             System.out.println("Start device Twin and get remaining properties...");
-            // Properties already set in the Service will shows up in the generic onProperty callback, with value and version.
-            Succeed.set(false);
-            client.startDeviceTwin(new DeviceTwinStatusCallBack(), null, new onProperty(), null);
-            do
-            {
-                Thread.sleep(1000);
-            }
-            while(!Succeed.get());
-
-
-            System.out.println("Subscribe to Desired properties on device Twin...");
-            Map<Property, Pair<TwinPropertyCallBack, Object>> desiredProperties = new HashMap<Property, Pair<TwinPropertyCallBack, Object>>()
-            {
+            CountDownLatch twinInitializedLatch = new CountDownLatch(1);
+            client.subscribeToDesiredPropertiesAsync(
+                (statusCode, context) ->
                 {
-                    put(new Property("HomeTemp(F)", null), new Pair<TwinPropertyCallBack, Object>(new onHomeTempChange(), null));
-                    put(new Property("LivingRoomLights", null), new Pair<TwinPropertyCallBack, Object>(new onProperty(), null));
-                    put(new Property("BedroomRoomLights", null), new Pair<TwinPropertyCallBack, Object>(new onProperty(), null));
-                    put(new Property("HomeSecurityCamera", null), new Pair<TwinPropertyCallBack, Object>(new onCameraActivity(), null));
-                }
-            };
-            client.subscribeToTwinDesiredProperties(desiredProperties);
+                    if (statusCode == OK)
+                    {
+                        System.out.println("Successfully subscribed to desired properties. Getting initial twin state");
 
-            System.out.println("Get device Twin...");
-            client.getDeviceTwin(); // For each desired property in the Service, the SDK will call the appropriate callback with the value and version.
+                        // It is recommended to get the initial twin state after every time you have subscribed to desired
+                        // properties, but is not mandatory. The benefit is that you are up to date on any twin updates
+                        // your client may have missed while not being subscribed, but the cost is that the get twin request
+                        // may not provide any new twin updates while still requiring some messaging between the client and service.
+                        client.getTwinAsync(
+                            (twin, callbackContext) ->
+                            {
+                                System.out.println("Received initial twin state");
+                                System.out.println(twin.toString());
+                                twinInitializedLatch.countDown();
+
+                            },
+                            null);
+                    }
+                    else
+                    {
+                        System.out.println("Failed to subscribe to desired properties with status code " + statusCode);
+                        System.exit(-1);
+                    }
+                },
+                null,
+                (twin, context) ->
+                {
+                    for (String propertyKey : twin.getDesiredProperties().keySet())
+                    {
+                        Object propertyValue = twin.getDesiredProperties().get(propertyKey);
+                        System.out.println("Received desired property update with property key " + propertyKey + " and value " + propertyValue);
+                    }
+                },
+                null);
+
+            twinInitializedLatch.await();
 
             System.out.println("Update reported properties...");
-            Set<Property> reportProperties = new HashSet<Property>()
-            {
+            TwinCollection reportedProperties = new TwinCollection();
+            reportedProperties.put("HomeTemp(F)", 70);
+            reportedProperties.put("LivingRoomLights", LIGHTS.ON);
+            reportedProperties.put("BedroomRoomLights", LIGHTS.OFF);
+            CountDownLatch twinReportedPropertiesSentLatch = new CountDownLatch(1);
+            client.updateReportedPropertiesAsync(
+                reportedProperties,
+                (statusCode, e, callbackContext) ->
                 {
-                    add(new Property("HomeTemp(F)", 70));
-                    add(new Property("LivingRoomLights", LIGHTS.ON));
-                    add(new Property("BedroomRoomLights", LIGHTS.OFF));
-                }
-            };
+                    if (statusCode == OK)
+                    {
+                        System.out.println("Reported properties updated successfully");
+                    }
+                    else
+                    {
+                        System.out.println("Reported properties failed to be updated. Status code: " + statusCode);
+                        e.printStackTrace();
+                    }
 
-            ReportedPropertiesParameters params = new ReportedPropertiesParameters(reportProperties);
-            ReportedPropertiesContext sharableContext = new ReportedPropertiesContext("Send All Params Reported Properties Context Message");
-            params.setCorrelationCallback(new ReportedPropertiesCorrelation("SendAllParams"), sharableContext);
-            params.setReportedPropertiesCallback(new ReportedPropertiesCallback("SendAllParams"), sharableContext);
+                    twinReportedPropertiesSentLatch.countDown();
+                },
+                null);
 
-            client.sendReportedProperties(params);
-
-            for(int i = 0; i < MAX_EVENTS_TO_REPORT; i++)
-            {
-
-                if (Math.random() % MAX_EVENTS_TO_REPORT == 3)
-                {
-                    sharableContext = new ReportedPropertiesContext("HomeSecurityCamera=BURGLAR Reported Properties Context Message (" + i + ")");
-                    params = new ReportedPropertiesParameters(new HashSet<Property>() {{ add(new Property("HomeSecurityCamera", CAMERA.DETECTED_BURGLAR)); }});
-                    params.setCorrelationCallback(new ReportedPropertiesCorrelation("HomeSecurityCamera=BURGLAR (" + i + ")"), sharableContext);
-                    params.setReportedPropertiesCallback(new ReportedPropertiesCallback("HomeSecurityCamera=BURGLAR (" + i + ")"), sharableContext);
-
-                    client.sendReportedProperties(params);
-                }
-                else
-                {
-
-                    sharableContext = new ReportedPropertiesContext("HomeSecurityCamera=SAFELY_WORKING Reported Properties Context Message (" + i + ")");
-                    params = new ReportedPropertiesParameters(new HashSet<Property>() {{ add(new Property("HomeSecurityCamera", CAMERA.SAFELY_WORKING)); }});
-                    params.setCorrelationCallback(new ReportedPropertiesCorrelation("HomeSecurityCamera=SAFELY_WORKING (" + i + ")"), sharableContext);
-                    params.setReportedPropertiesCallback(new ReportedPropertiesCallback("HomeSecurityCamera=SAFELY_WORKING (" + i + ")"), sharableContext);
-
-                    client.sendReportedProperties(params);
-                }
-                if(i == MAX_EVENTS_TO_REPORT-1)
-                {
-                    sharableContext = new ReportedPropertiesContext("BedroomRoomLights=null Reported Properties Context Message (" + i + ")");
-                    params = new ReportedPropertiesParameters(new HashSet<Property>() {{ add(new Property("BedroomRoomLights", null)); }});
-                    params.setCorrelationCallback(new ReportedPropertiesCorrelation("BedroomRoomLights=null (" + i + ")"), sharableContext);
-                    params.setReportedPropertiesCallback(new ReportedPropertiesCallback("BedroomRoomLights=null (" + i + ")"), sharableContext);
-
-                    client.sendReportedProperties(params);
-                }
-                System.out.println("Updating reported properties..");
-            }
-
-            System.out.println("Waiting for Desired properties");
+            twinReportedPropertiesSentLatch.await();
         }
         catch (Exception e)
         {
             System.out.println("On exception, shutting down \n" + " Cause: " + e.getCause() + " \n" +  e.getMessage());
-            client.closeNow();
+            client.close();
             System.out.println("Shutting down...");
         }
 
@@ -401,9 +215,8 @@ public class DeviceTwinSample
         Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
         scanner.nextLine();
 
-        client.closeNow();
+        client.close();
 
         System.out.println("Shutting down...");
-
     }
 }

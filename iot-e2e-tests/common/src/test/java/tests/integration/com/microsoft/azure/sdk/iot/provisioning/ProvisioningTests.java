@@ -6,13 +6,10 @@
 package tests.integration.com.microsoft.azure.sdk.iot.provisioning;
 
 
-import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
+import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
+import com.microsoft.azure.sdk.iot.provisioning.service.configs.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.PropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
-import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
@@ -20,11 +17,11 @@ import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProv
 import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderTPMEmulator;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.twin.Twin;
+import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
+import com.microsoft.azure.sdk.iot.service.twin.TwinClientOptions;
+import com.microsoft.azure.sdk.iot.service.twin.Pair;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -33,6 +30,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509CertificateGenerator;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.DeviceProvisioningServiceTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
@@ -42,11 +40,10 @@ import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol.*;
 import static junit.framework.TestCase.assertNotNull;
@@ -77,8 +74,8 @@ public class ProvisioningTests extends ProvisioningCommon
     {
         String jsonPayload = "{\"a\":\"b\"}";
         String expectedHubToProvisionTo;
-        String farAwayIotHubHostname = IotHubConnectionString.createConnectionString(farAwayIotHubConnectionString).getHostName();
-        String iothubHostName = IotHubConnectionString.createConnectionString(iotHubConnectionString).getHostName();
+        String farAwayIotHubHostname = IotHubConnectionString.createIotHubConnectionString(farAwayIotHubConnectionString).getHostName();
+        String iothubHostName = IotHubConnectionString.createIotHubConnectionString(iotHubConnectionString).getHostName();
 
         if (farAwayIotHubHostname.length() > iothubHostName.length())
         {
@@ -218,6 +215,26 @@ public class ProvisioningTests extends ProvisioningCommon
         assertNotNull(retrievedTpmAttestation.getEndorsementKey());
     }
 
+    @ContinuousIntegrationTest
+    @Test
+    public void individualEnrollmentWithECCCertificates() throws Exception
+    {
+        if (testInstance.attestationType != AttestationType.X509)
+        {
+            // test is only relevant for x509 authentication
+            return;
+        }
+
+        if (Tools.isAndroid())
+        {
+            // ECC cert generation is broken for Android. "ECDSA KeyPairGenerator is not available"
+            return;
+        }
+
+        testInstance.certificateAlgorithm = X509CertificateGenerator.CertificateAlgorithm.ECC;
+        customAllocationFlow(EnrollmentType.INDIVIDUAL);
+    }
+
     /***
      * This test flow uses a custom allocation policy to decide which of the two hubs a device should be provisioned to.
      * The custom allocation policy has a webhook to an Azure function, and that function will always dictate to provision
@@ -235,8 +252,8 @@ public class ProvisioningTests extends ProvisioningCommon
         }
 
         List<String> possibleStartingHubHostNames = new ArrayList<>();
-        String farAwayIotHubHostname = IotHubConnectionString.createConnectionString(farAwayIotHubConnectionString).getHostName();
-        String iothubHostName = IotHubConnectionString.createConnectionString(iotHubConnectionString).getHostName();
+        String farAwayIotHubHostname = IotHubConnectionString.createIotHubConnectionString(farAwayIotHubConnectionString).getHostName();
+        String iothubHostName = IotHubConnectionString.createIotHubConnectionString(iotHubConnectionString).getHostName();
         possibleStartingHubHostNames.add(farAwayIotHubHostname);
         possibleStartingHubHostNames.add(iothubHostName);
 
@@ -281,7 +298,7 @@ public class ProvisioningTests extends ProvisioningCommon
 
         testInstance.securityProvider = getSecurityProviderInstance(enrollmentType, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubsToStartAt, capabilities);
 
-        ProvisioningStatus provisioningStatus = registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, iothubsToStartAt);
+        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, iothubsToStartAt);
 
         assertProvisionedDeviceCapabilitiesAreExpected(capabilities, farAwayIotHubConnectionString);
 
@@ -300,28 +317,6 @@ public class ProvisioningTests extends ProvisioningCommon
         //re-register device, test which hub it was provisioned to
         registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, reprovisionPolicy.getUpdateHubAssignment() ? iothubsToFinishAt : iothubsToStartAt);
         assertTwinIsCorrect(reprovisionPolicy, expectedReportedPropertyName, expectedReportedPropertyValue, !reprovisionPolicy.getUpdateHubAssignment());
-    }
-
-    private static class StubTwinCallback implements IotHubEventCallback, PropertyCallBack
-    {
-        private final CountDownLatch twinLock;
-
-        public StubTwinCallback(CountDownLatch twinLock)
-        {
-                this.twinLock = twinLock;
-        }
-
-        @Override
-        public void execute(IotHubStatusCode responseStatus, Object callbackContext)
-        {
-            twinLock.countDown(); //this will be called once upon twin start, and once for sending a single reported property
-        }
-
-        @Override
-        public void PropertyCall(Object propertyKey, Object propertyValue, Object context)
-        {
-            //do nothing
-        }
     }
 
     private void enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType enrollmentType) throws Exception
@@ -378,19 +373,17 @@ public class ProvisioningTests extends ProvisioningCommon
     {
         if (reprovisionPolicy != null && reprovisionPolicy.getMigrateDeviceData())
         {
-            DeviceTwin twinClient;
+            TwinClient twinClient;
             if (inFarAwayHub)
             {
-                twinClient = DeviceTwin.createFromConnectionString(farAwayIotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+                twinClient = new TwinClient(farAwayIotHubConnectionString, TwinClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
             }
             else
             {
-                twinClient = DeviceTwin.createFromConnectionString(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+                twinClient = new TwinClient(iotHubConnectionString, TwinClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
             }
 
-            DeviceTwinDevice device = new DeviceTwinDevice(testInstance.provisionedDeviceId);
-
-            twinClient.getTwin(device);
+            Twin device = twinClient.get(testInstance.provisionedDeviceId);
 
             if (reprovisionPolicy.getMigrateDeviceData())
             {
@@ -414,35 +407,39 @@ public class ProvisioningTests extends ProvisioningCommon
         }
     }
 
-    private List<String> getStartingHubs() throws IOException
+    private List<String> getStartingHubs()
     {
-        String farAwayIotHubHostname = IotHubConnectionString.createConnectionString(farAwayIotHubConnectionString).getHostName();
+        String farAwayIotHubHostname = IotHubConnectionString.createIotHubConnectionString(farAwayIotHubConnectionString).getHostName();
         List<String> iotHubsToStartAt = new ArrayList<>();
         iotHubsToStartAt.add(farAwayIotHubHostname);
         return iotHubsToStartAt;
     }
 
-    private List<String> getHubsToReprovisionTo() throws IOException
+    private List<String> getHubsToReprovisionTo()
     {
-        String iothubHostName = IotHubConnectionString.createConnectionString(iotHubConnectionString).getHostName();
+        String iothubHostName = IotHubConnectionString.createIotHubConnectionString(iotHubConnectionString).getHostName();
         List<String> iotHubsToReprovisionTo = new ArrayList<>();
         iotHubsToReprovisionTo.add(iothubHostName);
         return iotHubsToReprovisionTo;
     }
 
-    private void sendReportedPropertyUpdate(String expectedReportedPropertyName, String expectedReportedPropertyValue, String iothubUri, String deviceId) throws InterruptedException, IOException, URISyntaxException
+    private void sendReportedPropertyUpdate(String expectedReportedPropertyName, String expectedReportedPropertyValue, String iothubUri, String deviceId) throws InterruptedException, IOException, URISyntaxException, TimeoutException
     {
         //hardcoded AMQP here only because we aren't testing this connection. We just need to open a connection to send a twin update so that
         // we can test if the twin updates carry over after reprovisioning
-        DeviceClient deviceClient = DeviceClient.createFromSecurityProvider(iothubUri, deviceId, testInstance.securityProvider, IotHubClientProtocol.AMQPS);
-        deviceClient.open();
-        CountDownLatch twinLock = new CountDownLatch(2);
-        deviceClient.startDeviceTwin(new StubTwinCallback(twinLock), null, new StubTwinCallback(twinLock), null);
-        Set<Property> reportedProperties = new HashSet<>();
-        reportedProperties.add(new Property(expectedReportedPropertyName, expectedReportedPropertyValue));
-        deviceClient.sendReportedProperties(reportedProperties);
-        twinLock.await(MAX_TWIN_PROPAGATION_WAIT_SECONDS, TimeUnit.SECONDS);
-        deviceClient.closeNow();
+        DeviceClient deviceClient = new DeviceClient(iothubUri, deviceId, testInstance.securityProvider, IotHubClientProtocol.AMQPS);
+        deviceClient.open(false);
+        deviceClient.subscribeToDesiredProperties(
+            (twin, context) ->
+            {
+                // don't care about handling desired properties for this test
+            },
+            null);
+
+        TwinCollection twinCollection = new TwinCollection();
+        twinCollection.put(expectedReportedPropertyName, expectedReportedPropertyValue);
+        deviceClient.updateReportedProperties(twinCollection);
+        deviceClient.close();
     }
 
     private void updateEnrollmentToForceReprovisioning(EnrollmentType enrollmentType, List<String> iothubsToFinishAt) throws ProvisioningServiceClientException

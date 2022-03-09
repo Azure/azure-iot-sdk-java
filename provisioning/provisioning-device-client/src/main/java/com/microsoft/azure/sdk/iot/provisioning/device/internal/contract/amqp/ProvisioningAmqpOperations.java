@@ -1,6 +1,5 @@
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp;
 
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.SDKUtils;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
@@ -8,7 +7,12 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.Provi
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceTransportException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
-import com.microsoft.azure.sdk.iot.deps.util.ObjectLock;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.ObjectLock;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.amqp.AmqpDeviceOperations;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.amqp.AmqpListener;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.amqp.AmqpMessage;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.amqp.AmqpsConnection;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.amqp.SaslHandler;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -17,7 +21,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements AmqpListener
+class ProvisioningAmqpOperations extends AmqpDeviceOperations implements AmqpListener
 {
     private static final String AMQP_ADDRESS_FMT = "/%s/registrations/%s";
     private static final String AMQP_REGISTER_DEVICE = "iotdps-register";
@@ -46,7 +50,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
      * @param hostName The Provisioning Endpoint
      * @throws ProvisioningDeviceClientException Exception thrown if parameter is not provided
      */
-    public ProvisioningAmqpOperations(String idScope, String hostName) throws ProvisioningDeviceClientException
+    ProvisioningAmqpOperations(String idScope, String hostName) throws ProvisioningDeviceClientException
     {
         // SRS_ProvisioningAmqpOperations_07_002: [The constructor shall throw ProvisioningDeviceClientException if either scopeId and hostName are null or empty.]
         if ((idScope == null) || (idScope.isEmpty()))

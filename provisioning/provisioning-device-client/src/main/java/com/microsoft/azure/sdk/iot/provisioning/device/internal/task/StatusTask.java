@@ -21,7 +21,7 @@ import javax.net.ssl.SSLContext;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 
-public class StatusTask implements Callable<RegistrationOperationStatusParser>
+class StatusTask implements Callable<RegistrationOperationStatusParser>
 {
     private static final int MAX_WAIT_FOR_STATUS_RESPONSE = 100;
     private static final String THREAD_NAME = "azure-iot-sdk-StatusTask";
@@ -42,7 +42,7 @@ public class StatusTask implements Callable<RegistrationOperationStatusParser>
                 ResponseData data = (ResponseData) context;
                 data.setResponseData(responseData.getResponseData());
                 data.setContractState(responseData.getContractState());
-                data.setWaitForStatusInMS(responseData.getWaitForStatusInMS());
+                data.setWaitForStatusInMilliseconds(responseData.getWaitForStatusInMilliseconds());
             }
             else
             {

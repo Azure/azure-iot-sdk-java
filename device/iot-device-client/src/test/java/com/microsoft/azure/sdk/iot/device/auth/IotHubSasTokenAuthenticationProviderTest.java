@@ -5,10 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.device.auth;
 
-import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import mockit.*;
 import org.junit.Test;
 
@@ -59,16 +55,6 @@ public class IotHubSasTokenAuthenticationProviderTest
             this.sasToken = mockSasToken;
             this.deviceId = expectedDeviceId;
             this.hostname = expectedHostname;
-        }
-
-        @Override
-        public void setPathToIotHubTrustedCert(String pathToCertificate)
-        {
-        }
-
-        @Override
-        public void setIotHubTrustedCert(String certificate)
-        {
         }
 
         @Override
@@ -198,8 +184,8 @@ public class IotHubSasTokenAuthenticationProviderTest
         IotHubSasTokenAuthenticationProvider authenticationProvider = new mockIotHubSasTokenAuthenticationImplementation(expectedTokenValidSecs, expectedTimeBufferPercentage);
 
         //assert
-        assertEquals(expectedTokenValidSecs, Deencapsulation.getField(authenticationProvider, "tokenValidSecs"));
-        assertEquals(expectedTimeBufferPercentage, Deencapsulation.getField(authenticationProvider, "timeBufferPercentage"));
+        assertEquals(expectedTokenValidSecs, (long) Deencapsulation.getField(authenticationProvider, "tokenValidSecs"));
+        assertEquals(expectedTimeBufferPercentage, (int) Deencapsulation.getField(authenticationProvider, "timeBufferPercentage"));
     }
 
     //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_016: [If the provided tokenValidSecs is less than 1, this function shall throw an IllegalArgumentException.]

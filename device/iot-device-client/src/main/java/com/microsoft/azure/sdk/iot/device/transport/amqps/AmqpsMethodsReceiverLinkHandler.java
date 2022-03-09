@@ -3,9 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpsMessage;
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
+import com.microsoft.azure.sdk.iot.device.ClientConfiguration;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.MessageCallback;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
@@ -14,7 +13,7 @@ import org.apache.qpid.proton.engine.Receiver;
 
 import java.util.Map;
 
-public final class AmqpsMethodsReceiverLinkHandler extends AmqpsReceiverLinkHandler
+final class AmqpsMethodsReceiverLinkHandler extends AmqpsReceiverLinkHandler
 {
     private static final String CORRELATION_ID_KEY = "com.microsoft:channel-correlation-id";
     private static final String CORRELATION_ID_KEY_PREFIX = "methods:";
@@ -28,25 +27,25 @@ public final class AmqpsMethodsReceiverLinkHandler extends AmqpsReceiverLinkHand
 
     private static final String LINK_TYPE = "methods";
 
-    private final DeviceClientConfig deviceClientConfig;
+    private final ClientConfiguration clientConfiguration;
 
-    AmqpsMethodsReceiverLinkHandler(Receiver receiver, AmqpsLinkStateCallback amqpsLinkStateCallback, DeviceClientConfig deviceClientConfig, String linkCorrelationId)
+    AmqpsMethodsReceiverLinkHandler(Receiver receiver, AmqpsLinkStateCallback amqpsLinkStateCallback, ClientConfiguration clientConfiguration, String linkCorrelationId)
     {
         super(receiver, amqpsLinkStateCallback, linkCorrelationId);
 
-        this.deviceClientConfig = deviceClientConfig;
+        this.clientConfiguration = clientConfiguration;
 
-        this.receiverLinkAddress = getAddress(deviceClientConfig);
+        this.receiverLinkAddress = getAddress(clientConfiguration);
 
         //Note that this correlation id value must be equivalent to the correlation id in the method sender link that it is paired with
         this.amqpProperties.put(Symbol.getSymbol(CORRELATION_ID_KEY), Symbol.getSymbol(CORRELATION_ID_KEY_PREFIX + this.linkCorrelationId));
-        this.amqpProperties.put(Symbol.getSymbol(VERSION_IDENTIFIER_KEY), deviceClientConfig.getProductInfo().getUserAgentString());
+        this.amqpProperties.put(Symbol.getSymbol(VERSION_IDENTIFIER_KEY), clientConfiguration.getProductInfo().getUserAgentString());
     }
 
-    static String getTag(DeviceClientConfig deviceClientConfig, String linkCorrelationId)
+    static String getTag(ClientConfiguration clientConfiguration, String linkCorrelationId)
     {
-        String moduleId = deviceClientConfig.getModuleId();
-        String deviceId = deviceClientConfig.getDeviceId();
+        String moduleId = clientConfiguration.getModuleId();
+        String deviceId = clientConfiguration.getDeviceId();
         if (moduleId != null && !moduleId.isEmpty())
         {
             return RECEIVER_LINK_TAG_PREFIX + deviceId + "/" + moduleId + "-" + linkCorrelationId;
@@ -57,10 +56,10 @@ public final class AmqpsMethodsReceiverLinkHandler extends AmqpsReceiverLinkHand
         }
     }
 
-    private static String getAddress(DeviceClientConfig deviceClientConfig)
+    private static String getAddress(ClientConfiguration clientConfiguration)
     {
-        String moduleId = deviceClientConfig.getModuleId();
-        String deviceId = deviceClientConfig.getDeviceId();
+        String moduleId = clientConfiguration.getModuleId();
+        String deviceId = clientConfiguration.getDeviceId();
         if (moduleId != null && !moduleId.isEmpty())
         {
             return String.format(MODULE_RECEIVER_LINK_ENDPOINT_PATH, deviceId, moduleId);
@@ -84,8 +83,8 @@ public final class AmqpsMethodsReceiverLinkHandler extends AmqpsReceiverLinkHand
         iotHubTransportMessage.setMessageType(MessageType.DEVICE_METHODS);
         iotHubTransportMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
 
-        MessageCallback messageCallback = deviceClientConfig.getDeviceMethodsMessageCallback();
-        Object messageContext = deviceClientConfig.getDeviceMethodsMessageContext();
+        MessageCallback messageCallback = clientConfiguration.getDirectMethodsMessageCallback();
+        Object messageContext = clientConfiguration.getDirectMethodsMessageContext();
 
         iotHubTransportMessage.setMessageCallback(messageCallback);
         iotHubTransportMessage.setMessageCallbackContext(messageContext);

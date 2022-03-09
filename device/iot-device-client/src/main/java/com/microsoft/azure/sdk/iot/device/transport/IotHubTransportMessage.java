@@ -3,8 +3,9 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 
 /**
  * Extends Message, adding transport artifacts.
@@ -14,7 +15,7 @@ public class IotHubTransportMessage extends Message
     /// <summary>
     /// [Required in IoTHubTransportManager] Used to specify the method invoked for the message (POST, GET).
     /// </summary>
-    private IotHubMethod iotHubMethod;
+    private HttpsMethod iotHubMethod;
 
     /// <summary>
     /// [Required in IoTHubTransportManager] Used to specify the URI path of this message.
@@ -36,13 +37,6 @@ public class IotHubTransportMessage extends Message
      */
     public IotHubTransportMessage(byte[] data, MessageType messageType)
     {
-        /*
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_001: [**If the message body is null, the constructor shall throw an IllegalArgumentException thrown by base constructor.**]**
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_002: [**The constructor shall save the message body by calling super with the body as parameter.**]**
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_003: [**The constructor shall set the messageType to the given value by calling the super with the given value.**]**
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_015: [**The constructor shall initialize version, requestId and status to null.**]**
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_016: [**The constructor shall initialize operationType to UNKNOWN**]**
-        */
         super(data);
         super.setMessageType(messageType);
         this.methodName = null;
@@ -58,7 +52,6 @@ public class IotHubTransportMessage extends Message
      */
     public IotHubTransportMessage(String body)
     {
-        // Codes_SRS_IOTHUBTRANSPORTMESSAGE_21_002: [This method shall throw IllegalArgumentException if the body argument is null.]
         super(body);
         super.setMessageType(MessageType.UNKNOWN);
         this.methodName = null;
@@ -70,7 +63,6 @@ public class IotHubTransportMessage extends Message
 
     public IotHubTransportMessage(byte[] data, MessageType messageType, String messageId, String correlationId, MessageProperty[] messageProperties)
     {
-        //Codes_SRS_IOTHUBTRANSPORTMESSAGE_34_017: [This constructor shall return an instance of IotHubTransportMessage with provided bytes, messagetype, correlationid, messageid, and application properties.]
         super(data);
         super.setMessageType(messageType);
         this.setMessageId(messageId);
@@ -108,9 +100,6 @@ public class IotHubTransportMessage extends Message
      */
     public void setVersion(String version)
     {
-        /*
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_004: [**The function shall set the version.**]**
-         */
         this.version = version;
     }
 
@@ -120,9 +109,6 @@ public class IotHubTransportMessage extends Message
      */
     public String getVersion()
     {
-        /*
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_005: [**The function shall return the value of the version either set by the setter or the default (null) if unset so far.**]**
-         */
         return  this.version;
     }
 
@@ -132,9 +118,6 @@ public class IotHubTransportMessage extends Message
      */
     public void setRequestId(String id)
     {
-        /*
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_006: [**The function shall save the request id.**]**
-         */
         this.requestId = id;
     }
 
@@ -144,9 +127,6 @@ public class IotHubTransportMessage extends Message
      */
     public String getRequestId()
     {
-        /*
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_007: [**The function shall return the value of the request id either set by the setter or the default (null) if unset so far.**]**
-         */
         return this.requestId;
     }
 
@@ -156,9 +136,6 @@ public class IotHubTransportMessage extends Message
      */
     public void setStatus(String status)
     {
-        /*
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_008: [**The function shall save the status.**]**
-         */
         this.status = status;
     }
 
@@ -168,9 +145,6 @@ public class IotHubTransportMessage extends Message
      */
     public String getStatus()
     {
-        /*
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_009: [**The function shall return the value of the status either set by the setter or the default (null) if unset so far.**]**
-         */
         return this.status;
     }
 
@@ -180,9 +154,6 @@ public class IotHubTransportMessage extends Message
      */
     public void setDeviceOperationType(DeviceOperations deviceOperationType)
     {
-        /*
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_010: [**The function shall save the device twin operation type.**]**
-         */
         this.operationType = deviceOperationType;
     }
 
@@ -192,9 +163,6 @@ public class IotHubTransportMessage extends Message
      */
     public DeviceOperations getDeviceOperationType()
     {
-        /*
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_011: [**The function shall return the operation type either set by the setter or the default if unset so far.**]**
-         */
         return this.operationType;
     }
 
@@ -220,10 +188,6 @@ public class IotHubTransportMessage extends Message
     {
         if (methodName == null)
         {
-            /*
-            **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_012: [**The function shall throw IllegalArgumentException if the methodName is null.**]**
-            **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_013: [**The function shall set the methodName.**]**
-             */
             throw new IllegalArgumentException("Method name cannot be null");
         }
         this.methodName = methodName;
@@ -235,19 +199,15 @@ public class IotHubTransportMessage extends Message
      */
     public String getMethodName()
     {
-        /*
-        **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_014: [**The function shall return the methodName either set by the setter or the default (null) if unset so far.**]**
-         */
         return methodName;
     }
 
     /**
      * Setter for the IoT Hub method
-     * @param iotHubMethod The enum containing the IoT Hub method.
+     * @param iotHubMethod The HTTPS method.
      */
-    public void setIotHubMethod(IotHubMethod iotHubMethod)
+    public void setIotHubMethod(HttpsMethod iotHubMethod)
     {
-        /* Codes_SRS_IOTHUBTRANSPORTMESSAGE_21_002: [The setIotHubMethod shall store the iotHubMethod. This function do not evaluates this parameter.] */
         this.iotHubMethod = iotHubMethod;
     }
 
@@ -257,17 +217,15 @@ public class IotHubTransportMessage extends Message
      */
     public void setUriPath(String uriPath)
     {
-        /* Codes_SRS_IOTHUBTRANSPORTMESSAGE_21_003: [The setUriPath shall store the uriPath. This function do not evaluates this parameter.] */
         this.uriPath = uriPath;
     }
 
     /**
-     * Getter for the IoT Hub method
+     * Getter for the HTTPS method
      * @return the IoT Hub method (POST, GET).
      */
-    public IotHubMethod getIotHubMethod()
+    public HttpsMethod getIotHubMethod()
     {
-        /* Codes_SRS_IOTHUBTRANSPORTMESSAGE_21_004: [The getIotHubMethod shall return the stored iotHubMethod.] */
         return this.iotHubMethod;
     }
 
@@ -277,7 +235,6 @@ public class IotHubTransportMessage extends Message
      */
     public String getUriPath()
     {
-        /* Codes_SRS_IOTHUBTRANSPORTMESSAGE_21_005: [The getUriPath shall return the stored uriPath.] */
         return uriPath;
     }
 

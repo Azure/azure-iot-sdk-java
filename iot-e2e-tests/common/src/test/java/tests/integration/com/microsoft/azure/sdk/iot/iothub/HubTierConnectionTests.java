@@ -2,11 +2,15 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
+import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
+import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryIdentity;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -15,6 +19,7 @@ import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.BasicTierHubOnlyTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 
 import javax.net.ssl.SSLContext;
@@ -27,7 +32,6 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS_WS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
-import static junit.framework.TestCase.fail;
 import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 
 @IotHubTest
@@ -57,9 +61,9 @@ public class HubTierConnectionTests extends IntegrationTest
 
     public HubTierConnectionTestInstance testInstance;
 
-    protected static RegistryManager registryManager;
+    protected static RegistryClient registryClient;
 
-    public HubTierConnectionTests(DeviceClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, boolean useHttpProxy)
+    public HubTierConnectionTests(DeviceClient client, IotHubClientProtocol protocol, RegistryIdentity identity, AuthenticationType authenticationType, boolean useHttpProxy)
     {
         this.testInstance = new HubTierConnectionTestInstance(client, protocol, identity, authenticationType, useHttpProxy);
     }
@@ -71,25 +75,28 @@ public class HubTierConnectionTests extends IntegrationTest
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
-        String publicKeyCert = x509CertificateGenerator.getPublicCertificate();
-        String privateKey = x509CertificateGenerator.getPrivateKey();
         String x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
 
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
         String uuid = UUID.randomUUID().toString();
         String deviceId = "java-tier-connection-e2e-test".concat("-" + uuid);
         String deviceIdX509 = "java-tier-connection-e2e-test-X509".concat("-" + uuid);
 
-        Device device = Device.createFromId(deviceId, null, null);
-        Device deviceX509 = Device.createDevice(deviceIdX509, SELF_SIGNED);
+        Device device = new Device(deviceId);
+        Device deviceX509 = new Device(deviceIdX509, SELF_SIGNED);
 
-        deviceX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
+        deviceX509.setThumbprint(x509Thumbprint, x509Thumbprint);
 
-        Tools.addDeviceWithRetry(registryManager, device);
-        Tools.addDeviceWithRetry(registryManager, deviceX509);
+        Tools.addDeviceWithRetry(registryClient, device);
+        Tools.addDeviceWithRetry(registryClient, deviceX509);
 
-        hostName = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString).getHostName();
-        SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCert, privateKey);
+        hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString).getHostName();
+        SSLContext sslContext = SSLContextBuilder.buildSSLContext(x509CertificateGenerator.getX509Certificate(), x509CertificateGenerator.getPrivateKey());
+
+        ClientOptions options = ClientOptions.builder().sslContext(sslContext).build();
+
+        Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
+        ClientOptions optionsWithProxy = ClientOptions.builder().proxySettings((new ProxySettings(testProxy, testProxyUser, testProxyPass))).build();
 
         return new ArrayList(Arrays.asList(
                 new Object[][]
@@ -99,10 +106,10 @@ public class HubTierConnectionTests extends IntegrationTest
                                 {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS, false},
 
                                 //x509 device client
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, sslContext), AMQPS, deviceX509, SELF_SIGNED, false},
+                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, options), AMQPS, deviceX509, SELF_SIGNED, false},
 
                                 //sas token device client, with proxy
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS, true}
+                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS, options), AMQPS_WS, device, SAS, true}
                         }
         ));
     }
@@ -110,15 +117,7 @@ public class HubTierConnectionTests extends IntegrationTest
     @BeforeClass
     public static void classSetup()
     {
-        try
-        {
-            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-            fail("Unexpected exception encountered");
-        }
+        registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
     }
 
     @BeforeClass
@@ -139,18 +138,14 @@ public class HubTierConnectionTests extends IntegrationTest
     @Before
     public void SetProxyIfApplicable()
     {
-        if (testInstance.useHttpProxy)
-        {
-            Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-            testInstance.client.setProxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass));
-        }
+
     }
 
     public static class HubTierConnectionTestInstance
     {
         public DeviceClient client;
         public IotHubClientProtocol protocol;
-        public BaseDevice identity;
+        public RegistryIdentity identity;
         public AuthenticationType authenticationType;
         public ClientType clientType;
         public String publicKeyCert;
@@ -159,14 +154,14 @@ public class HubTierConnectionTests extends IntegrationTest
         public CorrelationDetailsLoggingAssert correlationDetailsLoggingAssert;
         public boolean useHttpProxy;
 
-        public HubTierConnectionTestInstance(DeviceClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, boolean useHttpProxy)
+        public HubTierConnectionTestInstance(DeviceClient client, IotHubClientProtocol protocol, RegistryIdentity identity, AuthenticationType authenticationType, boolean useHttpProxy)
         {
             this.client = client;
             this.protocol = protocol;
             this.identity = identity;
             this.authenticationType = authenticationType;
-            this.publicKeyCert = x509CertificateGenerator.getPublicCertificate();
-            this.privateKey = x509CertificateGenerator.getPrivateKey();
+            this.publicKeyCert = x509CertificateGenerator.getPublicCertificatePEM();
+            this.privateKey = x509CertificateGenerator.getPrivateKeyPEM();
             this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
             String deviceId = identity.getDeviceId();
             this.useHttpProxy = useHttpProxy;
@@ -175,16 +170,16 @@ public class HubTierConnectionTests extends IntegrationTest
         }
     }
 
-    protected static class DeviceMethodCallback implements com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback
+    protected static class MethodCallback implements com.microsoft.azure.sdk.iot.device.twin.MethodCallback
     {
         @Override
-        public DeviceMethodData call(String methodName, Object methodData, Object context)
+        public DirectMethodResponse onMethodInvoked(String methodName, Object methodData, Object context)
         {
-            return new DeviceMethodData(200, "payload");
+            return new DirectMethodResponse(200, "payload");
         }
     }
 
-    protected static class DeviceMethodStatusCallBack implements IotHubEventCallback
+    protected static class DirectMethodStatusCallback implements IotHubEventCallback
     {
         public void execute(IotHubStatusCode status, Object context)
         {
@@ -194,20 +189,21 @@ public class HubTierConnectionTests extends IntegrationTest
 
     @Test
     @BasicTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void enableMethodFailedWithBasicTier() throws IOException, InterruptedException
     {
         //arrange
         List<Pair<IotHubConnectionStatus, Throwable>> connectionStatusUpdates = new ArrayList<>();
-        testInstance.client.registerConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> connectionStatusUpdates.add(new Pair<>(status, throwable)), null);
+        testInstance.client.setConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> connectionStatusUpdates.add(new Pair<>(status, throwable)), null);
 
-        testInstance.client.open();
+        testInstance.client.open(false);
 
         //act
-        testInstance.client.subscribeToDeviceMethod(new DeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
+        testInstance.client.subscribeToMethodsAsync(new MethodCallback(), null, new DirectMethodStatusCallback(), null);
 
         //assert
         waitForDisconnect(connectionStatusUpdates, WAIT_FOR_DISCONNECT_TIMEOUT_MILLISECONDS, testInstance.client);
-        testInstance.client.closeNow();
+        testInstance.client.close();
     }
 
     public static void waitForDisconnect(List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates, long timeout, InternalClient client) throws InterruptedException
