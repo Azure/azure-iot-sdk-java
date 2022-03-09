@@ -39,22 +39,22 @@ to migrate to v2 when they have the chance. For more details on LTS releases, se
 
 #### DeviceClient
 
-| Change needed? | V1 class#method  | Equivalent V2 class#method |
+| Changed? | V1 class#method  | Equivalent V2 class#method |
 |:---|:---|:---|
 | yes | DeviceClient#createFromSecurityProvider(String, String, SecurityProvider, IotHubClientProtocol); | new DeviceClient(String, String, SecurityProvider, IotHubClientProtocol);  |
 | yes | DeviceClient#createFromSecurityProvider(String, String, SecurityProvider, IotHubClientProtocol, ClientOptions); | new DeviceClient(String, String, SecurityProvider, IotHubClientProtocol, ClientOptions);  |
 | yes | DeviceClient#setMessageCallback(MessageCallback, Object); | DeviceClient#setMessageCallback(MessageCallback, Object);  |
 | yes | DeviceClient#open(); | DeviceClient#open(boolean);  |
-| yes | DeviceClient#open(boolean); | DeviceClient#open(boolean);  |
+| no | DeviceClient#open(boolean); | DeviceClient#open(boolean);  |
 | yes | DeviceClient#closeNow(); | DeviceClient#close();  |
-| yes | DeviceClient#close(); | DeviceClient#close();  |
-| yes | DeviceClient#getFileUploadSasUri(FileUploadSasUriRequest); | DeviceClient#getFileUploadSasUri(FileUploadSasUriRequest);  |
-| yes | DeviceClient#completeFileUpload(FileUploadCompletionNotification); | DeviceClient#completeFileUpload(FileUploadCompletionNotification);  |
+| no | DeviceClient#close(); | DeviceClient#close();  |
+| no | DeviceClient#getFileUploadSasUri(FileUploadSasUriRequest); | DeviceClient#getFileUploadSasUri(FileUploadSasUriRequest);  |
+| no | DeviceClient#completeFileUpload(FileUploadCompletionNotification); | DeviceClient#completeFileUpload(FileUploadCompletionNotification);  |
 | yes | DeviceClient#uploadToBlobAsync(String, InputStream, long, IotHubEventCallback, Object); | no equivalent method**  |
-| yes | DeviceClient#isMultiplexed(); | DeviceClient#isMultiplexed();  |
-| yes | DeviceClient#sendEventAsync(Message, IotHubEventCallback, Object); | DeviceClient#sendEventAsync(Message, IotHubEventCallback, Object);  |
+| no | DeviceClient#isMultiplexed(); | DeviceClient#isMultiplexed();  |
+| no | DeviceClient#sendEventAsync(Message, IotHubEventCallback, Object); | DeviceClient#sendEventAsync(Message, IotHubEventCallback, Object);  |
 | yes | DeviceClient#registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback, Object); | DeviceClient#setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback, Object);  |
-| yes | DeviceClient#setRetryPolicy(RetryPolicy); | DeviceClient#setRetryPolicy(RetryPolicy);  |
+| no | DeviceClient#setRetryPolicy(RetryPolicy); | DeviceClient#setRetryPolicy(RetryPolicy);  |
 | yes | DeviceClient#getProductInfo(); | DeviceClient#getProductInfo();  |
 | yes | DeviceClient#subscribeToDeviceMethod(DeviceMethodCallback , Object, IotHubEventCallback, Object); | DeviceClient#subscribeToMethodsAsync(MethodCallback, Object, IotHubEventCallback, Object);  |
 | yes | DeviceClient#startDeviceTwin(IotHubEventCallback, Object, TwinPropertyCallback, Object); | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
