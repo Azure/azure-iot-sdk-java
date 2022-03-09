@@ -39,36 +39,36 @@ to migrate to v2 when they have the chance. For more details on LTS releases, se
 
 #### DeviceClient
 
-| V1 class#method  | Equivalent V2 class#method |
-|:---|:---|
-| DeviceClient#createFromSecurityProvider(String, String, SecurityProvider, IotHubClientProtocol); | new DeviceClient(String, String, SecurityProvider, IotHubClientProtocol);  |
-| DeviceClient#createFromSecurityProvider(String, String, SecurityProvider, IotHubClientProtocol, ClientOptions); | new DeviceClient(String, String, SecurityProvider, IotHubClientProtocol, ClientOptions);  |
-| DeviceClient#setMessageCallback(MessageCallback, Object); | DeviceClient#setMessageCallback(MessageCallback, Object);  |
-| DeviceClient#open(); | DeviceClient#open(boolean);  |
-| DeviceClient#open(boolean); | DeviceClient#open(boolean);  |
-| DeviceClient#closeNow(); | DeviceClient#close();  |
-| DeviceClient#close(); | DeviceClient#close();  |
-| DeviceClient#getFileUploadSasUri(FileUploadSasUriRequest); | DeviceClient#getFileUploadSasUri(FileUploadSasUriRequest);  |
-| DeviceClient#completeFileUpload(FileUploadCompletionNotification); | DeviceClient#completeFileUpload(FileUploadCompletionNotification);  |
-| DeviceClient#uploadToBlobAsync(String, InputStream, long, IotHubEventCallback, Object); | no equivalent method**  |
-| DeviceClient#isMultiplexed(); | DeviceClient#isMultiplexed();  |
-| DeviceClient#sendEventAsync(Message, IotHubEventCallback, Object); | DeviceClient#sendEventAsync(Message, IotHubEventCallback, Object);  |
-| DeviceClient#registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback, Object); | DeviceClient#setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback, Object);  |
-| DeviceClient#setRetryPolicy(RetryPolicy); | DeviceClient#setRetryPolicy(RetryPolicy);  |
-| DeviceClient#getProductInfo(); | DeviceClient#getProductInfo();  |
-| DeviceClient#subscribeToDeviceMethod(DeviceMethodCallback , Object, IotHubEventCallback, Object); | DeviceClient#subscribeToMethodsAsync(MethodCallback, Object, IotHubEventCallback, Object);  |
-| DeviceClient#startDeviceTwin(IotHubEventCallback, Object, TwinPropertyCallback, Object); | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
-| DeviceClient#startDeviceTwin(IotHubEventCallback, Object, TwinPropertiesCallback, Object); | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
-| DeviceClient#startDeviceTwin(IotHubEventCallback, Object, PropertyCallBack<Type1, Type2>, Object); | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
-| DeviceClient#getDeviceTwin(); | DeviceClient#getTwinAsync();  |
-| DeviceClient#subscribeToDesiredProperties(Map<Property, Pair<PropertyCallBack<String, Object>, Object>>); | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
-| DeviceClient#subscribeToTwinDesiredProperties(Map<Property, Pair<TwinPropertyCallBack, Object>>(); | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
-| DeviceClient#sendReportedProperties(Set<Property>); | DeviceClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesCallback, Object);  |
-| DeviceClient#sendReportedProperties(Set<Property>, int); | DeviceClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesCallback, Object);  |
-| DeviceClient#sendReportedProperties(ReportedPropertiesParameters); | DeviceClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesUpdateCorrelatingMessageCallback, Object);  |
-| DeviceClient#sendReportedProperties(Set<Property>, Integer, CorrelatingMessageCallback, Object, IotHubEventCallback, Object); | DeviceClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesUpdateCorrelatingMessageCallback, Object);  |
-| DeviceClient#setOption(String, Object); | no equivalent method***  |
-| DeviceClient#setProxySettings(ProxySettings); | no equivalent method****  |
+| Change needed? | V1 class#method  | Equivalent V2 class#method |
+|:---|:---|:---|
+| yes | DeviceClient#createFromSecurityProvider(String, String, SecurityProvider, IotHubClientProtocol); | new DeviceClient(String, String, SecurityProvider, IotHubClientProtocol);  |
+| yes | DeviceClient#createFromSecurityProvider(String, String, SecurityProvider, IotHubClientProtocol, ClientOptions); | new DeviceClient(String, String, SecurityProvider, IotHubClientProtocol, ClientOptions);  |
+| yes | DeviceClient#setMessageCallback(MessageCallback, Object); | DeviceClient#setMessageCallback(MessageCallback, Object);  |
+| yes | DeviceClient#open(); | DeviceClient#open(boolean);  |
+| yes | DeviceClient#open(boolean); | DeviceClient#open(boolean);  |
+| yes | DeviceClient#closeNow(); | DeviceClient#close();  |
+| yes | DeviceClient#close(); | DeviceClient#close();  |
+| yes | DeviceClient#getFileUploadSasUri(FileUploadSasUriRequest); | DeviceClient#getFileUploadSasUri(FileUploadSasUriRequest);  |
+| yes | DeviceClient#completeFileUpload(FileUploadCompletionNotification); | DeviceClient#completeFileUpload(FileUploadCompletionNotification);  |
+| yes | DeviceClient#uploadToBlobAsync(String, InputStream, long, IotHubEventCallback, Object); | no equivalent method**  |
+| yes | DeviceClient#isMultiplexed(); | DeviceClient#isMultiplexed();  |
+| yes | DeviceClient#sendEventAsync(Message, IotHubEventCallback, Object); | DeviceClient#sendEventAsync(Message, IotHubEventCallback, Object);  |
+| yes | DeviceClient#registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback, Object); | DeviceClient#setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback, Object);  |
+| yes | DeviceClient#setRetryPolicy(RetryPolicy); | DeviceClient#setRetryPolicy(RetryPolicy);  |
+| yes | DeviceClient#getProductInfo(); | DeviceClient#getProductInfo();  |
+| yes | DeviceClient#subscribeToDeviceMethod(DeviceMethodCallback , Object, IotHubEventCallback, Object); | DeviceClient#subscribeToMethodsAsync(MethodCallback, Object, IotHubEventCallback, Object);  |
+| yes | DeviceClient#startDeviceTwin(IotHubEventCallback, Object, TwinPropertyCallback, Object); | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
+| yes | DeviceClient#startDeviceTwin(IotHubEventCallback, Object, TwinPropertiesCallback, Object); | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
+| yes | DeviceClient#startDeviceTwin(IotHubEventCallback, Object, PropertyCallBack<Type1, Type2>, Object); | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
+| yes | DeviceClient#getDeviceTwin(); | DeviceClient#getTwinAsync();  |
+| yes | DeviceClient#subscribeToDesiredProperties(Map<Property, Pair<PropertyCallBack<String, Object>, Object>>); | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
+| yes | DeviceClient#subscribeToTwinDesiredProperties(Map<Property, Pair<TwinPropertyCallBack, Object>>(); | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
+| yes | DeviceClient#sendReportedProperties(Set<Property>); | DeviceClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesCallback, Object);  |
+| yes | DeviceClient#sendReportedProperties(Set<Property>, int); | DeviceClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesCallback, Object);  |
+| yes | DeviceClient#sendReportedProperties(ReportedPropertiesParameters); | DeviceClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesUpdateCorrelatingMessageCallback, Object);  |
+| yes | DeviceClient#sendReportedProperties(Set<Property>, Integer, CorrelatingMessageCallback, Object, IotHubEventCallback, Object); | DeviceClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesUpdateCorrelatingMessageCallback, Object);  |
+| yes | DeviceClient#setOption(String, Object); | no equivalent method***  |
+| yes | DeviceClient#setProxySettings(ProxySettings); | no equivalent method****  |
 
 ** This method has been split into the three individual steps that this method used to take. See [this file upload sample](./device/iot-device-samples/file-upload-sample) for an example of how to do file upload using these discrete steps.
 
