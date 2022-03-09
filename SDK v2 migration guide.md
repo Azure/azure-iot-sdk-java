@@ -36,7 +36,7 @@ to migrate to v2 when they have the chance.
 
 ## Migration Guide
 
-### IoT hub Device Client
+### IoT Hub Device Client
 
 #### DeviceClient
 
