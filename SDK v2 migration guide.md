@@ -161,45 +161,45 @@ been moved to a new ConfigurationsClient in v2.
 
 #### RegistryManager
 
-| V1 class#method  | Equivalent V2 class#method |
-|:---|:---|
-| RegistryManager#open(); | no equivalent method**  |
-| RegistryManager#close(); | no equivalent method**  |
-| RegistryManager#addDevice(Device); | RegistryClient#addDevice(Device);  |
-| RegistryManager#addDeviceAsync(Device); | no equivalent method***  |
-| RegistryManager#getDevice(String); | RegistryClient#getDevice(String);  |
-| RegistryManager#getDeviceAsync(String); | no equivalent method***  |
-| RegistryManager#updateDevice(Device); | RegistryClient#updateDevice(Device);  |
-| RegistryManager#updateDeviceAsync(Device); | no equivalent method*** |
-| RegistryManager#removeDevice(String); | RegistryClient#removeDevice(String);  |
-| RegistryManager#removeDeviceAsync(String); | no equivalent method*** |
-| RegistryManager#getDevices(Integer); | no equivalent method**** |
-| RegistryManager#getDevicesAsync(Integer); | no equivalent method**** |
-| RegistryManager#getDeviceConnectionString(); | no equivalent method. Removed since this was not a service call.  |
-| RegistryManager#getStatistics(); | RegistryClient#getStatistics();  |
-| RegistryManager#getStatisticsAsync(); | no equivalent method*** |
-| RegistryManager#exportDevices(String, Boolean); | RegistryClient#exportDevices(String, boolean);  |
-| RegistryManager#exportDevicesAsync(String, Boolean); | no equivalent method*** |
-| RegistryManager#exportDevices(JobProperties); | RegistryClient#exportDevices(RegistryJob);  |
-| RegistryManager#exportDevicesAsync(JobProperties); | no equivalent method*** |
-| RegistryManager#importDevices(String, String); | RegistryClient#importDevices(String, String);  |
-| RegistryManager#importDevicesAsync(String, String); | no equivalent method*** |
-| RegistryManager#importDevices(JobProperties); | RegistryClient#importDevices(JobProperties);  |
-| RegistryManager#importDevicesAsync(JobProperties); | no equivalent method*** |
-| RegistryManager#getJob(String); | RegistryClient#getJob(String);  |
-| RegistryManager#addModule(Module); | RegistryClient#addModule(Module);  |
-| RegistryManager#getModule(String); | RegistryClient#getModule(String);  |
-| RegistryManager#getModulesOnDevice(String); | RegistryClient#getModulesOnDevice(String);  |
-| RegistryManager#updateModule(Module); | RegistryClient#updateModule(Module);  |
-| RegistryManager#updateModule(Module, Boolean); | RegistryClient#updateModule(Module);  |
-| RegistryManager#removeModule(String, String); | RegistryClient#removeModule(String, String);  |
-| RegistryManager#addConfiguration(Configuration); | ConfigurationsClient#create(Configuration);  |
-| RegistryManager#getConfiguration(String); | ConfigurationsClient#get(String);  |
-| RegistryManager#getConfigurations(int); | ConfigurationsClient#getConfigurations(int);  |
-| RegistryManager#updateConfiguration(Configuration); | ConfigurationsClient#replace(Configuration);  |
-| RegistryManager#updateConfiguration(Configuration, Boolean); |  ConfigurationsClient#updateConfiguration(Configuration); |
-| RegistryManager#removeConfiguration(String); | ConfigurationsClient#delete(String);  |
-| RegistryManager#applyConfigurationContentOnDevice(String, ConfigurationContent); | ConfigurationsClient#applyConfigurationContentOnDevice(String, ConfigurationContent);  |
+| V1 class#method | Changed? | Equivalent V2 class#method |
+|:---|:---|:---|
+| RegistryManager#open(); | yes | no equivalent method**  |
+| RegistryManager#close(); | yes | no equivalent method**  |
+| RegistryManager#addDevice(Device); | yes | RegistryClient#addDevice(Device);  |
+| RegistryManager#addDeviceAsync(Device); | yes | no equivalent method***  |
+| RegistryManager#getDevice(String); | yes | RegistryClient#getDevice(String);  |
+| RegistryManager#getDeviceAsync(String); | yes | no equivalent method***  |
+| RegistryManager#updateDevice(Device); | yes | RegistryClient#updateDevice(Device);  |
+| RegistryManager#updateDeviceAsync(Device); | yes | no equivalent method*** |
+| RegistryManager#removeDevice(String); | yes | RegistryClient#removeDevice(String);  |
+| RegistryManager#removeDeviceAsync(String); | yes | no equivalent method*** |
+| RegistryManager#getDevices(Integer); | yes | no equivalent method**** |
+| RegistryManager#getDevicesAsync(Integer); | yes | no equivalent method**** |
+| RegistryManager#getDeviceConnectionString(); | yes | no equivalent method. Removed since this was not a service call.  |
+| RegistryManager#getStatistics(); | yes | RegistryClient#getStatistics();  |
+| RegistryManager#getStatisticsAsync(); | yes | no equivalent method*** |
+| RegistryManager#exportDevices(String, Boolean); | yes | RegistryClient#exportDevices(String, boolean);  |
+| RegistryManager#exportDevicesAsync(String, Boolean); | yes | no equivalent method*** |
+| RegistryManager#exportDevices(JobProperties); | yes | RegistryClient#exportDevices(RegistryJob);  |
+| RegistryManager#exportDevicesAsync(JobProperties); | yes | no equivalent method*** |
+| RegistryManager#importDevices(String, String); | yes | RegistryClient#importDevices(String, String);  |
+| RegistryManager#importDevicesAsync(String, String); | yes | no equivalent method*** |
+| RegistryManager#importDevices(JobProperties); | yes | RegistryClient#importDevices(JobProperties);  |
+| RegistryManager#importDevicesAsync(JobProperties); | yes | no equivalent method*** |
+| RegistryManager#getJob(String); | yes | RegistryClient#getJob(String);  |
+| RegistryManager#addModule(Module); | yes | RegistryClient#addModule(Module);  |
+| RegistryManager#getModule(String); | yes | RegistryClient#getModule(String);  |
+| RegistryManager#getModulesOnDevice(String); | yes | RegistryClient#getModulesOnDevice(String);  |
+| RegistryManager#updateModule(Module); | yes | RegistryClient#updateModule(Module);  |
+| RegistryManager#updateModule(Module, Boolean); | yes | RegistryClient#updateModule(Module);  |
+| RegistryManager#removeModule(String, String); | yes | RegistryClient#removeModule(String, String);  |
+| RegistryManager#addConfiguration(Configuration); | yes | ConfigurationsClient#create(Configuration);  |
+| RegistryManager#getConfiguration(String); | yes | ConfigurationsClient#get(String);  |
+| RegistryManager#getConfigurations(int); | yes | ConfigurationsClient#getConfigurations(int);  |
+| RegistryManager#updateConfiguration(Configuration); | yes | ConfigurationsClient#replace(Configuration);  |
+| RegistryManager#updateConfiguration(Configuration, Boolean); | yes |  ConfigurationsClient#updateConfiguration(Configuration); |
+| RegistryManager#removeConfiguration(String); | yes | ConfigurationsClient#delete(String);  |
+| RegistryManager#applyConfigurationContentOnDevice(String, ConfigurationContent); | yes | ConfigurationsClient#applyConfigurationContentOnDevice(String, ConfigurationContent);  |
 
 ** This method did nothing so it didn't need a v2 equivalent
 
@@ -210,53 +210,53 @@ been moved to a new ConfigurationsClient in v2.
 
 #### DeviceTwin
 
-| V1 class#method  | Equivalent V2 class#method |
-|:---|:---|
-| DeviceTwin#getTwin(DeviceTwinDevice); | TwinClient#get(String), TwinClient#get(String, String);  |
-| DeviceTwin#updateTwin(DeviceTwinDevice); | TwinClient#patch(Twin);  |
-| DeviceTwin#replaceTwin(DeviceTwinDevice); | TwinClient#replace(Twin);  |
-| DeviceTwin#queryTwin(String); | TwinClient#query(String), QueryClient.queryTwins(String)  |
-| DeviceTwin#scheduleUpdateTwin(String, DeviceTwinDevice, Date, long); | ScheduledJobsClient#scheduleUpdateTwin(String, String, Twin, Date, long);  |
+| V1 class#method | Changed? | Equivalent V2 class#method |
+|:---|:---|:---|
+| DeviceTwin#getTwin(DeviceTwinDevice); | yes | TwinClient#get(String), TwinClient#get(String, String);  |
+| DeviceTwin#updateTwin(DeviceTwinDevice); | yes | TwinClient#patch(Twin);  |
+| DeviceTwin#replaceTwin(DeviceTwinDevice); | yes | TwinClient#replace(Twin);  |
+| DeviceTwin#queryTwin(String); | yes | TwinClient#query(String), QueryClient.queryTwins(String)  |
+| DeviceTwin#scheduleUpdateTwin(String, DeviceTwinDevice, Date, long); | yes | ScheduledJobsClient#scheduleUpdateTwin(String, String, Twin, Date, long);  |
 
 
 #### DeviceMethod
 
-| V1 class#method  | Equivalent V2 class#method |
-|:---|:---|
-| DeviceMethod#invoke(String, String, Long, Long, Object); | DirectMethodsClient#invoke(String, String, DirectMethodRequestOptions);  |
-| DeviceMethod#invoke(String, String, String, Long, Long, Object); | DirectMethodsClient#invoke(String, String, String, DirectMethodRequestOptions);  |
-| DeviceMethod#scheduleDeviceMethod(String, String, Long, Long, Object, Date, long); | ScheduledJobsClient#scheduleDirectMethod(String, String, String, Date, DirectMethodsJobOptions);  |
+| V1 class#method | Changed? | Equivalent V2 class#method |
+|:---|:---|:---|
+| DeviceMethod#invoke(String, String, Long, Long, Object); | yes | DirectMethodsClient#invoke(String, String, DirectMethodRequestOptions);  |
+| DeviceMethod#invoke(String, String, String, Long, Long, Object); | yes | DirectMethodsClient#invoke(String, String, String, DirectMethodRequestOptions);  |
+| DeviceMethod#scheduleDeviceMethod(String, String, Long, Long, Object, Date, long); | yes | ScheduledJobsClient#scheduleDirectMethod(String, String, String, Date, DirectMethodsJobOptions);  |
 
 
 #### JobClient
 
-| V1 class#method  | Equivalent V2 class#method |
-|:---|:---|
-| JobClient#scheduleUpdateTwin(String, String, DeviceTwinDevice, Date, long); | ScheduledJobsClient#scheduleUpdateTwin(String, String, Twin, Date, long);  |
-| JobClient#scheduleDeviceMethod(String, String, Long, Long, Object, Date, long); | ScheduledJobsClient#scheduleDirectMethod(String, String, String, Date, DirectMethodsJobOptions);  |
-| JobClient#getJob(String); | ScheduledJobsClient#getJob(String);  |
-| JobClient#cancelJob(String); | ScheduledJobsClient#cancelJob(String);  |
-| JobClient#queryDeviceJob(String); | ScheduledJobsClient#query(String), QueryClient#queryJobs(String);  |
+| V1 class#method | Changed? | Equivalent V2 class#method |
+|:---|:---|:---|
+| JobClient#scheduleUpdateTwin(String, String, DeviceTwinDevice, Date, long); | yes | ScheduledJobsClient#scheduleUpdateTwin(String, String, Twin, Date, long);  |
+| JobClient#scheduleDeviceMethod(String, String, Long, Long, Object, Date, long); | yes | ScheduledJobsClient#scheduleDirectMethod(String, String, String, Date, DirectMethodsJobOptions);  |
+| JobClient#getJob(String); | yes | ScheduledJobsClient#getJob(String);  |
+| JobClient#cancelJob(String); | yes | ScheduledJobsClient#cancelJob(String);  |
+| JobClient#queryDeviceJob(String); | yes | ScheduledJobsClient#query(String), QueryClient#queryJobs(String);  |
 
 
 #### ServiceClient
 
-| V1 class#method  | Equivalent V2 class#method |
-|:---|:---|
-| ServiceClient#open(); | MessagingClient#open();  |
-| ServiceClient#close(); | MessagingClient#close();  |
-| ServiceClient#send(String, Message); | MessagingClient#send(String, Message);  |
-| ServiceClient#send(String, String, Message); | MessagingClient#send(String, String, Message);  |
-| ServiceClient#getFileUploadNotificationReceiver(); | new FileUploadNotificationProcessorClient(String, IotHubServiceClientProtocol, Function<FeedbackBatch, AcknowledgementType>);  |
-| FileUploadNotificationReceiver#open(); | FileUploadNotificationProcessorClient#start();  |
-| FileUploadNotificationReceiver#close(); | FileUploadNotificationProcessorClient#stop();  |
-| FileUploadNotificationReceiver#receive(); | no equivalent method**  |
-| FileUploadNotificationReceiver#receive(int); | no equivalent method**  |
-| ServiceClient#getFeedbackReceiver(); | new MessageFeedbackProcessorClient(String, IotHubServiceClientProtocol, Function<FileUploadNotification, AcknowledgementType>);  |
-| FeedbackReceiver#open(); | MessageFeedbackProcessorClient#start();  |
-| FeedbackReceiver#close(); | MessageFeedbackProcessorClient#stop();  |
-| FeedbackReceiver#receive(); | no equivalent method**  |
-| FeedbackReceiver#receive(int); | no equivalent method**  |
+| V1 class#method | Changed? | Equivalent V2 class#method |
+|:---|:---|:---|
+| ServiceClient#open(); | yes | MessagingClient#open();  |
+| ServiceClient#close(); | yes | MessagingClient#close();  |
+| ServiceClient#send(String, Message); | yes | MessagingClient#send(String, Message);  |
+| ServiceClient#send(String, String, Message); | yes | MessagingClient#send(String, String, Message);  |
+| ServiceClient#getFileUploadNotificationReceiver(); | yes | new FileUploadNotificationProcessorClient(String, IotHubServiceClientProtocol, Function<FeedbackBatch, AcknowledgementType>);  |
+| FileUploadNotificationReceiver#open(); | yes | FileUploadNotificationProcessorClient#start();  |
+| FileUploadNotificationReceiver#close(); | yes | FileUploadNotificationProcessorClient#stop();  |
+| FileUploadNotificationReceiver#receive(); | yes | no equivalent method**  |
+| FileUploadNotificationReceiver#receive(int); | yes | no equivalent method**  |
+| ServiceClient#getFeedbackReceiver(); | yes | new MessageFeedbackProcessorClient(String, IotHubServiceClientProtocol, Function<FileUploadNotification, AcknowledgementType>);  |
+| FeedbackReceiver#open(); | yes | MessageFeedbackProcessorClient#start();  |
+| FeedbackReceiver#close(); | yes | MessageFeedbackProcessorClient#stop();  |
+| FeedbackReceiver#receive(); | yes | no equivalent method**  |
+| FeedbackReceiver#receive(int); | yes | no equivalent method**  |
 
 ** Your FileUploadNotificationProcessorClient and MessageFeedbackProcessorClient will start receiving as soon as the client is started
 
