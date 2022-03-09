@@ -258,7 +258,7 @@ been moved to a new ConfigurationsClient in v2.
 | FeedbackReceiver#receive(); | yes | no equivalent method**  |
 | FeedbackReceiver#receive(int); | yes | no equivalent method**  |
 
-** Your FileUploadNotificationProcessorClient and MessageFeedbackProcessorClient will start receiving as soon as the client is started
+** FileUploadNotificationProcessorClient and MessageFeedbackProcessorClient will start receiving as soon as the client is started. Events are received through the callback provided at constructor time.
 
 
 #### Other notable breaking changes
