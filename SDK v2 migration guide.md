@@ -1,4 +1,4 @@
-# Migration guide
+# SDK v2 Migration guide
 
 This document outlines the changes made from this library's 1.X.X releases to its 2.X.X releases. Since this is
 a major version upgrade, there are a number of breaking changes that will affect your ability to compile. Provided here
@@ -22,7 +22,7 @@ are outlines of the notable breaking changes as well as a mapping from v1 APIs t
 
 There are a number of reasons why the Azure IoT SDK team chose to do a major version revision. Here are a few of the more important reasons:
   - [Upcoming certificate changes](./upcoming_certificate_changes_readme.md) dictated that the SDK needed to stop pinning on a specific IoT Hub public certificate and start reading certificates from the device certificate store.
-  - Several 3rd party dependencies (Bouncycastle, JNR Unixsocket, Azure Storage SDK) were becoming harder to carry due to security concerns and they could only be removed by making breaking changes.
+  - Several 3rd party dependencies (Bouncycastle, JNR Unixsocket, Azure Storage SDK) were becoming harder to carry due to security concerns and they could only be removed by removing or alterring existing APIs.
   - Many existing client classes (RegistryManager, DeviceTwin, DeviceMethod, ServiceClient, etc.) were confusingly named and contained methods that weren't always consistent with the client's assumed responsibilities.
   - Many existing client's had a mix of standard constructors (```new DeviceClient(...)```) and static builder constructors (```DeviceClient.createFromSecurityProvider(...)```) that caused some confusion among users.
   - ```DeviceClient``` and ```ModuleClient``` had unneccessarily different method names for the same operations (```deviceClient.startDeviceTwin(...)``` vs ```moduleClient.startTwin(...)```) that could be easily unified for consistency.
@@ -122,6 +122,7 @@ No API surface changes have been made to the MultiplexingClient class
 This client has been removed in v2. It is replaced by the MultiplexingClient. See this repo's multiplexing client sample for more information.
 
 #### Other notable breaking changes
+
 - Trust certificates are read from the physical device's trusted root certification authorities certificate store rather than from source.
   - Users are expected to install the required public certificates into this certificate store if they are not present already.
   - See [this document](./upcoming_certificate_changes_readme.md) for additional context on which certificates need to be installed.
@@ -149,6 +150,7 @@ This client has been removed in v2. It is replaced by the MultiplexingClient. Se
 For v1 classes with more than one equivalent v2 classes, the methods that were in the v1 class have been split up to 
 create clients with more cohesive capabilities. For instance, configurations CRUD was in the v1 RegistryManager, but has 
 been moved to a new ConfigurationsClient in v2.
+
 
 #### RegistryManager
 
@@ -198,6 +200,7 @@ been moved to a new ConfigurationsClient in v2.
 
 **** Iot Hub does not have a useable "list devices" operation
 
+
 #### DeviceTwin
 
 | V1 class#method  | Equivalent V2 class#method |
@@ -228,6 +231,7 @@ been moved to a new ConfigurationsClient in v2.
 | JobClient#cancelJob(String); | ScheduledJobsClient#cancelJob(String);  |
 | JobClient#queryDeviceJob(String); | ScheduledJobsClient#query(String), QueryClient#queryJobs(String);  |
 
+
 #### ServiceClient
 
 | V1 class#method  | Equivalent V2 class#method |
@@ -249,6 +253,7 @@ been moved to a new ConfigurationsClient in v2.
 
 ** Your FileUploadNotificationProcessorClient and MessageFeedbackProcessorClient will start receiving as soon as the client is started
 
+
 #### Other notable breaking changes
 
 - Trust certificates are read from the physical device's trusted root certification authorities certificate store rather than from source.
@@ -269,6 +274,7 @@ been moved to a new ConfigurationsClient in v2.
 
 No notable changes, but the security providers that are used in conjunction with this client have changed. See [this section](#security-provider-clients) for more details.
 
+
 ### DPS Service Client
 
 No client APIs have changed for this package, but there are a few notable breaking changes:
@@ -280,6 +286,7 @@ No client APIs have changed for this package, but there are a few notable breaki
   - Each deprecated API in the 1.X.X versions describes which API you should use instead.
 - Reduced access levels to classes and methods that were never intended to be public where possible
 - Reduce default SAS token time to live from 1 year to 1 hour for security purposes
+
 
 ### Security Provider Clients
 
@@ -303,9 +310,9 @@ Question:
 > What do I gain by upgrading to the 2.X.X release?
 
 Answer:
-> You get a smaller set of dependencies which makes for a lighter SDK overall. You also get a more concise and clear API surface
-> since all deprecated APIs have been removed. Lastly, and most importantly, you get an SDK that is decoupled from a particular
-> IoT hub and Device Provisioning Service root certificate. This makes these versions more future proof since they aren't tied to a root certificate
+> You get a smaller set of dependencies which makes for a lighter SDK overall. You also get a more concise and clear API surface. 
+> Lastly, and most importantly, you get an SDK that is decoupled from a particular IoT hub and Device Provisioning 
+> Service public certificate. This makes these versions more future proof since they aren't tied to a certificate
 > that will be changed within a few years and may be changed again beyond then. 
 
 Question:
@@ -359,7 +366,8 @@ Question:
 > I was using a deprecated API that was removed in the 2.X.X upgrade, what should I do?
 
 Answer:
-> The deprecated API in the 1.X.X version documents which API you should use instead of the deprecated API.
+> The deprecated API in the 1.X.X version documents which API you should use instead of the deprecated API. This guide
+also contains a mapping from v1 API to equivalent v2 API that should tell you which v2 API to use.
 
 Question:
 > After upgrading, some of my catch statements no longer work because the API I was using no longer declares that it throws that exception. Do I still need to catch something there?
