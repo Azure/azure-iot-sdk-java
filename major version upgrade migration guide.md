@@ -100,7 +100,7 @@ Breaking changes:
 #### DeviceClient
 
 | V1 class#method  | Equivalent V2 class#method |
-|---:|---:|
+|:---|:---|
 | DeviceClient#setMessageCallback(MessageCallback, Object); | DeviceClient#setMessageCallback(MessageCallback, Object);  |
 | DeviceClient#open(); | DeviceClient#open(boolean);  |
 | DeviceClient#open(boolean); | DeviceClient#open(boolean);  |
@@ -126,12 +126,13 @@ Breaking changes:
 | DeviceClient#setOption(String, Object); | no equivalent method***  |
 
 ** This method has been split into the three individual steps that this method used to take. See the file upload samples within this repo for an example of how to do file upload using these discrete steps.
+
 *** The options that were previously set in this method are now set at DeviceClient constructor time in the optional ClientOptions parameter.
 
 #### ModuleClient
 
 | V1 class#method  | Equivalent V2 class#method |
-|---:|---:|
+|:---|:---|
 | ModuleClient#createFromEnvironment(); | ModuleClient#createFromEnvironment(UnixDomainSocketChannel);  |
 | ModuleClient#sendEventAsync(Message, IotHubEventCallback, Object); | ModuleClient#sendEventAsync(Message, IotHubEventCallback, Object);  |
 | ModuleClient#sendEventAsync(Message, IotHubEventCallback, Object, String); | ModuleClient#sendEventAsync(Message, IotHubEventCallback, Object, String);  |
@@ -171,7 +172,7 @@ This client has been removed in v2. It is replaced by the MultiplexingClient. Se
 ### IoT hub Service Client
  
 | V1 class  | Equivalent V2 Class(es)|
-|---:|---:|
+|:---|:---|
 | RegistryManager   | RegistryClient, ConfigurationsClient  |
 | DeviceTwin   | TwinClient  |
 | DeviceMethod |  DirectMethodsClient | 
@@ -185,7 +186,7 @@ been moved to a new ConfigurationsClient in v2.
 #### RegistryManager
 
 | V1 class#method  | Equivalent V2 class#method |
-|---:|---:|
+|:---|:---|
 | RegistryManager#open(); | no equivalent method**  |
 | RegistryManager#close(); | no equivalent method**  |
 | RegistryManager#addDevice(Device); | RegistryClient#addDevice(Device);  |
@@ -225,13 +226,15 @@ been moved to a new ConfigurationsClient in v2.
 | RegistryManager#applyConfigurationContentOnDevice(String, ConfigurationContent); | ConfigurationsClient#applyConfigurationContentOnDevice(String, ConfigurationContent);  |
 
 ** This method did nothing so it didn't need a v2 equivalent
+
 *** This method was a wrapper on the synchronous version of the method. Users can write their own wrapper instead
+
 **** Iot Hub does not have a useable "list devices" operation
 
 #### DeviceTwin
 
 | V1 class#method  | Equivalent V2 class#method |
-|---:|---:|
+|:---|:---|
 | DeviceTwin#getTwin(DeviceTwinDevice); | TwinClient#get(String), TwinClient#get(String, String);  |
 | DeviceTwin#updateTwin(DeviceTwinDevice); | TwinClient#patch(Twin);  |
 | DeviceTwin#replaceTwin(DeviceTwinDevice); | TwinClient#replace(Twin);  |
@@ -242,7 +245,7 @@ been moved to a new ConfigurationsClient in v2.
 #### DeviceMethod
 
 | V1 class#method  | Equivalent V2 class#method |
-|---:|---:|
+|:---|:---|
 | DeviceMethod#invoke(String, String, Long, Long, Object); | DirectMethodsClient#invoke(String, String, DirectMethodRequestOptions);  |
 | DeviceMethod#invoke(String, String, String, Long, Long, Object); | DirectMethodsClient#invoke(String, String, String, DirectMethodRequestOptions);  |
 | DeviceMethod#scheduleDeviceMethod(String, String, Long, Long, Object, Date, long); | ScheduledJobsClient#scheduleDirectMethod(String, String, String, Date, DirectMethodsJobOptions);  |
@@ -251,7 +254,7 @@ been moved to a new ConfigurationsClient in v2.
 #### JobClient
 
 | V1 class#method  | Equivalent V2 class#method |
-|---:|---:|
+|:---|:---|
 | JobClient#scheduleUpdateTwin(String, String, DeviceTwinDevice, Date, long); | ScheduledJobsClient#scheduleUpdateTwin(String, String, Twin, Date, long);  |
 | JobClient#scheduleDeviceMethod(String, String, Long, Long, Object, Date, long); | ScheduledJobsClient#scheduleDirectMethod(String, String, String, Date, DirectMethodsJobOptions);  |
 | JobClient#getJob(String); | ScheduledJobsClient#getJob(String);  |
@@ -263,7 +266,7 @@ been moved to a new ConfigurationsClient in v2.
 #### ServiceClient
 
 | V1 class#method  | Equivalent V2 class#method |
-|---:|---:|
+|:---|:---|
 | ServiceClient#open(); | MessagingClient#open();  |
 | ServiceClient#close(); | MessagingClient#close();  |
 | ServiceClient#send(String, Message); | MessagingClient#send(String, Message);  |
