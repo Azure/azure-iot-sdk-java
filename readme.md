@@ -8,7 +8,7 @@ contains many breaking changes, but is substantially more future proof than the 
 let us know on our [discussions page](https://github.com/Azure/azure-iot-sdk-java/discussions) if you have any concerns, 
 questions, or further changes you'd like to see!
 
-If you need any help migrating your code to try out the new 2.X.X clients, please see this [migration guide](https://github.com/Azure/azure-iot-sdk-java/blob/preview/major%20version%20upgrade%20migration%20guide.md).
+If you need any help migrating your code to try out the new 2.X.X clients, please see this [migration guide](./SDK%20v2%20migration%20guide.md).
 
 ## Critical upcoming change notice
 
