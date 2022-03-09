@@ -1,99 +1,39 @@
 # Migration guide
 
 This document outlines the changes made from this library's 1.X.X releases to its 2.X.X releases. Since this is
-a major version upgrade, there are a number of breaking changes that will affect your ability to compile. This
-document will be split into a section per package for simplicity.
+a major version upgrade, there are a number of breaking changes that will affect your ability to compile.
 
-## Why is v1 being replaced?
+## Table Of Contents
 
-There are a number of reasons why the Azure IoT SDK team chose to do a major version revision
+ - [Why is v1 being replaced](#Why-the-v1-sdk-is-being-replaced)
+ - [What will happen to the v1 SDK](#What-will-happen-to-the-v1-sdk)
+ - [Migration Guide](#migrating-guide)
+   - [IoT Hub Device Client](#iot-hub-device-client)
+   - [IoT Hub Service Client](#iot-hub-service-client)
+   - [DPS Device Client](#dps-device-client)
+   - [DPS Service Client](#dps-service-client)
+   - [IoT Hub Device Client](#iot-hub-device-client)
+   - [Security Provider Clients](#security-provider-clients)
+   - [Deps](#deps)
+ - [Frequently asked questions](#frequently-asked-questions)
+
+## Why the v1 SDK is being replaced
+
+There are a number of reasons why the Azure IoT SDK team chose to do a major version revision. Here are a few of the more important reasons:
   - [Upcoming certificate changes](./upcoming_certificate_changes_readme.md) dictated that the SDK needed to stop pinning on a specific IoT Hub public certificate and start reading certificates from the device certificate store.
   - Several 3rd party dependencies (Bouncycastle, JNR Unixsocket, Azure Storage SDK) were becoming harder to carry due to security concerns and they could only be removed by making breaking changes.
   - Many existing client classes (RegistryManager, DeviceTwin, DeviceMethod, ServiceClient, etc.) were confusingly named and contained methods that weren't always consistent with the client's assumed responsibilities.
   - Many existing client's had a mix of standard constructors (```new DeviceClient(...)```) and static builder constructors (```DeviceClient.createFromSecurityProvider(...)```) that caused some confusion among users.
   - ```DeviceClient``` and ```ModuleClient``` had unneccessarily different method names for the same operations (```deviceClient.startDeviceTwin(...)``` vs ```moduleClient.startTwin(...)```) that could be easily unified for consistency.
   - ```DeviceClient``` and ```ModuleClient``` had many asynchronous methods whose naming did not reflect that they were asynchronous. This led to some users calling these methods as though they were synchronous.
-## Breaking changes overview by package
 
-### IoT hub Device Client
+## What will happen to the v1 SDK
 
-Breaking changes:
-- Trust certificates are read from the physical device's trusted root certification authorities certificate store rather than from source.
-  - Users are expected to install the required public certificates into this certificate store if they are not present already.
-  - See [this document](./upcoming_certificate_changes_readme.md) for additional context on which certificates need to be installed.
-- DeviceClient and ModuleClient constructors that take public certificates and private keys as strings have been removed.
-  - Users must provide an instance of SSLContext that has their public certificates and private keys loaded into it instead.
-  - See [this sample](./device/iot-device-samples/send-event-x509) for the recommended way to create this SSLContext and how to construct your DeviceClient and/or ModuleClient with it.
-- deviceClient.uploadToBlobAsync() has been removed.
-  - Users can still use deviceClient.getFileUploadSasUri() to get a SAS URI that can be used with the Azure Storage SDK to upload the file.
-  - See [this sample](./device/iot-device-samples/file-upload-sample) for the recommended way to upload files.
-- DeviceClient and ModuleClient APIs have been unified for consistent naming.
-- DeviceClient and ModuleClient APIs that behave asynchronously have been renamed to include an "Async" suffix. The API's behavior was not changed, however.
-  - This was done because several APIs such as startDeviceTwin were being used by users as though they were synchronous methods when they were not.
-- All other deprecated APIs have also been removed.
-- The Bouncycastle and Azure Storage SDK dependencies have been removed.
-- The "com.microsoft.azure.sdk.iot.device.DeviceTwin" namespace has been changed to "com.microsoft.azure.sdk.iot.device.twin" to remove uppercase letters from it.
-- DeviceClient and ModuleClient deprecated closeNow() and moved it's functionality into close() to match other language SDKs.
-- Renamed some twin desired property callback method names to make them match a more standard callback method naming convention.
-- Reduced access levels to classes and methods that were never intended to be public where possible.
-- Device/ModuleClient method "registerConnectionStatusChangeCallback" has been renamed to "setConnectionStatusChangeCallback".
-- Several callback interfaces and methods have been renamed to fix the spelling of callback from "CallBack" to "Callback".
-- ```ModuleClient.createFromEnvironment(...)``` APIs now require a unix domain socket implementation to be provided, rather than the SDK providing one. A sample [here](./device/iot-device-samples/unix-domain-socket-sample) demonstrates one such implementation that can be provided.
-- All ```setOption(...)``` options such as setting SAS token expiry, HTTPS read timeout, etc, have been converted to options in the ```ClientOptions``` constructor argument.
-- ```setProxySettings``` has been removed and replaced by providing the same proxy settings to the ```ClientOptions``` builder.
-- ```open()``` has been removed from DeviceClient, ModuleClient and MultiplexingClient in favor of ```open(boolean withRetry)```
-- ```DeviceClient.createFromSecurityProvider(...)``` has been replaced with a normal constructor with the same arguments.
+We have released [one final LTS version](https://github.com/Azure/azure-iot-sdk-java/releases/tag/2022-03-04) of the v1 SDK that
+we will support like any other LTS release (security bug fixes, some non-security bug fixes as needed), but users are still encouraged
+to migrate to v2 when they have the chance.
 
-### IoT hub Service Client
- 
-Breaking changes:
-- Trust certificates are read from the physical device's trusted root certification authorities certificate store rather than from source.
-  - Users are expected to install the required public certificates into this certificate store if they are not present already
-  - See [this document](./upcoming_certificate_changes_readme.md) for additional context on which certificates need to be installed.
-- All deprecated APIs have been removed
-  - Each deprecated API in the 1.X.X versions describes which API you should use instead.
-- The Bouncycastle dependencies have been removed
-  - The Bouncycastle dependencies were used for some certificate parsing logic that has been removed from the SDK.
-- Reduced access levels to classes and methods that were never intended to be public where possible 
-- Removed service error code descriptions that the service would never return the error code for
-- Reduce default SAS token time to live from 1 year to 1 hour for security purposes
-- Removed unnecessary synchronization on service client APIs to allow for a single client to make multiple service APIs simultaneously
-- Removed asynchronous APIs for service client APIs 
-  - These were wrappers on top of the existing sync APIs. Users are expected to write async wrappers that better fit their preferred async framework.
-- Removed asynchronous APIs for service client APIs 
-- Removed ```open()``` and ```close()``` APIs for registryClient since they do nothing anymore
-- Fixed a bug where dates retrieved by the client were converted to local time zone rather than keeping them in UTC time.  
-
-### Device Provisioning Service Device Client
-
-No notable changes, but the security providers that are used in conjunction with this client have changed. See [this section](#security-provider-clients) for more details.
-
-### Device Provisioning Service Service Client
-
-Breaking changes:
-- Trust certificates are read from the physical device's trusted root certification authorities certificate store rather than from source.
-  - Users are expected to install the required public certificates into this certificate store if they are not present already
-  - See [this document](./upcoming_certificate_changes_readme.md) for additional context on which certificates need to be installed.
-- All deprecated APIs have been removed
-  - Each deprecated API in the 1.X.X versions describes which API you should use instead.
-- Reduced access levels to classes and methods that were never intended to be public where possible
-- Reduce default SAS token time to live from 1 year to 1 hour for security purposes
-
-### Security Provider Clients
-
-Breaking changes:
-- Trust certificates are read from the physical device's trusted root certification authorities certificate store rather than from source.
-  - Users are expected to install the required public certificates into this certificate store if they are not present already
-  - See [this document](./upcoming_certificate_changes_readme.md) for additional context on which certificates need to be installed.
-  - Users of the X509 SecurityProvider are expected to pass in the parsed certificates and keys as Java security primitives rather than as strings
-    - See [this sample](./provisioning/provisioning-samples/provisioning-X509-sample) for a demonstration on how to create these Java security primitives from strings
-  
-### Deps
-
-Breaking changes:
-- The deps package has been removed from the v2 SDK and its classes have been copied to the respective client libraries that used them
-
-## Migrating from v1 to v2
+## Migrating Guide
 
 ### IoT hub Device Client
 
@@ -101,9 +41,13 @@ Breaking changes:
 
 | V1 class#method  | Equivalent V2 class#method |
 |:---|:---|
+| DeviceClient#createFromSecurityProvider(String, String, SecurityProvider, IotHubClientProtocol); | nwe DeviceClient(String, String, SecurityProvider, IotHubClientProtocol);  |
+| DeviceClient#createFromSecurityProvider(String, String, SecurityProvider, IotHubClientProtocol, ClientOptions); | nwe DeviceClient(String, String, SecurityProvider, IotHubClientProtocol, ClientOptions);  |
 | DeviceClient#setMessageCallback(MessageCallback, Object); | DeviceClient#setMessageCallback(MessageCallback, Object);  |
 | DeviceClient#open(); | DeviceClient#open(boolean);  |
 | DeviceClient#open(boolean); | DeviceClient#open(boolean);  |
+| DeviceClient#closeNow(); | DeviceClient#close();  |
+| DeviceClient#close(); | DeviceClient#close();  |
 | DeviceClient#getFileUploadSasUri(FileUploadSasUriRequest); | DeviceClient#getFileUploadSasUri(FileUploadSasUriRequest);  |
 | DeviceClient#completeFileUpload(FileUploadCompletionNotification); | DeviceClient#completeFileUpload(FileUploadCompletionNotification);  |
 | DeviceClient#uploadToBlobAsync(String, InputStream, long, IotHubEventCallback, Object); | no equivalent method**  |
@@ -124,10 +68,13 @@ Breaking changes:
 | DeviceClient#sendReportedProperties(ReportedPropertiesParameters); | DeviceClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesUpdateCorrelatingMessageCallback, Object);  |
 | DeviceClient#sendReportedProperties(Set<Property>, Integer, CorrelatingMessageCallback, Object, IotHubEventCallback, Object); | DeviceClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesUpdateCorrelatingMessageCallback, Object);  |
 | DeviceClient#setOption(String, Object); | no equivalent method***  |
+| DeviceClient#setProxySettings(ProxySettings); | no equivalent method****  |
 
 ** This method has been split into the three individual steps that this method used to take. See the file upload samples within this repo for an example of how to do file upload using these discrete steps.
 
 *** The options that were previously set in this method are now set at DeviceClient constructor time in the optional ClientOptions parameter.
+
+**** Proxy settings are now set at ModuleClient constructor time in the optional ClientOptions parameter,
 
 #### ModuleClient
 
@@ -142,11 +89,13 @@ Breaking changes:
 | ModuleClient#invokeMethod(String, String, MethodRequest); | ModuleClient#invokeMethod(String, String, MethodRequest);  |
 | ModuleClient#open(); | ModuleClient#open(boolean);  |
 | ModuleClient#open(boolean); | ModuleClient#open(boolean);  |
+| ModuleClient#closeNow(); | ModuleClient#close();  |
+| ModuleClient#close(); | ModuleClient#close();  |
 | ModuleClient#registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback, Object); | ModuleClient#setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback, Object);  |
 | ModuleClient#setRetryPolicy(RetryPolicy); | ModuleClient#setRetryPolicy(RetryPolicy);  |
 | ModuleClient#setOperationTimeout(long); | ModuleClient#setOperationTimeout(long);  |
 | ModuleClient#getProductInfo(); | ModuleClient#getProductInfo();  |
-| ModuleClient#subscribeToMethod(DeviceMethodCallback , Object, IotHubEventCallback, Object);(); | ModuleClient#subscribeToMethodsAsync(MethodCallback, Object, IotHubEventCallback, Object);  |
+| ModuleClient#subscribeToMethod(DeviceMethodCallback , Object, IotHubEventCallback, Object); | ModuleClient#subscribeToMethodsAsync(MethodCallback, Object, IotHubEventCallback, Object);  |
 | ModuleClient#startTwin(IotHubEventCallback, Object, TwinPropertyCallback, Object); | ModuleClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
 | ModuleClient#startTwin(IotHubEventCallback, Object, TwinPropertiesCallback, Object); | ModuleClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
 | ModuleClient#startTwin(IotHubEventCallback, Object, PropertyCallBack<Type1, Type2>, Object); | ModuleClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
@@ -157,9 +106,11 @@ Breaking changes:
 | ModuleClient#sendReportedProperties(ReportedPropertiesParameters); | ModuleClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesUpdateCorrelatingMessageCallback, Object);  |
 | ModuleClient#sendReportedProperties(Set<Property>, Integer, CorrelatingMessageCallback, Object, IotHubEventCallback, Object); | ModuleClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesUpdateCorrelatingMessageCallback, Object);  |
 | ModuleClient#setOption(String, Object); | no equivalent method***  |
+| ModuleClient#setProxySettings(ProxySettings); | no equivalent method****  |
 
 *** The options that were previously set in this method are now set at ModuleClient constructor time in the optional ClientOptions parameter.
 
+**** Proxy settings are now set at ModuleClient constructor time in the optional ClientOptions parameter,
 
 #### MultiplexingClient
 
@@ -168,6 +119,21 @@ No API surface changes have been made to the MultiplexingClient class
 #### TransportClient
 
 This client has been removed in v2. It is replaced by the MultiplexingClient. See this repo's multiplexing client sample for more information.
+
+#### Other notable breaking changes
+- Trust certificates are read from the physical device's trusted root certification authorities certificate store rather than from source.
+  - Users are expected to install the required public certificates into this certificate store if they are not present already.
+  - See [this document](./upcoming_certificate_changes_readme.md) for additional context on which certificates need to be installed.
+- DeviceClient and ModuleClient constructors that take public certificates and private keys as strings have been removed.
+  - Users must provide an instance of SSLContext that has their public certificates and private keys loaded into it instead.
+  - See [this sample](./device/iot-device-samples/send-event-x509) for the recommended way to create this SSLContext and how to construct your DeviceClient and/or ModuleClient with it.
+- deviceClient.uploadToBlobAsync() has been removed.
+  - Users can still use deviceClient.getFileUploadSasUri() to get a SAS URI that can be used with the Azure Storage SDK to upload the file.
+  - See [this sample](./device/iot-device-samples/file-upload-sample) for the recommended way to upload files.
+- The Bouncycastle, JNR Unixsocket, and Azure Storage SDK dependencies have been removed.
+- Reduced access levels to classes and methods that were never intended to be public where possible.
+- ```ModuleClient.createFromEnvironment(...)``` APIs now require a unix domain socket implementation to be provided, rather than the SDK providing one. A sample [here](./device/iot-device-samples/unix-domain-socket-sample) demonstrates one such implementation that can be provided.
+
 
 ### IoT hub Service Client
  
@@ -190,13 +156,13 @@ been moved to a new ConfigurationsClient in v2.
 | RegistryManager#open(); | no equivalent method**  |
 | RegistryManager#close(); | no equivalent method**  |
 | RegistryManager#addDevice(Device); | RegistryClient#addDevice(Device);  |
-| RegistryManager#addDeviceAsync(); | no equivalent method***  |
+| RegistryManager#addDeviceAsync(Device); | no equivalent method***  |
 | RegistryManager#getDevice(String); | RegistryClient#getDevice(String);  |
-| RegistryManager#getDeviceAsync(); | no equivalent method***  |
-| RegistryManager#updateDevice(); | RegistryClient#updateDevice();  |
-| RegistryManager#updateDeviceAsync(); | no equivalent method*** |
-| RegistryManager#removeDevice(); | RegistryClient#removeDevice();  |
-| RegistryManager#removeDeviceAsync(); | no equivalent method*** |
+| RegistryManager#getDeviceAsync(String); | no equivalent method***  |
+| RegistryManager#updateDevice(Device); | RegistryClient#updateDevice(Device);  |
+| RegistryManager#updateDeviceAsync(Device); | no equivalent method*** |
+| RegistryManager#removeDevice(String); | RegistryClient#removeDevice(String);  |
+| RegistryManager#removeDeviceAsync(String); | no equivalent method*** |
 | RegistryManager#getDevices(Integer); | no equivalent method**** |
 | RegistryManager#getDevicesAsync(Integer); | no equivalent method**** |
 | RegistryManager#getDeviceConnectionString(); | no equivalent method. Removed since this was not a service call.  |
@@ -260,8 +226,6 @@ been moved to a new ConfigurationsClient in v2.
 | JobClient#getJob(String); | ScheduledJobsClient#getJob(String);  |
 | JobClient#cancelJob(String); | ScheduledJobsClient#cancelJob(String);  |
 | JobClient#queryDeviceJob(String); | ScheduledJobsClient#query(String), QueryClient#queryJobs(String);  |
-| JobClient#(); | ScheduledJobsClient#();  |
-| JobClient#(); | ScheduledJobsClient#();  |
 
 #### ServiceClient
 
@@ -284,13 +248,53 @@ been moved to a new ConfigurationsClient in v2.
 
 ** Your FileUploadNotificationProcessorClient and MessageFeedbackProcessorClient will start receiving as soon as the client is started
 
+#### Other notable breaking changes
 
-### Device Provisioning Service Device Client
+- Trust certificates are read from the physical device's trusted root certification authorities certificate store rather than from source.
+  - Users are expected to install the required public certificates into this certificate store if they are not present already
+  - See [this document](./upcoming_certificate_changes_readme.md) for additional context on which certificates need to be installed.
+- The Bouncycastle dependencies have been removed
+  - The Bouncycastle dependencies were used for some certificate parsing logic that has been removed from the SDK.
+- Reduced access levels to classes and methods that were never intended to be public where possible 
+- Removed service error code descriptions that the service would never return the error code for
+- Reduce default SAS token time to live from 1 year to 1 hour for security purposes
+- Removed unnecessary synchronization on service client APIs to allow for a single client to make multiple service APIs simultaneously
+- Removed asynchronous APIs for service client APIs 
+  - These were wrappers on top of the existing sync APIs. Users are expected to write async wrappers that better fit their preferred async framework.
+- Fixed a bug where dates retrieved by the client were converted to local time zone rather than keeping them in UTC time.  
 
-### Device Provisioning Service Service Client
+
+### DPS Device Client
+
+No notable changes, but the security providers that are used in conjunction with this client have changed. See [this section](#security-provider-clients) for more details.
+
+### DPS Service Client
+
+No client APIs have changed for this package, but there are a few notable breaking changes:
+
+- Trust certificates are read from the physical device's trusted root certification authorities certificate store rather than from source.
+  - Users are expected to install the required public certificates into this certificate store if they are not present already
+  - See [this document](./upcoming_certificate_changes_readme.md) for additional context on which certificates need to be installed.
+- All deprecated APIs have been removed
+  - Each deprecated API in the 1.X.X versions describes which API you should use instead.
+- Reduced access levels to classes and methods that were never intended to be public where possible
+- Reduce default SAS token time to live from 1 year to 1 hour for security purposes
 
 ### Security Provider Clients
 
+Breaking changes:
+- Trust certificates are read from the physical device's trusted root certification authorities certificate store rather than from source.
+  - Users are expected to install the required public certificates into this certificate store if they are not present already
+  - See [this document](./upcoming_certificate_changes_readme.md) for additional context on which certificates need to be installed.
+  - Users of the X509 SecurityProvider are expected to pass in the parsed certificates and keys as Java security primitives rather than as strings
+    - See [this sample](./provisioning/provisioning-samples/provisioning-X509-sample) for a demonstration on how to create these Java security primitives from strings
+
+
+### Deps
+
+Breaking changes:
+- The deps package has been removed from the v2 SDK and its classes have been copied to the respective client libraries that used them
+  
 
 ## Frequently Asked Questions
 
