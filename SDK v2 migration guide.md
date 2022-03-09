@@ -70,7 +70,7 @@ to migrate to v2 when they have the chance. For more details on LTS releases, se
 | DeviceClient#setOption(String, Object); | no equivalent method***  |
 | DeviceClient#setProxySettings(ProxySettings); | no equivalent method****  |
 
-** This method has been split into the three individual steps that this method used to take. See [this file upload sample](file-upload-sample) for an example of how to do file upload using these discrete steps.
+** This method has been split into the three individual steps that this method used to take. See [this file upload sample](./device/iot-device-samples/file-upload-sample) for an example of how to do file upload using these discrete steps.
 
 *** The options that were previously set in this method are now set at DeviceClient constructor time in the optional ClientOptions parameter.
 
@@ -118,7 +118,7 @@ No API surface changes have been made to the MultiplexingClient class
 
 #### TransportClient
 
-This client has been removed in v2. It is replaced by the MultiplexingClient. See [this sample](mux-sample) for more information.
+This client has been removed in v2. It is replaced by the MultiplexingClient. See [this sample](./device/iot-device-samples/multiplexing-sample) for more information.
 
 #### Other notable breaking changes
 
@@ -396,7 +396,3 @@ Question:
 
 Answer:
 > Yes, this library still supports multiplexing. The MultiplexingClient has replaced the TransportClient here. See [this sample](./device/iot-device-samples/multiplexing-sample) for reference.
-
-
-[file-upload-sample]: https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-samples/file-upload-sample/src/main/java/samples/com/microsoft/azure/sdk/iot/FileUploadSample.java
-[mux-sample]: https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-samples/multiplexing-sample/src/main/java/samples/com/microsoft/azure/sdk/iot/MultiplexingSample.java
