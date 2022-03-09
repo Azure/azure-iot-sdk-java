@@ -5,7 +5,7 @@ a major version upgrade, there are a number of breaking changes that will affect
 
 ## Table Of Contents
 
- - [Why is v1 being replaced](#Why-the-v1-sdk-is-being-replaced)
+ - [Why the v1 SDK is being replaced](#Why-the-v1-sdk-is-being-replaced)
  - [What will happen to the v1 SDK](#What-will-happen-to-the-v1-sdk)
  - [Migration Guide](#migrating-guide)
    - [IoT Hub Device Client](#iot-hub-device-client)
