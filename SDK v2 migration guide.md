@@ -402,3 +402,9 @@ Question:
 
 Answer:
 > Yes, this library still supports multiplexing. The MultiplexingClient has replaced the TransportClient here. See [this sample](./device/iot-device-samples/multiplexing-sample) for reference.
+
+Question:
+> Is the v2 library backwards compatible in any way?
+
+Answer:
+> No. Several APIs have been added to v2 that are not present in v1. On top of that, several APIs in v2 are expected to behave differently than they did in v1.
