@@ -116,6 +116,12 @@ public class IndividualEnrollment extends Serializable
     @Setter
     private DeviceRegistrationState deviceRegistrationState;
 
+    // optional device information.
+    private static final String OPTIONAL_DEVICE_INFORMATION_TAG = "optionalDeviceInformation";
+    @Expose
+    @SerializedName(OPTIONAL_DEVICE_INFORMATION_TAG)
+    private TwinCollection optionalDeviceInformation;
+
     // the attestation
     private static final String ATTESTATION_TAG = "attestation";
     @Expose
