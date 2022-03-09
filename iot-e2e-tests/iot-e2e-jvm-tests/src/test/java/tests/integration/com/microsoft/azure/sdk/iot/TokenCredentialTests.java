@@ -62,7 +62,7 @@ public class TokenCredentialTests
         Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
 
         // We remove and recreate the device for a clean start
-        RegistryClient registryClient = new RegistryClient(iotHubConnectionString);
+        RegistryClient registryClient = buildRegistryClientWithTokenCredential();
 
         Device device = new Device("some-device-" + UUID.randomUUID(), AuthenticationType.SAS);
         registryClient.addDevice(device);
