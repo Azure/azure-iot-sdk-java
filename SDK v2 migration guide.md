@@ -80,7 +80,7 @@ to migrate to v2 when they have the chance. For more details on LTS releases, se
 
 | V1 class#method  | Equivalent V2 class#method |
 |:---|:---|
-| ModuleClient#createFromEnvironment(); | ModuleClient#createFromEnvironment(UnixDomainSocketChannel);  |
+| ModuleClient#createFromEnvironment(); | ModuleClient#createFromEnvironment(UnixDomainSocketChannel);**  |
 | ModuleClient#sendEventAsync(Message, IotHubEventCallback, Object); | ModuleClient#sendEventAsync(Message, IotHubEventCallback, Object);  |
 | ModuleClient#sendEventAsync(Message, IotHubEventCallback, Object, String); | ModuleClient#sendEventAsync(Message, IotHubEventCallback, Object, String);  |
 | ModuleClient#setMessageCallback(MessageCallback, Object); | ModuleClient#setMessageCallback(MessageCallback, Object);  |
@@ -108,6 +108,12 @@ to migrate to v2 when they have the chance. For more details on LTS releases, se
 | ModuleClient#setOption(String, Object); | no equivalent method***  |
 | ModuleClient#setProxySettings(ProxySettings); | no equivalent method****  |
 
+** ```ModuleClient.createFromEnvironment(...)``` APIs now require a unix domain socket implementation to be provided, 
+rather than the SDK providing one. A sample [here](./device/iot-device-samples/unix-domain-socket-sample) demonstrates 
+one such implementation that can be provided. This change was made so that users can control how the SDK communicates over
+unix domain sockets if they want, and so that users who don't use modules aren't given a dependency on a unix domain 
+socket communication library that their application would never need.
+
 *** The options that were previously set in this method are now set at ModuleClient constructor time in the optional ClientOptions parameter.
 
 **** Proxy settings are now set at ModuleClient constructor time in the optional ClientOptions parameter,
@@ -132,8 +138,10 @@ This client has been removed in v2. It is replaced by the MultiplexingClient. Se
   - Users can still use deviceClient.getFileUploadSasUri() to get a SAS URI that can be used with the Azure Storage SDK to upload the file.
   - See [this sample](./device/iot-device-samples/file-upload-sample) for the recommended way to upload files.
 - The Bouncycastle, JNR Unixsocket, and Azure Storage SDK dependencies have been removed.
+  - Bouncycastle dependencies were removed as they were large and only used for parsing certificates. Now that users are expected to parse certificates, it was safe to remove these dependencies.
+  - JNR unixsocket dependency was removed because it was only used for one specific use case when constructing module clients, and because other unix domain socket libraries could be used instead depending on the user's preference.
+  - Azure Storage SDK dependency was removed because it made more sense for the user to pick which version of the Azure Storage SDK works best for their application rather than forcing a particular version onto them.
 - Reduced access levels to classes and methods that were never intended to be public where possible.
-- ```ModuleClient.createFromEnvironment(...)``` APIs now require a unix domain socket implementation to be provided, rather than the SDK providing one. A sample [here](./device/iot-device-samples/unix-domain-socket-sample) demonstrates one such implementation that can be provided.
 
 
 ### IoT hub Service Client
@@ -256,15 +264,15 @@ been moved to a new ConfigurationsClient in v2.
 #### Other notable breaking changes
 
 - Trust certificates are read from the physical device's trusted root certification authorities certificate store rather than from source.
-  - Users are expected to install the required public certificates into this certificate store if they are not present already
+  - Users are expected to install the required public certificates into this certificate store if they are not present already.
   - See [this document](./upcoming_certificate_changes_readme.md) for additional context on which certificates need to be installed.
-- The Bouncycastle dependencies have been removed
+- The Bouncycastle dependencies have been removed.
   - The Bouncycastle dependencies were used for some certificate parsing logic that has been removed from the SDK.
-- Reduced access levels to classes and methods that were never intended to be public where possible 
-- Removed service error code descriptions that the service would never return the error code for
-- Reduce default SAS token time to live from 1 year to 1 hour for security purposes
-- Removed unnecessary synchronization on service client APIs to allow for a single client to make multiple service APIs simultaneously
-- Removed asynchronous APIs for service client APIs 
+- Reduced access levels to classes and methods that were never intended to be public where possible .
+- Removed service error code descriptions that the service would never return the error code for.
+- Reduce default SAS token time to live from 1 year to 1 hour for security purposes.
+- Removed unnecessary synchronization on service client APIs to allow for a single client to make service API calls simultaneously.
+- Removed asynchronous APIs for service client APIs.
   - These were wrappers on top of the existing sync APIs. Users are expected to write async wrappers that better fit their preferred async framework.
 - Fixed a bug where dates retrieved by the client were converted to local time zone rather than keeping them in UTC time.  
 
@@ -279,22 +287,20 @@ No notable changes, but the security providers that are used in conjunction with
 No client APIs have changed for this package, but there are a few notable breaking changes:
 
 - Trust certificates are read from the physical device's trusted root certification authorities certificate store rather than from source.
-  - Users are expected to install the required public certificates into this certificate store if they are not present already
+  - Users are expected to install the required public certificates into this certificate store if they are not present already.
   - See [this document](./upcoming_certificate_changes_readme.md) for additional context on which certificates need to be installed.
-- All deprecated APIs have been removed
-  - Each deprecated API in the 1.X.X versions describes which API you should use instead.
-- Reduced access levels to classes and methods that were never intended to be public where possible
-- Reduce default SAS token time to live from 1 year to 1 hour for security purposes
+- Reduced access levels to classes and methods that were never intended to be public where possible.
+- Reduce default SAS token time to live from 1 year to 1 hour for security purposes.
 
 
 ### Security Provider Clients
 
 Breaking changes:
 - Trust certificates are read from the physical device's trusted root certification authorities certificate store rather than from source.
-  - Users are expected to install the required public certificates into this certificate store if they are not present already
+  - Users are expected to install the required public certificates into this certificate store if they are not present already.
   - See [this document](./upcoming_certificate_changes_readme.md) for additional context on which certificates need to be installed.
-  - Users of the X509 SecurityProvider are expected to pass in the parsed certificates and keys as Java security primitives rather than as strings
-    - See [this sample](./provisioning/provisioning-samples/provisioning-X509-sample) for a demonstration on how to create these Java security primitives from strings
+  - Users of the X509 SecurityProvider are expected to pass in the parsed certificates and keys as Java security primitives rather than as strings.
+    - See [this sample](./provisioning/provisioning-samples/provisioning-X509-sample) for a demonstration on how to create these Java security primitives from strings.
 
 
 ### Deps
