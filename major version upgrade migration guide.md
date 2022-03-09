@@ -115,29 +115,29 @@ been moved to a new ConfigurationsClient in v2.
 
 | V1 class#method  | Equivalent V2 class#method |
 |---:|---:|
-| RegistryManager#open(); | no equivalent method, this concept was removed as it was unneccessary  |
-| RegistryManager#close(); | no equivalent method, this concept was removed as it was unneccessary  |
+| RegistryManager#open(); | no equivalent method**  |
+| RegistryManager#close(); | no equivalent method**  |
 | RegistryManager#addDevice(Device); | RegistryClient#addDevice(Device);  |
-| RegistryManager#addDeviceAsync(); | no equivalent method. Users can write an async wrapper on the sync equivalent to replace this  |
+| RegistryManager#addDeviceAsync(); | no equivalent method***  |
 | RegistryManager#getDevice(String); | RegistryClient#getDevice(String);  |
-| RegistryManager#getDeviceAsync(); | no equivalent method. Users can write an async wrapper on the sync equivalent to replace this  |
+| RegistryManager#getDeviceAsync(); | no equivalent method***  |
 | RegistryManager#updateDevice(); | RegistryClient#updateDevice();  |
-| RegistryManager#updateDeviceAsync(); | no equivalent method. Users can write an async wrapper on the sync equivalent to replace this  |
+| RegistryManager#updateDeviceAsync(); | no equivalent method*** |
 | RegistryManager#removeDevice(); | RegistryClient#removeDevice();  |
-| RegistryManager#removeDeviceAsync(); | no equivalent method. Users can write an async wrapper on the sync equivalent to replace this  |
+| RegistryManager#removeDeviceAsync(); | no equivalent method*** |
 | RegistryManager#getDevices(Integer); | no equivalent method. Iot Hub does not have a useable "list devices" operation |
 | RegistryManager#getDevicesAsync(Integer); | no equivalent method. Iot Hub does not have a useable "list devices" operation |
 | RegistryManager#getDeviceConnectionString(); | no equivalent method. Removed since this was not a service call.  |
 | RegistryManager#getStatistics(); | RegistryClient#getStatistics();  |
-| RegistryManager#getStatisticsAsync(); | no equivalent method. Users can write an async wrapper on the sync equivalent to replace this  |
+| RegistryManager#getStatisticsAsync(); | no equivalent method*** |
 | RegistryManager#exportDevices(String, Boolean); | RegistryClient#exportDevices(String, boolean);  |
-| RegistryManager#exportDevicesAsync(String, Boolean); | no equivalent method. Users can write an async wrapper on the sync equivalent to replace this  |
+| RegistryManager#exportDevicesAsync(String, Boolean); | no equivalent method*** |
 | RegistryManager#exportDevices(JobProperties); | RegistryClient#exportDevices(RegistryJob);  |
-| RegistryManager#exportDevicesAsync(JobProperties); | no equivalent method. Users can write an async wrapper on the sync equivalent to replace this  |
+| RegistryManager#exportDevicesAsync(JobProperties); | no equivalent method*** |
 | RegistryManager#importDevices(String, String); | RegistryClient#importDevices(String, String);  |
-| RegistryManager#importDevicesAsync(String, String); | no equivalent method. Users can write an async wrapper on the sync equivalent to replace this  |
+| RegistryManager#importDevicesAsync(String, String); | no equivalent method*** |
 | RegistryManager#importDevices(JobProperties); | RegistryClient#importDevices(JobProperties);  |
-| RegistryManager#importDevicesAsync(JobProperties); | no equivalent method. Users can write an async wrapper on the sync equivalent to replace this  |
+| RegistryManager#importDevicesAsync(JobProperties); | no equivalent method*** |
 | RegistryManager#getJob(String); | RegistryClient#getJob(String);  |
 | RegistryManager#addModule(Module); | RegistryClient#addModule(Module);  |
 | RegistryManager#getModule(String); | RegistryClient#getModule(String);  |
@@ -152,6 +152,9 @@ been moved to a new ConfigurationsClient in v2.
 | RegistryManager#updateConfiguration(Configuration, Boolean); | no equivalent method. Users should use the overload that just takes a configuration  |
 | RegistryManager#removeConfiguration(String); | ConfigurationsClient#delete(String);  |
 | RegistryManager#applyConfigurationContentOnDevice(String, ConfigurationContent); | ConfigurationsClient#applyConfigurationContentOnDevice(String, ConfigurationContent);  |
+
+** This method did nothing so it didn't need a v2 equivalent
+*** This method was a wrapper on the synchronous version of the method. Users can write their own wrapper instead
 
 ### Device Provisioning Service Device Client
 
