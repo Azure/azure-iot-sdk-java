@@ -7,11 +7,9 @@ package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
-import org.apache.qpid.proton.engine.BaseHandler;
 import org.apache.qpid.proton.engine.HandlerException;
 import org.apache.qpid.proton.reactor.Reactor;
 import org.apache.qpid.proton.reactor.ReactorOptions;
-import org.omg.CORBA.CurrentOperations;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
