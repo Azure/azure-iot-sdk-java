@@ -97,9 +97,6 @@ public class MultiplexingClientTests extends IntegrationTest
     private static final int FAULT_INJECTION_RECOVERY_TIMEOUT_MILLIS = 2 * 60 * 1000;
     private static final int FAULT_INJECTION_TIMEOUT_MILLIS = 60 * 1000;
     private static final int DEVICE_METHOD_SUBSCRIBE_TIMEOUT_MILLISECONDS = 60 * 1000;
-    private static final int TWIN_SUBSCRIBE_TIMEOUT_MILLIS = 60 * 1000;
-    private static final long MAXIMUM_TIME_TO_WAIT_FOR_DESIRED_PROPERTY_SUBSCRIPTION_ACKNOWLEDGEMENT = 500; // .5 seconds
-    private static final long MAXIMUM_TIME_TO_WAIT_FOR_REPORTED_PROPERTY_ACKNOWLEDGEMENT = 1000; // 1 second
     private static final int DESIRED_PROPERTY_CALLBACK_TIMEOUT_MILLIS = 60 * 1000;
     private static final int DEVICE_SESSION_OPEN_TIMEOUT = 60 * 1000;
     private static final int DEVICE_SESSION_CLOSE_TIMEOUT = 60 * 1000;
