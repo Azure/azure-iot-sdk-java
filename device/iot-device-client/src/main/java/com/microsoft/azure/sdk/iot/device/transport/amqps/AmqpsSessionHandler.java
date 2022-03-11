@@ -174,11 +174,13 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
             this.session.close();
 
             log.debug("Amqp device session closed remotely unexpectedly for device {}", getDeviceId());
+            clearHandlers();
             this.amqpsSessionStateCallback.onSessionClosedUnexpectedly(session.getRemoteCondition(), this.getDeviceId());
         }
         else
         {
             log.trace("Amqp device session closed remotely as expected for device {}", getDeviceId());
+            clearHandlers();
             this.amqpsSessionStateCallback.onSessionClosedAsExpected(this.getDeviceId());
         }
     }
@@ -549,5 +551,23 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
 
         this.subscribeToTwinOnReconnection = true;
         this.alreadyCreatedTwinLinks = true;
+    }
+
+    // Removes any children of this handler (such as LoggingFlowController) and disassociates this handler
+    // from the proton reactor. By removing the reference of the proton reactor to this handler, this handler becomes
+    // eligible for garbage collection by the JVM. This is important for multiplexed connections where links come and go
+    // but the reactor stays alive for a long time.
+    private void clearHandlers()
+    {
+        this.session.attachments().clear();
+
+        // This session handler shouldn't have any children, but other handlers may be added as this SDK grows and
+        // this protects against potential memory leaks.
+        Iterator<Handler> childrenIterator = this.children();
+        while (childrenIterator.hasNext())
+        {
+            childrenIterator.next();
+            childrenIterator.remove();
+        }
     }
 }

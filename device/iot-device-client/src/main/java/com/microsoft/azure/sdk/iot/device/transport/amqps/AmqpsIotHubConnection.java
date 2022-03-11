@@ -216,6 +216,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
 
         clientConfigurations.remove(config);
+        deviceSessionsOpenedLatches.remove(config.getDeviceId());
     }
 
     public void open() throws TransportException
@@ -1197,6 +1198,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         for (ClientConfiguration successfullyUnregisteredConfig : configsUnregisteredSuccessfully)
         {
             this.multiplexingClientsToUnregister.remove(successfullyUnregisteredConfig);
+            this.deviceSessionsOpenedLatches.remove(successfullyUnregisteredConfig.getDeviceId());
         }
 
         this.clientConfigurations.removeAll(configsUnregisteredSuccessfully);
