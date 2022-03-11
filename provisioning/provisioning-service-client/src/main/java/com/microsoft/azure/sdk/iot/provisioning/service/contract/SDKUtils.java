@@ -8,9 +8,9 @@ package com.microsoft.azure.sdk.iot.provisioning.service.contract;
  */
 public class SDKUtils
 {
-    private static final String SERVICE_API_VERSION = "2019-03-31";
+    private static final String SERVICE_API_VERSION = "2021-10-01";
     private static final String PROVISIONING_SERVICE_CLIENT = "com.microsoft.azure.sdk.iot.provisioning.service.provisioning-service-client/";
-    private static final String PROVISIONING_SERVICE_CLIENT_VERSION = "2.0.0";
+    private static final String PROVISIONING_SERVICE_CLIENT_VERSION = "2.0.1-preview-001";
 
     private static final String JAVA_RUNTIME = System.getProperty("java.version");
     private static final String OPERATING_SYSTEM = System.getProperty("java.runtime.name").toLowerCase().contains("android") ? "Android" : System.getProperty("os.name");

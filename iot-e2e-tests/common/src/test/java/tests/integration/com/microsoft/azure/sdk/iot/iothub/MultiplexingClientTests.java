@@ -550,6 +550,7 @@ public class MultiplexingClientTests extends IntegrationTest
         assertTrue("Unexpected callback result: " + messageSendSuccess.getCallbackStatusCode(), messageSendSuccess.getResult());
     }
 
+    @ContinuousIntegrationTest
     @Test
     @StandardTierHubOnlyTest
     public void receiveMessagesIncludingProperties() throws Exception
@@ -573,6 +574,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
     // MessageCallback for cloud to device messages should not be preserved between registrations by default
     @Test
+    @ContinuousIntegrationTest
     @StandardTierHubOnlyTest
     public void cloudToDeviceMessageSubscriptionNotPreservedByDeviceClientAfterUnregistration() throws Exception
     {

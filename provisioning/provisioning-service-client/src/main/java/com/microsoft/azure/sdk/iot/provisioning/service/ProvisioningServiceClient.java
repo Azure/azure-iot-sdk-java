@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service;
 
+import com.azure.core.credential.AzureSasCredential;
+import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningConnectionString;
 import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.provisioning.service.contract.ContractApiHttp;
@@ -15,6 +17,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningS
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * Device Provisioning Service Client.
@@ -105,6 +108,57 @@ public final class ProvisioningServiceClient
     }
 
     /**
+     * Create a {@link ProvisioningServiceClient} instance with a custom {@link TokenCredential} to allow for finer grain control
+     * of authentication tokens used in the underlying connection.
+     *
+     * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
+     *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
+     */
+    public ProvisioningServiceClient(String hostName, TokenCredential credential)
+    {
+        if (Tools.isNullOrEmpty(hostName))
+        {
+            throw new IllegalArgumentException("hostName cannot be null or empty");
+        }
+
+        if (credential == null)
+        {
+            throw new IllegalArgumentException("credential cannot be null");
+        }
+
+        ContractApiHttp contractApiHttp = new ContractApiHttp(hostName, credential);
+
+        this.individualEnrollmentManager = IndividualEnrollmentManager.createFromContractApiHttp(contractApiHttp);
+        this.enrollmentGroupManager = EnrollmentGroupManager.createFromContractApiHttp(contractApiHttp);
+        this.registrationStatusManager = RegistrationStatusManager.createFromContractApiHttp(contractApiHttp);
+    }
+
+    /**
+     * Create a {@link ProvisioningServiceClient} instance with the specifed {@link AzureSasCredential}.
+     *
+     * @param azureSasCredential The SAS token provider that will be used for authentication.
+     */
+    public ProvisioningServiceClient(String hostName, AzureSasCredential azureSasCredential)
+    {
+        if (Tools.isNullOrEmpty(hostName))
+        {
+            throw new IllegalArgumentException("hostName cannot be null or empty");
+        }
+
+        if (azureSasCredential == null)
+        {
+            throw new IllegalArgumentException("credential cannot be null");
+        }
+
+        ContractApiHttp contractApiHttp = new ContractApiHttp(hostName, azureSasCredential);
+
+        this.individualEnrollmentManager = IndividualEnrollmentManager.createFromContractApiHttp(contractApiHttp);
+        this.enrollmentGroupManager = EnrollmentGroupManager.createFromContractApiHttp(contractApiHttp);
+        this.registrationStatusManager = RegistrationStatusManager.createFromContractApiHttp(contractApiHttp);
+    }
+
+    /**
+     * PRIVATE CONSTRUCTOR
      * Create a new instance of the {@code DeviceProvisioningServiceClient} that exposes
      * the API to the Device Provisioning Service.
      *

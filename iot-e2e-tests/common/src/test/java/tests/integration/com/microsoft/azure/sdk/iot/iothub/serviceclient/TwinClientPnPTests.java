@@ -16,6 +16,7 @@ import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -233,6 +234,7 @@ public class TwinClientPnPTests extends IntegrationTest
         this.testInstance.dispose();
     }
 
+    @Ignore // TODO the service fails to propagate the model id in Canary environments
     @Test
     public void testGetTwinWithModelId() throws Exception {
         // arrange

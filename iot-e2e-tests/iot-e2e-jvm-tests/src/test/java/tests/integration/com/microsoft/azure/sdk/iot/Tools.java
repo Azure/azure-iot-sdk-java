@@ -44,6 +44,9 @@ public class Tools
 
     private static final String ANDROID_BUILD_CONFIG_CLASS = "com.iothub.azure.microsoft.com.androide2e.test.BuildConfig";
 
+    public static final String DPS_CONNECTION_STRING_ENV_VAR_NAME = "IOT_DPS_CONNECTION_STRING";
+    public static final String provisioningConnectionString = retrieveEnvironmentVariableValue(DPS_CONNECTION_STRING_ENV_VAR_NAME);
+
     public static String retrieveEnvironmentVariableValue(String environmentVariableName)
     {
         String environmentVariableValue;
