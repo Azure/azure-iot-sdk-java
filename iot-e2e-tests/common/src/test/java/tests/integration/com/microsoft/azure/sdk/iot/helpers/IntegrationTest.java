@@ -65,7 +65,7 @@ public abstract class IntegrationTest
 
     // Each test must finish in under 2 minutes. Only the token renewal test should last longer,
     // but that test overrides this value to fit its needs as a very long test.
-    int E2E_TEST_TIMEOUT_MILLISECONDS = 60 * 60 * 1000;
+    int E2E_TEST_TIMEOUT_MILLISECONDS = 2 * 60 * 1000;
 
     // The order of these rules matters since the throttle resistant test rule will rerun tests "for free" if they
     // encounter a throttling exception, but the RerurnFailedTestRule will rerun a failed test only up to X times if it encounters

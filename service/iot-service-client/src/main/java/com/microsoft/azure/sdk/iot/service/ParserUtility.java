@@ -337,7 +337,7 @@ public class ParserUtility
         return json;
     }
 
-    public static Object resolveJsonElement(JsonElement jsonElement, String payloadType)
+    public static Object resolveJsonElement(JsonElement jsonElement)
     {
         if (jsonElement == null || jsonElement.isJsonNull())
         {
@@ -345,22 +345,15 @@ public class ParserUtility
         }
         else if (jsonElement.isJsonPrimitive())
         {
-            return getJsonPrimitiveValue(jsonElement.getAsJsonPrimitive());
+            return jsonElement;
         }
         else if (jsonElement.isJsonObject())
         {
-            // If the payload type is JsonObject while creating DirectMethodRequestOptions, then return
-            // MethodResult's payload in type of JsonObject as well; otherwise, return the MethodResult's
-            // payload in Map.
-            if (payloadType.equals("JsonObject"))
-            {
-                return jsonElement.getAsJsonObject();
-            }
-            return getJsonObjectValue(jsonElement.getAsJsonObject());
+            return jsonElement.getAsJsonObject();
         }
         else if (jsonElement.isJsonArray())
         {
-            return getJsonArrayValue(jsonElement.getAsJsonArray());
+            return jsonElement.getAsJsonArray();
         }
         else
         {
@@ -390,7 +383,7 @@ public class ParserUtility
         Map<String, Object> map = new HashMap<>();
         for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet())
         {
-            map.put(entry.getKey(), resolveJsonElement(entry.getValue(), ""));
+            map.put(entry.getKey(), resolveJsonElement(entry.getValue()));
         }
 
         return map;
@@ -401,7 +394,7 @@ public class ParserUtility
         List<Object> list = new ArrayList<>();
         for (JsonElement element : jsonArray.getAsJsonArray())
         {
-            list.add(resolveJsonElement(element, ""));
+            list.add(resolveJsonElement(element));
         }
 
         return list;

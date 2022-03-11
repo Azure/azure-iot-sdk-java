@@ -7,11 +7,9 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 
 import com.azure.core.credential.AzureSasCredential;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.*;
+import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
@@ -34,18 +32,13 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestModuleIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
-import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 
 /**
  * Utility functions, setup and teardown for all device method integration tests. This class should not contain any tests,
@@ -80,6 +73,7 @@ public class DirectMethodsCommon extends IntegrationTest
     protected static final String PAYLOAD_STRING = "This is a valid payload";
 
     protected DirectMethodTestInstance testInstance;
+    protected Object methodDataObject;
 
     protected static Collection inputsCommon()
     {
@@ -175,14 +169,12 @@ public class DirectMethodsCommon extends IntegrationTest
 
     private String loopback(Object methodData)
     {
-//        String payload = new String((byte[])methodData, StandardCharsets.UTF_8).replace("\"", "");
         String payload = new String(methodData.toString().getBytes(StandardCharsets.UTF_8)).replace("\"", "");
         return METHOD_LOOPBACK + ":" + payload;
     }
 
     private String delayInMilliseconds(Object methodData) throws InterruptedException
     {
-//        String payload = new String((byte[])methodData, StandardCharsets.UTF_8).replace("\"", "");
         String payload = new String(methodData.toString().getBytes(StandardCharsets.UTF_8)).replace("\"", "");
         long delay = Long.parseLong(payload);
         Thread.sleep(delay);
@@ -238,7 +230,7 @@ public class DirectMethodsCommon extends IntegrationTest
                     result = e.toString();
                     status = METHOD_THROWS;
                 }
-                deviceMethodData = new DirectMethodResponse(status, result);
+                deviceMethodData = new DirectMethodResponse(status, new JsonPrimitive(result));
 
                 return deviceMethodData;
             },
@@ -276,6 +268,8 @@ public class DirectMethodsCommon extends IntegrationTest
                         result = e.toString();
                         status = METHOD_THROWS;
                     }
+
+                    methodDataObject = methodData;
                     deviceMethodData = new DirectMethodResponse(status, result);
 
                     return deviceMethodData;
@@ -294,72 +288,105 @@ public class DirectMethodsCommon extends IntegrationTest
         // Act
         DirectMethodRequestOptions options =
             DirectMethodRequestOptions.builder()
-                .payload(PAYLOAD_STRING)
+                .payload(new JsonPrimitive(PAYLOAD_STRING))
                 .build();
 
-        String payloadType = "String";
         MethodResult result;
         if (testInstance.identity instanceof TestModuleIdentity)
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity)testInstance.identity).getModule().getId(), METHOD_LOOPBACK, options, payloadType);
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity)testInstance.identity).getModule().getId(), METHOD_LOOPBACK, options);
         }
         else
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_LOOPBACK, options, payloadType);
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_LOOPBACK, options);
         }
 
         // Assert
         assertNotNull(result);
         assertEquals((long)METHOD_SUCCESS, (long)result.getStatus());
-        assertEquals(METHOD_LOOPBACK + ":" + PAYLOAD_STRING, result.getPayload());
+        assertEquals(METHOD_LOOPBACK + ":" + PAYLOAD_STRING, result.getPayload().toString().replace("\"", ""));
     }
 
     protected void invokeMethodWithDifferentPayloadType() throws Exception
     {
-        // Payload in type of string
-        String payloadString = PAYLOAD_STRING;
-        helper(payloadString);
+        // Types which can be converted to JsonPrimitive
+        invokeHelper("###test message!!!");
+        invokeHelper(1.0);
+        invokeHelper(true);
+        invokeHelper('c');
 
-        // Payload in type of Map
-        Map<String, String> payloadMap = new HashMap<>();
-        payloadMap.put("mapKey", "mapVal");
-        helper(payloadMap);
+        // Types which can be converted to JsonArray
+        List<String> list = new ArrayList<>();
+        list.add("element1");
+        list.add("element2");
+        list.add("element3");
+        invokeHelper(list);
 
-        // Payload in type of JsonObject
-        JsonObject payloadJsonObject = new JsonObject();
-        payloadJsonObject.addProperty("key", "value");
+        Set<String> set = new HashSet<>();
+        set.add("A");
+        set.add("B");
+        set.add("C");
+        invokeHelper(set);
 
-        JsonParser parser = new JsonParser();
-        JsonElement jsonElement = parser.parse("{\"message\":\"Hi\",\"place\":{\"name\":\"World!\"}}");
-        JsonObject rootObject = jsonElement.getAsJsonObject();
-        payloadJsonObject.add("new", jsonElement);
-        helper(payloadJsonObject);
+        // Types which can be converted to JsonObject
+        Map<String, String> map = new HashMap<>();
+        map.put("key1", "value1");
+        map.put("key2", "value2");
+        invokeHelper(map);
+
+        CustomObject customObject = new CustomObject("some test message", 1, true, new NestedCustomObject("some nested test message", 2));
+        invokeHelper(customObject);
     }
 
-    private void helper(Object payload) throws Exception
+    private void invokeHelper(Object payload) throws Exception
     {
+        String jsonString = new Gson().toJson(payload);
+
         DirectMethodRequestOptions options =
                 DirectMethodRequestOptions.builder()
-                        .payload(payload)
+                        .payload(new JsonParser().parse(jsonString))
                         .build();
 
-        String payloadType = payload.getClass().getSimpleName();
         MethodResult result;
         if (testInstance.identity instanceof TestModuleIdentity)
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity)testInstance.identity).getModule().getId(), METHOD_ECHO, options, payloadType);
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity)testInstance.identity).getModule().getId(), METHOD_ECHO, options);
         }
         else
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_ECHO, options,payloadType);
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_ECHO, options);
         }
 
-        // Assert
+        // Assert on service side
         assertNotNull(result);
         assertEquals((long)METHOD_SUCCESS, (long)result.getStatus());
         assertEquals(options.getPayload().getClass(), result.getPayload().getClass());
         assertEquals(options.getPayload(), result.getPayload());
-//        System.out.println(result.getPayload());
+
+        // Assert across service and device side
+        if (payload instanceof CustomObject)
+        {
+            assertEquals(methodDataObject.toString(), convertCustomToMap((CustomObject) payload).toString());
+        }
+        else
+        {
+            assertEquals(methodDataObject.toString(), payload.toString());
+        }
+    }
+
+    private Map<String, Object> convertCustomToMap(CustomObject customObject)
+    {
+        NestedCustomObject nestedCustomObject = customObject.getNestedCustomObjectAttri();
+        Map<String, Object> nestedMap = new ObjectMapper().convertValue(nestedCustomObject, Map.class);
+
+        Map<String, Object> map = new HashMap(){{
+            put("stringAttri", customObject.getStringAttri());
+            put("intAttri", customObject.getIntAttri());
+            put("boolAttri", customObject.getBooleanAttri());
+            put("nestedCustomObjectAttri", nestedMap.toString());
+        }};
+
+        return map;
     }
 
     protected static DirectMethodsClient buildDeviceMethodClientWithAzureSasCredential()

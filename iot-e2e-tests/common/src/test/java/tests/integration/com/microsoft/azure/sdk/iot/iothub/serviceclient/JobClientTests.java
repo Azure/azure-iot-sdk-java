@@ -7,6 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 
 import com.azure.core.credential.AzureSasCredential;
+import com.google.gson.JsonPrimitive;
 import com.microsoft.azure.sdk.iot.service.jobs.DirectMethodsJobOptions;
 import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJob;
 import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobStatus;
@@ -239,7 +240,7 @@ public class JobClientTests extends IntegrationTest
                 {
                     DirectMethodsJobOptions options =
                         DirectMethodsJobOptions.builder()
-                            .payload(PAYLOAD_STRING)
+                            .payload(new JsonPrimitive(PAYLOAD_STRING))
                             .methodConnectTimeoutSeconds(CONNECTION_TIMEOUT)
                             .methodResponseTimeoutSeconds(RESPONSE_TIMEOUT)
                             .maxExecutionTimeSeconds(MAX_EXECUTION_TIME_IN_SECONDS)
@@ -353,7 +354,7 @@ public class JobClientTests extends IntegrationTest
         String jobId = JOB_ID_NAME + UUID.randomUUID();
         DirectMethodsJobOptions options =
             DirectMethodsJobOptions.builder()
-                .payload(PAYLOAD_STRING)
+                .payload(new JsonPrimitive(PAYLOAD_STRING))
                 .methodConnectTimeoutSeconds(CONNECTION_TIMEOUT)
                 .methodResponseTimeoutSeconds(RESPONSE_TIMEOUT)
                 .maxExecutionTimeSeconds(MAX_EXECUTION_TIME_IN_SECONDS)
@@ -422,7 +423,7 @@ public class JobClientTests extends IntegrationTest
                     {
                         DirectMethodsJobOptions options =
                             DirectMethodsJobOptions.builder()
-                                .payload(PAYLOAD_STRING)
+                                .payload(new JsonPrimitive(PAYLOAD_STRING))
                                 .methodConnectTimeoutSeconds(CONNECTION_TIMEOUT)
                                 .methodResponseTimeoutSeconds(RESPONSE_TIMEOUT)
                                 .maxExecutionTimeSeconds(MAX_EXECUTION_TIME_IN_SECONDS)
@@ -541,7 +542,7 @@ public class JobClientTests extends IntegrationTest
                 {
                     DirectMethodsJobOptions options =
                         DirectMethodsJobOptions.builder()
-                            .payload(PAYLOAD_STRING)
+                            .payload(new JsonPrimitive(PAYLOAD_STRING))
                             .methodConnectTimeoutSeconds(CONNECTION_TIMEOUT)
                             .methodResponseTimeoutSeconds(RESPONSE_TIMEOUT)
                             .maxExecutionTimeSeconds(MAX_EXECUTION_TIME_IN_SECONDS)

@@ -68,8 +68,7 @@ public class HttpResponse
      */
     public byte[] getBody()
     {
-//        return Arrays.copyOf(this.body, this.body.length);
-        return this.body;
+        return Arrays.copyOf(this.body, this.body.length);
     }
 
     /**

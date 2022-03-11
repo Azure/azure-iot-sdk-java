@@ -1,5 +1,6 @@
 package glue;
 
+import com.google.gson.JsonPrimitive;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
@@ -197,7 +198,7 @@ public class ModuleGlue
             String payload = params.getString("payload");
             int responseTimeout = params.getInteger("responseTimeoutInSeconds", 0);
             int connectionTimeout = params.getInteger("connectTimeoutInSeconds", 0);
-            MethodRequest request = new MethodRequest(methodName, payload, responseTimeout, connectionTimeout);
+            MethodRequest request = new MethodRequest(methodName, new JsonPrimitive(payload), responseTimeout, connectionTimeout);
             try
             {
                 MethodResult result = client.invokeMethod(deviceId, request);
@@ -637,7 +638,7 @@ public class ModuleGlue
             String payload = params.getString("payload");
             int responseTimeout = params.getInteger("responseTimeoutInSeconds", 0);
             int connectionTimeout = params.getInteger("connectTimeoutInSeconds", 0);
-            MethodRequest request = new MethodRequest(methodName, payload, responseTimeout, connectionTimeout);
+            MethodRequest request = new MethodRequest(methodName, new JsonPrimitive(payload), responseTimeout, connectionTimeout);
             try
             {
                 MethodResult result = client.invokeMethod(deviceId, moduleId, request);

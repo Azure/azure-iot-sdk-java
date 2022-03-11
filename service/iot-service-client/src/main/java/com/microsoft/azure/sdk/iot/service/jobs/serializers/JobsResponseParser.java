@@ -257,7 +257,7 @@ public class JobsResponseParser
 
         if (map.containsKey(CLOUDTODEVICEMETHOD_TAG))
         {
-            jobsResponseParser.cloudToDeviceMethod.fromJson(gson.toJson(map.get(CLOUDTODEVICEMETHOD_TAG)), "");
+            jobsResponseParser.cloudToDeviceMethod.fromJson(gson.toJson(map.get(CLOUDTODEVICEMETHOD_TAG)));
         }
 
         if (map.containsKey(OUTCOME_TAG))
@@ -274,14 +274,14 @@ public class JobsResponseParser
                 else
                 {
                     String outcomeResponse = gson.toJson(value);
-                    methodParserResponse.fromJson(outcomeResponse, "");
+                    methodParserResponse.fromJson(outcomeResponse);
                     jobsResponseParser.methodResponse = methodParserResponse;
                 }
             }
             else
             {
                 MethodParser methodParserResponse = new MethodParser();
-                methodParserResponse.fromJson(gson.toJson(map.get(OUTCOME_TAG)), "");
+                methodParserResponse.fromJson(gson.toJson(map.get(OUTCOME_TAG)));
                 jobsResponseParser.methodResponse = methodParserResponse;
             }
         }

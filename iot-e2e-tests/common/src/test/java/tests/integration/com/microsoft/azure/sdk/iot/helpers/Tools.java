@@ -181,7 +181,7 @@ public class Tools
     private final static Object testX509ModuleQueueLock = new Object();
 
     // number of devices to add in bulk when proactively adding devices to the queue of available test devices
-    private static final int PROACTIVE_TEST_DEVICE_REGISRATION_COUNT = 1;
+    private static final int PROACTIVE_TEST_DEVICE_REGISRATION_COUNT = 100;
 
     /**
      * Return a device identity and client that can be used for a test. If a recycled identity is available to use, this method will prioritize using

@@ -3,6 +3,7 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
+import com.google.gson.JsonPrimitive;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
 import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
@@ -82,7 +83,7 @@ public class ModuleInvokeMethodSample
         ModuleClient client = ModuleClient.createFromEnvironment(new UnixDomainSocketSample.UnixDomainSocketChannelImpl(), protocol);
         client.open(false);
 
-        MethodRequest methodRequest = new MethodRequest(methodName, methodPayload);
+        MethodRequest methodRequest = new MethodRequest(methodName, new JsonPrimitive(methodPayload));
         MethodResult result;
         try
         {

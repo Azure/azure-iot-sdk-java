@@ -7,6 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.methods;
 
 
 import com.azure.core.credential.AzureSasCredential;
+import com.google.gson.JsonPrimitive;
 import com.microsoft.azure.sdk.iot.service.exceptions.ErrorCodeDescription;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
@@ -134,18 +135,18 @@ public class DirectMethodsTests extends DirectMethodsCommon
         {
             DirectMethodRequestOptions options =
                 DirectMethodRequestOptions.builder()
-                    .payload("7000")
+                    .payload(new JsonPrimitive("7000"))
                     .methodResponseTimeoutSeconds(RESPONSE_TIMEOUT)
                     .methodConnectTimeoutSeconds(CONNECTION_TIMEOUT)
                     .build();
 
             if (testInstance.identity instanceof TestModuleIdentity)
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), METHOD_DELAY_IN_MILLISECONDS, options, "String");
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), METHOD_DELAY_IN_MILLISECONDS, options);
             }
             else
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_DELAY_IN_MILLISECONDS, options, "String");
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_DELAY_IN_MILLISECONDS, options);
             }
             assert true;
         }
@@ -157,7 +158,7 @@ public class DirectMethodsTests extends DirectMethodsCommon
         // Act
         DirectMethodRequestOptions options =
             DirectMethodRequestOptions.builder()
-                .payload("100")
+                .payload(new JsonPrimitive("100"))
                 .methodResponseTimeoutSeconds(RESPONSE_TIMEOUT)
                 .methodConnectTimeoutSeconds(CONNECTION_TIMEOUT)
                 .build();
@@ -165,17 +166,17 @@ public class DirectMethodsTests extends DirectMethodsCommon
         MethodResult result;
         if (testInstance.identity instanceof TestModuleIdentity)
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), METHOD_DELAY_IN_MILLISECONDS, options, "String");
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), METHOD_DELAY_IN_MILLISECONDS, options);
         }
         else
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_DELAY_IN_MILLISECONDS, options, "String");
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_DELAY_IN_MILLISECONDS, options);
         }
 
         // Assert
         assertNotNull(buildExceptionMessage("method result was null", testInstance.identity.getClient()), result);
         assertEquals(buildExceptionMessage("Expected SUCCESS but got " + result.getStatus(), testInstance.identity.getClient()), (long)METHOD_SUCCESS, (long)result.getStatus());
-        assertEquals(buildExceptionMessage("Expected " + METHOD_DELAY_IN_MILLISECONDS + ":succeed" + " But got " + result.getPayload(), testInstance.identity.getClient()), METHOD_DELAY_IN_MILLISECONDS + ":succeed", result.getPayload());
+        assertEquals(buildExceptionMessage("Expected " + METHOD_DELAY_IN_MILLISECONDS + ":succeed" + " But got " + result.getPayload(), testInstance.identity.getClient()), METHOD_DELAY_IN_MILLISECONDS + ":succeed", result.getPayload().toString().replace("\"", ""));
     }
 
     @Test
@@ -192,18 +193,18 @@ public class DirectMethodsTests extends DirectMethodsCommon
         {
             DirectMethodRequestOptions options =
                 DirectMethodRequestOptions.builder()
-                    .payload("7000")
+                    .payload(new JsonPrimitive("7000"))
                     .methodResponseTimeoutSeconds(5)
                     .methodConnectTimeoutSeconds(CONNECTION_TIMEOUT)
                     .build();
 
             if (testInstance.identity instanceof TestModuleIdentity)
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), METHOD_DELAY_IN_MILLISECONDS, options, "");
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), METHOD_DELAY_IN_MILLISECONDS, options);
             }
             else
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_DELAY_IN_MILLISECONDS, options, "");
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_DELAY_IN_MILLISECONDS, options);
             }
         }
         catch (IotHubGatewayTimeoutException e)
@@ -239,11 +240,11 @@ public class DirectMethodsTests extends DirectMethodsCommon
 
             if (testInstance.identity instanceof TestModuleIdentity)
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), METHOD_LOOPBACK, options, "");
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), METHOD_LOOPBACK, options);
             }
             else
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_LOOPBACK, options, "");
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_LOOPBACK, options);
             }
 
             Assert.fail(buildExceptionMessage("Invoking method on device or module that wasn't online should have thrown an exception", testInstance.identity.getClient()));

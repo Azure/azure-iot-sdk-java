@@ -137,7 +137,7 @@ public class MethodParser
      *                  - Otherwise, it is only `payload`.
      * @throws IllegalArgumentException This exception is thrown if the one of the provided information do not fits the requirements.
      */
-    public synchronized void fromJson(String json, String payloadType) throws IllegalArgumentException
+    public synchronized void fromJson(String json) throws IllegalArgumentException
     {
 
         if ((json == null) || json.isEmpty())
@@ -161,7 +161,7 @@ public class MethodParser
                        2.6
                  */
                 this.operation = Operation.payload;
-                this.payload = resolveJsonElement(jsonElement, payloadType);
+                this.payload = resolveJsonElement(jsonElement);
             }
             else if (jsonElement instanceof JsonObject)
             {
@@ -201,7 +201,7 @@ public class MethodParser
                         JsonElement payloadNode = jsonObject.get(PAYLOAD_TAG);
                         if (payloadNode != null)
                         {
-                            payload = resolveJsonElement(payloadNode, payloadType);
+                            payload = resolveJsonElement(payloadNode);
                         }
                     }
                 }
@@ -239,7 +239,7 @@ public class MethodParser
                         JsonElement payloadNode = jsonObject.get(PAYLOAD_TAG);
                         if (payloadNode != null)
                         {
-                            payload = resolveJsonElement(payloadNode, payloadType);
+                            payload = resolveJsonElement(payloadNode);
                         }
                     }
                     else
@@ -267,10 +267,6 @@ public class MethodParser
      */
     public Object getPayload()
     {
-        if (payload instanceof JsonElement && ((JsonElement) payload).isJsonPrimitive() && ((JsonPrimitive) payload).isString())
-        {
-            return ((JsonPrimitive) payload).getAsString();
-        }
         return payload;
     }
 

@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.device.edge;
 
+import com.google.gson.JsonPrimitive;
 import mockit.Deencapsulation;
 import org.junit.Test;
 
@@ -21,7 +22,7 @@ public class MethodRequestTest
     public void constructorUsesDefaultTimeouts()
     {
         //act
-        MethodRequest request = new MethodRequest(expectedMethodName, expectedPayload);
+        MethodRequest request = new MethodRequest(expectedMethodName, new JsonPrimitive(expectedPayload));
 
         //assert
         assertNull(Deencapsulation.getField(request, "responseTimeoutInSeconds"));
@@ -33,7 +34,7 @@ public class MethodRequestTest
     public void constructorThrowsForEmptyMethodName()
     {
         //act
-        MethodRequest request = new MethodRequest("", expectedPayload);
+        MethodRequest request = new MethodRequest("", new JsonPrimitive(expectedPayload));
     }
 
     // Tests_SRS_DIRECTMETHODREQUEST_34_002: [If the provided methodName is null or empty, this function shall throw an IllegalArgumentException.]
@@ -41,7 +42,7 @@ public class MethodRequestTest
     public void constructorThrowsForNullMethodName()
     {
         //act
-        MethodRequest request = new MethodRequest(null, expectedPayload);
+        MethodRequest request = new MethodRequest(null, new JsonPrimitive(expectedPayload));
     }
 
     // Tests_SRS_DIRECTMETHODREQUEST_34_003: [This constructor shall save the provided payload, methodname, and timeouts.]
@@ -53,13 +54,13 @@ public class MethodRequestTest
         int expectedConnectionTimeout = 4;
 
         //act
-        MethodRequest request = new MethodRequest(expectedMethodName, expectedPayload, expectedResponseTimeout, expectedConnectionTimeout);
+        MethodRequest request = new MethodRequest(expectedMethodName, new JsonPrimitive(expectedPayload), expectedResponseTimeout, expectedConnectionTimeout);
 
         //assert
         assertEquals(expectedResponseTimeout, (int) Deencapsulation.getField(request, "responseTimeoutInSeconds"));
         assertEquals(expectedConnectionTimeout, (int) Deencapsulation.getField(request, "connectionTimeoutInSeconds"));
         assertEquals(expectedMethodName, Deencapsulation.getField(request, "methodName"));
-        assertEquals(expectedPayload, Deencapsulation.getField(request, "payload"));
+        assertEquals(new JsonPrimitive(expectedPayload), Deencapsulation.getField(request, "payload"));
 
     }
 }

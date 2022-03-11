@@ -3,6 +3,9 @@
 
 package com.microsoft.azure.sdk.iot.service.methods;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
@@ -78,7 +81,7 @@ public class DirectMethodsClientTest
         String methodName;
         int responseTimeoutInSeconds;
         int connectTimeoutInSeconds;
-        Object payload;
+        JsonElement payload;
     }
 
     private static final TestMethod[] illegalParameter = new TestMethod[]
@@ -89,7 +92,7 @@ public class DirectMethodsClientTest
                         methodName = STANDARD_METHODNAME;
                         responseTimeoutInSeconds = STANDARD_TIMEOUT_SECONDS;
                         connectTimeoutInSeconds = STANDARD_TIMEOUT_SECONDS;
-                        payload = STANDARD_PAYLOAD_MAP;
+                        payload = new JsonParser().parse(new Gson().toJson(STANDARD_PAYLOAD_MAP));
                     }},
                     new TestMethod()
                     {{
@@ -97,7 +100,7 @@ public class DirectMethodsClientTest
                         methodName = STANDARD_METHODNAME;
                         responseTimeoutInSeconds = STANDARD_TIMEOUT_SECONDS;
                         connectTimeoutInSeconds = STANDARD_TIMEOUT_SECONDS;
-                        payload = STANDARD_PAYLOAD_MAP;
+                        payload = new JsonParser().parse(new Gson().toJson(STANDARD_PAYLOAD_MAP));
                     }},
                     new TestMethod()
                     {{
@@ -105,7 +108,7 @@ public class DirectMethodsClientTest
                         methodName = null;
                         responseTimeoutInSeconds = STANDARD_TIMEOUT_SECONDS;
                         connectTimeoutInSeconds = STANDARD_TIMEOUT_SECONDS;
-                        payload = STANDARD_PAYLOAD_MAP;
+                        payload = new JsonParser().parse(new Gson().toJson(STANDARD_PAYLOAD_MAP));
                     }},
                     new TestMethod()
                     {{
@@ -113,7 +116,7 @@ public class DirectMethodsClientTest
                         methodName = "";
                         responseTimeoutInSeconds = STANDARD_TIMEOUT_SECONDS;
                         connectTimeoutInSeconds = STANDARD_TIMEOUT_SECONDS;
-                        payload = STANDARD_PAYLOAD_MAP;
+                        payload = new JsonParser().parse(new Gson().toJson(STANDARD_PAYLOAD_MAP));
                     }},
             };
 
@@ -126,7 +129,7 @@ public class DirectMethodsClientTest
                         methodName = STANDARD_METHODNAME;
                         responseTimeoutInSeconds = STANDARD_TIMEOUT_SECONDS;
                         connectTimeoutInSeconds = STANDARD_TIMEOUT_SECONDS;
-                        payload = STANDARD_PAYLOAD_MAP;
+                        payload = new JsonParser().parse(new Gson().toJson(STANDARD_PAYLOAD_MAP));
                     }},
                     new TestMethod()
                     {{
@@ -135,7 +138,7 @@ public class DirectMethodsClientTest
                         methodName = STANDARD_METHODNAME;
                         responseTimeoutInSeconds = STANDARD_TIMEOUT_SECONDS;
                         connectTimeoutInSeconds = STANDARD_TIMEOUT_SECONDS;
-                        payload = STANDARD_PAYLOAD_MAP;
+                        payload = new JsonParser().parse(new Gson().toJson(STANDARD_PAYLOAD_MAP));
                     }},
                     new TestMethod()
                     {{
@@ -144,7 +147,7 @@ public class DirectMethodsClientTest
                         methodName = STANDARD_METHODNAME;
                         responseTimeoutInSeconds = STANDARD_TIMEOUT_SECONDS;
                         connectTimeoutInSeconds = STANDARD_TIMEOUT_SECONDS;
-                        payload = STANDARD_PAYLOAD_MAP;
+                        payload = new JsonParser().parse(new Gson().toJson(STANDARD_PAYLOAD_MAP));
                     }},
                     new TestMethod()
                     {{
@@ -153,7 +156,7 @@ public class DirectMethodsClientTest
                         methodName = STANDARD_METHODNAME;
                         responseTimeoutInSeconds = STANDARD_TIMEOUT_SECONDS;
                         connectTimeoutInSeconds = STANDARD_TIMEOUT_SECONDS;
-                        payload = STANDARD_PAYLOAD_MAP;
+                        payload = new JsonParser().parse(new Gson().toJson(STANDARD_PAYLOAD_MAP));
                     }},
                     new TestMethod()
                     {{
@@ -162,7 +165,7 @@ public class DirectMethodsClientTest
                         methodName = null;
                         responseTimeoutInSeconds = STANDARD_TIMEOUT_SECONDS;
                         connectTimeoutInSeconds = STANDARD_TIMEOUT_SECONDS;
-                        payload = STANDARD_PAYLOAD_MAP;
+                        payload = new JsonParser().parse(new Gson().toJson(STANDARD_PAYLOAD_MAP));
                     }},
                     new TestMethod()
                     {{
@@ -171,7 +174,7 @@ public class DirectMethodsClientTest
                         methodName = "";
                         responseTimeoutInSeconds = STANDARD_TIMEOUT_SECONDS;
                         connectTimeoutInSeconds = STANDARD_TIMEOUT_SECONDS;
-                        payload = STANDARD_PAYLOAD_MAP;
+                        payload = new JsonParser().parse(new Gson().toJson(STANDARD_PAYLOAD_MAP));
                     }},
             };
 
@@ -245,7 +248,7 @@ public class DirectMethodsClientTest
                         .methodResponseTimeoutSeconds(testCase.responseTimeoutInSeconds)
                         .build();
 
-                testMethod.invoke(testCase.deviceId, testCase.methodName, options, "");
+                testMethod.invoke(testCase.deviceId, testCase.methodName, options);
                 assertTrue(
                         "Negative case> DeviceId=" + testCase.deviceId +
                         " MethodName=" + testCase.methodName +
@@ -283,7 +286,7 @@ public class DirectMethodsClientTest
                         .methodResponseTimeoutSeconds(testCase.responseTimeoutInSeconds)
                         .build();
 
-                testMethod.invoke(testCase.deviceId, testCase.moduleId, testCase.methodName, options, "");
+                testMethod.invoke(testCase.deviceId, testCase.moduleId, testCase.methodName, options);
                 assertTrue(
                         "Negative case> DeviceId=" + testCase.deviceId +
                                 " ModuleName=" + testCase.moduleId +
