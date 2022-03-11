@@ -29,6 +29,7 @@ import com.microsoft.azure.sdk.iot.service.query.TwinQueryResponse;
 import com.microsoft.rest.ServiceResponseWithHeaders;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assume;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -56,6 +57,7 @@ public class TokenCredentialTests
 
     private static final int METHOD_SUBSCRIPTION_TIMEOUT_MILLISECONDS = 60 * 1000;
 
+    @Ignore // TODO the service throws a 500 error in Canary environments
     @Test
     public void cloudToDeviceTelemetryWithTokenCredential() throws Exception
     {
@@ -88,6 +90,7 @@ public class TokenCredentialTests
         assertEquals(1, deviceGetAfter.getCloudToDeviceMessageCount());
     }
 
+    @Ignore // TODO the service throws a 500 error in Canary environments
     @Test
     public void getDigitalTwinWithTokenCredential() throws IOException, IotHubException, URISyntaxException
     {
@@ -110,6 +113,7 @@ public class TokenCredentialTests
         assertEquals(responseWithHeaders.body().getMetadata().getModelId(), THERMOSTAT_MODEL_ID);
     }
 
+    @Ignore // TODO the service throws a 500 error in Canary environments
     @Test
     public void deviceLifecycleWithTokenCredential() throws Exception
     {
@@ -136,6 +140,7 @@ public class TokenCredentialTests
         assertEquals(DeviceStatus.Disabled, deviceUpdated.getStatus());
     }
 
+    @Ignore // TODO the service throws a 500 error in Canary environments
     @Test
     public void invokeMethodSucceedWithTokenCredential() throws Exception
     {
@@ -185,6 +190,7 @@ public class TokenCredentialTests
         assertEquals((long) successStatusCode, (long) result.getStatus());
     }
 
+    @Ignore // TODO the service throws a 500 error in Canary environments
     @Test
     public void testGetDeviceTwinWithTokenCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
     {
@@ -201,6 +207,7 @@ public class TokenCredentialTests
         assertNotNull(twin.getETag());
     }
 
+    @Ignore // TODO the service throws a 500 error in Canary environments
     @Test
     public void testQueryTwinWithTokenCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
     {
