@@ -216,6 +216,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
 
         clientConfigurations.remove(config);
+        deviceSessionsOpenedLatches.remove(config.getDeviceId());
     }
 
     public void open() throws TransportException

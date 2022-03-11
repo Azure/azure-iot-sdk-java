@@ -878,6 +878,8 @@ public class IotHubTransport implements IotHubListener
                         throw new MultiplexingClientDeviceRegistrationTimeoutException("Timed out waiting for all device unregistrations to finish.");
                     }
                 }
+
+                this.deviceConnectionStates.remove(newlyUnregisteredConfig.getDeviceId());
             }
         }
     }
