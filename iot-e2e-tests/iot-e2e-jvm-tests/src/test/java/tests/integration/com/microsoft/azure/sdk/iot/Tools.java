@@ -12,6 +12,8 @@ import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClientOptions;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
@@ -119,6 +121,14 @@ public class Tools
         TokenCredential tokenCredential = buildTokenCredentialFromEnvironment();
         QueryClientOptions options = QueryClientOptions.builder().build();
         return new QueryClient(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
+    }
+
+    public static RegistryClient buildRegistryClientWithTokenCredential()
+    {
+        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+        TokenCredential tokenCredential = buildTokenCredentialFromEnvironment();
+        RegistryClientOptions options = RegistryClientOptions.builder().build();
+        return new RegistryClient(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
     }
 
     public static TokenCredential buildTokenCredentialFromEnvironment()
