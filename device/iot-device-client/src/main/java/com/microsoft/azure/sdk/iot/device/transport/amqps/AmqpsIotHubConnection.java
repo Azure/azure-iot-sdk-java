@@ -317,17 +317,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                         CountDownLatch deviceSessionOpenedCountDownLatch = this.deviceSessionsOpenedLatches.get(config.getDeviceId());
                         int timeout = config.getAmqpOpenDeviceSessionsTimeout();
 
-                        /*try
-                        {*/
-                            deviceSessionsOpenTimedOut = !deviceSessionOpenedCountDownLatch.await(timeout, TimeUnit.SECONDS);
-                        /*}
-                        catch (NullPointerException e)
-                        {
-                            // indicates that the device session was unregistered while opening the connection, likely due to
-                            // retry logic for both the mux level connection and a particular multiplexed device running
-                            // simultaneously. Safe to ignore.
-                            log.trace("Ignoring null pointer exception from deviceSessionOpenedCountDownLatch");
-                        }*/
+                        deviceSessionsOpenTimedOut = !deviceSessionOpenedCountDownLatch.await(timeout, TimeUnit.SECONDS);
 
                         if (deviceSessionsOpenTimedOut)
                         {
