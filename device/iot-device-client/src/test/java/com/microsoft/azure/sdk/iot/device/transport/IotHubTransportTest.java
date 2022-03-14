@@ -958,7 +958,7 @@ public class IotHubTransportTest
                 mockedAmqpsIotHubConnection.setListener(transport);
                 times = 1;
 
-                mockedAmqpsIotHubConnection.open();
+                mockedAmqpsIotHubConnection.open((Collection<ClientConfiguration>) any);
                 times = 1;
             }
         };
@@ -998,7 +998,7 @@ public class IotHubTransportTest
                 mockedAmqpsIotHubConnection.setListener(transport);
                 times = 1;
 
-                mockedAmqpsIotHubConnection.open();
+                mockedAmqpsIotHubConnection.open((Collection<ClientConfiguration>) any);
                 times = 1;
             }
         };
