@@ -71,7 +71,12 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     private final ClientConfiguration.AuthType authenticationType;
     private final Set<ClientConfiguration> clientConfigurations;
     private IotHubListener listener;
+
+    // additional context for the savedException. Used to distinguish errors that affect the whole multiplexed
+    // connection vs errors that only affect a particular session within the broader multiplexed connection.
+    private boolean isSavedExceptionConnectionLevelException;
     private TransportException savedException;
+
     private boolean reconnectionScheduled = false;
     private final Object executorServiceLock = new Object();
     private final Map<String, Boolean> reconnectionsScheduled = new ConcurrentHashMap<>();
@@ -223,6 +228,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     {
         log.debug("Opening amqp layer...");
         reconnectionScheduled = false;
+        isSavedExceptionConnectionLevelException = false;
         connectionId = UUID.randomUUID().toString();
 
         this.savedException = null;
@@ -463,6 +469,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         catch (IOException e)
         {
             this.savedException = new TransportException(e);
+            this.isSavedExceptionConnectionLevelException = true;
+
             log.error("Encountered an exception while setting ssl domain for the amqp connection", this.savedException);
         }
 
@@ -546,6 +554,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         {
             ErrorCondition errorCondition = connection.getRemoteCondition();
             this.savedException = AmqpsExceptionTranslator.convertFromAmqpException(errorCondition);
+            this.isSavedExceptionConnectionLevelException = true;
             log.error("Amqp connection was closed remotely", this.savedException);
             this.connection.close();
         }
@@ -575,6 +584,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
 
         this.savedException = AmqpsExceptionTranslator.convertFromAmqpException(errorCondition);
+        this.isSavedExceptionConnectionLevelException = true;
 
         // In the event that we get a local error and the connection is already in the closed state we need to manually call
         // onConnectionLocalClose. Proton will not queue the CONNECTION_LOCAL_CLOSE event since the Endpoint status is CLOSED
@@ -731,6 +741,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                     catch (TransportException e)
                     {
                         log.error("Failed to send CBS authentication message", e);
+                        this.isSavedExceptionConnectionLevelException = true;
                         this.savedException = e;
                     }
                 }
@@ -746,6 +757,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                     catch (TransportException e)
                     {
                         log.error("Failed to send CBS authentication message", e);
+                        this.isSavedExceptionConnectionLevelException = true;
                         this.savedException = e;
                     }
                 }
@@ -795,6 +807,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 if (this.savedException == null)
                 {
                     this.savedException = new MultiplexingDeviceUnauthorizedException("One or more multiplexed devices failed to authenticate");
+                    this.isSavedExceptionConnectionLevelException = true;
                 }
 
                 if (this.savedException instanceof MultiplexingDeviceUnauthorizedException)
@@ -813,6 +826,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         else
         {
             this.savedException = transportException;
+            this.isSavedExceptionConnectionLevelException = true;
         }
 
         this.listener.onMultiplexedDeviceSessionRegistrationFailed(this.connectionId, deviceId, transportException);
@@ -842,7 +856,11 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         // If the session closes during an open call, need to decrement this latch so that the open call doesn't wait
         // for this session to open. The above call to onMultiplexedDeviceSessionRegistrationFailed will report
         // the relevant exception.
-        this.deviceSessionsOpenedLatches.get(deviceId).countDown();
+        CountDownLatch deviceSessionOpenedLatch = this.deviceSessionsOpenedLatches.get(deviceId);
+        if (deviceSessionOpenedLatch != null)
+        {
+            deviceSessionOpenedLatch.countDown();
+        }
 
         if (isMultiplexing)
         {
@@ -854,6 +872,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         {
             // When not multiplexing, reconnection logic will just spin up the whole connection again.
             this.savedException = savedException;
+            this.isSavedExceptionConnectionLevelException = false;
             log.error("Amqp session closed unexpectedly. Closing this connection...", this.savedException);
             this.connection.close();
         }
@@ -863,6 +882,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     public void onCBSSessionClosedUnexpectedly(ErrorCondition errorCondition)
     {
         this.savedException = AmqpsExceptionTranslator.convertFromAmqpException(errorCondition);
+        this.isSavedExceptionConnectionLevelException = true;
         log.error("Amqp CBS session closed unexpectedly. Closing this connection...", this.savedException);
         this.connection.close();
     }
@@ -873,8 +893,15 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         // don't want to signal Client_Close to transport layer if this is in the middle of a disconnected_retrying event
         if (this.reconnectionsScheduled.get(deviceId) == null || !this.reconnectionsScheduled.get(deviceId))
         {
-            log.trace("onSessionClosedAsExpected callback executed, notifying transport layer");
-            this.listener.onMultiplexedDeviceSessionLost(null, this.connectionId, deviceId);
+            // if a connection level error was detected (TCP connection lost, for instance), this layer will deliberately
+            // close all the device sessions, leading to this callback executing. In this case, don't notify transport layer
+            // for each deliberately closed session since the IotHubTransport layer will invoke the relevant connection
+            // status callbacks for each multiplexed device instead.
+            if (this.isMultiplexing && (this.savedException == null || !this.isSavedExceptionConnectionLevelException))
+            {
+                log.trace("onSessionClosedAsExpected callback executed, notifying transport layer");
+                this.listener.onMultiplexedDeviceSessionLost(null, this.connectionId, deviceId);
+            }
         }
     }
 
