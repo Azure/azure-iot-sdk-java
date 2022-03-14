@@ -1087,11 +1087,6 @@ public class IotHubTransport implements IotHubListener
                                 this.sslContext,
                                 this.proxySettings,
                                 this.keepAliveInterval);
-
-                        for (ClientConfiguration config : this.deviceClientConfigs.values())
-                        {
-                            ((AmqpsIotHubConnection) this.iotHubTransportConnection).registerMultiplexedDevice(config);
-                        }
                     }
                     else
                     {
@@ -1105,7 +1100,15 @@ public class IotHubTransport implements IotHubListener
         }
 
         this.iotHubTransportConnection.setListener(this);
-        this.iotHubTransportConnection.open();
+        if (this.iotHubTransportConnection instanceof AmqpsIotHubConnection)
+        {
+            ((AmqpsIotHubConnection) this.iotHubTransportConnection).open(this.deviceClientConfigs.values());
+        }
+        else
+        {
+            this.iotHubTransportConnection.open();
+        }
+
         this.updateStatus(IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, null);
     }
 
@@ -1147,7 +1150,8 @@ public class IotHubTransport implements IotHubListener
 
         while (this.deviceConnectionStates.get(deviceId) == IotHubConnectionStatus.DISCONNECTED_RETRYING
                 && !hasReconnectOperationTimedOut
-                && transportException.isRetryable())
+                && transportException.isRetryable()
+                && this.connectionStatus != IotHubConnectionStatus.DISCONNECTED_RETRYING) // device specific reconnection should stop if mux level reconnection has started
         {
             reconnectionAttempts++;
 
@@ -1290,8 +1294,7 @@ public class IotHubTransport implements IotHubListener
             return;
         }
 
-        ((AmqpsIotHubConnection) this.iotHubTransportConnection).unregisterMultiplexedDevice(config, true);
-        ((AmqpsIotHubConnection) this.iotHubTransportConnection).registerMultiplexedDevice(config);
+        ((AmqpsIotHubConnection) this.iotHubTransportConnection).reconnectDeviceSession(config);
     }
 
     private ClientConfiguration getConfig(String deviceId)

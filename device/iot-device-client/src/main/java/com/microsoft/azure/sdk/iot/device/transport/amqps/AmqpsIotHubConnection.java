@@ -65,6 +65,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     private final Queue<Message> messagesToSend = new ConcurrentLinkedQueue<>();
     private String connectionId;
     private IotHubConnectionStatus state;
+    private final Object stateLock = new Object(); // lock to prevent simultaneous open/register/unregister calls
     private final String hostName;
     private SSLContext sslContext;
     private final boolean isWebsocketConnection;
@@ -182,18 +183,30 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         this.keepAliveInterval = keepAliveInterval;
     }
 
+    public void reconnectDeviceSession(ClientConfiguration config)
+    {
+        synchronized (this.stateLock)
+        {
+            unregisterMultiplexedDevice(config, true);
+            registerMultiplexedDevice(config);
+        }
+    }
+
     public void registerMultiplexedDevice(ClientConfiguration config)
     {
-        if (this.state == IotHubConnectionStatus.CONNECTED)
+        synchronized (this.stateLock)
         {
-            // session opening logic should be done from a proton reactor thread, not this thread. This queue gets polled
-            // onTimerTask so that this client gets registered on that thread instead.
-            log.trace("Queuing the registration of device {} to an active multiplexed connection", config.getDeviceId());
-            deviceSessionsOpenedLatches.put(config.getDeviceId(), new CountDownLatch(1));
-            this.multiplexingClientsToRegister.add(config);
-        }
+            if (this.state == IotHubConnectionStatus.CONNECTED)
+            {
+                // session opening logic should be done from a proton reactor thread, not this thread. This queue gets polled
+                // onTimerTask so that this client gets registered on that thread instead.
+                log.trace("Queuing the registration of device {} to an active multiplexed connection", config.getDeviceId());
+                deviceSessionsOpenedLatches.put(config.getDeviceId(), new CountDownLatch(1));
+                this.multiplexingClientsToRegister.add(config);
+            }
 
-        clientConfigurations.add(config);
+            clientConfigurations.add(config);
+        }
     }
 
     /**
@@ -204,126 +217,165 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
      */
     public void unregisterMultiplexedDevice(ClientConfiguration config, boolean willReconnect)
     {
-        if (this.state == IotHubConnectionStatus.CONNECTED)
+        synchronized (this.stateLock)
         {
-            // session closing logic should be done from a proton reactor thread, not this thread. This queue gets polled
-            // onTimerTask so that this client gets unregistered on that thread instead.
-            if (willReconnect)
+            if (this.state == IotHubConnectionStatus.CONNECTED)
             {
-                log.trace("Queuing the unregistration of device {} from an active multiplexed connection. The device will be re-registered for reconnection purposes.", config.getDeviceId());
-            }
-            else
-            {
-                log.trace("Queuing the unregistration of device {} from an active multiplexed connection", config.getDeviceId());
+                // session closing logic should be done from a proton reactor thread, not this thread. This queue gets polled
+                // onTimerTask so that this client gets unregistered on that thread instead.
+                if (willReconnect)
+                {
+                    log.trace("Queuing the unregistration of device {} from an active multiplexed connection. The device will be re-registered for reconnection purposes.", config.getDeviceId());
+                }
+                else
+                {
+                    log.trace("Queuing the unregistration of device {} from an active multiplexed connection", config.getDeviceId());
+                }
+
+                this.multiplexingClientsToUnregister.put(config, willReconnect);
             }
 
-            this.multiplexingClientsToUnregister.put(config, willReconnect);
+            clientConfigurations.remove(config);
+            deviceSessionsOpenedLatches.remove(config.getDeviceId());
         }
+    }
 
-        clientConfigurations.remove(config);
-        deviceSessionsOpenedLatches.remove(config.getDeviceId());
+    // wrapper of the parameterless open call, but with a synchronized block to ensure that all the provided configs
+    // will be registered before the open, and that the open call won't be interrupted by a register/unregister call
+    // that could cause exceptions.
+    public void open(Collection<ClientConfiguration> configurations) throws TransportException
+    {
+        synchronized (this.stateLock)
+        {
+            for (ClientConfiguration configuration : configurations)
+            {
+                this.registerMultiplexedDevice(configuration);
+            }
+
+            open();
+        }
     }
 
     public void open() throws TransportException
     {
-        log.debug("Opening amqp layer...");
-        reconnectionScheduled = false;
-        isSavedExceptionConnectionLevelException = false;
-        connectionId = UUID.randomUUID().toString();
-
-        this.savedException = null;
-
-        if (this.state == IotHubConnectionStatus.DISCONNECTED)
+        synchronized (this.stateLock)
         {
-            for (ClientConfiguration clientConfig : clientConfigurations)
+            log.debug("Opening amqp layer...");
+            reconnectionScheduled = false;
+            isSavedExceptionConnectionLevelException = false;
+            connectionId = UUID.randomUUID().toString();
+
+            this.multiplexingClientsToUnregister.clear();
+            this.multiplexingClientsToRegister.clear();
+
+            this.savedException = null;
+
+            if (this.state == IotHubConnectionStatus.DISCONNECTED)
             {
-                this.addSessionHandler(clientConfig);
-            }
-
-            initializeStateLatches();
-
-            try
-            {
-                this.openAsync();
-
-                if (this.authenticationType == ClientConfiguration.AuthType.SAS_TOKEN)
+                for (ClientConfiguration clientConfig : clientConfigurations)
                 {
-                    // x509 authenticated connections don't open authentication links since the SSL handshake does all the authentication
-                    log.trace("Waiting for authentication links to open...");
+                    this.addSessionHandler(clientConfig);
                 }
 
-                Iterator<ClientConfiguration> configsIterator = this.clientConfigurations.iterator();
-                ClientConfiguration defaultConfig = configsIterator.hasNext() ? configsIterator.next() : null;
-                int timeoutSeconds = ClientConfiguration.DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT_IN_SECONDS;
-                if (defaultConfig != null)
-                {
-                    timeoutSeconds = defaultConfig.getAmqpOpenAuthenticationSessionTimeout();
-                }
-                boolean authenticationSessionOpenTimedOut = !this.authenticationSessionOpenedLatch.await(timeoutSeconds, TimeUnit.SECONDS);
+                initializeStateLatches();
 
-                if (this.savedException != null)
+                try
                 {
-                    throw this.savedException;
-                }
+                    this.openAsync();
 
-                if (authenticationSessionOpenTimedOut)
-                {
-                    closeConnectionWithException("Timed out waiting for authentication session to open", true);
-                }
+                    if (this.authenticationType == ClientConfiguration.AuthType.SAS_TOKEN)
+                    {
+                        // x509 authenticated connections don't open authentication links since the SSL handshake does all the authentication
+                        log.trace("Waiting for authentication links to open...");
+                    }
 
-                log.trace("Waiting for device sessions to open...");
-                boolean deviceSessionsOpenTimedOut = false;
-                for (ClientConfiguration config : this.clientConfigurations)
-                {
-                    //Each device has its own worker session timeout according to its config settings
-                    deviceSessionsOpenTimedOut = !this.deviceSessionsOpenedLatches.get(config.getDeviceId()).await(config.getAmqpOpenDeviceSessionsTimeout(), TimeUnit.SECONDS);
+                    Iterator<ClientConfiguration> configsIterator = this.clientConfigurations.iterator();
+                    ClientConfiguration defaultConfig = configsIterator.hasNext() ? configsIterator.next() : null;
+                    int timeoutSeconds = ClientConfiguration.DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT_IN_SECONDS;
+                    if (defaultConfig != null)
+                    {
+                        timeoutSeconds = defaultConfig.getAmqpOpenAuthenticationSessionTimeout();
+                    }
+                    boolean authenticationSessionOpenTimedOut = !this.authenticationSessionOpenedLatch.await(timeoutSeconds, TimeUnit.SECONDS);
+
+                    if (this.savedException != null)
+                    {
+                        throw this.savedException;
+                    }
+
+                    if (authenticationSessionOpenTimedOut)
+                    {
+                        closeConnectionWithException("Timed out waiting for authentication session to open", true);
+                    }
+
+                    log.trace("Waiting for device sessions to open...");
+                    boolean deviceSessionsOpenTimedOut = false;
+                    for (ClientConfiguration config : this.clientConfigurations)
+                    {
+                        //Each device has its own worker session timeout according to its config settings
+
+                        CountDownLatch deviceSessionOpenedCountDownLatch = this.deviceSessionsOpenedLatches.get(config.getDeviceId());
+                        int timeout = config.getAmqpOpenDeviceSessionsTimeout();
+
+                        /*try
+                        {*/
+                            deviceSessionsOpenTimedOut = !deviceSessionOpenedCountDownLatch.await(timeout, TimeUnit.SECONDS);
+                        /*}
+                        catch (NullPointerException e)
+                        {
+                            // indicates that the device session was unregistered while opening the connection, likely due to
+                            // retry logic for both the mux level connection and a particular multiplexed device running
+                            // simultaneously. Safe to ignore.
+                            log.trace("Ignoring null pointer exception from deviceSessionOpenedCountDownLatch");
+                        }*/
+
+                        if (deviceSessionsOpenTimedOut)
+                        {
+                            // If any device session times out while opening, don't wait for the others
+                            break;
+                        }
+                    }
+
+                    if (this.savedException != null)
+                    {
+                        throw this.savedException;
+                    }
 
                     if (deviceSessionsOpenTimedOut)
                     {
-                        // If any device session times out while opening, don't wait for the others
-                        break;
+                        closeConnectionWithException("Timed out waiting for worker links to open", true);
                     }
                 }
-
-                if (this.savedException != null)
+                catch (TransportException e)
                 {
-                    throw this.savedException;
-                }
+                    // since some session handlers were created and saved locally, they must be deleted so that the next open
+                    // call doesn't add new session handlers on top of a list of the same session handlers from the last attempt.
+                    clearLocalState();
 
-                if (deviceSessionsOpenTimedOut)
+                    // clean up network resources and thread scheduler before exiting this layer. Subsequent open attempts
+                    // will create a new reactor and a new executor service
+                    closeNetworkResources();
+                    throw e;
+                }
+                catch (InterruptedException e)
                 {
-                    closeConnectionWithException("Timed out waiting for worker links to open", true);
+                    // since some session handlers were created and saved locally, they must be deleted so that the next open
+                    // call doesn't add new session handlers on top of a list of the same session handlers from the last attempt.
+                    clearLocalState();
+
+                    // clean up network resources and thread scheduler before exiting this layer. Subsequent open attempts
+                    // will create a new reactor and a new executor service
+                    closeNetworkResources();
+
+                    TransportException interruptedTransportException = new TransportException("Interrupted while waiting for links to open for AMQP connection", e);
+                    interruptedTransportException.setRetryable(true);
+                    throw interruptedTransportException;
                 }
             }
-            catch (TransportException e)
-            {
-                // since some session handlers were created and saved locally, they must be deleted so that the next open
-                // call doesn't add new session handlers on top of a list of the same session handlers from the last attempt.
-                clearLocalState();
 
-                // clean up network resources and thread scheduler before exiting this layer. Subsequent open attempts
-                // will create a new reactor and a new executor service
-                closeNetworkResources();
-                throw e;
-            }
-            catch (InterruptedException e)
-            {
-                // since some session handlers were created and saved locally, they must be deleted so that the next open
-                // call doesn't add new session handlers on top of a list of the same session handlers from the last attempt.
-                clearLocalState();
-
-                // clean up network resources and thread scheduler before exiting this layer. Subsequent open attempts
-                // will create a new reactor and a new executor service
-                closeNetworkResources();
-
-                TransportException interruptedTransportException = new TransportException("Interrupted while waiting for links to open for AMQP connection", e);
-                interruptedTransportException.setRetryable(true);
-                throw interruptedTransportException;
-            }
+            this.state = IotHubConnectionStatus.CONNECTED;
+            this.listener.onConnectionEstablished(this.connectionId);
         }
-
-        this.state = IotHubConnectionStatus.CONNECTED;
-        this.listener.onConnectionEstablished(this.connectionId);
 
         log.debug("Amqp connection opened successfully");
     }
@@ -342,33 +394,36 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
     public void close()
     {
-        log.debug("Shutting down amqp layer...");
-        try
+        synchronized (this.stateLock)
         {
-            closeAsync();
-
+            log.debug("Shutting down amqp layer...");
             try
             {
-                log.trace("Waiting for reactor to close...");
-                // Result is not used
-                //noinspection ResultOfMethodCallIgnored
-                closeReactorLatch.await(MAX_WAIT_TO_CLOSE_CONNECTION, TimeUnit.MILLISECONDS);
+                closeAsync();
+
+                try
+                {
+                    log.trace("Waiting for reactor to close...");
+                    // Result is not used
+                    //noinspection ResultOfMethodCallIgnored
+                    closeReactorLatch.await(MAX_WAIT_TO_CLOSE_CONNECTION, TimeUnit.MILLISECONDS);
+                }
+                catch (InterruptedException e)
+                {
+                    // If the SDK's disconnect message doesn't make it to the service, just clean up the local resources.
+                    // The service will eventually figure out that the connection was lost since the keep-alive pings stop.
+                    log.warn("Interrupted while waiting on reactor to close gracefully. Forcefully closing the reactor now.", e);
+                }
             }
-            catch (InterruptedException e)
+            finally
             {
-                // If the SDK's disconnect message doesn't make it to the service, just clean up the local resources.
-                // The service will eventually figure out that the connection was lost since the keep-alive pings stop.
-                log.warn("Interrupted while waiting on reactor to close gracefully. Forcefully closing the reactor now.", e);
+                // always clean up the executor service, free the reactor and set the state as DISCONNECTED even when the close
+                // isn't successful. Failing to free the reactor in particular leaks network resources
+                clearLocalState();
+                closeNetworkResources();
+                this.state = IotHubConnectionStatus.DISCONNECTED;
+                log.trace("Amqp connection closed successfully");
             }
-        }
-        finally
-        {
-            // always clean up the executor service, free the reactor and set the state as DISCONNECTED even when the close
-            // isn't successful. Failing to free the reactor in particular leaks network resources
-            clearLocalState();
-            closeNetworkResources();
-            this.state = IotHubConnectionStatus.DISCONNECTED;
-            log.trace("Amqp connection closed successfully");
         }
     }
 
@@ -844,13 +899,14 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     @Override
     public void onSessionClosedUnexpectedly(ErrorCondition errorCondition, String deviceId)
     {
-        TransportException savedException = AmqpsExceptionTranslator.convertFromAmqpException(errorCondition);
+        this.savedException = AmqpsExceptionTranslator.convertFromAmqpException(errorCondition);
+        this.isSavedExceptionConnectionLevelException = false;
 
         if (this.isMultiplexing)
         {
             // If a device is registered to an active multiplexed connection, and the session closes locally before opening,
             // need to notify upper layer that the register call failed, and that it shouldn't wait for it to report having opened.
-            this.listener.onMultiplexedDeviceSessionRegistrationFailed(this.connectionId, deviceId, savedException);
+            this.listener.onMultiplexedDeviceSessionRegistrationFailed(this.connectionId, deviceId, this.savedException);
         }
 
         // If the session closes during an open call, need to decrement this latch so that the open call doesn't wait
@@ -871,8 +927,6 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         else
         {
             // When not multiplexing, reconnection logic will just spin up the whole connection again.
-            this.savedException = savedException;
-            this.isSavedExceptionConnectionLevelException = false;
             log.error("Amqp session closed unexpectedly. Closing this connection...", this.savedException);
             this.connection.close();
         }
@@ -897,10 +951,10 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             // close all the device sessions, leading to this callback executing. In this case, don't notify transport layer
             // for each deliberately closed session since the IotHubTransport layer will invoke the relevant connection
             // status callbacks for each multiplexed device instead.
-            if (this.isMultiplexing && (this.savedException == null || !this.isSavedExceptionConnectionLevelException))
+            if (this.isMultiplexing && !this.isSavedExceptionConnectionLevelException)
             {
                 log.trace("onSessionClosedAsExpected callback executed, notifying transport layer");
-                this.listener.onMultiplexedDeviceSessionLost(null, this.connectionId, deviceId);
+                this.listener.onMultiplexedDeviceSessionLost(this.savedException, this.connectionId, deviceId);
             }
         }
     }
