@@ -1166,7 +1166,7 @@ public class MultiplexingClientTests extends IntegrationTest
     }
 
     // Open a multiplexed connection, send a fault injection message to drop the TCP connection, and ensure that the multiplexed
-    // connection recovers
+    // connection recovers and that no twin/method subscriptions were lost
     @Test
     @ErrInjTest
     @IotHubTest
@@ -1175,6 +1175,12 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
         ConnectionStatusChangeTracker multiplexedConnectionStatusChangeTracker = new ConnectionStatusChangeTracker();
         ConnectionStatusChangeTracker[] connectionStatusChangeTrackers = new ConnectionStatusChangeTracker[DEVICE_MULTIPLEX_COUNT];
+
+        TwinClient twinClientServiceClient =
+                new TwinClient(iotHubConnectionString, TwinClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
+
+        DirectMethodsClient directMethodServiceClientClient =
+                new DirectMethodsClient(iotHubConnectionString, DirectMethodsClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
@@ -1193,6 +1199,53 @@ public class MultiplexingClientTests extends IntegrationTest
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             assertTrue("Multiplexing client opened successfully, but connection status change callback didn't onStatusChanged.", connectionStatusChangeTrackers[i].isOpen);
+        }
+
+        // Subscribe to methods for all multiplexed clients
+        DirectMethodCallback[] deviceDirectMethodCallbacks = new DirectMethodCallback[DEVICE_MULTIPLEX_COUNT];
+        String[] expectedMethodNames = new String[DEVICE_MULTIPLEX_COUNT];
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            expectedMethodNames[i] = UUID.randomUUID().toString();
+            deviceDirectMethodCallbacks[i] = new DirectMethodCallback(expectedMethodNames[i]);
+            subscribeToDirectMethod(testInstance.deviceClientArray.get(i), deviceDirectMethodCallbacks[i]);
+        }
+
+        // Start twin for all multiplexed clients
+        String[] expectedPropertyKeys = new String[DEVICE_MULTIPLEX_COUNT];
+        String[] expectedPropertyValues = new String[DEVICE_MULTIPLEX_COUNT];
+        CountDownLatch[] desiredPropertyUpdateLatches = new CountDownLatch[DEVICE_MULTIPLEX_COUNT];
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            // The twin for this test identity is about to be modified. Set this flag so that the test identity recycler re-uses this identity only for tests
+            // that don't care about the initial twin state of an identity
+            testInstance.testDevicesArrayIdentity.get(i).twinUpdated = true;
+            expectedPropertyKeys[i] = UUID.randomUUID().toString();
+            expectedPropertyValues[i] = UUID.randomUUID().toString();
+            desiredPropertyUpdateLatches[i] = new CountDownLatch(1);
+            int finalI = i;
+            testInstance.deviceClientArray.get(i).subscribeToDesiredProperties(
+                    (twin, context) ->
+                    {
+                        boolean receivedExpectedDesiredPropertyUpdate =
+                                isPropertyInTwinCollection(twin.getDesiredProperties(), expectedPropertyKeys[finalI], expectedPropertyValues[finalI]);
+
+                        if (receivedExpectedDesiredPropertyUpdate)
+                        {
+                            desiredPropertyUpdateLatches[finalI].countDown();
+                        }
+                    },
+                    null);
+        }
+
+        // Subscribe to cloud to device messages for all multiplexed clients
+        String[] expectedMessageCorrelationIds = new String[DEVICE_MULTIPLEX_COUNT];
+        MessageCallback[] messageCallbacks = new MessageCallback[DEVICE_MULTIPLEX_COUNT];
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            expectedMessageCorrelationIds[i] = UUID.randomUUID().toString();
+            messageCallbacks[i] = new MessageCallback(expectedMessageCorrelationIds[i]);
+            testInstance.deviceClientArray.get(i).setMessageCallback(messageCallbacks[i], null);
         }
 
         Message errorInjectionMessage = ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(1, 10);
@@ -1216,8 +1269,24 @@ public class MultiplexingClientTests extends IntegrationTest
             // The faulted device should eventually recover
             assertConnectionStateCallbackFiredConnected(connectionStatusChangeTrackers[i], FAULT_INJECTION_RECOVERY_TIMEOUT_MILLIS);
 
+            // each multiplexed device client should only have received DISCONNECTED_RETRYING. If the DISCONNECTED event occurs, users will
+            // likely have some retry logic that kicks in which should be avoided since the multiplexing client itself is still retrying
+            assertFalse("Multiplexed client recieved DISCONNECTED callback unexpectedly", connectionStatusChangeTrackers[i].clientClosedUnexpectedly);
+            assertFalse("Multiplexed client recieved DISCONNECTED callback unexpectedly", connectionStatusChangeTrackers[i].clientClosedGracefully);
+
             // Try to send a message over the now-recovered device session
             testSendingMessageFromDeviceClient(testInstance.deviceClientArray.get(i));
+
+            // test receiving direct methods
+            testDirectMethods(directMethodServiceClientClient, testInstance.deviceIdentityArray.get(i).getDeviceId(), expectedMethodNames[i], deviceDirectMethodCallbacks[i]);
+
+            // Send desired property update to multiplexed device
+            testDesiredPropertiesFlow(testInstance.deviceClientArray.get(i), twinClientServiceClient, desiredPropertyUpdateLatches[i], expectedPropertyKeys[i], expectedPropertyValues[i]);
+
+            // Testing sending reported properties
+            testReportedPropertiesFlow(testInstance.deviceClientArray.get(i), twinClientServiceClient, expectedPropertyKeys[i], expectedPropertyValues[i]);
+
+            testReceivingCloudToDeviceMessage(testInstance.deviceIdentityArray.get(i).getDeviceId(), messageCallbacks[i], expectedMessageCorrelationIds[i]);
         }
 
         // double check that the recovery of any particular device did not cause a device earlier in the array to lose connection
