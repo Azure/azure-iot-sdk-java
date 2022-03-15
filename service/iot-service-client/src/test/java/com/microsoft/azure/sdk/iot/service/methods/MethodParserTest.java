@@ -3,7 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.service.methods;
 
-import com.google.gson.*;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.microsoft.azure.sdk.iot.service.Helpers;
 import com.microsoft.azure.sdk.iot.service.methods.serializers.MethodParser;
 import mockit.Deencapsulation;
@@ -37,7 +38,8 @@ public class MethodParserTest
 
     // One-liner map may cause incorrect serializing by Gson.toJson(). This seems a known issue mentioned here: https://github.com/google/gson/issues/1080.
     private static final Map<String, Object> PAYLOAD_MAP = mapGenerator();
-    private static final String PAYLOAD_MAP_JSON_STRING = "{\"boolean\":true,\"string\":\"STRING\",\"double\":1.0E10,\"map\":{\"innerKey\":\"innerVal\"},\"int\":123,\"long\":12345678901}";
+    private static final String PAYLOAD_MAP_JSON_STRING = "{\"string\":\"STRING\",\"int\":123,\"double\":1.0E10,\"long\":12345678901,\"boolean\":true,\"map\":{\"innerKey\":\"innerVal\"}}";
+
     private static final String METHOD_REQUEST_PATTERN_WITH_TIMEOUT = "{\"methodName\":\"%s\",\"responseTimeoutInSeconds\":%d,\"connectTimeoutInSeconds\":%d,\"payload\":%s}";
     private static final String METHOD_REQUEST_PATTERN_WITHOUT_TIMEOUT = "{\"methodName\":\"%s\",\"payload\":%s}";
     private static final String METHOD_REQUEST_PATTERN_WITH_RESPONSE_TIMEOUT = "{\"methodName\":\"%s\",\"responseTimeoutInSeconds\":%d,\"payload\":%s}";
@@ -46,13 +48,13 @@ public class MethodParserTest
 
     private static final List<TestMethod> VALID_METHOD_REQUESTS = asList(
             createMethodRequestWithTimeout(STANDARD_NAME, STANDARD_TIMEOUT, STANDARD_TIMEOUT, "null", false, null),
-            createMethodRequestWithTimeout(STANDARD_NAME, STANDARD_TIMEOUT, STANDARD_TIMEOUT, "null", true, new JsonParser().parse(new Gson().toJson("null"))),
-            createMethodRequestWithTimeout(STANDARD_NAME, STANDARD_TIMEOUT, STANDARD_TIMEOUT, "", true, new JsonParser().parse(new Gson().toJson(""))),
-            createMethodRequestWithTimeout(STANDARD_NAME, STANDARD_TIMEOUT, STANDARD_TIMEOUT, "10", false, new JsonParser().parse(new Gson().toJson(10))),
-            createMethodRequestWithTimeout(STANDARD_NAME, STANDARD_TIMEOUT, STANDARD_TIMEOUT, PAYLOAD_MAP_JSON_STRING, false, new Gson().toJson(PAYLOAD_MAP)),
-            createMethodRequestWithOutTimeout(STANDARD_NAME, PAYLOAD_MAP_JSON_STRING, false, new Gson().toJson(PAYLOAD_MAP)),
-            createMethodRequestWithResponseTimeout(STANDARD_NAME, STANDARD_TIMEOUT, PAYLOAD_MAP_JSON_STRING, false, new Gson().toJson(PAYLOAD_MAP)),
-            createMethodRequestWithConnectTimeout(STANDARD_NAME, STANDARD_TIMEOUT, PAYLOAD_MAP_JSON_STRING, false, new Gson().toJson(PAYLOAD_MAP))
+            createMethodRequestWithTimeout(STANDARD_NAME, STANDARD_TIMEOUT, STANDARD_TIMEOUT, "null", true, "null"),
+            createMethodRequestWithTimeout(STANDARD_NAME, STANDARD_TIMEOUT, STANDARD_TIMEOUT, "", true, ""),
+            createMethodRequestWithTimeout(STANDARD_NAME, STANDARD_TIMEOUT, STANDARD_TIMEOUT, "10", false, 10),
+            createMethodRequestWithTimeout(STANDARD_NAME, STANDARD_TIMEOUT, STANDARD_TIMEOUT, PAYLOAD_MAP_JSON_STRING, false, PAYLOAD_MAP),
+            createMethodRequestWithOutTimeout(STANDARD_NAME, PAYLOAD_MAP_JSON_STRING, false, PAYLOAD_MAP),
+            createMethodRequestWithResponseTimeout(STANDARD_NAME, STANDARD_TIMEOUT, PAYLOAD_MAP_JSON_STRING, false, PAYLOAD_MAP),
+            createMethodRequestWithConnectTimeout(STANDARD_NAME, STANDARD_TIMEOUT, PAYLOAD_MAP_JSON_STRING, false, PAYLOAD_MAP)
     );
 
     private static final List<TestMethod> INVALID_METHOD_REQUESTS = asList(
@@ -68,14 +70,14 @@ public class MethodParserTest
     );
 
     private static final List<TestMethod> VALID_METHOD_RESPONSES = asList(
-            createMethodResponse(201, "null", true, new JsonParser().parse(new Gson().toJson("null"))),
-            createMethodResponse(201, "", true, new JsonParser().parse(new Gson().toJson(""))),
-            createMethodResponse(201, "Hi, this is a payload", true, new JsonParser().parse(new Gson().toJson("Hi, this is a payload"))),
-            createMethodResponse(201, "10", false, new JsonParser().parse(new Gson().toJson(10))),
-            createMethodResponse(201, "true", false, new JsonParser().parse(new Gson().toJson(true))),
-            createMethodResponse(201, "[1.0,2.0,3.0]", false, new JsonParser().parse(new Gson().toJson((asList(1.0, 2.0, 3.0))))),
-            createMethodResponse(201, PAYLOAD_MAP_JSON_STRING, false, new Gson().toJson(PAYLOAD_MAP)),
-            createMethodResponse(null, PAYLOAD_MAP_JSON_STRING, false, new Gson().toJson(PAYLOAD_MAP))
+            createMethodResponse(201, "null", true, "null"),
+            createMethodResponse(201, "", true, ""),
+            createMethodResponse(201, "Hi, this is a payload", true, "Hi, this is a payload"),
+            createMethodResponse(201, "10", false, 10),
+            createMethodResponse(201, "true", false, true),
+            createMethodResponse(201, "[1.0,2.0,3.0]", false, asList(1.0, 2.0, 3.0)),
+            createMethodResponse(201, PAYLOAD_MAP_JSON_STRING, false, PAYLOAD_MAP),
+            createMethodResponse(null, PAYLOAD_MAP_JSON_STRING, false, PAYLOAD_MAP)
     );
 
     private static final List<TestMethod> INVALID_METHOD_RESPONSES = asList(
@@ -88,7 +90,7 @@ public class MethodParserTest
             createMethodResponse("{\"methodName\":}")
     );
 
-	private static class TestMethod
+    private static class TestMethod
     {
 
         String name;
@@ -135,26 +137,7 @@ public class MethodParserTest
         assertEquals(actualConnectTimeout, expectedConnectTimeout);
         assertEquals(actualStatus, expectedStatus);
         assertEquals(actualOperation.toString(), expectedOperation);
-        if (expectedPayload instanceof Number)
-        {
-            assertEquals(((Number) expectedPayload).doubleValue(), ((Number) actualPayload).doubleValue(), 1e-10);
-        }
-        else if (expectedPayload instanceof List)
-        {
-            Helpers.assertListEquals((List) expectedPayload, (List) actualPayload);
-        }
-        else if (expectedPayload instanceof String && actualPayload instanceof JsonObject)
-        {
-            assertEquals(expectedPayload, String.valueOf(actualPayload));
-        }
-        else if (actualPayload instanceof Map)
-        {
-            Helpers.assertMap((Map) expectedPayload, (Map) actualPayload);
-        }
-        else
-        {
-            assertEquals(expectedPayload, actualPayload);
-        }
+        assertEquals(new GsonBuilder().create().toJsonTree(expectedPayload), new GsonBuilder().create().toJsonTree(actualPayload));
     }
 
     /**
@@ -166,11 +149,11 @@ public class MethodParserTest
      * @param expectedOperation       is the expected operation type.
      */
     private static void assertMethod(
-        MethodParser methodParser,
-        String expectedName,
-        Integer expectedStatus,
-        Object expectedPayload,
-        String expectedOperation
+            MethodParser methodParser,
+            String expectedName,
+            Integer expectedStatus,
+            Object expectedPayload,
+            String expectedOperation
     )
     {
         assertNotNull(methodParser);
@@ -183,32 +166,7 @@ public class MethodParserTest
         assertEquals(actualName, expectedName);
         assertEquals(actualStatus, expectedStatus);
         assertEquals(actualOperation.toString(), expectedOperation);
-        if (expectedPayload instanceof Number)
-        {
-            assertEquals(((Number) expectedPayload).doubleValue(), ((Number) actualPayload).doubleValue(), 1e-10);
-        }
-        else if (expectedPayload instanceof List)
-        {
-            Helpers.assertListEquals((List) expectedPayload, (List) actualPayload);
-        }
-        else if (expectedPayload instanceof String && actualPayload instanceof JsonObject)
-        {
-            assertEquals(expectedPayload, String.valueOf(actualPayload));
-        }
-        else if (actualPayload instanceof Map)
-        {
-            if (expectedPayload instanceof String)
-            {
-                assertEquals(expectedPayload, new Gson().toJson(actualPayload));
-            }else
-            {
-                Helpers.assertMap((Map) expectedPayload, (Map) actualPayload);
-            }
-        }
-        else
-        {
-            assertEquals(expectedPayload, actualPayload);
-        }
+        assertEquals(new GsonBuilder().create().toJsonTree(expectedPayload), new GsonBuilder().create().toJsonTree(actualPayload));
     }
 
     /* Tests_SRS_METHODPARSER_21_029: [The constructor shall create an instance of the methodParser.] */
@@ -244,7 +202,7 @@ public class MethodParserTest
 
             // Assert
             assertMethod(methodParser, testCase.name, testCase.responseTimeout, testCase.connectTimeout,
-                         null, testCase.payload, "invoke"
+                    null, testCase.payload, "invoke"
             );
         }
     }
@@ -319,7 +277,8 @@ public class MethodParserTest
             methodParser.fromJson(testCase.json);
 
             // Assert
-            assertMethod(methodParser, null, null, testCase.payload, "payload");
+            assertMethod(methodParser, null, null, testCase.payload, "payload"
+            );
         }
     }
 
@@ -345,7 +304,8 @@ public class MethodParserTest
             methodParser.fromJson(testCase.jsonResult);
 
             // Assert
-            assertMethod(methodParser, null, testCase.status, testCase.payload, "response");
+            assertMethod(methodParser, null, testCase.status, testCase.payload, "response"
+            );
         }
     }
 
@@ -378,7 +338,7 @@ public class MethodParserTest
 
             // Assert
             assertMethod(methodParser, testCase.name, testCase.responseTimeout, testCase.connectTimeout,
-                         null, testCase.payload, "invoke"
+                    null, testCase.payload, "invoke"
             );
         }
     }

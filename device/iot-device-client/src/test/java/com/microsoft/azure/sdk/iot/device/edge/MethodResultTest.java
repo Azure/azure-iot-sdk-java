@@ -25,7 +25,7 @@ public class MethodResultTest
         MethodResult result = new MethodResult(json);
 
         //assert
-        assertEquals("somePayload", result.getPayload());
+        assertEquals("somePayload", result.getPayloadAsJsonString());
         assertEquals(2, result.getStatus());
     }
 }

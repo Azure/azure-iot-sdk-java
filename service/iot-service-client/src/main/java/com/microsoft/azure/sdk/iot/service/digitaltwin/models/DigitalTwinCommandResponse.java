@@ -3,6 +3,9 @@
 
 package com.microsoft.azure.sdk.iot.service.digitaltwin.models;
 
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+
 /**
  * Represents the device command invocation results.
  */
@@ -15,7 +18,7 @@ public final class DigitalTwinCommandResponse {
     /**
      *  Command invocation result payload, as supplied by the device.
      */
-    private String payload;
+    private JsonElement payload;
 
     public Integer getStatus()
     {
@@ -27,12 +30,22 @@ public final class DigitalTwinCommandResponse {
         this.status = status;
     }
 
-    public String getPayload()
+    public JsonElement getPayloadAsJsonElement()
     {
         return payload;
     }
 
-    public void setPayload(String payload)
+    public String getPayloadAsJsonString()
+    {
+        return getPayloadAsCustomType(String.class);
+    }
+
+    public <T> T getPayloadAsCustomType(Class<T> customObject)
+    {
+        return new GsonBuilder().create().fromJson(payload, customObject);
+    }
+
+    public void setPayload(JsonElement payload)
     {
         this.payload = payload;
     }

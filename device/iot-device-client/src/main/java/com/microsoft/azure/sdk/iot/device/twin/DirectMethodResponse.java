@@ -6,7 +6,6 @@ package com.microsoft.azure.sdk.iot.device.twin;
 public class DirectMethodResponse
 {
     private int status;
-
     private Object responseMessage;
 
     public DirectMethodResponse(int status, Object responseMessage)

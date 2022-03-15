@@ -5,6 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service.methods;
 
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import lombok.Getter;
 
 /**
@@ -21,12 +23,27 @@ public final class MethodResult
     /**
      * Payload with the result of the Invoke Method
      */
-    @Getter
-    private final Object payload;
+    private final JsonElement payload;
 
-    public MethodResult(Integer status, Object payload)
+    public MethodResult(Integer status, JsonElement payload)
     {
         this.status = status;
         this.payload = payload;
+    }
+
+    // Payload getters with different types
+    public JsonElement getPayloadAsJsonElement()
+    {
+        return payload;
+    }
+
+    public String getPayloadAsJsonString()
+    {
+        return getPayloadAsCustomType(String.class);
+    }
+
+    public <T> T getPayloadAsCustomType(Class<T> customObject)
+    {
+        return new GsonBuilder().create().fromJson(payload, customObject);
     }
 }

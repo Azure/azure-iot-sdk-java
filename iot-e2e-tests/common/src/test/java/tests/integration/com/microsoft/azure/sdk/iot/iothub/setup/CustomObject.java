@@ -4,10 +4,15 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 import lombok.Getter;
+import lombok.Setter;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class CustomObject
 {
     @Getter
+    @Setter
     private String stringAttri;
 
     @Getter
@@ -26,5 +31,17 @@ public class CustomObject
         this.intAttri = intAttri;
         this.boolAttri = boolAttri;
         this.nestedCustomObjectAttri = nestedCustomObjectAttri;
+    }
+
+    public String toString()
+    {
+        Map<String, Object> map = new HashMap(){{
+            put("stringAttri", stringAttri);
+            put("intAttri", intAttri);
+            put("boolAttri", boolAttri);
+            put("nestedCustomObjectAttri", nestedCustomObjectAttri.toString());
+        }};
+
+        return map.toString();
     }
 }

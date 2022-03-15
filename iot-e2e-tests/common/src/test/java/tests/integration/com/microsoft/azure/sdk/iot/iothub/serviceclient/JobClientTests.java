@@ -7,7 +7,6 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 
 import com.azure.core.credential.AzureSasCredential;
-import com.google.gson.JsonPrimitive;
 import com.microsoft.azure.sdk.iot.service.jobs.DirectMethodsJobOptions;
 import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJob;
 import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobStatus;
@@ -240,7 +239,7 @@ public class JobClientTests extends IntegrationTest
                 {
                     DirectMethodsJobOptions options =
                         DirectMethodsJobOptions.builder()
-                            .payload(new JsonPrimitive(PAYLOAD_STRING))
+                            .payload(PAYLOAD_STRING)
                             .methodConnectTimeoutSeconds(CONNECTION_TIMEOUT)
                             .methodResponseTimeoutSeconds(RESPONSE_TIMEOUT)
                             .maxExecutionTimeSeconds(MAX_EXECUTION_TIME_IN_SECONDS)
@@ -293,7 +292,7 @@ public class JobClientTests extends IntegrationTest
             MethodResult methodResult = jobResult.getValue().getOutcomeResult();
             assertNotNull("Device method didn't return any outcome", methodResult);
             assertEquals(200L, (long) methodResult.getStatus());
-            assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, methodResult.getPayload());
+            assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, methodResult.getPayloadAsJsonString());
         }
 
         // asserts for the client side.
@@ -354,7 +353,7 @@ public class JobClientTests extends IntegrationTest
         String jobId = JOB_ID_NAME + UUID.randomUUID();
         DirectMethodsJobOptions options =
             DirectMethodsJobOptions.builder()
-                .payload(new JsonPrimitive(PAYLOAD_STRING))
+                .payload(PAYLOAD_STRING)
                 .methodConnectTimeoutSeconds(CONNECTION_TIMEOUT)
                 .methodResponseTimeoutSeconds(RESPONSE_TIMEOUT)
                 .maxExecutionTimeSeconds(MAX_EXECUTION_TIME_IN_SECONDS)
@@ -383,7 +382,7 @@ public class JobClientTests extends IntegrationTest
         MethodResult methodResult = job.getOutcomeResult();
         assertNotNull("Device method didn't return any outcome", methodResult);
         assertEquals(200L, (long) methodResult.getStatus());
-        assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, methodResult.getPayload());
+        assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, methodResult.getPayloadAsJsonString());
 
         // asserts for the client side.
         assertEquals(0, deviceTestManger.getStatusError());
@@ -423,7 +422,7 @@ public class JobClientTests extends IntegrationTest
                     {
                         DirectMethodsJobOptions options =
                             DirectMethodsJobOptions.builder()
-                                .payload(new JsonPrimitive(PAYLOAD_STRING))
+                                .payload(PAYLOAD_STRING)
                                 .methodConnectTimeoutSeconds(CONNECTION_TIMEOUT)
                                 .methodResponseTimeoutSeconds(RESPONSE_TIMEOUT)
                                 .maxExecutionTimeSeconds(MAX_EXECUTION_TIME_IN_SECONDS)
@@ -500,7 +499,7 @@ public class JobClientTests extends IntegrationTest
                 MethodResult methodResult = jobResult.getOutcomeResult();
                 assertNotNull("Device method didn't return any outcome", methodResult);
                 assertEquals(200L, (long) methodResult.getStatus());
-                assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, methodResult.getPayload());
+                assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, methodResult.getPayloadAsJsonString());
             }
             else
             {
@@ -542,7 +541,7 @@ public class JobClientTests extends IntegrationTest
                 {
                     DirectMethodsJobOptions options =
                         DirectMethodsJobOptions.builder()
-                            .payload(new JsonPrimitive(PAYLOAD_STRING))
+                            .payload(PAYLOAD_STRING)
                             .methodConnectTimeoutSeconds(CONNECTION_TIMEOUT)
                             .methodResponseTimeoutSeconds(RESPONSE_TIMEOUT)
                             .maxExecutionTimeSeconds(MAX_EXECUTION_TIME_IN_SECONDS)

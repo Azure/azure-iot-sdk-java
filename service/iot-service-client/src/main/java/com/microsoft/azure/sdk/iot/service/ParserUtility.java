@@ -345,7 +345,7 @@ public class ParserUtility
         }
         else if (jsonElement.isJsonPrimitive())
         {
-            return jsonElement;
+            return jsonElement.getAsJsonPrimitive();
         }
         else if (jsonElement.isJsonObject())
         {

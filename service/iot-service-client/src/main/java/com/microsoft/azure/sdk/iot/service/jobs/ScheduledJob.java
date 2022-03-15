@@ -166,7 +166,7 @@ public class ScheduledJob
             {
                 try
                 {
-                    this.outcomeResult = new MethodResult(jobsResponseParser.getCloudToDeviceMethod().getStatus(), jobsResponseParser.getCloudToDeviceMethod().getPayload());
+                    this.outcomeResult = new MethodResult(jobsResponseParser.getCloudToDeviceMethod().getStatus(), new GsonBuilder().create().toJsonTree(jobsResponseParser.getCloudToDeviceMethod().getPayload()));
                 }
                 catch (IllegalArgumentException e)
                 {

@@ -4,6 +4,7 @@
 package tests.integration.com.microsoft.azure.sdk.iot.digitaltwin;
 
 import com.azure.core.credential.AzureSasCredential;
+import com.google.gson.JsonElement;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesCallback;
@@ -445,7 +446,7 @@ public class DigitalTwinClientTests extends IntegrationTest
 
         // Device method callback
         MethodCallback methodCallback = (methodName, methodData, context) -> {
-            String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
+            JsonElement jsonRequest = methodData.getPayloadAsJsonElement();
             if(methodName.equalsIgnoreCase(commandName)) {
                 return new DirectMethodResponse(deviceSuccessResponseStatus, jsonRequest);
             }
@@ -475,13 +476,13 @@ public class DigitalTwinClientTests extends IntegrationTest
 
         // assert
         assertEquals(deviceSuccessResponseStatus, responseWithNoPayload.getStatus());
-        assertEquals("\"\"", responseWithNoPayload.getPayload());
+        assertEquals("", responseWithNoPayload.getPayloadAsJsonString().replace("{}", ""));
         assertEquals(deviceSuccessResponseStatus, responseWithJsonStringPayload.getStatus());
-        assertEquals(jsonStringInput, responseWithJsonStringPayload.getPayload());
+        assertEquals(jsonStringInput, responseWithJsonStringPayload.getPayloadAsJsonString());
         assertEquals(deviceSuccessResponseStatus, responseWithDatePayload.getStatus());
-        assertEquals(commandInput, responseWithDatePayload.getPayload());
+        assertEquals(commandInput, responseWithDatePayload.getPayloadAsJsonString());
         assertEquals(deviceSuccessResponseStatus, datePayloadResponseWithHeaders.body().getStatus());
-        assertEquals(commandInput, datePayloadResponseWithHeaders.body().getPayload());
+        assertEquals(commandInput, datePayloadResponseWithHeaders.body().getPayloadAsJsonString());
     }
 
     private static DigitalTwinClient buildDigitalTwinClientWithAzureSasCredential()

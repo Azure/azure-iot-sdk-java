@@ -1,6 +1,5 @@
 package glue;
 
-import com.google.gson.JsonPrimitive;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
@@ -14,15 +13,7 @@ import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.hsm.UnixDomainSocketChannel;
-import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesSubscriptionCallback;
-import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesCallback;
-import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
-import com.microsoft.azure.sdk.iot.device.twin.GetTwinCallback;
-import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
-import com.microsoft.azure.sdk.iot.device.twin.Property;
-import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesCallback;
-import com.microsoft.azure.sdk.iot.device.twin.Twin;
-import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
+import com.microsoft.azure.sdk.iot.device.twin.*;
 import io.swagger.server.api.MainApiException;
 import io.swagger.server.api.model.Certificate;
 import io.swagger.server.api.model.ConnectResponse;
@@ -198,7 +189,7 @@ public class ModuleGlue
             String payload = params.getString("payload");
             int responseTimeout = params.getInteger("responseTimeoutInSeconds", 0);
             int connectionTimeout = params.getInteger("connectTimeoutInSeconds", 0);
-            MethodRequest request = new MethodRequest(methodName, new JsonPrimitive(payload), responseTimeout, connectionTimeout);
+            MethodRequest request = new MethodRequest(methodName, payload, responseTimeout, connectionTimeout);
             try
             {
                 MethodResult result = client.invokeMethod(deviceId, request);
@@ -576,7 +567,7 @@ public class ModuleGlue
                     new MethodCallback()
                     {
                         @Override
-                        public DirectMethodResponse onMethodInvoked(String methodName, Object methodData, Object context)
+                        public DirectMethodResponse onMethodInvoked(String methodName, DirectMethodPayload methodData, Object context)
                         {
                             return handleMethodInvocation(methodName, methodData, context);
                         }
@@ -619,7 +610,7 @@ public class ModuleGlue
         // values over manually.  I'm sure there's a better way, but this is test code.
         JsonObject fixedObject = new JsonObject();
         fixedObject.put("status", result.getStatus());
-        fixedObject.put("payload", result.getPayloadObject());
+        fixedObject.put("payload", result.getPayloadAsJsonElement());
         return fixedObject;
     }
 
@@ -638,7 +629,7 @@ public class ModuleGlue
             String payload = params.getString("payload");
             int responseTimeout = params.getInteger("responseTimeoutInSeconds", 0);
             int connectionTimeout = params.getInteger("connectTimeoutInSeconds", 0);
-            MethodRequest request = new MethodRequest(methodName, new JsonPrimitive(payload), responseTimeout, connectionTimeout);
+            MethodRequest request = new MethodRequest(methodName, payload, responseTimeout, connectionTimeout);
             try
             {
                 MethodResult result = client.invokeMethod(deviceId, moduleId, request);

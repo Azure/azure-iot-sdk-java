@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service.jobs.scheduled;
 
-import com.google.gson.JsonArray;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
@@ -836,7 +835,7 @@ public class ScheduledJobsClientTest
         final String jobId = null;
         final String queryCondition = "validQueryCondition";
         final String methodName = "validMethodName";
-        final JsonArray payload = new JsonArray();
+        final Set<String> payload = new HashSet<>();
         final Date startTimeUtc = new Date();
         final long maxExecutionTimeInSeconds = 10;
         ScheduledJobsClient testJobClient = null;
@@ -862,7 +861,7 @@ public class ScheduledJobsClientTest
         final String jobId = "";
         final String queryCondition = "validQueryCondition";
         final String methodName = "validMethodName";
-        final JsonArray payload = new JsonArray();
+        final Set<String> payload = new HashSet<>();
         final Date startTimeUtc = new Date();
         final long maxExecutionTimeInSeconds = 10;
         ScheduledJobsClient testJobClient = null;
@@ -888,7 +887,7 @@ public class ScheduledJobsClientTest
         final String jobId = "invalidJobId";
         final String queryCondition = "validQueryCondition";
         final String methodName = "validMethodName";
-        final JsonArray payload = new JsonArray();
+        final Set<String> payload = new HashSet<>();
         final Date startTimeUtc = new Date();
         final int maxExecutionTimeInSeconds = 10;
         final String json = "validJson";
@@ -937,7 +936,7 @@ public class ScheduledJobsClientTest
         final String jobId = "ValidJobId";
         final String queryCondition = "validQueryCondition";
         final String methodName = null;
-        final JsonArray payload = new JsonArray();
+        final Set<String> payload = new HashSet<>();
         final Date startTimeUtc = new Date();
         final long maxExecutionTimeInSeconds = 10;
         ScheduledJobsClient testJobClient = null;
@@ -964,7 +963,7 @@ public class ScheduledJobsClientTest
         final String jobId = "ValidJobId";
         final String queryCondition = "validQueryCondition";
         final String methodName = "";
-        final JsonArray payload = new JsonArray();
+        final Set<String> payload = new HashSet<>();
         final Date startTimeUtc = new Date();
         final long maxExecutionTimeInSeconds = 10;
         ScheduledJobsClient testJobClient = null;
@@ -990,7 +989,7 @@ public class ScheduledJobsClientTest
         final String jobId = "ValidJobId";
         final String queryCondition = "validQueryCondition";
         final String methodName = "validMethodName";
-        final JsonArray payload = new JsonArray();
+        final Set<String> payload = new HashSet<>();
         final Date startTimeUtc = null;
         final long maxExecutionTimeInSeconds = 10;
         ScheduledJobsClient testJobClient = null;
@@ -1016,7 +1015,7 @@ public class ScheduledJobsClientTest
         final String jobId = "ValidJobId";
         final String queryCondition = "validQueryCondition";
         final String methodName = "validMethodName";
-        final JsonArray payload = new JsonArray();
+        final Set<String> payload = new HashSet<>();
         final Date startTimeUtc = new Date();
         final int maxExecutionTimeInSeconds = -10;
         ScheduledJobsClient testJobClient = null;
@@ -1043,7 +1042,7 @@ public class ScheduledJobsClientTest
         final String jobId = "validJobId";
         final String queryCondition = "validQueryCondition";
         final String methodName = "validMethodName";
-        final JsonArray payload = new JsonArray();
+        final Set<String> payload = new HashSet<>();
         final Date startTimeUtc = new Date();
         final int maxExecutionTimeInSeconds = 10;
         final String json = "validJson";
@@ -1094,7 +1093,7 @@ public class ScheduledJobsClientTest
         final String jobId = "validJobId";
         final String queryCondition = "validQueryCondition";
         final String methodName = "validMethodName";
-        final JsonArray payload = new JsonArray();
+        final Set<String> payload = new HashSet<>();
         final Date startTimeUtc = new Date();
         final int maxExecutionTimeInSeconds = 10;
         final String json = "validJson";
@@ -1153,7 +1152,7 @@ public class ScheduledJobsClientTest
         final String jobId = "validJobId";
         final String queryCondition = "validQueryCondition";
         final String methodName = "validMethodName";
-        final JsonArray payload = new JsonArray();
+        final Set<String> payload = new HashSet<>();
         final Date startTimeUtc = new Date();
         final int maxExecutionTimeInSeconds = 10;
         final String json = "validJson";
@@ -1204,7 +1203,7 @@ public class ScheduledJobsClientTest
         final String jobId = "validJobId";
         final String queryCondition = "validQueryCondition";
         final String methodName = "validMethodName";
-        final JsonArray payload = new JsonArray();
+        final Set<String> payload = new HashSet<>();
         final Date startTimeUtc = new Date();
         final int maxExecutionTimeInSeconds = 10;
         final String json = "validJson";
@@ -1248,7 +1247,7 @@ public class ScheduledJobsClientTest
         final String jobId = "validJobId";
         final String queryCondition = "validQueryCondition";
         final String methodName = "validMethodName";
-        final JsonArray payload = new JsonArray();
+        final Set<String> payload = new HashSet<>();
         final Date startTimeUtc = new Date();
         final int maxExecutionTimeInSeconds = 10;
         final String json = "validJson";

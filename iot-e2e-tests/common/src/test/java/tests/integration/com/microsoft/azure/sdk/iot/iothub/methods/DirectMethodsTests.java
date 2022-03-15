@@ -7,7 +7,6 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.methods;
 
 
 import com.azure.core.credential.AzureSasCredential;
-import com.google.gson.JsonPrimitive;
 import com.microsoft.azure.sdk.iot.service.exceptions.ErrorCodeDescription;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
@@ -35,7 +34,9 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestModuleIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.CustomObject;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DirectMethodsCommon;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.NestedCustomObject;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -135,7 +136,7 @@ public class DirectMethodsTests extends DirectMethodsCommon
         {
             DirectMethodRequestOptions options =
                 DirectMethodRequestOptions.builder()
-                    .payload(new JsonPrimitive("7000"))
+                    .payload("7000")
                     .methodResponseTimeoutSeconds(RESPONSE_TIMEOUT)
                     .methodConnectTimeoutSeconds(CONNECTION_TIMEOUT)
                     .build();
@@ -158,7 +159,7 @@ public class DirectMethodsTests extends DirectMethodsCommon
         // Act
         DirectMethodRequestOptions options =
             DirectMethodRequestOptions.builder()
-                .payload(new JsonPrimitive("100"))
+                .payload("100")
                 .methodResponseTimeoutSeconds(RESPONSE_TIMEOUT)
                 .methodConnectTimeoutSeconds(CONNECTION_TIMEOUT)
                 .build();
@@ -176,7 +177,7 @@ public class DirectMethodsTests extends DirectMethodsCommon
         // Assert
         assertNotNull(buildExceptionMessage("method result was null", testInstance.identity.getClient()), result);
         assertEquals(buildExceptionMessage("Expected SUCCESS but got " + result.getStatus(), testInstance.identity.getClient()), (long)METHOD_SUCCESS, (long)result.getStatus());
-        assertEquals(buildExceptionMessage("Expected " + METHOD_DELAY_IN_MILLISECONDS + ":succeed" + " But got " + result.getPayload(), testInstance.identity.getClient()), METHOD_DELAY_IN_MILLISECONDS + ":succeed", result.getPayload().toString().replace("\"", ""));
+        assertEquals(buildExceptionMessage("Expected " + METHOD_DELAY_IN_MILLISECONDS + ":succeed" + " But got " + result.getPayloadAsJsonString(), testInstance.identity.getClient()), METHOD_DELAY_IN_MILLISECONDS + ":succeed", result.getPayloadAsJsonString());
     }
 
     @Test
@@ -193,7 +194,7 @@ public class DirectMethodsTests extends DirectMethodsCommon
         {
             DirectMethodRequestOptions options =
                 DirectMethodRequestOptions.builder()
-                    .payload(new JsonPrimitive("7000"))
+                    .payload("7000")
                     .methodResponseTimeoutSeconds(5)
                     .methodConnectTimeoutSeconds(CONNECTION_TIMEOUT)
                     .build();
@@ -334,9 +335,23 @@ public class DirectMethodsTests extends DirectMethodsCommon
 
     @Test
     @StandardTierHubOnlyTest
-    public void invokeMethodWithDifferentPayloadType() throws Exception
+    public void invokeMethodWithPayloadAsString() throws Exception
     {
-        super.openDeviceClientAndMakeEchoCall();
-        super.invokeMethodWithDifferentPayloadType();
+        super.SubscribeToMethodAndReceiveAsJsonString();
+
+        // Direct method payload in String type
+        String string = "This is a valid payload";
+        super.invokeHelper(string);
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void invokeMethodWithPayloadAsCustomObject() throws Exception
+    {
+        super.SubscribeToMethodAndReceiveAsCustomObject();
+
+        // Direct method payload in Custom type
+        CustomObject customObject = new CustomObject("some test message", 1, true, new NestedCustomObject("some nested test message", 2));
+        super.invokeHelper(customObject);
     }
 }

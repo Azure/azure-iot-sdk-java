@@ -7,9 +7,8 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 
 import com.azure.core.credential.AzureSasCredential;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.*;
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.twin.DirectMethodPayload;
 import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
@@ -50,7 +49,7 @@ public class DirectMethodsCommon extends IntegrationTest
     public static final String METHOD_RESET = "reset";
     public static final String METHOD_LOOPBACK = "loopback";
     public static final String METHOD_DELAY_IN_MILLISECONDS = "delayInMilliseconds";
-    public static final String METHOD_ECHO = "echo";
+    public static final String METHOD_MODIFY = "modify";
     public static final String METHOD_UNKNOWN = "unknown";
 
     public static final int METHOD_SUCCESS = 200;
@@ -73,7 +72,10 @@ public class DirectMethodsCommon extends IntegrationTest
     protected static final String PAYLOAD_STRING = "This is a valid payload";
 
     protected DirectMethodTestInstance testInstance;
-    protected Object methodDataObject;
+
+    private DirectMethodPayload directMethodPayload;
+    private DirectMethodResponse directMethodResponse;
+    private int statusCode;
 
     protected static Collection inputsCommon()
     {
@@ -169,20 +171,29 @@ public class DirectMethodsCommon extends IntegrationTest
 
     private String loopback(Object methodData)
     {
-        String payload = new String(methodData.toString().getBytes(StandardCharsets.UTF_8)).replace("\"", "");
+        String payload = new String(((DirectMethodPayload)methodData).getPayloadAsJsonString().getBytes(StandardCharsets.UTF_8)).replace("\"", "");
         return METHOD_LOOPBACK + ":" + payload;
     }
 
     private String delayInMilliseconds(Object methodData) throws InterruptedException
     {
-        String payload = new String(methodData.toString().getBytes(StandardCharsets.UTF_8)).replace("\"", "");
+        String payload = new String(((DirectMethodPayload)methodData).getPayloadAsJsonString().getBytes(StandardCharsets.UTF_8)).replace("\"", "");
         long delay = Long.parseLong(payload);
         Thread.sleep(delay);
         return METHOD_DELAY_IN_MILLISECONDS + ":succeed";
     }
 
-    private Object echo(Object methodData)
+    private Object modifyPayload(Object methodData)
     {
+        if (methodData instanceof String)
+        {
+            methodData = "This is a new valid payload.";
+        }
+        else if (methodData instanceof CustomObject)
+        {
+            ((CustomObject)methodData).setStringAttri("new test message");
+        }
+
         return methodData;
     }
 
@@ -215,10 +226,6 @@ public class DirectMethodsCommon extends IntegrationTest
                             result = delayInMilliseconds(methodData);
                             status = METHOD_SUCCESS;
                             break;
-                        case METHOD_ECHO:
-                            result = (String) echo(methodData);
-                            status = METHOD_SUCCESS;
-                            break;
                         default:
                             result = "unknown:" + methodName;
                             status = METHOD_NOT_DEFINED;
@@ -230,14 +237,14 @@ public class DirectMethodsCommon extends IntegrationTest
                     result = e.toString();
                     status = METHOD_THROWS;
                 }
-                deviceMethodData = new DirectMethodResponse(status, new JsonPrimitive(result));
+                deviceMethodData = new DirectMethodResponse(status, result);
 
                 return deviceMethodData;
             },
             null);
     }
 
-    public void openDeviceClientAndMakeEchoCall() throws Exception
+    public void SubscribeToMethodAndReceiveAsJsonString() throws Exception
     {
         testInstance.setup();
         this.testInstance.identity.getClient().open(true);
@@ -245,17 +252,20 @@ public class DirectMethodsCommon extends IntegrationTest
         this.testInstance.identity.getClient().subscribeToMethods(
                 (methodName, methodData, context) ->
                 {
+                    String methodDataAsJsonString = methodData.getPayloadAsJsonString();
+
                     System.out.println("Device invoked " + methodName);
-                    DirectMethodResponse deviceMethodData;
+                    DirectMethodResponse methodResponseAsJsonString;
                     int status;
                     Object result;
+
                     try
                     {
                         switch (methodName)
                         {
-                            case METHOD_ECHO:
-                                result = echo(methodData);
-                                status = METHOD_SUCCESS;
+                            case METHOD_MODIFY:
+                                result = modifyPayload(methodDataAsJsonString);
+                                status = UUID.randomUUID().hashCode();
                                 break;
                             default:
                                 result = "unknown:" + methodName;
@@ -269,10 +279,59 @@ public class DirectMethodsCommon extends IntegrationTest
                         status = METHOD_THROWS;
                     }
 
-                    methodDataObject = methodData;
-                    deviceMethodData = new DirectMethodResponse(status, result);
+                    methodResponseAsJsonString = new DirectMethodResponse(status, result);
 
-                    return deviceMethodData;
+                    directMethodPayload = methodData;
+                    directMethodResponse = methodResponseAsJsonString;
+                    statusCode = status;
+
+                    return methodResponseAsJsonString;
+                },
+                null);
+    }
+
+    public void SubscribeToMethodAndReceiveAsCustomObject() throws Exception
+    {
+        testInstance.setup();
+        this.testInstance.identity.getClient().open(true);
+
+        this.testInstance.identity.getClient().subscribeToMethods(
+                (methodName, methodData, context) ->
+                {
+                    CustomObject methodDataAsCustomObject = methodData.getPayloadAsCustomType(CustomObject.class);
+
+                    System.out.println("Device invoked " + methodName);
+                    DirectMethodResponse methodResponseAsCustomObject;
+                    Object result;
+                    int status;
+
+                    try
+                    {
+                        switch (methodName)
+                        {
+                            case METHOD_MODIFY:
+                                result = modifyPayload(methodDataAsCustomObject);
+                                status = UUID.randomUUID().hashCode();
+                                break;
+                            default:
+                                result = "unknown:" + methodName;
+                                status = METHOD_NOT_DEFINED;
+                                break;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        result = e.toString();
+                        status = METHOD_THROWS;
+                    }
+
+                    methodResponseAsCustomObject = new DirectMethodResponse(status, result);
+
+                    directMethodPayload = methodData;
+                    directMethodResponse = methodResponseAsCustomObject;
+                    statusCode = status;
+
+                    return methodResponseAsCustomObject;
                 },
                 null);
     }
@@ -288,7 +347,7 @@ public class DirectMethodsCommon extends IntegrationTest
         // Act
         DirectMethodRequestOptions options =
             DirectMethodRequestOptions.builder()
-                .payload(new JsonPrimitive(PAYLOAD_STRING))
+                .payload(PAYLOAD_STRING)
                 .build();
 
         MethodResult result;
@@ -304,89 +363,57 @@ public class DirectMethodsCommon extends IntegrationTest
         // Assert
         assertNotNull(result);
         assertEquals((long)METHOD_SUCCESS, (long)result.getStatus());
-        assertEquals(METHOD_LOOPBACK + ":" + PAYLOAD_STRING, result.getPayload().toString().replace("\"", ""));
+        assertEquals(METHOD_LOOPBACK + ":" + PAYLOAD_STRING, result.getPayloadAsJsonString());
     }
 
-    protected void invokeMethodWithDifferentPayloadType() throws Exception
+    protected void invokeHelper(Object payload) throws Exception
     {
-        // Types which can be converted to JsonPrimitive
-        invokeHelper("###test message!!!");
-        invokeHelper(1.0);
-        invokeHelper(true);
-        invokeHelper('c');
-
-        // Types which can be converted to JsonArray
-        List<String> list = new ArrayList<>();
-        list.add("element1");
-        list.add("element2");
-        list.add("element3");
-        invokeHelper(list);
-
-        Set<String> set = new HashSet<>();
-        set.add("A");
-        set.add("B");
-        set.add("C");
-        invokeHelper(set);
-
-        // Types which can be converted to JsonObject
-        Map<String, String> map = new HashMap<>();
-        map.put("key1", "value1");
-        map.put("key2", "value2");
-        invokeHelper(map);
-
-        CustomObject customObject = new CustomObject("some test message", 1, true, new NestedCustomObject("some nested test message", 2));
-        invokeHelper(customObject);
-    }
-
-    private void invokeHelper(Object payload) throws Exception
-    {
-        String jsonString = new Gson().toJson(payload);
-
         DirectMethodRequestOptions options =
                 DirectMethodRequestOptions.builder()
-                        .payload(new JsonParser().parse(jsonString))
+                        .payload(payload)
                         .build();
 
         MethodResult result;
         if (testInstance.identity instanceof TestModuleIdentity)
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity)testInstance.identity).getModule().getId(), METHOD_ECHO, options);
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity)testInstance.identity).getModule().getId(), METHOD_MODIFY, options);
         }
         else
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_ECHO, options);
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_MODIFY, options);
         }
 
-        // Assert on service side
-        assertNotNull(result);
-        assertEquals((long)METHOD_SUCCESS, (long)result.getStatus());
-        assertEquals(options.getPayload().getClass(), result.getPayload().getClass());
-        assertEquals(options.getPayload(), result.getPayload());
-
-        // Assert across service and device side
-        if (payload instanceof CustomObject)
+        // Assert
+        if (payload instanceof String)
         {
-            assertEquals(methodDataObject.toString(), convertCustomToMap((CustomObject) payload).toString());
+            // e2e test for DirectMethodRequestOptions and DirectMethodPayload
+            assertPayloadHelper(options.getPayload(), directMethodPayload.getPayloadAsJsonString());
+            // e2e test for DirectMethodResponse and MethodResult
+            assertEquals((long)statusCode, (long)result.getStatus());
+            assertPayloadHelper(directMethodResponse.getResponseMessage(), result.getPayloadAsJsonString());
         }
-        else
+        else if (payload instanceof CustomObject)
         {
-            assertEquals(methodDataObject.toString(), payload.toString());
+            // e2e test for DirectMethodRequestOptions and DirectMethodPayload
+            assertPayloadHelper(options.getPayload(), directMethodPayload.getPayloadAsCustomType(CustomObject.class));
+            // e2e test for DirectMethodResponse and MethodResult
+            assertEquals((long)statusCode, (long)result.getStatus());
+            assertPayloadHelper(directMethodResponse.getResponseMessage(), result.getPayloadAsCustomType(CustomObject.class));
         }
     }
 
-    private Map<String, Object> convertCustomToMap(CustomObject customObject)
+    private void assertPayloadHelper(Object senderPayload, Object receiverPayload)
     {
-        NestedCustomObject nestedCustomObject = customObject.getNestedCustomObjectAttri();
-        Map<String, Object> nestedMap = new ObjectMapper().convertValue(nestedCustomObject, Map.class);
+        assertNotNull(receiverPayload);
 
-        Map<String, Object> map = new HashMap(){{
-            put("stringAttri", customObject.getStringAttri());
-            put("intAttri", customObject.getIntAttri());
-            put("boolAttri", customObject.getBooleanAttri());
-            put("nestedCustomObjectAttri", nestedMap.toString());
-        }};
-
-        return map;
+        if (senderPayload instanceof  String && receiverPayload instanceof String)
+        {
+            assertEquals(senderPayload, receiverPayload);
+        }
+        else if (senderPayload instanceof  CustomObject && receiverPayload instanceof CustomObject)
+        {
+            assertEquals(((CustomObject)senderPayload).toString(), ((CustomObject)receiverPayload).toString());
+        }
     }
 
     protected static DirectMethodsClient buildDeviceMethodClientWithAzureSasCredential()

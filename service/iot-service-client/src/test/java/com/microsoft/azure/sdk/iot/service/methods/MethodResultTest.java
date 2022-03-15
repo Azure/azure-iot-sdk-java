@@ -5,6 +5,10 @@
 
 package com.microsoft.azure.sdk.iot.service.methods;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonPrimitive;
 import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
 import org.junit.Test;
 
@@ -26,24 +30,26 @@ public class MethodResultTest
     public void constructorCreatesNewMethodResult()
     {
         //act
-        MethodResult methodResult = new MethodResult(123, "TestObject");
+        MethodResult methodResult = new MethodResult(123, new JsonPrimitive("TestObject"));
 
         //assert
         assertNotNull(methodResult);
         assertThat(methodResult.getStatus(), is(123));
-        assertThat(methodResult.getPayload().toString(), is("TestObject"));
+        assertThat(methodResult.getPayloadAsJsonElement(), is(new JsonPrimitive("TestObject")));
+
+
     }
 
     @Test
     public void constructorCreatesNewMethodResult_NullStatus()
     {
         //act
-        MethodResult methodResult = new MethodResult(null, "TestObject");
+        MethodResult methodResult = new MethodResult(null, new JsonPrimitive("TestObject"));
 
         //assert
         assertNotNull(methodResult);
         assertNull(methodResult.getStatus());
-        assertThat(methodResult.getPayload().toString(), is("TestObject"));
+        assertThat(methodResult.getPayloadAsJsonElement(), is(new JsonPrimitive("TestObject")));
     }
     
     @Test
@@ -55,6 +61,6 @@ public class MethodResultTest
         //assert
         assertNotNull(methodResult);
         assertThat(methodResult.getStatus(), is(123));
-        assertNull(methodResult.getPayload());
+        assertNull(methodResult.getPayloadAsJsonElement());
     }
 }

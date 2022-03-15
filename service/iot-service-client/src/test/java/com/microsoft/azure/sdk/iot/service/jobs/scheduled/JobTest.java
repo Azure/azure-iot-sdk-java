@@ -412,7 +412,7 @@ public class JobTest
         assertNotNull(job.getOutcomeResult());
         MethodResult methodResult = job.getOutcomeResult();
         assertEquals(methodReturnStatus, (long)methodResult.getStatus());
-        assertEquals(methodReturnPayload, methodResult.getPayload());
+        assertEquals(methodReturnPayload, methodResult.getPayloadAsJsonString());
         assertNotNull(job.getLastUpdatedDateTime());
         assertNull(job.getError());
     }

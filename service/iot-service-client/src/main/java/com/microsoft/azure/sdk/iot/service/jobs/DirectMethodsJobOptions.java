@@ -3,7 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.service.jobs;
 
-import com.google.gson.JsonElement;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -20,7 +19,7 @@ public final class DirectMethodsJobOptions
      * The payload of the direct method request. May be null.
      */
     @Getter
-    private final JsonElement payload;
+    private final Object payload;
 
     /**
      * The timeout (in seconds) before the direct method request will fail if the device fails to respond to the request.

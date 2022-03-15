@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.device.edge;
 
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -21,7 +22,7 @@ public class MethodResult
     private static final String PAYLOAD_KEY_NAME = "payload";
     @Expose(serialize = false)
     @SerializedName(PAYLOAD_KEY_NAME)
-    private Object payload;
+    private JsonElement payload;
 
     //empty constructor for gson
     private MethodResult()
@@ -42,24 +43,18 @@ public class MethodResult
         return this.status;
     }
 
-    public Object getPayloadObject()
+    public JsonElement getPayloadAsJsonElement()
     {
-        return this.payload;
+        return payload;
     }
 
-    public String getPayload()
+    public String getPayloadAsJsonString()
     {
-        if (this.payload instanceof String)
-        {
-            return (String) this.payload;
-        }
-        else if (this.payload instanceof byte[])
-        {
-            return new String((byte[]) this.payload, StandardCharsets.UTF_8);
-        }
-        else
-        {
-            return this.payload.toString();
-        }
+        return getPayloadAsCustomType(String.class);
+    }
+
+    public <T> T getPayloadAsCustomType(Class<T> customObject)
+    {
+        return new GsonBuilder().create().fromJson(payload, customObject);
     }
 }

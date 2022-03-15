@@ -5,6 +5,7 @@ package com.microsoft.azure.sdk.iot.service.methods;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
+import com.google.gson.GsonBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
@@ -271,7 +272,7 @@ public final class DirectMethodsClient
         MethodParser methodParserResponse = new MethodParser();
         methodParserResponse.fromJson(new String(response.getBody(), StandardCharsets.UTF_8));
 
-        return new MethodResult(methodParserResponse.getStatus(), methodParserResponse.getPayload());
+        return new MethodResult(methodParserResponse.getStatus(), new GsonBuilder().create().toJsonTree(methodParserResponse.getPayload()));
     }
 
     private String getAuthenticationToken()

@@ -15,5 +15,5 @@ public interface MethodCallback
      * @param context The context set when subscribing to direct methods. Will be null if no context was set when subscribing.
      * @return The direct method response to deliver to the process that invoked this method. May not be null.
      */
-    DirectMethodResponse onMethodInvoked(String methodName, Object methodData, Object context);
+    DirectMethodResponse onMethodInvoked(String methodName, DirectMethodPayload methodData, Object context);
 }
