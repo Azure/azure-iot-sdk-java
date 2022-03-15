@@ -874,7 +874,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     public void onSessionClosedAsExpected(String deviceId)
     {
         log.trace("onSessionClosedAsExpected callback executed, notifying transport layer");
-        this.listener.onMultiplexedDeviceSessionLost(null, this.connectionId, deviceId);
+        this.listener.onMultiplexedDeviceSessionLost(this.savedException, this.connectionId, deviceId);
     }
 
     private void addWebSocketLayer(Transport transport)
