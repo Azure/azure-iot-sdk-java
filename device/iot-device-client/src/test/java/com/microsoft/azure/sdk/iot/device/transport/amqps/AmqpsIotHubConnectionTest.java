@@ -1061,44 +1061,6 @@ public class AmqpsIotHubConnectionTest {
         assertEquals(mockedIotHubListener, listener);
     }
 
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_060 [If the provided event object's transport holds an error condition object, this function shall report the associated TransportException to this object's listeners.]
-    @Test
-    public void OnTransportErrorReportsErrorCodeIfPresent() throws TransportException
-    {
-        //arrange
-        final StringBuilder methodsCalled = new StringBuilder();
-        new MockUp<AmqpsIotHubConnection>()
-        {
-            @Mock void scheduleReconnection(TransportException throwable)
-            {
-                methodsCalled.append("scheduleReconnection");
-            }
-        };
-        baseExpectations();
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, "");
-        connection.setListener(mockedIotHubListener);
-        new NonStrictExpectations()
-        {
-            {
-                mockEvent.getTransport();
-                result = mockTransport;
-                mockTransport.getCondition();
-                result = mockedErrorCondition;
-                mockedErrorCondition.getCondition();
-                result = mockedSymbol;
-                mockedSymbol.toString();
-                result = AmqpSessionWindowViolationException.errorCode;
-                Deencapsulation.invoke(connection, "scheduleReconnection", new Class[] {TransportException.class}, (TransportException) any);
-            }
-        };
-
-        //act
-        connection.onTransportError(mockEvent);
-
-        //assert
-        assertTrue(methodsCalled.toString().contains("scheduleReconnection"));
-    }
-
     // Tests_SRS_AMQPSTRANSPORT_34_072: [If the provided message is not saved in the saved map of messages to acknowledge, this function shall return false.]
     @Test
     public void sendMessageDoesNotAckIfNoAssociatedAmqpsMessage() throws TransportException
