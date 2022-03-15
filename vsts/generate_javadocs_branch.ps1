@@ -20,7 +20,6 @@ function CreateJavadocReleaseBranch(
     $GitHubEmail,
     $Sources,
     $FolderName,
-    $UpdateDepsDocs,
     $UpdateDeviceClientDocs,
     $UpdateServiceClientDocs,    
     $UpdateProvisioningDeviceClientDocs,
@@ -64,14 +63,6 @@ function CreateJavadocReleaseBranch(
 
     Write-Host "Copying generated javadocs to replace current javadocs"
     Set-Location apidocs 
-
-    if ($UpdateDepsDocs -eq "True")
-    {
-        Remove-Item ..\$FolderName\deps -Force -Recurse
-        New-item -Path ..\$FolderName\deps -ItemType Directory
-        Copy-Item -Force -Path .\deps\* -Destination ..\$FolderName\deps
-        Copy-Item -Recurse -Force -Path .\deps\com -Destination ..\$FolderName\deps
-    }
 
     if ($UpdateDeviceClientDocs -eq "True")
     {
@@ -153,7 +144,6 @@ function CreateJavadocReleaseBranch(
         Copy-Item -Recurse -Force -Path .\provisioning\security\x509-provider\com -Destination ..\$FolderName\provisioning\security\x509-provider
     }
 
-    Remove-Item ..\deps -Force -Recurse
     Remove-Item ..\device -Force -Recurse
     Remove-Item ..\service -Force -Recurse
     Remove-Item ..\provisioning -Force -Recurse
