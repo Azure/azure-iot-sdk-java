@@ -6,11 +6,7 @@ package com.microsoft.azure.sdk.iot.device;
 import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubReceiveTask;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubSendTask;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
-import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
+import com.microsoft.azure.sdk.iot.device.transport.*;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
@@ -37,11 +33,13 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
     private final IotHubTransport transport;
     private final IotHubSendTask sendTask;
     private final IotHubReceiveTask receiveTask;
+    private final IotHubReconnectTask reconnectTask;
 
     private ScheduledExecutorService receiveTaskScheduler;
     private ScheduledExecutorService sendTaskScheduler;
-    private IotHubConnectionStatus state;
+    private ScheduledExecutorService reconnectTaskScheduler;
 
+    private IotHubConnectionStatus state;
 
     // This lock is used to keep calls to open/close/connection status changes synchronous.
     private final Object stateLock = new Object();
@@ -72,6 +70,7 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
 
         this.sendTask = new IotHubSendTask(this.transport);
         this.receiveTask = new IotHubReceiveTask(this.transport);
+        this.reconnectTask = new IotHubReconnectTask(this.transport);
     }
 
     DeviceIO(
@@ -85,6 +84,7 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
         this.transport = new IotHubTransport(hostName, protocol, sslContext, proxySettings, this, keepAliveInterval);
         this.sendTask = new IotHubSendTask(this.transport);
         this.receiveTask = new IotHubReceiveTask(this.transport);
+        this.reconnectTask = new IotHubReconnectTask(this.transport);
     }
 
     /**
@@ -170,6 +170,7 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
 
         this.sendTaskScheduler = Executors.newScheduledThreadPool(1);
         this.receiveTaskScheduler = Executors.newScheduledThreadPool(1);
+        this.reconnectTaskScheduler = Executors.newScheduledThreadPool(1);
 
         // Note that even though these threads are scheduled at a fixed interval, the sender/receiver threads will wait
         // if no messages are available to process. These waiting threads will still count against the pool size defined above,
@@ -184,6 +185,8 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
         this.sendTaskScheduler.scheduleWithFixedDelay(this.sendTask, 0,
                 sendPeriodInMilliseconds, TimeUnit.MILLISECONDS);
         this.receiveTaskScheduler.scheduleWithFixedDelay(this.receiveTask, 0,
+                receivePeriodInMilliseconds, TimeUnit.MILLISECONDS);
+        this.reconnectTaskScheduler.scheduleWithFixedDelay(this.reconnectTask, 0,
                 receivePeriodInMilliseconds, TimeUnit.MILLISECONDS);
 
         this.state = IotHubConnectionStatus.CONNECTED;
@@ -203,6 +206,16 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
             log.trace("Shutting down receiveTaskScheduler");
             this.receiveTaskScheduler.shutdownNow();
             this.receiveTaskScheduler = null;
+        }
+    }
+
+    private void stopReconnectThreads()
+    {
+        if (this.reconnectTaskScheduler != null)
+        {
+            log.trace("Shutting down reconnectTaskScheduler");
+            this.reconnectTaskScheduler.shutdownNow();
+            this.reconnectTaskScheduler = null;
         }
     }
 
@@ -369,6 +382,11 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
         {
             // No need to keep spawning send/receive tasks during reconnection or when the client is closed
             this.stopWorkerThreads();
+
+            if (status == IotHubConnectionStatus.DISCONNECTED)
+            {
+                this.stopReconnectThreads();
+            }
         }
         else if (status == IotHubConnectionStatus.CONNECTED)
         {

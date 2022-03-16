@@ -4,8 +4,6 @@
 package com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubSendTask;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
 import mockit.Expectations;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -13,6 +11,7 @@ import mockit.Verifications;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.concurrent.Semaphore;
 
 /** Unit tests for IotHubSendTask. */
 public class IotHubSendTaskTest
@@ -25,12 +24,12 @@ public class IotHubSendTaskTest
     @Test
     public void runSendsAllMessages()
     {
-        final Object sendThreadLock = new Object();
+        final Semaphore sendThreadSemaphore = new Semaphore(1);
         new Expectations()
         {
             {
-                mockTransport.getSendThreadLock();
-                result = sendThreadLock;
+                mockTransport.getSendThreadSemaphore();
+                result = sendThreadSemaphore;
 
                 mockTransport.hasMessagesToSend();
                 result = true;
@@ -51,12 +50,12 @@ public class IotHubSendTaskTest
     @Test
     public void runInvokesAllCallbacks()
     {
-        final Object sendThreadLock = new Object();
+        final Semaphore sendThreadSemaphore = new Semaphore(1);
         new Expectations()
         {
             {
-                mockTransport.getSendThreadLock();
-                result = sendThreadLock;
+                mockTransport.getSendThreadSemaphore();
+                result = sendThreadSemaphore;
 
                 mockTransport.hasMessagesToSend();
                 result = false;

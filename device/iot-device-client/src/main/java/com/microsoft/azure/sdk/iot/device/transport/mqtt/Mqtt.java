@@ -9,7 +9,6 @@ import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
-import com.microsoft.azure.sdk.iot.device.transport.ReconnectionNotifier;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.PahoExceptionTranslator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -345,7 +344,7 @@ public abstract class Mqtt implements MqttCallback
                 transportException = new TransportException(throwable);
             }
 
-            ReconnectionNotifier.notifyDisconnectAsync(transportException, this.listener, this.connectionId);
+            this.listener.onConnectionLost(transportException, this.connectionId);
         }
     }
 
