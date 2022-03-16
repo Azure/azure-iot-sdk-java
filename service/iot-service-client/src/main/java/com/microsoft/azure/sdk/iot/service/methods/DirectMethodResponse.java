@@ -12,7 +12,7 @@ import lombok.Getter;
 /**
  * Store the status and payload received as result of a method invoke.
  */
-public final class MethodResult
+public final class DirectMethodResponse
 {
     /**
      * Status of the Invoke Method.
@@ -25,23 +25,36 @@ public final class MethodResult
      */
     private final JsonElement payload;
 
-    public MethodResult(Integer status, JsonElement payload)
+    public DirectMethodResponse(Integer status, JsonElement payload)
     {
         this.status = status;
         this.payload = payload;
     }
 
-    // Payload getters with different types
+    /**
+     * Return the DirectMethodResponse payload in JsonElement type
+     * @return the DirectMethodResponse payload in JsonElement type
+     */
     public JsonElement getPayloadAsJsonElement()
     {
         return payload;
     }
 
-    public String getPayloadAsJsonString()
+    /**
+     * Return the DirectMethodResponse payload in String type
+     * @return the DirectMethodResponse payload in String type
+     */
+    public String getPayloadAsString()
     {
         return getPayloadAsCustomType(String.class);
     }
 
+    /**
+     * Return the DirectMethodResponse payload in Custom type
+     * @param customObject the Custom type in which the payload can return
+     * @param <T> it describes the type parameter
+     * @return the DirectMethodResponse payload in Custom type
+     */
     public <T> T getPayloadAsCustomType(Class<T> customObject)
     {
         return new GsonBuilder().create().fromJson(payload, customObject);

@@ -147,7 +147,7 @@ public class MethodParser
     public synchronized void fromJson(String json) throws IllegalArgumentException
     {
 
-        if ((json == null) || json.isEmpty())
+        if (json == null || json.isEmpty())
         {
             throw new IllegalArgumentException("Invalid json.");
         }
@@ -269,7 +269,7 @@ public class MethodParser
 
     public JsonElement getPayloadFromJson(String json)
     {
-        if ((json == null) || json.isEmpty())
+        if (json == null || json.isEmpty())
         {
             return new JsonObject();
         }

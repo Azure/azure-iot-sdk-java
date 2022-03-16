@@ -81,7 +81,7 @@ public final class DirectMethod
                                  **Codes_SRS_DEVICEMETHOD_25_011: [**If the user callback is successful and user has successfully provided the response message and status, then this method shall build a device method message of type DEVICE_OPERATION_METHOD_SEND_RESPONSE, serilize the user data by invoking MethodParser from serializer and save the user data as payload in the message before sending it to IotHub via sendeventAsync before marking the result as complete**]**
                                  **Codes_SRS_DEVICEMETHOD_25_015: [**User can provide null response message upon invoking the device method callback which will be serialized as is, before sending it to IotHub.**]**
                                  */
-                                JsonElement payload = new GsonBuilder().create().toJsonTree(responseData.getResponseMessage());
+                                JsonElement payload = new GsonBuilder().create().toJsonTree(responseData.getPayload());
                                 MethodParser methodParserObject = new MethodParser(payload);
                                 IotHubTransportMessage responseMessage = new IotHubTransportMessage(methodParserObject.toJson().getBytes(StandardCharsets.UTF_8), MessageType.DEVICE_METHODS);
                                 responseMessage.setRequestId(methodMessage.getRequestId());

@@ -11,7 +11,7 @@ import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobStatus;
 import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobsClient;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodRequestOptions;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
-import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
 import java.io.IOException;
@@ -86,7 +86,7 @@ public class DirectMethodSample
                 .methodResponseTimeoutSeconds(responseTimeout)
                 .build();
 
-        MethodResult result = methodClient.invoke(deviceId, methodName, options);
+        DirectMethodResponse result = methodClient.invoke(deviceId, methodName, options);
         if(result == null)
         {
             throw new IOException("Method invoke returns null");

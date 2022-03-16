@@ -30,16 +30,30 @@ public final class DigitalTwinCommandResponse {
         this.status = status;
     }
 
+    /**
+     * Return the DigitalTwinCommandResponse payload in JsonElement type
+     * @return the DigitalTwinCommandResponse payload in JsonElement type
+     */
     public JsonElement getPayloadAsJsonElement()
     {
         return payload;
     }
 
-    public String getPayloadAsJsonString()
+    /**
+     * Return the DigitalTwinCommandResponse payload in String type
+     * @return the DigitalTwinCommandResponse payload in String type
+     */
+    public String getPayloadAsString()
     {
         return getPayloadAsCustomType(String.class);
     }
 
+    /**
+     * Return the DigitalTwinCommandResponse payload in Custom type
+     * @param customObject the Custom type in which the payload can return
+     * @param <T> it describes the type parameter
+     * @return the DigitalTwinCommandResponse payload in Custom type
+     */
     public <T> T getPayloadAsCustomType(Class<T> customObject)
     {
         return new GsonBuilder().create().fromJson(payload, customObject);

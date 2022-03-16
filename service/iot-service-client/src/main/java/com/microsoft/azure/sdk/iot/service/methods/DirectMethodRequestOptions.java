@@ -10,7 +10,9 @@ import lombok.Getter;
 public final class DirectMethodRequestOptions
 {
     /**
-     * The payload of the direct method request. May be null.
+     * The payload of the direct method request. This parameter can take
+         * null: the DirectMethodRequestOptions object will not include the "payload" field;
+         * String/List/Map/complex nested object: it will be serialized as value of "payload" field in DirectMethodRequestOptions.
      */
     @Getter
     private final Object payload;

@@ -5,11 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.service.methods;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonNull;
 import com.google.gson.JsonPrimitive;
-import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -20,7 +16,7 @@ import static org.junit.Assert.assertNull;
 /**
  * Unit tests for method result class
  */
-public class MethodResultTest 
+public class DirectMethodResponseTest
 {
     /* Tests_SRS_METHODRESULT_21_001: [The constructor shall save the status and payload representing the method invoke result.] */
     /* Tests_SRS_METHODRESULT_21_002: [There is no restrictions for these values, it can be empty, or null.] */
@@ -30,12 +26,12 @@ public class MethodResultTest
     public void constructorCreatesNewMethodResult()
     {
         //act
-        MethodResult methodResult = new MethodResult(123, new JsonPrimitive("TestObject"));
+        DirectMethodResponse directMethodResponse = new DirectMethodResponse(123, new JsonPrimitive("TestObject"));
 
         //assert
-        assertNotNull(methodResult);
-        assertThat(methodResult.getStatus(), is(123));
-        assertThat(methodResult.getPayloadAsJsonElement(), is(new JsonPrimitive("TestObject")));
+        assertNotNull(directMethodResponse);
+        assertThat(directMethodResponse.getStatus(), is(123));
+        assertThat(directMethodResponse.getPayloadAsJsonElement(), is(new JsonPrimitive("TestObject")));
 
 
     }
@@ -44,23 +40,23 @@ public class MethodResultTest
     public void constructorCreatesNewMethodResult_NullStatus()
     {
         //act
-        MethodResult methodResult = new MethodResult(null, new JsonPrimitive("TestObject"));
+        DirectMethodResponse directMethodResponse = new DirectMethodResponse(null, new JsonPrimitive("TestObject"));
 
         //assert
-        assertNotNull(methodResult);
-        assertNull(methodResult.getStatus());
-        assertThat(methodResult.getPayloadAsJsonElement(), is(new JsonPrimitive("TestObject")));
+        assertNotNull(directMethodResponse);
+        assertNull(directMethodResponse.getStatus());
+        assertThat(directMethodResponse.getPayloadAsJsonElement(), is(new JsonPrimitive("TestObject")));
     }
     
     @Test
     public void constructorCreatesNewMethodResult_NullPayload()
     {
         //act
-        MethodResult methodResult = new MethodResult(123, null);
+        DirectMethodResponse directMethodResponse = new DirectMethodResponse(123, null);
 
         //assert
-        assertNotNull(methodResult);
-        assertThat(methodResult.getStatus(), is(123));
-        assertNull(methodResult.getPayloadAsJsonElement());
+        assertNotNull(directMethodResponse);
+        assertThat(directMethodResponse.getStatus(), is(123));
+        assertNull(directMethodResponse.getPayloadAsJsonElement());
     }
 }

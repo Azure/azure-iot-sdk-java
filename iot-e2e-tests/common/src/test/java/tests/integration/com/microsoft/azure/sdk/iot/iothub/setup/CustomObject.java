@@ -9,6 +9,9 @@ import lombok.Setter;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This class is for direct methods in e2e tests which takes Custom type as payload type.
+ */
 public class CustomObject
 {
     @Getter

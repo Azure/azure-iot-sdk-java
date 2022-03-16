@@ -7,17 +7,13 @@ import com.azure.core.credential.AzureSasCredential;
 import com.google.gson.JsonElement;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesCallback;
 import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
-import com.microsoft.azure.sdk.iot.device.twin.Pair;
-import com.microsoft.azure.sdk.iot.device.twin.Property;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.MultiplexingClient;
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
 import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesCallback;
-import com.microsoft.azure.sdk.iot.device.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
@@ -61,18 +57,13 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -476,13 +467,13 @@ public class DigitalTwinClientTests extends IntegrationTest
 
         // assert
         assertEquals(deviceSuccessResponseStatus, responseWithNoPayload.getStatus());
-        assertEquals("", responseWithNoPayload.getPayloadAsJsonString().replace("{}", ""));
+        assertEquals("{}", responseWithNoPayload.getPayloadAsString());
         assertEquals(deviceSuccessResponseStatus, responseWithJsonStringPayload.getStatus());
-        assertEquals(jsonStringInput, responseWithJsonStringPayload.getPayloadAsJsonString());
+        assertEquals(jsonStringInput, responseWithJsonStringPayload.getPayloadAsString());
         assertEquals(deviceSuccessResponseStatus, responseWithDatePayload.getStatus());
-        assertEquals(commandInput, responseWithDatePayload.getPayloadAsJsonString());
+        assertEquals(commandInput, responseWithDatePayload.getPayloadAsString());
         assertEquals(deviceSuccessResponseStatus, datePayloadResponseWithHeaders.body().getStatus());
-        assertEquals(commandInput, datePayloadResponseWithHeaders.body().getPayloadAsJsonString());
+        assertEquals(commandInput, datePayloadResponseWithHeaders.body().getPayloadAsString());
     }
 
     private static DigitalTwinClient buildDigitalTwinClientWithAzureSasCredential()

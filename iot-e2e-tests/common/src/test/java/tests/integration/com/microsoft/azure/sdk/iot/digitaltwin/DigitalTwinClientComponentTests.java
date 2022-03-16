@@ -192,13 +192,13 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
 
         // assert
         assertEquals(deviceSuccessResponseStatus, responseWithNoPayload.getStatus());
-        assertEquals("", responseWithNoPayload.getPayloadAsJsonString().replace("{}", ""));
+        assertEquals("{}", responseWithNoPayload.getPayloadAsString());
         assertEquals(deviceSuccessResponseStatus, responseWithJsonStringPayload.getStatus());
-        assertEquals(jsonStringInput, responseWithJsonStringPayload.getPayloadAsJsonString());
+        assertEquals(jsonStringInput, responseWithJsonStringPayload.getPayloadAsString());
         assertEquals(deviceSuccessResponseStatus, responseWithDatePayload.getStatus());
-        assertEquals(commandInput, responseWithDatePayload.getPayloadAsJsonString());
+        assertEquals(commandInput, responseWithDatePayload.getPayloadAsString());
         assertEquals(deviceSuccessResponseStatus, datePayloadResponseWithHeaders.body().getStatus());
-        assertEquals(commandInput, datePayloadResponseWithHeaders.body().getPayloadAsJsonString());
+        assertEquals(commandInput, datePayloadResponseWithHeaders.body().getPayloadAsString());
     }
 
     @Test
@@ -247,12 +247,12 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
 
         // assert
         assertEquals(deviceSuccessResponseStatus, responseWithNoPayload.getStatus());
-        assertEquals("", responseWithNoPayload.getPayloadAsJsonString().replace("{}", ""));
+        assertEquals("{}", responseWithNoPayload.getPayloadAsString());
         assertEquals(deviceSuccessResponseStatus, responseWithJsonStringPayload.getStatus());
-        assertEquals(jsonStringInput, responseWithJsonStringPayload.getPayloadAsJsonString());
+        assertEquals(jsonStringInput, responseWithJsonStringPayload.getPayloadAsString());
         assertEquals(deviceSuccessResponseStatus, responseWithDatePayload.getStatus());
-        assertEquals(commandInput, responseWithDatePayload.getPayloadAsJsonString());
+        assertEquals(commandInput, responseWithDatePayload.getPayloadAsString());
         assertEquals(deviceSuccessResponseStatus, datePayloadResponseWithHeaders.body().getStatus());
-        assertEquals(commandInput, datePayloadResponseWithHeaders.body().getPayloadAsJsonString());
+        assertEquals(commandInput, datePayloadResponseWithHeaders.body().getPayloadAsString());
     }
 }

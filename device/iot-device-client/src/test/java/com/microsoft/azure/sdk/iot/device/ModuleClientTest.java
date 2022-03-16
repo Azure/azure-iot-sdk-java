@@ -8,8 +8,8 @@ package com.microsoft.azure.sdk.iot.device;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.edge.HttpsHsmTrustBundleProvider;
-import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
-import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
+import com.microsoft.azure.sdk.iot.device.edge.DirectMethodRequest;
+import com.microsoft.azure.sdk.iot.device.edge.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.hsm.HsmException;
@@ -72,10 +72,10 @@ public class ModuleClientTest
     URL mockedURL;
 
     @Mocked
-    MethodResult mockedMethodResult;
+    DirectMethodResponse mockedDirectMethodResponse;
 
     @Mocked
-    MethodRequest mockedMethodRequest;
+    DirectMethodRequest mockedDirectMethodRequest;
 
     @Mocked
     HttpsTransportManager mockedHttpsTransportManager;
@@ -784,23 +784,23 @@ public class ModuleClientTest
                 new HttpsTransportManager((ClientConfiguration) any);
                 result = mockedHttpsTransportManager;
 
-                mockedHttpsTransportManager.invokeMethod(mockedMethodRequest, expectedDeviceId, "");
-                result = mockedMethodResult;
+                mockedHttpsTransportManager.invokeMethod(mockedDirectMethodRequest, expectedDeviceId, "");
+                result = mockedDirectMethodResponse;
             }
         };
 
         //act
-        MethodResult actualResult = client.invokeMethod(expectedDeviceId, mockedMethodRequest);
+        DirectMethodResponse actualResult = client.invokeMethod(expectedDeviceId, mockedDirectMethodRequest);
 
         //assert
-        assertEquals(mockedMethodResult, actualResult);
+        assertEquals(mockedDirectMethodResponse, actualResult);
         new Verifications()
         {
             {
                 mockedHttpsTransportManager.open();
                 times = 1;
 
-                mockedHttpsTransportManager.invokeMethod(mockedMethodRequest, expectedDeviceId, "");
+                mockedHttpsTransportManager.invokeMethod(mockedDirectMethodRequest, expectedDeviceId, "");
                 times = 1;
             }
         };
@@ -821,13 +821,13 @@ public class ModuleClientTest
                 new HttpsTransportManager((ClientConfiguration) any);
                 result = mockedHttpsTransportManager;
 
-                mockedHttpsTransportManager.invokeMethod(mockedMethodRequest, expectedDeviceId, "");
+                mockedHttpsTransportManager.invokeMethod(mockedDirectMethodRequest, expectedDeviceId, "");
                 result = new IOException();
             }
         };
 
         //act
-        client.invokeMethod(expectedDeviceId, mockedMethodRequest);
+        client.invokeMethod(expectedDeviceId, mockedDirectMethodRequest);
     }
 
     //Tests_SRS_MODULECLIENT_34_035: [This function shall create an HttpsTransportManager and use it to invoke the method on the module.]
@@ -846,23 +846,23 @@ public class ModuleClientTest
                 new HttpsTransportManager((ClientConfiguration) any);
                 result = mockedHttpsTransportManager;
 
-                mockedHttpsTransportManager.invokeMethod(mockedMethodRequest, expectedDeviceId, expectedModuleId);
-                result = mockedMethodResult;
+                mockedHttpsTransportManager.invokeMethod(mockedDirectMethodRequest, expectedDeviceId, expectedModuleId);
+                result = mockedDirectMethodResponse;
             }
         };
 
         //act
-        MethodResult actualResult = client.invokeMethod(expectedDeviceId, expectedModuleId, mockedMethodRequest);
+        DirectMethodResponse actualResult = client.invokeMethod(expectedDeviceId, expectedModuleId, mockedDirectMethodRequest);
 
         //assert
-        assertEquals(mockedMethodResult, actualResult);
+        assertEquals(mockedDirectMethodResponse, actualResult);
         new Verifications()
         {
             {
                 mockedHttpsTransportManager.open();
                 times = 1;
 
-                mockedHttpsTransportManager.invokeMethod(mockedMethodRequest, expectedDeviceId, expectedModuleId);
+                mockedHttpsTransportManager.invokeMethod(mockedDirectMethodRequest, expectedDeviceId, expectedModuleId);
                 times = 1;
             }
         };
@@ -884,13 +884,13 @@ public class ModuleClientTest
                 new HttpsTransportManager((ClientConfiguration) any);
                 result = mockedHttpsTransportManager;
 
-                mockedHttpsTransportManager.invokeMethod(mockedMethodRequest, expectedDeviceId, expectedModuleId);
+                mockedHttpsTransportManager.invokeMethod(mockedDirectMethodRequest, expectedDeviceId, expectedModuleId);
                 result = new IOException();
             }
         };
 
         //act
-        client.invokeMethod(expectedDeviceId, expectedModuleId, mockedMethodRequest);
+        client.invokeMethod(expectedDeviceId, expectedModuleId, mockedDirectMethodRequest);
     }
 
     //Tests_SRS_MODULECLIENT_34_037: [If the provided deviceId is null or empty, this function shall throw an IllegalArgumentException.]
@@ -902,7 +902,7 @@ public class ModuleClientTest
         ModuleClient client = new ModuleClient("connection string", IotHubClientProtocol.AMQPS);
 
         //act
-        client.invokeMethod(null, mockedMethodRequest);
+        client.invokeMethod(null, mockedDirectMethodRequest);
     }
 
     //Tests_SRS_MODULECLIENT_34_037: [If the provided deviceId is null or empty, this function shall throw an IllegalArgumentException.]
@@ -914,7 +914,7 @@ public class ModuleClientTest
         ModuleClient client = new ModuleClient("connection string", IotHubClientProtocol.AMQPS);
 
         //act
-        client.invokeMethod("", mockedMethodRequest);
+        client.invokeMethod("", mockedDirectMethodRequest);
     }
 
     //Tests_SRS_MODULECLIENT_34_038: [If the provided deviceId is null or empty, this function shall throw an IllegalArgumentException.]
@@ -926,7 +926,7 @@ public class ModuleClientTest
         ModuleClient client = new ModuleClient("connection string", IotHubClientProtocol.AMQPS);
 
         //act
-        client.invokeMethod(null, "someValidModule", mockedMethodRequest);
+        client.invokeMethod(null, "someValidModule", mockedDirectMethodRequest);
     }
 
     //Tests_SRS_MODULECLIENT_34_038: [If the provided deviceId is null or empty, this function shall throw an IllegalArgumentException.]
@@ -938,7 +938,7 @@ public class ModuleClientTest
         ModuleClient client = new ModuleClient("connection string", IotHubClientProtocol.AMQPS);
 
         //act
-        client.invokeMethod("", "someValidModule", mockedMethodRequest);
+        client.invokeMethod("", "someValidModule", mockedDirectMethodRequest);
     }
 
     //Tests_SRS_MODULECLIENT_34_039: [If the provided deviceId is null or empty, this function shall throw an IllegalArgumentException.]
@@ -950,7 +950,7 @@ public class ModuleClientTest
         ModuleClient client = new ModuleClient("connection string", IotHubClientProtocol.AMQPS);
 
         //act
-        client.invokeMethod("someValidDevice", null, mockedMethodRequest);
+        client.invokeMethod("someValidDevice", null, mockedDirectMethodRequest);
     }
 
     //Tests_SRS_MODULECLIENT_34_039: [If the provided deviceId is null or empty, this function shall throw an IllegalArgumentException.]
@@ -962,6 +962,6 @@ public class ModuleClientTest
         ModuleClient client = new ModuleClient("connection string", IotHubClientProtocol.AMQPS);
 
         //act
-        client.invokeMethod("someValidDevice", "", mockedMethodRequest);
+        client.invokeMethod("someValidDevice", "", mockedDirectMethodRequest);
     }
 }

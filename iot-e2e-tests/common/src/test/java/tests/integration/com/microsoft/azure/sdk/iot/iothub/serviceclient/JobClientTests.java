@@ -24,7 +24,7 @@ import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
-import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.service.twin.Pair;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnauthorizedException;
@@ -289,10 +289,10 @@ public class JobClientTests extends IntegrationTest
         for (Map.Entry<String, ScheduledJob> jobResult : jobResults.entrySet())
         {
             assertNotNull(jobResult.getValue());
-            MethodResult methodResult = jobResult.getValue().getOutcomeResult();
-            assertNotNull("Device method didn't return any outcome", methodResult);
-            assertEquals(200L, (long) methodResult.getStatus());
-            assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, methodResult.getPayloadAsJsonString());
+            DirectMethodResponse directMethodResponse = jobResult.getValue().getOutcomeResult();
+            assertNotNull("Device method didn't return any outcome", directMethodResponse);
+            assertEquals(200L, (long) directMethodResponse.getStatus());
+            assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, directMethodResponse.getPayloadAsString());
         }
 
         // asserts for the client side.
@@ -379,10 +379,10 @@ public class JobClientTests extends IntegrationTest
             fail("Failed to schedule a method invocation, job status " + job.getJobStatus() + ":" + job.getStatusMessage());
         }
 
-        MethodResult methodResult = job.getOutcomeResult();
-        assertNotNull("Device method didn't return any outcome", methodResult);
-        assertEquals(200L, (long) methodResult.getStatus());
-        assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, methodResult.getPayloadAsJsonString());
+        DirectMethodResponse directMethodResponse = job.getOutcomeResult();
+        assertNotNull("Device method didn't return any outcome", directMethodResponse);
+        assertEquals(200L, (long) directMethodResponse.getStatus());
+        assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, directMethodResponse.getPayloadAsString());
 
         // asserts for the client side.
         assertEquals(0, deviceTestManger.getStatusError());
@@ -496,10 +496,10 @@ public class JobClientTests extends IntegrationTest
             assertNotNull(jobResult);
             if (jobResult.getJobType() == ScheduledJobType.scheduleDeviceMethod)
             {
-                MethodResult methodResult = jobResult.getOutcomeResult();
-                assertNotNull("Device method didn't return any outcome", methodResult);
-                assertEquals(200L, (long) methodResult.getStatus());
-                assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, methodResult.getPayloadAsJsonString());
+                DirectMethodResponse directMethodResponse = jobResult.getOutcomeResult();
+                assertNotNull("Device method didn't return any outcome", directMethodResponse);
+                assertEquals(200L, (long) directMethodResponse.getStatus());
+                assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, directMethodResponse.getPayloadAsString());
             }
             else
             {

@@ -4,7 +4,7 @@ package samples.com.microsoft.azure.sdk.iot.service;
 
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodRequestOptions;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
-import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.service.twin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
@@ -85,7 +85,7 @@ public class Thermostat {
                 .methodResponseTimeoutSeconds(responseTimeout)
                 .build();
 
-        MethodResult result = methodClient.invoke(deviceId, methodToInvoke, options);
+        DirectMethodResponse result = methodClient.invoke(deviceId, methodToInvoke, options);
         if(result == null)
         {
             throw new IOException("Method result is null");

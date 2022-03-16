@@ -18,7 +18,7 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnauthorizedExceptio
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodRequestOptions;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClientOptions;
-import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubGatewayTimeoutException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -164,7 +164,7 @@ public class DirectMethodsTests extends DirectMethodsCommon
                 .methodConnectTimeoutSeconds(CONNECTION_TIMEOUT)
                 .build();
 
-        MethodResult result;
+        DirectMethodResponse result;
         if (testInstance.identity instanceof TestModuleIdentity)
         {
             result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), METHOD_DELAY_IN_MILLISECONDS, options);
@@ -177,7 +177,7 @@ public class DirectMethodsTests extends DirectMethodsCommon
         // Assert
         assertNotNull(buildExceptionMessage("method result was null", testInstance.identity.getClient()), result);
         assertEquals(buildExceptionMessage("Expected SUCCESS but got " + result.getStatus(), testInstance.identity.getClient()), (long)METHOD_SUCCESS, (long)result.getStatus());
-        assertEquals(buildExceptionMessage("Expected " + METHOD_DELAY_IN_MILLISECONDS + ":succeed" + " But got " + result.getPayloadAsJsonString(), testInstance.identity.getClient()), METHOD_DELAY_IN_MILLISECONDS + ":succeed", result.getPayloadAsJsonString());
+        assertEquals(buildExceptionMessage("Expected " + METHOD_DELAY_IN_MILLISECONDS + ":succeed" + " But got " + result.getPayloadAsString(), testInstance.identity.getClient()), METHOD_DELAY_IN_MILLISECONDS + ":succeed", result.getPayloadAsString());
     }
 
     @Test
@@ -337,7 +337,7 @@ public class DirectMethodsTests extends DirectMethodsCommon
     @StandardTierHubOnlyTest
     public void invokeMethodWithPayloadAsString() throws Exception
     {
-        super.SubscribeToMethodAndReceiveAsJsonString();
+        super.subscribeToMethodAndReceiveAsJsonString();
 
         // Direct method payload in String type
         String string = "This is a valid payload";
@@ -348,7 +348,7 @@ public class DirectMethodsTests extends DirectMethodsCommon
     @StandardTierHubOnlyTest
     public void invokeMethodWithPayloadAsCustomObject() throws Exception
     {
-        super.SubscribeToMethodAndReceiveAsCustomObject();
+        super.subscribeToMethodAndReceiveAsCustomObject();
 
         // Direct method payload in Custom type
         CustomObject customObject = new CustomObject("some test message", 1, true, new NestedCustomObject("some nested test message", 2));

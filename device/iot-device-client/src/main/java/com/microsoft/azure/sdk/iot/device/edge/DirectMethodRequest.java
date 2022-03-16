@@ -14,7 +14,7 @@ import com.google.gson.annotations.SerializedName;
  */
 // This suppression below is addressing warnings of fields used for serialization.
 @SuppressWarnings({"FieldCanBeLocal", "unused"})
-public class MethodRequest
+public class DirectMethodRequest
 {
     private static final String METHOD_NAME_KEY_NAME = "methodName";
     @Expose(deserialize = false)
@@ -38,24 +38,28 @@ public class MethodRequest
 
     /**
      * Constructor for a MethodRequest. Uses default responseTimeout and connectionTimeout which is to never timeout
-     * @param methodName The method to be invoked
-     * @param payload the payload attached to that method
+     * @param methodName the method to be invoked
+     * @param payload the payload attached to that method. This parameter can take
+         * null: the DirectMethodRequest object will not include the "payload" field
+         * String/List/Map/complex nested object: it will be serialized as value of "payload" field in DirectMethodRequest
      * @throws IllegalArgumentException if the provided methodName is null or empty
      */
-    public MethodRequest(String methodName, Object payload) throws IllegalArgumentException
+    public DirectMethodRequest(String methodName, Object payload) throws IllegalArgumentException
     {
         this(methodName, payload, null, null);
     }
 
     /**
      * Constructor for a MethodRequest.
-     * @param methodName The method to be invoked
-     * @param payload the payload attached to that method
+     * @param methodName the method to be invoked
+     * @param payload the payload attached to that method. This parameter can take
+         * null: the DirectMethodRequest object will not include the "payload" field
+         * String/List/Map/complex nested object: it will be serialized as value of "payload" field in DirectMethodRequest
      * @param responseTimeout the timeout in seconds for the response to be received
      * @param connectionTimeout the timeout in seconds for the connection to be established
      * @throws IllegalArgumentException if the provided methodName is null or empty
      */
-    public MethodRequest(String methodName, Object payload, Integer responseTimeout, Integer connectionTimeout) throws IllegalArgumentException
+    public DirectMethodRequest(String methodName, Object payload, Integer responseTimeout, Integer connectionTimeout) throws IllegalArgumentException
     {
         if (methodName == null || methodName.isEmpty())
         {
@@ -78,5 +82,5 @@ public class MethodRequest
     }
 
     //empty constructor for gson
-    MethodRequest() { }
+    DirectMethodRequest() { }
 }
