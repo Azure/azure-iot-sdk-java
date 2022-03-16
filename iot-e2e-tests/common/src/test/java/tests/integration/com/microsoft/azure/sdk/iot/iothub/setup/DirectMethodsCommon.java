@@ -322,7 +322,7 @@ public class DirectMethodsCommon extends IntegrationTest
                     }
 
                     log.info("Device invoked " + methodName);
-                    com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse methodResponseAsCustomObject;
+                    com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse methodResponseAsDifferentTypeObject;
                     Object result;
                     int status;
 
@@ -346,13 +346,13 @@ public class DirectMethodsCommon extends IntegrationTest
                         status = METHOD_THROWS;
                     }
 
-                    methodResponseAsCustomObject = new com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse(status, result);
+                    methodResponseAsDifferentTypeObject = new com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse(status, result);
 
                     this.testInstance.directMethodPayload = methodData;
-                    this.testInstance.directMethodResponse = methodResponseAsCustomObject;
+                    this.testInstance.directMethodResponse = methodResponseAsDifferentTypeObject;
                     this.testInstance.statusCode = status;
 
-                    return methodResponseAsCustomObject;
+                    return methodResponseAsDifferentTypeObject;
                 },
                 null);
     }
