@@ -63,7 +63,6 @@ public final class IotHubReconnectTask implements Runnable
         catch (Throwable e)
         {
             log.warn("Reconnect task encountered exception while reconnecting", e);
-            e.printStackTrace(); //TODO remove
         }
     }
 }

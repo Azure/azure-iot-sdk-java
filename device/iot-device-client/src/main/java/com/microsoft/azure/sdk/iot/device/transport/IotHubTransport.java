@@ -561,6 +561,8 @@ public class IotHubTransport implements IotHubListener
 
             // keep attempting to reconnect the connection and any multiplexed device sessions until they are all CONNECTED
             // or they reach a DISCONNECTED state due to retry expired, timeout, encountering a non-retryable exception, etc.
+            // This logic will prioritize reconnecting the amqp/mqtt connection before it attempts to reconnect any multiplexed
+            // device sessions. And while it is reconnecting device sessions, it will reconnect them sequentially.
             while (needsReconnect())
             {
                 // If user initiates a close of this client, abandon all reconnection logic
@@ -606,6 +608,12 @@ public class IotHubTransport implements IotHubListener
     private boolean checkIfPreviousReconnectionAttemptFinished(String deviceSessionToReconnect)
     {
         MultiplexedDeviceState lastReconnectAttemptsDeviceSession = this.multiplexedDeviceConnectionStates.get(deviceSessionToReconnect);
+
+        if (lastReconnectAttemptsDeviceSession == null)
+        {
+            return true; // the device was unregistered during its reconnection, so it's reconnection attempts can stop
+        }
+
         if (lastReconnectAttemptsDeviceSession.getConnectionStatus() != IotHubConnectionStatus.DISCONNECTED_RETRYING)
         {
             // signals that a device session that attempted to reconnect has either successfully reconnected or has
