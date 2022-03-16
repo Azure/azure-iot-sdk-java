@@ -964,6 +964,15 @@ public class MultiplexingClientTests extends IntegrationTest
         @Override
         public void onStatusChanged(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
         {
+            if (callbackContext == null)
+            {
+                log.info("Received status update of {} with reason {} for multiplexing client", status, statusChangeReason);
+            }
+            else
+            {
+                log.info("Received status update of {} with reason {} for device {}", status, statusChangeReason, (String) callbackContext);
+            }
+
             if (status == IotHubConnectionStatus.CONNECTED)
             {
                 isOpen = true;
@@ -1071,7 +1080,7 @@ public class MultiplexingClientTests extends IntegrationTest
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             connectionStatusChangeTrackers[i] = new ConnectionStatusChangeTracker();
-            testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
+            testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], testInstance.deviceClientArray.get(i).getConfig().getDeviceId());
         }
 
         testInstance.multiplexingClient.open(false);
@@ -1128,7 +1137,7 @@ public class MultiplexingClientTests extends IntegrationTest
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             connectionStatusChangeTrackers[i] = new ConnectionStatusChangeTracker();
-            testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
+            testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], testInstance.deviceClientArray.get(i).getConfig().getDeviceId());
         }
 
         testInstance.multiplexingClient.open(false);
@@ -1173,7 +1182,7 @@ public class MultiplexingClientTests extends IntegrationTest
     @IotHubTest
     public void multiplexedConnectionRecoversFromTcpConnectionDrop() throws Exception
     {
-        testInstance.setup(DEVICE_MULTIPLEX_COUNT);
+        testInstance.setup(DEVICE_MULTIPLEX_COUNT, MultiplexingClientOptions.builder().build(), true);
         ConnectionStatusChangeTracker multiplexedConnectionStatusChangeTracker = new ConnectionStatusChangeTracker();
         ConnectionStatusChangeTracker[] connectionStatusChangeTrackers = new ConnectionStatusChangeTracker[DEVICE_MULTIPLEX_COUNT];
 
@@ -1186,7 +1195,7 @@ public class MultiplexingClientTests extends IntegrationTest
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             connectionStatusChangeTrackers[i] = new ConnectionStatusChangeTracker();
-            testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
+            testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], testInstance.deviceClientArray.get(i).getConfig().getDeviceId());
         }
 
         testInstance.multiplexingClient.setConnectionStatusChangeCallback(multiplexedConnectionStatusChangeTracker, null);
@@ -1300,7 +1309,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
             // each multiplexed device client should only have received DISCONNECTED_RETRYING. If the DISCONNECTED event occurs, users will
             // likely have some retry logic that kicks in which should be avoided since the multiplexing client itself is still retrying
-            assertFalse("Multiplexed client recieved DISCONNECTED callback unexpectedly", connectionStatusChangeTrackers[i].clientClosedUnexpectedly);
+            assertFalse("Multiplexed client recieved DISCONNECTED callback unexpectedly", connectionStatusChangeTrackers[i].clientClosedUnexpectedly); //TODO fails still?
             assertFalse("Multiplexed client recieved DISCONNECTED callback unexpectedly", connectionStatusChangeTrackers[i].clientClosedGracefully);
 
             // Try to send a message over the now-recovered device session
@@ -1597,7 +1606,7 @@ public class MultiplexingClientTests extends IntegrationTest
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             connectionStatusChangeTrackers[i] = new ConnectionStatusChangeTracker();
-            testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
+            testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], testInstance.deviceClientArray.get(i).getConfig().getDeviceId());
         }
 
         testInstance.multiplexingClient.open(false);
@@ -1660,7 +1669,7 @@ public class MultiplexingClientTests extends IntegrationTest
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             connectionStatusChangeTrackers[i] = new ConnectionStatusChangeTracker();
-            testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
+            testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], testInstance.deviceClientArray.get(i).getConfig().getDeviceId());
         }
 
         // Disable a device that will be on the multiplexed connection when the multiplexed connection hasn't opened yet
@@ -1723,7 +1732,7 @@ public class MultiplexingClientTests extends IntegrationTest
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             connectionStatusChangeTrackers[i] = new ConnectionStatusChangeTracker();
-            testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
+            testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], testInstance.deviceClientArray.get(i).getConfig().getDeviceId());
         }
 
         testInstance.multiplexingClient.open(false);
@@ -1770,7 +1779,7 @@ public class MultiplexingClientTests extends IntegrationTest
             for (int i = 1; i < DEVICE_MULTIPLEX_COUNT; i++)
             {
                 assertFalse(connectionStatusChangeTrackers[i].clientClosedUnexpectedly);
-                assertTrue(connectionStatusChangeTrackers[i].isOpen);
+                assertFalse(connectionStatusChangeTrackers[i].clientClosedGracefully);
             }
 
             // Verify that the multiplexed connection itself was unaffected
@@ -1872,7 +1881,7 @@ public class MultiplexingClientTests extends IntegrationTest
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             connectionStatusChangeTrackers[i] = new ConnectionStatusChangeTracker();
-            testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
+            testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], testInstance.deviceClientArray.get(i).getConfig().getDeviceId());
         }
 
         testInstance.multiplexingClient.open(false);

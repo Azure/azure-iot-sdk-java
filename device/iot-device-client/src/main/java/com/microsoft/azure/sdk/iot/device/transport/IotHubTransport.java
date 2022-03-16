@@ -366,12 +366,12 @@ public class IotHubTransport implements IotHubListener
     }
 
     @Override
-    public void onMultiplexedDeviceSessionLost(TransportException e, String connectionId, String deviceId)
+    public void onMultiplexedDeviceSessionLost(TransportException e, String connectionId, String deviceId, boolean shouldReconnect)
     {
         if (connectionId.equals(this.iotHubTransportConnection.getConnectionId()))
         {
             log.debug("The device session in the multiplexed connection to the IoT Hub has been lost for device {}", deviceId);
-            if (e == null)
+            if (e == null && !shouldReconnect)
             {
                 this.updateStatus(IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.CLIENT_CLOSE, null, deviceId);
             }

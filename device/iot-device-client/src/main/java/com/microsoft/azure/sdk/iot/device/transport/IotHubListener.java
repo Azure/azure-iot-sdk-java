@@ -60,8 +60,10 @@ public interface IotHubListener
      * @param connectionId the Id of the connection, used to identify which of possible many reconnection attempts
      *                     this event belongs to.
      * @param deviceId the Id of the device that the session belongs to
+     * @param shouldReconnect false if this session was lost because the user opted to unregister the client from
+     * the multiplexed connection.
      */
-    void onMultiplexedDeviceSessionLost(TransportException e, String connectionId, String deviceId);
+    void onMultiplexedDeviceSessionLost(TransportException e, String connectionId, String deviceId, boolean shouldReconnect);
 
     /**
      * Callback to be fired when the multiplexed connection fails to register a device session.

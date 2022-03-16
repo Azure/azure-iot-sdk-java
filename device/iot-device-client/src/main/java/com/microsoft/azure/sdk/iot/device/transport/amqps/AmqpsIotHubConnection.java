@@ -828,7 +828,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     @Override
     public void onSessionClosedUnexpectedly(ErrorCondition errorCondition, String deviceId)
     {
-        TransportException savedException = AmqpsExceptionTranslator.convertFromAmqpException(errorCondition);
+        this.savedException = AmqpsExceptionTranslator.convertFromAmqpException(errorCondition);
 
         if (this.isMultiplexing)
         {
@@ -851,12 +851,12 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             // When multiplexing, don't kill the connection just because a session dropped.
             log.error("Amqp session closed unexpectedly. notifying the transport layer to start reconnection logic...", this.savedException);
             this.reconnectingDeviceSessionHandlers.putAll(this.sessionHandlers);
-            this.listener.onMultiplexedDeviceSessionLost(savedException, this.connectionId, deviceId);
+            boolean isReconnecting = this.reconnectingDeviceSessionHandlers.containsKey(deviceId);
+            this.listener.onMultiplexedDeviceSessionLost(this.savedException, this.connectionId, deviceId, isReconnecting);
         }
         else
         {
             // When not multiplexing, reconnection logic will just spin up the whole connection again.
-            this.savedException = savedException;
             log.error("Amqp session closed unexpectedly. Closing this connection...", this.savedException);
             this.connection.close();
         }
@@ -876,7 +876,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         if (this.isMultiplexing)
         {
             log.trace("onSessionClosedAsExpected callback executed, notifying transport layer");
-            this.listener.onMultiplexedDeviceSessionLost(this.savedException, this.connectionId, deviceId);
+            boolean isReconnecting = this.reconnectingDeviceSessionHandlers.containsKey(deviceId);
+            this.listener.onMultiplexedDeviceSessionLost(this.savedException, this.connectionId, deviceId, isReconnecting);
         }
     }
 
