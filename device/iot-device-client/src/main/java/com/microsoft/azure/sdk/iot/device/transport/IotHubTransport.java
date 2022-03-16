@@ -91,11 +91,11 @@ public class IotHubTransport implements IotHubListener
 
     // State lock used to communicate to the IotHubSendTask thread when a message needs to be sent or a callback needs to be invoked.
     // It is this layer's responsibility to notify that task each time a message is queued to send, or when a callback is queued to be invoked.
-    private final Object sendThreadLock = new Object();
+    private final Semaphore sendThreadSemaphore = new Semaphore(0);
 
     // State lock used to communicate to the IotHubReceiveTask thread when a received message needs to be handled. It is this
     // layer's responsibility to notify that task each time a message is received.
-    private final Object receiveThreadLock = new Object();
+    private final Semaphore receiveThreadSemaphore = new Semaphore(0);
 
     // State lock used to communicate to the IotHubReconnectTask thread when a reconnection needs to be handled. It is this
     // layer's responsibility to notify that task each time a connection is lost.
@@ -161,14 +161,14 @@ public class IotHubTransport implements IotHubListener
         this.keepAliveInterval = keepAliveInterval;
     }
 
-    public Object getSendThreadLock()
+    public Semaphore getSendThreadSemaphore()
     {
-        return this.sendThreadLock;
+        return this.sendThreadSemaphore;
     }
 
-    public Object getReceiveThreadLock()
+    public Semaphore getReceiveThreadSemaphore()
     {
-        return this.receiveThreadLock;
+        return this.receiveThreadSemaphore;
     }
 
     public Semaphore getReconnectThreadSemaphore()
@@ -178,26 +178,17 @@ public class IotHubTransport implements IotHubListener
 
     public boolean hasMessagesToSend()
     {
-        synchronized (sendThreadLock)
-        {
-            return this.waitingPacketsQueue.size() > 0;
-        }
+        return this.waitingPacketsQueue.size() > 0;
     }
 
     public boolean hasReceivedMessagesToHandle()
     {
-        synchronized (receiveThreadLock)
-        {
-            return this.receivedMessagesQueue.size() > 0;
-        }
+        return this.receivedMessagesQueue.size() > 0;
     }
 
     public boolean hasCallbacksToExecute()
     {
-        synchronized (sendThreadLock)
-        {
-            return this.callbackPacketsQueue.size() > 0;
-        }
+        return this.callbackPacketsQueue.size() > 0;
     }
 
     public boolean needsReconnect()
@@ -519,16 +510,13 @@ public class IotHubTransport implements IotHubListener
                 this.updateStatus(IotHubConnectionStatus.DISCONNECTED, reason, cause);
 
                 // Notify send thread to finish up so it doesn't survive this close
-                synchronized (this.sendThreadLock)
-                {
-                    this.sendThreadLock.notifyAll();
-                }
+                this.sendThreadSemaphore.release();
 
                 // Notify receive thread to finish up so it doesn't survive this close
-                synchronized (this.receiveThreadLock)
-                {
-                    this.receiveThreadLock.notifyAll();
-                }
+                this.receiveThreadSemaphore.release();
+
+                // Notify reconnect thread to finish up so it doesn't survive this close
+                this.reconnectThreadSemaphore.release();
 
                 log.debug("Client connection closed successfully");
             }
@@ -1390,13 +1378,13 @@ public class IotHubTransport implements IotHubListener
     {
         final IotHubTransportPacket transportPacket;
         final Queue<IotHubTransportPacket> waitingPacketsQueue;
-        final Object sendThreadLock;
+        final Semaphore sendThreadSemaphore;
 
-        MessageRetryRunnable(Queue<IotHubTransportPacket> waitingPacketsQueue, IotHubTransportPacket transportPacket, Object sendThreadLock)
+        MessageRetryRunnable(Queue<IotHubTransportPacket> waitingPacketsQueue, IotHubTransportPacket transportPacket, Semaphore sendThreadSemaphore)
         {
             this.waitingPacketsQueue = waitingPacketsQueue;
             this.transportPacket = transportPacket;
-            this.sendThreadLock = sendThreadLock;
+            this.sendThreadSemaphore = sendThreadSemaphore;
         }
 
         @Override
@@ -1405,10 +1393,7 @@ public class IotHubTransport implements IotHubListener
             this.waitingPacketsQueue.add(this.transportPacket);
 
             // Wake up send messages thread so that it can send this message
-            synchronized (this.sendThreadLock)
-            {
-                this.sendThreadLock.notifyAll();
-            }
+            this.sendThreadSemaphore.release();
         }
     }
 
@@ -1439,7 +1424,7 @@ public class IotHubTransport implements IotHubListener
                 RetryDecision retryDecision = config.getRetryPolicy().getRetryDecision(packet.getCurrentRetryAttempt(), transportException);
                 if (retryDecision.shouldRetry())
                 {
-                    this.taskScheduler.schedule(new MessageRetryRunnable(this.waitingPacketsQueue, packet, this.sendThreadLock), retryDecision.getDuration(), MILLISECONDS);
+                    this.taskScheduler.schedule(new MessageRetryRunnable(this.waitingPacketsQueue, packet, this.sendThreadSemaphore), retryDecision.getDuration(), MILLISECONDS);
                     return;
                 }
                 else
@@ -1730,13 +1715,10 @@ public class IotHubTransport implements IotHubListener
     {
         if (packet.getCallback() != null)
         {
-            synchronized (this.sendThreadLock)
-            {
-                this.callbackPacketsQueue.add(packet);
+            this.callbackPacketsQueue.add(packet);
 
-                //Wake up send messages thread so that it can process this new callback if it was asleep
-                this.sendThreadLock.notifyAll();
-            }
+            //Wake up send messages thread so that it can process this new callback if it was asleep
+            this.sendThreadSemaphore.release();
         }
     }
 
@@ -1781,24 +1763,18 @@ public class IotHubTransport implements IotHubListener
             log.warn("Exception thrown while calling the onQueueRequest callback in addToWaitingQueue", ex);
         }
 
-        synchronized (this.sendThreadLock)
-        {
-            this.waitingPacketsQueue.add(packet);
+        this.waitingPacketsQueue.add(packet);
 
-            // Wake up IotHubSendTask so it can send this message
-            this.sendThreadLock.notifyAll();
-        }
+        // Wake up IotHubSendTask so it can send this message
+        this.sendThreadSemaphore.release();
     }
 
     private void addToReceivedMessagesQueue(IotHubTransportMessage message)
     {
-        synchronized (this.receiveThreadLock)
-        {
-            this.receivedMessagesQueue.add(message);
+        this.receivedMessagesQueue.add(message);
 
-            // Wake up IotHubReceiveTask so it can handle receiving this message
-            this.receiveThreadLock.notifyAll();
-        }
+        // Wake up IotHubReceiveTask so it can handle receiving this message
+        this.receiveThreadSemaphore.release();
     }
 
     /**

@@ -5,6 +5,8 @@ package com.microsoft.azure.sdk.iot.device.transport;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.concurrent.Semaphore;
+
 /**
  * Sends batched messages and invokes callbacks on completed requests. Meant to
  * be used with an executor that continuously calls run().
@@ -21,7 +23,7 @@ public final class IotHubSendTask implements Runnable
     // as this SDK would otherwise periodically spawn new threads of this type that would do nothing. It is the IotHubTransport
     // layer's responsibility to notify this thread when a message is queued to be sent or when a callback is queued to be executed
     // so that this thread can handle it.
-    private final Object sendThreadLock;
+    private final Semaphore sendThreadSemaphore;
 
     public IotHubSendTask(IotHubTransport transport)
     {
@@ -31,7 +33,7 @@ public final class IotHubSendTask implements Runnable
         }
 
         this.transport = transport;
-        this.sendThreadLock = this.transport.getSendThreadLock();
+        this.sendThreadSemaphore = this.transport.getSendThreadSemaphore();
     }
 
     public void run()
@@ -41,14 +43,11 @@ public final class IotHubSendTask implements Runnable
 
         try
         {
-            synchronized (this.sendThreadLock)
+            if (!this.transport.hasMessagesToSend() && !this.transport.hasCallbacksToExecute() && !this.transport.isClosed())
             {
-                if (!this.transport.hasMessagesToSend() && !this.transport.hasCallbacksToExecute() && !this.transport.isClosed())
-                {
-                    // IotHubTransport layer will notify this thread once a message is ready to be sent or a callback is ready
-                    // to be executed. Until then, do nothing.
-                    this.sendThreadLock.wait();
-                }
+                // IotHubTransport layer will notify this thread once a message is ready to be sent or a callback is ready
+                // to be executed. Until then, do nothing.
+                this.sendThreadSemaphore.acquire();
             }
 
             this.transport.sendMessages();
