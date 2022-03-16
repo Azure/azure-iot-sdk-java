@@ -38,7 +38,9 @@ public final class IotHubReceiveTask implements Runnable
 
     public void run()
     {
-        String threadName = this.transport.getDeviceClientUniqueIdentifier() + "-" + "Cxn" + transport.getTransportConnectionId() + "-" + THREAD_NAME;
+        String deviceClientId = this.transport.getDeviceClientUniqueIdentifier();
+        String connectionId = transport.getTransportConnectionId();
+        String threadName = deviceClientId + "-" + "Cxn" + connectionId + "-" + THREAD_NAME;
         Thread.currentThread().setName(threadName);
 
         try
@@ -49,8 +51,9 @@ public final class IotHubReceiveTask implements Runnable
             {
                 if (!this.transport.hasReceivedMessagesToHandle() && !this.transport.isClosed())
                 {
-                    // AMQP and MQTT layers will notify the IoTHubTransport layer once a message arrives, and at
-                    // that time, this thread will be notified to handle them.
+                    // IotHubTransport layer will make this semaphore available to acquire only once a received message
+                    // is ready to be handled. Once it is made available to acquire, this thread will
+                    // wake up and handle the received messages. Until then, do nothing.
                     this.receiveThreadSemaphore.acquire();
                 }
             }

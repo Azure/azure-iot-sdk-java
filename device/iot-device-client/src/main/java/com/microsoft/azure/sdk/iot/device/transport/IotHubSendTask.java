@@ -38,15 +38,18 @@ public final class IotHubSendTask implements Runnable
 
     public void run()
     {
-        String threadName = this.transport.getDeviceClientUniqueIdentifier() + "-" + "Cxn" + transport.getTransportConnectionId() + "-" + THREAD_NAME;
+        String deviceClientId = this.transport.getDeviceClientUniqueIdentifier();
+        String connectionId = transport.getTransportConnectionId();
+        String threadName = deviceClientId + "-" + "Cxn" + connectionId + "-" + THREAD_NAME;
         Thread.currentThread().setName(threadName);
 
         try
         {
             if (!this.transport.hasMessagesToSend() && !this.transport.hasCallbacksToExecute() && !this.transport.isClosed())
             {
-                // IotHubTransport layer will notify this thread once a message is ready to be sent or a callback is ready
-                // to be executed. Until then, do nothing.
+                // IotHubTransport layer will make this semaphore available to acquire only once a message is ready to
+                // be sent or a callback is ready to be executed. Once it is made available to acquire, this thread will
+                // wake up, send the messages and invoke the callbacks. Until then, do nothing.
                 this.sendThreadSemaphore.acquire();
             }
 

@@ -193,6 +193,11 @@ public class IotHubTransport implements IotHubListener
 
     public boolean needsReconnect()
     {
+        if (this.connectionStatus == IotHubConnectionStatus.DISCONNECTED_RETRYING)
+        {
+            return true;
+        }
+
         for (MultiplexedDeviceState multiplexedDeviceState : this.multiplexedDeviceConnectionStates.values())
         {
             if (multiplexedDeviceState.getConnectionStatus() == IotHubConnectionStatus.DISCONNECTED_RETRYING)
@@ -201,7 +206,7 @@ public class IotHubTransport implements IotHubListener
             }
         }
 
-        return this.connectionStatus == IotHubConnectionStatus.DISCONNECTED_RETRYING;
+        return false;
     }
 
     //Renaming it to isOpen would be confusing considering this layer's state is either open/closed/reconnecting
@@ -358,16 +363,17 @@ public class IotHubTransport implements IotHubListener
         if (connectionId.equals(this.iotHubTransportConnection.getConnectionId()))
         {
             log.debug("The device session in the multiplexed connection to the IoT Hub has been lost for device {}", deviceId);
-            if (e == null && !shouldReconnect)
-            {
-                this.updateStatus(IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.CLIENT_CLOSE, null, deviceId);
-            }
-            else
+            if (shouldReconnect)
             {
                 this.updateStatus(IotHubConnectionStatus.DISCONNECTED_RETRYING, exceptionToStatusChangeReason(e), e, deviceId);
 
                 log.trace("Waking up reconnection thread");
                 this.reconnectThreadSemaphore.release();
+            }
+            else
+            {
+                // if the session shouldn't be reconnected, then it was a user-initiated close of the session
+                this.updateStatus(IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.CLIENT_CLOSE, null, deviceId);
             }
         }
     }
@@ -532,15 +538,8 @@ public class IotHubTransport implements IotHubListener
             int reconnectionAttempt = 0;
             String deviceSessionToReconnect = null;
 
-            RetryPolicy retryPolicy; // retry policy to be used for connection level retry, not device session specific retry
-            if (isMultiplexing)
-            {
-                retryPolicy = multiplexingRetryPolicy;
-            }
-            else
-            {
-                retryPolicy = this.getDefaultConfig().getRetryPolicy();
-            }
+            // retry policy to be used for connection level retry, not device session specific retry
+            RetryPolicy retryPolicy = isMultiplexing ? multiplexingRetryPolicy : this.getDefaultConfig().getRetryPolicy();
 
             // keep attempting to reconnect the connection and any multiplexed device sessions until they are all CONNECTED
             // or they reach a DISCONNECTED state due to retry expired, timeout, encountering a non-retryable exception, etc.
@@ -1256,9 +1255,9 @@ public class IotHubTransport implements IotHubListener
         this.updateStatus(IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, null);
     }
 
-    //For reconnecting multiplexed devices only. Since this triggers asynchronous functions in the AMQP layer, there
+    // For reconnecting multiplexed devices only. Since this triggers asynchronous functions in the AMQP layer, there
     // is no guarantee that the reconnect worked just because the unregister/register calls return successfully.
-    // Still need to check the device connection status before you can report the device to be re-connected.
+    // Still need to check the device connection status before you can report the device to be connected.
     private void singleDeviceReconnectAttemptAsync(String deviceSessionToReconnect) throws InterruptedException
     {
         MultiplexedDeviceState multiplexedDeviceState = multiplexedDeviceConnectionStates.get(deviceSessionToReconnect);
@@ -1576,33 +1575,42 @@ public class IotHubTransport implements IotHubListener
 
     private void updateStatus(IotHubConnectionStatus newConnectionStatus, IotHubConnectionStatusChangeReason reason, Throwable throwable, String deviceId)
     {
-        if (this.multiplexedDeviceConnectionStates.containsKey(deviceId) && this.multiplexedDeviceConnectionStates.get(deviceId).getConnectionStatus() != newConnectionStatus)
+        if (!this.multiplexedDeviceConnectionStates.containsKey(deviceId))
         {
-            if (throwable == null)
+            // not tracking the state of this device, likely because it was unregistered. No need to update any status here.
+            return;
+        }
+
+        if (this.multiplexedDeviceConnectionStates.get(deviceId).getConnectionStatus() == newConnectionStatus)
+        {
+            // new status is the same as the current status, so no need to update anything here.
+            return;
+        }
+
+        if (throwable == null)
+        {
+            log.debug("Updating device {} status to new status {} with reason {}", deviceId, newConnectionStatus, reason);
+        }
+        else
+        {
+            log.warn("Updating device {} status to new status {} with reason {}", deviceId, newConnectionStatus, reason, throwable);
+        }
+
+        synchronized (this.multiplexingDeviceStateLock)
+        {
+            MultiplexedDeviceState deviceState = new MultiplexedDeviceState(newConnectionStatus, throwable);
+
+            if (newConnectionStatus == IotHubConnectionStatus.DISCONNECTED_RETRYING)
             {
-                log.debug("Updating device {} status to new status {} with reason {}", deviceId, newConnectionStatus, reason);
-            }
-            else
-            {
-                log.warn("Updating device {} status to new status {} with reason {}", deviceId, newConnectionStatus, reason, throwable);
+                // When the reconnect thread wakes up, it will know that this device session has not attempted any
+                // reconnect attempts yet.
+                deviceState.setReconnectionAttemptNumber(0);
             }
 
-            synchronized (this.multiplexingDeviceStateLock)
-            {
-                MultiplexedDeviceState deviceState = new MultiplexedDeviceState(newConnectionStatus, throwable);
+            this.multiplexedDeviceConnectionStates.put(deviceId, deviceState);
 
-                if (newConnectionStatus == IotHubConnectionStatus.DISCONNECTED_RETRYING)
-                {
-                    // When the reconnect thread wakes up, it will know that this device session has not attempted any
-                    // reconnect attempts yet.
-                    deviceState.setReconnectionAttemptNumber(0);
-                }
-
-                this.multiplexedDeviceConnectionStates.put(deviceId, deviceState);
-
-                log.debug("Invoking connection status callbacks with new status details");
-                invokeConnectionStatusChangeCallback(newConnectionStatus, reason, throwable, deviceId);
-            }
+            log.debug("Invoking connection status callbacks with new status details");
+            invokeConnectionStatusChangeCallback(newConnectionStatus, reason, throwable, deviceId);
         }
     }
 

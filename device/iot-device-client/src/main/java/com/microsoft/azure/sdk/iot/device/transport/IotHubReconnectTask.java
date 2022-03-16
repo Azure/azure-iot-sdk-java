@@ -19,7 +19,7 @@ public final class IotHubReconnectTask implements Runnable
     // This lock is used to communicate state between this thread and the IoTHubTransport layer. This thread will
     // wait until a disconnection event occurs in that layer before continuing. This means that if the transport layer
     // has no connectivity problems, then this thread will do nothing and cost nothing.
-    private final Semaphore reconnectThreadLock;
+    private final Semaphore reconnectThreadSemaphore;
 
     public IotHubReconnectTask(IotHubTransport transport)
     {
@@ -29,12 +29,14 @@ public final class IotHubReconnectTask implements Runnable
         }
 
         this.transport = transport;
-        this.reconnectThreadLock = this.transport.getReconnectThreadSemaphore();
+        this.reconnectThreadSemaphore = this.transport.getReconnectThreadSemaphore();
     }
 
     public void run()
     {
-        String threadName = this.transport.getDeviceClientUniqueIdentifier() + "-" + "Cxn" + transport.getTransportConnectionId() + "-" + THREAD_NAME;
+        String deviceClientId = this.transport.getDeviceClientUniqueIdentifier();
+        String connectionId = transport.getTransportConnectionId();
+        String threadName = deviceClientId + "-" + "Cxn" + connectionId + "-" + THREAD_NAME;
         Thread.currentThread().setName(threadName);
 
         try
@@ -43,8 +45,10 @@ public final class IotHubReconnectTask implements Runnable
             {
                 if (!transport.needsReconnect())
                 {
-                    // IotHubTransport layer will notify this thread once a disconnection event occurs. Until then, do nothing.
-                    this.reconnectThreadLock.acquire();
+                    // IotHubTransport layer will make this semaphore available to acquire only once a disconnection
+                    // event occurs. Once it is made available to acquire, this thread will wake up and run the reconnection
+                    // logic.
+                    this.reconnectThreadSemaphore.acquire();
                 }
             }
             catch (InterruptedException e)
