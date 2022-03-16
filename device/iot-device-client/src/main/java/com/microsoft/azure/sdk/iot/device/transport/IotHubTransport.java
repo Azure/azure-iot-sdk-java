@@ -177,7 +177,6 @@ public class IotHubTransport implements IotHubListener
         return this.reconnectThreadLock;
     }
 
-
     public boolean hasMessagesToSend()
     {
         synchronized (sendThreadLock)
@@ -541,167 +540,129 @@ public class IotHubTransport implements IotHubListener
         }
     }
 
+    // should only be called from IotHubReconnectTask
     public void reconnect()
     {
         synchronized (this.reconnectionLock)
         {
-            long reconnectionStartTimeMillis = System.currentTimeMillis();
-            int reconnectionAttempts = 0;
+            long reconnectionStartTimeMillis = 0;
+            int reconnectionAttempt = 0;
             String deviceSessionToReconnect = null;
 
+            RetryPolicy retryPolicy; // retry policy to be used for connection level retry, not device session specific retry
+            if (isMultiplexing)
+            {
+                retryPolicy = multiplexingRetryPolicy;
+            }
+            else
+            {
+                retryPolicy = this.getDefaultConfig().getRetryPolicy();
+            }
+
+            // keep attempting to reconnect the connection and any multiplexed device sessions until they are all CONNECTED
+            // or they reach a DISCONNECTED state due to retry expired, timeout, encountering a non-retryable exception, etc.
             while (needsReconnect())
             {
+                // If user initiates a close of this client, abandon all reconnection logic
                 if (this.isClosing)
                 {
                     log.trace("Abandoning reconnection logic since this client has started closing");
                     return;
                 }
 
+                // if the connection as a whole is DISCONNECTED_RETRYING (as opposed to one or many multiplexed device
+                // sessions being DISCONNECTED_RETRYING)
                 if (this.connectionStatus == IotHubConnectionStatus.DISCONNECTED_RETRYING)
                 {
-                    synchronized (this.inProgressMessagesLock)
-                    {
-                        log.trace("Due to disconnection event, clearing active queues, and re-queueing them to waiting queues to be re-processed later upon reconnection");
-                        for (IotHubTransportPacket packetToRequeue : inProgressPackets.values())
-                        {
-                            this.addToWaitingQueue(packetToRequeue);
-                        }
+                    clearInProgressMessages();
 
-                        inProgressPackets.clear();
+                    if (reconnectionStartTimeMillis == 0)
+                    {
+                        reconnectionStartTimeMillis = System.currentTimeMillis();
                     }
 
-                    Throwable cause = this.connectionStatusLastException;
-                    TransportException transportException;
-                    if (cause instanceof TransportException)
-                    {
-                        transportException = (TransportException) cause;
-                    }
-                    else
-                    {
-                        transportException = new TransportException(cause);
-                        transportException.setRetryable(true);
-                    }
-
-                    if (this.hasOperationTimedOut(reconnectionStartTimeMillis))
-                    {
-                        log.debug("Reconnection was abandoned due to the operation timeout");
-                        this.close(
-                                IotHubConnectionStatusChangeReason.RETRY_EXPIRED,
-                                new DeviceOperationTimeoutException("Device operation for reconnection timed out"));
-                    }
-
-                    log.trace("Attempting reconnect attempt {}", reconnectionAttempts);
-                    reconnectionAttempts++;
-
-                    RetryPolicy retryPolicy;
-                    if (isMultiplexing)
-                    {
-                        retryPolicy = multiplexingRetryPolicy;
-                    }
-                    else
-                    {
-                        retryPolicy = this.getDefaultConfig().getRetryPolicy();
-                    }
-                    RetryDecision retryDecision = retryPolicy.getRetryDecision(reconnectionAttempts, transportException);
-                    if (!retryDecision.shouldRetry())
-                    {
-                        log.debug("Reconnection was abandoned due to the retry policy");
-                        this.close(IotHubConnectionStatusChangeReason.RETRY_EXPIRED, transportException); //TODO deadlock?
-                    }
-
-                    log.trace("Sleeping between reconnect attempts");
-                    IotHubTransport.sleepUninterruptibly(retryDecision.getDuration(), MILLISECONDS);
-
-                    transportException = singleReconnectAttempt();
-
-                    if (transportException != null && !transportException.isRetryable())
-                    {
-                        log.error("Reconnection was abandoned due to encountering a non-retryable exception", transportException);
-                        this.close(this.exceptionToStatusChangeReason(transportException), transportException);
-                    }
+                    singleReconnectAttempt(retryPolicy, reconnectionAttempt, reconnectionStartTimeMillis);
+                    reconnectionAttempt++;
                 }
                 else // one or more multiplexed device sessions lost connectivity
                 {
-                    for (String deviceId : this.multiplexedDeviceConnectionStates.keySet())
-                    {
-                        IotHubConnectionStatus status = this.multiplexedDeviceConnectionStates.get(deviceId).getConnectionStatus();
-                        if (status == IotHubConnectionStatus.DISCONNECTED_RETRYING)
-                        {
-                            deviceSessionToReconnect = deviceId;
-                        }
-                        else if (status == IotHubConnectionStatus.CONNECTED && deviceSessionToReconnect != null && deviceSessionToReconnect.equals(deviceId))
-                        {
-                            // singals that a device session that attempted to reconnect has successfully reconnected and
-                            // that this retry logic can move on to reconnecting a different device session if needed
-                            deviceSessionToReconnect = null;
-                        }
-
-                        //TODO any fast way out of this loop?
-                    }
+                    // pick one of the DISCONNECTED_RETRYING device sessions to attempt to reconnect
+                    deviceSessionToReconnect = pickDeviceSessionToReconnect(deviceSessionToReconnect);
 
                     if (deviceSessionToReconnect != null)
                     {
-                        MultiplexedDeviceState multiplexedDeviceState = multiplexedDeviceConnectionStates.get(deviceSessionToReconnect);
-                        if (multiplexedDeviceState.getConnectionStatus() == IotHubConnectionStatus.DISCONNECTED_RETRYING)
-                        {
-                            Throwable cause = multiplexedDeviceState.getLastException();
-                            TransportException transportException;
-                            if (cause instanceof TransportException)
-                            {
-                                transportException = (TransportException) cause;
-                            }
-                            else
-                            {
-                                transportException = new TransportException(cause);
-                                transportException.setRetryable(true);
-                            }
-
-                            if (this.hasOperationTimedOut(reconnectionStartTimeMillis))
-                            {
-                                this.updateStatus(IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.RETRY_EXPIRED, transportException, deviceSessionToReconnect);
-                                log.debug("Reconnection for device {} was abandoned due to the operation timeout", deviceSessionToReconnect);
-                            }
-
-                            if (multiplexedDeviceState.getReconnectionAttemptNumber() == 0)
-                            {
-                                multiplexedDeviceState.setStartReconnectTime(System.currentTimeMillis());
-                            }
-
-                            multiplexedDeviceState.incrementReconnectionAttemptNumber();
-
-                            ClientConfiguration config = this.getConfig(deviceSessionToReconnect);
-
-                            if (config == null)
-                            {
-                                log.debug("Reconnection for device {} was abandoned because it was unregistered while reconnecting", deviceSessionToReconnect);
-                                continue;
-                            }
-
-                            RetryPolicy retryPolicy = config.getRetryPolicy();
-                            RetryDecision retryDecision = retryPolicy.getRetryDecision(multiplexedDeviceState.getReconnectionAttemptNumber(), transportException);
-                            if (!retryDecision.shouldRetry())
-                            {
-                                this.updateStatus(IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.RETRY_EXPIRED, transportException, deviceSessionToReconnect);
-                                log.debug("Reconnection for device {} was abandoned due to the retry policy", deviceSessionToReconnect);
-                            }
-
-                            log.trace("Attempting to reconnect device session: attempt {}", reconnectionAttempts);
-
-                            // This call triggers some async amqp logic, so all this function can do is wait for a bit and check the connection
-                            // status for this device before retrying.
-                            singleDeviceReconnectAttemptAsync(deviceSessionToReconnect);
-
-                            log.trace("Sleeping between device reconnect attempts for device {}", deviceSessionToReconnect);
-                            IotHubTransport.sleepUninterruptibly(retryDecision.getDuration(), MILLISECONDS);
-
-                            if (!transportException.isRetryable())
-                            {
-                                this.updateStatus(IotHubConnectionStatus.DISCONNECTED, this.exceptionToStatusChangeReason(transportException), transportException, deviceSessionToReconnect);
-                                log.error("Reconnection for device {} was abandoned due to encountering a non-retryable exception", deviceSessionToReconnect, transportException);
-                            }
-                        }
+                        singleDeviceReconnectAttemptAsync(deviceSessionToReconnect);
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * Check if the previous reconnection attempt for the given device session has reached a terminal state yet or not
+     * @param deviceSessionToReconnect the deviceId of the device session to check on.
+     * @return true if the reconnection attempt has reached a terminal state (CONNECTED or DISCONNECTED), and false otherwise.
+     */
+    private boolean checkIfPreviousReconnectionAttemptFinished(String deviceSessionToReconnect)
+    {
+        MultiplexedDeviceState lastReconnectAttemptsDeviceSession = this.multiplexedDeviceConnectionStates.get(deviceSessionToReconnect);
+        if (lastReconnectAttemptsDeviceSession.getConnectionStatus() != IotHubConnectionStatus.DISCONNECTED_RETRYING)
+        {
+            // signals that a device session that attempted to reconnect has either successfully reconnected or has
+            // reached a terminal DISCONNECTED state due to exhausting its retry, encountering a non-retryable exception, etc.
+            log.trace("Finished reconnection logic for device session for device {} with terminal state {}", deviceSessionToReconnect, lastReconnectAttemptsDeviceSession.getConnectionStatus());
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Pick which device session out of possibly many DISCONNECTED_RETRYING multiplexed device sessions to attempt a retry
+     * on next.
+     * @param previousDeviceSessionToReconnect the device Id of the device session that the last reconnection attempt
+     * was for, or null if this is the first reconnect attempt for any device session.
+     * @return The device Id of the multiplexed device session that should attempt to reconnect next. This will be
+     * the same value as the passed in previousDeviceSessionToReconnect if that device session's reconnection attempts
+     * have not reached a terminal state yet. If null, then no device sessions need reconnecting anymore.
+     */
+    private String pickDeviceSessionToReconnect(String previousDeviceSessionToReconnect)
+    {
+        boolean previousReconnectionAttemptFinished = checkIfPreviousReconnectionAttemptFinished(previousDeviceSessionToReconnect);
+
+        if (previousReconnectionAttemptFinished)
+        {
+            // if the last device session to attempt reconnection has reached a terminal state, pick a new device session
+            // from the set of DISCONNECTED_RETRYING device sessions
+            for (String deviceId : this.multiplexedDeviceConnectionStates.keySet())
+            {
+                IotHubConnectionStatus status = this.multiplexedDeviceConnectionStates.get(deviceId).getConnectionStatus();
+                if (status == IotHubConnectionStatus.DISCONNECTED_RETRYING)
+                {
+                    return deviceId;
+                }
+            }
+
+            return null; // no devices are DISCONNECTED_RETRYING
+        }
+
+        // if the previous reconnect attempt hasn't reached a terminal state yet, just continue retrying it
+        return previousDeviceSessionToReconnect;
+    }
+
+    private void clearInProgressMessages()
+    {
+        synchronized (this.inProgressMessagesLock)
+        {
+            if (inProgressPackets.size() > 0)
+            {
+                log.trace("Due to disconnection event, clearing active queues, and re-queueing them to waiting queues to be re-processed later upon reconnection");
+                for (IotHubTransportPacket packetToRequeue : inProgressPackets.values())
+                {
+                    this.addToWaitingQueue(packetToRequeue);
+                }
+
+                inProgressPackets.clear();
             }
         }
     }
@@ -1307,18 +1268,58 @@ public class IotHubTransport implements IotHubListener
     //For reconnecting multiplexed devices only. Since this triggers asynchronous functions in the AMQP layer, there
     // is no guarantee that the reconnect worked just because the unregister/register calls return successfully.
     // Still need to check the device connection status before you can report the device to be re-connected.
-    private void singleDeviceReconnectAttemptAsync(String deviceId)
+    private void singleDeviceReconnectAttemptAsync(String deviceSessionToReconnect)
     {
-        ClientConfiguration config = this.getConfig(deviceId);
-
-        if (config == null)
+        MultiplexedDeviceState multiplexedDeviceState = multiplexedDeviceConnectionStates.get(deviceSessionToReconnect);
+        if (multiplexedDeviceState.getConnectionStatus() == IotHubConnectionStatus.DISCONNECTED_RETRYING)
         {
-            log.debug("Reconnection for device {} was abandoned because it was unregistered while reconnecting", deviceId);
-            return;
-        }
+            TransportException transportException = getTransportExceptionFromThrowable(multiplexedDeviceState.getLastException());
 
-        ((AmqpsIotHubConnection) this.iotHubTransportConnection).unregisterMultiplexedDevice(config, true);
-        ((AmqpsIotHubConnection) this.iotHubTransportConnection).registerMultiplexedDevice(config);
+            if (multiplexedDeviceState.getReconnectionAttemptNumber() == 0)
+            {
+                multiplexedDeviceState.setStartReconnectTime(System.currentTimeMillis());
+            }
+
+            if (this.hasOperationTimedOut(multiplexedDeviceState.getStartReconnectTime()))
+            {
+                this.updateStatus(IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.RETRY_EXPIRED, transportException, deviceSessionToReconnect);
+                log.debug("Reconnection for device {} was abandoned due to the operation timeout", deviceSessionToReconnect);
+            }
+
+            multiplexedDeviceState.incrementReconnectionAttemptNumber();
+
+            ClientConfiguration config = this.getConfig(deviceSessionToReconnect);
+
+            if (config == null)
+            {
+                log.debug("Reconnection for device {} was abandoned because it was unregistered while reconnecting", deviceSessionToReconnect);
+                return;
+            }
+
+            RetryPolicy retryPolicy = config.getRetryPolicy();
+            RetryDecision retryDecision = retryPolicy.getRetryDecision(multiplexedDeviceState.getReconnectionAttemptNumber(), transportException);
+            if (!retryDecision.shouldRetry())
+            {
+                this.updateStatus(IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.RETRY_EXPIRED, transportException, deviceSessionToReconnect);
+                log.debug("Reconnection for device {} was abandoned due to the retry policy", deviceSessionToReconnect);
+            }
+
+            log.trace("Attempting to reconnect device session: attempt {}", multiplexedDeviceState.getReconnectionAttemptNumber());
+
+            // This call triggers some async amqp logic, so all this function can do is wait for a bit and check the connection
+            // status for this device before retrying.
+            ((AmqpsIotHubConnection) this.iotHubTransportConnection).unregisterMultiplexedDevice(config, true);
+            ((AmqpsIotHubConnection) this.iotHubTransportConnection).registerMultiplexedDevice(config);
+
+            log.trace("Sleeping between device reconnect attempts for device {}", deviceSessionToReconnect);
+            IotHubTransport.sleepUninterruptibly(retryDecision.getDuration(), MILLISECONDS);
+
+            if (!transportException.isRetryable())
+            {
+                this.updateStatus(IotHubConnectionStatus.DISCONNECTED, this.exceptionToStatusChangeReason(transportException), transportException, deviceSessionToReconnect);
+                log.error("Reconnection for device {} was abandoned due to encountering a non-retryable exception", deviceSessionToReconnect, transportException);
+            }
+        }
     }
 
     private ClientConfiguration getConfig(String deviceId)
@@ -1331,11 +1332,33 @@ public class IotHubTransport implements IotHubListener
 
     /**
      * Attempts to close and then re-open the iotHubTransportConnection once
-     *
-     * @return the exception encountered during closing or opening, or null if reconnection succeeded
      */
-    private TransportException singleReconnectAttempt()
+    private void singleReconnectAttempt(RetryPolicy retryPolicy, int reconnectionAttempt, long reconnectionStartTimeMillis)
     {
+        if (this.hasOperationTimedOut(reconnectionStartTimeMillis))
+        {
+            log.debug("Reconnection was abandoned due to the operation timeout");
+            this.close(
+                    IotHubConnectionStatusChangeReason.RETRY_EXPIRED,
+                    new DeviceOperationTimeoutException("Device operation for reconnection timed out"));
+            return;
+        }
+
+        TransportException transportException = getTransportExceptionFromThrowable(this.connectionStatusLastException);
+
+        log.trace("Attempting reconnect attempt {}", reconnectionAttempt);
+
+        RetryDecision retryDecision = retryPolicy.getRetryDecision(reconnectionAttempt, transportException);
+        if (!retryDecision.shouldRetry())
+        {
+            log.debug("Reconnection was abandoned due to the retry policy");
+            this.close(IotHubConnectionStatusChangeReason.RETRY_EXPIRED, transportException);
+            return;
+        }
+
+        log.trace("Sleeping between reconnect attempts");
+        IotHubTransport.sleepUninterruptibly(retryDecision.getDuration(), MILLISECONDS);
+
         try
         {
             log.trace("Attempting to close and re-open the iot hub transport connection...");
@@ -1347,10 +1370,14 @@ public class IotHubTransport implements IotHubListener
         {
             checkForUnauthorizedException(newTransportException);
             log.warn("Failed to close and re-open the iot hub transport connection, checking if another retry attempt should be made", newTransportException);
-            return newTransportException;
+            transportException = newTransportException;
         }
 
-        return null;
+        if (!transportException.isRetryable())
+        {
+            log.error("Reconnection was abandoned due to encountering a non-retryable exception", transportException);
+            this.close(this.exceptionToStatusChangeReason(transportException), transportException);
+        }
     }
 
     /**
@@ -1596,7 +1623,7 @@ public class IotHubTransport implements IotHubListener
         for (String registeredDeviceId : this.connectionStatusChangeCallbacks.keySet())
         {
             MultiplexedDeviceState multiplexedDeviceState = this.multiplexedDeviceConnectionStates.get(registeredDeviceId);
-            if (multiplexedDeviceState != null && multiplexedDeviceState.getConnectionStatus() != status) //TODO why would this be null?
+            if (multiplexedDeviceState != null && multiplexedDeviceState.getConnectionStatus() != status)
             {
                 // only onStatusChanged the callback if the state of the device is changing.
                 this.connectionStatusChangeCallbacks.get(registeredDeviceId).onStatusChanged(status, reason, e, this.connectionStatusChangeCallbackContexts.get(registeredDeviceId));
@@ -1824,5 +1851,18 @@ public class IotHubTransport implements IotHubListener
             //Device key is present, sas token will be renewed upon re-opening the connection
             transportException.setRetryable(true);
         }
+    }
+
+    private static TransportException getTransportExceptionFromThrowable(Throwable cause)
+    {
+        TransportException transportException;
+        if (cause instanceof TransportException)
+        {
+            return (TransportException) cause;
+        }
+
+        transportException = new TransportException(cause);
+        transportException.setRetryable(true);
+        return transportException;
     }
 }
