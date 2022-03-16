@@ -40,6 +40,10 @@ import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.NestedCustomOb
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
@@ -335,23 +339,75 @@ public class DirectMethodsTests extends DirectMethodsCommon
 
     @Test
     @StandardTierHubOnlyTest
+    public void invokeMethodWithPayloadAsNull() throws Exception
+    {
+        // Direct method with null payload
+        super.subscribeToMethodAndReceiveAsDifferentTypes("Null");
+        super.invokeHelper(null);
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void invokeMethodWithPayloadAsPrimitiveType() throws Exception
+    {
+        // Direct method payload in boolean (one of Primitive types)
+        boolean bool = true;
+        super.subscribeToMethodAndReceiveAsDifferentTypes("Boolean");
+        super.invokeHelper(bool);
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
     public void invokeMethodWithPayloadAsString() throws Exception
     {
-        super.subscribeToMethodAndReceiveAsJsonString();
-
         // Direct method payload in String type
-        String string = "This is a valid payload";
+        String string = "This is a valid payload.";
+        super.subscribeToMethodAndReceiveAsDifferentTypes(string.getClass().getSimpleName());
         super.invokeHelper(string);
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void invokeMethodWithPayloadAsArray() throws Exception
+    {
+        // Direct method payload in Array
+        byte[] bytes = new byte[]{1, 1, 1};
+        super.subscribeToMethodAndReceiveAsDifferentTypes("Array");
+        super.invokeHelper(bytes);
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void invokeMethodWithPayloadAsList() throws Exception
+    {
+        // Direct method payload in List type
+        List<Double> list = new ArrayList<>();
+        list.add(1.0);
+        list.add(1.0);
+        list.add(1.0);
+        super.subscribeToMethodAndReceiveAsDifferentTypes(list.getClass().getSimpleName());
+        super.invokeHelper(list);
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void invokeMethodWithPayloadAsMap() throws Exception
+    {
+        // Direct method payload in Map type
+        Map<String, Object> map = new HashMap<>();
+        map.put("key", "value");
+
+        super.subscribeToMethodAndReceiveAsDifferentTypes(map.getClass().getSimpleName());
+        super.invokeHelper(map);
     }
 
     @Test
     @StandardTierHubOnlyTest
     public void invokeMethodWithPayloadAsCustomObject() throws Exception
     {
-        super.subscribeToMethodAndReceiveAsCustomObject();
-
         // Direct method payload in Custom type
         CustomObject customObject = new CustomObject("some test message", 1, true, new NestedCustomObject("some nested test message", 2));
+        super.subscribeToMethodAndReceiveAsDifferentTypes(customObject.getClass().getSimpleName());
         super.invokeHelper(customObject);
     }
 }

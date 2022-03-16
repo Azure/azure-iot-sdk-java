@@ -82,6 +82,8 @@ public class ModuleInvokeMethodSample
         ModuleClient client = ModuleClient.createFromEnvironment(new UnixDomainSocketSample.UnixDomainSocketChannelImpl(), protocol);
         client.open(false);
 
+        // Along with String as the type of "methodPayload" here, the type can also be Null/Primitive type/Array/List/Map/custom type.
+        // Please also refer to https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-client/src/main/java/com/microsoft/azure/sdk/iot/device/edge/DirectMethodRequest.java
         DirectMethodRequest directMethodRequest = new DirectMethodRequest(methodName, methodPayload);
         DirectMethodResponse result;
         try

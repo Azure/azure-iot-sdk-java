@@ -35,6 +35,13 @@ public class DirectMethodSample
     private static final String methodName = "[Function Name]";
     private static final int responseTimeout = 200;
     private static final int connectTimeout = 5;
+
+    // The payload can be:
+    // Null: the "payload" field will not be included;
+    // Primitive type/String/Array/List/Map/custom type: will be serialized as value of the "payload" field using GSON.
+    //
+    // For a full list of end-to-end tests with different payload types, please refer to
+    // https://github.com/Azure/azure-iot-sdk-java/blob/main/iot-e2e-tests/common/src/test/java/tests/integration/com/microsoft/azure/sdk/iot/iothub/methods/DirectMethodsTests.java
     private static final Map<String, Object> payload = new HashMap<String, Object>()
     {
         {
@@ -92,7 +99,9 @@ public class DirectMethodSample
             throw new IOException("Method invoke returns null");
         }
         System.out.println("Status=" + result.getStatus());
-        System.out.println("Payload=" + result.getPayload());
+
+        // Payload type in request for this sample is Map only, so we are using getPayloadAsCustomType(Map.class) to get payload in response.
+        System.out.println("Payload=" + result.getPayloadAsCustomType(Map.class));
     }
 
     private static void scheduleInvokeMethod(DirectMethodsClient methodClient, ScheduledJobsClient jobClient) throws IotHubException, IOException, InterruptedException

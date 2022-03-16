@@ -11,9 +11,9 @@ public class DirectMethodResponse
     /**
      * Constructor for a DirectMethodResponse.
      * @param status the status in DirectMethodResponse which is returned by the device
-     * @param payload the payload attached to that method. This parameter can take
-         * null: the DirectMethodResponse object will not include the "payload" field
-         * String/List/Map/complex nested object: it will be serialized as value of "payload" field in DirectMethodResponse
+     * @param payload the payload attached to that method. This parameter can be
+         * Null: the DirectMethodResponse object will not include the "payload" field
+         * Primitive type/String/Array/List/Map/custom type: will be serialized as value of the "payload" field using GSON.
      */
     public DirectMethodResponse(int status, Object payload)
     {

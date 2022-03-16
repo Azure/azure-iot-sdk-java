@@ -49,14 +49,14 @@ public final class DigitalTwinCommandResponse {
     }
 
     /**
-     * Return the DigitalTwinCommandResponse payload in Custom type
-     * @param customObject the Custom type in which the payload can return
-     * @param <T> it describes the type parameter
+     * Return the DigitalTwinCommandResponse payload in a custom type of your choosing
+     * Use this if you wish to deserialize to a specific type using a deserialization library of your choice
+     * @param clazz the Custom type into which the payload can be deserialized
      * @return the DigitalTwinCommandResponse payload in Custom type
      */
-    public <T> T getPayloadAsCustomType(Class<T> customObject)
+    public <T> T getPayloadAsCustomType(Class<T> clazz)
     {
-        return new GsonBuilder().create().fromJson(payload, customObject);
+        return new GsonBuilder().create().fromJson(payload, clazz);
     }
 
     public void setPayload(JsonElement payload)

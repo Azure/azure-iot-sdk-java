@@ -191,13 +191,45 @@ public class DirectMethodsCommon extends IntegrationTest
 
     private Object modifyPayload(Object methodData)
     {
-        if (methodData instanceof String)
+        if (methodData instanceof Boolean)
         {
+            // set methodData from true to false
+            methodData = false;
+        }
+        else if (methodData instanceof String)
+        {
+            // set methodData (as a String) from "This is a valid payload." to "This is a new valid payload."
             methodData = "This is a new valid payload.";
+        }
+        else if (methodData instanceof byte[])
+        {
+            // set the first element in methodData (as a byte array) from 1 (original value) to 2
+            ((byte[]) methodData)[0] = 2;
+        }
+        else if (methodData instanceof List)
+        {
+            if (!((List<?>) methodData).isEmpty())
+            {
+                // set the first element in methodData (as a list) from 1.0 (original value) to 2.0
+                ((List<Double>) methodData).set(0, 2.0);
+            }
+        }
+        else if (methodData instanceof Map)
+        {
+            if (!((Map<?, ?>) methodData).isEmpty())
+            {
+                // set the value of "key" in methodData (as a map) from "value" to "new value"
+                ((Map<String, Object>) methodData).put("key", "new value");
+            }
         }
         else if (methodData instanceof CustomObject)
         {
+            // set the value of "stringAttri" in methodData (as a CustomObject) from "test message" to "new test message"
             ((CustomObject)methodData).setStringAttri("new test message");
+        }
+        else
+        {
+            methodData = "NULL Payload.";
         }
 
         return methodData;
@@ -250,96 +282,79 @@ public class DirectMethodsCommon extends IntegrationTest
             null);
     }
 
-    public void subscribeToMethodAndReceiveAsJsonString() throws Exception
+    public void subscribeToMethodAndReceiveAsDifferentTypes(String type) throws Exception
     {
         testInstance.setup();
         this.testInstance.identity.getClient().open(true);
 
         this.testInstance.identity.getClient().subscribeToMethods(
-            (methodName, methodData, context) ->
-            {
-                String methodDataAsJsonString = methodData.getPayloadAsString();
-
-                log.info("Device invoked " + methodName);
-                com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse methodResponseAsJsonString;
-                int status;
-                Object result;
-
-                try
+                (methodName, methodData, context) ->
                 {
-                    switch (methodName)
+                    Object methodDataAsDifferentTypeObject;
+
+                    if (type.equals("Boolean"))
                     {
-                        case METHOD_MODIFY:
-                            result = modifyPayload(methodDataAsJsonString);
-                            status = 1 + new Random().nextInt(998); // random number bound from 1 to 999
-                            break;
-                        default:
-                            result = "unknown:" + methodName;
-                            status = METHOD_NOT_DEFINED;
-                            break;
+                        methodDataAsDifferentTypeObject = methodData.getPayloadAsCustomType(Boolean.class);
                     }
-                }
-                catch (Exception e)
-                {
-                    result = e.toString();
-                    status = METHOD_THROWS;
-                }
-
-                methodResponseAsJsonString = new com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse(status, result);
-
-                this.testInstance.directMethodPayload = methodData;
-                this.testInstance.directMethodResponse = methodResponseAsJsonString;
-                this.testInstance.statusCode = status;
-
-                return methodResponseAsJsonString;
-            },
-            null);
-    }
-
-    public void subscribeToMethodAndReceiveAsCustomObject() throws Exception
-    {
-        testInstance.setup();
-        this.testInstance.identity.getClient().open(true);
-
-        this.testInstance.identity.getClient().subscribeToMethods(
-            (methodName, methodData, context) ->
-            {
-                CustomObject methodDataAsCustomObject = methodData.getPayloadAsCustomType(CustomObject.class);
-
-                log.info("Device invoked " + methodName);
-                com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse methodResponseAsCustomObject;
-                Object result;
-                int status;
-
-                try
-                {
-                    switch (methodName)
+                    else if (type.equals("String"))
                     {
-                        case METHOD_MODIFY:
-                            result = modifyPayload(methodDataAsCustomObject);
-                            status = 1 + new Random().nextInt(998); // random number bound from 1 to 999
-                            break;
-                        default:
-                            result = "unknown:" + methodName;
-                            status = METHOD_NOT_DEFINED;
-                            break;
+                        methodDataAsDifferentTypeObject = methodData.getPayloadAsString();
                     }
-                }
-                catch (Exception e)
-                {
-                    result = e.toString();
-                    status = METHOD_THROWS;
-                }
+                    else if (type.equals("Array"))
+                    {
+                        methodDataAsDifferentTypeObject = methodData.getPayloadAsCustomType(byte[].class);
+                    }
+                    else if (type.equals("ArrayList"))
+                    {
+                        methodDataAsDifferentTypeObject = methodData.getPayloadAsCustomType(List.class);
+                    }
+                    else if (type.equals("HashMap"))
+                    {
+                        methodDataAsDifferentTypeObject = methodData.getPayloadAsCustomType(Map.class);
+                    }
+                    else if (type.equals("CustomObject"))
+                    {
+                        methodDataAsDifferentTypeObject = methodData.getPayloadAsCustomType(CustomObject.class);
+                    }
+                    else
+                    {
+                        methodDataAsDifferentTypeObject = methodData.getPayloadAsString();
+                    }
 
-                methodResponseAsCustomObject = new com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse(status, result);
+                    log.info("Device invoked " + methodName);
+                    com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse methodResponseAsCustomObject;
+                    Object result;
+                    int status;
 
-                this.testInstance.directMethodPayload = methodData;
-                this.testInstance.directMethodResponse = methodResponseAsCustomObject;
-                this.testInstance.statusCode = status;
+                    try
+                    {
+                        switch (methodName)
+                        {
+                            case METHOD_MODIFY:
+                                result = modifyPayload(methodDataAsDifferentTypeObject);
+                                status = 1 + new Random().nextInt(998); // random number bound from 1 to 999
+                                break;
+                            default:
+                                result = "unknown:" + methodName;
+                                status = METHOD_NOT_DEFINED;
+                                break;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        result = e.toString();
+                        status = METHOD_THROWS;
+                    }
 
-                return methodResponseAsCustomObject;
-            },
-            null);
+                    methodResponseAsCustomObject = new com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse(status, result);
+
+                    this.testInstance.directMethodPayload = methodData;
+                    this.testInstance.directMethodResponse = methodResponseAsCustomObject;
+                    this.testInstance.statusCode = status;
+
+                    return methodResponseAsCustomObject;
+                },
+                null);
     }
 
     @After
@@ -392,13 +407,39 @@ public class DirectMethodsCommon extends IntegrationTest
         }
 
         // Assert
-        if (payload instanceof String)
+        if (payload instanceof Boolean)
         {
             // e2e test for DirectMethodRequestOptions and DirectMethodPayload
-            assertPayloadHelper(options.getPayload(), this.testInstance.directMethodPayload.getPayloadAsString());
+            assertPayloadHelper(options.getPayload(), this.testInstance.directMethodPayload.getPayloadAsCustomType(Boolean.class));
             // e2e test for DirectMethodResponse between device/module and service
             assertEquals((long)this.testInstance.statusCode, (long)result.getStatus());
-            assertPayloadHelper(this.testInstance.directMethodResponse.getPayload(), result.getPayloadAsString());
+            assertPayloadHelper(this.testInstance.directMethodResponse.getPayload(), result.getPayloadAsCustomType(Boolean.class));
+        }
+        else if (payload instanceof byte[])
+        {
+            // e2e test for DirectMethodRequestOptions and DirectMethodPayload
+            assertPayloadHelper(new String((byte[]) options.getPayload(), StandardCharsets.UTF_8),
+                    new String(this.testInstance.directMethodPayload.getPayloadAsCustomType(byte[].class), StandardCharsets.UTF_8));
+            // e2e test for DirectMethodResponse between device/module and service
+            assertEquals((long)this.testInstance.statusCode, (long)result.getStatus());
+            assertPayloadHelper(new String((byte[]) this.testInstance.directMethodResponse.getPayload(), StandardCharsets.UTF_8),
+                    new String(result.getPayloadAsCustomType(byte[].class), StandardCharsets.UTF_8));
+        }
+        else if (payload instanceof List)
+        {
+            // e2e test for DirectMethodRequestOptions and DirectMethodPayload
+            assertPayloadHelper(options.getPayload(), this.testInstance.directMethodPayload.getPayloadAsCustomType(List.class));
+            // e2e test for DirectMethodResponse between device/module and service
+            assertEquals((long)this.testInstance.statusCode, (long)result.getStatus());
+            assertPayloadHelper(this.testInstance.directMethodResponse.getPayload(), result.getPayloadAsCustomType(List.class));
+        }
+        else if (payload instanceof Map)
+        {
+            // e2e test for DirectMethodRequestOptions and DirectMethodPayload
+            assertPayloadHelper(options.getPayload(), this.testInstance.directMethodPayload.getPayloadAsCustomType(Map.class));
+            // e2e test for DirectMethodResponse between device/module and service
+            assertEquals((long)this.testInstance.statusCode, (long)result.getStatus());
+            assertPayloadHelper(this.testInstance.directMethodResponse.getPayload(), result.getPayloadAsCustomType(Map.class));
         }
         else if (payload instanceof CustomObject)
         {
@@ -408,19 +449,30 @@ public class DirectMethodsCommon extends IntegrationTest
             assertEquals((long)this.testInstance.statusCode, (long)result.getStatus());
             assertPayloadHelper(this.testInstance.directMethodResponse.getPayload(), result.getPayloadAsCustomType(CustomObject.class));
         }
+        else
+        {
+            // e2e test for DirectMethodRequestOptions and DirectMethodPayload
+            assertPayloadHelper(options.getPayload(), this.testInstance.directMethodPayload.getPayloadAsString());
+            // e2e test for DirectMethodResponse between device/module and service
+            assertEquals((long)this.testInstance.statusCode, (long)result.getStatus());
+            assertPayloadHelper(this.testInstance.directMethodResponse.getPayload(), result.getPayloadAsString());
+        }
     }
 
     private void assertPayloadHelper(Object senderPayload, Object receiverPayload)
     {
-        assertNotNull(receiverPayload);
-
-        if (senderPayload instanceof String && receiverPayload instanceof String)
+        if (senderPayload != null)
         {
-            assertEquals(senderPayload, receiverPayload);
+            assertNotNull(receiverPayload);
         }
-        else if (senderPayload instanceof CustomObject && receiverPayload instanceof CustomObject)
+
+        if (senderPayload instanceof CustomObject && receiverPayload instanceof CustomObject)
         {
             assertEquals(((CustomObject)senderPayload).toString(), ((CustomObject)receiverPayload).toString());
+        }
+        else
+        {
+            assertEquals(senderPayload, receiverPayload);
         }
     }
 

@@ -10,7 +10,7 @@ import lombok.AllArgsConstructor;
 
 /**
  * This class is for the payload of direct method request which is received on the device/module.
- * It is used with onMethodInvoked() callback which is executed each time a direct method is invoked.
+ * It is used with the onMethodInvoked() callback which is executed each time a direct method is invoked.
  */
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 public class DirectMethodPayload
@@ -36,13 +36,13 @@ public class DirectMethodPayload
     }
 
     /**
-     * Return the DirectMethodPayload payload in Custom type
-     * @param customObject the Custom type in which the payload can return
-     * @param <T> it describes the type parameter
+     * Return the DirectMethodPayload payload in a custom type of your choosing
+     * Use this if you wish to deserialize to a specific type using a deserialization library of your choice
+     * @param clazz the Custom type into which the payload can be deserialized
      * @return the DirectMethodPayload payload in Custom type
      */
-    public <T> T getPayloadAsCustomType(Class<T> customObject)
+    public <T> T getPayloadAsCustomType(Class<T> clazz)
     {
-        return new GsonBuilder().create().fromJson(methodPayload, customObject);
+        return new GsonBuilder().create().fromJson(methodPayload, clazz);
     }
 }
