@@ -1303,7 +1303,7 @@ public class IotHubTransport implements IotHubListener
             ((AmqpsIotHubConnection) this.iotHubTransportConnection).registerMultiplexedDevice(config);
 
             log.trace("Sleeping between device reconnect attempts for device {}", deviceSessionToReconnect);
-            IotHubTransport.sleep(retryDecision.getDuration());
+            MILLISECONDS.sleep(retryDecision.getDuration());
 
             if (!transportException.isRetryable())
             {
@@ -1348,7 +1348,7 @@ public class IotHubTransport implements IotHubListener
         }
 
         log.trace("Sleeping between reconnect attempts");
-        IotHubTransport.sleep(retryDecision.getDuration());
+        MILLISECONDS.sleep(retryDecision.getDuration());
 
         try
         {
@@ -1593,7 +1593,8 @@ public class IotHubTransport implements IotHubListener
 
                 if (newConnectionStatus == IotHubConnectionStatus.DISCONNECTED_RETRYING)
                 {
-                    // This is the start of the timer for reconnection
+                    // When the reconnect thread wakes up, it will know that this device session has not attempted any
+                    // reconnect attempts yet.
                     deviceState.setReconnectionAttemptNumber(0);
                 }
 
@@ -1774,16 +1775,6 @@ public class IotHubTransport implements IotHubListener
 
         // Wake up IotHubReceiveTask so it can handle receiving this message
         this.receiveThreadSemaphore.release();
-    }
-
-    /**
-     * Sleep for a length of time
-     *
-     * @param sleepFor length of time to sleep for, in milliseconds
-     */
-    private static void sleep(long sleepFor) throws InterruptedException
-    {
-        MILLISECONDS.sleep(sleepFor);
     }
 
     /**
