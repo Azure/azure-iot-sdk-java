@@ -5,8 +5,6 @@ package com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubReceiveTask;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
 import mockit.Expectations;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -15,6 +13,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.concurrent.Semaphore;
 
 /** Unit tests for IotHubReceiveTask. */
 public class IotHubReceiveTaskTest
@@ -27,12 +26,12 @@ public class IotHubReceiveTaskTest
     @Test
     public void runReceivesAllMessages() throws DeviceClientException
     {
-        final Object receiveThreadLock = new Object();
+        final Semaphore receiveThreadSemaphore = new Semaphore(1);
         new Expectations()
         {
             {
-                mockTransport.getReceiveThreadLock();
-                result = receiveThreadLock;
+                mockTransport.getReceiveThreadSemaphore();
+                result = receiveThreadSemaphore;
 
                 mockTransport.hasReceivedMessagesToHandle();
                 result = true;
