@@ -6,8 +6,7 @@ package com.microsoft.azure.sdk.iot.device.transport;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Sends batched messages and invokes callbacks on completed requests. Meant to
- * be used with an executor that continuously calls run().
+ * Thread that waits for disconnection events and then owns the reconnection execution once a disconnection event is detected.
  */
 @Slf4j
 public final class IotHubReconnectTask implements Runnable
@@ -16,11 +15,8 @@ public final class IotHubReconnectTask implements Runnable
     private final IotHubTransport transport;
 
     // This lock is used to communicate state between this thread and the IoTHubTransport layer. This thread will
-    // wait until a message or callback is queued in that layer before continuing. This means that if the transport layer
-    // has no outgoing messages and no callbacks queueing, then this thread will do nothing and cost nothing. This is useful
-    // as this SDK would otherwise periodically spawn new threads of this type that would do nothing. It is the IotHubTransport
-    // layer's responsibility to notify this thread when a message is queued to be sent or when a callback is queued to be executed
-    // so that this thread can handle it.
+    // wait until a disconnection event occurs in that layer before continuing. This means that if the transport layer
+    // has no connectivity problems, then this thread will do nothing and cost nothing.
     private final Object reconnectThreadLock;
 
     public IotHubReconnectTask(IotHubTransport transport)
@@ -47,8 +43,7 @@ public final class IotHubReconnectTask implements Runnable
                 {
                     if (!transport.needsReconnect())
                     {
-                        // IotHubTransport layer will notify this thread once a message is ready to be sent or a callback is ready
-                        // to be executed. Until then, do nothing.
+                        // IotHubTransport layer will notify this thread once a disconnection event occurs. Until then, do nothing.
                         this.reconnectThreadLock.wait();
                     }
                 }
