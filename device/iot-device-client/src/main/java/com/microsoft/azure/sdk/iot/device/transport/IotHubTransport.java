@@ -339,6 +339,7 @@ public class IotHubTransport implements IotHubListener
 
         synchronized (this.reconnectThreadLock)
         {
+            log.trace("Waking up reconnection thread");
             this.reconnectThreadLock.notify();
         }
     }
@@ -380,6 +381,7 @@ public class IotHubTransport implements IotHubListener
 
                 synchronized (this.reconnectThreadLock)
                 {
+                    log.trace("Waking up reconnection thread");
                     this.reconnectThreadLock.notify();
                 }
             }
