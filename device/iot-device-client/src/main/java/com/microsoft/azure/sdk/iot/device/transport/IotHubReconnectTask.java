@@ -5,6 +5,8 @@ package com.microsoft.azure.sdk.iot.device.transport;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.concurrent.Semaphore;
+
 /**
  * Thread that waits for disconnection events and then owns the reconnection execution once a disconnection event is detected.
  */
@@ -17,7 +19,7 @@ public final class IotHubReconnectTask implements Runnable
     // This lock is used to communicate state between this thread and the IoTHubTransport layer. This thread will
     // wait until a disconnection event occurs in that layer before continuing. This means that if the transport layer
     // has no connectivity problems, then this thread will do nothing and cost nothing.
-    private final Object reconnectThreadLock;
+    private final Semaphore reconnectThreadLock;
 
     public IotHubReconnectTask(IotHubTransport transport)
     {
@@ -27,7 +29,7 @@ public final class IotHubReconnectTask implements Runnable
         }
 
         this.transport = transport;
-        this.reconnectThreadLock = this.transport.getReconnectThreadLock();
+        this.reconnectThreadLock = this.transport.getReconnectThreadSemaphore();
     }
 
     public void run()
@@ -39,13 +41,10 @@ public final class IotHubReconnectTask implements Runnable
         {
             try
             {
-                synchronized (this.reconnectThreadLock)
+                if (!transport.needsReconnect())
                 {
-                    if (!transport.needsReconnect())
-                    {
-                        // IotHubTransport layer will notify this thread once a disconnection event occurs. Until then, do nothing.
-                        this.reconnectThreadLock.wait();
-                    }
+                    // IotHubTransport layer will notify this thread once a disconnection event occurs. Until then, do nothing.
+                    this.reconnectThreadLock.acquire();
                 }
             }
             catch (InterruptedException e)

@@ -22,7 +22,6 @@ import java.util.*;
 import java.util.concurrent.*;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 /**
  * Manages queueing of message sending, receiving and callbacks. Manages notifying users of connection status change updates
@@ -100,7 +99,7 @@ public class IotHubTransport implements IotHubListener
 
     // State lock used to communicate to the IotHubReconnectTask thread when a reconnection needs to be handled. It is this
     // layer's responsibility to notify that task each time a connection is lost.
-    private final Object reconnectThreadLock = new Object();
+    private final Semaphore reconnectThreadSemaphore = new Semaphore(0);
 
     private final IotHubClientProtocol protocol;
     private final String hostName;
@@ -172,9 +171,9 @@ public class IotHubTransport implements IotHubListener
         return this.receiveThreadLock;
     }
 
-    public Object getReconnectThreadLock()
+    public Semaphore getReconnectThreadSemaphore()
     {
-        return this.reconnectThreadLock;
+        return this.reconnectThreadSemaphore;
     }
 
     public boolean hasMessagesToSend()
@@ -337,11 +336,8 @@ public class IotHubTransport implements IotHubListener
 
         this.updateStatus(IotHubConnectionStatus.DISCONNECTED_RETRYING, exceptionToStatusChangeReason(e), e);
 
-        synchronized (this.reconnectThreadLock)
-        {
-            log.trace("Waking up reconnection thread");
-            this.reconnectThreadLock.notify();
-        }
+        log.trace("Waking up reconnection thread");
+        this.reconnectThreadSemaphore.release();
     }
 
     @Override
@@ -379,11 +375,8 @@ public class IotHubTransport implements IotHubListener
             {
                 this.updateStatus(IotHubConnectionStatus.DISCONNECTED_RETRYING, exceptionToStatusChangeReason(e), e, deviceId);
 
-                synchronized (this.reconnectThreadLock)
-                {
-                    log.trace("Waking up reconnection thread");
-                    this.reconnectThreadLock.notify();
-                }
+                log.trace("Waking up reconnection thread");
+                this.reconnectThreadSemaphore.release();
             }
         }
     }
