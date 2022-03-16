@@ -9,27 +9,35 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.telemetry;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.ModuleClient;
-import com.microsoft.azure.sdk.iot.service.Module;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
+import com.microsoft.azure.sdk.iot.service.messaging.FeedbackBatch;
+import com.microsoft.azure.sdk.iot.service.messaging.FeedbackRecord;
+import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import org.junit.Assert;
+import com.microsoft.azure.sdk.iot.service.messaging.MessageFeedbackProcessorClient;
+import com.microsoft.azure.sdk.iot.service.messaging.MessageFeedbackProcessorClientOptions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Success;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestModuleIdentity;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.ReceiveMessagesCommon;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+import java.io.IOException;
+import java.util.UUID;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
-import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
+import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.fail;
 
 /**
  * Test class containing all non error injection tests to be run on JVM and android pertaining to receiving messages on a device/module.
@@ -38,9 +46,9 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
 @RunWith(Parameterized.class)
 public class ReceiveMessagesTests extends ReceiveMessagesCommon
 {
-    public ReceiveMessagesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception
+    public ReceiveMessagesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {
-        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+        super(protocol, authenticationType, clientType);
     }
 
     @Before
@@ -52,122 +60,105 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
 
     @Test
     @StandardTierHubOnlyTest
-    public void receiveMessagesOverIncludingProperties() throws Exception
+    public void receiveMessage() throws Exception
     {
-        if (testInstance.protocol == HTTPS)
-        {
-            testInstance.client.setOption(SET_MINIMUM_POLLING_INTERVAL, ONE_SECOND_POLLING_INTERVAL);
-        }
+        receiveMessage(MESSAGE_SIZE_IN_BYTES);
+    }
 
-        testInstance.client.open();
+    // Test out receiving a near-maximum sized cloud to device message both for testing the sending of it from the
+    // service client, but also to test how MQTT/HTTPS/AMQPS handle it on the receiving side. AMQP in particular
+    // has some "partial delivery" scenarios that are worth having an e2e test around.
+    @Test
+    @ContinuousIntegrationTest
+    @StandardTierHubOnlyTest
+    public void receiveLargeMessage() throws Exception
+    {
+        receiveMessage(LARGE_MESSAGE_SIZE_IN_BYTES);
+    }
 
-        com.microsoft.azure.sdk.iot.device.MessageCallback callback = new MessageCallback();
+    public void receiveMessage(int messageSize) throws Exception
+    {
+        testInstance.identity.getClient().open(false);
+
+        Message serviceMessage = createCloudToDeviceMessage(messageSize);
+        serviceMessage.setMessageId(UUID.randomUUID().toString());
+
+        com.microsoft.azure.sdk.iot.device.MessageCallback callback = new MessageCallback(serviceMessage);
 
         if (testInstance.protocol == MQTT || testInstance.protocol == MQTT_WS)
         {
-            callback = new MessageCallbackMqtt();
+            callback = new MessageCallbackMqtt(serviceMessage);
         }
 
         Success messageReceived = new Success();
 
-        if (testInstance.client instanceof DeviceClient)
+        if (testInstance.identity.getClient() instanceof DeviceClient)
         {
-            ((DeviceClient) testInstance.client).setMessageCallback(callback, messageReceived);
+            ((DeviceClient) testInstance.identity.getClient()).setMessageCallback(callback, messageReceived);
         }
-        else if (testInstance.client instanceof ModuleClient)
+        else if (testInstance.identity.getClient() instanceof ModuleClient)
         {
-            ((ModuleClient) testInstance.client).setMessageCallback(callback, messageReceived);
+            ((ModuleClient) testInstance.identity.getClient()).setMessageCallback(callback, messageReceived);
         }
 
-        if (testInstance.client instanceof DeviceClient)
+        if (testInstance.identity.getClient() instanceof DeviceClient)
         {
-            sendMessageToDevice(testInstance.identity.getDeviceId(), testInstance.protocol.toString());
+            testInstance.messagingClient.send(testInstance.identity.getDeviceId(), serviceMessage);
         }
-        else if (testInstance.client instanceof ModuleClient)
+        else if (testInstance.identity.getClient() instanceof ModuleClient)
         {
-            sendMessageToModule(testInstance.identity.getDeviceId(), ((Module) testInstance.identity).getId(), testInstance.protocol.toString());
+            testInstance.messagingClient.send(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), serviceMessage);
         }
 
         waitForMessageToBeReceived(messageReceived, testInstance.protocol.toString());
 
+        // flakey feature
+        //waitForFeedbackMessage(serviceMessage.getMessageId());
+
         Thread.sleep(200);
-        testInstance.client.closeNow();
+        testInstance.identity.getClient().close();
     }
 
-    @Test
-    @StandardTierHubOnlyTest
-    public void receiveBackToBackUniqueC2DCommandsOverAmqpsUsingSendAsync() throws Exception
+    private void waitForFeedbackMessage(String expectedMessageId) throws InterruptedException, IOException, IotHubException, TimeoutException
     {
-        List messageIdListStoredOnC2DSend = new ArrayList(); // store the message id list on sending C2D commands using service client
-        List messageIdListStoredOnReceive = new ArrayList(); // store the message id list on receiving C2D commands using device client
+        final Success feedbackReceived = new Success();
 
-        if (this.testInstance.protocol != AMQPS)
+        Function<FeedbackBatch, AcknowledgementType> feedbackMessageProcessor = feedbackBatch ->
         {
-            //only want to test for AMQPS
-            return;
-        }
-
-        // This E2E test is for testing multiple C2D sends and make sure buffers are not getting overwritten
-        List<CompletableFuture<Void>> futureList = new ArrayList<>();
-
-        // set identity to receive back to back different commands using AMQPS protocol
-        testInstance.client.open();
-
-        // set call back for device client for receiving message
-        com.microsoft.azure.sdk.iot.device.MessageCallback callBackOnRx = new MessageCallbackForBackToBackC2DMessages(messageIdListStoredOnReceive);
-
-        if (testInstance.client instanceof DeviceClient)
-        {
-            ((DeviceClient) testInstance.client).setMessageCallback(callBackOnRx, null);
-        }
-        else if (testInstance.client instanceof ModuleClient)
-        {
-            ((ModuleClient) testInstance.client).setMessageCallback(callBackOnRx, null);
-        }
-
-        // send back to back unique commands from service client using sendAsync operation.
-        for (int i = 0; i < MAX_COMMANDS_TO_SEND; i++)
-        {
-            String messageString = Integer.toString(i);
-            com.microsoft.azure.sdk.iot.service.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.Message(messageString);
-
-            // set message id
-            serviceMessage.setMessageId(Integer.toString(i));
-
-            // set expected list of messaged id's
-            messageIdListStoredOnC2DSend.add(Integer.toString(i));
-
-            // send the message. Service client uses AMQPS protocol
-            CompletableFuture<Void> future;
-            if (testInstance.client instanceof DeviceClient)
+            for (FeedbackRecord feedbackRecord : feedbackBatch.getRecords())
             {
-                future = testInstance.serviceClient.sendAsync(testInstance.identity.getDeviceId(), serviceMessage);
-                futureList.add(future);
+                if (feedbackRecord.getDeviceId().equals(testInstance.identity.getDeviceId())
+                    && feedbackRecord.getOriginalMessageId().equals(expectedMessageId))
+                {
+                    feedbackReceived.setResult(true);
+                    feedbackReceived.callbackWasFired();
+                }
             }
-            else if (testInstance.client instanceof ModuleClient)
+
+            return AcknowledgementType.ABANDON;
+        };
+
+        MessageFeedbackProcessorClientOptions messageFeedbackProcessorClientOptions =
+            MessageFeedbackProcessorClientOptions.builder()
+                .build();
+
+        MessageFeedbackProcessorClient messageFeedbackProcessorClient =
+            new MessageFeedbackProcessorClient(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS_WS, feedbackMessageProcessor, messageFeedbackProcessorClientOptions);
+
+        messageFeedbackProcessorClient.start();
+
+        long startTime = System.currentTimeMillis();
+        while (!feedbackReceived.wasCallbackFired())
+        {
+            Thread.sleep(1000);
+
+            if (System.currentTimeMillis() - startTime > FEEDBACK_TIMEOUT_MILLIS)
             {
-                testInstance.serviceClient.send(testInstance.identity.getDeviceId(), ((Module) testInstance.identity).getId(), serviceMessage);
+                fail("Timed out waiting on notification for device " + testInstance.identity.getDeviceId());
             }
         }
 
-        int futureTimeout = 3;
-
-        for (CompletableFuture<Void> future : futureList)
-        {
-            try
-            {
-                future.get(futureTimeout, TimeUnit.MINUTES);
-            }
-            catch (ExecutionException e)
-            {
-                Assert.fail(buildExceptionMessage("Exception : " + e.getMessage(), testInstance.client));
-            }
-        }
-
-        // Now wait for messages to be received in the device client
-        waitForBackToBackC2DMessagesToBeReceived(messageIdListStoredOnReceive);
-        testInstance.client.closeNow(); //close the device client connection
-        Assert.assertTrue(buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Received messages don't match up with sent messages", testInstance.client), messageIdListStoredOnReceive.containsAll(messageIdListStoredOnC2DSend)); // check if the received list is same as the actual list that was created on sending the messages
-        messageIdListStoredOnReceive.clear();
+        messageFeedbackProcessorClient.stop();
+        assertTrue(feedbackReceived.getResult());
     }
 }

@@ -50,7 +50,7 @@ The device client exhibits the following connection status changes with reason:
   </tr>
 </table>
 
-For status `CLIENT_CLOSE`, `COMMUNICATION_ERROR` and `RETRY_EXPIRED`, the application can attempt to reconnect by closing and opening the client again eg. calling `deviceClient.closeNow();` `deviceClient.open();` in a separate thread.
+For status `CLIENT_CLOSE`, `COMMUNICATION_ERROR` and `RETRY_EXPIRED`, the application can attempt to reconnect by closing and opening the client again eg. calling `deviceClient.close();` `deviceClient.open();` in a separate thread.
 
 We would like to highlight here that a separate thread should be used to call `open()`/ `closeNow()`. These calls should never be made from the same thread in the `IotHubConnectionStatusChangeCallback`. 
 

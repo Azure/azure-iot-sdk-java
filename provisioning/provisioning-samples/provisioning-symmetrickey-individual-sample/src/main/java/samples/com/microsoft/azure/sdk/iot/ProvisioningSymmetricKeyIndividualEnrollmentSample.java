@@ -13,6 +13,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.Provi
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 /**
@@ -84,10 +85,10 @@ public class ProvisioningSymmetricKeyIndividualEnrollmentSample
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
         SecurityProviderSymmetricKey securityClientSymmetricKey;
-        Scanner scanner = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
         DeviceClient deviceClient = null;
 
-        securityClientSymmetricKey = new SecurityProviderSymmetricKey(SYMMETRIC_KEY.getBytes(), REGISTRATION_ID);
+        securityClientSymmetricKey = new SecurityProviderSymmetricKey(SYMMETRIC_KEY.getBytes(StandardCharsets.UTF_8), REGISTRATION_ID);
 
         ProvisioningDeviceClient provisioningDeviceClient = null;
         try
@@ -121,8 +122,8 @@ public class ProvisioningSymmetricKeyIndividualEnrollmentSample
                 String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
                 try
                 {
-                    deviceClient = DeviceClient.createFromSecurityProvider(iotHubUri, deviceId, securityClientSymmetricKey, IotHubClientProtocol.MQTT);
-                    deviceClient.open();
+                    deviceClient = new DeviceClient(iotHubUri, deviceId, securityClientSymmetricKey, IotHubClientProtocol.MQTT);
+                    deviceClient.open(false);
                     Message messageToSendFromDeviceToHub =  new Message("Whatever message you would like to send");
 
                     System.out.println("Sending message from device to IoT Hub...");
@@ -133,7 +134,7 @@ public class ProvisioningSymmetricKeyIndividualEnrollmentSample
                     System.out.println("Device client threw an exception: " + e.getMessage());
                     if (deviceClient != null)
                     {
-                        deviceClient.closeNow();
+                        deviceClient.close();
                     }
                 }
             }
@@ -143,7 +144,7 @@ public class ProvisioningSymmetricKeyIndividualEnrollmentSample
             System.out.println("Provisioning Device Client threw an exception" + e.getMessage());
             if (provisioningDeviceClient != null)
             {
-                provisioningDeviceClient.closeNow();
+                provisioningDeviceClient.close();
             }
         }
 
@@ -152,11 +153,11 @@ public class ProvisioningSymmetricKeyIndividualEnrollmentSample
         scanner.nextLine();
         if (provisioningDeviceClient != null)
         {
-            provisioningDeviceClient.closeNow();
+            provisioningDeviceClient.close();
         }
         if (deviceClient != null)
         {
-            deviceClient.closeNow();
+            deviceClient.close();
         }
 
         System.out.println("Shutting down...");

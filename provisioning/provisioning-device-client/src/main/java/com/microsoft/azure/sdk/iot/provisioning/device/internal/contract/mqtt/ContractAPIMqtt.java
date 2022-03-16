@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.mqtt;
 
-import com.microsoft.azure.sdk.iot.deps.util.ObjectLock;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.ObjectLock;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.SDKUtils;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
@@ -11,12 +11,16 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.DeviceRegistrationParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
-import com.microsoft.azure.sdk.iot.deps.transport.mqtt.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.mqtt.MqttConnection;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.mqtt.MqttListener;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.mqtt.MqttMessage;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.mqtt.MqttQos;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -41,6 +45,20 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
 
     private Throwable lostConnection = null;
 
+    @Override
+    public String getConnectionId() {
+        if (this.mqttConnection != null) {
+            return this.mqttConnection.getConnectionId();
+        }
+
+        return null;
+    }
+
+    @Override
+    public String getHostName() {
+        return this.hostname;
+    }
+
     /**
      * This constructor creates an instance of Mqtt class and initializes member variables
      * @param provisioningDeviceClientConfig Config used for provisioning Cannot be {@code null}.
@@ -64,7 +82,7 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
             throw new ProvisioningDeviceClientException("The hostName cannot be null or empty.");
         }
 
-        this.useWebSockets = provisioningDeviceClientConfig.getUseWebSockets();
+        this.useWebSockets = provisioningDeviceClientConfig.isUsingWebSocket();
         this.hostname = hostName;
         this.idScope = idScope;
         this.packetId = 1;
@@ -238,7 +256,7 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
             String topic = String.format(MQTT_REGISTER_MESSAGE_FMT, this.packetId++);
 
             //SRS_ContractAPIMqtt_07_026: [ This method shall build the required Json input using parser. ]
-            byte[] payload = new DeviceRegistrationParser(requestData.getRegistrationId(), requestData.getPayload()).toJson().getBytes();
+            byte[] payload = new DeviceRegistrationParser(requestData.getRegistrationId(), requestData.getPayload()).toJson().getBytes(StandardCharsets.UTF_8);
 
             // SRS_ContractAPIMqtt_07_005: [This method shall send an MQTT message with the property of iotdps-register.]
             this.executeProvisioningMessage(topic, payload, responseCallback, callbackContext);

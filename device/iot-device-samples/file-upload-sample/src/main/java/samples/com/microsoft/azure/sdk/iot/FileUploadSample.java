@@ -5,17 +5,16 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobClientBuilder;
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
+import com.microsoft.azure.sdk.iot.device.FileUploadCompletionNotification;
+import com.microsoft.azure.sdk.iot.device.FileUploadSasUriRequest;
+import com.microsoft.azure.sdk.iot.device.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -82,15 +81,15 @@ public class FileUploadSample
         {
             System.out.println("On exception, shutting down \n" + " Cause: " + e.getCause() + " \nERROR: " +  e.getMessage());
             System.out.println("Shutting down...");
-            client.closeNow();
+            client.close();
         }
 
         System.out.println("Press any key to exit...");
 
-        Scanner scanner = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
         scanner.nextLine();
         System.out.println("Shutting down...");
-        client.closeNow();
+        client.close();
     }
 
     private static void uploadFileOrDirectory(DeviceClient client, String fullFileName) throws IOException, URISyntaxException {
@@ -127,13 +126,13 @@ public class FileUploadSample
         }
     }
 
-    private static void uploadFile(DeviceClient client, String baseDirectory, String relativeFileName) throws IOException, URISyntaxException {
+    private static void uploadFile(DeviceClient client, String baseDirectory, String relativeFileName) throws IOException
+    {
         File file = new File(baseDirectory, relativeFileName);
-        try (InputStream inputStream = new FileInputStream(file))
-        {
-            long streamLength = file.length();
 
-            if(relativeFileName.startsWith("\\"))
+        try
+        {
+            if (relativeFileName.startsWith("\\"))
             {
                 relativeFileName = relativeFileName.substring(1);
             }
@@ -153,7 +152,7 @@ public class FileUploadSample
                         .endpoint(sasUriResponse.getBlobUri().toString())
                         .buildClient();
 
-                blobClient.upload(inputStream, streamLength);
+                blobClient.uploadFromFile(file.getPath());
             }
             catch (Exception e)
             {
@@ -167,15 +166,15 @@ public class FileUploadSample
                 e.printStackTrace();
                 return;
             }
-            finally
-            {
-                inputStream.close();
-            }
 
             FileUploadCompletionNotification completionNotification = new FileUploadCompletionNotification(sasUriResponse.getCorrelationId(), true);
             client.completeFileUpload(completionNotification);
 
             System.out.println("Finished file upload for file " + fileNameList.get(index));
+        }
+        finally
+        {
+            client.close();
         }
     }
 }

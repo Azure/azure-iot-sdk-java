@@ -5,8 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
-import com.microsoft.azure.sdk.iot.deps.serializer.ErrorMessageParser;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 
 import java.nio.charset.StandardCharsets;
@@ -21,7 +19,7 @@ public class IotHubExceptionManager
      *
      * @param httpResponse Http response object to verify
      * @throws IotHubBadFormatException This exception is thrown if the response status equal 400
-     * @throws IotHubUnathorizedException This exception is thrown if the response status equal 401
+     * @throws IotHubUnauthorizedException This exception is thrown if the response status equal 401
      * @throws IotHubTooManyDevicesException This exception is thrown if the response status equal 403
      * @throws IotHubNotFoundException This exception is thrown if the response status equal 404
      * @throws IotHubPreconditionFailedException This exception is thrown if the response status equal 412
@@ -34,8 +32,8 @@ public class IotHubExceptionManager
      */
     public static void httpResponseVerification(HttpResponse httpResponse)
             throws 
-            IotHubBadFormatException, 
-            IotHubUnathorizedException, 
+            IotHubBadFormatException,
+            IotHubUnauthorizedException,
             IotHubTooManyDevicesException,
             IotHubPreconditionFailedException,
             IotHubTooManyRequestsException,
@@ -48,7 +46,6 @@ public class IotHubExceptionManager
     {
         int responseStatus = httpResponse.getStatus();
 
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_21_013: [If the httpresponse contains a reason message, the function must print this reason in the error message]
         String errorMessage = ErrorMessageParser.bestErrorMessage(new String(httpResponse.getErrorReason(), StandardCharsets.UTF_8));
         int errorCode = ErrorMessageParser.bestErrorCode(errorMessage);
 
@@ -61,65 +58,53 @@ public class IotHubExceptionManager
 
         ErrorCodeDescription errorCodeDescription = ErrorCodeDescription.Parse(errorCode);
 
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_001: [The function shall throw IotHubBadFormatException if the Http response status equal 400]
         if (400 == responseStatus)
         {
             throw new IotHubBadFormatException(errorMessage, errorCode, errorCodeDescription);
         }
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_002: [The function shall throw IotHubUnathorizedException if the Http response status equal 401]
         else if (401 == responseStatus)
         {
-            throw new IotHubUnathorizedException(errorMessage, errorCode, errorCodeDescription);
+            throw new IotHubUnauthorizedException(errorMessage, errorCode, errorCodeDescription);
         }
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_003: [The function shall throw IotHubTooManyDevicesException if the Http response status equal 403]
         else if (403 == responseStatus)
         {
             throw new IotHubTooManyDevicesException(errorMessage, errorCode, errorCodeDescription);
         }
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_004: [The function shall throw IotHubNotFoundException if the Http response status equal 404]
         else if (404 == responseStatus)
         {
             throw new IotHubNotFoundException(errorMessage, errorCode, errorCodeDescription);
         }
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_34_018: [The function shall throw IotHubConflictException if the Http response status equal 409]
         else if (409 == responseStatus)
         {
             throw new IotHubConflictException(errorMessage, errorCode, errorCodeDescription);
         }
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_005: [The function shall throw IotHubPreconditionFailedException if the Http response status equal 412]
         else if (412 == responseStatus)
         {
             throw new IotHubPreconditionFailedException(errorMessage, errorCode, errorCodeDescription);
         }
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_006: [The function shall throw IotHubTooManyRequestsException if the Http response status equal 429]
         else if (429 == responseStatus)
         {
             throw new IotHubTooManyRequestsException(errorMessage, errorCode, errorCodeDescription);
         }
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_007: [The function shall throw IotHubInternalServerErrorException if the Http response status equal 500]
         else if (500 == responseStatus)
         {
             throw new IotHubInternalServerErrorException(errorMessage, errorCode, errorCodeDescription);
         }
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_21_008: [The function shall throw IotHubBadGatewayException if the Http response status equal 502]
         else if (502 == responseStatus)
         {
             throw new IotHubBadGatewayException(errorMessage, errorCode, errorCodeDescription);
         }
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_009: [The function shall throw IotHubServerBusyException if the Http response status equal 503]
         else if (503 == responseStatus)
         {
             throw new IotHubServerBusyException(errorMessage, errorCode, errorCodeDescription);
         }
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_21_010: [The function shall throw IotHubGatewayTimeoutException if the Http response status equal 504]
         else if (504 == responseStatus)
         {
             throw new IotHubGatewayTimeoutException(errorMessage, errorCode, errorCodeDescription);
         }
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_011: [The function shall throw IotHubException if the Http response status none of them above and greater than 300 copying the error Http reason to the exception]
         else if (responseStatus > 300)
         {
-            if(errorMessage.isEmpty())
+            if (errorMessage.isEmpty())
             {
                 throw new IotHubException("Unknown error reason");
             }
@@ -128,6 +113,65 @@ public class IotHubExceptionManager
                 throw new IotHubException(errorMessage, errorCode, errorCodeDescription);
             }
         }
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_012: [The function shall return without exception if the response status equal or less than 300]
+    }
+
+    /**
+     * Return a new exception instance that best matches the given HTTP status code and description
+     * @param responseStatus The HTTP status code (404, 500, etc.)
+     * @param description The HTTP response body
+     * @return a new exception instance that best matches the given HTTP status code
+     */
+    public static IotHubException mapException(int responseStatus, String description)
+    {
+        ErrorCodeDescription errorCodeDescription = ErrorCodeDescription.Parse(responseStatus);
+
+        if (400 == responseStatus)
+        {
+            return new IotHubBadFormatException(description, responseStatus, errorCodeDescription);
+        }
+        else if (401 == responseStatus)
+        {
+            return new IotHubUnauthorizedException(description, responseStatus, errorCodeDescription);
+        }
+        else if (403 == responseStatus)
+        {
+            return new IotHubTooManyDevicesException(description, responseStatus, errorCodeDescription);
+        }
+        else if (404 == responseStatus)
+        {
+            return new IotHubNotFoundException(description, responseStatus, errorCodeDescription);
+        }
+        else if (409 == responseStatus)
+        {
+            return new IotHubConflictException(description, responseStatus, errorCodeDescription);
+        }
+        else if (412 == responseStatus)
+        {
+            return new IotHubPreconditionFailedException(description, responseStatus, errorCodeDescription);
+        }
+        else if (429 == responseStatus)
+        {
+            return new IotHubTooManyRequestsException(description, responseStatus, errorCodeDescription);
+        }
+        else if (500 == responseStatus)
+        {
+            return new IotHubInternalServerErrorException(description, responseStatus, errorCodeDescription);
+        }
+        else if (502 == responseStatus)
+        {
+            return new IotHubBadGatewayException(description, responseStatus, errorCodeDescription);
+        }
+        else if (503 == responseStatus)
+        {
+            return new IotHubServerBusyException(description, responseStatus, errorCodeDescription);
+        }
+        else if (504 == responseStatus)
+        {
+            return new IotHubGatewayTimeoutException(description, responseStatus, errorCodeDescription);
+        }
+        else
+        {
+            return new IotHubException(description, responseStatus, errorCodeDescription);
+        }
     }
 }

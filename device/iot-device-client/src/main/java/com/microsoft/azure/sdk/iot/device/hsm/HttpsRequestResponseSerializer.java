@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class HttpsRequestResponseSerializer
+class HttpsRequestResponseSerializer
 {
     private static final String SP = " ";
     private static final String CR = "\r";
@@ -39,7 +39,6 @@ public class HttpsRequestResponseSerializer
     {
         if (httpsRequest == null)
         {
-            // Codes_SRS_HTTPREQUESTRESPONSESERIALIZER_34_001: [If the provided request is null, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("The httpsRequest cannot be null");
         }
 
@@ -53,13 +52,11 @@ public class HttpsRequestResponseSerializer
             throw new IllegalArgumentException("host cannot be null or empty");
         }
         
-        // Codes_SRS_HTTPREQUESTRESPONSESERIALIZER_34_003: [This function shall serialize the provided httpsRequest into the form:
         // POST /modules/<moduleName>/sign?api-version=2018-06-28 HTTP/1.1
         // Host: localhost:8081
         // Connection: close
         // <header>: <value>
         // <header>: <value1>; <value2>
-        // .]
 
         httpsRequest.setHeaderField("Connection", "close");
 
@@ -111,30 +108,24 @@ public class HttpsRequestResponseSerializer
     {
         if (bufferedReader == null)
         {
-            // Codes_SRS_HTTPREQUESTRESPONSESERIALIZER_34_004: [If the provided bufferedReader is null, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("buffered reader cannot be null");
         }
 
-        // Codes_SRS_HTTPREQUESTRESPONSESERIALIZER_34_005: [This function shall read lines from the provided buffered
-        // reader with the following format:
         //  <version> <status code> <error reason>
         //  <header>:<value>
         //  <header>:<value>
         //  ...
         //  <http body content>
-        // .]
         String statusLine = bufferedReader.readLine();
         if (statusLine == null || statusLine.isEmpty())
         {
-            // Codes_SRS_HTTPREQUESTRESPONSESERIALIZER_34_006: [If the buffered reader doesn't have at least one line, this function shall throw an IOException.]
             throw new IOException("Response is empty.");
         }
 
         String[] statusLineParts = statusLine.split(SP);
         if (statusLineParts.length != 3)
         {
-            // Codes_SRS_HTTPREQUESTRESPONSESERIALIZER_34_006: [If the buffered reader's first line does not have the version, status code, and error reason split by a space, this function shall throw an IOException.]
-            throw new IOException("Status line is not valid.");
+            throw new IOException("Status line is not valid: " + statusLine);
         }
 
         String[] httpVersion = statusLineParts[0].split(ProtocolVersionSeparator);
@@ -151,13 +142,12 @@ public class HttpsRequestResponseSerializer
         }
         catch (NumberFormatException e)
         {
-            // Codes_SRS_HTTPREQUESTRESPONSESERIALIZER_34_007: [If the status code is not parsable into an int, this function shall throw an IOException.]
             throw new IOException("StatusCode is not valid " + statusLineParts[1] + ".");
         }
 
         Map<String, List<String>> headerFields = readHeaderFields(bufferedReader);
         byte[] body = readBody(bufferedReader);
-        byte[] errorReason = statusLineParts[2].getBytes();
+        byte[] errorReason = statusLineParts[2].getBytes(StandardCharsets.UTF_8);
 
         bufferedReader.close();
 
@@ -220,6 +210,6 @@ public class HttpsRequestResponseSerializer
             next = bufferedReader.readLine();
         }
 
-        return bodyString.toString().getBytes();
+        return bodyString.toString().getBytes(StandardCharsets.UTF_8);
     }
 }

@@ -52,7 +52,6 @@ x64/
 *.vssscc
 .builds
 *.pidb
-*.log
 *.scc
 
 # Visual C++ cache files
@@ -206,7 +205,6 @@ service/java/target
 service/java/iot.service.sdk.java.iml
 java/device/doc/api_reference
 java/service/doc/api_reference
-.idea
 *.class
 target
 *.iml
@@ -234,10 +232,20 @@ vertx.log.lck
 # =========================
 
 #Whitelist, will allow changes to log4j.properties files to be tracked via source control
-!log4j.properties
+!log4j2.properties
 
 apidocs
 *.html
 *.js
 *.css
 package-list
+
+
+# =========================
+# Codestyles, Inspection Profiles, Scopes
+# =========================
+
+!/.idea
+/.idea/*
+!/.idea/inspectionProfiles
+!/.idea/scopes

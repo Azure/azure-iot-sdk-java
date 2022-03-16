@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
+import com.microsoft.azure.sdk.iot.device.ClientConfiguration;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public final class AmqpsMethodsSenderLinkHandler extends AmqpsSenderLinkHandler
+final class AmqpsMethodsSenderLinkHandler extends AmqpsSenderLinkHandler
 {
     private static final String CORRELATION_ID_KEY = "com.microsoft:channel-correlation-id";
     private static final String CORRELATION_ID_KEY_PREFIX = "methods:";
@@ -31,21 +31,21 @@ public final class AmqpsMethodsSenderLinkHandler extends AmqpsSenderLinkHandler
 
     private static final String LINK_TYPE = "methods";
 
-    AmqpsMethodsSenderLinkHandler(Sender sender, AmqpsLinkStateCallback amqpsLinkStateCallback, DeviceClientConfig deviceClientConfig, String linkCorrelationId)
+    AmqpsMethodsSenderLinkHandler(Sender sender, AmqpsLinkStateCallback amqpsLinkStateCallback, ClientConfiguration clientConfiguration, String linkCorrelationId)
     {
-        super(sender, amqpsLinkStateCallback, linkCorrelationId);
+        super(sender, amqpsLinkStateCallback, linkCorrelationId, clientConfiguration.getModelId());
 
-        this.senderLinkAddress = getAddress(deviceClientConfig);
+        this.senderLinkAddress = getAddress(clientConfiguration);
 
         //Note that this correlation id value must be equivalent to the correlation id in the method receiver link that it is paired with
         this.amqpProperties.put(Symbol.getSymbol(CORRELATION_ID_KEY), Symbol.getSymbol(CORRELATION_ID_KEY_PREFIX + this.linkCorrelationId));
-        this.amqpProperties.put(Symbol.getSymbol(VERSION_IDENTIFIER_KEY), deviceClientConfig.getProductInfo().getUserAgentString());
+        this.amqpProperties.put(Symbol.getSymbol(VERSION_IDENTIFIER_KEY), clientConfiguration.getProductInfo().getUserAgentString());
     }
 
-    static String getTag(DeviceClientConfig deviceClientConfig, String linkCorrelationId)
+    static String getTag(ClientConfiguration clientConfiguration, String linkCorrelationId)
     {
-        String moduleId = deviceClientConfig.getModuleId();
-        String deviceId = deviceClientConfig.getDeviceId();
+        String moduleId = clientConfiguration.getModuleId();
+        String deviceId = clientConfiguration.getDeviceId();
         if (moduleId != null && !moduleId.isEmpty())
         {
             return SENDER_LINK_TAG_PREFIX + deviceId + "/" + moduleId + "-" + linkCorrelationId;
@@ -56,10 +56,10 @@ public final class AmqpsMethodsSenderLinkHandler extends AmqpsSenderLinkHandler
         }
     }
 
-    private static String getAddress(DeviceClientConfig deviceClientConfig)
+    private static String getAddress(ClientConfiguration clientConfiguration)
     {
-        String moduleId = deviceClientConfig.getModuleId();
-        String deviceId = deviceClientConfig.getDeviceId();
+        String moduleId = clientConfiguration.getModuleId();
+        String deviceId = clientConfiguration.getDeviceId();
         if (moduleId != null && !moduleId.isEmpty())
         {
             return String.format(MODULE_SENDER_LINK_ENDPOINT_PATH, deviceId, moduleId);
@@ -82,7 +82,7 @@ public final class AmqpsMethodsSenderLinkHandler extends AmqpsSenderLinkHandler
         if (message.getMessageType() == MessageType.DEVICE_METHODS)
         {
             MessageImpl protonMessage = super.iotHubMessageToProtonMessage(message);
-            IotHubTransportMessage deviceMethodMessage = (IotHubTransportMessage) message;
+            IotHubTransportMessage directMethodMessage = (IotHubTransportMessage) message;
 
             Properties properties;
             if (protonMessage.getProperties() != null)
@@ -94,17 +94,17 @@ public final class AmqpsMethodsSenderLinkHandler extends AmqpsSenderLinkHandler
                 properties = new Properties();
             }
 
-            if (deviceMethodMessage.getRequestId() != null)
+            if (directMethodMessage.getRequestId() != null)
             {
-                properties.setCorrelationId(UUID.fromString(deviceMethodMessage.getRequestId()));
+                properties.setCorrelationId(UUID.fromString(directMethodMessage.getRequestId()));
             }
 
             protonMessage.setProperties(properties);
 
             Map<String, Object> userProperties = new HashMap<>();
-            if (deviceMethodMessage.getStatus() != null)
+            if (directMethodMessage.getStatus() != null)
             {
-                userProperties.put(APPLICATION_PROPERTY_KEY_IOTHUB_STATUS, Integer.parseInt(deviceMethodMessage.getStatus()));
+                userProperties.put(APPLICATION_PROPERTY_KEY_IOTHUB_STATUS, Integer.parseInt(directMethodMessage.getStatus()));
             }
 
             if (protonMessage.getApplicationProperties() != null && protonMessage.getApplicationProperties().getValue() != null)

@@ -12,6 +12,7 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Json parser for the response received from an HSM unit upon a failed sign request
  */
+@SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
 public class ErrorResponse
 {
     private static final String MESSAGE_NAME = "message";
@@ -35,7 +36,6 @@ public class ErrorResponse
      */
     public String getMessage()
     {
-        // Codes_SRS_HTTPHSMERRORRESPONSE_34_001: [This function shall return the saved message.]
         return this.message;
     }
 }

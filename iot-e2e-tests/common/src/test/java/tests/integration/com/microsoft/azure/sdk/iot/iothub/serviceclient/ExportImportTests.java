@@ -5,7 +5,6 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
-import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
@@ -14,16 +13,16 @@ import com.azure.storage.blob.sas.BlobContainerSasPermission;
 import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 import com.azure.storage.blob.specialized.BlobInputStream;
 import com.azure.storage.blob.specialized.BlockBlobClient;
-import com.microsoft.azure.sdk.iot.deps.serializer.ExportImportDeviceParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.StorageAuthenticationType;
-import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
-import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.DeviceStatus;
-import com.microsoft.azure.sdk.iot.service.ExportImportDevice;
-import com.microsoft.azure.sdk.iot.service.ImportMode;
-import com.microsoft.azure.sdk.iot.service.JobProperties;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryJob;
+import com.microsoft.azure.sdk.iot.service.registry.serializers.ExportImportDeviceParser;
+import com.microsoft.azure.sdk.iot.service.registry.StorageAuthenticationType;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
+import com.microsoft.azure.sdk.iot.service.twin.TwinCollection;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
+import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
+import com.microsoft.azure.sdk.iot.service.registry.ExportImportDevice;
+import com.microsoft.azure.sdk.iot.service.registry.ImportMode;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubTooManyDevicesException;
 import mockit.Deencapsulation;
@@ -32,7 +31,6 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import sun.misc.IOUtils;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
@@ -42,10 +40,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubT
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,17 +68,17 @@ public class ExportImportTests extends IntegrationTest
     private static BlobContainerClient importContainer;
     private static BlobContainerClient exportContainer;
 
-    private static RegistryManager registryManager;
+    private static RegistryClient registryClient;
 
     @BeforeClass
-    public static void setUp() throws URISyntaxException, InvalidKeyException, IOException
+    public static void setUp() throws IOException
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         storageAccountConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.STORAGE_ACCOUNT_CONNECTION_STRING_ENV_VAR_NAME);
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
         String uuid = UUID.randomUUID().toString();
         deviceId = deviceId.concat("-" + uuid);
 
@@ -120,12 +115,6 @@ public class ExportImportTests extends IntegrationTest
         //Cleaning up the containers
         importContainer.delete();
         exportContainer.delete();
-
-        if (registryManager != null)
-        {
-            registryManager.close();
-            registryManager = null;
-        }
     }
 
     @Test (timeout = IMPORT_EXPORT_TEST_TIMEOUT_MILLISECONDS)
@@ -219,14 +208,14 @@ public class ExportImportTests extends IntegrationTest
         for (int i = 0; i < numberOfDevices; i++)
         {
             String deviceId = "java-bulk-test-" + UUID.randomUUID().toString();
-            Device device = Device.createFromId(deviceId, null, null);
+            Device device = new Device(deviceId);
             AuthenticationMechanism authentication = new AuthenticationMechanism(device.getSymmetricKey());
 
             ExportImportDevice deviceToAdd = new ExportImportDevice();
             deviceToAdd.setId(deviceId);
             deviceToAdd.setAuthentication(authentication);
             deviceToAdd.setStatus(DeviceStatus.Enabled);
-            TwinCollection tags = new TwinCollection(); tags.putFinal("test01", "firstvalue");
+            TwinCollection tags = new TwinCollection(); tags.put("test01", "firstvalue");
             deviceToAdd.setTags(tags);
 
             devicesForImport.add(deviceToAdd);
@@ -241,24 +230,24 @@ public class ExportImportTests extends IntegrationTest
         String containerSasUri = getContainerSasUri(exportContainer);
 
         boolean exportJobScheduled = false;
-        JobProperties exportJob = null;
+        RegistryJob exportJob = null;
         while (!exportJobScheduled)
         {
             try
             {
                 if (storageAuthenticationType.isPresent())
                 {
-                    JobProperties exportJobProperties =
-                        JobProperties.createForExportJob(
+                    RegistryJob exportJobProperties =
+                        RegistryJob.createForExportJob(
                             containerSasUri,
                             excludeKeys,
                             storageAuthenticationType.get());
 
-                    exportJob = registryManager.exportDevices(exportJobProperties);
+                    exportJob = registryClient.exportDevices(exportJobProperties);
                 }
                 else
                 {
-                    exportJob = registryManager.exportDevices(containerSasUri, excludeKeys);
+                    exportJob = registryClient.exportDevices(containerSasUri, excludeKeys);
                 }
                 exportJobScheduled = true;
 
@@ -270,14 +259,14 @@ public class ExportImportTests extends IntegrationTest
             }
         }
 
-        JobProperties.JobStatus jobStatus;
+        RegistryJob.JobStatus jobStatus;
 
         long startTime = System.currentTimeMillis();
         while (true)
         {
-            exportJob = registryManager.getJob(exportJob.getJobId());
+            exportJob = registryClient.getJob(exportJob.getJobId());
             jobStatus = exportJob.getStatus();
-            if (jobStatus == JobProperties.JobStatus.COMPLETED || jobStatus == JobProperties.JobStatus.FAILED)
+            if (jobStatus == RegistryJob.JobStatus.COMPLETED || jobStatus == RegistryJob.JobStatus.FAILED)
             {
                 break;
             }
@@ -315,7 +304,7 @@ public class ExportImportTests extends IntegrationTest
         }
         scanner.close();
 
-        if (jobStatus != JobProperties.JobStatus.COMPLETED)
+        if (jobStatus != RegistryJob.JobStatus.COMPLETED)
         {
             Assert.fail("The export job was not completed successfully");
         }
@@ -351,20 +340,20 @@ public class ExportImportTests extends IntegrationTest
 
         // Starting the import job
         boolean importJobScheduled = false;
-        JobProperties importJob = null;
+        RegistryJob importJob = null;
         while (!importJobScheduled)
         {
             try
             {
                 if (storageAuthenticationType.isPresent())
                 {
-                    // For a given StorageAuthenticationType, create JobProperties and pass it
-                    JobProperties importJobProperties = JobProperties.createForImportJob(getContainerSasUri(importContainer), getContainerSasUri(importContainer), storageAuthenticationType.get());
-                    importJob = registryManager.importDevices(importJobProperties);
+                    // For a given StorageAuthenticationType, create RegistryJob and pass it
+                    RegistryJob importJobProperties = RegistryJob.createForImportJob(getContainerSasUri(importContainer), getContainerSasUri(importContainer), storageAuthenticationType.get());
+                    importJob = registryClient.importDevices(importJobProperties);
                 }
                 else
                 {
-                    importJob = registryManager.importDevices(getContainerSasUri(importContainer), getContainerSasUri(importContainer));
+                    importJob = registryClient.importDevices(getContainerSasUri(importContainer), getContainerSasUri(importContainer));
                 }
                 importJobScheduled = true;
             }
@@ -379,9 +368,9 @@ public class ExportImportTests extends IntegrationTest
         long startTime = System.currentTimeMillis();
         while (true)
         {
-            importJob = registryManager.getJob(importJob.getJobId());
-            if (importJob.getStatus() == JobProperties.JobStatus.COMPLETED
-                    || importJob.getStatus() == JobProperties.JobStatus.FAILED)
+            importJob = registryClient.getJob(importJob.getJobId());
+            if (importJob.getStatus() == RegistryJob.JobStatus.COMPLETED
+                    || importJob.getStatus() == RegistryJob.JobStatus.FAILED)
             {
                 break;
             }
@@ -395,7 +384,7 @@ public class ExportImportTests extends IntegrationTest
         }
 
         // Checking the result of the import job
-        if (importJob.getStatus() != JobProperties.JobStatus.COMPLETED)
+        if (importJob.getStatus() != RegistryJob.JobStatus.COMPLETED)
         {
             Assert.fail("The import job was not completed successfully for " + importMode + " operation.");
         }

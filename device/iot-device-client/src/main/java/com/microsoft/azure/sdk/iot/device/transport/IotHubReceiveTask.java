@@ -6,6 +6,8 @@ package com.microsoft.azure.sdk.iot.device.transport;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.concurrent.Semaphore;
+
 /**
  * Polls an IoT Hub for messages and invokes a callback if one is found.
  * Meant to be used with an executor that continuously calls run().
@@ -21,7 +23,7 @@ public final class IotHubReceiveTask implements Runnable
     // has no received messages to handle, then this thread will do nothing and cost nothing. This is useful
     // as this SDK would otherwise periodically spawn new threads of this type that would do nothing. It is the IotHubTransport
     // layer's responsibility to notify this thread when a message has been received so that this thread can handle it.
-    private final Object receiveThreadLock;
+    private final Semaphore receiveThreadSemaphore;
 
     public IotHubReceiveTask(IotHubTransport transport)
     {
@@ -31,12 +33,15 @@ public final class IotHubReceiveTask implements Runnable
         }
 
         this.transport = transport;
-        this.receiveThreadLock = this.transport.getReceiveThreadLock();
+        this.receiveThreadSemaphore = this.transport.getReceiveThreadSemaphore();
     }
 
     public void run()
     {
-        Thread.currentThread().setName(THREAD_NAME);
+        String deviceClientId = this.transport.getDeviceClientUniqueIdentifier();
+        String connectionId = transport.getTransportConnectionId();
+        String threadName = deviceClientId + "-" + "Cxn" + connectionId + "-" + THREAD_NAME;
+        Thread.currentThread().setName(threadName);
 
         try
         {
@@ -44,19 +49,28 @@ public final class IotHubReceiveTask implements Runnable
             // wait on the IoTHubTransport layer to notify this thread that a received message is ready to be handled.
             if (this.transport.getProtocol() != IotHubClientProtocol.HTTPS)
             {
-                synchronized (this.receiveThreadLock)
+                if (!this.transport.hasReceivedMessagesToHandle() && !this.transport.isClosed())
                 {
-                    if (!this.transport.hasReceivedMessagesToHandle() && !this.transport.isClosed())
-                    {
-                        // AMQP and MQTT layers will notify the IoTHubTransport layer once a message arrives, and at
-                        // that time, this thread will be notified to handle them.
-                        this.receiveThreadLock.wait();
-                    }
+                    // IotHubTransport layer will make this semaphore available to acquire only once a received message
+                    // is ready to be handled. Once it is made available to acquire, this thread will
+                    // wake up and handle the received messages. Until then, do nothing.
+                    //
+                    // Note that this thread is not expected to release the semaphore once it is done handling messages.
+                    // This semaphore is not acquired to safely modify shared resources, but instead is used to signal
+                    // when to start working. It is more akin to the basic Java wait/notify pattern, but without the
+                    // order of operations dependency that wait/notify has.
+                    this.receiveThreadSemaphore.acquire();
                 }
             }
 
             this.transport.handleMessage();
 
+        }
+        catch (InterruptedException e)
+        {
+            // Typically happens if a disconnection event occurs and the DeviceIO layer cancels the send/receive threads
+            // while the reconnection takes place.
+            log.trace("Interrupted while waiting for work. Thread is now ending.");
         }
         catch (Throwable e)
         {

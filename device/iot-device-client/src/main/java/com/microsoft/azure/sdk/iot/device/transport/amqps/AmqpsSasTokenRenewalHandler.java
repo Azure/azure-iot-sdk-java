@@ -7,23 +7,28 @@ import org.apache.qpid.proton.amqp.messaging.Accepted;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.engine.BaseHandler;
 import org.apache.qpid.proton.engine.Event;
+import org.apache.qpid.proton.engine.Handler;
 import org.apache.qpid.proton.reactor.Reactor;
+import org.apache.qpid.proton.reactor.Task;
+
+import java.util.Iterator;
 
 /**
  * This class is responsible for proactively renewing sas tokens for a single device. When multiplexing, there will
- * be one instance of this class per device. It will periodically execute the onTimerTask logic to send a renewed sas token,
+ * be one instance of this class per device. It will periodically onStatusChanged the onTimerTask logic to send a renewed sas token,
  * and then will schedule the next timer task appropriately.
  */
 @Slf4j
-public class AmqpsSasTokenRenewalHandler extends BaseHandler implements AuthenticationMessageCallback
+class AmqpsSasTokenRenewalHandler extends BaseHandler implements AuthenticationMessageCallback
 {
     //If the sas token renewal cannot be sent, try again in this many milliseconds
     private static final int RETRY_INTERVAL_MILLISECONDS = 5000;
 
-    final AmqpsCbsSessionHandler amqpsCbsSessionHandler;
+    private final AmqpsCbsSessionHandler amqpsCbsSessionHandler;
     final AmqpsSessionHandler amqpsSessionHandler;
     private boolean isClosed;
     private AmqpsSasTokenRenewalHandler nextToAuthenticate;
+    private Task scheduledTask;
 
     public AmqpsSasTokenRenewalHandler(AmqpsCbsSessionHandler amqpsCbsSessionHandler, AmqpsSessionHandler amqpsSessionHandler)
     {
@@ -40,15 +45,21 @@ public class AmqpsSasTokenRenewalHandler extends BaseHandler implements Authenti
     @Override
     public void onTimerTask(Event event)
     {
-        log.trace("onTimerTask fired for sas token renewal handler for device {}", this.amqpsSessionHandler.getDeviceId());
-        try
+        if (this.amqpsSessionHandler != null)
         {
-            sendAuthenticationMessage(event.getReactor());
-        }
-        catch (TransportException e)
-        {
-            log.error("Failed to send the CBS authentication message to authenticate device {}, trying to send again in {} milliseconds", this.amqpsSessionHandler.getDeviceId(), RETRY_INTERVAL_MILLISECONDS);
-            scheduleRenewalRetry(event.getReactor());
+            log.trace("onTimerTask fired for sas token renewal handler for device {}", this.amqpsSessionHandler.getDeviceId());
+            if (!isClosed)
+            {
+                try
+                {
+                    sendAuthenticationMessage(event.getReactor());
+                }
+                catch (TransportException e)
+                {
+                    log.error("Failed to send the CBS authentication message to authenticate device {}, trying to send again in {} milliseconds", this.amqpsSessionHandler.getDeviceId(), RETRY_INTERVAL_MILLISECONDS);
+                    scheduleRenewalRetry(event.getReactor());
+                }
+            }
         }
     }
 
@@ -57,7 +68,7 @@ public class AmqpsSasTokenRenewalHandler extends BaseHandler implements Authenti
         if (!isClosed)
         {
             log.debug("Sending authentication message for device {}", amqpsSessionHandler.getDeviceId());
-            amqpsCbsSessionHandler.sendAuthenticationMessage(amqpsSessionHandler.getDeviceClientConfig(), this);
+            amqpsCbsSessionHandler.sendAuthenticationMessage(amqpsSessionHandler.getClientConfiguration(), this);
 
             scheduleRenewal(reactor);
         }
@@ -97,6 +108,7 @@ public class AmqpsSasTokenRenewalHandler extends BaseHandler implements Authenti
     public void close()
     {
         this.isClosed = true;
+        clearHandlers();
     }
 
     // The warning is for how getSasTokenAuthentication() may return null, but this code only executes when our config
@@ -104,15 +116,36 @@ public class AmqpsSasTokenRenewalHandler extends BaseHandler implements Authenti
     @SuppressWarnings("ConstantConditions")
     private void scheduleRenewal(Reactor reactor)
     {
-        int sasTokenRenewalPeriod = this.amqpsSessionHandler.getDeviceClientConfig().getSasTokenAuthentication().getMillisecondsBeforeProactiveRenewal();
+        int sasTokenRenewalPeriod = this.amqpsSessionHandler.getClientConfiguration().getSasTokenAuthentication().getMillisecondsBeforeProactiveRenewal();
 
         log.trace("Scheduling proactive sas token renewal for device {} in {} milliseconds", this.amqpsSessionHandler.getDeviceId(), sasTokenRenewalPeriod);
 
-        reactor.schedule(sasTokenRenewalPeriod, this);
+        this.scheduledTask = reactor.schedule(sasTokenRenewalPeriod, this);
     }
 
     private void scheduleRenewalRetry(Reactor reactor)
     {
-        reactor.schedule(RETRY_INTERVAL_MILLISECONDS, this);
+        this.scheduledTask = reactor.schedule(RETRY_INTERVAL_MILLISECONDS, this);
+    }
+
+    // Removes any children of this handler (such as LoggingFlowController) and disassociates this handler
+    // from the proton reactor. By removing the reference of the proton reactor to this handler, this handler becomes
+    // eligible for garbage collection by the JVM. This is important for multiplexed connections where SAS token renewal
+    // handlers come and go but the reactor stays alive for a long time.
+    private void clearHandlers()
+    {
+        if (this.scheduledTask != null)
+        {
+            this.scheduledTask.attachments().clear();
+        }
+
+        // an instance of this class shouldn't have any children, but other handlers may be added as this SDK
+        // grows and this protects against potential memory leaks
+        Iterator<Handler> childrenIterator = this.children();
+        while (childrenIterator.hasNext())
+        {
+            childrenIterator.next();
+            childrenIterator.remove();
+        }
     }
 }

@@ -8,6 +8,7 @@
 package com.microsoft.azure.sdk.iot.provisioning.device;
 
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.SDKUtils;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ProvisioningTask;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
@@ -80,6 +81,8 @@ public class ProvisioningDeviceClient
         this.provisioningDeviceClientContract = ProvisioningDeviceClientContract.createProvisioningContract(this.provisioningDeviceClientConfig);
         //SRS_ProvisioningDeviceClient_25_007: [ The constructor shall create an executor service with fixed thread pool of size 1. ]
         this.executor = Executors.newFixedThreadPool(MAX_THREADS_TO_RUN);
+
+        log.debug("Initialized a ProvisioningDeviceClient instance using SDK version {}", SDKUtils.PROVISIONING_DEVICE_CLIENT_VERSION);
     }
 
     /**
@@ -136,7 +139,7 @@ public class ProvisioningDeviceClient
     /**
      * Closes all the executors opened by the client if they have not already closed.
      */
-    public void closeNow()
+    public void close()
     {
         //SRS_ProvisioningDeviceClient_25_011: [ This method shall check if executor is terminated and if not shall shutdown the executor. ]
         if (executor != null && !executor.isTerminated())

@@ -5,75 +5,161 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
+import com.azure.core.credential.AzureSasCredential;
+import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.proton.transport.proxy.ProxyHandler;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyHandlerImpl;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
-import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.ErrorLoggingBaseHandlerWithCleanup;
-import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
-import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
+import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.messaging.ErrorContext;
+import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
-import com.microsoft.azure.sdk.iot.service.Tools;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubSSLContext;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
-import org.apache.qpid.proton.engine.*;
+import org.apache.qpid.proton.engine.Connection;
+import org.apache.qpid.proton.engine.EndpointState;
+import org.apache.qpid.proton.engine.Event;
+import org.apache.qpid.proton.engine.Session;
+import org.apache.qpid.proton.engine.SslDomain;
+import org.apache.qpid.proton.engine.Transport;
 import org.apache.qpid.proton.engine.impl.TransportInternal;
+import org.apache.qpid.proton.reactor.Handshaker;
 import org.apache.qpid.proton.reactor.Reactor;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 @Slf4j
-public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
+abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup implements CbsSessionStateCallback
 {
-    public static final String WEBSOCKET_PATH = "/$iothub/websocket";
-    public static final String WEBSOCKET_SUB_PROTOCOL = "AMQPWSB10";
-    public static final int AMQPS_PORT = 5671;
-    public static final int AMQPS_WS_PORT = 443;
+    private static final int AMQPS_PORT = 5671;
+    private static final int AMQPS_WS_PORT = 443;
+    private static final String WEB_SOCKET_PATH = "/$iothub/websocket";
+    private static final String WEB_SOCKET_SUB_PROTOCOL = "AMQPWSB10";
+    private static final String WEB_SOCKET_QUERY = "iothub-no-client-cert=true";
+    private static final int MAX_MESSAGE_PAYLOAD_SIZE = 65 * 1024; //max IoT Hub cloud to device message size is 65 kb, so amqp websocket layer should buffer at most that much space
 
-    protected Exception savedException;
-    protected boolean connectionOpenedRemotely;
-    protected boolean sessionOpenedRemotely;
-    protected boolean linkOpenedRemotely;
+    private String connectionId;
+    private final int keepAliveIntervalSeconds;
 
+    @Getter
     protected final String hostName;
-    protected final String userName;
-    protected final String sasToken;
-    protected final IotHubServiceClientProtocol iotHubServiceClientProtocol;
-    protected final ProxyOptions proxyOptions;
-    protected final SSLContext sslContext;
+    private TokenCredential credential;
+    private AzureSasCredential azureSasCredential;
+    private String connectionString;
+    private IotHubServiceClientProtocol protocol;
+    private ProxyOptions proxyOptions;
+    private SSLContext sslContext;
 
-    protected AmqpConnectionHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    Connection connection;
+    private CbsSessionHandler cbsSessionHandler;
+    private Runnable onConnectionClosedCallback;
+
+    AmqpConnectionHandler(
+        String connectionString,
+        IotHubServiceClientProtocol protocol,
+        Consumer<ErrorContext> errorProcessor,
+        ProxyOptions proxyOptions,
+        SSLContext sslContext,
+        int keepAliveIntervalSeconds)
     {
-        if (Tools.isNullOrEmpty(hostName))
+        if (connectionString == null || connectionString.isEmpty())
+        {
+            throw new IllegalArgumentException("connectionString can not be null or empty");
+        }
+
+        Objects.requireNonNull(protocol);
+
+        this.proxyOptions = proxyOptions;
+        this.hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString).getHostName();
+        this.connectionString = connectionString;
+        this.errorProcessor = errorProcessor;
+        this.keepAliveIntervalSeconds = keepAliveIntervalSeconds;
+
+        commonConstructorSetup(protocol, proxyOptions, sslContext, keepAliveIntervalSeconds);
+    }
+
+    AmqpConnectionHandler(
+        String hostName,
+        AzureSasCredential azureSasCredential,
+        IotHubServiceClientProtocol protocol,
+        Consumer<ErrorContext> errorProcessor,
+        ProxyOptions proxyOptions,
+        SSLContext sslContext,
+        int keepAliveIntervalSeconds)
+    {
+        if (hostName == null || hostName.isEmpty())
         {
             throw new IllegalArgumentException("hostName can not be null or empty");
         }
-        if (Tools.isNullOrEmpty(userName))
-        {
-            throw new IllegalArgumentException("userName can not be null or empty");
-        }
-        if (Tools.isNullOrEmpty(sasToken))
-        {
-            throw new IllegalArgumentException("sasToken can not be null or empty");
-        }
 
-        if (iotHubServiceClientProtocol == null)
-        {
-            throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
-        }
+        Objects.requireNonNull(protocol);
+        Objects.requireNonNull(azureSasCredential);
 
-        this.savedException = null;
-        this.connectionOpenedRemotely = false;
-        this.sessionOpenedRemotely = false;
-        this.linkOpenedRemotely = false;
-
-        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
-        this.proxyOptions = proxyOptions;
         this.hostName = hostName;
-        this.userName = userName;
-        this.sasToken = sasToken;
+        this.azureSasCredential = azureSasCredential;
+        this.errorProcessor = errorProcessor;
+        this.keepAliveIntervalSeconds = keepAliveIntervalSeconds;
+
+        commonConstructorSetup(protocol, proxyOptions, sslContext, keepAliveIntervalSeconds);
+    }
+
+    AmqpConnectionHandler(
+        String hostName,
+        TokenCredential credential,
+        IotHubServiceClientProtocol protocol,
+        Consumer<ErrorContext> errorProcessor,
+        ProxyOptions proxyOptions,
+        SSLContext sslContext,
+        int keepAliveIntervalSeconds)
+    {
+        if (hostName == null || hostName.isEmpty())
+        {
+            throw new IllegalArgumentException("hostName can not be null or empty");
+        }
+
+        Objects.requireNonNull(protocol);
+        Objects.requireNonNull(credential);
+
+        this.hostName = hostName;
+        this.credential = credential;
+        this.errorProcessor = errorProcessor;
+        this.keepAliveIntervalSeconds = keepAliveIntervalSeconds;
+
+        commonConstructorSetup(protocol, proxyOptions, sslContext, keepAliveIntervalSeconds);
+    }
+
+    private void commonConstructorSetup(
+            IotHubServiceClientProtocol protocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext,
+            int keepAliveIntervalSeconds)
+    {
+        this.proxyOptions = proxyOptions;
         this.sslContext = sslContext; // if null, a default SSLContext will be generated for the user
+        this.protocol = protocol;
+        this.connectionId = UUID.randomUUID().toString();
+
+        if (keepAliveIntervalSeconds <= 0)
+        {
+            throw new IllegalArgumentException("Keep alive interval must be greater than 0 milliseconds");
+        }
+
+        if (proxyOptions != null && this.protocol != IotHubServiceClientProtocol.AMQPS_WS)
+        {
+            throw new UnsupportedOperationException("Proxies are only supported over AMQPS_WS");
+        }
+
+        // Enables proton-j to automatically mirror the local state of the client with the remote state. For instance,
+        // if the service closes a session, this handshaker will automatically close the session locally as well.
+        add(new Handshaker());
     }
 
     @Override
@@ -81,8 +167,7 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
     {
         Reactor reactor = event.getReactor();
 
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_033: [The event handler shall set the current handler to handle the connection events.]
-        if (this.iotHubServiceClientProtocol == IotHubServiceClientProtocol.AMQPS_WS)
+        if (this.protocol == IotHubServiceClientProtocol.AMQPS_WS)
         {
             if (proxyOptions != null)
             {
@@ -107,48 +192,91 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
     public void onConnectionBound(Event event)
     {
         Transport transport = event.getConnection().getTransport();
-        if (transport != null)
+
+        // Convert from seconds to milliseconds since this proton-j API only accepts keep alive in milliseconds
+        transport.setIdleTimeout(this.keepAliveIntervalSeconds * 1000);
+
+        if (this.protocol == IotHubServiceClientProtocol.AMQPS_WS)
         {
-            if (this.iotHubServiceClientProtocol == IotHubServiceClientProtocol.AMQPS_WS)
-            {
-                WebSocketImpl webSocket = new WebSocketImpl();
-                webSocket.configure(this.hostName, WEBSOCKET_PATH, AMQPS_WS_PORT, WEBSOCKET_SUB_PROTOCOL, null, null);
-                ((TransportInternal)transport).addTransportLayer(webSocket);
-            }
-
-            Sasl sasl = transport.sasl();
-            sasl.plain(this.userName, this.sasToken);
-
-            SslDomain domain = makeDomain();
-            domain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
-            transport.ssl(domain);
-
-            if (this.proxyOptions != null)
-            {
-                addProxyLayer(transport, this.hostName);
-            }
+            WebSocketImpl webSocket = new WebSocketImpl(MAX_MESSAGE_PAYLOAD_SIZE);
+            webSocket.configure(this.hostName, WEB_SOCKET_PATH, WEB_SOCKET_QUERY, AMQPS_WS_PORT, WEB_SOCKET_SUB_PROTOCOL, null, null);
+            ((TransportInternal) transport).addTransportLayer(webSocket);
         }
+
+        // Note that this does not mean that the connection will not be authenticated. This simply defers authentication
+        // to the claims based security model that IoT Hub implements wherein the client sends the authentication token
+        // over the CBS link rather than doing a sasl.plain(username, password) call at this point.
+        transport.sasl().setMechanisms("ANONYMOUS");
+
+        SslDomain domain = makeDomain();
+        domain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
+        transport.ssl(domain);
+
+        if (this.proxyOptions != null)
+        {
+            addProxyLayer(transport, this.hostName);
+        }
+    }
+
+    @Override
+    public void onConnectionInit(Event event)
+    {
+        Connection conn = event.getConnection();
+        conn.setHostname(hostName);
+        log.debug("Opening AMQP connection");
+        conn.open();
     }
 
     @Override
     public void onLinkRemoteOpen(Event event)
     {
         super.onLinkRemoteOpen(event);
-        this.linkOpenedRemotely = true;
     }
 
     @Override
     public void onSessionRemoteOpen(Event event)
     {
         super.onSessionRemoteOpen(event);
-        this.sessionOpenedRemotely = true;
     }
 
     @Override
     public void onConnectionRemoteOpen(Event event)
     {
         super.onConnectionRemoteOpen(event);
-        this.connectionOpenedRemotely = true;
+        this.connection = event.getConnection();
+
+        // Once the connection opens, get that connection and make it create a new session that will serve as the CBS
+        // session where authentication will take place.
+        Session cbsSession = event.getConnection().session();
+
+        if (this.credential != null)
+        {
+            this.cbsSessionHandler = new CbsSessionHandler(cbsSession, this, this.credential);
+        }
+        else if (this.azureSasCredential != null)
+        {
+            this.cbsSessionHandler = new CbsSessionHandler(cbsSession, this, this.azureSasCredential);
+        }
+        else
+        {
+            this.cbsSessionHandler = new CbsSessionHandler(cbsSession, this, this.connectionString);
+        }
+    }
+
+    @Override
+    public void onConnectionRemoteClose(Event event)
+    {
+        super.onConnectionRemoteClose(event);
+
+        if (this.onConnectionClosedCallback != null)
+        {
+            this.onConnectionClosedCallback.run();
+        }
+    }
+
+    public String getConnectionId()
+    {
+        return this.connectionId;
     }
 
     /**
@@ -156,21 +284,18 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
      * @throws IOException if an exception was encountered while openinging the AMQP connection. The encountered
      * exception will be the inner exception
      */
-    protected void verifyConnectionWasOpened() throws IOException
+    public void verifyConnectionWasOpened() throws IOException, IotHubException
     {
         if (this.protonJExceptionParser != null)
         {
-            throw new IOException("Encountered exception during amqp connection: " + protonJExceptionParser.getError() + " with description " + protonJExceptionParser.getErrorDescription());
-        }
-
-        if (this.savedException != null)
-        {
-            throw new IOException("Connection failed to be established", this.savedException);
-        }
-
-        if (!this.connectionOpenedRemotely || !this.sessionOpenedRemotely || !this.linkOpenedRemotely)
-        {
-            throw new IOException("Amqp connection timed out waiting for service to respond");
+            if (this.protonJExceptionParser.getIotHubException() != null)
+            {
+                throw this.protonJExceptionParser.getIotHubException();
+            }
+            else if (this.protonJExceptionParser.getNetworkException() != null)
+            {
+                throw this.protonJExceptionParser.getNetworkException();
+            }
         }
     }
 
@@ -182,22 +307,15 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
     {
         SslDomain domain = Proton.sslDomain();
 
-        try
+        if (this.sslContext == null)
         {
-            if (this.sslContext == null)
-            {
-                // Need the base trusted certs for IotHub in our ssl context. IotHubSSLContext handles that
-                domain.setSslContext(new IotHubSSLContext().getSSLContext());
-            }
-            else
-            {
-                // Custom SSLContext set by user from service client options
-                domain.setSslContext(this.sslContext);
-            }
+            // Need the base trusted certs for IotHub in our ssl context. IotHubSSLContext handles that
+            domain.setSslContext(new IotHubSSLContext().getSSLContext());
         }
-        catch (Exception e)
+        else
         {
-            this.savedException = e;
+            // Custom SSLContext set by user from service client options
+            domain.setSslContext(this.sslContext);
         }
 
         domain.init(SslDomain.Mode.CLIENT);
@@ -212,5 +330,36 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
         final ProxyHandler proxyHandler = new ProxyHandlerImpl();
         proxy.configure(hostName + ":" + AmqpConnectionHandler.AMQPS_WS_PORT, null, proxyHandler, transport);
         ((TransportInternal) transport).addTransportLayer(proxy);
+    }
+
+    public boolean isOpen()
+    {
+        return this.connection != null
+            && this.connection.getLocalState() == EndpointState.ACTIVE
+            && this.connection.getRemoteState() == EndpointState.ACTIVE
+            && this.cbsSessionHandler.isOpen();
+    }
+
+    public void closeAsync(Runnable onConnectionClosedCallback)
+    {
+        if (this.connection != null)
+        {
+            log.debug("Shutdown event occurred, closing amqp connection");
+            this.connection.close();
+        }
+
+        if (this.cbsSessionHandler != null)
+        {
+            log.debug("Shutdown event occurred, closing cbs session");
+            this.cbsSessionHandler.close();
+        }
+
+        this.onConnectionClosedCallback = onConnectionClosedCallback;
+    }
+
+    @Override
+    public void onAuthenticationFailed(IotHubException e)
+    {
+        this.protonJExceptionParser = new ProtonJExceptionParser(e);
     }
 }

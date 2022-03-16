@@ -5,9 +5,10 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -36,56 +37,72 @@ import java.util.Date;
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollmentgroup">Device Enrollment Group</a>
  */
-public class X509CertificateInfo
+public class X509CertificateInfo implements Serializable
 {
     // the subject name of the X509 certificate
     private static final String SUBJECT_NAME_TAG = "subjectName";
     @Expose
     @SerializedName(SUBJECT_NAME_TAG)
+    @Getter
+    @Setter
     private String subjectName;
 
     // the sha1 thumbprint of the X509 certificate
     private static final String SHA1_THUMBPRINT_TAG = "sha1Thumbprint";
     @Expose
     @SerializedName(SHA1_THUMBPRINT_TAG)
+    @Getter
+    @Setter
     private String sha1Thumbprint;
 
     // the sha256 thumbprint of the X509 certificate
     private static final String SHA256_THUMBPRINT_TAG = "sha256Thumbprint";
     @Expose
     @SerializedName(SHA256_THUMBPRINT_TAG)
+    @Getter
+    @Setter
     private String sha256Thumbprint;
 
     // the issuer name of the X509 certificate
     private static final String ISSUER_NAME_TAG = "issuerName";
     @Expose
     @SerializedName(ISSUER_NAME_TAG)
+    @Getter
+    @Setter
     private String issuerName;
 
     // the no before date and time
     private static final String NO_BEFORE_UTC_TAG = "notBeforeUtc";
     @Expose
     @SerializedName(NO_BEFORE_UTC_TAG)
-    private String notBeforeUtc = null;
-    private transient Date notBeforeUtcDate;
+    private String notBeforeUtcString;
+    @Getter
+    @Setter
+    private transient Date notBeforeUtc;
 
     // the no after date and time
     private static final String NO_AFTER_UTC_TAG = "notAfterUtc";
     @Expose
     @SerializedName(NO_AFTER_UTC_TAG)
-    private String notAfterUtc = null;
-    private transient Date notAfterUtcDate;
+    private String notAfterUtcString;
+    @Getter
+    @Setter
+    private transient Date notAfterUtc;
 
     // the serial number of the X509 certificate
     private static final String SERIAL_NUMBER_TAG = "serialNumber";
     @Expose
     @SerializedName(SERIAL_NUMBER_TAG)
+    @Getter
+    @Setter
     private String serialNumber;
 
     // the version of the X509 certificate
     private static final String VERSION_TAG = "version";
     @Expose
     @SerializedName(VERSION_TAG)
+    @Getter
+    @Setter
     private Integer version;
 
     /**
@@ -99,7 +116,7 @@ public class X509CertificateInfo
     public X509CertificateInfo(X509CertificateInfo x509CertificateInfo)
     {
         /* SRS_X509_CERTIFICATE_INFO_21_001: [The constructor shall throw IllegalArgumentException if the provided x509CertificateInfo is null or invalid.] */
-        if(x509CertificateInfo == null)
+        if (x509CertificateInfo == null)
         {
             throw new IllegalArgumentException("x509CertificateInfo cannot be null");
         }
@@ -108,174 +125,32 @@ public class X509CertificateInfo
         this.setSha1Thumbprint(x509CertificateInfo.sha1Thumbprint);
         this.setSha256Thumbprint(x509CertificateInfo.sha256Thumbprint);
         this.setIssuerName(x509CertificateInfo.issuerName);
-        this.setNotBeforeUtc(x509CertificateInfo.notBeforeUtc);
-        this.setNotAfterUtc(x509CertificateInfo.notAfterUtc);
+        this.setNotBeforeUtcString(x509CertificateInfo.notBeforeUtcString);
+        this.setNotAfterUtcString(x509CertificateInfo.notAfterUtcString);
         this.setSerialNumber(x509CertificateInfo.serialNumber);
         this.setVersion(x509CertificateInfo.version);
     }
 
-    /**
-     * Getter for the subjectName.
-     *
-     * @return the {@code String} with the stored subjectName. It can be {@code null} or empty.
-     */
-    public String getSubjectName()
+    private void setNotBeforeUtcString(String notBeforeUtcString)
     {
-        /* SRS_X509_CERTIFICATE_INFO_21_003: [The getSubjectName shall return the stored subjectName.] */
-        return this.subjectName;
-    }
-
-    /**
-     * Getter for the sha1Thumbprint.
-     *
-     * @return the {@code String} with the stored sha1Thumbprint. It can be {@code null} or empty.
-     */
-    public String getSha1Thumbprint()
-    {
-        /* SRS_X509_CERTIFICATE_INFO_21_004: [The getSha1Thumbprint shall return the stored sha1Thumbprint.] */
-        return this.sha1Thumbprint;
-    }
-
-    /**
-     * Getter for the sha256Thumbprint.
-     *
-     * @return the {@code String} with the stored sha256Thumbprint. It can be {@code null} or empty.
-     */
-    public String getSha256Thumbprint()
-    {
-        /* SRS_X509_CERTIFICATE_INFO_21_005: [The getSha256Thumbprint shall return the stored sha256Thumbprint.] */
-        return this.sha256Thumbprint;
-    }
-
-    /**
-     * Getter for the issuerName.
-     *
-     * @return the {@code String} with the stored issuerName. It can be {@code null} or empty.
-     */
-    public String getIssuerName()
-    {
-        /* SRS_X509_CERTIFICATE_INFO_21_006: [The getIssuerName shall return the stored issuerName.] */
-        return this.issuerName;
-    }
-
-    /**
-     * Getter for the notBeforeUtc.
-     *
-     * @return the {@code Date} with the stored notBeforeUtc. It can be {@code null}.
-     */
-    public Date getNotBeforeUtc()
-    {
-        /* SRS_X509_CERTIFICATE_INFO_21_007: [The getNotBeforeUtc shall return the stored notBeforeUtc in a Date object.] */
-        return this.notBeforeUtcDate;
-    }
-
-    /**
-     * Getter for the notAfterUtc.
-     *
-     * @return the {@code Date} with the stored notAfterUtc. It can be {@code null}.
-     */
-    public Date getNotAfterUtc()
-    {
-        /* SRS_X509_CERTIFICATE_INFO_21_009: [The getNotAfterUtc shall return the stored notAfterUtc in a Date object.] */
-        return this.notAfterUtcDate;
-    }
-
-    /**
-     * Getter for the serialNumber.
-     *
-     * @return the {@code String} with the stored serialNumber. It can be {@code null} or empty.
-     */
-    public String getSerialNumber()
-    {
-        /* SRS_X509_CERTIFICATE_INFO_21_011: [The getSerialNumber shall return the stored serialNumber.] */
-        return this.serialNumber;
-    }
-
-    /**
-     * Getter for the version.
-     *
-     * @return the {@code Integer} with the stored version. It can be {@code null}.
-     */
-    public Integer getVersion()
-    {
-        /* SRS_X509_CERTIFICATE_INFO_21_012: [The getVersion shall return the stored version.] */
-        return this.version;
-    }
-
-    private void setSubjectName(String subjectName)
-    {
-        if(Tools.isNullOrEmpty(subjectName))
+        if (notBeforeUtcString == null || notBeforeUtcString.isEmpty())
         {
-            throw new IllegalArgumentException("subjectName on X509 info cannot be null or empty");
-        }
-        this.subjectName = subjectName;
-    }
-
-    private void setSha1Thumbprint(String sha1Thumbprint)
-    {
-        if(Tools.isNullOrEmpty(sha1Thumbprint))
-        {
-            throw new IllegalArgumentException("sha1Thumbprint on X509 info cannot be null or empty");
-        }
-        this.sha1Thumbprint = sha1Thumbprint;
-    }
-
-    private void setSha256Thumbprint(String sha256Thumbprint)
-    {
-        if(Tools.isNullOrEmpty(sha256Thumbprint))
-        {
-            throw new IllegalArgumentException("sha256Thumbprint on X509 info cannot be null or empty");
-        }
-        this.sha256Thumbprint = sha256Thumbprint;
-    }
-
-    private void setIssuerName(String issuerName)
-    {
-        if(Tools.isNullOrEmpty(issuerName))
-        {
-            throw new IllegalArgumentException("issuerName on X509 info cannot be null or empty");
-        }
-        this.issuerName = issuerName;
-    }
-
-    private void setNotBeforeUtc(String notBeforeUtc)
-    {
-        if(Tools.isNullOrEmpty(notBeforeUtc))
-        {
-            throw new IllegalArgumentException("notBeforeUtc on X509 info cannot be null or empty");
+            throw new IllegalArgumentException("notBeforeUtcString on X509 info cannot be null or empty");
         }
 
-        this.notBeforeUtcDate = ParserUtility.getDateTimeUtc(notBeforeUtc);
-        this.notBeforeUtc = notBeforeUtc;
+        this.notBeforeUtc = ParserUtility.getDateTimeUtc(notBeforeUtcString);
+        this.notBeforeUtcString = notBeforeUtcString;
     }
 
-    private void setNotAfterUtc(String notAfterUtc)
+    private void setNotAfterUtcString(String notAfterUtcString)
     {
-        if(Tools.isNullOrEmpty(notAfterUtc))
+        if (notAfterUtcString == null || notAfterUtcString.isEmpty())
         {
-            throw new IllegalArgumentException("notAfterUtc on X509 info cannot be null or empty");
+            throw new IllegalArgumentException("notAfterUtcString on X509 info cannot be null or empty");
         }
 
-        this.notAfterUtcDate = ParserUtility.getDateTimeUtc(notAfterUtc);
-        this.notAfterUtc = notAfterUtc;
-    }
-
-    private void setSerialNumber(String serialNumber)
-    {
-        if(Tools.isNullOrEmpty(serialNumber))
-        {
-            throw new IllegalArgumentException("serialNumber on X509 info cannot be null or empty");
-        }
-        this.serialNumber = serialNumber;
-    }
-
-    private void setVersion(Integer version)
-    {
-        if(version == null)
-        {
-            throw new IllegalArgumentException("version on X509 info cannot be null");
-        }
-        this.version = version;
+        this.notAfterUtc = ParserUtility.getDateTimeUtc(notAfterUtcString);
+        this.notAfterUtcString = notAfterUtcString;
     }
 
     /**

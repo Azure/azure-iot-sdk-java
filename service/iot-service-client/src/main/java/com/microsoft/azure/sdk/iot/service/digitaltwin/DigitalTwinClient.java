@@ -3,14 +3,18 @@
 
 package com.microsoft.azure.sdk.iot.service.digitaltwin;
 
+import com.azure.core.credential.AzureSasCredential;
+import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.customized.DigitalTwinGetHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.customized.DigitalTwinUpdateHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.DigitalTwins;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinInvokeRootLevelCommandHeaders;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.models.*;
-import com.microsoft.rest.*;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinCommandResponse;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinInvokeCommandHeaders;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinInvokeCommandRequestOptions;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinUpdateRequestOptions;
+import com.microsoft.rest.ServiceResponseWithHeaders;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -21,14 +25,71 @@ import java.util.List;
 public class DigitalTwinClient {
     private final DigitalTwinAsyncClient digitalTwinAsyncClient;
 
-    DigitalTwinClient(String connectionString) {
-        digitalTwinAsyncClient = DigitalTwinAsyncClient.createFromConnectionString(connectionString);
+    /**
+     * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
+     * @param connectionString The IoT Hub connection string
+     */
+    public DigitalTwinClient(String connectionString) {
+        this(connectionString, DigitalTwinClientOptions.builder().build());
     }
 
     /**
      * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
-     * @param connectionString The IoTHub connection string
-     * @return DigitalTwinClient
+     * @param connectionString The IoT Hub connection string
+     * @param options The optional settings for this client. May not be null.
+     */
+    public DigitalTwinClient(String connectionString, DigitalTwinClientOptions options) {
+        digitalTwinAsyncClient = new DigitalTwinAsyncClient(connectionString, options);
+    }
+
+    /**
+     * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
+     *                                    this library when they are needed.
+     */
+    public DigitalTwinClient(String hostName, TokenCredential credential) {
+        this(hostName, credential, DigitalTwinClientOptions.builder().build());
+    }
+
+    /**
+     * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
+     *                                    this library when they are needed.
+     * @param options The optional settings for this client. May not be null.
+     */
+    public DigitalTwinClient(String hostName, TokenCredential credential, DigitalTwinClientOptions options) {
+        digitalTwinAsyncClient = new DigitalTwinAsyncClient(hostName, credential, options);
+    }
+
+    /**
+     * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param azureSasCredential The SAS token provider that will be used for authentication.
+     */
+    public DigitalTwinClient(String hostName, AzureSasCredential azureSasCredential) {
+        this(hostName, azureSasCredential, DigitalTwinClientOptions.builder().build());
+    }
+
+    /**
+     * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param azureSasCredential The SAS token provider that will be used for authentication.
+     * @param options The optional settings for this client. May not be null.
+     */
+    public DigitalTwinClient(String hostName, AzureSasCredential azureSasCredential, DigitalTwinClientOptions options) {
+        digitalTwinAsyncClient = new DigitalTwinAsyncClient(hostName, azureSasCredential, options);
+    }
+
+    /**
+     * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
+     * @param connectionString The IoT Hub connection string
+     * @return The instantiated DigitalTwinClient.
      */
     public static DigitalTwinClient createFromConnectionString(String connectionString)
     {
@@ -101,9 +162,8 @@ public class DigitalTwinClient {
      * @param digitalTwinId The Id of the digital twin.
      * @param commandName The command to be invoked.
      * @return A {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
-     * @throws IOException can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
-    public DigitalTwinCommandResponse invokeCommand(String digitalTwinId, String commandName) throws IOException {
+    public DigitalTwinCommandResponse invokeCommand(String digitalTwinId, String commandName) {
         return invokeCommandWithResponse(digitalTwinId, commandName, null, null).body();
     }
 
@@ -113,9 +173,8 @@ public class DigitalTwinClient {
      * @param commandName The command to be invoked.
      * @param payload The command payload.
      * @return A {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
-     * @throws IOException can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
-    public DigitalTwinCommandResponse invokeCommand(String digitalTwinId, String commandName, String payload) throws IOException {
+    public DigitalTwinCommandResponse invokeCommand(String digitalTwinId, String commandName, String payload) {
         // Retrofit does not work well with null in body
         return invokeCommandWithResponse(digitalTwinId, commandName, payload, null).body();
     }
@@ -127,9 +186,9 @@ public class DigitalTwinClient {
      * @param payload The command payload.
      * @param options The optional settings for this request.
      * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinInvokeRootLevelCommandHeaders} and {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
-     * @throws IOException can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
-    public ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> invokeCommandWithResponse(String digitalTwinId, String commandName, String payload, DigitalTwinInvokeCommandRequestOptions options) throws IOException {
+    public ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> invokeCommandWithResponse(String digitalTwinId, String commandName, String payload, DigitalTwinInvokeCommandRequestOptions options)
+    {
         return digitalTwinAsyncClient
                 .invokeCommandWithResponse(digitalTwinId, commandName, payload, options)
                 .toBlocking().single();
@@ -141,9 +200,8 @@ public class DigitalTwinClient {
      * @param componentName The component name under which the command is defined.
      * @param commandName The command to be invoked.
      * @return A {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
-     * @throws IOException can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
-    public DigitalTwinCommandResponse invokeComponentCommand(String digitalTwinId, String componentName, String commandName) throws IOException {
+    public DigitalTwinCommandResponse invokeComponentCommand(String digitalTwinId, String componentName, String commandName) {
         return invokeComponentCommandWithResponse(digitalTwinId, componentName, commandName, null, null).body();
     }
 
@@ -154,9 +212,8 @@ public class DigitalTwinClient {
      * @param commandName The command to be invoked.
      * @param payload The command payload.
      * @return A {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
-     * @throws IOException can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
-    public DigitalTwinCommandResponse invokeComponentCommand(String digitalTwinId, String componentName, String commandName, String payload) throws IOException {
+    public DigitalTwinCommandResponse invokeComponentCommand(String digitalTwinId, String componentName, String commandName, String payload) {
         // Retrofit does not work well with null in body
         return invokeComponentCommandWithResponse(digitalTwinId, componentName, commandName, payload, null).body();
     }
@@ -169,9 +226,9 @@ public class DigitalTwinClient {
      * @param payload The command payload.
      * @param options The optional settings for this request.
      * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinInvokeRootLevelCommandHeaders} and {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
-     * @throws IOException can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
-    public ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> invokeComponentCommandWithResponse(String digitalTwinId, String componentName, String commandName, String payload, DigitalTwinInvokeCommandRequestOptions options) throws IOException {
+    public ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> invokeComponentCommandWithResponse(String digitalTwinId, String componentName, String commandName, String payload, DigitalTwinInvokeCommandRequestOptions options)
+    {
         return digitalTwinAsyncClient.invokeComponentCommandWithResponse(digitalTwinId, componentName, commandName, payload, options)
                 .toBlocking().single();
     }

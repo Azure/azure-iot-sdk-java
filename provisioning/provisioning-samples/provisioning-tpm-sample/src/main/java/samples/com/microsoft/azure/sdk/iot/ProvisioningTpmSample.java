@@ -15,6 +15,7 @@ import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProv
 import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderTPMEmulator;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 import static org.apache.commons.codec.binary.Base64.encodeBase64;
@@ -72,13 +73,13 @@ public class ProvisioningTpmSample
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
         SecurityProviderTpm securityClientTPMEmulator = null;
-        Scanner scanner = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
         DeviceClient deviceClient = null;
 
         try
         {
             securityClientTPMEmulator = new SecurityProviderTPMEmulator();
-            System.out.println("Endorsement Key : \n" + new String(encodeBase64(securityClientTPMEmulator.getEndorsementKey())));
+            System.out.println("Endorsement Key : \n" + new String(encodeBase64(securityClientTPMEmulator.getEndorsementKey()), StandardCharsets.UTF_8));
             System.out.println("Registration Id : \n" + securityClientTPMEmulator.getRegistrationId());
             System.out.println("Please visit Azure Portal (https://portal.azure.com/) and create a TPM Individual Enrollment with the information above i.e EndorsementKey and RegistrationId \n" +
                                        "Press enter when you are ready to run registration after enrolling with the service");
@@ -121,8 +122,8 @@ public class ProvisioningTpmSample
                 String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
                 try
                 {
-                    deviceClient = DeviceClient.createFromSecurityProvider(iotHubUri, deviceId, securityClientTPMEmulator, IotHubClientProtocol.MQTT);
-                    deviceClient.open();
+                    deviceClient = new DeviceClient(iotHubUri, deviceId, securityClientTPMEmulator, IotHubClientProtocol.MQTT);
+                    deviceClient.open(false);
                     Message messageToSendFromDeviceToHub =  new Message("Whatever message you would like to send");
 
                     System.out.println("Sending message from device to IoT Hub...");
@@ -133,7 +134,7 @@ public class ProvisioningTpmSample
                     System.out.println("Device client threw an exception: " + e.getMessage());
                     if (deviceClient != null)
                     {
-                        deviceClient.closeNow();
+                        deviceClient.close();
                     }
                 }
             }
@@ -143,7 +144,7 @@ public class ProvisioningTpmSample
             System.out.println("Provisioning Device Client threw an exception" + e.getMessage());
             if (provisioningDeviceClient != null)
             {
-                provisioningDeviceClient.closeNow();
+                provisioningDeviceClient.close();
             }
         }
 
@@ -152,11 +153,11 @@ public class ProvisioningTpmSample
         scanner.nextLine();
         if (provisioningDeviceClient != null)
         {
-            provisioningDeviceClient.closeNow();
+            provisioningDeviceClient.close();
         }
         if (deviceClient != null)
         {
-            deviceClient.closeNow();
+            deviceClient.close();
         }
 
         System.out.println("Shutting down...");

@@ -10,8 +10,13 @@ def INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING = project.hasProperty(
 def DEVICE_PROVISIONING_SERVICE_ID_SCOPE = project.hasProperty('IOT_DPS_ID_SCOPE') ? '"'+project.property('IOT_DPS_ID_SCOPE')+'"': '""'
 def CUSTOM_ALLOCATION_WEBHOOK_URL = project.hasProperty('CUSTOM_ALLOCATION_POLICY_WEBHOOK') ? '"'+project.property('CUSTOM_ALLOCATION_POLICY_WEBHOOK')+'"': '""'
 def FAR_AWAY_IOTHUB_CONNECTION_STRING = project.hasProperty('FAR_AWAY_IOTHUB_CONNECTION_STRING') ? '"'+project.property('FAR_AWAY_IOTHUB_CONNECTION_STRING')+'"': '""'
+def DPS_GLOBALDEVICEENDPOINT = project.hasProperty('DPS_GLOBALDEVICEENDPOINT') ? '"'+project.property('DPS_GLOBALDEVICEENDPOINT')+'"': '""'
 def IS_BASIC_TIER_HUB = project.hasProperty('IS_BASIC_TIER_HUB') ? '"'+project.property('IS_BASIC_TIER_HUB')+'"' : '"false"'
 def IS_PULL_REQUEST = project.hasProperty('IS_PULL_REQUEST') ? '"'+project.property('IS_PULL_REQUEST')+'"' : '"false"'
+def IOTHUB_CLIENT_ID = project.hasProperty('IOTHUB_CLIENT_ID') ? '"'+project.property('IOTHUB_CLIENT_ID')+'"' : '""'
+def IOTHUB_CLIENT_SECRET = project.hasProperty('IOTHUB_CLIENT_SECRET') ? '"'+project.property('IOTHUB_CLIENT_SECRET')+'"' : '""'
+def MSFT_TENANT_ID = project.hasProperty('MSFT_TENANT_ID') ? '"'+project.property('MSFT_TENANT_ID')+'"' : '""'
+def RECYCLE_TEST_IDENTITIES = project.hasProperty('RECYCLE_TEST_IDENTITIES') ? '"'+project.property('RECYCLE_TEST_IDENTITIES')+'"' : '"false"'
 
 def STRING='String'
 //***********************************************************************************************//
@@ -40,17 +45,22 @@ android {
             buildConfigField STRING, 'IOT_DPS_ID_SCOPE', DEVICE_PROVISIONING_SERVICE_ID_SCOPE
             buildConfigField STRING, 'CUSTOM_ALLOCATION_POLICY_WEBHOOK', CUSTOM_ALLOCATION_WEBHOOK_URL
             buildConfigField STRING, 'FAR_AWAY_IOTHUB_CONNECTION_STRING', FAR_AWAY_IOTHUB_CONNECTION_STRING
+            buildConfigField STRING, 'DPS_GLOBALDEVICEENDPOINT', DPS_GLOBALDEVICEENDPOINT
             buildConfigField STRING, 'IS_BASIC_TIER_HUB', IS_BASIC_TIER_HUB
             buildConfigField STRING, 'IS_PULL_REQUEST', IS_PULL_REQUEST
+            buildConfigField STRING, 'IOTHUB_CLIENT_ID', IOTHUB_CLIENT_ID
+            buildConfigField STRING, 'IOTHUB_CLIENT_SECRET', IOTHUB_CLIENT_SECRET
+            buildConfigField STRING, 'MSFT_TENANT_ID', MSFT_TENANT_ID
+            buildConfigField STRING, 'RECYCLE_TEST_IDENTITIES', RECYCLE_TEST_IDENTITIES
         }
     }
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -88,8 +98,8 @@ dependencies {
     // This jar contains the dependencies of the test code. DeviceClient, for instance. This jar isn't in the m2 folder, but rather it is in this cloned repo after mvn install is run
     implementation files('../../common/target/iot-e2e-common-0.26.0-with-deps.jar')
 
-    implementation ('com.microsoft.azure.android:azure-storage-android:2.0.0@aar')
     implementation ('org.apache.commons:commons-lang3:3.6')
+    implementation ('javax.xml.stream:stax-api:1.0-2')
 
     androidTestImplementation 'com.android.support:support-annotations:27.1.1'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'

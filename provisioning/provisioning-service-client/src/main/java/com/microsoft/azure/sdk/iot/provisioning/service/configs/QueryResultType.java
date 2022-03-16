@@ -4,7 +4,6 @@
 package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 
 import java.lang.reflect.Field;
 
@@ -48,13 +47,13 @@ public enum QueryResultType
 
     static QueryResultType fromString(String result)
     {
-        if(Tools.isNullOrEmpty(result))
+        if (result == null || result.isEmpty())
         {
             throw new IllegalArgumentException("type cannot be null or empty.");
         }
 
         Field[] fields = QueryResultType.class.getFields();
-        for(Field field: fields)
+        for (Field field: fields)
         {
             if (field.getAnnotation(SerializedName.class).value().equalsIgnoreCase(result))
             {

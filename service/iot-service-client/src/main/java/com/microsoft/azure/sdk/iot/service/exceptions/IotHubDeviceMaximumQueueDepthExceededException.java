@@ -5,8 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
-
 /**
  * Create iot hub device maximum queue depth exceeded exception
  */
@@ -26,4 +24,6 @@ public class IotHubDeviceMaximumQueueDepthExceededException extends IotHubExcept
     {
         super(message, errorCode, errorCodeDescription);
     }
+
+    public static final String amqpErrorCode = "amqp:resource-limit-exceeded";
 }

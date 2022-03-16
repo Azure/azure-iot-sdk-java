@@ -7,20 +7,43 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.task;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.net.ssl.SSLContext;
 
 @SuppressWarnings("SameParameterValue") // Some constructors currently are passed null params, but they are designed to be generic.
 public class RequestData
 {
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
     private byte[] endorsementKey;
+
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
     private byte[] storageRootKey;
+
+    @Getter
     private final String registrationId;
+
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
     private String operationId;
 
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
     private SSLContext sslContext;
+
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
     private String sasToken;
-    private boolean isX509;
-    private String jsonPayload;
+
+    private final boolean isX509;
+
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
+    private String payload;
 
     /**
      * Constructor for Request data
@@ -39,7 +62,8 @@ public class RequestData
         this.registrationId = registrationId;
         this.sslContext = sslContext;
         this.sasToken = sasToken;
-        this.jsonPayload = payload;
+        this.payload = payload;
+        this.isX509 = false;
     }
 
     /**
@@ -55,7 +79,8 @@ public class RequestData
         this.registrationId = registrationId;
         this.sslContext = sslContext;
         this.sasToken = sasToken;
-        this.jsonPayload = payload;
+        this.payload = payload;
+        this.isX509 = false;
     }
 
     /**
@@ -71,7 +96,7 @@ public class RequestData
         this.registrationId = registrationId;
         this.sslContext = sslContext;
         this.isX509 = isX509;
-        this.jsonPayload = payload;
+        this.payload = payload;
     }
 
     /**
@@ -89,47 +114,8 @@ public class RequestData
         this.operationId = operationId;
         this.sslContext = sslContext;
         this.sasToken = sasToken;
-        this.jsonPayload = payload;
-    }
-
-    /**
-     * Getter for endorsement key
-     * @return endorsement key
-     */
-    public byte[] getEndorsementKey()
-    {
-        //SRS_RequestData_25_002: [ This method shall retrieve endorsementKey. ]
-        return endorsementKey;
-    }
-
-    /**
-     * Getter for Storage root key
-     * @return Storage root key.
-     */
-    public byte[] getStorageRootKey()
-    {
-        //SRS_RequestData_25_004: [ This method shall retrieve storageRootKey. ]
-        return storageRootKey;
-    }
-
-    /**
-     * Getter for Registration ID
-     * @return registration id.
-     */
-    public String getRegistrationId()
-    {
-        //SRS_RequestData_25_006: [ This method shall retrieve registrationId. ]
-        return registrationId;
-    }
-
-    /**
-     * Getter for operation Id
-     * @return Operation Id value.
-     */
-    public String getOperationId()
-    {
-        //SRS_RequestData_25_008: [ This method shall retrieve operationId. ]
-        return operationId;
+        this.payload = payload;
+        this.isX509 = false;
     }
 
     /**
@@ -140,63 +126,5 @@ public class RequestData
     {
         //SRS_RequestData_25_015: [ This method shall return true is it is X509, false otherwise. ]
         return isX509;
-    }
-
-    /**
-     * Getter for SSL Context
-     * @return SSL context
-     */
-    public SSLContext getSslContext()
-    {
-        //SRS_RequestData_25_010: [ This method shall retrieve sslContext. ]
-        return sslContext;
-    }
-
-    /**
-     * Setter for SSL context.
-     * @param sslContext sslContext value. Can be {@code null};
-     */
-    void setSslContext(SSLContext sslContext)
-    {
-        //SRS_RequestData_25_011: [ This method shall set sslContext. ]
-        this.sslContext = sslContext;
-    }
-
-    /**
-     * Getter for SasToken.
-     * @return SasToken value.
-     */
-    public String getSasToken()
-    {
-        //SRS_RequestData_25_012: [ This method shall retrieve sasToken. ]
-        return sasToken;
-    }
-
-    /**
-     * Setter for SasToken.
-     * @param sasToken Sastoken value. Can be {@code null};
-     */
-    void setSasToken(String sasToken)
-    {
-        //SRS_RequestData_25_013: [ This method shall set sasToken. ]
-        this.sasToken = sasToken;
-    }
-
-    /**
-     * Setter for Payload.
-     * @param payload value. Can be {@code null};
-     */
-    public void setPayload(String payload)
-    {
-        this.jsonPayload = payload;
-    }
-
-    /**
-     * Getter for Payload.
-     * @return Payload value.
-     */
-    public String getPayload()
-    {
-        return this.jsonPayload;
     }
 }

@@ -11,7 +11,7 @@ All the artifacts that you need to execute this sample are ready to be built and
 ## References
 
 [Provisioning service client documentation](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.provisioningserviceclient?view=azure-java-stable)
-[Provisioning service client source code](https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-service-client)
+[Provisioning service client source code](https://github.com/Azure/azure-iot-sdk-java/tree/main/provisioning/provisioning-service-client)
 
 ## How to run the samples on Linux or Windows
 
@@ -34,7 +34,7 @@ Note that the samples for Windows and Linux use Maven.
         private static final String PROVISIONING_CONNECTION_STRING = "[Provisioning Connection String]";
         ```
     2. You must copy the root certificate for the group of devices. If you don't have it, you can use the 
-        [provisioning X509 cert generator](https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-tools/provisioning-x509-cert-generator).
+        [provisioning X509 cert generator](https://github.com/Azure/azure-iot-sdk-java/tree/main/provisioning/provisioning-tools/provisioning-x509-cert-generator).
         Fill the `PUBLIC_KEY_CERTIFICATE_STRING` with the root certificate. Be careful to do **not** change your
         certificate, _adding_ or _removing_ characters like spaces, tabs or new lines (`\n`).
         ```java
@@ -199,7 +199,7 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-enrollme
     private static final String PROVISIONING_CONNECTION_STRING = "{Provisioning Connection String}";
     ```
 13. You must copy the root certificate for the group of devices. If you don't have it, you can use the 
-    [provisioning X509 cert generator](https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-tools/provisioning-x509-cert-generator).
+    [provisioning X509 cert generator](https://github.com/Azure/azure-iot-sdk-java/tree/main/provisioning/provisioning-tools/provisioning-x509-cert-generator).
     Add the follow class-level variable to the **App**, and fill the `PUBLIC_KEY_CERTIFICATE_STRING` with the 
     root certificate.
     ```java

@@ -28,15 +28,13 @@ public interface IotHubTransportConnection
      * Sets a listener into the Transport Connection object. This listener updates the Transport layer of connection status
      * updates, message arrivals, and message acknowledgements
      * @param listener the listener for connection status updates, message arrivals, and message acknowledgements
-     * @throws TransportException If the provided listener is null
      */
-    void setListener(IotHubListener listener) throws TransportException;
+    void setListener(IotHubListener listener);
 
     /**
      * Closes the transport connection.
-     * @throws TransportException If any exceptions are encountered while closing.
      */
-    void close() throws TransportException;
+    void close();
 
     /**
      * Send a single message to the IotHub over the Transport Connection

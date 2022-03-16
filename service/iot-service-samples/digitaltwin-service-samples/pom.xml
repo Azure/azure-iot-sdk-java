@@ -10,10 +10,6 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>digitaltwin-service-samples</artifactId>
 
-    <properties>
-        <slf4j-version>1.7.25</slf4j-version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>io.reactivex</groupId>
@@ -24,8 +20,6 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.11.2</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

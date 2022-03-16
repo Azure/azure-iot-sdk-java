@@ -30,11 +30,11 @@ Our SDK is entirely open-source and we do accept pull-requests if you feel like 
 any relevant issue number in the pull request description. Please see [Contribute code](#contribute-code) code below.
 
 # Contribute documentation
-For simple markdown files, we accept documentation pull requests submitted against the `master` branch, if it's about existing SDK features.
+For simple markdown files, we accept documentation pull requests submitted against the `main` branch, if it's about existing SDK features.
 If your PR is about future changes or has changes to the comments in the code itself, we'll treat is as a code change (see the next section).
 
 # Contribute code
-Pull-requests for code to be submitted against the `master` branch. We will review the request and once approved we will be running it in our gated build system. We try to maintain a high bar for code quality and maintainability, we insist on having tests associated with the code, and if necessary, additions/modifications to the requirement documents. Please refer to our [coding guidelines](https://github.com/Azure/azure-iot-sdk-java/blob/master/.github/CODING_GUIDELINES.md) before you begin contribution.
+Pull-requests for code to be submitted against the `main` branch. We will review the request and once approved we will be running it in our gated build system. We try to maintain a high bar for code quality and maintainability, we insist on having tests associated with the code, and if necessary, additions/modifications to the requirement documents. Please refer to our [coding guidelines](https://github.com/Azure/azure-iot-sdk-java/blob/main/.github/CODING_GUIDELINES.md) before you begin contribution.
 
 Also, have you signed the [Contribution License Agreement](https://cla.microsoft.com/) ([CLA](https://cla.microsoft.com/))? A friendly bot will remind you about it when you submit your pull-request.
 
@@ -55,8 +55,8 @@ For an example see the template in the [Adding new files](#adding-new-files)
 ## Adding new files
 If your contribution is not part of an already existed code, you must create a new requirement file and a new unit test. Our team created a template to help you on it. 
 
-The template is located at [Template.java](https://github.com/Azure/azure-iot-sdk-java/tree/master/device/iot-device-client/src/main/java/com/microsoft/azure/sdk/iot/device/Template.java). For the requirements you can copy the [template_requirements.md](https://github.com/Azure/azure-iot-sdk-java/tree/master/device/iot-device-client/devdoc/requirement_docs/com/microsoft/azure/iothub/template_requirements.md) to the appropriate `devdoc` directory and change it to fit your needs.
-For the unit test, the template is located at [TemplateTest.java](https://github.com/Azure/azure-iot-sdk-java/tree/master/device/iot-device-client/src/test/java/tests/unit/com/microsoft/azure/sdk/iot/device). This test template explains how the [template](https://github.com/Azure/azure-iot-sdk-java/tree/master/device/iot-device-client/src/main/java/com/microsoft/azure/sdk/iot/device/Template.java) is tested.
+The template is located at [Template.java](https://github.com/Azure/azure-iot-sdk-java/tree/main/device/iot-device-client/src/main/java/com/microsoft/azure/sdk/iot/device/Template.java). For the requirements you can copy the [template_requirements.md](https://github.com/Azure/azure-iot-sdk-java/tree/main/device/iot-device-client/devdoc/requirement_docs/com/microsoft/azure/iothub/template_requirements.md) to the appropriate `devdoc` directory and change it to fit your needs.
+For the unit test, the template is located at [TemplateTest.java](https://github.com/Azure/azure-iot-sdk-java/tree/main/device/iot-device-client/src/test/java/tests/unit/com/microsoft/azure/sdk/iot/device). This test template explains how the [template](https://github.com/Azure/azure-iot-sdk-java/tree/main/device/iot-device-client/src/main/java/com/microsoft/azure/sdk/iot/device/Template.java) is tested.
 
 ## Review Process
 We expect all guidelines to be met before accepting a pull request. As such, we will work with you to address issues we find by leaving comments in your code. Please understand that it may take a few iterations before the code is accepted as we maintain high standards on code quality. Once we feel comfortable with a contribution, we will validate the change and accept the pull request.

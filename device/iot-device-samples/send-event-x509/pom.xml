@@ -35,29 +35,4 @@
             </plugin>
         </plugins>
     </build>
-    <dependencies>
-        <!--suppress MavenDuplicateDependenciesInspection -->
-        <!--
-        This duplicate dependency declaration is only here so that it can demonstrate how to exclude
-        bouncycastle dependency from the device client library.
-        -->
-        <dependency>
-            <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>${iot-device-client-artifact-id}</artifactId>
-            <version>${iot-device-client-version}</version>
-            <exclusions>
-                <!--These bouncycastle jars are only needed if you are using the deprecated constructors that take
-                certificates as strings, rather than taking an SSLContext directly. Since this sample does not use
-                those deprecated constructors, these are safe to exclude.-->
-                <exclusion>
-                    <groupId>org.bouncycastle</groupId>
-                    <artifactId>bcmail-jdk15on</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.bouncycastle</groupId>
-                    <artifactId>bcprov-jdk15on</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-    </dependencies>
 </project>

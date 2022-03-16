@@ -25,11 +25,13 @@ Please follow the instructions and template below to save us time requesting add
 4. Include enough information for us to address the bug:
    -  A detailed description.
    -  A [Minimal Complete Reproducible Example](https://stackoverflow.com/help/mcve). This is code we can cut and paste into a readily available sample and run, or a link to a project you've written that we can compile to reproduce the bug. 
-   -  Console logs (https://github.com/Azure/azure-iot-sdk-java/blob/master/logging.md).
+   -  Console logs (https://github.com/Azure/azure-iot-sdk-java/blob/main/logging.md).
 
 5. Delete these instructions before submitting the bug.
 
 Below is a generic bug report format. We recommend you use it as a template and replace the information below each header with your own. 
+
+Note that bugs that only affect unsupported platforms will likely be treated as feature requests, and may be closed as "won't fix" if we have no plans to support that platform. See [this document](../../supported_platforms.md) for details on which platforms are officially supported. 
 
 ------------------------------- delete above -------------------------------
 

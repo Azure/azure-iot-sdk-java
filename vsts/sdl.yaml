@@ -2,24 +2,35 @@ name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Re
 resources:
 - repo: self
   clean: true
-phases:
 
+jobs:
 ### SDL Tasks ###
-- phase: SDL
+- job: SDL
   displayName: SDL Tasks
 
   condition: succeeded()
-  queue:
-    name: cloud-hosted-sdl-java
+  pool:
+    vmImage: windows-latest
     timeoutInMinutes: 60
   steps:
+  - task: Maven@3
+    inputs:
+      mavenPomFile: 'pom.xml' 
+      goals: 'install' # Need to install this to the local repo as the CG task doesn't build the project
+      options: '-D"maven.test.skip=true" -D"maven.javadoc.skip=true"' # Don't run the unit tests or doc gen to save some time
+    
   - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
     displayName: 'Component Detection'
+    inputs:
+      alertWarningLevel: High
+      failOnAlert: true
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@2
     displayName: CredScan
     inputs:
       debugMode: false
+      suppressionsFile: vsts/CredScanSuppressions.json
+      toolMajorVersion: V2
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-autoapplicability.AutoApplicability@1
     displayName: AutoApplicability
@@ -33,26 +44,42 @@ phases:
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-vulnerabilityassessment.VulnerabilityAssessment@0
     displayName: 'Vulnerability Assessment'
 
-  - task: fortifyvsts.hpe-security-fortify-vsts.build-task-fortify-sca.FortifySCA@1
-    displayName: Fortify
+    ## Spotbugs doesn't have a false positive list, but instead recommends annotating the lines of code in question
+    ## with annotations like @SuppressFBWarnings("MS_SHOULD_BE_FINAL")
+  - powershell: ./vsts/spotbugs.ps1
+    displayName: 'Run Spotbugs'
+
+    ## Semmle doesn't have a false positive list, but instead recommends marking the lines of code in question
+    ## with "// lgtm"
+    ## https://help.semmle.com/lgtm-enterprise/user/help/alert-suppression.html#suppresswarnings-annotation
+  - task: Semmle@1
+    #Only run this step if it isn't a pull request. Semmle only needs to run nightly
+    condition: ne(variables['Build.Reason'], 'PullRequest')
+    env:
+      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
     inputs:
-      applicationType: java
-      buildClasspath: '$(Build.SourcesDirectory)'
-      buildSourceVersion: 1.8
-      buildSourcePath: '$(Build.SourcesDirectory)'
-      buildAnalyzerParams: '-exclude "$(Build.SourcesDirectory)\**\test\**\*" -exclude "$(Build.SourcesDirectory)\**\*sample*\**\*" -exclude "$(Build.SourcesDirectory)\edge-e2e\**\*" -exclude "$(Build.SourcesDirectory)\iot-e2e-tests\**\*" -exclude "$(Build.SourcesDirectory)\provisioning\provisioning-tools\**\*"'
-      fortifyBuildId: 12345
-      scaVerbose: true
-      scaDebug: true
-      additionalScanParams: '-filter "$(Build.SourcesDirectory)\vsts\fortify\filter.txt"'
+      toolVersion: 'Latest'
+      sourceCodeDirectory: '$(Build.SourcesDirectory)'
+      language: 'java'
+      buildCommandsString: 'mvn clean install -DskipTests -T 2C'
+      querySuite: 'Recommended'
+      timeout: '1800'
+      ram: '16384'
+      addProjectDirToScanningExclusionList: true
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@1
     displayName: PoliCheck
     inputs:
       targetType: F
-
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-antimalware.AntiMalware@3
-    displayName: 'AntiMalware Scanner'
+   
+  - task: AntiMalware@4
+    inputs:
+      InputType: 'Basic'
+      ScanType: 'CustomScan'
+      FileDirPath: '$(Build.StagingDirectory)'
+      TreatSignatureUpdateFailureAs: 'Warning'
+      SignatureFreshness: 'UpToDate'
+      TreatStaleSignatureAs: 'Error'
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
     displayName: 'Publish Security Analysis Logs'
@@ -61,7 +88,7 @@ phases:
     displayName: 'Post Analysis'
     inputs:
       CredScan: true
-      FortifySCA: true
+      Semmle: true
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-uploadtotsa.TSAUpload@1
     displayName: 'TSA upload'
@@ -70,12 +97,12 @@ phases:
       codebase: NewOrUpdate
       tsaEnvironment: PROD
       codeBaseName: 'Azure-Iot-SDK-Java-Master'
-      notificationAlias: 'timtay@microsoft.com, prmathur@microsoft.com, jasminel@microsoft.com'
-      codeBaseAdmins: 'REDMOND\timtay;REDMOND\prmathur;REDMOND\jasminel'
+      notificationAlias: 'aziotdndmgdsdk@microsoft.com'
+      codeBaseAdmins: 'REDMOND\timtay;REDMOND\jamdavi;REDMOND\azabbasi'
       instanceUrlForTsaV2: MSAZURE
       projectNameMSAZURE: One
-      areaPath: 'One\IoT\Platform\Clients\java'
-      iterationPath: 'One\IoT\Backlog'
+      areaPath: 'One\IoT\Platform and Devices\IoT Devices\SDKs\Managed'
+      iterationPath: 'One\Custom\IoT\Backlog'
       uploadAPIScan: false
       uploadBinSkim: false
       uploadFxCop: false
@@ -83,3 +110,4 @@ phases:
       uploadPREfast: false
       uploadRoslyn: false
       uploadTSLint: false
+      FortifySCA: false

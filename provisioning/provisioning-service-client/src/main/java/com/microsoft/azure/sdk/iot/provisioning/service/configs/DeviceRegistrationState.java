@@ -7,9 +7,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
+import lombok.Getter;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -34,18 +34,21 @@ import java.util.Date;
  *
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
  */
-public class DeviceRegistrationState
+@SuppressWarnings("unused") // A number of private fields are unused but may be filled in by serialization
+public class DeviceRegistrationState implements Serializable
 {
     // the registration identifier
     private static final String REGISTRATION_ID_TAG = "registrationId";
     @Expose
     @SerializedName(REGISTRATION_ID_TAG)
+    @Getter
     private String registrationId;
 
     // the device identifier
     private static final String DEVICE_ID_TAG = "deviceId";
     @Expose
     @SerializedName(DEVICE_ID_TAG)
+    @Getter
     private String deviceId;
 
     // the created date and time
@@ -53,21 +56,24 @@ public class DeviceRegistrationState
     @Expose
     @SerializedName(CREATED_DATETIME_UTC_TAG)
     @SuppressWarnings("unused") // used by reflection during json serialization/deserialization
-    private String createdDateTimeUtc;
-    private transient Date createdDateTimeUtcDate;
+    private String createdDateTimeUtcString;
+    @Getter
+    private transient Date createdDateTimeUtc;
 
     // last update date and time
     private static final String LAST_UPDATED_DATETIME_UTC_TAG = "lastUpdatedDateTimeUtc";
     @Expose
     @SerializedName(LAST_UPDATED_DATETIME_UTC_TAG)
     @SuppressWarnings("unused") // used by reflection during json serialization/deserialization
-    private String lastUpdatedDateTimeUtc;
-    private transient Date lastUpdatedDateTimeUtcDate;
+    private String lastUpdatedDateTimeUtcString;
+    @Getter
+    private transient Date lastUpdatedDateTimeUtc;
 
     // assigned hub
     private static final String ASSIGNED_HUB_TAG = "assignedHub";
     @Expose
     @SerializedName(ASSIGNED_HUB_TAG)
+    @Getter
     private String assignedHub;
 
     // registration status
@@ -75,24 +81,28 @@ public class DeviceRegistrationState
     private static final String QUOTED_STATE_TAG = "\"" + STATE_TAG + "\"";
     @Expose
     @SerializedName(STATE_TAG)
+    @Getter
     private EnrollmentStatus status;
 
     // error code
     private static final String ERROR_CODE_TAG = "errorCode";
     @Expose
     @SerializedName(ERROR_CODE_TAG)
+    @Getter
     private Integer errorCode;
 
     // error message
     private static final String ERROR_MESSAGE_TAG = "errorMessage";
     @Expose
     @SerializedName(ERROR_MESSAGE_TAG)
+    @Getter
     private String errorMessage;
 
     // the eTag
     private static final String ETAG_TAG = "etag";
     @Expose
     @SerializedName(ETAG_TAG)
+    @Getter
     private String etag;
 
     /**
@@ -106,7 +116,7 @@ public class DeviceRegistrationState
      */
     public DeviceRegistrationState(String json)
     {
-        if (Tools.isNullOrEmpty(json))
+        if (json == null || json.isEmpty())
         {
             throw new IllegalArgumentException("JSON with result is null or empty");
         }
@@ -121,14 +131,14 @@ public class DeviceRegistrationState
             this.deviceId = result.deviceId;
         }
 
-        if (result.createdDateTimeUtc != null)
+        if (result.createdDateTimeUtcString != null)
         {
-            this.createdDateTimeUtcDate = ParserUtility.getDateTimeUtc(result.createdDateTimeUtc);
+            this.createdDateTimeUtc = ParserUtility.getDateTimeUtc(result.createdDateTimeUtcString);
         }
 
-        if (result.lastUpdatedDateTimeUtc != null)
+        if (result.lastUpdatedDateTimeUtcString != null)
         {
-            this.lastUpdatedDateTimeUtcDate = ParserUtility.getDateTimeUtc(result.lastUpdatedDateTimeUtc);
+            this.lastUpdatedDateTimeUtc = ParserUtility.getDateTimeUtc(result.lastUpdatedDateTimeUtcString);
         }
 
         if (result.assignedHub != null)
@@ -163,96 +173,6 @@ public class DeviceRegistrationState
             ParserUtility.validateStringUTF8(result.etag);
             this.etag = result.etag;
         }
-    }
-
-    /**
-     * Getter for the registrationId.
-     *
-     * @return The {@code String} with the registrationID content. It cannot be {@code null} or empty.
-     */
-    public String getRegistrationId()
-    {
-        return this.registrationId;
-    }
-
-    /**
-     * Getter for the deviceId.
-     *
-     * @return The {@code String} with the deviceID content. It can be {@code null}.
-     */
-    public String getDeviceId()
-    {
-        return this.deviceId;
-    }
-
-    /**
-     * Getter for the createdDateTimeUtc.
-     *
-     * @return The {@code Date} with the createdDateTimeUtc content. It can be {@code null}.
-     */
-    public Date getCreatedDateTimeUtc()
-    {
-        return this.createdDateTimeUtcDate;
-    }
-
-    /**
-     * Getter for the lastUpdatedDateTimeUtc.
-     *
-     * @return The {@code Date} with the lastUpdatedDateTimeUtc content. It can be {@code null}.
-     */
-    public Date getLastUpdatedDateTimeUtc()
-    {
-        return this.lastUpdatedDateTimeUtcDate;
-    }
-
-    /**
-     * Getter for the assignedHub.
-     *
-     * @return The {@code String} with the assignedHub content. It can be {@code null}.
-     */
-    public String getAssignedHub()
-    {
-        return this.assignedHub;
-    }
-
-    /**
-     * Getter for the status.
-     *
-     * @return The {@code EnrollmentStatus} with the status content. It can be {@code null}.
-     */
-    public EnrollmentStatus getStatus()
-    {
-        return this.status;
-    }
-
-    /**
-     * Getter for the errorCode.
-     *
-     * @return The {@code Integer} with the errorCode content. It can be {@code null}.
-     */
-    public Integer getErrorCode()
-    {
-        return this.errorCode;
-    }
-
-    /**
-     * Getter for the errorMessage.
-     *
-     * @return The {@code String} with the errorMessage content. It can be {@code null}.
-     */
-    public String getErrorMessage()
-    {
-        return this.errorMessage;
-    }
-
-    /**
-     * Getter for the etag.
-     *
-     * @return The {@code String} with the etag content. It can be {@code null}.
-     */
-    public String getEtag()
-    {
-        return this.etag;
     }
 
     /**

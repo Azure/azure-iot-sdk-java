@@ -4,9 +4,8 @@
 package samples.com.microsoft.azure.sdk.iot.device;
 
 import com.google.gson.Gson;
-import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
+import com.microsoft.azure.sdk.iot.device.twin.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
@@ -23,8 +22,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 import static java.util.Map.Entry;
 
 @Slf4j
@@ -40,6 +39,19 @@ public class TemperatureController {
             this.value = value;
         }
     }
+
+    private static final ReportedPropertiesCallback sendReportedPropertiesResponseCallback = (statusCode, e, callbackContext) ->
+    {
+        if (statusCode == OK)
+        {
+            System.out.println("Reported properties updated successfully");
+        }
+        else
+        {
+            System.out.println("Reported properties failed to be updated. Status code: " + statusCode);
+            e.printStackTrace();
+        }
+    };
 
     // DTDL interface used: https://github.com/Azure/iot-plugandplay-models/blob/main/dtmi/com/example/temperaturecontroller-2.json
     // The TemperatureController model contains 2 Thermostat components that implement different versions of Thermostat models.
@@ -59,7 +71,7 @@ public class TemperatureController {
     private static final String deviceSymmetricKey = System.getenv("IOTHUB_DEVICE_DPS_DEVICE_KEY");
     private static final String registrationId = System.getenv("IOTHUB_DEVICE_DPS_DEVICE_ID");
 
-    // Plug and play features are available over either MQTT or MQTT_WS.
+    // Plug and play features are available over MQTT, MQTT_WS, AMQPS, and AMQPS_WS.
     private static final ProvisioningDeviceClientTransportProtocol provisioningProtocol = ProvisioningDeviceClientTransportProtocol.MQTT;
     private static final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
 
@@ -155,20 +167,39 @@ public class TemperatureController {
 
         log.debug("Set handler for \"reboot\" command.");
         log.debug("Set handler for \"getMaxMinReport\" command.");
-        deviceClient.subscribeToDeviceMethod(new MethodCallback(), null, new MethodIotHubEventCallback(), null);
+        deviceClient.subscribeToMethodsAsync(new MethodCallback(), null, new MethodIotHubEventCallback(), null);
 
         log.debug("Set handler to receive \"targetTemperature\" updates.");
-        deviceClient.startDeviceTwin(new TwinIotHubEventCallback(), null, new GenericPropertyUpdateCallback(), null);
-        Map<Property, Pair<TwinPropertyCallBack, Object>> desiredPropertyUpdateCallback = Stream.of(
-                new AbstractMap.SimpleEntry<Property, Pair<TwinPropertyCallBack, Object>>(
-                        new Property(THERMOSTAT_1, null),
-                        new Pair<>(new TargetTemperatureUpdateCallback(), THERMOSTAT_1)),
-                new AbstractMap.SimpleEntry<Property, Pair<TwinPropertyCallBack, Object>>(
-                        new Property(THERMOSTAT_2, null),
-                        new Pair<>(new TargetTemperatureUpdateCallback(), THERMOSTAT_2))
-        ).collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
-
-        deviceClient.subscribeToTwinDesiredProperties(desiredPropertyUpdateCallback);
+        deviceClient.subscribeToDesiredPropertiesAsync(
+            (statusCode, context) ->
+            {
+                if (statusCode == OK)
+                {
+                    log.info("Successfully subscribed to desired properties. Getting initial state");
+                    deviceClient.getTwinAsync(
+                        (twin, getTwinContext) ->
+                        {
+                            log.info("Initial twin state received");
+                            log.info(twin.toString());
+                        },
+                        null);
+                }
+                else
+                {
+                    log.info("Failed to subscribe to desired properties. Error code {}", statusCode);
+                    System.exit(-1);
+                }
+            },
+            null,
+            (twin, context) ->
+            {
+                TwinCollection desiredProperties = twin.getDesiredProperties();
+                for (String desiredPropertyKey : desiredProperties.keySet())
+                {
+                    TargetTemperatureUpdateCallback.onPropertyChanged(new Property(desiredPropertyKey, desiredProperties.get(desiredPropertyKey)), null);
+                }
+            },
+            null);
 
         updateDeviceInformation();
         sendDeviceMemory();
@@ -213,7 +244,7 @@ public class TemperatureController {
     }
 
     private static void initializeAndProvisionDevice() throws ProvisioningDeviceClientException, IOException, URISyntaxException, InterruptedException {
-        SecurityProviderSymmetricKey securityClientSymmetricKey = new SecurityProviderSymmetricKey(deviceSymmetricKey.getBytes(), registrationId);
+        SecurityProviderSymmetricKey securityClientSymmetricKey = new SecurityProviderSymmetricKey(deviceSymmetricKey.getBytes(StandardCharsets.UTF_8), registrationId);
         ProvisioningDeviceClient provisioningDeviceClient;
         ProvisioningStatus provisioningStatus = new ProvisioningStatus();
 
@@ -238,8 +269,7 @@ public class TemperatureController {
             Thread.sleep(MAX_TIME_TO_WAIT_FOR_REGISTRATION);
         }
 
-        ClientOptions options = new ClientOptions();
-        options.setModelId(MODEL_ID);
+        ClientOptions options = ClientOptions.builder().modelId(MODEL_ID).build();
 
         if (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED) {
             System.out.println("IotHUb Uri : " + provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri());
@@ -249,8 +279,8 @@ public class TemperatureController {
             String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
 
             log.debug("Opening the device client.");
-            deviceClient = DeviceClient.createFromSecurityProvider(iotHubUri, deviceId, securityClientSymmetricKey, IotHubClientProtocol.MQTT, options);
-            deviceClient.open();
+            deviceClient = new DeviceClient(iotHubUri, deviceId, securityClientSymmetricKey, IotHubClientProtocol.MQTT, options);
+            deviceClient.open(false);
         }
     }
 
@@ -259,11 +289,10 @@ public class TemperatureController {
      * This method also sets a connection status change callback, that will get triggered any time the device's connection status changes.
      */
     private static void initializeDeviceClient() throws URISyntaxException, IOException {
-        ClientOptions options = new ClientOptions();
-        options.setModelId(MODEL_ID);
+        ClientOptions options = ClientOptions.builder().modelId(MODEL_ID).build();
         deviceClient = new DeviceClient(deviceConnectionString, protocol, options);
 
-        deviceClient.registerConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> {
+        deviceClient.setConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> {
             log.debug("Connection status change registered: status={}, reason={}", status, statusChangeReason);
 
             if (throwable != null) {
@@ -272,20 +301,21 @@ public class TemperatureController {
             }
         }, deviceClient);
 
-        deviceClient.open();
+        deviceClient.open(false);
     }
 
     /**
      * The callback to handle "reboot" command. This method will send a temperature update (of 0°C) over telemetry for both associated components.
      */
-    private static class MethodCallback implements DeviceMethodCallback {
+    private static class MethodCallback implements com.microsoft.azure.sdk.iot.device.twin.MethodCallback
+    {
         final String reboot = "reboot";
         final String getMaxMinReport1 = "thermostat1*getMaxMinReport";
         final String getMaxMinReport2 = "thermostat2*getMaxMinReport";
 
         @SneakyThrows(InterruptedException.class)
         @Override
-        public DeviceMethodData call(String methodName, Object methodData, Object context) {
+        public DirectMethodResponse onMethodInvoked(String methodName, Object methodData, Object context) {
             String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
 
             switch (methodName) {
@@ -301,7 +331,7 @@ public class TemperatureController {
                     maxTemperature.put(THERMOSTAT_2, 0.0d);
 
                     temperatureReadings.clear();
-                    return new DeviceMethodData(StatusCode.COMPLETED.value, null);
+                    return new DirectMethodResponse(StatusCode.COMPLETED.value, null);
 
                 case getMaxMinReport1:
                 case getMaxMinReport2:
@@ -341,19 +371,19 @@ public class TemperatureController {
                                     startTime,
                                     endTime);
 
-                            return new DeviceMethodData(StatusCode.COMPLETED.value, responsePayload);
+                            return new DirectMethodResponse(StatusCode.COMPLETED.value, responsePayload);
                         }
 
                         log.debug("Command: component=\"{}\", no relevant readings found since {}, cannot generate any report.", componentName, since);
-                        return new DeviceMethodData(StatusCode.NOT_FOUND.value, null);
+                        return new DirectMethodResponse(StatusCode.NOT_FOUND.value, null);
                     }
 
                     log.debug("Command: component=\"{}\", no temperature readings sent yet, cannot generate any report.", componentName);
-                    return new DeviceMethodData(StatusCode.NOT_FOUND.value, null);
+                    return new DirectMethodResponse(StatusCode.NOT_FOUND.value, null);
 
                 default:
                     log.debug("Command: command=\"{}\" is not implemented, no action taken.", methodName);
-                    return new DeviceMethodData(StatusCode.NOT_FOUND.value, null);
+                    return new DirectMethodResponse(StatusCode.NOT_FOUND.value, null);
             }
         }
     }
@@ -362,27 +392,26 @@ public class TemperatureController {
      * The desired property update callback, which receives the target temperature as a desired property update,
      * and updates the current temperature value over telemetry and reported property update.
      */
-    private static class TargetTemperatureUpdateCallback implements TwinPropertyCallBack {
+    private static class TargetTemperatureUpdateCallback
+    {
+        final static String propertyName = "targetTemperature";
 
-        String propertyName = "targetTemperature";
-
-        @SneakyThrows({IOException.class, InterruptedException.class})
-        @Override
-        public void TwinPropertyCallBack(Property property, Object context) {
+        @SneakyThrows(InterruptedException.class)
+        public static void onPropertyChanged(Property property, Object context) {
             String componentName = (String) context;
 
             if (property.getKey().equalsIgnoreCase(componentName)) {
                 double targetTemperature = (double) ((TwinCollection) property.getValue()).get(propertyName);
                 log.debug("Property: Received - component=\"{}\", {\"{}\": {}°C}.", componentName, propertyName, targetTemperature);
 
-                Set<Property> pendingPropertyPatch = PnpConvention.createComponentWritablePropertyResponse(
+                TwinCollection pendingPropertyPatch = PnpConvention.createComponentWritablePropertyResponse(
                         propertyName,
                         targetTemperature,
                         componentName,
                         StatusCode.IN_PROGRESS.value,
                         property.getVersion().longValue(),
                         null);
-                deviceClient.sendReportedProperties(pendingPropertyPatch);
+                deviceClient.updateReportedPropertiesAsync(pendingPropertyPatch, sendReportedPropertiesResponseCallback, null);
                 log.debug("Property: Update - component=\"{}\", {\"{}\": {}°C} is {}", componentName, propertyName, targetTemperature, StatusCode.IN_PROGRESS);
 
                 // Update temperature in 2 steps
@@ -392,14 +421,14 @@ public class TemperatureController {
                     Thread.sleep(5 * 1000);
                 }
 
-                Set<Property> completedPropertyPatch = PnpConvention.createComponentWritablePropertyResponse(
+                TwinCollection completedPropertyPatch = PnpConvention.createComponentWritablePropertyResponse(
                         propertyName,
                         temperature.get(componentName),
                         componentName,
                         StatusCode.COMPLETED.value,
                         property.getVersion().longValue(),
                         "Successfully updated target temperature.");
-                deviceClient.sendReportedProperties(completedPropertyPatch);
+                deviceClient.updateReportedPropertiesAsync(completedPropertyPatch, sendReportedPropertiesResponseCallback, null);
                 log.debug("Property: Update - {\"{}\": {}°C} is {}", propertyName, temperature.get(componentName), StatusCode.COMPLETED);
             } else {
                 log.debug("Property: Received an unrecognized property update from service.");
@@ -411,7 +440,7 @@ public class TemperatureController {
     private static void updateDeviceInformation() throws IOException {
         String componentName = "deviceInformation";
 
-        Set<Property> deviceInfoPatch = PnpConvention.createComponentPropertyPatch(componentName, new HashMap<String, Object>()
+        TwinCollection deviceInfoPatch = PnpConvention.createComponentPropertyPatch(componentName, new HashMap<String, Object>()
         {{
             put("manufacturer", "element15");
             put("model", "ModelIDxcdvmk");
@@ -423,7 +452,7 @@ public class TemperatureController {
             put("totalMemory", 1024);
         }});
 
-        deviceClient.sendReportedProperties(deviceInfoPatch);
+        deviceClient.updateReportedPropertiesAsync(deviceInfoPatch, sendReportedPropertiesResponseCallback, null);
         log.debug("Property: Update - component = \"{}\" is {}.", componentName, StatusCode.COMPLETED);
     }
     
@@ -440,9 +469,9 @@ public class TemperatureController {
 
     private static void sendDeviceSerialNumber() throws IOException {
         String propertyName = "serialNumber";
-        Set<Property> propertyPatch = PnpConvention.createPropertyPatch(propertyName, SERIAL_NO);
+        TwinCollection propertyPatch = PnpConvention.createPropertyPatch(propertyName, SERIAL_NO);
 
-        deviceClient.sendReportedProperties(propertyPatch);
+        deviceClient.updateReportedPropertiesAsync(propertyPatch, sendReportedPropertiesResponseCallback, null);
         log.debug("Property: Update - {\"{}\": {}} is {}", propertyName, SERIAL_NO, StatusCode.COMPLETED);
     }
 
@@ -479,20 +508,9 @@ public class TemperatureController {
         String propertyName = "maxTempSinceLastReboot";
         double maxTemp = maxTemperature.get(componentName);
 
-        Set<Property> reportedProperty = PnpConvention.createComponentPropertyPatch(propertyName, maxTemp, componentName);
-        deviceClient.sendReportedProperties(reportedProperty);
+        TwinCollection reportedProperty = PnpConvention.createComponentPropertyPatch(propertyName, maxTemp, componentName);
+        deviceClient.updateReportedPropertiesAsync(reportedProperty, sendReportedPropertiesResponseCallback, null);
         log.debug("Property: Update - {\"{}\": {}°C} is {}.", propertyName, maxTemp, StatusCode.COMPLETED);
-    }
-
-    /**
-     * The callback to be invoked in response to device twin operations in IoT Hub.
-     */
-    private static class TwinIotHubEventCallback implements IotHubEventCallback {
-
-        @Override
-        public void execute(IotHubStatusCode responseStatus, Object callbackContext) {
-            log.debug("Property - Response from IoT Hub: {}", responseStatus.name());
-        }
     }
 
     /**
@@ -516,17 +534,6 @@ public class TemperatureController {
         public void execute(IotHubStatusCode responseStatus, Object callbackContext) {
             Message msg = (Message) callbackContext;
             log.debug("Telemetry - Response from IoT Hub: message Id={}, status={}", msg.getMessageId(), responseStatus.name());
-        }
-    }
-
-    /**
-     * The callback to be invoked for a property change that is not explicitly monitored by the device.
-     */
-    private static class GenericPropertyUpdateCallback implements TwinPropertyCallBack {
-
-        @Override
-        public void TwinPropertyCallBack(Property property, Object context) {
-            log.debug("Property - Received property unhandled by device, key={}, value={}", property.getKey(), property.getValue());
         }
     }
 

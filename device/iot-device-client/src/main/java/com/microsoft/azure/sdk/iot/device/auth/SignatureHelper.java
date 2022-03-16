@@ -19,7 +19,7 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64;
 
 /** Builds the authorization signature as a composition of functions. */
 @Slf4j
-public final class SignatureHelper
+final class SignatureHelper
 {
     /**
      * The device ID will be the prefix. The expiry time, as a UNIX
@@ -40,8 +40,6 @@ public final class SignatureHelper
      */
     public static byte[] buildRawSignature(String resourceUri, long expiryTime)
     {
-        // Codes_SRS_SIGNATUREHELPER_11_001: [The function shall initialize the message being encoded as "<scope>\n<expiryTime>".]
-        // Codes_SRS_SIGNATUREHELPER_11_002: [The function shall decode the message using the charset UTF-8.]
         return String.format(RAW_SIGNATURE_FORMAT, resourceUri, expiryTime)
                 .getBytes(SIGNATURE_CHARSET);
     }
@@ -55,8 +53,7 @@ public final class SignatureHelper
      */
     public static byte[] decodeDeviceKeyBase64(String deviceKey)
     {
-        // Codes_SRS_SIGNATUREHELPER_11_003: [The function shall decode the device key using Base64.]
-        return decodeBase64(deviceKey.getBytes());
+        return decodeBase64(deviceKey.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -72,13 +69,11 @@ public final class SignatureHelper
     {
         String hmacSha256 = "HmacSHA256";
 
-        // Codes_SRS_SIGNATUREHELPER_11_005: [The function shall use the device key as the secret for the algorithm.]
         SecretKeySpec secretKey = new SecretKeySpec(deviceKey, hmacSha256);
 
         byte[] encryptedSig = null;
         try
         {
-            // Codes_SRS_SIGNATUREHELPER_11_004: [The function shall encrypt the signature using the HMAC-SHA256 algorithm.]
             Mac hMacSha256 = Mac.getInstance(hmacSha256);
             hMacSha256.init(secretKey);
             encryptedSig = hMacSha256.doFinal(sig);
@@ -103,7 +98,6 @@ public final class SignatureHelper
      */
     public static byte[] encodeSignatureBase64(byte[] sig)
     {
-        // Codes_SRS_SIGNATUREHELPER_11_006: [The function shall encode the signature using Base64.]
         return encodeBase64(sig);
     }
 
@@ -116,7 +110,6 @@ public final class SignatureHelper
      */
     public static String encodeSignatureUtf8(byte[] sig)
     {
-        // Codes_SRS_SIGNATUREHELPER_11_010: [The function shall encode the signature using charset UTF-8.]
         return new String(sig, SIGNATURE_CHARSET);
     }
 
@@ -136,8 +129,6 @@ public final class SignatureHelper
         String strSig;
         try
         {
-            // Codes_SRS_SIGNATUREHELPER_11_007: [The function shall replace web-unsafe characters in the signature with a '%' followed by two hexadecimal digits, where the hexadecimal digits are determined by the UTF-8 charset.]
-            // Codes_SRS_SIGNATUREHELPER_11_008: [The function shall replace spaces with '+' signs.]
             strSig = URLEncoder.encode(sig, SIGNATURE_CHARSET.name());
         }
         catch (UnsupportedEncodingException e)

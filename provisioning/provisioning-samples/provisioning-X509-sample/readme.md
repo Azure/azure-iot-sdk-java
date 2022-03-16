@@ -267,10 +267,10 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=provisioning-x50
             System.out.println("Provisioning Device Client threw an exception" + e.getMessage());
             if (provisioningDeviceClient != null)
             {
-                provisioningDeviceClient.closeNow();
+                provisioningDeviceClient.close();
             }
         }
-        provisioningDeviceClient.closeNow();
+        provisioningDeviceClient.close();
 
     ```
     This piece of code does the following :
@@ -382,7 +382,7 @@ This part of the tutorial builds on top of the code you wrote in the previous se
         System.out.println("Device client threw an exception: " + e.getMessage());
         if (deviceClient != null)
         {
-            deviceClient.closeNow();
+            deviceClient.close();
         }
     }	
     ```
@@ -415,8 +415,8 @@ This part of the tutorial builds on top of the code you wrote in the previous se
 
 
 [azure-portal]: https://www.portal.azure.com
-[x509-cert-generator]:https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-tools/provisioning-x509-cert-generator
-[povisioning-device-client]:https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-device-client
-[povisioning-service-client]:https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-service-client
-[povisioning-single-enrollement-sample]:https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-samples/service-enrollment-sample
-[povisioning-group-enrollement-sample]:https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-samples/service-enrollment-group-sample
+[x509-cert-generator]:https://github.com/Azure/azure-iot-sdk-java/tree/main/provisioning/provisioning-tools/provisioning-x509-cert-generator
+[povisioning-device-client]:https://github.com/Azure/azure-iot-sdk-java/tree/main/provisioning/provisioning-device-client
+[povisioning-service-client]:https://github.com/Azure/azure-iot-sdk-java/tree/main/provisioning/provisioning-service-client
+[povisioning-single-enrollement-sample]:https://github.com/Azure/azure-iot-sdk-java/tree/main/provisioning/provisioning-samples/service-enrollment-sample
+[povisioning-group-enrollement-sample]:https://github.com/Azure/azure-iot-sdk-java/tree/main/provisioning/provisioning-samples/service-enrollment-group-sample

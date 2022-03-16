@@ -17,7 +17,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 /**
- * Symmetric Key authenticated enrollment group sample
+ * Symmetric Key authenticated enrollment group sample. In order to demonstrate best security practices, this sample
+ * does not take the enrollment group level symmetric key as an input. Instead, it only takes the device specific derived
+ * symmetric key. To learn how to derive this device specific symmetric key, see the {@link ComputeDerivedSymmetricKeySample}
+ * in this same directory.
  */
 @SuppressWarnings("CommentedOutCode") // Ignored in samples as we use these comments to show other options.
 public class ProvisioningSymmetricKeyEnrollmentGroupSample
@@ -28,12 +31,14 @@ public class ProvisioningSymmetricKeyEnrollmentGroupSample
     // Typically "global.azure-devices-provisioning.net"
     private static final String GLOBAL_ENDPOINT = "[Your Provisioning Service Global Endpoint here]";
 
-    // The symmetric key of the enrollment group. Unlike with individual enrollments, this key cannot be used directly when provisioning a device.
-    // Instead, this sample will demonstrate how to derive the symmetric key for your particular device within the enrollment group.
-    private static final String ENROLLMENT_GROUP_SYMMETRIC_KEY = "[Enter your Symmetric Key here]";
+    // Not to be confused with the symmetric key of the enrollment group itself, this key is derived from the symmetric
+    // key of the enrollment group and the desired device id of the device to provision. See the
+    // "ComputeDerivedSymmetricKeySample" code in this same directory for instructions on how to derive this key.
+    private static final String DERIVED_ENROLLMENT_GROUP_SYMMETRIC_KEY = "[Enter your derived symmetric key here]";
 
     // The Id to assign to this device when it is provisioned to an IoT Hub. This value is arbitrary outside of some
-    // character limitations. For sample purposes, this value is filled in for you, but it may be changed.
+    // character limitations. For sample purposes, this value is filled in for you, but it may be changed. This value
+    // must be consistent with the device id used when deriving the symmetric key that is used in this sample.
     private static final String PROVISIONED_DEVICE_ID = "myProvisionedDevice";
 
     // Uncomment one line to choose which protocol you'd like to use
@@ -83,17 +88,13 @@ public class ProvisioningSymmetricKeyEnrollmentGroupSample
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
         SecurityProviderSymmetricKey securityClientSymmetricKey;
-        Scanner scanner = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
         DeviceClient deviceClient = null;
-
-        // Since enrollment groups can be used to provision more than one device, the service requires you to derive the
-        // symmetric key for your device to provision based on the symmetric key of the enrollment group, and the desired
-        // device Id of the device you are provisioning
 
         // For the sake of security, you shouldn't save keys into String variables as that places them in heap memory. For the sake
         // of simplicity within this sample, though, we will save it as a string. Typically this key would be loaded as byte[] so that
         // it can be removed from stack memory.
-        byte[] derivedSymmetricKey = SecurityProviderSymmetricKey.ComputeDerivedSymmetricKey(ENROLLMENT_GROUP_SYMMETRIC_KEY.getBytes(StandardCharsets.UTF_8), PROVISIONED_DEVICE_ID);
+        byte[] derivedSymmetricKey = DERIVED_ENROLLMENT_GROUP_SYMMETRIC_KEY.getBytes(StandardCharsets.UTF_8);
 
         securityClientSymmetricKey = new SecurityProviderSymmetricKey(derivedSymmetricKey, PROVISIONED_DEVICE_ID);
 
@@ -129,8 +130,8 @@ public class ProvisioningSymmetricKeyEnrollmentGroupSample
                 String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
                 try
                 {
-                    deviceClient = DeviceClient.createFromSecurityProvider(iotHubUri, deviceId, securityClientSymmetricKey, IotHubClientProtocol.MQTT);
-                    deviceClient.open();
+                    deviceClient = new DeviceClient(iotHubUri, deviceId, securityClientSymmetricKey, IotHubClientProtocol.MQTT);
+                    deviceClient.open(false);
                     Message messageToSendFromDeviceToHub =  new Message("Whatever message you would like to send");
 
                     System.out.println("Sending message from device to IoT Hub...");
@@ -141,7 +142,7 @@ public class ProvisioningSymmetricKeyEnrollmentGroupSample
                     System.out.println("Device client threw an exception: " + e.getMessage());
                     if (deviceClient != null)
                     {
-                        deviceClient.closeNow();
+                        deviceClient.close();
                     }
                 }
             }
@@ -151,7 +152,7 @@ public class ProvisioningSymmetricKeyEnrollmentGroupSample
             System.out.println("Provisioning Device Client threw an exception" + e.getMessage());
             if (provisioningDeviceClient != null)
             {
-                provisioningDeviceClient.closeNow();
+                provisioningDeviceClient.close();
             }
         }
 
@@ -160,11 +161,11 @@ public class ProvisioningSymmetricKeyEnrollmentGroupSample
         scanner.nextLine();
         if (provisioningDeviceClient != null)
         {
-            provisioningDeviceClient.closeNow();
+            provisioningDeviceClient.close();
         }
         if (deviceClient != null)
         {
-            deviceClient.closeNow();
+            deviceClient.close();
         }
 
         System.out.println("Shutting down...");

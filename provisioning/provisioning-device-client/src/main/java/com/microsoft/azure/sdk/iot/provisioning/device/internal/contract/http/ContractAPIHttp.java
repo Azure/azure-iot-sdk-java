@@ -7,9 +7,9 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.http;
 
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpRequest;
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.https.HttpMethod;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.https.HttpRequest;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.https.HttpResponse;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.*;
@@ -54,9 +54,19 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
     private static final Integer ACCEPTABLE_NONCE_HTTP_STATUS = 401;
 
     @Override
-    public void open(RequestData requestData) throws ProvisioningDeviceConnectionException
+    public void open(RequestData requestData)
     {
         // dummy call for Http
+    }
+
+    @Override
+    public String getConnectionId() {
+        return "HTTP";
+    }
+
+    @Override
+    public String getHostName() {
+        return this.hostName;
     }
 
     @Override
@@ -198,10 +208,10 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
         {
             //SRS_ContractAPIHttp_25_004: [This method shall retrieve the Url by calling 'generateRegisterUrl' on an object for UrlPathBuilder.]
             String url = new UrlPathBuilder(this.hostName, this.idScope, ProvisioningDeviceClientTransportProtocol.HTTPS).generateRegisterUrl(requestData.getRegistrationId());
-            String base64EncodedEk = new String(encodeBase64(requestData.getEndorsementKey()));
-            String base64EncodedSrk = new String(encodeBase64(requestData.getStorageRootKey()));
+            String base64EncodedEk = new String(encodeBase64(requestData.getEndorsementKey()), StandardCharsets.UTF_8);
+            String base64EncodedSrk = new String(encodeBase64(requestData.getStorageRootKey()), StandardCharsets.UTF_8);
             //SRS_ContractAPIHttp_25_025: [ This method shall build the required Json input using parser. ]
-            byte[] payload = new DeviceRegistrationParser(requestData.getRegistrationId(), requestData.getPayload(), base64EncodedEk, base64EncodedSrk).toJson().getBytes();
+            byte[] payload = new DeviceRegistrationParser(requestData.getRegistrationId(), requestData.getPayload(), base64EncodedEk, base64EncodedSrk).toJson().getBytes(StandardCharsets.UTF_8);
             //SRS_ContractAPIHttp_25_005: [This method shall prepare the PUT request by setting following headers on a HttpRequest 1. User-Agent : User Agent String for the SDK 2. Accept : "application/json" 3. Content-Type: "application/json; charset=utf-8".]
             HttpRequest httpRequest = this.prepareRequest(new URL(url), HttpMethod.PUT, payload, null);
             //SRS_ContractAPIHttp_25_006: [This method shall set the SSLContext for the Http Request.]
@@ -220,7 +230,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
                 {
                     String tpmRegistrationResultJson = new String(httpResponse.getErrorReason(), StandardCharsets.UTF_8);
                     TpmRegistrationResultParser registerResponseTPMParser = TpmRegistrationResultParser.createFromJson(tpmRegistrationResultJson);
-                    byte[] base64DecodedAuthKey = decodeBase64(registerResponseTPMParser.getAuthenticationKey().getBytes());
+                    byte[] base64DecodedAuthKey = decodeBase64(registerResponseTPMParser.getAuthenticationKey().getBytes(StandardCharsets.UTF_8));
                     responseCallback.run(new ResponseData(base64DecodedAuthKey, ContractState.DPS_REGISTRATION_RECEIVED, 0), dpsAuthorizationCallbackContext);
                     return;
                 }
@@ -271,7 +281,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
             //SRS_ContractAPIHttp_25_012: [This method shall retrieve the Url by calling 'generateRegisterUrl' on an object for UrlPathBuilder.]
             String url = new UrlPathBuilder(this.hostName, this.idScope, ProvisioningDeviceClientTransportProtocol.HTTPS).generateRegisterUrl(requestData.getRegistrationId());
             Map<String, String> headersMap = null;
-            if(requestData.getSasToken() != null)
+            if (requestData.getSasToken() != null)
             {
                 headersMap = new HashMap<>();
                 headersMap.put(AUTHORIZATION, requestData.getSasToken());
@@ -281,13 +291,13 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
             if (requestData.getEndorsementKey() != null && requestData.getStorageRootKey() != null)
             {
                 //SRS_ContractAPIHttp_25_027: [ This method shall base 64 encoded endorsement key, storage root key. ]
-                String base64EncodedEk = new String(encodeBase64(requestData.getEndorsementKey()));
-                String base64EncodedSrk = new String(encodeBase64(requestData.getStorageRootKey()));
-                payload = new DeviceRegistrationParser(requestData.getRegistrationId(), requestData.getPayload(), base64EncodedEk, base64EncodedSrk).toJson().getBytes();
+                String base64EncodedEk = new String(encodeBase64(requestData.getEndorsementKey()), StandardCharsets.UTF_8);
+                String base64EncodedSrk = new String(encodeBase64(requestData.getStorageRootKey()), StandardCharsets.UTF_8);
+                payload = new DeviceRegistrationParser(requestData.getRegistrationId(), requestData.getPayload(), base64EncodedEk, base64EncodedSrk).toJson().getBytes(StandardCharsets.UTF_8);
             }
             else
             {
-                payload = new DeviceRegistrationParser(requestData.getRegistrationId(), requestData.getPayload()).toJson().getBytes();
+                payload = new DeviceRegistrationParser(requestData.getRegistrationId(), requestData.getPayload()).toJson().getBytes(StandardCharsets.UTF_8);
             }
 
             //SRS_ContractAPIHttp_25_013: [This method shall prepare the PUT request by setting following headers on a HttpRequest 1. User-Agent : User Agent String for the SDK 2. Accept : "application/json" 3. Content-Type: "application/json; charset=utf-8" 4. Authorization: specified sas token as authorization if a non null value is given.]

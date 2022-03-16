@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
+import com.microsoft.azure.sdk.iot.device.ClientConfiguration;
 import com.microsoft.azure.sdk.iot.device.MessageCallback;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
@@ -12,9 +12,9 @@ import org.apache.qpid.proton.engine.Receiver;
 
 import java.util.Map;
 
-import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_UNKNOWN;
+import static com.microsoft.azure.sdk.iot.device.twin.DeviceOperations.DEVICE_OPERATION_UNKNOWN;
 
-public final class AmqpsTelemetryReceiverLinkHandler extends AmqpsReceiverLinkHandler
+final class AmqpsTelemetryReceiverLinkHandler extends AmqpsReceiverLinkHandler
 {
     private static final String CORRELATION_ID_KEY = "com.microsoft:channel-correlation-id";
 
@@ -29,30 +29,30 @@ public final class AmqpsTelemetryReceiverLinkHandler extends AmqpsReceiverLinkHa
 
     private static final String LINK_TYPE = "telemetry";
 
-    private final DeviceClientConfig deviceClientConfig;
+    private final ClientConfiguration clientConfiguration;
 
-    AmqpsTelemetryReceiverLinkHandler(Receiver receiver, AmqpsLinkStateCallback amqpsLinkStateCallback, DeviceClientConfig deviceClientConfig, String linkCorrelationId)
+    AmqpsTelemetryReceiverLinkHandler(Receiver receiver, AmqpsLinkStateCallback amqpsLinkStateCallback, ClientConfiguration clientConfiguration, String linkCorrelationId)
     {
         super(receiver, amqpsLinkStateCallback, linkCorrelationId);
 
-        this.deviceClientConfig = deviceClientConfig;
+        this.clientConfiguration = clientConfiguration;
 
-        this.receiverLinkAddress = getAddress(deviceClientConfig);
+        this.receiverLinkAddress = getAddress(clientConfiguration);
 
-        this.amqpProperties.put(Symbol.getSymbol(VERSION_IDENTIFIER_KEY), deviceClientConfig.getProductInfo().getUserAgentString());
+        this.amqpProperties.put(Symbol.getSymbol(VERSION_IDENTIFIER_KEY), clientConfiguration.getProductInfo().getUserAgentString());
 
-        String moduleId = this.deviceClientConfig.getModuleId();
+        String moduleId = this.clientConfiguration.getModuleId();
         if (moduleId != null)
         {
-            this.amqpProperties.put(Symbol.getSymbol(CORRELATION_ID_KEY), Symbol.getSymbol(this.deviceClientConfig.getDeviceId() + "/" + moduleId));
+            this.amqpProperties.put(Symbol.getSymbol(CORRELATION_ID_KEY), Symbol.getSymbol(this.clientConfiguration.getDeviceId() + "/" + moduleId));
         }
         else
         {
-            this.amqpProperties.put(Symbol.getSymbol(CORRELATION_ID_KEY), Symbol.getSymbol(this.deviceClientConfig.getDeviceId()));
+            this.amqpProperties.put(Symbol.getSymbol(CORRELATION_ID_KEY), Symbol.getSymbol(this.clientConfiguration.getDeviceId()));
         }
     }
 
-    static String getTag(DeviceClientConfig clientConfig, String linkCorrelationId)
+    static String getTag(ClientConfiguration clientConfig, String linkCorrelationId)
     {
         String moduleId = clientConfig.getModuleId();
         String deviceId = clientConfig.getDeviceId();
@@ -66,13 +66,13 @@ public final class AmqpsTelemetryReceiverLinkHandler extends AmqpsReceiverLinkHa
         }
     }
 
-    private static String getAddress(DeviceClientConfig deviceClientConfig)
+    private static String getAddress(ClientConfiguration clientConfiguration)
     {
-        String moduleId = deviceClientConfig.getModuleId();
-        String deviceId = deviceClientConfig.getDeviceId();
+        String moduleId = clientConfiguration.getModuleId();
+        String deviceId = clientConfiguration.getDeviceId();
         if (moduleId != null && !moduleId.isEmpty())
         {
-            if (deviceClientConfig.getGatewayHostname() != null)
+            if (clientConfiguration.getGatewayHostname() != null)
             {
                 return String.format(MODULE_RECEIVER_LINK_ENDPOINT_PATH_EDGEHUB, deviceId, moduleId);
             }
@@ -115,8 +115,8 @@ public final class AmqpsTelemetryReceiverLinkHandler extends AmqpsReceiverLinkHa
 
         //inputName may be null, and if it is, then the default callback and default callback context will be used from config
         String inputName = iotHubTransportMessage.getInputName();
-        MessageCallback messageCallback = deviceClientConfig.getDeviceTelemetryMessageCallback(inputName);
-        Object messageContext = deviceClientConfig.getDeviceTelemetryMessageContext(inputName);
+        MessageCallback messageCallback = clientConfiguration.getDeviceTelemetryMessageCallback(inputName);
+        Object messageContext = clientConfiguration.getDeviceTelemetryMessageContext(inputName);
 
         iotHubTransportMessage.setMessageCallback(messageCallback);
         iotHubTransportMessage.setMessageCallbackContext(messageContext);

@@ -3,8 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
+import com.microsoft.azure.sdk.iot.device.ClientConfiguration;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.MessageCallback;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
@@ -16,7 +16,7 @@ import org.apache.qpid.proton.engine.Receiver;
 
 import java.util.Map;
 
-import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.*;
+import static com.microsoft.azure.sdk.iot.device.twin.DeviceOperations.*;
 
 @Slf4j
 final class AmqpsTwinReceiverLinkHandler extends AmqpsReceiverLinkHandler
@@ -45,27 +45,27 @@ final class AmqpsTwinReceiverLinkHandler extends AmqpsReceiverLinkHandler
 
     private static final String LINK_TYPE = "twin";
 
-    private final DeviceClientConfig deviceClientConfig;
+    private final ClientConfiguration clientConfiguration;
 
-    AmqpsTwinReceiverLinkHandler(Receiver receiver, AmqpsLinkStateCallback amqpsLinkStateCallback, DeviceClientConfig deviceClientConfig, String linkCorrelationId, Map<String, DeviceOperations> twinOperationCorrelationMap)
+    AmqpsTwinReceiverLinkHandler(Receiver receiver, AmqpsLinkStateCallback amqpsLinkStateCallback, ClientConfiguration clientConfiguration, String linkCorrelationId, Map<String, DeviceOperations> twinOperationCorrelationMap)
     {
         super(receiver, amqpsLinkStateCallback, linkCorrelationId);
 
-        this.deviceClientConfig = deviceClientConfig;
+        this.clientConfiguration = clientConfiguration;
 
-        this.receiverLinkAddress = getAddress(deviceClientConfig);
+        this.receiverLinkAddress = getAddress(clientConfiguration);
 
         //Note that this correlation id value must be equivalent to the correlation id in the twin sender link that it is paired with
         this.amqpProperties.put(Symbol.getSymbol(CORRELATION_ID_KEY), Symbol.getSymbol(CORRELATION_ID_KEY_PREFIX + this.linkCorrelationId));
-        this.amqpProperties.put(Symbol.getSymbol(VERSION_IDENTIFIER_KEY), deviceClientConfig.getProductInfo().getUserAgentString());
+        this.amqpProperties.put(Symbol.getSymbol(VERSION_IDENTIFIER_KEY), clientConfiguration.getProductInfo().getUserAgentString());
 
         this.twinOperationCorrelationMap = twinOperationCorrelationMap;
     }
 
-    static String getTag(DeviceClientConfig deviceClientConfig, String linkCorrelationId)
+    static String getTag(ClientConfiguration clientConfiguration, String linkCorrelationId)
     {
-        String moduleId = deviceClientConfig.getModuleId();
-        String deviceId = deviceClientConfig.getDeviceId();
+        String moduleId = clientConfiguration.getModuleId();
+        String deviceId = clientConfiguration.getDeviceId();
         if (moduleId != null && !moduleId.isEmpty())
         {
             return RECEIVER_LINK_TAG_PREFIX + deviceId + "/" + moduleId + "-" + linkCorrelationId;
@@ -76,10 +76,10 @@ final class AmqpsTwinReceiverLinkHandler extends AmqpsReceiverLinkHandler
         }
     }
 
-    private static String getAddress(DeviceClientConfig deviceClientConfig)
+    private static String getAddress(ClientConfiguration clientConfiguration)
     {
-        String moduleId = deviceClientConfig.getModuleId();
-        String deviceId = deviceClientConfig.getDeviceId();
+        String moduleId = clientConfiguration.getModuleId();
+        String deviceId = clientConfiguration.getDeviceId();
         if (moduleId != null && !moduleId.isEmpty())
         {
             return String.format(MODULE_RECEIVER_LINK_ENDPOINT_PATH, deviceId, moduleId);
@@ -101,8 +101,8 @@ final class AmqpsTwinReceiverLinkHandler extends AmqpsReceiverLinkHandler
     {
         IotHubTransportMessage iotHubTransportMessage = super.protonMessageToIoTHubMessage(protonMsg);
 
-        MessageCallback messageCallback = deviceClientConfig.getDeviceTwinMessageCallback();
-        Object messageContext = deviceClientConfig.getDeviceTwinMessageContext();
+        MessageCallback messageCallback = clientConfiguration.getDeviceTwinMessageCallback();
+        Object messageContext = clientConfiguration.getDeviceTwinMessageContext();
 
         iotHubTransportMessage.setMessageCallback(messageCallback);
         iotHubTransportMessage.setMessageCallbackContext(messageContext);

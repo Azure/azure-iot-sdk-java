@@ -11,11 +11,8 @@ import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProv
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
-import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.security.cert.CertificateException;
 import java.util.Base64;
 
 public class SecurityProviderSymmetricKey extends SecurityProvider
@@ -24,7 +21,6 @@ public class SecurityProviderSymmetricKey extends SecurityProvider
     private final byte[] primaryKey;
     private byte[] secondaryKey;
     private final String registrationId;
-    private static final String HMAC_SHA256 = "HmacSHA256";
 
     /**
      * Constructor for Symmetric key security provider
@@ -67,8 +63,8 @@ public class SecurityProviderSymmetricKey extends SecurityProvider
             throw new IllegalArgumentException("Registration ID cannot be null");
         }
 
-        this.primaryKey = primaryKey.getBytes();
-        this.secondaryKey = secondaryKey.getBytes();
+        this.primaryKey = primaryKey.getBytes(StandardCharsets.UTF_8);
+        this.secondaryKey = secondaryKey.getBytes(StandardCharsets.UTF_8);
         this.registrationId = registrationId;
     }
 
@@ -104,43 +100,6 @@ public class SecurityProviderSymmetricKey extends SecurityProvider
             throw new SecurityProviderException("Registration is null or empty");
         }
         return registrationId;
-    }
-
-    /**
-     * Retrieves the SSL context loaded with trusted certs. In case of X509 SSL context shall be loaded with complete chain
-     * all the way till the leaf along with its private key.
-     *
-     * @return The SSLContext relevant to the flow
-     * @throws SecurityProviderException If ssl context could not be generated for any of the reason
-     */
-    @Override
-    public SSLContext getSSLContext() throws SecurityProviderException
-    {
-        try
-        {
-            //SRS_SecurityClientTpm_25_004: [ This method shall generate SSLContext for this flow. ]
-            return this.generateSSLContext();
-        }
-        catch (NoSuchAlgorithmException | KeyStoreException | CertificateException | IOException | KeyManagementException e)
-        {
-            //SRS_SecurityClientTpm_25_005: [ This method shall throw SecurityProviderException if any of the underlying API's in generating SSL context fails. ]
-            throw new SecurityProviderException(e);
-        }
-    }
-
-    private SSLContext generateSSLContext() throws NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException, KeyManagementException
-    {
-        SSLContext sslContext = SSLContext.getInstance(DEFAULT_TLS_PROTOCOL);
-
-        // create keystore
-        //SRS_SecurityClientTpm_25_006: [ This method shall load the keystore with TrustedCerts. ]
-        KeyStore keyStore = this.getKeyStoreWithTrustedCerts();
-
-        TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-        trustManagerFactory.init(keyStore);
-        //SRS_SecurityClientTpm_25_007: [ This method shall initialize SSLContext with the default trustManager loaded with keystore. ]
-        sslContext.init(null, trustManagerFactory.getTrustManagers(), new SecureRandom());
-        return sslContext;
     }
 
     /**
@@ -185,9 +144,9 @@ public class SecurityProviderSymmetricKey extends SecurityProvider
     {
         // The symmetric key, as provided by the Azure Portal, is a base64 encoded string, so first we need to decode it
         byte[] masterKeyBytes = Base64.getDecoder().decode(enrollmentGroupSymmetricKey);
-        SecretKeySpec secretKey = new SecretKeySpec(masterKeyBytes, HMAC_SHA256);
-        Mac hMacSha256 = Mac.getInstance(HMAC_SHA256);
+        SecretKeySpec secretKey = new SecretKeySpec(masterKeyBytes, HMAC_SHA_256);
+        Mac hMacSha256 = Mac.getInstance(HMAC_SHA_256);
         hMacSha256.init(secretKey);
-        return Base64.getEncoder().encode(hMacSha256.doFinal(deviceId.getBytes()));
+        return Base64.getEncoder().encode(hMacSha256.doFinal(deviceId.getBytes(StandardCharsets.UTF_8)));
     }
 }

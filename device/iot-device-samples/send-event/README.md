@@ -17,32 +17,32 @@ Listed below is the command to launch the sample along with a description of its
 
 ```
 $> cd {sample root}/send-event
-$> java -jar target/send-event-{version}-with-deps.jar "{connection string}" {number of messages to send} {protocol}  {path to trusted root ca}
+$> java -jar target/send-event-{version}-with-deps.jar [-c "{connection string}"] [-h] [-p {protocol}] [-pc {path to trusted root ca}] [-r {number of requests to send}]
 ```
 
 ### Arguments Description
 
 * Connection String:
-  * IoT Hub connection string format:
+    * IoT Hub connection string format:
 
-    ```
-    HostName=your-hub.azure-devices.net;DeviceId=yourDevice;SharedAccessKey=XXXYYYZZZ=;
-    ```
+      ```
+      HostName=your-hub.azure-devices.net;DeviceId=yourDevice;SharedAccessKey=XXXYYYZZZ=;
+      ```
 
-  * IoT Edge connection string:
+    * IoT Edge connection string:
 
-    ```
-    HostName=your-hub.azure-devices.net;DeviceId=yourDevice;SharedAccessKey=XXXYYYZZZ=;GatewayHostName=mygateway.contoso.com
-    ```
+      ```
+      HostName=your-hub.azure-devices.net;DeviceId=yourDevice;SharedAccessKey=XXXYYYZZZ=;GatewayHostName=mygateway.contoso.com
+      ```
 
 * Number of messages - Expressed in decimal
 * Protocol - Choices are "mqtt", "https", "amqps", "amqps_ws", "mqtt_ws"
-* Path to trusted CA certificate: This is optional for IoT Hub since it's certificate is signed by public root CA. For the Edge Hub, if the CA is not a public root, a path tp the root CA certificate in PEM format is absolutely required. This is required even if the root certificate is installed in the trusted certificate store of the OS.
+* Path to trusted CA certificate: This is optional for IoT Hub since it's certificate is signed by public root CA. For the Edge Hub, if the CA is not a public root, a path to the root CA certificate in PEM format is absolutely required. This is required even if the root certificate is installed in the trusted certificate store of the OS.
 
 Sample command invocation:
 
 ```
-$> java -jar target/send-event-1.14.0-with-deps.jar "{connection string}" 20 mqtt /home/user/ca_cert.pem
+$> java -jar target/send-event-1.14.0-with-deps.jar -c "{connection string}" -r 20 -p mqtt -pc /home/user/ca_cert.pem
 ```
 
 ## Verify output

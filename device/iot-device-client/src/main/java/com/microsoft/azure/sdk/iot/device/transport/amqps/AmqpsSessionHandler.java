@@ -1,7 +1,7 @@
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
+import com.microsoft.azure.sdk.iot.device.ClientConfiguration;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
@@ -15,14 +15,17 @@ import org.apache.qpid.proton.engine.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.*;
+import static com.microsoft.azure.sdk.iot.device.twin.DeviceOperations.*;
 import static com.microsoft.azure.sdk.iot.device.MessageType.*;
 
 @Slf4j
-public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
+class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
 {
     @Getter
-    private final DeviceClientConfig deviceClientConfig;
+    private final ClientConfiguration clientConfiguration;
+
+    // "Explicit" vs "Implicit" here refers to actions that the user initiated ("Explicit"ly calling startTwin)
+    // vs actions the SDK initiated ("Implicit"ly opening twin links after reconnecting because they were open previously)
 
     //Subscriptions that are initiated by the SDK, not the user of the SDK. State should not carry over between connections.
     private final Map<Integer, SubscriptionType> implicitInProgressSubscriptionMessages = new ConcurrentHashMap<>();
@@ -38,8 +41,10 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
     private final AmqpsSessionStateCallback amqpsSessionStateCallback;
 
     //Should not carry over state between reconnects
-    private final List<AmqpsSenderLinkHandler> senderLinkHandlers = new ArrayList<>();
-    private final List<AmqpsReceiverLinkHandler> receiverLinkHandlers = new ArrayList<>();
+    //Maps from the type of message (twin/method/telemetry) to the appropriate sender/receiver link handler
+    private final Map<MessageType, AmqpsSenderLinkHandler> senderLinkHandlers = new ConcurrentHashMap<>();
+    private final Map<MessageType, AmqpsReceiverLinkHandler> receiverLinkHandlers = new ConcurrentHashMap<>();
+
     private Session session;
     private boolean alreadyCreatedTelemetryLinks;
     private boolean alreadyCreatedTwinLinks;
@@ -50,10 +55,11 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
     private boolean methodsReceiverLinkOpened;
     private boolean sessionOpenedRemotely;
     private boolean sessionHandlerClosedBeforeRemoteSessionOpened;
+    private boolean isClosing;
 
-    AmqpsSessionHandler(final DeviceClientConfig deviceClientConfig, AmqpsSessionStateCallback amqpsSessionStateCallback)
+    AmqpsSessionHandler(final ClientConfiguration clientConfiguration, AmqpsSessionStateCallback amqpsSessionStateCallback)
     {
-        this.deviceClientConfig = deviceClientConfig;
+        this.clientConfiguration = clientConfiguration;
         this.amqpsSessionStateCallback = amqpsSessionStateCallback;
     }
 
@@ -82,6 +88,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
         this.methodsReceiverLinkOpened = false;
         this.sessionOpenedRemotely = false;
         this.sessionHandlerClosedBeforeRemoteSessionOpened = false;
+        this.isClosing = false;
     }
 
     public void closeSession()
@@ -101,7 +108,15 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
 
                 // This is a difficult scenario to reproduce, but it typically happens during retry logic if the client gives
                 // up on a retry attempt prior to the service opening the session remotely.
+                this.isClosing = true;
                 this.session.close();
+
+                if (session.getLocalState() == EndpointState.CLOSED)
+                {
+                    // Since session was never opened, there will be no callback for onSessionRemoteClose, so now is
+                    // the appropriate time to notify the connection layer that this session has finished closing.
+                    this.amqpsSessionStateCallback.onSessionClosedAsExpected(this.getDeviceId());
+                }
             }
             else
             {
@@ -115,7 +130,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
 
     public String getDeviceId()
     {
-        return this.deviceClientConfig.getDeviceId();
+        return this.clientConfiguration.getDeviceId();
     }
 
     @Override
@@ -136,7 +151,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
             log.trace("Closing an out of date session now that the service has opened the session remotely.");
             this.session.close();
         }
-        else if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
+        else if (this.clientConfiguration.getAuthenticationType() == ClientConfiguration.AuthType.X509_CERTIFICATE)
         {
             log.trace("Opening worker links for device {}", this.getDeviceId());
             openLinks();
@@ -153,17 +168,19 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
     public void onSessionRemoteClose(Event e)
     {
         Session session = e.getSession();
-        if (session.getLocalState() == EndpointState.ACTIVE)
+        if (session.getLocalState() == EndpointState.ACTIVE || !isClosing)
         {
             //Service initiated this session close
             this.session.close();
 
             log.debug("Amqp device session closed remotely unexpectedly for device {}", getDeviceId());
+            clearHandlers();
             this.amqpsSessionStateCallback.onSessionClosedUnexpectedly(session.getRemoteCondition(), this.getDeviceId());
         }
         else
         {
             log.trace("Amqp device session closed remotely as expected for device {}", getDeviceId());
+            clearHandlers();
             this.amqpsSessionStateCallback.onSessionClosedAsExpected(this.getDeviceId());
         }
     }
@@ -181,13 +198,17 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
     public void onLinkOpened(BaseHandler linkHandler)
     {
         boolean allLinksOpen = true;
-        for (AmqpsSenderLinkHandler senderLinkHandler : senderLinkHandlers)
+        for (AmqpsSenderLinkHandler senderLinkHandler : senderLinkHandlers.values())
         {
+            // Ignored because Sender is passed in from elsewhere and we won't know the condition of the Link
+            //noinspection ConstantConditions
             allLinksOpen &= senderLinkHandler.senderLink != null && senderLinkHandler.senderLink.getRemoteState() == EndpointState.ACTIVE;
         }
 
-        for (AmqpsReceiverLinkHandler receiverLinkHandler : receiverLinkHandlers)
+        for (AmqpsReceiverLinkHandler receiverLinkHandler : receiverLinkHandlers.values())
         {
+            // Ignored because Sender is passed in from elsewhere and we won't know the condition of the Link
+            //noinspection ConstantConditions
             allLinksOpen &= receiverLinkHandler.receiverLink != null && receiverLinkHandler.receiverLink.getRemoteState() == EndpointState.ACTIVE;
         }
 
@@ -225,21 +246,17 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
         {
             this.twinSenderLinkOpened = true;
 
-            if (this.twinReceiverLinkOpened && this.explicitInProgressTwinSubscriptionMessage != null)
-            {
-                this.amqpsSessionStateCallback.onMessageAcknowledged(this.explicitInProgressTwinSubscriptionMessage, Accepted.getInstance(), this.getDeviceId());
-                this.explicitInProgressTwinSubscriptionMessage = null; //By setting this to null, this session can handle another twin subscription message
-            }
+            // not acknowledging the explicit twin subsription message yet since the implicit twin desired properties
+            // subscription message has not been acknowledged yet. See onMessageAcknowledged for the code path that
+            // acknowledges the twin subscription message.
         }
         else if (linkHandler instanceof AmqpsTwinReceiverLinkHandler)
         {
             this.twinReceiverLinkOpened = true;
 
-            if (this.twinSenderLinkOpened && this.explicitInProgressTwinSubscriptionMessage != null)
-            {
-                this.amqpsSessionStateCallback.onMessageAcknowledged(this.explicitInProgressTwinSubscriptionMessage, Accepted.getInstance(), this.getDeviceId());
-                this.explicitInProgressTwinSubscriptionMessage = null; //By setting this to null, this session can handle another twin subscription message
-            }
+            // not acknowledging the explicit twin subsription message yet since the implicit twin desired properties
+            // subscription message has not been acknowledged yet. See onMessageAcknowledged for the code path that
+            // acknowledges the twin subscription message.
         }
         else if (linkHandler instanceof AmqpsMethodsSenderLinkHandler)
         {
@@ -270,6 +287,11 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
         {
             this.implicitInProgressSubscriptionMessages.remove(deliveryTag);
             log.trace("The acknowledged message was the desired properties subscription message");
+
+            // Now that both the twin links have opened, and the desired property subscription message has been ack'd, twin
+            // has successfully been subscribed to.
+            this.amqpsSessionStateCallback.onMessageAcknowledged(this.explicitInProgressTwinSubscriptionMessage, Accepted.getInstance(), this.getDeviceId());
+            this.explicitInProgressTwinSubscriptionMessage = null; //By setting this to null, this session can handle another twin subscription message
         }
         else
         {
@@ -280,6 +302,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
     @Override
     public void onMessageReceived(IotHubTransportMessage message)
     {
+        message.setConnectionDeviceId(this.getDeviceId());
         this.amqpsSessionStateCallback.onMessageReceived(message);
     }
 
@@ -293,197 +316,258 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
 
     public boolean acknowledgeReceivedMessage(IotHubTransportMessage message, DeliveryState ackType)
     {
-        for (AmqpsReceiverLinkHandler linksHandler : receiverLinkHandlers)
+        AmqpsReceiverLinkHandler receiverLinkHandler = receiverLinkHandlers.get(message.getMessageType());
+
+        if (receiverLinkHandler != null)
         {
-            if (linksHandler.acknowledgeReceivedMessage(message, ackType))
-            {
-                return true;
-            }
+            return receiverLinkHandler.acknowledgeReceivedMessage(message, ackType);
         }
 
+        log.warn("Failed to acknowledge the received message because its receiver link is no longer active");
         return false;
     }
 
     void openLinks()
     {
-        //Note that this method should only be called from a reactor thread such as during a callback of onSessionRemoteOpen.
+        // Note that this method should only be called from a reactor thread such as during a callback of onSessionRemoteOpen.
         // Just like sending and receiving messages, opening links is only safe on a reactor thread.
         if (!alreadyCreatedTelemetryLinks)
         {
-            createTelemetryLinks();
+            createTelemetryLinksAsync();
         }
 
         if (subscribeToTwinOnReconnection && !alreadyCreatedTwinLinks)
         {
-            createTwinLinks();
+            createTwinLinksAsync();
         }
 
         if (subscribeToMethodsOnReconnection && !alreadyCreatedMethodLinks)
         {
-            createMethodLinks();
+            createMethodLinksAsync();
         }
     }
 
-    boolean sendMessage(Message message)
+    SendResult sendMessage(Message message)
     {
-        if (this.deviceClientConfig.getDeviceId().equals(message.getConnectionDeviceId()))
+        if (!this.clientConfiguration.getDeviceId().equals(message.getConnectionDeviceId()))
         {
-            if (message.getMessageType() == null)
+            // This should never happen since this session handler was chosen from a map of device Id -> session handler
+            // so it should have the same device Id as in the map it was grabbed from.
+            log.warn("Failed to send the message because this session belongs to a different device");
+            return SendResult.WRONG_DEVICE;
+        }
+
+        MessageType messageType = message.getMessageType();
+        if (messageType == null)
+        {
+            // Twin and method messages have a message type assigned to them when they are constructed by this SDK
+            // (users can't construct twin/method messages directly), but telemetry messages don't necessarily have this
+            // type assigned since users may create telemetry messages. By default, assume any messages with an
+            // unassigned type are telemetry messages.
+            messageType = DEVICE_TELEMETRY;
+        }
+
+        // Check if the message being sent is a subscription change message. If so, open the corresponding links.
+        if (message instanceof IotHubTransportMessage)
+        {
+            IotHubTransportMessage transportMessage = (IotHubTransportMessage) message;
+            DeviceOperations subscriptionType = transportMessage.getDeviceOperationType();
+
+            if (subscriptionType == DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST)
             {
-                message.setMessageType(DEVICE_TELEMETRY);
+                return handleMethodSubscriptionRequest(transportMessage);
             }
 
-            MessageType messageType = message.getMessageType();
-
-            //Check if the message being sent is a subscription change message. If so, open the corresponding links.
-            if (message instanceof IotHubTransportMessage)
+            if (subscriptionType == DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
             {
-                IotHubTransportMessage transportMessage = (IotHubTransportMessage) message;
-                DeviceOperations subscriptionType = ((IotHubTransportMessage) message).getDeviceOperationType();
+                return handleTwinSubscriptionRequest(transportMessage);
+            }
+        }
 
-                if (subscriptionType == DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST)
-                {
-                    if (this.methodsSenderLinkOpened && this.methodsReceiverLinkOpened)
-                    {
-                        // No need to do anything. Method links are already opened
-                        this.amqpsSessionStateCallback.onMessageAcknowledged(message, Accepted.getInstance(), this.getDeviceId());
-                        return true;
-                    }
+        AmqpsSenderLinkHandler senderLinkHandler = this.senderLinkHandlers.get(messageType);
 
-                    if (this.explicitInProgressMethodsSubscriptionMessage == null)
-                    {
-                        createMethodLinks();
-                        this.explicitInProgressMethodsSubscriptionMessage = transportMessage;
-                        return true; //connection layer doesn't care about this delivery tag
-                    }
-                    else
-                    {
-                        log.debug("Rejecting methods subscription message because that subscription is already in progress");
-                        return false;
-                    }
-                }
-                else //noinspection StatementWithEmptyBody
-                    if (subscriptionType == DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
-                {
-                    //TODO: can add logic here to tear down twin links if the user wants to unsubscribe to desired properties
-                }
-                else if (subscriptionType == DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
-                {
-                    if (this.twinSenderLinkOpened && this.twinReceiverLinkOpened)
-                    {
-                        // No need to do anything. Twin links are already opened and desired properties subscription is automatically
-                        // sent once the twin links are opened.
-                        this.amqpsSessionStateCallback.onMessageAcknowledged(message, Accepted.getInstance(), this.getDeviceId());
-                        return true;
-                    }
+        if (senderLinkHandler == null)
+        {
+            // no sender link handler saved for this message type, so it can't be sent
+            // Should never happen since telemetry links are always opened, and twin/method messages can't be sent
+            // before their respective subscription messages have already opened their links.
+            return SendResult.LINKS_NOT_OPEN;
+        }
 
-                    if (this.explicitInProgressTwinSubscriptionMessage == null)
-                    {
-                        createTwinLinks();
-                        this.explicitInProgressTwinSubscriptionMessage = transportMessage;
-                        return true;
-                    }
-                    else
-                    {
-                        log.debug("Rejecting twin subscription message because that subscription is already in progress");
-                        return false;
-                    }
-                }
+        if (messageType == DEVICE_TWIN)
+        {
+            if (explicitInProgressTwinSubscriptionMessage != null)
+            {
+                // When this variable is not null, it means there is a subscription on twin in progress. These are initiated
+                // by the user when they call startTwin.
+                //
+                // Don't send any twin messages while a twin subscription is in progress. Wait until the subscription
+                // has been acknowledged by the service before sending it.
+                return SendResult.SUBSCRIPTION_IN_PROGRESS;
             }
 
-            for (AmqpsSenderLinkHandler senderLinkHandler : this.senderLinkHandlers)
+            for (SubscriptionType subscriptionType : this.implicitInProgressSubscriptionMessages.values())
             {
-                if (senderLinkHandler instanceof AmqpsTelemetrySenderLinkHandler && messageType == DEVICE_TELEMETRY
-                        || senderLinkHandler instanceof AmqpsTwinSenderLinkHandler && messageType == DEVICE_TWIN
-                        || senderLinkHandler instanceof AmqpsMethodsSenderLinkHandler && messageType == DEVICE_METHODS)
+                if (subscriptionType == SubscriptionType.DESIRED_PROPERTIES_SUBSCRIPTION)
                 {
-                    if (messageType == DEVICE_TWIN)
-                    {
-                        if (explicitInProgressTwinSubscriptionMessage != null)
-                        {
-                            // Don't send any twin messages while a twin subscription is in progress. Wait until the subscription
-                            // has been acknowledged by the service before sending it.
-                            return false;
-                        }
-
-                        for (SubscriptionType subscriptionType : this.implicitInProgressSubscriptionMessages.values())
-                        {
-                            if (subscriptionType == SubscriptionType.DESIRED_PROPERTIES_SUBSCRIPTION)
-                            {
-                                // Don't send any twin messages while a twin subscription is in progress. Wait until the subscription
-                                // has been acknowledged by the service before sending it.
-                                return false;
-                            }
-                        }
-                    }
-
-                    AmqpsSendResult amqpsSendResult = senderLinkHandler.sendMessageAndGetDeliveryTag(message);
-
-                    if (amqpsSendResult.isDeliverySuccessful())
-                    {
-                        return true; // since this is a loop, can't just return amqpsSendResult.isDeliverySuccessful
-                    }
+                    // When there is at least one desired properties subscription in the implicitInProgressSubscriptionMessages
+                    // value set, then that means there is a desired properties subscription message that has been sent
+                    // to the service, but has not been acknowledged yet. These implicit subscriptions happen when a
+                    // session loses connectivity temporarily, and the session handler sends out subscription messages
+                    // to the service to re-establish all subscritptions that were active prior to the disconnection.
+                    //
+                    // Don't send any twin messages while a twin subscription is in progress. Reject this message until
+                    // the subscription has been acknowledged by the service. The connection layer will requeue this message
+                    // and it will have another chance to send when the timer task that checks for outgoing queued messages
+                    // executes again.
+                    return SendResult.SUBSCRIPTION_IN_PROGRESS;
                 }
             }
         }
 
-        return false;
+        AmqpsSendResult amqpsSendResult = senderLinkHandler.sendMessageAndGetDeliveryTag(message);
+
+        if (amqpsSendResult.isDeliverySuccessful())
+        {
+            return SendResult.SUCCESS;
+        }
+
+        return SendResult.UNKNOWN_FAILURE;
+    }
+
+    private SendResult handleTwinSubscriptionRequest(IotHubTransportMessage transportMessage)
+    {
+        if (this.twinSenderLinkOpened && this.twinReceiverLinkOpened)
+        {
+            // No need to do anything besides ack the message. Twin links are already opened and desired properties
+            // subscription is automatically sent once the twin links are opened, so there is no need to send
+            // this message over the wire.
+            log.trace("Automatically acknowledging the twin subscription request because the twin links are already open");
+            this.amqpsSessionStateCallback.onMessageAcknowledged(transportMessage, Accepted.getInstance(), this.getDeviceId());
+            return SendResult.SUCCESS;
+        }
+
+        // If this session hasn't already started subscribing to twins
+        if (this.explicitInProgressTwinSubscriptionMessage == null)
+        {
+            // Don't ack the subscription message here. Once the twin links have finished opening both locally and remotely,
+            // it will be ack'd.
+            log.trace("Creating the twin links to handle the twin subscription message");
+            createTwinLinksAsync();
+            this.explicitInProgressTwinSubscriptionMessage = transportMessage;
+            return SendResult.SUCCESS;
+        }
+
+        log.debug("Rejecting twin subscription message because that subscription is already in progress");
+        return SendResult.DUPLICATE_SUBSCRIPTION_MESSAGE;
+    }
+
+    private SendResult handleMethodSubscriptionRequest(IotHubTransportMessage transportMessage)
+    {
+        if (this.methodsSenderLinkOpened && this.methodsReceiverLinkOpened)
+        {
+            // No need to do anything besides ack the message. Method links are already opened so there is no need to send
+            // this message over the wire.
+            log.trace("Automatically acknowledging the direct method subscription request because the direct method links are already open");
+            this.amqpsSessionStateCallback.onMessageAcknowledged(transportMessage, Accepted.getInstance(), this.getDeviceId());
+            return SendResult.SUCCESS;
+        }
+
+        // If this session hasn't already started subscribing to methods
+        if (this.explicitInProgressMethodsSubscriptionMessage == null)
+        {
+            // Don't ack the subscription message here. Once the method links have finished opening both locally and remotely,
+            // it will be ack'd.
+            log.trace("Creating the direct method links to handle the direct method subscription message");
+            createMethodLinksAsync();
+            this.explicitInProgressMethodsSubscriptionMessage = transportMessage;
+            return SendResult.SUCCESS;
+        }
+
+        log.debug("Rejecting methods subscription message because that subscription is already in progress");
+        return SendResult.DUPLICATE_SUBSCRIPTION_MESSAGE;
     }
 
     private void closeLinks()
     {
-        for (AmqpsSenderLinkHandler senderLinkHandler : this.senderLinkHandlers)
+        for (AmqpsSenderLinkHandler senderLinkHandler : this.senderLinkHandlers.values())
         {
             senderLinkHandler.close();
         }
 
-        for (AmqpsReceiverLinkHandler receiverLinkHandler : this.receiverLinkHandlers)
+        for (AmqpsReceiverLinkHandler receiverLinkHandler : this.receiverLinkHandlers.values())
         {
             receiverLinkHandler.close();
         }
     }
 
-    private void createTelemetryLinks()
+    // This opens the telemetry links locally, but the service still needs to open them remotely as well. The
+    // "onLinkOpened()" event will onStatusChanged when that happens.
+    private void createTelemetryLinksAsync()
     {
         String telemetryLinkCorrelationId = UUID.randomUUID().toString();
 
-        Sender sender = session.sender(AmqpsTelemetrySenderLinkHandler.getTag(deviceClientConfig, telemetryLinkCorrelationId));
-        this.senderLinkHandlers.add(new AmqpsTelemetrySenderLinkHandler(sender, this, this.deviceClientConfig, telemetryLinkCorrelationId));
+        Sender sender = session.sender(AmqpsTelemetrySenderLinkHandler.getTag(clientConfiguration, telemetryLinkCorrelationId));
+        this.senderLinkHandlers.put(DEVICE_TELEMETRY, new AmqpsTelemetrySenderLinkHandler(sender, this, this.clientConfiguration, telemetryLinkCorrelationId));
 
-        Receiver receiver = session.receiver(AmqpsTelemetryReceiverLinkHandler.getTag(deviceClientConfig, telemetryLinkCorrelationId));
-        this.receiverLinkHandlers.add(new AmqpsTelemetryReceiverLinkHandler(receiver, this, this.deviceClientConfig, telemetryLinkCorrelationId));
+        Receiver receiver = session.receiver(AmqpsTelemetryReceiverLinkHandler.getTag(clientConfiguration, telemetryLinkCorrelationId));
+        this.receiverLinkHandlers.put(DEVICE_TELEMETRY, new AmqpsTelemetryReceiverLinkHandler(receiver, this, this.clientConfiguration, telemetryLinkCorrelationId));
         this.alreadyCreatedTelemetryLinks = true;
     }
 
-    private void createMethodLinks()
+    // This opens the methods links locally, but the service still needs to open them remotely as well. The
+    // "onLinkOpened()" event will onStatusChanged when that happens.
+    private void createMethodLinksAsync()
     {
+        log.debug("Creating direct method links");
         String methodsLinkCorrelationId = UUID.randomUUID().toString();
 
-        Sender sender = session.sender(AmqpsMethodsSenderLinkHandler.getTag(deviceClientConfig, methodsLinkCorrelationId));
-        this.senderLinkHandlers.add(new AmqpsMethodsSenderLinkHandler(sender, this, this.deviceClientConfig, methodsLinkCorrelationId));
+        Sender sender = session.sender(AmqpsMethodsSenderLinkHandler.getTag(clientConfiguration, methodsLinkCorrelationId));
+        this.senderLinkHandlers.put(DEVICE_METHODS, new AmqpsMethodsSenderLinkHandler(sender, this, this.clientConfiguration, methodsLinkCorrelationId));
 
-        Receiver receiver = session.receiver(AmqpsMethodsReceiverLinkHandler.getTag(deviceClientConfig, methodsLinkCorrelationId));
-        this.receiverLinkHandlers.add(new AmqpsMethodsReceiverLinkHandler(receiver, this, this.deviceClientConfig, methodsLinkCorrelationId));
+        Receiver receiver = session.receiver(AmqpsMethodsReceiverLinkHandler.getTag(clientConfiguration, methodsLinkCorrelationId));
+        this.receiverLinkHandlers.put(DEVICE_METHODS, new AmqpsMethodsReceiverLinkHandler(receiver, this, this.clientConfiguration, methodsLinkCorrelationId));
 
         this.subscribeToMethodsOnReconnection = true;
         this.alreadyCreatedMethodLinks = true;
     }
 
-    private void createTwinLinks()
+    // This opens the twin links locally, but the service still needs to open them remotely as well. The
+    // "onLinkOpened()" event will onStatusChanged when that happens.
+    private void createTwinLinksAsync()
     {
+        log.debug("Creating twin links");
         String twinLinkCorrelationId = UUID.randomUUID().toString();
 
         //Twin sender and receiver links need to correlate operation request messages to operation response messages.
         //This map allows the sender link to know how to handle a message that is received with a correlation id
         Map<String, DeviceOperations> twinOperationCorrelationMap = new HashMap<>();
 
-        Sender sender = session.sender(AmqpsTwinSenderLinkHandler.getTag(deviceClientConfig, twinLinkCorrelationId));
-        this.senderLinkHandlers.add(new AmqpsTwinSenderLinkHandler(sender, this, this.deviceClientConfig, twinLinkCorrelationId, twinOperationCorrelationMap));
+        Sender sender = session.sender(AmqpsTwinSenderLinkHandler.getTag(clientConfiguration, twinLinkCorrelationId));
+        this.senderLinkHandlers.put(DEVICE_TWIN, new AmqpsTwinSenderLinkHandler(sender, this, this.clientConfiguration, twinLinkCorrelationId, twinOperationCorrelationMap));
 
-        Receiver receiver = session.receiver(AmqpsTwinReceiverLinkHandler.getTag(deviceClientConfig, twinLinkCorrelationId));
-        this.receiverLinkHandlers.add(new AmqpsTwinReceiverLinkHandler(receiver, this, this.deviceClientConfig, twinLinkCorrelationId, twinOperationCorrelationMap));
+        Receiver receiver = session.receiver(AmqpsTwinReceiverLinkHandler.getTag(clientConfiguration, twinLinkCorrelationId));
+        this.receiverLinkHandlers.put(DEVICE_TWIN, new AmqpsTwinReceiverLinkHandler(receiver, this, this.clientConfiguration, twinLinkCorrelationId, twinOperationCorrelationMap));
 
         this.subscribeToTwinOnReconnection = true;
         this.alreadyCreatedTwinLinks = true;
+    }
+
+    // Removes any children of this handler (such as LoggingFlowController) and disassociates this handler
+    // from the proton reactor. By removing the reference of the proton reactor to this handler, this handler becomes
+    // eligible for garbage collection by the JVM. This is important for multiplexed connections where links come and go
+    // but the reactor stays alive for a long time.
+    private void clearHandlers()
+    {
+        this.session.attachments().clear();
+
+        // This session handler shouldn't have any children, but other handlers may be added as this SDK grows and
+        // this protects against potential memory leaks.
+        Iterator<Handler> childrenIterator = this.children();
+        while (childrenIterator.hasNext())
+        {
+            childrenIterator.next();
+            childrenIterator.remove();
+        }
     }
 }

@@ -36,7 +36,7 @@ public class SendEvent
     protected static class IotHubConnectionStatusChangeCallbackLogger implements IotHubConnectionStatusChangeCallback
     {
         @Override
-        public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+        public void onStatusChanged(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
         {
             System.out.println();
             System.out.println("CONNECTION STATUS UPDATE: " + status);
@@ -52,13 +52,13 @@ public class SendEvent
             if (status == IotHubConnectionStatus.DISCONNECTED)
             {
                 System.out.println("The connection was lost, and is not being re-established." +
-                        " Look at provided exception for how to resolve this issue." +
-                        " Cannot send messages until this issue is resolved, and you manually re-open the device client");
+                    " Look at provided exception for how to resolve this issue." +
+                    " Cannot send messages until this issue is resolved, and you manually re-open the device client");
             }
             else if (status == IotHubConnectionStatus.DISCONNECTED_RETRYING)
             {
                 System.out.println("The connection was lost, but is being re-established." +
-                        " Can still send messages, but they won't be sent until the connection is re-established");
+                    " Can still send messages, but they won't be sent until the connection is re-established");
             }
             else if (status == IotHubConnectionStatus.CONNECTED)
             {
@@ -74,113 +74,43 @@ public class SendEvent
      * @param args
      * args[0] = IoT Hub or Edge Hub connection string
      * args[1] = number of messages to send
-     * args[2] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws')
-     * args[3] = path to certificate to enable one-way authentication over ssl. (Not necessary when connecting directly to Iot Hub, but required if connecting to an Edge device using a non public root CA certificate).
+     * args[2] = protocol (optional, one of 'mqtt' or 'amqps' or 'httpsnt' or 'amqps_ws')
      */
     public static void main(String[] args)
-            throws IOException, URISyntaxException
+        throws IOException, URISyntaxException
     {
+        InputParameters params = new InputParameters(args);
+
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
 
-        if (args.length <= 1 || args.length >= 5)
-        {
-            System.out.format(
-                    "Expected 2 or 3 arguments but received: %d.\n"
-                            + "The program should be called with the following args: \n"
-                            + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key> or HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>;GatewayHostName=<gateway> \n"
-                            + "2. [number of requests to send]\n"
-                            + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n"
-                            + "4. (optional) path to certificate to enable one-way authentication over ssl \n",
-                    args.length);
-            return;
-        }
-
-        String connString = args[0];
+        String connString = params.getConnectionString();
         int numRequests;
-        String pathToCertificate = null;
         try
         {
-            numRequests = Integer.parseInt(args[1]);
+            numRequests = Integer.parseInt(params.getNumberOfRequests());
         }
         catch (NumberFormatException e)
         {
             System.out.format(
-                    "Could not parse the number of requests to send. "
-                            + "Expected an int but received:\n%s.\n", args[1]);
+                "Could not parse the number of requests to send. "
+                    + "Expected an int but received: [" + params.getNumberOfRequests() + "]");
             return;
         }
-        IotHubClientProtocol protocol;
-        if (args.length == 2)
-        {
-            protocol = IotHubClientProtocol.MQTT;
-        }
-        else
-        {
-            String protocolStr = args[2];
-            if (protocolStr.equals("https"))
-            {
-                protocol = IotHubClientProtocol.HTTPS;
-            }
-            else if (protocolStr.equals("amqps"))
-            {
-                protocol = IotHubClientProtocol.AMQPS;
-            }
-            else if (protocolStr.equals("mqtt"))
-            {
-                protocol = IotHubClientProtocol.MQTT;
-            }
-            else if (protocolStr.equals("amqps_ws"))
-            {
-                protocol = IotHubClientProtocol.AMQPS_WS;
-            }
-            else if (protocolStr.equals("mqtt_ws"))
-            {
-                protocol = IotHubClientProtocol.MQTT_WS;
-            }
-            else
-            {
-                System.out.format(
-                        "Expected argument 2 to be one of 'mqtt', 'https', 'amqps' or 'amqps_ws' but received %s\n"
-                                + "The program should be called with the following args: \n"
-                                + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
-                                + "2. [number of requests to send]\n"
-                                + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n"
-                                + "4. (optional) path to certificate to enable one-way authentication over ssl for amqps \n",
-                        protocolStr);
-                return;
-            }
 
-            if (args.length == 3)
-            {
-                pathToCertificate = null;
-            }
-            else
-            {
-                pathToCertificate = args[3];
-            }
-        }
 
+        IotHubClientProtocol protocol = params.getProtocol();
 
         System.out.println("Successfully read input parameters.");
         System.out.format("Using communication protocol %s.\n", protocol.name());
 
         DeviceClient client = new DeviceClient(connString, protocol);
-        if (pathToCertificate != null )
-        {
-            client.setOption("SetCertificatePath", pathToCertificate );
-        }
 
         System.out.println("Successfully created an IoT Hub client.");
 
-        // Set your token expiry time limit here
-        long time = 2400;
-        client.setOption("SetSASTokenExpiryTime", time);
-        System.out.println("Updated token expiry time to " + time);
+        client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
-        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
-
-        client.open();
+        client.open(false);
 
         System.out.println("Opened connection to IoT Hub.");
         System.out.println("Sending the following event messages:");
@@ -199,7 +129,7 @@ public class SendEvent
             try
             {
                 Message msg = new Message(msgStr);
-                msg.setContentTypeFinal("application/json");
+                msg.setContentType("application/json");
                 msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
                 msg.setMessageId(java.util.UUID.randomUUID().toString());
                 msg.setExpiryTime(D2C_MESSAGE_TIMEOUT);
@@ -208,7 +138,6 @@ public class SendEvent
                 EventCallback callback = new EventCallback();
                 client.sendEventAsync(msg, callback, msg);
             }
-
             catch (Exception e)
             {
                 e.printStackTrace(); // Trace the exception
@@ -222,7 +151,6 @@ public class SendEvent
         {
             Thread.sleep(D2C_MESSAGE_TIMEOUT);
         }
-
         catch (InterruptedException e)
         {
             e.printStackTrace();
@@ -230,7 +158,7 @@ public class SendEvent
 
         // close the connection
         System.out.println("Closing");
-        client.closeNow();
+        client.close();
 
         if (!failedMessageListOnClose.isEmpty())
         {

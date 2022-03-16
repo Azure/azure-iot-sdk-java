@@ -5,16 +5,16 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobClientBuilder;
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
+import com.microsoft.azure.sdk.iot.device.FileUploadCompletionNotification;
+import com.microsoft.azure.sdk.iot.device.FileUploadSasUriRequest;
+import com.microsoft.azure.sdk.iot.device.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 /**
@@ -85,14 +85,14 @@ public class FileUploadSimpleSample
 
             System.out.println("Using the Azure Storage SDK to upload file to Azure Storage...");
 
-            try (FileInputStream fileInputStream = new FileInputStream(file))
+            try
             {
                 BlobClient blobClient =
                     new BlobClientBuilder()
                         .endpoint(sasUriResponse.getBlobUri().toString())
                         .buildClient();
 
-                blobClient.upload(fileInputStream, file.length());
+                blobClient.uploadFromFile(fullFileName);
             }
             catch (Exception e)
             {
@@ -111,7 +111,7 @@ public class FileUploadSimpleSample
 
                 System.out.println("Notified IoT Hub that the SAS URI can be freed and that the file upload was a failure.");
 
-                client.closeNow();
+                client.close();
                 return;
             }
 
@@ -126,14 +126,14 @@ public class FileUploadSimpleSample
         {
             System.out.println("On exception, shutting down \n" + " Cause: " + e.getCause() + " \nERROR: " +  e.getMessage());
             System.out.println("Shutting down...");
-            client.closeNow();
+            client.close();
         }
 
         System.out.println("Press any key to exit...");
 
-        Scanner scanner = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
         scanner.nextLine();
         System.out.println("Shutting down...");
-        client.closeNow();
+        client.close();
     }
 }

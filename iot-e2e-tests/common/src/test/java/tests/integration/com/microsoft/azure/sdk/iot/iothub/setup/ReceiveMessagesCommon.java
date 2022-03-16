@@ -7,9 +7,16 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.service.*;
+import com.microsoft.azure.sdk.iot.service.messaging.DeliveryAcknowledgement;
+import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.runners.Parameterized;
@@ -17,9 +24,9 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.telemetry.ReceiveMessagesTests;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.TimeoutException;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
@@ -30,19 +37,15 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
  * Utility functions, setup and teardown for all C2D telemetry integration tests. This class should not contain any tests,
  * but any child class should.
  */
+@Slf4j
 public class ReceiveMessagesCommon extends IntegrationTest
 {
     @Parameterized.Parameters(name = "{0}_{1}_{2}")
-    public static Collection inputs() throws Exception
+    public static Collection inputs()
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         IntegrationTest.isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         IntegrationTest.isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
-
-        X509CertificateGenerator certificateGenerator = new X509CertificateGenerator();
-        String publicKeyCert = certificateGenerator.getPublicCertificate();
-        String privateKey = certificateGenerator.getPrivateKey();
-        String x509Thumbprint = certificateGenerator.getX509Thumbprint();
 
         messageProperties = new HashMap<>(3);
         messageProperties.put("name1", "value1");
@@ -53,15 +56,15 @@ public class ReceiveMessagesCommon extends IntegrationTest
                 new Object[][]
                         {
                                 //sas token module client
-                                {MQTT, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                {AMQPS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                {MQTT, SAS, ClientType.DEVICE_CLIENT},
+                                {AMQPS, SAS, ClientType.DEVICE_CLIENT},
+                                {MQTT_WS, SAS, ClientType.DEVICE_CLIENT},
+                                {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT},
 
                                 //x509 module client
-                                {HTTPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                {AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint}
+                                {HTTPS, SELF_SIGNED, ClientType.DEVICE_CLIENT},
+                                {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT},
+                                {AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT}
                         }
         ));
 
@@ -71,14 +74,14 @@ public class ReceiveMessagesCommon extends IntegrationTest
                     new Object[][]
                             {
                                     //sas token module client
-                                    {MQTT, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {AMQPS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {MQTT_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {AMQPS_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {MQTT, SAS, ClientType.MODULE_CLIENT},
+                                    {AMQPS, SAS, ClientType.MODULE_CLIENT},
+                                    {MQTT_WS, SAS, ClientType.MODULE_CLIENT},
+                                    {AMQPS_WS, SAS, ClientType.MODULE_CLIENT},
 
                                     //x509 module client
-                                    {MQTT, SELF_SIGNED, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {AMQPS, SELF_SIGNED, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint}
+                                    {MQTT, SELF_SIGNED, ClientType.MODULE_CLIENT},
+                                    {AMQPS, SELF_SIGNED, ClientType.MODULE_CLIENT}
                             }
             ));
         }
@@ -88,142 +91,79 @@ public class ReceiveMessagesCommon extends IntegrationTest
 
     protected static Map<String, String> messageProperties = new HashMap<>(3);
 
-    protected final static String SET_MINIMUM_POLLING_INTERVAL = "SetMinimumPollingInterval";
-    protected final static Long ONE_SECOND_POLLING_INTERVAL = 1000L;
-
-    // variables used in E2E test for sending back to back messages using C2D sendAsync method
-    protected static final int MAX_COMMANDS_TO_SEND = 5; // maximum commands to be sent in a loop
+    protected static int MESSAGE_SIZE_IN_BYTES = 1000;
+    protected static int LARGE_MESSAGE_SIZE_IN_BYTES = 65000; // Max C2D message size is 65535
 
     protected static String iotHubConnectionString = "";
 
     // How much to wait until receiving a message from the server, in milliseconds
     protected static final int RECEIVE_TIMEOUT_MILLISECONDS = 3 * 60 * 1000; // 3 minutes
 
-    protected static String expectedCorrelationId = "1234";
-    protected static String expectedMessageId = "5678";
+    protected static final int FEEDBACK_TIMEOUT_MILLIS = 60 * 1000; // 1 minute
+
     protected static final long ERROR_INJECTION_RECOVERY_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
 
     public ReceiveMessagesTestInstance testInstance;
 
-    public ReceiveMessagesCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception
+    public ReceiveMessagesCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {
-        this.testInstance = new ReceiveMessagesTestInstance(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+        this.testInstance = new ReceiveMessagesTestInstance(protocol, authenticationType, clientType);
     }
 
     public class ReceiveMessagesTestInstance
     {
-        public InternalClient client;
         public IotHubClientProtocol protocol;
-        public BaseDevice identity;
+        public TestIdentity identity;
         public AuthenticationType authenticationType;
         public ClientType clientType;
         public String publicKeyCert;
         public String privateKey;
         public String x509Thumbprint;
-        public RegistryManager registryManager;
-        public ServiceClient serviceClient;
+        public RegistryClient registryClient;
+        public MessagingClient messagingClient;
 
-        public ReceiveMessagesTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception
+        public ReceiveMessagesTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
         {
             this.protocol = protocol;
             this.authenticationType = authenticationType;
             this.clientType = clientType;
-            this.publicKeyCert = publicKeyCert;
-            this.privateKey = privateKey;
-            this.x509Thumbprint = x509Thumbprint;
-            this.registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-            this.serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
+            this.publicKeyCert = x509CertificateGenerator.getPublicCertificatePEM();
+            this.privateKey = x509CertificateGenerator.getPrivateKeyPEM();
+            this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
+            this.registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
+            this.messagingClient = new MessagingClient(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
         }
 
         public void setup() throws Exception
         {
-            String TEST_UUID = UUID.randomUUID().toString();
-            SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCert, privateKey);
             if (clientType == ClientType.DEVICE_CLIENT)
             {
-                if (authenticationType == SAS)
-                {
-                    //sas device client
-                    String deviceId = "java-method-e2e-test-device".concat("-" + TEST_UUID);
-                    Device device = Device.createFromId(deviceId, null, null);
-                    device = Tools.addDeviceWithRetry(registryManager, device);
-                    this.client = new DeviceClient(registryManager.getDeviceConnectionString(device), protocol);
-                    this.identity = device;
-                }
-                else if (authenticationType == SELF_SIGNED)
-                {
-                    //x509 device client
-                    String deviceX509Id = "java-method-e2e-test-device-x509".concat("-" + TEST_UUID);
-                    Device deviceX509 = Device.createDevice(deviceX509Id, AuthenticationType.SELF_SIGNED);
-                    deviceX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
-                    deviceX509 = Tools.addDeviceWithRetry(registryManager, deviceX509);
-                    this.client = new DeviceClient(registryManager.getDeviceConnectionString(deviceX509), protocol, sslContext);
-                    this.identity = deviceX509;
-                }
-                else
-                {
-                    throw new Exception("Test code has not been written for this path yet");
-                }
+                this.identity = Tools.getTestDevice(iotHubConnectionString, this.protocol, this.authenticationType, false);
             }
             else if (clientType == ClientType.MODULE_CLIENT)
             {
-                if (authenticationType == SAS)
-                {
-                    //sas device client to house the module under test
-                    String deviceId = "java-receive-message-e2e-test-device".concat("-" + TEST_UUID);
-                    Device device = Device.createFromId(deviceId, null, null);
-                    device = Tools.addDeviceWithRetry(registryManager, device);
-
-                    //sas module client
-                    String moduleId = "java-receive-message-e2e-test-module".concat("-" + TEST_UUID);
-                    Module module = Module.createFromId(deviceId, moduleId, null);
-                    module = Tools.addModuleWithRetry(registryManager, module);
-                    this.client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), protocol);
-                    this.identity = module;
-                }
-                else if (authenticationType == SELF_SIGNED)
-                {
-                    //x509 device client to house the module under test
-                    String deviceX509Id = "java-receive-message-e2e-test-device-x509".concat("-" + TEST_UUID);
-                    Device deviceX509 = Device.createDevice(deviceX509Id, AuthenticationType.SELF_SIGNED);
-                    deviceX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
-                    deviceX509 = Tools.addDeviceWithRetry(registryManager, deviceX509);
-
-                    //x509 module client
-                    String moduleX509Id = "java-receive-message-e2e-test-module-x509".concat("-" + TEST_UUID);
-                    Module moduleX509 = Module.createModule(deviceX509Id, moduleX509Id, AuthenticationType.SELF_SIGNED);
-                    moduleX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
-                    moduleX509 = Tools.addModuleWithRetry(registryManager, moduleX509);
-                    this.client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509, moduleX509), protocol, sslContext);
-                    this.identity = moduleX509;
-                }
-                else
-                {
-                    throw new Exception("Test code has not been written for this path yet");
-                }
-
-                if ((this.protocol == AMQPS || this.protocol == AMQPS_WS) && this.authenticationType == SAS)
-                {
-                    this.client.setOption("SetAmqpOpenAuthenticationSessionTimeout", AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS);
-                    this.client.setOption("SetAmqpOpenDeviceSessionsTimeout", AMQP_DEVICE_SESSION_TIMEOUT_SECONDS);
-                }
+                this.identity = Tools.getTestModule(iotHubConnectionString, this.protocol, this.authenticationType, false);
             }
 
-            testInstance.serviceClient.open();
+            this.messagingClient.open();
         }
 
         public void dispose()
         {
+            if (this.identity != null && this.identity.getClient() != null)
+            {
+                this.identity.getClient().close();
+            }
+
+            Tools.disposeTestIdentity(this.identity, iotHubConnectionString);
+
             try
             {
-                this.client.closeNow();
-                this.registryManager.removeDevice(this.identity.getDeviceId()); //removes all modules associated with this device, too
-                this.serviceClient.close();
+                this.messagingClient.close();
             }
-            catch (Exception e)
+            catch (InterruptedException e)
             {
-                //not a big deal if dispose fails. This test suite is not testing the functions in this cleanup.
-                // If identities are left registered, they will be deleted my nightly cleanup job anyways
+                log.warn("Failed to close messagingClient", e);
             }
         }
     }
@@ -241,9 +181,9 @@ public class ReceiveMessagesCommon extends IntegrationTest
 
     public static class MessageCallbackForBackToBackC2DMessages implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
-        private final List messageIdListStoredOnReceive;
+        private final List<String> messageIdListStoredOnReceive;
 
-        public MessageCallbackForBackToBackC2DMessages(List messageIdListStoredOnReceive)
+        public MessageCallbackForBackToBackC2DMessages(List<String> messageIdListStoredOnReceive)
         {
             this.messageIdListStoredOnReceive = messageIdListStoredOnReceive;
         }
@@ -257,14 +197,37 @@ public class ReceiveMessagesCommon extends IntegrationTest
 
     public static class MessageCallback implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
+        private final Message expectedMessage;
+
+        public MessageCallback()
+        {
+            this.expectedMessage = null;
+        }
+
+        public MessageCallback(Message expectedMessage)
+        {
+            this.expectedMessage = expectedMessage;
+        }
+
         public IotHubMessageResult execute(com.microsoft.azure.sdk.iot.device.Message msg, Object context)
         {
-            Boolean resultValue = true;
+            boolean resultValue = true;
             HashMap<String, String> messageProperties = (HashMap<String, String>) ReceiveMessagesTests.messageProperties;
-            Success messageReceived = (Success)context;
-            if (!hasExpectedProperties(msg, messageProperties) || !hasExpectedSystemProperties(msg))
+            Success messageReceived = (Success) context;
+
+            if (expectedMessage != null)
             {
-                resultValue = false;
+                if (!hasExpectedProperties(msg, messageProperties) || !hasExpectedSystemProperties(msg, expectedMessage.getCorrelationId(), expectedMessage.getMessageId()))
+                {
+                    log.warn("Unexpected properties in the received message");
+                    resultValue = false;
+                }
+
+                if (!ArrayUtils.isEquals(this.expectedMessage.getBytes(), msg.getBytes()))
+                {
+                    log.warn("Unexpected payload in the received message");
+                    resultValue = false;
+                }
             }
 
             messageReceived.callbackWasFired();
@@ -275,16 +238,41 @@ public class ReceiveMessagesCommon extends IntegrationTest
 
     public static class MessageCallbackMqtt implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
+        private final Message expectedMessage;
+
+        public MessageCallbackMqtt()
+        {
+            this.expectedMessage = null;
+        }
+
+        public MessageCallbackMqtt(Message expectedMessage)
+        {
+            this.expectedMessage = expectedMessage;
+        }
+
         public IotHubMessageResult execute(com.microsoft.azure.sdk.iot.device.Message msg, Object context)
         {
             HashMap<String, String> messageProperties = (HashMap<String, String>) ReceiveMessagesTests.messageProperties;
             Success messageReceived = (Success)context;
-            if (hasExpectedProperties(msg, messageProperties) && hasExpectedSystemProperties(msg))
+            boolean resultValue = true;
+
+            if (this.expectedMessage != null)
             {
-                messageReceived.setResult(true);
+                if (!hasExpectedProperties(msg, messageProperties) || !hasExpectedSystemProperties(msg, expectedMessage.getCorrelationId(), expectedMessage.getMessageId()))
+                {
+                    log.warn("Unexpected properties in the received message");
+                    resultValue = false;
+                }
+
+                if (!ArrayUtils.isEquals(this.expectedMessage.getBytes(), msg.getBytes()))
+                {
+                    log.warn("Unexpected payload in the received message");
+                    resultValue = false;
+                }
             }
 
             messageReceived.callbackWasFired();
+            messageReceived.setResult(resultValue);
 
             return IotHubMessageResult.COMPLETE;
         }
@@ -303,7 +291,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
         return true;
     }
 
-    protected static boolean hasExpectedSystemProperties(com.microsoft.azure.sdk.iot.device.Message msg)
+    protected static boolean hasExpectedSystemProperties(com.microsoft.azure.sdk.iot.device.Message msg, String expectedCorrelationId, String expectedMessageId)
     {
         if (msg.getCorrelationId() == null || !msg.getCorrelationId().equals(expectedCorrelationId))
         {
@@ -313,24 +301,26 @@ public class ReceiveMessagesCommon extends IntegrationTest
         return msg.getMessageId() != null && msg.getMessageId().equals(expectedMessageId);//all system properties are as expected
     }
 
-    protected void sendMessageToDevice(String deviceId, String protocolName) throws IotHubException, IOException
+    protected Message createCloudToDeviceMessage(int messageSize) throws IotHubException, IOException
     {
-        String messageString = "Java service e2e test message to be received over " + protocolName + " protocol";
-        com.microsoft.azure.sdk.iot.service.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.Message(messageString);
-        serviceMessage.setCorrelationId(expectedCorrelationId);
-        serviceMessage.setMessageId(expectedMessageId);
+        byte[] payload = new byte[messageSize];
+        new Random().nextBytes(payload);
+        com.microsoft.azure.sdk.iot.service.messaging.Message serviceMessage = new Message(payload);
+        serviceMessage.setCorrelationId(UUID.randomUUID().toString());
+        serviceMessage.setMessageId(UUID.randomUUID().toString());
         serviceMessage.setProperties(messageProperties);
-        testInstance.serviceClient.send(deviceId, serviceMessage);
+        serviceMessage.setDeliveryAcknowledgement(DeliveryAcknowledgement.Full);
+        return serviceMessage;
     }
 
-    protected void sendMessageToModule(String deviceId, String moduleId, String protocolName) throws IotHubException, IOException
+    protected void sendMessageToDevice(String deviceId, int messageSize) throws IotHubException, IOException, InterruptedException, TimeoutException
     {
-        String messageString = "Java service e2e test message to be received over " + protocolName + " protocol";
-        com.microsoft.azure.sdk.iot.service.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.Message(messageString);
-        serviceMessage.setCorrelationId(expectedCorrelationId);
-        serviceMessage.setMessageId(expectedMessageId);
-        serviceMessage.setProperties(messageProperties);
-        testInstance.serviceClient.send(deviceId, moduleId, serviceMessage);
+        testInstance.messagingClient.send(deviceId, createCloudToDeviceMessage(messageSize));
+    }
+
+    protected void sendMessageToModule(String deviceId, String moduleId, int messageSize) throws IotHubException, IOException, InterruptedException, TimeoutException
+    {
+        testInstance.messagingClient.send(deviceId, moduleId, createCloudToDeviceMessage(messageSize));
     }
 
     protected void waitForMessageToBeReceived(Success messageReceived, String protocolName)
@@ -344,41 +334,18 @@ public class ReceiveMessagesCommon extends IntegrationTest
 
                 if (System.currentTimeMillis() - startTime > RECEIVE_TIMEOUT_MILLISECONDS)
                 {
-                    Assert.fail(buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Timed out waiting to receive message", testInstance.client));
+                    Assert.fail(buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Timed out waiting to receive message", testInstance.identity.getClient()));
                 }
             }
 
             if (!messageReceived.getResult())
             {
-                Assert.fail(buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Receiving message over " + protocolName + " protocol failed. Received message was missing expected properties", testInstance.client));
+                Assert.fail(buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Receiving message over " + protocolName + " protocol failed. Received message was missing expected properties", testInstance.identity.getClient()));
             }
         }
         catch (InterruptedException e)
         {
-            Assert.fail(buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Receiving message over " + protocolName + " protocol failed. Unexpected interrupted exception occurred", testInstance.client));
-        }
-    }
-
-    protected void waitForBackToBackC2DMessagesToBeReceived(List messageIdListStoredOnReceive)
-    {
-        try
-        {
-            long startTime = System.currentTimeMillis();
-
-            // check if all messages are received.
-            while (messageIdListStoredOnReceive.size() != MAX_COMMANDS_TO_SEND)
-            {
-                Thread.sleep(100);
-
-                if (System.currentTimeMillis() - startTime > RECEIVE_TIMEOUT_MILLISECONDS)
-                {
-                    Assert.fail(buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Receiving messages timed out.", testInstance.client));
-                }
-            }
-        }
-        catch (InterruptedException e)
-        {
-            Assert.fail(buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Receiving message failed. Unexpected interrupted exception occurred.", testInstance.client));
+            Assert.fail(buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Receiving message over " + protocolName + " protocol failed. Unexpected interrupted exception occurred", testInstance.identity.getClient()));
         }
     }
 }

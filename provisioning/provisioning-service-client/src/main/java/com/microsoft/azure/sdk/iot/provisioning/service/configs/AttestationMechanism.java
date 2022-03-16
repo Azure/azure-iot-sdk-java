@@ -7,8 +7,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
+import lombok.Getter;
+
+import java.io.Serializable;
 
 /**
  * Representation of a single Device Provisioning Service Attestation mechanism in the IndividualEnrollment and EnrollmentGroup.
@@ -18,12 +20,13 @@ import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningS
  *
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
  */
-public final class AttestationMechanism
+public final class AttestationMechanism implements Serializable
 {
     // The AttestationMechanismType that identifies if the attestation is TPM (TpmAttestation), X509 (X509Attestation) or Symmetric Keys (SymmetricKeysAttestation).
     private static final String ATTESTATION_TYPE_TAG = "type";
     @Expose
     @SerializedName(ATTESTATION_TYPE_TAG)
+    @Getter
     private final AttestationMechanismType type;
 
     // This is the TpmAttestation that contains the TPM keys. It is valid on AttestationMechanismType.TPM.
@@ -55,12 +58,12 @@ public final class AttestationMechanism
     public AttestationMechanism(Attestation attestation)
     {
         /* SRS_ATTESTATION_MECHANISM_21_001: [The constructor shall throw IllegalArgumentException if the provided attestation is null or invalid.] */
-        if(attestation == null)
+        if (attestation == null)
         {
             throw new IllegalArgumentException("Attestation cannot be null");
         }
 
-        if(attestation instanceof TpmAttestation)
+        if (attestation instanceof TpmAttestation)
         {
             /* SRS_ATTESTATION_MECHANISM_21_002: [If the provided attestation is instance of TpmAttestation, the constructor shall store the provided tpm keys.] */
             this.tpm = (TpmAttestation)attestation;
@@ -71,7 +74,7 @@ public final class AttestationMechanism
             /* SRS_ATTESTATION_MECHANISM_21_003: [If the provided attestation is instance of TpmAttestation, the constructor shall set the attestation type as TPM.] */
             this.type = AttestationMechanismType.TPM;
         }
-        else if(attestation instanceof X509Attestation)
+        else if (attestation instanceof X509Attestation)
         {
             /* SRS_ATTESTATION_MECHANISM_21_006: [If the provided attestation is instance of X509Attestation, the constructor shall store the provided x509 certificates.] */
             this.x509 = (X509Attestation)attestation;
@@ -82,7 +85,7 @@ public final class AttestationMechanism
             /* SRS_ATTESTATION_MECHANISM_21_007: [If the provided attestation is instance of X509Attestation, the constructor shall set the attestation type as X509.] */
             this.type = AttestationMechanismType.X509;
         }
-        else if(attestation instanceof SymmetricKeyAttestation)
+        else if (attestation instanceof SymmetricKeyAttestation)
         {
             /* SRS_ATTESTATION_MECHANISM_44_016: [If the provided attestation is instance of SymmetricKeyAttestation, the constructor shall store the provided symmetric keys.] */
             this.symmetricKey = (SymmetricKeyAttestation)attestation;
@@ -102,7 +105,7 @@ public final class AttestationMechanism
 
     public AttestationMechanism(String json)
     {
-        if (Tools.isNullOrEmpty(json))
+        if (json == null || json.isEmpty())
         {
             throw new IllegalArgumentException("JSON with result is null or empty");
         }
@@ -114,17 +117,6 @@ public final class AttestationMechanism
         this.tpm = result.tpm;
         this.type = result.type;
         this.x509 = result.x509;
-    }
-
-    /**
-     * Getter for the type.
-     *
-     * @return the {@link AttestationMechanismType} that contains the stored type. It cannot be {@code null}.
-     */
-    public AttestationMechanismType getType()
-    {
-        /* SRS_ATTESTATION_MECHANISM_21_009: [The getType shall return a AttestationMechanismType with the stored mechanism type.] */
-        return this.type;
     }
 
     /**

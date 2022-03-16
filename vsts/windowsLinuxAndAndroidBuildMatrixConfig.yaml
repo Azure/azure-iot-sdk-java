@@ -4,7 +4,7 @@ trigger:
   batch: true
   branches:
     include:
-      - master
+      - main
   paths:
     exclude:
       - doc/*
@@ -17,7 +17,7 @@ jobs:
   - job: Windows
     timeoutInMinutes: 180
     pool:
-      name: Hosted VS2017
+      vmImage: windows-latest
     displayName: Windows
     condition: succeeded()
     steps:
@@ -46,8 +46,12 @@ jobs:
           PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
           CUSTOM_ALLOCATION_POLICY_WEBHOOK: $(CUSTOM-ALLOCATION-POLICY-WEBHOOK)
           FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
+          DPS_GLOBALDEVICEENDPOINT: $(DPS-GLOBALDEVICEENDPOINT)
           IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
           TARGET_BRANCH: $(System.PullRequest.TargetBranch)
+          IOTHUB_CLIENT_SECRET: $(IOTHUB-CLIENT-SECRET)
+          IOTHUB_CLIENT_ID: $(IOTHUB-CLIENT-ID)
+          MSFT_TENANT_ID: $(MSFT-TENANT-ID)
         condition: always()
 
       - task: CopyFiles@2
@@ -60,6 +64,30 @@ jobs:
           TargetFolder: '$(Build.ArtifactStagingDirectory)'
         continueOnError: true
         condition: always()
+      
+      - task: CopyFiles@2
+        displayName: 'Copy Build Results to Artifact Staging Directory'
+        inputs:
+          flattenFolders: true
+          SourceFolder: '$(Build.SourcesDirectory)'
+          Contents: |
+            **/target/*.jar
+            **/target/*.pom
+            !**/target/*-sources.jar
+            !**/target/*-javadoc.jar
+            !**/target/dice-*
+            !**/target/provisioning-x509-cert-generator*
+            !**/target/*emulator*
+            !**/*sample*/**/target/**
+            !**/*test*/**/target/**
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/buildOutput'
+        continueOnError: true
+        condition: always()
+
+      - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+        displayName: 'Generate SBOM for Build Artifacts'
+        inputs:
+          BuildDropPath: '$(Build.ArtifactStagingDirectory)/buildOutput'
 
       - task: PublishBuildArtifacts@1
         displayName: 'Publish Artifact Staging Directory'
@@ -78,10 +106,16 @@ jobs:
   - job: Linux
     timeoutInMinutes: 180
     pool:
-      name: Hosted Ubuntu 1604
+      # If this is changed, don't forget to update supported_platforms.md in the root directory. That document outlines what OS we test on and should stay up to date.
+      vmImage: 'ubuntu-18.04'
     displayName: Linux
     condition: succeeded()
     steps:
+      - task: CmdLine@2
+        displayName: 'Print Linux version'
+        inputs:
+          script: 'cat /etc/*release'
+
       - powershell: ./vsts/echo_versions.ps1
         displayName: 'Echo Versions'
         env:
@@ -113,8 +147,13 @@ jobs:
           PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
           CUSTOM_ALLOCATION_POLICY_WEBHOOK: $(CUSTOM-ALLOCATION-POLICY-WEBHOOK)
           FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
+          DPS_GLOBALDEVICEENDPOINT: $(DPS-GLOBALDEVICEENDPOINT)
           IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
           TARGET_BRANCH: $(System.PullRequest.TargetBranch)
+          IOTHUB_CLIENT_SECRET: $(IOTHUB-CLIENT-SECRET)
+          IOTHUB_CLIENT_ID: $(IOTHUB-CLIENT-ID)
+          MSFT_TENANT_ID: $(MSFT-TENANT-ID)
+          RECYCLE_TEST_IDENTITIES: true
         condition: always()
 
       - task: CopyFiles@2
@@ -145,7 +184,7 @@ jobs:
   - job: AndroidBuild
     timeoutInMinutes: 30
     pool:
-      name: Hosted VS2017
+      vmImage: windows-latest
     displayName: Android Build
 
     steps:
@@ -171,8 +210,13 @@ jobs:
           INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING: $(IOTHUB-CONN-STRING-INVALIDCERT)
           CUSTOM_ALLOCATION_POLICY_WEBHOOK: $(CUSTOM-ALLOCATION-POLICY-WEBHOOK)
           FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
+          DPS_GLOBALDEVICEENDPOINT: $(DPS-GLOBALDEVICEENDPOINT)
           IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
+          IOTHUB_CLIENT_SECRET: $(IOTHUB-CLIENT-SECRET)
+          IOTHUB_CLIENT_ID: $(IOTHUB-CLIENT-ID)
+          MSFT_TENANT_ID: $(MSFT-TENANT-ID)
           TARGET_BRANCH: $(System.PullRequest.TargetBranch)
+          RECYCLE_TEST_IDENTITIES: true
         condition: always()
 
       - task: CopyFiles@2
@@ -191,11 +235,11 @@ jobs:
           targetPath: 'iot-e2e-tests/android/app/build/outputs/apk'
 
   - job: AndroidTest
-    timeoutInMinutes: 80
+    timeoutInMinutes: 50
     pool:
       vmImage: 'macOS-latest'
     strategy:
-      maxParallel: 17
+      maxParallel: 12
       matrix:
         TestGroup1:
           ANDROID_TEST_GROUP_ID: TestGroup1
@@ -221,16 +265,6 @@ jobs:
           ANDROID_TEST_GROUP_ID: TestGroup11
         TestGroup12:
           ANDROID_TEST_GROUP_ID: TestGroup12
-        TestGroup13:
-          ANDROID_TEST_GROUP_ID: TestGroup13
-        TestGroup14:
-          ANDROID_TEST_GROUP_ID: TestGroup14
-        TestGroup15:
-          ANDROID_TEST_GROUP_ID: TestGroup15
-        TestGroup16:
-          ANDROID_TEST_GROUP_ID: TestGroup16
-        TestGroup17:
-          ANDROID_TEST_GROUP_ID: TestGroup17
 
     displayName: Android Test
     dependsOn: AndroidBuild
@@ -255,7 +289,7 @@ jobs:
       - task: Bash@3
         condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
         displayName: 'Start Android Emulator'
-        timeoutInMinutes: 30
+        timeoutInMinutes: 15
         continueOnError: false
         inputs:
           targetType: 'filePath'

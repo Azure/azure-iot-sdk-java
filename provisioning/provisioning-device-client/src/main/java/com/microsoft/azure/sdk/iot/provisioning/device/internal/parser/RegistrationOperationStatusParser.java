@@ -11,23 +11,28 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
 
 /**
  * Parses JSON which represent the RegistrationOperationStatus object.
  * Format : https://docs.microsoft.com/en-us/rest/api/iot-dps/RuntimeRegistration/RegisterDevice#definitions_registrationoperationstatus
  */
+@SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
 public class RegistrationOperationStatusParser
 {
     private static final String OPERATION_ID = "operationId";
     @SerializedName(OPERATION_ID)
+    @Getter
     private String operationId;
 
     private static final String STATUS = "status";
     @SerializedName(STATUS)
+    @Getter
     private String status;
 
     private static final String REGISTRATION_STATE = "registrationState";
     @SerializedName(REGISTRATION_STATE)
+    @Getter
     private DeviceRegistrationResultParser registrationState;
 
     //empty constructor for Gson
@@ -45,7 +50,7 @@ public class RegistrationOperationStatusParser
      */
     public static RegistrationOperationStatusParser createFromJson(String json) throws IllegalArgumentException
     {
-        if((json == null) || json.isEmpty())
+        if ((json == null) || json.isEmpty())
         {
             //SRS_RegistrationOperationStatusParser_25_001: [ This method shall throw IllegalArgumentException if provided Json is null or empty. ]
             throw new IllegalArgumentException("JSON cannot be null or empty");
@@ -189,37 +194,5 @@ public class RegistrationOperationStatusParser
             }
         }
         return registrationOperationStatusParser;
-    }
-
-    /**
-     * Getter for the Operation Id
-     * @return Operation Id. Cannot be {@code null}
-     */
-    public String getOperationId()
-    {
-        //SRS_RegistrationOperationStatusParser_25_023: [ This method shall return operationId. ]
-        return operationId;
-    }
-
-    /**
-     * Getter for the Status
-     * @return Status retrieved after parsing. Cannot be {@code null}
-     */
-    public String getStatus()
-    {
-        //SRS_RegistrationOperationStatusParser_25_024: [ This method shall return status . ]
-        return status;
-    }
-
-    /**
-     * Returns DeviceRegistrationResultParser object.
-     * Format : https://docs.microsoft.com/en-us/rest/api/iot-dps/RuntimeRegistration/RegisterDevice#definitions_deviceregistrationresult
-     *
-     * @return DeviceRegistrationResultParser object
-     */
-    public DeviceRegistrationResultParser getRegistrationState()
-    {
-        //SRS_RegistrationOperationStatusParser_25_025: [ This method shall return DeviceRegistrationResultParser Object. ]
-        return registrationState;
     }
 }

@@ -5,7 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.android.iothub;
 
-import com.microsoft.azure.sdk.iot.android.helper.TestGroup13;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup10;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -18,12 +18,11 @@ import java.net.URISyntaxException;
 
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.FileUploadTests;
 
-@TestGroup13
+@TestGroup10
 @RunWith(Parameterized.class)
 public class FileUploadAndroidRunner extends FileUploadTests
 {
-    public FileUploadAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean withProxy) throws InterruptedException, IOException, IotHubException, URISyntaxException
-    {
+    public FileUploadAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean withProxy) throws IOException {
         super(protocol, authenticationType, withProxy);
     }
 }

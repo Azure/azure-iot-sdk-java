@@ -5,8 +5,8 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.service.JobProperties;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryJob;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.blob.CloudBlob;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
@@ -30,20 +30,20 @@ public class DeviceManagerExportSample
         container.createIfNotExists();
         String containerSasUri = SampleUtils.getContainerSasUri(container);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
-        JobProperties exportJob = registryManager.exportDevices(containerSasUri, excludeKeys);
+        RegistryClient registryClient = new RegistryClient(SampleUtils.iotHubConnectionString);
+        RegistryJob exportJob = registryClient.exportDevices(containerSasUri, excludeKeys);
 
-        while(true)
+        while (true)
         {
-            exportJob = registryManager.getJob(exportJob.getJobId());
-            if (exportJob.getStatus() == JobProperties.JobStatus.COMPLETED)
+            exportJob = registryClient.getJob(exportJob.getJobId());
+            if (exportJob.getStatus() == RegistryJob.JobStatus.COMPLETED)
             {
                 break;
             }
             Thread.sleep(500);
         }
 
-        for(ListBlobItem blobItem : container.listBlobs())
+        for (ListBlobItem blobItem : container.listBlobs())
         {
             if (blobItem instanceof CloudBlob)
             {
@@ -51,8 +51,6 @@ public class DeviceManagerExportSample
                 blob.download(new FileOutputStream(SampleUtils.exportFileLocation + blob.getName()));
             }
         }
-
-        registryManager.close();
 
         System.out.println("Export job completed. Results are in " + SampleUtils.exportFileLocation);
     }

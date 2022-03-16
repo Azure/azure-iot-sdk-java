@@ -3,13 +3,12 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
-import com.microsoft.azure.sdk.iot.device.transport.ReconnectionNotifier;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.PahoExceptionTranslator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -21,11 +20,9 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Slf4j
-abstract public class Mqtt implements MqttCallback
+public abstract class Mqtt implements MqttCallback
 {
     private static final int CONNECTION_TIMEOUT = 60 * 1000;
     private static final int DISCONNECTION_TIMEOUT = 60 * 1000;
@@ -34,8 +31,9 @@ abstract public class Mqtt implements MqttCallback
     private static final int QOS = 1;
     private static final int MAX_SUBSCRIBE_ACK_WAIT_TIME = 15 * 1000;
 
-    // paho mqtt only supports 10 messages in flight at the same time
-    private static final int MAX_IN_FLIGHT_COUNT = 10;
+    // relatively arbitrary, but only because Paho doesn't have any particular recommendations here. Just a high enough
+    // value that users who are building a gateway type solution don't find this value to be a bottleneck.
+    static final int MAX_IN_FLIGHT_COUNT = 65000;
 
     private MqttAsyncClient mqttAsyncClient;
     private final MqttConnectOptions connectOptions;
@@ -66,6 +64,7 @@ abstract public class Mqtt implements MqttCallback
     final static String CONTENT_ENCODING = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".ce";
     final static String CREATION_TIME_UTC = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".ctime";
     final static String MQTT_SECURITY_INTERFACE_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".ifid";
+    final static String COMPONENT_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".sub";
 
     private final static String IOTHUB_ACK = "iothub-ack";
 
@@ -81,25 +80,17 @@ abstract public class Mqtt implements MqttCallback
 
     /**
      * Constructor to instantiate mqtt broker connection.
-     * @param mqttAsyncClient the connection to use
      * @param messageListener the listener to be called back upon a message arriving
      * @param deviceId the Id of the device this connection belongs to
      */
     Mqtt(
-        MqttAsyncClient mqttAsyncClient,
         MqttMessageListener messageListener,
         String deviceId,
         MqttConnectOptions connectOptions,
         Map<Integer, Message> unacknowledgedSentMessages,
         Queue<Pair<String, byte[]>> receivedMessages)
     {
-        if (mqttAsyncClient == null)
-        {
-            throw new IllegalArgumentException("Mqtt connection info cannot be null");
-        }
-
         this.deviceId = deviceId;
-        this.mqttAsyncClient = mqttAsyncClient;
         this.receivedMessages = receivedMessages;
         this.stateLock = new Object();
         this.receivedMessagesLock = new Object();
@@ -107,6 +98,11 @@ abstract public class Mqtt implements MqttCallback
         this.messageListener = messageListener;
         this.connectOptions = connectOptions;
         this.unacknowledgedSentMessages = unacknowledgedSentMessages;
+    }
+
+    void updatePassword(char[] newPassword)
+    {
+        this.connectOptions.setPassword(newPassword);
     }
 
     /**
@@ -130,7 +126,7 @@ abstract public class Mqtt implements MqttCallback
             }
             catch (MqttException e)
             {
-                log.warn("Exception encountered while sending MQTT CONNECT packet", e);
+                log.debug("Exception encountered while sending MQTT CONNECT packet", e);
 
                 this.disconnect();
                 throw PahoExceptionTranslator.convertToMqttException(e, "Unable to establish MQTT connection");
@@ -140,10 +136,8 @@ abstract public class Mqtt implements MqttCallback
 
     /**
      * Method to disconnect to mqtt broker connection.
-     *
-     * @throws TransportException if failed to ends the mqtt connection.
      */
-    void disconnect() throws TransportException
+    void disconnect()
     {
         try
         {
@@ -156,16 +150,29 @@ abstract public class Mqtt implements MqttCallback
                 {
                     disconnectToken.waitForCompletion(DISCONNECTION_TIMEOUT);
                 }
+
                 log.debug("Sent MQTT DISCONNECT packet was acknowledged");
             }
-
-            this.mqttAsyncClient.close();
         }
         catch (MqttException e)
         {
-            log.warn("Exception encountered while sending MQTT DISCONNECT packet", e);
-
-            throw PahoExceptionTranslator.convertToMqttException(e, "Unable to disconnect");
+            // If the SDK's disconnect message doesn't make it to the service, just clean up the local resources.
+            // The service will eventually figure out that the connection was lost since the keep-alive pings stop.
+            TransportException transportException = PahoExceptionTranslator.convertToMqttException(e, "Unable to disconnect");
+            log.warn("Exception encountered while sending MQTT DISCONNECT packet. Forcefully closing the connection.", transportException);
+        }
+        finally
+        {
+            try
+            {
+                this.mqttAsyncClient.close();
+            }
+            catch (MqttException ex)
+            {
+                // As per the documentation for mqttAsyncClient.close() this exception is only thrown if the client is already
+                // closed. No need to re-attempt anything here.
+                log.debug("Mqtt client was already closed, so ignoring the thrown exception", ex);
+            }
         }
     }
 
@@ -195,13 +202,16 @@ abstract public class Mqtt implements MqttCallback
 
             byte[] payload = message.getBytes();
 
+            // Wait until either the number of in flight messages is below the limit before publishing another message
+            // Or wait until the connection is lost so the message can be requeued for later
             while (this.mqttAsyncClient.getPendingDeliveryTokens().length >= MAX_IN_FLIGHT_COUNT)
             {
+                //noinspection BusyWait
                 Thread.sleep(10);
 
                 if (!this.mqttAsyncClient.isConnected())
                 {
-                    TransportException transportException = new TransportException("Cannot publish when mqtt client is holding 10 tokens and is disconnected");
+                    TransportException transportException = new TransportException("Cannot publish when mqtt client is holding " + MAX_IN_FLIGHT_COUNT + " tokens and is disconnected");
                     transportException.setRetryable(true);
                     throw transportException;
                 }
@@ -276,9 +286,8 @@ abstract public class Mqtt implements MqttCallback
      * Method to receive messages on mqtt broker connection.
      *
      * @return a received message. It can be {@code null}
-     * @throws TransportException if failed to receive mqtt message.
      */
-    public IotHubTransportMessage receive() throws TransportException
+    public IotHubTransportMessage receive()
     {
         synchronized (this.receivedMessagesLock)
         {
@@ -298,7 +307,7 @@ abstract public class Mqtt implements MqttCallback
                     }
                     else
                     {
-                        throw new TransportException("Data cannot be null when topic is non-null");
+                        log.warn("Data cannot be null when topic is non-null");
                     }
                 }
                 else
@@ -318,39 +327,24 @@ abstract public class Mqtt implements MqttCallback
     @Override
     public void connectionLost(Throwable throwable)
     {
-        TransportException ex = null;
-
         log.warn("Mqtt connection lost", throwable);
 
-        try
-        {
-            this.disconnect();
-        }
-        catch (TransportException e)
-        {
-            ex = e;
-        }
+        this.disconnect();
 
         if (this.listener != null)
         {
-            if (ex == null)
+            TransportException transportException;
+            if (throwable instanceof MqttException)
             {
-                if (throwable instanceof MqttException)
-                {
-                    throwable = PahoExceptionTranslator.convertToMqttException((MqttException) throwable, "Mqtt connection lost");
-                    log.trace("Mqtt connection loss interpreted into transport exception", throwable);
-                }
-                else
-                {
-                    throwable = new TransportException(throwable);
-                }
+                transportException = PahoExceptionTranslator.convertToMqttException((MqttException) throwable, "Mqtt connection lost");
+                log.trace("Mqtt connection loss interpreted into transport exception", throwable);
             }
             else
             {
-                throwable = ex;
+                transportException = new TransportException(throwable);
             }
 
-            ReconnectionNotifier.notifyDisconnectAsync(throwable, this.listener, this.connectionId);
+            this.listener.onConnectionLost(transportException, this.connectionId);
         }
     }
 
@@ -517,7 +511,7 @@ abstract public class Mqtt implements MqttCallback
                         message.setContentEncoding(value);
                         break;
                     case CONTENT_TYPE:
-                        message.setContentTypeFinal(value);
+                        message.setContentType(value);
                         break;
                     default:
                         message.setProperty(key, value);

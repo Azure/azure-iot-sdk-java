@@ -17,15 +17,15 @@ import org.apache.qpid.proton.amqp.messaging.Source;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.amqp.transport.ReceiverSettleMode;
 import org.apache.qpid.proton.engine.*;
-import org.apache.qpid.proton.reactor.FlowController;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-public abstract class AmqpsReceiverLinkHandler extends BaseHandler
+abstract class AmqpsReceiverLinkHandler extends BaseHandler
 {
     static final String VERSION_IDENTIFIER_KEY = "com.microsoft:client-version";
     private static final String API_VERSION_KEY = "com.microsoft:api-version";
@@ -57,20 +57,33 @@ public abstract class AmqpsReceiverLinkHandler extends BaseHandler
         BaseHandler.setHandler(receiver, this);
 
         //This flow controller handles all link credit handling on our behalf
-        add(new FlowController());
+        add(new LoggingFlowController(this.linkCorrelationId));
     }
 
     @Override
     public void onLinkRemoteOpen(Event event)
     {
-        log.debug("{} receiver link with link correlation id {} was successfully opened", getLinkInstanceType(), this.linkCorrelationId);
+        log.debug("{} receiver link with address {} and link correlation id {} was successfully opened", getLinkInstanceType(), this.receiverLinkAddress, this.linkCorrelationId);
         this.amqpsLinkStateCallback.onLinkOpened(this);
+
+        boolean hasFlowController = false;
+        Iterator<Handler> children = children();
+        while (children.hasNext())
+        {
+            hasFlowController |= children.next() instanceof LoggingFlowController;
+        }
+
+        if (!hasFlowController)
+        {
+            log.trace("No flow controller detected in {} link with address {} and link correlation id {}. Adding a new flow controller.", getLinkInstanceType(), this.receiverLinkAddress, this.linkCorrelationId);
+            add(new LoggingFlowController(this.linkCorrelationId));
+        }
     }
 
     @Override
     public void onLinkLocalOpen(Event event)
     {
-        log.trace("{} receiver link with link correlation id {} opened locally", getLinkInstanceType(), this.linkCorrelationId);
+        log.trace("{} receiver link with address {} and link correlation id {} opened locally", getLinkInstanceType(), this.receiverLinkAddress, this.linkCorrelationId);
     }
 
     @Override
@@ -79,9 +92,20 @@ public abstract class AmqpsReceiverLinkHandler extends BaseHandler
         // Safe to cast as receiver here since this event only fires when a message is ready to be received over this receiver link
         Receiver receiverLink = (Receiver) event.getLink();
         AmqpsMessage amqpsMessage = this.getMessageFromReceiverLink(receiverLink);
+
+        if (amqpsMessage == null)
+        {
+            // This happens if the delivery was a partial delivery and a full message can't be formed just yet.
+            // onDelivery will be called by the reactor again with another chunk of the partial delivery, and will
+            // continue to be called until it is fully formed.
+            return;
+        }
+
         IotHubTransportMessage iotHubMessage = this.protonMessageToIoTHubMessage(amqpsMessage);
         this.receivedMessagesMap.put(iotHubMessage, amqpsMessage);
         this.amqpsLinkStateCallback.onMessageReceived(iotHubMessage);
+
+        log.trace("Current link credit on {} receiver link with address {} and link correlation id {} is {}", this.getLinkInstanceType(), this.receiverLinkAddress, this.linkCorrelationId, receiverLink.getCredit());
     }
 
     @Override
@@ -99,7 +123,7 @@ public abstract class AmqpsReceiverLinkHandler extends BaseHandler
         link.setReceiverSettleMode(ReceiverSettleMode.FIRST);
         link.setProperties(this.amqpProperties);
         link.open();
-        log.trace("Opening {} receiver link with correlation id {}", this.getLinkInstanceType(), this.linkCorrelationId);
+        log.trace("Opening {} receiver link with address {} and link correlation id {}", this.getLinkInstanceType(), this.receiverLinkAddress, this.linkCorrelationId);
     }
 
     @Override
@@ -108,13 +132,14 @@ public abstract class AmqpsReceiverLinkHandler extends BaseHandler
         Link link = event.getLink();
         if (link.getLocalState() == EndpointState.ACTIVE)
         {
-            log.debug("{} receiver link with link correlation id {} was closed remotely unexpectedly", getLinkInstanceType(), this.linkCorrelationId);
+            log.debug("{} receiver link with address {} and link correlation id {} was closed remotely unexpectedly", getLinkInstanceType(), this.receiverLinkAddress, this.linkCorrelationId);
             link.close();
+            clearHandlers();
             this.amqpsLinkStateCallback.onLinkClosedUnexpectedly(link.getRemoteCondition());
         }
         else
         {
-            log.trace("Closing amqp session now that this {} receiver link with link correlation id {} has closed remotely and locally", getLinkInstanceType(), linkCorrelationId);
+            log.trace("Closing amqp session now that {} receiver link with address {} and link correlation id {} has closed remotely and locally", getLinkInstanceType(), this.receiverLinkAddress, linkCorrelationId);
             event.getSession().close();
         }
     }
@@ -125,12 +150,12 @@ public abstract class AmqpsReceiverLinkHandler extends BaseHandler
         Link link = event.getLink();
         if (link.getRemoteState() == EndpointState.CLOSED)
         {
-            log.trace("Closing amqp session now that this {} receiver link with link correlation id {} has closed remotely and locally", getLinkInstanceType(), linkCorrelationId);
+            log.trace("Closing amqp session now that {} receiver link with address {} and link correlation id {} has closed remotely and locally", getLinkInstanceType(), this.receiverLinkAddress, linkCorrelationId);
             event.getSession().close();
         }
         else
         {
-            log.trace("{} receiver link with correlation id {} was closed locally", this.getLinkInstanceType(), this.linkCorrelationId);
+            log.trace("{} receiver link with address {} and link correlation id {} was closed locally", this.getLinkInstanceType(), this.receiverLinkAddress, this.linkCorrelationId);
         }
     }
 
@@ -151,13 +176,18 @@ public abstract class AmqpsReceiverLinkHandler extends BaseHandler
     {
         Delivery delivery = receiver.current();
 
-        if ((delivery != null) && delivery.isReadable() && !delivery.isPartial())
+        if (delivery == null)
+        {
+            return null;
+        }
+
+        if (delivery.isReadable() && !delivery.isPartial())
         {
             int size = delivery.pending();
             byte[] buffer = new byte[size];
             int bytesRead = receiver.recv(buffer, 0, buffer.length);
 
-            log.trace("read {} bytes from receiver link {}", bytesRead, receiver.getName());
+            log.trace("read {} bytes from {} receiver link with address {} and link correlation id {}", bytesRead, getLinkInstanceType(), this.receiverLinkAddress, this.linkCorrelationId);
 
             boolean receiverLinkAdvanced = receiver.advance();
 
@@ -168,7 +198,7 @@ public abstract class AmqpsReceiverLinkHandler extends BaseHandler
 
             if (size != bytesRead)
             {
-                log.warn("Amqp read from {} receiver link with link correlation id {} did not read the expected amount of bytes. Read {} but expected {}", getLinkInstanceType(), this.linkCorrelationId, bytesRead, size);
+                log.warn("Amqp read operation on {} receiver link with link correlation id {} did not read the expected amount of bytes. Read {} but expected {}", getLinkInstanceType(), this.linkCorrelationId, bytesRead, size);
             }
 
             AmqpsMessage amqpsMessage = new AmqpsMessage();
@@ -178,12 +208,22 @@ public abstract class AmqpsReceiverLinkHandler extends BaseHandler
             return amqpsMessage;
         }
 
+        if (delivery.isPartial())
+        {
+            log.trace("Partial delivery received on {} receiver link with address {} and link correlation id {}.", getLinkInstanceType(), this.receiverLinkAddress, this.linkCorrelationId);
+        }
+        else
+        {
+            // not partial, but not readable either
+            log.warn("Unreadable delivery received on {} receiver link with address {} and link correlation id {}.", getLinkInstanceType(), this.receiverLinkAddress, this.linkCorrelationId);
+        }
+
         return null;
     }
 
     IotHubTransportMessage protonMessageToIoTHubMessage(AmqpsMessage protonMsg)
     {
-        log.trace("Converting proton message to iot hub message for {} receiver link with link correlation id {}. Proton message correlation id {}", getLinkInstanceType(), this.linkCorrelationId, protonMsg.getCorrelationId());
+        log.trace("Converting proton message to iot hub message for {} receiver link with address {} and link correlation id {}. Proton message correlation id {}", getLinkInstanceType(), this.receiverLinkAddress, this.linkCorrelationId, protonMsg.getCorrelationId());
         byte[] msgBody;
         Data d = (Data) protonMsg.getBody();
         if (d != null)
@@ -230,7 +270,7 @@ public abstract class AmqpsReceiverLinkHandler extends BaseHandler
 
             if (properties.getContentType() != null)
             {
-                iotHubTransportMessage.setContentTypeFinal(properties.getContentType().toString());
+                iotHubTransportMessage.setContentType(properties.getContentType().toString());
             }
         }
 
@@ -262,8 +302,24 @@ public abstract class AmqpsReceiverLinkHandler extends BaseHandler
     {
         if (this.receiverLink.getLocalState() != EndpointState.CLOSED)
         {
-            log.debug("Closing {} receiver link with link correlation id {}", getLinkInstanceType(), this.linkCorrelationId);
+            log.debug("Closing {} receiver link with address {} and link correlation id {}", getLinkInstanceType(), this.receiverLinkAddress, this.linkCorrelationId);
             this.receiverLink.close();
+            clearHandlers();
+        }
+    }
+
+    // Removes any children of this handler (such as LoggingFlowController) and disassociates this handler
+    // from the proton reactor. By removing the reference of the proton reactor to this handler, this handler becomes
+    // eligible for garbage collection by the JVM. This is important for multiplexed connections where links come and go
+    // but the reactor stays alive for a long time.
+    private void clearHandlers()
+    {
+        this.receiverLink.attachments().clear();
+        Iterator<Handler> childrenIterator = this.children();
+        while (childrenIterator.hasNext())
+        {
+            childrenIterator.next();
+            childrenIterator.remove();
         }
     }
 }

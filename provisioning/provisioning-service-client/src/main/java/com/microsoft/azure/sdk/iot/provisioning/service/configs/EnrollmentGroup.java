@@ -9,11 +9,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
-import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Collection;
 import java.util.Date;
@@ -91,12 +90,25 @@ import java.util.Date;
  *
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollmentgroup">Device Enrollment Group</a>
  */
+@SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
 public class EnrollmentGroup extends Serializable
 {
-    // the enrollment group identifier
     private static final String ENROLLMENT_GROUP_ID_TAG = "enrollmentGroupId";
+
+    /**
+     * The unique identifier for this enrollment group.
+     *
+     * <p>
+     * A valid enrollment group Id shall follow this criteria.
+     * A case-sensitive string (up to 128 char long)
+     * of ASCII 7-bit alphanumeric chars
+     * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
+     * </p>
+     */
     @Expose
     @SerializedName(ENROLLMENT_GROUP_ID_TAG)
+    @Getter
+    @Setter
     private String enrollmentGroupId;
 
     // the attestation
@@ -105,22 +117,40 @@ public class EnrollmentGroup extends Serializable
     @SerializedName(ATTESTATION_TAG)
     private AttestationMechanism attestation;
 
-    // the iothub host name
+
     private static final String IOTHUB_HOST_NAME_TAG = "iotHubHostName";
     @Expose
     @SerializedName(IOTHUB_HOST_NAME_TAG)
+    @Getter
+    @Setter
     private String iotHubHostName;
 
     // the initial Twin state identifier (Twin is a special case and will be manually serialized).
     private static final String INITIAL_TWIN_STATE_TAG = "initialTwin";
+
+    /**
+     * The hostname of the IoT hub for this enrollment group.
+     *
+     * <p>
+     * A valid IoT hub host name shall follow this criteria.
+     * A case-sensitive string (up to 128 char long)
+     * of ASCII 7-bit alphanumeric chars
+     * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
+     * A valid host name shall have, at least 2 parts separated by '.'.
+     * </p>
+     */
     @Expose
     @SerializedName(INITIAL_TWIN_STATE_TAG)
+    @Getter
+    @Setter
     private TwinState initialTwin;
 
     // the provisioning status
     private static final String PROVISIONING_STATUS_TAG = "provisioningStatus";
     @Expose
     @SerializedName(PROVISIONING_STATUS_TAG)
+    @Getter
+    @Setter
     private ProvisioningStatus provisioningStatus;
 
     // the datetime this resource was created
@@ -128,50 +158,64 @@ public class EnrollmentGroup extends Serializable
     @Expose
     @SerializedName(CREATED_DATETIME_UTC_TAG)
     @SuppressWarnings("unused") // used by reflection during json serialization/deserialization
-    private String createdDateTimeUtc;
-    private transient Date createdDateTimeUtcDate;
+    private String createdDateTimeUtcString;
+    @Getter
+    private transient Date createdDateTimeUtc;
 
     // the datetime this resource was last updated
     private static final String LAST_UPDATED_DATETIME_UTC_TAG = "lastUpdatedDateTimeUtc";
     @Expose
     @SerializedName(LAST_UPDATED_DATETIME_UTC_TAG)
     @SuppressWarnings("unused") // used by reflection during json serialization/deserialization
-    private String lastUpdatedDateTimeUtc;
-    private transient Date lastUpdatedDateTimeUtcDate;
+    private String lastUpdatedDateTimeUtcString;
+    @Getter
+    private transient Date lastUpdatedDateTimeUtc;
 
     // the eTag
     private static final String ETAG_TAG = "etag";
     @Expose
     @SerializedName(ETAG_TAG)
+    @Getter
+    @Setter
     private String etag;
 
     // the reprovisioning policy
     private static final String REPROVISION_POLICY_TAG = "reprovisionPolicy";
     @Expose
     @SerializedName(REPROVISION_POLICY_TAG)
+    @Getter
+    @Setter
     private ReprovisionPolicy reprovisionPolicy;
 
     // the custom allocation definition
     private static final String CUSTOM_ALLOCATION_DEFINITION_TAG = "customAllocationDefinition";
     @Expose
     @SerializedName(CUSTOM_ALLOCATION_DEFINITION_TAG)
+    @Getter
+    @Setter
     private CustomAllocationDefinition customAllocationDefinition;
 
     // the allocation policy of the resource. overrides the tenant level allocation policy
     private static final String ALLOCATION_POLICY_TAG = "allocationPolicy";
     @Expose
     @SerializedName(ALLOCATION_POLICY_TAG)
+    @Getter
+    @Setter
     private AllocationPolicy allocationPolicy;
 
     // the list of names of IoT hubs the device in this resource can be allocated to. Must be a subset of tenant level list of IoT hubs
     private static final String IOT_HUBS_TAG = "iotHubs";
     @Expose
     @SerializedName(IOT_HUBS_TAG)
+    @Getter
+    @Setter
     private Collection<String> iotHubs;
 
     private static final String DEVICE_CAPABILITIES_TAG = "capabilities";
     @Expose
     @SerializedName(DEVICE_CAPABILITIES_TAG)
+    @Getter
+    @Setter
     private DeviceCapabilities capabilities;
 
     /**
@@ -252,7 +296,7 @@ public class EnrollmentGroup extends Serializable
      */
     public EnrollmentGroup(String json)
     {
-        if (Tools.isNullOrEmpty(json))
+        if (json == null || json.isEmpty())
         {
             throw new IllegalArgumentException("JSON with result is null or empty");
         }
@@ -265,36 +309,37 @@ public class EnrollmentGroup extends Serializable
 
         if (result.iotHubHostName != null)
         {
-            this.setIotHubHostNameFinal(result.iotHubHostName);
+            this.setIotHubHostName(result.iotHubHostName);
         }
         if (result.provisioningStatus != null)
         {
-            this.setProvisioningStatusFinal(result.provisioningStatus);
+            this.setProvisioningStatus(result.provisioningStatus);
         }
         if (result.initialTwin != null)
         {
-            this.setInitialTwinFinal(result.initialTwin);
+            this.setInitialTwin(result.initialTwin);
         }
 
-        if (result.createdDateTimeUtc != null)
+        if (result.createdDateTimeUtcString != null)
         {
-            this.setCreatedDateTimeUtc(result.createdDateTimeUtc);
+            this.setCreatedDateTimeUtcString(result.createdDateTimeUtcString);
         }
 
-        if (result.lastUpdatedDateTimeUtc != null)
+        if (result.lastUpdatedDateTimeUtcString != null)
         {
-            this.setLastUpdatedDateTimeUtc(result.lastUpdatedDateTimeUtc);
+            this.setLastUpdatedDateTimeUtcString(result.lastUpdatedDateTimeUtcString);
         }
 
         if (result.etag != null)
         {
-            this.setEtagFinal(result.etag);
+            this.setEtag(result.etag);
         }
 
         this.setIotHubs(result.getIotHubs());
         this.setAllocationPolicy(result.getAllocationPolicy());
         this.setCustomAllocationDefinition(result.getCustomAllocationDefinition());
         this.setReprovisionPolicy(result.getReprovisionPolicy());
+        this.setCapabilities(result.getCapabilities());
     }
 
     /**
@@ -321,34 +366,6 @@ public class EnrollmentGroup extends Serializable
         }
 
         return enrollmentGroupJson;
-    }
-
-    /**
-     * Getter for the enrollmentGroupId.
-     *
-     * @return The {@code String} with the enrollmentGroupId content. It cannot be {@code null} or empty.
-     */
-    public String getEnrollmentGroupId()
-    {
-        return this.enrollmentGroupId;
-    }
-
-    /**
-     * Setter for the enrollmentGroupId.
-     *
-     * <p>
-     *     A valid enrollment group Id shall follow this criteria.
-     *         A case-sensitive string (up to 128 char long)
-     *         of ASCII 7-bit alphanumeric chars
-     *         + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
-     * </p>
-     *
-     * @param enrollmentGroupId the {@code String} with the new enrollmentGroupId. It cannot be {@code null}, empty, or invalid.
-     * @throws IllegalArgumentException If the provided enrollmentGroupId is {@code null}, empty, or invalid.
-     */
-    protected final void setEnrollmentGroupId(String enrollmentGroupId)
-    {
-        this.enrollmentGroupId = enrollmentGroupId;
     }
 
     /**
@@ -421,183 +438,11 @@ public class EnrollmentGroup extends Serializable
             throw new IllegalArgumentException("attestation for EnrollmentGroup shall be X509 or SymmetricKey");
         }
 
-        if (attestation instanceof X509Attestation)
-        {
-            if (((X509Attestation)attestation).getRootCertificatesFinal() == null)
-            {
-                throw new IllegalArgumentException("X509 attestation for EnrollmentGroup does not contains a valid certificate.");
-            }
-        }
-
         this.attestation = new AttestationMechanism(attestation);
     }
 
     /**
-     * Getter for the iotHubHostName.
-     *
-     * @return The {@code String} with the iotHubHostName content. It cannot be {@code null} or empty.
-     */
-    public String getIotHubHostName()
-    {
-        return this.iotHubHostName;
-    }
-
-    /**
-     * Setter for the iotHubHostName.
-     *
-     * <p>
-     *     A valid iothub host name shall follow this criteria.
-     *         A case-sensitive string (up to 128 char long)
-     *         of ASCII 7-bit alphanumeric chars
-     *         + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
-     *     A valid host name shall have, at least 2 parts separated by '.'.
-     * </p>
-     *
-     * @param iotHubHostName the {@code String} with the new iotHubHostName. It cannot be {@code null}, empty, or invalid.
-     * @throws IllegalArgumentException If the provided iotHubHostName is {@code null}, empty, or invalid.
-     */
-    @Deprecated
-    public void setIotHubHostName(String iotHubHostName)
-    {
-        this.iotHubHostName = iotHubHostName;
-    }
-
-    /**
-     * Setter for the iotHubHostName.
-     *
-     * <p>
-     *     A valid iothub host name shall follow this criteria.
-     *         A case-sensitive string (up to 128 char long)
-     *         of ASCII 7-bit alphanumeric chars
-     *         + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
-     *     A valid host name shall have, at least 2 parts separated by '.'.
-     * </p>
-     *
-     * @param iotHubHostName the {@code String} with the new iotHubHostName. It cannot be {@code null}, empty, or invalid.
-     * @throws IllegalArgumentException If the provided iotHubHostName is {@code null}, empty, or invalid.
-     */
-    public final void setIotHubHostNameFinal(String iotHubHostName)
-    {
-        this.iotHubHostName = iotHubHostName;
-    }
-
-    /**
-     * Getter for the initialTwin.
-     *
-     * @return The {@code TwinState} with the initialTwin content. Its optional and can be {@code null}.
-     */
-    public TwinState getInitialTwin()
-    {
-        return this.initialTwin;
-    }
-
-    /**
-     * Setter for the initialTwin.
-     *
-     * <p>
-     *     It provides a Twin precondition for the provisioned device.
-     * </p>
-     *
-     * @param initialTwin the {@code TwinState} with the new initialTwin. It cannot be {@code null}.
-     * @throws IllegalArgumentException If the provided initialTwin is {@code null}.
-     */
-    @Deprecated
-    public void setInitialTwin(TwinState initialTwin)
-    {
-        if (initialTwin == null)
-        {
-            throw new IllegalArgumentException("initialTwin cannot be null");
-        }
-
-        this.initialTwin = initialTwin;
-    }
-
-    /**
-     * Setter for the initialTwin.
-     *
-     * <p>
-     *     It provides a Twin precondition for the provisioned device.
-     * </p>
-     *
-     * @param initialTwin the {@code TwinState} with the new initialTwin. It cannot be {@code null}.
-     * @throws IllegalArgumentException If the provided initialTwin is {@code null}.
-     */
-    public final void setInitialTwinFinal(TwinState initialTwin)
-    {
-        if (initialTwin == null)
-        {
-            throw new IllegalArgumentException("initialTwin cannot be null");
-        }
-
-        this.initialTwin = initialTwin;
-    }
-
-    /**
-     * Getter for the provisioningStatus.
-     *
-     * @return The {@code ProvisioningStatus} with the provisioningStatus content. It can be 'enabled' or 'disabled'.
-     */
-    public ProvisioningStatus getProvisioningStatus()
-    {
-        return this.provisioningStatus;
-    }
-
-    /**
-     * Setter for the provisioningStatus.
-     *
-     * <p>
-     *     It provides a Status precondition for the provisioned device.
-     * </p>
-     *
-     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #setProvisioningStatusFinal(ProvisioningStatus)}
-     *
-     * @param provisioningStatus the {@code ProvisioningStatus} with the new provisioningStatus. It cannot be {@code null}.
-     * @throws IllegalArgumentException If the provided provisioningStatus is {@code null}.
-     */
-    @Deprecated
-    public void setProvisioningStatus(ProvisioningStatus provisioningStatus)
-    {
-        if (provisioningStatus == null)
-        {
-            throw new IllegalArgumentException("provisioningStatus cannot be null");
-        }
-
-        this.provisioningStatus = provisioningStatus;
-    }
-
-
-    /**
-     * Setter for the provisioningStatus.
-     *
-     * <p>
-     *     It provides a Status precondition for the provisioned device.
-     * </p>
-     *
-     * @param provisioningStatus the {@code ProvisioningStatus} with the new provisioningStatus. It cannot be {@code null}.
-     * @throws IllegalArgumentException If the provided provisioningStatus is {@code null}.
-     */
-    public final void setProvisioningStatusFinal(ProvisioningStatus provisioningStatus)
-    {
-        if (provisioningStatus == null)
-        {
-            throw new IllegalArgumentException("provisioningStatus cannot be null");
-        }
-
-        this.provisioningStatus = provisioningStatus;
-    }
-
-    /**
-     * Getter for the createdDateTimeUtcDate.
-     *
-     * @return The {@code Date} with the createdDateTimeUtcDate content. It can be {@code null}.
-     */
-    public Date getCreatedDateTimeUtc()
-    {
-        return this.createdDateTimeUtcDate;
-    }
-
-    /**
-     * Setter for the createdDateTimeUtc.
+     * Setter for the createdDateTimeUtcString.
      *
      * <p>
      *     This Date and Time is provided by the provisioning service. If the enrollmentGroup is not created yet,
@@ -607,25 +452,15 @@ public class EnrollmentGroup extends Serializable
      *         "2016-06-01T21:22:43.7996883Z"
      * </p>
      *
-     * @param createdDateTimeUtc the {@code String} with the new createdDateTimeUtc. It can be {@code null}, empty or not valid.
+     * @param createdDateTimeUtcString the {@code String} with the new createdDateTimeUtcString. It can be {@code null}, empty or not valid.
      */
-    protected final void setCreatedDateTimeUtc(String createdDateTimeUtc)
+    private void setCreatedDateTimeUtcString(String createdDateTimeUtcString)
     {
-        this.createdDateTimeUtcDate = ParserUtility.getDateTimeUtc(createdDateTimeUtc);
+        this.createdDateTimeUtc = ParserUtility.getDateTimeUtc(createdDateTimeUtcString);
     }
 
     /**
-     * Getter for the lastUpdatedDateTimeUtcDate.
-     *
-     * @return The {@code Date} with the lastUpdatedDateTimeUtcDate content. It can be {@code null}.
-     */
-    public Date getLastUpdatedDateTimeUtc()
-    {
-        return this.lastUpdatedDateTimeUtcDate;
-    }
-
-    /**
-     * Setter for the lastUpdatedDateTimeUtc.
+     * Setter for the lastUpdatedDateTimeUtcString.
      *
      * <p>
      *     This Date and Time is provided by the provisioning service. If the enrollmentGroup is not created yet,
@@ -635,140 +470,11 @@ public class EnrollmentGroup extends Serializable
      *         "2016-06-01T21:22:43.7996883Z"
      * </p>
      *
-     * @param lastUpdatedDateTimeUtc the {@code String} with the new lastUpdatedDateTimeUtc. It can be {@code null}, empty or not valid.
+     * @param lastUpdatedDateTimeUtcString the {@code String} with the new lastUpdatedDateTimeUtcString. It can be {@code null}, empty or not valid.
      */
-    protected final void setLastUpdatedDateTimeUtc(String lastUpdatedDateTimeUtc)
+    private void setLastUpdatedDateTimeUtcString(String lastUpdatedDateTimeUtcString)
     {
-        this.lastUpdatedDateTimeUtcDate = ParserUtility.getDateTimeUtc(lastUpdatedDateTimeUtc);
-    }
-
-    /**
-     * Getter for the etag.
-     *
-     * @return The {@code String} with the etag content. It can be {@code null}.
-     */
-    public String getEtag()
-    {
-        return this.etag;
-    }
-
-    /**
-     * Setter for the etag.
-     *
-     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #setEtagFinal(String)}
-     *
-     * @param etag the {@code String} with the new etag. It cannot be {@code null}, empty or invalid.
-     * @throws IllegalArgumentException If the provided etag is {@code null}, empty or invalid.
-     */
-    @Deprecated
-    public void setEtag(String etag)
-    {
-        this.etag = etag;
-    }
-
-    /**
-     * Setter for the etag.
-     *
-     * @param etag the {@code String} with the new etag. It cannot be {@code null}, empty or invalid.
-     * @throws IllegalArgumentException If the provided etag is {@code null}, empty or invalid.
-     */
-    public final void setEtagFinal(String etag)
-    {
-        this.etag = etag;
-    }
-
-    public DeviceCapabilities getCapabilities()
-    {
-        return this.capabilities;
-    }
-
-    /**
-     * @param capabilities the device capabilities to set
-     */
-    public final void setCapabilities(DeviceCapabilities capabilities)
-    {
-        this.capabilities = capabilities;
-    }
-
-
-    /**
-     * Getter for the reprovision policy.
-     *
-     * @return The {@code ReprovisionPolicy} with the reprovisionPolicy content.
-     */
-    public ReprovisionPolicy getReprovisionPolicy()
-    {
-        return this.reprovisionPolicy;
-    }
-
-    /**
-     * Setter for the reprovision policy.
-     *
-     * @param reprovisionPolicy the {@code ReprovisionPolicy} with the behavior when a device is re-provisioned to an IoT hub.
-     */
-    public void setReprovisionPolicy(ReprovisionPolicy reprovisionPolicy)
-    {
-        this.reprovisionPolicy = reprovisionPolicy;
-    }
-
-    /**
-     * Getter for the allocation policy.
-     *
-     * @return The {@code AllocationPolicy} with the allocationPolicy content.
-     */
-    public AllocationPolicy getAllocationPolicy()
-    {
-        return this.allocationPolicy;
-    }
-
-    /**
-     * Setter for the allocation policy.
-     *
-     * @param allocationPolicy the {@code AllocationPolicy} with the allocation policy of this resource. Overrides the tenant level allocation policy.
-     */
-    public void setAllocationPolicy(AllocationPolicy allocationPolicy)
-    {
-        this.allocationPolicy = allocationPolicy;
-    }
-
-    /**
-     * Getter for the list of IoTHub names that the device can be allocated to..
-     *
-     * @return The {@code AllocationPolicy} with the allocationPolicy content.
-     */
-    public Collection<String> getIotHubs()
-    {
-        return this.iotHubs;
-    }
-
-    /**
-     * Setter for the list of IotHubs available for allocation.
-     *
-     * @param iotHubs the {@code List<String>} of names of IoT hubs the device(s) in this resource can be allocated to. Must be a subset of tenant level list of IoT hubs
-     */
-    public void setIotHubs(Collection<String> iotHubs)
-    {
-        this.iotHubs = iotHubs;
-    }
-
-    /**
-     * Getter for the custom allocation definition policy.
-     *
-     * @return The {@code CustomAllocationDefinition} policy.
-     */
-    public CustomAllocationDefinition getCustomAllocationDefinition()
-    {
-        return this.customAllocationDefinition;
-    }
-
-    /**
-     * Setter for the custom allocation definition policy.
-     *
-     * @param customAllocationDefinition the {@code CustomAllocationDefinition} with the custom allocation policy of this resource.
-     */
-    public void setCustomAllocationDefinition(CustomAllocationDefinition customAllocationDefinition)
-    {
-        this.customAllocationDefinition = customAllocationDefinition;
+        this.lastUpdatedDateTimeUtc = ParserUtility.getDateTimeUtc(lastUpdatedDateTimeUtcString);
     }
 
     /**

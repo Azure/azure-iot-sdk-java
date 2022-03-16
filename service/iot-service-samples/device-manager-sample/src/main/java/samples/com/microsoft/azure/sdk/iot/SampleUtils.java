@@ -21,6 +21,7 @@ public class SampleUtils
     public static final String iotHubConnectionString = "[IoT hub connection string goes here]";
     public static final String storageConnectionString = "[Sample storage connection string goes here]";
     public static final String deviceId = "[Device Id goes here]";
+    public static final String edgeId = "[Edge Id goes here]";
     public static final String moduleId0 = "[Module0 Id goes here]";
     public static final String moduleId1 = "[Module1 Id goes here]";
     public static final String configurationId = "[Configuration Id goes here]";
@@ -28,8 +29,8 @@ public class SampleUtils
 
     public static String getContainerSasUri(CloudBlobContainer container) throws InvalidKeyException, StorageException
     {
-        //Set the expiry time and permissions for the container.
-        //In this case no start time is specified, so the shared access signature becomes valid immediately.
+        // Set the expiry time and permissions for the container.
+        // In this case no start time is specified, so the shared access signature becomes valid immediately.
         SharedAccessBlobPolicy sasConstraints = new SharedAccessBlobPolicy();
         Date expirationDate = Date.from(Instant.now().plus(Duration.ofDays(1)));
         sasConstraints.setSharedAccessExpiryTime(expirationDate);
@@ -40,10 +41,10 @@ public class SampleUtils
                 SharedAccessBlobPermissions.DELETE);
         sasConstraints.setPermissions(permissions);
 
-        //Generate the shared access signature on the container, setting the constraints directly on the signature.
+        // Generate the shared access signature on the container, setting the constraints directly on the signature.
         String sasContainerToken = container.generateSharedAccessSignature(sasConstraints, null);
 
-        //Return the URI string for the container, including the SAS token.
+        // Return the URI string for the container, including the SAS token.
         return container.getUri() + "?" + sasContainerToken;
     }
 }

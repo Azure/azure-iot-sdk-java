@@ -24,12 +24,12 @@ public abstract class IotHubSasTokenAuthenticationProvider extends IotHubAuthent
     /**
      * The percentage of a sas token's life that will happen before it should be renewed. Between 1 and 100
      */
-    protected int timeBufferPercentage = 85;
+    int timeBufferPercentage = 85;
 
-    protected static final long MILLISECONDS_PER_SECOND = 1000L;
-    protected static final long MINIMUM_EXPIRATION_TIME_OFFSET = 1L;
+    private static final long MILLISECONDS_PER_SECOND = 1000L;
+    private static final long MINIMUM_EXPIRATION_TIME_OFFSET = 1L;
 
-    protected static final String ENCODING_FORMAT_NAME = StandardCharsets.UTF_8.displayName();
+    static final String ENCODING_FORMAT_NAME = StandardCharsets.UTF_8.displayName();
 
     protected IotHubSasToken sasToken;
 
@@ -41,7 +41,7 @@ public abstract class IotHubSasTokenAuthenticationProvider extends IotHubAuthent
         super(hostname, gatewayHostname, deviceId, moduleId);
     }
 
-    public IotHubSasTokenAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, SSLContext sslContext)
+    IotHubSasTokenAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, SSLContext sslContext)
     {
         super(hostname, gatewayHostname, deviceId, moduleId, sslContext);
     }
@@ -61,6 +61,20 @@ public abstract class IotHubSasTokenAuthenticationProvider extends IotHubAuthent
         }
 
         //Codes_SRS_IOTHUBSASTOKENAUTHENTICATION_34_018: [This function shall save the provided timeBufferPercentage.]
+        this.timeBufferPercentage = timeBufferPercentage;
+    }
+
+    IotHubSasTokenAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, long tokenValidSecs, int timeBufferPercentage, SSLContext sslContext)
+    {
+        super(hostname, gatewayHostname, deviceId, moduleId, sslContext);
+
+        this.setTokenValidSecs(tokenValidSecs);
+
+        if (timeBufferPercentage < 1 || timeBufferPercentage > 100)
+        {
+            throw new IllegalArgumentException("Time buffer percentage must be a percentage between 1 and 100");
+        }
+
         this.timeBufferPercentage = timeBufferPercentage;
     }
 
@@ -85,6 +99,12 @@ public abstract class IotHubSasTokenAuthenticationProvider extends IotHubAuthent
     public boolean isAuthenticationProviderRenewalNecessary()
     {
         //Codes_SRS_IOTHUBSASTOKENAUTHENTICATION_34_017: [If the saved sas token has expired, this function shall return true.]
+        return (this.sasToken != null && this.sasToken.isExpired());
+    }
+
+    public boolean isSasTokenExpired()
+    {
+        //similar to isAuthenticationProviderRenewalNecessary, but this won't be overriden by most classes that inherit from this class
         return (this.sasToken != null && this.sasToken.isExpired());
     }
 

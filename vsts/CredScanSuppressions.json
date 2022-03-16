@@ -1,0 +1,21 @@
+{
+    "tool": "Credential Scanner",
+    "suppressions": [
+        {
+            "file": "SamplesArguments.java",
+            "_justification": "File uses the phrase \"Secret\" in a few places, but no credentials are present in the file"
+        },
+        {
+          "file": "ToolsTest.java",
+          "_justification": "Fake credentials for test purposes"
+        },
+        {
+          "placeholder": "1234567890abcdefghijklmnopqrstvwxyz=",
+          "_justification": "Fake credential for test purposes"
+        },
+        {
+          "file": "RegistryClientTest.java",
+          "_justification": "Fake credentials for test purposes"
+        }
+    ]
+}

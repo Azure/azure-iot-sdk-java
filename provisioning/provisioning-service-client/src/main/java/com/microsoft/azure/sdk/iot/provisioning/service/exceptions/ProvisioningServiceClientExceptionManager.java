@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service.exceptions;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.ErrorMessageParser;
 
 /**
  * Provide static function to verify the Device Provisioning Service results and throw appropriate exception.
@@ -51,12 +50,12 @@ public class ProvisioningServiceClientExceptionManager
         // Codes_SRS_SERVICE_SDK_JAVA_PROVISIONINGSERVICECLIENTEXCEPTIONMANAGER_21_013: [If the httpresponse contains a reason message, the function must print this reason in the error message]
         String errorMessage = ErrorMessageParser.bestErrorMessage(errorReason);
 
-        if((responseStatus >= 400) && (responseStatus < 500))
+        if ((responseStatus >= 400) && (responseStatus < 500))
         {
             // Codes_SRS_SERVICE_SDK_JAVA_PROVISIONINGSERVICECLIENTEXCEPTIONMANAGER_21_015: [The function shall throw ProvisioningServiceClientBadUsageException or one of its child if the response status is in the interval of 400 and 499]
             throwProvisioningServiceClientBadUsageException(responseStatus, errorMessage);
         }
-        else if((responseStatus >= 500) && (responseStatus < 600))
+        else if ((responseStatus >= 500) && (responseStatus < 600))
         {
             // Codes_SRS_SERVICE_SDK_JAVA_PROVISIONINGSERVICECLIENTEXCEPTIONMANAGER_21_016: [The function shall throw ProvisioningServiceClientTransientException or one of its child if the response status is in the interval of 500 and 599]
             throwProvisioningServiceClientTransientException(responseStatus, errorMessage);
@@ -64,7 +63,7 @@ public class ProvisioningServiceClientExceptionManager
         else if (responseStatus > 300)
         {
             // Codes_SRS_SERVICE_SDK_JAVA_PROVISIONINGSERVICECLIENTEXCEPTIONMANAGER_12_011: [The function shall throw ProvisioningServiceClientUnknownException if the Http response status none of them above and greater than 300 copying the error Http reason to the exception]
-            if(errorMessage.isEmpty())
+            if (errorMessage.isEmpty())
             {
                 throw new ProvisioningServiceClientUnknownException("Http response unknown error reason " + responseStatus);
             }
@@ -97,7 +96,7 @@ public class ProvisioningServiceClientExceptionManager
                 // Codes_SRS_SERVICE_SDK_JAVA_PROVISIONINGSERVICECLIENTEXCEPTIONMANAGER_21_006: [The function shall throw ProvisioningServiceClientTooManyRequestsException if the response status equal 429]
                 throw new ProvisioningServiceClientTooManyRequestsException(errorMessage);
             default:
-                if(errorMessage.isEmpty())
+                if (errorMessage.isEmpty())
                 {
                     throw new ProvisioningServiceClientBadUsageException("Http response bad usage " + responseStatus);
                 }

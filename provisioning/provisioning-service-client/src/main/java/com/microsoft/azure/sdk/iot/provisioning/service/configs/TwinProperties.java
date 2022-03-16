@@ -7,6 +7,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
+
+import java.io.Serializable;
 
 /**
  * Representation of a single Twin Properties for the Device Provisioning Service.
@@ -55,12 +58,13 @@ import com.google.gson.annotations.SerializedName;
  * @see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-device-twins">Understand and use device twins in IoT Hub</a>
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iothub/devicetwinapi">Device Twin Api</a>
  */
-public class TwinProperties
+public class TwinProperties implements Serializable
 {
     // the twin desired properties
     private static final String DESIRED_PROPERTIES_TAG = "desired";
     @Expose
     @SerializedName(DESIRED_PROPERTIES_TAG)
+    @Getter
     private TwinCollection desired;
 
     /**
@@ -87,7 +91,7 @@ public class TwinProperties
     TwinProperties(TwinCollection desired)
     {
         /* SRS_TWIN_PROPERTIES_21_001: [The constructor shall throw IllegalArgumentException if the provided desired property is null.] */
-        if(desired == null)
+        if (desired == null)
         {
             throw new IllegalArgumentException("Desired property cannot be null.");
         }
@@ -115,7 +119,7 @@ public class TwinProperties
         JsonObject twinJson = new JsonObject();
 
         /* SRS_TWIN_PROPERTIES_21_004: [If the desired property is null, the toJsonElement shall not include the `desired` in the final JSON.] */
-        if(this.desired != null)
+        if (this.desired != null)
         {
             twinJson.add(DESIRED_PROPERTIES_TAG, this.desired.toJsonElement());
         }
@@ -145,23 +149,12 @@ public class TwinProperties
         JsonObject twinJson = new JsonObject();
 
         /* SRS_TWIN_PROPERTIES_21_006: [If the desired property is null, the toJsonElementWithMetadata shall not include the `desired` in the final JSON.] */
-        if(this.desired != null)
+        if (this.desired != null)
         {
             twinJson.add(DESIRED_PROPERTIES_TAG, this.desired.toJsonElementWithMetadata());
         }
 
         return twinJson;
-    }
-
-    /**
-     * Getter for the desired property.
-     *
-     * @return The {@code TwinCollection} with the desired property content. It can be {@code null}.
-     */
-    public TwinCollection getDesired()
-    {
-        /* SRS_TWIN_PROPERTIES_21_007: [The getDesired shall return a TwinCollection with the stored desired property.] */
-        return this.desired;
     }
 
     /**

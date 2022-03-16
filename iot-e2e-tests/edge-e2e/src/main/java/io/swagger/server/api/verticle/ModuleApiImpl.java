@@ -11,7 +11,7 @@ import io.vertx.core.Handler;
 @SuppressWarnings("ALL")
 public class ModuleApiImpl implements ModuleApi
 {
-    public static ModuleGlue _moduleGlue = new ModuleGlue();
+    public static final ModuleGlue _moduleGlue = new ModuleGlue();
 
     @Override
     public void moduleConnectFromEnvironmentTransportTypePut(String transportType, Handler<AsyncResult<ConnectResponse>> handler)

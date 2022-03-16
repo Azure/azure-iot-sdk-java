@@ -7,7 +7,6 @@ import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import org.apache.commons.lang3.tuple.Pair;
-import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 
 import java.io.UnsupportedEncodingException;
@@ -16,7 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Queue;
 
-public class MqttMessaging extends Mqtt
+class MqttMessaging extends Mqtt
 {
     private final String moduleId;
     private final String eventsSubscribeTopic;
@@ -25,7 +24,6 @@ public class MqttMessaging extends Mqtt
     private final boolean isEdgeHub;
 
     public MqttMessaging(
-        MqttAsyncClient mqttAsyncClient,
         String deviceId,
         MqttMessageListener messageListener,
         String moduleId,
@@ -34,7 +32,7 @@ public class MqttMessaging extends Mqtt
         Map<Integer, Message> unacknowledgedSentMessages,
         Queue<Pair<String, byte[]>> receivedMessages)
     {
-        super(mqttAsyncClient, messageListener, deviceId, connectOptions, unacknowledgedSentMessages, receivedMessages);
+        super(messageListener, deviceId, connectOptions, unacknowledgedSentMessages, receivedMessages);
 
         if (deviceId == null || deviceId.isEmpty())
         {
@@ -72,7 +70,7 @@ public class MqttMessaging extends Mqtt
         }
     }
 
-    public void stop() throws TransportException
+    public void stop()
     {
         this.disconnect();
     }
@@ -108,6 +106,11 @@ public class MqttMessaging extends Mqtt
         if (message.isSecurityMessage())
         {
             separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, MQTT_SECURITY_INTERFACE_ID, MessageProperty.IOTHUB_SECURITY_INTERFACE_ID_VALUE, false);
+        }
+
+        if (message.getComponentName() != null && !message.getComponentName().isEmpty())
+        {
+            separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, COMPONENT_ID, message.getComponentName(), false);
         }
 
         for (MessageProperty property : message.getProperties())

@@ -5,6 +5,8 @@ package com.microsoft.azure.sdk.iot.device.transport;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.concurrent.Semaphore;
+
 /**
  * Sends batched messages and invokes callbacks on completed requests. Meant to
  * be used with an executor that continuously calls run().
@@ -21,7 +23,7 @@ public final class IotHubSendTask implements Runnable
     // as this SDK would otherwise periodically spawn new threads of this type that would do nothing. It is the IotHubTransport
     // layer's responsibility to notify this thread when a message is queued to be sent or when a callback is queued to be executed
     // so that this thread can handle it.
-    private final Object sendThreadLock;
+    private final Semaphore sendThreadSemaphore;
 
     public IotHubSendTask(IotHubTransport transport)
     {
@@ -31,27 +33,39 @@ public final class IotHubSendTask implements Runnable
         }
 
         this.transport = transport;
-        this.sendThreadLock = this.transport.getSendThreadLock();
+        this.sendThreadSemaphore = this.transport.getSendThreadSemaphore();
     }
 
     public void run()
     {
-        Thread.currentThread().setName(THREAD_NAME);
+        String deviceClientId = this.transport.getDeviceClientUniqueIdentifier();
+        String connectionId = transport.getTransportConnectionId();
+        String threadName = deviceClientId + "-" + "Cxn" + connectionId + "-" + THREAD_NAME;
+        Thread.currentThread().setName(threadName);
 
         try
         {
-            synchronized (this.sendThreadLock)
+            if (!this.transport.hasMessagesToSend() && !this.transport.hasCallbacksToExecute() && !this.transport.isClosed())
             {
-                if (!this.transport.hasMessagesToSend() && !this.transport.hasCallbacksToExecute() && !this.transport.isClosed())
-                {
-                    // IotHubTransport layer will notify this thread once a message is ready to be sent or a callback is ready
-                    // to be executed. Until then, do nothing.
-                    this.sendThreadLock.wait();
-                }
+                // IotHubTransport layer will make this semaphore available to acquire only once a message is ready to
+                // be sent or a callback is ready to be executed. Once it is made available to acquire, this thread will
+                // wake up, send the messages and invoke the callbacks. Until then, do nothing.
+                //
+                // Note that this thread is not expected to release the semaphore once it is done sending messages.
+                // This semaphore is not acquired to safely modify shared resources, but instead is used to signal
+                // when to start working. It is more akin to the basic Java wait/notify pattern, but without the
+                // order of operations dependency that wait/notify has.
+                this.sendThreadSemaphore.acquire();
             }
 
             this.transport.sendMessages();
             this.transport.invokeCallbacks();
+        }
+        catch (InterruptedException e)
+        {
+            // Typically happens if a disconnection event occurs and the DeviceIO layer cancels the send/receive threads
+            // while the reconnection takes place.
+            log.trace("Interrupted while waiting for work. Thread is now ending.");
         }
         catch (Throwable e)
         {

@@ -5,9 +5,9 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.service.Configuration;
-import com.microsoft.azure.sdk.iot.service.ConfigurationContent;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.configurations.Configuration;
+import com.microsoft.azure.sdk.iot.service.configurations.ConfigurationContent;
+import com.microsoft.azure.sdk.iot.service.configurations.ConfigurationsClient;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
 import java.io.IOException;
@@ -72,13 +72,13 @@ public class ConfigurationManangerSample
         System.out.println("Shutting down sample...");
     }
 
-    private static void GetAllConfiguration() throws Exception
+    private static void GetAllConfiguration()
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        ConfigurationsClient configurationsClient = new ConfigurationsClient(SampleUtils.iotHubConnectionString);
 
         try
         {
-            List<Configuration> configList = registryManager.getConfigurations(20);
+            List<Configuration> configList = configurationsClient.get(20);
             System.out.println(configList.size() + " Configurations found");
 
             for (Configuration config : configList)
@@ -92,9 +92,9 @@ public class ConfigurationManangerSample
         }
     }
 
-    private static void AddConfiguration() throws Exception
+    private static void AddConfiguration()
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        ConfigurationsClient configurationsClient = new ConfigurationsClient(SampleUtils.iotHubConnectionString);
 
         ConfigurationContent content = new ConfigurationContent();
         content.setDeviceContent(DEVICE_CONTENT_SAMPLE);
@@ -108,7 +108,7 @@ public class ConfigurationManangerSample
 
         try
         {
-            config = registryManager.addConfiguration(config);
+            config = configurationsClient.create(config);
             System.out.println("Add configuration " + config.getId() + " succeeded.");
             printConfiguration(config);
         }
@@ -116,18 +116,16 @@ public class ConfigurationManangerSample
         {
             iote.printStackTrace();
         }
-
-        registryManager.close();
     }
 
-    private static Configuration GetConfiguration() throws Exception
+    private static Configuration GetConfiguration()
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        ConfigurationsClient configurationsClient = new ConfigurationsClient(SampleUtils.iotHubConnectionString);
 
         Configuration returnConfig = null;
         try
         {
-            returnConfig = registryManager.getConfiguration(SampleUtils.configurationId);
+            returnConfig = configurationsClient.get(SampleUtils.configurationId);
             printConfiguration(returnConfig);
         }
         catch (IotHubException | IOException iote)
@@ -135,44 +133,38 @@ public class ConfigurationManangerSample
             iote.printStackTrace();
         }
 
-        registryManager.close();
-
         return returnConfig;
     }
 
-    private static void UpdateConfiguration(Configuration config) throws Exception
+    private static void UpdateConfiguration(Configuration config)
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        ConfigurationsClient configurationsClient = new ConfigurationsClient(SampleUtils.iotHubConnectionString);
 
         config.setPriority(1);
         try
         {
-            config = registryManager.updateConfiguration(config);
+            config = configurationsClient.replace(config);
             printConfiguration(config);
         }
         catch (IotHubException | IOException iote)
         {
             iote.printStackTrace();
         }
-
-        registryManager.close();
     }
 
-    private static void RemoveConfiguration() throws Exception
+    private static void RemoveConfiguration()
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        ConfigurationsClient configurationsClient = new ConfigurationsClient(SampleUtils.iotHubConnectionString);
 
         try
         {
-            registryManager.removeConfiguration(SampleUtils.configurationId);
+            configurationsClient.delete(SampleUtils.configurationId);
             System.out.println("Device removed: " + SampleUtils.configurationId);
         }
         catch (IotHubException | IOException iote)
         {
             iote.printStackTrace();
         }
-
-        registryManager.close();
     }
 
     private static void printConfiguration(Configuration config)
@@ -238,6 +230,18 @@ public class ConfigurationManangerSample
         if (dc != null)
         {
             for (Map.Entry<String, Object> entry : dc.entrySet())
+            {
+                String key = entry.getKey();
+                Object val = entry.getValue();
+                System.out.println("    " + key + " : " + val.toString());
+            }
+        }
+
+        Map<String, Object> moduleContent = config.getContent().getModuleContent();
+        System.out.println("  Content.ModuleContent: ");
+        if (dc != null)
+        {
+            for (Map.Entry<String, Object> entry : moduleContent.entrySet())
             {
                 String key = entry.getKey();
                 Object val = entry.getValue();

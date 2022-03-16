@@ -5,7 +5,7 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.provisioning.setup;
 
-import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
+import com.microsoft.azure.sdk.iot.provisioning.service.configs.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
@@ -19,32 +19,44 @@ import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderX50
 import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
+import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
+import com.microsoft.azure.sdk.iot.service.twin.TwinClientOptions;
+import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import junit.framework.AssertionFailedError;
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemReader;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.security.Key;
+import java.security.Security;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.*;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED;
 import static junit.framework.TestCase.fail;
 import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.junit.Assert.*;
-import static tests.integration.com.microsoft.azure.sdk.iot.iothub.twin.QueryTwinTests.QUERY_TIMEOUT_MILLISECONDS;
 
 @Slf4j
 public class ProvisioningCommon extends IntegrationTest
@@ -67,6 +79,7 @@ public class ProvisioningCommon extends IntegrationTest
         customAllocationWebhookUrl = Tools.retrieveEnvironmentVariableValue(CUSTOM_ALLOCATION_WEBHOOK_URL_VAR_NAME);
         provisioningServiceGlobalEndpointWithInvalidCert = Tools.retrieveEnvironmentVariableValue(DPS_GLOBAL_ENDPOINT_WITH_INVALID_CERT_ENV_VAR_NAME);
         provisioningServiceWithInvalidCertConnectionString = Tools.retrieveEnvironmentVariableValue(DPS_CONNECTION_STRING_WITH_INVALID_CERT_ENV_VAR_NAME);
+        provisioningServiceGlobalEndpoint = Tools.retrieveEnvironmentVariableValue(DPS_GLOBAL_ENDPOINT_ENV_VAR_NAME, "global.azure-devices-provisioning.net");
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
     }
 
@@ -105,7 +118,8 @@ public class ProvisioningCommon extends IntegrationTest
     public static final String DPS_CONNECTION_STRING_WITH_INVALID_CERT_ENV_VAR_NAME = "PROVISIONING_CONNECTION_STRING_INVALIDCERT";
     public static String provisioningServiceWithInvalidCertConnectionString = "";
 
-    public static String provisioningServiceGlobalEndpoint = "global.azure-devices-provisioning.net";
+    public static final String DPS_GLOBAL_ENDPOINT_ENV_VAR_NAME = "DPS_GLOBALDEVICEENDPOINT";
+    public static String provisioningServiceGlobalEndpoint = "";
 
     public static final String DPS_GLOBAL_ENDPOINT_WITH_INVALID_CERT_ENV_VAR_NAME = "DPS_GLOBALDEVICEENDPOINT_INVALIDCERT";
     public static String provisioningServiceGlobalEndpointWithInvalidCert = "";
@@ -114,12 +128,13 @@ public class ProvisioningCommon extends IntegrationTest
     public static String provisioningServiceIdScope = "";
 
     public static final long MAX_TIME_TO_WAIT_FOR_REGISTRATION_MILLISECONDS = 60 * 1000;
+    public static final int QUERY_TIMEOUT_MILLISECONDS = 4 * 60 * 1000; // 4 minutes
 
     public static final int MAX_TPM_CONNECT_RETRY_ATTEMPTS = 10;
 
     protected static final String CUSTOM_ALLOCATION_WEBHOOK_API_VERSION = "2019-03-31";
 
-    public RegistryManager registryManager = null;
+    public RegistryClient registryClient = null;
 
     //sending reported properties for twin operations takes some time to get the appropriate callback
     public static final int MAX_TWIN_PROPAGATION_WAIT_SECONDS = 60;
@@ -140,26 +155,7 @@ public class ProvisioningCommon extends IntegrationTest
         }
         else if (attestationType == AttestationType.TPM)
         {
-            if (!isPullRequest)
-            {
-                //TODO TPM tests are flakey, so only run them for CI and nightly builds
-                return Arrays.asList(
-                        new Object[][]
-                                {
-                                        {ProvisioningDeviceClientTransportProtocol.HTTPS, attestationType},
-                                        {ProvisioningDeviceClientTransportProtocol.AMQPS, attestationType},
-                                        {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, attestationType}
-
-                                        //MQTT/MQTT_WS does not support tpm attestation
-                                        //{ProvisioningDeviceClientTransportProtocol.MQTT, attestationType},
-                                        //{ProvisioningDeviceClientTransportProtocol.MQTT_WS, attestationType},
-                                });
-            }
-            else
-            {
-                //no tests to run for pull request builds
-                return Collections.emptyList();
-            }
+            return Collections.emptyList(); // TPM tests are run in the ProvisioningTPMTests file so they can be run in serial
         }
         else
         {
@@ -207,6 +203,7 @@ public class ProvisioningCommon extends IntegrationTest
         public SecurityProvider securityProvider;
         public String provisionedIotHubUri;
         public ProvisioningServiceClient provisioningServiceClient;
+        public X509CertificateGenerator.CertificateAlgorithm certificateAlgorithm;
 
         public ProvisioningTestInstance(ProvisioningDeviceClientTransportProtocol protocol, AttestationType attestationType)
         {
@@ -215,14 +212,16 @@ public class ProvisioningCommon extends IntegrationTest
             this.groupId = "";// by default, assume enrollment has no group id
             this.registrationId = "java-provisioning-test-" + this.attestationType.toString().toLowerCase().replace("_", "-") + "-" + UUID.randomUUID().toString();
             this.provisioningServiceClient =
-                    ProvisioningServiceClient.createFromConnectionString(provisioningServiceConnectionString);
+                    new ProvisioningServiceClient(provisioningServiceConnectionString);
+
+            this.certificateAlgorithm = X509CertificateGenerator.CertificateAlgorithm.RSA;
         }
     }
 
     @Before
     public void setUp() throws Exception
     {
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
 
         this.testInstance = new ProvisioningTestInstance(this.testInstance.protocol, this.testInstance.attestationType);
     }
@@ -230,12 +229,7 @@ public class ProvisioningCommon extends IntegrationTest
     @After
     public void tearDown()
     {
-        if (registryManager != null)
-        {
-            registryManager.close();
-        }
-
-        registryManager = null;
+        registryClient = null;
 
         if (testInstance != null && testInstance.securityProvider != null && testInstance.securityProvider instanceof SecurityProviderTPMEmulator)
         {
@@ -323,6 +317,14 @@ public class ProvisioningCommon extends IntegrationTest
         Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Unexpected status", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), PROVISIONING_DEVICE_STATUS_ASSIGNED, provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus());
         testInstance.provisionedDeviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
         testInstance.provisionedIotHubUri = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri();
+
+        assertEquals(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus(), PROVISIONING_DEVICE_STATUS_ASSIGNED);
+        assertEquals(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getRegistrationId(), testInstance.registrationId);
+        assertNotNull(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getCreatedDateTimeUtc());
+        assertNotNull(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getLastUpdatesDateTimeUtc());
+        assertNotNull(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getLastUpdatesDateTimeUtc());
+        assertNotNull(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getSubstatus());
+
         assertNotNull(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Expected a device id", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), testInstance.provisionedDeviceId);
         assertFalse(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Expected a device id", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), testInstance.provisionedDeviceId.isEmpty());
         assertNotNull(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Expected uri", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), testInstance.provisionedIotHubUri);
@@ -404,7 +406,7 @@ public class ProvisioningCommon extends IntegrationTest
             {
                 if (provisioningStatus != null && provisioningStatus.provisioningDeviceClient != null)
                 {
-                    provisioningStatus.provisioningDeviceClient.closeNow();
+                    provisioningStatus.provisioningDeviceClient.close();
                 }
             }
         }
@@ -429,21 +431,21 @@ public class ProvisioningCommon extends IntegrationTest
                 continue;
             }
 
-            DeviceClient deviceClient = DeviceClient.createFromSecurityProvider(iothubUri, deviceId, testInstance.securityProvider, iotHubClientProtocol);
-            deviceClient.closeNow();
+            DeviceClient deviceClient = new DeviceClient(iothubUri, deviceId, testInstance.securityProvider, iotHubClientProtocol);
+            deviceClient.close();
         }
     }
 
     protected void assertProvisionedDeviceCapabilitiesAreExpected(DeviceCapabilities expectedDeviceCapabilities, String provisionedHubConnectionString) throws IOException, IotHubException, InterruptedException {
-        DeviceTwin deviceTwin = DeviceTwin.createFromConnectionString(provisionedHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        TwinClient twinClient = new TwinClient(provisionedHubConnectionString, TwinClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
 
         boolean deviceFoundInCorrectHub = false;
-        Query query = null;
         long startTime = System.currentTimeMillis();
+        Twin twin = new Twin();
         while (!deviceFoundInCorrectHub)
         {
-            query = deviceTwin.queryTwin("SELECT * FROM devices WHERE deviceId = '" + testInstance.provisionedDeviceId +"'");
-            deviceFoundInCorrectHub = deviceTwin.hasNextDeviceTwin(query);
+            twin = twinClient.get(testInstance.provisionedDeviceId);
+            deviceFoundInCorrectHub = twin.getCapabilities() != null;
 
             Thread.sleep(3000);
 
@@ -453,14 +455,13 @@ public class ProvisioningCommon extends IntegrationTest
             }
         }
 
-        DeviceTwinDevice provisionedDevice = deviceTwin.getNextDeviceTwin(query);
         if (expectedDeviceCapabilities.isIotEdge())
         {
-            assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Provisioned device isn't edge device: " + testInstance.provisionedDeviceId, getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), provisionedDevice.getCapabilities().isIotEdge());
+            assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Provisioned device isn't edge device: " + testInstance.provisionedDeviceId, getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), twin.getCapabilities().isIotEdge());
         }
         else
         {
-            assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Provisioned device shouldn't be edge device " + testInstance.provisionedDeviceId, getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), provisionedDevice.getCapabilities() == null || !provisionedDevice.getCapabilities().isIotEdge());
+            assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Provisioned device shouldn't be edge device " + testInstance.provisionedDeviceId, getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), twin.getCapabilities() == null || !twin.getCapabilities().isIotEdge());
         }
     }
 
@@ -485,12 +486,12 @@ public class ProvisioningCommon extends IntegrationTest
         return getSecurityProviderInstance(enrollmentType, null, null, null, null);
     }
 
-    public SecurityProvider getSecurityProviderInstance(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubs) throws ProvisioningServiceClientException, GeneralSecurityException, IOException, SecurityProviderException, InterruptedException
+    public SecurityProvider getSecurityProviderInstance(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubs) throws ProvisioningServiceClientException, GeneralSecurityException, IOException, SecurityProviderException
     {
         return getSecurityProviderInstance(enrollmentType, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, null);
     }
 
-    public SecurityProvider getSecurityProviderInstance(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubs, DeviceCapabilities deviceCapabilities) throws ProvisioningServiceClientException, GeneralSecurityException, IOException, SecurityProviderException, InterruptedException
+    public SecurityProvider getSecurityProviderInstance(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubs, DeviceCapabilities deviceCapabilities) throws ProvisioningServiceClientException, GeneralSecurityException, SecurityProviderException, IOException
     {
         SecurityProvider securityProvider = null;
         TwinCollection tags = new TwinCollection();
@@ -520,7 +521,7 @@ public class ProvisioningCommon extends IntegrationTest
                 testInstance.groupId = "java-provisioning-test-group-id-" + testInstance.attestationType.toString().toLowerCase().replace("_", "-") + "-" + UUID.randomUUID().toString();
 
                 testInstance.enrollmentGroup = new EnrollmentGroup(testInstance.groupId, new SymmetricKeyAttestation(null, null));
-                testInstance.enrollmentGroup.setInitialTwinFinal(twinState);
+                testInstance.enrollmentGroup.setInitialTwin(twinState);
                 testInstance.enrollmentGroup.setAllocationPolicy(allocationPolicy);
                 testInstance.enrollmentGroup.setReprovisionPolicy(reprovisionPolicy);
                 testInstance.enrollmentGroup.setCustomAllocationDefinition(customAllocationDefinition);
@@ -550,14 +551,18 @@ public class ProvisioningCommon extends IntegrationTest
             }
             else if (testInstance.attestationType == AttestationType.X509)
             {
-                X509CertificateGenerator certificateGenerator = new X509CertificateGenerator(testInstance.registrationId);
-                String leafPublicPem = certificateGenerator.getPublicCertificate();
-                String leafPrivateKey = certificateGenerator.getPrivateKey();
+                X509CertificateGenerator certificateGenerator = new X509CertificateGenerator(testInstance.certificateAlgorithm, testInstance.registrationId);
+                String leafPublicPem = certificateGenerator.getPublicCertificatePEM();
+                String leafPrivateKeyPem = certificateGenerator.getPrivateKeyPEM();
 
-                Collection<String> signerCertificates = new LinkedList<>();
+                Collection<X509Certificate> signerCertificates = new LinkedList<>();
                 Attestation attestation = X509Attestation.createFromClientCertificates(leafPublicPem);
                 createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, twinState, deviceCapabilities);
-                securityProvider = new SecurityProviderX509Cert(leafPublicPem, leafPrivateKey, signerCertificates);
+
+                X509Certificate leafPublicCert = parsePublicKeyCertificate(leafPublicPem);
+                Key leafPrivateKey = parsePrivateKey(leafPrivateKeyPem);
+
+                securityProvider = new SecurityProviderX509Cert(leafPublicCert, leafPrivateKey, signerCertificates);
             }
             else if (testInstance.attestationType == AttestationType.SYMMETRIC_KEY)
             {
@@ -565,7 +570,7 @@ public class ProvisioningCommon extends IntegrationTest
                 createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, twinState, deviceCapabilities);
                 assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Expected symmetric key attestation", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), testInstance.individualEnrollment.getAttestation() instanceof  SymmetricKeyAttestation);
                 SymmetricKeyAttestation symmetricKeyAttestation = (SymmetricKeyAttestation) testInstance.individualEnrollment.getAttestation();
-                securityProvider = new SecurityProviderSymmetricKey(symmetricKeyAttestation.getPrimaryKey().getBytes(), testInstance.registrationId);
+                securityProvider = new SecurityProviderSymmetricKey(symmetricKeyAttestation.getPrimaryKey().getBytes(StandardCharsets.UTF_8), testInstance.registrationId);
             }
 
             Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Unexpected device id assigned", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), testInstance.provisionedDeviceId, testInstance.individualEnrollment.getDeviceId());
@@ -580,13 +585,47 @@ public class ProvisioningCommon extends IntegrationTest
     private void createTestIndividualEnrollment(Attestation attestation, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubs, TwinState twinState, DeviceCapabilities deviceCapabilities) throws ProvisioningServiceClientException
     {
         testInstance.individualEnrollment = new IndividualEnrollment(testInstance.registrationId, attestation);
-        testInstance.individualEnrollment.setDeviceIdFinal(testInstance.provisionedDeviceId);
-        testInstance.individualEnrollment.setCapabilitiesFinal(deviceCapabilities);
+        testInstance.individualEnrollment.setDeviceId(testInstance.provisionedDeviceId);
+        testInstance.individualEnrollment.setCapabilities(deviceCapabilities);
         testInstance.individualEnrollment.setAllocationPolicy(allocationPolicy);
         testInstance.individualEnrollment.setReprovisionPolicy(reprovisionPolicy);
         testInstance.individualEnrollment.setCustomAllocationDefinition(customAllocationDefinition);
         testInstance.individualEnrollment.setIotHubs(iothubs);
         testInstance.individualEnrollment.setInitialTwin(twinState);
         testInstance.individualEnrollment = testInstance.provisioningServiceClient.createOrUpdateIndividualEnrollment(testInstance.individualEnrollment);
+    }
+
+    private static Key parsePrivateKey(String privateKeyString) throws IOException
+    {
+        Security.addProvider(new BouncyCastleProvider());
+        PEMParser privateKeyParser = new PEMParser(new StringReader(privateKeyString));
+        Object possiblePrivateKey = privateKeyParser.readObject();
+        return getPrivateKey(possiblePrivateKey);
+    }
+
+    private static X509Certificate parsePublicKeyCertificate(String publicKeyCertificateString) throws CertificateException, IOException
+    {
+        Security.addProvider(new BouncyCastleProvider());
+        PemReader publicKeyCertificateReader = new PemReader(new StringReader(publicKeyCertificateString));
+        PemObject possiblePublicKeyCertificate = publicKeyCertificateReader.readPemObject();
+        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+        return (X509Certificate) certFactory.generateCertificate(new ByteArrayInputStream(possiblePublicKeyCertificate.getContent()));
+    }
+
+    private static Key getPrivateKey(Object possiblePrivateKey) throws IOException
+    {
+        if (possiblePrivateKey instanceof PEMKeyPair)
+        {
+            return new JcaPEMKeyConverter().getKeyPair((PEMKeyPair) possiblePrivateKey)
+                .getPrivate();
+        }
+        else if (possiblePrivateKey instanceof PrivateKeyInfo)
+        {
+            return new JcaPEMKeyConverter().getPrivateKey((PrivateKeyInfo) possiblePrivateKey);
+        }
+        else
+        {
+            throw new IOException("Unable to parse private key, type unknown");
+        }
     }
 }

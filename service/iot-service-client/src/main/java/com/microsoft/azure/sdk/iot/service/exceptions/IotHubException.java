@@ -5,8 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
-import com.microsoft.azure.sdk.iot.deps.serializer.ErrorMessageParser;
 import lombok.Getter;
 
 /**
@@ -14,11 +12,18 @@ import lombok.Getter;
  */
 public class IotHubException extends Exception
 {
+    /**
+     * Instantiate a new IotHubException with no details.
+     */
     public IotHubException()
     {
         this(null);
     }
 
+    /**
+     * Instantiate a new IotHubException.
+     * @param message the human readable description for why this exception was thrown.
+     */
     public IotHubException(String message)
     {
         this(message, ErrorMessageParser.getDefaultErrorCode(), ErrorCodeDescription.UnclassifiedErrorCode);
@@ -28,6 +33,18 @@ public class IotHubException extends Exception
     {
         super(message);
         this.errorCodeDescription = errorCodeDescription;
+        this.errorCode = errorCode;
+    }
+
+    /**
+     * Instantiate a new IotHubException.
+     * @param errorCode the Http status code (200, 401, 404, etc.)
+     * @param message the human readable description for why this exception was thrown.
+     */
+    public IotHubException(int errorCode, String message)
+    {
+        super(message);
+        this.errorCodeDescription = ErrorCodeDescription.Parse(errorCode);
         this.errorCode = errorCode;
     }
 

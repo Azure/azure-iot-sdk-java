@@ -6,8 +6,8 @@ This folder contains simple samples showing how to use the various features of t
 
 * [Device manager sample](device-manager-sample): Shows how to work with the device ID registry of IoT Hub. 
 * [Service client sample](service-client-sample): Shows how to send Cloud to Device messages through IoT Hub. 
-* [Plug and play samples](https://github.com/Azure/azure-iot-sdk-java/tree/master/service/iot-service-samples/pnp-service-sample): Shows how to get the plug and play model ID, update properties on the twin and invoke commands. 
-* [Digital Twin samples](https://github.com/Azure/azure-iot-sdk-java/tree/master/service/iot-service-samples/digitaltwin-service-samples): Shows how to use the DigitalTwinClient to perform server-side operations on plug-and-play compatible devices.
+* [Plug and play samples](https://github.com/Azure/azure-iot-sdk-java/tree/main/service/iot-service-samples/pnp-service-sample): Shows how to get the plug and play model ID, update properties on the twin and invoke commands. 
+* [Digital Twin samples](https://github.com/Azure/azure-iot-sdk-java/tree/main/service/iot-service-samples/digitaltwin-service-samples): Shows how to use the DigitalTwinClient to perform server-side operations on plug-and-play compatible devices.
 
 ## How to run the samples on Linux or Windows
 
@@ -95,7 +95,7 @@ You need to first clone the repository or download the sample project folder on 
 	To run the Service Client Sample application using Maven, execute the following command.
     
     ```
-    mvn exec:java -Dexec.mainClass="samples.com.microsoft.azure.sdk.iot.ServiceClientSample"
+    mvn exec:java -Dexec.mainClass="samples.com.microsoft.azure.sdk.iot.MessagingClientSample"
     ```
 
 	You can verify the result of your operation by using [Device Explorer or iothub-explorer tool][lnk-manage-iot-hub].
@@ -103,7 +103,7 @@ You need to first clone the repository or download the sample project folder on 
 #### Build and run the DigitalTwin(plug and play) Service Sample application for a device with no components:
 <br/>
 
-> Note: This sample requires the device sample to be running - [Thermostat Device Sample](https://github.com/Azure/azure-iot-sdk-java/tree/master/device/iot-device-samples/pnp-device-sample/thermostat-device-sample)
+> Note: This sample requires the device sample to be running - [Thermostat Device Sample](https://github.com/Azure/azure-iot-sdk-java/tree/main/device/iot-device-samples/pnp-device-sample/thermostat-device-sample)
 <br/>
 This sample uses the following simple model which has no components - [Thermostat](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/Thermostat.json) and perform root-level operations on a plug and play compatible device.
 
@@ -140,7 +140,7 @@ This sample uses the following simple model which has no components - [Thermosta
 #### Build and run the DigitalTwin(plug and play) Service Sample application for a device with components:
 <br/>
 
-> Note: This sample requires the device sample to be running - [TemperatureController Device Sample](https://github.com/Azure/azure-iot-sdk-java/tree/master/device/iot-device-samples/pnp-device-sample/temperature-controller-device-sample)
+> Note: This sample requires the device sample to be running - [TemperatureController Device Sample](https://github.com/Azure/azure-iot-sdk-java/tree/main/device/iot-device-samples/pnp-device-sample/temperature-controller-device-sample)
 <br/>
 This sample uses the following model which has components - [TemperatureController](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/TemperatureController.json) and performs component-level operations on a plug and play compatible device.
 

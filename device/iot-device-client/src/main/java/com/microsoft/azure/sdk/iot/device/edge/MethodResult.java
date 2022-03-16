@@ -9,6 +9,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.nio.charset.StandardCharsets;
+
 public class MethodResult
 {
     private static final String STATUS_KEY_NAME = "status";
@@ -22,14 +24,13 @@ public class MethodResult
     private Object payload;
 
     //empty constructor for gson
-    MethodResult()
+    private MethodResult()
     {
 
     }
 
     public MethodResult(String json)
     {
-        // Codes_SRS_DIRECTMETHODRESULT_34_003: [This constructor shall retrieve the payload and status from the provided json.]
         MethodResult result = new GsonBuilder().create().fromJson(json, MethodResult.class);
 
         this.payload = result.payload;
@@ -38,7 +39,6 @@ public class MethodResult
 
     public int getStatus()
     {
-        // Codes_SRS_DIRECTMETHODRESULT_34_001: [This function shall return the saved status.]
         return this.status;
     }
 
@@ -49,14 +49,13 @@ public class MethodResult
 
     public String getPayload()
     {
-        // Codes_SRS_DIRECTMETHODRESULT_34_002: [This function shall return the saved status.]
         if (this.payload instanceof String)
         {
             return (String) this.payload;
         }
         else if (this.payload instanceof byte[])
         {
-            return new String((byte[]) this.payload);
+            return new String((byte[]) this.payload, StandardCharsets.UTF_8);
         }
         else
         {

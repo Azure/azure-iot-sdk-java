@@ -10,10 +10,9 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceMethodData;
+import com.microsoft.azure.sdk.iot.device.twin.Pair;
+import com.microsoft.azure.sdk.iot.device.twin.Property;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
@@ -85,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
         return METHOD_NOT_DEFINED;
     }
 
-    protected static class DeviceMethodStatusCallBack implements IotHubEventCallback
+    protected static class DeviceMethodStatusCallback implements IotHubEventCallback
     {
         public void execute(IotHubStatusCode status, Object context)
         {
@@ -93,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    protected static class SampleDeviceMethodCallback implements com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback
+    protected static class SampleDeviceMethodCallback implements com.microsoft.azure.sdk.iot.device.twin.DeviceMethodCallback
     {
         @Override
         public DeviceMethodData call(String methodName, Object methodData, Object context)
@@ -121,12 +120,12 @@ public class MainActivity extends AppCompatActivity {
 
     private static AtomicBoolean Succeed = new AtomicBoolean(false);
 
-    protected static class DeviceTwinStatusCallBack implements IotHubEventCallback
+    protected static class DeviceTwinStatusCallback implements IotHubEventCallback
     {
         @Override
         public void execute(IotHubStatusCode status, Object context)
         {
-            if((status == IotHubStatusCode.OK) || (status == IotHubStatusCode.OK_EMPTY))
+            if((status == IotHubStatusCode.OK) || (status == IotHubStatusCode.OK))
             {
                 Succeed.set(true);
             }
@@ -138,10 +137,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    protected static class onProperty implements TwinPropertyCallBack
+    protected static class onProperty implements TwinPropertyCallback
     {
         @Override
-        public void TwinPropertyCallBack(Property property, Object context)
+        public void TwinPropertyCallback(Property property, Object context)
         {
             System.out.println(
                     "onProperty callback for " + (property.getIsReported()?"reported": "desired") +
@@ -158,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
 
         try
         {
-            client.open();
+            client.open(false);
             if (protocol == IotHubClientProtocol.MQTT)
             {
                 MessageCallbackMqtt callback = new MessageCallbackMqtt();
@@ -170,9 +169,9 @@ public class MainActivity extends AppCompatActivity {
                 Counter counter = new Counter(0);
                 client.setMessageCallback(callback, counter);
             }
-            client.subscribeToDeviceMethod(new SampleDeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
+            client.subscribeToDeviceMethod(new SampleDeviceMethodCallback(), null, new DeviceMethodStatusCallback(), null);
             Succeed.set(false);
-            client.startDeviceTwin(new DeviceTwinStatusCallBack(), null, new onProperty(), null);
+            client.startDeviceTwin(new DeviceTwinStatusCallback(), null, new onProperty(), null);
 
             do
             {
@@ -180,13 +179,13 @@ public class MainActivity extends AppCompatActivity {
             }
             while(!Succeed.get());
 
-            Map<Property, Pair<TwinPropertyCallBack, Object>> desiredProperties = new HashMap<Property, Pair<TwinPropertyCallBack, Object>>()
+            Map<Property, Pair<TwinPropertyCallback, Object>> desiredProperties = new HashMap<Property, Pair<TwinPropertyCallback, Object>>()
             {
                 {
-                    put(new Property("HomeTemp(F)", null), new Pair<TwinPropertyCallBack, Object>(new onProperty(), null));
-                    put(new Property("LivingRoomLights", null), new Pair<TwinPropertyCallBack, Object>(new onProperty(), null));
-                    put(new Property("BedroomRoomLights", null), new Pair<TwinPropertyCallBack, Object>(new onProperty(), null));
-                    put(new Property("HomeSecurityCamera", null), new Pair<TwinPropertyCallBack, Object>(new onProperty(), null));
+                    put(new Property("HomeTemp(F)", null), new Pair<TwinPropertyCallback, Object>(new onProperty(), null));
+                    put(new Property("LivingRoomLights", null), new Pair<TwinPropertyCallback, Object>(new onProperty(), null));
+                    put(new Property("BedroomRoomLights", null), new Pair<TwinPropertyCallback, Object>(new onProperty(), null));
+                    put(new Property("HomeSecurityCamera", null), new Pair<TwinPropertyCallback, Object>(new onProperty(), null));
                 }
             };
 
@@ -197,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
         catch (Exception e2)
         {
             System.err.println("Exception while opening IoTHub connection: " + e2.getMessage());
-            client.closeNow();
+            client.close();
             System.out.println("Shutting down...");
         }
     }
@@ -281,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
             }
             else
             {
-                client.uploadToBlobAsync(file.getName(), new FileInputStream(file), file.length(), new FileUploadStatusCallBack(), null);
+                client.uploadToBlobAsync(file.getName(), new FileInputStream(file), file.length(), new FileUploadStatusCallback(), null);
             }
 
             System.out.println("File upload started with success");
@@ -294,7 +293,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    protected static class FileUploadStatusCallBack implements IotHubEventCallback
+    protected static class FileUploadStatusCallback implements IotHubEventCallback
     {
         public void execute(IotHubStatusCode status, Object context)
         {
@@ -305,7 +304,7 @@ public class MainActivity extends AppCompatActivity {
     private void stopClient() throws URISyntaxException, IOException
     {
         String OPERATING_SYSTEM = System.getProperty("os.name");
-        client.closeNow();
+        client.close();
         System.out.println("Shutting down..." + OPERATING_SYSTEM);
         android.os.Process.killProcess(android.os.Process.myPid());
     }

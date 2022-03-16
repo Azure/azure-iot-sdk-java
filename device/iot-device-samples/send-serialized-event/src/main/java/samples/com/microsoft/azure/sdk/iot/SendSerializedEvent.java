@@ -20,7 +20,7 @@ public class SendSerializedEvent
         // Data
         private static final int DEFAULT_NUMREQUESTS = 10; // m/s
 
-        public String[] rawArguments;
+        public final String[] rawArguments;
         public int numRequests;
         public boolean parsedSuccessfully;
         public String connectionString;
@@ -156,7 +156,7 @@ public class SendSerializedEvent
 
             System.out.println("Successfully created an IoT Hub client.");
 
-            client.open();
+            client.open(false);
 
             System.out.println("Opened connection to IoT Hub.");
 
@@ -183,7 +183,7 @@ public class SendSerializedEvent
                 messageSentLatch.await();
             }
 
-            client.closeNow();
+            client.close();
         }
         catch (Exception e)
         {

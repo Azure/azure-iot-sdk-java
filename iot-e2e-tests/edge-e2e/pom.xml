@@ -18,13 +18,13 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>4.13.1</version>
         </dependency>
 
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-unit</artifactId>
-            <version>3.8.4</version>
+            <version>3.9.9</version>
         </dependency>
 
         <dependency>
@@ -34,15 +34,21 @@
         </dependency>
 
         <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-web</artifactId>
+            <version>3.9.4</version>
+        </dependency>
+
+        <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-parser</artifactId>
-            <version>1.0.50</version>
+            <version>1.0.56</version>
         </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>2.11.2</version>
+            <version>2.12.2</version>
         </dependency>
 
         <dependency>
@@ -61,6 +67,12 @@
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>${iot-service-client-artifact-id}</artifactId>
             <version>${iot-service-client-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot.samples.device</groupId>
+            <artifactId>unix-domain-socket-sample</artifactId>
+            <version>1.18.0</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

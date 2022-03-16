@@ -10,7 +10,7 @@ import static com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeRea
 @Slf4j
 public class IotHubConnectionStatusChangeLogger implements IotHubConnectionStatusChangeCallback {
     @Override
-    public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext) {
+    public void onStatusChanged(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext) {
         log.debug("### Connection status change reported: status={}, reason={}, throwable={}", status, statusChangeReason, throwable);
 
         switch (status) {

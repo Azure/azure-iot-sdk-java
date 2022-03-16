@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_METHODS;
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_TWIN;
+import static com.microsoft.azure.sdk.iot.device.transport.mqtt.Mqtt.MAX_IN_FLIGHT_COUNT;
 
 @Slf4j
 public class MqttIotHubConnection implements IotHubTransportConnection, MqttMessageListener
@@ -42,7 +43,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private static final String SSL_PREFIX = "ssl://";
     private static final String SSL_PORT_SUFFIX = ":8883";
 
-    private static final int KEEP_ALIVE_INTERVAL = 230;
     private static final int MQTT_VERSION = 4;
     private static final boolean SET_CLEAN_SESSION = false;
 
@@ -51,7 +51,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private String connectionId;
     private String webSocketQueryString;
     private final Object mqttConnectionStateLock = new Object(); // lock for preventing simultaneous open and close calls
-    private final DeviceClientConfig config;
+    private final ClientConfiguration config;
     private IotHubConnectionStatus state = IotHubConnectionStatus.DISCONNECTED;
     private IotHubListener listener;
     private final String clientId;
@@ -59,25 +59,25 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
 
     //Messaging clients, never null
     private final MqttMessaging deviceMessaging;
-    private final MqttDeviceTwin deviceTwin;
-    private final MqttDeviceMethod deviceMethod;
+    private final MqttTwin deviceTwin;
+    private final MqttDirectMethod directMethod;
 
     private final Map<IotHubTransportMessage, Integer> receivedMessagesToAcknowledge = new ConcurrentHashMap<>();
 
     /**
-     * Constructs an instance from the given {@link DeviceClientConfig}
+     * Constructs an instance from the given {@link ClientConfiguration}
      * object.
      *
      * @param config the client configuration.
+     * @throws TransportException if the mqtt connection configuration cannot be constructed.
      */
     // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
     // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
-    @SuppressWarnings("ConstantConditions")
-    public MqttIotHubConnection(DeviceClientConfig config) throws IllegalArgumentException, TransportException
+    public MqttIotHubConnection(ClientConfiguration config) throws TransportException
     {
         if (config == null)
         {
-            throw new IllegalArgumentException("The DeviceClientConfig cannot be null.");
+            throw new IllegalArgumentException("The ClientConfiguration cannot be null.");
         }
         if (config.getIotHubHostname() == null || config.getIotHubHostname().length() == 0)
         {
@@ -100,29 +100,18 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             throw new TransportException("Failed to get SSLContext", e);
         }
 
-        char[] password = null;
-        if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
+        if (this.config.getAuthenticationType() == ClientConfiguration.AuthType.SAS_TOKEN)
         {
             log.trace("MQTT connection will use sas token based auth");
-            try
-            {
-                password = this.config.getSasTokenAuthentication().getSasToken();
-            }
-            catch (IOException e)
-            {
-                throw new TransportException("Failed to get sas token", e);
-            }
-
             this.webSocketQueryString = NO_CLIENT_CERT_QUERY_STRING;
         }
-        else if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
+        else if (this.config.getAuthenticationType() == ClientConfiguration.AuthType.X509_CERTIFICATE)
         {
             log.trace("MQTT connection will use X509 certificate based auth");
-            password = null;
         }
 
-        //URLEncoder follows HTML spec for encoding urls, which includes substituting space characters with '+'
-        // We want "%20" for spaces, not '+', however, so replace them manually after utf-8 encoding
+        // URLEncoder follows HTML spec for encoding urls, which includes substituting space characters with '+'
+        // We want "%20" for spaces, not '+', however, so replace them manually after utf-8 encoding.
         String userAgentString = this.config.getProductInfo().getUserAgentString();
         String clientUserAgentIdentifier;
         try
@@ -131,7 +120,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         }
         catch (UnsupportedEncodingException e)
         {
-            throw new TransportException("Failed to get URLEncode the user agent string", e);
+            throw new TransportException("Failed to URLEncode the user agent string", e);
         }
 
         String deviceId = this.config.getDeviceId();
@@ -147,13 +136,22 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
 
         String serviceParams;
         String modelId = this.config.getModelId();
-        if(modelId == null || modelId.isEmpty())
+        if (modelId == null || modelId.isEmpty())
         {
             serviceParams = TransportUtils.IOTHUB_API_VERSION;
         }
         else
         {
-            serviceParams = TransportUtils.IOTHUB_API_VERSION + "&" + MODEL_ID + "=" + modelId;
+            try
+            {
+                // URLEncoder follows HTML spec for encoding urls, which includes substituting space characters with '+'
+                // We want "%20" for spaces, not '+', however, so replace them manually after utf-8 encoding.
+                serviceParams = TransportUtils.IOTHUB_API_VERSION + "&" + MODEL_ID + "=" + URLEncoder.encode(modelId, StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20");
+            }
+            catch (UnsupportedEncodingException e)
+            {
+                throw new TransportException("Failed to URLEncode the modelId string", e);
+            }
         }
 
         String iotHubUserName = this.config.getIotHubHostname() + "/" + clientId + "/?api-version=" + serviceParams + "&" + clientUserAgentIdentifier;
@@ -164,7 +162,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             host = this.config.getIotHubHostname();
         }
 
-        if (this.config.isUseWebsocket())
+        if (this.config.isUsingWebsocket())
         {
             if (this.webSocketQueryString == null)
             {
@@ -180,12 +178,12 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             this.serverUri = SSL_PREFIX + host + SSL_PORT_SUFFIX;
         }
 
-        MqttAsyncClient mqttAsyncClient = buildMqttAsyncClient(this.serverUri, clientId);
         MqttConnectOptions connectOptions = new MqttConnectOptions();
-        connectOptions.setKeepAliveInterval(KEEP_ALIVE_INTERVAL);
+        connectOptions.setKeepAliveInterval(config.getKeepAliveInterval());
         connectOptions.setCleanSession(SET_CLEAN_SESSION);
         connectOptions.setMqttVersion(MQTT_VERSION);
         connectOptions.setUserName(iotHubUserName);
+        connectOptions.setMaxInflight(MAX_IN_FLIGHT_COUNT);
         ProxySettings proxySettings = config.getProxySettings();
         if (proxySettings != null)
         {
@@ -214,17 +212,11 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             connectOptions.setSocketFactory(sslContext.getSocketFactory());
         }
 
-        if (password != null && password.length > 0)
-        {
-            connectOptions.setPassword(password);
-        }
-
         // these variables are shared between the messaging, twin and method subclients
         Map<Integer, Message> unacknowledgedSentMessages = new ConcurrentHashMap<>();
         Queue<Pair<String, byte[]>> receivedMessages = new ConcurrentLinkedQueue<>();
 
         this.deviceMessaging = new MqttMessaging(
-            mqttAsyncClient,
             deviceId,
             this,
             moduleId,
@@ -233,17 +225,13 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             unacknowledgedSentMessages,
             receivedMessages);
 
-        mqttAsyncClient.setCallback(this.deviceMessaging);
-
-        this.deviceMethod = new MqttDeviceMethod(
-            mqttAsyncClient,
+        this.directMethod = new MqttDirectMethod(
             deviceId,
             connectOptions,
             unacknowledgedSentMessages,
             receivedMessages);
 
-        this.deviceTwin = new MqttDeviceTwin(
-            mqttAsyncClient,
+        this.deviceTwin = new MqttTwin(
             deviceId,
             connectOptions,
             unacknowledgedSentMessages,
@@ -264,7 +252,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             this.connectionId = UUID.randomUUID().toString();
             this.deviceMessaging.setConnectionId(this.connectionId);
             this.deviceTwin.setConnectionId(this.connectionId);
-            this.deviceMethod.setConnectionId(this.connectionId);
+            this.directMethod.setConnectionId(this.connectionId);
 
             if (this.state == IotHubConnectionStatus.CONNECTED)
             {
@@ -272,6 +260,27 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             }
 
             log.debug("Opening MQTT connection...");
+
+            if (this.config.getSasTokenAuthentication() != null)
+            {
+                try
+                {
+                    log.trace("Setting password for MQTT connection since it is a SAS token authenticated connection");
+                    this.deviceMessaging.updatePassword(this.config.getSasTokenAuthentication().getSasToken());
+                }
+                catch (IOException e)
+                {
+                    throw new TransportException("Failed to open the MQTT connection because a SAS token could not be retrieved", e);
+                }
+            }
+
+            // MqttAsyncClient's are unusable after they have been closed. This logic creates a new client
+            // each time an open is called
+            MqttAsyncClient mqttAsyncClient = buildMqttAsyncClient(this.serverUri, this.clientId);
+            mqttAsyncClient.setCallback(this.deviceMessaging);
+            this.deviceMessaging.setMqttAsyncClient(mqttAsyncClient);
+            this.deviceTwin.setMqttAsyncClient(mqttAsyncClient);
+            this.directMethod.setMqttAsyncClient(mqttAsyncClient);
 
             this.deviceMessaging.start();
             this.state = IotHubConnectionStatus.CONNECTED;
@@ -286,7 +295,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
      * Closes the connection. After the connection is closed, it is no longer usable.
      * If the connection is already closed, the function shall do nothing.
      */
-    public void close() throws TransportException
+    public void close()
     {
         synchronized (this.mqttConnectionStateLock)
         {
@@ -297,20 +306,12 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
 
             log.debug("Closing MQTT connection");
 
-            this.deviceMethod.stop();
+            this.directMethod.stop();
             this.deviceTwin.stop();
             this.deviceMessaging.stop();
 
             this.state = IotHubConnectionStatus.DISCONNECTED;
             log.debug("Successfully closed MQTT connection");
-
-            // MqttAsyncClient's are unusable after they have been closed. This logic creates a new client
-            // so that if this MqttIotHubConnection layer is opened again, it will have a usable mqttAsyncClient
-            MqttAsyncClient mqttAsyncClient = buildMqttAsyncClient(this.serverUri, this.clientId);
-            this.deviceMessaging.setMqttAsyncClient(mqttAsyncClient);
-            mqttAsyncClient.setCallback(this.deviceMessaging);
-            this.deviceTwin.setMqttAsyncClient(mqttAsyncClient);
-            this.deviceMethod.setMqttAsyncClient(mqttAsyncClient);
         }
     }
 
@@ -351,13 +352,13 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             throw new IllegalStateException("Cannot send event using a closed MQTT connection");
         }
 
-        IotHubStatusCode result = IotHubStatusCode.OK_EMPTY;
+        IotHubStatusCode result = IotHubStatusCode.OK;
 
         if (message.getMessageType() == DEVICE_METHODS)
         {
-            this.deviceMethod.start();
+            this.directMethod.start();
             log.trace("Sending MQTT device method message ({})", message);
-            this.deviceMethod.send((IotHubTransportMessage) message);
+            this.directMethod.send((IotHubTransportMessage) message);
         }
         else if (message.getMessageType() == DEVICE_TWIN)
         {
@@ -405,8 +406,8 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         log.trace("Sending MQTT ACK for a received message ({})", message);
         if (message.getMessageType() == DEVICE_METHODS)
         {
-            this.deviceMethod.start();
-            this.deviceMethod.sendMessageAcknowledgement(messageId);
+            this.directMethod.start();
+            this.directMethod.sendMessageAcknowledgement(messageId);
         }
         else if (message.getMessageType() == DEVICE_TWIN)
         {
@@ -433,35 +434,26 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     @Override
     public void onMessageArrived(int messageId)
     {
-        IotHubTransportMessage transportMessage = null;
-        try
+        IotHubTransportMessage transportMessage = this.directMethod.receive();
+        if (transportMessage != null)
         {
-            transportMessage = this.deviceMethod.receive();
+            log.trace("Received MQTT device method message ({})", transportMessage);
+        }
+        else
+        {
+            transportMessage = deviceTwin.receive();
             if (transportMessage != null)
             {
-                log.trace("Received MQTT device method message ({})", transportMessage);
+                log.trace("Received MQTT device twin message ({})", transportMessage);
             }
             else
             {
-                transportMessage = deviceTwin.receive();
+                transportMessage = deviceMessaging.receive();
                 if (transportMessage != null)
                 {
-                    log.trace("Received MQTT device twin message ({})", transportMessage);
-                }
-                else
-                {
-                    transportMessage = deviceMessaging.receive();
-                    if (transportMessage != null)
-                    {
-                        log.trace("Received MQTT device messaging message ({})", transportMessage);
-                    }
+                    log.trace("Received MQTT device messaging message ({})", transportMessage);
                 }
             }
-        }
-        catch (TransportException e)
-        {
-            this.listener.onMessageReceived(null, new TransportException("Failed to receive message from service", e));
-            log.error("Encountered exception while receiving message over MQTT", e);
         }
 
         if (transportMessage == null)
@@ -482,15 +474,14 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                     transportMessage.setMessageCallbackContext(this.config.getDeviceTwinMessageContext());
                     break;
                 case DEVICE_METHODS:
-                    transportMessage.setMessageCallback(this.config.getDeviceMethodsMessageCallback());
-                    transportMessage.setMessageCallbackContext(this.config.getDeviceMethodsMessageContext());
+                    transportMessage.setMessageCallback(this.config.getDirectMethodsMessageCallback());
+                    transportMessage.setMessageCallbackContext(this.config.getDirectMethodsMessageContext());
                     break;
                 case DEVICE_TELEMETRY:
                     transportMessage.setMessageCallback(this.config.getDeviceTelemetryMessageCallback(transportMessage.getInputName()));
                     transportMessage.setMessageCallbackContext(this.config.getDeviceTelemetryMessageContext(transportMessage.getInputName()));
                     break;
                 case UNKNOWN:
-                case CBS_AUTHENTICATION:
                 default:
                     //do nothing
             }
