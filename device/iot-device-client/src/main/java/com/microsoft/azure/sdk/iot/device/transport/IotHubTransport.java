@@ -1379,7 +1379,10 @@ public class IotHubTransport implements IotHubListener
         final Queue<IotHubTransportPacket> waitingPacketsQueue;
         final Semaphore sendThreadSemaphore;
 
-        MessageRetryRunnable(Queue<IotHubTransportPacket> waitingPacketsQueue, IotHubTransportPacket transportPacket, Semaphore sendThreadSemaphore)
+        MessageRetryRunnable(
+                Queue<IotHubTransportPacket> waitingPacketsQueue,
+                IotHubTransportPacket transportPacket,
+                Semaphore sendThreadSemaphore)
         {
             this.waitingPacketsQueue = waitingPacketsQueue;
             this.transportPacket = transportPacket;

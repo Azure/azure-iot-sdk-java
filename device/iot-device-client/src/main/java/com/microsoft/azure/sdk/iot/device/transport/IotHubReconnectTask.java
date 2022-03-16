@@ -48,12 +48,17 @@ public final class IotHubReconnectTask implements Runnable
                     // IotHubTransport layer will make this semaphore available to acquire only once a disconnection
                     // event occurs. Once it is made available to acquire, this thread will wake up and run the reconnection
                     // logic.
+                    //
+                    // Note that this thread is not expected to release the semaphore once it is done reconnecting.
+                    // This semaphore is not acquired to safely modify shared resources, but instead is used to signal
+                    // when to start working. It is more akin to the basic Java wait/notify pattern, but without the
+                    // order of operations dependency that wait/notify has.
                     this.reconnectThreadSemaphore.acquire();
                 }
             }
             catch (InterruptedException e)
             {
-                // likely means the client is shutting down, so no need to wait for disconnection events anymore.
+                // likely means the client is shutting down, so no need to worry about handling disconnection events anymore.
                 log.trace("Interrupted while waiting for disconnection events. Thread is now ending.");
                 return;
             }

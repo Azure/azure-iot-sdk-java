@@ -50,6 +50,11 @@ public final class IotHubSendTask implements Runnable
                 // IotHubTransport layer will make this semaphore available to acquire only once a message is ready to
                 // be sent or a callback is ready to be executed. Once it is made available to acquire, this thread will
                 // wake up, send the messages and invoke the callbacks. Until then, do nothing.
+                //
+                // Note that this thread is not expected to release the semaphore once it is done sending messages.
+                // This semaphore is not acquired to safely modify shared resources, but instead is used to signal
+                // when to start working. It is more akin to the basic Java wait/notify pattern, but without the
+                // order of operations dependency that wait/notify has.
                 this.sendThreadSemaphore.acquire();
             }
 
