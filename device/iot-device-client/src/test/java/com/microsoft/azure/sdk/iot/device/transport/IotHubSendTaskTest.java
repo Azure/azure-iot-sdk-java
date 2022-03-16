@@ -11,6 +11,7 @@ import mockit.Verifications;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.concurrent.Semaphore;
 
 /** Unit tests for IotHubSendTask. */
 public class IotHubSendTaskTest
@@ -23,12 +24,12 @@ public class IotHubSendTaskTest
     @Test
     public void runSendsAllMessages()
     {
-        final Object sendThreadLock = new Object();
+        final Semaphore sendThreadSemaphore = new Semaphore(1);
         new Expectations()
         {
             {
                 mockTransport.getSendThreadSemaphore();
-                result = sendThreadLock;
+                result = sendThreadSemaphore;
 
                 mockTransport.hasMessagesToSend();
                 result = true;
@@ -49,12 +50,12 @@ public class IotHubSendTaskTest
     @Test
     public void runInvokesAllCallbacks()
     {
-        final Object sendThreadLock = new Object();
+        final Semaphore sendThreadSemaphore = new Semaphore(1);
         new Expectations()
         {
             {
                 mockTransport.getSendThreadSemaphore();
-                result = sendThreadLock;
+                result = sendThreadSemaphore;
 
                 mockTransport.hasMessagesToSend();
                 result = false;

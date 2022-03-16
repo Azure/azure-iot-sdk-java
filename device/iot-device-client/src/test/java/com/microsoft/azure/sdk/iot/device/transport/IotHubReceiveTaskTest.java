@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.concurrent.Semaphore;
 
 /** Unit tests for IotHubReceiveTask. */
 public class IotHubReceiveTaskTest
@@ -25,12 +26,12 @@ public class IotHubReceiveTaskTest
     @Test
     public void runReceivesAllMessages() throws DeviceClientException
     {
-        final Object receiveThreadLock = new Object();
+        final Semaphore receiveThreadSemaphore = new Semaphore(1);
         new Expectations()
         {
             {
                 mockTransport.getReceiveThreadSemaphore();
-                result = receiveThreadLock;
+                result = receiveThreadSemaphore;
 
                 mockTransport.hasReceivedMessagesToHandle();
                 result = true;
