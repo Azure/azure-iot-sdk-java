@@ -1180,6 +1180,7 @@ public class MultiplexingClientTests extends IntegrationTest
     @Test
     @ErrInjTest
     @IotHubTest
+    @StandardTierHubOnlyTest
     public void multiplexedConnectionRecoversFromTcpConnectionDrop() throws Exception
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT, MultiplexingClientOptions.builder().build(), true);
@@ -1619,69 +1620,6 @@ public class MultiplexingClientTests extends IntegrationTest
         try
         {
             // verify that the disabled device loses its device session
-            long startTime = System.currentTimeMillis();
-            while (!connectionStatusChangeTrackers[0].wentDisconnectedRetrying)
-            {
-                Thread.sleep(200);
-
-                if (System.currentTimeMillis() - startTime > FAULT_INJECTION_TIMEOUT_MILLIS)
-                {
-                    fail("Timed out waiting for the disabled device's client to report DISCONNECTED_RETRYING");
-                }
-            }
-
-            // Verify that the other devices on the multiplexed connection were unaffected
-            for (int i = 1; i < DEVICE_MULTIPLEX_COUNT; i++)
-            {
-                assertFalse("A multiplexed device closed unexpectedly", connectionStatusChangeTrackers[i].clientClosedUnexpectedly);
-            }
-
-            // Verify that the multiplexed connection itself was unaffected
-            assertFalse("MultiplexingClient lost connectivity unexpectedly", multiplexedConnectionStatusChangeTracker.clientClosedUnexpectedly);
-
-            // Verify that the other devices can still send telemetry
-            testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray.subList(1, DEVICE_MULTIPLEX_COUNT));
-
-            testInstance.multiplexingClient.close();
-        }
-        finally
-        {
-            deviceToDisable.setStatus(DeviceStatus.Enabled); // re enable the device in case it gets recycled
-            registryClient.updateDevice(deviceToDisable);
-        }
-    }
-
-    // If you register a disabled device to a multiplexed connection that hasn't opened yet, the open call should succeed
-    // but the disabled device's session should drop shortly afterwards and the other devices on the multiplexed connection
-    // should be unaffected.
-    @ContinuousIntegrationTest
-    @Test
-    public void disableDeviceBeforeOpen() throws Exception
-    {
-        testInstance.setup(DEVICE_MULTIPLEX_COUNT);
-
-        String deviceIdToDisable = testInstance.deviceIdentityArray.get(0).getDeviceId();
-
-        ConnectionStatusChangeTracker multiplexedConnectionStatusChangeTracker = new ConnectionStatusChangeTracker();
-        testInstance.multiplexingClient.setConnectionStatusChangeCallback(multiplexedConnectionStatusChangeTracker, null);
-
-        ConnectionStatusChangeTracker[] connectionStatusChangeTrackers = new ConnectionStatusChangeTracker[DEVICE_MULTIPLEX_COUNT];
-        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
-        {
-            connectionStatusChangeTrackers[i] = new ConnectionStatusChangeTracker();
-            testInstance.deviceClientArray.get(i).setConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], testInstance.deviceClientArray.get(i).getConfig().getDeviceId());
-        }
-
-        // Disable a device that will be on the multiplexed connection when the multiplexed connection hasn't opened yet
-        Device deviceToDisable = registryClient.getDevice(deviceIdToDisable);
-        deviceToDisable.setStatus(DeviceStatus.Disabled);
-        registryClient.updateDevice(deviceToDisable);
-
-        try
-        {
-            testInstance.multiplexingClient.open(false);
-
-            // verify that the disabled device eventually loses its device session
             long startTime = System.currentTimeMillis();
             while (!connectionStatusChangeTrackers[0].wentDisconnectedRetrying)
             {
