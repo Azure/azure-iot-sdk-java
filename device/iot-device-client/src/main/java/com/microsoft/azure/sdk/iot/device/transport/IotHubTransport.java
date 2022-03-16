@@ -594,7 +594,7 @@ public class IotHubTransport implements IotHubListener
 
         if (lastReconnectAttemptsDeviceSession == null)
         {
-            return true; // the device was unregistered during its reconnection, so it's reconnection attempts can stop
+            return true; // the device was unregistered during its reconnection, so its reconnection attempts can stop
         }
 
         if (lastReconnectAttemptsDeviceSession.getConnectionStatus() != IotHubConnectionStatus.DISCONNECTED_RETRYING)
