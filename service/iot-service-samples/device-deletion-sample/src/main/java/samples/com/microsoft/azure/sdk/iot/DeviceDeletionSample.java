@@ -5,25 +5,25 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.ExportImportDeviceParser;
 import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.EnrollmentGroup;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.IndividualEnrollment;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.QueryResult;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.QuerySpecification;
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
-import com.microsoft.azure.sdk.iot.service.devicetwin.SqlQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
+import com.microsoft.azure.sdk.iot.service.query.SqlQueryBuilder;
+import com.microsoft.azure.sdk.iot.service.query.TwinQueryResponse;
+import com.microsoft.azure.sdk.iot.service.registry.serializers.ExportImportDeviceParser;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
+import com.microsoft.azure.sdk.iot.service.twin.Twin;
+import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -96,38 +96,19 @@ public class DeviceDeletionSample
 
         @Override
         public void run() {
-            DeviceTwin deviceTwin;
-            try
-            {
-                deviceTwin = DeviceTwin.createFromConnectionString(iotConnString);
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-                ranSuccessfully = false;
-                System.out.println("Could not create registry manager from the provided connection string, exiting iot hub cleanup thread");
-                return;
-            }
+            TwinClient twinClient = new TwinClient(iotConnString);
 
             System.out.println("Querying ");
 
             List<String> deviceIdsToRemove = new ArrayList<>();
-            SqlQuery sqlQuery = null;
-            try
-            {
-                sqlQuery = SqlQuery.createSqlQuery("*", SqlQuery.FromType.DEVICES, null, null);
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
+            String query = SqlQueryBuilder.createSqlQuery("*", SqlQueryBuilder.FromType.DEVICES, null, null);
 
             while (true)
             {
-                final Query twinQuery;
+                TwinQueryResponse twinQuery;
                 try
                 {
-                    twinQuery = deviceTwin.queryTwin(sqlQuery.getQuery(), 100);
+                    twinQuery = twinClient.query(query);
                 }
                 catch (IotHubException e)
                 {
@@ -144,13 +125,13 @@ public class DeviceDeletionSample
 
                 try
                 {
-                    while (deviceTwin.hasNextDeviceTwin(twinQuery))
+                    while (twinQuery.hasNext())
                     {
-                        DeviceTwinDevice d = deviceTwin.getNextDeviceTwin(twinQuery);
+                        Twin twin = twinQuery.next();
 
-                        if (!d.getDeviceId().toLowerCase().contains("longhaul"))
+                        if (!twin.getDeviceId().toLowerCase().contains("longhaul"))
                         {
-                            deviceIdsToRemove.add(d.getDeviceId());
+                            deviceIdsToRemove.add(twin.getDeviceId());
 
                             if (deviceIdsToRemove.size() >= 100)
                             {
@@ -206,7 +187,7 @@ public class DeviceDeletionSample
     // registry manager for this
     private static final String DELETE_IMPORT_MODE = "delete";
     public static void removeDevices(Iterable<String> deviceIds, String connectionString) throws IOException, IotHubException {
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionString.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         URL url = getBulkDeviceAddUrl(iotHubConnectionString);
 
         List<ExportImportDeviceParser> parsers = new ArrayList<>();
@@ -223,8 +204,7 @@ public class DeviceDeletionSample
 
         String sasTokenString = new IotHubServiceSasToken(iotHubConnectionString).toString();
 
-        HttpRequest request = new HttpRequest(url, HttpMethod.POST, body.toJson().getBytes());
-        request.setHeaderField("authorization", sasTokenString);
+        HttpRequest request = new HttpRequest(url, HttpMethod.POST, body.toJson().getBytes(), sasTokenString);
         request.setHeaderField("Accept", "application/json");
         request.setHeaderField("Content-Type", "application/json");
         request.setHeaderField("charset", "utf-8");
