@@ -1562,7 +1562,6 @@ public class IotHubTransport implements IotHubListener
                 {
                     MultiplexedDeviceState deviceState = multiplexedDeviceConnectionStates.get(config.getDeviceId());
                     deviceState.setConnectionStatus(newConnectionStatus);
-                    deviceState.setStartReconnectTime(System.currentTimeMillis());
                     deviceState.setReconnectionAttemptNumber(0);
                 }
             }
