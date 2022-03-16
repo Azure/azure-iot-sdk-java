@@ -41,24 +41,35 @@ public final class IotHubReconnectTask implements Runnable
 
         try
         {
-            synchronized (this.reconnectThreadLock)
+            try
             {
-                if (!transport.needsReconnect())
+                synchronized (this.reconnectThreadLock)
                 {
-                    // IotHubTransport layer will notify this thread once a message is ready to be sent or a callback is ready
-                    // to be executed. Until then, do nothing.
-                    this.reconnectThreadLock.wait();
+                    if (!transport.needsReconnect())
+                    {
+                        // IotHubTransport layer will notify this thread once a message is ready to be sent or a callback is ready
+                        // to be executed. Until then, do nothing.
+                        this.reconnectThreadLock.wait();
+                    }
                 }
             }
+            catch (InterruptedException e)
+            {
+                // likely means the client is shutting down, so no need to wait for disconnection events anymore.
+                log.trace("Interrupted while waiting for disconnection events. Thread is now ending.");
+                return;
+            }
 
-            log.debug("Starting reconnection process");
-            this.transport.reconnect();
-        }
-        catch (InterruptedException e)
-        {
-            // Typically happens if a disconnection event occurs and the DeviceIO layer cancels the send/receive threads
-            // while the reconnection takes place.
-            log.trace("Interrupted while waiting for work. Thread is now ending.");
+            try
+            {
+                log.debug("Starting reconnection process");
+                this.transport.reconnect();
+            }
+            catch (InterruptedException e)
+            {
+                // likely means the client is shutting down, and any reconnection attempts should be abandoned
+                log.trace("Interrupted while reconnecting. Thread is now ending.");
+            }
         }
         catch (Throwable e)
         {

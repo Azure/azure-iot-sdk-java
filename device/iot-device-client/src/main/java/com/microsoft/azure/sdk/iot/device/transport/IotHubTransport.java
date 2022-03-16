@@ -541,7 +541,7 @@ public class IotHubTransport implements IotHubListener
     }
 
     // should only be called from IotHubReconnectTask
-    public void reconnect()
+    public void reconnect() throws InterruptedException
     {
         synchronized (this.reconnectionLock)
         {
@@ -1276,7 +1276,7 @@ public class IotHubTransport implements IotHubListener
     //For reconnecting multiplexed devices only. Since this triggers asynchronous functions in the AMQP layer, there
     // is no guarantee that the reconnect worked just because the unregister/register calls return successfully.
     // Still need to check the device connection status before you can report the device to be re-connected.
-    private void singleDeviceReconnectAttemptAsync(String deviceSessionToReconnect)
+    private void singleDeviceReconnectAttemptAsync(String deviceSessionToReconnect) throws InterruptedException
     {
         MultiplexedDeviceState multiplexedDeviceState = multiplexedDeviceConnectionStates.get(deviceSessionToReconnect);
         if (multiplexedDeviceState.getConnectionStatus() == IotHubConnectionStatus.DISCONNECTED_RETRYING)
@@ -1320,7 +1320,7 @@ public class IotHubTransport implements IotHubListener
             ((AmqpsIotHubConnection) this.iotHubTransportConnection).registerMultiplexedDevice(config);
 
             log.trace("Sleeping between device reconnect attempts for device {}", deviceSessionToReconnect);
-            IotHubTransport.sleepUninterruptibly(retryDecision.getDuration(), MILLISECONDS);
+            IotHubTransport.sleep(retryDecision.getDuration());
 
             if (!transportException.isRetryable())
             {
@@ -1341,7 +1341,7 @@ public class IotHubTransport implements IotHubListener
     /**
      * Attempts to close and then re-open the iotHubTransportConnection once
      */
-    private void singleReconnectAttempt(RetryPolicy retryPolicy, int reconnectionAttempt, long reconnectionStartTimeMillis)
+    private void singleReconnectAttempt(RetryPolicy retryPolicy, int reconnectionAttempt, long reconnectionStartTimeMillis) throws InterruptedException
     {
         if (this.hasOperationTimedOut(reconnectionStartTimeMillis))
         {
@@ -1365,7 +1365,7 @@ public class IotHubTransport implements IotHubListener
         }
 
         log.trace("Sleeping between reconnect attempts");
-        IotHubTransport.sleepUninterruptibly(retryDecision.getDuration(), MILLISECONDS);
+        IotHubTransport.sleep(retryDecision.getDuration());
 
         try
         {
@@ -1807,41 +1807,13 @@ public class IotHubTransport implements IotHubListener
     }
 
     /**
-     * Sleep for a length of time without interruption
+     * Sleep for a length of time
      *
-     * @param sleepFor length of time to sleep for
-     * @param unit time unit associated with sleepFor
+     * @param sleepFor length of time to sleep for, in milliseconds
      */
-    @SuppressWarnings("SameParameterValue")
-    // The TimeUnit is currently always MilliSeconds, but this method can be used generically as well.
-    private static void sleepUninterruptibly(long sleepFor, TimeUnit unit)
+    private static void sleep(long sleepFor) throws InterruptedException
     {
-        boolean interrupted = false;
-        try
-        {
-            long remainingNanos = unit.toNanos(sleepFor);
-            long end = System.nanoTime() + remainingNanos;
-            while (true)
-            {
-                try
-                {
-                    NANOSECONDS.sleep(remainingNanos);
-                    return;
-                }
-                catch (InterruptedException e)
-                {
-                    interrupted = true;
-                    remainingNanos = end - System.nanoTime();
-                }
-            }
-        }
-        finally
-        {
-            if (interrupted)
-            {
-                Thread.currentThread().interrupt();
-            }
-        }
+        MILLISECONDS.sleep(sleepFor);
     }
 
     /**
