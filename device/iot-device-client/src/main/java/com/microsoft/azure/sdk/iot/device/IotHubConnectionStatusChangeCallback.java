@@ -3,8 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.transport.ConnectionStatusChangeContext;
-
 /**
  * Callback interface for allowing users to respond to changes in the connectivity of this sdk to Iot Hub.
  */
