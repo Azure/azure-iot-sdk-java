@@ -160,7 +160,7 @@ public class Thermostat {
                 .subscribe(
                         response ->
                         {
-                            System.out.println("Invoked Command " + commandName + " response: " + prettyString(response.getPayloadAsString()));
+                            System.out.println("Invoked Command " + commandName + " response: " + prettyString(response.getPayload(String.class)));
                             latch.countDown();
                         },
                         error ->

@@ -351,7 +351,7 @@ public class Thermostat {
         public DirectMethodResponse onMethodInvoked(String methodName, DirectMethodPayload methodData, Object context) {
             if (methodName.equalsIgnoreCase(commandName)) {
 
-                String jsonRequest = methodData.getPayloadAsString();
+                String jsonRequest = methodData.getPayload(String.class);
                 Date since = getCommandRequestValue(jsonRequest, Date.class);
                 log.debug("Command: Received - Generating min, max, avg temperature report since {}.", since);
 

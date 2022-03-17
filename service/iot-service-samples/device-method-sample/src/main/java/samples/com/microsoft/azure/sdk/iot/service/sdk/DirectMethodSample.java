@@ -101,7 +101,7 @@ public class DirectMethodSample
         System.out.println("Status=" + result.getStatus());
 
         // Payload type in request for this sample is Map only, so we are using getPayloadAsCustomType(Map.class) to get payload in response.
-        System.out.println("Payload=" + result.getPayloadAsCustomType(Map.class));
+        System.out.println("Payload=" + result.getPayload(Map.class));
     }
 
     private static void scheduleInvokeMethod(DirectMethodsClient methodClient, ScheduledJobsClient jobClient) throws IotHubException, IOException, InterruptedException

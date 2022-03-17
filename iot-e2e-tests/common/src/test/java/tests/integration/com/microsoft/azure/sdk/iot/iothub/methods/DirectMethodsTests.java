@@ -5,7 +5,6 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.methods;
 
-
 import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.service.exceptions.ErrorCodeDescription;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
@@ -181,7 +180,8 @@ public class DirectMethodsTests extends DirectMethodsCommon
         // Assert
         assertNotNull(buildExceptionMessage("method result was null", testInstance.identity.getClient()), result);
         assertEquals(buildExceptionMessage("Expected SUCCESS but got " + result.getStatus(), testInstance.identity.getClient()), (long)METHOD_SUCCESS, (long)result.getStatus());
-        assertEquals(buildExceptionMessage("Expected " + METHOD_DELAY_IN_MILLISECONDS + ":succeed" + " But got " + result.getPayloadAsString(), testInstance.identity.getClient()), METHOD_DELAY_IN_MILLISECONDS + ":succeed", result.getPayloadAsString());
+        assertEquals(buildExceptionMessage("Expected " + METHOD_DELAY_IN_MILLISECONDS + ":succeed" + " But got " + result.getPayload(String.class),
+                testInstance.identity.getClient()), METHOD_DELAY_IN_MILLISECONDS + ":succeed", result.getPayload(String.class));
     }
 
     @Test

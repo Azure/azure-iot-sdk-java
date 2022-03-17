@@ -13,7 +13,7 @@ public class DirectMethodResponse
      * @param status the status in DirectMethodResponse which is returned by the device
      * @param payload the payload attached to that method. This parameter can be
          * Null: the DirectMethodResponse object will not include the "payload" field
-         * Primitive type/String/Array/List/Map/custom type: will be serialized as value of the "payload" field using GSON.
+         * Primitive type (e.g., String, Int)/Array/List/Map/custom type: will be serialized as value of the "payload" field using GSON.
      */
     public DirectMethodResponse(int status, Object payload)
     {

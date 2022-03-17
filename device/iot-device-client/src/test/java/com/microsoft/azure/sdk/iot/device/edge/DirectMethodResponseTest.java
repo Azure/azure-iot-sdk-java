@@ -18,9 +18,6 @@ import static junit.framework.TestCase.assertEquals;
 
 public class DirectMethodResponseTest
 {
-    // Tests_SRS_DIRECTMETHODRESULT_34_001: [This function shall return the saved status.]
-    // Tests_SRS_DIRECTMETHODRESULT_34_002: [This function shall return the saved status.]
-    // Tests_SRS_DIRECTMETHODRESULT_34_003: [This constructor shall retrieve the payload and status from the provided json.]
     @Test
     public void constructorParsesJsonAndGettersWork()
     {
@@ -44,13 +41,13 @@ public class DirectMethodResponseTest
         assertEquals(new JsonNull(), resultForNull.getPayloadAsJsonElement());
         assertEquals(0, resultForNull.getStatus());
 
-        assertEquals(string, resultForString.getPayloadAsCustomType(String.class));
+        assertEquals(string, resultForString.getPayload(String.class));
         assertEquals(1, resultForString.getStatus());
 
-        assertEquals(list, resultForList.getPayloadAsCustomType(List.class));
+        assertEquals(list, resultForList.getPayload(List.class));
         assertEquals(2, resultForList.getStatus());
 
-        assertEquals(map, resultForMap.getPayloadAsCustomType(Map.class));
+        assertEquals(map, resultForMap.getPayload(Map.class));
         assertEquals(3, resultForMap.getStatus());
     }
 }

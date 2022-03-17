@@ -273,11 +273,9 @@ public class MethodParser
         {
             return new JsonObject();
         }
-        else
-        {
-            JsonElement jsonElement = new JsonParser().parse(json);
-            return jsonElement;
-        }
+
+        JsonElement jsonElement = new JsonParser().parse(json);
+        return jsonElement;
     }
 
     /**

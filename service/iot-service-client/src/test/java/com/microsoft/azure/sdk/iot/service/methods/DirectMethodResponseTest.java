@@ -32,8 +32,6 @@ public class DirectMethodResponseTest
         assertNotNull(directMethodResponse);
         assertThat(directMethodResponse.getStatus(), is(123));
         assertThat(directMethodResponse.getPayloadAsJsonElement(), is(new JsonPrimitive("TestObject")));
-
-
     }
 
     @Test

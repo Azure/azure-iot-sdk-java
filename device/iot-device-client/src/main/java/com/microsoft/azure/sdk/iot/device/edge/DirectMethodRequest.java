@@ -41,7 +41,7 @@ public class DirectMethodRequest
      * @param methodName the method to be invoked
      * @param payload the payload attached to that method. This parameter can be
          * Null: the DirectMethodRequest object will not include the "payload" field
-         * Primitive type/String/Array/List/Map/custom type: will be serialized as value of the "payload" field using GSON.
+         * Primitive type (e.g., String, Int)/Array/List/Map/custom type: will be serialized as value of the "payload" field using GSON.
      * @throws IllegalArgumentException if the provided methodName is null or empty
      */
     public DirectMethodRequest(String methodName, Object payload) throws IllegalArgumentException
@@ -54,7 +54,7 @@ public class DirectMethodRequest
      * @param methodName the method to be invoked
      * @param payload the payload attached to that method. This parameter can be
          * Null: the DirectMethodRequest object will not include the "payload" field
-         * Primitive type/String/Array/List/Map/custom type: will be serialized as value of the "payload" field using GSON.
+         * Primitive type (e.g., String, Int)/Array/List/Map/custom type: will be serialized as value of the "payload" field using GSON.
      * @param responseTimeout the timeout in seconds for the response to be received
      * @param connectionTimeout the timeout in seconds for the connection to be established
      * @throws IllegalArgumentException if the provided methodName is null or empty

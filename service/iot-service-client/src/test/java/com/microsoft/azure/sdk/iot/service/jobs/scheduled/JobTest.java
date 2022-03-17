@@ -412,7 +412,7 @@ public class JobTest
         assertNotNull(job.getOutcomeResult());
         DirectMethodResponse directMethodResponse = job.getOutcomeResult();
         assertEquals(methodReturnStatus, (long) directMethodResponse.getStatus());
-        assertEquals(methodReturnPayload, directMethodResponse.getPayloadAsString());
+        assertEquals(methodReturnPayload, directMethodResponse.getPayload(String.class));
         assertNotNull(job.getLastUpdatedDateTime());
         assertNull(job.getError());
     }

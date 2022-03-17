@@ -316,7 +316,7 @@ public class TemperatureController {
         @SneakyThrows(InterruptedException.class)
         @Override
         public DirectMethodResponse onMethodInvoked(String methodName, DirectMethodPayload methodData, Object context) {
-            String jsonRequest = methodData.getPayloadAsString();
+            String jsonRequest = methodData.getPayload(String.class);
 
             switch (methodName) {
                 case reboot:

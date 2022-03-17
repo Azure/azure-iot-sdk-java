@@ -491,7 +491,7 @@ public class DirectMethodsClientTest
 
         //assert
         assertThat(result.getStatus(), is(123));
-        assertThat(result.getPayloadAsString(), is(STANDARD_PAYLOAD_STR));
+        assertThat(result.getPayload(String.class), is(STANDARD_PAYLOAD_STR));
         new Verifications()
         {
             {

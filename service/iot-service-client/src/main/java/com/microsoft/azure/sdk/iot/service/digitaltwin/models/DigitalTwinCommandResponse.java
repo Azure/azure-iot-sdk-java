@@ -40,21 +40,21 @@ public final class DigitalTwinCommandResponse {
     }
 
     /**
-     * Return the DigitalTwinCommandResponse payload in String type
-     * @return the DigitalTwinCommandResponse payload in String type
+     * Use this if you wish to deserialize to a specific type using a deserialization library of your choice
+     * Return the DigitalTwinCommandResponse payload in json string
+     * @return the DigitalTwinCommandResponse payload in json string
      */
-    public String getPayloadAsString()
+    public String getPayloadAsJsonString()
     {
-        return getPayloadAsCustomType(String.class);
+        return payload.toString();
     }
 
     /**
      * Return the DigitalTwinCommandResponse payload in a custom type of your choosing
-     * Use this if you wish to deserialize to a specific type using a deserialization library of your choice
      * @param clazz the Custom type into which the payload can be deserialized
      * @return the DigitalTwinCommandResponse payload in Custom type
      */
-    public <T> T getPayloadAsCustomType(Class<T> clazz)
+    public <T> T getPayload(Class<T> clazz)
     {
         return new GsonBuilder().create().fromJson(payload, clazz);
     }

@@ -292,7 +292,7 @@ public class JobClientTests extends IntegrationTest
             DirectMethodResponse directMethodResponse = jobResult.getValue().getOutcomeResult();
             assertNotNull("Device method didn't return any outcome", directMethodResponse);
             assertEquals(200L, (long) directMethodResponse.getStatus());
-            assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, directMethodResponse.getPayloadAsString());
+            assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, directMethodResponse.getPayload(String.class));
         }
 
         // asserts for the client side.
@@ -382,7 +382,7 @@ public class JobClientTests extends IntegrationTest
         DirectMethodResponse directMethodResponse = job.getOutcomeResult();
         assertNotNull("Device method didn't return any outcome", directMethodResponse);
         assertEquals(200L, (long) directMethodResponse.getStatus());
-        assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, directMethodResponse.getPayloadAsString());
+        assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, directMethodResponse.getPayload(String.class));
 
         // asserts for the client side.
         assertEquals(0, deviceTestManger.getStatusError());
@@ -499,7 +499,7 @@ public class JobClientTests extends IntegrationTest
                 DirectMethodResponse directMethodResponse = jobResult.getOutcomeResult();
                 assertNotNull("Device method didn't return any outcome", directMethodResponse);
                 assertEquals(200L, (long) directMethodResponse.getStatus());
-                assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, directMethodResponse.getPayloadAsString());
+                assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, directMethodResponse.getPayload(String.class));
             }
             else
             {
