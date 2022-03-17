@@ -123,4 +123,36 @@ public enum IotHubStatusCode
 
         return iotHubStatus;
     }
+
+    /**
+     * Returns true if this event callback signals that the asynchronous action was unsuccessful, but could be retried.
+     * Returns false if it was successful, or it was unsuccessful but should not be retried.
+     * @param statusCode The status code.
+     * @return true if this event callback signals that the asynchronous action was unsuccessful, but could be retried, and false otherwise
+     */
+    public static boolean isRetryable(IotHubStatusCode statusCode)
+    {
+        switch (statusCode)
+        {
+            case ERROR:
+            case MESSAGE_CANCELLED_ONCLOSE:
+            case MESSAGE_EXPIRED:
+            case THROTTLED:
+            case INTERNAL_SERVER_ERROR:
+            case SERVER_BUSY:
+                return true;
+            default:
+                return false; // even for OK case, return false here since it wouldn't need to be retried.
+        }
+    }
+
+    /**
+     * Returns true if this event callback signals that the asynchronous action was successful, and false otherwise.
+     * @param statusCode The status code.
+     * @return true if this event callback signals that the asynchronous action was successful, and false otherwise.
+     */
+    public static boolean isSuccessful(IotHubStatusCode statusCode)
+    {
+        return statusCode == OK;
+    }
 }
