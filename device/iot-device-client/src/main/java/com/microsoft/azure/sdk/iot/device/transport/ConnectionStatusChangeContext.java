@@ -17,7 +17,7 @@ public class ConnectionStatusChangeContext
     IotHubConnectionStatus newStatus;
 
     /**
-     * The reason why the sdk changed to this status.
+     * The reason why status changed.
      */
     @Getter
     IotHubConnectionStatusChangeReason newStatusReason;
