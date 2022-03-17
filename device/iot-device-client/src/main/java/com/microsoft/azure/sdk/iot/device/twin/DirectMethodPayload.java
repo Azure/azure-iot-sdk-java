@@ -9,7 +9,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 
 /**
- * This class is for the payload of direct method request which is received on the device/module.
+ * This class contains the payload of a direct method request that was received by the device/module.
  * It is used with the onMethodInvoked() callback which is executed each time a direct method is invoked.
  */
 @AllArgsConstructor(access = AccessLevel.PACKAGE)

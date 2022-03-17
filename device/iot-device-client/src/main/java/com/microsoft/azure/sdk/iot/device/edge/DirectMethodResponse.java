@@ -10,6 +10,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @AllArgsConstructor
 public class DirectMethodResponse
@@ -17,6 +18,7 @@ public class DirectMethodResponse
     private static final String STATUS_KEY_NAME = "status";
     @Expose(serialize = false)
     @SerializedName(STATUS_KEY_NAME)
+    @Getter
     private int status;
 
     private static final String PAYLOAD_KEY_NAME = "payload";
@@ -36,11 +38,6 @@ public class DirectMethodResponse
 
         this.payload = result.payload;
         this.status = result.status;
-    }
-
-    public int getStatus()
-    {
-        return this.status;
     }
 
     /**
