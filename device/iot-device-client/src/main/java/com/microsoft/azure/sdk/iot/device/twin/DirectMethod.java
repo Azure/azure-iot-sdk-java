@@ -68,7 +68,7 @@ public final class DirectMethod
                             log.trace("Executing method invocation callback for method name {} for message {}", methodMessage.getMethodName(), methodMessage);
 
                             MethodParser methodParser = new MethodParser();
-                            JsonElement jsonElement = methodParser.getPayloadFromJson(new String(methodMessage.getBytes()));
+                            JsonElement jsonElement = methodParser.getPayloadFromJson(new String(methodMessage.getBytes(), StandardCharsets.UTF_8));
                             DirectMethodResponse responseData = methodCallback.onMethodInvoked(methodMessage.getMethodName(), new DirectMethodPayload(jsonElement), deviceMethodCallbackContext);
                             log.trace("Method invocation callback returned for method name {} for message {}", methodMessage.getMethodName(), methodMessage);
 
