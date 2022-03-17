@@ -39,7 +39,7 @@ public class Thermostat {
         }
     }
 
-    private static final ReportedPropertiesCallback sendReportedPropertiesResponseCallback = (statusCode, e, callbackContext) ->
+    private static final ReportedPropertiesCallback sendReportedPropertiesResponseCallback = (statusCode, version, e, callbackContext) ->
     {
         if (statusCode == OK)
         {

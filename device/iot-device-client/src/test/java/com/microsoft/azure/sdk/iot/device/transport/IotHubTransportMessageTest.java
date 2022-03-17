@@ -89,16 +89,16 @@ public class IotHubTransportMessageTest
     public void setVersionSetsTheVersion()
     {
         // arrange
-        String versionStr = "abcdefg";
+        int version = 1234;
         byte[] data = new byte[1];
         MessageType messageType = MessageType.DEVICE_TWIN;
         IotHubTransportMessage iotHubTransportMessage = new IotHubTransportMessage(data, messageType);
 
         // act
-        iotHubTransportMessage.setVersion(versionStr);
+        iotHubTransportMessage.setVersion(version);
 
         // assert
-        assertEquals(versionStr, iotHubTransportMessage.getVersion());
+        assertEquals(version, iotHubTransportMessage.getVersion());
     }
 
     /*
@@ -108,17 +108,17 @@ public class IotHubTransportMessageTest
     public void getVersionGetsTheVersion()
     {
         // arrange
-        String versionStr = "abcdefg";
+        int version = 1234;
         byte[] data = new byte[1];
         MessageType messageType = MessageType.DEVICE_TWIN;
         IotHubTransportMessage iotHubTransportMessage = new IotHubTransportMessage(data, messageType);
-        iotHubTransportMessage.setVersion(versionStr);
+        iotHubTransportMessage.setVersion(version);
 
         // act
-        String version = iotHubTransportMessage.getVersion();
+        int versionActual = iotHubTransportMessage.getVersion();
 
         // assert
-        assertEquals(versionStr, version);
+        assertEquals(version, versionActual);
     }
 
     /*

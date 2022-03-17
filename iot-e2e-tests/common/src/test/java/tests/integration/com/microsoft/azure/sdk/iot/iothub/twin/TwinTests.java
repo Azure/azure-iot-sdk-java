@@ -8,10 +8,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.twin.GetTwinCorrelatingMessageCallback;
-import com.microsoft.azure.sdk.iot.device.twin.Twin;
-import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
-import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesUpdateCorrelatingMessageCallback;
+import com.microsoft.azure.sdk.iot.device.twin.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.twin.Pair;
@@ -166,9 +163,10 @@ public class TwinTests extends TwinCommon
         com.microsoft.azure.sdk.iot.device.twin.TwinCollection twinCollection = new com.microsoft.azure.sdk.iot.device.twin.TwinCollection();
         twinCollection.put(reportedPropertyKey1, reportedPropertyValue1);
         twinCollection.put(reportedPropertyKey2, reportedPropertyValue2);
-        IotHubStatusCode statusCode = testInstance.testIdentity.getClient().updateReportedProperties(twinCollection);
+        ReportedPropertiesUpdateResponse response = testInstance.testIdentity.getClient().updateReportedProperties(twinCollection);
 
-        assertEquals(IotHubStatusCode.OK, statusCode);
+        assertEquals(IotHubStatusCode.OK, response.getStatusCode());
+        assertTrue(response.getVersion() > 0);
 
         com.microsoft.azure.sdk.iot.service.twin.Twin serviceClientTwin = testInstance.getServiceClientTwin();
         assertTrue(isPropertyInSet(serviceClientTwin.getReportedProperties(), reportedPropertyKey1, reportedPropertyValue1));
@@ -194,14 +192,14 @@ public class TwinTests extends TwinCommon
         // send one reported property
         com.microsoft.azure.sdk.iot.device.twin.TwinCollection twinCollection = new com.microsoft.azure.sdk.iot.device.twin.TwinCollection();
         twinCollection.put(reportedPropertyKey1, reportedPropertyValue1);
-        IotHubStatusCode statusCode = testInstance.testIdentity.getClient().updateReportedProperties(twinCollection);
-        assertEquals(IotHubStatusCode.OK, statusCode);
+        ReportedPropertiesUpdateResponse response = testInstance.testIdentity.getClient().updateReportedProperties(twinCollection);
+        assertEquals(IotHubStatusCode.OK, response.getStatusCode());
 
         // send a different reported property
         twinCollection.clear();
         twinCollection.put(reportedPropertyKey2, reportedPropertyValue2);
-        statusCode = testInstance.testIdentity.getClient().updateReportedProperties(twinCollection);
-        assertEquals(IotHubStatusCode.OK, statusCode);
+        response = testInstance.testIdentity.getClient().updateReportedProperties(twinCollection);
+        assertEquals(IotHubStatusCode.OK, response.getStatusCode());
 
         com.microsoft.azure.sdk.iot.service.twin.Twin serviceClientTwin = testInstance.getServiceClientTwin();
         assertTrue(isPropertyInSet(serviceClientTwin.getReportedProperties(), reportedPropertyKey1, reportedPropertyValue1));

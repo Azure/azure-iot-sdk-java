@@ -122,14 +122,10 @@ class MqttTwin extends Mqtt
                     throw new IllegalArgumentException("Request Id is Mandatory");
                 }
 
-                String version = message.getVersion();
-
-                if (version != null)
-                {
-                    topic.append(AND);
-                    topic.append(VERSION);
-                    topic.append(version);
-                }
+                int version = message.getVersion();
+                topic.append(AND);
+                topic.append(VERSION);
+                topic.append(version);
                 break;
             }
             case DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST:
@@ -141,14 +137,11 @@ class MqttTwin extends Mqtt
                 topic.append(BACKSLASH);
                 topic.append(DESIRED);
 
-                String version = message.getVersion();
-                if (version != null)
-                {
-                    topic.append(BACKSLASH);
-                    topic.append(QUESTION);
-                    topic.append(VERSION);
-                    topic.append(version);
-                }
+                int version = message.getVersion();
+                topic.append(BACKSLASH);
+                topic.append(QUESTION);
+                topic.append(VERSION);
+                topic.append(version);
                 break;
 
             }
@@ -331,7 +324,11 @@ class MqttTwin extends Mqtt
 
                             if (topicTokens.length > VERSION_TOKEN)
                             {
-                                message.setVersion(getVersion(topicTokens[VERSION_TOKEN]));
+                                String version = getVersion(topicTokens[VERSION_TOKEN]);
+                                if (version != null && !version.isEmpty())
+                                {
+                                    message.setVersion(Integer.parseInt(version));
+                                }
                             }
                         }
                         else if (topic.length() > PATCH.length() && topic.startsWith(PATCH))
@@ -351,7 +348,7 @@ class MqttTwin extends Mqtt
                                 {
                                     if (message != null)
                                     {
-                                        message.setVersion(getVersion(topicTokens[PATCH_VERSION_TOKEN]));
+                                        message.setVersion(Integer.parseInt(getVersion(topicTokens[PATCH_VERSION_TOKEN])));
                                     }
                                 }
                             }
@@ -362,21 +359,5 @@ class MqttTwin extends Mqtt
 
             return message;
         }
-    }
-
-    @SuppressWarnings("SameParameterValue") // This method currently has a single caller (with a single value for "message"),
-    // but can be used to create a new TransportException with any message string.
-    private void throwDeviceTwinTransportException(String message) throws TransportException
-    {
-        TransportException transportException = new TransportException(message);
-        transportException.setIotHubService(TransportException.IotHubService.TWIN);
-        throw transportException;
-    }
-
-    private void throwDeviceTwinTransportException(Exception e) throws TransportException
-    {
-        TransportException transportException = new TransportException(e);
-        transportException.setIotHubService(TransportException.IotHubService.TWIN);
-        throw transportException;
     }
 }

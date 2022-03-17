@@ -15,9 +15,10 @@ public interface ReportedPropertiesCallback
      * The callback that is executed when the reported properties update request has completed.
      * @param statusCode The service's status code for the request. If {@link IotHubStatusCode#OK} then the request was
      * processed succesfully.
+     * @param version The new version of the twin's reported properties after this request.
      * @param e The exception that was encountered if any exception was encountered.
      * @param context The context that was provided for this callback in
      * {@link com.microsoft.azure.sdk.iot.device.InternalClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesCallback, Object)}
      */
-    void onReportedPropertiesUpdateAcknowledged(IotHubStatusCode statusCode, TransportException e, Object context);
+    void onReportedPropertiesUpdateAcknowledged(IotHubStatusCode statusCode, int version, TransportException e, Object context);
 }

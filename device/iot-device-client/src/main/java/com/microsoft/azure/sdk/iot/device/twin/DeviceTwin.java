@@ -138,7 +138,7 @@ public class DeviceTwin implements MessageCallback
 
         if (reportedProperties.getVersion() != null)
         {
-            updateReportedPropertiesRequest.setVersion(Integer.toString(reportedProperties.getVersion()));
+            updateReportedPropertiesRequest.setVersion(reportedProperties.getVersion());
         }
 
         updateReportedPropertiesRequest.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST);
