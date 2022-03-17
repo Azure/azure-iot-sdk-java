@@ -128,7 +128,7 @@ public enum IotHubStatusCode
      * Returns true if this event callback signals that the asynchronous action was unsuccessful, but could be retried.
      * Returns false if it was successful, or it was unsuccessful but should not be retried.
      * @param statusCode The status code.
-     * @return true if this event callback signals that the asynchronous action was unsuccessful, but could be retried, and false otherwise
+     * @return true if this event callback signals that the asynchronous action was unsuccessful, but could be retried, and false otherwise.
      */
     public static boolean isRetryable(IotHubStatusCode statusCode)
     {
