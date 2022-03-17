@@ -5,6 +5,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
 import com.microsoft.azure.sdk.iot.device.exceptions.DeviceOperationTimeoutException;
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.ConnectionStatusChangeContext;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import lombok.extern.slf4j.Slf4j;
 
@@ -106,8 +107,12 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
     }
 
     @Override
-    public void onStatusChanged(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+    public void onStatusChanged(ConnectionStatusChangeContext connectionStatusChangeContext)
     {
+        IotHubConnectionStatus status = connectionStatusChangeContext.getNewStatus();
+        IotHubConnectionStatusChangeReason statusChangeReason = connectionStatusChangeContext.getNewStatusReason();
+        Throwable throwable = connectionStatusChangeContext.getCause();
+
         if (throwable == null)
         {
             log.info("CONNECTION STATUS UPDATE FOR CLIENT: " + getClientId() + " - " + status + ", " + statusChangeReason);

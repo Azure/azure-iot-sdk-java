@@ -72,9 +72,9 @@ public class SendMessagesTests extends SendMessagesCommon
         Success messageSent = new Success();
         messageSent.setResult(false);
         testInstance.setup();
-        testInstance.identity.getClient().setConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) ->
+        testInstance.identity.getClient().setConnectionStatusChangeCallback((context) ->
         {
-            if (status == IotHubConnectionStatus.CONNECTED)
+            if (context.getNewStatus() == IotHubConnectionStatus.CONNECTED)
             {
                 try
                 {

@@ -1548,7 +1548,8 @@ public class IotHubTransport implements IotHubListener
             this.connectionStatus = newConnectionStatus;
             this.connectionStatusLastException = throwable;
 
-            this.deviceIOConnectionStatusChangeCallback.onStatusChanged(newConnectionStatus, reason, throwable, null);
+            ConnectionStatusChangeContext connectionStatusChangeContext = new ConnectionStatusChangeContext(newConnectionStatus, reason, throwable, null);
+            this.deviceIOConnectionStatusChangeCallback.onStatusChanged(connectionStatusChangeContext);
 
             //invoke connection status callbacks
             log.debug("Invoking connection status callbacks with new status details");
@@ -1571,7 +1572,8 @@ public class IotHubTransport implements IotHubListener
             // If multiplexing, fire the multiplexing state callback as long as it was set.
             if (isMultiplexing && this.multiplexingStateCallback != null)
             {
-                this.multiplexingStateCallback.onStatusChanged(newConnectionStatus, reason, throwable, this.multiplexingStateCallbackContext);
+                ConnectionStatusChangeContext multiplexingConnectionStatusChangeContext = new ConnectionStatusChangeContext(newConnectionStatus, reason, throwable, this.multiplexingStateCallbackContext);
+                this.multiplexingStateCallback.onStatusChanged(multiplexingConnectionStatusChangeContext);
             }
         }
     }
@@ -1625,7 +1627,8 @@ public class IotHubTransport implements IotHubListener
             if (multiplexedDeviceState != null && multiplexedDeviceState.getConnectionStatus() != status)
             {
                 // only onStatusChanged the callback if the state of the device is changing.
-                this.connectionStatusChangeCallbacks.get(registeredDeviceId).onStatusChanged(status, reason, e, this.connectionStatusChangeCallbackContexts.get(registeredDeviceId));
+                ConnectionStatusChangeContext connectionStatusChangeContext = new ConnectionStatusChangeContext(status, reason, e, this.connectionStatusChangeCallbackContexts.get(registeredDeviceId));
+                this.connectionStatusChangeCallbacks.get(registeredDeviceId).onStatusChanged(connectionStatusChangeContext);
             }
         }
     }
@@ -1636,12 +1639,14 @@ public class IotHubTransport implements IotHubListener
         {
             for (String registeredDeviceId : this.connectionStatusChangeCallbacks.keySet())
             {
-                this.connectionStatusChangeCallbacks.get(registeredDeviceId).onStatusChanged(status, reason, e, this.connectionStatusChangeCallbackContexts.get(registeredDeviceId));
+                ConnectionStatusChangeContext connectionStatusChangeContext = new ConnectionStatusChangeContext(status, reason, e, this.connectionStatusChangeCallbackContexts.get(registeredDeviceId));
+                this.connectionStatusChangeCallbacks.get(registeredDeviceId).onStatusChanged(connectionStatusChangeContext);
             }
         }
         else if (this.connectionStatusChangeCallbacks.containsKey(deviceId))
         {
-            this.connectionStatusChangeCallbacks.get(deviceId).onStatusChanged(status, reason, e, this.connectionStatusChangeCallbackContexts.get(deviceId));
+            ConnectionStatusChangeContext connectionStatusChangeContext = new ConnectionStatusChangeContext(status, reason, e, this.connectionStatusChangeCallbackContexts.get(deviceId));
+            this.connectionStatusChangeCallbacks.get(deviceId).onStatusChanged(connectionStatusChangeContext);
         }
         else
         {

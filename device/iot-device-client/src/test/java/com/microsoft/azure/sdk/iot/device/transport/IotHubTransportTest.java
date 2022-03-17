@@ -2008,11 +2008,7 @@ public class IotHubTransportTest
         new Verifications()
         {
             {
-                mockedIotHubConnectionStatusChangeCallback.onStatusChanged(
-                        (IotHubConnectionStatus)any,
-                        (IotHubConnectionStatusChangeReason)any,
-                        (Throwable)any,
-                        any);
+                mockedIotHubConnectionStatusChangeCallback.onStatusChanged((ConnectionStatusChangeContext) any);
                 times = 1;
             }
         };
@@ -2044,11 +2040,7 @@ public class IotHubTransportTest
         new Verifications()
         {
             {
-                mockedIotHubConnectionStatusChangeCallback.onStatusChanged(
-                        (IotHubConnectionStatus)any,
-                        (IotHubConnectionStatusChangeReason)any,
-                        (Throwable)any,
-                        any);
+                mockedIotHubConnectionStatusChangeCallback.onStatusChanged((ConnectionStatusChangeContext) any);
                 times = 0;
             }
         };

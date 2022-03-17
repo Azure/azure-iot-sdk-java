@@ -1,6 +1,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.transport.ConnectionStatusChangeContext;
 import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
@@ -105,17 +106,20 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
     }
 
     @Override
-    public void onStatusChanged(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext) {
+    public void onStatusChanged(ConnectionStatusChangeContext connectionStatusChangeContext) {
         Pair<IotHubConnectionStatusChangeCallback, Object> suppliedCallbackPair = this.suppliedConnectionStatusChangeCallback;
+        IotHubConnectionStatus status = connectionStatusChangeContext.getNewStatus();
+        IotHubConnectionStatusChangeReason statusChangeReason = connectionStatusChangeContext.getNewStatusReason();
+        Throwable throwable = connectionStatusChangeContext.getCause();
 
         if (shouldDeviceReconnect(status, statusChangeReason, throwable)) {
             if (suppliedCallbackPair != null) {
-                suppliedCallbackPair.getKey().onStatusChanged(DISCONNECTED_RETRYING, NO_NETWORK, throwable, suppliedCallbackPair.getValue());
+                suppliedCallbackPair.getKey().onStatusChanged(new ConnectionStatusChangeContext(DISCONNECTED_RETRYING, NO_NETWORK, throwable, suppliedCallbackPair.getValue()));
             }
 
             handleRecoverableDisconnection();
         } else if (suppliedCallbackPair != null) {
-            suppliedCallbackPair.getKey().onStatusChanged(status, statusChangeReason, throwable, suppliedCallbackPair.getValue());
+            suppliedCallbackPair.getKey().onStatusChanged(new ConnectionStatusChangeContext(status, statusChangeReason, throwable, suppliedCallbackPair.getValue()));
         }
     }
 
