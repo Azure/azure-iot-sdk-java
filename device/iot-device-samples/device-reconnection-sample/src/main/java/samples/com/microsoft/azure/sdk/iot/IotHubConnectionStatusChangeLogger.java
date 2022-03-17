@@ -16,7 +16,6 @@ public class IotHubConnectionStatusChangeLogger implements IotHubConnectionStatu
         IotHubConnectionStatusChangeReason statusChangeReason = connectionStatusChangeContext.getNewStatusReason();
         Throwable throwable = connectionStatusChangeContext.getCause();
 
-
         log.debug("### Connection status change reported: status={}, reason={}, throwable={}", status, statusChangeReason, throwable);
 
         switch (status) {
