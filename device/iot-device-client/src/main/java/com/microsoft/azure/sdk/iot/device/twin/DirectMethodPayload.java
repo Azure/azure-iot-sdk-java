@@ -27,8 +27,8 @@ public class DirectMethodPayload
     }
 
     /**
-     * Use this if you wish to deserialize to a specific type using a deserialization library of your choice
      * Return the DirectMethodPayload payload in json string
+     * Use this if you wish to deserialize to a specific type using a deserialization library of your choice
      * @return the DirectMethodPayload payload in json string
      */
     public String getPayloadAsJsonString()

@@ -50,8 +50,8 @@ public class DirectMethodResponse
     }
 
     /**
-     * Use this if you wish to deserialize to a specific type using a deserialization library of your choice
      * Return the DirectMethodResponse payload in json string
+     * Use this if you wish to deserialize to a specific type using a deserialization library of your choice
      * @return the DirectMethodResponse payload in json string
      */
     public String getPayloadAsJsonString()

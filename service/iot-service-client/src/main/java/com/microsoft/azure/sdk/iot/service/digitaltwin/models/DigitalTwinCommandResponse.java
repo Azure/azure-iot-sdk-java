@@ -40,8 +40,8 @@ public final class DigitalTwinCommandResponse {
     }
 
     /**
-     * Use this if you wish to deserialize to a specific type using a deserialization library of your choice
      * Return the DigitalTwinCommandResponse payload in json string
+     * Use this if you wish to deserialize to a specific type using a deserialization library of your choice
      * @return the DigitalTwinCommandResponse payload in json string
      */
     public String getPayloadAsJsonString()
