@@ -2,7 +2,7 @@ package glue;
 
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodRequestOptions;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
-import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import io.swagger.server.api.MainApiException;
 import io.swagger.server.api.model.ConnectResponse;
@@ -81,7 +81,7 @@ public class ServiceGlue
             String payload = params.getString("payload");
             int responseTimeout = params.getInteger("responseTimeoutInSeconds", 0);
             int connectionTimeout = params.getInteger("connectTimeoutInSeconds", 0);
-            MethodResult result = null;
+            DirectMethodResponse result = null;
             System.out.printf("invoking%n");
             try
             {

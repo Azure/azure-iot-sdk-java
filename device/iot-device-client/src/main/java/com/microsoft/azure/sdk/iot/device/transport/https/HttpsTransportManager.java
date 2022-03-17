@@ -4,8 +4,8 @@
 package com.microsoft.azure.sdk.iot.device.transport.https;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
-import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
+import com.microsoft.azure.sdk.iot.device.edge.DirectMethodRequest;
+import com.microsoft.azure.sdk.iot.device.edge.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 
@@ -164,7 +164,7 @@ public class HttpsTransportManager
 
     /**
      * Invoke a direct method to the provided uri
-     * @param methodRequest the method request to make
+     * @param directMethodRequest the method request to make
      * @param deviceId the device id of the device the moduleId belongs to
      * @param moduleId the module id of the module to invoke the method on
      * @return the result of that request
@@ -172,7 +172,7 @@ public class HttpsTransportManager
      * @throws URISyntaxException if the provided deviceId and/or moduleId cannot be encoded correctly
      * @throws TransportException if any issues occur when sending the http request to its target
      */
-    public MethodResult invokeMethod(MethodRequest methodRequest, String deviceId, String moduleId) throws IOException, URISyntaxException, TransportException
+    public DirectMethodResponse invokeMethod(DirectMethodRequest directMethodRequest, String deviceId, String moduleId) throws IOException, URISyntaxException, TransportException
     {
         URI uri;
         if (moduleId == null || moduleId.isEmpty())
@@ -188,19 +188,19 @@ public class HttpsTransportManager
             uri = getModuleMethodUri(deviceId, moduleId);
         }
 
-        return this.invokeMethod(methodRequest, uri);
+        return this.invokeMethod(directMethodRequest, uri);
     }
 
     /**
      * Invoke a direct method to the provided uri
-     * @param methodRequest the method request to make
+     * @param directMethodRequest the method request to make
      * @param uri the path to send the request to
      * @return the result of that request
      * @throws IOException if the IotHub cannot be reached
      */
-    private MethodResult invokeMethod(MethodRequest methodRequest, URI uri) throws IOException, TransportException
+    private DirectMethodResponse invokeMethod(DirectMethodRequest directMethodRequest, URI uri) throws IOException, TransportException
     {
-        if (methodRequest == null)
+        if (directMethodRequest == null)
         {
             //Codes_SRS_HTTPSTRANSPORTMANAGER_34_019: [If the provided method request is null, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("direct method request cannot be null");
@@ -213,7 +213,7 @@ public class HttpsTransportManager
         }
 
         //Codes_SRS_HTTPSTRANSPORTMANAGER_34_021: [This function shall set the methodrequest json as the body of the http message.]
-        IotHubTransportMessage message = new IotHubTransportMessage(methodRequest.toJson());
+        IotHubTransportMessage message = new IotHubTransportMessage(directMethodRequest.toJson());
 
         //Codes_SRS_HTTPSTRANSPORTMANAGER_34_022: [This function shall set the http method to POST.]
         message.setIotHubMethod(HttpsMethod.POST);
@@ -236,7 +236,7 @@ public class HttpsTransportManager
 
         //Codes_SRS_HTTPSTRANSPORTMANAGER_34_027 [If the http response doesn't contain an error code, this function return a method result with the response message body as the method result body.]
         String resultJson = new String(responseMessage.getBody(), StandardCharsets.UTF_8);
-        return new MethodResult(resultJson);
+        return new DirectMethodResponse(resultJson);
     }
 
     private static URI getDirectMethodUri(String deviceId) throws UnsupportedEncodingException, URISyntaxException

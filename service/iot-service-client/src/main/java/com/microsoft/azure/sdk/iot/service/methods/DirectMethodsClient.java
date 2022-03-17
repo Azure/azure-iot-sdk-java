@@ -5,6 +5,7 @@ package com.microsoft.azure.sdk.iot.service.methods;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
+import com.google.gson.GsonBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
@@ -153,7 +154,7 @@ public final class DirectMethodsClient
      * @throws IotHubException This exception is thrown if the response verification failed.
      * @throws IOException This exception is thrown if the IO operation failed.
      */
-    public MethodResult invoke(String deviceId, String methodName) throws IotHubException, IOException
+    public DirectMethodResponse invoke(String deviceId, String methodName) throws IotHubException, IOException
     {
         return invoke(deviceId, methodName, DirectMethodRequestOptions.builder().build());
     }
@@ -168,7 +169,7 @@ public final class DirectMethodsClient
      * @throws IotHubException This exception is thrown if the response verification failed.
      * @throws IOException This exception is thrown if the IO operation failed.
      */
-    public MethodResult invoke(String deviceId, String methodName, DirectMethodRequestOptions options) throws IotHubException, IOException
+    public DirectMethodResponse invoke(String deviceId, String methodName, DirectMethodRequestOptions options) throws IotHubException, IOException
     {
         if (deviceId == null || deviceId.isEmpty())
         {
@@ -196,7 +197,7 @@ public final class DirectMethodsClient
      * @throws IotHubException This exception is thrown if the response verification failed.
      * @throws IOException This exception is thrown if the IO operation failed.
      */
-    public MethodResult invoke(String deviceId, String moduleId, String methodName) throws IotHubException, IOException
+    public DirectMethodResponse invoke(String deviceId, String moduleId, String methodName) throws IotHubException, IOException
     {
         return invoke(deviceId, moduleId, methodName, DirectMethodRequestOptions.builder().build());
     }
@@ -212,7 +213,7 @@ public final class DirectMethodsClient
      * @throws IotHubException This exception is thrown if the response verification failed.
      * @throws IOException This exception is thrown if the IO operation failed.
      */
-    public MethodResult invoke(String deviceId, String moduleId, String methodName, DirectMethodRequestOptions options)
+    public DirectMethodResponse invoke(String deviceId, String moduleId, String methodName, DirectMethodRequestOptions options)
         throws IotHubException, IOException
     {
         if (deviceId == null || deviceId.isEmpty())
@@ -237,7 +238,7 @@ public final class DirectMethodsClient
         return invokeMethod(url, methodName, options);
     }
 
-    private MethodResult invokeMethod(URL url, String methodName, DirectMethodRequestOptions options)
+    private DirectMethodResponse invokeMethod(URL url, String methodName, DirectMethodRequestOptions options)
             throws IotHubException, IOException
     {
         MethodParser methodParser =
@@ -271,7 +272,7 @@ public final class DirectMethodsClient
         MethodParser methodParserResponse = new MethodParser();
         methodParserResponse.fromJson(new String(response.getBody(), StandardCharsets.UTF_8));
 
-        return new MethodResult(methodParserResponse.getStatus(), methodParserResponse.getPayload());
+        return new DirectMethodResponse(methodParserResponse.getStatus(), new GsonBuilder().create().toJsonTree(methodParserResponse.getPayload()));
     }
 
     private String getAuthenticationToken()

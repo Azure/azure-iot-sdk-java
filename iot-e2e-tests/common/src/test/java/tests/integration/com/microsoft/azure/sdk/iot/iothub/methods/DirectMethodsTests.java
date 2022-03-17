@@ -5,7 +5,6 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.methods;
 
-
 import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.service.exceptions.ErrorCodeDescription;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
@@ -18,7 +17,7 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnauthorizedExceptio
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodRequestOptions;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClientOptions;
-import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubGatewayTimeoutException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -34,10 +33,16 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestModuleIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.CustomObject;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DirectMethodsCommon;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.NestedCustomObject;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
@@ -162,7 +167,7 @@ public class DirectMethodsTests extends DirectMethodsCommon
                 .methodConnectTimeoutSeconds(CONNECTION_TIMEOUT)
                 .build();
 
-        MethodResult result;
+        DirectMethodResponse result;
         if (testInstance.identity instanceof TestModuleIdentity)
         {
             result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), METHOD_DELAY_IN_MILLISECONDS, options);
@@ -175,7 +180,8 @@ public class DirectMethodsTests extends DirectMethodsCommon
         // Assert
         assertNotNull(buildExceptionMessage("method result was null", testInstance.identity.getClient()), result);
         assertEquals(buildExceptionMessage("Expected SUCCESS but got " + result.getStatus(), testInstance.identity.getClient()), (long)METHOD_SUCCESS, (long)result.getStatus());
-        assertEquals(buildExceptionMessage("Expected " + METHOD_DELAY_IN_MILLISECONDS + ":succeed" + " But got " + result.getPayload(), testInstance.identity.getClient()), METHOD_DELAY_IN_MILLISECONDS + ":succeed", result.getPayload());
+        assertEquals(buildExceptionMessage("Expected " + METHOD_DELAY_IN_MILLISECONDS + ":succeed" + " But got " + result.getPayload(String.class),
+                testInstance.identity.getClient()), METHOD_DELAY_IN_MILLISECONDS + ":succeed", result.getPayload(String.class));
     }
 
     @Test
@@ -329,5 +335,79 @@ public class DirectMethodsTests extends DirectMethodsCommon
         {
             proxyServer.stop();
         }
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void invokeMethodWithPayloadAsNull() throws Exception
+    {
+        // Direct method with null payload
+        super.subscribeToMethodAndReceiveAsDifferentTypes("Null");
+        super.invokeHelper(null);
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void invokeMethodWithPayloadAsPrimitiveType() throws Exception
+    {
+        // Direct method payload in boolean (one of Primitive types)
+        boolean bool = true;
+        super.subscribeToMethodAndReceiveAsDifferentTypes("Boolean");
+        super.invokeHelper(bool);
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void invokeMethodWithPayloadAsString() throws Exception
+    {
+        // Direct method payload in String type
+        String string = "This is a valid payload.";
+        super.subscribeToMethodAndReceiveAsDifferentTypes(string.getClass().getSimpleName());
+        super.invokeHelper(string);
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void invokeMethodWithPayloadAsArray() throws Exception
+    {
+        // Direct method payload in Array
+        byte[] bytes = new byte[]{1, 1, 1};
+        super.subscribeToMethodAndReceiveAsDifferentTypes("Array");
+        super.invokeHelper(bytes);
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void invokeMethodWithPayloadAsList() throws Exception
+    {
+        // Direct method payload in List type
+        List<Double> list = new ArrayList<>();
+        list.add(1.0);
+        list.add(1.0);
+        list.add(1.0);
+        super.subscribeToMethodAndReceiveAsDifferentTypes(list.getClass().getSimpleName());
+        super.invokeHelper(list);
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void invokeMethodWithPayloadAsMap() throws Exception
+    {
+        // Direct method payload in Map type
+        Map<String, Object> map = new HashMap<>();
+        map.put("key", "value");
+
+        super.subscribeToMethodAndReceiveAsDifferentTypes(map.getClass().getSimpleName());
+        super.invokeHelper(map);
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void invokeMethodWithPayloadAsCustomObject() throws Exception
+    {
+        // Direct method payload in Custom type
+        CustomObject customObject = new CustomObject("some test message", 1, true, new NestedCustomObject("some nested test message", 2));
+        super.subscribeToMethodAndReceiveAsDifferentTypes(customObject.getClass().getSimpleName());
+        super.invokeHelper(customObject);
     }
 }

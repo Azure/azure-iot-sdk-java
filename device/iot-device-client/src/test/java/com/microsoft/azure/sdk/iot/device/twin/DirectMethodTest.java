@@ -195,7 +195,7 @@ public class DirectMethodTest
         new NonStrictExpectations()
         {
             {
-                mockedDeviceMethodCB.onMethodInvoked(anyString, any, any);
+                mockedDeviceMethodCB.onMethodInvoked(anyString, (DirectMethodPayload)any, any);
                 result = testUserData;
 
                 new IotHubTransportMessage((byte[]) any, DEVICE_METHODS);
@@ -250,7 +250,7 @@ public class DirectMethodTest
         new NonStrictExpectations()
         {
             {
-                mockedDeviceMethodCB.onMethodInvoked(anyString, any, any);
+                mockedDeviceMethodCB.onMethodInvoked(anyString, (DirectMethodPayload)any, any);
                 result = testUserData;
             }
         };
@@ -289,7 +289,7 @@ public class DirectMethodTest
         new NonStrictExpectations()
         {
             {
-                mockedDeviceMethodCB.onMethodInvoked(anyString, any, any);
+                mockedDeviceMethodCB.onMethodInvoked(anyString, (DirectMethodPayload)any, any);
                 result = testUserData;
             }
         };
@@ -330,7 +330,7 @@ public class DirectMethodTest
         new NonStrictExpectations()
         {
             {
-                mockedDeviceMethodCB.onMethodInvoked(anyString, any, any);
+                mockedDeviceMethodCB.onMethodInvoked(anyString, (DirectMethodPayload)any, any);
                 result = testUserData;
             }
         };
@@ -366,7 +366,7 @@ public class DirectMethodTest
         new NonStrictExpectations()
         {
             {
-                mockedDeviceMethodCB.onMethodInvoked(anyString, any, any);
+                mockedDeviceMethodCB.onMethodInvoked(anyString, (DirectMethodPayload)any, any);
                 result = new Exception("Test Exception");
             }
         };

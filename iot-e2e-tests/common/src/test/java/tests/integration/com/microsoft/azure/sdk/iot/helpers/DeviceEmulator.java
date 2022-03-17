@@ -6,6 +6,7 @@
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.twin.DirectMethodPayload;
 import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
 import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
@@ -217,7 +218,7 @@ public class DeviceEmulator
     protected class MethodInvokeCallback implements MethodCallback
     {
         @Override
-        public synchronized DirectMethodResponse onMethodInvoked(String methodName, Object methodData, Object context)
+        public synchronized DirectMethodResponse onMethodInvoked(String methodName, DirectMethodPayload methodData, Object context)
         {
             System.out.println("Device invoked " + methodName);
             DirectMethodResponse directMethodResponse;

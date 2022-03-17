@@ -10,7 +10,7 @@ import com.microsoft.azure.sdk.iot.service.jobs.serializers.JobsResponseParser;
 import com.microsoft.azure.sdk.iot.service.jobs.serializers.JobsStatisticsParser;
 import com.microsoft.azure.sdk.iot.service.twin.TwinState;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
-import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.service.twin.Pair;
 import lombok.Getter;
 
@@ -121,7 +121,7 @@ public class ScheduledJob
     private final String parentJobId;
 
     @Getter
-    private MethodResult outcomeResult;
+    private DirectMethodResponse outcomeResult;
 
     /**
      * The error message of the job in query, if any.
@@ -166,7 +166,9 @@ public class ScheduledJob
             {
                 try
                 {
-                    this.outcomeResult = new MethodResult(jobsResponseParser.getCloudToDeviceMethod().getStatus(), jobsResponseParser.getCloudToDeviceMethod().getPayload());
+                    this.outcomeResult = new DirectMethodResponse(
+                        jobsResponseParser.getCloudToDeviceMethod().getStatus(),
+                        new GsonBuilder().create().toJsonTree(jobsResponseParser.getCloudToDeviceMethod().getPayload()));
                 }
                 catch (IllegalArgumentException e)
                 {
