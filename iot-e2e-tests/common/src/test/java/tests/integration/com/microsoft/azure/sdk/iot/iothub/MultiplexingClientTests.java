@@ -10,6 +10,8 @@ import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.ConnectionStatusChangeContext;
+import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesCallback;
+import com.microsoft.azure.sdk.iot.device.twin.DirectMethodPayload;
 import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
@@ -760,7 +762,7 @@ public class MultiplexingClientTests extends IntegrationTest
         }
 
         @Override
-        public DirectMethodResponse onMethodInvoked(String methodName, Object methodData, Object context) {
+        public DirectMethodResponse onMethodInvoked(String methodName, DirectMethodPayload methodData, Object context) {
             directMethodCallbackFired = true;
             if (methodName.equals(expectedMethodName))
             {

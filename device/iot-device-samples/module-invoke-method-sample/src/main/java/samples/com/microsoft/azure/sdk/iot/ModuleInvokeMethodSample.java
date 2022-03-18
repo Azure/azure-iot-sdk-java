@@ -4,8 +4,8 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
-import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
+import com.microsoft.azure.sdk.iot.device.edge.DirectMethodRequest;
+import com.microsoft.azure.sdk.iot.device.edge.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 
 import java.io.IOException;
@@ -82,21 +82,23 @@ public class ModuleInvokeMethodSample
         ModuleClient client = ModuleClient.createFromEnvironment(new UnixDomainSocketSample.UnixDomainSocketChannelImpl(), protocol);
         client.open(false);
 
-        MethodRequest methodRequest = new MethodRequest(methodName, methodPayload);
-        MethodResult result;
+        // Along with String as the type of "methodPayload" here, the type can also be Null/Primitive type/Array/List/Map/custom type.
+        // Please also refer to https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-client/src/main/java/com/microsoft/azure/sdk/iot/device/edge/DirectMethodRequest.java
+        DirectMethodRequest directMethodRequest = new DirectMethodRequest(methodName, methodPayload);
+        DirectMethodResponse result;
         try
         {
             if (moduleIdToInvokeOn == null || moduleIdToInvokeOn.isEmpty())
             {
-                result = invokeMethodOnDevice(methodName, deviceIdToInvokeOn, client, methodRequest);
+                result = invokeMethodOnDevice(methodName, deviceIdToInvokeOn, client, directMethodRequest);
             }
             else
             {
-                result = invokeMethodOnModule(methodName, deviceIdToInvokeOn, moduleIdToInvokeOn, client, methodRequest);
+                result = invokeMethodOnModule(methodName, deviceIdToInvokeOn, moduleIdToInvokeOn, client, directMethodRequest);
             }
 
             System.out.println("Received response status: " + result.getStatus());
-            System.out.println("Received response payload: " + result.getPayloadObject());
+            System.out.println("Received response payload: " + result.getPayload(String.class));
         }
         catch (ModuleClientException e)
         {
@@ -109,18 +111,18 @@ public class ModuleInvokeMethodSample
         }
     }
 
-    private static MethodResult invokeMethodOnDevice(String methodName, String deviceIdToInvokeOn, ModuleClient client, MethodRequest methodRequest) throws ModuleClientException
+    private static DirectMethodResponse invokeMethodOnDevice(String methodName, String deviceIdToInvokeOn, ModuleClient client, DirectMethodRequest directMethodRequest) throws ModuleClientException
     {
         System.out.println("Invoking method \"" + methodName + "\" on device \"" + deviceIdToInvokeOn + "\"");
-        MethodResult result = client.invokeMethod(deviceIdToInvokeOn, methodRequest);
+        DirectMethodResponse result = client.invokeMethod(deviceIdToInvokeOn, directMethodRequest);
         System.out.println("Finished Invoking method \"" + methodName + "\" on device \"" + deviceIdToInvokeOn + "\"");
         return result;
     }
 
-    private static MethodResult invokeMethodOnModule(String methodName, String deviceIdToInvokeOn, String moduleIdToInvokeOn, ModuleClient client, MethodRequest methodRequest) throws ModuleClientException
+    private static DirectMethodResponse invokeMethodOnModule(String methodName, String deviceIdToInvokeOn, String moduleIdToInvokeOn, ModuleClient client, DirectMethodRequest directMethodRequest) throws ModuleClientException
     {
         System.out.println("Invoking method \"" + methodName + "\" on module \"" + moduleIdToInvokeOn + "\"");
-        MethodResult result = client.invokeMethod(deviceIdToInvokeOn, moduleIdToInvokeOn, methodRequest);
+        DirectMethodResponse result = client.invokeMethod(deviceIdToInvokeOn, moduleIdToInvokeOn, directMethodRequest);
         System.out.println("Finished Invoking method \"" + methodName + "\" on module \"" + moduleIdToInvokeOn + "\"");
         return result;
     }

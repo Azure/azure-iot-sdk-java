@@ -22,7 +22,7 @@
 # the packages where we keep our JSON parsing classes from minification to avoid this issue
 -keep class com.microsoft.azure.sdk.iot.deps.serializer.* { *; }
 -keep class com.microsoft.azure.sdk.iot.deps.twin.* { *; }
--keep class com.microsoft.azure.sdk.iot.device.edge.MethodRequest { *; }
+-keep class com.microsoft.azure.sdk.iot.device.edge.DirectMethodRequest { *; }
 -keep class com.microsoft.azure.sdk.iot.device.hsm.parser.ErrorResponse { *; }
 -keep class com.microsoft.azure.sdk.iot.device.hsm.parser.SignRequest { *; }
 

@@ -5,6 +5,7 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.ConnectionStatusChangeContext;
+import com.microsoft.azure.sdk.iot.device.twin.DirectMethodPayload;
 import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
@@ -51,7 +52,7 @@ public class DirectMethodSample
     protected static class SampleMethodCallback implements MethodCallback
     {
         @Override
-        public DirectMethodResponse onMethodInvoked(String methodName, Object methodData, Object context)
+        public DirectMethodResponse onMethodInvoked(String methodName, DirectMethodPayload methodData, Object context)
         {
             DirectMethodResponse deviceMethodData;
             int status = method_default(methodData);
@@ -60,7 +61,7 @@ public class DirectMethodSample
                 status = method_command(methodData);
             }
 
-            deviceMethodData = new DirectMethodResponse(status, "executed " + methodName);
+            deviceMethodData = new DirectMethodResponse(status, methodData);
 
             return deviceMethodData;
         }
