@@ -23,7 +23,7 @@ public class IotHubTransportMessage extends Message
     private String uriPath;
 
     private String methodName;
-    private String version;
+    private int version;
     private String requestId;
     private String status;
     private DeviceOperations operationType;
@@ -40,7 +40,7 @@ public class IotHubTransportMessage extends Message
         super(data);
         super.setMessageType(messageType);
         this.methodName = null;
-        this.version = null;
+        this.version = 0;
         this.requestId = null;
         this.status = null;
         this.operationType = DeviceOperations.DEVICE_OPERATION_UNKNOWN;
@@ -55,7 +55,7 @@ public class IotHubTransportMessage extends Message
         super(body);
         super.setMessageType(MessageType.UNKNOWN);
         this.methodName = null;
-        this.version = null;
+        this.version = 0;
         this.requestId = null;
         this.status = null;
         this.operationType = DeviceOperations.DEVICE_OPERATION_UNKNOWN;
@@ -98,7 +98,7 @@ public class IotHubTransportMessage extends Message
      * Setter for the message version
      * @param version The String containing the version.
      */
-    public void setVersion(String version)
+    public void setVersion(int version)
     {
         this.version = version;
     }
@@ -107,9 +107,9 @@ public class IotHubTransportMessage extends Message
      * Getter for the message version
      * @return the String containing the version.
      */
-    public String getVersion()
+    public int getVersion()
     {
-        return  this.version;
+        return this.version;
     }
 
     /**

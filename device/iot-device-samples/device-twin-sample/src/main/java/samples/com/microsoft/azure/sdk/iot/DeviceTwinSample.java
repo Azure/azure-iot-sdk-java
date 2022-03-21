@@ -189,7 +189,7 @@ public class DeviceTwinSample
             CountDownLatch twinReportedPropertiesSentLatch = new CountDownLatch(1);
             client.updateReportedPropertiesAsync(
                 reportedProperties,
-                (statusCode, e, callbackContext) ->
+                (statusCode, version, e, callbackContext) ->
                 {
                     if (statusCode == OK)
                     {

@@ -8,10 +8,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.twin.GetTwinCorrelatingMessageCallback;
-import com.microsoft.azure.sdk.iot.device.twin.Twin;
-import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
-import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesUpdateCorrelatingMessageCallback;
+import com.microsoft.azure.sdk.iot.device.twin.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.twin.Pair;
@@ -32,6 +29,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -163,12 +161,13 @@ public class TwinTests extends TwinCommon
             },
             null);
 
-        com.microsoft.azure.sdk.iot.device.twin.TwinCollection twinCollection = new com.microsoft.azure.sdk.iot.device.twin.TwinCollection();
-        twinCollection.put(reportedPropertyKey1, reportedPropertyValue1);
-        twinCollection.put(reportedPropertyKey2, reportedPropertyValue2);
-        IotHubStatusCode statusCode = testInstance.testIdentity.getClient().updateReportedProperties(twinCollection);
+        Twin twin = testInstance.testIdentity.getClient().getTwin();
+        twin.getReportedProperties().put(reportedPropertyKey1, reportedPropertyValue1);
+        twin.getReportedProperties().put(reportedPropertyKey2, reportedPropertyValue2);
+        ReportedPropertiesUpdateResponse response = testInstance.testIdentity.getClient().updateReportedProperties(twin.getReportedProperties());
 
-        assertEquals(IotHubStatusCode.OK, statusCode);
+        assertEquals(IotHubStatusCode.OK, response.getStatusCode());
+        assertTrue(response.getVersion() > 0);
 
         com.microsoft.azure.sdk.iot.service.twin.Twin serviceClientTwin = testInstance.getServiceClientTwin();
         assertTrue(isPropertyInSet(serviceClientTwin.getReportedProperties(), reportedPropertyKey1, reportedPropertyValue1));
@@ -192,16 +191,18 @@ public class TwinTests extends TwinCommon
             null);
 
         // send one reported property
-        com.microsoft.azure.sdk.iot.device.twin.TwinCollection twinCollection = new com.microsoft.azure.sdk.iot.device.twin.TwinCollection();
-        twinCollection.put(reportedPropertyKey1, reportedPropertyValue1);
-        IotHubStatusCode statusCode = testInstance.testIdentity.getClient().updateReportedProperties(twinCollection);
-        assertEquals(IotHubStatusCode.OK, statusCode);
+        Twin twin = testInstance.testIdentity.getClient().getTwin();
+        twin.getReportedProperties().put(reportedPropertyKey1, reportedPropertyValue1);
+        ReportedPropertiesUpdateResponse response = testInstance.testIdentity.getClient().updateReportedProperties(twin.getReportedProperties());
+        twin.getReportedProperties().setVersion(response.getVersion());
+        assertEquals(IotHubStatusCode.OK, response.getStatusCode());
 
         // send a different reported property
-        twinCollection.clear();
-        twinCollection.put(reportedPropertyKey2, reportedPropertyValue2);
-        statusCode = testInstance.testIdentity.getClient().updateReportedProperties(twinCollection);
-        assertEquals(IotHubStatusCode.OK, statusCode);
+        twin.getReportedProperties().clear();
+        twin.getReportedProperties().put(reportedPropertyKey2, reportedPropertyValue2);
+        response = testInstance.testIdentity.getClient().updateReportedProperties(twin.getReportedProperties());
+        twin.getReportedProperties().setVersion(response.getVersion());
+        assertEquals(IotHubStatusCode.OK, response.getStatusCode());
 
         com.microsoft.azure.sdk.iot.service.twin.Twin serviceClientTwin = testInstance.getServiceClientTwin();
         assertTrue(isPropertyInSet(serviceClientTwin.getReportedProperties(), reportedPropertyKey1, reportedPropertyValue1));
@@ -289,11 +290,11 @@ public class TwinTests extends TwinCommon
             },
             expectedGetTwinContext);
 
-        getTwinOnRequestQueuedLatch.await();
-        getTwinOnRequestSentLatch.await();
-        getTwinOnRequestAcknowledgedLatch.await();
-        getTwinOnResponseReceivedLatch.await();
-        getTwinOnResponseAcknowledgedLatch.await();
+        assertTrue("Timed out waiting for a callback", getTwinOnRequestQueuedLatch.await(TWIN_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS));
+        assertTrue("Timed out waiting for a callback", getTwinOnRequestSentLatch.await(TWIN_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS));
+        assertTrue("Timed out waiting for a callback", getTwinOnRequestAcknowledgedLatch.await(TWIN_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS));
+        assertTrue("Timed out waiting for a callback", getTwinOnResponseReceivedLatch.await(TWIN_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS));
+        assertTrue("Timed out waiting for a callback", getTwinOnResponseAcknowledgedLatch.await(TWIN_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS));
 
         Twin twin = twinAtomicReference.get();
 
@@ -320,8 +321,7 @@ public class TwinTests extends TwinCommon
         // create some reported properties
         final String reportedPropertyKey = UUID.randomUUID().toString();
         final String reportedPropertyValue = UUID.randomUUID().toString();
-        TwinCollection reportedProperties = new TwinCollection();
-        reportedProperties.put(reportedPropertyKey, reportedPropertyValue);
+        twin.getReportedProperties().put(reportedPropertyKey, reportedPropertyValue);
 
         // send the reported properties and wait for the service to have acknowledged them
         final Object expectedUpdateReportedPropertiesContext = new Object();
@@ -333,7 +333,7 @@ public class TwinTests extends TwinCommon
 
         AtomicReference<IotHubStatusCode> iotHubStatusCodeAtomicReference = new AtomicReference<>();
         testInstance.testIdentity.getClient().updateReportedPropertiesAsync(
-            reportedProperties,
+                twin.getReportedProperties(),
             new ReportedPropertiesUpdateCorrelatingMessageCallback()
             {
                 @Override
@@ -364,7 +364,7 @@ public class TwinTests extends TwinCommon
                 }
 
                 @Override
-                public void onResponseReceived(Message message, Object callbackContext, IotHubStatusCode statusCode, TransportException e)
+                public void onResponseReceived(Message message, Object callbackContext, IotHubStatusCode statusCode, int version, TransportException e)
                 {
                     if (message != null && callbackContext.equals(expectedUpdateReportedPropertiesContext) && e == null && statusCode == IotHubStatusCode.OK)
                     {
@@ -384,11 +384,11 @@ public class TwinTests extends TwinCommon
             },
             expectedUpdateReportedPropertiesContext);
 
-        updateReportedPropertiesOnRequestQueuedLatch.await();
-        updateReportedPropertiesOnRequestSentLatch.await();
-        updateReportedPropertiesOnRequestAcknowledgedLatch.await();
-        updateReportedPropertiesOnResponseReceivedLatch.await();
-        updateReportedPropertiesOnResponseAcknowledgedLatch.await();
+        assertTrue("Timed out waiting for a callback", updateReportedPropertiesOnRequestQueuedLatch.await(TWIN_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS));
+        assertTrue("Timed out waiting for a callback", updateReportedPropertiesOnRequestSentLatch.await(TWIN_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS));
+        assertTrue("Timed out waiting for a callback", updateReportedPropertiesOnRequestAcknowledgedLatch.await(TWIN_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS));
+        assertTrue("Timed out waiting for a callback", updateReportedPropertiesOnResponseReceivedLatch.await(TWIN_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS));
+        assertTrue("Timed out waiting for a callback", updateReportedPropertiesOnResponseAcknowledgedLatch.await(TWIN_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS));
 
         IotHubStatusCode statusCode = iotHubStatusCodeAtomicReference.get();
 

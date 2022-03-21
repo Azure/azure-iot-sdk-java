@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
+import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesUpdateResponse;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
@@ -38,9 +39,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
@@ -232,10 +231,11 @@ public class TwinCommon extends IntegrationTest
         twin.getReportedProperties().put(reportedPropertyKey, reportedPropertyValue);
 
         // send the reported properties and wait for the service to have acknowledged them
-        IotHubStatusCode statusCode = testInstance.testIdentity.getClient().updateReportedProperties(twin.getReportedProperties());
+        ReportedPropertiesUpdateResponse response = testInstance.testIdentity.getClient().updateReportedProperties(twin.getReportedProperties());
 
         // the reported properties request should have been ack'd with OK from the service
-        assertEquals(IotHubStatusCode.OK, statusCode);
+        assertEquals(IotHubStatusCode.OK, response.getStatusCode());
+        assertTrue(response.getVersion() > 0);
 
         // get the twin from the service client to check if the reported property is now present
         testInstance.serviceTwin = testInstance.getServiceClientTwin();

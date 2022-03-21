@@ -7,18 +7,9 @@ package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
-import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesCallback;
-import com.microsoft.azure.sdk.iot.device.twin.DeviceTwin;
-import com.microsoft.azure.sdk.iot.device.twin.DirectMethod;
-import com.microsoft.azure.sdk.iot.device.twin.GetTwinCallback;
-import com.microsoft.azure.sdk.iot.device.twin.GetTwinCorrelatingMessageCallback;
-import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
-import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesCallback;
-import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesSubscriptionCallback;
-import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesUpdateCorrelatingMessageCallback;
-import com.microsoft.azure.sdk.iot.device.twin.Twin;
-import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
+import com.microsoft.azure.sdk.iot.device.twin.*;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import lombok.extern.slf4j.Slf4j;
 
@@ -374,13 +365,13 @@ public class InternalClient
      * properties before this method can be called.
      *
      * @param reportedProperties The reported property key/value pairs to add/update in the twin.
-     * @return The status code returned by the service for this operation. If this value is {@link IotHubStatusCode#OK} then
-     * the patch was successful.
+     * @return The status code returned by the service for this operation and the new reported properties version. If
+     * the status code value is {@link IotHubStatusCode#OK} then the patch was successful.
      * @throws TimeoutException if the service fails to acknowledge the reported property update request within the default timeout.
      * @throws InterruptedException if the operation is interrupted while waiting on the reported property update request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open or if this client has not subscribed to desired properties yet.
      */
-    public IotHubStatusCode updateReportedProperties(TwinCollection reportedProperties)
+    public ReportedPropertiesUpdateResponse updateReportedProperties(TwinCollection reportedProperties)
         throws TimeoutException, InterruptedException, IllegalStateException
     {
         return updateReportedProperties(reportedProperties, DEFAULT_TIMEOUT_MILLISECONDS);
@@ -394,22 +385,24 @@ public class InternalClient
      * @param reportedProperties The reported property key/value pairs to add/update in the twin.
      * @param timeoutMilliseconds The maximum number of milliseconds this call will wait for the service to acknowledge the reported properties update request. If 0,
      * then it will wait indefinitely.
-     * @return The status code returned by the service for this operation. If this value is {@link IotHubStatusCode#OK} then
-     * the patch was successful.
+     * @return The status code returned by the service for this operation and the new reported properties version. If
+     * the status code value is {@link IotHubStatusCode#OK} then the patch was successful.
      * @throws TimeoutException if the service fails to acknowledge the reported property update request within the provided timeout.
      * @throws InterruptedException if the operation is interrupted while waiting on the reported property update request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open or if this client has not subscribed to desired properties yet.
      */
-    public IotHubStatusCode updateReportedProperties(TwinCollection reportedProperties, int timeoutMilliseconds)
+    public ReportedPropertiesUpdateResponse updateReportedProperties(TwinCollection reportedProperties, int timeoutMilliseconds)
         throws InterruptedException, TimeoutException, IllegalStateException
     {
         AtomicReference<IotHubStatusCode> statusCodeAtomicReference = new AtomicReference<>();
+        AtomicReference<Integer> versionAtomicReference = new AtomicReference<>();
         CountDownLatch latch = new CountDownLatch(1);
         this.updateReportedPropertiesAsync(
             reportedProperties,
-            (statusCode, e, callbackContext) ->
+            (statusCode, version, e, callbackContext) ->
             {
                 statusCodeAtomicReference.set(statusCode);
+                versionAtomicReference.set(version);
                 latch.countDown();
             },
             null);
@@ -428,7 +421,7 @@ public class InternalClient
             }
         }
 
-        return statusCodeAtomicReference.get();
+        return new ReportedPropertiesUpdateResponse(statusCodeAtomicReference.get(), versionAtomicReference.get());
     }
 
     /**
@@ -672,9 +665,9 @@ public class InternalClient
                 }
 
                 @Override
-                public void onResponseReceived(Message message, Object callbackContext, IotHubStatusCode statusCode, TransportException e)
+                public void onResponseReceived(Message message, Object callbackContext, IotHubStatusCode statusCode, int version, TransportException e)
                 {
-                    reportedPropertiesCallback.onReportedPropertiesUpdateAcknowledged(statusCode, e, callbackContext);
+                    reportedPropertiesCallback.onReportedPropertiesUpdateAcknowledged(statusCode, version, e, callbackContext);
                 }
 
                 @Override

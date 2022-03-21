@@ -391,6 +391,13 @@ public class TwinCollection extends HashMap<String, Object> {
     }
 
     /**
+     * Setter for the version.
+     */
+    public final void setVersion(int version) {
+        this.version = version;
+    }
+
+    /**
      * Getter for the TwinCollection metadata
      *
      * @return the {@link TwinMetadata} of the Whole TwinCollection. It can be {@code null}.
