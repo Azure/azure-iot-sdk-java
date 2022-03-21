@@ -33,12 +33,11 @@ public class DeviceTwinMessageTest
         IotHubTransportMessage msg = new IotHubTransportMessage(actualData, MessageType.DEVICE_TWIN);
 
         //assert
-        String actualVersion = Deencapsulation.getField(msg, "version");
+        int actualVersion = Deencapsulation.getField(msg, "version");
         String actualRequestId = Deencapsulation.getField(msg, "requestId");
         String actualStatus = Deencapsulation.getField(msg, "status");
         DeviceOperations operationType = Deencapsulation.getField(msg, "operationType");
 
-        assertNull(actualVersion);
         assertNull(actualRequestId);
         assertNull(actualStatus);
         assertEquals(operationType, DeviceOperations.DEVICE_OPERATION_UNKNOWN);
