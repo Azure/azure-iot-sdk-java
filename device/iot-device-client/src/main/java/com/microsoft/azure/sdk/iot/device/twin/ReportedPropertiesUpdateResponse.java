@@ -17,7 +17,9 @@ public class ReportedPropertiesUpdateResponse
     private final IotHubStatusCode statusCode;
 
     /**
-     * The new version of the reported properties after a successful reported properties update.
+     * The new version of the reported properties after a successful reported properties update. If the client updating
+     * its reported properties is connected to Edgehub instead of IoT Hub, then this version won't change since Edgehub
+     * does not apply this reported properties update immediately.
      */
     @Getter
     private final int version;

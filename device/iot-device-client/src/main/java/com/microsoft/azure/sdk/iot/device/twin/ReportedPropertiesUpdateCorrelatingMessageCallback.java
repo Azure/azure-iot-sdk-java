@@ -49,7 +49,9 @@ public interface ReportedPropertiesUpdateCorrelatingMessageCallback
      * @param message The response message received by the transport.
      * @param callbackContext The context sent with the message.
      * @param statusCode The status of the update reported properties onMethodInvoked as a whole.
-     * @param version The new version of the reported properties after a successful update.
+     * @param version The new version of the reported properties after a successful update. If the client updating
+     * its reported properties is connected to Edgehub instead of IoT Hub, then this version won't change since Edgehub
+     * does not apply this reported properties update immediately.
      * @param e The error or exception given by the transport. If there are no errors this will be {@code null}.
      */
     void onResponseReceived(Message message, Object callbackContext, IotHubStatusCode statusCode, int version, TransportException e);
