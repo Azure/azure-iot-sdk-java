@@ -229,11 +229,10 @@ public class TwinCommon extends IntegrationTest
         // create some reported properties
         final String reportedPropertyKey = UUID.randomUUID().toString();
         final String reportedPropertyValue = UUID.randomUUID().toString();
-        TwinCollection reportedProperties = new TwinCollection();
-        reportedProperties.put(reportedPropertyKey, reportedPropertyValue);
+        twin.getReportedProperties().put(reportedPropertyKey, reportedPropertyValue);
 
         // send the reported properties and wait for the service to have acknowledged them
-        IotHubStatusCode statusCode = testInstance.testIdentity.getClient().updateReportedProperties(reportedProperties);
+        IotHubStatusCode statusCode = testInstance.testIdentity.getClient().updateReportedProperties(twin.getReportedProperties());
 
         // the reported properties request should have been ack'd with OK from the service
         assertEquals(IotHubStatusCode.OK, statusCode);
