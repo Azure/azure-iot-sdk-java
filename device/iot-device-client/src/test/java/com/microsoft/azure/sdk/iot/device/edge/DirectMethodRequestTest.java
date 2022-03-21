@@ -11,7 +11,7 @@ import org.junit.Test;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNull;
 
-public class MethodRequestTest
+public class DirectMethodRequestTest
 {
     final static String expectedMethodName = "some method";
     final static String expectedPayload = "some payload";
@@ -21,7 +21,7 @@ public class MethodRequestTest
     public void constructorUsesDefaultTimeouts()
     {
         //act
-        MethodRequest request = new MethodRequest(expectedMethodName, expectedPayload);
+        DirectMethodRequest request = new DirectMethodRequest(expectedMethodName, expectedPayload);
 
         //assert
         assertNull(Deencapsulation.getField(request, "responseTimeoutInSeconds"));
@@ -33,7 +33,7 @@ public class MethodRequestTest
     public void constructorThrowsForEmptyMethodName()
     {
         //act
-        MethodRequest request = new MethodRequest("", expectedPayload);
+        DirectMethodRequest request = new DirectMethodRequest("", expectedPayload);
     }
 
     // Tests_SRS_DIRECTMETHODREQUEST_34_002: [If the provided methodName is null or empty, this function shall throw an IllegalArgumentException.]
@@ -41,7 +41,7 @@ public class MethodRequestTest
     public void constructorThrowsForNullMethodName()
     {
         //act
-        MethodRequest request = new MethodRequest(null, expectedPayload);
+        DirectMethodRequest request = new DirectMethodRequest(null, expectedPayload);
     }
 
     // Tests_SRS_DIRECTMETHODREQUEST_34_003: [This constructor shall save the provided payload, methodname, and timeouts.]
@@ -53,13 +53,12 @@ public class MethodRequestTest
         int expectedConnectionTimeout = 4;
 
         //act
-        MethodRequest request = new MethodRequest(expectedMethodName, expectedPayload, expectedResponseTimeout, expectedConnectionTimeout);
+        DirectMethodRequest request = new DirectMethodRequest(expectedMethodName, expectedPayload, expectedResponseTimeout, expectedConnectionTimeout);
 
         //assert
         assertEquals(expectedResponseTimeout, (int) Deencapsulation.getField(request, "responseTimeoutInSeconds"));
         assertEquals(expectedConnectionTimeout, (int) Deencapsulation.getField(request, "connectionTimeoutInSeconds"));
         assertEquals(expectedMethodName, Deencapsulation.getField(request, "methodName"));
         assertEquals(expectedPayload, Deencapsulation.getField(request, "payload"));
-
     }
 }

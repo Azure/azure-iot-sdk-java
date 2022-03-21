@@ -166,7 +166,7 @@ public class IotHubServicesCommon
                                                                          AuthenticationType authType) throws IOException, InterruptedException
     {
         final List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates = new ArrayList<>();
-        client.setConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> actualStatusUpdates.add(new Pair<>(status, throwable)), new Object());
+        client.setConnectionStatusChangeCallback((context) -> actualStatusUpdates.add(new Pair<>(context.getNewStatus(), context.getCause())), new Object());
 
         sendMessages(client, protocol, messagesToSend, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, interMessageDelay, actualStatusUpdates);
 
@@ -260,7 +260,7 @@ public class IotHubServicesCommon
                                                                                   AuthenticationType authType) throws IOException, InterruptedException
     {
         final List<Pair<IotHubConnectionStatus, Throwable>> statusUpdates = new ArrayList<>();
-        client.setConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> statusUpdates.add(new Pair<>(status, throwable)), new Object());
+        client.setConnectionStatusChangeCallback((context) -> statusUpdates.add(new Pair<>(context.getNewStatus(), context.getCause())), new Object());
 
         client.open(false);
 

@@ -2,6 +2,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.twin.DirectMethodPayload;
 import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
@@ -172,7 +173,7 @@ public class HubTierConnectionTests extends IntegrationTest
     protected static class MethodCallback implements com.microsoft.azure.sdk.iot.device.twin.MethodCallback
     {
         @Override
-        public DirectMethodResponse onMethodInvoked(String methodName, Object methodData, Object context)
+        public DirectMethodResponse onMethodInvoked(String methodName, DirectMethodPayload methodData, Object context)
         {
             return new DirectMethodResponse(200, "payload");
         }
@@ -192,7 +193,7 @@ public class HubTierConnectionTests extends IntegrationTest
     {
         //arrange
         List<Pair<IotHubConnectionStatus, Throwable>> connectionStatusUpdates = new ArrayList<>();
-        testInstance.client.setConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> connectionStatusUpdates.add(new Pair<>(status, throwable)), null);
+        testInstance.client.setConnectionStatusChangeCallback((context) -> connectionStatusUpdates.add(new Pair<>(context.getNewStatus(), context.getCause())), null);
 
         testInstance.client.open(false);
 

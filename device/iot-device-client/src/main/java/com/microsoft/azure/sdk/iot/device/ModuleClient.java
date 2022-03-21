@@ -10,8 +10,8 @@ import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.SignatureProvider;
 import com.microsoft.azure.sdk.iot.device.edge.HttpsHsmTrustBundleProvider;
-import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
-import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
+import com.microsoft.azure.sdk.iot.device.edge.DirectMethodRequest;
+import com.microsoft.azure.sdk.iot.device.edge.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.edge.TrustBundleProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
@@ -412,12 +412,12 @@ public class ModuleClient extends InternalClient
     /**
      * Invoke a method on a device
      * @param deviceId the device to invoke a method on
-     * @param methodRequest the request containing the method to invoke on the device
+     * @param directMethodRequest the request containing the method to invoke on the device
      * @return the result of the method call
      * @throws ModuleClientException if the method cannot be invoked
      * @throws IllegalArgumentException if deviceId is null or empty
      */
-    public MethodResult invokeMethod(String deviceId, MethodRequest methodRequest) throws ModuleClientException, IllegalArgumentException
+    public DirectMethodResponse invokeMethod(String deviceId, DirectMethodRequest directMethodRequest) throws ModuleClientException, IllegalArgumentException
     {
         if (deviceId == null || deviceId.isEmpty())
         {
@@ -428,7 +428,7 @@ public class ModuleClient extends InternalClient
         {
             HttpsTransportManager httpsTransportManager = new HttpsTransportManager(this.config);
             httpsTransportManager.open();
-            return httpsTransportManager.invokeMethod(methodRequest, deviceId, "");
+            return httpsTransportManager.invokeMethod(directMethodRequest, deviceId, "");
         }
         catch (URISyntaxException | IOException | TransportException e)
         {
@@ -440,12 +440,12 @@ public class ModuleClient extends InternalClient
      * Invoke a method on a module
      * @param deviceId the device the module belongs to
      * @param moduleId the module to invoke the method on
-     * @param methodRequest the request containing the method to invoke on the device
+     * @param directMethodRequest the request containing the method to invoke on the device
      * @return the result of the method call
      * @throws ModuleClientException if the method cannot be invoked
      * @throws IllegalArgumentException if deviceId is null or empty, or if moduleId is null or empty
      */
-    public MethodResult invokeMethod(String deviceId, String moduleId, MethodRequest methodRequest) throws ModuleClientException, IllegalArgumentException
+    public DirectMethodResponse invokeMethod(String deviceId, String moduleId, DirectMethodRequest directMethodRequest) throws ModuleClientException, IllegalArgumentException
     {
         if (deviceId == null || deviceId.isEmpty())
         {
@@ -461,7 +461,7 @@ public class ModuleClient extends InternalClient
         {
             HttpsTransportManager httpsTransportManager = new HttpsTransportManager(this.config);
             httpsTransportManager.open();
-            return httpsTransportManager.invokeMethod(methodRequest, deviceId, moduleId);
+            return httpsTransportManager.invokeMethod(directMethodRequest, deviceId, moduleId);
         }
         catch (URISyntaxException | IOException | TransportException e)
         {

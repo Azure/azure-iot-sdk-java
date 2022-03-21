@@ -2,6 +2,7 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
+import com.microsoft.azure.sdk.iot.device.ConnectionStatusChangeContext;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,7 +11,11 @@ import static com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeRea
 @Slf4j
 public class IotHubConnectionStatusChangeLogger implements IotHubConnectionStatusChangeCallback {
     @Override
-    public void onStatusChanged(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext) {
+    public void onStatusChanged(ConnectionStatusChangeContext connectionStatusChangeContext) {
+        IotHubConnectionStatus status = connectionStatusChangeContext.getNewStatus();
+        IotHubConnectionStatusChangeReason statusChangeReason = connectionStatusChangeContext.getNewStatusReason();
+        Throwable throwable = connectionStatusChangeContext.getCause();
+
         log.debug("### Connection status change reported: status={}, reason={}, throwable={}", status, statusChangeReason, throwable);
 
         switch (status) {

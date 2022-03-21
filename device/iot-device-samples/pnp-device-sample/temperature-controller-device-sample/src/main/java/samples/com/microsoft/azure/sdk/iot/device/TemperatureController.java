@@ -292,9 +292,10 @@ public class TemperatureController {
         ClientOptions options = ClientOptions.builder().modelId(MODEL_ID).build();
         deviceClient = new DeviceClient(deviceConnectionString, protocol, options);
 
-        deviceClient.setConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> {
-            log.debug("Connection status change registered: status={}, reason={}", status, statusChangeReason);
+        deviceClient.setConnectionStatusChangeCallback((context) -> {
+            log.debug("Connection status change registered: status={}, reason={}", context.getNewStatus(), context.getNewStatusReason());
 
+            Throwable throwable = context.getCause();
             if (throwable != null) {
                 log.debug("The connection status change was caused by the following Throwable: {}", throwable.getMessage());
                 throwable.printStackTrace();
@@ -315,8 +316,8 @@ public class TemperatureController {
 
         @SneakyThrows(InterruptedException.class)
         @Override
-        public DirectMethodResponse onMethodInvoked(String methodName, Object methodData, Object context) {
-            String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
+        public DirectMethodResponse onMethodInvoked(String methodName, DirectMethodPayload methodData, Object context) {
+            String jsonRequest = methodData.getPayload(String.class);
 
             switch (methodName) {
                 case reboot:

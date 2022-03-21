@@ -4,8 +4,8 @@
 package com.microsoft.azure.sdk.iot.device.transport.https;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
-import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
+import com.microsoft.azure.sdk.iot.device.edge.DirectMethodRequest;
+import com.microsoft.azure.sdk.iot.device.edge.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.exceptions.HubOrDeviceIdNotFoundException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
@@ -42,9 +42,9 @@ public class HttpsTransportManagerTest
     @Mocked
     private IotHubTransportMessage mockedTransportMessage;
     @Mocked
-    private MethodRequest mockedMethodRequest;
+    private DirectMethodRequest mockedDirectMethodRequest;
     @Mocked
-    private MethodResult mockedMethodResult;
+    private DirectMethodResponse mockedDirectMethodResponse;
 
 
     /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_001: [The constructor shall store the device client configuration `config`.] */
@@ -439,7 +439,7 @@ public class HttpsTransportManagerTest
         new Expectations(HttpsTransportManager.class)
         {
             {
-                mockedMethodRequest.toJson();
+                mockedDirectMethodRequest.toJson();
                 result = expectedMethodRequestJson;
 
                 new IotHubTransportMessage(expectedMethodRequestJson);
@@ -464,12 +464,12 @@ public class HttpsTransportManagerTest
                 mockResponseMessage.getBody();
                 result = expectedResponseBody.getBytes(StandardCharsets.UTF_8);
 
-                new MethodResult(expectedResponseBody);
+                new DirectMethodResponse(expectedResponseBody);
             }
         };
 
         //act
-        transportManager.invokeMethod(mockedMethodRequest, expectedDeviceId, expectedModuleId);
+        transportManager.invokeMethod(mockedDirectMethodRequest, expectedDeviceId, expectedModuleId);
     }
 
     //Tests_SRS_HTTPSTRANSPORTMANAGER_34_018: [If a moduleId is provided, this function shall call invokeMethod with the provided request and
@@ -496,7 +496,7 @@ public class HttpsTransportManagerTest
         new Expectations(HttpsTransportManager.class)
         {
             {
-                mockedMethodRequest.toJson();
+                mockedDirectMethodRequest.toJson();
                 result = expectedMethodRequestJson;
 
                 new IotHubTransportMessage(expectedMethodRequestJson);
@@ -521,12 +521,12 @@ public class HttpsTransportManagerTest
                 mockResponseMessage.getBody();
                 result = expectedResponseBody.getBytes(StandardCharsets.UTF_8);
 
-                new MethodResult(expectedResponseBody);
+                new DirectMethodResponse(expectedResponseBody);
             }
         };
 
         //act
-        transportManager.invokeMethod(mockedMethodRequest, expectedDeviceId, "");
+        transportManager.invokeMethod(mockedDirectMethodRequest, expectedDeviceId, "");
     }
 
 
@@ -551,7 +551,7 @@ public class HttpsTransportManagerTest
         final String expectedDeviceId = "myDevice";
 
         //act
-        Deencapsulation.invoke(transportManager, "invokeMethod", new Class[] {MethodRequest.class, URI.class}, mockedMethodRequest, (URI) null);
+        Deencapsulation.invoke(transportManager, "invokeMethod", new Class[] {DirectMethodRequest.class, URI.class}, mockedDirectMethodRequest, (URI) null);
     }
 
 
@@ -571,7 +571,7 @@ public class HttpsTransportManagerTest
         new Expectations(HttpsTransportManager.class)
         {
             {
-                mockedMethodRequest.toJson();
+                mockedDirectMethodRequest.toJson();
                 result = expectedMethodRequestJson;
 
                 new IotHubTransportMessage(expectedMethodRequestJson);
@@ -599,7 +599,7 @@ public class HttpsTransportManagerTest
         };
 
         //act
-        transportManager.invokeMethod(mockedMethodRequest, expectedDeviceId, "");
+        transportManager.invokeMethod(mockedDirectMethodRequest, expectedDeviceId, "");
     }
 
     //Tests_SRS_HTTPSTRANSPORTMANAGER_34_028 [This function shall set the uri path of the provided message to the

@@ -4,6 +4,8 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.ConnectionStatusChangeContext;
+import com.microsoft.azure.sdk.iot.device.twin.DirectMethodPayload;
 import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
@@ -50,7 +52,7 @@ public class DirectMethodSample
     protected static class SampleMethodCallback implements MethodCallback
     {
         @Override
-        public DirectMethodResponse onMethodInvoked(String methodName, Object methodData, Object context)
+        public DirectMethodResponse onMethodInvoked(String methodName, DirectMethodPayload methodData, Object context)
         {
             DirectMethodResponse deviceMethodData;
             int status = method_default(methodData);
@@ -59,7 +61,7 @@ public class DirectMethodSample
                 status = method_command(methodData);
             }
 
-            deviceMethodData = new DirectMethodResponse(status, "executed " + methodName);
+            deviceMethodData = new DirectMethodResponse(status, methodData);
 
             return deviceMethodData;
         }
@@ -68,8 +70,12 @@ public class DirectMethodSample
     protected static class IotHubConnectionStatusChangeCallbackLogger implements IotHubConnectionStatusChangeCallback
     {
         @Override
-        public void onStatusChanged(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+        public void onStatusChanged(ConnectionStatusChangeContext connectionStatusChangeContext)
         {
+            IotHubConnectionStatus status = connectionStatusChangeContext.getNewStatus();
+            IotHubConnectionStatusChangeReason statusChangeReason = connectionStatusChangeContext.getNewStatusReason();
+            Throwable throwable = connectionStatusChangeContext.getCause();
+
             System.out.println();
             System.out.println("CONNECTION STATUS UPDATE: " + status);
             System.out.println("CONNECTION STATUS REASON: " + statusChangeReason);

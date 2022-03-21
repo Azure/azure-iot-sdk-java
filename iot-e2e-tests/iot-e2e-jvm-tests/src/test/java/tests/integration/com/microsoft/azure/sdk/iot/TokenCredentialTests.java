@@ -5,7 +5,6 @@ package tests.integration.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
@@ -19,7 +18,7 @@ import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
-import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.customized.DigitalTwinGetHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.serialization.BasicDigitalTwin;
@@ -153,7 +152,7 @@ public class TokenCredentialTests
         final AtomicBoolean methodsSubscriptionComplete = new AtomicBoolean(false);
         final AtomicBoolean methodsSubscribedSuccessfully = new AtomicBoolean(false);
         deviceClient.subscribeToMethodsAsync(
-            (methodName, methodData, context) -> new DirectMethodResponse(successStatusCode, "success"),
+            (methodName, methodData, context) -> new com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse(successStatusCode, "success"),
             null,
             (responseStatus, callbackContext) ->
             {
@@ -180,7 +179,7 @@ public class TokenCredentialTests
 
         assertTrue("Method subscription callback fired with non 200 status code", methodsSubscribedSuccessfully.get());
 
-        MethodResult result = methodServiceClient.invoke(device.getDeviceId(), "someMethod");
+        DirectMethodResponse result = methodServiceClient.invoke(device.getDeviceId(), "someMethod");
 
         assertEquals((long) successStatusCode, (long) result.getStatus());
     }

@@ -345,15 +345,15 @@ public class ParserUtility
         }
         else if (jsonElement.isJsonPrimitive())
         {
-            return getJsonPrimitiveValue(jsonElement.getAsJsonPrimitive());
+            return jsonElement.getAsJsonPrimitive();
         }
         else if (jsonElement.isJsonObject())
         {
-            return getJsonObjectValue(jsonElement.getAsJsonObject());
+            return jsonElement.getAsJsonObject();
         }
         else if (jsonElement.isJsonArray())
         {
-            return getJsonArrayValue(jsonElement.getAsJsonArray());
+            return jsonElement.getAsJsonArray();
         }
         else
         {

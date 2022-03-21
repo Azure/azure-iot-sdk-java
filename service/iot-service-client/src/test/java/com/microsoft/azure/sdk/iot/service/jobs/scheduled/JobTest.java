@@ -13,7 +13,7 @@ import com.microsoft.azure.sdk.iot.service.jobs.serializers.JobsStatisticsParser
 import com.microsoft.azure.sdk.iot.service.methods.serializers.MethodParser;
 import com.microsoft.azure.sdk.iot.service.twin.TwinState;
 import com.microsoft.azure.sdk.iot.service.twin.TwinCollection;
-import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
 import mockit.*;
 import org.junit.Test;
 
@@ -410,9 +410,9 @@ public class JobTest
         assertEquals(ScheduledJobStatus.completed, job.getJobStatus());
         assertNotNull(job.getCloudToDeviceMethod());
         assertNotNull(job.getOutcomeResult());
-        MethodResult methodResult = job.getOutcomeResult();
-        assertEquals(methodReturnStatus, (long)methodResult.getStatus());
-        assertEquals(methodReturnPayload, methodResult.getPayload());
+        DirectMethodResponse directMethodResponse = job.getOutcomeResult();
+        assertEquals(methodReturnStatus, (long) directMethodResponse.getStatus());
+        assertEquals(methodReturnPayload, directMethodResponse.getPayload(String.class));
         assertNotNull(job.getLastUpdatedDateTime());
         assertNull(job.getError());
     }
