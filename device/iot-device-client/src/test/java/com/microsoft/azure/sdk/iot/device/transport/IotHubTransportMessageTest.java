@@ -62,7 +62,7 @@ public class IotHubTransportMessageTest
 
         // assert
         assertEquals(messageType, iotHubTransportMessage.getMessageType());
-        assertNull(iotHubTransportMessage.getVersion());
+        assertEquals(0, iotHubTransportMessage.getVersion());
         assertNull(iotHubTransportMessage.getRequestId());
         assertNull(iotHubTransportMessage.getStatus());
         assertEquals(DEVICE_OPERATION_UNKNOWN, iotHubTransportMessage.getDeviceOperationType());
