@@ -31,7 +31,7 @@ public class InternalClient
     private static final String METHODS_OVER_HTTP_ERROR_MESSAGE =
         "Direct methods are only supported over MQTT, MQTT_WS, AMQPS, and AMQPS_WS";
 
-    private static final int DEFAULT_TIMEOUT_MILLISECONDS = 60 * 1000;
+    protected static final int DEFAULT_TIMEOUT_MILLISECONDS = 60 * 1000;
 
     ClientConfiguration config;
     private DeviceIO deviceIO;
