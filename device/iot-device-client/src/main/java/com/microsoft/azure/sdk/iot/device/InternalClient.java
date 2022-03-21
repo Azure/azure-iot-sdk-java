@@ -365,8 +365,8 @@ public class InternalClient
      * properties before this method can be called.
      *
      * @param reportedProperties The reported property key/value pairs to add/update in the twin.
-     * @return The status code returned by the service for this operation. If this value is {@link IotHubStatusCode#OK} then
-     * the patch was successful.
+     * @return The status code returned by the service for this operation and the new reported properties version. If
+     * the status code value is {@link IotHubStatusCode#OK} then the patch was successful.
      * @throws TimeoutException if the service fails to acknowledge the reported property update request within the default timeout.
      * @throws InterruptedException if the operation is interrupted while waiting on the reported property update request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open or if this client has not subscribed to desired properties yet.
@@ -385,8 +385,8 @@ public class InternalClient
      * @param reportedProperties The reported property key/value pairs to add/update in the twin.
      * @param timeoutMilliseconds The maximum number of milliseconds this call will wait for the service to acknowledge the reported properties update request. If 0,
      * then it will wait indefinitely.
-     * @return The status code returned by the service for this operation. If this value is {@link IotHubStatusCode#OK} then
-     * the patch was successful.
+     * @return The status code returned by the service for this operation and the new reported properties version. If
+     * the status code value is {@link IotHubStatusCode#OK} then the patch was successful.
      * @throws TimeoutException if the service fails to acknowledge the reported property update request within the provided timeout.
      * @throws InterruptedException if the operation is interrupted while waiting on the reported property update request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open or if this client has not subscribed to desired properties yet.
@@ -665,9 +665,9 @@ public class InternalClient
                 }
 
                 @Override
-                public void onResponseReceived(Message message, Object callbackContext, IotHubStatusCode statusCode, TransportException e)
+                public void onResponseReceived(Message message, Object callbackContext, IotHubStatusCode statusCode, int version, TransportException e)
                 {
-                    reportedPropertiesCallback.onReportedPropertiesUpdateAcknowledged(statusCode, ((IotHubTransportMessage)message).getVersion(), e, callbackContext);
+                    reportedPropertiesCallback.onReportedPropertiesUpdateAcknowledged(statusCode, version, e, callbackContext);
                 }
 
                 @Override

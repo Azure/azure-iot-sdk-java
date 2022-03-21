@@ -362,7 +362,7 @@ public class TwinTests extends TwinCommon
                 }
 
                 @Override
-                public void onResponseReceived(Message message, Object callbackContext, IotHubStatusCode statusCode, TransportException e)
+                public void onResponseReceived(Message message, Object callbackContext, IotHubStatusCode statusCode, int version, TransportException e)
                 {
                     if (message != null && callbackContext.equals(expectedUpdateReportedPropertiesContext) && e == null && statusCode == IotHubStatusCode.OK)
                     {
