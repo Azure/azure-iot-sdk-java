@@ -9,6 +9,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
+import com.microsoft.azure.sdk.iot.device.ConnectionStatusChangeContext;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.registry.Module;
@@ -319,8 +320,13 @@ public class TokenRenewalTests extends IntegrationTest
         }
 
         @Override
-        public void onStatusChanged(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+        public void onStatusChanged(ConnectionStatusChangeContext connectionStatusChangeContext)
         {
+            IotHubConnectionStatus status = connectionStatusChangeContext.getNewStatus();
+            IotHubConnectionStatusChangeReason statusChangeReason = connectionStatusChangeContext.getNewStatusReason();
+            Throwable throwable = connectionStatusChangeContext.getCause();
+            Object callbackContext = connectionStatusChangeContext.getCallbackContext();
+
             System.out.println();
             System.out.println("CONNECTION STATUS UPDATE: " + status);
             System.out.println("CONNECTION STATUS REASON: " + statusChangeReason);
