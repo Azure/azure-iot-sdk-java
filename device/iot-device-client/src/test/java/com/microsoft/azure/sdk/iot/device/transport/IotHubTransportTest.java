@@ -3,15 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.ClientConfiguration;
-import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
-import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
-import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
-import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
-import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
-import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.device.MessageCallback;
+import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
 import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
@@ -2008,11 +2000,7 @@ public class IotHubTransportTest
         new Verifications()
         {
             {
-                mockedIotHubConnectionStatusChangeCallback.onStatusChanged(
-                        (IotHubConnectionStatus)any,
-                        (IotHubConnectionStatusChangeReason)any,
-                        (Throwable)any,
-                        any);
+                mockedIotHubConnectionStatusChangeCallback.onStatusChanged((ConnectionStatusChangeContext) any);
                 times = 1;
             }
         };
@@ -2044,11 +2032,7 @@ public class IotHubTransportTest
         new Verifications()
         {
             {
-                mockedIotHubConnectionStatusChangeCallback.onStatusChanged(
-                        (IotHubConnectionStatus)any,
-                        (IotHubConnectionStatusChangeReason)any,
-                        (Throwable)any,
-                        any);
+                mockedIotHubConnectionStatusChangeCallback.onStatusChanged((ConnectionStatusChangeContext) any);
                 times = 0;
             }
         };

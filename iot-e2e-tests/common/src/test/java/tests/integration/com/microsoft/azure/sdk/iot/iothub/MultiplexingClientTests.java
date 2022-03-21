@@ -9,6 +9,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.ConnectionStatusChangeContext;
 import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesCallback;
 import com.microsoft.azure.sdk.iot.device.twin.DirectMethodPayload;
 import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
@@ -60,7 +61,6 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestDeviceIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.*;
-import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.TwinCommon;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -963,8 +963,12 @@ public class MultiplexingClientTests extends IntegrationTest
         public boolean clientClosedUnexpectedly = false;
 
         @Override
-        public void onStatusChanged(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+        public void onStatusChanged(ConnectionStatusChangeContext connectionStatusChangeContext)
         {
+            IotHubConnectionStatus status = connectionStatusChangeContext.getNewStatus();
+            IotHubConnectionStatusChangeReason statusChangeReason = connectionStatusChangeContext.getNewStatusReason();
+            Object callbackContext = connectionStatusChangeContext.getCallbackContext();
+
             if (callbackContext == null)
             {
                 log.info("Received status update of {} with reason {} for multiplexing client", status, statusChangeReason);
