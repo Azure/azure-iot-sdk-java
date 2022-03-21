@@ -196,7 +196,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
     public void errorInjectionTestFlow(com.microsoft.azure.sdk.iot.device.Message errorInjectionMessage) throws IOException, IotHubException, InterruptedException, TimeoutException
     {
         List<Pair<IotHubConnectionStatus, Throwable>> connectionStatusUpdates = new ArrayList<>();
-        testInstance.identity.getClient().setConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> connectionStatusUpdates.add(new Pair<>(status, throwable)), null);
+        testInstance.identity.getClient().setConnectionStatusChangeCallback((context) -> connectionStatusUpdates.add(new Pair<>(context.getNewStatus(), context.getCause())), null);
 
         com.microsoft.azure.sdk.iot.device.MessageCallback callback = new MessageCallback();
 

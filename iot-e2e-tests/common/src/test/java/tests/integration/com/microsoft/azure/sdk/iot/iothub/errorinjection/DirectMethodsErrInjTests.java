@@ -248,7 +248,7 @@ public class DirectMethodsErrInjTests extends DirectMethodsCommon
     {
         // Arrange
         List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates = new ArrayList<>();
-        IotHubConnectionStatusChangeCallback connectionStatusUpdateCallback = (status, statusChangeReason, throwable, callbackContext) -> actualStatusUpdates.add(new Pair<>(status, throwable));
+        IotHubConnectionStatusChangeCallback connectionStatusUpdateCallback = (context) -> actualStatusUpdates.add(new Pair<>(context.getNewStatus(), context.getCause()));
         this.testInstance.identity.getClient().setConnectionStatusChangeCallback(connectionStatusUpdateCallback, null);
         invokeMethodSucceed();
 

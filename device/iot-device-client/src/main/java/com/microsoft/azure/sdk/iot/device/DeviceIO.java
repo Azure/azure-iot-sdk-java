@@ -368,8 +368,10 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
      * the send/receive threads accordingly
      */
     @Override
-    public void onStatusChanged(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+    public void onStatusChanged(ConnectionStatusChangeContext connectionStatusChangeContext)
     {
+        IotHubConnectionStatus status = connectionStatusChangeContext.getNewStatus();
+        IotHubConnectionStatusChangeReason statusChangeReason = connectionStatusChangeContext.getNewStatusReason();
         log.trace("DeviceIO notified of status {} with reason {}", status, statusChangeReason);
 
         if (status == this.state)
