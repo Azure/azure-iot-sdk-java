@@ -17,6 +17,8 @@ class TwinGsonBuilder
      */
     static Gson getGson()
     {
+        // intentionally not setting up thread safety precautions here because the worst case scenario is that multiple
+        // instances are made. As soon as each of those instances is overwritten, Java garbage collection will pick them up anyways.
         if (gson == null)
         {
             gson = new GsonBuilder()
