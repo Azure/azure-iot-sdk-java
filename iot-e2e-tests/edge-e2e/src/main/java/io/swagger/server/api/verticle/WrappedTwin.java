@@ -25,7 +25,7 @@ public class WrappedTwin
 
         return new JsonObject()
                 .put("properties", new JsonObject()
-                    .put("desired", mapToJson(setToMap(this.twin.getDesiredProperties())))
-                    .put("reported", mapToJson(setToMap(this.twin.getReportedProperties()))));
+                    .put("desired", mapToJson(this.twin.getDesiredProperties()))
+                    .put("reported", mapToJson(this.twin.getReportedProperties())));
     }
 }
