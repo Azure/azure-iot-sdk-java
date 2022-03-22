@@ -14,7 +14,6 @@ import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesUpdateResponse;
 import com.microsoft.azure.sdk.iot.device.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubPreconditionFailedException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

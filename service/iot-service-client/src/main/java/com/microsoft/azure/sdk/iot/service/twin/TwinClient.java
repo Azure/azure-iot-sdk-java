@@ -223,14 +223,11 @@ public final class TwinClient
     }
 
     /**
-     * This method updates device twin for the specified device.
-     * <p>This API uses the IoT Hub PATCH API when sending updates, but it sends the full twin with each patch replace.
-     * As a result, devices subscribed to twin will receive notifications that each property is changed when this API is
-     * called, even if only some of the properties were changed.</p>
+     * This method patches the twin for the specified device.
      * <p>See <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/devices/updatetwin">PATCH</a> for
      * more details.</p>
      *
-     * @param twin The device with a valid Id for which device twin is to be updated.
+     * @param twin The device with a valid Id for which twin is to be updated.
      * @throws IOException This exception is thrown if the IO operation failed.
      * @throws IotHubException This exception is thrown if the response verification failed.
      */
@@ -240,14 +237,11 @@ public final class TwinClient
     }
 
     /**
-     * This method updates device twin for the specified device.
-     * <p>This API uses the IoT Hub PATCH API when sending updates, but it sends the full twin with each patch replace.
-     * As a result, devices subscribed to twin will receive notifications that each property is changed when this API is
-     * called, even if only some of the properties were changed.</p>
+     * This method patches the twin for the specified device.
      * <p>See <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/devices/updatetwin">PATCH</a> for
      * more details.</p>
      *
-     * @param twin The device with a valid Id for which device twin is to be updated.
+     * @param twin The device with a valid Id for which twin is to be updated.
      * @param ifMatch the string representing a ETag for the device twin, as per RFC7232. If null, no if-match header
      * will be sent as a part of this request and it will be executed unconditionally.
      * @throws IOException This exception is thrown if the IO operation failed.
@@ -325,7 +319,7 @@ public final class TwinClient
         }
 
         URL url;
-        if ((twin.getModuleId() == null) || twin.getModuleId().length() ==0)
+        if (twin.getModuleId() == null || twin.getModuleId().length() == 0)
         {
             url = this.iotHubConnectionString.getUrlTwin(twin.getDeviceId());
         }
