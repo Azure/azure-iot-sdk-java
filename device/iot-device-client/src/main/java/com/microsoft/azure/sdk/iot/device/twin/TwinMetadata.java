@@ -76,8 +76,6 @@ public class TwinMetadata
      */
     TwinMetadata(String lastUpdated, Integer lastUpdatedVersion, String lastUpdatedBy, String lastUpdatedByDigest) {
         if (!Tools.isNullOrEmpty(lastUpdated)) {
-            /* SRS_TWIN_METADATA_21_001: [The constructor shall parse the provided `lastUpdated` String to the Date and store it as the TwinMetadata lastUpdated.] */
-            /* SRS_TWIN_METADATA_21_002: [The constructor shall throw IllegalArgumentException if it cannot convert the provided `lastUpdated` String to Date.] */
             this.lastUpdated = ParserUtility.getDateTimeUtc(lastUpdated);
         }
 
@@ -89,10 +87,8 @@ public class TwinMetadata
             this.lastUpdatedByDigest = lastUpdatedByDigest;
         }
 
-        /* SRS_TWIN_METADATA_21_003: [The constructor shall store the provided lastUpdatedVersion as is.] */
         this.lastUpdatedVersion = lastUpdatedVersion;
 
-        /* SRS_TWIN_METADATA_21_012: [The constructor shall throw IllegalArgumentException if both lastUpdated and lastUpdatedVersion are null.] */
         if ((this.lastUpdatedVersion == null) && (this.lastUpdated == null)) {
             throw new IllegalArgumentException("no valid data to create a TwinMetadata.");
         }
@@ -106,12 +102,10 @@ public class TwinMetadata
      * @param metadata the original {@code TwinMetadata} to copy.
      */
     TwinMetadata(TwinMetadata metadata) {
-        /* SRS_TWIN_METADATA_21_010: [The constructor shall throw IllegalArgumentException if the provided metadata is null.] */
         if (metadata == null) {
             throw new IllegalArgumentException("metadata to copy cannot be null");
         }
 
-        /* SRS_TWIN_METADATA_21_011: [The constructor shall copy the content of the provided metadata.] */
         this.lastUpdated = metadata.getLastUpdated();
         this.lastUpdatedVersion = metadata.getLastUpdatedVersion();
         this.lastUpdatedBy = metadata.getLastUpdatedBy();
@@ -153,7 +147,6 @@ public class TwinMetadata
      * @throws IllegalArgumentException If no valid parameter was provide and the class will be empty, or if the DateTime is invalid.
      */
     static TwinMetadata tryExtractFromMap(Object metadata) {
-        /* SRS_TWIN_METADATA_21_004: [The tryExtractFromMap shall return null if the provided metadata is not a Map.] */
         if (!(metadata instanceof Map)) {
             return null;
         }
@@ -208,7 +201,6 @@ public class TwinMetadata
      * @return the {@code Integer} with the stored lastUpdatedVersion. It can be {@code null}.
      */
     public Integer getLastUpdatedVersion() {
-        /* SRS_TWIN_METADATA_21_007: [The getLastUpdatedVersion shall return the stored lastUpdatedVersion.] */
         return this.lastUpdatedVersion;
     }
 
@@ -218,11 +210,7 @@ public class TwinMetadata
      * @return the {@code Date} with the stored lastUpdated. It can be {@code null}.
      */
     public Date getLastUpdated() {
-        /* SRS_TWIN_METADATA_21_008: [The getLastUpdated shall return the stored lastUpdated.] */
-        if (this.lastUpdated == null) {
-            return null;
-        }
-        return new Date(this.lastUpdated.getTime());
+        return this.lastUpdated;
     }
 
     /**
@@ -239,7 +227,6 @@ public class TwinMetadata
      * @return The {@code JsonElement} with the content of this class.
      */
     JsonElement toJsonElement() {
-        /* SRS_TWIN_METADATA_21_009: [The toJsonElement shall return a JsonElement with the information in this class in a JSON format.] */
         JsonObject jsonObject = new JsonObject();
         if (this.lastUpdated != null) {
             jsonObject.addProperty(LAST_UPDATE_TAG, ParserUtility.dateTimeUtcToString(this.lastUpdated));
@@ -263,7 +250,6 @@ public class TwinMetadata
      */
     @Override
     public String toString() {
-        /* SRS_TWIN_METADATA_21_010: [The toString shall return a String with the information in this class in a pretty print JSON.] */
         return toJsonElement().toString();
     }
 }

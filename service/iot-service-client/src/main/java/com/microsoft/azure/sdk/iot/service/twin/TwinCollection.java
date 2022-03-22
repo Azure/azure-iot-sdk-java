@@ -263,7 +263,6 @@ public class TwinCollection extends HashMap<String, Object> {
     static TwinCollection createFromRawCollection(Map<? extends String, Object> rawCollection) {
         TwinCollection twinCollection = new TwinCollection();
         Map<? extends String, Object> metadata = null;
-
         for (Entry<? extends String, Object> entry : rawCollection.entrySet()) {
             if (entry.getKey().equals(VERSION_TAG)) {
                 if (!(entry.getValue() instanceof Number)) {
@@ -392,15 +391,21 @@ public class TwinCollection extends HashMap<String, Object> {
     }
 
     /**
+     * Setter for the version of this twin collection.
+     * @param version the version.
+     */
+    public final void setVersion(int version)
+    {
+        this.version = version;
+    }
+
+    /**
      * Getter for the TwinCollection metadata
      *
      * @return the {@link TwinMetadata} of the Whole TwinCollection. It can be {@code null}.
      */
     public final TwinMetadata getTwinMetadata() {
-        if (this.twinMetadata == null) {
-            return null;
-        }
-        return new TwinMetadata(this.twinMetadata);
+        return this.twinMetadata;
     }
 
     /**
@@ -410,10 +415,7 @@ public class TwinCollection extends HashMap<String, Object> {
      * @return the {@link TwinMetadata} ot the specific entry in the TwinCollection. It can be {@code null}.
      */
     public final TwinMetadata getTwinMetadata(String key) {
-        if (this.metadataMap.get(key) == null) {
-            return null;
-        }
-        return new TwinMetadata(this.metadataMap.get(key));
+        return this.metadataMap.get(key);
     }
 
     /**

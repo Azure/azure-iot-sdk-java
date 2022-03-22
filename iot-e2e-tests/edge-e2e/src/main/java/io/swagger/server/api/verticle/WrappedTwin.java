@@ -1,6 +1,5 @@
 package io.swagger.server.api.verticle;
 
-import com.microsoft.azure.sdk.iot.service.twin.Pair;
 import com.microsoft.azure.sdk.iot.service.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import io.vertx.core.json.JsonObject;
@@ -26,23 +25,7 @@ public class WrappedTwin
 
         return new JsonObject()
                 .put("properties", new JsonObject()
-                    .put("desired", mapToJson(setToMap(this.twin.getDesiredProperties())))
-                    .put("reported", mapToJson(setToMap(this.twin.getReportedProperties()))));
+                    .put("desired", mapToJson(this.twin.getDesiredProperties()))
+                    .put("reported", mapToJson(this.twin.getReportedProperties())));
     }
-
-    private TwinCollection setToMap(Set<Pair> set)
-    {
-        TwinCollection map = new TwinCollection();
-
-        if (set != null)
-        {
-            for (Pair pair : set)
-            {
-                map.put(pair.getKey(), pair.getValue());
-            }
-        }
-
-        return map;
-    }
-
 }

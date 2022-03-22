@@ -181,7 +181,7 @@ public class TwinStateTest
 
         // act - assert
         assertEquals(TAGS, twinState.getTags());
-        assertEquals(PROPERTIES, twinState.getDesiredProperty());
+        assertEquals(PROPERTIES, twinState.getDesiredProperties());
     }
 
     /* SRS_TWIN_STATE_21_007: [The toString shall return a String with the information in this class in a pretty print JSON.] */

@@ -3,10 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.twin;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -158,7 +155,8 @@ public class Twin
      */
     public JsonElement toJsonElement()
     {
-        Gson gson = new GsonBuilder().disableHtmlEscaping().serializeNulls().create();
+        Gson gson = TwinGsonBuilder.getGson();
+
         JsonElement json = gson.toJsonTree(this).getAsJsonObject();
 
         // Since null values are lost when building the json tree, need to manually re-add properties as reported
@@ -179,7 +177,6 @@ public class Twin
      */
     public TwinCollection getDesiredProperties()
     {
-        /* SRS_TWIN_STATE_21_006: [The getTwin shall return a TwinCollection with the stored desired property.] */
         if (this.properties == null)
         {
             return null;
@@ -194,7 +191,6 @@ public class Twin
      */
     public TwinCollection getReportedProperties()
     {
-        /* SRS_TWIN_STATE_21_007: [The getReportedProperties shall return a TwinCollection with the stored reported property.] */
         if (this.properties == null)
         {
             return null;
@@ -210,11 +206,15 @@ public class Twin
     @Override
     public String toString()
     {
-        /* SRS_TWIN_STATE_21_008: [The toString shall return a String with the information in this class in a pretty print JSON.] */
-        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().setPrettyPrinting().disableHtmlEscaping().create();
+        Gson gson = new GsonBuilder()
+                .excludeFieldsWithoutExposeAnnotation()
+                .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
+                .setPrettyPrinting()
+                .disableHtmlEscaping()
+                .create();
+
         JsonObject jsonObject = gson.toJsonTree(this).getAsJsonObject();
 
-        /* SRS_TWIN_STATE_21_010: [If the properties is null, the JSON shall not include the `properties`.] */
         if (this.properties != null)
         {
             jsonObject.add(PROPERTIES_TAG, this.properties.toJsonElementWithMetadata());
@@ -233,15 +233,12 @@ public class Twin
      */
     public static Twin createFromTwinJson(String json)
     {
-        /* SRS_TWIN_STATE_21_011: [The factory shall throw IllegalArgumentException if the JSON is null or empty.] */
         if (Tools.isNullOrEmpty(json))
         {
             throw new IllegalArgumentException("JSON with result is null or empty");
         }
 
-        /* SRS_TWIN_STATE_21_012: [The factory shall throw JsonSyntaxException if the JSON is invalid.] */
-        /* SRS_TWIN_STATE_21_013: [The factory shall deserialize the provided JSON for the twin class and subclasses.] */
-        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
+        Gson gson = TwinGsonBuilder.getGson();
         Twin result = gson.fromJson(json, Twin.class);
 
         /*
@@ -268,15 +265,13 @@ public class Twin
      */
     public static Twin createFromDesiredPropertyJson(String json)
     {
-        /* SRS_TWIN_STATE_21_014: [The factory shall throw IllegalArgumentException if the JSON is null or empty.] */
         if (Tools.isNullOrEmpty(json))
         {
             throw new IllegalArgumentException("JSON with result is null or empty");
         }
 
-        /* SRS_TWIN_STATE_21_015: [The factory shall throw JsonSyntaxException if the JSON is invalid.] */
-        /* SRS_TWIN_STATE_21_016: [The factory shall deserialize the provided JSON for the Twin class and subclasses.] */
-        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
+        Gson gson = TwinGsonBuilder.getGson();
+
         TwinCollection result = gson.fromJson(json, TwinCollection.class);
 
         return new Twin(result, null);
@@ -292,15 +287,13 @@ public class Twin
      */
     public static Twin createFromReportedPropertyJson(String json)
     {
-        /* SRS_TWIN_STATE_21_017: [The factory shall throw IllegalArgumentException if the JSON is null or empty.] */
         if (Tools.isNullOrEmpty(json))
         {
             throw new IllegalArgumentException("JSON with result is null or empty");
         }
 
-        /* SRS_TWIN_STATE_21_018: [The factory shall throw JsonSyntaxException if the JSON is invalid.] */
-        /* SRS_TWIN_STATE_21_019: [The factory shall deserialize the provided JSON for the Twin class and subclasses.] */
-        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
+        Gson gson = TwinGsonBuilder.getGson();
+
         TwinCollection result = gson.fromJson(json, TwinCollection.class);
 
         return new Twin(null, result);
@@ -316,15 +309,13 @@ public class Twin
      */
     public static Twin createFromPropertiesJson(String json)
     {
-        /* SRS_TWIN_STATE_21_020: [The factory shall throw IllegalArgumentException if the JSON is null or empty.] */
         if (Tools.isNullOrEmpty(json))
         {
             throw new IllegalArgumentException("JSON with result is null or empty");
         }
 
-        /* SRS_TWIN_STATE_21_021: [The factory shall throw JsonSyntaxException if the JSON is invalid.] */
-        /* SRS_TWIN_STATE_21_022: [The factory shall deserialize the provided JSON for the Twin class and subclasses.] */
-        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
+        Gson gson = TwinGsonBuilder.getGson();
+        
         TwinProperties result = gson.fromJson(json, TwinProperties.class);
 
         return new Twin(result.getDesired(), result.getReported());
@@ -340,6 +331,5 @@ public class Twin
     @SuppressWarnings("unused")
     Twin()
     {
-        /* SRS_TWIN_STATE_21_023: [The Twin shall provide an empty constructor to make GSON happy.] */
     }
 }

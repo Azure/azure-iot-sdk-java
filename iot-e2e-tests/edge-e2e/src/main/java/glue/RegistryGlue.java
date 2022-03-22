@@ -2,7 +2,6 @@ package glue;
 
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
-import com.microsoft.azure.sdk.iot.service.twin.Pair;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import io.swagger.server.api.MainApiException;
 import io.swagger.server.api.model.ConnectResponse;
@@ -105,13 +104,9 @@ public class RegistryGlue
         else
         {
             Twin twin = new Twin(deviceId, moduleId);
-            Set<Pair> newProps = new HashSet<>();
             Map<String, Object> desiredProps = ((JsonObject) props).getJsonObject("properties").getJsonObject("desired").getMap();
-            for (String key : desiredProps.keySet())
-            {
-                newProps.add(new Pair(key, desiredProps.get(key)));
-            }
-            twin.setDesiredProperties(newProps);
+            twin.getDesiredProperties().putAll(desiredProps);
+
             try
             {
                 client.patch(twin);
@@ -120,7 +115,6 @@ public class RegistryGlue
             {
                 handler.handle(Future.failedFuture(e));
             }
-
 
             handler.handle(Future.succeededFuture());
         }
@@ -137,6 +131,4 @@ public class RegistryGlue
             }
         }
     }
-
-
 }

@@ -364,7 +364,8 @@ public class InternalClient
      * Patch this client's twin with the provided reported properties. This client must have subscribed to desired
      * properties before this method can be called.
      *
-     * @param reportedProperties The reported property key/value pairs to add/update in the twin.
+     * @param reportedProperties The reported property key/value pairs to add/update in the twin. To delete a particular
+     * reported property, set the value to null.
      * @return The status code returned by the service for this operation and the new reported properties version. If
      * the status code value is {@link IotHubStatusCode#OK} then the patch was successful.
      * @throws TimeoutException if the service fails to acknowledge the reported property update request within the default timeout.
@@ -382,7 +383,8 @@ public class InternalClient
      * properties before this method can be called. This client must have subscribed to desired
      * properties before this method can be called.
      *
-     * @param reportedProperties The reported property key/value pairs to add/update in the twin.
+     * @param reportedProperties The reported property key/value pairs to add/update in the twin. To delete a particular
+     * reported property, set the value to null.
      * @param timeoutMilliseconds The maximum number of milliseconds this call will wait for the service to acknowledge the reported properties update request. If 0,
      * then it will wait indefinitely.
      * @return The status code returned by the service for this operation and the new reported properties version. If
@@ -630,7 +632,8 @@ public class InternalClient
      * Patch this client's twin with the provided reported properties asynchronously. This client must have subscribed
      * to desired properties before this method can be called.
      *
-     * @param reportedProperties The reported property key/value pairs to add/update in the twin.
+     * @param reportedProperties The reported property key/value pairs to add/update in the twin. To delete a particular
+     * reported property, set the value to null.
      * @param reportedPropertiesCallback The callback to be executed once the reported properties update request
      * has been acknowledged by the service.
      * @param callbackContext The context that will be included in the callback of reportedPropertiesCallback. May be null.
@@ -688,7 +691,8 @@ public class InternalClient
      * and is only intended for users who need insight on the state of this process every step of the way.
      * </p>
      *
-     * @param reportedProperties The reported property key/value pairs to add/update in the twin.
+     * @param reportedProperties The reported property key/value pairs to add/update in the twin. To delete a particular
+     * reported property, set the value to null.
      * @param reportedPropertiesUpdateCorrelatingMessageCallback The callback to be executed once the state of the reported
      * properties update request message has changed. This provides context on when the message is queued, sent, acknowledged, etc.
      * @param callbackContext The context that will be included in each callback of updateReportedPropertiesCallback. May be null.

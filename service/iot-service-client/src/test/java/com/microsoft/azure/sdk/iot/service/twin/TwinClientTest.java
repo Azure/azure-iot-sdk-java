@@ -356,9 +356,9 @@ public class TwinClientTest
             {
                 mockedDevice.getDeviceId();
                 result = "SomeDevID";
-                Deencapsulation.invoke(mockedDevice, "getDesiredMap");
+                Deencapsulation.invoke(mockedDevice, "getDesiredProperties");
                 result = testMap;
-                Deencapsulation.invoke(mockedDevice, "getTagsMap");
+                Deencapsulation.invoke(mockedDevice, "getTags");
                 result = testMap;
                 new TwinState((TwinCollection)any, (TwinCollection)any, null);
                 result = mockedTwinState;
@@ -476,9 +476,9 @@ public class TwinClientTest
             {
                 mockedDevice.getDeviceId();
                 result = "SomeDevID";
-                Deencapsulation.invoke(mockedDevice, "getDesiredMap");
+                Deencapsulation.invoke(mockedDevice, "getDesiredProperties");
                 result = testMap;
-                Deencapsulation.invoke(mockedDevice, "getTagsMap");
+                Deencapsulation.invoke(mockedDevice, "getTags");
                 result = null;
                 new TwinState(null, (TwinCollection)any, null);
                 result = mockedTwinState;
@@ -521,9 +521,9 @@ public class TwinClientTest
             {
                 mockedDevice.getDeviceId();
                 result = "SomeDevID";
-                Deencapsulation.invoke(mockedDevice, "getDesiredMap");
+                Deencapsulation.invoke(mockedDevice, "getDesiredProperties");
                 result = null;
-                Deencapsulation.invoke(mockedDevice, "getTagsMap");
+                Deencapsulation.invoke(mockedDevice, "getTags");
                 result = testMap;
                 new TwinState((TwinCollection)any, null, null);
                 result = mockedTwinState;

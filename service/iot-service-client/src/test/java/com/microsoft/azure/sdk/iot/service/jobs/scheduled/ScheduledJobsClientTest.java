@@ -21,7 +21,6 @@ import com.microsoft.azure.sdk.iot.service.query.SqlQueryBuilder;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
-import com.microsoft.azure.sdk.iot.service.twin.Pair;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.service.twin.TwinState;
@@ -169,9 +168,8 @@ public class ScheduledJobsClientTest
         final Date startTimeUtc = new Date();
         final long maxExecutionTimeInSeconds = 10;
         final String json = "validJson";
-
-        Set<Pair> testTags = new HashSet<>();
-        testTags.add(new Pair("testTag", "tagObject"));
+        TwinCollection testTags = new TwinCollection();
+        testTags.put("testTag", "tagObject");
 
         //assert
         new Expectations()
@@ -237,9 +235,8 @@ public class ScheduledJobsClientTest
         final Date startTimeUtc = new Date();
         final long maxExecutionTimeInSeconds = 10;
         final String json = "validJson";
-
-        Set<Pair> testTags = new HashSet<>();
-        testTags.add(new Pair("testTag", "tagObject"));
+        TwinCollection testTags = new TwinCollection();
+        testTags.put("testTag", "tagObject");
 
         new Expectations()
         {
@@ -305,12 +302,14 @@ public class ScheduledJobsClientTest
         final long maxExecutionTimeInSeconds = 10;
         final String json = "validJson";
 
-        Set<Pair> testTags = new HashSet<>();
-        testTags.add(new Pair("testTag", "tagObject"));
-        Set<Pair> testDesired = new HashSet<>();
-        testTags.add(new Pair("testDesired", "val1"));
-        Set<Pair> testResponse = new HashSet<>();
-        testTags.add(new Pair("testResponse", "val2"));
+        TwinCollection testTags = new TwinCollection();
+        testTags.put("testTag", "tagObject");
+
+        TwinCollection testDesired = new TwinCollection();
+        testTags.put("testDesired", "val1");
+
+        TwinCollection testResponse = new TwinCollection();
+        testTags.put("testResponse", "val2");
 
         new Expectations()
         {
@@ -424,8 +423,9 @@ public class ScheduledJobsClientTest
         final Twin updateTwin = mockedTwin;
         final Date startTimeUtc = new Date();
         final long maxExecutionTimeInSeconds = 10;
-        Set<Pair> testTags = new HashSet<>();
-        testTags.add(new Pair("testTag", "tagObject"));
+        TwinCollection testTags = new TwinCollection();
+        testTags.put("testTag", "tagObject");
+
         final String json = "validJson";
         ScheduledJobsClient testJobClient = null;
         new NonStrictExpectations()
@@ -565,8 +565,8 @@ public class ScheduledJobsClientTest
         final long maxExecutionTimeInSeconds = 10;
         final String json = "validJson";
 
-        Set<Pair> testTags = new HashSet<>();
-        testTags.add(new Pair("testTag", "tagObject"));
+        TwinCollection testTags = new TwinCollection();
+        testTags.put("testTag", "tagObject");
 
         new NonStrictExpectations()
         {
@@ -641,8 +641,8 @@ public class ScheduledJobsClientTest
         final long maxExecutionTimeInSeconds = 10;
         final String json = "validJson";
 
-        Set<Pair> testTags = new HashSet<>();
-        testTags.add(new Pair("testTag", "tagObject"));
+        TwinCollection testTags = new TwinCollection();
+        testTags.put("testTag", "tagObject");
 
         new NonStrictExpectations()
         {
@@ -709,8 +709,8 @@ public class ScheduledJobsClientTest
         final long maxExecutionTimeInSeconds = 10;
         final String json = "validJson";
 
-        Set<Pair> testTags = new HashSet<>();
-        testTags.add(new Pair("testTag", "tagObject"));
+        TwinCollection testTags = new TwinCollection();
+        testTags.put("testTag", "tagObject");
 
         new NonStrictExpectations()
         {
@@ -770,8 +770,8 @@ public class ScheduledJobsClientTest
         final long maxExecutionTimeInSeconds = 10;
         final String json = "validJson";
 
-        Set<Pair> testTags = new HashSet<>();
-        testTags.add(new Pair("testTag", "tagObject"));
+        TwinCollection testTags = new TwinCollection();
+        testTags.put("testTag", "tagObject");
 
         new Expectations()
         {

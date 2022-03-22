@@ -18,7 +18,6 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
-import com.microsoft.azure.sdk.iot.service.twin.Pair;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
@@ -467,17 +466,17 @@ public final class ScheduledJobsClient
 
         if (device.getTags() != null)
         {
-            tags = setToMap(device.getTags());
+            tags = device.getTags();
         }
 
         if (device.getDesiredProperties() != null)
         {
-            desired = setToMap(device.getDesiredProperties());
+            desired = device.getDesiredProperties();
         }
 
         if (device.getReportedProperties() != null)
         {
-            reported = setToMap(device.getReportedProperties());
+            reported = device.getReportedProperties();
         }
 
         TwinState twinState = new TwinState(tags, desired, reported);
@@ -497,20 +496,6 @@ public final class ScheduledJobsClient
         }
 
         return twinState;
-    }
-
-    private TwinCollection setToMap(Set<Pair> set)
-    {
-        TwinCollection map = new TwinCollection();
-
-        if (set != null)
-        {
-            for (Pair p : set)
-            {
-                map.put(p.getKey(), p.getValue());
-            }
-        }
-        return map;
     }
 
     private String getAuthenticationToken()

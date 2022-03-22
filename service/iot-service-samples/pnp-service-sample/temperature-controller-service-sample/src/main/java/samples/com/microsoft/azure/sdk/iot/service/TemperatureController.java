@@ -64,12 +64,12 @@ public class TemperatureController {
         String propertyName = "targetTemperature";
         double propertyValue = 60.2;
         String componentName = "thermostat1";
-        twin.setDesiredProperties(PnpHelper.CreateComponentPropertyPatch(propertyName, propertyValue, componentName));
+        twin.getDesiredProperties().putAll(PnpHelper.CreateComponentPropertyPatch(propertyName, propertyValue, componentName));
         twinClient.patch(twin);
 
         // Get the updated twin properties.
         twin = twinClient.get(deviceId);
-        System.out.println("The updated desired properties: " + twin.getDesiredProperties().iterator().next().getValue());
+        System.out.println("The updated desired properties: " + twin.getDesiredProperties().values().iterator().next());
     }
 
     private static void InvokeMethodOnRootLevel() throws IOException, IotHubException {

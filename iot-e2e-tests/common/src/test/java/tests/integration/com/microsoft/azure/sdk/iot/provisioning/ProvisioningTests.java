@@ -21,7 +21,6 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClientOptions;
-import com.microsoft.azure.sdk.iot.service.twin.Pair;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -391,9 +390,9 @@ public class ProvisioningTests extends ProvisioningCommon
                 Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Twin size is unexpected value", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId),
                         1, device.getReportedProperties().size());
                 boolean expectedKeyPairFound = false;
-                for (Pair pair: device.getReportedProperties())
+                for (String reportedPropertyKey : device.getReportedProperties().keySet())
                 {
-                    expectedKeyPairFound |= (pair.getKey().equals(expectedPropertyName) && pair.getValue().equals(expectedPropertyValue));
+                    expectedKeyPairFound |= (reportedPropertyKey.equals(expectedPropertyName) && device.getReportedProperties().get(reportedPropertyKey).equals(expectedPropertyValue));
                 }
                 assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Reported property that was sent was not found", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId),
                         expectedKeyPairFound);
