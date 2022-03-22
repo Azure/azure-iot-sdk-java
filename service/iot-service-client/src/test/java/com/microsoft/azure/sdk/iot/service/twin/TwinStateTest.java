@@ -179,68 +179,6 @@ public class TwinStateTest
         assertNull(Deencapsulation.getField(twinState, "properties"));
     }
 
-    /* SRS_TWIN_STATE_21_002: [The toJsonElement shall return a JsonElement with the information in this class in a JSON format.] */
-    @Test
-    public void toJsonElementReturnsTagsAndProperties()
-    {
-        // arrange
-        final String json = "{\"tags\":{\"tag1\":\"val1\",\"tag2\":\"val2\",\"tag3\":\"val3\"},\"properties\":{\"desired\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"},\"reported\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"}},\"configurations\":null,\"deviceScope\":null,\"parentScopes\":[],\"deviceId\":null,\"moduleId\":null,\"modelId\":null,\"generationId\":null,\"etag\":null,\"version\":null,\"status\":null,\"statusReason\":null,\"statusUpdatedTime\":null,\"connectionState\":null,\"connectionStateUpdatedTime\":null,\"lastActivityTime\":null,\"capabilities\":null}";
-        TwinState twinState = new TwinState(TAGS, PROPERTIES, PROPERTIES);
-
-        // act
-        JsonElement jsonElement = Deencapsulation.invoke(twinState, "toJsonElement");
-
-        // assert
-        Helpers.assertJson(jsonElement.toString(), json);
-    }
-
-    /* SRS_TWIN_STATE_21_003: [If the tags is null, the toJsonElement shall not include the `tags` in the final JSON.] */
-    @Test
-    public void toJsonElementReturnsProperties()
-    {
-        // arrange
-        final String json =
-            "{\"tags\":null,\"properties\":{\"desired\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"},\"reported\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"}},\"configurations\":null,\"deviceScope\":null,\"parentScopes\":[],\"deviceId\":null,\"moduleId\":null,\"modelId\":null,\"generationId\":null,\"etag\":null,\"version\":null,\"status\":null,\"statusReason\":null,\"statusUpdatedTime\":null,\"connectionState\":null,\"connectionStateUpdatedTime\":null,\"lastActivityTime\":null,\"capabilities\":null}";
-        TwinState twinState = new TwinState(null, PROPERTIES, PROPERTIES);
-
-        // act
-        JsonElement jsonElement = Deencapsulation.invoke(twinState, "toJsonElement");
-
-        // assert
-        Helpers.assertJson(jsonElement.toString(), json);
-    }
-
-    /* SRS_TWIN_STATE_21_004: [If the properties is null, the toJsonElement shall not include the `properties` in the final JSON.] */
-    @Test
-    public void toJsonElementReturnsTags()
-    {
-        // arrange
-        final String json =
-            "{\"tags\":{\"tag1\":\"val1\",\"tag2\":\"val2\",\"tag3\":\"val3\"},\"properties\":null,\"configurations\":null,\"deviceScope\":null,\"parentScopes\":[],\"deviceId\":null,\"moduleId\":null,\"modelId\":null,\"generationId\":null,\"etag\":null,\"version\":null,\"status\":null,\"statusReason\":null,\"statusUpdatedTime\":null,\"connectionState\":null,\"connectionStateUpdatedTime\":null,\"lastActivityTime\":null,\"capabilities\":null}";
-        TwinState twinState = new TwinState(TAGS, null, null);
-
-        // act
-        JsonElement jsonElement = Deencapsulation.invoke(twinState, "toJsonElement");
-
-        // assert
-        Helpers.assertJson(jsonElement.toString(), json);
-    }
-
-    /* SRS_TWIN_STATE_21_003: [If the tags is null, the toJsonElement shall not include the `tags` in the final JSON.] */
-    /* SRS_TWIN_STATE_21_004: [If the properties is null, the toJsonElement shall not include the `properties` in the final JSON.] */
-    @Test
-    public void toJsonElementReturnsEmptyJson()
-    {
-        // arrange
-        TwinState twinState = new TwinState(null, null, null);
-
-        // act
-        JsonElement jsonElement = Deencapsulation.invoke(twinState, "toJsonElement");
-
-        // assert
-        Helpers.assertJson(jsonElement.toString(), "{\"tags\":null,\"properties\":null,\"configurations\":null,\"deviceScope\":null,\"parentScopes\":[],\"deviceId\":null,\"moduleId\":null,\"modelId\":null,\"generationId\":null,\"etag\":null,\"version\":null,\"status\":null,\"statusReason\":null,\"statusUpdatedTime\":null,\"connectionState\":null,\"connectionStateUpdatedTime\":null,\"lastActivityTime\":null,\"capabilities\":null}");
-    }
-
     //Tests_SRS_TWIN_STATE_34_024: [The json element shall include all null desired and reported properties.]
     @Test
     public void toJsonElementPreservesNullDesiredProperties()
@@ -401,36 +339,6 @@ public class TwinStateTest
         // assert
     }
 
-    /* SRS_TWIN_STATE_21_013: [The factory shall deserialize the provided JSON for the Twin class and subclasses.] */
-    @Test
-    public void createFromTwinJson()
-    {
-        // arrange
-        final String json =
-                "{\"tags\":{\"tag1\":\"val1\",\"tag2\":\"val2\",\"tag3\":\"val3\"},\"properties\":{\"desired\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"},\"reported\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"}},\"configurations\":{\"p1\":{\"status\":\"targeted\"},\"p2\":{\"status\":\"applied\"}},\"deviceScope\":null,\"parentScopes\":[],\"deviceId\":\"validDeviceId\",\"moduleId\":null,\"modelId\":null,\"generationId\":\"validGenerationId\",\"etag\":\"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\",\"version\":3,\"status\":\"enabled\",\"statusReason\":\"validStatusReason\",\"statusUpdatedTime\":\"2016-06-01T21:22:41+00:00\",\"connectionState\":\"Disconnected\",\"connectionStateUpdatedTime\":\"2016-06-01T21:22:41+00:00\",\"lastActivityTime\":\"xxx\",\"capabilities\":null}";
-
-        // act
-        TwinState twinState = new TwinState(json);
-
-        // assert
-        Helpers.assertJson(Deencapsulation.invoke(twinState, "toJsonElement").toString(), json);
-    }
-
-    /* SRS_TWIN_STATE_21_013: [The factory shall deserialize the provided JSON for the Twin class and subclasses.] */
-    @Test
-    public void createFromTwinJsonWithTagsAndProperties()
-    {
-        // arrange
-        final String json =
-                "{\"tags\":{\"tag1\":\"val1\",\"tag2\":\"val2\",\"tag3\":\"val3\"},\"properties\":{\"desired\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"},\"reported\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"}},\"configurations\":null,\"deviceScope\":null,\"parentScopes\":[],\"deviceId\":null,\"moduleId\":null,\"modelId\":null,\"generationId\":null,\"etag\":null,\"version\":null,\"status\":null,\"statusReason\":null,\"statusUpdatedTime\":null,\"connectionState\":null,\"connectionStateUpdatedTime\":null,\"lastActivityTime\":null,\"capabilities\":null}";
-
-        // act
-        TwinState twinState = new TwinState(json);
-
-        // assert
-        Helpers.assertJson(Deencapsulation.invoke(twinState, "toJsonElement").toString(), json);
-    }
-
     /* SRS_TWIN_STATE_21_014: [The factory shall throw IllegalArgumentException if the JSON is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void createFromDesiredPropertyJsonThrowsOnNull()
@@ -583,20 +491,6 @@ public class TwinStateTest
         TwinState.createFromPropertiesJson(json);
 
         // assert
-    }
-
-    /* SRS_TWIN_STATE_21_022: [The factory shall deserialize the provided JSON for the Twin class and subclasses.] */
-    @Test
-    public void createFromPropertiesJsonSucceed()
-    {
-        // arrange
-        final String json =  "{\"tags\":null,\"properties\":null,\"configurations\":null,\"deviceScope\":null,\"parentScopes\":[],\"deviceId\":null,\"moduleId\":null,\"modelId\":null,\"generationId\":null,\"etag\":null,\"version\":null,\"status\":null,\"statusReason\":null,\"statusUpdatedTime\":null,\"connectionState\":null,\"connectionStateUpdatedTime\":null,\"lastActivityTime\":null,\"capabilities\":null}";
-
-        // act
-        TwinState twinState = TwinState.createFromPropertiesJson(json);
-
-        // assert
-        Helpers.assertJson(Deencapsulation.invoke(twinState, "toJsonElement").toString(), json);
     }
 
     /* SRS_TWIN_STATE_21_023: [The TwinState shall provide an empty constructor to make GSON happy.] */
