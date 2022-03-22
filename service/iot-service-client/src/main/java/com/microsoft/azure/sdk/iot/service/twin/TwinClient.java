@@ -28,6 +28,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
+import static com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest.IF_MATCH;
 import static com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest.REQUEST_ID;
 
 /**
@@ -235,6 +236,25 @@ public final class TwinClient
      */
     public Twin patch(Twin twin) throws IotHubException, IOException
     {
+        return patch(twin, null);
+    }
+
+    /**
+     * This method updates device twin for the specified device.
+     * <p>This API uses the IoT Hub PATCH API when sending updates, but it sends the full twin with each patch replace.
+     * As a result, devices subscribed to twin will receive notifications that each property is changed when this API is
+     * called, even if only some of the properties were changed.</p>
+     * <p>See <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/devices/updatetwin">PATCH</a> for
+     * more details.</p>
+     *
+     * @param twin The device with a valid Id for which device twin is to be updated.
+     * @param ifMatch the string representing a ETag for the device twin, as per RFC7232. If null, no if-match header
+     * will be sent as a part of this request and it will be executed unconditionally.
+     * @throws IOException This exception is thrown if the IO operation failed.
+     * @throws IotHubException This exception is thrown if the response verification failed.
+     */
+    public Twin patch(Twin twin, String ifMatch) throws IotHubException, IOException
+    {
         if (twin == null || twin.getDeviceId() == null || twin.getDeviceId().length() == 0)
         {
             throw new IllegalArgumentException("Instantiate a twin and set device Id to be used.");
@@ -261,6 +281,11 @@ public final class TwinClient
 
         HttpRequest httpRequest = createRequest(url, HttpMethod.PATCH, twinJson.getBytes(StandardCharsets.UTF_8));
 
+        if (ifMatch != null)
+        {
+            httpRequest.setHeaderField(IF_MATCH, ifMatch);
+        }
+
         // no need to return http response since method returns void
         HttpResponse httpResponse = httpRequest.send();
         String twinString = new String(httpResponse.getBody(), StandardCharsets.UTF_8);
@@ -277,6 +302,22 @@ public final class TwinClient
      * @return The Twin object's current state returned from the service after the replace operation.
      */
     public Twin replace(Twin twin) throws IotHubException, IOException
+    {
+        return replace(twin, null);
+    }
+
+    /**
+     * Replace the full twin for a given device or module with the provided twin.
+     *
+     * @param twin The twin object to replace the current twin object.
+     * @param ifMatch the string representing a ETag for the device twin, as per RFC7232. If null, no if-match header
+     * will be sent as a part of this request and it will be executed unconditionally.
+     * @throws IotHubException If any an IoT hub level exception is thrown. For instance,
+     * if the sendHttpRequest is unauthorized, a exception that extends IotHubException will be thrown.
+     * @throws IOException If the sendHttpRequest failed to send to IoT hub.
+     * @return The Twin object's current state returned from the service after the replace operation.
+     */
+    public Twin replace(Twin twin, String ifMatch) throws IotHubException, IOException
     {
         if (twin == null || twin.getDeviceId() == null || twin.getDeviceId().length() == 0)
         {
@@ -296,6 +337,11 @@ public final class TwinClient
         TwinState twinState = new TwinState(twin.getTags(), twin.getDesiredProperties(), null);
         String twinJson = twinState.toJsonElement().toString();
         HttpRequest httpRequest = createRequest(url, HttpMethod.PUT, twinJson.getBytes(StandardCharsets.UTF_8));
+
+        if (ifMatch != null)
+        {
+            httpRequest.setHeaderField(IF_MATCH, ifMatch);
+        }
 
         HttpResponse httpResponse = httpRequest.send();
         String twinString = new String(httpResponse.getBody(), StandardCharsets.UTF_8);

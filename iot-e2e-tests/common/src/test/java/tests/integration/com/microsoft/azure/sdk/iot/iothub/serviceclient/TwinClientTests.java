@@ -126,39 +126,4 @@ public class TwinClientTests extends IntegrationTest
         assertFalse("old twin property was not deleted when twin client replaced it", TwinCommon.isPropertyInTwinCollection(twin.getDesiredProperties(), desiredPropertyToBeReplacedKey, desiredPropertyToBeReplacedValue));
         assertTrue("new twin property was not saved when twin client added it using twinClient.replace", TwinCommon.isPropertyInTwinCollection(twin.getDesiredProperties(), expectedDesiredPropertyKey, expectedDesiredPropertyValue));
     }
-
-    @Test
-    public void updateDesiredPropertiesThrowsForOutOfDateEtag() throws IOException, InterruptedException, IotHubException, TimeoutException, GeneralSecurityException, URISyntaxException
-    {
-        TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, IotHubClientProtocol.AMQPS, AuthenticationType.SAS, true);
-        TwinClient twinClient = new TwinClient(iotHubConnectionString, twinClientOptions);
-        Twin twin = twinClient.get(testDeviceIdentity.getDeviceId());
-
-        String initialEtag = twin.getETag();
-
-        final String desiredPropertyKey1 = UUID.randomUUID().toString();
-        final String desiredPropertyValue1 = UUID.randomUUID().toString();
-
-        final String desiredPropertyKey2 = UUID.randomUUID().toString();
-        final String desiredPropertyValue2 = UUID.randomUUID().toString();
-
-        // send a desired property update and wait for it to be received by the device/module
-        twin.getDesiredProperties().put(desiredPropertyKey1, desiredPropertyValue1);
-        twin = twinClient.patch(twin);
-
-        // intentionally set an out of date etag to test the precondition failed logic
-        twin.setETag(initialEtag);
-
-        try
-        {
-            //TODO not taking if-match header?
-            twin.getDesiredProperties().put(desiredPropertyKey2, desiredPropertyValue2);
-            twinClient.patch(twin);
-            fail("Expected a IotHubPreconditionFailedException to be thrown since the etag of the twin is out of date");
-        }
-        catch (IotHubPreconditionFailedException e)
-        {
-            // expected throw, ignore the exception
-        }
-    }
 }
