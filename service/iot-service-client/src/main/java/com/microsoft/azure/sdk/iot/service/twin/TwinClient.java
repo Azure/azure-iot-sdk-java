@@ -307,7 +307,7 @@ public final class TwinClient
      * @param ifMatch the string representing a ETag for the device twin, as per RFC7232. If null, no if-match header
      * will be sent as a part of this request and it will be executed unconditionally.
      * @throws IotHubException If any an IoT hub level exception is thrown. For instance,
-     * if the sendHttpRequest is unauthorized, a exception that extends IotHubException will be thrown.
+     * if the sendHttpRequest is unauthorized, an exception that extends IotHubException will be thrown.
      * @throws IOException If the sendHttpRequest failed to send to IoT hub.
      * @return The Twin object's current state returned from the service after the replace operation.
      */
