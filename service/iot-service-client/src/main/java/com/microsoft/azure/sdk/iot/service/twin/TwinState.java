@@ -3,10 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.service.twin;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
@@ -335,7 +332,12 @@ public class TwinState
      */
     public JsonElement toJsonElement()
     {
-        Gson gson = new GsonBuilder().disableHtmlEscaping().serializeNulls().create();
+        Gson gson = new GsonBuilder()
+                .disableHtmlEscaping()
+                .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
+                .serializeNulls()
+                .create();
+
         JsonElement json = gson.toJsonTree(this).getAsJsonObject();
 
         // Since null values are lost when building the json tree, need to manually re-add properties as reported
@@ -432,7 +434,12 @@ public class TwinState
 
         /* SRS_TWIN_STATE_21_012: [The factory shall throw JsonSyntaxException if the JSON is invalid.] */
         /* SRS_TWIN_STATE_21_013: [The factory shall deserialize the provided JSON for the twin class and subclasses.] */
-        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
+        Gson gson = new GsonBuilder()
+                .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
+                .excludeFieldsWithoutExposeAnnotation()
+                .disableHtmlEscaping()
+                .create();
+
         TwinState result = gson.fromJson(json, TwinState.class);
 
         /*
