@@ -233,15 +233,15 @@ public final class TwinClient
      * @throws IOException This exception is thrown if the IO operation failed.
      * @throws IotHubException This exception is thrown if the response verification failed.
      */
-    public void patch(Twin twin) throws IotHubException, IOException
+    public Twin patch(Twin twin) throws IotHubException, IOException
     {
         if (twin == null || twin.getDeviceId() == null || twin.getDeviceId().length() == 0)
         {
             throw new IllegalArgumentException("Instantiate a twin and set device Id to be used.");
         }
 
-        if ((twin.getDesiredMap() == null || twin.getDesiredMap().isEmpty()) &&
-                (twin.getTagsMap() == null || twin.getTagsMap().isEmpty()))
+        if ((twin.getDesiredProperties() == null || twin.getDesiredProperties().isEmpty()) &&
+                (twin.getTags() == null || twin.getTags().isEmpty()))
         {
             throw new IllegalArgumentException("Set either desired properties or tags for the device to be updated.");
         }
@@ -256,13 +256,15 @@ public final class TwinClient
             url = IotHubConnectionString.getUrlModuleTwin(this.hostName, twin.getDeviceId(), twin.getModuleId());
         }
 
-        TwinState twinState = new TwinState(twin.getTagsMap(), twin.getDesiredMap(), null);
+        TwinState twinState = new TwinState(twin.getTags(), twin.getDesiredProperties(), null);
         String twinJson = twinState.toJsonElement().toString();
 
         HttpRequest httpRequest = createRequest(url, HttpMethod.PATCH, twinJson.getBytes(StandardCharsets.UTF_8));
 
         // no need to return http response since method returns void
-        httpRequest.send();
+        HttpResponse httpResponse = httpRequest.send();
+        String twinString = new String(httpResponse.getBody(), StandardCharsets.UTF_8);
+        return Twin.fromJson(twinString);
     }
 
     /**
@@ -291,7 +293,7 @@ public final class TwinClient
             url = this.iotHubConnectionString.getUrlModuleTwin(twin.getDeviceId(), twin.getModuleId());
         }
 
-        TwinState twinState = new TwinState(twin.getTagsMap(), twin.getDesiredMap(), null);
+        TwinState twinState = new TwinState(twin.getTags(), twin.getDesiredProperties(), null);
         String twinJson = twinState.toJsonElement().toString();
         HttpRequest httpRequest = createRequest(url, HttpMethod.PUT, twinJson.getBytes(StandardCharsets.UTF_8));
 

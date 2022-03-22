@@ -15,7 +15,6 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
-import com.microsoft.azure.sdk.iot.service.twin.Pair;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClientOptions;
@@ -210,9 +209,7 @@ public class TwinCommon extends IntegrationTest
         assertFalse(twin.getDesiredProperties().containsKey(desiredPropertyKey));
 
         // send a desired property update and wait for it to be received by the device/module
-        Set<Pair> desiredProperties = new HashSet<>();
-        desiredProperties.add(new Pair(desiredPropertyKey, desiredPropertyValue));
-        testInstance.serviceTwin.setDesiredProperties(desiredProperties);
+        testInstance.serviceTwin.getDesiredProperties().put(desiredPropertyKey, desiredPropertyValue);
         testInstance.twinServiceClient.patch(testInstance.serviceTwin);
 
         // the desired property update received by the device must match the key/value pair sent by the service client
@@ -240,16 +237,15 @@ public class TwinCommon extends IntegrationTest
         // get the twin from the service client to check if the reported property is now present
         testInstance.serviceTwin = testInstance.getServiceClientTwin();
 
-        Set<Pair> reportedPropertiesSet = testInstance.serviceTwin.getReportedProperties();
-        assertTrue(reportedPropertiesSet.size() > 0);
-        assertTrue("Did not find expected reported property key and/or value after the device reported it", isPropertyInSet(reportedPropertiesSet, reportedPropertyKey, reportedPropertyValue));
+        assertTrue(testInstance.serviceTwin.getReportedProperties().size() > 0);
+        assertTrue("Did not find expected reported property key and/or value after the device reported it", isPropertyInTwinCollection(testInstance.serviceTwin.getReportedProperties(), reportedPropertyKey, reportedPropertyValue));
     }
 
-    public static boolean isPropertyInSet(Set<Pair> properties, String key, String value)
+    public static boolean isPropertyInTwinCollection(TwinCollection properties, String expectedKey, String expectedValue)
     {
-        for (Pair property : properties)
+        for (String key : properties.keySet())
         {
-            if (property.getKey().equals(key) && property.getValue().equals(value))
+            if (key.equals(expectedKey) && properties.get(key).equals(expectedValue))
             {
                 return true;
             }
@@ -258,7 +254,7 @@ public class TwinCommon extends IntegrationTest
         return false;
     }
 
-    public static boolean isPropertyInTwinCollection(TwinCollection properties, String expectedKey, String expectedValue)
+    public static boolean isPropertyInTwinCollection(com.microsoft.azure.sdk.iot.service.twin.TwinCollection properties, String expectedKey, String expectedValue)
     {
         for (String key : properties.keySet())
         {

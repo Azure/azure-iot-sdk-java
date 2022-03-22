@@ -6,7 +6,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.twin.Pair;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubPreconditionFailedException;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClientOptions;
@@ -24,12 +24,11 @@ import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.TwinCommon;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 
 import static junit.framework.TestCase.*;
+import static org.junit.Assert.fail;
 
 @Slf4j
 @IotHubTest
@@ -58,9 +57,7 @@ public class TwinClientTests extends IntegrationTest
         String expectedTagKey = UUID.randomUUID().toString();
         String expectedTagValue = UUID.randomUUID().toString();
 
-        Set<Pair> tags = new HashSet<>();
-        tags.add(new Pair(expectedTagKey, expectedTagValue));
-        twin.setTags(tags);
+        twin.getTags().put(expectedTagKey, expectedTagValue);
 
         twinClient.patch(twin);
         twin = twinClient.get(testDeviceIdentity.getDeviceId());
@@ -69,10 +66,9 @@ public class TwinClientTests extends IntegrationTest
         assertNotNull(twin.getTags());
         assertEquals(1, twin.getTags().size());
 
-        for (Pair pair : twin.getTags())
+        for (String actualTagKey : twin.getTags().keySet())
         {
-            String actualTagKey = pair.getKey();
-            String actualTagValue = (String) pair.getValue();
+            String actualTagValue = (String) twin.getTags().get(actualTagKey);
 
             assertEquals(expectedTagKey, actualTagKey);
             assertEquals(expectedTagValue, actualTagValue);
@@ -89,16 +85,14 @@ public class TwinClientTests extends IntegrationTest
         String expectedDesiredPropertyKey = UUID.randomUUID().toString();
         String expectedDesiredPropertyValue = UUID.randomUUID().toString();
 
-        Set<Pair> desiredProperties = new HashSet<>();
-        desiredProperties.add(new Pair(expectedDesiredPropertyKey, expectedDesiredPropertyValue));
-        twin.setDesiredProperties(desiredProperties);
+        twin.getDesiredProperties().put(expectedDesiredPropertyKey, expectedDesiredPropertyValue);
 
         // act
         twinClient.patch(twin);
 
         // assert
         twin = twinClient.get(testDeviceIdentity.getDeviceId());
-        assertTrue(TwinCommon.isPropertyInSet(twin.getDesiredProperties(), expectedDesiredPropertyKey, expectedDesiredPropertyValue));
+        assertTrue(TwinCommon.isPropertyInTwinCollection(twin.getDesiredProperties(), expectedDesiredPropertyKey, expectedDesiredPropertyValue));
     }
 
     @Test
@@ -111,28 +105,60 @@ public class TwinClientTests extends IntegrationTest
         String desiredPropertyToBeReplacedKey = UUID.randomUUID().toString();
         String desiredPropertyToBeReplacedValue = UUID.randomUUID().toString();
 
-        Set<Pair> desiredProperties = new HashSet<>();
-        desiredProperties.add(new Pair(desiredPropertyToBeReplacedKey, desiredPropertyToBeReplacedValue));
-        twin.setDesiredProperties(desiredProperties);
+        twin.getDesiredProperties().put(desiredPropertyToBeReplacedKey, desiredPropertyToBeReplacedValue);
 
         // add some properties to the twin that will be removed when the twinClient.replace call executes
         twinClient.patch(twin);
 
         twin = twinClient.get(testDeviceIdentity.getDeviceId());
-        assertTrue(TwinCommon.isPropertyInSet(twin.getDesiredProperties(), desiredPropertyToBeReplacedKey, desiredPropertyToBeReplacedValue));
+        assertTrue(TwinCommon.isPropertyInTwinCollection(twin.getDesiredProperties(), desiredPropertyToBeReplacedKey, desiredPropertyToBeReplacedValue));
 
         String expectedDesiredPropertyKey = UUID.randomUUID().toString();
         String expectedDesiredPropertyValue = UUID.randomUUID().toString();
 
-        desiredProperties.clear();
-        desiredProperties.add(new Pair(expectedDesiredPropertyKey, expectedDesiredPropertyValue));
-        twin.setDesiredProperties(desiredProperties);
+        twin.getDesiredProperties().clear();
+        twin.getDesiredProperties().put(expectedDesiredPropertyKey, expectedDesiredPropertyValue);
 
         // act
         twin = twinClient.replace(twin);
 
         // assert
-        assertFalse("old twin property was not deleted when twin client replaced it", TwinCommon.isPropertyInSet(twin.getDesiredProperties(), desiredPropertyToBeReplacedKey, desiredPropertyToBeReplacedValue));
-        assertTrue("new twin property was not saved when twin client added it using twinClient.replace", TwinCommon.isPropertyInSet(twin.getDesiredProperties(), expectedDesiredPropertyKey, expectedDesiredPropertyValue));
+        assertFalse("old twin property was not deleted when twin client replaced it", TwinCommon.isPropertyInTwinCollection(twin.getDesiredProperties(), desiredPropertyToBeReplacedKey, desiredPropertyToBeReplacedValue));
+        assertTrue("new twin property was not saved when twin client added it using twinClient.replace", TwinCommon.isPropertyInTwinCollection(twin.getDesiredProperties(), expectedDesiredPropertyKey, expectedDesiredPropertyValue));
+    }
+
+    @Test
+    public void updateDesiredPropertiesThrowsForOutOfDateEtag() throws IOException, InterruptedException, IotHubException, TimeoutException, GeneralSecurityException, URISyntaxException
+    {
+        TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, IotHubClientProtocol.AMQPS, AuthenticationType.SAS, true);
+        TwinClient twinClient = new TwinClient(iotHubConnectionString, twinClientOptions);
+        Twin twin = twinClient.get(testDeviceIdentity.getDeviceId());
+
+        String initialEtag = twin.getETag();
+
+        final String desiredPropertyKey1 = UUID.randomUUID().toString();
+        final String desiredPropertyValue1 = UUID.randomUUID().toString();
+
+        final String desiredPropertyKey2 = UUID.randomUUID().toString();
+        final String desiredPropertyValue2 = UUID.randomUUID().toString();
+
+        // send a desired property update and wait for it to be received by the device/module
+        twin.getDesiredProperties().put(desiredPropertyKey1, desiredPropertyValue1);
+        twin = twinClient.patch(twin);
+
+        // intentionally set an out of date etag to test the precondition failed logic
+        twin.setETag(initialEtag);
+
+        try
+        {
+            //TODO not taking if-match header?
+            twin.getDesiredProperties().put(desiredPropertyKey2, desiredPropertyValue2);
+            twinClient.patch(twin);
+            fail("Expected a IotHubPreconditionFailedException to be thrown since the etag of the twin is out of date");
+        }
+        catch (IotHubPreconditionFailedException e)
+        {
+            // expected throw, ignore the exception
+        }
     }
 }

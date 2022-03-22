@@ -25,7 +25,6 @@ import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
-import com.microsoft.azure.sdk.iot.service.twin.Pair;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnauthorizedException;
 import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobsClientOptions;
@@ -155,9 +154,7 @@ public class JobClientTests extends IntegrationTest
                 try
                 {
                     Twin twin = new Twin(deviceId);
-                    Set<Pair> testDesProp = new HashSet<>();
-                    testDesProp.add(new Pair(STANDARD_PROPERTY_HOMETEMP, jobTemperature));
-                    twin.setDesiredProperties(testDesProp);
+                    twin.getDesiredProperties().put(STANDARD_PROPERTY_HOMETEMP, jobTemperature);
                     twinExpectedTemperature.put(jobId, jobTemperature);
 
                     jobClient.scheduleUpdateTwin(
@@ -433,9 +430,7 @@ public class JobClientTests extends IntegrationTest
                     else
                     {
                         Twin twin = new Twin(deviceId);
-                        Set<Pair> testDesProp = new HashSet<>();
-                        testDesProp.add(new Pair(STANDARD_PROPERTY_HOMETEMP, jobTemperature));
-                        twin.setDesiredProperties(testDesProp);
+                        twin.getDesiredProperties().put(STANDARD_PROPERTY_HOMETEMP, jobTemperature);
                         twinExpectedTemperature.put(jobId, jobTemperature);
 
                         jobClient.scheduleUpdateTwin(

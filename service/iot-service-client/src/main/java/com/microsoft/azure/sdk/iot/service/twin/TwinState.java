@@ -365,7 +365,7 @@ public class TwinState
      *
      * @return The {@code TwinCollection} with the desired property content. It can be {@code null}.
      */
-    public TwinCollection getDesiredProperty()
+    public TwinCollection getDesiredProperties()
     {
         /* SRS_TWIN_STATE_21_006: [The getDesiredProperty shall return a TwinCollection with the stored desired property.] */
         if (this.properties == null)
@@ -380,7 +380,7 @@ public class TwinState
      *
      * @return The {@code TwinCollection} with the reported property content. It can be {@code null}.
      */
-    public TwinCollection getReportedProperty()
+    public TwinCollection getReportedProperties()
     {
         /* SRS_TWIN_STATE_21_007: [The getReportedProperty shall return a TwinCollection with the stored reported property.] */
         if (this.properties == null)

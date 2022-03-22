@@ -330,7 +330,7 @@ public class IndividualEnrollment extends Serializable
              * as part of the collection. So, we need to reorganize this map using the
              * TwinCollection format. This constructor will do that.
              */
-            this.initialTwin = new TwinState(result.initialTwin.getTags(), result.initialTwin.getDesiredProperty());
+            this.initialTwin = new TwinState(result.initialTwin.getTags(), result.initialTwin.getDesiredProperties());
         }
 
         if (result.createdDateTimeUtcString != null)

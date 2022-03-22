@@ -38,7 +38,6 @@ import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.twin.Pair;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClientOptions;
@@ -920,9 +919,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
     private static void testDesiredPropertiesFlow(DeviceClient deviceClient, TwinClient twinClientServiceClient, CountDownLatch twinPropertyReceivedLatch, String expectedPropertyKey, String expectedPropertyValue) throws IOException, IotHubException, InterruptedException {
         Twin serviceClientTwin = new Twin(deviceClient.getConfig().getDeviceId());
-        Set<Pair> desiredProperties = new HashSet<>();
-        desiredProperties.add(new com.microsoft.azure.sdk.iot.service.twin.Pair(expectedPropertyKey, expectedPropertyValue));
-        serviceClientTwin.setDesiredProperties(desiredProperties);
+        serviceClientTwin.getDesiredProperties().put(expectedPropertyKey, expectedPropertyValue);
         twinClientServiceClient.patch(serviceClientTwin);
 
         boolean timedOut = !twinPropertyReceivedLatch.await(DESIRED_PROPERTY_CALLBACK_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
@@ -943,11 +940,11 @@ public class MultiplexingClientTests extends IntegrationTest
         // Verify that the new reported property value can be seen from the service client
         Twin serviceClientTwin = twinClientServiceClient.get(deviceClient.getConfig().getDeviceId());
 
-        Set<com.microsoft.azure.sdk.iot.service.twin.Pair> retrievedReportedProperties = serviceClientTwin.getReportedProperties();
+        com.microsoft.azure.sdk.iot.service.twin.TwinCollection retrievedReportedProperties = serviceClientTwin.getReportedProperties();
         assertEquals(1, retrievedReportedProperties.size());
-        com.microsoft.azure.sdk.iot.service.twin.Pair retrievedReportedPropertyPair = retrievedReportedProperties.iterator().next();
-        assertTrue(retrievedReportedPropertyPair.getKey().equalsIgnoreCase(expectedPropertyKey));
-        String actualReportedPropertyValue = retrievedReportedPropertyPair.getValue().toString();
+        String retrievedReportedPropertyKey = retrievedReportedProperties.keySet().iterator().next();
+        assertEquals(expectedPropertyKey, retrievedReportedPropertyKey);
+        String actualReportedPropertyValue = (String) retrievedReportedProperties.get(retrievedReportedPropertyKey);
         assertEquals(expectedReportedPropertyValue, actualReportedPropertyValue);
     }
 

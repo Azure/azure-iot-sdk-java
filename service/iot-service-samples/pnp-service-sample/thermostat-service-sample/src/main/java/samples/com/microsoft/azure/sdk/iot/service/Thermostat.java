@@ -59,12 +59,12 @@ public class Thermostat {
         System.out.println("Updating Device twin property");
         String propertyName = "targetTemperature";
         double propertyValue = 60.2;
-        twin.setDesiredProperties(Collections.singleton(new Pair(propertyName, propertyValue)));
+        twin.getDesiredProperties().put(propertyName, propertyValue);
         twinClient.patch(twin);
 
         // Get the updated twin properties.
         twin = twinClient.get(deviceId);
-        System.out.println("The updated desired properties: " + twin.getDesiredProperties().iterator().next().getValue());
+        System.out.println("The updated desired properties: " + twin.getDesiredProperties().values().iterator().next());
     }
 
     private static void InvokeMethod() throws IOException, IotHubException {

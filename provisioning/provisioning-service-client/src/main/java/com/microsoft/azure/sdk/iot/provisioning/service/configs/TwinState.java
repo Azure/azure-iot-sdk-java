@@ -172,13 +172,8 @@ public class TwinState implements Serializable
      *
      * @return The {@code TwinCollection} with the desired property content. It can be {@code null}.
      */
-    public TwinCollection getDesiredProperty()
+    public TwinCollection getDesiredProperties()
     {
-        /* SRS_TWIN_STATE_21_006: [The getDesiredProperty shall return a TwinCollection with the stored desired property.] */
-        if (this.properties == null)
-        {
-            return null;
-        }
         return this.properties.getDesired();
     }
 

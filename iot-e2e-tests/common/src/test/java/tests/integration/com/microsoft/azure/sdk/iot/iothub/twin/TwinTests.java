@@ -8,10 +8,13 @@ import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.twin.*;
+import com.microsoft.azure.sdk.iot.device.twin.GetTwinCorrelatingMessageCallback;
+import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesUpdateCorrelatingMessageCallback;
+import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesUpdateResponse;
+import com.microsoft.azure.sdk.iot.device.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.twin.Pair;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubPreconditionFailedException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,8 +28,6 @@ import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.TwinCommon;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -78,10 +79,8 @@ public class TwinTests extends TwinCommon
             null);
 
         // send a desired property update and wait for it to be received by the device/module
-        Set<Pair> desiredProperties = new HashSet<>();
-        desiredProperties.add(new Pair(desiredPropertyKey1, desiredPropertyValue1));
-        desiredProperties.add(new Pair(desiredPropertyKey2, desiredPropertyValue2));
-        testInstance.serviceTwin.setDesiredProperties(desiredProperties);
+        testInstance.serviceTwin.getDesiredProperties().put(desiredPropertyKey1, desiredPropertyValue1);
+        testInstance.serviceTwin.getDesiredProperties().put(desiredPropertyKey2, desiredPropertyValue2);
         testInstance.twinServiceClient.patch(testInstance.serviceTwin);
 
         desiredPropertyUpdatedLatch.await();
@@ -123,10 +122,8 @@ public class TwinTests extends TwinCommon
             null);
 
         // send a desired property update and wait for it to be received by the device/module
-        Set<Pair> desiredProperties = new HashSet<>();
-        desiredProperties.add(new Pair(desiredPropertyKey1, desiredPropertyValue1));
-        testInstance.serviceTwin.setDesiredProperties(desiredProperties);
-        testInstance.twinServiceClient.patch(testInstance.serviceTwin);
+        testInstance.serviceTwin.getDesiredProperties().put(desiredPropertyKey1, desiredPropertyValue1);
+        testInstance.serviceTwin = testInstance.twinServiceClient.patch(testInstance.serviceTwin);
 
         desiredProperty1UpdatedLatch.await();
         com.microsoft.azure.sdk.iot.device.twin.Twin desiredPropertyUpdate = desiredPropertyUpdateAtomicReference.get();
@@ -134,10 +131,9 @@ public class TwinTests extends TwinCommon
         // the desired property update received by the device must match the key/value pair sent by the service client
         assertTrue(isPropertyInTwinCollection(desiredPropertyUpdate.getDesiredProperties(), desiredPropertyKey1, desiredPropertyValue1));
 
-        desiredProperties.clear();
-        desiredProperties.add(new Pair(desiredPropertyKey2, desiredPropertyValue2));
-        testInstance.serviceTwin.setDesiredProperties(desiredProperties);
-        testInstance.twinServiceClient.patch(testInstance.serviceTwin);
+        testInstance.serviceTwin.getDesiredProperties().clear();
+        testInstance.serviceTwin.getDesiredProperties().put(desiredPropertyKey2, desiredPropertyValue2);
+        testInstance.serviceTwin = testInstance.twinServiceClient.patch(testInstance.serviceTwin);
 
         desiredProperty2UpdatedLatch.await();
         desiredPropertyUpdate = desiredPropertyUpdateAtomicReference.get();
@@ -170,8 +166,8 @@ public class TwinTests extends TwinCommon
         assertTrue(response.getVersion() > 0);
 
         com.microsoft.azure.sdk.iot.service.twin.Twin serviceClientTwin = testInstance.getServiceClientTwin();
-        assertTrue(isPropertyInSet(serviceClientTwin.getReportedProperties(), reportedPropertyKey1, reportedPropertyValue1));
-        assertTrue(isPropertyInSet(serviceClientTwin.getReportedProperties(), reportedPropertyKey2, reportedPropertyValue2));
+        assertTrue(isPropertyInTwinCollection(serviceClientTwin.getReportedProperties(), reportedPropertyKey1, reportedPropertyValue1));
+        assertTrue(isPropertyInTwinCollection(serviceClientTwin.getReportedProperties(), reportedPropertyKey2, reportedPropertyValue2));
     }
 
     @Test
@@ -205,8 +201,8 @@ public class TwinTests extends TwinCommon
         assertEquals(IotHubStatusCode.OK, response.getStatusCode());
 
         com.microsoft.azure.sdk.iot.service.twin.Twin serviceClientTwin = testInstance.getServiceClientTwin();
-        assertTrue(isPropertyInSet(serviceClientTwin.getReportedProperties(), reportedPropertyKey1, reportedPropertyValue1));
-        assertTrue(isPropertyInSet(serviceClientTwin.getReportedProperties(), reportedPropertyKey2, reportedPropertyValue2));
+        assertTrue(isPropertyInTwinCollection(serviceClientTwin.getReportedProperties(), reportedPropertyKey1, reportedPropertyValue1));
+        assertTrue(isPropertyInTwinCollection(serviceClientTwin.getReportedProperties(), reportedPropertyKey2, reportedPropertyValue2));
     }
 
     // Both updateReportedPropertiesAsync and getTwinAsync have overloads that expose a verbose state callback detailing
@@ -305,9 +301,7 @@ public class TwinTests extends TwinCommon
         assertFalse(twin.getDesiredProperties().containsKey(desiredPropertyKey));
 
         // send a desired property update and wait for it to be received by the device/module
-        Set<Pair> desiredProperties = new HashSet<>();
-        desiredProperties.add(new Pair(desiredPropertyKey, desiredPropertyValue));
-        testInstance.serviceTwin.setDesiredProperties(desiredProperties);
+        testInstance.serviceTwin.getDesiredProperties().put(desiredPropertyKey, desiredPropertyValue);
         testInstance.twinServiceClient.patch(testInstance.serviceTwin);
 
         desiredPropertyUpdatedLatch.await();
@@ -398,8 +392,8 @@ public class TwinTests extends TwinCommon
         // get the twin from the service client to check if the reported property is now present
         testInstance.serviceTwin = testInstance.getServiceClientTwin();
 
-        Set<Pair> reportedPropertiesSet = testInstance.serviceTwin.getReportedProperties();
-        assertTrue(reportedPropertiesSet.size() > 0);
-        assertTrue("Did not find expected reported property key and/or value after the device reported it", isPropertyInSet(reportedPropertiesSet, reportedPropertyKey, reportedPropertyValue));
+        com.microsoft.azure.sdk.iot.service.twin.TwinCollection reportedProperties = testInstance.serviceTwin.getReportedProperties();
+        assertTrue(reportedProperties.size() > 0);
+        assertTrue("Did not find expected reported property key and/or value after the device reported it", isPropertyInTwinCollection(reportedProperties, reportedPropertyKey, reportedPropertyValue));
     }
 }
