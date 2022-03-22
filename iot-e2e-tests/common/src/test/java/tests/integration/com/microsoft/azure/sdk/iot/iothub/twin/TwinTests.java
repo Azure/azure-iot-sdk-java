@@ -204,6 +204,40 @@ public class TwinTests extends TwinCommon
         assertTrue(isPropertyInTwinCollection(serviceClientTwin.getReportedProperties(), reportedPropertyKey2, reportedPropertyValue2));
     }
 
+    @Test
+    public void canDeleteReportedProperties() throws IOException, TimeoutException, InterruptedException, IotHubException
+    {
+        final String reportedPropertyKey = UUID.randomUUID().toString();
+        final String reportedPropertyValue = UUID.randomUUID().toString();
+
+        testInstance.testIdentity.getClient().subscribeToDesiredProperties(
+                (twin, context) ->
+                {
+                    // don't care about desired properties for this test. Just need to open twin links
+                },
+                null);
+
+        Twin twin = testInstance.testIdentity.getClient().getTwin();
+        twin.getReportedProperties().put(reportedPropertyKey, reportedPropertyValue);
+        ReportedPropertiesUpdateResponse response = testInstance.testIdentity.getClient().updateReportedProperties(twin.getReportedProperties());
+
+        assertEquals(IotHubStatusCode.OK, response.getStatusCode());
+        System.out.println(response.getVersion());
+        assertTrue(response.getVersion() > 0);
+
+        twin.getReportedProperties().setVersion(response.getVersion());
+        twin.getReportedProperties().put(reportedPropertyKey, null);
+        response = testInstance.testIdentity.getClient().updateReportedProperties(twin.getReportedProperties());
+
+        assertEquals(IotHubStatusCode.OK, response.getStatusCode());
+        System.out.println(response.getVersion());
+        assertTrue(response.getVersion() > 0);
+
+        com.microsoft.azure.sdk.iot.service.twin.Twin serviceClientTwin = testInstance.getServiceClientTwin();
+        assertFalse(isPropertyInTwinCollection(serviceClientTwin.getReportedProperties(), reportedPropertyKey, reportedPropertyValue));
+    }
+
+
     // Both updateReportedPropertiesAsync and getTwinAsync have overloads that expose a verbose state callback detailing
     // when a message is queued, sent, ack'd, etc. This test makes sure that those callbacks are all executed as expected and in order.
     @ContinuousIntegrationTest

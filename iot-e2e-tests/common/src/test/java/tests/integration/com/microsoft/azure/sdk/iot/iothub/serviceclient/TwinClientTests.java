@@ -59,8 +59,7 @@ public class TwinClientTests extends IntegrationTest
 
         twin.getTags().put(expectedTagKey, expectedTagValue);
 
-        twinClient.patch(twin);
-        twin = twinClient.get(testDeviceIdentity.getDeviceId());
+        twin = twinClient.patch(twin);
 
         assertNotNull(twin);
         assertNotNull(twin.getTags());
@@ -88,11 +87,32 @@ public class TwinClientTests extends IntegrationTest
         twin.getDesiredProperties().put(expectedDesiredPropertyKey, expectedDesiredPropertyValue);
 
         // act
-        twinClient.patch(twin);
+        twin = twinClient.patch(twin);
 
         // assert
-        twin = twinClient.get(testDeviceIdentity.getDeviceId());
         assertTrue(TwinCommon.isPropertyInTwinCollection(twin.getDesiredProperties(), expectedDesiredPropertyKey, expectedDesiredPropertyValue));
+    }
+
+    @Test
+    public void testPatchTwinToDeleteDesiredProperty() throws IOException, GeneralSecurityException, IotHubException, URISyntaxException
+    {
+        TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, IotHubClientProtocol.AMQPS, AuthenticationType.SAS, true);
+        TwinClient twinClient = new TwinClient(iotHubConnectionString, twinClientOptions);
+        Twin twin = twinClient.get(testDeviceIdentity.getDeviceId());
+
+        String expectedDesiredPropertyKey = UUID.randomUUID().toString();
+        String expectedDesiredPropertyValue = UUID.randomUUID().toString();
+
+        twin.getDesiredProperties().put(expectedDesiredPropertyKey, expectedDesiredPropertyValue);
+
+        twin = twinClient.patch(twin);
+
+        // act
+        twin.getDesiredProperties().put(expectedDesiredPropertyKey, null);
+        twin = twinClient.patch(twin);
+
+        // assert
+        assertFalse(TwinCommon.isPropertyInTwinCollection(twin.getDesiredProperties(), expectedDesiredPropertyKey, expectedDesiredPropertyValue));
     }
 
     @Test

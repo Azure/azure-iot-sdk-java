@@ -155,11 +155,7 @@ public class Twin
      */
     public JsonElement toJsonElement()
     {
-        Gson gson = new GsonBuilder()
-                .disableHtmlEscaping()
-                .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
-                .serializeNulls()
-                .create();
+        Gson gson = TwinGsonBuilder.getGson();
 
         JsonElement json = gson.toJsonTree(this).getAsJsonObject();
 
@@ -242,11 +238,7 @@ public class Twin
             throw new IllegalArgumentException("JSON with result is null or empty");
         }
 
-        Gson gson = new GsonBuilder()
-                .excludeFieldsWithoutExposeAnnotation()
-                .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
-                .disableHtmlEscaping()
-                .create();
+        Gson gson = TwinGsonBuilder.getGson();
         Twin result = gson.fromJson(json, Twin.class);
 
         /*
@@ -278,11 +270,7 @@ public class Twin
             throw new IllegalArgumentException("JSON with result is null or empty");
         }
 
-        Gson gson = new GsonBuilder()
-                .excludeFieldsWithoutExposeAnnotation()
-                .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
-                .disableHtmlEscaping()
-                .create();
+        Gson gson = TwinGsonBuilder.getGson();
 
         TwinCollection result = gson.fromJson(json, TwinCollection.class);
 
@@ -304,11 +292,7 @@ public class Twin
             throw new IllegalArgumentException("JSON with result is null or empty");
         }
 
-        Gson gson = new GsonBuilder()
-                .excludeFieldsWithoutExposeAnnotation()
-                .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
-                .disableHtmlEscaping()
-                .create();
+        Gson gson = TwinGsonBuilder.getGson();
 
         TwinCollection result = gson.fromJson(json, TwinCollection.class);
 
@@ -330,11 +314,7 @@ public class Twin
             throw new IllegalArgumentException("JSON with result is null or empty");
         }
 
-        Gson gson = new GsonBuilder()
-                .excludeFieldsWithoutExposeAnnotation()
-                .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
-                .disableHtmlEscaping()
-                .create();
+        Gson gson = TwinGsonBuilder.getGson();
         
         TwinProperties result = gson.fromJson(json, TwinProperties.class);
 

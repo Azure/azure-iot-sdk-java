@@ -244,19 +244,19 @@ public class TwinState
 
     // the twin tags
     private static final String TAGS_TAG = "tags";
-    @Expose(serialize = false)
+    @Expose
     @SerializedName(TAGS_TAG)
     private TwinCollection tags;
 
     // the twin desired properties
     private static final String PROPERTIES_TAG = "properties";
-    @Expose(serialize = false)
+    @Expose
     @SerializedName(PROPERTIES_TAG)
     private TwinProperties properties;
 
     // the twin configurations
     private static final String CONFIGURATION_TAG = "configurations";
-    @Expose(serialize = false)
+    @Expose
     @SerializedName(CONFIGURATION_TAG)
     @Getter
     @Setter
@@ -332,11 +332,7 @@ public class TwinState
      */
     public JsonElement toJsonElement()
     {
-        Gson gson = new GsonBuilder()
-                .disableHtmlEscaping()
-                .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
-                .serializeNulls()
-                .create();
+        Gson gson = TwinGsonBuilder.getGson();
 
         JsonElement json = gson.toJsonTree(this).getAsJsonObject();
 
@@ -425,11 +421,7 @@ public class TwinState
             throw new IllegalArgumentException("JSON with result is null or empty");
         }
 
-        Gson gson = new GsonBuilder()
-                .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
-                .excludeFieldsWithoutExposeAnnotation()
-                .disableHtmlEscaping()
-                .create();
+        Gson gson = TwinGsonBuilder.getGson();
 
         TwinState result = gson.fromJson(json, TwinState.class);
 
@@ -478,7 +470,7 @@ public class TwinState
             throw new IllegalArgumentException("JSON with result is null or empty");
         }
 
-        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
+        Gson gson = TwinGsonBuilder.getGson();
         TwinCollection result = gson.fromJson(json, TwinCollection.class);
 
         return new TwinState(null, result, null);
@@ -499,7 +491,7 @@ public class TwinState
             throw new IllegalArgumentException("JSON with result is null or empty");
         }
 
-        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
+        Gson gson = TwinGsonBuilder.getGson();
         TwinCollection result = gson.fromJson(json, TwinCollection.class);
 
         return new TwinState(null, null, result);
@@ -520,7 +512,7 @@ public class TwinState
             throw new IllegalArgumentException("JSON with result is null or empty");
         }
 
-        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
+        Gson gson = TwinGsonBuilder.getGson();
         TwinProperties result = gson.fromJson(json, TwinProperties.class);
 
         return new TwinState(null, result.getDesired(), result.getReported());
