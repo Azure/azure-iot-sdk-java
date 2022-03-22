@@ -227,7 +227,7 @@ public final class TwinClient
      * <p>See <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/devices/updatetwin">PATCH</a> for
      * more details.</p>
      *
-     * @param twin The device with a valid Id for which twin is to be updated.
+     * @param twin The twin to be patched. To delete a particular property, set the value to null.
      * @throws IOException This exception is thrown if the IO operation failed.
      * @throws IotHubException This exception is thrown if the response verification failed.
      */
@@ -241,7 +241,7 @@ public final class TwinClient
      * <p>See <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/devices/updatetwin">PATCH</a> for
      * more details.</p>
      *
-     * @param twin The device with a valid Id for which twin is to be updated.
+     * @param twin The twin to be patched. To delete a particular property, set the value to null.
      * @param ifMatch the string representing a ETag for the device twin, as per RFC7232. If null, no if-match header
      * will be sent as a part of this request and it will be executed unconditionally.
      * @throws IOException This exception is thrown if the IO operation failed.
