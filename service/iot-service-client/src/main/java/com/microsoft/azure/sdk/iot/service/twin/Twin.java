@@ -79,16 +79,19 @@ public class Twin
         twin.setVersion(twinState.getVersion());
         twin.setETag(twinState.getETag());
 
+        twin.getTags().setVersion(twinState.getTags().getVersion());
         if (twinState.getTags().size() > 0)
         {
             twin.getTags().putAll(twinState.getTags());
         }
 
+        twin.getDesiredProperties().setVersion(twinState.getDesiredProperties().getVersion());
         if (twinState.getDesiredProperties().size() > 0)
         {
             twin.getDesiredProperties().putAll(twinState.getDesiredProperties());
         }
 
+        twin.getReportedProperties().setVersion(twinState.getReportedProperties().getVersion());
         if (twinState.getReportedProperties().size() > 0)
         {
             twin.getReportedProperties().putAll(twinState.getReportedProperties());

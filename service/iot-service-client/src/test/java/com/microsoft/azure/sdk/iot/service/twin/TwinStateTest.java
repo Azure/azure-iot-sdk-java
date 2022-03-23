@@ -392,7 +392,7 @@ public class TwinStateTest
         TwinState twinState = TwinState.createFromDesiredPropertyJson(json);
 
         // assert
-        Helpers.assertJson(twinState.getDesiredProperties().toJsonElement().toString(), json);
+        Helpers.assertJson(twinState.getDesiredProperties().toJsonObject().toString(), json);
     }
 
     /* SRS_TWIN_STATE_21_017: [The factory shall throw IllegalArgumentException if the JSON is null or empty.] */
@@ -448,7 +448,7 @@ public class TwinStateTest
         TwinState twinState = TwinState.createFromReportedPropertyJson(json);
 
         // assert
-        Helpers.assertJson(twinState.getReportedProperties().toJsonElement().toString(), json);
+        Helpers.assertJson(twinState.getReportedProperties().toJsonObject().toString(), json);
     }
 
     /* SRS_TWIN_STATE_21_020: [The factory shall throw IllegalArgumentException if the JSON is null or empty.] */
