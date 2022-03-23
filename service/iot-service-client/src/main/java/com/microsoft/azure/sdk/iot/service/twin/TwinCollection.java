@@ -334,7 +334,7 @@ public class TwinCollection extends HashMap<String, Object> {
         JsonObject object = ParserUtility.mapToJsonElement(this).getAsJsonObject();
         if (this.version != null)
         {
-            object.add(VERSION_TAG, new JsonPrimitive(this.version));
+            object.addProperty(VERSION_TAG, this.version);
         }
         return object;
     }
