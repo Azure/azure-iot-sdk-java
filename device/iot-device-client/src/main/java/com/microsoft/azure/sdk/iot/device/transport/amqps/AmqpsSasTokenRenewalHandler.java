@@ -136,6 +136,7 @@ class AmqpsSasTokenRenewalHandler extends BaseHandler implements AuthenticationM
     {
         if (this.scheduledTask != null)
         {
+            this.scheduledTask.cancel();
             this.scheduledTask.attachments().clear();
         }
 

@@ -321,5 +321,7 @@ abstract class AmqpsReceiverLinkHandler extends BaseHandler
             childrenIterator.next();
             childrenIterator.remove();
         }
+
+        this.receiverLink.free();
     }
 }
