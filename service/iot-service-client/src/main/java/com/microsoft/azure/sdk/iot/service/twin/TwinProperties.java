@@ -164,12 +164,12 @@ public class TwinProperties
 
         if (this.desired != null)
         {
-            twinJson.add(DESIRED_PROPERTIES_TAG, this.desired.toJsonElement());
+            twinJson.add(DESIRED_PROPERTIES_TAG, this.desired.toJsonObject());
         }
 
         if (this.reported != null)
         {
-            twinJson.add(REPORTED_PROPERTIES_TAG, this.reported.toJsonElement());
+            twinJson.add(REPORTED_PROPERTIES_TAG, this.reported.toJsonObject());
         }
 
         return twinJson;
