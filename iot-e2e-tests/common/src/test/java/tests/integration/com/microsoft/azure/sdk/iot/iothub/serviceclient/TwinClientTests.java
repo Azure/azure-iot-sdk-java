@@ -91,6 +91,7 @@ public class TwinClientTests extends IntegrationTest
 
         // assert
         assertTrue(TwinCommon.isPropertyInTwinCollection(twin.getDesiredProperties(), expectedDesiredPropertyKey, expectedDesiredPropertyValue));
+        assertNotNull(twin.getDesiredProperties().getVersion());
     }
 
     @Test
@@ -145,5 +146,6 @@ public class TwinClientTests extends IntegrationTest
         // assert
         assertFalse("old twin property was not deleted when twin client replaced it", TwinCommon.isPropertyInTwinCollection(twin.getDesiredProperties(), desiredPropertyToBeReplacedKey, desiredPropertyToBeReplacedValue));
         assertTrue("new twin property was not saved when twin client added it using twinClient.replace", TwinCommon.isPropertyInTwinCollection(twin.getDesiredProperties(), expectedDesiredPropertyKey, expectedDesiredPropertyValue));
+        assertNotNull(twin.getDesiredProperties().getVersion());
     }
 }
