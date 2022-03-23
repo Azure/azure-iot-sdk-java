@@ -393,7 +393,7 @@ public class TwinCollection extends HashMap<String, Object> {
     /**
      * Setter for the version.
      */
-    public final void setVersion(int version) {
+    public final void setVersion(Integer version) {
         this.version = version;
     }
 

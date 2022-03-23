@@ -5,6 +5,7 @@ package com.microsoft.azure.sdk.iot.service.twin;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.microsoft.azure.sdk.iot.service.ParserUtility;
 
 import java.util.HashMap;
@@ -329,8 +330,13 @@ public class TwinCollection extends HashMap<String, Object> {
      *
      * @return The {@code JsonElement} with the content of this class.
      */
-    public JsonElement toJsonElement() {
-        return ParserUtility.mapToJsonElement(this);
+    public JsonObject toJsonObject() {
+        JsonObject object = ParserUtility.mapToJsonElement(this).getAsJsonObject();
+        if (this.version != null)
+        {
+            object.add(VERSION_TAG, new JsonPrimitive(this.version));
+        }
+        return object;
     }
 
     /**
@@ -394,7 +400,7 @@ public class TwinCollection extends HashMap<String, Object> {
      * Setter for the version of this twin collection.
      * @param version the version.
      */
-    public final void setVersion(int version)
+    public final void setVersion(Integer version)
     {
         this.version = version;
     }
