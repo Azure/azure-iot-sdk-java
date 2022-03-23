@@ -17,7 +17,7 @@ public class WrappedTwin
 
     private JsonObject mapToJson(TwinCollection map)
     {
-        return new JsonObject(map.toJsonElement().toString());
+        return new JsonObject(map.toJsonObject().toString());
     }
 
     public JsonObject toJsonObject()
