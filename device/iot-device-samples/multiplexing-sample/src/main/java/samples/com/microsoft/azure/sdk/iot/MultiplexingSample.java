@@ -13,7 +13,6 @@ import com.microsoft.azure.sdk.iot.device.MultiplexingClient;
 import com.microsoft.azure.sdk.iot.device.MultiplexingClientOptions;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -119,7 +118,7 @@ public class MultiplexingSample
         {
             multiplexingClientManager.open();
         }
-        catch (IotHubClientException | IOException e)
+        catch (IotHubClientException e)
         {
             // error is logged by the MultiplexingClientManager, no need to log it here, too
             System.out.println("Exiting sample...");

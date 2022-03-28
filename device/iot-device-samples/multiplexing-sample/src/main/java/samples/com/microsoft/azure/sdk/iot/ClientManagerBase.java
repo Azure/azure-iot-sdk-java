@@ -73,7 +73,7 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
      * If the client is in CONNECTING or CONNECTED state, Open will be no-op.
      * @throws IOException if opening the connection fails due to IO problems.
      */
-    public void open() throws IOException, IotHubClientException
+    public void open() throws IotHubClientException
     {
         synchronized (lastKnownConnectionStatusLock)
         {
@@ -174,7 +174,7 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
                     {
                         connect();
                     }
-                    catch (IOException | IotHubClientException ex)
+                    catch (IotHubClientException ex)
                     {
                         log.error("Exception thrown while opening client instance: " + getClientId(), ex);
                     }
@@ -186,7 +186,7 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
     /**
      * Attempts to open the client and establish the connection.
      */
-    public void connect() throws IOException, IotHubClientException
+    public void connect() throws IotHubClientException
     {
         // Device client does not have retry on the initial open() call. Will need to be re-opened by the calling application
         // Lock the lastKnownConnectionStus so no other process will be able to change it while the client manager is attempting to open the connection.
@@ -228,7 +228,7 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
                     {
                         log.error("Non-retryable exception thrown while opening client instance " + getClientId() + ": ", ex);
                         lastKnownConnectionStatus = ConnectionStatus.DISCONNECTED;
-                        throw ex;
+                        throw new IotHubClientException(IotHubStatusCode.ERROR, ex);
                     }
                 }
 
