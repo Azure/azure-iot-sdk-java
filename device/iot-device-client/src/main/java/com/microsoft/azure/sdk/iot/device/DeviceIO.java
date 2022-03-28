@@ -109,12 +109,12 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
         }
     }
 
-    void registerMultiplexedDeviceClient(List<ClientConfiguration> configs, long timeoutMilliseconds) throws InterruptedException, TimeoutException, IotHubClientException
+    void registerMultiplexedDeviceClient(List<ClientConfiguration> configs, long timeoutMilliseconds) throws InterruptedException, IotHubClientException
     {
         this.transport.registerMultiplexedDeviceClient(configs, timeoutMilliseconds);
     }
 
-    void unregisterMultiplexedDeviceClient(List<ClientConfiguration> configs, long timeoutMilliseconds) throws InterruptedException, TimeoutException, IotHubClientException
+    void unregisterMultiplexedDeviceClient(List<ClientConfiguration> configs, long timeoutMilliseconds) throws InterruptedException, IotHubClientException
     {
         this.transport.unregisterMultiplexedDeviceClient(configs, timeoutMilliseconds);
     }

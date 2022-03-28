@@ -234,7 +234,7 @@ public final class DeviceClient extends InternalClient
      * Get a file upload SAS URI which the Azure Storage SDK can use to upload a file to blob for this device. See <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-file-upload#initialize-a-file-upload">this documentation</a> for more details.
      * @param request The request details for getting the SAS URI, including the destination blob name.
      * @return The file upload details to be used with the Azure Storage SDK in order to upload a file from this device.
-     * @throws IOException If this HTTPS request fails to send.
+     * @throws IotHubClientException If this HTTPS request fails to send or if the service rejects the request for any reason.
      */
     public FileUploadSasUriResponse getFileUploadSasUri(FileUploadSasUriRequest request) throws IotHubClientException
     {
@@ -249,7 +249,7 @@ public final class DeviceClient extends InternalClient
     /**
      * Notify IoT hub that a file upload has been completed, successfully or otherwise. See <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-file-upload#notify-iot-hub-of-a-completed-file-upload">this documentation</a> for more details.
      * @param notification The notification details, including if the file upload succeeded.
-     * @throws IOException If this HTTPS request fails to send.
+     * @throws IotHubClientException If this HTTPS request fails to send or if the service rejects the request for any reason.
      */
     public void completeFileUpload(FileUploadCompletionNotification notification) throws IotHubClientException
     {

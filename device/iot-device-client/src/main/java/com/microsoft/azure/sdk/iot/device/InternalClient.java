@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.HTTPS;
@@ -176,12 +175,10 @@ public class InternalClient
      *
      * @param message the message to be sent.
      *
-     * @return The service's response code for this operation. If it is {@link IotHubStatusCode#OK} then the message was delivered successfully.
      * @throws InterruptedException if the operation is interrupted while waiting on the telemetry to be acknowledged by the service.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
-     * @throws TimeoutException if the service fails to acknowledge the telemetry message within the default timeout.
      */
-    public void sendEvent(Message message) throws InterruptedException, TimeoutException, IllegalStateException, IotHubClientException
+    public void sendEvent(Message message) throws InterruptedException, IllegalStateException, IotHubClientException
     {
         sendEvent(message, DEFAULT_TIMEOUT_MILLISECONDS);
     }
@@ -195,9 +192,8 @@ public class InternalClient
      *
      * @throws InterruptedException if the operation is interrupted while waiting on the telemetry to be acknowledged by the service.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
-     * @throws TimeoutException if the service fails to acknowledge the telemetry message within the provided timeout.
      */
-    public void sendEvent(Message message, int timeoutMilliseconds) throws InterruptedException, TimeoutException, IllegalStateException, IotHubClientException
+    public void sendEvent(Message message, int timeoutMilliseconds) throws InterruptedException, IllegalStateException, IotHubClientException
     {
         verifyRegisteredIfMultiplexing();
         message.setConnectionDeviceId(this.config.getDeviceId());
@@ -244,9 +240,8 @@ public class InternalClient
      *
      * @throws InterruptedException if the operation is interrupted while waiting on the telemetry to be acknowledged by the service.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
-     * @throws TimeoutException if the service fails to acknowledge the batch telemetry message within the default timeout.
      */
-    public void sendEvents(List<Message> messages) throws InterruptedException, TimeoutException, IllegalStateException, IotHubClientException
+    public void sendEvents(List<Message> messages) throws InterruptedException, IllegalStateException, IotHubClientException
     {
         this.sendEvents(messages, DEFAULT_TIMEOUT_MILLISECONDS);
     }
@@ -264,9 +259,8 @@ public class InternalClient
      *
      * @throws InterruptedException if the operation is interrupted while waiting on the telemetry to be acknowledged by the service.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
-     * @throws TimeoutException if the service fails to acknowledge the batch telemetry message within the provided timeout.
      */
-    public void sendEvents(List<Message> messages, int timeoutMilliseconds) throws InterruptedException, TimeoutException, IllegalStateException, IotHubClientException
+    public void sendEvents(List<Message> messages, int timeoutMilliseconds) throws InterruptedException, IllegalStateException, IotHubClientException
     {
         final CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<IotHubClientException> iotHubClientExceptionReference = new AtomicReference<>();
@@ -306,7 +300,6 @@ public class InternalClient
      * @param desiredPropertiesCallback The callback to execute each time a desired property update message is received
      * from the service. This will contain one or many properties updated at once.
      * @param desiredPropertiesCallbackContext The context that will be included in the callback of desiredPropertiesCallback. May be null.
-     * @throws TimeoutException if the service fails to acknowledge the subscription request within the default timeout.
      * @throws InterruptedException if the operation is interrupted while waiting on the subscription request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open.
      */
@@ -325,7 +318,6 @@ public class InternalClient
      * @param desiredPropertiesCallbackContext The context that will be included in the callback of desiredPropertiesCallback. May be null.
      * @param timeoutMilliseconds The maximum number of milliseconds this call will wait for the service to acknowledge the subscription request. If 0,
      * then it will wait indefinitely.
-     * @throws TimeoutException if the service fails to acknowledge the subscription request within the provided timeout.
      * @throws InterruptedException if the operation is interrupted while waiting on the subscription request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open.
      */
@@ -371,9 +363,7 @@ public class InternalClient
      *
      * @param reportedProperties The reported property key/value pairs to add/update in the twin. To delete a particular
      * reported property, set the value to null.
-     * @return The status code returned by the service for this operation and the new reported properties version. If
-     * the status code value is {@link IotHubStatusCode#OK} then the patch was successful.
-     * @throws TimeoutException if the service fails to acknowledge the reported property update request within the default timeout.
+     * @return The new reported properties version.
      * @throws InterruptedException if the operation is interrupted while waiting on the reported property update request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open or if this client has not subscribed to desired properties yet.
      */
@@ -392,9 +382,7 @@ public class InternalClient
      * reported property, set the value to null.
      * @param timeoutMilliseconds The maximum number of milliseconds this call will wait for the service to acknowledge the reported properties update request. If 0,
      * then it will wait indefinitely.
-     * @return The status code returned by the service for this operation and the new reported properties version. If
-     * the status code value is {@link IotHubStatusCode#OK} then the patch was successful.
-     * @throws TimeoutException if the service fails to acknowledge the reported property update request within the provided timeout.
+     * @return The new reported properties version.
      * @throws InterruptedException if the operation is interrupted while waiting on the reported property update request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open or if this client has not subscribed to desired properties yet.
      */
@@ -441,7 +429,6 @@ public class InternalClient
      * Get the twin for this client. This client must have subscribed to desired properties before this method can be called.
      *
      * @return The twin for this client
-     * @throws TimeoutException if the service fails to acknowledge the getTwin request within the default timeout.
      * @throws InterruptedException if the operation is interrupted while waiting on the getTwin request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open or if this client has not subscribed to desired properties yet.
      */
@@ -456,7 +443,6 @@ public class InternalClient
      * @param timeoutMilliseconds The maximum number of milliseconds this call will wait for the service to return the twin.
      * If 0, then it will wait indefinitely.
      * @return The twin for this client
-     * @throws TimeoutException if the service fails to acknowledge the getTwin request within the provided timeout.
      * @throws InterruptedException if the operation is interrupted while waiting on the getTwin request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open or if this client has not subscribed to desired properties yet.
      */
@@ -503,8 +489,6 @@ public class InternalClient
      * @param methodCallback Callback on which direct methods shall be invoked. Cannot be {@code null}.
      * @param methodCallbackContext Context for device method callback. Can be {@code null}.
      *
-     * @return The service's response code for this operation. If it is {@link IotHubStatusCode#OK} then this client has subscribed successfully.
-     * @throws TimeoutException if the service fails to acknowledge the subscription request within the default timeout.
      * @throws InterruptedException if the operation is interrupted while waiting on the subscription request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open.
      */
@@ -522,8 +506,6 @@ public class InternalClient
      * @param timeoutMilliseconds The maximum number of milliseconds this call will wait for the service to return the twin.
      * If 0, then it will wait indefinitely.
      *
-     * @return The service's response code for this operation. If it is {@link IotHubStatusCode#OK} then this client has subscribed successfully.
-     * @throws TimeoutException if the service fails to acknowledge the subscription request within the provided timeout.
      * @throws InterruptedException if the operation is interrupted while waiting on the subscription request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open.
      */

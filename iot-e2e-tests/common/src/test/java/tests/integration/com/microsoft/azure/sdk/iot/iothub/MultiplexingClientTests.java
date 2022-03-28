@@ -368,7 +368,7 @@ public class MultiplexingClientTests extends IntegrationTest
                     openExceptions[finalI] = new AtomicReference<>();
                     testInstances[finalI].multiplexingClient.open(false);
                 }
-                catch (IotHubClientException | IOException e)
+                catch (IotHubClientException e)
                 {
                     openExceptions[finalI].set(e);
                 }

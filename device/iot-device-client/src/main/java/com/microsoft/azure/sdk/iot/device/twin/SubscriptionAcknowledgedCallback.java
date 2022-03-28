@@ -14,8 +14,8 @@ public interface SubscriptionAcknowledgedCallback
      * The callback that is executed when the request to subscribe to desired properties or direct methodshas been
      * acknowledged by the service.
      * @param context The context that was provided for this callback in
-     * {@link com.microsoft.azure.sdk.iot.device.InternalClient#subscribeToDesiredPropertiesAsync(SubscriptionAcknowledgedCallback, Object, DesiredPropertiesCallback, Object)}
-     * or in {@link  com.microsoft.azure.sdk.iot.device.InternalClient#subscribeToMethodsAsync(SubscriptionAcknowledgedCallback, Object, MethodCallback, Object)}.
+     * {@link com.microsoft.azure.sdk.iot.device.InternalClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesCallback, Object, SubscriptionAcknowledgedCallback, Object)}
+     * or in {@link  com.microsoft.azure.sdk.iot.device.InternalClient#subscribeToMethodsAsync(MethodCallback, Object, SubscriptionAcknowledgedCallback, Object)}.
      */
     void onSubscriptionAcknowledged(IotHubClientException exception, Object context);
 }

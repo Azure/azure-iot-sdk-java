@@ -130,12 +130,6 @@ public class MultiplexingClientManager extends ClientManagerBase
             multiplexingClient.close();
             throw e;
         }
-        catch (TimeoutException e)
-        {
-            log.error("Timed out waiting for device registration to finish, closing client...", e);
-            multiplexingClient.close();
-            throw e;
-        }
         catch (IotHubClientException e)
         {
             log.error("Unexpected exception thrown during device registration, closing client...", e);
@@ -166,12 +160,6 @@ public class MultiplexingClientManager extends ClientManagerBase
             multiplexingClient.close();
             throw e;
         }
-        catch (TimeoutException e)
-        {
-            log.error("Timed out waiting for device registration to finish, closing client...", e);
-            multiplexingClient.close();
-            throw e;
-        }
         catch (IotHubClientException e)
         {
             log.error("Unexpected exception thrown during device registration, closing client...", e);
@@ -186,7 +174,7 @@ public class MultiplexingClientManager extends ClientManagerBase
         {
             this.multiplexingClient.unregisterDeviceClients(deviceClients, timeoutMilliseconds);
         }
-        catch (IotHubClientException | TimeoutException e)
+        catch (IotHubClientException e)
         {
             log.error("Encountered an exception while unregistering device from active multiplexed connection, closing client...", e);
             multiplexingClient.close();

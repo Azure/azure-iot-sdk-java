@@ -148,13 +148,13 @@ public class MultiplexingClient
      * @param withRetry if true, this open call will apply the current retry policy to allow for the open call to be
      * retried if it fails.
      *
-     * @throws MultiplexingClientException If any IO or authentication errors occur while opening the multiplexed connection.
+     * @throws IotHubClientException If any IO or authentication errors occur while opening the multiplexed connection.
      * @throws MultiplexingClientRegistrationException If one or many of the registered devices failed to authenticate.
      * Any devices not found in the map of registration exceptions provided by
      * {@link MultiplexingClientRegistrationException#getRegistrationExceptions()} have registered successfully.
      * Even when this is thrown, the AMQPS/AMQPS_WS connection is still open, and other clients may be registered to it.
      */
-    public void open(boolean withRetry) throws IotHubClientException, IOException
+    public void open(boolean withRetry) throws IotHubClientException
     {
         synchronized (this.operationLock)
         {
@@ -232,11 +232,10 @@ public class MultiplexingClient
      * this failure can be found nested within the map given by
      * {@link MultiplexingClientRegistrationException#getRegistrationExceptions()}. If this exception is
      * thrown, the device was not registered, and therefore it does not need to be unregistered.
-     * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If this operation takes longer than the default timeout allows.
-     * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
+     * @throws IotHubClientException If this operation takes longer than the default timeout allows.
      * @param deviceClient The device client to associate with this multiplexing client.
      */
-    public void registerDeviceClient(DeviceClient deviceClient) throws InterruptedException, TimeoutException, IotHubClientException
+    public void registerDeviceClient(DeviceClient deviceClient) throws InterruptedException, IotHubClientException
     {
         this.registerDeviceClient(deviceClient, DEFAULT_REGISTRATION_TIMEOUT_MILLISECONDS);
     }
@@ -285,12 +284,13 @@ public class MultiplexingClient
      * this failure can be found nested within the map given by
      * {@link MultiplexingClientRegistrationException#getRegistrationExceptions()}. If this exception is
      * thrown, the device was not registered, and therefore it does not need to be unregistered.
-     * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If this operation takes longer than the provided timeout allows.
-     * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
+     * @throws IotHubClientException If this operation takes longer than the provided timeout allows.
      * @param deviceClient The device client to associate with this multiplexing client.
-     * @param timeoutMilliseconds How long (in milliseconds) to let this operation wait for all registrations to complete. If this threshold is passed, a {@link com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException} is thrown.
+     * @param timeoutMilliseconds How long (in milliseconds) to let this operation wait for all registrations to complete.
+     * If this threshold is passed, a {@link com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException} with status code
+     * {@link  IotHubStatusCode#DEVICE_OPERATION_TIMED_OUT} is thrown.
      */
-    public void registerDeviceClient(DeviceClient deviceClient, long timeoutMilliseconds) throws InterruptedException, TimeoutException, IotHubClientException
+    public void registerDeviceClient(DeviceClient deviceClient, long timeoutMilliseconds) throws InterruptedException, IotHubClientException
     {
         Objects.requireNonNull(deviceClient);
         List<DeviceClient> clientList = new ArrayList<>();
@@ -341,8 +341,7 @@ public class MultiplexingClient
      * found in the map of registration exceptions provided by this exception have registered successfully. Any devices
      * that are found in the map of registration exceptions provided by this exception were not registered, and therefore
      * do not need to be unregistered.
-     * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If this operation takes longer than the default timeout allows.
-     * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
+     * @throws IotHubClientException If this operation takes longer than the default timeout allows.
      * @param deviceClients The device clients to associate with this multiplexing client.
      */
     public void registerDeviceClients(Iterable<DeviceClient> deviceClients) throws InterruptedException, TimeoutException, IotHubClientException
@@ -393,12 +392,13 @@ public class MultiplexingClient
      * found in the map of registration exceptions provided by this exception have registered successfully. Any devices
      * that are found in the map of registration exceptions provided by this exception were not registered, and therefore
      * do not need to be unregistered.
-     * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If this operation takes longer than the provided timeout allows.
-     * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
+     * @throws IotHubClientException If this operation takes longer than the provided timeout allows.
      * @param deviceClients The device clients to associate with this multiplexing client.
-     * @param timeoutMilliseconds How long (in milliseconds) to let this operation wait for all registrations to complete. If this threshold is passed, a {@link com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException} is thrown.
+     * @param timeoutMilliseconds How long (in milliseconds) to let this operation wait for all registrations to complete.
+     * If this threshold is passed, a {@link com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException} with status code
+     * {@link  IotHubStatusCode#DEVICE_OPERATION_TIMED_OUT} is thrown.
      */
-    public void registerDeviceClients(Iterable<DeviceClient> deviceClients, long timeoutMilliseconds) throws InterruptedException, TimeoutException, IotHubClientException
+    public void registerDeviceClients(Iterable<DeviceClient> deviceClients, long timeoutMilliseconds) throws InterruptedException, IotHubClientException
     {
         Objects.requireNonNull(deviceClients);
 
@@ -525,8 +525,7 @@ public class MultiplexingClient
      * <p>
      * @param deviceClient The device client to unregister from this multiplexing client.
      * @throws InterruptedException If the thread gets interrupted while waiting for the unregistration to succeed.
-     * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If the unregistration takes longer than the default timeout allows.
-     * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
+     * @throws IotHubClientException If the unregistration takes longer than the default timeout allows.
      */
     public void unregisterDeviceClient(DeviceClient deviceClient) throws InterruptedException, TimeoutException, IotHubClientException
     {
@@ -555,12 +554,13 @@ public class MultiplexingClient
      * after this device is re-registered.
      * <p>
      * @param deviceClient The device client to unregister from this multiplexing client.
-     * @param timeoutMilliseconds How long (in milliseconds) to let this operation wait for all unregistrations to complete. If this threshold is passed, a {@link com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException} is thrown.
+     * @param timeoutMilliseconds How long (in milliseconds) to let this operation wait for all registrations to complete.
+     * If this threshold is passed, a {@link com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException} with status code
+     * {@link  IotHubStatusCode#DEVICE_OPERATION_TIMED_OUT} is thrown.
      * @throws InterruptedException If the thread gets interrupted while waiting for the unregistration to succeed.
-     * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If the unregistration takes longer than the provided timeout allows.
-     * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
+     * @throws IotHubClientException If the unregistration takes longer than the provided timeout allows.
      */
-    public void unregisterDeviceClient(DeviceClient deviceClient, long timeoutMilliseconds) throws InterruptedException, TimeoutException, IotHubClientException
+    public void unregisterDeviceClient(DeviceClient deviceClient, long timeoutMilliseconds) throws InterruptedException, IotHubClientException
     {
         Objects.requireNonNull(deviceClient);
         List<DeviceClient> clientList = new ArrayList<>();
@@ -587,10 +587,9 @@ public class MultiplexingClient
      * <p>
      * @param deviceClients The device clients to unregister from this multiplexing client.
      * @throws InterruptedException If the thread gets interrupted while waiting for the unregistration to succeed.
-     * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If the unregistration takes longer than the default timeout allows.
-     * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
+     * @throws IotHubClientException If the unregistration takes longer than the default timeout allows.
      */
-    public void unregisterDeviceClients(Iterable<DeviceClient> deviceClients) throws InterruptedException, TimeoutException, IotHubClientException
+    public void unregisterDeviceClients(Iterable<DeviceClient> deviceClients) throws InterruptedException, IotHubClientException
     {
         this.unregisterDeviceClients(deviceClients, DEFAULT_UNREGISTRATION_TIMEOUT_MILLISECONDS);
     }
@@ -613,12 +612,13 @@ public class MultiplexingClient
      * after these devices are re-registered.
      * <p>
      * @param deviceClients The device clients to unregister from this multiplexing client.
-     * @param timeoutMilliseconds How long (in milliseconds) to let this operation wait for all unregistrations to complete. If this threshold is passed, a {@link com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException} is thrown.
+     * @param timeoutMilliseconds How long (in milliseconds) to let this operation wait for all registrations to complete.
+     * If this threshold is passed, a {@link com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException} with status code
+     * {@link  IotHubStatusCode#DEVICE_OPERATION_TIMED_OUT} is thrown.
      * @throws InterruptedException If the thread gets interrupted while waiting for the unregistration to succeed.
-     * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If the unregistration takes longer than the provided timeout allows.
-     * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
+     * @throws IotHubClientException If the unregistration takes longer than the provided timeout allows.
      */
-    public void unregisterDeviceClients(Iterable<DeviceClient> deviceClients, long timeoutMilliseconds) throws InterruptedException, TimeoutException, IotHubClientException
+    public void unregisterDeviceClients(Iterable<DeviceClient> deviceClients, long timeoutMilliseconds) throws InterruptedException, IotHubClientException
     {
         Objects.requireNonNull(deviceClients);
 

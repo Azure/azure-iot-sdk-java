@@ -31,7 +31,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Map;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Public API for communicating from Edge Modules. A ModuleClient can be used to send messages from an Edge module to an EdgeHub or an IotHub.
@@ -342,13 +341,11 @@ public class ModuleClient extends InternalClient
      * @param message the message to be sent.
      * @param outputName the outputName to route the message to
      *
-     * @return The service's response code for this operation. If it is {@link IotHubStatusCode#OK} then the message was delivered successfully.
      * @throws InterruptedException if the operation is interrupted while waiting on the telemetry to be acknowledged by the service.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
-     * @throws TimeoutException if the service fails to acknowledge the telemetry message within the provided timeout.
      */
     public void sendEvent(Message message, String outputName)
-            throws IllegalArgumentException, InterruptedException, TimeoutException, IotHubClientException
+            throws IllegalArgumentException, InterruptedException, IotHubClientException
     {
         this.sendEvent(message, outputName, DEFAULT_TIMEOUT_MILLISECONDS);
     }
@@ -361,13 +358,11 @@ public class ModuleClient extends InternalClient
      * @param timeoutMilliseconds The maximum number of milliseconds to wait for the service to acknowledge this message.
      * If 0, then it will wait indefinitely.
      *
-     * @return The service's response code for this operation. If it is {@link IotHubStatusCode#OK} then the message was delivered successfully.
      * @throws InterruptedException if the operation is interrupted while waiting on the telemetry to be acknowledged by the service.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
-     * @throws TimeoutException if the service fails to acknowledge the telemetry message within the provided timeout.
      */
     public void sendEvent(Message message, String outputName, int timeoutMilliseconds)
-            throws IllegalArgumentException, InterruptedException, TimeoutException, IotHubClientException
+            throws IllegalArgumentException, InterruptedException, IotHubClientException
     {
         if (outputName == null || outputName.isEmpty())
         {
@@ -380,7 +375,7 @@ public class ModuleClient extends InternalClient
 
     @Override
     public void sendEvent(Message message)
-            throws IllegalArgumentException, InterruptedException, TimeoutException, IotHubClientException
+            throws IllegalArgumentException, InterruptedException, IotHubClientException
     {
         message.setConnectionModuleId(this.config.getModuleId());
         super.sendEvent(message);

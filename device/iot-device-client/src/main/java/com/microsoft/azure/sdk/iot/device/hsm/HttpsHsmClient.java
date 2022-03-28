@@ -65,7 +65,7 @@ public class HttpsHsmClient
      * @param signRequest the request to send
      * @param generationId the generation id
      * @return The response from the HSM
-     * @throws IotHubClientException If there was a problem interacting with the HSM
+     * @throws TransportException If there was a problem communicating with the HSM
      */
     public SignResponse sign(String apiVersion, String moduleName, SignRequest signRequest, String generationId) throws TransportException, UnsupportedEncodingException
     {
@@ -112,8 +112,6 @@ public class HttpsHsmClient
      * @param apiVersion the api version to use
      * @return the trust bundle response from the hsm, contains the certificates to be trusted
      * @throws TransportException if the HSM cannot be reached
-     * @throws MalformedURLException if a proper URL cannot be constructed due to the provided api version
-     * @throws IotHubClientException if the hsm rejects the request for any reason
      */
     public TrustBundleResponse getTrustBundle(String apiVersion) throws TransportException
     {

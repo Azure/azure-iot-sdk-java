@@ -15,7 +15,7 @@ public interface ReportedPropertiesCallback
      * The callback that is executed when the reported properties update request has completed.
      * @param statusCode The service's status code for the request. If {@link IotHubStatusCode#OK} then the request was
      * processed succesfully.
-     * @param version The new version of the reported properties after a successful update. If the client updating
+     * @param response The new version of the reported properties after a successful update. If the client updating
      * its reported properties is connected to Edgehub instead of IoT Hub, then this version won't change since Edgehub
      * does not apply this reported properties update immediately.
      * @param e The exception that was encountered if any exception was encountered.

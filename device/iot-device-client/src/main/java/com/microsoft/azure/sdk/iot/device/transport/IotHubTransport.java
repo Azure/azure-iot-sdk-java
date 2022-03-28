@@ -938,7 +938,7 @@ public class IotHubTransport implements IotHubListener
         this.multiplexingStateCallbackContext = callbackContext;
     }
 
-    public void registerMultiplexedDeviceClient(List<ClientConfiguration> configs, long timeoutMilliseconds) throws InterruptedException, TimeoutException, IotHubClientException, MultiplexingClientRegistrationException
+    public void registerMultiplexedDeviceClient(List<ClientConfiguration> configs, long timeoutMilliseconds) throws InterruptedException, IotHubClientException, MultiplexingClientRegistrationException
     {
         if (getProtocol() != IotHubClientProtocol.AMQPS && getProtocol() != IotHubClientProtocol.AMQPS_WS)
         {
@@ -977,7 +977,7 @@ public class IotHubTransport implements IotHubListener
                     boolean operationHasTimedOut = System.currentTimeMillis() >= timeoutTime;
                     if (operationHasTimedOut)
                     {
-                        throw new TimeoutException("Timed out waiting for all device registrations to finish.");
+                        throw new IotHubClientException(DEVICE_OPERATION_TIMED_OUT, "Timed out waiting for all device registrations to finish.");
                     }
                 }
 
@@ -1004,7 +1004,7 @@ public class IotHubTransport implements IotHubListener
         }
     }
 
-    public void unregisterMultiplexedDeviceClient(List<ClientConfiguration> configs, long timeoutMilliseconds) throws InterruptedException, TimeoutException, IotHubClientException
+    public void unregisterMultiplexedDeviceClient(List<ClientConfiguration> configs, long timeoutMilliseconds) throws InterruptedException, IotHubClientException
     {
         if (getProtocol() != IotHubClientProtocol.AMQPS && getProtocol() != IotHubClientProtocol.AMQPS_WS)
         {
@@ -1040,7 +1040,7 @@ public class IotHubTransport implements IotHubListener
                     boolean operationHasTimedOut = System.currentTimeMillis() >= timeoutTime;
                     if (operationHasTimedOut)
                     {
-                        throw new TimeoutException("Timed out waiting for all device unregistrations to finish.");
+                        throw new IotHubClientException(DEVICE_OPERATION_TIMED_OUT, "Timed out waiting for all device unregistrations to finish.");
                     }
                 }
 
