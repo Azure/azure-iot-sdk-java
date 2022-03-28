@@ -3,9 +3,10 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.device.exceptions;
+package com.microsoft.azure.sdk.iot.device.transport.https.exceptions;
 
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubServiceException;
 
 public class HubOrDeviceIdNotFoundException extends IotHubServiceException
 {
@@ -32,6 +33,6 @@ public class HubOrDeviceIdNotFoundException extends IotHubServiceException
     @Override
     public IotHubStatusCode getStatusCode()
     {
-        return IotHubStatusCode.HUB_OR_DEVICE_ID_NOT_FOUND;
+        return IotHubStatusCode.NOT_FOUND;
     }
 }

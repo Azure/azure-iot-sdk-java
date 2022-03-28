@@ -7,8 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
-import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.ConnectionStatusChangeContext;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
@@ -39,6 +38,7 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static junit.framework.TestCase.assertTrue;
@@ -226,7 +226,7 @@ public class TokenRenewalTests extends IntegrationTest
         }
     }
 
-    private List<InternalClient> createClientsToTest() throws IotHubException, IOException, URISyntaxException, ModuleClientException, InterruptedException, GeneralSecurityException
+    private List<InternalClient> createClientsToTest() throws IotHubException, IOException, URISyntaxException, InterruptedException, GeneralSecurityException
     {
         List<InternalClient> clients = new ArrayList<>();
         Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
@@ -259,7 +259,7 @@ public class TokenRenewalTests extends IntegrationTest
         return clients;
     }
 
-    private MultiplexingClient createMultiplexedClientToTest(IotHubClientProtocol protocol, List<DeviceClient> clientsToCreate, String hostname) throws IotHubException, IOException, URISyntaxException, MultiplexingClientException, InterruptedException, GeneralSecurityException
+    private MultiplexingClient createMultiplexedClientToTest(IotHubClientProtocol protocol, List<DeviceClient> clientsToCreate, String hostname) throws IotHubException, IOException, URISyntaxException, InterruptedException, GeneralSecurityException, IotHubClientException, TimeoutException
     {
         MultiplexingClient multiplexingClient = new MultiplexingClient(hostname, protocol);
 
@@ -283,7 +283,7 @@ public class TokenRenewalTests extends IntegrationTest
         }
     }
 
-    private void openEachClient(List<InternalClient> clients) throws IOException
+    private void openEachClient(List<InternalClient> clients) throws IOException, IotHubClientException
     {
         for (InternalClient client : clients)
         {
@@ -366,7 +366,7 @@ public class TokenRenewalTests extends IntegrationTest
         }
     }
 
-    private InternalClient createModuleClient(IotHubClientProtocol protocol, ProxySettings proxySettings) throws IOException, IotHubException, ModuleClientException, URISyntaxException, InterruptedException {
+    private InternalClient createModuleClient(IotHubClientProtocol protocol, ProxySettings proxySettings) throws IOException, IotHubException, URISyntaxException, InterruptedException {
         UUID uuid = UUID.randomUUID();
         String deviceId = "token-renewal-test-device-" + protocol + "-" + uuid.toString();
         String moduleId = "token-renewal-test-module-" + protocol + "-" + uuid.toString();

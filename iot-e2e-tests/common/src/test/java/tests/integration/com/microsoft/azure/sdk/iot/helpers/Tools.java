@@ -17,7 +17,6 @@ import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.ModuleClient;
-import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.registry.Module;
@@ -374,7 +373,7 @@ public class Tools
      * @throws IotHubException If the registry addition of a module fails.
      * @throws GeneralSecurityException If creating the x509 certificates for an x509 module fails.
      */
-    public static TestModuleIdentity getTestModule(String iotHubConnectionString, IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean needCleanTwin, ClientOptions.ClientOptionsBuilder optionsBuilder) throws URISyntaxException, IOException, IotHubException, InterruptedException, ModuleClientException, GeneralSecurityException
+    public static TestModuleIdentity getTestModule(String iotHubConnectionString, IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean needCleanTwin, ClientOptions.ClientOptionsBuilder optionsBuilder) throws URISyntaxException, IOException, IotHubException, InterruptedException, GeneralSecurityException
     {
         TestModuleIdentity testModuleIdentity;
         if (authenticationType == AuthenticationType.SAS)
@@ -417,12 +416,12 @@ public class Tools
      * @throws IotHubException If the registry addition of a module fails.
      * @throws GeneralSecurityException If creating the x509 certificates for an x509 module fails.
      */
-    public static TestModuleIdentity getTestModule(String iotHubConnectionString, IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean needCleanTwin) throws URISyntaxException, IOException, IotHubException, InterruptedException, ModuleClientException, GeneralSecurityException
+    public static TestModuleIdentity getTestModule(String iotHubConnectionString, IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean needCleanTwin) throws URISyntaxException, IOException, IotHubException, InterruptedException, GeneralSecurityException
     {
         return getTestModule(iotHubConnectionString, protocol, authenticationType, needCleanTwin, ClientOptions.builder());
     }
 
-    private static TestModuleIdentity getSasTestModule(String iotHubConnectionString, IotHubClientProtocol protocol, boolean needCleanTwin, ClientOptions.ClientOptionsBuilder optionsBuilder) throws URISyntaxException, IOException, IotHubException, InterruptedException, ModuleClientException, GeneralSecurityException
+    private static TestModuleIdentity getSasTestModule(String iotHubConnectionString, IotHubClientProtocol protocol, boolean needCleanTwin, ClientOptions.ClientOptionsBuilder optionsBuilder) throws URISyntaxException, IOException, IotHubException, InterruptedException, GeneralSecurityException
     {
         // Want to make sure that no thread checks the size of a queue and then has the size change before it can
         // remove an identity from the queue.
@@ -471,7 +470,7 @@ public class Tools
         }
     }
 
-    private static TestModuleIdentity getX509TestModule(String iotHubConnectionString, IotHubClientProtocol protocol, boolean needCleanTwin, ClientOptions.ClientOptionsBuilder optionsBuilder) throws URISyntaxException, IOException, IotHubException, InterruptedException, ModuleClientException, GeneralSecurityException
+    private static TestModuleIdentity getX509TestModule(String iotHubConnectionString, IotHubClientProtocol protocol, boolean needCleanTwin, ClientOptions.ClientOptionsBuilder optionsBuilder) throws URISyntaxException, IOException, IotHubException, InterruptedException, GeneralSecurityException
     {
         // Want to make sure that no thread checks the size of a queue and then has the size change before it can
         // remove an identity from the queue.

@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
@@ -10,7 +11,6 @@ import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 /**
  * <p>
@@ -184,9 +184,10 @@ public final class DeviceClient extends InternalClient
      * it fails. Both the operation timeout set in {@link #setOperationTimeout(long)} and the retry policy set in
      * {{@link #setRetryPolicy(RetryPolicy)}} will be respected while retrying to open the connection.
      *
-     * @throws IOException if a connection to an IoT hub cannot be established.
+     * @throws IotHubClientException if a connection to an IoT hub cannot be established or if the connection can be
+     * established but the service rejects it for any reason.
      */
-    public void open(boolean withRetry) throws IOException
+    public void open(boolean withRetry) throws IotHubClientException
     {
         if (this.deviceClientType == DeviceClientType.USE_MULTIPLEXING_CLIENT)
         {
@@ -235,7 +236,7 @@ public final class DeviceClient extends InternalClient
      * @return The file upload details to be used with the Azure Storage SDK in order to upload a file from this device.
      * @throws IOException If this HTTPS request fails to send.
      */
-    public FileUploadSasUriResponse getFileUploadSasUri(FileUploadSasUriRequest request) throws IOException
+    public FileUploadSasUriResponse getFileUploadSasUri(FileUploadSasUriRequest request) throws IotHubClientException
     {
         if (this.fileUpload == null)
         {
@@ -250,7 +251,7 @@ public final class DeviceClient extends InternalClient
      * @param notification The notification details, including if the file upload succeeded.
      * @throws IOException If this HTTPS request fails to send.
      */
-    public void completeFileUpload(FileUploadCompletionNotification notification) throws IOException
+    public void completeFileUpload(FileUploadCompletionNotification notification) throws IotHubClientException
     {
         if (this.fileUpload == null)
         {

@@ -6,12 +6,12 @@ package samples.com.microsoft.azure.sdk.iot;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
-import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
+import com.microsoft.azure.sdk.iot.device.MessageSentCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MultiplexingClient;
 import com.microsoft.azure.sdk.iot.device.MultiplexingClientOptions;
-import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Sample that demonstrates creating a multiplexed connection to IoT Hub using AMQPS / AMQPS_WS. It also demonstrates
@@ -58,7 +59,8 @@ public class MultiplexingSample
      * run with more than 2 devices.
      */
     public static void main(String[] args)
-            throws URISyntaxException, InterruptedException, MultiplexingClientException {
+            throws URISyntaxException, InterruptedException, IotHubClientException
+    {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
 
@@ -117,7 +119,7 @@ public class MultiplexingSample
         {
             multiplexingClientManager.open();
         }
-        catch (MultiplexingClientException | IOException e)
+        catch (IotHubClientException | IOException e)
         {
             // error is logged by the MultiplexingClientManager, no need to log it here, too
             System.out.println("Exiting sample...");
@@ -134,7 +136,7 @@ public class MultiplexingSample
         {
             multiplexingClientManager.registerDeviceClients(multiplexedDeviceClients.values());
         }
-        catch (MultiplexingClientException e)
+        catch (IotHubClientException | TimeoutException e)
         {
             // error is logged by the MultiplexingClientManager, no need to log it here, too
             System.out.println("Exiting sample...");
@@ -170,7 +172,7 @@ public class MultiplexingSample
         {
             multiplexingClientManager.unregisterDeviceClient(multiplexedDeviceClients.get(deviceIdToUnregister));
         }
-        catch (MultiplexingClientException e)
+        catch (IotHubClientException | TimeoutException e)
         {
             // error is logged by the MultiplexingClientManager, no need to log it here, too
             System.out.println("Exiting sample...");
@@ -190,7 +192,7 @@ public class MultiplexingSample
         {
             multiplexingClientManager.registerDeviceClient(multiplexedDeviceClients.get(deviceIdToUnregister));
         }
-        catch (MultiplexingClientException e)
+        catch (IotHubClientException | TimeoutException e)
         {
             // error is logged by the MultiplexingClientManager, no need to log it here, too
             System.out.println("Exiting sample...");
@@ -210,11 +212,12 @@ public class MultiplexingSample
     }
 
     private static int acknowledgedSentMessages = 0;
-    private static class TelemetryAcknowledgedEventCallback implements IotHubEventCallback
+    private static class TelemetryAcknowledgedEventCallback implements MessageSentCallback
     {
-        public void execute(IotHubStatusCode status, Object context)
+        public void onMessageSent(Message sentMessage, IotHubClientException exception, Object context)
         {
             String messageId = (String) context;
+            IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
             System.out.println("IoT Hub responded to message "+ messageId  + " with status " + status.name());
             acknowledgedSentMessages++;
         }

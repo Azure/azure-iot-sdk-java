@@ -9,8 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SampleMessageReceiveCallback implements MessageCallback {
     @Override
-    public IotHubMessageResult execute(Message msg,
-                                       Object context) {
+    public IotHubMessageResult onCloudToDeviceMessageReceived(Message msg,
+                                                              Object context) {
         log.debug("Received message with content: {}", new String(msg.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
         for (MessageProperty messageProperty : msg.getProperties()) {
             log.debug("{}: {}", messageProperty.getName(), messageProperty.getValue());

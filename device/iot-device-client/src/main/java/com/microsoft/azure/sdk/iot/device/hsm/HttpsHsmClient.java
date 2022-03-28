@@ -5,7 +5,9 @@
 
 package com.microsoft.azure.sdk.iot.device.hsm;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.ErrorResponse;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignRequest;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignResponse;
@@ -14,12 +16,8 @@ import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsRequest;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.qpid.proton.reactor.impl.IO;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -67,11 +65,9 @@ public class HttpsHsmClient
      * @param signRequest the request to send
      * @param generationId the generation id
      * @return The response from the HSM
-     * @throws IOException If the HSM cannot be reached
-     * @throws TransportException If the HSM cannot be reached
-     * @throws HsmException If there was a problem interacting with the HSM
+     * @throws IotHubClientException If there was a problem interacting with the HSM
      */
-    public SignResponse sign(String apiVersion, String moduleName, SignRequest signRequest, String generationId) throws IOException, TransportException, HsmException
+    public SignResponse sign(String apiVersion, String moduleName, SignRequest signRequest, String generationId) throws TransportException, UnsupportedEncodingException
     {
         log.debug("Sending sign request...");
         String uri = baseUrl != null ? baseUrl.replaceFirst("/*$", "") : "";
@@ -81,7 +77,16 @@ public class HttpsHsmClient
         String pathBuilder = "/modules/" + URLEncoder.encode(moduleName, StandardCharsets.UTF_8.name()) +
                 "/genid/" + URLEncoder.encode(generationId, StandardCharsets.UTF_8.name()) +
                 "/sign";
-        HttpsResponse response = sendRequestBasedOnScheme(HttpsMethod.POST, body, uri, pathBuilder, API_VERSION_QUERY_STRING_PREFIX + apiVersion);
+
+        HttpsResponse response = null;
+        try
+        {
+            response = sendRequestBasedOnScheme(HttpsMethod.POST, body, uri, pathBuilder, API_VERSION_QUERY_STRING_PREFIX + apiVersion);
+        }
+        catch (IOException e)
+        {
+            throw new TransportException("Could not send request to HSM", e);
+        }
 
         int responseCode = response.getStatus();
         String responseBody = new String(response.getBody(), StandardCharsets.UTF_8);
@@ -98,7 +103,7 @@ public class HttpsHsmClient
                 exceptionMessage = exceptionMessage + " Error response message: " + errorResponse.getMessage();
             }
 
-            throw new HsmException(exceptionMessage);
+            throw IotHubStatusCode.getConnectionStatusException(IotHubStatusCode.getIotHubStatusCode(responseCode), exceptionMessage);
         }
     }
 
@@ -108,9 +113,9 @@ public class HttpsHsmClient
      * @return the trust bundle response from the hsm, contains the certificates to be trusted
      * @throws TransportException if the HSM cannot be reached
      * @throws MalformedURLException if a proper URL cannot be constructed due to the provided api version
-     * @throws HsmException if the hsm rejects the request for any reason
+     * @throws IotHubClientException if the hsm rejects the request for any reason
      */
-    public TrustBundleResponse getTrustBundle(String apiVersion) throws IOException, TransportException, HsmException
+    public TrustBundleResponse getTrustBundle(String apiVersion) throws TransportException
     {
         log.debug("Getting trust bundle...");
         if (apiVersion == null || apiVersion.isEmpty())
@@ -120,7 +125,15 @@ public class HttpsHsmClient
 
         String uri = baseUrl != null ? baseUrl.replaceFirst("/*$", "") : "";
 
-        HttpsResponse response = sendRequestBasedOnScheme(HttpsMethod.GET, new byte[0], uri, "/trust-bundle", API_VERSION_QUERY_STRING_PREFIX + apiVersion);
+        HttpsResponse response = null;
+        try
+        {
+            response = sendRequestBasedOnScheme(HttpsMethod.GET, new byte[0], uri, "/trust-bundle", API_VERSION_QUERY_STRING_PREFIX + apiVersion);
+        }
+        catch (IOException e)
+        {
+            throw IotHubStatusCode.getConnectionStatusException(IotHubStatusCode.IO_ERROR, "Could not send request to HSM");
+        }
 
         int statusCode = response.getStatus();
         String body = response.getBody() != null ? new String(response.getBody(), StandardCharsets.UTF_8) : "";
@@ -133,11 +146,11 @@ public class HttpsHsmClient
             ErrorResponse errorResponse = ErrorResponse.fromJson(body);
             if (errorResponse != null)
             {
-                throw new HsmException("Received error from hsm with status code " + statusCode + " and message " + errorResponse.getMessage());
+                throw IotHubStatusCode.getConnectionStatusException(IotHubStatusCode.getIotHubStatusCode(statusCode), "Received error from hsm with status code " + statusCode + " and message " + errorResponse.getMessage());
             }
             else
             {
-                throw new HsmException("Received error from hsm with status code " + statusCode);
+                throw IotHubStatusCode.getConnectionStatusException(IotHubStatusCode.getIotHubStatusCode(statusCode), "Received error from hsm with status code " + statusCode);
             }
         }
     }

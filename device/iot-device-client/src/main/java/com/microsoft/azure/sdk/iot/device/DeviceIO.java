@@ -3,18 +3,16 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
-import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.*;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
 
@@ -90,10 +88,8 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
     /**
      * Starts asynchronously sending and receiving messages from an IoT Hub. If
      * the client is already open, the function shall do nothing.
-     *
-     * @throws IOException if a connection to an IoT Hub cannot be established.
      */
-    void open(boolean withRetry) throws IOException
+    void open(boolean withRetry) throws IotHubClientException
     {
         synchronized (this.stateLock)
         {
@@ -106,43 +102,19 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
             {
                 this.transport.open(withRetry);
             }
-            catch (DeviceClientException e)
+            catch (TransportException e)
             {
-                throw new IOException("Could not open the connection", e);
+                throw e.toIotHubClientException();
             }
         }
     }
 
-    // Functionally the same as "open()", but without wrapping any thrown TransportException into an IOException
-    void openWithoutWrappingException(boolean withRetry) throws TransportException
-    {
-        try
-        {
-            open(withRetry);
-        }
-        catch (IOException e)
-        {
-            // We did this silly thing in the DeviceClient to work around the fact that we can't throw TransportExceptions
-            // directly in methods like deviceClient.open() because the open API existed before the TransportException did.
-            // To get around it, we just nested the meaningful exception into an IOException. The multiplexing client doesn't
-            // have to do the same thing though, so this code un-nests the exception when possible.
-            Throwable cause = e.getCause();
-            if (cause instanceof TransportException)
-            {
-                throw (TransportException) cause;
-            }
-
-            // should never happen. Open only throws IOExceptions with an inner exception of type TransportException
-            throw new IllegalStateException("Encountered a wrapped IOException with no inner transport exception", e);
-        }
-    }
-
-    void registerMultiplexedDeviceClient(List<ClientConfiguration> configs, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
+    void registerMultiplexedDeviceClient(List<ClientConfiguration> configs, long timeoutMilliseconds) throws InterruptedException, TimeoutException, IotHubClientException
     {
         this.transport.registerMultiplexedDeviceClient(configs, timeoutMilliseconds);
     }
 
-    void unregisterMultiplexedDeviceClient(List<ClientConfiguration> configs, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
+    void unregisterMultiplexedDeviceClient(List<ClientConfiguration> configs, long timeoutMilliseconds) throws InterruptedException, TimeoutException, IotHubClientException
     {
         this.transport.unregisterMultiplexedDeviceClient(configs, timeoutMilliseconds);
     }
@@ -253,7 +225,7 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
      */
     void sendEventAsync(Message message,
-                        IotHubEventCallback callback,
+                        MessageSentCallback callback,
                         Object callbackContext,
                         String deviceId)
     {

@@ -6,10 +6,8 @@
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.twin.DirectMethodPayload;
-import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
-import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
-import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
+import com.microsoft.azure.sdk.iot.device.twin.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -50,7 +48,7 @@ public class DeviceEmulator
         this.client = client;
     }
 
-    void open() throws IOException
+    void open() throws IOException, IotHubClientException
     {
         this.client.open(false);
     }
@@ -78,8 +76,8 @@ public class DeviceEmulator
 
     @SuppressWarnings("SameParameterValue") // DeviceEmulator will subscribe to default callback in case the supplied callback is null
     void subscribeToDirectMethod(
-        MethodCallback methodCallback, Object directMethodCallbackContext,
-        IotHubEventCallback directMethodStatusCallback, Object directMethodStatusCallbackContext)
+            MethodCallback methodCallback, Object directMethodCallbackContext,
+            SubscriptionAcknowledgedCallback directMethodStatusCallback, Object directMethodStatusCallbackContext)
             throws IOException, InterruptedException
     {
         if(methodCallback == null)
@@ -124,12 +122,10 @@ public class DeviceEmulator
      *
      * @throws IOException if failed to start the Device twin.
      */
-    void subscribeToDeviceTwin() throws IOException
+    void subscribeToDeviceTwin() throws IOException, InterruptedException
     {
         CountDownLatch subscribedLatch = new CountDownLatch(1);
         client.subscribeToDesiredPropertiesAsync(
-            (statusCode, context) -> subscribedLatch.countDown(),
-            null,
             (twin, context) ->
             {
                 TwinCollection desiredProperties = twin.getDesiredProperties();
@@ -138,7 +134,11 @@ public class DeviceEmulator
                     DeviceTwinProperty.onPropertyChanged(key, desiredProperties.get(key), null);
                 }
             },
+            null,
+            (exception, context) -> subscribedLatch.countDown(),
             null);
+
+        subscribedLatch.await();
     }
 
     /**
@@ -183,20 +183,19 @@ public class DeviceEmulator
         int statusError;
     }
 
-    private class DeviceStatusCallback implements IotHubEventCallback
+    private class DeviceStatusCallback implements SubscriptionAcknowledgedCallback
     {
         @Override
-        public synchronized void execute(IotHubStatusCode status, Object context)
+        public synchronized void onSubscriptionAcknowledged(IotHubClientException exception, Object context)
         {
             DeviceStatus deviceStatus = (DeviceStatus)context;
-            switch(status)
+            if (exception == null)
             {
-                case OK:
-                    deviceStatus.statusOk++;
-                    break;
-                default:
-                    deviceStatus.statusError++;
-                    break;
+                deviceStatus.statusOk++;
+            }
+            else
+            {
+                deviceStatus.statusError++;
             }
         }
     }

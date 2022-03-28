@@ -4,8 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
-import com.microsoft.azure.sdk.iot.device.ConnectionStatusChangeContext;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import java.io.IOException;
@@ -30,12 +29,13 @@ public class SendReceiveModuleSample
     private  static final int D2C_MESSAGE_TIMEOUT = 5000; // 5 seconds
     private  static final List<String> failedMessageListOnClose = new ArrayList<>(); // List of messages that failed on close
 
-    protected static class EventCallback implements IotHubEventCallback
+    protected static class EventCallback implements MessageSentCallback
     {
-        public void execute(IotHubStatusCode status, Object context)
+        public void onMessageSent(Message sentMessage, IotHubClientException exception,  Object context)
         {
             Message msg = (Message) context;
 
+            IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
             System.out.println("IoT Hub responded to message "+ msg.getMessageId()  + " with status " + status.name());
 
             if (status==IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE)
@@ -75,8 +75,8 @@ public class SendReceiveModuleSample
     protected static class MessageCallback
             implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
-        public IotHubMessageResult execute(Message msg,
-                                           Object context)
+        public IotHubMessageResult onCloudToDeviceMessageReceived(Message msg,
+                                                                  Object context)
         {
             Counter counter = (Counter) context;
             System.out.println(
@@ -120,7 +120,7 @@ public class SendReceiveModuleSample
     // from IoTHub and return COMPLETE
     protected static class MessageCallbackMqtt implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
-        public IotHubMessageResult execute(Message msg, Object context)
+        public IotHubMessageResult onCloudToDeviceMessageReceived(Message msg, Object context)
         {
             Counter counter = (Counter) context;
             System.out.println(
@@ -185,7 +185,7 @@ public class SendReceiveModuleSample
      * args[2] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws')
      * args[3] = path to certificate to enable one-way authentication over ssl for amqps (optional, default shall be used if unspecified).
      */
-    public static void main(String[] args) throws IOException, URISyntaxException, ModuleClientException
+    public static void main(String[] args) throws IOException, URISyntaxException, IotHubClientException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");

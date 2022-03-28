@@ -6,8 +6,6 @@
  */
 package com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-
 /**
  * An interface for the retry policy.
  */

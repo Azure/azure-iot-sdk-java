@@ -4,7 +4,6 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.ConnectionStatusChangeContext;
 import com.microsoft.azure.sdk.iot.device.twin.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
@@ -142,9 +141,18 @@ public class DeviceTwinSample
             System.out.println("Start device Twin and get remaining properties...");
             CountDownLatch twinInitializedLatch = new CountDownLatch(1);
             client.subscribeToDesiredPropertiesAsync(
-                (statusCode, context) ->
+                (twin, context) ->
                 {
-                    if (statusCode == OK)
+                    for (String propertyKey : twin.getDesiredProperties().keySet())
+                    {
+                        Object propertyValue = twin.getDesiredProperties().get(propertyKey);
+                        System.out.println("Received desired property update with property key " + propertyKey + " and value " + propertyValue);
+                    }
+                },
+                null,
+                (exception, context) ->
+                {
+                    if (exception == null)
                     {
                         System.out.println("Successfully subscribed to desired properties. Getting initial twin state");
 
@@ -153,28 +161,20 @@ public class DeviceTwinSample
                         // your client may have missed while not being subscribed, but the cost is that the get twin request
                         // may not provide any new twin updates while still requiring some messaging between the client and service.
                         client.getTwinAsync(
-                            (twin, callbackContext) ->
-                            {
-                                System.out.println("Received initial twin state");
-                                System.out.println(twin.toString());
-                                twinInitializedLatch.countDown();
+                                (twin, getTwinException, callbackContext) ->
+                                {
+                                    System.out.println("Received initial twin state");
+                                    System.out.println(twin.toString());
+                                    twinInitializedLatch.countDown();
 
-                            },
-                            null);
+                                },
+                                null);
                     }
                     else
                     {
-                        System.out.println("Failed to subscribe to desired properties with status code " + statusCode);
+                        IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
+                        System.out.println("Failed to subscribe to desired properties with status code " + status);
                         System.exit(-1);
-                    }
-                },
-                null,
-                (twin, context) ->
-                {
-                    for (String propertyKey : twin.getDesiredProperties().keySet())
-                    {
-                        Object propertyValue = twin.getDesiredProperties().get(propertyKey);
-                        System.out.println("Received desired property update with property key " + propertyKey + " and value " + propertyValue);
                     }
                 },
                 null);

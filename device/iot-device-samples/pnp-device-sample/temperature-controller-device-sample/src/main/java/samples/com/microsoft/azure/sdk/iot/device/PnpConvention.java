@@ -12,7 +12,6 @@ import lombok.NonNull;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
 
 /*

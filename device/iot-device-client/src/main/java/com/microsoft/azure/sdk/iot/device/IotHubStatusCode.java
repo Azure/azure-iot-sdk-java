@@ -3,26 +3,91 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubServiceException;
+import com.microsoft.azure.sdk.iot.device.transport.https.exceptions.*;
 
 /**
  * An IoT Hub status code. Included in a message from an IoT Hub to a device.
  */
 public enum IotHubStatusCode
 {
+    /**
+     * The request completed without exception
+     */
     OK,
+
+    /**
+     * The request failed because it had one or more format issues.
+     */
     BAD_FORMAT,
+
+    /**
+     * The request failed because the provided credentials are out of date or incorrect.
+     */
     UNAUTHORIZED,
-    TOO_MANY_DEVICES,
-    HUB_OR_DEVICE_ID_NOT_FOUND,
+
+    /**
+     * The request failed because the quota for such operations has been exceeded. For file upload operations, this
+     * signifies that the maximum number of concurrent file upload operations are already happening. For telemetry operations,
+     * this signifies that the IoT Hub has reached its daily quota for messages ingested.
+     */
+    QUOTA_EXCEEDED,
+
+    /**
+     * The request failed because the resource the request targeted does not exist.
+     */
+    NOT_FOUND,
+
+    /**
+     * The request failed because the request provided an out of date ETag or version number.
+     */
     PRECONDITION_FAILED,
+
+    /**
+     * The request failed because the request payload exceeded IoT Hub's size limits.
+     */
     REQUEST_ENTITY_TOO_LARGE,
+
+    /**
+     * The request was rejected by the service because it is handling too many requests right now.
+     */
     THROTTLED,
+
+    /**
+     * The service encountered a exception while handling the request.
+     */
     INTERNAL_SERVER_ERROR,
+
+    /**
+     * The request was rejected by the service because it is too busy to handle it right now.
+     */
     SERVER_BUSY,
+
+    /**
+     * The request failed for an unknown reason.
+     */
     ERROR,
+
+    /**
+     * The request failed to be sent to the service and/or acknowledged by the service before it expired.
+     */
     MESSAGE_EXPIRED,
-    MESSAGE_CANCELLED_ONCLOSE;
+
+    /**
+     * The request failed to be sent to the service and/or acknowledged by the service before the client was closed.
+     */
+    MESSAGE_CANCELLED_ONCLOSE,
+
+    /**
+     * The request failed because of network level issues.
+     */
+    IO_ERROR,
+
+    /**
+     * The request failed because it took longer than the device operation timeout as defined in {@link DeviceClient#setOperationTimeout(long)}.
+     */
+    DEVICE_OPERATION_TIMED_OUT;
 
     public static IotHubServiceException getConnectionStatusException(IotHubStatusCode statusCode, String statusDescription)
     {
@@ -40,10 +105,10 @@ public enum IotHubStatusCode
             case UNAUTHORIZED:
                 transportException = new UnauthorizedException(statusDescription);
                 break;
-            case TOO_MANY_DEVICES:
+            case QUOTA_EXCEEDED:
                 transportException = new TooManyDevicesException(statusDescription);
                 break;
-            case HUB_OR_DEVICE_ID_NOT_FOUND:
+            case NOT_FOUND:
                 transportException = new HubOrDeviceIdNotFoundException(statusDescription);
                 break;
             case PRECONDITION_FAILED:
@@ -97,10 +162,10 @@ public enum IotHubStatusCode
                 iotHubStatus = UNAUTHORIZED;
                 break;
             case 403:
-                iotHubStatus = TOO_MANY_DEVICES;
+                iotHubStatus = QUOTA_EXCEEDED;
                 break;
             case 404:
-                iotHubStatus = HUB_OR_DEVICE_ID_NOT_FOUND;
+                iotHubStatus = NOT_FOUND;
                 break;
             case 412:
                 iotHubStatus = PRECONDITION_FAILED;
@@ -154,5 +219,15 @@ public enum IotHubStatusCode
     public static boolean isSuccessful(IotHubStatusCode statusCode)
     {
         return statusCode == OK;
+    }
+
+    public static IotHubClientException toException(IotHubStatusCode statusCode)
+    {
+        if (!IotHubStatusCode.isSuccessful(statusCode))
+        {
+            return new IotHubClientException(statusCode);
+        }
+
+        return null;
     }
 }

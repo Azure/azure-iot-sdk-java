@@ -3,8 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-
 public class TransportUtils
 {
     public static final String IOTHUB_API_VERSION = "2020-09-30";

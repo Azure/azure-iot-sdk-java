@@ -4,7 +4,7 @@
 package com.microsoft.azure.sdk.iot.device.twin;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,7 +35,7 @@ public class DeviceTwin implements MessageCallback
     }
 
     @Override
-    public IotHubMessageResult execute(Message message, Object callbackContext)
+    public IotHubMessageResult onCloudToDeviceMessageReceived(Message message, Object callbackContext)
     {
         if (message.getMessageType() != MessageType.DEVICE_TWIN)
         {
@@ -84,13 +84,13 @@ public class DeviceTwin implements MessageCallback
             }
 
             @Override
-            public void onRequestAcknowledged(Message message, Object callbackContext, TransportException e)
+            public void onRequestAcknowledged(Message message, Object callbackContext, IotHubClientException e)
             {
                 twinCallback.onRequestAcknowledged(message, callbackContext, e);
             }
 
             @Override
-            public void onResponseReceived(Message message, Object callbackContext, TransportException e)
+            public void onResponseReceived(Message message, Object callbackContext, IotHubClientException e)
             {
                 int status = Integer.parseInt(((IotHubTransportMessage) message).getStatus());
                 Twin twin = Twin.createFromPropertiesJson(new String(message.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
@@ -105,7 +105,7 @@ public class DeviceTwin implements MessageCallback
         });
         getTwinRequestMessage.setCorrelatingMessageCallbackContext(callbackContext);
 
-        IotHubEventCallback onMessageAcknowledgedCallback = (responseStatus, context) ->
+        MessageSentCallback onMessageAcknowledgedCallback = (responseStatus, exception, context) ->
         {
             // no action needed here. The correlating message callback will handle the various message state callbacks including this one
         };
@@ -143,7 +143,7 @@ public class DeviceTwin implements MessageCallback
 
         updateReportedPropertiesRequest.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST);
 
-        IotHubEventCallback iotHubEventCallback = (statusCode, context) ->
+        MessageSentCallback messageSentCallback = (statusCode, exception, context) ->
         {
             // no action needed here. The correlating message callback will handle the various message state callbacks including this one
         };
@@ -169,7 +169,7 @@ public class DeviceTwin implements MessageCallback
             }
 
             @Override
-            public void onRequestAcknowledged(Message message, Object callbackContext, TransportException e)
+            public void onRequestAcknowledged(Message message, Object callbackContext, IotHubClientException e)
             {
                 if (reportedPropertiesUpdateCorrelatingMessageCallback != null)
                 {
@@ -178,7 +178,7 @@ public class DeviceTwin implements MessageCallback
             }
 
             @Override
-            public void onResponseReceived(Message message, Object callbackContext, TransportException e)
+            public void onResponseReceived(Message message, Object callbackContext, IotHubClientException e)
             {
                 IotHubTransportMessage dtMessage = (IotHubTransportMessage) message;
                 String status = dtMessage.getStatus();
@@ -191,7 +191,7 @@ public class DeviceTwin implements MessageCallback
                 if (reportedPropertiesUpdateCorrelatingMessageCallback != null)
                 {
                     log.trace("Executing twin status callback for device operation twin update reported properties response with status " + iotHubStatus);
-                    reportedPropertiesUpdateCorrelatingMessageCallback.onResponseReceived(message, callbackContext, iotHubStatus, dtMessage.getVersion(), e);
+                    reportedPropertiesUpdateCorrelatingMessageCallback.onResponseReceived(message, callbackContext, iotHubStatus, new ReportedPropertiesUpdateResponse(dtMessage.getVersion()), e);
                 }
             }
 
@@ -207,11 +207,11 @@ public class DeviceTwin implements MessageCallback
 
         updateReportedPropertiesRequest.setCorrelatingMessageCallbackContext(callbackContext);
 
-        this.client.sendEventAsync(updateReportedPropertiesRequest, iotHubEventCallback, callbackContext);
+        this.client.sendEventAsync(updateReportedPropertiesRequest, messageSentCallback, callbackContext);
     }
 
     public void subscribeToDesiredPropertiesAsync(
-        DesiredPropertiesSubscriptionCallback desiredPropertiesSubscriptionCallback,
+        SubscriptionAcknowledgedCallback subscriptionAcknowledgedCallback,
         Object subscribeToDesiredPropertiesCallbackContext,
         DesiredPropertiesCallback desiredPropertiesCallback,
         Object desiredPropertiesUpdateCallbackContext)
@@ -224,11 +224,11 @@ public class DeviceTwin implements MessageCallback
         IotHubTransportMessage desiredPropertiesNotificationRequest = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_TWIN);
         desiredPropertiesNotificationRequest.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST);
 
-        IotHubEventCallback eventCallback = (responseStatus, callbackContext) ->
+        MessageSentCallback eventCallback = (sentMessage, exception, callbackContext) ->
         {
-            if (desiredPropertiesSubscriptionCallback != null)
+            if (subscriptionAcknowledgedCallback != null)
             {
-                desiredPropertiesSubscriptionCallback.onSubscriptionAcknowledged(responseStatus, callbackContext);
+                subscriptionAcknowledgedCallback.onSubscriptionAcknowledged(exception, callbackContext);
             }
         };
 

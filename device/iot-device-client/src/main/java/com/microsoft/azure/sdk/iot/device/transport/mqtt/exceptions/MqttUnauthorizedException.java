@@ -5,7 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
+import com.microsoft.azure.sdk.iot.device.transport.ProtocolException;
 
 /**
  *  This exception is thrown when an MQTT Connection Return code of 0x05 is encountered when opening an MQTT connection

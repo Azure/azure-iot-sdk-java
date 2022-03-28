@@ -4,7 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.ConnectionStatusChangeContext;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import java.io.IOException;
@@ -20,17 +20,16 @@ public class SendEventWithProxy
 {
     private static final List<String> failedMessageListOnClose = new ArrayList<>(); // List of messages that failed on close
 
-    protected static class EventCallback implements IotHubEventCallback
+    protected static class EventCallback implements MessageSentCallback
     {
-        public void execute(IotHubStatusCode status, Object context)
+        public void onMessageSent(Message sentMessage, IotHubClientException exception,  Object context)
         {
-            Message msg = (Message) context;
-
-            System.out.println("IoT Hub responded to message "+ msg.getMessageId()  + " with status " + status.name());
+            IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
+            System.out.println("IoT Hub responded to message "+ sentMessage.getMessageId()  + " with status " + status.name());
 
             if (status==IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE)
             {
-                failedMessageListOnClose.add(msg.getMessageId());
+                failedMessageListOnClose.add(sentMessage.getMessageId());
             }
         }
     }
@@ -87,7 +86,7 @@ public class SendEventWithProxy
      * args[6] = (optional) proxy password
      */
     public static void main(String[] args)
-            throws IOException, URISyntaxException
+            throws IOException, URISyntaxException, IotHubClientException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
@@ -213,7 +212,7 @@ public class SendEventWithProxy
                 System.out.println(msgStr);
 
                 EventCallback callback = new EventCallback();
-                client.sendEventAsync(msg, callback, msg);
+                client.sendEventAsync(msg, callback, null);
             }
             catch (Exception e)
             {

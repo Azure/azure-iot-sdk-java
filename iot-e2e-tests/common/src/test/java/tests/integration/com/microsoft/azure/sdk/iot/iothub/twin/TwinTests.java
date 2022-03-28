@@ -6,8 +6,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.twin;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.twin.GetTwinCorrelatingMessageCallback;
 import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesUpdateCorrelatingMessageCallback;
 import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesUpdateResponse;
@@ -40,25 +39,25 @@ import static org.junit.Assert.*;
 @RunWith(Parameterized.class)
 public class TwinTests extends TwinCommon
 {
-    public TwinTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException, InterruptedException, IotHubException, URISyntaxException, GeneralSecurityException, ModuleClientException
+    public TwinTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException, InterruptedException, IotHubException, URISyntaxException, GeneralSecurityException
     {
         super(protocol, authenticationType, clientType);
     }
 
     @Before
-    public void setup() throws GeneralSecurityException, ModuleClientException, IOException, InterruptedException, URISyntaxException, IotHubException
+    public void setup() throws GeneralSecurityException, IOException, InterruptedException, URISyntaxException, IotHubException, IotHubClientException
     {
         this.testInstance.setup();
     }
 
     @Test
-    public void testBasicTwinFlow() throws InterruptedException, IOException, IotHubException, TimeoutException
+    public void testBasicTwinFlow() throws InterruptedException, IOException, IotHubException, TimeoutException, IotHubClientException
     {
         super.testBasicTwinFlow(true);
     }
 
     @Test
-    public void receiveMultipleDesiredPropertiesAtOnce() throws IOException, InterruptedException, IotHubException, TimeoutException
+    public void receiveMultipleDesiredPropertiesAtOnce() throws IOException, InterruptedException, IotHubException, TimeoutException, IotHubClientException
     {
         final String desiredPropertyKey1 = UUID.randomUUID().toString();
         final String desiredPropertyValue1 = UUID.randomUUID().toString();
@@ -91,7 +90,7 @@ public class TwinTests extends TwinCommon
     }
 
     @Test
-    public void receiveMultipleDesiredPropertiesSequentially() throws IOException, InterruptedException, IotHubException, TimeoutException
+    public void receiveMultipleDesiredPropertiesSequentially() throws IOException, InterruptedException, IotHubException, TimeoutException, IotHubClientException
     {
         final String desiredPropertyKey1 = UUID.randomUUID().toString();
         final String desiredPropertyValue1 = UUID.randomUUID().toString();
@@ -141,7 +140,7 @@ public class TwinTests extends TwinCommon
     }
 
     @Test
-    public void sendMultipleReportedPropertiesAtOnce() throws IOException, TimeoutException, InterruptedException, IotHubException
+    public void sendMultipleReportedPropertiesAtOnce() throws IOException, TimeoutException, InterruptedException, IotHubException, IotHubClientException
     {
         final String reportedPropertyKey1 = UUID.randomUUID().toString();
         final String reportedPropertyValue1 = UUID.randomUUID().toString();
@@ -161,7 +160,6 @@ public class TwinTests extends TwinCommon
         twin.getReportedProperties().put(reportedPropertyKey2, reportedPropertyValue2);
         ReportedPropertiesUpdateResponse response = testInstance.testIdentity.getClient().updateReportedProperties(twin.getReportedProperties());
 
-        assertEquals(IotHubStatusCode.OK, response.getStatusCode());
         assertTrue(response.getVersion() > 0);
 
         com.microsoft.azure.sdk.iot.service.twin.Twin serviceClientTwin = testInstance.getServiceClientTwin();
@@ -170,7 +168,7 @@ public class TwinTests extends TwinCommon
     }
 
     @Test
-    public void sendMultipleReportedPropertiesSequentially() throws TimeoutException, InterruptedException, IOException, IotHubException
+    public void sendMultipleReportedPropertiesSequentially() throws TimeoutException, InterruptedException, IOException, IotHubException, IotHubClientException
     {
         final String reportedPropertyKey1 = UUID.randomUUID().toString();
         final String reportedPropertyValue1 = UUID.randomUUID().toString();
@@ -190,14 +188,12 @@ public class TwinTests extends TwinCommon
         twin.getReportedProperties().put(reportedPropertyKey1, reportedPropertyValue1);
         ReportedPropertiesUpdateResponse response = testInstance.testIdentity.getClient().updateReportedProperties(twin.getReportedProperties());
         twin.getReportedProperties().setVersion(response.getVersion());
-        assertEquals(IotHubStatusCode.OK, response.getStatusCode());
 
         // send a different reported property
         twin.getReportedProperties().clear();
         twin.getReportedProperties().put(reportedPropertyKey2, reportedPropertyValue2);
         response = testInstance.testIdentity.getClient().updateReportedProperties(twin.getReportedProperties());
         twin.getReportedProperties().setVersion(response.getVersion());
-        assertEquals(IotHubStatusCode.OK, response.getStatusCode());
 
         com.microsoft.azure.sdk.iot.service.twin.Twin serviceClientTwin = testInstance.getServiceClientTwin();
         assertTrue(isPropertyInTwinCollection(serviceClientTwin.getReportedProperties(), reportedPropertyKey1, reportedPropertyValue1));
@@ -205,7 +201,7 @@ public class TwinTests extends TwinCommon
     }
 
     @Test
-    public void canDeleteReportedProperties() throws IOException, TimeoutException, InterruptedException, IotHubException
+    public void canDeleteReportedProperties() throws IOException, TimeoutException, InterruptedException, IotHubException, IotHubClientException
     {
         final String reportedPropertyKey = UUID.randomUUID().toString();
         final String reportedPropertyValue = UUID.randomUUID().toString();
@@ -221,16 +217,12 @@ public class TwinTests extends TwinCommon
         twin.getReportedProperties().put(reportedPropertyKey, reportedPropertyValue);
         ReportedPropertiesUpdateResponse response = testInstance.testIdentity.getClient().updateReportedProperties(twin.getReportedProperties());
 
-        assertEquals(IotHubStatusCode.OK, response.getStatusCode());
-        System.out.println(response.getVersion());
         assertTrue(response.getVersion() > 0);
 
         twin.getReportedProperties().setVersion(response.getVersion());
         twin.getReportedProperties().put(reportedPropertyKey, null);
         response = testInstance.testIdentity.getClient().updateReportedProperties(twin.getReportedProperties());
 
-        assertEquals(IotHubStatusCode.OK, response.getStatusCode());
-        System.out.println(response.getVersion());
         assertTrue(response.getVersion() > 0);
 
         com.microsoft.azure.sdk.iot.service.twin.Twin serviceClientTwin = testInstance.getServiceClientTwin();
@@ -242,7 +234,7 @@ public class TwinTests extends TwinCommon
     // when a message is queued, sent, ack'd, etc. This test makes sure that those callbacks are all executed as expected and in order.
     @ContinuousIntegrationTest
     @Test
-    public void testCorrelatingMessageCallbackOverloads() throws TimeoutException, InterruptedException, IOException, IotHubException
+    public void testCorrelatingMessageCallbackOverloads() throws TimeoutException, InterruptedException, IOException, IotHubException, IotHubClientException
     {
         final String desiredPropertyKey = UUID.randomUUID().toString();
         final String desiredPropertyValue = UUID.randomUUID().toString();
@@ -290,7 +282,7 @@ public class TwinTests extends TwinCommon
                 }
 
                 @Override
-                public void onRequestAcknowledged(Message message, Object callbackContext, TransportException e)
+                public void onRequestAcknowledged(Message message, Object callbackContext, IotHubClientException e)
                 {
                     if (message != null && callbackContext.equals(expectedGetTwinContext) && e == null)
                     {
@@ -299,7 +291,7 @@ public class TwinTests extends TwinCommon
                 }
 
                 @Override
-                public void onResponseReceived(Twin twin, Message message, Object callbackContext, IotHubStatusCode statusCode, TransportException e)
+                public void onResponseReceived(Twin twin, Message message, Object callbackContext, IotHubStatusCode statusCode, IotHubClientException e)
                 {
                     if (message != null && callbackContext.equals(expectedGetTwinContext) && e == null && statusCode == IotHubStatusCode.OK)
                     {
@@ -382,7 +374,7 @@ public class TwinTests extends TwinCommon
                 }
 
                 @Override
-                public void onRequestAcknowledged(Message message, Object callbackContext, TransportException e)
+                public void onRequestAcknowledged(Message message, Object callbackContext, IotHubClientException e)
                 {
                     if (message != null && callbackContext.equals(expectedUpdateReportedPropertiesContext) && e == null)
                     {
@@ -391,7 +383,7 @@ public class TwinTests extends TwinCommon
                 }
 
                 @Override
-                public void onResponseReceived(Message message, Object callbackContext, IotHubStatusCode statusCode, int version, TransportException e)
+                public void onResponseReceived(Message message, Object callbackContext, IotHubStatusCode statusCode, ReportedPropertiesUpdateResponse response, IotHubClientException e)
                 {
                     if (message != null && callbackContext.equals(expectedUpdateReportedPropertiesContext) && e == null && statusCode == IotHubStatusCode.OK)
                     {

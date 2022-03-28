@@ -9,10 +9,6 @@ import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import static com.microsoft.azure.sdk.iot.service.ParserUtility.getJsonObjectValue;
 import static com.microsoft.azure.sdk.iot.service.ParserUtility.resolveJsonElement;
 

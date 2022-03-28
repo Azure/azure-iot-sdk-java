@@ -3,9 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.transport.RetryDecision;
-import com.microsoft.azure.sdk.iot.device.transport.NoRetry;
 import java.util.Arrays;
 import java.util.Collection;
 import org.junit.Before;

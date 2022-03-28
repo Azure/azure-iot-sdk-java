@@ -188,7 +188,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
             this.messageIdListStoredOnReceive = messageIdListStoredOnReceive;
         }
 
-        public IotHubMessageResult execute(com.microsoft.azure.sdk.iot.device.Message msg, Object context)
+        public IotHubMessageResult onCloudToDeviceMessageReceived(com.microsoft.azure.sdk.iot.device.Message msg, Object context)
         {
             messageIdListStoredOnReceive.add(msg.getMessageId()); // add received messsage id to messageList
             return IotHubMessageResult.COMPLETE;
@@ -209,7 +209,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
             this.expectedMessage = expectedMessage;
         }
 
-        public IotHubMessageResult execute(com.microsoft.azure.sdk.iot.device.Message msg, Object context)
+        public IotHubMessageResult onCloudToDeviceMessageReceived(com.microsoft.azure.sdk.iot.device.Message msg, Object context)
         {
             boolean resultValue = true;
             HashMap<String, String> messageProperties = (HashMap<String, String>) ReceiveMessagesTests.messageProperties;
@@ -250,7 +250,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
             this.expectedMessage = expectedMessage;
         }
 
-        public IotHubMessageResult execute(com.microsoft.azure.sdk.iot.device.Message msg, Object context)
+        public IotHubMessageResult onCloudToDeviceMessageReceived(com.microsoft.azure.sdk.iot.device.Message msg, Object context)
         {
             HashMap<String, String> messageProperties = (HashMap<String, String>) ReceiveMessagesTests.messageProperties;
             Success messageReceived = (Success)context;

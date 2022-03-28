@@ -4,7 +4,7 @@
 package com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import mockit.Expectations;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -24,7 +24,7 @@ public class IotHubReceiveTaskTest
     // Tests_SRS_IOTHUBRECEIVETASK_11_001: [The constructor shall save the transport.]
     // Tests_SRS_IOTHUBRECEIVETASK_11_002: [The function shall poll an IoT Hub for messages, invoke the message callback if one exists, and return one of COMPLETE, ABANDON, or REJECT to the IoT Hub.]
     @Test
-    public void runReceivesAllMessages() throws DeviceClientException
+    public void runReceivesAllMessages() throws IotHubClientException, TransportException
     {
         final Semaphore receiveThreadSemaphore = new Semaphore(1);
         new Expectations()
@@ -80,7 +80,7 @@ public class IotHubReceiveTaskTest
 
     // Tests_SRS_IOTHUBRECEIVETASK_11_004: [The function shall not crash because of an IOException thrown by the transport.]
     @Test
-    public void runDoesNotCrashFromIoException() throws IOException, URISyntaxException, DeviceClientException
+    public void runDoesNotCrashFromIoException() throws IOException, URISyntaxException, IotHubClientException, TransportException
     {
         new NonStrictExpectations()
         {
@@ -96,7 +96,7 @@ public class IotHubReceiveTaskTest
 
     // Tests_SRS_IOTHUBRECEIVETASK_11_005: [The function shall not crash because of any error or exception thrown by the transport.]
     @Test
-    public void runDoesNotCrashFromThrowable() throws IOException, URISyntaxException, DeviceClientException
+    public void runDoesNotCrashFromThrowable() throws IOException, URISyntaxException, IotHubClientException, TransportException
     {
         new NonStrictExpectations()
         {

@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 
 /**
  * This interface has a number of call backs to notify when a message is in a specific part of the {@link com.microsoft.azure.sdk.iot.device.transport.IotHubTransport} lifecycle.
@@ -36,7 +36,7 @@ public interface CorrelatingMessageCallback
      * @param callbackContext The context sent with the message.
      * @param e The exception given by the transport. If there are no errors this will be {@code null}.
      */
-    void onRequestAcknowledged(Message message, Object callbackContext, TransportException e);
+    void onRequestAcknowledged(Message message, Object callbackContext, IotHubClientException e);
 
     /**
      * Called when a response to the sent message has been sent by IoT hub and has been receieved by the transport.
@@ -45,7 +45,7 @@ public interface CorrelatingMessageCallback
      * @param callbackContext The context sent with the message.
      * @param e The exception given by the transport. If there are no errors this will be {@code null}.
      */
-    void onResponseReceived(Message message, Object callbackContext, TransportException e);
+    void onResponseReceived(Message message, Object callbackContext, IotHubClientException e);
 
     /**
      * Called when a response to the message has been sent by IoT hub and has been acknowledged by the transport.

@@ -6,6 +6,7 @@ package samples.com.microsoft.azure.sdk.iot;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -25,7 +26,8 @@ public class DeviceClientManagerSample {
      * Sends a number of messages to an IoT. Default protocol is to use AMQP transport.
      */
     public static void main(String[] args)
-            throws URISyntaxException, IOException {
+            throws URISyntaxException, IOException, IotHubClientException
+    {
 
         SampleParameters params = new SampleParameters(args);
 
@@ -99,7 +101,7 @@ public class DeviceClientManagerSample {
             Message msg = composeMessage(i);
             SampleMessageSendCallback callback = new SampleMessageSendCallback();
             try {
-                deviceClientManager.sendEventAsync(msg, callback, msg);
+                deviceClientManager.sendEventAsync(msg, callback, null);
             } catch (Exception e) {
                 failedMessageListOnClose.add(msg.getMessageId());
                 log.error("Exception thrown while sending telemetry: ", e);

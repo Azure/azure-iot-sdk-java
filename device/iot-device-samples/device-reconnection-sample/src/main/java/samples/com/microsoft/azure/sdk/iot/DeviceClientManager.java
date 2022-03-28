@@ -1,12 +1,12 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.ConnectionStatusChangeContext;
 import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
-import com.microsoft.azure.sdk.iot.device.exceptions.DeviceOperationTimeoutException;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +53,7 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
         }
     }
 
-    public void open() throws IOException {
+    public void open() throws IOException, IotHubClientException {
         synchronized (lock) {
             if(connectionStatus == ConnectionStatus.DISCONNECTED) {
                 connectionStatus = ConnectionStatus.CONNECTING;
@@ -64,7 +64,8 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
         doConnectWithRetry();
     }
 
-    private void doConnectWithRetry() throws IOException {
+    private void doConnectWithRetry() throws IOException, IotHubClientException
+    {
         // Device client does not have retry on the initial open() call. Will need to be re-opened by the calling application
         while (connectionStatus == ConnectionStatus.CONNECTING) {
             synchronized (lock) {
@@ -126,7 +127,10 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
 
     // This handles the state where the DeviceClient reports that OperationTimeout has expired, and stops retrying; even though the applied RetryPolicy is still valid.
     private boolean shouldDeviceReconnect(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable) {
-        return (status == DISCONNECTED && statusChangeReason == RETRY_EXPIRED && throwable instanceof DeviceOperationTimeoutException);
+        return status == DISCONNECTED
+                && statusChangeReason == RETRY_EXPIRED
+                && throwable instanceof IotHubClientException
+                && ((IotHubClientException) throwable).isRetryable();
     }
 
     private void handleRecoverableDisconnection() {
@@ -152,7 +156,7 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
                         }
                         try {
                             doConnectWithRetry();
-                        } catch (IOException e) {
+                        } catch (IOException | IotHubClientException e) {
                             log.error("Exception thrown while opening DeviceClient instance: ", e);
                         }
                     }

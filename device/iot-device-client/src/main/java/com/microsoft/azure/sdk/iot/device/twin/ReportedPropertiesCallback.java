@@ -4,7 +4,7 @@
 package com.microsoft.azure.sdk.iot.device.twin;
 
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 
 /**
  * Callback to be executed when a reported properties update request has completed.
@@ -22,5 +22,5 @@ public interface ReportedPropertiesCallback
      * @param context The context that was provided for this callback in
      * {@link com.microsoft.azure.sdk.iot.device.InternalClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesCallback, Object)}
      */
-    void onReportedPropertiesUpdateAcknowledged(IotHubStatusCode statusCode, int version, TransportException e, Object context);
+    void onReportedPropertiesUpdateAcknowledged(IotHubStatusCode statusCode, ReportedPropertiesUpdateResponse response, IotHubClientException e, Object context);
 }

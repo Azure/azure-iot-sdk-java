@@ -6,7 +6,7 @@ package samples.com.microsoft.azure.sdk.iot;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.edge.DirectMethodRequest;
 import com.microsoft.azure.sdk.iot.device.edge.DirectMethodResponse;
-import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -25,7 +25,7 @@ public class ModuleInvokeMethodSample
      * args[4] = the device id of the device to invoke the method on
      * args[5] = (optional) the module id to invoke the method on
      */
-    public static void main(String[] args) throws IOException, URISyntaxException, ModuleClientException
+    public static void main(String[] args) throws IOException, URISyntaxException, IotHubClientException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
@@ -100,7 +100,7 @@ public class ModuleInvokeMethodSample
             System.out.println("Received response status: " + result.getStatus());
             System.out.println("Received response payload: " + result.getPayload(String.class));
         }
-        catch (ModuleClientException e)
+        catch (IotHubClientException e)
         {
             System.out.println("Encountered an exception while invoking method");
             e.printStackTrace();
@@ -111,7 +111,7 @@ public class ModuleInvokeMethodSample
         }
     }
 
-    private static DirectMethodResponse invokeMethodOnDevice(String methodName, String deviceIdToInvokeOn, ModuleClient client, DirectMethodRequest directMethodRequest) throws ModuleClientException
+    private static DirectMethodResponse invokeMethodOnDevice(String methodName, String deviceIdToInvokeOn, ModuleClient client, DirectMethodRequest directMethodRequest) throws IotHubClientException, IOException
     {
         System.out.println("Invoking method \"" + methodName + "\" on device \"" + deviceIdToInvokeOn + "\"");
         DirectMethodResponse result = client.invokeMethod(deviceIdToInvokeOn, directMethodRequest);
@@ -119,7 +119,7 @@ public class ModuleInvokeMethodSample
         return result;
     }
 
-    private static DirectMethodResponse invokeMethodOnModule(String methodName, String deviceIdToInvokeOn, String moduleIdToInvokeOn, ModuleClient client, DirectMethodRequest directMethodRequest) throws ModuleClientException
+    private static DirectMethodResponse invokeMethodOnModule(String methodName, String deviceIdToInvokeOn, String moduleIdToInvokeOn, ModuleClient client, DirectMethodRequest directMethodRequest) throws IotHubClientException, IOException
     {
         System.out.println("Invoking method \"" + methodName + "\" on module \"" + moduleIdToInvokeOn + "\"");
         DirectMethodResponse result = client.invokeMethod(deviceIdToInvokeOn, moduleIdToInvokeOn, directMethodRequest);

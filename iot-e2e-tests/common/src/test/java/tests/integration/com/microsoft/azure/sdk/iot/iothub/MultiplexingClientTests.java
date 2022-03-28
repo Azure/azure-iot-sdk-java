@@ -10,8 +10,9 @@ import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.ConnectionStatusChangeContext;
-import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesCallback;
+import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientRegistrationException;
 import com.microsoft.azure.sdk.iot.device.twin.DirectMethodPayload;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
@@ -22,9 +23,7 @@ import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MultiplexingClient;
 import com.microsoft.azure.sdk.iot.device.MultiplexingClientOptions;
 import com.microsoft.azure.sdk.iot.device.ProxySettings;
-import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationAuthenticationException;
-import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
-import com.microsoft.azure.sdk.iot.device.exceptions.UnauthorizedException;
+import com.microsoft.azure.sdk.iot.device.transport.https.exceptions.UnauthorizedException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
@@ -69,10 +68,8 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -154,12 +151,12 @@ public class MultiplexingClientTests extends IntegrationTest
             this.protocol = protocol;
         }
 
-        public void setup(int multiplexingDeviceSessionCount) throws InterruptedException, IotHubException, IOException, URISyntaxException, MultiplexingClientException, GeneralSecurityException
+        public void setup(int multiplexingDeviceSessionCount) throws InterruptedException, IotHubException, IOException, URISyntaxException, GeneralSecurityException, IotHubClientException, TimeoutException
         {
             setup(multiplexingDeviceSessionCount, null, false);
         }
 
-        public void setup(int multiplexingDeviceSessionCount, MultiplexingClientOptions options, boolean needCleanTwin) throws InterruptedException, IotHubException, IOException, URISyntaxException, MultiplexingClientException, GeneralSecurityException
+        public void setup(int multiplexingDeviceSessionCount, MultiplexingClientOptions options, boolean needCleanTwin) throws InterruptedException, IotHubException, IOException, URISyntaxException, GeneralSecurityException, IotHubClientException, TimeoutException
         {
             deviceIdentityArray = new ArrayList<>(multiplexingDeviceSessionCount);
             deviceClientArray = new ArrayList<>(multiplexingDeviceSessionCount);
@@ -186,14 +183,7 @@ public class MultiplexingClientTests extends IntegrationTest
         {
             if (this.multiplexingClient != null)
             {
-                try
-                {
-                    this.multiplexingClient.close();
-                }
-                catch (MultiplexingClientException e)
-                {
-                    log.error("Failed to close multiplexing client", e);
-                }
+                this.multiplexingClient.close();
             }
 
             if (this.testDevicesArrayIdentity != null)
@@ -368,7 +358,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
         long startOpenTime = System.currentTimeMillis();
         Thread[] openThreads = new Thread[multiplexingClientCount];
-        AtomicReference<MultiplexingClientException>[] openExceptions = new AtomicReference[multiplexingClientCount];
+        AtomicReference<Exception>[] openExceptions = new AtomicReference[multiplexingClientCount];
         for (int i = 0; i < multiplexingClientCount; i++)
         {
             int finalI = i;
@@ -378,7 +368,7 @@ public class MultiplexingClientTests extends IntegrationTest
                     openExceptions[finalI] = new AtomicReference<>();
                     testInstances[finalI].multiplexingClient.open(false);
                 }
-                catch (MultiplexingClientException e)
+                catch (IotHubClientException | IOException e)
                 {
                     openExceptions[finalI].set(e);
                 }
@@ -635,7 +625,7 @@ public class MultiplexingClientTests extends IntegrationTest
         }
 
         @Override
-        public IotHubMessageResult execute(Message message, Object callbackContext)
+        public IotHubMessageResult onCloudToDeviceMessageReceived(Message message, Object callbackContext)
         {
             messageCallbackFired = true;
             if (message.getCorrelationId().equals(expectedCorrelationId))
@@ -726,26 +716,10 @@ public class MultiplexingClientTests extends IntegrationTest
         assertTrue("Device method callback fired, but unexpected method name was received", deviceDirectMethodCallback.expectedMethodReceived);
     }
 
-    private static void subscribeToDirectMethod(DeviceClient deviceClient, DirectMethodCallback deviceDirectMethodCallback) throws InterruptedException, IOException
+    private static void subscribeToDirectMethod(DeviceClient deviceClient, DirectMethodCallback deviceDirectMethodCallback) throws InterruptedException, IOException, IotHubClientException, TimeoutException
     {
         Success methodsSubscribedSuccess = new Success();
-        deviceClient.subscribeToMethodsAsync(deviceDirectMethodCallback, null, (responseStatus, callbackContext) -> {
-            ((Success) callbackContext).setCallbackStatusCode(responseStatus);
-            ((Success) callbackContext).setResult(responseStatus == IotHubStatusCode.OK);
-            ((Success) callbackContext).callbackWasFired();
-        }, methodsSubscribedSuccess);
-
-        // Wait for methods subscription to be acknowledged by hub
-        long startTime = System.currentTimeMillis();
-        while (methodsSubscribedSuccess.wasCallbackFired())
-        {
-            Thread.sleep(200);
-
-            if (System.currentTimeMillis() - startTime > DEVICE_METHOD_SUBSCRIBE_TIMEOUT_MILLISECONDS)
-            {
-                throw new AssertionError("Timed out waiting for device method subscription to be acknowledged");
-            }
-        }
+        deviceClient.subscribeToMethods(deviceDirectMethodCallback, null);
     }
 
     private static class DirectMethodCallback implements com.microsoft.azure.sdk.iot.device.twin.MethodCallback
@@ -930,7 +904,7 @@ public class MultiplexingClientTests extends IntegrationTest
         }
     }
 
-    private static void testReportedPropertiesFlow(DeviceClient deviceClient, TwinClient twinClientServiceClient, String expectedPropertyKey, String expectedPropertyValue) throws IOException, IotHubException, InterruptedException, TimeoutException
+    private static void testReportedPropertiesFlow(DeviceClient deviceClient, TwinClient twinClientServiceClient, String expectedPropertyKey, String expectedPropertyValue) throws IOException, IotHubException, InterruptedException, TimeoutException, IotHubClientException
     {
         String expectedReportedPropertyValue = expectedPropertyValue + "-reported";
         TwinCollection reportedProperties = new TwinCollection();
@@ -1361,7 +1335,7 @@ public class MultiplexingClientTests extends IntegrationTest
         {
             testInstance.multiplexingClient.registerDeviceClient(clientWithIncorrectCredentials);
         }
-        catch (MultiplexingClientDeviceRegistrationAuthenticationException e)
+        catch (MultiplexingClientRegistrationException e)
         {
             Map<String, Exception> registrationExceptions = e.getRegistrationExceptions();
             assertEquals(1, registrationExceptions.size());
@@ -1397,7 +1371,7 @@ public class MultiplexingClientTests extends IntegrationTest
         {
             testInstance.multiplexingClient.open(false);
         }
-        catch (MultiplexingClientDeviceRegistrationAuthenticationException e)
+        catch (MultiplexingClientRegistrationException e)
         {
             Map<String, Exception> registrationExceptions = e.getRegistrationExceptions();
             assertEquals(1, registrationExceptions.size());
@@ -1452,7 +1426,7 @@ public class MultiplexingClientTests extends IntegrationTest
         {
             testInstance.multiplexingClient.registerDeviceClients(clientsWithIncorrectCredentials);
         }
-        catch (MultiplexingClientDeviceRegistrationAuthenticationException e)
+        catch (MultiplexingClientRegistrationException e)
         {
             Map<String, Exception> registrationExceptions = e.getRegistrationExceptions();
             assertEquals(DEVICE_MULTIPLEX_COUNT, registrationExceptions.size());
@@ -1507,7 +1481,7 @@ public class MultiplexingClientTests extends IntegrationTest
         {
             testInstance.multiplexingClient.open(false);
         }
-        catch (MultiplexingClientDeviceRegistrationAuthenticationException e)
+        catch (MultiplexingClientRegistrationException e)
         {
             Map<String, Exception> registrationExceptions = e.getRegistrationExceptions();
             assertEquals(DEVICE_MULTIPLEX_COUNT, registrationExceptions.size());
@@ -1689,7 +1663,7 @@ public class MultiplexingClientTests extends IntegrationTest
                 testInstance.multiplexingClient.registerDeviceClient(testInstance.deviceClientArray.get(0));
                 fail("Registering a disabled device to an active multiplexing connection should have thrown an exception");
             }
-            catch (MultiplexingClientDeviceRegistrationAuthenticationException ex)
+            catch (MultiplexingClientRegistrationException ex)
             {
                 assertTrue(ex.getRegistrationExceptions().containsKey(deviceToDisable.getDeviceId()));
             }
@@ -1784,7 +1758,7 @@ public class MultiplexingClientTests extends IntegrationTest
             testInstance.multiplexingClient.registerDeviceClient(invalidDeviceClient);
             fail("Expected multiplexingClient to throw since it registered a device that did not exist.");
         }
-        catch (MultiplexingClientDeviceRegistrationAuthenticationException e)
+        catch (MultiplexingClientRegistrationException e)
         {
             // expected throw since the deviceId in the connection string does not exist, ignore
         }

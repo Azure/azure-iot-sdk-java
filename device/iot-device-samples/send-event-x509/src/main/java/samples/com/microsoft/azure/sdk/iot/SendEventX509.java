@@ -4,6 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -41,17 +42,16 @@ public class SendEventX509
     private  static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds
     private  static final List<String> failedMessageListOnClose = new ArrayList<>(); // List of messages that failed on close
   
-    protected static class EventCallback implements IotHubEventCallback
+    protected static class EventCallback implements MessageSentCallback
     {
-        public void execute(IotHubStatusCode status, Object context)
+        public void onMessageSent(Message sentMessage, IotHubClientException exception,  Object context)
         {
-            Message msg = (Message) context;
-            
-            System.out.println("IoT Hub responded to message "+ msg.getMessageId()  + " with status " + status.name());
+            IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
+            System.out.println("IoT Hub responded to message "+ sentMessage.getMessageId()  + " with status " + status.name());
             
             if (status== IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE)
             {
-                failedMessageListOnClose.add(msg.getMessageId());
+                failedMessageListOnClose.add(sentMessage.getMessageId());
             }
         }
     }
@@ -65,7 +65,7 @@ public class SendEventX509
      * args[1] = number of requests to send
      * args[2] = IoT Hub protocol to use, optional and defaults to MQTT
      */
-    public static void main(String[] args) throws IOException, URISyntaxException, GeneralSecurityException
+    public static void main(String[] args) throws IOException, URISyntaxException, GeneralSecurityException, IotHubClientException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
@@ -169,7 +169,7 @@ public class SendEventX509
                 System.out.println(msgStr);
 
                 EventCallback callback = new EventCallback();
-                client.sendEventAsync(msg, callback, msg);
+                client.sendEventAsync(msg, callback, null);
             }
             catch (Exception e)
             {

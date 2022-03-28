@@ -3,7 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -69,7 +68,7 @@ public class IotHubStatusCodeTest
                 IotHubStatusCode.getIotHubStatusCode(httpsStatus);
 
         final IotHubStatusCode expectedStatus =
-                IotHubStatusCode.TOO_MANY_DEVICES;
+                IotHubStatusCode.QUOTA_EXCEEDED;
         assertThat(testStatus, is(expectedStatus));
     }
 
@@ -82,7 +81,7 @@ public class IotHubStatusCodeTest
                 IotHubStatusCode.getIotHubStatusCode(httpsStatus);
 
         final IotHubStatusCode expectedStatus =
-                IotHubStatusCode.HUB_OR_DEVICE_ID_NOT_FOUND;
+                IotHubStatusCode.NOT_FOUND;
         assertThat(testStatus, is(expectedStatus));
     }
 
