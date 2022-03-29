@@ -1286,7 +1286,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
             // each multiplexed device client should only have received DISCONNECTED_RETRYING. If the DISCONNECTED event occurs, users will
             // likely have some retry logic that kicks in which should be avoided since the multiplexing client itself is still retrying
-            assertFalse("Multiplexed client recieved DISCONNECTED callback unexpectedly", connectionStatusChangeTrackers[i].clientClosedUnexpectedly); //TODO fails still?
+            assertFalse("Multiplexed client recieved DISCONNECTED callback unexpectedly", connectionStatusChangeTrackers[i].clientClosedUnexpectedly);
             assertFalse("Multiplexed client recieved DISCONNECTED callback unexpectedly", connectionStatusChangeTrackers[i].clientClosedGracefully);
 
             // Try to send a message over the now-recovered device session

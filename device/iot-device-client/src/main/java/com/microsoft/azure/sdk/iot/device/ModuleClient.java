@@ -321,10 +321,13 @@ public class ModuleClient extends InternalClient
 
                 return new ModuleClient(iotHubAuthenticationProvider, protocol);
             }
-            catch (TransportException | URISyntaxException | CertificateException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e)
+            catch (URISyntaxException | CertificateException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e)
             {
-                // TODO
-                throw new IotHubClientException(IotHubStatusCode.ERROR, e);
+                throw new IotHubClientException(IotHubStatusCode.ERROR, "Failed to handle the provided certificates", e);
+            }
+            catch (TransportException e)
+            {
+                throw e.toIotHubClientException();
             }
         }
     }
