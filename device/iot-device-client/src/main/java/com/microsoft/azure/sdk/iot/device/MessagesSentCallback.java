@@ -7,6 +7,10 @@ import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 
 import java.util.List;
 
+/**
+ * The callback interface that defines how this client will notify you once a batch of messages has been sent and acknowledged
+ * by the service. Used by {@link InternalClient#sendEventsAsync(List, MessagesSentCallback, Object)}
+ */
 public interface MessagesSentCallback
 {
     /**
@@ -17,7 +21,7 @@ public interface MessagesSentCallback
      * @param sentMessages the messages that either were sent or failed to send.
      * @param clientException the exception that was encountered while sending the request. If null, no exception was
      * encountered and the messages were all successfully sent.
-     * @param callbackContext a custom context given by the developer.
+     * @param callbackContext a custom context given by the developer. Will be null if no custom context was provided.
      */
     void onMessagesSent(List<Message> sentMessages, IotHubClientException clientException, Object callbackContext);
 }
