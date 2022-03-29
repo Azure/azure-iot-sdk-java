@@ -30,7 +30,7 @@ public enum IotHubStatusCode
     /**
      * The request failed because the quota for such operations has been exceeded. For file upload operations, this
      * signifies that the maximum number of concurrent file upload operations are already happening. For telemetry operations,
-     * this signifies that the IoT Hub has reached its daily quota for messages ingested.
+     * this signifies that the IoT Hub has reached its daily quota for the number of messages ingested.
      */
     QUOTA_EXCEEDED,
 
