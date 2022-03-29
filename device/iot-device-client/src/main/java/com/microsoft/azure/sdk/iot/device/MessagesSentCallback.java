@@ -16,7 +16,7 @@ public interface MessagesSentCallback
     /**
      * The callback that is executed once the messages associated with this callback has been acknowledged by the service.
      *
-     * These messages are sent in bulk and are either all succeeded or all failed to send.
+     * These messages are sent in bulk and have either all succeeded or all failed to send.
      *
      * @param sentMessages the messages that either were sent or failed to send.
      * @param clientException the exception that was encountered while sending the request. If null, no exception was

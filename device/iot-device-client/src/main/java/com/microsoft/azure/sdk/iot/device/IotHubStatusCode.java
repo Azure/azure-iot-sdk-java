@@ -28,9 +28,13 @@ public enum IotHubStatusCode
     UNAUTHORIZED,
 
     /**
-     * The request failed because the quota for such operations has been exceeded. For file upload operations, this
-     * signifies that the maximum number of concurrent file upload operations are already happening. For telemetry operations,
-     * this signifies that the IoT hub has reached its daily quota for the number of messages ingested.
+     * The request failed because the quota for such operations has been exceeded.
+     * <p>
+     *     For file upload operations, this signifies that the maximum number of concurrent file upload operations are already happening.
+     * </p>
+     * <p>
+     *     For telemetry operations, this signifies that the IoT hub has reached its daily quota for the number of messages ingested.
+     * </p>
      */
     QUOTA_EXCEEDED,
 
@@ -85,7 +89,8 @@ public enum IotHubStatusCode
     IO_ERROR,
 
     /**
-     * The request failed because it took longer than the device operation timeout as defined in {@link DeviceClient#setOperationTimeout(long)}.
+     * The request failed because it took longer than the device operation timeout as defined in {@link DeviceClient#setOperationTimeout(long)}
+     * or took longer than the timeout as defined in a synchronous operation such as {@link DeviceClient#sendEvent(Message, int)}.
      */
     DEVICE_OPERATION_TIMED_OUT;
 
