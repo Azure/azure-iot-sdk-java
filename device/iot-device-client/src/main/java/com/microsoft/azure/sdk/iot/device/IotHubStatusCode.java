@@ -50,7 +50,7 @@ public enum IotHubStatusCode
     REQUEST_ENTITY_TOO_LARGE,
 
     /**
-     * The request was rejected by the service because it is handling too many requests right now.
+     * The request was rejected by the service because the service is handling too many requests right now.
      */
     THROTTLED,
 
