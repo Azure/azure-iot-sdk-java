@@ -1,18 +1,12 @@
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientRegistrationException;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
+import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientRegistrationException;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.TimeoutException;
+import java.util.*;
 
 import static com.microsoft.azure.sdk.iot.device.ClientConfiguration.DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
 
@@ -344,7 +338,7 @@ public class MultiplexingClient
      * @throws IotHubClientException If this operation takes longer than the default timeout allows.
      * @param deviceClients The device clients to associate with this multiplexing client.
      */
-    public void registerDeviceClients(Iterable<DeviceClient> deviceClients) throws InterruptedException, TimeoutException, IotHubClientException
+    public void registerDeviceClients(Iterable<DeviceClient> deviceClients) throws InterruptedException, IotHubClientException
     {
         this.registerDeviceClients(deviceClients, DEFAULT_REGISTRATION_TIMEOUT_MILLISECONDS);
     }
@@ -527,7 +521,7 @@ public class MultiplexingClient
      * @throws InterruptedException If the thread gets interrupted while waiting for the unregistration to succeed.
      * @throws IotHubClientException If the unregistration takes longer than the default timeout allows.
      */
-    public void unregisterDeviceClient(DeviceClient deviceClient) throws InterruptedException, TimeoutException, IotHubClientException
+    public void unregisterDeviceClient(DeviceClient deviceClient) throws InterruptedException, IotHubClientException
     {
         this.unregisterDeviceClient(deviceClient, DEFAULT_UNREGISTRATION_TIMEOUT_MILLISECONDS);
     }

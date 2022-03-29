@@ -154,8 +154,6 @@ public final class DeviceClient extends InternalClient
      *
      * @throws IllegalArgumentException if the callback is {@code null} but a context is
      * passed in.
-     * @throws IllegalStateException if the callback is set after the client is
-     * closed.
      */
     public DeviceClient setMessageCallback(MessageCallback callback, Object context) throws IllegalArgumentException
     {

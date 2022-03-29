@@ -177,6 +177,7 @@ public class InternalClient
      *
      * @throws InterruptedException if the operation is interrupted while waiting on the telemetry to be acknowledged by the service.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
      */
     public void sendEvent(Message message) throws InterruptedException, IllegalStateException, IotHubClientException
     {
@@ -192,6 +193,7 @@ public class InternalClient
      *
      * @throws InterruptedException if the operation is interrupted while waiting on the telemetry to be acknowledged by the service.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
      */
     public void sendEvent(Message message, int timeoutMilliseconds) throws InterruptedException, IllegalStateException, IotHubClientException
     {
@@ -240,6 +242,7 @@ public class InternalClient
      *
      * @throws InterruptedException if the operation is interrupted while waiting on the telemetry to be acknowledged by the service.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
      */
     public void sendEvents(List<Message> messages) throws InterruptedException, IllegalStateException, IotHubClientException
     {
@@ -259,6 +262,7 @@ public class InternalClient
      *
      * @throws InterruptedException if the operation is interrupted while waiting on the telemetry to be acknowledged by the service.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
      */
     public void sendEvents(List<Message> messages, int timeoutMilliseconds) throws InterruptedException, IllegalStateException, IotHubClientException
     {
@@ -302,6 +306,7 @@ public class InternalClient
      * @param desiredPropertiesCallbackContext The context that will be included in the callback of desiredPropertiesCallback. May be null.
      * @throws InterruptedException if the operation is interrupted while waiting on the subscription request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
      */
     public void subscribeToDesiredProperties(DesiredPropertiesCallback desiredPropertiesCallback, Object desiredPropertiesCallbackContext)
         throws InterruptedException, IllegalStateException, IotHubClientException
@@ -320,6 +325,7 @@ public class InternalClient
      * then it will wait indefinitely.
      * @throws InterruptedException if the operation is interrupted while waiting on the subscription request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
      */
     public void subscribeToDesiredProperties(DesiredPropertiesCallback desiredPropertiesCallback, Object desiredPropertiesCallbackContext, int timeoutMilliseconds)
         throws InterruptedException, IllegalStateException, IotHubClientException
@@ -366,6 +372,7 @@ public class InternalClient
      * @return The new reported properties version.
      * @throws InterruptedException if the operation is interrupted while waiting on the reported property update request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open or if this client has not subscribed to desired properties yet.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
      */
     public ReportedPropertiesUpdateResponse updateReportedProperties(TwinCollection reportedProperties)
         throws InterruptedException, IllegalStateException, IotHubClientException
@@ -385,6 +392,7 @@ public class InternalClient
      * @return The new reported properties version.
      * @throws InterruptedException if the operation is interrupted while waiting on the reported property update request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open or if this client has not subscribed to desired properties yet.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
      */
     public ReportedPropertiesUpdateResponse updateReportedProperties(TwinCollection reportedProperties, int timeoutMilliseconds)
         throws InterruptedException, IllegalStateException, IotHubClientException
@@ -431,6 +439,7 @@ public class InternalClient
      * @return The twin for this client
      * @throws InterruptedException if the operation is interrupted while waiting on the getTwin request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open or if this client has not subscribed to desired properties yet.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
      */
     public Twin getTwin() throws InterruptedException, IllegalStateException, IotHubClientException
     {
@@ -445,6 +454,7 @@ public class InternalClient
      * @return The twin for this client
      * @throws InterruptedException if the operation is interrupted while waiting on the getTwin request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open or if this client has not subscribed to desired properties yet.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
      */
     public Twin getTwin(int timeoutMilliseconds) throws InterruptedException, IllegalStateException, IotHubClientException
     {
@@ -491,6 +501,7 @@ public class InternalClient
      *
      * @throws InterruptedException if the operation is interrupted while waiting on the subscription request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
      */
     public void subscribeToMethods(MethodCallback methodCallback, Object methodCallbackContext)
         throws IllegalStateException, InterruptedException, IotHubClientException
@@ -508,6 +519,7 @@ public class InternalClient
      *
      * @throws InterruptedException if the operation is interrupted while waiting on the subscription request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
      */
     public void subscribeToMethods(MethodCallback methodCallback, Object methodCallbackContext, int timeoutMilliseconds)
         throws IllegalStateException, InterruptedException, IotHubClientException
@@ -631,7 +643,7 @@ public class InternalClient
         }
 
         this.twin.subscribeToDesiredPropertiesAsync(
-                subscriptionAcknowledgedCallback,
+            subscriptionAcknowledgedCallback,
             desiredPropertiesSubscriptionCallbackContext,
             desiredPropertiesCallback,
             desiredPropertiesCallbackContext);
