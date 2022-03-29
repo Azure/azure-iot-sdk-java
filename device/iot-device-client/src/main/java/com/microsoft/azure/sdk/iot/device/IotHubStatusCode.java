@@ -55,7 +55,7 @@ public enum IotHubStatusCode
     THROTTLED,
 
     /**
-     * The service encountered a exception while handling the request.
+     * The service encountered an error while handling the request.
      */
     INTERNAL_SERVER_ERROR,
 
