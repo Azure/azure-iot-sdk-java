@@ -149,28 +149,13 @@ public class TokenCredentialTests
         DeviceClient deviceClient = new DeviceClient(Tools.getDeviceConnectionString(iotHubConnectionString, device), MQTT);
         deviceClient.open(false);
         final int successStatusCode = 200;
-        final AtomicBoolean methodsSubscriptionComplete = new AtomicBoolean(false);
-        final AtomicBoolean methodsSubscribedSuccessfully = new AtomicBoolean(false);
         deviceClient.subscribeToMethods(
             (methodName, methodData, context) -> new com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse(successStatusCode, "success"),
             null);
 
-        long startTime = System.currentTimeMillis();
-        while (!methodsSubscriptionComplete.get())
-        {
-            Thread.sleep(200);
-
-            if (System.currentTimeMillis() - startTime > METHOD_SUBSCRIPTION_TIMEOUT_MILLISECONDS)
-            {
-                fail("Timed out waiting for device registration to complete.");
-            }
-        }
-
-        assertTrue("Method subscription callback fired with non 200 status code", methodsSubscribedSuccessfully.get());
-
         DirectMethodResponse result = methodServiceClient.invoke(device.getDeviceId(), "someMethod");
 
-        assertEquals((long) successStatusCode, (long) result.getStatus());
+        assertEquals(successStatusCode, (long) result.getStatus());
     }
 
     @Test
