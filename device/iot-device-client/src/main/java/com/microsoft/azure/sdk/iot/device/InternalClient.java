@@ -234,8 +234,8 @@ public class InternalClient
     /**
      * Synchronously sends a batch of messages to IoT hub
      *
-     * HTTPS messages will be sent in a single batch and MQTT and AMQP messages will be sent individually.
-     * In case of HTTPS, This API call is an all-or-nothing single HTTPS message and the callback will be triggered only once.
+     * This operation is only supported over HTTPS.
+     *
      * Maximum payload size for HTTPS is 255KB
      *
      * @param messages the messages to be sent.
@@ -243,8 +243,10 @@ public class InternalClient
      * @throws InterruptedException if the operation is interrupted while waiting on the telemetry to be acknowledged by the service.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
      * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
+     * @throws UnsupportedOperationException if the client is not using HTTPS.
      */
-    public void sendEvents(List<Message> messages) throws InterruptedException, IllegalStateException, IotHubClientException
+    public void sendEvents(List<Message> messages)
+            throws InterruptedException, IllegalStateException, IotHubClientException, UnsupportedOperationException
     {
         this.sendEvents(messages, DEFAULT_TIMEOUT_MILLISECONDS);
     }
@@ -252,8 +254,8 @@ public class InternalClient
     /**
      * Synchronously sends a batch of messages to IoT hub
      *
-     * HTTPS messages will be sent in a single batch and MQTT and AMQP messages will be sent individually.
-     * In case of HTTPS, This API call is an all-or-nothing single HTTPS message and the callback will be triggered only once.
+     * This operation is only supported over HTTPS.
+     *
      * Maximum payload size for HTTPS is 255KB
      *
      * @param messages the messages to be sent.
@@ -263,8 +265,10 @@ public class InternalClient
      * @throws InterruptedException if the operation is interrupted while waiting on the telemetry to be acknowledged by the service.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
      * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
+     * @throws UnsupportedOperationException if the client is not using HTTPS.
      */
-    public void sendEvents(List<Message> messages, int timeoutMilliseconds) throws InterruptedException, IllegalStateException, IotHubClientException
+    public void sendEvents(List<Message> messages, int timeoutMilliseconds)
+            throws InterruptedException, IllegalStateException, IotHubClientException, UnsupportedOperationException
     {
         final CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<IotHubClientException> iotHubClientExceptionReference = new AtomicReference<>();
@@ -579,8 +583,10 @@ public class InternalClient
 
     /**
      * Asynchronously sends a batch of messages to the IoT hub
-     * HTTPS messages will be sent in a single batch and MQTT and AMQP messages will be sent individually.
-     * In case of HTTPS, This API call is an all-or-nothing single HTTPS message and the callback will be triggered only once.
+     *
+     * This operation is only supported over HTTPS. This API call is an all-or-nothing single HTTPS message and the
+     * callback will be triggered once this batch message has been sent.
+     *
      * Maximum payload size for HTTPS is 255KB
      *
      * @param messages the list of message to be sent.
@@ -591,9 +597,10 @@ public class InternalClient
      *
      * @throws IllegalArgumentException if the message provided is {@code null}.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
+     * @throws UnsupportedOperationException if the client is not using HTTPS.
      */
     public void sendEventsAsync(List<Message> messages, MessagesSentCallback callback, Object callbackContext)
-        throws IllegalStateException
+        throws IllegalStateException, UnsupportedOperationException
     {
         verifyRegisteredIfMultiplexing();
 
@@ -605,6 +612,11 @@ public class InternalClient
         // wrap the message sent callback such that when the batch message sends, we notify the user that their list of messages have been sent
         MessageSentCallback messageSentCallback =
                 (sentMessage, clientException, callbackContext1) -> callback.onMessagesSent(messages, clientException, callbackContext1);
+
+        if (this.config.getProtocol() != HTTPS)
+        {
+            throw new UnsupportedOperationException("Batch messaging is only supported over HTTPS");
+        }
 
         Message message = new BatchMessage(messages);
 
