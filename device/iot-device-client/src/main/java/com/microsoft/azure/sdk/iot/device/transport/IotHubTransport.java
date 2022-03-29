@@ -1032,7 +1032,7 @@ public class IotHubTransport implements IotHubListener
             }
         }
 
-        // when a client is unregistered, remove all "waiting" and "in progress" messages that it had queued
+        // When a client is unregistered, remove all "waiting" and "in progress" messages that it had queued.
         for (IotHubTransportPacket waitingPacket : this.waitingPacketsQueue)
         {
             String deviceIdForMessage = waitingPacket.getDeviceId();
