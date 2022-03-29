@@ -175,10 +175,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
             }
         };
 
-        final CountDownLatch subscribedToMethodsLatch = new CountDownLatch(1);
         deviceClient.subscribeToMethods(methodCallback, commandName);
-
-        assertTrue("Timed out waiting for client to subscribe to methods", subscribedToMethodsLatch.await(1, TimeUnit.MINUTES));
 
         // act
         DigitalTwinCommandResponse responseWithNoPayload = this.digitalTwinClient.invokeComponentCommand(deviceId, componentName, commandName, null);
@@ -224,11 +221,8 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
             }
         };
 
-        final CountDownLatch subscribedToMethodsLatch = new CountDownLatch(1);
         // IotHub event callback
         deviceClient.subscribeToMethods(methodCallback, commandName);
-
-        assertTrue("Timed out waiting for client to subscribe to methods", subscribedToMethodsLatch.await(1, TimeUnit.MINUTES));
 
         // act
         DigitalTwinCommandResponse responseWithNoPayload = this.digitalTwinClient.invokeCommand(deviceId, commandName, null);
