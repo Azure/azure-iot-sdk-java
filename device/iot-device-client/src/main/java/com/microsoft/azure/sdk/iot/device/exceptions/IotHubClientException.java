@@ -42,7 +42,7 @@ public class IotHubClientException extends Exception
 
     public IotHubClientException(IotHubStatusCode statusCode, Exception nestedException)
     {
-        this(statusCode, "");
+        this(statusCode, "", nestedException);
     }
 
     public IotHubClientException(IotHubStatusCode statusCode, String errorMessage, Exception nestedException)
