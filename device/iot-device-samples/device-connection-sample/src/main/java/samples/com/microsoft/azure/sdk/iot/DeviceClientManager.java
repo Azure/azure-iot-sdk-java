@@ -17,11 +17,11 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
     // The twin for this client. Stays up to date as reported properties are sent and desired properties are received.
     private Twin twin;
 
-    // outgoing work queue of the client
+    // Outgoing work queue of the client
     private final Queue<Message> telemetryToResend = new ConcurrentLinkedQueue<>();
     private final TwinCollection reportedPropertiesToSend = new TwinCollection();
 
-    // connection state of the client
+    // Connection state of the client
     private IotHubConnectionStatus connectionStatus = IotHubConnectionStatus.DISCONNECTED;
     private boolean reconnectNeeded = false;
     private boolean gettingTwinAfterReconnection = false;
@@ -58,7 +58,7 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
                             // should only happen if the user provides a shared access signature instead of a connection string.
                             // indicates that the device client is now unusable because there is no way to renew the shared
                             // access signature. Users who want to pass in these tokens instead of using a connection string
-                            // should see the custom sas token provider sample in this repo.
+                            // should see the custom SAS token provider sample in this repo.
                             // https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-samples/custom-sas-token-provider-sample/src/main/java/samples/com/microsoft/azure/sdk/iot/CustomSasTokenProviderSample.java
                             System.out.println("Ending sample because the provided credentials have expired.");
                             System.exit(-1);
@@ -110,7 +110,7 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
         }
         catch (InterruptedException e)
         {
-            System.out.println("connection management function interrupted, likely because the sample has ended");
+            System.out.println("Connection management function interrupted, likely because the sample has ended");
         }
         finally
         {
@@ -164,18 +164,9 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
                     case UNAUTHORIZED:
                         System.out.println("Failed to open the device client due to incorrect or badly formatted credentials: " + e.getMessage());
                         return false;
-                    case THROTTLED:
-                        System.out.println("Failed to open the device client due to service throttling: " + e.getMessage());
-                        break;
-                    case IO_ERROR:
-                        System.out.println("Failed to open the device client due to network issues: " + e.getMessage());
-                        break;
                     case NOT_FOUND:
                         System.out.println("Failed to open the device client because the device is not registered on your IoT Hub: " + e.getMessage());
                         return false;
-                    case INTERNAL_SERVER_ERROR:
-                        System.out.println("Failed to open the device client due to service encountering a transient error: " + e.getMessage());
-                        break;
                 }
 
                 if (e.isRetryable())
@@ -229,18 +220,18 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
         Message messageToSend;
         if (this.telemetryToResend.isEmpty())
         {
-            // if no previous messages failed to send, send a new message
+            // If no previous messages failed to send, send a new message
             messageToSend = new Message("hello world");
         }
         else
         {
-            // if any previous message failed to send, retry sending it before moving on to new messages
+            // If any previous message failed to send, retry sending it before moving on to new messages
             messageToSend = this.telemetryToResend.remove();
         }
 
         try
         {
-            this.deviceClient.sendEventAsync(messageToSend, this, messageToSend);
+            this.deviceClient.sendEventAsync(messageToSend, this, null);
         }
         catch (IllegalStateException e)
         {
@@ -254,19 +245,20 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
     @Override
     public void onMessageSent(Message sentMessage, IotHubClientException e, Object callbackContext)
     {
-        Message message = (Message) callbackContext;
         if (e == null)
         {
-            System.out.println("Successfully sent message with correlation id " + message.getCorrelationId());
+            System.out.println("Successfully sent message with correlation Id " + sentMessage.getCorrelationId());
+            return;
         }
-        else if (e.isRetryable())
+
+        if (e.isRetryable())
         {
-            System.out.println("Failed to send message with correlation id " + message.getCorrelationId() + " due to retryable error with status code " + e.getStatusCode().name() + ". Requeueing message.");
-            telemetryToResend.add(message);
+            System.out.println("Failed to send message with correlation Id " + sentMessage.getCorrelationId() + " due to retryable error with status code " + e.getStatusCode().name() + ". Requeueing message.");
+            telemetryToResend.add(sentMessage);
         }
         else
         {
-            System.out.println("Failed to send message with correlation id " + message.getCorrelationId() + " due to an unretryable error with status code " + e.getStatusCode().name() + ". Discarding message as it can never be sent");
+            System.out.println("Failed to send message with correlation Id " + sentMessage.getCorrelationId() + " due to an unretryable error with status code " + e.getStatusCode().name() + ". Discarding message as it can never be sent");
         }
     }
     // endregion
@@ -313,6 +305,7 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
             {
                 System.out.println("Successfully updated reported properties with new key " + propertyKey + " with value " + this.reportedPropertiesToSend.get(propertyKey));
             }
+
             int newReportedPropertiesVersion = response.getVersion();
             System.out.println("New reported properties version is " + newReportedPropertiesVersion);
             this.reportedPropertiesToSend.setVersion(newReportedPropertiesVersion);
@@ -389,6 +382,9 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
     @Override
     public DirectMethodResponse onMethodInvoked(String methodName, DirectMethodPayload payload, Object context)
     {
+        // Typically there would be some method handling that differs based on the name of the method and/or the payload
+        // provided, but this sample's method handling is simplified for brevity. There are other samples in this repo
+        // that demonstrate handling methods in more depth.
         System.out.println("Method " + methodName + " invoked on device.");
         return new DirectMethodResponse(200, null);
     }
@@ -399,7 +395,7 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
     @Override
     public IotHubMessageResult onCloudToDeviceMessageReceived(Message message, Object callbackContext)
     {
-        System.out.println("Received cloud to device message with correlation id " + message.getCorrelationId());
+        System.out.println("Received cloud to device message with correlation Id " + message.getCorrelationId());
         return IotHubMessageResult.COMPLETE;
     }
     // endregion

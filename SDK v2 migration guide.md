@@ -56,13 +56,13 @@ to migrate to v2 when they have the chance. For more details on LTS releases, se
 | DeviceClient#registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback, Object); | yes | DeviceClient#setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback, Object);  |
 | DeviceClient#setRetryPolicy(RetryPolicy); | no | DeviceClient#setRetryPolicy(RetryPolicy);  |
 | DeviceClient#getProductInfo(); | yes | DeviceClient#getProductInfo();  |
-| DeviceClient#subscribeToDeviceMethod(DeviceMethodCallback , Object, IotHubEventCallback, Object); | yes | DeviceClient#subscribeToMethodsAsync(MethodCallback, Object, IotHubEventCallback, Object);  |
-| DeviceClient#startDeviceTwin(IotHubEventCallback, Object, TwinPropertyCallback, Object); | yes | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
-| DeviceClient#startDeviceTwin(IotHubEventCallback, Object, TwinPropertiesCallback, Object); | yes | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
-| DeviceClient#startDeviceTwin(IotHubEventCallback, Object, PropertyCallBack<Type1, Type2>, Object); | yes | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
+| DeviceClient#subscribeToDeviceMethod(DeviceMethodCallback , Object, IotHubEventCallback, Object); | yes | DeviceClient#subscribeToMethodsAsync(MethodCallback, Object, SubscriptionAcknowledgedCallback, Object);  |
+| DeviceClient#startDeviceTwin(IotHubEventCallback, Object, TwinPropertyCallback, Object); | yes | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesCallback, Object, SubscriptionAcknowledgedCallback, Object);  |
+| DeviceClient#startDeviceTwin(IotHubEventCallback, Object, TwinPropertiesCallback, Object); | yes | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesCallback, Object, SubscriptionAcknowledgedCallback, Object);  |
+| DeviceClient#startDeviceTwin(IotHubEventCallback, Object, PropertyCallBack<Type1, Type2>, Object); | yes | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesCallback, Object, SubscriptionAcknowledgedCallback, Object);  |
 | DeviceClient#getDeviceTwin(); | yes | DeviceClient#getTwinAsync();  |
-| DeviceClient#subscribeToDesiredProperties(Map<Property, Pair<PropertyCallBack<String, Object>, Object>>); | yes | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
-| DeviceClient#subscribeToTwinDesiredProperties(Map<Property, Pair<TwinPropertyCallBack, Object>>(); | yes | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
+| DeviceClient#subscribeToDesiredProperties(Map<Property, Pair<PropertyCallBack<String, Object>, Object>>); | yes | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesCallback, Object, SubscriptionAcknowledgedCallback, Object);  |
+| DeviceClient#subscribeToTwinDesiredProperties(Map<Property, Pair<TwinPropertyCallBack, Object>>(); | yes | DeviceClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesCallback, Object, SubscriptionAcknowledgedCallback, Object);  |
 | DeviceClient#sendReportedProperties(Set<Property>); | yes | DeviceClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesCallback, Object);  |
 | DeviceClient#sendReportedProperties(Set<Property>, int); | yes | DeviceClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesCallback, Object);  |
 | DeviceClient#sendReportedProperties(ReportedPropertiesParameters); | yes | DeviceClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesUpdateCorrelatingMessageCallback, Object);  |
@@ -95,12 +95,12 @@ to migrate to v2 when they have the chance. For more details on LTS releases, se
 | ModuleClient#setRetryPolicy(RetryPolicy); | no | ModuleClient#setRetryPolicy(RetryPolicy);  |
 | ModuleClient#setOperationTimeout(long); | no | ModuleClient#setOperationTimeout(long);  |
 | ModuleClient#getProductInfo(); | no | ModuleClient#getProductInfo();  |
-| ModuleClient#subscribeToMethod(DeviceMethodCallback , Object, IotHubEventCallback, Object); | yes | ModuleClient#subscribeToMethodsAsync(MethodCallback, Object, IotHubEventCallback, Object);  |
-| ModuleClient#startTwin(IotHubEventCallback, Object, TwinPropertyCallback, Object); | yes | ModuleClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
-| ModuleClient#startTwin(IotHubEventCallback, Object, TwinPropertiesCallback, Object); | yes | ModuleClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
-| ModuleClient#startTwin(IotHubEventCallback, Object, PropertyCallBack<Type1, Type2>, Object); | yes | ModuleClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
-| ModuleClient#subscribeToDesiredProperties(Map<Property, Pair<PropertyCallBack<String, Object>, Object>>); | yes | ModuleClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
-| ModuleClient#subscribeToTwinDesiredProperties(Map<Property, Pair<TwinPropertyCallBack, Object>>(); | yes | ModuleClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object);  |
+| ModuleClient#subscribeToMethod(DeviceMethodCallback , Object, IotHubEventCallback, Object); | yes | ModuleClient#subscribeToMethodsAsync(MethodCallback, Object, SubscriptionAcknowledgedCallback, Object);  |
+| ModuleClient#startTwin(IotHubEventCallback, Object, TwinPropertyCallback, Object); | yes | ModuleClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesCallback, Object, SubscriptionAcknowledgedCallback, Object);  |
+| ModuleClient#startTwin(IotHubEventCallback, Object, TwinPropertiesCallback, Object); | yes | ModuleClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesCallback, Object, SubscriptionAcknowledgedCallback, Object);  |
+| ModuleClient#startTwin(IotHubEventCallback, Object, PropertyCallBack<Type1, Type2>, Object); | yes | ModuleClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesCallback, Object, SubscriptionAcknowledgedCallback, Object);  |
+| ModuleClient#subscribeToDesiredProperties(Map<Property, Pair<PropertyCallBack<String, Object>, Object>>); | yes | ModuleClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesCallback, Object, SubscriptionAcknowledgedCallback, Object);  |
+| ModuleClient#subscribeToTwinDesiredProperties(Map<Property, Pair<TwinPropertyCallBack, Object>>(); | yes | ModuleClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesCallback, Object, SubscriptionAcknowledgedCallback, Object);  |
 | ModuleClient#sendReportedProperties(Set<Property>); | yes | ModuleClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesCallback, Object);  |
 | ModuleClient#sendReportedProperties(Set<Property>, int); | yes | ModuleClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesCallback, Object);  |
 | ModuleClient#sendReportedProperties(ReportedPropertiesParameters); | yes | ModuleClient#updateReportedPropertiesAsync(TwinCollection, ReportedPropertiesUpdateCorrelatingMessageCallback, Object);  |

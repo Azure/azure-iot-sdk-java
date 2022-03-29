@@ -113,7 +113,7 @@ public class TransportException extends Exception
         else if (this instanceof AmqpInternalErrorException
                 || this instanceof InternalServerErrorException)
         {
-            return new IotHubClientException(IotHubStatusCode.INTERNAL_SERVER_ERROR, "Failed to open the client due to the service encountering an internal service error", this);
+            return new IotHubClientException(IotHubStatusCode.INTERNAL_SERVER_ERROR, "Failed to open the client due to the service encountering an internal server error", this);
         }
         else if (this instanceof IotHubServiceException)
         {
