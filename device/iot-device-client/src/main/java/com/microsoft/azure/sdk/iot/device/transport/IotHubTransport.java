@@ -273,7 +273,7 @@ public class IotHubTransport implements IotHubListener
             // For instance, a message is sent by a multiplexed device client, the client is unregistered, and then the
             // client receives the acknowledgement for that sent message. Safe to ignore since the user has opted to stop
             // tracking it.
-            log.trace("A message was acknowledged by IoT Hub, but this client has already stopped tracking it ({})", message);
+            log.trace("A message was acknowledged by IoT hub, but this client has already stopped tracking it ({})", message);
         }
     }
 
@@ -1032,7 +1032,7 @@ public class IotHubTransport implements IotHubListener
             }
         }
 
-        // when a client is unregistered, remove all "waiting" and "in progress" messages that it had queued
+        // When a client is unregistered, remove all "waiting" and "in progress" messages that it had queued.
         for (IotHubTransportPacket waitingPacket : this.waitingPacketsQueue)
         {
             String deviceIdForMessage = waitingPacket.getDeviceId();
