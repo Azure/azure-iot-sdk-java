@@ -172,8 +172,7 @@ public class DeviceTwinSample
                     }
                     else
                     {
-                        IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
-                        System.out.println("Failed to subscribe to desired properties with status code " + status);
+                        System.out.println("Failed to subscribe to desired properties with status code " + exception.getStatusCode());
                         System.exit(-1);
                     }
                 },
