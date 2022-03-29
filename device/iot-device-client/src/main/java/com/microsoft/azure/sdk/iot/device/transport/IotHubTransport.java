@@ -1041,6 +1041,7 @@ public class IotHubTransport implements IotHubListener
                 if (unregisteredConfig.getDeviceId().equals(deviceIdForMessage))
                 {
                     this.waitingPacketsQueue.remove(waitingPacket);
+                    waitingPacket.setStatus(IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE);
                     this.addToCallbackQueue(waitingPacket);
                 }
             }
@@ -1055,7 +1056,9 @@ public class IotHubTransport implements IotHubListener
                 {
                     if (unregisteredConfig.getDeviceId().equals(deviceIdForMessage))
                     {
-                        this.addToCallbackQueue(this.inProgressPackets.remove(messageId));
+                        IotHubTransportPacket cancelledPacket = this.inProgressPackets.remove(messageId);
+                        cancelledPacket.setStatus(IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE);
+                        this.addToCallbackQueue(cancelledPacket);
                     }
                 }
             }
