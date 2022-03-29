@@ -76,7 +76,7 @@ class MqttDirectMethod extends Mqtt
 
         if (!isStarted)
         {
-            throwMethodsTransportException("Start device method before using send");
+            throw new TransportException("Start device method before using send");
         }
 
         if (message.getMessageType() != MessageType.DEVICE_METHODS)
@@ -109,7 +109,7 @@ class MqttDirectMethod extends Mqtt
             }
             default:
             {
-                throwMethodsTransportException("Mismatched device method operation");
+                throw new TransportException("Mismatched device method operation");
             }
         }
     }
@@ -173,12 +173,5 @@ class MqttDirectMethod extends Mqtt
 
             return message;
         }
-    }
-
-    private void throwMethodsTransportException(String message) throws TransportException
-    {
-        TransportException transportException = new TransportException(message);
-        transportException.setIotHubService(TransportException.IotHubService.METHODS);
-        throw transportException;
     }
 }

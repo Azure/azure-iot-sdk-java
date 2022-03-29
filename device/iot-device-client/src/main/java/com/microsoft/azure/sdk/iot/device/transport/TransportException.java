@@ -18,22 +18,9 @@ import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.MqttIdentifi
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.MqttServerUnavailableException;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.MqttUnauthorizedException;
 
-import static com.microsoft.azure.sdk.iot.device.transport.TransportException.IotHubService.NOT_APPLICABLE;
-
 public class TransportException extends Exception
 {
     protected boolean isRetryable = false;
-
-    public enum IotHubService
-    {
-        TWIN,
-        TELEMETRY,
-        METHODS,
-        FILE_UPLOAD,
-        NOT_APPLICABLE
-    }
-
-    private IotHubService iotHubService = NOT_APPLICABLE;
 
     public TransportException()
     {
@@ -63,16 +50,6 @@ public class TransportException extends Exception
     public void setRetryable(boolean isRetryable)
     {
         this.isRetryable = isRetryable;
-    }
-
-    public IotHubService getIotHubService()
-    {
-        return iotHubService;
-    }
-
-    public void setIotHubService(IotHubService iotHubService)
-    {
-        this.iotHubService = iotHubService;
     }
 
     public IotHubClientException toIotHubClientException()
