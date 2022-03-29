@@ -807,7 +807,7 @@ public class ModuleClientTest
     }
 
     //Tests_SRS_MODULECLIENT_34_034: [If this function encounters an exception, it shall throw a moduleClientException with that exception nested.]
-    @Test (expected = IOException.class)
+    @Test (expected = IotHubClientException.class)
     public void invokeMethodOnDeviceWrapsExceptions() throws URISyntaxException, IOException, TransportException, IotHubClientException
     {
         //arrange
@@ -869,7 +869,7 @@ public class ModuleClientTest
     }
 
     //Tests_SRS_MODULECLIENT_34_036: [If this function encounters an exception, it shall throw a moduleClientException with that exception nested.]
-    @Test (expected = IOException.class)
+    @Test (expected = IotHubClientException.class)
     public void invokeMethodOnModuleWrapsExceptions() throws URISyntaxException, IOException, TransportException, IotHubClientException
     {
         //arrange
