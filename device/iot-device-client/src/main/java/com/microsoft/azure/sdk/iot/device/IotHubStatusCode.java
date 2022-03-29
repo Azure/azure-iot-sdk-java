@@ -106,7 +106,7 @@ public enum IotHubStatusCode
                 transportException = new UnauthorizedException(statusDescription);
                 break;
             case QUOTA_EXCEEDED:
-                transportException = new TooManyDevicesException(statusDescription);
+                transportException = new QuotaExceededException(statusDescription);
                 break;
             case NOT_FOUND:
                 transportException = new HubOrDeviceIdNotFoundException(statusDescription);

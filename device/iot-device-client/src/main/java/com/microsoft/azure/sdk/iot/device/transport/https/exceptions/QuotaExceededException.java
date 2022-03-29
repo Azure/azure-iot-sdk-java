@@ -8,24 +8,24 @@ package com.microsoft.azure.sdk.iot.device.transport.https.exceptions;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubServiceException;
 
-public class TooManyDevicesException extends IotHubServiceException
+public class QuotaExceededException extends IotHubServiceException
 {
-    public TooManyDevicesException()
+    public QuotaExceededException()
     {
         super();
     }
 
-    public TooManyDevicesException(String message)
+    public QuotaExceededException(String message)
     {
         super(message);
     }
 
-    public TooManyDevicesException(String message, Throwable cause)
+    public QuotaExceededException(String message, Throwable cause)
     {
         super(message, cause);
     }
 
-    public TooManyDevicesException(Throwable cause)
+    public QuotaExceededException(Throwable cause)
     {
         super(cause);
     }
