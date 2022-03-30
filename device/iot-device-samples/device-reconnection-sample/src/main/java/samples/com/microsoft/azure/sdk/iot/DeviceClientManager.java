@@ -53,7 +53,7 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
                             System.exit(-1);
                         }
 
-                        if (newStatusReason == IotHubConnectionStatusChangeReason.EXPIRED_SAS_TOKEN)
+                        if (newStatus == IotHubConnectionStatus.DISCONNECTED && newStatusReason == IotHubConnectionStatusChangeReason.EXPIRED_SAS_TOKEN)
                         {
                             // should only happen if the user provides a shared access signature instead of a connection string.
                             // indicates that the device client is now unusable because there is no way to renew the shared
