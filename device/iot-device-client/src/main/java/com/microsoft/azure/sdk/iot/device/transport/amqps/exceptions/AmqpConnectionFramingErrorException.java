@@ -5,7 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
+import com.microsoft.azure.sdk.iot.device.transport.ProtocolException;
 
 /**
  * This exception is thrown when a amqp:connection:framing-error error is encountered over an AMQP connection

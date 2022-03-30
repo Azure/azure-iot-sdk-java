@@ -5,7 +5,7 @@ package com.microsoft.azure.sdk.iot.device.twin;
 
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 
 /**
  * Detailed state notification callback for tracking a particular
@@ -41,7 +41,7 @@ public interface GetTwinCorrelatingMessageCallback
      * @param callbackContext The context sent with the message.
      * @param e The error or exception given by the transport. If there are no errors this will be {@code null}.
      */
-    void onRequestAcknowledged(Message message, Object callbackContext, TransportException e);
+    void onRequestAcknowledged(Message message, Object callbackContext, IotHubClientException e);
 
     /**
      * Called when a response to the sent message has been sent by IoT hub and has been receieved by the transport. This response
@@ -54,7 +54,7 @@ public interface GetTwinCorrelatingMessageCallback
      * @param statusCode The status of the update reported properties call as a whole.
      * @param e The error or exception given by the transport. If there are no errors this will be {@code null}.
      */
-    void onResponseReceived(Twin twin, Message message, Object callbackContext, IotHubStatusCode statusCode, TransportException e);
+    void onResponseReceived(Twin twin, Message message, Object callbackContext, IotHubStatusCode statusCode, IotHubClientException e);
 
     /**
      * Called when a response to the message has been sent by IoT hub and has been acknowledged by the transport.

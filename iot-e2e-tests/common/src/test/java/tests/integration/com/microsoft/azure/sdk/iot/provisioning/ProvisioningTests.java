@@ -6,6 +6,7 @@
 package tests.integration.com.microsoft.azure.sdk.iot.provisioning;
 
 
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
@@ -422,7 +423,7 @@ public class ProvisioningTests extends ProvisioningCommon
         return iotHubsToReprovisionTo;
     }
 
-    private void sendReportedPropertyUpdate(String expectedReportedPropertyName, String expectedReportedPropertyValue, String iothubUri, String deviceId) throws InterruptedException, IOException, URISyntaxException, TimeoutException
+    private void sendReportedPropertyUpdate(String expectedReportedPropertyName, String expectedReportedPropertyValue, String iothubUri, String deviceId) throws InterruptedException, IOException, URISyntaxException, TimeoutException, IotHubClientException
     {
         //hardcoded AMQP here only because we aren't testing this connection. We just need to open a connection to send a twin update so that
         // we can test if the twin updates carry over after reprovisioning

@@ -5,10 +5,11 @@ package tests.integration.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
-import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.registry.DeviceStatus;
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
@@ -18,7 +19,6 @@ import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
-import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.customized.DigitalTwinGetHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.serialization.BasicDigitalTwin;
@@ -88,7 +88,7 @@ public class TokenCredentialTests
     }
 
     @Test
-    public void getDigitalTwinWithTokenCredential() throws IOException, IotHubException, URISyntaxException
+    public void getDigitalTwinWithTokenCredential() throws IOException, IotHubException, URISyntaxException, IotHubClientException
     {
         Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
 
@@ -149,43 +149,17 @@ public class TokenCredentialTests
         DeviceClient deviceClient = new DeviceClient(Tools.getDeviceConnectionString(iotHubConnectionString, device), MQTT);
         deviceClient.open(false);
         final int successStatusCode = 200;
-        final AtomicBoolean methodsSubscriptionComplete = new AtomicBoolean(false);
-        final AtomicBoolean methodsSubscribedSuccessfully = new AtomicBoolean(false);
-        deviceClient.subscribeToMethodsAsync(
+        deviceClient.subscribeToMethods(
             (methodName, methodData, context) -> new com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse(successStatusCode, "success"),
-            null,
-            (responseStatus, callbackContext) ->
-            {
-                if (responseStatus == IotHubStatusCode.OK)
-                {
-                    methodsSubscribedSuccessfully.set(true);
-                }
-
-                methodsSubscriptionComplete.set(true);
-            },
-            null
-        );
-
-        long startTime = System.currentTimeMillis();
-        while (!methodsSubscriptionComplete.get())
-        {
-            Thread.sleep(200);
-
-            if (System.currentTimeMillis() - startTime > METHOD_SUBSCRIPTION_TIMEOUT_MILLISECONDS)
-            {
-                fail("Timed out waiting for device registration to complete.");
-            }
-        }
-
-        assertTrue("Method subscription callback fired with non 200 status code", methodsSubscribedSuccessfully.get());
+            null);
 
         DirectMethodResponse result = methodServiceClient.invoke(device.getDeviceId(), "someMethod");
 
-        assertEquals((long) successStatusCode, (long) result.getStatus());
+        assertEquals(successStatusCode, (long) result.getStatus());
     }
 
     @Test
-    public void testGetDeviceTwinWithTokenCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
+    public void testGetDeviceTwinWithTokenCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException
     {
         Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
 
@@ -201,7 +175,7 @@ public class TokenCredentialTests
     }
 
     @Test
-    public void testQueryTwinWithTokenCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
+    public void testQueryTwinWithTokenCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException
     {
         Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
 

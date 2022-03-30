@@ -3,28 +3,29 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.device.exceptions;
+package com.microsoft.azure.sdk.iot.device.transport.https.exceptions;
 
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubServiceException;
 
-public class TooManyDevicesException extends IotHubServiceException
+public class BadFormatException extends IotHubServiceException
 {
-    public TooManyDevicesException()
+    public BadFormatException()
     {
         super();
     }
 
-    public TooManyDevicesException(String message)
+    public BadFormatException(String message)
     {
         super(message);
     }
 
-    public TooManyDevicesException(String message, Throwable cause)
+    public BadFormatException(String message, Throwable cause)
     {
         super(message, cause);
     }
 
-    public TooManyDevicesException(Throwable cause)
+    public BadFormatException(Throwable cause)
     {
         super(cause);
     }
@@ -32,6 +33,6 @@ public class TooManyDevicesException extends IotHubServiceException
     @Override
     public IotHubStatusCode getStatusCode()
     {
-        return IotHubStatusCode.TOO_MANY_DEVICES;
+        return IotHubStatusCode.BAD_FORMAT;
     }
 }

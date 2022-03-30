@@ -4,7 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.ModuleClient;
-import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.hsm.UnixDomainSocketChannel;
 import jnr.unixsocket.UnixSocketAddress;
 import jnr.unixsocket.UnixSocketChannel;
@@ -53,7 +53,7 @@ public class UnixDomainSocketSample
         }
     }
 
-    public static void main(String[] args) throws IOException, URISyntaxException, ModuleClientException
+    public static void main(String[] args) throws IOException, URISyntaxException, IotHubClientException
     {
         UnixDomainSocketChannel unixDomainSocketChannel = new UnixDomainSocketChannelImpl();
 

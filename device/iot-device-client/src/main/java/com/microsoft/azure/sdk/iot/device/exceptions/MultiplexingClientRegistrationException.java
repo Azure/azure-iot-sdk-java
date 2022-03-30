@@ -3,35 +3,34 @@
 
 package com.microsoft.azure.sdk.iot.device.exceptions;
 
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 /**
  * Exception that is thrown when one or more devices fail to register to an active multiplexed connection.
- * Only thrown by AMQP layer, not by MultiplexingClient layer.
  */
-public class MultiplexingDeviceUnauthorizedException extends UnauthorizedException
+public class MultiplexingClientRegistrationException extends IotHubClientException
 {
     private Map<String, Exception> registrationExceptions = new HashMap<>();
 
     /**
      * Construct a new MultiplexingClientDeviceRegistrationAuthenticationException with no nested exception and no error message.
      */
-    public MultiplexingDeviceUnauthorizedException()
+    public MultiplexingClientRegistrationException()
     {
-        super();
-        this.isRetryable = false;
+        super(IotHubStatusCode.ERROR);
     }
 
     /**
      * Construct a new MultiplexingClientDeviceRegistrationAuthenticationException with no nested exception but with an error message.
      * @param message The top level message for this exception.
      */
-    public MultiplexingDeviceUnauthorizedException(String message)
+    public MultiplexingClientRegistrationException(String message)
     {
-        super(message);
-        this.isRetryable = false;
+        super(IotHubStatusCode.ERROR, message);
     }
 
     /**
@@ -39,20 +38,18 @@ public class MultiplexingDeviceUnauthorizedException extends UnauthorizedExcepti
      * @param message The top level message for this exception.
      * @param cause The nested exception.
      */
-    public MultiplexingDeviceUnauthorizedException(String message, Throwable cause)
+    public MultiplexingClientRegistrationException(String message, Exception cause)
     {
-        super(message, cause);
-        this.isRetryable = false;
+        super(IotHubStatusCode.ERROR, message, cause);
     }
 
     /**
      * Construct a new MultiplexingClientDeviceRegistrationAuthenticationException with a nested exception but no error message.
      * @param cause The nested exception.
      */
-    public MultiplexingDeviceUnauthorizedException(Throwable cause)
+    public MultiplexingClientRegistrationException(Exception cause)
     {
-        super(cause);
-        this.isRetryable = false;
+        super(IotHubStatusCode.ERROR, "", cause);
     }
 
     /**

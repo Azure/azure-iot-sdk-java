@@ -4,7 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.ConnectionStatusChangeContext;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import java.io.IOException;
@@ -19,12 +19,12 @@ public class SendEvent
     private  static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds
     private  static final List<String> failedMessageListOnClose = new ArrayList<>(); // List of messages that failed on close
 
-    protected static class EventCallback implements IotHubEventCallback
+    protected static class EventCallback implements MessageSentCallback
     {
-        public void execute(IotHubStatusCode status, Object context)
+        public void onMessageSent(Message sentMessage, IotHubClientException exception, Object context)
         {
             Message msg = (Message) context;
-
+            IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
             System.out.println("IoT Hub responded to message "+ msg.getMessageId()  + " with status " + status.name());
 
             if (status==IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE)
@@ -82,7 +82,7 @@ public class SendEvent
      * args[2] = protocol (optional, one of 'mqtt' or 'amqps' or 'httpsnt' or 'amqps_ws')
      */
     public static void main(String[] args)
-        throws IOException, URISyntaxException
+            throws IOException, URISyntaxException, IotHubClientException
     {
         InputParameters params = new InputParameters(args);
 
@@ -141,7 +141,7 @@ public class SendEvent
                 System.out.println(msgStr);
 
                 EventCallback callback = new EventCallback();
-                client.sendEventAsync(msg, callback, msg);
+                client.sendEventAsync(msg, callback, null);
             }
             catch (Exception e)
             {

@@ -3,7 +3,9 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.device.exceptions;
+package com.microsoft.azure.sdk.iot.device.transport.https.exceptions;
+
+import com.microsoft.azure.sdk.iot.device.transport.IotHubServiceException;
 
 public class ServiceUnknownException extends IotHubServiceException
 {

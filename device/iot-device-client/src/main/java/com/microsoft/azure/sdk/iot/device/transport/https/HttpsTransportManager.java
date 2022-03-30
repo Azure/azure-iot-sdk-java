@@ -6,13 +6,11 @@ package com.microsoft.azure.sdk.iot.device.transport.https;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.edge.DirectMethodRequest;
 import com.microsoft.azure.sdk.iot.device.edge.DirectMethodResponse;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -169,36 +167,35 @@ public class HttpsTransportManager
      * @param moduleId the module id of the module to invoke the method on
      * @return the result of that request
      * @throws IOException if the IotHub cannot be reached
-     * @throws URISyntaxException if the provided deviceId and/or moduleId cannot be encoded correctly
      * @throws TransportException if any issues occur when sending the http request to its target
      */
-    public DirectMethodResponse invokeMethod(DirectMethodRequest directMethodRequest, String deviceId, String moduleId) throws IOException, URISyntaxException, TransportException
+    public DirectMethodResponse invokeMethod(DirectMethodRequest directMethodRequest, String deviceId, String moduleId) throws IOException, TransportException
     {
-        URI uri;
+        String path;
         if (moduleId == null || moduleId.isEmpty())
         {
             //Codes_SRS_HTTPSTRANSPORTMANAGER_34_017: [If a moduleId is not provided, this function shall call invokeMethod with the provided request and
             // a uri in the format twins/<device id>/methods?api-version=<api_version>.]
-            uri = getDirectMethodUri(deviceId);
+            path = getDirectMethodPath(deviceId);
         }
         else
         {
             //Codes_SRS_HTTPSTRANSPORTMANAGER_34_018: [If a moduleId is provided, this function shall call invokeMethod with the provided request and
             // a uri in the format twins/<device id>/modules/<module id>/methods?api-version=<api_version>.]
-            uri = getModuleMethodUri(deviceId, moduleId);
+            path = getModuleMethodPath(deviceId, moduleId);
         }
 
-        return this.invokeMethod(directMethodRequest, uri);
+        return this.invokeMethod(directMethodRequest, path);
     }
 
     /**
      * Invoke a direct method to the provided uri
      * @param directMethodRequest the method request to make
-     * @param uri the path to send the request to
+     * @param path the path to send the request to
      * @return the result of that request
      * @throws IOException if the IotHub cannot be reached
      */
-    private DirectMethodResponse invokeMethod(DirectMethodRequest directMethodRequest, URI uri) throws IOException, TransportException
+    private DirectMethodResponse invokeMethod(DirectMethodRequest directMethodRequest, String path) throws IOException, TransportException
     {
         if (directMethodRequest == null)
         {
@@ -206,10 +203,10 @@ public class HttpsTransportManager
             throw new IllegalArgumentException("direct method request cannot be null");
         }
 
-        if (uri == null || uri.toString().isEmpty())
+        if (path == null || path.isEmpty())
         {
             //Codes_SRS_HTTPSTRANSPORTMANAGER_34_020: [If the provided uri is null or empty, this function shall throw an IllegalArgumentException.]
-            throw new IllegalArgumentException("uri cannot be null or be an empty path");
+            throw new IllegalArgumentException("path cannot be null or be an empty path");
         }
 
         //Codes_SRS_HTTPSTRANSPORTMANAGER_34_021: [This function shall set the methodrequest json as the body of the http message.]
@@ -219,7 +216,7 @@ public class HttpsTransportManager
         message.setIotHubMethod(HttpsMethod.POST);
 
         //Codes_SRS_HTTPSTRANSPORTMANAGER_34_023: [This function shall set the http message's uri path to the provided uri path.]
-        message.setUriPath(uri.toString());
+        message.setUriPath(path);
 
         //Codes_SRS_HTTPSTRANSPORTMANAGER_34_024 [This function shall set a custom property of 'x-ms-edge-moduleId' to the value of <device id>/<module id> of the sending module/device.]
         Map<String, String> additionalHeaders = new HashMap<>();
@@ -239,16 +236,16 @@ public class HttpsTransportManager
         return new DirectMethodResponse(resultJson);
     }
 
-    private static URI getDirectMethodUri(String deviceId) throws UnsupportedEncodingException, URISyntaxException
+    private static String getDirectMethodPath(String deviceId) throws UnsupportedEncodingException
     {
         deviceId = URLEncoder.encode(deviceId, StandardCharsets.UTF_8.name());
-        return new URI(String.format(DeviceMethodUriFormat, deviceId));
+        return String.format(DeviceMethodUriFormat, deviceId);
     }
 
-    private static URI getModuleMethodUri(String deviceId, String moduleId) throws UnsupportedEncodingException, URISyntaxException
+    private static String getModuleMethodPath(String deviceId, String moduleId) throws UnsupportedEncodingException
     {
         deviceId = URLEncoder.encode(deviceId, StandardCharsets.UTF_8.name());
         moduleId = URLEncoder.encode(moduleId, StandardCharsets.UTF_8.name());
-        return new URI(String.format(ModuleMethodUriFormat, deviceId, moduleId));
+        return String.format(ModuleMethodUriFormat, deviceId, moduleId);
     }
 }

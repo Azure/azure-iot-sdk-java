@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
@@ -27,34 +27,46 @@ final class FileUpload
         httpsTransportManager.open();
     }
 
-    FileUploadSasUriResponse getFileUploadSasUri(FileUploadSasUriRequest request) throws IOException
+    FileUploadSasUriResponse getFileUploadSasUri(FileUploadSasUriRequest request) throws IotHubClientException
     {
         IotHubTransportMessage message = new IotHubTransportMessage(request.toJson());
         message.setIotHubMethod(HttpsMethod.POST);
 
-        HttpsResponse responseMessage = httpsTransportManager.getFileUploadSasUri(message);
-
-        String responseMessagePayload = validateServiceStatusCode(responseMessage, "Failed to get the file upload SAS URI");
-
-        if (responseMessagePayload == null || responseMessagePayload.isEmpty())
+        try
         {
-            throw new IOException("Sas URI response message had no payload");
-        }
+            HttpsResponse responseMessage = httpsTransportManager.getFileUploadSasUri(message);
+            String responseMessagePayload = validateServiceStatusCode(responseMessage);
 
-        return new FileUploadSasUriResponse(responseMessagePayload);
+            if (responseMessagePayload == null || responseMessagePayload.isEmpty())
+            {
+                throw new IotHubClientException(IotHubStatusCode.ERROR, "SAS URI response message had no payload");
+            }
+
+            return new FileUploadSasUriResponse(responseMessagePayload);
+        }
+        catch (IOException e)
+        {
+            throw new IotHubClientException(IotHubStatusCode.IO_ERROR, "Failed to get file upload SAS URI", e);
+        }
     }
 
-    void sendNotification(FileUploadCompletionNotification fileUploadStatusParser) throws IOException
+    void sendNotification(FileUploadCompletionNotification fileUploadStatusParser) throws IotHubClientException
     {
         IotHubTransportMessage message = new IotHubTransportMessage(fileUploadStatusParser.toJson());
         message.setIotHubMethod(HttpsMethod.POST);
 
-        HttpsResponse responseMessage = httpsTransportManager.sendFileUploadNotification(message);
-
-        validateServiceStatusCode(responseMessage, "Failed to complete the file upload notification");
+        try
+        {
+            HttpsResponse responseMessage = httpsTransportManager.sendFileUploadNotification(message);
+            validateServiceStatusCode(responseMessage);
+        }
+        catch (IOException e)
+        {
+            throw new IotHubClientException(IotHubStatusCode.IO_ERROR, "Failed to send file upload completion notification", e);
+        }
     }
 
-    private String validateServiceStatusCode(HttpsResponse responseMessage, String errorMessage) throws IOException
+    private String validateServiceStatusCode(HttpsResponse responseMessage) throws IotHubClientException
     {
         String responseMessagePayload = null;
         if (responseMessage.getBody() != null && responseMessage.getBody().length > 0)
@@ -62,15 +74,12 @@ final class FileUpload
             responseMessagePayload = new String(responseMessage.getBody(), DEFAULT_IOTHUB_MESSAGE_CHARSET);
         }
 
-        IotHubServiceException serviceException =
-            IotHubStatusCode.getConnectionStatusException(
-                IotHubStatusCode.getIotHubStatusCode(responseMessage.getStatus()),
-                responseMessagePayload);
+        IotHubStatusCode statusCode = IotHubStatusCode.getIotHubStatusCode(responseMessage.getStatus());
 
         // serviceException is only not null if the provided status code was a non-successful status code like 400, 429, 500, etc.
-        if (serviceException != null)
+        if (!IotHubStatusCode.isSuccessful(statusCode))
         {
-            throw new IOException(errorMessage, serviceException);
+            throw new IotHubClientException(statusCode, responseMessagePayload);
         }
 
         return responseMessagePayload;

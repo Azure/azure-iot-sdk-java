@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.device.FileUploadSasUriRequest;
 import com.microsoft.azure.sdk.iot.device.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 
 import java.io.File;
 import java.io.IOException;
@@ -92,7 +93,7 @@ public class FileUploadSample
         client.close();
     }
 
-    private static void uploadFileOrDirectory(DeviceClient client, String fullFileName) throws IOException, URISyntaxException {
+    private static void uploadFileOrDirectory(DeviceClient client, String fullFileName) throws IOException, URISyntaxException, IotHubClientException {
         File file = new File(fullFileName);
         if(file.isDirectory())
         {
@@ -104,7 +105,7 @@ public class FileUploadSample
         }
     }
 
-    private static void uploadFileOrDirectoryRecursive(DeviceClient client, String baseDirectory, String relativePath) throws IOException, URISyntaxException {
+    private static void uploadFileOrDirectoryRecursive(DeviceClient client, String baseDirectory, String relativePath) throws IOException, URISyntaxException, IotHubClientException {
         String[] fileNameList;
 
         File file = new File(baseDirectory, relativePath);
@@ -126,7 +127,7 @@ public class FileUploadSample
         }
     }
 
-    private static void uploadFile(DeviceClient client, String baseDirectory, String relativeFileName) throws IOException
+    private static void uploadFile(DeviceClient client, String baseDirectory, String relativeFileName) throws IOException, IotHubClientException
     {
         File file = new File(baseDirectory, relativeFileName);
 

@@ -4,7 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.ConnectionStatusChangeContext;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import org.apache.commons.codec.binary.Base64;
 
@@ -189,17 +189,17 @@ public class CustomSasTokenProviderSample
         }
     }
 
-    protected static class EventCallback implements IotHubEventCallback
+    protected static class EventCallback implements MessageSentCallback
     {
-        public void execute(IotHubStatusCode status, Object context)
+        public void onMessageSent(Message sentMessage, IotHubClientException exception,  Object context)
         {
-            Message msg = (Message) context;
+            IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
 
-            System.out.println("IoT Hub responded to message "+ msg.getMessageId()  + " with status " + status.name());
+            System.out.println("IoT Hub responded to message "+ sentMessage.getMessageId()  + " with status " + status.name());
 
             if (status == IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE)
             {
-                failedMessageListOnClose.add(msg.getMessageId());
+                failedMessageListOnClose.add(sentMessage.getMessageId());
             }
         }
     }
@@ -252,7 +252,7 @@ public class CustomSasTokenProviderSample
      * args[2] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws')
      * args[3] = path to certificate to enable one-way authentication over ssl. (Not necessary when connecting directly to Iot Hub, but required if connecting to an Edge device using a non public root CA certificate).
      */
-    public static void main(String[] args) throws IOException
+    public static void main(String[] args) throws IOException, IotHubClientException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
@@ -343,7 +343,7 @@ public class CustomSasTokenProviderSample
             System.out.println(msgStr);
 
             EventCallback callback = new EventCallback();
-            client.sendEventAsync(msg, callback, msg);
+            client.sendEventAsync(msg, callback, null);
         }
         catch (Exception e)
         {

@@ -89,10 +89,7 @@ public class ConfigurationContentParser
         if (this.modulesContent != null)
         {
             Map<String, Object> map = new HashMap<>();
-            for (Map.Entry<String, Map<String, Object>> entry: this.modulesContent.entrySet())
-            {
-                map.put(entry.getKey(), entry.getValue());
-            }
+            map.putAll(this.modulesContent);
             contentJson.add(MODULES_CONTENT_NAME, ParserUtility.mapToJsonElement(map));
         }
 

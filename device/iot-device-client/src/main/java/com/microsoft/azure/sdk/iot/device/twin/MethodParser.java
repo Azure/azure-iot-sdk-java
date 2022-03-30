@@ -20,9 +20,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import static com.microsoft.azure.sdk.iot.device.twin.ParserUtility.getJsonObjectValue;
-import static com.microsoft.azure.sdk.iot.device.twin.ParserUtility.resolveJsonElement;
-
 /**
  * Representation of a single Direct Method Access collection with a Json serializer and deserializer.
  */

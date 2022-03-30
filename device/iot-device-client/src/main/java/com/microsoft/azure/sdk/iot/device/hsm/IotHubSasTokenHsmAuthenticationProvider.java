@@ -8,7 +8,7 @@ package com.microsoft.azure.sdk.iot.device.hsm;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenWithRefreshAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.SignatureProvider;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -174,7 +174,7 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
 
             return new IotHubSasToken(host, deviceId, null, sharedAccessToken, moduleId, expiresOn);
         }
-        catch (UnsupportedEncodingException | HsmException e)
+        catch (UnsupportedEncodingException e)
         {
             throw new IOException(e);
         }

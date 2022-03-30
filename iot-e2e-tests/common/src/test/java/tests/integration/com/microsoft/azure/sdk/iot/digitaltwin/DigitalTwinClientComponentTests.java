@@ -5,6 +5,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.digitaltwin;
 
 import com.google.gson.*;
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.twin.*;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
@@ -75,7 +76,8 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
     }
 
     @Before
-    public void setUp() throws URISyntaxException, IOException, IotHubException {
+    public void setUp() throws URISyntaxException, IOException, IotHubException, IotHubClientException
+    {
         this.deviceClient = createDeviceClient(protocol);
         deviceClient.open(false);
         digitalTwinClient = DigitalTwinClient.createFromConnectionString(IOTHUB_CONNECTION_STRING);
@@ -146,7 +148,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
 
     @Test
     @StandardTierHubOnlyTest
-    public void invokeComponentLevelCommand() throws IOException, InterruptedException
+    public void invokeComponentLevelCommand() throws IOException, InterruptedException, IotHubClientException
     {
         // arrange
         String componentName = "thermostat1";
@@ -173,16 +175,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
             }
         };
 
-        final CountDownLatch subscribedToMethodsLatch = new CountDownLatch(1);
-        // IotHub event callback
-        IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) ->
-        {
-            subscribedToMethodsLatch.countDown();
-        };
-
-        deviceClient.subscribeToMethodsAsync(methodCallback, commandName, iotHubEventCallback, commandName);
-
-        assertTrue("Timed out waiting for client to subscribe to methods", subscribedToMethodsLatch.await(1, TimeUnit.MINUTES));
+        deviceClient.subscribeToMethods(methodCallback, commandName);
 
         // act
         DigitalTwinCommandResponse responseWithNoPayload = this.digitalTwinClient.invokeComponentCommand(deviceId, componentName, commandName, null);
@@ -203,7 +196,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
 
     @Test
     @StandardTierHubOnlyTest
-    public void invokeRootLevelCommand() throws IOException, InterruptedException
+    public void invokeRootLevelCommand() throws IOException, InterruptedException, IotHubClientException
     {
         // arrange
         String commandName = "reboot";
@@ -228,16 +221,8 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
             }
         };
 
-        final CountDownLatch subscribedToMethodsLatch = new CountDownLatch(1);
         // IotHub event callback
-        IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) ->
-        {
-            subscribedToMethodsLatch.countDown();
-        };
-
-        deviceClient.subscribeToMethodsAsync(methodCallback, commandName, iotHubEventCallback, commandName);
-
-        assertTrue("Timed out waiting for client to subscribe to methods", subscribedToMethodsLatch.await(1, TimeUnit.MINUTES));
+        deviceClient.subscribeToMethods(methodCallback, commandName);
 
         // act
         DigitalTwinCommandResponse responseWithNoPayload = this.digitalTwinClient.invokeCommand(deviceId, commandName, null);

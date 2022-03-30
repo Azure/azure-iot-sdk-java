@@ -7,7 +7,7 @@ package com.microsoft.azure.sdk.iot.device;
  * An interface for an IoT Hub message callback.
  * <p>
  * The developer is expected to create an implementation of this interface,
- * and the transport will call {@link MessageCallback#execute(Message, Object)}
+ * and the transport will call {@link MessageCallback#onCloudToDeviceMessageReceived(Message, Object)}
  * upon receiving a message from an IoT Hub.
  */
 public interface MessageCallback
@@ -29,5 +29,5 @@ public interface MessageCallback
      * @return whether the IoT Hub should {@link IotHubMessageResult#COMPLETE}, {@link IotHubMessageResult#ABANDON},
      * or {@link IotHubMessageResult#REJECT} the message.
      */
-    IotHubMessageResult execute(Message message, Object callbackContext);
+    IotHubMessageResult onCloudToDeviceMessageReceived(Message message, Object callbackContext);
 }

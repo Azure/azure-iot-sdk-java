@@ -4,7 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.ConnectionStatusChangeContext;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import javax.net.ssl.SSLContext;
@@ -79,7 +79,7 @@ public class SendReceiveX509
     // from IoTHub and return COMPLETE
     protected static class MessageCallbackMqtt implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
-        public IotHubMessageResult execute(Message msg, Object context)
+        public IotHubMessageResult onCloudToDeviceMessageReceived(Message msg, Object context)
         {
             Counter counter = (Counter) context;
             System.out.println(
@@ -96,16 +96,16 @@ public class SendReceiveX509
         }
     }
 
-    protected static class EventCallback implements IotHubEventCallback
+    protected static class EventCallback implements MessageSentCallback
     {
-        public void execute(IotHubStatusCode status, Object context)
+        public void onMessageSent(Message sentMessage, IotHubClientException exception,  Object context)
         {
-          Message msg = (Message) context;
-          System.out.println("IoT Hub responded to message "+ msg.getMessageId()  + " with status " + status.name());
-          if (status==IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE)
-          {
-              failedMessageListOnClose.add(msg.getMessageId());
-          }
+            IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
+            System.out.println("IoT Hub responded to message "+ sentMessage.getMessageId()  + " with status " + status.name());
+            if (status==IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE)
+            {
+                failedMessageListOnClose.add(sentMessage.getMessageId());
+            }
         }
     }
 
@@ -156,7 +156,7 @@ public class SendReceiveX509
      * args[1] = number of requests to send
      * args[2] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws')
      */
-    public static void main(String[] args) throws IOException, URISyntaxException, GeneralSecurityException
+    public static void main(String[] args) throws IOException, URISyntaxException, GeneralSecurityException, IotHubClientException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
@@ -269,7 +269,7 @@ public class SendReceiveX509
                 msg.setExpiryTime(D2C_MESSAGE_TIMEOUT);
                 System.out.println(msgStr);
                 EventCallback eventCallback = new EventCallback();
-                client.sendEventAsync(msg, eventCallback, msg);
+                client.sendEventAsync(msg, eventCallback, null);
             }
             catch (Exception e)
             {
