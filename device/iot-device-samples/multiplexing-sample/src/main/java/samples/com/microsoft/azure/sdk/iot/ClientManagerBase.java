@@ -71,7 +71,7 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
     /**
      * When client manager is being opened it first makes sure the client is in a DISCONNECTED state
      * If the client is in CONNECTING or CONNECTED state, Open will be no-op.
-     * @throws IOException if opening the connection fails due to IO problems.
+     * @throws IotHubClientException if opening the connection fails due to IO problems.
      */
     public void open() throws IotHubClientException
     {

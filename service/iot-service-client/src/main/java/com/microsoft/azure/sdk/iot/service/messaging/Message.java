@@ -163,10 +163,7 @@ public class Message
 
     public void setProperties(Map<String, String> properties)
     {
-        for (Map.Entry<String, String> entry : properties.entrySet())
-        {
-            this.properties.put(entry.getKey(), entry.getValue());
-        }
+        this.properties.putAll(properties);
     }
 
     public void clearCustomProperties()
