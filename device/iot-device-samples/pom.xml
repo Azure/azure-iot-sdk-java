@@ -38,7 +38,6 @@
         <module>pnp-device-sample</module>
         <module>custom-sas-token-provider-sample</module>
         <module>unix-domain-socket-sample</module>
-        <module>device-connection-sample</module>
     </modules>
     <dependencies>
        <dependency>
