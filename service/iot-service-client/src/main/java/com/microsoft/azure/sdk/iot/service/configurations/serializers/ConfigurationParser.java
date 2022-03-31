@@ -1,9 +1,6 @@
 package com.microsoft.azure.sdk.iot.service.configurations.serializers;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.service.ParserUtility;
@@ -99,7 +96,12 @@ public class ConfigurationParser
     @Setter
     private String eTag;
 
-    private final transient static Gson gson = new GsonBuilder().enableComplexMapKeySerialization().serializeNulls().create();
+    private final transient static Gson gson =
+            new GsonBuilder()
+                .enableComplexMapKeySerialization()
+                .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
+                .serializeNulls()
+                .create();
 
     /**
      * Empty constructor: Used only to keep GSON happy.
