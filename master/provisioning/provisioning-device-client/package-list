@@ -8,3 +8,6 @@ com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions
 com.microsoft.azure.sdk.iot.provisioning.device.internal.parser
 com.microsoft.azure.sdk.iot.provisioning.device.internal.task
 com.microsoft.azure.sdk.iot.provisioning.device.plugandplay
+com.microsoft.azure.sdk.iot.provisioning.device.transport.amqp
+com.microsoft.azure.sdk.iot.provisioning.device.transport.https
+com.microsoft.azure.sdk.iot.provisioning.device.transport.mqtt
