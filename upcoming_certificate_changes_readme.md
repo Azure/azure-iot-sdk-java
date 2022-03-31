@@ -20,7 +20,8 @@ continue to connect to the service once this transition starts:
 - Upgrade your SDK package versions to be, at minimum, those defined in [this release](https://github.com/Azure/azure-iot-sdk-java/releases/tag/lts_7_2021)
   - The packages in this release and all later releases will have both the Baltimore and the DigiCert CA roots saved in 
   the SDK, so they can connect now and will still be able to connect once this transition starts.
-- Upgrade your SDK package versions to the still-in-development 2.X.X packages that are discussed [here](https://github.com/Azure/azure-iot-sdk-java/discussions/1267) 
+  - Note that this SDK version will only function correctly while the IoT services use either the Baltimore or DigiCert CA root certificates. If the IoT service migrates to new root certificates again in the future, then this SDK version change is **not** sufficient.
+- Upgrade your SDK package versions to at least the 2.0.0 packages that are found [here](https://github.com/Azure/azure-iot-sdk-java/releases/tag/2022-3-30) 
 once they include a long term support release.
   - The packages in this planned release will no longer store any certificates in source code, and instead will read the 
   trusted certificates from your device's certificate store. With this change, the SDK will become decoupled from the service's 
@@ -33,13 +34,7 @@ as we have in the past with important bug fixes, but newer features will only be
 so users are strongly recommended to upgrade to the 2.X.X releases once they have a published long term support release.
 
 **Users who don't upgrade to the packages in [this release](https://github.com/Azure/azure-iot-sdk-java/releases/tag/lts_7_2021)
-or to the upcoming 2.X.X packages will begin experiencing unrecoverable, consistent connection failures from their devices starting June 2022.**
-
-[A preview release](https://github.com/Azure/azure-iot-sdk-java/releases/tag/2021-08-30) has been published that 
-contains a preview of the new 2.X.X clients that we plan on bringing into main in the near future. This release 
-contains many breaking changes including the changes listed above, but is substantially more future proof than the 
-1.X.X clients. Please try it out and let us know on our discussions page if you have any concerns, questions, or 
-further changes you'd like to see!
+or to the 2.X.X packages will begin experiencing unrecoverable, consistent connection failures from their devices starting June 2022.**
 
 If you need any help migrating your code to try out the new 2.X.X clients, please see this [migration guide](https://github.com/Azure/azure-iot-sdk-java/blob/preview/major%20version%20upgrade%20migration%20guide.md).
 
