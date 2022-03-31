@@ -34,8 +34,8 @@ as we have in the past with important bug fixes, but newer features will only be
 so users are strongly recommended to upgrade to the 2.X.X releases once they have a published long term support release.
 
 **Users who don't upgrade to the packages in [this release](https://github.com/Azure/azure-iot-sdk-java/releases/tag/lts_7_2021)
-or to the 2.0.0 packages will begin experiencing unrecoverable, consistent connection failures from their devices starting June 2022.**
+or to the 2.X.X packages will begin experiencing unrecoverable, consistent connection failures from their devices starting June 2022.**
 
-If you need any help migrating your code to try out the new 2.0.0 clients, please see this [migration guide](https://github.com/Azure/azure-iot-sdk-java/blob/preview/major%20version%20upgrade%20migration%20guide.md).
+If you need any help migrating your code to try out the new 2.X.X clients, please see this [migration guide](https://github.com/Azure/azure-iot-sdk-java/blob/preview/major%20version%20upgrade%20migration%20guide.md).
 
 If you have any questions, comments, or concerns about this upcoming change, please let us know on our [discussions page](https://github.com/Azure/azure-iot-sdk-java/discussions).
