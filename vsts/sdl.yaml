@@ -5,8 +5,8 @@ resources:
 
 jobs:
 ### SDL Tasks ###
-- job: SDL
-  displayName: SDL Tasks
+- job: Java SDL
+  displayName: Java SDL Tasks
 
   condition: succeeded()
   pool:
