@@ -1,12 +1,12 @@
 # Microsoft Azure IoT SDKs for Java
 
-## Preview V2 clients notice
+## 2.0.0 clients release notice
 
-[A preview release](https://github.com/Azure/azure-iot-sdk-java/releases/tag/2021-08-30) has been published that 
-contains a preview of the new 2.X.X clients that we plan on bringing into main in the near future. This release 
-contains many breaking changes, but is substantially more future proof than the 1.X.X clients. Please try it out and 
-let us know on our [discussions page](https://github.com/Azure/azure-iot-sdk-java/discussions) if you have any concerns, 
-questions, or further changes you'd like to see!
+[A 2.0.0 release](https://github.com/Azure/azure-iot-sdk-java/releases/tag/2022-3-30) has been published for each package 
+in this library. With this release, all future features will be brought only to this new major version, so users are highly
+encouraged to migrate from the 1.X.X releases to the new 2.0.0 releases. We have released 
+[one final LTS release](https://github.com/Azure/azure-iot-sdk-java/releases/tag/2022-03-04) for the 1.X.X packages that will
+be supported like any other LTS release.
 
 If you need any help migrating your code to try out the new 2.X.X clients, please see this [migration guide](./SDK%20v2%20migration%20guide.md).
 
