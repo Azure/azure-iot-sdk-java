@@ -5,7 +5,7 @@ resources:
 
 jobs:
 ### SDL Tasks ###
-- job: Java SDL
+- job: Java_SDL
   displayName: Java SDL Tasks
 
   condition: succeeded()
