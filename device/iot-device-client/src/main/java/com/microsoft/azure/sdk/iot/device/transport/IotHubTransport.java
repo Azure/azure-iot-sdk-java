@@ -839,7 +839,7 @@ public class IotHubTransport implements IotHubListener
             IotHubClientException clientException = null;
             if (status != OK)
             {
-                clientException = new IotHubClientException(status);
+                clientException = new IotHubClientException(status, "Received an unsuccessful operation error code from the service: " + status);
             }
 
             callback.onMessageSent(packet.getMessage(), clientException, context);
