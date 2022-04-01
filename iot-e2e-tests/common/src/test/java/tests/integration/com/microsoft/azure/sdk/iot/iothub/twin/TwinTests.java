@@ -425,7 +425,7 @@ public class TwinTests extends TwinCommon
     // If the user sends a reported properties update with an out of date reported properties version, the client should
     // throw a PRECONDITION_FAILED error code
     @Test
-    public void sendMultipleReportedPropertiesChecksForVersion() throws TimeoutException, InterruptedException, IOException, IotHubException, IotHubClientException
+    public void sendMultipleReportedPropertiesChecksForVersion() throws Exception
     {
         // IoT hub appears to ignore the sent version for AMQP. Probably a service bug.
         assumeFalse(testInstance.protocol == IotHubClientProtocol.AMQPS || testInstance.protocol == IotHubClientProtocol.AMQPS_WS);
