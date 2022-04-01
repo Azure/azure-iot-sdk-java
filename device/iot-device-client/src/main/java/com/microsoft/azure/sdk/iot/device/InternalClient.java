@@ -227,8 +227,10 @@ public class InternalClient
         IotHubClientException exception = iotHubClientExceptionReference.get();
         if (exception != null)
         {
-            // Rather than throw the exception as is, create a new one so the stack trace for the user points here
-            // instead of pointing to the message reading logic that the user doesn't directly call.
+            // This exception was thrown from an internal thread that the user does not directly call, so its stacktrace
+            // is not very traceable for a user. Rather than throw the exception as is, create a new one so the stacktrace
+            // the user receives points them to this synchronous method and has a nested exception with the internal thread's
+            // stacktrace that can be used for our debugging purposes.
             throw new IotHubClientException(exception.getStatusCode(), exception.getMessage(), exception);
         }
     }
@@ -299,8 +301,10 @@ public class InternalClient
         IotHubClientException exception = iotHubClientExceptionReference.get();
         if (exception != null)
         {
-            // Rather than throw the exception as is, create a new one so the stack trace for the user points here
-            // instead of pointing to the message reading logic that the user doesn't directly call.
+            // This exception was thrown from an internal thread that the user does not directly call, so its stacktrace
+            // is not very traceable for a user. Rather than throw the exception as is, create a new one so the stacktrace 
+            // the user receives points them to this synchronous method and has a nested exception with the internal thread's
+            // stacktrace that can be used for our debugging purposes.
             throw new IotHubClientException(exception.getStatusCode(), exception.getMessage(), exception);
         }
     }
@@ -367,8 +371,10 @@ public class InternalClient
         IotHubClientException exception = iotHubClientExceptionReference.get();
         if (exception != null)
         {
-            // Rather than throw the exception as is, create a new one so the stack trace for the user points here
-            // instead of pointing to the message reading logic that the user doesn't directly call.
+            // This exception was thrown from an internal thread that the user does not directly call, so its stacktrace
+            // is not very traceable for a user. Rather than throw the exception as is, create a new one so the stacktrace 
+            // the user receives points them to this synchronous method and has a nested exception with the internal thread's
+            // stacktrace that can be used for our debugging purposes.
             throw new IotHubClientException(exception.getStatusCode(), exception.getMessage(), exception);
         }
     }
@@ -437,8 +443,10 @@ public class InternalClient
         IotHubClientException exception = iotHubClientExceptionAtomicReference.get();
         if (exception != null)
         {
-            // Rather than throw the exception as is, create a new one so the stack trace for the user points here
-            // instead of pointing to the message reading logic that the user doesn't directly call.
+            // This exception was thrown from an internal thread that the user does not directly call, so its stacktrace
+            // is not very traceable for a user. Rather than throw the exception as is, create a new one so the stacktrace 
+            // the user receives points them to this synchronous method and has a nested exception with the internal thread's
+            // stacktrace that can be used for our debugging purposes.
             throw new IotHubClientException(exception.getStatusCode(), exception.getMessage(), exception);
         }
 
@@ -499,8 +507,10 @@ public class InternalClient
         IotHubClientException exception = iotHubClientExceptionReference.get();
         if (exception != null)
         {
-            // Rather than throw the exception as is, create a new one so the stack trace for the user points here
-            // instead of pointing to the message reading logic that the user doesn't directly call.
+            // This exception was thrown from an internal thread that the user does not directly call, so its stacktrace
+            // is not very traceable for a user. Rather than throw the exception as is, create a new one so the stacktrace 
+            // the user receives points them to this synchronous method and has a nested exception with the internal thread's
+            // stacktrace that can be used for our debugging purposes.
             throw new IotHubClientException(exception.getStatusCode(), exception.getMessage(), exception);
         }
 
@@ -567,8 +577,10 @@ public class InternalClient
         IotHubClientException exception = iotHubClientExceptionReference.get();
         if (exception != null)
         {
-            // Rather than throw the exception as is, create a new one so the stack trace for the user points here
-            // instead of pointing to the message reading logic that the user doesn't directly call.
+            // This exception was thrown from an internal thread that the user does not directly call, so its stacktrace
+            // is not very traceable for a user. Rather than throw the exception as is, create a new one so the stacktrace 
+            // the user receives points them to this synchronous method and has a nested exception with the internal thread's
+            // stacktrace that can be used for our debugging purposes.
             throw new IotHubClientException(exception.getStatusCode(), exception.getMessage(), exception);
         }
     }
