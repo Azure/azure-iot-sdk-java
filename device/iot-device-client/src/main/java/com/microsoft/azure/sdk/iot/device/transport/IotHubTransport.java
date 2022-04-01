@@ -316,6 +316,15 @@ public class IotHubTransport implements IotHubListener
                         {
                             clientException = e.toIotHubClientException();
                         }
+                        else
+                        {
+                            IotHubStatusCode statusCode = IotHubStatusCode.getIotHubStatusCode(Integer.parseInt(message.getStatus()));
+                            if (!IotHubStatusCode.isSuccessful(statusCode))
+                            {
+                                clientException = new IotHubClientException(statusCode, "Received an unsuccessful operation error code from the service: " + statusCode);
+                            }
+                        }
+
                         callback.onResponseReceived(message, context, clientException);
                     }
                 }
@@ -1450,15 +1459,7 @@ public class IotHubTransport implements IotHubListener
             log.warn("The device operation timeout has been exceeded for the message, so it has been abandoned ({})", packet.getMessage(), transportException);
         }
 
-        IotHubStatusCode errorCode = (transportException instanceof IotHubServiceException) ?
-                ((IotHubServiceException) transportException).getStatusCode() : IotHubStatusCode.ERROR;
-
-        if (transportException instanceof AmqpConnectionThrottledException)
-        {
-            errorCode = IotHubStatusCode.THROTTLED;
-        }
-
-        packet.setStatus(errorCode);
+        packet.setStatus(transportException.toIotHubClientException().getStatusCode());
         this.addToCallbackQueue(packet);
     }
 

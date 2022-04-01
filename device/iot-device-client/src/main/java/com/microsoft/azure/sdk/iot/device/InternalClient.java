@@ -227,7 +227,9 @@ public class InternalClient
         IotHubClientException exception = iotHubClientExceptionReference.get();
         if (exception != null)
         {
-            throw exception;
+            // Rather than throw the exception as is, create a new one so the stack trace for the user points here
+            // instead of pointing to the message reading logic that the user doesn't directly call.
+            throw new IotHubClientException(exception.getStatusCode(), exception.getMessage(), exception);
         }
     }
 
@@ -297,7 +299,9 @@ public class InternalClient
         IotHubClientException exception = iotHubClientExceptionReference.get();
         if (exception != null)
         {
-            throw exception;
+            // Rather than throw the exception as is, create a new one so the stack trace for the user points here
+            // instead of pointing to the message reading logic that the user doesn't directly call.
+            throw new IotHubClientException(exception.getStatusCode(), exception.getMessage(), exception);
         }
     }
 
@@ -363,7 +367,9 @@ public class InternalClient
         IotHubClientException exception = iotHubClientExceptionReference.get();
         if (exception != null)
         {
-            throw exception;
+            // Rather than throw the exception as is, create a new one so the stack trace for the user points here
+            // instead of pointing to the message reading logic that the user doesn't directly call.
+            throw new IotHubClientException(exception.getStatusCode(), exception.getMessage(), exception);
         }
     }
 
@@ -431,7 +437,9 @@ public class InternalClient
         IotHubClientException exception = iotHubClientExceptionAtomicReference.get();
         if (exception != null)
         {
-            throw exception;
+            // Rather than throw the exception as is, create a new one so the stack trace for the user points here
+            // instead of pointing to the message reading logic that the user doesn't directly call.
+            throw new IotHubClientException(exception.getStatusCode(), exception.getMessage(), exception);
         }
 
         return responseAtomicReference.get();
@@ -491,7 +499,9 @@ public class InternalClient
         IotHubClientException exception = iotHubClientExceptionReference.get();
         if (exception != null)
         {
-            throw exception;
+            // Rather than throw the exception as is, create a new one so the stack trace for the user points here
+            // instead of pointing to the message reading logic that the user doesn't directly call.
+            throw new IotHubClientException(exception.getStatusCode(), exception.getMessage(), exception);
         }
 
         return twinAtomicReference.get();
@@ -557,7 +567,9 @@ public class InternalClient
         IotHubClientException exception = iotHubClientExceptionReference.get();
         if (exception != null)
         {
-            throw exception;
+            // Rather than throw the exception as is, create a new one so the stack trace for the user points here
+            // instead of pointing to the message reading logic that the user doesn't directly call.
+            throw new IotHubClientException(exception.getStatusCode(), exception.getMessage(), exception);
         }
     }
 
