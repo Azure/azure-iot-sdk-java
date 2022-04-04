@@ -2603,34 +2603,6 @@ public class IotHubTransportTest
         assertEquals("handleMessageException", methodsCalled.toString());
     }
 
-    //Tests_SRS_IOTHUBTRANSPORT_34_079: [If the provided transportException is an AmqpConnectionThrottledException,
-    // this function shall set the status of the callback packet to the error code for THROTTLED.]
-    @Test
-    public void handleMessageExceptionChecksForAmqpThrottling()
-    {
-        //arrange
-        new Expectations()
-        {
-            {
-                mockedConfig.getDeviceId();
-                result = "someDeviceId";
-            }
-        };
-        final IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
-
-        //act
-        Deencapsulation.invoke(transport, "handleMessageException", new Class[] {IotHubTransportPacket.class, TransportException.class}, mockedPacket, new AmqpConnectionThrottledException());
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockedPacket.setStatus(IotHubStatusCode.THROTTLED);
-                times = 1;
-            }
-        };
-    }
-
     @Test
     public void sendMessagesChecksForExpiredMessagesInWaitingQueue()
     {

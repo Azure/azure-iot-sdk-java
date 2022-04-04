@@ -33,6 +33,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 @IotHubTest
 @StandardTierHubOnlyTest
@@ -229,7 +230,6 @@ public class TwinTests extends TwinCommon
         assertFalse(isPropertyInTwinCollection(serviceClientTwin.getReportedProperties(), reportedPropertyKey, reportedPropertyValue));
     }
 
-
     // Both updateReportedPropertiesAsync and getTwinAsync have overloads that expose a verbose state callback detailing
     // when a message is queued, sent, ack'd, etc. This test makes sure that those callbacks are all executed as expected and in order.
     @ContinuousIntegrationTest
@@ -420,5 +420,47 @@ public class TwinTests extends TwinCommon
         com.microsoft.azure.sdk.iot.service.twin.TwinCollection reportedProperties = testInstance.serviceTwin.getReportedProperties();
         assertTrue(reportedProperties.size() > 0);
         assertTrue("Did not find expected reported property key and/or value after the device reported it", isPropertyInTwinCollection(reportedProperties, reportedPropertyKey, reportedPropertyValue));
+    }
+
+    // If the user sends a reported properties update with an out of date reported properties version, the client should
+    // throw a PRECONDITION_FAILED error code
+    @Test
+    public void sendMultipleReportedPropertiesChecksForVersion() throws Exception
+    {
+        // IoT hub appears to ignore the sent version for AMQP. Probably a service bug.
+        assumeFalse(testInstance.protocol == IotHubClientProtocol.AMQPS || testInstance.protocol == IotHubClientProtocol.AMQPS_WS);
+
+        final String reportedPropertyKey1 = UUID.randomUUID().toString();
+        final String reportedPropertyValue1 = UUID.randomUUID().toString();
+
+        final String reportedPropertyKey2 = UUID.randomUUID().toString();
+        final String reportedPropertyValue2 = UUID.randomUUID().toString();
+
+        testInstance.testIdentity.getClient().subscribeToDesiredProperties(
+                (twin, context) ->
+                {
+                    // don't care about desired properties for this test. Just need to open twin links
+                },
+                null);
+
+        // send one reported property
+        Twin twin = testInstance.testIdentity.getClient().getTwin();
+        twin.getReportedProperties().put(reportedPropertyKey1, reportedPropertyValue1);
+        testInstance.testIdentity.getClient().updateReportedProperties(twin.getReportedProperties());
+
+        // send a different reported property
+        twin.getReportedProperties().clear();
+        twin.getReportedProperties().put(reportedPropertyKey2, reportedPropertyValue2);
+        twin.getReportedProperties().setVersion(0); // deliberately set an out of date reported properties twin version
+
+        try
+        {
+            testInstance.testIdentity.getClient().updateReportedProperties(twin.getReportedProperties());
+            fail("Expected a precondition failed error since an out of date reported properties version was set");
+        }
+        catch (IotHubClientException e)
+        {
+            assertEquals(IotHubStatusCode.PRECONDITION_FAILED, e.getStatusCode());
+        }
     }
 }

@@ -47,7 +47,7 @@ public class IotHubClientException extends Exception
 
     public IotHubClientException(IotHubStatusCode statusCode, String errorMessage, Exception nestedException)
     {
-        super(nestedException);
+        super(errorMessage, nestedException);
         this.isRetryable = IotHubStatusCode.isRetryable(statusCode);
         this.statusCode = statusCode;
     }
