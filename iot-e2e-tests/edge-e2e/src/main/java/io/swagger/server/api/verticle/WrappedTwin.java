@@ -4,8 +4,6 @@ import com.microsoft.azure.sdk.iot.service.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import io.vertx.core.json.JsonObject;
 
-import java.util.Set;
-
 public class WrappedTwin
 {
     final Twin twin;

@@ -6,6 +6,7 @@ package com.microsoft.azure.sdk.iot.device.twin;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,7 +17,7 @@ public final class DirectMethod
 {
     private MethodCallback methodCallback;
     private Object deviceMethodCallbackContext;
-    private final IotHubEventCallback deviceMethodStatusCallback;
+    private final MessageSentCallback deviceMethodStatusCallback;
     private final Object deviceMethodStatusCallbackContext;
     private final Object DEVICE_METHOD_LOCK = new Object();
 
@@ -33,7 +34,7 @@ public final class DirectMethod
         **Codes_SRS_DEVICEMETHOD_25_007: [**On receiving a message from IOTHub with for method invoke, the callback DeviceMethodResponseMessageCallback is triggered.**]**
          */
         @Override
-        public IotHubMessageResult execute(Message message, Object callbackContext)
+        public IotHubMessageResult onCloudToDeviceMessageReceived(Message message, Object callbackContext)
         {
             synchronized (DEVICE_METHOD_LOCK)
             {
@@ -46,7 +47,7 @@ public final class DirectMethod
                     **Codes_SRS_DEVICEMETHOD_25_009: [**If the received message is not of type DirectMethod and DEVICE_OPERATION_METHOD_RECEIVE_REQUEST then user shall be notified on the status callback registered by the user as ERROR before marking the status of the sent message as Abandon **]**
                      */
                     log.error("Unexpected message type received {}", message.getMessageType());
-                    deviceMethodStatusCallback.execute(iotHubStatus, deviceMethodStatusCallbackContext);
+                    deviceMethodStatusCallback.onMessageSent(message, IotHubStatusCode.toException(iotHubStatus), deviceMethodStatusCallbackContext);
                     return IotHubMessageResult.ABANDON;
                 }
 
@@ -96,7 +97,7 @@ public final class DirectMethod
                             {
                                 log.info("User callback did not send any data for response");
                                 result = IotHubMessageResult.REJECT;
-                                deviceMethodStatusCallback.execute(iotHubStatus, deviceMethodStatusCallbackContext);
+                                deviceMethodStatusCallback.onMessageSent(message, IotHubStatusCode.toException(iotHubStatus), deviceMethodStatusCallbackContext);
                             }
                         } catch (Exception e)
                         {
@@ -105,7 +106,7 @@ public final class DirectMethod
                             /*
                              **Codes_SRS_DEVICEMETHOD_25_014: [**If the user invoked callback failed for any reason then the user shall be notified on the status callback registered by the user as ERROR before marking the status of the sent message as Rejected.**]**
                              */
-                            deviceMethodStatusCallback.execute(iotHubStatus, deviceMethodStatusCallbackContext);
+                            deviceMethodStatusCallback.onMessageSent(message, IotHubStatusCode.toException(iotHubStatus), deviceMethodStatusCallbackContext);
                         }
                     }
                     else
@@ -123,12 +124,12 @@ public final class DirectMethod
         }
     }
 
-    private final class DirectMethodRequestMessageCallback implements IotHubEventCallback
+    private final class DirectMethodRequestMessageCallback implements MessageSentCallback
     {
         @Override
-        public void execute(IotHubStatusCode responseStatus, Object callbackContext)
+        public void onMessageSent(Message sentMessage, IotHubClientException exception, Object callbackContext)
         {
-            deviceMethodStatusCallback.execute(responseStatus, deviceMethodStatusCallbackContext);
+            deviceMethodStatusCallback.onMessageSent(sentMessage, exception, deviceMethodStatusCallbackContext);
         }
     }
 
@@ -140,7 +141,7 @@ public final class DirectMethod
      * @param client  Device client  object for this connection instance for the device. Cannot be {@code null}
      * @throws  IllegalArgumentException This exception is thrown if either deviceIO or config or deviceMethodStatusCallback are null
      */
-    public DirectMethod(InternalClient client, IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext) throws IllegalArgumentException
+    public DirectMethod(InternalClient client, SubscriptionAcknowledgedCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext) throws IllegalArgumentException
     {
         if (client == null)
         {
@@ -154,7 +155,14 @@ public final class DirectMethod
 
         this.client = client;
         this.config = client.getConfig();
-        this.deviceMethodStatusCallback = deviceMethodStatusCallback;
+        this.deviceMethodStatusCallback = new MessageSentCallback()
+        {
+            @Override
+            public void onMessageSent(Message sentMessage, IotHubClientException clientException, Object callbackContext)
+            {
+                deviceMethodStatusCallback.onSubscriptionAcknowledged(clientException, callbackContext);
+            }
+        };
         this.deviceMethodStatusCallbackContext = deviceMethodStatusCallbackContext;
         this.config.setDirectMethodsMessageCallback(new DirectMethodResponseCallback(), null);
     }

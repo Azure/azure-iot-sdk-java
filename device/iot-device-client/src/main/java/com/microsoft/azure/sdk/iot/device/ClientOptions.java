@@ -82,8 +82,8 @@ public final class ClientOptions
     private final int httpsConnectTimeout = DEFAULT_HTTPS_CONNECT_TIMEOUT_MILLISECONDS;
 
     /**
-     * This option is applicable for HTTP/AMQP/MQTT. This option specifies the time to live for all generated
-     * SAS tokens. By default, this value is 1 hour.
+     * This option specifies the time to live (in seconds) for all SAS tokens generated for this client. By default,
+     * this value is 1 hour.
      */
     @Getter
     @Builder.Default

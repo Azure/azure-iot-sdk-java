@@ -32,7 +32,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Use the ScheduledJobsClient to schedule and cancel jobs for a group of devices using IoT hub.

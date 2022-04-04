@@ -7,10 +7,8 @@ package com.microsoft.azure.sdk.iot.device.hsm;
 
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
-import com.microsoft.azure.sdk.iot.device.hsm.HsmException;
-import com.microsoft.azure.sdk.iot.device.hsm.IotHubSasTokenHsmAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.SignatureProvider;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import mockit.*;
 import org.junit.Test;
 
@@ -41,7 +39,7 @@ public class IotHubSasTokenHsmAuthenticationProviderTest
     // Tests_SRS_MODULEAUTHENTICATIONWITHHSM_34_001: [This function shall construct a sas token from the provided arguments and then return a IotHubSasTokenHsmAuthenticationProvider instance that uses that sas token.]
     // Tests_SRS_MODULEAUTHENTICATIONWITHHSM_34_003: [If the gatewayHostname is not null or empty, this function shall construct the sas token using the gateway hostname instead of the hostname.]
     @Test
-    public void staticConstructorSuccess() throws IOException, TransportException, URISyntaxException, HsmException
+    public void staticConstructorSuccess() throws IOException, TransportException, URISyntaxException
     {
         //arrange
         new MockUp<System>()
@@ -73,7 +71,7 @@ public class IotHubSasTokenHsmAuthenticationProviderTest
 
     // Codes_SRS_MODULEAUTHENTICATIONWITHHSM_34_006: [If the gatewayHostname is present, this function shall construct the sas token using the gateway hostname instead of the hostname.]
     @Test
-    public void staticConstructorSuccessWithGatewayHostname() throws IOException, TransportException, URISyntaxException, HsmException
+    public void staticConstructorSuccessWithGatewayHostname() throws IOException, TransportException, URISyntaxException
     {
         //arrange
         new MockUp<System>()
@@ -105,7 +103,7 @@ public class IotHubSasTokenHsmAuthenticationProviderTest
 
     // Tests_SRS_MODULEAUTHENTICATIONWITHHSM_34_004: [If the gatewayHostname is null or empty, this function shall construct the sas token using the hostname instead of the gateway hostname.]
     @Test
-    public void staticConstructorSuccessWithoutGatewayHostname() throws IOException, TransportException, URISyntaxException, HsmException
+    public void staticConstructorSuccessWithoutGatewayHostname() throws IOException, TransportException, URISyntaxException
     {
         //arrange
         new MockUp<System>()
@@ -138,7 +136,7 @@ public class IotHubSasTokenHsmAuthenticationProviderTest
 
     // Tests_SRS_MODULEAUTHENTICATIONWITHHSM_34_005: [This function shall create a new sas token and save it locally.]
     @Test
-    public void refreshSasTokenCreatesNewSasToken() throws TransportException, IOException, URISyntaxException, HsmException
+    public void refreshSasTokenCreatesNewSasToken() throws TransportException, IOException, URISyntaxException
     {
         //arrange
         new MockUp<System>()

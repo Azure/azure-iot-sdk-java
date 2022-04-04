@@ -114,14 +114,20 @@ public class ConfigurationsClientTests extends IntegrationTest
     {
         // Arrange
         ConfigurationsClientTestInstance testInstance = new ConfigurationsClientTestInstance();
+
+        // testing such that one configuration uses a floating point value and the other an integer so that
+        // the value is maintained as an int/float through serialization and deserialization
+        int expectedTemperatureValue = 66;
+        double expectedPressureValue = 28.02;
+
         final HashMap<String, Object> testDeviceContent = new HashMap<String, Object>()
         {
             {
                 put("properties.desired.chiller-water", new HashMap<String, Object>()
                     {
                         {
-                            put("temperature", 66);
-                            put("pressure", 28);
+                            put("temperature", expectedTemperatureValue);
+                            put("pressure", expectedPressureValue);
                         }
                     }
                 );
@@ -163,8 +169,8 @@ public class ConfigurationsClientTests extends IntegrationTest
             String[] entry = pair.split("=");
             actualMap.put(entry[0].trim(), entry[1].trim());
         }
-        assertEquals(buildExceptionMessage("", hostName), "66.0", actualMap.get("temperature"));
-        assertEquals(buildExceptionMessage("", hostName), "28.0", actualMap.get("pressure"));
+        assertEquals(buildExceptionMessage("", hostName), expectedTemperatureValue, Integer.valueOf(actualMap.get("temperature")).intValue());
+        assertEquals(buildExceptionMessage("", hostName), expectedPressureValue, Double.valueOf(actualMap.get("pressure")).doubleValue(), 0);
         assertEquals(buildExceptionMessage("", hostName), "SELECT deviceId FROM devices WHERE properties.reported.chillerWaterSettings.status=\'pending\'",
             configRetrieved.getMetrics().getQueries().get("waterSettingsPending"));
         assertEquals(buildExceptionMessage("", hostName), "properties.reported.chillerProperties.model=\'4000x\'",

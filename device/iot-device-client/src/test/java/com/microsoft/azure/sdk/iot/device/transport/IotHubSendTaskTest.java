@@ -3,7 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import mockit.Expectations;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -78,7 +77,7 @@ public class IotHubSendTaskTest
 
     // Tests_SRS_IOTHUBSENDTASK_11_005: [The function shall not crash because of an IOException thrown by the transport.]
     @Test
-    public void runDoesNotCrashFromIoException() throws DeviceClientException
+    public void runDoesNotCrashFromIoException()
     {
         new NonStrictExpectations()
         {
@@ -94,7 +93,7 @@ public class IotHubSendTaskTest
 
     // Tests_SRS_IOTHUBSENDTASK_11_008: [The function shall not crash because of any error or exception thrown by the transport.]
     @Test
-    public void runDoesNotCrashFromThrowable() throws DeviceClientException
+    public void runDoesNotCrashFromThrowable()
     {
         new NonStrictExpectations()
         {

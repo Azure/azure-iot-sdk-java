@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import org.apache.qpid.proton.engine.HandlerException;
 import org.apache.qpid.proton.reactor.Reactor;

@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.twin.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
@@ -32,7 +33,7 @@ public class InternalClientTest
     private static final Object NULL_OBJECT = null;
 
     @Mocked
-    IotHubEventCallback mockedIotHubEventCallback;
+    MessageSentCallback mockedMessageSentCallback;
 
     @Mocked
     ClientConfiguration mockConfig;
@@ -283,7 +284,7 @@ public class InternalClientTest
 
     /* Tests_SRS_INTERNALCLIENT_21_008: [The close shall close the deviceIO connection.] */
     @Test
-    public void closeClosesTransportSuccess() throws IOException, URISyntaxException
+    public void closeClosesTransportSuccess() throws IOException, URISyntaxException, IotHubClientException
     {
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
@@ -305,7 +306,7 @@ public class InternalClientTest
 
     /* Tests_SRS_INTERNALCLIENT_21_009: [If the closing a connection via deviceIO is not successful, the close shall throw IOException.] */
     @Test
-    public void closeBadCloseTransportThrows() throws IOException, URISyntaxException
+    public void closeBadCloseTransportThrows() throws IOException, URISyntaxException, IotHubClientException
     {
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
@@ -343,8 +344,8 @@ public class InternalClientTest
     @Test
     public void sendEventAsyncSendsSuccess(
             @Mocked final Message mockMessage,
-            @Mocked final IotHubEventCallback mockCallback)
-            throws IOException, URISyntaxException
+            @Mocked final MessageSentCallback mockCallback)
+            throws IOException, URISyntaxException, IotHubClientException
     {
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
@@ -370,8 +371,8 @@ public class InternalClientTest
     @Test
     public void sendEventAsyncSetsConnectionDeviceId(
             @Mocked final Message mockMessage,
-            @Mocked final IotHubEventCallback mockCallback)
-            throws IOException, URISyntaxException
+            @Mocked final MessageSentCallback mockCallback)
+            throws IOException, URISyntaxException, IotHubClientException
     {
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
@@ -406,8 +407,8 @@ public class InternalClientTest
     @Test
     public void sendEventAsyncBadSendThrows(
             @Mocked final Message mockMessage,
-            @Mocked final IotHubEventCallback mockCallback)
-            throws IOException, URISyntaxException
+            @Mocked final MessageSentCallback mockCallback)
+            throws IOException, URISyntaxException, IotHubClientException
     {
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
@@ -486,9 +487,9 @@ public class InternalClientTest
     Tests_SRS_INTERNALCLIENT_25_038: [**This method shall subscribe to device methods by calling subscribeToMethodsAsync on DirectMethod object which it created.**]**
      */
     @Test
-    public void subscribeToDeviceMethodSucceeds(@Mocked final IotHubEventCallback mockedStatusCB,
+    public void subscribeToDeviceMethodSucceeds(@Mocked final SubscriptionAcknowledgedCallback mockedStatusCB,
                                                 @Mocked final MethodCallback mockedDeviceMethodCB,
-                                                @Mocked final DirectMethod mockedMethod) throws IOException, URISyntaxException
+                                                @Mocked final DirectMethod mockedMethod) throws IOException, URISyntaxException, IotHubClientException
     {
         //arrange
         
@@ -504,8 +505,7 @@ public class InternalClientTest
         client.open(false);
 
         //act
-
-        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {MethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, mockedDeviceMethodCB, NULL_OBJECT, mockedStatusCB, NULL_OBJECT);
+        client.subscribeToMethodsAsync(mockedDeviceMethodCB, NULL_OBJECT, mockedStatusCB, NULL_OBJECT);
 
         //assert
         new Verifications()
@@ -522,7 +522,7 @@ public class InternalClientTest
     Tests_SRS_INTERNALCLIENT_25_036: [**If the client has not been open, the function shall throw an IOException.**]**
      */
     @Test (expected = IllegalStateException.class)
-    public void subscribeToDeviceMethodThrowsIfClientNotOpen(@Mocked final IotHubEventCallback mockedStatusCB,
+    public void subscribeToDeviceMethodThrowsIfClientNotOpen(@Mocked final SubscriptionAcknowledgedCallback mockedStatusCB,
                                                              @Mocked final MethodCallback mockedDeviceMethodCB)
             throws IOException, URISyntaxException
     {
@@ -539,15 +539,15 @@ public class InternalClientTest
         final InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
 
         //act
-        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {MethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, mockedDeviceMethodCB, null, mockedStatusCB, null);
+        client.subscribeToMethodsAsync(mockedDeviceMethodCB, NULL_OBJECT, mockedStatusCB, NULL_OBJECT);
     }
 
     /*
     Tests_SRS_INTERNALCLIENT_25_037: [**If deviceMethodCallback or deviceMethodStatusCallback is null, the function shall throw an IllegalArgumentException.**]**
      */
     @Test (expected = IllegalArgumentException.class)
-    public void subscribeToDeviceMethodThrowsIfDeviceMethodCallbackNull(@Mocked final IotHubEventCallback mockedStatusCB)
-            throws IOException, URISyntaxException
+    public void subscribeToDeviceMethodThrowsIfDeviceMethodCallbackNull(@Mocked final MessageSentCallback mockedStatusCB)
+            throws IOException, URISyntaxException, IotHubClientException
     {
         //arrange
         
@@ -563,12 +563,12 @@ public class InternalClientTest
         client.open(false);
 
         //act
-        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {MethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, null, null, mockedStatusCB, null);
+        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {MethodCallback.class, Object.class, MessageSentCallback.class, Object.class}, null, null, mockedStatusCB, null);
     }
 
     @Test (expected = IllegalArgumentException.class)
     public void subscribeToDeviceMethodThrowsIfDeviceMethodStatusCallbackNull(@Mocked final MethodCallback mockedDeviceMethodCB)
-            throws IOException, URISyntaxException
+            throws IOException, URISyntaxException, IotHubClientException
     {
         //arrange
         
@@ -591,9 +591,9 @@ public class InternalClientTest
     Tests_SRS_INTERNALCLIENT_25_039: [**This method shall update the deviceMethodCallback if called again, but it shall not subscribe twice.**]**
      */
     @Test
-    public void subscribeToDeviceMethodWorksEvenWhenCalledTwice(@Mocked final IotHubEventCallback mockedStatusCB,
+    public void subscribeToDeviceMethodWorksEvenWhenCalledTwice(@Mocked final SubscriptionAcknowledgedCallback mockedStatusCB,
                                                                 @Mocked final MethodCallback mockedDeviceMethodCB,
-                                                                @Mocked final DirectMethod mockedMethod) throws IOException, URISyntaxException
+                                                                @Mocked final DirectMethod mockedMethod) throws IOException, URISyntaxException, IotHubClientException
     {
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
@@ -606,10 +606,10 @@ public class InternalClientTest
         };
         final InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, ClientOptions.class}, mockIotHubConnectionString, protocol, null);
         client.open(false);
-        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {MethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, mockedDeviceMethodCB, NULL_OBJECT, mockedStatusCB, NULL_OBJECT);
+        client.subscribeToMethodsAsync(mockedDeviceMethodCB, NULL_OBJECT, mockedStatusCB, NULL_OBJECT);
 
         // act
-        Deencapsulation.invoke(client, "subscribeToMethodsAsync", new Class[] {MethodCallback.class, Object.class, IotHubEventCallback.class, Object.class}, mockedDeviceMethodCB, NULL_OBJECT, mockedStatusCB, NULL_OBJECT);
+        client.subscribeToMethodsAsync(mockedDeviceMethodCB, NULL_OBJECT, mockedStatusCB, NULL_OBJECT);
 
         // assert
         new Verifications()

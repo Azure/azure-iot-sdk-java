@@ -7,7 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
-import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesUpdateResponse;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
@@ -105,7 +105,7 @@ public class TwinCommon extends IntegrationTest
 
     protected TwinTestInstance testInstance;
 
-    public TwinCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException, InterruptedException, IotHubException, ModuleClientException, GeneralSecurityException, URISyntaxException
+    public TwinCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException
     {
         this.testInstance = new TwinTestInstance(protocol, authenticationType, clientType);
     }
@@ -125,7 +125,7 @@ public class TwinCommon extends IntegrationTest
         public Twin serviceTwin;
         public com.microsoft.azure.sdk.iot.device.twin.Twin lastDesiredPropertyUpdate;
 
-        public TwinTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException, InterruptedException
+        public TwinTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, InterruptedException
         {
             this.protocol = protocol;
             this.authenticationType = authenticationType;
@@ -139,7 +139,7 @@ public class TwinCommon extends IntegrationTest
             this.queryClient = new QueryClient(iotHubConnectionString);
         }
 
-        public void setup() throws IOException, GeneralSecurityException, IotHubException, URISyntaxException, ModuleClientException, InterruptedException
+        public void setup() throws IOException, GeneralSecurityException, IotHubException, URISyntaxException, InterruptedException, IotHubClientException
         {
             if (clientType == ClientType.DEVICE_CLIENT)
             {
@@ -186,7 +186,7 @@ public class TwinCommon extends IntegrationTest
 
     // a function that tests both reported and desired property functionality for a test instance. Can be called multiple
     // times and does not require a clean twin
-    public void testBasicTwinFlow(boolean subscribe) throws InterruptedException, IOException, IotHubException, TimeoutException
+    public void testBasicTwinFlow(boolean subscribe) throws InterruptedException, IOException, IotHubException, TimeoutException, IotHubClientException
     {
         final String desiredPropertyKey = UUID.randomUUID().toString();
         final String desiredPropertyValue = UUID.randomUUID().toString();
@@ -231,7 +231,6 @@ public class TwinCommon extends IntegrationTest
         ReportedPropertiesUpdateResponse response = testInstance.testIdentity.getClient().updateReportedProperties(twin.getReportedProperties());
 
         // the reported properties request should have been ack'd with OK from the service
-        assertEquals(IotHubStatusCode.OK, response.getStatusCode());
         assertTrue(response.getVersion() > 0);
 
         // get the twin from the service client to check if the reported property is now present

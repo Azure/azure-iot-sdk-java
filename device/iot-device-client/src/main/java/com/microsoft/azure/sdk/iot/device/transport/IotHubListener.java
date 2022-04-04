@@ -8,7 +8,6 @@
 package com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 
 /**
  * Callback interface for communicating connection and message status updates from individual protocol clients

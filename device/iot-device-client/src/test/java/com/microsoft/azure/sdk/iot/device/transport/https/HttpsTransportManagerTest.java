@@ -3,12 +3,13 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.https;
 
-import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.ClientConfiguration;
+import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.edge.DirectMethodRequest;
 import com.microsoft.azure.sdk.iot.device.edge.DirectMethodResponse;
-import com.microsoft.azure.sdk.iot.device.exceptions.HubOrDeviceIdNotFoundException;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.https.exceptions.HubOrDeviceIdNotFoundException;
 import mockit.*;
 import org.junit.Test;
 

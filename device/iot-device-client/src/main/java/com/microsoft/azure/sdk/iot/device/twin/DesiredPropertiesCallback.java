@@ -13,7 +13,7 @@ public interface DesiredPropertiesCallback
      *
      * @param twin A {@link Twin} instance containing the updated desired properties.
      * @param context The context that was provided for this callback in
-     * {@link com.microsoft.azure.sdk.iot.device.InternalClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesSubscriptionCallback, Object, DesiredPropertiesCallback, Object)}
+     * {@link com.microsoft.azure.sdk.iot.device.InternalClient#subscribeToDesiredPropertiesAsync(DesiredPropertiesCallback, Object, SubscriptionAcknowledgedCallback, Object)}
      */
     void onDesiredPropertiesUpdated(Twin twin, Object context);
 }

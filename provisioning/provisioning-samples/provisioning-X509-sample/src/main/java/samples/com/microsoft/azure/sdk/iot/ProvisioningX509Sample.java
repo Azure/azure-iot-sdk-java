@@ -4,6 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
@@ -72,12 +73,12 @@ public class ProvisioningX509Sample
         }
     }
 
-    private static class IotHubEventCallbackImpl implements IotHubEventCallback
+    private static class MessageSentCallbackImpl implements MessageSentCallback
     {
         @Override
-        public void execute(IotHubStatusCode responseStatus, Object callbackContext)
+        public void onMessageSent(Message sentMessage, IotHubClientException exception, Object callbackContext)
         {
-            System.out.println("Message received!");
+            System.out.println("Message sent!");
         }
     }
 
@@ -138,7 +139,7 @@ public class ProvisioningX509Sample
                     Message messageToSendFromDeviceToHub =  new Message("Whatever message you would like to send");
 
                     System.out.println("Sending message from device to IoT Hub...");
-                    deviceClient.sendEventAsync(messageToSendFromDeviceToHub, new IotHubEventCallbackImpl(), null);
+                    deviceClient.sendEventAsync(messageToSendFromDeviceToHub, new MessageSentCallbackImpl(), null);
                 }
                 catch (IOException e)
                 {

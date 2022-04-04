@@ -6,7 +6,6 @@
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.service.messaging.ErrorContext;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.engine.BaseHandler;
 import org.apache.qpid.proton.engine.EndpointState;

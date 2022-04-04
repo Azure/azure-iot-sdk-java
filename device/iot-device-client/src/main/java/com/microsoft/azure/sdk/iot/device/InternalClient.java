@@ -6,8 +6,7 @@
 package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.device.twin.*;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
@@ -17,7 +16,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.HTTPS;
@@ -156,9 +154,10 @@ public class InternalClient
      * it fails. Both the operation timeout set in {@link #setOperationTimeout(long)} and the retry policy set in
      * {{@link #setRetryPolicy(RetryPolicy)}} will be respected while retrying to open the connection.
      *
-     * @throws IOException if a connection to an IoT hub cannot be established.
+     * @throws IotHubClientException if a connection to an IoT hub cannot be established or if the connection can be
+     * established but the service rejects it for any reason.
      */
-    public void open(boolean withRetry) throws IOException
+    public void open(boolean withRetry) throws IotHubClientException
     {
         this.deviceIO.open(withRetry);
     }
@@ -176,14 +175,13 @@ public class InternalClient
      *
      * @param message the message to be sent.
      *
-     * @return The service's response code for this operation. If it is {@link IotHubStatusCode#OK} then the message was delivered successfully.
      * @throws InterruptedException if the operation is interrupted while waiting on the telemetry to be acknowledged by the service.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
-     * @throws TimeoutException if the service fails to acknowledge the telemetry message within the default timeout.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
      */
-    public IotHubStatusCode sendEvent(Message message) throws InterruptedException, TimeoutException
+    public void sendEvent(Message message) throws InterruptedException, IllegalStateException, IotHubClientException
     {
-        return sendEvent(message, DEFAULT_TIMEOUT_MILLISECONDS);
+        sendEvent(message, DEFAULT_TIMEOUT_MILLISECONDS);
     }
 
     /**
@@ -193,21 +191,20 @@ public class InternalClient
      * @param timeoutMilliseconds The maximum number of milliseconds to wait for the service to acknowledge this message.
      * If 0, then it will wait indefinitely.
      *
-     * @return The service's response code for this operation. If it is {@link IotHubStatusCode#OK} then the message was delivered successfully.
      * @throws InterruptedException if the operation is interrupted while waiting on the telemetry to be acknowledged by the service.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
-     * @throws TimeoutException if the service fails to acknowledge the telemetry message within the provided timeout.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
      */
-    public IotHubStatusCode sendEvent(Message message, int timeoutMilliseconds) throws InterruptedException, TimeoutException
+    public void sendEvent(Message message, int timeoutMilliseconds) throws InterruptedException, IllegalStateException, IotHubClientException
     {
         verifyRegisteredIfMultiplexing();
         message.setConnectionDeviceId(this.config.getDeviceId());
 
         final CountDownLatch latch = new CountDownLatch(1);
-        AtomicReference<IotHubStatusCode> statusCodeReference = new AtomicReference<>();
-        IotHubEventCallback eventCallback = (responseStatus, callbackContext) ->
+        AtomicReference<IotHubClientException> iotHubClientExceptionReference = new AtomicReference<>();
+        MessageSentCallback eventCallback = (sentMessage, exception, callbackContext) ->
         {
-            statusCodeReference.set(responseStatus);
+            iotHubClientExceptionReference.set(exception);
             latch.countDown();
         };
 
@@ -223,59 +220,65 @@ public class InternalClient
 
             if (timedOut)
             {
-                throw new TimeoutException("Timed out waiting for service to acknowledge telemetry");
+                throw new IotHubClientException(IotHubStatusCode.DEVICE_OPERATION_TIMED_OUT, "Timed out waiting for service to acknowledge telemetry");
             }
         }
 
-        return statusCodeReference.get();
+        IotHubClientException exception = iotHubClientExceptionReference.get();
+        if (exception != null)
+        {
+            throw exception;
+        }
     }
 
     /**
      * Synchronously sends a batch of messages to IoT hub
      *
-     * HTTPS messages will be sent in a single batch and MQTT and AMQP messages will be sent individually.
-     * In case of HTTPS, This API call is an all-or-nothing single HTTPS message and the callback will be triggered only once.
+     * This operation is only supported over HTTPS.
+     *
      * Maximum payload size for HTTPS is 255KB
      *
      * @param messages the messages to be sent.
      *
-     * @return The service's response code for this operation. If it is {@link IotHubStatusCode#OK} then the message was delivered successfully.
      * @throws InterruptedException if the operation is interrupted while waiting on the telemetry to be acknowledged by the service.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
-     * @throws TimeoutException if the service fails to acknowledge the batch telemetry message within the default timeout.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
+     * @throws UnsupportedOperationException if the client is not using HTTPS.
      */
-    public IotHubStatusCode sendEvent(List<Message> messages) throws InterruptedException, TimeoutException
+    public void sendEvents(List<Message> messages)
+            throws InterruptedException, IllegalStateException, IotHubClientException, UnsupportedOperationException
     {
-        return this.sendEvent(messages, DEFAULT_TIMEOUT_MILLISECONDS);
+        this.sendEvents(messages, DEFAULT_TIMEOUT_MILLISECONDS);
     }
 
     /**
      * Synchronously sends a batch of messages to IoT hub
      *
-     * HTTPS messages will be sent in a single batch and MQTT and AMQP messages will be sent individually.
-     * In case of HTTPS, This API call is an all-or-nothing single HTTPS message and the callback will be triggered only once.
+     * This operation is only supported over HTTPS.
+     *
      * Maximum payload size for HTTPS is 255KB
      *
      * @param messages the messages to be sent.
      * @param timeoutMilliseconds The maximum number of milliseconds to wait for the service to acknowledge this batch message.
      * If 0, then it will wait indefinitely.
      *
-     * @return The service's response code for this operation. If it is {@link IotHubStatusCode#OK} then the message was delivered successfully.
      * @throws InterruptedException if the operation is interrupted while waiting on the telemetry to be acknowledged by the service.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
-     * @throws TimeoutException if the service fails to acknowledge the batch telemetry message within the provided timeout.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
+     * @throws UnsupportedOperationException if the client is not using HTTPS.
      */
-    public IotHubStatusCode sendEvent(List<Message> messages, int timeoutMilliseconds) throws InterruptedException, TimeoutException
+    public void sendEvents(List<Message> messages, int timeoutMilliseconds)
+            throws InterruptedException, IllegalStateException, IotHubClientException, UnsupportedOperationException
     {
         final CountDownLatch latch = new CountDownLatch(1);
-        AtomicReference<IotHubStatusCode> statusCodeReference = new AtomicReference<>();
-        IotHubEventCallback eventCallback = (responseStatus, callbackContext) ->
+        AtomicReference<IotHubClientException> iotHubClientExceptionReference = new AtomicReference<>();
+        MessagesSentCallback eventCallback = (sentMessages, exception, callbackContext) ->
         {
-            statusCodeReference.set(responseStatus);
+            iotHubClientExceptionReference.set(exception);
             latch.countDown();
         };
 
-        this.sendEventAsync(messages, eventCallback, null);
+        this.sendEventsAsync(messages, eventCallback, null);
 
         if (timeoutMilliseconds == 0)
         {
@@ -287,11 +290,15 @@ public class InternalClient
 
             if (timedOut)
             {
-                throw new TimeoutException("Timed out waiting for service to acknowledge telemetry");
+                throw new IotHubClientException(IotHubStatusCode.DEVICE_OPERATION_TIMED_OUT, "Timed out waiting for service to acknowledge telemetry");
             }
         }
 
-        return statusCodeReference.get();
+        IotHubClientException exception = iotHubClientExceptionReference.get();
+        if (exception != null)
+        {
+            throw exception;
+        }
     }
 
     /**
@@ -301,16 +308,14 @@ public class InternalClient
      * @param desiredPropertiesCallback The callback to execute each time a desired property update message is received
      * from the service. This will contain one or many properties updated at once.
      * @param desiredPropertiesCallbackContext The context that will be included in the callback of desiredPropertiesCallback. May be null.
-     * @return The status code returned by the service in response to subscribing to desired properties. If this value is
-     * {@link IotHubStatusCode#OK} then the subscription was successfull. Otherwise, the subscription failed.
-     * @throws TimeoutException if the service fails to acknowledge the subscription request within the default timeout.
      * @throws InterruptedException if the operation is interrupted while waiting on the subscription request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
      */
-    public IotHubStatusCode subscribeToDesiredProperties(DesiredPropertiesCallback desiredPropertiesCallback, Object desiredPropertiesCallbackContext)
-        throws TimeoutException, InterruptedException, IllegalStateException
+    public void subscribeToDesiredProperties(DesiredPropertiesCallback desiredPropertiesCallback, Object desiredPropertiesCallbackContext)
+        throws InterruptedException, IllegalStateException, IotHubClientException
     {
-        return subscribeToDesiredProperties(desiredPropertiesCallback, desiredPropertiesCallbackContext, DEFAULT_TIMEOUT_MILLISECONDS);
+        subscribeToDesiredProperties(desiredPropertiesCallback, desiredPropertiesCallbackContext, DEFAULT_TIMEOUT_MILLISECONDS);
     }
 
     /**
@@ -322,26 +327,24 @@ public class InternalClient
      * @param desiredPropertiesCallbackContext The context that will be included in the callback of desiredPropertiesCallback. May be null.
      * @param timeoutMilliseconds The maximum number of milliseconds this call will wait for the service to acknowledge the subscription request. If 0,
      * then it will wait indefinitely.
-     * @return The status code returned by the service in response to subscribing to desired properties. If this value is
-     * {@link IotHubStatusCode#OK} then the subscription was successfull. Otherwise, the subscription failed.
-     * @throws TimeoutException if the service fails to acknowledge the subscription request within the provided timeout.
      * @throws InterruptedException if the operation is interrupted while waiting on the subscription request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
      */
-    public IotHubStatusCode subscribeToDesiredProperties(DesiredPropertiesCallback desiredPropertiesCallback, Object desiredPropertiesCallbackContext, int timeoutMilliseconds)
-        throws InterruptedException, TimeoutException, IllegalStateException
+    public void subscribeToDesiredProperties(DesiredPropertiesCallback desiredPropertiesCallback, Object desiredPropertiesCallbackContext, int timeoutMilliseconds)
+        throws InterruptedException, IllegalStateException, IotHubClientException
     {
-        AtomicReference<IotHubStatusCode> statusCodeAtomicReference = new AtomicReference<>();
+        AtomicReference<IotHubClientException> iotHubClientExceptionReference = new AtomicReference<>();
         CountDownLatch latch = new CountDownLatch(1);
         this.subscribeToDesiredPropertiesAsync(
-            (statusCode, context) ->
+            desiredPropertiesCallback,
+            desiredPropertiesCallbackContext,
+            (exception, context) ->
             {
-                statusCodeAtomicReference.set(statusCode);
+                iotHubClientExceptionReference.set(exception);
                 latch.countDown();
             },
-            null,
-            desiredPropertiesCallback,
-            desiredPropertiesCallbackContext);
+            null);
 
         if (timeoutMilliseconds == 0)
         {
@@ -353,11 +356,15 @@ public class InternalClient
 
             if (timedOut)
             {
-                throw new TimeoutException("Timed out waiting for service to acknowledge desired properties subscription request");
+                throw new IotHubClientException(IotHubStatusCode.DEVICE_OPERATION_TIMED_OUT, "Timed out waiting for service to acknowledge desired properties subscription request");
             }
         }
 
-        return statusCodeAtomicReference.get();
+        IotHubClientException exception = iotHubClientExceptionReference.get();
+        if (exception != null)
+        {
+            throw exception;
+        }
     }
 
     /**
@@ -366,14 +373,13 @@ public class InternalClient
      *
      * @param reportedProperties The reported property key/value pairs to add/update in the twin. To delete a particular
      * reported property, set the value to null.
-     * @return The status code returned by the service for this operation and the new reported properties version. If
-     * the status code value is {@link IotHubStatusCode#OK} then the patch was successful.
-     * @throws TimeoutException if the service fails to acknowledge the reported property update request within the default timeout.
+     * @return The new reported properties version.
      * @throws InterruptedException if the operation is interrupted while waiting on the reported property update request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open or if this client has not subscribed to desired properties yet.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
      */
     public ReportedPropertiesUpdateResponse updateReportedProperties(TwinCollection reportedProperties)
-        throws TimeoutException, InterruptedException, IllegalStateException
+        throws InterruptedException, IllegalStateException, IotHubClientException
     {
         return updateReportedProperties(reportedProperties, DEFAULT_TIMEOUT_MILLISECONDS);
     }
@@ -387,24 +393,23 @@ public class InternalClient
      * reported property, set the value to null.
      * @param timeoutMilliseconds The maximum number of milliseconds this call will wait for the service to acknowledge the reported properties update request. If 0,
      * then it will wait indefinitely.
-     * @return The status code returned by the service for this operation and the new reported properties version. If
-     * the status code value is {@link IotHubStatusCode#OK} then the patch was successful.
-     * @throws TimeoutException if the service fails to acknowledge the reported property update request within the provided timeout.
+     * @return The new reported properties version.
      * @throws InterruptedException if the operation is interrupted while waiting on the reported property update request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open or if this client has not subscribed to desired properties yet.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
      */
     public ReportedPropertiesUpdateResponse updateReportedProperties(TwinCollection reportedProperties, int timeoutMilliseconds)
-        throws InterruptedException, TimeoutException, IllegalStateException
+        throws InterruptedException, IllegalStateException, IotHubClientException
     {
-        AtomicReference<IotHubStatusCode> statusCodeAtomicReference = new AtomicReference<>();
-        AtomicReference<Integer> versionAtomicReference = new AtomicReference<>();
+        AtomicReference<IotHubClientException> iotHubClientExceptionAtomicReference = new AtomicReference<>();
+        AtomicReference<ReportedPropertiesUpdateResponse> responseAtomicReference = new AtomicReference<>();
         CountDownLatch latch = new CountDownLatch(1);
         this.updateReportedPropertiesAsync(
             reportedProperties,
-            (statusCode, version, e, callbackContext) ->
+            (statusCode, response, e, callbackContext) ->
             {
-                statusCodeAtomicReference.set(statusCode);
-                versionAtomicReference.set(version);
+                iotHubClientExceptionAtomicReference.set(e);
+                responseAtomicReference.set(response);
                 latch.countDown();
             },
             null);
@@ -419,22 +424,28 @@ public class InternalClient
 
             if (timedOut)
             {
-                throw new TimeoutException("Timed out waiting for service to acknowledge reported properties update");
+                throw new IotHubClientException(IotHubStatusCode.DEVICE_OPERATION_TIMED_OUT, "Timed out waiting for service to acknowledge reported properties update");
             }
         }
 
-        return new ReportedPropertiesUpdateResponse(statusCodeAtomicReference.get(), versionAtomicReference.get());
+        IotHubClientException exception = iotHubClientExceptionAtomicReference.get();
+        if (exception != null)
+        {
+            throw exception;
+        }
+
+        return responseAtomicReference.get();
     }
 
     /**
      * Get the twin for this client. This client must have subscribed to desired properties before this method can be called.
      *
      * @return The twin for this client
-     * @throws TimeoutException if the service fails to acknowledge the getTwin request within the default timeout.
      * @throws InterruptedException if the operation is interrupted while waiting on the getTwin request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open or if this client has not subscribed to desired properties yet.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
      */
-    public Twin getTwin() throws InterruptedException, TimeoutException, IllegalStateException
+    public Twin getTwin() throws InterruptedException, IllegalStateException, IotHubClientException
     {
         return getTwin(DEFAULT_TIMEOUT_MILLISECONDS);
     }
@@ -445,18 +456,20 @@ public class InternalClient
      * @param timeoutMilliseconds The maximum number of milliseconds this call will wait for the service to return the twin.
      * If 0, then it will wait indefinitely.
      * @return The twin for this client
-     * @throws TimeoutException if the service fails to acknowledge the getTwin request within the provided timeout.
      * @throws InterruptedException if the operation is interrupted while waiting on the getTwin request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open or if this client has not subscribed to desired properties yet.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
      */
-    public Twin getTwin(int timeoutMilliseconds) throws InterruptedException, TimeoutException, IllegalStateException
+    public Twin getTwin(int timeoutMilliseconds) throws InterruptedException, IllegalStateException, IotHubClientException
     {
         final CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<com.microsoft.azure.sdk.iot.device.twin.Twin> twinAtomicReference = new AtomicReference<>();
+        AtomicReference<IotHubClientException> iotHubClientExceptionReference = new AtomicReference<>();
         getTwinAsync(
-            (twin, callbackContext) ->
+            (twin, exception, callbackContext) ->
             {
                 twinAtomicReference.set(twin);
+                iotHubClientExceptionReference.set(exception);
                 latch.countDown();
             },
             null);
@@ -471,8 +484,14 @@ public class InternalClient
 
             if (timedOut)
             {
-                throw new TimeoutException("Timed out waiting for service to respond to getTwin request");
+                throw new IotHubClientException(IotHubStatusCode.DEVICE_OPERATION_TIMED_OUT, "Timed out waiting for service to respond to getTwin request");
             }
+        }
+
+        IotHubClientException exception = iotHubClientExceptionReference.get();
+        if (exception != null)
+        {
+            throw exception;
         }
 
         return twinAtomicReference.get();
@@ -484,15 +503,14 @@ public class InternalClient
      * @param methodCallback Callback on which direct methods shall be invoked. Cannot be {@code null}.
      * @param methodCallbackContext Context for device method callback. Can be {@code null}.
      *
-     * @return The service's response code for this operation. If it is {@link IotHubStatusCode#OK} then this client has subscribed successfully.
-     * @throws TimeoutException if the service fails to acknowledge the subscription request within the default timeout.
      * @throws InterruptedException if the operation is interrupted while waiting on the subscription request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
      */
-    public IotHubStatusCode subscribeToMethods(MethodCallback methodCallback, Object methodCallbackContext)
-        throws IllegalStateException, InterruptedException, TimeoutException
+    public void subscribeToMethods(MethodCallback methodCallback, Object methodCallbackContext)
+        throws IllegalStateException, InterruptedException, IotHubClientException
     {
-        return this.subscribeToMethods(methodCallback, methodCallbackContext, DEFAULT_TIMEOUT_MILLISECONDS);
+        this.subscribeToMethods(methodCallback, methodCallbackContext, DEFAULT_TIMEOUT_MILLISECONDS);
     }
 
     /**
@@ -503,25 +521,24 @@ public class InternalClient
      * @param timeoutMilliseconds The maximum number of milliseconds this call will wait for the service to return the twin.
      * If 0, then it will wait indefinitely.
      *
-     * @return The service's response code for this operation. If it is {@link IotHubStatusCode#OK} then this client has subscribed successfully.
-     * @throws TimeoutException if the service fails to acknowledge the subscription request within the provided timeout.
      * @throws InterruptedException if the operation is interrupted while waiting on the subscription request to be acknowledged by the service.
      * @throws IllegalStateException if this client is not open.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
      */
-    public IotHubStatusCode subscribeToMethods(MethodCallback methodCallback, Object methodCallbackContext, int timeoutMilliseconds)
-        throws IllegalStateException, InterruptedException, TimeoutException
+    public void subscribeToMethods(MethodCallback methodCallback, Object methodCallbackContext, int timeoutMilliseconds)
+        throws IllegalStateException, InterruptedException, IotHubClientException
     {
         final CountDownLatch latch = new CountDownLatch(1);
-        AtomicReference<IotHubStatusCode> iotHubStatusCodeAtomicReference = new AtomicReference<>();
+        AtomicReference<IotHubClientException> iotHubClientExceptionReference = new AtomicReference<>();
         subscribeToMethodsAsync(
             methodCallback,
             methodCallbackContext,
-            (responseStatus, callbackContext) ->
+            (exception, callbackContext) ->
             {
-                iotHubStatusCodeAtomicReference.set(responseStatus);
+                iotHubClientExceptionReference.set(exception);
                 latch.countDown();
             },
-    null);
+            null);
 
         if (timeoutMilliseconds == 0)
         {
@@ -533,11 +550,15 @@ public class InternalClient
 
             if (timedOut)
             {
-                throw new TimeoutException("Timed out waiting for service to respond to direct method subscription request");
+                throw new IotHubClientException(IotHubStatusCode.DEVICE_OPERATION_TIMED_OUT, "Timed out waiting for service to respond to direct method subscription request");
             }
         }
 
-        return iotHubStatusCodeAtomicReference.get();
+        IotHubClientException exception = iotHubClientExceptionReference.get();
+        if (exception != null)
+        {
+            throw exception;
+        }
     }
 
     /**
@@ -552,7 +573,7 @@ public class InternalClient
      * @throws IllegalArgumentException if the message provided is {@code null}.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
      */
-    public void sendEventAsync(Message message, IotHubEventCallback callback, Object callbackContext)
+    public void sendEventAsync(Message message, MessageSentCallback callback, Object callbackContext)
         throws IllegalStateException
     {
         verifyRegisteredIfMultiplexing();
@@ -562,8 +583,10 @@ public class InternalClient
 
     /**
      * Asynchronously sends a batch of messages to the IoT hub
-     * HTTPS messages will be sent in a single batch and MQTT and AMQP messages will be sent individually.
-     * In case of HTTPS, This API call is an all-or-nothing single HTTPS message and the callback will be triggered only once.
+     *
+     * This operation is only supported over HTTPS. This API call is an all-or-nothing single HTTPS message and the
+     * callback will be triggered once this batch message has been sent.
+     *
      * Maximum payload size for HTTPS is 255KB
      *
      * @param messages the list of message to be sent.
@@ -574,9 +597,10 @@ public class InternalClient
      *
      * @throws IllegalArgumentException if the message provided is {@code null}.
      * @throws IllegalStateException if the client has not been opened yet or is already closed.
+     * @throws UnsupportedOperationException if the client is not using HTTPS.
      */
-    public void sendEventAsync(List<Message> messages, IotHubEventCallback callback, Object callbackContext)
-        throws IllegalStateException
+    public void sendEventsAsync(List<Message> messages, MessagesSentCallback callback, Object callbackContext)
+        throws IllegalStateException, UnsupportedOperationException
     {
         verifyRegisteredIfMultiplexing();
 
@@ -585,16 +609,25 @@ public class InternalClient
             message.setConnectionDeviceId(this.config.getDeviceId());
         }
 
+        // wrap the message sent callback such that when the batch message sends, we notify the user that their list of messages have been sent
+        MessageSentCallback messageSentCallback =
+                (sentMessage, clientException, callbackContext1) -> callback.onMessagesSent(messages, clientException, callbackContext1);
+
+        if (this.config.getProtocol() != HTTPS)
+        {
+            throw new UnsupportedOperationException("Batch messaging is only supported over HTTPS");
+        }
+
         Message message = new BatchMessage(messages);
 
-        deviceIO.sendEventAsync(message, callback, callbackContext, this.config.getDeviceId());
+        deviceIO.sendEventAsync(message, messageSentCallback, callbackContext, this.config.getDeviceId());
     }
 
     /**
      * Start receiving desired property updates for this client asynchronously. After subscribing to desired properties, this client can
      * freely send reported property updates and make getTwin calls.
      *
-     * @param desiredPropertiesSubscriptionCallback The callback to execute once the service has acknowledged the subscription request.
+     * @param subscriptionAcknowledgedCallback The callback to execute once the service has acknowledged the subscription request.
      * @param desiredPropertiesSubscriptionCallbackContext The context that will be included in the callback of desiredPropertiesSubscriptionCallback. May be null.
      * @param desiredPropertiesCallback The callback to execute each time a desired property update message is received
      * from the service. This will contain one or many properties updated at once.
@@ -602,10 +635,10 @@ public class InternalClient
      * @throws IllegalStateException if this client is not open.
      */
     public void subscribeToDesiredPropertiesAsync(
-        DesiredPropertiesSubscriptionCallback desiredPropertiesSubscriptionCallback,
-        Object desiredPropertiesSubscriptionCallbackContext,
         DesiredPropertiesCallback desiredPropertiesCallback,
-        Object desiredPropertiesCallbackContext)
+        Object desiredPropertiesCallbackContext,
+        SubscriptionAcknowledgedCallback subscriptionAcknowledgedCallback,
+        Object desiredPropertiesSubscriptionCallbackContext)
             throws IllegalStateException
     {
         verifyRegisteredIfMultiplexing();
@@ -622,7 +655,7 @@ public class InternalClient
         }
 
         this.twin.subscribeToDesiredPropertiesAsync(
-            desiredPropertiesSubscriptionCallback,
+            subscriptionAcknowledgedCallback,
             desiredPropertiesSubscriptionCallbackContext,
             desiredPropertiesCallback,
             desiredPropertiesCallbackContext);
@@ -662,15 +695,15 @@ public class InternalClient
                 }
 
                 @Override
-                public void onRequestAcknowledged(Message message, Object callbackContext, TransportException e)
+                public void onRequestAcknowledged(Message message, Object callbackContext, IotHubClientException e)
                 {
                     // do nothing, user opted not to care about this event by using this API
                 }
 
                 @Override
-                public void onResponseReceived(Message message, Object callbackContext, IotHubStatusCode statusCode, int version, TransportException e)
+                public void onResponseReceived(Message message, Object callbackContext, IotHubStatusCode statusCode, ReportedPropertiesUpdateResponse response, IotHubClientException e)
                 {
-                    reportedPropertiesCallback.onReportedPropertiesUpdateAcknowledged(statusCode, version, e, callbackContext);
+                    reportedPropertiesCallback.onReportedPropertiesUpdateAcknowledged(statusCode, response, e, callbackContext);
                 }
 
                 @Override
@@ -739,20 +772,17 @@ public class InternalClient
             }
 
             @Override
-            public void onRequestAcknowledged(Message message, Object callbackContext, TransportException e)
+            public void onRequestAcknowledged(Message message, Object callbackContext, IotHubClientException e)
             {
                 // do nothing, user opted not to care about this event by using this API
             }
 
             @Override
-            public void onResponseReceived(Twin twin, Message message, Object callbackContext, IotHubStatusCode statusCode, TransportException e)
+            public void onResponseReceived(Twin twin, Message message, Object callbackContext, IotHubStatusCode statusCode, IotHubClientException e)
             {
-                if (statusCode == IotHubStatusCode.OK)
-                {
-                    log.trace("Executing twin callback for message {}", message);
-                    twinCallback.onTwinReceived(twin, callbackContext);
-                    log.trace("Twin callback returned for message {}", message);
-                }
+                log.trace("Executing twin callback for message {}", message);
+                twinCallback.onTwinReceived(twin, e, callbackContext);
+                log.trace("Twin callback returned for message {}", message);
             }
 
             @Override
@@ -807,9 +837,9 @@ public class InternalClient
     public void subscribeToMethodsAsync(
         MethodCallback methodCallback,
         Object methodCallbackContext,
-        IotHubEventCallback methodStatusCallback,
+        SubscriptionAcknowledgedCallback methodStatusCallback,
         Object methodStatusCallbackContext)
-        throws IllegalStateException
+            throws IllegalStateException
     {
         verifyRegisteredIfMultiplexing();
         verifyMethodsAreSupported();

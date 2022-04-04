@@ -13,6 +13,7 @@ import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpConnectionThrottledException;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpUnauthorizedAccessException;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsIotHubConnection;
+import com.microsoft.azure.sdk.iot.device.transport.https.exceptions.UnauthorizedException;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.MqttUnauthorizedException;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,8 @@ import javax.net.ssl.SSLContext;
 import java.util.*;
 import java.util.concurrent.*;
 
+import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.DEVICE_OPERATION_TIMED_OUT;
+import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
@@ -258,7 +261,12 @@ public class IotHubTransport implements IotHubListener
                     if (callback != null)
                     {
                         Object context = correlationCallbackContexts.get(correlationId);
-                        callback.onRequestAcknowledged(packet.getMessage(), context, e);
+                        IotHubClientException clientException = null;
+                        if (e != null)
+                        {
+                            clientException = e.toIotHubClientException();
+                        }
+                        callback.onRequestAcknowledged(packet.getMessage(), context, clientException);
                     }
                 }
 
@@ -306,7 +314,12 @@ public class IotHubTransport implements IotHubListener
                     if (callback != null)
                     {
                         Object context = correlationCallbackContexts.get(correlationId);
-                        callback.onResponseReceived(message, context, e);
+                        IotHubClientException clientException = null;
+                        if (e != null)
+                        {
+                            clientException = e.toIotHubClientException();
+                        }
+                        callback.onResponseReceived(message, context, clientException);
                     }
                 }
             }
@@ -407,7 +420,7 @@ public class IotHubTransport implements IotHubListener
      *
      * @throws TransportException if a communication channel cannot be established.
      */
-    public void open(boolean withRetry) throws TransportException
+    public void open(boolean withRetry) throws TransportException, IotHubClientException
     {
         if (this.connectionStatus == IotHubConnectionStatus.CONNECTED)
         {
@@ -670,24 +683,11 @@ public class IotHubTransport implements IotHubListener
      * @param deviceId the Id of the device that is sending this message.
      * invoked.
      */
-    public void addMessage(Message message, IotHubEventCallback callback, Object callbackContext, String deviceId)
+    public void addMessage(Message message, MessageSentCallback callback, Object callbackContext, String deviceId)
     {
         if (this.connectionStatus == IotHubConnectionStatus.DISCONNECTED)
         {
             throw new IllegalStateException("Cannot add a message when the transport is closed.");
-        }
-
-        // We will get the nested messages and queue them normally if this is a batch message but the protocol is not HTTPS
-        // Currently only HTTPS is supports batch message events.
-        if (message instanceof BatchMessage && !(this.iotHubTransportConnection instanceof HttpsIotHubConnection))
-        {
-            for (Message singleMessage : ((BatchMessage) message).getNestedMessages())
-            {
-                this.addToWaitingQueue(new IotHubTransportPacket(singleMessage, callback, callbackContext, null, System.currentTimeMillis(), deviceId));
-                log.debug("Messages were queued to be sent later ({})", singleMessage);
-            }
-
-            return;
         }
 
         IotHubTransportPacket packet = new IotHubTransportPacket(message, callback, callbackContext, null, System.currentTimeMillis(), deviceId);
@@ -825,12 +825,18 @@ public class IotHubTransport implements IotHubListener
         while (packet != null)
         {
             IotHubStatusCode status = packet.getStatus();
-            IotHubEventCallback callback = packet.getCallback();
+            MessageSentCallback callback = packet.getCallback();
             Object context = packet.getContext();
 
             log.debug("Invoking the callback function for sent message, IoT Hub responded to message ({}) with status {}", packet.getMessage(), status);
 
-            callback.execute(status, context);
+            IotHubClientException clientException = null;
+            if (status != OK)
+            {
+                clientException = new IotHubClientException(status);
+            }
+
+            callback.onMessageSent(packet.getMessage(), clientException, context);
 
             packet = this.callbackPacketsQueue.poll();
         }
@@ -844,9 +850,9 @@ public class IotHubTransport implements IotHubListener
      * </p>
      * If no message callback is set, the function will do nothing.
      *
-     * @throws DeviceClientException if the server could not be reached.
+     * @throws TransportException if the server could not be reached.
      */
-    public void handleMessage() throws DeviceClientException
+    public void handleMessage() throws TransportException
     {
         if (this.connectionStatus == IotHubConnectionStatus.CONNECTED)
         {
@@ -922,7 +928,7 @@ public class IotHubTransport implements IotHubListener
         this.multiplexingStateCallbackContext = callbackContext;
     }
 
-    public void registerMultiplexedDeviceClient(List<ClientConfiguration> configs, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
+    public void registerMultiplexedDeviceClient(List<ClientConfiguration> configs, long timeoutMilliseconds) throws InterruptedException, IotHubClientException, MultiplexingClientRegistrationException
     {
         if (getProtocol() != IotHubClientProtocol.AMQPS && getProtocol() != IotHubClientProtocol.AMQPS_WS)
         {
@@ -944,7 +950,7 @@ public class IotHubTransport implements IotHubListener
 
         // If the multiplexed connection is active, block until all the registered devices have been connected.
         long timeoutTime = System.currentTimeMillis() + timeoutMilliseconds;
-        MultiplexingClientDeviceRegistrationAuthenticationException registrationException = null;
+        MultiplexingClientRegistrationException registrationException = null;
         if (this.connectionStatus != IotHubConnectionStatus.DISCONNECTED)
         {
             for (ClientConfiguration newlyRegisteredConfig : configs)
@@ -961,7 +967,7 @@ public class IotHubTransport implements IotHubListener
                     boolean operationHasTimedOut = System.currentTimeMillis() >= timeoutTime;
                     if (operationHasTimedOut)
                     {
-                        throw new MultiplexingClientDeviceRegistrationTimeoutException("Timed out waiting for all device registrations to finish.");
+                        throw new IotHubClientException(DEVICE_OPERATION_TIMED_OUT, "Timed out waiting for all device registrations to finish.");
                     }
                 }
 
@@ -969,7 +975,7 @@ public class IotHubTransport implements IotHubListener
                 {
                     if (registrationException == null)
                     {
-                        registrationException = new MultiplexingClientDeviceRegistrationAuthenticationException("Failed to register one or more devices to the multiplexed connection.");
+                        registrationException = new MultiplexingClientRegistrationException("Failed to register one or more devices to the multiplexed connection.");
                     }
 
                     registrationException.addRegistrationException(deviceId, deviceRegistrationException);
@@ -988,7 +994,7 @@ public class IotHubTransport implements IotHubListener
         }
     }
 
-    public void unregisterMultiplexedDeviceClient(List<ClientConfiguration> configs, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
+    public void unregisterMultiplexedDeviceClient(List<ClientConfiguration> configs, long timeoutMilliseconds) throws InterruptedException, IotHubClientException
     {
         if (getProtocol() != IotHubClientProtocol.AMQPS && getProtocol() != IotHubClientProtocol.AMQPS_WS)
         {
@@ -1024,7 +1030,7 @@ public class IotHubTransport implements IotHubListener
                     boolean operationHasTimedOut = System.currentTimeMillis() >= timeoutTime;
                     if (operationHasTimedOut)
                     {
-                        throw new MultiplexingClientDeviceRegistrationTimeoutException("Timed out waiting for all device unregistrations to finish.");
+                        throw new IotHubClientException(DEVICE_OPERATION_TIMED_OUT, "Timed out waiting for all device unregistrations to finish.");
                     }
                 }
 
@@ -1123,7 +1129,7 @@ public class IotHubTransport implements IotHubListener
             try
             {
                 log.debug("Executing callback for received message ({})", receivedMessage);
-                result = messageCallback.execute(receivedMessage, messageCallbackContext);
+                result = messageCallback.onCloudToDeviceMessageReceived(receivedMessage, messageCallbackContext);
             }
             catch (Throwable ex)
             {
@@ -1365,7 +1371,7 @@ public class IotHubTransport implements IotHubListener
             log.debug("Reconnection was abandoned due to the operation timeout");
             this.close(
                     IotHubConnectionStatusChangeReason.RETRY_EXPIRED,
-                    new DeviceOperationTimeoutException("Device operation for reconnection timed out"));
+                    new IotHubClientException(DEVICE_OPERATION_TIMED_OUT, "Device operation for reconnection timed out"));
             return;
         }
 

@@ -12,8 +12,6 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.configurations.serializers.ConfigurationParser;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.registry.Module;
-import com.microsoft.azure.sdk.iot.service.registry.serializers.RegistryIdentityParser;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
@@ -343,7 +341,7 @@ public class ConfigurationsClient
 
         URL url = IotHubConnectionString.getUrlApplyConfigurationContent(this.hostName, deviceId);
 
-        HttpRequest request = createRequest(url, HttpMethod.POST, content.toConfigurationContentParser().toJson().getBytes(StandardCharsets.UTF_8));
+        HttpRequest request = createRequest(url, HttpMethod.POST, content.toConfigurationContentParser().toJsonElement().toString().getBytes(StandardCharsets.UTF_8));
 
         request.send();
     }

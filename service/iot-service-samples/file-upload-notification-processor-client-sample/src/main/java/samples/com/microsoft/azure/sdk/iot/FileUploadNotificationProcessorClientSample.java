@@ -16,8 +16,6 @@ import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationProce
 import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Scanner;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;

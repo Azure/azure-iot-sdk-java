@@ -3,9 +3,10 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.device.exceptions;
+package com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 
 /**
  * Exception class that covers all exceptions communicated from the IoT Hub that are not due to connection issues in

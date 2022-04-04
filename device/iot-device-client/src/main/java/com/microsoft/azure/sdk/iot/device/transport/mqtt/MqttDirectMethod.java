@@ -6,13 +6,12 @@ package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 import com.microsoft.azure.sdk.iot.device.twin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 
@@ -77,7 +76,7 @@ class MqttDirectMethod extends Mqtt
 
         if (!isStarted)
         {
-            throwMethodsTransportException("Start device method before using send");
+            throw new TransportException("Start device method before using send");
         }
 
         if (message.getMessageType() != MessageType.DEVICE_METHODS)
@@ -110,7 +109,7 @@ class MqttDirectMethod extends Mqtt
             }
             default:
             {
-                throwMethodsTransportException("Mismatched device method operation");
+                throw new TransportException("Mismatched device method operation");
             }
         }
     }
@@ -174,12 +173,5 @@ class MqttDirectMethod extends Mqtt
 
             return message;
         }
-    }
-
-    private void throwMethodsTransportException(String message) throws TransportException
-    {
-        TransportException transportException = new TransportException(message);
-        transportException.setIotHubService(TransportException.IotHubService.METHODS);
-        throw transportException;
     }
 }

@@ -1,5 +1,7 @@
 package tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations;
 
+import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientRegistrationException;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -8,7 +10,7 @@ import java.lang.annotation.Target;
 
 /**
  * Tests that use the {@link com.microsoft.azure.sdk.iot.device.MultiplexingClient}. This annotation adds some additional
- * logging to a test when it fails from a {@link com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationAuthenticationException}.
+ * logging to a test when it fails from a {@link MultiplexingClientRegistrationException}.
  * see {@link tests.integration.com.microsoft.azure.sdk.iot.helpers.rules.MultiplexingClientTestRule} for more details.
  */
 @Retention(RetentionPolicy.RUNTIME)

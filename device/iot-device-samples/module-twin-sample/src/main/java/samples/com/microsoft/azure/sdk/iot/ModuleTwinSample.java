@@ -4,9 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.ConnectionStatusChangeContext;
 import com.microsoft.azure.sdk.iot.device.twin.*;
-import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import java.io.IOException;
@@ -77,11 +75,10 @@ public class ModuleTwinSample
      * @param args 
      * args[0] = IoT Hub connection string
      */
-    public static void main(String[] args) throws IOException, URISyntaxException, ModuleClientException
+    public static void main(String[] args) throws IOException, URISyntaxException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
-
 
         if (args.length < 1)
         {
@@ -139,9 +136,18 @@ public class ModuleTwinSample
             System.out.println("Start device Twin and get remaining properties...");
             CountDownLatch twinInitializedLatch = new CountDownLatch(1);
             client.subscribeToDesiredPropertiesAsync(
-                (statusCode, context) ->
+                (twin, context) ->
                 {
-                    if (statusCode == OK)
+                    for (String propertyKey : twin.getDesiredProperties().keySet())
+                    {
+                        Object propertyValue = twin.getDesiredProperties().get(propertyKey);
+                        System.out.println("Received desired property update with property key " + propertyKey + " and value " + propertyValue);
+                    }
+                },
+            null,
+                (exception, context) ->
+                {
+                    if (exception != null)
                     {
                         System.out.println("Successfully subscribed to desired properties. Getting initial twin state");
 
@@ -150,27 +156,18 @@ public class ModuleTwinSample
                         // your client may have missed while not being subscribed, but the cost is that the get twin request
                         // may not provide any new twin updates while still requiring some messaging between the client and service.
                         client.getTwinAsync(
-                            (twin, getTwinContext) ->
-                            {
-                                System.out.println("Received initial twin state");
-                                System.out.println(twin.toString());
-                                twinInitializedLatch.countDown();
-                            },
-                            null);
+                                (twin, getTwinException, getTwinContext) ->
+                                {
+                                    System.out.println("Received initial twin state");
+                                    System.out.println(twin.toString());
+                                    twinInitializedLatch.countDown();
+                                },
+                                null);
                     }
                     else
                     {
-                        System.out.println("Failed to subscribe to desired properties with status code " + statusCode);
+                        System.out.println("Failed to subscribe to desired properties with status code " + exception.getStatusCode());
                         System.exit(-1);
-                    }
-                },
-                null,
-                (twin, context) ->
-                {
-                    for (String propertyKey : twin.getDesiredProperties().keySet())
-                    {
-                        Object propertyValue = twin.getDesiredProperties().get(propertyKey);
-                        System.out.println("Received desired property update with property key " + propertyKey + " and value " + propertyValue);
                     }
                 },
                 null);

@@ -5,7 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.device.auth;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;

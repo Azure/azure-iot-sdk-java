@@ -105,10 +105,7 @@ public class HttpResponse
     public Map<String, String> getHeaderFields()
     {
         Map<String, String> headerFieldsCopy = new HashMap<>();
-        for (Map.Entry<String, String> field : this.headerFields.entrySet())
-        {
-            headerFieldsCopy.put(field.getKey(), field.getValue());
-        }
+        headerFieldsCopy.putAll(this.headerFields);
 
         return headerFieldsCopy;
     }

@@ -20,15 +20,9 @@ public class AuthenticationMechanism
     /**
      * Constructor that saves a symmetric key used for SAS authentication
      * @param symmetricKey the key to use for authentication
-     * @throws IllegalArgumentException if the provided symmetricKey is null
      */
-    public AuthenticationMechanism(SymmetricKey symmetricKey) throws IllegalArgumentException
+    public AuthenticationMechanism(SymmetricKey symmetricKey)
     {
-        if (symmetricKey == null)
-        {
-            throw new IllegalArgumentException(ILLEGAL_SYMMETRIC_KEY_STRING);
-        }
-
         this.symmetricKey = symmetricKey;
         this.type = AuthenticationType.SAS;
     }
@@ -108,15 +102,9 @@ public class AuthenticationMechanism
     /**
      * Setter for symmetric key.
      * @param symmetricKey the symmetric key to set
-     * @throws IllegalArgumentException if the provided symmetricKey is null
      */
-    public void setSymmetricKey(SymmetricKey symmetricKey) throws IllegalArgumentException
+    public void setSymmetricKey(SymmetricKey symmetricKey)
     {
-        if (symmetricKey == null)
-        {
-            throw new IllegalArgumentException(ILLEGAL_SYMMETRIC_KEY_STRING);
-        }
-
         this.symmetricKey = symmetricKey;
         this.type = AuthenticationType.SAS;
     }
@@ -164,15 +152,9 @@ public class AuthenticationMechanism
     /**
      * Setter for the authentication type of this object
      * @param type the type of authentication to set
-     * @throws IllegalArgumentException if the provided type is null
      */
-    public void setAuthenticationType(AuthenticationType type) throws IllegalArgumentException
+    public void setAuthenticationType(AuthenticationType type)
     {
-        if (type == null)
-        {
-            throw new IllegalArgumentException(ILLEGAL_AUTHENTICATION_TYPE);
-        }
-
         this.type = type;
     }
 }

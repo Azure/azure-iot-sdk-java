@@ -4,7 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.ConnectionStatusChangeContext;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import java.io.IOException;
@@ -48,7 +48,7 @@ public class HandleMessages
 
     protected static class MessageCallback implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
-        public IotHubMessageResult execute(Message msg, Object context)
+        public IotHubMessageResult onCloudToDeviceMessageReceived(Message msg, Object context)
         {
             Counter counter = (Counter) context;
             System.out.println(
@@ -85,7 +85,7 @@ public class HandleMessages
     // from IoTHub and return COMPLETE
     protected static class MessageCallbackMqtt implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
-        public IotHubMessageResult execute(Message msg, Object context)
+        public IotHubMessageResult onCloudToDeviceMessageReceived(Message msg, Object context)
         {
             Counter counter = (Counter) context;
             System.out.println(
@@ -144,7 +144,7 @@ public class HandleMessages
      * args[0] = IoT Hub connection string
      * args[1] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws')
      */
-    public static void main(String[] args) throws IOException, URISyntaxException
+    public static void main(String[] args) throws IOException, URISyntaxException, IotHubClientException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");

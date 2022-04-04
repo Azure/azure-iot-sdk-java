@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.device.twin;
 
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
+
 /**
  * The callback to be executed when the service responds to a getTwin request with the current twin.
  */
@@ -14,5 +16,5 @@ public interface GetTwinCallback
      * @param context The context that was provided for this callback in
      * {@link com.microsoft.azure.sdk.iot.device.InternalClient#getTwinAsync(GetTwinCallback, Object)}.
      */
-    void onTwinReceived(Twin twin, Object context);
+    void onTwinReceived(Twin twin, IotHubClientException clientException, Object context);
 }

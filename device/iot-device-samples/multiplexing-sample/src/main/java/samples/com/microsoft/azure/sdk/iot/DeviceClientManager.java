@@ -2,6 +2,7 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
 
@@ -46,7 +47,7 @@ public class DeviceClientManager extends ClientManagerBase
      * All classes that extend ClientManagerBase should implement how their inner client can be opened.
      */
     @Override
-    protected void openClient() throws IOException
+    protected void openClient() throws IotHubClientException
     {
         deviceClient.open(true);
     }
@@ -55,7 +56,7 @@ public class DeviceClientManager extends ClientManagerBase
      * All classes that extend ClientManagerBase should implement how their inner client can be closed.
      */
     @Override
-    protected void closeClient() throws IOException
+    protected void closeClient()
     {
         deviceClient.close();
     }

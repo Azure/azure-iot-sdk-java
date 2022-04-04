@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
@@ -80,10 +81,10 @@ public class SendMessagesTests extends SendMessagesCommon
                 {
                     testInstance.identity.getClient().sendEventAsync(
                         new Message("test message"),
-                        (responseStatus, callbackContext1) ->
+                        (responseStatus, exception, callbackContext1) ->
                         {
                             ((Success) callbackContext1).setResult(true);
-                            ((Success) callbackContext1).setCallbackStatusCode(responseStatus);
+                            ((Success) callbackContext1).setCallbackStatusCode(exception == null ? IotHubStatusCode.OK : exception.getStatusCode());
                             ((Success) callbackContext1).callbackWasFired();
                         },
                         messageSent);
@@ -202,7 +203,7 @@ public class SendMessagesTests extends SendMessagesCommon
 
     @ContinuousIntegrationTest
     @Test
-    public void sendMessagesWithECCCertificate() throws GeneralSecurityException, IOException, IotHubException, URISyntaxException, InterruptedException
+    public void sendMessagesWithECCCertificate() throws GeneralSecurityException, IOException, IotHubException, URISyntaxException, InterruptedException, IotHubClientException
     {
         // test is only applicable for self-signed device clients
         Assume.assumeFalse(testInstance.authenticationType != AuthenticationType.SELF_SIGNED || testInstance.clientType != ClientType.DEVICE_CLIENT);

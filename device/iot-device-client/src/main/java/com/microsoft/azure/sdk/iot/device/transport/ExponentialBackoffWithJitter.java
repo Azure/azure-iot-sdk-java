@@ -7,7 +7,6 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.security.SecureRandom;

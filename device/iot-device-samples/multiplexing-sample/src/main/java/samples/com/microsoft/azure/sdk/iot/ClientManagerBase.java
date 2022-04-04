@@ -2,9 +2,9 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
-import com.microsoft.azure.sdk.iot.device.exceptions.DeviceOperationTimeoutException;
-import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import com.microsoft.azure.sdk.iot.device.ConnectionStatusChangeContext;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import lombok.extern.slf4j.Slf4j;
@@ -35,12 +35,12 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
     /**
      * All classes that extend ClientManagerBase should implement how their inner client can be opened.
      */
-    protected abstract void openClient() throws IOException, MultiplexingClientException;
+    protected abstract void openClient() throws IOException, IotHubClientException;
 
     /**
      * All classes that extend ClientManagerBase should implement how their inner client can be closed.
      */
-    protected abstract void closeClient() throws IOException, MultiplexingClientException;
+    protected abstract void closeClient();
 
     /**
      * All classes that extend ClientManagerBase should implement how their inner client can be identified for logging purposes.
@@ -61,30 +61,19 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
     {
         synchronized (lastKnownConnectionStatusLock)
         {
-            try
-            {
-                log.debug("Closing the client instance " + getClientId() + " ...");
-                closeClient();
-            }
-            catch (IOException | MultiplexingClientException ex)
-            {
-                log.error("Exception thrown while closing client instance " + getClientId() + " : ", ex);
-            }
-            finally
-            {
-                // Once the connection is closed, set the Status to DISCONNECTED
-                lastKnownConnectionStatus = ConnectionStatus.DISCONNECTED;
-            }
+            log.debug("Closing the client instance " + getClientId() + " ...");
+            closeClient();
+            // Once the connection is closed, set the Status to DISCONNECTED
+            lastKnownConnectionStatus = ConnectionStatus.DISCONNECTED;
         }
     }
 
     /**
      * When client manager is being opened it first makes sure the client is in a DISCONNECTED state
      * If the client is in CONNECTING or CONNECTED state, Open will be no-op.
-     * @throws IOException if opening the connection fails due to IO problems.
-     * @throws MultiplexingClientException if the multiplexed connection fails to open.
+     * @throws IotHubClientException if opening the connection fails due to IO problems.
      */
-    public void open() throws IOException, MultiplexingClientException
+    public void open() throws IotHubClientException
     {
         synchronized (lastKnownConnectionStatusLock)
         {
@@ -138,7 +127,8 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
     {
         return status == DISCONNECTED
             && statusChangeReason == RETRY_EXPIRED
-            && throwable instanceof DeviceOperationTimeoutException;
+            && throwable instanceof IotHubClientException
+            && ((IotHubClientException) throwable).getStatusCode() == IotHubStatusCode.DEVICE_OPERATION_TIMED_OUT;
     }
 
     /**
@@ -184,7 +174,7 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
                     {
                         connect();
                     }
-                    catch (IOException | MultiplexingClientException ex)
+                    catch (IotHubClientException ex)
                     {
                         log.error("Exception thrown while opening client instance: " + getClientId(), ex);
                     }
@@ -196,7 +186,7 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
     /**
      * Attempts to open the client and establish the connection.
      */
-    public void connect() throws IOException, MultiplexingClientException
+    public void connect() throws IotHubClientException
     {
         // Device client does not have retry on the initial open() call. Will need to be re-opened by the calling application
         // Lock the lastKnownConnectionStus so no other process will be able to change it while the client manager is attempting to open the connection.
@@ -238,7 +228,7 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
                     {
                         log.error("Non-retryable exception thrown while opening client instance " + getClientId() + ": ", ex);
                         lastKnownConnectionStatus = ConnectionStatus.DISCONNECTED;
-                        throw ex;
+                        throw new IotHubClientException(IotHubStatusCode.ERROR, ex);
                     }
                 }
 

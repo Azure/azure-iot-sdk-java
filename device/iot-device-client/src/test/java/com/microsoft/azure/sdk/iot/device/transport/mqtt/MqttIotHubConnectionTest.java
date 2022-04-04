@@ -5,9 +5,9 @@ package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
-import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
-import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubServiceException;
+import com.microsoft.azure.sdk.iot.device.transport.ProtocolException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.https.IotHubUri;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
