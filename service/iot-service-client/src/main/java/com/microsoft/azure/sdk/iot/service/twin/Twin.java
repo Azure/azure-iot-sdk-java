@@ -92,9 +92,23 @@ public class Twin
         }
 
         twin.getReportedProperties().setVersion(twinState.getReportedProperties().getVersion());
+        twin.getDesiredProperties().setTwinMetadata(twinState.getDesiredProperties().getTwinMetadata());
+
+        if (twinState.getDesiredProperties().getMetadataMap().size() > 0)
+        {
+            twin.getDesiredProperties().getMetadataMap().putAll(twinState.getDesiredProperties().getMetadataMap());
+        }
+
         if (twinState.getReportedProperties().size() > 0)
         {
             twin.getReportedProperties().putAll(twinState.getReportedProperties());
+        }
+
+        twin.getReportedProperties().setTwinMetadata(twinState.getReportedProperties().getTwinMetadata());
+
+        if (twinState.getReportedProperties().getMetadataMap().size() > 0)
+        {
+            twin.getReportedProperties().getMetadataMap().putAll(twinState.getReportedProperties().getMetadataMap());
         }
 
         twin.setCapabilities(twinState.getCapabilities());

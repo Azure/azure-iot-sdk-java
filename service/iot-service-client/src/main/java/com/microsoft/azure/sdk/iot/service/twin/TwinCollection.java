@@ -151,6 +151,11 @@ public class TwinCollection extends HashMap<String, Object> {
         }
     }
 
+    final Map<String, TwinMetadata> getMetadataMap()
+    {
+        return metadataMap;
+    }
+
     /**
      * Add all information in the provided Map to the TwinCollection.
      *
@@ -411,6 +416,10 @@ public class TwinCollection extends HashMap<String, Object> {
      */
     public final TwinMetadata getTwinMetadata() {
         return this.twinMetadata;
+    }
+
+    final void setTwinMetadata(TwinMetadata twinMetadata) {
+        this.twinMetadata = twinMetadata;
     }
 
     /**
