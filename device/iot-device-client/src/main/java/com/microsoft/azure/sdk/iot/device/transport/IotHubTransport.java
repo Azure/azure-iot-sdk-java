@@ -314,10 +314,15 @@ public class IotHubTransport implements IotHubListener
                         IotHubClientException clientException = null;
                         if (e != null)
                         {
+                            // This case indicates that the transport layer failed to construct a valid message out of
+                            // a message delivered by the service
                             clientException = e.toIotHubClientException();
                         }
                         else
                         {
+                            // This case indicates that the transport layer constructed a valid message out of a message
+                            // delivered by the service, but that message may contain an unsuccessful status code in cases
+                            // such as if an operation was rejected because it was badly formatted.
                             IotHubStatusCode statusCode = IotHubStatusCode.getIotHubStatusCode(Integer.parseInt(message.getStatus()));
                             if (!IotHubStatusCode.isSuccessful(statusCode))
                             {
