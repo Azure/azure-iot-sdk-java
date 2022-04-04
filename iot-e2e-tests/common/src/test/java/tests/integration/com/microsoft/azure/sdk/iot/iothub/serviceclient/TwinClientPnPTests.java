@@ -138,15 +138,17 @@ public class TwinClientPnPTests extends IntegrationTest
 
         public void setup() throws Exception {
             String TEST_UUID = UUID.randomUUID().toString();
-            Random random = new Random();
-            int TEST_VERSION = random.nextInt();
+
+            // Hardcoding the version so that the test hub doesn't accumulate PnP models over time. Each hub can only
+            // have so many models in memory and the models currently don't get deleted ever.
+            int TEST_MODEL_VERSION = 1;
 
             /* Create unique device names */
             String deviceId = "java-twinPnp-e2e-test-device".concat("-" + TEST_UUID);
             String moduleId = "java-twinPnp-e2e-test-module".concat("-" + TEST_UUID);
             String deviceX509Id = "java-twinPnp-e2e-test-device-x509".concat("-" + TEST_UUID);
             String moduleX509Id = "java-twinPnp-e2e-test-module-x509".concat("-" + TEST_UUID);
-            ModelId = "dtmi:com:test:e2e;" + TEST_VERSION;
+            ModelId = "dtmi:com:test:e2e;" + TEST_MODEL_VERSION;
 
             /* Create device on the service */
             Device device = new Device(deviceId);
