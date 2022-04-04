@@ -137,7 +137,7 @@ public class Device extends RegistryIdentity
         if (parser.getCapabilities() != null)
         {
             this.capabilities = new DeviceCapabilities();
-            capabilities.setIotEdge(parser.getCapabilities().getIotEdge());
+            this.capabilities.setIotEdge(parser.getCapabilities().getIotEdge());
         }
 
         if (parser.getStatusUpdatedTime() != null)
