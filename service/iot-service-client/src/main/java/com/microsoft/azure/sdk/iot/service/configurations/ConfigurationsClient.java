@@ -341,7 +341,7 @@ public class ConfigurationsClient
 
         URL url = IotHubConnectionString.getUrlApplyConfigurationContent(this.hostName, deviceId);
 
-        HttpRequest request = createRequest(url, HttpMethod.POST, content.toConfigurationContentParser().toJson().getBytes(StandardCharsets.UTF_8));
+        HttpRequest request = createRequest(url, HttpMethod.POST, content.toConfigurationContentParser().toJsonElement().toString().getBytes(StandardCharsets.UTF_8));
 
         request.send();
     }

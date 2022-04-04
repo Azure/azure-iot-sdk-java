@@ -43,6 +43,7 @@ public class ConfigurationContent
         ConfigurationContentParser parser = new ConfigurationContentParser();
         parser.setModulesContent(this.modulesContent);
         parser.setDeviceContent(this.deviceContent);
+        parser.setModuleContent(this.moduleContent);
         return parser;
     }
 }
