@@ -53,3 +53,10 @@
 -keep class com.microsoft.azure.sdk.iot.provisioning.service.configs.* { *; }
 -keep class com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ErrorMessageParser { *; }
 -keep class com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ErrorMessage { *; }
+
+# E2E tests and E2E test dependencies to exclude from minification
+-keep class mockit.* { *; }
+-keep class org.bouncycastle.* { *; }
+-keep class tests.integration.com.microsoft.azure.sdk.iot.* { *; }
+-keep class org.bouncycastle.* { *; }
+-keep class org.junit.* { *; }
