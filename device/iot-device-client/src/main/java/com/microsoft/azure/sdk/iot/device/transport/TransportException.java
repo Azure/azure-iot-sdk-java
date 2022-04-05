@@ -92,6 +92,10 @@ public class TransportException extends Exception
         {
             return new IotHubClientException(IotHubStatusCode.INTERNAL_SERVER_ERROR, "Failed to open the client due to the service encountering an internal server error", this);
         }
+        else if (this instanceof AmqpLinkMessageSizeExceededException)
+        {
+            return new IotHubClientException(IotHubStatusCode.REQUEST_ENTITY_TOO_LARGE, "Failed to send the request because it exceeded the IoT Hub message size limit", this);
+        }
         else if (this instanceof IotHubServiceException)
         {
             return new IotHubClientException(((IotHubServiceException) this).getStatusCode(), "", this);

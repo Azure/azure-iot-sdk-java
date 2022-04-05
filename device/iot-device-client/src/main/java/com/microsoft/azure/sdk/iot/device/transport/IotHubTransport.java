@@ -278,7 +278,10 @@ public class IotHubTransport implements IotHubListener
         }
         else
         {
-            log.warn("A message was acknowledged by IoT Hub, but this client has no record of sending it ({})", message);
+            // For instance, a message is sent by a multiplexed device client, the client is unregistered, and then the
+            // client receives the acknowledgement for that sent message. Safe to ignore since the user has opted to stop
+            // tracking it.
+            log.trace("A message was acknowledged by IoT hub, but this client has already stopped tracking it ({})", message);
         }
     }
 
@@ -314,8 +317,22 @@ public class IotHubTransport implements IotHubListener
                         IotHubClientException clientException = null;
                         if (e != null)
                         {
+                            // This case indicates that the transport layer failed to construct a valid message out of
+                            // a message delivered by the service
                             clientException = e.toIotHubClientException();
                         }
+                        else
+                        {
+                            // This case indicates that the transport layer constructed a valid message out of a message
+                            // delivered by the service, but that message may contain an unsuccessful status code in cases
+                            // such as if an operation was rejected because it was badly formatted.
+                            IotHubStatusCode statusCode = IotHubStatusCode.getIotHubStatusCode(Integer.parseInt(message.getStatus()));
+                            if (!IotHubStatusCode.isSuccessful(statusCode))
+                            {
+                                clientException = new IotHubClientException(statusCode, "Received an unsuccessful operation error code from the service: " + statusCode);
+                            }
+                        }
+
                         callback.onResponseReceived(message, context, clientException);
                     }
                 }
@@ -830,7 +847,7 @@ public class IotHubTransport implements IotHubListener
             IotHubClientException clientException = null;
             if (status != OK)
             {
-                clientException = new IotHubClientException(status);
+                clientException = new IotHubClientException(status, "Received an unsuccessful operation error code from the service: " + status);
             }
 
             callback.onMessageSent(packet.getMessage(), clientException, context);
@@ -1032,6 +1049,38 @@ public class IotHubTransport implements IotHubListener
                 }
 
                 this.multiplexedDeviceConnectionStates.remove(newlyUnregisteredConfig.getDeviceId());
+            }
+        }
+
+        // When a client is unregistered, remove all "waiting" and "in progress" messages that it had queued.
+        for (IotHubTransportPacket waitingPacket : this.waitingPacketsQueue)
+        {
+            String deviceIdForMessage = waitingPacket.getDeviceId();
+            for (ClientConfiguration unregisteredConfig : configs)
+            {
+                if (unregisteredConfig.getDeviceId().equals(deviceIdForMessage))
+                {
+                    this.waitingPacketsQueue.remove(waitingPacket);
+                    waitingPacket.setStatus(IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE);
+                    this.addToCallbackQueue(waitingPacket);
+                }
+            }
+        }
+
+        synchronized (this.inProgressMessagesLock)
+        {
+            for (String messageId : this.inProgressPackets.keySet())
+            {
+                String deviceIdForMessage = this.inProgressPackets.get(messageId).getDeviceId();
+                for (ClientConfiguration unregisteredConfig : configs)
+                {
+                    if (unregisteredConfig.getDeviceId().equals(deviceIdForMessage))
+                    {
+                        IotHubTransportPacket cancelledPacket = this.inProgressPackets.remove(messageId);
+                        cancelledPacket.setStatus(IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE);
+                        this.addToCallbackQueue(cancelledPacket);
+                    }
+                }
             }
         }
     }
@@ -1450,15 +1499,7 @@ public class IotHubTransport implements IotHubListener
             log.warn("The device operation timeout has been exceeded for the message, so it has been abandoned ({})", packet.getMessage(), transportException);
         }
 
-        IotHubStatusCode errorCode = (transportException instanceof IotHubServiceException) ?
-                ((IotHubServiceException) transportException).getStatusCode() : IotHubStatusCode.ERROR;
-
-        if (transportException instanceof AmqpConnectionThrottledException)
-        {
-            errorCode = IotHubStatusCode.THROTTLED;
-        }
-
-        packet.setStatus(errorCode);
+        packet.setStatus(transportException.toIotHubClientException().getStatusCode());
         this.addToCallbackQueue(packet);
     }
 
