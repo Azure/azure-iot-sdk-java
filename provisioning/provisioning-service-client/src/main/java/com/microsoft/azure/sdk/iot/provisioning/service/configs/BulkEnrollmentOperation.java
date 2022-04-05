@@ -120,11 +120,11 @@ public final class BulkEnrollmentOperation
     public static JsonElement toJsonElement(BulkOperationMode mode, Collection<IndividualEnrollment> individualEnrollments)
     {
         /* SRS_BULK_OPERATION_21_005: [The toJsonElement shall throw IllegalArgumentException if the provided mode is null or the collection of individualEnrollments is null or empty.] */
-        if(mode == null)
+        if (mode == null)
         {
             throw new IllegalArgumentException("mode cannot be null");
         }
-        if((individualEnrollments == null) || individualEnrollments.isEmpty())
+        if ((individualEnrollments == null) || individualEnrollments.isEmpty())
         {
             throw new IllegalArgumentException("individualEnrollments cannot be null or empty");
         }

@@ -147,7 +147,7 @@ public class TemperatureController {
         DigitalTwinInvokeCommandRequestOptions options = new DigitalTwinInvokeCommandRequestOptions();
         try {
             ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> commandResponse = client.invokeComponentCommandWithResponse(digitalTwinid, componentName, commandName, commandInput, options);
-            System.out.println("Command " + commandName + ", payload: " + prettyString(commandResponse.body().getPayload()));
+            System.out.println("Command " + commandName + ", payload: " + prettyString(commandResponse.body().getPayload(String.class)));
             System.out.println("Command " + commandName + ", status: " + commandResponse.body().getStatus());
             System.out.println("Command " + commandName + ", requestId: " + commandResponse.headers().getRequestId());
         } catch (RestException ex)
@@ -175,7 +175,7 @@ public class TemperatureController {
         try
         {
             ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> commandResponse = client.invokeCommandWithResponse(digitalTwinid, commandName, commandInput, options);
-            System.out.println("Command " + commandName + ", payload: " + commandResponse.body().getPayload());
+            System.out.println("Command " + commandName + ", payload: " + commandResponse.body().getPayload(String.class));
             System.out.println("Command " + commandName + ", status: " + commandResponse.body().getStatus());
             System.out.println("Command " + commandName + ", requestId: " + commandResponse.headers().getRequestId());
         } catch (RestException ex)

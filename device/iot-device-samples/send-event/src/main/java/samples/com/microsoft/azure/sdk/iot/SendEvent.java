@@ -4,6 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import java.io.IOException;
@@ -18,12 +19,12 @@ public class SendEvent
     private  static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds
     private  static final List<String> failedMessageListOnClose = new ArrayList<>(); // List of messages that failed on close
 
-    protected static class EventCallback implements IotHubEventCallback
+    protected static class EventCallback implements MessageSentCallback
     {
-        public void execute(IotHubStatusCode status, Object context)
+        public void onMessageSent(Message sentMessage, IotHubClientException exception, Object context)
         {
             Message msg = (Message) context;
-
+            IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
             System.out.println("IoT Hub responded to message "+ msg.getMessageId()  + " with status " + status.name());
 
             if (status==IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE)
@@ -36,8 +37,12 @@ public class SendEvent
     protected static class IotHubConnectionStatusChangeCallbackLogger implements IotHubConnectionStatusChangeCallback
     {
         @Override
-        public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+        public void onStatusChanged(ConnectionStatusChangeContext connectionStatusChangeContext)
         {
+            IotHubConnectionStatus status = connectionStatusChangeContext.getNewStatus();
+            IotHubConnectionStatusChangeReason statusChangeReason = connectionStatusChangeContext.getNewStatusReason();
+            Throwable throwable = connectionStatusChangeContext.getCause();
+
             System.out.println();
             System.out.println("CONNECTION STATUS UPDATE: " + status);
             System.out.println("CONNECTION STATUS REASON: " + statusChangeReason);
@@ -52,13 +57,13 @@ public class SendEvent
             if (status == IotHubConnectionStatus.DISCONNECTED)
             {
                 System.out.println("The connection was lost, and is not being re-established." +
-                        " Look at provided exception for how to resolve this issue." +
-                        " Cannot send messages until this issue is resolved, and you manually re-open the device client");
+                    " Look at provided exception for how to resolve this issue." +
+                    " Cannot send messages until this issue is resolved, and you manually re-open the device client");
             }
             else if (status == IotHubConnectionStatus.DISCONNECTED_RETRYING)
             {
                 System.out.println("The connection was lost, but is being re-established." +
-                        " Can still send messages, but they won't be sent until the connection is re-established");
+                    " Can still send messages, but they won't be sent until the connection is re-established");
             }
             else if (status == IotHubConnectionStatus.CONNECTED)
             {
@@ -74,11 +79,10 @@ public class SendEvent
      * @param args
      * args[0] = IoT Hub or Edge Hub connection string
      * args[1] = number of messages to send
-     * args[2] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws')
-     * args[3] = path to certificate to enable one-way authentication over ssl. (Not necessary when connecting directly to Iot Hub, but required if connecting to an Edge device using a non public root CA certificate).
+     * args[2] = protocol (optional, one of 'mqtt' or 'amqps' or 'httpsnt' or 'amqps_ws')
      */
     public static void main(String[] args)
-            throws IOException, URISyntaxException
+            throws IOException, URISyntaxException, IotHubClientException
     {
         InputParameters params = new InputParameters(args);
 
@@ -87,7 +91,6 @@ public class SendEvent
 
         String connString = params.getConnectionString();
         int numRequests;
-        String pathToCertificate;
         try
         {
             numRequests = Integer.parseInt(params.getNumberOfRequests());
@@ -95,8 +98,8 @@ public class SendEvent
         catch (NumberFormatException e)
         {
             System.out.format(
-                    "Could not parse the number of requests to send. "
-                            + "Expected an int but received: [" + params.getNumberOfRequests() + "]");
+                "Could not parse the number of requests to send. "
+                    + "Expected an int but received: [" + params.getNumberOfRequests() + "]");
             return;
         }
 
@@ -108,22 +111,11 @@ public class SendEvent
 
         DeviceClient client = new DeviceClient(connString, protocol);
 
-        pathToCertificate = params.getPathCert();
-        if (pathToCertificate != null )
-        {
-            client.setOption("SetCertificatePath", pathToCertificate );
-        }
-
         System.out.println("Successfully created an IoT Hub client.");
 
-        // Set your token expiry time limit here
-        long time = 2400;
-        client.setOption("SetSASTokenExpiryTime", time);
-        System.out.println("Updated token expiry time to " + time);
+        client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
-        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
-
-        client.open();
+        client.open(false);
 
         System.out.println("Opened connection to IoT Hub.");
         System.out.println("Sending the following event messages:");
@@ -142,14 +134,14 @@ public class SendEvent
             try
             {
                 Message msg = new Message(msgStr);
-                msg.setContentTypeFinal("application/json");
+                msg.setContentType("application/json");
                 msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
                 msg.setMessageId(java.util.UUID.randomUUID().toString());
                 msg.setExpiryTime(D2C_MESSAGE_TIMEOUT);
                 System.out.println(msgStr);
 
                 EventCallback callback = new EventCallback();
-                client.sendEventAsync(msg, callback, msg);
+                client.sendEventAsync(msg, callback, null);
             }
             catch (Exception e)
             {
@@ -171,7 +163,7 @@ public class SendEvent
 
         // close the connection
         System.out.println("Closing");
-        client.closeNow();
+        client.close();
 
         if (!failedMessageListOnClose.isEmpty())
         {

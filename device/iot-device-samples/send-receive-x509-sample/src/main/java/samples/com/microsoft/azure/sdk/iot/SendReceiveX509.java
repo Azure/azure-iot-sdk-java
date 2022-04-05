@@ -4,10 +4,13 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.GeneralSecurityException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -76,7 +79,7 @@ public class SendReceiveX509
     // from IoTHub and return COMPLETE
     protected static class MessageCallbackMqtt implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
-        public IotHubMessageResult execute(Message msg, Object context)
+        public IotHubMessageResult onCloudToDeviceMessageReceived(Message msg, Object context)
         {
             Counter counter = (Counter) context;
             System.out.println(
@@ -93,24 +96,28 @@ public class SendReceiveX509
         }
     }
 
-    protected static class EventCallback implements IotHubEventCallback
+    protected static class EventCallback implements MessageSentCallback
     {
-        public void execute(IotHubStatusCode status, Object context)
+        public void onMessageSent(Message sentMessage, IotHubClientException exception,  Object context)
         {
-          Message msg = (Message) context;
-          System.out.println("IoT Hub responded to message "+ msg.getMessageId()  + " with status " + status.name());
-          if (status==IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE)
-          {
-              failedMessageListOnClose.add(msg.getMessageId());
-          }
+            IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
+            System.out.println("IoT Hub responded to message "+ sentMessage.getMessageId()  + " with status " + status.name());
+            if (status==IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE)
+            {
+                failedMessageListOnClose.add(sentMessage.getMessageId());
+            }
         }
     }
 
     protected static class IotHubConnectionStatusChangeCallbackLogger implements IotHubConnectionStatusChangeCallback
     {
         @Override
-        public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+        public void onStatusChanged(ConnectionStatusChangeContext connectionStatusChangeContext)
         {
+            IotHubConnectionStatus status = connectionStatusChangeContext.getNewStatus();
+            IotHubConnectionStatusChangeReason statusChangeReason = connectionStatusChangeContext.getNewStatusReason();
+            Throwable throwable = connectionStatusChangeContext.getCause();
+
             System.out.println();
             System.out.println("CONNECTION STATUS UPDATE: " + status);
             System.out.println("CONNECTION STATUS REASON: " + statusChangeReason);
@@ -149,7 +156,7 @@ public class SendReceiveX509
      * args[1] = number of requests to send
      * args[2] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws')
      */
-    public static void main(String[] args) throws IOException, URISyntaxException
+    public static void main(String[] args) throws IOException, URISyntaxException, GeneralSecurityException, IotHubClientException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
@@ -220,7 +227,9 @@ public class SendReceiveX509
         System.out.println("Successfully read input parameters.");
         System.out.format("Using communication protocol %s.\n", protocol.name());
 
-        DeviceClient client = new DeviceClient(connString, protocol, publicKeyCertificateString, false, privateKeyString, false);
+        SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCertificateString, privateKeyString);
+        ClientOptions clientOptions = ClientOptions.builder().sslContext(sslContext).build();
+        DeviceClient client = new DeviceClient(connString, protocol, clientOptions);
 
         System.out.println("Successfully created an IoT Hub client.");
 
@@ -230,9 +239,9 @@ public class SendReceiveX509
 
         System.out.println("Successfully set message callback.");
 
-        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
+        client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
-        client.open();
+        client.open(false);
 
         System.out.println("Opened connection to IoT Hub.");
 
@@ -254,13 +263,13 @@ public class SendReceiveX509
             try
             {
                 Message msg = new Message(msgStr);
-                msg.setContentTypeFinal("application/json");
+                msg.setContentType("application/json");
                 msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
                 msg.setMessageId(java.util.UUID.randomUUID().toString());
                 msg.setExpiryTime(D2C_MESSAGE_TIMEOUT);
                 System.out.println(msgStr);
                 EventCallback eventCallback = new EventCallback();
-                client.sendEventAsync(msg, eventCallback, msg);
+                client.sendEventAsync(msg, eventCallback, null);
             }
             catch (Exception e)
             {
@@ -288,7 +297,7 @@ public class SendReceiveX509
 
         // close the connection        
         System.out.println("Closing"); 
-        client.closeNow();
+        client.close();
         
         if (!failedMessageListOnClose.isEmpty())
         {

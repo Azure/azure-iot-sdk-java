@@ -5,7 +5,7 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
-import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
+import com.microsoft.azure.sdk.iot.device.transport.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-public abstract class AmqpsSenderLinkHandler extends BaseHandler
+abstract class AmqpsSenderLinkHandler extends BaseHandler
 {
     static final String VERSION_IDENTIFIER_KEY = "com.microsoft:client-version";
     private static final String API_VERSION_KEY = "com.microsoft:api-version";
@@ -73,19 +73,6 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
     {
         log.debug("{} sender link with address {} and link correlation id {} was successfully opened", getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId);
         this.amqpsLinkStateCallback.onLinkOpened(this);
-
-        boolean hasFlowController = false;
-        Iterator<Handler> children = children();
-        while (children.hasNext())
-        {
-            hasFlowController |= children.next() instanceof LoggingFlowController;
-        }
-
-        if (!hasFlowController)
-        {
-            log.warn("No flow controller detected in {} link with address {} and link correlation id {}. Adding a new flow controller.", getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId);
-            add(new LoggingFlowController(this.linkCorrelationId));
-        }
     }
 
     @Override
@@ -141,6 +128,7 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
         {
             log.debug("{} sender link with address {} and link correlation id {} was closed remotely unexpectedly", getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId);
             link.close();
+            clearHandlers();
             this.amqpsLinkStateCallback.onLinkClosedUnexpectedly(link.getRemoteCondition());
         }
         else
@@ -177,6 +165,7 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
         {
             log.debug("Closing {} sender link with address {} and link correlation id {}", getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId);
             this.senderLink.close();
+            clearHandlers();
         }
     }
 
@@ -224,7 +213,7 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
         Delivery delivery = this.senderLink.delivery(deliveryTag);
         try
         {
-            log.trace("Sending {} bytes over the amqp {} sender link with address {} and link correlation id {} with link credit", length, getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId, this.senderLink.getCredit());
+            log.trace("Sending {} bytes over the amqp {} sender link with address {} and link correlation id {} with link credit {}", length, getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId, this.senderLink.getCredit());
             int bytesSent = this.senderLink.send(msgData, 0, length);
 
             if (bytesSent != length)
@@ -328,5 +317,25 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
         Section section = new Data(binary);
         outgoingMessage.setBody(section);
         return outgoingMessage;
+    }
+
+    // Removes any children of this handler (such as LoggingFlowController) and disassociates this handler
+    // from the proton reactor. By removing the reference of the proton reactor to this handler, this handler becomes
+    // eligible for garbage collection by the JVM. This is important for multiplexed connections where links come and go
+    // but the reactor stays alive for a long time.
+    private void clearHandlers()
+    {
+        this.senderLink.attachments().clear();
+
+        // a sender link shouldn't have any children, but other handlers may be added as this SDK grows and this protects
+        // against potential memory leaks
+        Iterator<Handler> childrenIterator = this.children();
+        while (childrenIterator.hasNext())
+        {
+            childrenIterator.next();
+            childrenIterator.remove();
+        }
+
+        this.senderLink.free();
     }
 }

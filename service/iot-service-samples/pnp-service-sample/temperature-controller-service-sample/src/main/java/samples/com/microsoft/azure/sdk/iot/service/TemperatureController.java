@@ -2,14 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 package samples.com.microsoft.azure.sdk.iot.service;
 
-import com.microsoft.azure.sdk.iot.service.devicetwin.*;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodRequestOptions;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
+import com.microsoft.azure.sdk.iot.service.twin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
 import java.io.IOException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.TimeUnit;
 
 // This sample uses the model - https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/TemperatureController.json.
 public class TemperatureController {
@@ -17,8 +19,8 @@ public class TemperatureController {
     private static final String iotHubConnectionString  = System.getenv("IOTHUB_CONNECTION_STRING");
     private static final String deviceId = System.getenv("IOTHUB_DEVICE_ID");
 
-    private static DeviceTwin twinClient;
-    private static DeviceMethod methodClient;
+    private static TwinClient twinClient;
+    private static DirectMethodsClient methodClient;
 
     public static void main(String[] args) throws Exception {
         RunSample();
@@ -38,15 +40,15 @@ public class TemperatureController {
         InvokeMethodOnRootLevel();
     }
 
-    private static void InitializeServiceClient() throws IOException {
-        twinClient = DeviceTwin.createFromConnectionString(iotHubConnectionString);
-        methodClient = DeviceMethod.createFromConnectionString(iotHubConnectionString);
+    private static void InitializeServiceClient()
+    {
+        twinClient = new TwinClient(iotHubConnectionString);
+        methodClient = new DirectMethodsClient(iotHubConnectionString);
     }
 
     private static void GetAndUpdateTwin() throws IOException, IotHubException {
         // Get the twin and retrieve model Id set by Device client.
-        DeviceTwinDevice twin = new DeviceTwinDevice(deviceId);
-        twinClient.getTwin(twin);
+        Twin twin = twinClient.get(deviceId);
         System.out.println("Model Id of this Twin is: " + twin.getModelId());
 
         // Update the twin for thermostat1 component.
@@ -62,12 +64,12 @@ public class TemperatureController {
         String propertyName = "targetTemperature";
         double propertyValue = 60.2;
         String componentName = "thermostat1";
-        twin.setDesiredProperties(PnpHelper.CreateComponentPropertyPatch(propertyName, propertyValue, componentName));
-        twinClient.updateTwin(twin);
+        twin.getDesiredProperties().putAll(PnpHelper.CreateComponentPropertyPatch(propertyName, propertyValue, componentName));
+        twinClient.patch(twin);
 
         // Get the updated twin properties.
-        twinClient.getTwin(twin);
-        System.out.println("The updated desired properties: " + twin.getDesiredProperties().iterator().next().getValue());
+        twin = twinClient.get(deviceId);
+        System.out.println("The updated desired properties: " + twin.getDesiredProperties().values().iterator().next());
     }
 
     private static void InvokeMethodOnRootLevel() throws IOException, IotHubException {
@@ -75,12 +77,20 @@ public class TemperatureController {
         String methodToInvoke = "reboot";
         System.out.println("Invoking method: " + methodToInvoke);
 
-        Long responseTimeout = TimeUnit.SECONDS.toSeconds(200);
-        Long connectTimeout = TimeUnit.SECONDS.toSeconds(5);
+        int responseTimeout = 200;
+        int connectTimeout = 5;
 
         // Invoke the command.
         String commandInput = "5";
-        MethodResult result = methodClient.invoke(deviceId, methodToInvoke, responseTimeout, connectTimeout, commandInput);
+        DirectMethodRequestOptions options =
+            DirectMethodRequestOptions.builder()
+                .payload(commandInput)
+                .methodConnectTimeoutSeconds(connectTimeout)
+                .methodResponseTimeoutSeconds(responseTimeout)
+                .build();
+
+        DirectMethodResponse result = methodClient.invoke(deviceId, methodToInvoke, options);
+
         if(result == null)
         {
             throw new IOException("Method result is null");
@@ -93,8 +103,8 @@ public class TemperatureController {
         String methodToInvoke = PnpHelper.CreateComponentCommandName("thermostat1", "getMaxMinReport");
         System.out.println("Invoking method: " + methodToInvoke);
 
-        Long responseTimeout = TimeUnit.SECONDS.toSeconds(200);
-        Long connectTimeout = TimeUnit.SECONDS.toSeconds(5);
+        int responseTimeout = 200;
+        int connectTimeout = 5;
 
         // Invoke the command.
         // The command payload should be in the following format:
@@ -103,7 +113,15 @@ public class TemperatureController {
         //   "value": "commandInput"
         //  }
         String commandInput = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(5).format(DateTimeFormatter.ISO_DATE_TIME);
-        MethodResult result = methodClient.invoke(deviceId, methodToInvoke, responseTimeout, connectTimeout, commandInput);
+
+        DirectMethodRequestOptions options =
+            DirectMethodRequestOptions.builder()
+                .payload(commandInput)
+                .methodConnectTimeoutSeconds(connectTimeout)
+                .methodResponseTimeoutSeconds(responseTimeout)
+                .build();
+
+        DirectMethodResponse result = methodClient.invoke(deviceId, methodToInvoke, options);
         if(result == null)
         {
             throw new IOException("Method invoke returns null");

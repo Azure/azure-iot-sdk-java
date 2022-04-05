@@ -5,8 +5,6 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -68,9 +66,9 @@ import java.util.Map;
  *
  * <p> This class exposes the Twin collection with or without metadata as a Map here
  *     user can gat both the value and the metadata. For instance, in the above TwinCollection,
- *     {@link #get(Object)} for <b>Color</b> will return <b>White</b> and the {@link #getTwinMetadata(String)}
- *     for <b>Color</b> will return the Object TwinMetadata that contain {@link TwinMetadata#getLastUpdated()}
- *     that will returns the {@code Date} <b>2017-09-21T02:07:44.238Z</b> and {@link TwinMetadata#getLastUpdatedVersion()}
+ *     {@link #get(Object)} for <b>Color</b> will return <b>White</b> and  getTwinMetadata(String)
+ *     for <b>Color</b> will return the Object TwinMetadata and TwinMetadata.getLastUpdated()
+ *     that will returns the {@code Date} <b>2017-09-21T02:07:44.238Z</b> and TwinMetadata.getLastUpdatedVersion()
  *     that will returns the {@code Integer} <b>4</b>.
  *
  * <p> For the nested TwinCollection, you can do the same, for instance, the following code will return the
@@ -321,7 +319,7 @@ public class TwinCollection extends HashMap<String, Object> implements Serializa
                 }
             }
         }
-        if ((lastUpdatedVersion != null) || !Tools.isNullOrEmpty(lastUpdated))
+        if ((lastUpdatedVersion != null) || !(lastUpdated == null || lastUpdated.isEmpty()))
         {
             twinCollection.twinMetadata = new TwinMetadata(lastUpdated, lastUpdatedVersion);
         }

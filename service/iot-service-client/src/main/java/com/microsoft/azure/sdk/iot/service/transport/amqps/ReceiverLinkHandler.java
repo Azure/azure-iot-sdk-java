@@ -3,7 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpsMessage;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.amqp.Symbol;
@@ -13,15 +12,16 @@ import org.apache.qpid.proton.engine.BaseHandler;
 import org.apache.qpid.proton.engine.Delivery;
 import org.apache.qpid.proton.engine.EndpointState;
 import org.apache.qpid.proton.engine.Event;
+import org.apache.qpid.proton.engine.Handler;
 import org.apache.qpid.proton.engine.Link;
 import org.apache.qpid.proton.engine.Receiver;
-import org.apache.qpid.proton.reactor.FlowController;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 @Slf4j
-public abstract class ReceiverLinkHandler extends BaseHandler
+abstract class ReceiverLinkHandler extends BaseHandler
 {
     private static final String API_VERSION_KEY = "com.microsoft:api-version";
 
@@ -29,12 +29,12 @@ public abstract class ReceiverLinkHandler extends BaseHandler
     // can send messages over that link to the client. Each "link credit" corresponds to 1 service to client message.
     // Upon receiving a message over a receiving link, a credit should be refunded to the service so that
     // this initial credit doesn't run out.
-    final Map<Symbol, Object> amqpProperties;
+    private final Map<Symbol, Object> amqpProperties;
     @SuppressWarnings("unused") // Used in sub classes for future expansion.
     String receiverLinkTag;
-    final String linkCorrelationId;
+    private final String linkCorrelationId;
     String receiverLinkAddress;
-    final Receiver receiverLink;
+    private final Receiver receiverLink;
 
     private final LinkStateCallback linkStateCallback;
 
@@ -53,7 +53,7 @@ public abstract class ReceiverLinkHandler extends BaseHandler
         BaseHandler.setHandler(receiver, this);
 
         //This flow controller handles all link credit handling on our behalf
-        add(new FlowController());
+        add(new LoggingFlowController(this.linkCorrelationId));
     }
 
     @Override
@@ -61,6 +61,19 @@ public abstract class ReceiverLinkHandler extends BaseHandler
     {
         log.debug("{} receiver link with link correlation id {} was successfully opened", getLinkInstanceType(), this.linkCorrelationId);
         this.linkStateCallback.onReceiverLinkRemoteOpen();
+
+        boolean hasFlowController = false;
+        Iterator<Handler> children = children();
+        while (children.hasNext())
+        {
+            hasFlowController |= children.next() instanceof LoggingFlowController;
+        }
+
+        if (!hasFlowController)
+        {
+            log.trace("No flow controller detected in {} link with address {} and link correlation id {}. Adding a new flow controller.", getLinkInstanceType(), this.receiverLinkAddress, this.linkCorrelationId);
+            add(new LoggingFlowController(this.linkCorrelationId));
+        }
     }
 
     @Override
@@ -69,7 +82,7 @@ public abstract class ReceiverLinkHandler extends BaseHandler
         log.trace("{} receiver link with link correlation id {} opened locally", getLinkInstanceType(), this.linkCorrelationId);
     }
 
-    protected AmqpsMessage getMessageFromReceiverLink()
+    AmqpsMessage getMessageFromReceiverLink()
     {
         Delivery delivery = receiverLink.current();
         if (delivery.isReadable() && !delivery.isPartial()) {

@@ -4,7 +4,6 @@
 package com.microsoft.azure.sdk.iot.device.transport.https;
 
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
-import com.microsoft.azure.sdk.iot.device.exceptions.IotHubSizeExceededException;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -19,7 +18,7 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64String;
  * Builds a batched IoT Hub request body as a JSON array. The batched message
  * has a maximum size of 256 kb.
  */
-public final class HttpsBatchMessage implements HttpsMessage
+final class HttpsBatchMessage implements HttpsMessage
 {
     // Note: this limit is defined by the IoT Hub.
     private static final int SERVICEBOUND_MESSAGE_MAX_SIZE_BYTES = 255 * 1024 - 1;
@@ -42,12 +41,12 @@ public final class HttpsBatchMessage implements HttpsMessage
     private static final String PROPERTIES = "\"properties\"";
 
     /** The current batched message body. */
-    private String batchBody;
+    private final String batchBody;
 
     /** The current number of messages in the batch. */
     private int numMsgs;
 
-    public HttpsBatchMessage(List<HttpsSingleMessage> messageList) throws IotHubSizeExceededException
+    public HttpsBatchMessage(List<HttpsSingleMessage> messageList) throws IllegalArgumentException
     {
         StringBuilder batchBodyBuilder = new StringBuilder();
         batchBodyBuilder.append('[');
@@ -75,7 +74,7 @@ public final class HttpsBatchMessage implements HttpsMessage
         {
             String errMsg = String.format("Service-bound message size (%d bytes) cannot exceed %d bytes.",
                 newBatchBodyBytes.length, SERVICEBOUND_MESSAGE_MAX_SIZE_BYTES);
-            throw new IotHubSizeExceededException(errMsg);
+            throw new IllegalArgumentException(errMsg);
         }
     }
 
@@ -135,8 +134,6 @@ public final class HttpsBatchMessage implements HttpsMessage
      * format.
      *
      * @param msg the message to be converted to a corresponding JSON object.
-     *
-     * @return the JSON string representation of the message.
      */
     private static void addJsonToStringBuilder(HttpsSingleMessage msg, StringBuilder jsonStringBuilder)
     {

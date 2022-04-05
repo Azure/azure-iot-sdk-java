@@ -5,9 +5,9 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
+import com.microsoft.azure.sdk.iot.device.ClientConfiguration;
 import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
@@ -23,7 +23,7 @@ import java.util.UUID;
  * should not be created.
  */
 @Slf4j
-public class AmqpsCbsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
+class AmqpsCbsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
 {
     private Session session;
     private AmqpsCbsSenderLinkHandler cbsSenderLinkHandler;
@@ -92,10 +92,10 @@ public class AmqpsCbsSessionHandler extends BaseHandler implements AmqpsLinkStat
         }
     }
 
-    public void sendAuthenticationMessage(DeviceClientConfig deviceClientConfig, AuthenticationMessageCallback authenticationMessageCallback) throws TransportException
+    public void sendAuthenticationMessage(ClientConfiguration clientConfiguration, AuthenticationMessageCallback authenticationMessageCallback) throws TransportException
     {
         //Sender link attaches a correlation id to the authentication message and returns it here.
-        UUID correlationId = this.cbsSenderLinkHandler.sendAuthenticationMessage(deviceClientConfig);
+        UUID correlationId = this.cbsSenderLinkHandler.sendAuthenticationMessage(clientConfiguration);
 
         //Receiver link will get a delivery with the same correlation id containing the authentication status at some point.
         this.cbsReceiverLinkHandler.addAuthenticationMessageCorrelation(correlationId, authenticationMessageCallback);

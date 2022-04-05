@@ -3,20 +3,18 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-
 /**
  * Callback interface for allowing users to respond to changes in the connectivity of this sdk to Iot Hub.
  */
 public interface IotHubConnectionStatusChangeCallback
 {
     /**
-     * Callback that is executed when the connection status of this sdk to the iot hub changes. Includes details for more
+     * The callback that is executed each time the connection status of the client changes. Includes details for more
      * context on why that change occurred.
-     * @param status The new connection status of the sdk
-     * @param statusChangeReason the reason why the sdk changed to this status
-     * @param throwable The throwable that caused the change in status. May be null if there wasn't an associated throwable
-     * @param callbackContext the context for this callback that was registered by the user
+     *
+     * @param connectionStatusChangeContext the context surrounding the status change, including the new status, the reason
+     * for the new status, the underlying exception (if connection was lost), and the user provided context object that
+     * was set when setting the connection status change callback on the client.
      */
-    void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext);
+    void onStatusChanged(ConnectionStatusChangeContext connectionStatusChangeContext);
 }

@@ -4,15 +4,16 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
-import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
+import com.microsoft.azure.sdk.iot.device.twin.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.CountDownLatch;
+
+import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 
 /**
  * Device Twin Sample for sending module twin updates to an IoT Hub. Default protocol is to use
@@ -28,66 +29,16 @@ public class ModuleTwinSample
     private static final String SAMPLE_USAGE_WITH_INVALID_PROTOCOL = "Expected argument 2 to be one of 'mqtt', 'amqps' or 'amqps_ws' but received %s\n" + SAMPLE_USAGE;
 
     private enum LIGHTS{ ON, OFF }
-    private enum CAMERA{ DETECTED_BURGLAR, SAFELY_WORKING }
-    private static final int MAX_EVENTS_TO_REPORT = 5;
-
-    private static final AtomicBoolean Succeed = new AtomicBoolean(false);
-
-    protected static class DeviceTwinStatusCallBack implements IotHubEventCallback
-    {
-        @Override
-        public void execute(IotHubStatusCode status, Object context)
-        {
-            Succeed.set((status == IotHubStatusCode.OK) || (status == IotHubStatusCode.OK_EMPTY));
-            System.out.println("IoT Hub responded to device twin operation with status " + status.name());
-        }
-    }
-
-    /*
-     * If you don't care about version, you can use the PropertyCallBack.
-     */
-    protected static class onHomeTempChange implements TwinPropertyCallBack
-    {
-        @Override
-        public void TwinPropertyCallBack(Property property, Object context)
-        {
-            System.out.println(
-                    "onHomeTempChange change " + property.getKey() +
-                            " to " + property.getValue() +
-                            ", Properties version:" + property.getVersion());
-        }
-    }
-
-    protected static class onCameraActivity implements TwinPropertyCallBack
-    {
-        @Override
-        public void TwinPropertyCallBack(Property property, Object context)
-        {
-            System.out.println(
-                    "onCameraActivity change " + property.getKey() +
-                            " to " + property.getValue() +
-                            ", Properties version:" + property.getVersion());
-        }
-    }
-
-    protected static class onProperty implements TwinPropertyCallBack
-    {
-        @Override
-        public void TwinPropertyCallBack(Property property, Object context)
-        {
-            System.out.println(
-                    "onProperty callback for " + (property.getIsReported()?"reported": "desired") +
-                            " property " + property.getKey() +
-                            " to " + property.getValue() +
-                            ", Properties version:" + property.getVersion());
-        }
-    }
 
     protected static class IotHubConnectionStatusChangeCallbackLogger implements IotHubConnectionStatusChangeCallback
     {
         @Override
-        public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+        public void onStatusChanged(ConnectionStatusChangeContext connectionStatusChangeContext)
         {
+            IotHubConnectionStatus status = connectionStatusChangeContext.getNewStatus();
+            IotHubConnectionStatusChangeReason statusChangeReason = connectionStatusChangeContext.getNewStatusReason();
+            Throwable throwable = connectionStatusChangeContext.getCause();
+
             System.out.println();
             System.out.println("CONNECTION STATUS UPDATE: " + status);
             System.out.println("CONNECTION STATUS REASON: " + statusChangeReason);
@@ -124,11 +75,10 @@ public class ModuleTwinSample
      * @param args 
      * args[0] = IoT Hub connection string
      */
-    public static void main(String[] args) throws IOException, URISyntaxException, ModuleClientException
+    public static void main(String[] args) throws IOException, URISyntaxException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
-
 
         if (args.length < 1)
         {
@@ -176,74 +126,82 @@ public class ModuleTwinSample
         ModuleClient client = new ModuleClient(connString, protocol);
         System.out.println("Successfully created an IoT Hub client.");
 
-        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
+        client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
         try
         {
             System.out.println("Open connection to IoT Hub.");
-            client.open();
+            client.open(false);
 
             System.out.println("Start device Twin and get remaining properties...");
-            // Properties already set in the Service will shows up in the generic onProperty callback, with value and version.
-            Succeed.set(false);
-            client.startTwin(new DeviceTwinStatusCallBack(), null, new onProperty(), null);
-            do
-            {
-                Thread.sleep(1000);
-            }
-            while(!Succeed.get());
-
-
-            System.out.println("Subscribe to Desired properties on device Twin...");
-            Map<Property, Pair<TwinPropertyCallBack, Object>> desiredProperties = new HashMap<Property, Pair<TwinPropertyCallBack, Object>>()
-            {
+            CountDownLatch twinInitializedLatch = new CountDownLatch(1);
+            client.subscribeToDesiredPropertiesAsync(
+                (twin, context) ->
                 {
-                    put(new Property("HomeTemp(F)", null), new Pair<TwinPropertyCallBack, Object>(new onHomeTempChange(), null));
-                    put(new Property("LivingRoomLights", null), new Pair<TwinPropertyCallBack, Object>(new onProperty(), null));
-                    put(new Property("BedroomRoomLights", null), new Pair<TwinPropertyCallBack, Object>(new onProperty(), null));
-                    put(new Property("HomeSecurityCamera", null), new Pair<TwinPropertyCallBack, Object>(new onCameraActivity(), null));
-                }
-            };
-            client.subscribeToTwinDesiredProperties(desiredProperties);
+                    for (String propertyKey : twin.getDesiredProperties().keySet())
+                    {
+                        Object propertyValue = twin.getDesiredProperties().get(propertyKey);
+                        System.out.println("Received desired property update with property key " + propertyKey + " and value " + propertyValue);
+                    }
+                },
+            null,
+                (exception, context) ->
+                {
+                    if (exception != null)
+                    {
+                        System.out.println("Successfully subscribed to desired properties. Getting initial twin state");
 
-            System.out.println("Get device Twin...");
-            client.getTwin(); // For each desired property in the Service, the SDK will call the appropriate callback with the value and version.
+                        // It is recommended to get the initial twin state after every time you have subscribed to desired
+                        // properties, but is not mandatory. The benefit is that you are up to date on any twin updates
+                        // your client may have missed while not being subscribed, but the cost is that the get twin request
+                        // may not provide any new twin updates while still requiring some messaging between the client and service.
+                        client.getTwinAsync(
+                                (twin, getTwinException, getTwinContext) ->
+                                {
+                                    System.out.println("Received initial twin state");
+                                    System.out.println(twin.toString());
+                                    twinInitializedLatch.countDown();
+                                },
+                                null);
+                    }
+                    else
+                    {
+                        System.out.println("Failed to subscribe to desired properties with status code " + exception.getStatusCode());
+                        System.exit(-1);
+                    }
+                },
+                null);
 
             System.out.println("Update reported properties...");
-            Set<Property> reportProperties = new HashSet<Property>()
-            {
+            TwinCollection reportedProperties = new TwinCollection();
+            reportedProperties.put("HomeTemp(F)", 70);
+            reportedProperties.put("LivingRoomLights", LIGHTS.ON);
+            reportedProperties.put("BedroomRoomLights", LIGHTS.OFF);
+            CountDownLatch twinReportedPropertiesSentLatch = new CountDownLatch(1);
+            client.updateReportedPropertiesAsync(
+                reportedProperties,
+                (statusCode, version, e, callbackContext) ->
                 {
-                    add(new Property("HomeTemp(F)", 70));
-                    add(new Property("LivingRoomLights", LIGHTS.ON));
-                    add(new Property("BedroomRoomLights", LIGHTS.OFF));
-                }
-            };
-            client.sendReportedProperties(reportProperties);
+                    if (statusCode == OK)
+                    {
+                        System.out.println("Reported properties updated successfully");
+                    }
+                    else
+                    {
+                        System.out.println("Reported properties failed to be updated. Status code: " + statusCode);
+                        e.printStackTrace();
+                    }
 
-            for(int i = 0; i < MAX_EVENTS_TO_REPORT; i++)
-            {
+                    twinReportedPropertiesSentLatch.countDown();
+                },
+                null);
 
-                if (Math.random() % MAX_EVENTS_TO_REPORT == 3)
-                {
-                    client.sendReportedProperties(new HashSet<Property>() {{ add(new Property("HomeSecurityCamera", CAMERA.DETECTED_BURGLAR)); }});
-                }
-                else
-                {
-                    client.sendReportedProperties(new HashSet<Property>() {{ add(new Property("HomeSecurityCamera", CAMERA.SAFELY_WORKING)); }});
-                }
-                if(i == MAX_EVENTS_TO_REPORT-1)
-                {
-                    client.sendReportedProperties(new HashSet<Property>() {{ add(new Property("BedroomRoomLights", null)); }});
-                }
-                System.out.println("Updating reported properties..");
-            }
-
-            System.out.println("Waiting for Desired properties");
+            twinReportedPropertiesSentLatch.await();
         }
         catch (Exception e)
         {
             System.out.println("On exception, shutting down \n" + " Cause: " + e.getCause() + " \n" +  e.getMessage());
-            client.closeNow();
+            client.close();
             System.out.println("Shutting down...");
         }
 
@@ -252,7 +210,7 @@ public class ModuleTwinSample
         Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
         scanner.nextLine();
 
-        client.closeNow();
+        client.close();
 
         System.out.println("Shutting down...");
     }

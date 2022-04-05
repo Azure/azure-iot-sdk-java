@@ -3,27 +3,96 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubServiceException;
+import com.microsoft.azure.sdk.iot.device.transport.https.exceptions.*;
 
 /**
  * An IoT Hub status code. Included in a message from an IoT Hub to a device.
  */
 public enum IotHubStatusCode
 {
+    /**
+     * The request completed without exception
+     */
     OK,
-    OK_EMPTY,
+
+    /**
+     * The request failed because it had one or more format issues.
+     */
     BAD_FORMAT,
+
+    /**
+     * The request failed because the provided credentials are out of date or incorrect.
+     */
     UNAUTHORIZED,
-    TOO_MANY_DEVICES,
-    HUB_OR_DEVICE_ID_NOT_FOUND,
+
+    /**
+     * The request failed because the quota for such operations has been exceeded.
+     * <p>
+     *     For file upload operations, this signifies that the maximum number of concurrent file upload operations are already happening.
+     * </p>
+     * <p>
+     *     For telemetry operations, this signifies that the IoT hub has reached its daily quota for the number of messages ingested.
+     * </p>
+     */
+    QUOTA_EXCEEDED,
+
+    /**
+     * The request failed because the resource the request targeted does not exist.
+     */
+    NOT_FOUND,
+
+    /**
+     * The request failed because the request provided an out of date ETag or version number.
+     */
     PRECONDITION_FAILED,
+
+    /**
+     * The request failed because the request payload exceeded IoT Hub's size limits.
+     */
     REQUEST_ENTITY_TOO_LARGE,
+
+    /**
+     * The request was rejected by the service because the service is handling too many requests right now.
+     */
     THROTTLED,
+
+    /**
+     * The service encountered an error while handling the request.
+     */
     INTERNAL_SERVER_ERROR,
+
+    /**
+     * The request was rejected by the service because it is too busy to handle it right now.
+     */
     SERVER_BUSY,
+
+    /**
+     * The request failed for an unknown reason.
+     */
     ERROR,
+
+    /**
+     * The request failed to be sent to the service and/or acknowledged by the service before it expired.
+     */
     MESSAGE_EXPIRED,
-    MESSAGE_CANCELLED_ONCLOSE;
+
+    /**
+     * The request failed to be sent to the service and/or acknowledged by the service before the client was closed.
+     */
+    MESSAGE_CANCELLED_ONCLOSE,
+
+    /**
+     * The request failed because of network level issues.
+     */
+    IO_ERROR,
+
+    /**
+     * The request failed because it took longer than the device operation timeout as defined in {@link DeviceClient#setOperationTimeout(long)}
+     * or took longer than the timeout as defined in a synchronous operation such as {@link DeviceClient#sendEvent(Message, int)}.
+     */
+    DEVICE_OPERATION_TIMED_OUT;
 
     public static IotHubServiceException getConnectionStatusException(IotHubStatusCode statusCode, String statusDescription)
     {
@@ -31,7 +100,6 @@ public enum IotHubStatusCode
         switch (statusCode)
         {
             case OK:
-            case OK_EMPTY:
             case MESSAGE_CANCELLED_ONCLOSE:
             case MESSAGE_EXPIRED:
                 transportException = null;
@@ -42,10 +110,10 @@ public enum IotHubStatusCode
             case UNAUTHORIZED:
                 transportException = new UnauthorizedException(statusDescription);
                 break;
-            case TOO_MANY_DEVICES:
-                transportException = new TooManyDevicesException(statusDescription);
+            case QUOTA_EXCEEDED:
+                transportException = new QuotaExceededException(statusDescription);
                 break;
-            case HUB_OR_DEVICE_ID_NOT_FOUND:
+            case NOT_FOUND:
                 transportException = new HubOrDeviceIdNotFoundException(statusDescription);
                 break;
             case PRECONDITION_FAILED:
@@ -85,15 +153,12 @@ public enum IotHubStatusCode
      */
     public static IotHubStatusCode getIotHubStatusCode(int httpsStatus)
     {
-        // Codes_SRS_IOTHUBSTATUSCODE_11_001: [The function shall convert the given HTTPS status code to the corresponding IoT Hub status code.]
         IotHubStatusCode iotHubStatus;
         switch (httpsStatus)
         {
             case 200:
-                iotHubStatus = OK;
-                break;
             case 204:
-                iotHubStatus = OK_EMPTY;
+                iotHubStatus = OK;
                 break;
             case 400:
                 iotHubStatus = BAD_FORMAT;
@@ -102,10 +167,10 @@ public enum IotHubStatusCode
                 iotHubStatus = UNAUTHORIZED;
                 break;
             case 403:
-                iotHubStatus = TOO_MANY_DEVICES;
+                iotHubStatus = QUOTA_EXCEEDED;
                 break;
             case 404:
-                iotHubStatus = HUB_OR_DEVICE_ID_NOT_FOUND;
+                iotHubStatus = NOT_FOUND;
                 break;
             case 412:
                 iotHubStatus = PRECONDITION_FAILED;
@@ -123,10 +188,51 @@ public enum IotHubStatusCode
                 iotHubStatus = SERVER_BUSY;
                 break;
             default:
-                // Codes_SRS_IOTHUBSTATUSCODE_11_002: [If the given HTTPS status code does not map to an IoT Hub status code, the function return status code ERROR.]
                 iotHubStatus = ERROR;
         }
 
         return iotHubStatus;
+    }
+
+    /**
+     * Returns true if this event callback signals that the asynchronous action was unsuccessful, but could be retried.
+     * Returns false if it was successful, or it was unsuccessful but should not be retried.
+     * @param statusCode The status code.
+     * @return true if this event callback signals that the asynchronous action was unsuccessful, but could be retried, and false otherwise.
+     */
+    public static boolean isRetryable(IotHubStatusCode statusCode)
+    {
+        switch (statusCode)
+        {
+            case ERROR:
+            case MESSAGE_CANCELLED_ONCLOSE:
+            case MESSAGE_EXPIRED:
+            case THROTTLED:
+            case INTERNAL_SERVER_ERROR:
+            case SERVER_BUSY:
+                return true;
+            default:
+                return false; // even for OK case, return false here since it wouldn't need to be retried.
+        }
+    }
+
+    /**
+     * Returns true if this event callback signals that the asynchronous action was successful, and false otherwise.
+     * @param statusCode The status code.
+     * @return true if this event callback signals that the asynchronous action was successful, and false otherwise.
+     */
+    public static boolean isSuccessful(IotHubStatusCode statusCode)
+    {
+        return statusCode == OK;
+    }
+
+    public static IotHubClientException toException(IotHubStatusCode statusCode)
+    {
+        if (!IotHubStatusCode.isSuccessful(statusCode))
+        {
+            return new IotHubClientException(statusCode);
+        }
+
+        return null;
     }
 }

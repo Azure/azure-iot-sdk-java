@@ -6,12 +6,9 @@
 package com.microsoft.azure.sdk.iot.device.hsm;
 
 import com.microsoft.azure.sdk.iot.device.ModuleClient;
-import com.microsoft.azure.sdk.iot.device.hsm.HsmException;
-import com.microsoft.azure.sdk.iot.device.hsm.HttpsHsmClient;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignRequest;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignResponse;
-import com.microsoft.azure.sdk.iot.device.hsm.HttpHsmSignatureProvider;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -41,6 +38,9 @@ public class HttpHsmSignatureProviderTest
     @Mocked
     SignResponse mockedSignResponse;
 
+    @Mocked
+    UnixDomainSocketChannel mockedUnixDomainSocketChannel;
+
     private static final String expectedProviderUri = "someProviderUri";
     private static final String expectedApiVersion = "1.1.1";
     private static final String expectedGenId = "gen1";
@@ -52,14 +52,14 @@ public class HttpHsmSignatureProviderTest
     public void constructorSuccess() throws NoSuchAlgorithmException, URISyntaxException
     {
         //act
-        HttpHsmSignatureProvider httpHsmSignatureProvider = new HttpHsmSignatureProvider(expectedProviderUri, defaultApiVersion);
+        HttpHsmSignatureProvider httpHsmSignatureProvider = new HttpHsmSignatureProvider(expectedProviderUri, defaultApiVersion, mockedUnixDomainSocketChannel);
 
         //assert
         assertEquals(defaultApiVersion, Deencapsulation.getField(httpHsmSignatureProvider, "apiVersion"));
         new Verifications()
         {
             {
-                new HttpsHsmClient(expectedProviderUri);
+                new HttpsHsmClient(expectedProviderUri, mockedUnixDomainSocketChannel);
                 times = 1;
             }
         };
@@ -70,14 +70,14 @@ public class HttpHsmSignatureProviderTest
     public void constructorSuccessWithApiVersion() throws NoSuchAlgorithmException, URISyntaxException
     {
         //act
-        HttpHsmSignatureProvider httpHsmSignatureProvider = new HttpHsmSignatureProvider(expectedProviderUri, expectedApiVersion);
+        HttpHsmSignatureProvider httpHsmSignatureProvider = new HttpHsmSignatureProvider(expectedProviderUri, expectedApiVersion, mockedUnixDomainSocketChannel);
 
         //assert
         assertEquals(expectedApiVersion, Deencapsulation.getField(httpHsmSignatureProvider, "apiVersion"));
         new Verifications()
         {
             {
-                new HttpsHsmClient(expectedProviderUri);
+                new HttpsHsmClient(expectedProviderUri, mockedUnixDomainSocketChannel);
                 times = 1;
             }
         };
@@ -88,7 +88,7 @@ public class HttpHsmSignatureProviderTest
     public void constructorThrowsIfProviderUriNullOrEmpty() throws NoSuchAlgorithmException, URISyntaxException
     {
         //act
-        HttpHsmSignatureProvider httpHsmSignatureProvider = new HttpHsmSignatureProvider(null, expectedApiVersion);
+        HttpHsmSignatureProvider httpHsmSignatureProvider = new HttpHsmSignatureProvider(null, expectedApiVersion, mockedUnixDomainSocketChannel);
     }
 
     // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_005: [If the apiVersion is null or empty, this function shall throw an IllegalArgumentException.]
@@ -96,12 +96,12 @@ public class HttpHsmSignatureProviderTest
     public void constructorThrowsIfApiVersionNullOrEmpty() throws NoSuchAlgorithmException, URISyntaxException
     {
         //act
-        HttpHsmSignatureProvider httpHsmSignatureProvider = new HttpHsmSignatureProvider(expectedProviderUri, null);
+        HttpHsmSignatureProvider httpHsmSignatureProvider = new HttpHsmSignatureProvider(expectedProviderUri, null, mockedUnixDomainSocketChannel);
     }
 
     // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_006: [This function shall create a signRequest for the hsm http client to sign, and shall return the utf-8 encoded result of that signing.]
     @Test
-    public void signSuccess(@Mocked URLEncoder mockedURLEncoder) throws NoSuchAlgorithmException, TransportException, IOException, URISyntaxException, HsmException
+    public void signSuccess(@Mocked URLEncoder mockedURLEncoder) throws NoSuchAlgorithmException, TransportException, IOException, URISyntaxException
     {
         //arrange
         final String keyName = "keyName";
@@ -111,7 +111,7 @@ public class HttpHsmSignatureProviderTest
         new NonStrictExpectations()
         {
             {
-                new HttpsHsmClient(expectedProviderUri);
+                new HttpsHsmClient(expectedProviderUri, mockedUnixDomainSocketChannel);
                 result = mockedHttpsHsmClient;
 
                 new SignRequest();
@@ -128,7 +128,7 @@ public class HttpHsmSignatureProviderTest
             }
         };
 
-        final HttpHsmSignatureProvider signatureProvider = new HttpHsmSignatureProvider(expectedProviderUri, expectedApiVersion);
+        final HttpHsmSignatureProvider signatureProvider = new HttpHsmSignatureProvider(expectedProviderUri, expectedApiVersion, mockedUnixDomainSocketChannel);
 
         //act
         String actualDigest = signatureProvider.sign(keyName, data, expectedGenId);
@@ -150,11 +150,11 @@ public class HttpHsmSignatureProviderTest
 
     // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_007: [If the provided data is null or empty, this function shall throw an IllegalArgumentException.]
     @Test (expected = IllegalArgumentException.class)
-    public void signThrowsForNullData() throws NoSuchAlgorithmException, TransportException, IOException, URISyntaxException, HsmException
+    public void signThrowsForNullData() throws NoSuchAlgorithmException, TransportException, IOException, URISyntaxException
     {
         //arrange
         final String keyName = "keyName";
-        final HttpHsmSignatureProvider signatureProvider = new HttpHsmSignatureProvider(expectedProviderUri, expectedApiVersion);
+        final HttpHsmSignatureProvider signatureProvider = new HttpHsmSignatureProvider(expectedProviderUri, expectedApiVersion, mockedUnixDomainSocketChannel);
 
         //act
         signatureProvider.sign(keyName, null, expectedGenId);

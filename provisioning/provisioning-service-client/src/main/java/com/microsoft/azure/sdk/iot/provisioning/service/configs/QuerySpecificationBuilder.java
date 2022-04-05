@@ -3,8 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
-
 /**
  * This is a helper to create a new instance of the {@link QuerySpecification}.
  *
@@ -80,7 +78,7 @@ public class QuerySpecificationBuilder
     public QuerySpecificationBuilder(String selection, FromType fromType)
     {
         /* SRS_QUERY_SPECIFICATION_BUILDER_21_001: [The constructor shall throw IllegalArgumentException if the provided `selection` is null, empty, or `fromType` is null.] */
-        if (Tools.isNullOrEmpty(selection) || fromType == null)
+        if (selection == null || selection.isEmpty() || fromType == null)
         {
             throw new IllegalArgumentException("selection and from are mandatory");
         }

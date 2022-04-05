@@ -5,10 +5,9 @@
 
 package com.microsoft.azure.sdk.iot.device.edge;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.hsm.HsmException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
+import com.microsoft.azure.sdk.iot.device.hsm.UnixDomainSocketChannel;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 
 /**
@@ -16,5 +15,5 @@ import java.net.URISyntaxException;
  */
 public interface TrustBundleProvider
 {
-    String getTrustBundleCerts(String providerUri, String apiVersion) throws URISyntaxException, TransportException, IOException, HsmException;
+    String getTrustBundleCerts(String providerUri, String apiVersion, UnixDomainSocketChannel unixDomainSocketChannel) throws URISyntaxException, TransportException;
 }

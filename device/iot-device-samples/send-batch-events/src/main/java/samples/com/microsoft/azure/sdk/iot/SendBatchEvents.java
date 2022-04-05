@@ -4,6 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import java.io.IOException;
@@ -20,12 +21,11 @@ public class SendBatchEvents
 
     // Sample can safely assume the context will always be a List<Message> so the cast is safe
     @SuppressWarnings("unchecked")
-    protected static class EventCallback implements IotHubEventCallback
+    protected static class MessagesSentCallbackImpl implements MessagesSentCallback
     {
-        public void execute(IotHubStatusCode status, Object context)
+        public void onMessagesSent(List<Message> messages, IotHubClientException exception, Object context)
         {
-            List<Message> messages = (List<Message>) context;
-
+            IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
             System.out.println("IoT Hub responded to the batch message with status " + status.name());
 
             if (status==IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE)
@@ -38,8 +38,12 @@ public class SendBatchEvents
     protected static class IotHubConnectionStatusChangeCallbackLogger implements IotHubConnectionStatusChangeCallback
     {
         @Override
-        public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+        public void onStatusChanged(ConnectionStatusChangeContext connectionStatusChangeContext)
         {
+            IotHubConnectionStatus status = connectionStatusChangeContext.getNewStatus();
+            IotHubConnectionStatusChangeReason statusChangeReason = connectionStatusChangeContext.getNewStatusReason();
+            Throwable throwable = connectionStatusChangeContext.getCause();
+
             System.out.println();
             System.out.println("CONNECTION STATUS UPDATE: " + status);
             System.out.println("CONNECTION STATUS REASON: " + statusChangeReason);
@@ -77,30 +81,27 @@ public class SendBatchEvents
      * args[0] = IoT Hub or Edge Hub connection string
      * args[1] = number of messages to send
      * args[2] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws')
-     * args[3] = path to certificate to enable one-way authentication over ssl. (Not necessary when connecting directly to Iot Hub, but required if connecting to an Edge device using a non public root CA certificate).
      */
     public static void main(String[] args)
-            throws IOException, URISyntaxException
+            throws IOException, URISyntaxException, IotHubClientException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
 
-        if (args.length <= 1 || args.length >= 5)
+        if (args.length <= 1 || args.length >= 4)
         {
             System.out.format(
                     "Expected 2 or 3 arguments but received: %d.\n"
                             + "The program should be called with the following args: \n"
                             + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key> or HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>;GatewayHostName=<gateway> \n"
                             + "2. [number of requests to send]\n"
-                            + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n"
-                            + "4. (optional) path to certificate to enable one-way authentication over ssl \n",
+                            + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n",
                     args.length);
             return;
         }
 
         String connString = args[0];
         int numRequests;
-        String pathToCertificate = null;
         try
         {
             numRequests = Integer.parseInt(args[1]);
@@ -147,19 +148,9 @@ public class SendBatchEvents
                                 + "The program should be called with the following args: \n"
                                 + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
                                 + "2. [number of requests to send]\n"
-                                + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n"
-                                + "4. (optional) path to certificate to enable one-way authentication over ssl for amqps \n",
+                                + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n",
                         protocolStr);
                 return;
-            }
-
-            if (args.length == 3)
-            {
-                pathToCertificate = null;
-            }
-            else
-            {
-                pathToCertificate = args[3];
             }
         }
 
@@ -169,21 +160,11 @@ public class SendBatchEvents
 
         DeviceClient client = new DeviceClient(connString, protocol);
 
-        if (pathToCertificate != null )
-        {
-            client.setOption("SetCertificatePath", pathToCertificate );
-        }
-
         System.out.println("Successfully created an IoT Hub client.");
 
-        // Set your token expiry time limit here
-        long time = 2400;
-        client.setOption("SetSASTokenExpiryTime", time);
-        System.out.println("Updated token expiry time to " + time);
+        client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
-        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
-
-        client.open();
+        client.open(false);
 
         System.out.println("Opened connection to IoT Hub.");
         System.out.println("Sending the following event messages in batch:");
@@ -202,7 +183,7 @@ public class SendBatchEvents
             String msgStr = "{\"deviceId\":\"" + deviceId +"\",\"messageId\":" + i + ",\"temperature\":"+ temperature +",\"humidity\":"+ humidity +"}";
 
                 Message msg = new Message(msgStr);
-                msg.setContentTypeFinal("application/json");
+                msg.setContentType("application/json");
                 msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
                 msg.setMessageId(java.util.UUID.randomUUID().toString());
                 msg.setExpiryTime(D2C_MESSAGE_TIMEOUT);
@@ -214,8 +195,8 @@ public class SendBatchEvents
 
         try
         {
-            EventCallback callback = new EventCallback();
-            client.sendEventBatchAsync(messageList, callback, messageList);
+            MessagesSentCallbackImpl messagesSentCallbackImpl = new MessagesSentCallbackImpl();
+            client.sendEventsAsync(messageList, messagesSentCallbackImpl, null);
         }
         catch (Exception e)
         {
@@ -237,7 +218,7 @@ public class SendBatchEvents
 
         // close the connection
         System.out.println("Closing");
-        client.closeNow();
+        client.close();
 
         if (!failedMessageListOnClose.isEmpty())
         {

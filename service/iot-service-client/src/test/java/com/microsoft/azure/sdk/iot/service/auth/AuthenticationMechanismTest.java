@@ -111,7 +111,6 @@ public class AuthenticationMechanismTest
         //assert
         assertEquals(expectedSecondaryThumbprint, actualAuthentication.getSecondaryThumbprint());
         assertEquals(expectedPrimaryThumbprint, actualAuthentication.getPrimaryThumbprint());
-        assertEquals(AuthenticationType.SELF_SIGNED, actualAuthentication.getAuthenticationType());
     }
 
     //Tests_SRS_AUTHENTICATION_MECHANISM_34_016: [This function shall set this object's secondary thumbprint to the provided value.]
@@ -128,7 +127,6 @@ public class AuthenticationMechanismTest
 
         //assert
         assertEquals(expectedSecondaryThumbprint, actualAuthentication.getSecondaryThumbprint());
-        assertEquals(AuthenticationType.SELF_SIGNED, actualAuthentication.getAuthenticationType());
     }
 
     //Tests_SRS_AUTHENTICATION_MECHANISM_34_009: [This function shall return the AuthenticationType of this object.]
@@ -144,39 +142,6 @@ public class AuthenticationMechanismTest
         assertEquals(AuthenticationType.SAS, authenticationWithSymmetricKey.getAuthenticationType());
         assertEquals(AuthenticationType.CERTIFICATE_AUTHORITY, authenticationCASigned.getAuthenticationType());
         assertEquals(AuthenticationType.SELF_SIGNED, authenticationSelfSigned.getAuthenticationType());
-    }
-
-    //Tests_SRS_AUTHENTICATION_MECHANISM_34_012: [This constructor shall throw an IllegalArgumentException if the provided symmetricKey is null.]
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsIllegalArgumentExceptionForNullSymmetricKey()
-    {
-        //arrange
-        SymmetricKey key = null;
-
-        //act
-        new AuthenticationMechanism(key);
-    }
-
-    //Tests_SRS_AUTHENTICATION_MECHANISM_34_013: [If the provided symmetricKey is null, this function shall throw an IllegalArgumentException.]
-    @Test (expected = IllegalArgumentException.class)
-    public void setSymmetricKeyThrowsForNullSymmetricKey()
-    {
-        //arrange
-        AuthenticationMechanism authentication = new AuthenticationMechanism(expectedSymmetricKey);
-
-        //act
-        authentication.setSymmetricKey(null);
-    }
-
-    //Tests_SRS_AUTHENTICATION_MECHANISM_34_014: [If the provided type is null, this function shall throw an IllegalArgumentException.]
-    @Test (expected = IllegalArgumentException.class)
-    public void setAuthenticationTypeThrowsForNullType()
-    {
-        //arrange
-        AuthenticationMechanism authentication = new AuthenticationMechanism(expectedSymmetricKey);
-
-        //act
-        authentication.setAuthenticationType(null);
     }
 
     //Tests_SRS_AUTHENTICATION_MECHANISM_34_023: [If the provided authentication type is self signed, a thumbprint will be generated, but no symmetric key will be generated.]
@@ -217,42 +182,5 @@ public class AuthenticationMechanismTest
         assertNotNull(sasAuth.getSymmetricKey());
         assertNull(sasAuth.getPrimaryThumbprint());
         assertNull(sasAuth.getSecondaryThumbprint());
-    }
-
-    @Test
-    public void equalsWorks()
-    {
-        //arrange
-        AuthenticationMechanism auth1 = new AuthenticationMechanism(AuthenticationType.CERTIFICATE_AUTHORITY);
-        AuthenticationMechanism auth2 = new AuthenticationMechanism(AuthenticationType.SELF_SIGNED);
-        AuthenticationMechanism auth3 = new AuthenticationMechanism(AuthenticationType.SAS);
-        AuthenticationMechanism auth4 = new AuthenticationMechanism("0000000000000000000000000000000000000000", "0000000000000000000000000000000000000000");
-        AuthenticationMechanism auth5 = new AuthenticationMechanism(new SymmetricKey());
-        AuthenticationMechanism auth6 = new AuthenticationMechanism(new SymmetricKey());
-        AuthenticationMechanism auth7 = new AuthenticationMechanism(AuthenticationType.CERTIFICATE_AUTHORITY);
-
-        //assert
-        assertNotEquals(auth1, auth2);
-        assertNotEquals(auth1, auth3);
-        assertNotEquals(auth1, auth4);
-        assertNotEquals(auth1, auth5);
-        assertNotEquals(auth1, auth6);
-        assertEquals(auth1, auth7);
-
-        assertNotEquals(auth2, auth3);
-        assertNotEquals(auth2, auth4);
-        assertNotEquals(auth2, auth5);
-        assertNotEquals(auth2, auth6);
-
-        assertNotEquals(auth3, auth4);
-        assertNotEquals(auth3, auth5);
-        assertNotEquals(auth3, auth6);
-
-        assertNotEquals(auth4, auth5);
-        assertNotEquals(auth4, auth6);
-
-        assertNotEquals(auth5, auth6);
-
-        assertNotEquals(auth1, "not an authentication object");
     }
 }

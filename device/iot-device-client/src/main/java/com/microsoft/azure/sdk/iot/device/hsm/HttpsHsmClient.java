@@ -5,7 +5,9 @@
 
 package com.microsoft.azure.sdk.iot.device.hsm;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.ErrorResponse;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignRequest;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignResponse;
@@ -13,23 +15,19 @@ import com.microsoft.azure.sdk.iot.device.hsm.parser.TrustBundleResponse;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsRequest;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
-import jnr.unixsocket.UnixSocketAddress;
-import jnr.unixsocket.UnixSocketChannel;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.net.*;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 @Slf4j
 public class HttpsHsmClient
 {
     private final String baseUrl;
     private final String scheme;
+    private final UnixDomainSocketChannel unixDomainSocketChannel;
 
     private static final String HTTPS_SCHEME = "https";
     private static final String HTTP_SCHEME = "http";
@@ -40,9 +38,11 @@ public class HttpsHsmClient
     /**
      * Client object for sending sign requests to an HSM unit
      * @param baseUrl The base url of the HSM
+     * @param unixDomainSocketChannel the implementation of the {@link UnixDomainSocketChannel} interface that will be used if any
+     * unix domain socket communication is required. May be null if no unix domain socket communication is required.
      * @throws URISyntaxException if the provided base url cannot be converted to a URI
      */
-    public HttpsHsmClient(String baseUrl) throws URISyntaxException
+    public HttpsHsmClient(String baseUrl, UnixDomainSocketChannel unixDomainSocketChannel) throws URISyntaxException
     {
         if (baseUrl == null || baseUrl.isEmpty())
         {
@@ -53,6 +53,9 @@ public class HttpsHsmClient
 
         this.baseUrl = baseUrl;
         this.scheme = new URI(baseUrl).getScheme();
+
+        // unixDomainSocketChannel is allowed to be null since the module may not need to do unix domain socket communication during setup depending on the Edge environment.
+        this.unixDomainSocketChannel = unixDomainSocketChannel;
     }
 
     /**
@@ -62,15 +65,11 @@ public class HttpsHsmClient
      * @param signRequest the request to send
      * @param generationId the generation id
      * @return The response from the HSM
-     * @throws IOException If the HSM cannot be reached
-     * @throws TransportException If the HSM cannot be reached
-     * @throws HsmException If there was a problem interacting with the HSM
+     * @throws TransportException If there was a problem communicating with the HSM
      */
-    public SignResponse sign(String apiVersion, String moduleName, SignRequest signRequest, String generationId) throws IOException, TransportException, HsmException
+    public SignResponse sign(String apiVersion, String moduleName, SignRequest signRequest, String generationId) throws TransportException, UnsupportedEncodingException
     {
         log.debug("Sending sign request...");
-        // Codes_SRS_HSMHTTPCLIENT_34_002: [This function shall build an http request with the url in the format
-        // <base url>/modules/<url encoded name>/genid/<url encoded gen id>/sign?api-version=<url encoded api version>.]
         String uri = baseUrl != null ? baseUrl.replaceFirst("/*$", "") : "";
 
         byte[] body = signRequest.toJson().getBytes(StandardCharsets.UTF_8);
@@ -78,13 +77,21 @@ public class HttpsHsmClient
         String pathBuilder = "/modules/" + URLEncoder.encode(moduleName, StandardCharsets.UTF_8.name()) +
                 "/genid/" + URLEncoder.encode(generationId, StandardCharsets.UTF_8.name()) +
                 "/sign";
-        HttpsResponse response = sendRequestBasedOnScheme(HttpsMethod.POST, body, uri, pathBuilder, API_VERSION_QUERY_STRING_PREFIX + apiVersion);
+
+        HttpsResponse response = null;
+        try
+        {
+            response = sendRequestBasedOnScheme(HttpsMethod.POST, body, uri, pathBuilder, API_VERSION_QUERY_STRING_PREFIX + apiVersion);
+        }
+        catch (IOException e)
+        {
+            throw new TransportException("Could not send request to HSM", e);
+        }
 
         int responseCode = response.getStatus();
         String responseBody = new String(response.getBody(), StandardCharsets.UTF_8);
         if (responseCode >= 200 && responseCode < 300)
         {
-            // Codes_SRS_HSMHTTPCLIENT_34_004: [If the response from the http call is 200, this function shall return the SignResponse built from the response body json.]
             return SignResponse.fromJson(responseBody);
         }
         else
@@ -96,8 +103,7 @@ public class HttpsHsmClient
                 exceptionMessage = exceptionMessage + " Error response message: " + errorResponse.getMessage();
             }
 
-            // Codes_SRS_HSMHTTPCLIENT_34_005: [If the response from the http call is not 200, this function shall throw an HsmException.]
-            throw new HsmException(exceptionMessage);
+            throw IotHubStatusCode.getConnectionStatusException(IotHubStatusCode.getIotHubStatusCode(responseCode), exceptionMessage);
         }
     }
 
@@ -106,45 +112,43 @@ public class HttpsHsmClient
      * @param apiVersion the api version to use
      * @return the trust bundle response from the hsm, contains the certificates to be trusted
      * @throws TransportException if the HSM cannot be reached
-     * @throws MalformedURLException if a proper URL cannot be constructed due to the provided api version
-     * @throws HsmException if the hsm rejects the request for any reason
      */
-    public TrustBundleResponse getTrustBundle(String apiVersion) throws IOException, TransportException, HsmException
+    public TrustBundleResponse getTrustBundle(String apiVersion) throws TransportException
     {
         log.debug("Getting trust bundle...");
         if (apiVersion == null || apiVersion.isEmpty())
         {
-            // Codes_SRS_HSMHTTPCLIENT_34_007: [If the provided api version is null or empty, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("api version cannot be null or empty");
         }
 
-        // Codes_SRS_HSMHTTPCLIENT_34_008: [This function shall build an http request with the url in the format
-        // <base url>/trust-bundle?api-version=<url encoded api version>.]
         String uri = baseUrl != null ? baseUrl.replaceFirst("/*$", "") : "";
 
-        // Codes_SRS_HSMHTTPCLIENT_34_009: [This function shall send a GET http request to the built url.]
-        HttpsResponse response = sendRequestBasedOnScheme(HttpsMethod.GET, new byte[0], uri, "/trust-bundle"
-                // Codes_SRS_HSMHTTPCLIENT_34_009: [This function shall send a GET http request to the built url.]
-                , API_VERSION_QUERY_STRING_PREFIX + apiVersion);
+        HttpsResponse response = null;
+        try
+        {
+            response = sendRequestBasedOnScheme(HttpsMethod.GET, new byte[0], uri, "/trust-bundle", API_VERSION_QUERY_STRING_PREFIX + apiVersion);
+        }
+        catch (IOException e)
+        {
+            throw IotHubStatusCode.getConnectionStatusException(IotHubStatusCode.IO_ERROR, "Could not send request to HSM");
+        }
 
         int statusCode = response.getStatus();
         String body = response.getBody() != null ? new String(response.getBody(), StandardCharsets.UTF_8) : "";
         if (statusCode >= 200 && statusCode < 300)
         {
-            // Codes_SRS_HSMHTTPCLIENT_34_010: [If the response from the http request is 200, this function shall return the trust bundle response.]
             return TrustBundleResponse.fromJson(body);
         }
         else
         {
-            // Codes_SRS_HSMHTTPCLIENT_34_011: [If the response from the http request is not 200, this function shall throw an HSMException.]
             ErrorResponse errorResponse = ErrorResponse.fromJson(body);
             if (errorResponse != null)
             {
-                throw new HsmException("Received error from hsm with status code " + statusCode + " and message " + errorResponse.getMessage());
+                throw IotHubStatusCode.getConnectionStatusException(IotHubStatusCode.getIotHubStatusCode(statusCode), "Received error from hsm with status code " + statusCode + " and message " + errorResponse.getMessage());
             }
             else
             {
-                throw new HsmException("Received error from hsm with status code " + statusCode);
+                throw IotHubStatusCode.getConnectionStatusException(IotHubStatusCode.getIotHubStatusCode(statusCode), "Received error from hsm with status code " + statusCode);
             }
         }
     }
@@ -189,7 +193,6 @@ public class HttpsHsmClient
         // will go into the unix socket request later, such as headers, method, etc.
         HttpsRequest httpsRequest = new HttpsRequest(requestUrl, httpsMethod, body, "");
 
-        // Codes_SRS_HSMHTTPCLIENT_34_003: [This function shall build an http request with headers ContentType and Accept with value application/json.]
         httpsRequest.setHeaderField("Accept", "application/json");
 
         if (body.length > 0)
@@ -208,15 +211,23 @@ public class HttpsHsmClient
         }
         else if (this.scheme.equalsIgnoreCase(UNIX_SCHEME))
         {
+            if (this.unixDomainSocketChannel == null)
+            {
+                throw new IllegalArgumentException("Must provide an implementation of the UnixDomainSocketChannel interface since this edge runtime setup requires communicating over unix domain sockets.");
+            }
+            else
+            {
+                log.trace("User provided UnixDomainSocketChannel will be used for setup.");
+            }
+
             String unixAddressPrefix = UNIX_SCHEME + "://";
             String localUnixSocketPath = baseUri.substring(baseUri.indexOf(unixAddressPrefix) + unixAddressPrefix.length());
 
-            // Codes_SRS_HSMHTTPCLIENT_34_006: [If the scheme of the provided url is Unix, this function shall send the http request using unix domain sockets.]
             response = sendHttpRequestUsingUnixSocket(httpsRequest, path, queryString, localUnixSocketPath);
         }
         else
         {
-            throw new UnsupportedOperationException("unrecognized URI scheme. Only HTTPS, HTTP and UNIX are supported");
+            throw new UnsupportedOperationException("unrecognized URI scheme \"" + this.scheme + "\". Only HTTPS, HTTP and UNIX are supported");
         }
 
         return response;
@@ -226,81 +237,75 @@ public class HttpsHsmClient
      * Send an HTTP request over a unix domain socket
      * @param httpsRequest the request to send
      * @return the response from the HSM unit
-     * @throws IOException If the unix socket cannot be reached
+     * @throws IOException If the unix domain socket cannot be reached
      */
     private HttpsResponse sendHttpRequestUsingUnixSocket(HttpsRequest httpsRequest, String httpRequestPath, String httpRequestQueryString, String unixSocketAddress) throws IOException
     {
-        log.debug("Sending data over unix socket...");
+        log.debug("Sending data over unix domain socket");
 
-        UnixSocketChannel channel = null;
         HttpsResponse response;
         try
         {
             //write to socket
             byte[] requestBytes = HttpsRequestResponseSerializer.serializeRequest(httpsRequest, httpRequestPath, httpRequestQueryString, unixSocketAddress);
-            UnixSocketAddress address = new UnixSocketAddress(unixSocketAddress);
-            channel = UnixSocketChannel.open(address);
+            unixDomainSocketChannel.open(unixSocketAddress);
 
             if (httpsRequest.getBody() != null)
             {
                 //append http request body to the request bytes
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                 outputStream.write(requestBytes);
                 outputStream.write(httpsRequest.getBody());
 
-                channel.write(ByteBuffer.wrap(outputStream.toByteArray()));
+                log.trace("Writing {} bytes to unix domain socket", outputStream.size());
+                unixDomainSocketChannel.write(outputStream.toByteArray());
             }
             else
             {
-                channel.write(ByteBuffer.wrap(requestBytes));
+                log.trace("Writing {} bytes to unix domain socket", requestBytes.length);
+                unixDomainSocketChannel.write(requestBytes);
             }
 
             //read response
-            String responseString = readResponseFromChannel(channel);
+            String responseString = readResponseFromChannel(unixDomainSocketChannel);
             response = HttpsRequestResponseSerializer.deserializeResponse(new BufferedReader(new StringReader(responseString)));
         }
         finally
         {
-            if (channel != null)
-            {
-                log.trace("Closing unix socket channel...");
-                channel.close();
-            }
+            log.trace("Closing unix domain socket");
+            unixDomainSocketChannel.close();
         }
 
         return response;
     }
 
-    private String readResponseFromChannel(UnixSocketChannel channel) throws IOException
+    private String readResponseFromChannel(UnixDomainSocketChannel channel) throws IOException
     {
-        log.debug("Reading response from unix socket channel...");
+        log.debug("Reading response from unix domain socket");
 
-        ByteBuffer buf = ByteBuffer.allocateDirect(10);
-        StringBuilder response = new StringBuilder();
-        int numRead = 0;
+        byte[] buf = new byte[400];
+        StringBuilder responseStringBuilder = new StringBuilder();
+        int numRead = channel.read(buf);
+
+        // keep reading from the unix domain socket in chunks until no more bytes are read
         while (numRead >= 0)
         {
-            // read() places read bytes at the buffer's position so the
-            // position should always be properly set before calling read()
-            // This method sets the position to 0
-            buf.rewind();
+            log.trace("Read {} bytes from unix domain socket", numRead);
+
+            // buf may not be filled completely, so take the subArray of bytes sized equal to numRead
+            String readChunk = new String(Arrays.copyOfRange(buf, 0, numRead), StandardCharsets.US_ASCII);
+            log.trace("Read chunk of data from unix domain socket:");
+            log.trace("{}", readChunk);
+            responseStringBuilder.append(readChunk);
 
             // Read bytes from the channel
             numRead = channel.read(buf);
-
-            // The read() method also moves the position so in order to
-            // read the new bytes, the buffer's position must be
-            // set back to 0
-            buf.rewind();
-
-            // Read bytes from ByteBuffer; see also
-            // e159 Getting Bytes from a ByteBuffer
-            for (int i=0; i<numRead; i++)
-            {
-                response.append(new String(new byte[]{buf.get()}, StandardCharsets.US_ASCII));
-            }
         }
 
-        return response.toString();
+        String response = responseStringBuilder.toString();
+        log.debug("Read response from unix domain socket channel");
+        log.debug("{}", response);
+
+        return response;
     }
 }

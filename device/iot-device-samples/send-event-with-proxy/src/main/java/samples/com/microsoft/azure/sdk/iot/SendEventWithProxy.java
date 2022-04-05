@@ -4,6 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import java.io.IOException;
@@ -19,17 +20,16 @@ public class SendEventWithProxy
 {
     private static final List<String> failedMessageListOnClose = new ArrayList<>(); // List of messages that failed on close
 
-    protected static class EventCallback implements IotHubEventCallback
+    protected static class EventCallback implements MessageSentCallback
     {
-        public void execute(IotHubStatusCode status, Object context)
+        public void onMessageSent(Message sentMessage, IotHubClientException exception,  Object context)
         {
-            Message msg = (Message) context;
-
-            System.out.println("IoT Hub responded to message "+ msg.getMessageId()  + " with status " + status.name());
+            IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
+            System.out.println("IoT Hub responded to message "+ sentMessage.getMessageId()  + " with status " + status.name());
 
             if (status==IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE)
             {
-                failedMessageListOnClose.add(msg.getMessageId());
+                failedMessageListOnClose.add(sentMessage.getMessageId());
             }
         }
     }
@@ -37,8 +37,12 @@ public class SendEventWithProxy
     protected static class IotHubConnectionStatusChangeCallbackLogger implements IotHubConnectionStatusChangeCallback
     {
         @Override
-        public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+        public void onStatusChanged(ConnectionStatusChangeContext connectionStatusChangeContext)
         {
+            IotHubConnectionStatus status = connectionStatusChangeContext.getNewStatus();
+            IotHubConnectionStatusChangeReason statusChangeReason = connectionStatusChangeContext.getNewStatusReason();
+            Throwable throwable = connectionStatusChangeContext.getCause();
+
             System.out.println();
             System.out.println("CONNECTION STATUS UPDATE: " + status);
             System.out.println("CONNECTION STATUS REASON: " + statusChangeReason);
@@ -82,7 +86,7 @@ public class SendEventWithProxy
      * args[6] = (optional) proxy password
      */
     public static void main(String[] args)
-            throws IOException, URISyntaxException
+            throws IOException, URISyntaxException, IotHubClientException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
@@ -181,18 +185,19 @@ public class SendEventWithProxy
         System.out.println("Successfully read input parameters.");
         System.out.format("Using communication protocol %s.\n", protocol.name());
 
-        DeviceClient client = new DeviceClient(connString, protocol);
-
         Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHostname, proxyPort));
         ProxySettings httpProxySettings = new ProxySettings(proxy, proxyUsername, proxyPassword);
         System.out.println("Using proxy address: " + proxyHostname + ":" + proxyPort);
-        client.setProxySettings(httpProxySettings);
+
+        ClientOptions clientOptions = ClientOptions.builder().proxySettings(httpProxySettings).build();
+        DeviceClient client = new DeviceClient(connString, protocol, clientOptions);
+
 
         System.out.println("Successfully created an IoT Hub client.");
 
-        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
+        client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
-        client.open();
+        client.open(false);
 
         System.out.println("Opened connection to IoT Hub.");
         System.out.println("Sending the following event messages:");
@@ -207,7 +212,7 @@ public class SendEventWithProxy
                 System.out.println(msgStr);
 
                 EventCallback callback = new EventCallback();
-                client.sendEventAsync(msg, callback, msg);
+                client.sendEventAsync(msg, callback, null);
             }
             catch (Exception e)
             {
@@ -230,7 +235,7 @@ public class SendEventWithProxy
 
         // close the connection
         System.out.println("Closing");
-        client.closeNow();
+        client.close();
 
         if (!failedMessageListOnClose.isEmpty())
         {

@@ -7,6 +7,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
 
 import java.io.Serializable;
 
@@ -80,6 +81,7 @@ public class TwinState implements Serializable
     private static final String TAGS_TAG = "tags";
     @Expose
     @SerializedName(TAGS_TAG)
+    @Getter
     private TwinCollection tags;
 
     // the twin desired properties
@@ -121,12 +123,11 @@ public class TwinState implements Serializable
      */
     public TwinState(TwinCollection tags, TwinCollection desiredProperty)
     {
-        /* SRS_TWIN_STATE_21_001: [The constructor shall store the provided tags and desiredProperty.] */
-        if(tags != null)
+        if (tags != null)
         {
             this.tags = TwinCollection.createFromRawCollection(tags);
         }
-        if(desiredProperty != null)
+        if (desiredProperty != null)
         {
             this.properties = new TwinProperties(desiredProperty);
         }
@@ -147,17 +148,14 @@ public class TwinState implements Serializable
      */
     JsonElement toJsonElement()
     {
-        /* SRS_TWIN_STATE_21_002: [The toJsonElement shall return a JsonElement with the information in this class in a JSON format.] */
         JsonObject twinJson = new JsonObject();
 
-        /* SRS_TWIN_STATE_21_003: [If the tags is null, the toJsonElement shall not include the `tags` in the final JSON.] */
-        if(this.tags != null)
+        if (this.tags != null)
         {
             twinJson.add(TAGS_TAG, this.tags.toJsonElement());
         }
 
-        /* SRS_TWIN_STATE_21_004: [If the property is null, the toJsonElement shall not include the `properties` in the final JSON.] */
-        if(this.properties != null)
+        if (this.properties != null)
         {
             twinJson.add(DESIRED_PROPERTIES_TAG, this.properties.toJsonElement());
         }
@@ -166,25 +164,13 @@ public class TwinState implements Serializable
     }
 
     /**
-     * Getter for the tags.
-     *
-     * @return The {@code TwinCollection} with the tags content. It can be {@code null}.
-     */
-    public TwinCollection getTags()
-    {
-        /* SRS_TWIN_STATE_21_005: [The getTags shall return a TwinCollection with the stored tags.] */
-        return this.tags;
-    }
-
-    /**
      * Getter for the desired property.
      *
      * @return The {@code TwinCollection} with the desired property content. It can be {@code null}.
      */
-    public TwinCollection getDesiredProperty()
+    public TwinCollection getDesiredProperties()
     {
-        /* SRS_TWIN_STATE_21_006: [The getDesiredProperty shall return a TwinCollection with the stored desired property.] */
-        if(this.properties == null)
+        if (this.properties == null)
         {
             return null;
         }
@@ -199,17 +185,14 @@ public class TwinState implements Serializable
     @Override
     public String toString()
     {
-        /* SRS_TWIN_STATE_21_007: [The toString shall return a String with the information in this class in a pretty print JSON.] */
         JsonObject twinJson = new JsonObject();
 
-        /* SRS_TWIN_STATE_21_008: [If the tags is null, the JSON shall not include the `tags`.] */
-        if(this.tags != null)
+        if (this.tags != null)
         {
             twinJson.add(TAGS_TAG, this.tags.toJsonElementWithMetadata());
         }
 
-        /* SRS_TWIN_STATE_21_009: [If the properties is null, the JSON shall not include the `properties`.] */
-        if(this.properties != null)
+        if (this.properties != null)
         {
             twinJson.add(DESIRED_PROPERTIES_TAG, this.properties.toJsonElementWithMetadata());
         }
@@ -227,6 +210,5 @@ public class TwinState implements Serializable
     @SuppressWarnings("unused")
     TwinState()
     {
-        /* SRS_TWIN_STATE_21_010: [The TwinState shall provide an empty constructor to make GSON happy.] */
     }
 }

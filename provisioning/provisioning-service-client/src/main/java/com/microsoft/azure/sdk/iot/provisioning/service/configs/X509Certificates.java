@@ -5,7 +5,7 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
+import lombok.Getter;
 
 import java.io.Serializable;
 
@@ -96,12 +96,14 @@ public class X509Certificates implements Serializable
     private static final String PRIMARY_TAG = "primary";
     @Expose
     @SerializedName(PRIMARY_TAG)
+    @Getter
     private X509CertificateWithInfo primary;
 
     // the secondary X509 certificate
     private static final String SECONDARY_TAG = "secondary";
     @Expose
     @SerializedName(SECONDARY_TAG)
+    @Getter
     private X509CertificateWithInfo secondary;
 
     /**
@@ -135,7 +137,7 @@ public class X509Certificates implements Serializable
     X509Certificates(String primary, String secondary)
     {
         /* SRS_X509_CERTIFICATES_21_001: [The constructor shall throw IllegalArgumentException if the primary certificate is null or empty.] */
-        if(Tools.isNullOrEmpty(primary))
+        if (primary == null || primary.isEmpty())
         {
             throw new IllegalArgumentException("primary certificate cannot be null or empty");
         }
@@ -143,7 +145,7 @@ public class X509Certificates implements Serializable
         this.primary = new X509CertificateWithInfo(primary);
 
         /* SRS_X509_CERTIFICATES_21_003: [If the secondary certificate is not null or empty, the constructor shall create a new instance of the X509CertificateWithInfo using the provided secondary certificate, and store it as the secondary Certificate.] */
-        if(!Tools.isNullOrEmpty(secondary))
+        if (!(secondary == null || secondary.isEmpty()))
         {
             this.secondary = new X509CertificateWithInfo(secondary);
         }
@@ -160,7 +162,7 @@ public class X509Certificates implements Serializable
     public X509Certificates(X509Certificates x509Certificates)
     {
         /* SRS_X509_CERTIFICATES_21_004: [The constructor shall throw IllegalArgumentException if the provide X509Certificates is null or if its primary certificate is null.] */
-        if((x509Certificates == null) || (x509Certificates.getPrimaryFinal() == null))
+        if ((x509Certificates == null) || (x509Certificates.getPrimary() == null))
         {
             throw new IllegalArgumentException("original x509Certificates cannot be null and its primary certificate cannot be null.");
         }
@@ -168,60 +170,10 @@ public class X509Certificates implements Serializable
         this.primary = new X509CertificateWithInfo(x509Certificates.primary);
 
         /* SRS_X509_CERTIFICATES_21_006: [If the secondary certificate is not null, the constructor shall create a new instance of the X509CertificateWithInfo using the provided secondary certificate, and store it as the secondary Certificate.] */
-        if(x509Certificates.secondary != null)
+        if (x509Certificates.secondary != null)
         {
             this.secondary = new X509CertificateWithInfo(x509Certificates.secondary);
         }
-    }
-
-    /**
-     * Getter for the primary.
-     *
-     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #getPrimaryFinal()}
-     *
-     * @return the {@link X509CertificateWithInfo} with the stored primary. It cannot be {@code null}.
-     */
-    @Deprecated
-    public X509CertificateWithInfo getPrimary()
-    {
-        /* SRS_X509_CERTIFICATES_21_007: [The getPrimary shall return the stored primary.] */
-        return this.primary;
-    }
-
-    /**
-     * Getter for the primary.
-     *
-     * @return the {@link X509CertificateWithInfo} with the stored primary. It cannot be {@code null}.
-     */
-    public final X509CertificateWithInfo getPrimaryFinal()
-    {
-        /* SRS_X509_CERTIFICATES_21_007: [The getPrimary shall return the stored primary.] */
-        return this.primary;
-    }
-
-    /**
-     * Getter for the secondary.
-     *
-     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #getSecondaryFinal()}
-     *
-     * @return the {@link X509CertificateWithInfo} with the stored secondary. It can be {@code null}.
-     */
-    @Deprecated
-    public X509CertificateWithInfo getSecondary()
-    {
-        /* SRS_X509_CERTIFICATES_21_008: [The getSecondary shall return the stored secondary.] */
-        return this.secondary;
-    }
-
-    /**
-     * Getter for the secondary.
-     *
-     * @return the {@link X509CertificateWithInfo} with the stored secondary. It can be {@code null}.
-     */
-    public final X509CertificateWithInfo getSecondaryFinal()
-    {
-        /* SRS_X509_CERTIFICATES_21_008: [The getSecondary shall return the stored secondary.] */
-        return this.secondary;
     }
 
     /**

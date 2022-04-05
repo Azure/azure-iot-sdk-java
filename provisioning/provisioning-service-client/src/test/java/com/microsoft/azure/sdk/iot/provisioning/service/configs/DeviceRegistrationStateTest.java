@@ -4,7 +4,6 @@
 package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.JsonSyntaxException;
-import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import mockit.Deencapsulation;
 import org.junit.Test;
 import com.microsoft.azure.sdk.iot.provisioning.service.Helpers;
@@ -155,7 +154,7 @@ public class DeviceRegistrationStateTest
         DeviceRegistrationState deviceRegistrationState = new DeviceRegistrationState(json);
 
         // assert
-        assertNull(Deencapsulation.getField(deviceRegistrationState, "createdDateTimeUtcDate"));
+        assertNull(Deencapsulation.getField(deviceRegistrationState, "createdDateTimeUtc"));
     }
 
     /* SRS_DEVICE_REGISTRATION_STATE_21_031: [Te constructor shall throw IllegalArgumentException if the createdDateTimeUtc is empty or invalid.] */
@@ -213,7 +212,7 @@ public class DeviceRegistrationStateTest
         DeviceRegistrationState deviceRegistrationState = new DeviceRegistrationState(VALID_JSON);
 
         // assert
-        Helpers.assertDateWithError((Date)Deencapsulation.getField(deviceRegistrationState, "createdDateTimeUtcDate"), VALID_DATE_AS_STRING);
+        Helpers.assertDateWithError((Date)Deencapsulation.getField(deviceRegistrationState, "createdDateTimeUtc"), VALID_DATE_AS_STRING);
     }
 
     /* SRS_DEVICE_REGISTRATION_STATE_21_009: [If the lastUpdatedDateTimeUtc is provided, the constructor shall parse it as date and time UTC.] */
@@ -236,7 +235,7 @@ public class DeviceRegistrationStateTest
         DeviceRegistrationState deviceRegistrationState = new DeviceRegistrationState(json);
 
         // assert
-        assertNull(Deencapsulation.getField(deviceRegistrationState, "lastUpdatedDateTimeUtcDate"));
+        assertNull(Deencapsulation.getField(deviceRegistrationState, "lastUpdatedDateTimeUtc"));
     }
 
     /* SRS_DEVICE_REGISTRATION_STATE_21_032: [Te constructor shall throw IllegalArgumentException if the lastUpdatedDateTimeUtc is empty or invalid.] */
@@ -294,7 +293,7 @@ public class DeviceRegistrationStateTest
         DeviceRegistrationState deviceRegistrationState = new DeviceRegistrationState(VALID_JSON);
 
         // assert
-        Helpers.assertDateWithError((Date)Deencapsulation.getField(deviceRegistrationState, "lastUpdatedDateTimeUtcDate"), VALID_DATE_AS_STRING);
+        Helpers.assertDateWithError((Date)Deencapsulation.getField(deviceRegistrationState, "lastUpdatedDateTimeUtc"), VALID_DATE_AS_STRING);
     }
 
     /* SRS_DEVICE_REGISTRATION_STATE_21_010: [If the assignedHub is not null, the constructor shall judge and store it.] */

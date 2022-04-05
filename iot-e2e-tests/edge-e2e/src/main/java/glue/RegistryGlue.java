@@ -1,12 +1,11 @@
 package glue;
 
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
+import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
+import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import io.swagger.server.api.MainApiException;
 import io.swagger.server.api.model.ConnectResponse;
-import io.swagger.server.api.verticle.WrappedDeviceTwinDevice;
+import io.swagger.server.api.verticle.WrappedTwin;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -14,37 +13,30 @@ import io.vertx.core.json.JsonObject;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings("ALL")
 public class RegistryGlue
 {
-    HashMap<String, DeviceTwin> _map = new HashMap<>();
+    HashMap<String, TwinClient> _map = new HashMap<>();
     int _clientCount = 0;
 
     public void connect(String connectionString, Handler<AsyncResult<ConnectResponse>> handler)
     {
         System.out.printf("Connect called%n");
-        try
-        {
-            DeviceTwin client = DeviceTwin.createFromConnectionString(connectionString);
+        TwinClient client = new TwinClient(connectionString);
 
-            this._clientCount++;
-            String connectionId = "registryClient_" + this._clientCount;
-            this._map.put(connectionId, client);
+        this._clientCount++;
+        String connectionId = "registryClient_" + this._clientCount;
+        this._map.put(connectionId, client);
 
-            ConnectResponse cr = new ConnectResponse();
-            cr.setConnectionId(connectionId);
-            handler.handle(Future.succeededFuture(cr));
-        } catch (IOException e)
-        {
-            handler.handle(Future.failedFuture(e));
-        }
+        ConnectResponse cr = new ConnectResponse();
+        cr.setConnectionId(connectionId);
+        handler.handle(Future.succeededFuture(cr));
     }
 
-    private DeviceTwin getClient(String connectionId)
+    private TwinClient getClient(String connectionId)
     {
         if (this._map.containsKey(connectionId))
         {
@@ -59,7 +51,7 @@ public class RegistryGlue
     private void _closeConnection(String connectionId)
     {
         System.out.printf("Disconnect for %s%n", connectionId);
-        DeviceTwin client = getClient(connectionId);
+        TwinClient client = getClient(connectionId);
         if (client != null)
         {
             this._map.remove(connectionId);
@@ -76,22 +68,25 @@ public class RegistryGlue
     {
         System.out.printf("getModuleTwin called for %s with deviceId = %s and moduleId = %s%n", connectionId, deviceId, moduleId);
 
-        DeviceTwin client = getClient(connectionId);
+        TwinClient client = getClient(connectionId);
         if (client == null)
         {
             handler.handle(Future.failedFuture(new MainApiException(500, "invalid connection id")));
         }
         else
         {
-            WrappedDeviceTwinDevice twin = new WrappedDeviceTwinDevice(deviceId, moduleId);
+            Twin twin = null;
             try
             {
-                client.getTwin(twin);
+                twin = client.get(deviceId, moduleId);
             } catch (IOException | IotHubException e)
             {
                 handler.handle(Future.failedFuture(e));
             }
-            handler.handle(Future.succeededFuture(twin.toJsonObject()));
+
+            WrappedTwin wrappedTwin = new WrappedTwin(twin);
+
+            handler.handle(Future.succeededFuture(wrappedTwin.toJsonObject()));
         }
     }
 
@@ -100,30 +95,25 @@ public class RegistryGlue
         System.out.printf("sendModuleTwinPatch called for %s with deviceId = %s and moduleId = %s%n", connectionId, deviceId, moduleId);
         System.out.println(props.toString());
 
-        DeviceTwin client = getClient(connectionId);
+        TwinClient client = getClient(connectionId);
         if (client == null)
         {
             handler.handle(Future.failedFuture(new MainApiException(500, "invalid connection id")));
         }
         else
         {
-            DeviceTwinDevice twin = new DeviceTwinDevice(deviceId, moduleId);
-            Set<Pair> newProps = new HashSet<>();
+            Twin twin = new Twin(deviceId, moduleId);
             Map<String, Object> desiredProps = ((JsonObject) props).getJsonObject("properties").getJsonObject("desired").getMap();
-            for (String key : desiredProps.keySet())
-            {
-                newProps.add(new Pair(key, desiredProps.get(key)));
-            }
-            twin.setDesiredProperties(newProps);
+            twin.getDesiredProperties().putAll(desiredProps);
+
             try
             {
-                client.updateTwin(twin);
+                client.patch(twin);
             }
             catch (IotHubException | IOException e)
             {
                 handler.handle(Future.failedFuture(e));
             }
-
 
             handler.handle(Future.succeededFuture());
         }
@@ -140,6 +130,4 @@ public class RegistryGlue
             }
         }
     }
-
-
 }

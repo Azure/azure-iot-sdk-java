@@ -3,16 +3,15 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
-import com.microsoft.azure.sdk.iot.device.IotHubMethod;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 import com.microsoft.azure.sdk.iot.device.MessageType;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
+import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceOperations;
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
 
-import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_UNKNOWN;
+import static com.microsoft.azure.sdk.iot.device.twin.DeviceOperations.DEVICE_OPERATION_UNKNOWN;
 import static org.junit.Assert.*;
 
 /**
@@ -63,7 +62,7 @@ public class IotHubTransportMessageTest
 
         // assert
         assertEquals(messageType, iotHubTransportMessage.getMessageType());
-        assertNull(iotHubTransportMessage.getVersion());
+        assertEquals(0, iotHubTransportMessage.getVersion());
         assertNull(iotHubTransportMessage.getRequestId());
         assertNull(iotHubTransportMessage.getStatus());
         assertEquals(DEVICE_OPERATION_UNKNOWN, iotHubTransportMessage.getDeviceOperationType());
@@ -90,16 +89,16 @@ public class IotHubTransportMessageTest
     public void setVersionSetsTheVersion()
     {
         // arrange
-        String versionStr = "abcdefg";
+        int version = 1234;
         byte[] data = new byte[1];
         MessageType messageType = MessageType.DEVICE_TWIN;
         IotHubTransportMessage iotHubTransportMessage = new IotHubTransportMessage(data, messageType);
 
         // act
-        iotHubTransportMessage.setVersion(versionStr);
+        iotHubTransportMessage.setVersion(version);
 
         // assert
-        assertEquals(versionStr, iotHubTransportMessage.getVersion());
+        assertEquals(version, iotHubTransportMessage.getVersion());
     }
 
     /*
@@ -109,17 +108,17 @@ public class IotHubTransportMessageTest
     public void getVersionGetsTheVersion()
     {
         // arrange
-        String versionStr = "abcdefg";
+        int version = 1234;
         byte[] data = new byte[1];
         MessageType messageType = MessageType.DEVICE_TWIN;
         IotHubTransportMessage iotHubTransportMessage = new IotHubTransportMessage(data, messageType);
-        iotHubTransportMessage.setVersion(versionStr);
+        iotHubTransportMessage.setVersion(version);
 
         // act
-        String version = iotHubTransportMessage.getVersion();
+        int versionActual = iotHubTransportMessage.getVersion();
 
         // assert
-        assertEquals(versionStr, version);
+        assertEquals(version, versionActual);
     }
 
     /*
@@ -302,10 +301,10 @@ public class IotHubTransportMessageTest
         IotHubTransportMessage iotHubTransportMessage = new IotHubTransportMessage("This is a valid body");
 
         // act
-        iotHubTransportMessage.setIotHubMethod(IotHubMethod.POST);
+        iotHubTransportMessage.setIotHubMethod(HttpsMethod.POST);
 
         // assert
-        assertEquals(IotHubMethod.POST, iotHubTransportMessage.getIotHubMethod());
+        assertEquals(HttpsMethod.POST, iotHubTransportMessage.getIotHubMethod());
     }
 
     /* Tests_SRS_IOTHUBTRANSPORTMESSAGE_21_003: [The setUriPath shall store the uriPath. This function do not evaluates this parameter.] */

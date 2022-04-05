@@ -5,8 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service.auth;
 
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
-
 /**
  * Extend AuthenticationMethod class, provide getters
  * for protected properties and implement populate function to set

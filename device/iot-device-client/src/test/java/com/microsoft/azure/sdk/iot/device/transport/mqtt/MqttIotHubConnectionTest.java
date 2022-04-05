@@ -5,15 +5,14 @@ package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
-import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
-import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubServiceException;
+import com.microsoft.azure.sdk.iot.device.transport.ProtocolException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.https.IotHubUri;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
-import com.microsoft.azure.sdk.iot.device.transport.mqtt.*;
 import mockit.*;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
@@ -53,16 +52,16 @@ public class MqttIotHubConnectionTest
     private ProductInfo mockedProductInfo;
 
     @Mocked
-    private DeviceClientConfig mockConfig;
+    private ClientConfiguration mockConfig;
 
     @Mocked
-    private MqttDeviceTwin mockDeviceTwin;
+    private MqttTwin mockDeviceTwin;
 
     @Mocked
     private MqttMessaging mockDeviceMessaging;
 
     @Mocked
-    private MqttDeviceMethod mockDeviceMethod;
+    private MqttDirectMethod mockDeviceMethod;
 
     @Mocked
     private IotHubUri mockIotHubUri;
@@ -74,16 +73,13 @@ public class MqttIotHubConnectionTest
     private MqttAsyncClient mockedMqttConnection;
 
     @Mocked
-    private IotHubConnectionStateCallback mockConnectionStateCallback;
-
-    @Mocked
     private Message mockedMessage;
 
     @Mocked
     private IotHubSasTokenAuthenticationProvider mockedSasTokenAuthenticationProvider;
 
     @Mocked
-    private Queue<DeviceClientConfig> mockedQueue;
+    private Queue<ClientConfiguration> mockedQueue;
 
     @Mocked
     private IotHubListener mockedIotHubListener;
@@ -120,8 +116,8 @@ public class MqttIotHubConnectionTest
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
 
-        DeviceClientConfig actualClientConfig = Deencapsulation.getField(connection, "config");
-        DeviceClientConfig expectedClientConfig = mockConfig;
+        ClientConfiguration actualClientConfig = Deencapsulation.getField(connection, "config");
+        ClientConfiguration expectedClientConfig = mockConfig;
         assertEquals(expectedClientConfig, actualClientConfig);
     }
 
@@ -237,10 +233,10 @@ public class MqttIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = ClientConfiguration.AuthType.SAS_TOKEN;
                 mockConfig.getSasTokenAuthentication().getSasToken();
                 result = expectedSasToken;
-                mockConfig.isUseWebsocket();
+                mockConfig.isUsingWebsocket();
                 result = false;
             }
         };
@@ -273,10 +269,10 @@ public class MqttIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = ClientConfiguration.AuthType.SAS_TOKEN;
                 mockConfig.getSasTokenAuthentication().getSasToken();
                 result = expectedSasToken;
-                mockConfig.isUseWebsocket();
+                mockConfig.isUsingWebsocket();
                 result = false;
                 mockConfig.getModelId();
                 result = modelId;
@@ -316,10 +312,10 @@ public class MqttIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = ClientConfiguration.AuthType.SAS_TOKEN;
                 mockConfig.getSasTokenAuthentication().getSasToken();
                 result = expectedToken;
-                mockConfig.isUseWebsocket();
+                mockConfig.isUsingWebsocket();
                 result = true;
                 mockConfig.getProxySettings();
                 result = null;
@@ -356,8 +352,8 @@ public class MqttIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
-                mockConfig.isUseWebsocket();
+                result = ClientConfiguration.AuthType.X509_CERTIFICATE;
+                mockConfig.isUsingWebsocket();
                 result = true;
                 mockConfig.getProxySettings();
                 result = null;
@@ -451,7 +447,7 @@ public class MqttIotHubConnectionTest
     // given in the configuration.]
     // Tests_SRS_MQTTIOTHUBCONNECTION_15_009: [The function shall send the message payload.]
     // Tests_SRS_MQTTIOTHUBCONNECTION_15_011: [If the message was successfully received by the service,
-    // the function shall return status code OK_EMPTY.]
+    // the function shall return status code OK.]
     @Test
     public void sendEventSendsMessageCorrectlyToIotHub() throws IOException, TransportException, MqttException
     {
@@ -473,7 +469,7 @@ public class MqttIotHubConnectionTest
         connection.open();
         IotHubStatusCode result = connection.sendMessage(mockedMessage);
 
-        assertEquals(IotHubStatusCode.OK_EMPTY, result);
+        assertEquals(IotHubStatusCode.OK, result);
 
         new Verifications()
         {
@@ -614,7 +610,7 @@ public class MqttIotHubConnectionTest
         connection.open();
         IotHubStatusCode result = connection.sendMessage(mockDeviceTwinMsg);
 
-        assertEquals(IotHubStatusCode.OK_EMPTY, result);
+        assertEquals(IotHubStatusCode.OK, result);
 
         new Verifications()
         {
@@ -654,7 +650,7 @@ public class MqttIotHubConnectionTest
         connection.open();
         IotHubStatusCode result = connection.sendMessage(mockDeviceMethodMsg);
 
-        assertEquals(IotHubStatusCode.OK_EMPTY, result);
+        assertEquals(IotHubStatusCode.OK, result);
 
         new Verifications()
         {
@@ -683,10 +679,10 @@ public class MqttIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = ClientConfiguration.AuthType.SAS_TOKEN;
                 mockConfig.getSasTokenAuthentication().getSasToken();
                 result = expectedSasToken;
-                mockConfig.isUseWebsocket();
+                mockConfig.isUsingWebsocket();
                 result = false;
             }
         };
@@ -719,10 +715,10 @@ public class MqttIotHubConnectionTest
         {
             {
                 mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                result = ClientConfiguration.AuthType.SAS_TOKEN;
                 mockConfig.getSasTokenAuthentication().getSasToken();
                 result = expectedSasToken;
-                mockConfig.isUseWebsocket();
+                mockConfig.isUsingWebsocket();
                 result = false;
             }
         };
@@ -1044,12 +1040,12 @@ public class MqttIotHubConnectionTest
                 mockedTransportMessage.getMessageType();
                 result = MessageType.DEVICE_METHODS;
 
-                mockConfig.getDeviceMethodsMessageCallback();
+                mockConfig.getDirectMethodsMessageCallback();
                 result = mockedMessageCallback;
 
                 mockedTransportMessage.setMessageCallback(mockedMessageCallback);
 
-                mockConfig.getDeviceMethodsMessageContext();
+                mockConfig.getDirectMethodsMessageContext();
                 result = callbackContext;
 
                 mockedTransportMessage.setMessageCallbackContext(callbackContext);
@@ -1165,9 +1161,9 @@ public class MqttIotHubConnectionTest
                 result = mockedMqttConnection;
                 new MqttMessaging(anyString, null, anyString, anyBoolean, (MqttConnectOptions) any, (Map) any, (Queue) any);
                 result = mockDeviceMessaging;
-                new MqttDeviceTwin(anyString, (MqttConnectOptions) any, (Map) any, (Queue) any);
+                new MqttTwin(anyString, (MqttConnectOptions) any, (Map) any, (Queue) any);
                 result = mockDeviceTwin;
-                new MqttDeviceMethod(anyString, (MqttConnectOptions) any, (Map) any, (Queue) any);
+                new MqttDirectMethod(anyString, (MqttConnectOptions) any, (Map) any, (Queue) any);
                 result = mockDeviceMethod;
                 mockDeviceMessaging.start();
                 result = null;

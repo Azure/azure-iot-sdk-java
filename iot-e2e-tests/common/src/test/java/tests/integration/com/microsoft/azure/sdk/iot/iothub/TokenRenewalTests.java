@@ -7,24 +7,28 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
-import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
+import com.microsoft.azure.sdk.iot.device.ConnectionStatusChangeContext;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import com.microsoft.azure.sdk.iot.service.DeviceStatus;
-import com.microsoft.azure.sdk.iot.service.Module;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.registry.Module;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.rules.RuleChain;
 import org.junit.rules.Timeout;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.rules.RerunFailedTestRule;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.rules.ThrottleResistantTestRule;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -34,6 +38,7 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static junit.framework.TestCase.assertTrue;
@@ -43,7 +48,7 @@ import static junit.framework.TestCase.assertTrue;
 public class TokenRenewalTests extends IntegrationTest
 {
     protected static String iotHubConnectionString;
-    private static RegistryManager registryManager;
+    private static RegistryClient registryClient;
     protected static HttpProxyServer proxyServer;
     private static String iotHubHostName;
     protected static String testProxyHostname = "127.0.0.1";
@@ -56,12 +61,9 @@ public class TokenRenewalTests extends IntegrationTest
     protected static final char[] testProxyPass = "1234".toCharArray(); // lgtm
 
 
-    final long SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL = 30;
+    final int SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL = 30;
     final long EXPIRED_SAS_TOKEN_GRACE_PERIOD_SECONDS = 600; //service extends 10 minute grace period after a token has expired
     final long EXTRA_BUFFER_TO_ENSURE_TOKEN_EXPIRED_SECONDS = 120; //wait time beyond the expected grace period, just in case
-
-    private static final Integer SEND_TIMEOUT_MILLISECONDS = 60000;
-    private static final Integer RETRY_MILLISECONDS = 100;
 
     private final List<TestIdentity> testIdentities = new ArrayList<>();
 
@@ -71,18 +73,20 @@ public class TokenRenewalTests extends IntegrationTest
 
     public TokenRenewalTests()
     {
-        // This overrides the IntegrationTest level timeout that is too restrictive for this particular test
-        timeout = new Timeout(TOKEN_RENEWAL_TEST_TIMEOUT_MILLISECONDS);
+        // This overrides the IntegrationTest level timeout that is too short for this particular test
+        testRerunRuleChain = RuleChain.outerRule(new RerunFailedTestRule())
+            .around(new ThrottleResistantTestRule())
+            .around(new Timeout(TOKEN_RENEWAL_TEST_TIMEOUT_MILLISECONDS));
     }
 
     @BeforeClass
-    public static void setUp() throws IOException
+    public static void setUp()
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
-        iotHubHostName = com.microsoft.azure.sdk.iot.service.IotHubConnectionString.createConnectionString(iotHubConnectionString).getHostName();
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        iotHubHostName = IotHubConnectionString.createIotHubConnectionString(iotHubConnectionString).getHostName();
+        registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
     }
 
     @BeforeClass
@@ -131,22 +135,6 @@ public class TokenRenewalTests extends IntegrationTest
         clients.addAll(amqpMultiplexedClients);
         clients.addAll(amqpwsMultiplexedClients);
 
-        // Multiplexed clients have this sas token expiry set already
-        for (InternalClient client : clients)
-        {
-            try
-            {
-                //set it so a newly generated sas token only lasts for a small amount of time
-                client.setOption("SetSASTokenExpiryTime", SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL);
-            }
-            catch (UnsupportedOperationException e)
-            {
-                // This will throw for clients with custom sas token providers since you cannot configure this value at the SDK
-                // level when the user controls all aspects of SAS token generation.
-                log.debug("Ignoring UnsupportedOperationException because it was expected");
-            }
-        }
-
         Success[] amqpDisconnectDidNotHappenSuccesses = new Success[clients.size()];
         Success[] mqttDisconnectDidHappenSuccesses = new Success[clients.size()];
         Success[] shutdownWasGracefulSuccesses = new Success[clients.size()];
@@ -161,9 +149,10 @@ public class TokenRenewalTests extends IntegrationTest
             amqpDisconnectDidNotHappenSuccesses[clientIndex].setResult(true); //assume success until unexpected DISCONNECTED_RETRYING
             mqttDisconnectDidHappenSuccesses[clientIndex].setResult(false); //assume failure until DISCONNECTED_RETRYING is triggered by token expiring
             shutdownWasGracefulSuccesses[clientIndex].setResult(true); //assume success until DISCONNECTED callback without CLIENT_CLOSE
+
             mqttDisconnectHadTokenExpiredReasonSuccesses[clientIndex].setResult(false); //assume failure until first disconnected_retrying executes with reason EXPIRED_SAS_TOKEN
 
-            clients.get(clientIndex).registerConnectionStatusChangeCallback(
+            clients.get(clientIndex).setConnectionStatusChangeCallback(
                 new IotHubConnectionStatusChangeTokenRenewalCallbackVerifier(
                     clients.get(clientIndex).getConfig().getProtocol(),
                     amqpDisconnectDidNotHappenSuccesses[clientIndex],
@@ -174,8 +163,8 @@ public class TokenRenewalTests extends IntegrationTest
         }
 
         openEachClient(clients);
-        amqpMultiplexingClient.open();
-        amqpWsMultiplexingClient.open();
+        amqpMultiplexingClient.open(false);
+        amqpWsMultiplexingClient.open(false);
 
         //wait until old sas token has expired, this should force the config to generate a new one from the device key
         System.out.println("Sleeping..." + System.currentTimeMillis());
@@ -201,7 +190,7 @@ public class TokenRenewalTests extends IntegrationTest
         {
             try
             {
-                client.closeNow();
+                client.close();
             }
             catch (UnsupportedOperationException ex)
             {
@@ -237,24 +226,23 @@ public class TokenRenewalTests extends IntegrationTest
         }
     }
 
-    private List<InternalClient> createClientsToTest() throws IotHubException, IOException, URISyntaxException, ModuleClientException, InterruptedException, GeneralSecurityException
+    private List<InternalClient> createClientsToTest() throws IotHubException, IOException, URISyntaxException, InterruptedException, GeneralSecurityException
     {
         List<InternalClient> clients = new ArrayList<>();
         Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
         for (IotHubClientProtocol protocol: IotHubClientProtocol.values())
         {
-            clients.add(createDeviceClient(protocol));
+            clients.add(createDeviceClient(protocol, null));
             if (protocol == HTTPS || protocol == MQTT_WS || protocol == AMQPS_WS)
             {
-                InternalClient client = createDeviceClient(protocol);
                 ProxySettings proxySettings = new ProxySettings(testProxy, testProxyUser, testProxyPass);
-                client.setProxySettings(proxySettings);
+                InternalClient client = createDeviceClient(protocol, proxySettings);
                 clients.add(client);
             }
 
             if (protocol != IotHubClientProtocol.HTTPS && !isBasicTierHub)
             {
-                clients.add(createModuleClient(protocol));
+                clients.add(createModuleClient(protocol, null));
             }
 
             // Add another client with a custom sas token provider. This is important to test
@@ -262,22 +250,22 @@ public class TokenRenewalTests extends IntegrationTest
             // with it behave the same way as mqtt/amqp connections without it.
             UUID uuid = UUID.randomUUID();
             String deviceId = "token-renewal-test-device-with-custom-sas-token-provider-" + protocol + "-" + uuid.toString();
-            com.microsoft.azure.sdk.iot.service.Device device = com.microsoft.azure.sdk.iot.service.Device.createFromId(deviceId, DeviceStatus.Enabled, null);
-            device = registryManager.addDevice(device);
-            SasTokenProvider sasTokenProvider = new SasTokenProviderImpl(registryManager.getDeviceConnectionString(device), (int) (SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL));
+            Device device = new Device(deviceId);
+            device = registryClient.addDevice(device);
+            SasTokenProvider sasTokenProvider = new SasTokenProviderImpl(Tools.getDeviceConnectionString(iotHubConnectionString, device), SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL);
             clients.add(new DeviceClient(iotHubHostName, deviceId, sasTokenProvider, protocol));
         }
 
         return clients;
     }
 
-    private MultiplexingClient createMultiplexedClientToTest(IotHubClientProtocol protocol, List<DeviceClient> clientsToCreate, String hostname) throws IotHubException, IOException, URISyntaxException, MultiplexingClientException, InterruptedException, GeneralSecurityException
+    private MultiplexingClient createMultiplexedClientToTest(IotHubClientProtocol protocol, List<DeviceClient> clientsToCreate, String hostname) throws IotHubException, IOException, URISyntaxException, InterruptedException, GeneralSecurityException, IotHubClientException, TimeoutException
     {
         MultiplexingClient multiplexingClient = new MultiplexingClient(hostname, protocol);
 
         for (int i = 0; i < MULTIPLEX_COUNT; i++)
         {
-            DeviceClient deviceClientToMultiplex = (DeviceClient) createDeviceClient(protocol);
+            DeviceClient deviceClientToMultiplex = (DeviceClient) createDeviceClient(protocol, null);
             clientsToCreate.add(deviceClientToMultiplex);
         }
 
@@ -291,17 +279,17 @@ public class TokenRenewalTests extends IntegrationTest
         for (InternalClient client : clients)
         {
             System.out.println("Sending test message for client " + client.getConfig().getDeviceId());
-            IotHubServicesCommon.sendMessageAndWaitForResponse(client, new MessageAndResult(new Message("some message"), IotHubStatusCode.OK_EMPTY), RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, client.getConfig().getProtocol());
+            IotHubServicesCommon.sendMessageAndWaitForResponse(client, new MessageAndResult(new Message("some message"), IotHubStatusCode.OK), client.getConfig().getProtocol());
         }
     }
 
-    private void openEachClient(List<InternalClient> clients) throws IOException
+    private void openEachClient(List<InternalClient> clients) throws IOException, IotHubClientException
     {
         for (InternalClient client : clients)
         {
             try
             {
-                client.open();
+                client.open(false);
             } catch (UnsupportedOperationException ex)
             {
                 //client was a multiplexing client which was already opened, safe to ignore
@@ -332,8 +320,13 @@ public class TokenRenewalTests extends IntegrationTest
         }
 
         @Override
-        public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+        public void onStatusChanged(ConnectionStatusChangeContext connectionStatusChangeContext)
         {
+            IotHubConnectionStatus status = connectionStatusChangeContext.getNewStatus();
+            IotHubConnectionStatusChangeReason statusChangeReason = connectionStatusChangeContext.getNewStatusReason();
+            Throwable throwable = connectionStatusChangeContext.getCause();
+            Object callbackContext = connectionStatusChangeContext.getCallbackContext();
+
             System.out.println();
             System.out.println("CONNECTION STATUS UPDATE: " + status);
             System.out.println("CONNECTION STATUS REASON: " + statusChangeReason);
@@ -373,24 +366,35 @@ public class TokenRenewalTests extends IntegrationTest
         }
     }
 
-    private InternalClient createModuleClient(IotHubClientProtocol protocol) throws IOException, IotHubException, ModuleClientException, URISyntaxException, InterruptedException {
+    private InternalClient createModuleClient(IotHubClientProtocol protocol, ProxySettings proxySettings) throws IOException, IotHubException, URISyntaxException, InterruptedException {
         UUID uuid = UUID.randomUUID();
         String deviceId = "token-renewal-test-device-" + protocol + "-" + uuid.toString();
         String moduleId = "token-renewal-test-module-" + protocol + "-" + uuid.toString();
-        com.microsoft.azure.sdk.iot.service.Device device = com.microsoft.azure.sdk.iot.service.Device.createFromId(deviceId, DeviceStatus.Enabled, null);
-        device = Tools.addDeviceWithRetry(registryManager, device);
-        Module module = Module.createModule(deviceId, moduleId, AuthenticationType.SAS);
-        module = Tools.addModuleWithRetry(registryManager, module);
-        ModuleClient moduleClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), protocol);
+        Device device = new Device(deviceId);
+        device = Tools.addDeviceWithRetry(registryClient, device);
+        Module module = new Module(deviceId, moduleId, AuthenticationType.SAS);
+        module = Tools.addModuleWithRetry(registryClient, module);
+
+        ClientOptions options =
+            ClientOptions.builder()
+                .sasTokenExpiryTime(SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL)
+                .proxySettings(proxySettings)
+                .build();
+
+        ModuleClient moduleClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), protocol, options);
         testIdentities.add(new TestModuleIdentity(moduleClient, device, module));
         return moduleClient;
     }
 
-    private InternalClient createDeviceClient(IotHubClientProtocol protocol) throws URISyntaxException, IOException, IotHubException, GeneralSecurityException
+    private InternalClient createDeviceClient(IotHubClientProtocol protocol, ProxySettings proxySettings) throws URISyntaxException, IOException, IotHubException, GeneralSecurityException
     {
+        ClientOptions.ClientOptionsBuilder optionsBuilder =
+            ClientOptions.builder()
+                .sasTokenExpiryTime(SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL)
+                .proxySettings(proxySettings);
         TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SAS, false);
-        com.microsoft.azure.sdk.iot.service.Device device = testDeviceIdentity.getDevice();
+        Device device = testDeviceIdentity.getDevice();
         testIdentities.add(testDeviceIdentity);
-        return new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), protocol);
+        return new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), protocol, optionsBuilder.build());
     }
 }

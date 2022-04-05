@@ -3,8 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpsMessage;
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 import com.microsoft.azure.sdk.iot.device.MessageType;
@@ -19,7 +17,6 @@ import org.apache.qpid.proton.amqp.messaging.Source;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.amqp.transport.ReceiverSettleMode;
 import org.apache.qpid.proton.engine.*;
-import org.apache.qpid.proton.reactor.FlowController;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -28,7 +25,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-public abstract class AmqpsReceiverLinkHandler extends BaseHandler
+abstract class AmqpsReceiverLinkHandler extends BaseHandler
 {
     static final String VERSION_IDENTIFIER_KEY = "com.microsoft:client-version";
     private static final String API_VERSION_KEY = "com.microsoft:api-version";
@@ -137,6 +134,7 @@ public abstract class AmqpsReceiverLinkHandler extends BaseHandler
         {
             log.debug("{} receiver link with address {} and link correlation id {} was closed remotely unexpectedly", getLinkInstanceType(), this.receiverLinkAddress, this.linkCorrelationId);
             link.close();
+            clearHandlers();
             this.amqpsLinkStateCallback.onLinkClosedUnexpectedly(link.getRemoteCondition());
         }
         else
@@ -272,7 +270,7 @@ public abstract class AmqpsReceiverLinkHandler extends BaseHandler
 
             if (properties.getContentType() != null)
             {
-                iotHubTransportMessage.setContentTypeFinal(properties.getContentType().toString());
+                iotHubTransportMessage.setContentType(properties.getContentType().toString());
             }
         }
 
@@ -306,6 +304,24 @@ public abstract class AmqpsReceiverLinkHandler extends BaseHandler
         {
             log.debug("Closing {} receiver link with address {} and link correlation id {}", getLinkInstanceType(), this.receiverLinkAddress, this.linkCorrelationId);
             this.receiverLink.close();
+            clearHandlers();
         }
+    }
+
+    // Removes any children of this handler (such as LoggingFlowController) and disassociates this handler
+    // from the proton reactor. By removing the reference of the proton reactor to this handler, this handler becomes
+    // eligible for garbage collection by the JVM. This is important for multiplexed connections where links come and go
+    // but the reactor stays alive for a long time.
+    private void clearHandlers()
+    {
+        this.receiverLink.attachments().clear();
+        Iterator<Handler> childrenIterator = this.children();
+        while (childrenIterator.hasNext())
+        {
+            childrenIterator.next();
+            childrenIterator.remove();
+        }
+
+        this.receiverLink.free();
     }
 }

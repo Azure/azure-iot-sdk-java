@@ -5,16 +5,15 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobClientBuilder;
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
+import com.microsoft.azure.sdk.iot.device.FileUploadCompletionNotification;
+import com.microsoft.azure.sdk.iot.device.FileUploadSasUriRequest;
+import com.microsoft.azure.sdk.iot.device.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -83,7 +82,7 @@ public class FileUploadSample
         {
             System.out.println("On exception, shutting down \n" + " Cause: " + e.getCause() + " \nERROR: " +  e.getMessage());
             System.out.println("Shutting down...");
-            client.closeNow();
+            client.close();
         }
 
         System.out.println("Press any key to exit...");
@@ -91,10 +90,10 @@ public class FileUploadSample
         Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
         scanner.nextLine();
         System.out.println("Shutting down...");
-        client.closeNow();
+        client.close();
     }
 
-    private static void uploadFileOrDirectory(DeviceClient client, String fullFileName) throws IOException, URISyntaxException {
+    private static void uploadFileOrDirectory(DeviceClient client, String fullFileName) throws IOException, URISyntaxException, IotHubClientException {
         File file = new File(fullFileName);
         if(file.isDirectory())
         {
@@ -106,7 +105,7 @@ public class FileUploadSample
         }
     }
 
-    private static void uploadFileOrDirectoryRecursive(DeviceClient client, String baseDirectory, String relativePath) throws IOException, URISyntaxException {
+    private static void uploadFileOrDirectoryRecursive(DeviceClient client, String baseDirectory, String relativePath) throws IOException, URISyntaxException, IotHubClientException {
         String[] fileNameList;
 
         File file = new File(baseDirectory, relativePath);
@@ -128,7 +127,8 @@ public class FileUploadSample
         }
     }
 
-    private static void uploadFile(DeviceClient client, String baseDirectory, String relativeFileName) throws IOException, URISyntaxException {
+    private static void uploadFile(DeviceClient client, String baseDirectory, String relativeFileName) throws IOException, IotHubClientException
+    {
         File file = new File(baseDirectory, relativeFileName);
 
         try
@@ -175,7 +175,7 @@ public class FileUploadSample
         }
         finally
         {
-            client.closeNow();
+            client.close();
         }
     }
 }

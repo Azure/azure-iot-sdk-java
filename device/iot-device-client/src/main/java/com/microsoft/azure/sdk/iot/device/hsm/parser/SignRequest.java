@@ -38,25 +38,21 @@ public class SignRequest
 
     public void setKeyId(String keyId)
     {
-        // Codes_SRS_HTTPHSMSIGNREQUEST_34_001: [This function shall save the provided keyId.]
         this.keyId = keyId;
     }
 
     public byte[] getData()
     {
-        // Codes_SRS_HTTPHSMSIGNREQUEST_34_002: [This function shall return the saved data.]
         return data.getBytes(StandardCharsets.UTF_8);
     }
 
     public void setData(byte[] data)
     {
-        // Codes_SRS_HTTPHSMSIGNREQUEST_34_003: [This function shall save the provided data after base64 encoding it.]
         this.data = encodeBase64String(data);
     }
 
     public void setAlgo(Mac algo)
     {
-        // Codes_SRS_HTTPHSMSIGNREQUEST_34_004: [This function shall save the provided algo.]
         this.algo = algo;
 
         this.algoString = algo.getAlgorithm().toUpperCase();

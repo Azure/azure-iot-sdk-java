@@ -5,8 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
-
 /**
  * Create iot hub invalid operation exception
  */
@@ -26,4 +24,6 @@ public class IotHubInvalidOperationException extends IotHubException
     {
         super(message, errorCode, errorCodeDescription);
     }
+
+    public static final String amqpErrorCode = "amqp:not-allowed";
 }

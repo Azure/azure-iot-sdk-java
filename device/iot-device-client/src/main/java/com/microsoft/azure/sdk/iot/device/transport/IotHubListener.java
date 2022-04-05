@@ -22,7 +22,7 @@ public interface IotHubListener
      * @param e Null if the message was successfully acknowledged. Otherwise, this exception communicates if the message
      *          should be resent at all
      */
-    void onMessageSent(Message message, String deviceId, Throwable e);
+    void onMessageSent(Message message, String deviceId, TransportException e);
 
     /**
      * Callback to be fired when a transport message has been received.
@@ -30,14 +30,14 @@ public interface IotHubListener
      * @param e the exception that was encountered while receiving messages. May be null if transportMessage
      *          is not null
      */
-    void onMessageReceived(IotHubTransportMessage transportMessage, Throwable e);
+    void onMessageReceived(IotHubTransportMessage transportMessage, TransportException e);
 
     /**
      * Callback to be fired when connection has been lost
      * @param e the cause of the connection loss
      * @param connectionId the id of the connection this update is relevant to
      */
-    void onConnectionLost(Throwable e, String connectionId);
+    void onConnectionLost(TransportException e, String connectionId);
 
     /**
      * Callback to be fired when the connection has been successfully established
@@ -59,8 +59,10 @@ public interface IotHubListener
      * @param connectionId the Id of the connection, used to identify which of possible many reconnection attempts
      *                     this event belongs to.
      * @param deviceId the Id of the device that the session belongs to
+     * @param shouldReconnect false if the disconnect was desired by the users, and true if it is the consequence of an
+     * issue where the SDK should retry.
      */
-    void onMultiplexedDeviceSessionLost(Throwable e, String connectionId, String deviceId);
+    void onMultiplexedDeviceSessionLost(TransportException e, String connectionId, String deviceId, boolean shouldReconnect);
 
     /**
      * Callback to be fired when the multiplexed connection fails to register a device session.

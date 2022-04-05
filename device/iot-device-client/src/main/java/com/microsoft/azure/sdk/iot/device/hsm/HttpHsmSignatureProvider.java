@@ -6,13 +6,13 @@
 package com.microsoft.azure.sdk.iot.device.hsm;
 
 import com.microsoft.azure.sdk.iot.device.auth.SignatureProvider;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignRequest;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignResponse;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.Mac;
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
@@ -35,29 +35,26 @@ public class HttpHsmSignatureProvider implements SignatureProvider
      * Constructor for an HttpHsmSignatureProvider but using the non-default api version
      * @param providerUri the uri for the signing provider
      * @param apiVersion the api version to call
+     * @param unixDomainSocketChannel the implementation of the {@link UnixDomainSocketChannel} interface that will be used if any
+     * unix domain socket communication is required. May be null if no unix domain socket communication is required.
      * @throws URISyntaxException if the provided uri cannot be parsed
      * @throws NoSuchAlgorithmException if the default sign request algorithm cannot be used
      */
-    public HttpHsmSignatureProvider(String providerUri, String apiVersion) throws URISyntaxException, NoSuchAlgorithmException
+    public HttpHsmSignatureProvider(String providerUri, String apiVersion, UnixDomainSocketChannel unixDomainSocketChannel) throws URISyntaxException, NoSuchAlgorithmException
     {
         if (providerUri == null || providerUri.isEmpty())
         {
-            // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_004: [If the providerUri is null or empty, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("provider uri cannot be null or empty");
         }
 
         if (apiVersion == null || apiVersion.isEmpty())
         {
-            // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_005: [If the apiVersion is null or empty, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("apiVersion cannot be null or empty");
         }
 
         log.trace("Creating HttpHsmSignatureProvider with providerUri {}", providerUri);
 
-        // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_002: [This constructor shall create a new HttpsHsmClient with the provided providerUri.]
-        this.httpClient = new HttpsHsmClient(providerUri);
-
-        // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_003: [This constructor shall save the provided api version.]
+        this.httpClient = new HttpsHsmClient(providerUri, unixDomainSocketChannel);
         this.apiVersion = apiVersion;
     }
 
@@ -67,19 +64,14 @@ public class HttpHsmSignatureProvider implements SignatureProvider
      * @param data the data to be signed
      * @param generationId the generation id
      * @return the signed data
-     * @throws IOException If the http client cannot reach the signing party
-     * @throws TransportException If the http client cannot reach the signing party
-     * @throws URISyntaxException If the url for the signing party cannot be parsed
      */
-    public String sign(String keyName, String data, String generationId) throws IOException, TransportException, URISyntaxException, HsmException
+    public String sign(String keyName, String data, String generationId) throws TransportException, UnsupportedEncodingException
     {
         if (data == null || data.isEmpty())
         {
-            // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_007: [If the provided data is null or empty, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("Data cannot be null or empty");
         }
 
-        // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_006: [This function shall create a signRequest for the hsm http client to sign, and shall return the utf-8 encoded result of that signing.]
         SignRequest signRequest = new SignRequest();
         signRequest.setAlgo(defaultSignRequestAlgo);
         signRequest.setData(data.getBytes(ENCODING_CHARSET));

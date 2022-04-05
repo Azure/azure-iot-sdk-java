@@ -22,13 +22,13 @@
 # the packages where we keep our JSON parsing classes from minification to avoid this issue
 -keep class com.microsoft.azure.sdk.iot.deps.serializer.* { *; }
 -keep class com.microsoft.azure.sdk.iot.deps.twin.* { *; }
--keep class com.microsoft.azure.sdk.iot.device.edge.MethodRequest { *; }
+-keep class com.microsoft.azure.sdk.iot.device.edge.DirectMethodRequest { *; }
 -keep class com.microsoft.azure.sdk.iot.device.hsm.parser.ErrorResponse { *; }
 -keep class com.microsoft.azure.sdk.iot.device.hsm.parser.SignRequest { *; }
 
 # These are the recommended exclusions when using the IoT Hub service client SDK. They are commented
 # out because this sample only uses the IoT Hub device client SDK
-#-keep class com.microsoft.azure.sdk.iot.service.ImportMode { *; }
+#-keep class com.microsoft.azure.sdk.iot.service.registry.ImportMode { *; }
 #-keep class com.microsoft.azure.sdk.iot.service.AuthenticationMechanism { *; }
 
 # These are the recommended exclusions when using the Device Provisioning Service device client SDK.

@@ -68,8 +68,8 @@ public class X509CAReferencesTest
         X509CAReferences x509CAReferences = Deencapsulation.newInstance(X509CAReferences.class, new Class[] {String.class, String.class},CA_REFERENCE_STRING, CA_REFERENCE_STRING);
 
         // act - assert
-        assertEquals(CA_REFERENCE_STRING, x509CAReferences.getPrimaryFinal());
-        assertEquals(CA_REFERENCE_STRING, x509CAReferences.getSecondaryFinal());
+        assertEquals(CA_REFERENCE_STRING, x509CAReferences.getPrimary());
+        assertEquals(CA_REFERENCE_STRING, x509CAReferences.getSecondary());
     }
 
     /* SRS_X509_CAREFERENCE_21_007: [The X509CAReferences shall provide an empty constructor to make GSON happy.] */

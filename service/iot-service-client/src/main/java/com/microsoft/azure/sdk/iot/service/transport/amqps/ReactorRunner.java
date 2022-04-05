@@ -7,12 +7,13 @@ package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
-import org.apache.qpid.proton.engine.BaseHandler;
 import org.apache.qpid.proton.engine.HandlerException;
 import org.apache.qpid.proton.reactor.Reactor;
 import org.apache.qpid.proton.reactor.ReactorOptions;
 
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class ReactorRunner
@@ -20,11 +21,16 @@ public class ReactorRunner
     private final static String THREAD_NAME = "azure-iot-sdk-ReactorRunner";
     private final String threadName;
     private final Reactor reactor;
-    public static final int REACTOR_TIMEOUT = 3141; // reactor timeout in milliseconds
-    public static final int CLOSE_REACTOR_GRACEFULLY_TIMEOUT = 10 * 1000;
+    private static final int REACTOR_TIMEOUT = 3141; // reactor timeout in milliseconds
     private static final int MAX_FRAME_SIZE = 4 * 1024;
+    private final AmqpConnectionHandler handler;
 
-    public ReactorRunner(BaseHandler baseHandler, String threadNamePrefix, String threadNamePostfix) throws IOException
+    public ReactorRunner(AmqpConnectionHandler handler) throws IOException
+    {
+        this(null, null, handler);
+    }
+
+    public ReactorRunner(String threadNamePrefix, String threadNamePostfix, AmqpConnectionHandler handler) throws IOException
     {
         ReactorOptions options = new ReactorOptions();
 
@@ -34,76 +40,17 @@ public class ReactorRunner
         // expected 64 * 1024 bytes. For more context, see https://github.com/Azure/azure-iot-sdk-java/issues/742
         options.setMaxFrameSize(MAX_FRAME_SIZE);
 
-        this.reactor = Proton.reactor(options, baseHandler);
+        this.reactor = Proton.reactor(options, handler);
         this.threadName = threadNamePrefix + "-" + THREAD_NAME + "-" + threadNamePostfix;
-    }
-
-    public void run(long timeoutMs)
-    {
-        Thread.currentThread().setName(this.threadName);
-
-        try
-        {
-            log.trace("Starting reactor thread {}", this.threadName);
-            this.reactor.setTimeout(REACTOR_TIMEOUT);
-
-            long startTime = System.currentTimeMillis();
-            long endTime = startTime + timeoutMs;
-
-            boolean closedBeforeTimeout = true;
-            this.reactor.start();
-            while (this.reactor.process())
-            {
-                if (System.currentTimeMillis() > endTime)
-                {
-                    closedBeforeTimeout = false;
-                    break;
-                }
-            }
-
-            if (!closedBeforeTimeout)
-            {
-                // onTimerTask event will fire immediately in the basehandler being run. It is the responsibility of that handler
-                // to close it's link/session/connection and stop this reactor. This runner will allow some time for the amqp connection
-                // to be closed gracefully, but will forcefully free the resources if the graceful close takes too long
-                log.trace("Scheduling shutdown event for reactor for thread {}", threadName);
-                this.reactor.schedule(0, this.reactor.getHandler());
-
-                startTime = System.currentTimeMillis();
-                while (this.reactor.process())
-                {
-                    if (System.currentTimeMillis() - startTime > CLOSE_REACTOR_GRACEFULLY_TIMEOUT)
-                    {
-                        // The connection/session/link may not have been closed from the service's perspective, but we can free up the socket at least
-                        log.trace("Amqp reactor in thread {} failed to close gracefully in expected time frame, forcefully closing it now", this.threadName);
-                        break;
-                    }
-                }
-
-                log.trace("Stopping reactor for thread {}", threadName);
-                this.reactor.stop();
-            }
-            else
-            {
-                log.trace("Amqp reactor thread closed itself gracefully before the designated time out");
-            }
-        }
-        catch (HandlerException e)
-        {
-            log.debug("Encountered an exception while running reactor on thread {}", threadName, e);
-        }
-        finally
-        {
-            log.trace("Freeing reactor now that reactor thread is done");
-            this.reactor.free();
-        }
-
-        log.trace("Finished reactor thread {}", this.threadName);
+        this.handler = handler;
     }
 
     public void run()
     {
-        Thread.currentThread().setName(this.threadName);
+        if (this.threadName != null)
+        {
+            Thread.currentThread().setName(this.threadName);
+        }
 
         try
         {
@@ -124,5 +71,41 @@ public class ReactorRunner
         log.trace("Finished reactor thread {}", this.threadName);
     }
 
+    public void stop(int timeoutMilliseconds) throws InterruptedException
+    {
+        if (timeoutMilliseconds < 0)
+        {
+            throw new IllegalArgumentException("timeoutMilliseconds must greater than or equal to 0");
+        }
+
+        try
+        {
+            final CountDownLatch onReactorClosedLatch = new CountDownLatch(1);
+            this.handler.closeAsync(() -> onReactorClosedLatch.countDown());
+
+            if (timeoutMilliseconds > 0)
+            {
+                boolean timedOut = !onReactorClosedLatch.await(timeoutMilliseconds, TimeUnit.MILLISECONDS);
+
+                if (timedOut)
+                {
+                    log.debug("Timed out waiting for amqp connection to close gracefully. Closing forcefully now.");
+                }
+            }
+            else
+            {
+                onReactorClosedLatch.await(); // wait indefinitely
+            }
+        }
+        finally
+        {
+            this.reactor.stop();
+        }
+    }
+
+    public boolean isRunning()
+    {
+        return this.reactor != null && this.handler != null && this.handler.isOpen();
+    }
 }
 

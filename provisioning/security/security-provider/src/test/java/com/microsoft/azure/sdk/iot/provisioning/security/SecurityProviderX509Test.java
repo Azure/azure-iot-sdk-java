@@ -200,51 +200,6 @@ public class SecurityProviderX509Test
 
     }
 
-    //SRS_SecurityClientX509_25_005: [ This method shall throw SecurityProviderException if X509 Key Manager is not found. ]
-    @Test (expected = SecurityProviderException.class)
-    public void getSslContextThrowsIfX509KeyManagerNotFound() throws SecurityProviderException, KeyManagementException, KeyStoreException
-    {
-
-        //arrange
-        Collection<X509Certificate> certificates = new LinkedList<>();
-        certificates.add(mockedX509Certificate);
-
-        SecurityProviderX509 securityClientX509Test = new SecurityProviderX509TestImpl(TEST_COMMON_NAME, mockedX509Certificate, mockedKey, certificates);
-        new NonStrictExpectations()
-        {
-            {
-                mockedKeyManagerFactory.getKeyManagers();
-                result = mockedKeyManager; // not necessarily X509
-            }
-        };
-
-        //act
-        securityClientX509Test.getSSLContext();
-    }
-
-    //SRS_SecurityClientX509_25_004: [ This method shall throw SecurityProviderException if X509 Trust Manager is not found. ]
-    @Test (expected = SecurityProviderException.class)
-    public void getSslContextThrowsIfX509TrustManagerNotFound() throws SecurityProviderException, KeyManagementException, KeyStoreException
-    {
-        //arrange
-        Collection<X509Certificate> certificates = new LinkedList<>();
-        certificates.add(mockedX509Certificate);
-
-        SecurityProviderX509 securityClientX509Test = new SecurityProviderX509TestImpl(TEST_COMMON_NAME, mockedX509Certificate, mockedKey, certificates);
-        new NonStrictExpectations()
-        {
-            {
-                mockedKeyManagerFactory.getKeyManagers();
-                result = mockedX509KeyManager;
-                mockedTrustManagerFactory.getTrustManagers();
-                result = mockedTrustManager; // not necessarily X509
-            }
-        };
-
-        //act
-        securityClientX509Test.getSSLContext();
-    }
-
     //SRS_SecurityClientX509_25_003: [ This method shall throw SecurityProviderException chained with the exception thrown from underlying API calls to SSL library. ]
     @Test (expected = SecurityProviderException.class)
     public void getSslContextThrowsIfAnyOfTheUnderlyingAPIFails() throws SecurityProviderException, KeyManagementException, KeyStoreException

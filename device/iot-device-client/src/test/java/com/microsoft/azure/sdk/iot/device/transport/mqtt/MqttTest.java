@@ -2,15 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
+import com.microsoft.azure.sdk.iot.device.ClientConfiguration;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
-import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.ProtocolException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
-import com.microsoft.azure.sdk.iot.device.transport.ReconnectionNotifier;
-import com.microsoft.azure.sdk.iot.device.transport.mqtt.*;
 import mockit.*;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -27,7 +25,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.*;
+import static com.microsoft.azure.sdk.iot.device.twin.DeviceOperations.*;
 import static org.junit.Assert.*;
 
 /**
@@ -68,7 +66,7 @@ public class MqttTest
     private IotHubSasToken mockSASToken;
 
     @Mocked
-    private DeviceClientConfig mockDeviceClientConfig;
+    private ClientConfiguration mockClientConfiguration;
 
     @Mocked
     private IotHubListener mockedIotHubListener;
@@ -104,10 +102,10 @@ public class MqttTest
         }
         else
         {
-            MqttDeviceTwin mqttDeviceTwin = new MqttDeviceTwin(null, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
-            Deencapsulation.invoke(mqttDeviceTwin, "setListener", new Class[]{IotHubListener.class}, listener);
-            Deencapsulation.invoke(mqttDeviceTwin, "setMqttAsyncClient", mockMqttAsyncClient);
-            return mqttDeviceTwin;
+            MqttTwin mqttTwin = new MqttTwin(null, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+            Deencapsulation.invoke(mqttTwin, "setListener", new Class[]{IotHubListener.class}, listener);
+            Deencapsulation.invoke(mqttTwin, "setMqttAsyncClient", mockMqttAsyncClient);
+            return mqttTwin;
         }
     }
 
@@ -712,21 +710,6 @@ public class MqttTest
         assertNull(receivedMessage);
     }
 
-    // Tests_SRS_Mqtt_34_025: [If the call to peekMessage returns null when topic is non-null then this method will throw a TransportException]
-    @Test(expected = TransportException.class)
-    public void receiveThrowsIotHubServiceExceptionWhenParsePayloadReturnsNull() throws TransportException
-    {
-        //arrange
-        final Mqtt mockMqtt = new MqttMessaging(CLIENT_ID, null, "", false, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
-
-        Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
-        Deencapsulation.setField(mockMqtt, "receivedMessages", testreceivedMessages);
-        testreceivedMessages.add(new MutablePair<>(MOCK_PARSE_TOPIC, (byte[]) null));
-
-        //act
-        mockMqtt.receive();
-    }
-
     //Tests_SRS_Mqtt_25_030: [The payload of the message and the topic is added to the received messages queue .]
     //Tests_SRS_Mqtt_34_045: [If there is a saved listener, this function shall notify that listener that a message arrived.]
     @Test
@@ -775,7 +758,7 @@ public class MqttTest
 
     //Tests_SRS_Mqtt_34_045: [If this object has a saved listener, this function shall notify the listener that connection was lost.]
     @Test
-    public void connectionLostAttemptsToReconnectWithSASTokenStillValid(final @Mocked ReconnectionNotifier reconnectionTask, final @Mocked TransportException mockedTransportException) throws IOException, MqttException
+    public void connectionLostAttemptsToReconnectWithSASTokenStillValid(final @Mocked TransportException mockedTransportException) throws IOException, MqttException
     {
         //arrange
         Mqtt mockMqtt;
@@ -786,7 +769,7 @@ public class MqttTest
             {
                 new TransportException(t);
                 result = mockedTransportException;
-                ReconnectionNotifier.notifyDisconnectAsync(mockedTransportException, mockedIotHubListener, anyString);
+                mockedIotHubListener.onConnectionLost(mockedTransportException, anyString);
             }
         };
 

@@ -66,76 +66,6 @@ public class X509ThumbprintTest
         assertEquals(expectedSecondaryThumbprint, Deencapsulation.invoke(thumbprint, "getSecondaryThumbprint", new Class[] {}));
     }
 
-    //Tests_SRS_X509THUMBPRINT_34_010: [This constructor shall throw an IllegalArgumentException if the provided thumbprints are null, empty, or not a valid format.]
-    @Test (expected = IllegalArgumentException.class)
-    public void illegalArgumentExceptionThrownByConstructorForEmptyPrimaryThumbprint()
-    {
-        //act
-        createTestThumbprint("", expectedSecondaryThumbprint);
-    }
-
-    //Tests_SRS_X509THUMBPRINT_34_010: [This constructor shall throw an IllegalArgumentException if the provided thumbprints are null, empty, or not a valid format.]
-    @Test (expected = IllegalArgumentException.class)
-    public void illegalArgumentExceptionThrownByConstructorForEmptySecondaryThumbprint()
-    {
-        //act
-        createTestThumbprint(expectedPrimaryThumbprint, "");
-    }
-
-    //Tests_SRS_X509THUMBPRINT_34_010: [This constructor shall throw an IllegalArgumentException if the provided thumbprints are null, empty, or not a valid format.]
-    @Test (expected = IllegalArgumentException.class)
-    public void illegalArgumentExceptionThrownByConstructorForNullPrimaryThumbprint()
-    {
-        //act
-        createTestThumbprint(null, expectedSecondaryThumbprint);
-    }
-
-    //Tests_SRS_X509THUMBPRINT_34_010: [This constructor shall throw an IllegalArgumentException if the provided thumbprints are null, empty, or not a valid format.]
-    @Test (expected = IllegalArgumentException.class)
-    public void illegalArgumentExceptionThrownByConstructorForNullSecondaryThumbprint()
-    {
-        //act
-        createTestThumbprint(expectedPrimaryThumbprint, null);
-    }
-
-    //Tests_SRS_X509THUMBPRINT_34_010: [This constructor shall throw an IllegalArgumentException if the provided thumbprints are null, empty, or not a valid format.]
-    @Test (expected = IllegalArgumentException.class)
-    public void illegalArgumentExceptionThrownByConstructorForInvalidPrimaryThumbprint()
-    {
-        //act
-        createTestThumbprint("NOT_A_THUMBPRINT", expectedSecondaryThumbprint);
-    }
-
-    //Tests_SRS_X509THUMBPRINT_34_010: [This constructor shall throw an IllegalArgumentException if the provided thumbprints are null, empty, or not a valid format.]
-    @Test (expected = IllegalArgumentException.class)
-    public void illegalArgumentExceptionThrownByConstructorForInvalidSecondaryThumbprint()
-    {
-        //act
-        createTestThumbprint(expectedPrimaryThumbprint, "NOT_A_THUMBPRINT");
-    }
-
-    //Tests_SRS_X509THUMBPRINT_34_007: [If the provided thumbprint string is not the proper format, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void illegalArgumentExceptionThrownBySetPrimaryThumbprintForIllegalThumbprint()
-    {
-        //arrange
-        X509Thumbprint thumbprint = createTestThumbprint(null, null);
-
-        //act
-        Deencapsulation.invoke(thumbprint, "setPrimaryThumbprint", new Class[] { String.class }, "");
-    }
-
-    //Tests_SRS_X509THUMBPRINT_34_008: [If the provided thumbprint string is not the proper format, an IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void illegalArgumentExceptionThrownBySetSecondaryThumbprintForIllegalThumbprint()
-    {
-        //arrange
-        X509Thumbprint thumbprint = createTestThumbprint(null, null);
-
-        //act
-        Deencapsulation.invoke(thumbprint, "setSecondaryThumbprint", new Class[] { String.class }, "");
-    }
-
     //Tests_SRS_X509THUMBPRINT_34_011: [This constructor shall generate a random primary and secondary thumbprint.]
     @Test
     public void emptyConstructorGeneratesThumbprints()
@@ -146,61 +76,6 @@ public class X509ThumbprintTest
         //assert
         assertNotNull(Deencapsulation.getField(thumbprint, "primaryThumbprint"));
         assertNotNull(Deencapsulation.getField(thumbprint, "secondaryThumbprint"));
-    }
-
-    @Test
-    public void equalsWorks()
-    {
-        // Arrange
-        X509Thumbprint s1 = createTestThumbprintWithInvalidThumbprintValues(null, null);
-        X509Thumbprint s2 = createTestThumbprintWithInvalidThumbprintValues("", null);
-        X509Thumbprint s3 = createTestThumbprintWithInvalidThumbprintValues(null, "");
-        X509Thumbprint s4 = createTestThumbprintWithInvalidThumbprintValues("", "");
-        X509Thumbprint s5 = createTestThumbprintWithInvalidThumbprintValues("", "secondaryThumbprint");
-        X509Thumbprint s6 = createTestThumbprintWithInvalidThumbprintValues("primaryThumbprint", "secondaryThumbprint2");
-        X509Thumbprint s7 = createTestThumbprintWithInvalidThumbprintValues("primaryThumbprint2", "secondaryThumbprint");
-        X509Thumbprint s8 = createTestThumbprintWithInvalidThumbprintValues("primaryThumbprint", "secondaryThumbprint");
-        X509Thumbprint s9 = createTestThumbprintWithInvalidThumbprintValues("primaryThumbprint", "secondaryThumbprint");
-
-        // Assert
-        assertNotEquals(s1, s2);
-        assertNotEquals(s1, s3);
-        assertNotEquals(s1, s4);
-        assertNotEquals(s1, s5);
-        assertNotEquals(s1, s6);
-        assertNotEquals(s1, s7);
-        assertNotEquals(s1, s8);
-
-        assertNotEquals(s2, s3);
-        assertNotEquals(s2, s4);
-        assertNotEquals(s2, s5);
-        assertNotEquals(s2, s6);
-        assertNotEquals(s2, s7);
-        assertNotEquals(s2, s8);
-
-        assertNotEquals(s3, s4);
-        assertNotEquals(s3, s5);
-        assertNotEquals(s3, s6);
-        assertNotEquals(s3, s7);
-        assertNotEquals(s3, s8);
-
-        assertNotEquals(s4, s5);
-        assertNotEquals(s4, s6);
-        assertNotEquals(s4, s7);
-        assertNotEquals(s4, s8);
-
-        assertNotEquals(s5, s6);
-        assertNotEquals(s5, s7);
-        assertNotEquals(s5, s8);
-
-        assertNotEquals(s6, s7);
-        assertNotEquals(s6, s8);
-
-        assertNotEquals(s7, s8);
-
-        assertEquals(s8, s9);
-
-        assertNotEquals(s1, "not a thumbprint object");
     }
 
     /**

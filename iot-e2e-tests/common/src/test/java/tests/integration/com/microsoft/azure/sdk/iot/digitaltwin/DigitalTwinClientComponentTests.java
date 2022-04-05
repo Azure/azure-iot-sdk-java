@@ -3,10 +3,12 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.digitaltwin;
 
+import com.google.gson.*;
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
-import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
+import com.microsoft.azure.sdk.iot.device.twin.*;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.UpdateOperationUtility;
@@ -28,16 +30,16 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.Standar
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @DigitalTwinTest
 @Slf4j
@@ -46,7 +48,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
 {
 
     private static final String IOTHUB_CONNECTION_STRING = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.IOTHUB_CONNECTION_STRING_ENV_VAR_NAME);
-    private static RegistryManager registryManager;
+    private static RegistryClient registryClient;
     private String deviceId;
     private DeviceClient deviceClient;
     private DigitalTwinClient digitalTwinClient = null;
@@ -70,41 +72,35 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
 
     @BeforeClass
     public static void setUpBeforeClass() throws IOException {
-        registryManager = RegistryManager.createFromConnectionString(IOTHUB_CONNECTION_STRING);
+        registryClient = new RegistryClient(IOTHUB_CONNECTION_STRING);
     }
 
     @Before
-    public void setUp() throws URISyntaxException, IOException, IotHubException {
+    public void setUp() throws URISyntaxException, IOException, IotHubException, IotHubClientException
+    {
         this.deviceClient = createDeviceClient(protocol);
-        deviceClient.open();
+        deviceClient.open(false);
         digitalTwinClient = DigitalTwinClient.createFromConnectionString(IOTHUB_CONNECTION_STRING);
     }
 
     @After
     public void cleanUp() {
         try {
-            deviceClient.closeNow();
-            registryManager.removeDevice(deviceId);
+            deviceClient.close();
+            registryClient.removeDevice(deviceId);
         } catch (Exception ex) {
             log.error("An exception occurred while closing/ deleting the device {}: {}", deviceId, ex);
         }
     }
 
     private DeviceClient createDeviceClient(IotHubClientProtocol protocol) throws IOException, IotHubException, URISyntaxException {
-        ClientOptions options = new ClientOptions();
-        options.setModelId(E2ETestConstants.TEMPERATURE_CONTROLLER_MODEL_ID);
+        ClientOptions options = ClientOptions.builder().modelId(E2ETestConstants.TEMPERATURE_CONTROLLER_MODEL_ID).build();
 
         this.deviceId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        Device device = Device.createDevice(deviceId, AuthenticationType.SAS);
-        Device registeredDevice = registryManager.addDevice(device);
-        String deviceConnectionString = registryManager.getDeviceConnectionString(registeredDevice);
+        Device device = new Device(deviceId, AuthenticationType.SAS);
+        Device registeredDevice = registryClient.addDevice(device);
+        String deviceConnectionString = Tools.getDeviceConnectionString(IOTHUB_CONNECTION_STRING, registeredDevice);
         return new DeviceClient(deviceConnectionString, protocol, options);
-    }
-
-    @AfterClass
-    public static void cleanUpAfterClass()
-    {
-        registryManager.close();
     }
 
     @Test
@@ -152,7 +148,8 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
 
     @Test
     @StandardTierHubOnlyTest
-    public void invokeComponentLevelCommand() throws IOException {
+    public void invokeComponentLevelCommand() throws IOException, InterruptedException, IotHubClientException
+    {
         // arrange
         String componentName = "thermostat1";
         String commandName = "getMaxMinReport";
@@ -168,20 +165,17 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
 
         // Device method callback
         String componentCommandName = componentName + "*" + commandName;
-        DeviceMethodCallback deviceMethodCallback = (methodName, methodData, context) -> {
-            String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
+        MethodCallback methodCallback = (methodName, methodData, context) -> {
+            JsonElement jsonRequest = methodData.getPayloadAsJsonElement();
             if(methodName.equalsIgnoreCase(componentCommandName)) {
-                return new DeviceMethodData(deviceSuccessResponseStatus, jsonRequest);
+                return new DirectMethodResponse(deviceSuccessResponseStatus, jsonRequest);
             }
             else {
-                return new DeviceMethodData(deviceFailureResponseStatus, jsonRequest);
+                return new DirectMethodResponse(deviceFailureResponseStatus, jsonRequest);
             }
         };
 
-        // IotHub event callback
-        IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) -> {};
-
-        deviceClient.subscribeToDeviceMethod(deviceMethodCallback, commandName, iotHubEventCallback, commandName);
+        deviceClient.subscribeToMethods(methodCallback, commandName);
 
         // act
         DigitalTwinCommandResponse responseWithNoPayload = this.digitalTwinClient.invokeComponentCommand(deviceId, componentName, commandName, null);
@@ -191,18 +185,19 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
 
         // assert
         assertEquals(deviceSuccessResponseStatus, responseWithNoPayload.getStatus());
-        assertEquals("\"\"", responseWithNoPayload.getPayload());
+        assertEquals("{}", responseWithNoPayload.getPayload(String.class));
         assertEquals(deviceSuccessResponseStatus, responseWithJsonStringPayload.getStatus());
-        assertEquals(jsonStringInput, responseWithJsonStringPayload.getPayload());
+        assertEquals(jsonStringInput, responseWithJsonStringPayload.getPayload(String.class));
         assertEquals(deviceSuccessResponseStatus, responseWithDatePayload.getStatus());
-        assertEquals(commandInput, responseWithDatePayload.getPayload());
+        assertEquals(commandInput, responseWithDatePayload.getPayload(String.class));
         assertEquals(deviceSuccessResponseStatus, datePayloadResponseWithHeaders.body().getStatus());
-        assertEquals(commandInput, datePayloadResponseWithHeaders.body().getPayload());
+        assertEquals(commandInput, datePayloadResponseWithHeaders.body().getPayload(String.class));
     }
 
     @Test
     @StandardTierHubOnlyTest
-    public void invokeRootLevelCommand() throws IOException {
+    public void invokeRootLevelCommand() throws IOException, InterruptedException, IotHubClientException
+    {
         // arrange
         String commandName = "reboot";
         String commandInput = "5";
@@ -216,20 +211,18 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
         Integer deviceFailureResponseStatus = 500;
 
         // Device method callback
-        DeviceMethodCallback deviceMethodCallback = (methodName, methodData, context) -> {
-            String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
+        MethodCallback methodCallback = (methodName, methodData, context) -> {
+            JsonElement jsonRequest = methodData.getPayloadAsJsonElement();
             if(methodName.equalsIgnoreCase(commandName)) {
-                return new DeviceMethodData(deviceSuccessResponseStatus, jsonRequest);
+                return new DirectMethodResponse(deviceSuccessResponseStatus, jsonRequest);
             }
             else {
-                return new DeviceMethodData(deviceFailureResponseStatus, jsonRequest);
+                return new DirectMethodResponse(deviceFailureResponseStatus, jsonRequest);
             }
         };
 
         // IotHub event callback
-        IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) -> {};
-
-        deviceClient.subscribeToDeviceMethod(deviceMethodCallback, commandName, iotHubEventCallback, commandName);
+        deviceClient.subscribeToMethods(methodCallback, commandName);
 
         // act
         DigitalTwinCommandResponse responseWithNoPayload = this.digitalTwinClient.invokeCommand(deviceId, commandName, null);
@@ -239,12 +232,12 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
 
         // assert
         assertEquals(deviceSuccessResponseStatus, responseWithNoPayload.getStatus());
-        assertEquals("\"\"", responseWithNoPayload.getPayload());
+        assertEquals("{}", responseWithNoPayload.getPayload(String.class));
         assertEquals(deviceSuccessResponseStatus, responseWithJsonStringPayload.getStatus());
-        assertEquals(jsonStringInput, responseWithJsonStringPayload.getPayload());
+        assertEquals(jsonStringInput, responseWithJsonStringPayload.getPayload(String.class));
         assertEquals(deviceSuccessResponseStatus, responseWithDatePayload.getStatus());
-        assertEquals(commandInput, responseWithDatePayload.getPayload());
+        assertEquals(commandInput, responseWithDatePayload.getPayload(String.class));
         assertEquals(deviceSuccessResponseStatus, datePayloadResponseWithHeaders.body().getStatus());
-        assertEquals(commandInput, datePayloadResponseWithHeaders.body().getPayload());
+        assertEquals(commandInput, datePayloadResponseWithHeaders.body().getPayload(String.class));
     }
 }

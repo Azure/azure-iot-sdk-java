@@ -3,11 +3,12 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.convention.ClientPropertiesCallback;
 import lombok.Getter;
 import lombok.Setter;
+import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 
 /**
  * Extends Message, adding transport artifacts.
@@ -22,7 +23,7 @@ public class IotHubTransportMessage extends Message
      */
     @Getter
     @Setter
-    private IotHubMethod iotHubMethod;
+    private HttpsMethod iotHubMethod;
 
     /**
      * The URI path of this message.
@@ -45,7 +46,7 @@ public class IotHubTransportMessage extends Message
      */
     @Getter
     @Setter
-    private String version;
+    private Integer version;
 
     /**
      * The message id.
@@ -90,17 +91,10 @@ public class IotHubTransportMessage extends Message
      */
     public IotHubTransportMessage(byte[] data, MessageType messageType)
     {
-        /*
-         **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_001: [**If the message body is null, the constructor shall throw an IllegalArgumentException thrown by base constructor.**]**
-         **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_002: [**The constructor shall save the message body by calling super with the body as parameter.**]**
-         **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_003: [**The constructor shall set the messageType to the given value by calling the super with the given value.**]**
-         **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_015: [**The constructor shall initialize version, requestId and status to null.**]**
-         **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_016: [**The constructor shall initialize operationType to UNKNOWN**]**
-         */
         super(data);
         super.setMessageType(messageType);
         this.methodName = null;
-        this.version = null;
+        this.version = 0;
         this.requestId = null;
         this.status = null;
         this.deviceOperationType = DeviceOperations.DEVICE_OPERATION_UNKNOWN;
@@ -113,11 +107,10 @@ public class IotHubTransportMessage extends Message
      */
     public IotHubTransportMessage(String body)
     {
-        // Codes_SRS_IOTHUBTRANSPORTMESSAGE_21_002: [This method shall throw IllegalArgumentException if the body argument is null.]
         super(body);
         super.setMessageType(MessageType.UNKNOWN);
         this.methodName = null;
-        this.version = null;
+        this.version = 0;
         this.requestId = null;
         this.status = null;
         this.deviceOperationType = DeviceOperations.DEVICE_OPERATION_UNKNOWN;
@@ -125,7 +118,6 @@ public class IotHubTransportMessage extends Message
 
     public IotHubTransportMessage(byte[] data, MessageType messageType, String messageId, String correlationId, MessageProperty[] messageProperties)
     {
-        //Codes_SRS_IOTHUBTRANSPORTMESSAGE_34_017: [This constructor shall return an instance of IotHubTransportMessage with provided bytes, messagetype, correlationid, messageid, and application properties.]
         super(data);
         super.setMessageType(messageType);
         this.setMessageId(messageId);
@@ -160,10 +152,6 @@ public class IotHubTransportMessage extends Message
     {
         if (methodName == null)
         {
-            /*
-             **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_012: [**The function shall throw IllegalArgumentException if the methodName is null.**]**
-             **Codes_SRS_IOTHUBTRANSPORTMESSAGE_12_013: [**The function shall set the methodName.**]**
-             */
             throw new IllegalArgumentException("Method name cannot be null");
         }
         this.methodName = methodName;

@@ -5,8 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service.auth;
 
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
-
 import java.util.HashMap;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
@@ -109,14 +107,14 @@ public class ProvisioningConnectionStringBuilder
         provisioningConnectionString.deviceProvisioningServiceName = ProvisioningConnectionStringBuilder.parseDeviceProvisioningServiceName(provisioningConnectionString);
 
         /* Codes_SRS_PROVISIONINGCONNECTIONSTRING_BUILDER_21_010: [The function shall create a new ServiceAuthenticationWithSharedAccessPolicyToken and set the authenticationMethod if sharedAccessKey is not defined.] */
-        if (Tools.isNullOrWhiteSpace(provisioningConnectionString.sharedAccessKey))
+        if (provisioningConnectionString.sharedAccessKey == null || provisioningConnectionString.sharedAccessKey.isEmpty())
         {
             provisioningConnectionString.authenticationMethod = new ServiceAuthenticationWithSharedAccessPolicyToken(
                     provisioningConnectionString.sharedAccessKeyName,
                     provisioningConnectionString.sharedAccessSignature);
         }
         /* Codes_SRS_PROVISIONINGCONNECTIONSTRING_BUILDER_21_011: [The function shall create a new ServiceAuthenticationWithSharedAccessPolicyKey and set the authenticationMethod if the sharedAccessSignature is not defined.] */
-        else if (Tools.isNullOrWhiteSpace(provisioningConnectionString.sharedAccessSignature))
+        else if (provisioningConnectionString.sharedAccessSignature == null || provisioningConnectionString.sharedAccessSignature.isEmpty())
         {
             provisioningConnectionString.authenticationMethod = new ServiceAuthenticationWithSharedAccessPolicyKey(
                     provisioningConnectionString.sharedAccessKeyName,
@@ -157,12 +155,13 @@ public class ProvisioningConnectionStringBuilder
     private static void validate(ProvisioningConnectionString provisioningConnectionString)
     {
         /* Codes_SRS_PROVISIONINGCONNECTIONSTRING_BUILDER_21_015: [The function shall throw IllegalArgumentException if the sharedAccessKeyName of the input itoHubConnectionString is empty.] */
-        if (Tools.isNullOrWhiteSpace(provisioningConnectionString.sharedAccessKeyName))
+        if (provisioningConnectionString.sharedAccessKeyName == null || provisioningConnectionString.sharedAccessKeyName.isEmpty())
         {
             throw new IllegalArgumentException("SharedAccessKeyName cannot be null or empty");
         }
         // CodesSRS_PROVISIONINGCONNECTIONSTRING_BUILDER_21_016: [The function shall throw IllegalArgumentException if either of the sharedAccessKey or the sharedAccessSignature of the input itoHubConnectionString is empty.] */
-        if (Tools.isNullOrWhiteSpace(provisioningConnectionString.sharedAccessKey) && Tools.isNullOrWhiteSpace(provisioningConnectionString.sharedAccessSignature))
+        if ((provisioningConnectionString.sharedAccessKey == null || provisioningConnectionString.sharedAccessKey.isEmpty())
+            && (provisioningConnectionString.sharedAccessSignature == null || provisioningConnectionString.sharedAccessSignature.isEmpty()))
         {
             throw new IllegalArgumentException("Should specify either sharedAccessKey or sharedAccessSignature");
         }

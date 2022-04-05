@@ -5,11 +5,10 @@
 
 package com.microsoft.azure.sdk.iot.device.edge;
 
+import com.microsoft.azure.sdk.iot.device.hsm.UnixDomainSocketChannel;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.TrustBundleResponse;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.hsm.HsmException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import com.microsoft.azure.sdk.iot.device.hsm.HttpsHsmClient;
-import com.microsoft.azure.sdk.iot.device.edge.HttpsHsmTrustBundleProvider;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import org.junit.Test;
@@ -25,6 +24,9 @@ public class HttpsHsmTrustBundleProviderTest
     HttpsHsmClient mockedHttpsHsmClient;
 
     @Mocked
+    UnixDomainSocketChannel mockedUnixDomainSocketChannel;
+
+    @Mocked
     TrustBundleResponse mockedTrustBundleResponse;
 
     final static String expectedUri = "someUri";
@@ -34,7 +36,7 @@ public class HttpsHsmTrustBundleProviderTest
     // Tests_SRS_TRUSTBUNDLEPROVIDER_34_001: [This function shall create an HttpsHsmClient using the provided provider uri.]
     // Tests_SRS_TRUSTBUNDLEPROVIDER_34_002: [This function shall invoke getTrustBundle on the HttpsHsmClient and return the resulting certificates.]
     @Test
-    public void getTrustBundleCertsSuccess() throws TransportException, IOException, HsmException, URISyntaxException
+    public void getTrustBundleCertsSuccess() throws TransportException, IOException, URISyntaxException
     {
         //arrange
         final String expectedCertificatesString = "some collection of certificates";
@@ -51,7 +53,7 @@ public class HttpsHsmTrustBundleProviderTest
         };
 
         //act
-        String actualCertificatesString = provider.getTrustBundleCerts(expectedUri, expectedAPIVersion);
+        String actualCertificatesString = provider.getTrustBundleCerts(expectedUri, expectedAPIVersion, mockedUnixDomainSocketChannel);
 
         //assert
         assertEquals(expectedCertificatesString, actualCertificatesString);

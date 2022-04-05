@@ -53,14 +53,14 @@ public abstract class ProvisioningDeviceClientContract
                 return new ContractAPIMqtt(provisioningDeviceClientConfig);
 
             case MQTT_WS:
-                provisioningDeviceClientConfig.setUseWebSockets(true);
+                provisioningDeviceClientConfig.setUsingWebSocket(true);
                 return new ContractAPIMqtt(provisioningDeviceClientConfig);
 
             case AMQPS:
                 return new ContractAPIAmqp(provisioningDeviceClientConfig);
 
             case AMQPS_WS:
-                provisioningDeviceClientConfig.setUseWebSockets(true);
+                provisioningDeviceClientConfig.setUsingWebSocket(true);
                 return new ContractAPIAmqp(provisioningDeviceClientConfig);
 
             case HTTPS:

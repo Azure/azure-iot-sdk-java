@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp;
 
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.SaslHandler;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.amqp.SaslHandler;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
@@ -67,7 +67,7 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
 
         this.hostName = hostName;
 
-        this.useWebSockets = provisioningDeviceClientConfig.getUseWebSockets();
+        this.useWebSockets = provisioningDeviceClientConfig.isUsingWebSocket();
 
         // SRS_ContractAPIAmqp_07_001: [The constructor shall save the scope id and hostname.]
         provisioningAmqpOperations = new ProvisioningAmqpOperations(this.idScope, hostName);

@@ -3,13 +3,14 @@ package samples.com.microsoft.azure.sdk.iot;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
 import com.microsoft.azure.sdk.iot.device.MultiplexingClient;
-import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationAuthenticationException;
-import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException;
-import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
+import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientRegistrationException;
 import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 /**
  * This class is in charge of handling reconnection logic and registering callbacks for connection status changes.
@@ -25,15 +26,15 @@ public class MultiplexingClientManager extends ClientManagerBase
     {
         void open();
         void close();
-        void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext);
-        void registerDeviceClients(Iterable<DeviceClient> deviceClients) throws InterruptedException, MultiplexingClientException;
-        void registerDeviceClient(DeviceClient deviceClient) throws InterruptedException, MultiplexingClientException;
-        void registerDeviceClients(Iterable<DeviceClient> deviceClients, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException;
-        void registerDeviceClient(DeviceClient deviceClient, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException;
-        void unregisterDeviceClients(Iterable<DeviceClient> deviceClients) throws InterruptedException, MultiplexingClientException;
-        void unregisterDeviceClient(DeviceClient deviceClient) throws InterruptedException, MultiplexingClientException;
-        void unregisterDeviceClients(Iterable<DeviceClient> deviceClients, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException;
-        void unregisterDeviceClient(DeviceClient deviceClient, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException;
+        void setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext);
+        void registerDeviceClients(Iterable<DeviceClient> deviceClients);
+        void registerDeviceClient(DeviceClient deviceClient);
+        void registerDeviceClients(Iterable<DeviceClient> deviceClients, long timeoutMilliseconds);
+        void registerDeviceClient(DeviceClient deviceClient, long timeoutMilliseconds);
+        void unregisterDeviceClients(Iterable<DeviceClient> deviceClients);
+        void unregisterDeviceClient(DeviceClient deviceClient);
+        void unregisterDeviceClients(Iterable<DeviceClient> deviceClients, long timeoutMilliseconds);
+        void unregisterDeviceClient(DeviceClient deviceClient, long timeoutMilliseconds);
     }
 
     /**
@@ -57,23 +58,23 @@ public class MultiplexingClientManager extends ClientManagerBase
     {
         this.multiplexingClient = multiplexingClient;
         this.multiplexClientId = multiplexClientId;
-        this.multiplexingClient.registerConnectionStatusChangeCallback(this, this);
+        this.multiplexingClient.setConnectionStatusChangeCallback(this, this);
     }
 
     /**
      * All classes that extend ClientManagerBase should implement how their inner client can be opened.
      */
     @Override
-    protected void openClient() throws MultiplexingClientException
+    protected void openClient() throws IotHubClientException, IOException
     {
-        this.multiplexingClient.open();
+        this.multiplexingClient.open(false);
     }
 
     /**
      * All classes that extend ClientManagerBase should implement how their inner client can be closed.
      */
     @Override
-    protected void closeClient() throws MultiplexingClientException
+    protected void closeClient()
     {
         this.multiplexingClient.close();
     }
@@ -87,33 +88,33 @@ public class MultiplexingClientManager extends ClientManagerBase
         return multiplexClientId;
     }
 
-    public void registerDeviceClients(Iterable<DeviceClient> deviceClients) throws InterruptedException, MultiplexingClientException
+    public void registerDeviceClients(Iterable<DeviceClient> deviceClients) throws InterruptedException, IotHubClientException, TimeoutException
     {
         this.registerDeviceClients(deviceClients, DEFAULT_REGISTRATION_TIMEOUT_MILLISECONDS);
     }
 
-    public void registerDeviceClient(DeviceClient deviceClient) throws InterruptedException, MultiplexingClientException
+    public void registerDeviceClient(DeviceClient deviceClient) throws InterruptedException, IotHubClientException, TimeoutException
     {
         this.registerDeviceClient(deviceClient, DEFAULT_REGISTRATION_TIMEOUT_MILLISECONDS);
     }
 
-    public void unregisterDeviceClients(Iterable<DeviceClient> deviceClients) throws InterruptedException, MultiplexingClientException
+    public void unregisterDeviceClients(Iterable<DeviceClient> deviceClients) throws InterruptedException, IotHubClientException, TimeoutException
     {
         this.unregisterDeviceClients(deviceClients, DEFAULT_UNREGISTRATION_TIMEOUT_MILLISECONDS);
     }
 
-    public void unregisterDeviceClient(DeviceClient deviceClient) throws InterruptedException, MultiplexingClientException
+    public void unregisterDeviceClient(DeviceClient deviceClient) throws InterruptedException, IotHubClientException, TimeoutException
     {
         this.unregisterDeviceClient(deviceClient, DEFAULT_UNREGISTRATION_TIMEOUT_MILLISECONDS);
     }
 
-    public void registerDeviceClients(Iterable<DeviceClient> deviceClients, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
+    public void registerDeviceClients(Iterable<DeviceClient> deviceClients, long timeoutMilliseconds) throws InterruptedException, IotHubClientException, TimeoutException
     {
         try
         {
             this.multiplexingClient.registerDeviceClients(deviceClients, timeoutMilliseconds);
         }
-        catch (MultiplexingClientDeviceRegistrationAuthenticationException e)
+        catch (MultiplexingClientRegistrationException e)
         {
             // When registering device clients to an active multiplexed connection, one to all of the devices may fail
             // to register if they have out-of-date or otherwise incorrect connection strings, for instance. The thrown exception
@@ -129,13 +130,7 @@ public class MultiplexingClientManager extends ClientManagerBase
             multiplexingClient.close();
             throw e;
         }
-        catch (MultiplexingClientDeviceRegistrationTimeoutException e)
-        {
-            log.error("Timed out waiting for device registration to finish, closing client...", e);
-            multiplexingClient.close();
-            throw e;
-        }
-        catch (MultiplexingClientException e)
+        catch (IotHubClientException e)
         {
             log.error("Unexpected exception thrown during device registration, closing client...", e);
             multiplexingClient.close();
@@ -143,13 +138,13 @@ public class MultiplexingClientManager extends ClientManagerBase
         }
     }
 
-    public void registerDeviceClient(DeviceClient deviceClient, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
+    public void registerDeviceClient(DeviceClient deviceClient, long timeoutMilliseconds) throws InterruptedException, IotHubClientException, TimeoutException
     {
         try
         {
             this.multiplexingClient.registerDeviceClient(deviceClient, timeoutMilliseconds);
         }
-        catch (MultiplexingClientDeviceRegistrationAuthenticationException e)
+        catch (MultiplexingClientRegistrationException e)
         {
             // When registering device clients to an active multiplexed connection, one to all of the devices may fail
             // to register if they have out-of-date or otherwise incorrect connection strings, for instance. The thrown exception
@@ -165,13 +160,7 @@ public class MultiplexingClientManager extends ClientManagerBase
             multiplexingClient.close();
             throw e;
         }
-        catch (MultiplexingClientDeviceRegistrationTimeoutException e)
-        {
-            log.error("Timed out waiting for device registration to finish, closing client...", e);
-            multiplexingClient.close();
-            throw e;
-        }
-        catch (MultiplexingClientException e)
+        catch (IotHubClientException e)
         {
             log.error("Unexpected exception thrown during device registration, closing client...", e);
             multiplexingClient.close();
@@ -179,13 +168,13 @@ public class MultiplexingClientManager extends ClientManagerBase
         }
     }
 
-    public void unregisterDeviceClients(Iterable<DeviceClient> deviceClients, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
+    public void unregisterDeviceClients(Iterable<DeviceClient> deviceClients, long timeoutMilliseconds) throws InterruptedException, IotHubClientException, TimeoutException
     {
         try
         {
             this.multiplexingClient.unregisterDeviceClients(deviceClients, timeoutMilliseconds);
         }
-        catch (MultiplexingClientException e)
+        catch (IotHubClientException e)
         {
             log.error("Encountered an exception while unregistering device from active multiplexed connection, closing client...", e);
             multiplexingClient.close();
@@ -193,13 +182,13 @@ public class MultiplexingClientManager extends ClientManagerBase
         }
     }
 
-    public void unregisterDeviceClient(DeviceClient deviceClient, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
+    public void unregisterDeviceClient(DeviceClient deviceClient, long timeoutMilliseconds) throws InterruptedException, IotHubClientException, TimeoutException
     {
         try
         {
             this.multiplexingClient.unregisterDeviceClient(deviceClient, timeoutMilliseconds);
         }
-        catch (MultiplexingClientException e)
+        catch (IotHubClientException e)
         {
             log.error("Encountered an exception while unregistering device from active multiplexed connection, closing client...", e);
             multiplexingClient.close();

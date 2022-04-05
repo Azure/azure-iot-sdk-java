@@ -7,10 +7,14 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.service.*;
-import com.microsoft.azure.sdk.iot.service.Message;
+import com.microsoft.azure.sdk.iot.service.messaging.DeliveryAcknowledgement;
+import com.microsoft.azure.sdk.iot.service.messaging.Message;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.After;
@@ -22,6 +26,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.iothub.telemetry.ReceiveMes
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.TimeoutException;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
@@ -86,9 +91,6 @@ public class ReceiveMessagesCommon extends IntegrationTest
 
     protected static Map<String, String> messageProperties = new HashMap<>(3);
 
-    protected final static String SET_MINIMUM_POLLING_INTERVAL = "SetMinimumPollingInterval";
-    protected final static Long ONE_SECOND_POLLING_INTERVAL = 1000L;
-
     protected static int MESSAGE_SIZE_IN_BYTES = 1000;
     protected static int LARGE_MESSAGE_SIZE_IN_BYTES = 65000; // Max C2D message size is 65535
 
@@ -97,8 +99,8 @@ public class ReceiveMessagesCommon extends IntegrationTest
     // How much to wait until receiving a message from the server, in milliseconds
     protected static final int RECEIVE_TIMEOUT_MILLISECONDS = 3 * 60 * 1000; // 3 minutes
 
-    protected static String expectedCorrelationId = "1234";
-    protected static String expectedMessageId = "5678";
+    protected static final int FEEDBACK_TIMEOUT_MILLIS = 60 * 1000; // 1 minute
+
     protected static final long ERROR_INJECTION_RECOVERY_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
 
     public ReceiveMessagesTestInstance testInstance;
@@ -117,19 +119,19 @@ public class ReceiveMessagesCommon extends IntegrationTest
         public String publicKeyCert;
         public String privateKey;
         public String x509Thumbprint;
-        public RegistryManager registryManager;
-        public ServiceClient serviceClient;
+        public RegistryClient registryClient;
+        public MessagingClient messagingClient;
 
         public ReceiveMessagesTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
         {
             this.protocol = protocol;
             this.authenticationType = authenticationType;
             this.clientType = clientType;
-            this.publicKeyCert = x509CertificateGenerator.getPublicCertificate();
-            this.privateKey = x509CertificateGenerator.getPrivateKey();
+            this.publicKeyCert = x509CertificateGenerator.getPublicCertificatePEM();
+            this.privateKey = x509CertificateGenerator.getPrivateKeyPEM();
             this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
-            this.registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-            this.serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
+            this.registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
+            this.messagingClient = new MessagingClient(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
         }
 
         public void setup() throws Exception
@@ -143,32 +145,26 @@ public class ReceiveMessagesCommon extends IntegrationTest
                 this.identity = Tools.getTestModule(iotHubConnectionString, this.protocol, this.authenticationType, false);
             }
 
-            if ((this.protocol == AMQPS || this.protocol == AMQPS_WS) && this.authenticationType == SAS)
-            {
-                this.identity.getClient().setOption("SetAmqpOpenAuthenticationSessionTimeout", AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS);
-                this.identity.getClient().setOption("SetAmqpOpenDeviceSessionsTimeout", AMQP_DEVICE_SESSION_TIMEOUT_SECONDS);
-            }
-
-            testInstance.serviceClient.open();
+            this.messagingClient.open();
         }
 
         public void dispose()
         {
-            try
+            if (this.identity != null && this.identity.getClient() != null)
             {
-                if (this.identity != null && this.identity.getClient() != null)
-                {
-                    this.identity.getClient().closeNow();
-                }
-
-                this.serviceClient.close();
-            }
-            catch (IOException e)
-            {
-                log.error("Failed to close clients during cleanup", e);
+                this.identity.getClient().close();
             }
 
             Tools.disposeTestIdentity(this.identity, iotHubConnectionString);
+
+            try
+            {
+                this.messagingClient.close();
+            }
+            catch (InterruptedException e)
+            {
+                log.warn("Failed to close messagingClient", e);
+            }
         }
     }
 
@@ -192,7 +188,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
             this.messageIdListStoredOnReceive = messageIdListStoredOnReceive;
         }
 
-        public IotHubMessageResult execute(com.microsoft.azure.sdk.iot.device.Message msg, Object context)
+        public IotHubMessageResult onCloudToDeviceMessageReceived(com.microsoft.azure.sdk.iot.device.Message msg, Object context)
         {
             messageIdListStoredOnReceive.add(msg.getMessageId()); // add received messsage id to messageList
             return IotHubMessageResult.COMPLETE;
@@ -213,21 +209,25 @@ public class ReceiveMessagesCommon extends IntegrationTest
             this.expectedMessage = expectedMessage;
         }
 
-        public IotHubMessageResult execute(com.microsoft.azure.sdk.iot.device.Message msg, Object context)
+        public IotHubMessageResult onCloudToDeviceMessageReceived(com.microsoft.azure.sdk.iot.device.Message msg, Object context)
         {
             boolean resultValue = true;
             HashMap<String, String> messageProperties = (HashMap<String, String>) ReceiveMessagesTests.messageProperties;
-            Success messageReceived = (Success)context;
-            if (!hasExpectedProperties(msg, messageProperties) || !hasExpectedSystemProperties(msg))
-            {
-                log.warn("Unexpected properties in the received message");
-                resultValue = false;
-            }
+            Success messageReceived = (Success) context;
 
-            if (this.expectedMessage != null && !ArrayUtils.isEquals(this.expectedMessage.getBytes(), msg.getBytes()))
+            if (expectedMessage != null)
             {
-                log.warn("Unexpected payload in the received message");
-                resultValue = false;
+                if (!hasExpectedProperties(msg, messageProperties) || !hasExpectedSystemProperties(msg, expectedMessage.getCorrelationId(), expectedMessage.getMessageId()))
+                {
+                    log.warn("Unexpected properties in the received message");
+                    resultValue = false;
+                }
+
+                if (!ArrayUtils.isEquals(this.expectedMessage.getBytes(), msg.getBytes()))
+                {
+                    log.warn("Unexpected payload in the received message");
+                    resultValue = false;
+                }
             }
 
             messageReceived.callbackWasFired();
@@ -250,21 +250,25 @@ public class ReceiveMessagesCommon extends IntegrationTest
             this.expectedMessage = expectedMessage;
         }
 
-        public IotHubMessageResult execute(com.microsoft.azure.sdk.iot.device.Message msg, Object context)
+        public IotHubMessageResult onCloudToDeviceMessageReceived(com.microsoft.azure.sdk.iot.device.Message msg, Object context)
         {
             HashMap<String, String> messageProperties = (HashMap<String, String>) ReceiveMessagesTests.messageProperties;
             Success messageReceived = (Success)context;
             boolean resultValue = true;
-            if (!hasExpectedProperties(msg, messageProperties) || !hasExpectedSystemProperties(msg))
-            {
-                log.warn("Unexpected properties in the received message");
-                resultValue = false;
-            }
 
-            if (this.expectedMessage != null && !ArrayUtils.isEquals(this.expectedMessage.getBytes(), msg.getBytes()))
+            if (this.expectedMessage != null)
             {
-                log.warn("Unexpected payload in the received message");
-                resultValue = false;
+                if (!hasExpectedProperties(msg, messageProperties) || !hasExpectedSystemProperties(msg, expectedMessage.getCorrelationId(), expectedMessage.getMessageId()))
+                {
+                    log.warn("Unexpected properties in the received message");
+                    resultValue = false;
+                }
+
+                if (!ArrayUtils.isEquals(this.expectedMessage.getBytes(), msg.getBytes()))
+                {
+                    log.warn("Unexpected payload in the received message");
+                    resultValue = false;
+                }
             }
 
             messageReceived.callbackWasFired();
@@ -287,7 +291,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
         return true;
     }
 
-    protected static boolean hasExpectedSystemProperties(com.microsoft.azure.sdk.iot.device.Message msg)
+    protected static boolean hasExpectedSystemProperties(com.microsoft.azure.sdk.iot.device.Message msg, String expectedCorrelationId, String expectedMessageId)
     {
         if (msg.getCorrelationId() == null || !msg.getCorrelationId().equals(expectedCorrelationId))
         {
@@ -301,21 +305,22 @@ public class ReceiveMessagesCommon extends IntegrationTest
     {
         byte[] payload = new byte[messageSize];
         new Random().nextBytes(payload);
-        com.microsoft.azure.sdk.iot.service.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.Message(payload);
-        serviceMessage.setCorrelationId(expectedCorrelationId);
-        serviceMessage.setMessageId(expectedMessageId);
+        com.microsoft.azure.sdk.iot.service.messaging.Message serviceMessage = new Message(payload);
+        serviceMessage.setCorrelationId(UUID.randomUUID().toString());
+        serviceMessage.setMessageId(UUID.randomUUID().toString());
         serviceMessage.setProperties(messageProperties);
+        serviceMessage.setDeliveryAcknowledgement(DeliveryAcknowledgement.Full);
         return serviceMessage;
     }
 
-    protected void sendMessageToDevice(String deviceId, int messageSize) throws IotHubException, IOException
+    protected void sendMessageToDevice(String deviceId, int messageSize) throws IotHubException, IOException, InterruptedException, TimeoutException
     {
-        testInstance.serviceClient.send(deviceId, createCloudToDeviceMessage(messageSize));
+        testInstance.messagingClient.send(deviceId, createCloudToDeviceMessage(messageSize));
     }
 
-    protected void sendMessageToModule(String deviceId, String moduleId, int messageSize) throws IotHubException, IOException
+    protected void sendMessageToModule(String deviceId, String moduleId, int messageSize) throws IotHubException, IOException, InterruptedException, TimeoutException
     {
-        testInstance.serviceClient.send(deviceId, moduleId, createCloudToDeviceMessage(messageSize));
+        testInstance.messagingClient.send(deviceId, moduleId, createCloudToDeviceMessage(messageSize));
     }
 
     protected void waitForMessageToBeReceived(Success messageReceived, String protocolName)

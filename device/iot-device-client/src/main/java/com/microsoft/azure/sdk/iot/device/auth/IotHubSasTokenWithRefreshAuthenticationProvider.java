@@ -5,9 +5,10 @@
 
 package com.microsoft.azure.sdk.iot.device.auth;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -36,6 +37,23 @@ public abstract class IotHubSasTokenWithRefreshAuthenticationProvider extends Io
     }
 
     /**
+     * Constructor for IotHubSasTokenWithRefreshAuthenticationProvider
+     * @param hostname the hostname
+     * @param gatewayHostName the gateway hostname
+     * @param deviceId the device id
+     * @param moduleId the module id
+     * @param sharedAccessToken the shared access token
+     * @param suggestedTimeToLiveSeconds the time to live for generated tokens
+     * @param timeBufferPercentage the percent of a sas token's life to live before renewing
+     * @param sslContext the SSLContext the connection will use
+     */
+    protected IotHubSasTokenWithRefreshAuthenticationProvider(String hostname, String gatewayHostName, String deviceId, String moduleId, String sharedAccessToken, int suggestedTimeToLiveSeconds, int timeBufferPercentage, SSLContext sslContext)
+    {
+        super(hostname, gatewayHostName, deviceId, moduleId, suggestedTimeToLiveSeconds, timeBufferPercentage, sslContext);
+        this.sasToken = new IotHubSasToken(hostname, deviceId, null, sharedAccessToken, moduleId, getExpiryTimeInSeconds());
+    }
+
+    /**
      * Constructs the audience string to be used in a sas token
      * @param hostname the hostname
      * @param deviceId the device id
@@ -47,13 +65,9 @@ public abstract class IotHubSasTokenWithRefreshAuthenticationProvider extends Io
     {
         if (hostname == null || deviceId == null || moduleId == null || hostname.isEmpty() || deviceId.isEmpty() || moduleId.isEmpty())
         {
-            // Codes_SRS_MODULEAUTHENTICATIONWITHTOKENREFRESH_34_001: [If any of the provided arguments are null or empty, this
-            // function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("No argument can be null or empty");
         }
 
-        // Codes_SRS_MODULEAUTHENTICATIONWITHTOKENREFRESH_34_002: [This function shall return the path
-        // "<hostname>/devices/<device id>/modules/<module id> url encoded with utf-8.]
         return URLEncoder.encode(String.format("%s/devices/%s/modules/%s", hostname, deviceId, moduleId), StandardCharsets.UTF_8.name());
     }
 
@@ -64,7 +78,6 @@ public abstract class IotHubSasTokenWithRefreshAuthenticationProvider extends Io
     @Override
     public boolean isAuthenticationProviderRenewalNecessary()
     {
-        // Codes_SRS_MODULEAUTHENTICATIONWITHTOKENREFRESH_34_003: [This function shall always return false.]
         return false;
     }
 

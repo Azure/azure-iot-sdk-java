@@ -5,9 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.device.auth;
 
-import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
-import com.microsoft.azure.sdk.iot.device.auth.*;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
@@ -265,30 +263,6 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
 
         //assert
         assertEquals(mockSasToken.toString(), String.valueOf(actualSasToken));
-    }
-
-    //Tests_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_001: [This function shall throw an UnsupportedOperationException.]
-    @Test (expected = UnsupportedOperationException.class)
-    public void setPathToCertificateThrows() throws IOException, InvalidKeyException, SecurityProviderException
-    {
-        //arrange
-        securityProviderExpectations();
-        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
-
-        //act
-        sasAuth.setPathToIotHubTrustedCert("any string");
-    }
-
-    //Tests_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_002: [This function shall throw an UnsupportedOperationException.]
-    @Test (expected = UnsupportedOperationException.class)
-    public void setCertificateThrows() throws IOException, InvalidKeyException, SecurityProviderException
-    {
-        //arrange
-        securityProviderExpectations();
-        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
-
-        //act
-        sasAuth.setIotHubTrustedCert("any string");
     }
 
     private void securityProviderExpectations() throws UnsupportedEncodingException, InvalidKeyException, SecurityProviderException

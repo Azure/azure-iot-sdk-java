@@ -7,7 +7,6 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.security.SecureRandom;
@@ -18,7 +17,6 @@ import java.security.SecureRandom;
 @Slf4j
 public class ExponentialBackoffWithJitter implements RetryPolicy
 {
-    // Codes_SRS_EXPONENTIALBACKOFF_28_006: [Constructor should have default values retryCount, minBackoff, maxBackoff, deltaBackoff and firstFastRetry]
     private int retryCount = Integer.MAX_VALUE;
     private long minBackoff = 100;
     private long maxBackoff = 10*1000; //10 seconds
@@ -47,13 +45,11 @@ public class ExponentialBackoffWithJitter implements RetryPolicy
      */
     public ExponentialBackoffWithJitter(int retryCount, long minBackoff, long maxBackoff, long deltaBackoff, boolean firstFastRetry)
     {
-        // Codes_SRS_EXPONENTIALBACKOFF_28_001: [If the retryCount is less than or equal to 0, the function shall throw an IllegalArgumentException.]
         if (retryCount <= 0)
         {
             throw new IllegalArgumentException("retryCount cannot be less than or equal to 0.");
         }
 
-        // Codes_SRS_EXPONENTIALBACKOFF_28_002: [Constructor should save retryCount, minBackoff, maxBackoff, deltaBackoff and firstFastRetry]
         this.retryCount = retryCount;
         this.minBackoff = minBackoff;
         this.maxBackoff = maxBackoff;
@@ -72,13 +68,10 @@ public class ExponentialBackoffWithJitter implements RetryPolicy
      */
     public RetryDecision getRetryDecision(int currentRetryCount, TransportException lastException)
     {
-        // Codes_SRS_EXPONENTIALBACKOFF_28_003: [The function shall indicate immediate retry on first retry if firstFastRetry is true]
         if (currentRetryCount == 0 && this.firstFastRetry) {
             return new RetryDecision(true, 0);
         }
 
-        // Codes_SRS_EXPONENTIALBACKOFF_28_004: [The function shall return non-zero wait time on first retry if firstFastRetry is false]
-        // Codes_SRS_EXPONENTIALBACKOFF_28_005: [The function shall return waitTime according to
         // F(x) = min(Cmin+ (2^(x-1)-1) * rand(C * (1 – Jd), C*(1-Ju)), Cmax) where  x is the xth retry.]
         if (currentRetryCount < this.retryCount)
         {

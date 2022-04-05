@@ -10,7 +10,6 @@ package com.microsoft.azure.sdk.iot.device.transport;
 import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 
 /**
  * Interface of what all a Transport Connection object must do. Serves to decouple the Message Queueing of the
@@ -28,9 +27,8 @@ public interface IotHubTransportConnection
      * Sets a listener into the Transport Connection object. This listener updates the Transport layer of connection status
      * updates, message arrivals, and message acknowledgements
      * @param listener the listener for connection status updates, message arrivals, and message acknowledgements
-     * @throws TransportException If the provided listener is null
      */
-    void setListener(IotHubListener listener) throws TransportException;
+    void setListener(IotHubListener listener);
 
     /**
      * Closes the transport connection.

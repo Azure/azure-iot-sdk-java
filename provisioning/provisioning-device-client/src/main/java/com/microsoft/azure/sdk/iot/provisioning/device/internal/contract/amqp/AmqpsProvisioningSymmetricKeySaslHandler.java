@@ -5,14 +5,13 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp;
 
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.SaslHandler;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.amqp.SaslHandler;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceSecurityException;
 
 /**
  * Implementation of a SaslHandler that is designed to handle Sasl negotiation using TPM authentication against the Device Provisioning Service
  */
-public class AmqpsProvisioningSymmetricKeySaslHandler implements SaslHandler
+class AmqpsProvisioningSymmetricKeySaslHandler implements SaslHandler
 {
     private final static String PLAIN_MECHANISM = "PLAIN";
     private final static String USERNAME_FORMAT = "%s/registrations/%s";
@@ -33,23 +32,19 @@ public class AmqpsProvisioningSymmetricKeySaslHandler implements SaslHandler
     {
         if (idScope == null || idScope.isEmpty())
         {
-            // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_002: [If any of the arguments are null or empty other than the autorizationCallbackContext, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("IdScope cannot be null or empty");
         }
 
         if (registrationId == null || registrationId.isEmpty())
         {
-            // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_002: [If any of the arguments are null or empty other than the autorizationCallbackContext, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("RegistrationId cannot be null or empty");
         }
 
         if (sasToken == null || sasToken.isEmpty())
         {
-            // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_002: [If any of the arguments are null or empty, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("sasToken cannot be null or empty");
         }
 
-        // Codes_SRS_AMQPSPROVISIONINGSYMMETRICKEYSASLHANDLER_34_001: [This constructor shall save the provided idScope, registrationId, and sas token.]
         this.idScope = idScope;
         this.registrationId = registrationId;
         this.sasToken = sasToken;
@@ -66,12 +61,10 @@ public class AmqpsProvisioningSymmetricKeySaslHandler implements SaslHandler
         {
             if (PLAIN_MECHANISM.equals(mechanism))
             {
-                // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_005: [This function shall return "PLAIN".]
                 return PLAIN_MECHANISM;
             }
         }
 
-        // Codes_SRS_AMQPSPROVISIONINGSYMMETRICKEYSASLHANDLER_34_004: [If the provided mechanisms array does not contain "PLAIN" then this function shall throw a ProvisioningDeviceSecurityException.]
         throw new ProvisioningDeviceSecurityException("Service endpoint does not support TPM authentication");
     }
 
@@ -82,7 +75,6 @@ public class AmqpsProvisioningSymmetricKeySaslHandler implements SaslHandler
      */
     public byte[] getInitPayload(String chosenMechanism)
     {
-        // Codes_SRS_AMQPSPROVISIONINGSYMMETRICKEYSASLHANDLER_34_007: [This function shall return an empty byte array".]
         return EMPTY_BYTE_ARRAY;
     }
 
@@ -91,9 +83,8 @@ public class AmqpsProvisioningSymmetricKeySaslHandler implements SaslHandler
      * @param saslChallenge The bytes from the Sasl challenge received from the service
      * @return the payload of the challenge response to the given challenge
      */
-    public byte[] handleChallenge(byte[] saslChallenge) throws ProvisioningDeviceClientException
+    public byte[] handleChallenge(byte[] saslChallenge)
     {
-        // Codes_SRS_AMQPSPROVISIONINGSYMMETRICKEYSASLHANDLER_34_009: [This function shall return an empty byte array.]
         return new byte[0];
     }
 
@@ -111,18 +102,15 @@ public class AmqpsProvisioningSymmetricKeySaslHandler implements SaslHandler
 
             case AUTH:
                 //bad credentials
-                // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_022: [If the sasl outcome is not OK, this function shall throw a SecurityException.]
                 throw new ProvisioningDeviceSecurityException("Sas token was rejected by the service");
 
             case SYS_TEMP:
-                // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_022: [If the sasl outcome is not OK, this function shall throw a SecurityException.]
                 throw new ProvisioningDeviceSecurityException("Sasl negotiation failed due to transient system error");
                 
             case SYS:
             case SYS_PERM:
             default:
                 //some other kind of failure
-                // Codes_SRS_AMQPSPROVISIONINGSASLHANDLER_34_022: [If the sasl outcome is not OK, this function shall throw a SecurityException.]
                 throw new ProvisioningDeviceSecurityException("Sasl negotiation with service failed");
         }
     }
@@ -130,21 +118,18 @@ public class AmqpsProvisioningSymmetricKeySaslHandler implements SaslHandler
     @Override
     public String getPlainUsername()
     {
-        // Codes_SRS_AMQPSPROVISIONINGSYMMETRICKEYSASLHANDLER_34_023: [This function shall return <idScope>/registrations/<registrationId>.]
         return String.format(USERNAME_FORMAT, this.idScope, registrationId);
     }
 
     @Override
     public String getPlainPassword()
     {
-        // Codes_SRS_AMQPSPROVISIONINGSYMMETRICKEYSASLHANDLER_34_023: [This function shall return the saved sas token.]
         return this.sasToken;
     }
 
     @Override
     public void setSasToken(String sasToken)
     {
-        // Codes_SRS_AMQPSPROVISIONINGSYMMETRICKEYSASLHANDLER_34_024: [This function shall save the provided sas token.]
         this.sasToken = sasToken;
     }
 }

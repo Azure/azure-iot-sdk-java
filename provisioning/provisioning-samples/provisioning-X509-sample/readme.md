@@ -267,10 +267,10 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=provisioning-x50
             System.out.println("Provisioning Device Client threw an exception" + e.getMessage());
             if (provisioningDeviceClient != null)
             {
-                provisioningDeviceClient.closeNow();
+                provisioningDeviceClient.close();
             }
         }
-        provisioningDeviceClient.closeNow();
+        provisioningDeviceClient.close();
 
     ```
     This piece of code does the following :
@@ -382,7 +382,7 @@ This part of the tutorial builds on top of the code you wrote in the previous se
         System.out.println("Device client threw an exception: " + e.getMessage());
         if (deviceClient != null)
         {
-            deviceClient.closeNow();
+            deviceClient.close();
         }
     }	
     ```

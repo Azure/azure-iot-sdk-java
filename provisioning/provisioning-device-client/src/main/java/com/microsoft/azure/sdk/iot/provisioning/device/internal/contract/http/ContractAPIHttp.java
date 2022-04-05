@@ -7,9 +7,9 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.http;
 
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpRequest;
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.https.HttpMethod;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.https.HttpRequest;
+import com.microsoft.azure.sdk.iot.provisioning.device.transport.https.HttpResponse;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.*;
@@ -54,7 +54,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
     private static final Integer ACCEPTABLE_NONCE_HTTP_STATUS = 401;
 
     @Override
-    public void open(RequestData requestData) throws ProvisioningDeviceConnectionException
+    public void open(RequestData requestData)
     {
         // dummy call for Http
     }
@@ -281,7 +281,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
             //SRS_ContractAPIHttp_25_012: [This method shall retrieve the Url by calling 'generateRegisterUrl' on an object for UrlPathBuilder.]
             String url = new UrlPathBuilder(this.hostName, this.idScope, ProvisioningDeviceClientTransportProtocol.HTTPS).generateRegisterUrl(requestData.getRegistrationId());
             Map<String, String> headersMap = null;
-            if(requestData.getSasToken() != null)
+            if (requestData.getSasToken() != null)
             {
                 headersMap = new HashMap<>();
                 headersMap.put(AUTHORIZATION, requestData.getSasToken());

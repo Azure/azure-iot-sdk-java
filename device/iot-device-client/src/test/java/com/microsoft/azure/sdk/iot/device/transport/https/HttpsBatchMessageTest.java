@@ -3,11 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.https;
 
-import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
-import com.microsoft.azure.sdk.iot.device.exceptions.IotHubSizeExceededException;
-import com.microsoft.azure.sdk.iot.device.transport.https.HttpsBatchMessage;
-import com.microsoft.azure.sdk.iot.device.transport.https.HttpsSingleMessage;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import org.junit.Test;
@@ -22,7 +18,6 @@ import java.util.Map;
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 
@@ -39,7 +34,7 @@ public class HttpsBatchMessageTest
     // Tests_SRS_HTTPSBATCHMESSAGE_11_006: [The function shall return the current batch message body as a byte array.]
     // Tests_SRS_HTTPSBATCHMESSAGE_11_007: [The batch message body shall be encoded using UTF-8.]
     @Test
-    public void constructorInitializesEmptyArrayBody() throws IotHubSizeExceededException
+    public void constructorInitializesEmptyArrayBody()
     {
         List<HttpsSingleMessage> mockMessageList = new ArrayList<>();
         HttpsBatchMessage batchMsg = new HttpsBatchMessage(mockMessageList);
@@ -53,7 +48,7 @@ public class HttpsBatchMessageTest
     // Tests_SRS_HTTPSBATCHMESSAGE_11_003: [The JSON object shall have the field "body" set to the raw message  encoded in Base64.]
     @Test
     public void addMessageEncodesBodyCorrectly(
-            @Mocked final HttpsSingleMessage mockMsg) throws IotHubSizeExceededException
+            @Mocked final HttpsSingleMessage mockMsg)
     {
         final String msgBody = "test-msg-body";
         new NonStrictExpectations()
@@ -77,7 +72,7 @@ public class HttpsBatchMessageTest
     // Tests_SRS_HTTPSBATCHMESSAGE_11_004: [The JSON object shall have the field "base64Encoded" set to true and always encode the body for a batch message.]
     @Test
     public void addMessageSetsBase64Correctly(
-            @Mocked final HttpsSingleMessage mockMsg) throws IotHubSizeExceededException
+            @Mocked final HttpsSingleMessage mockMsg)
     {
         final String msgBody = "test-msg-body";
         new NonStrictExpectations()
@@ -101,7 +96,7 @@ public class HttpsBatchMessageTest
 
     // Tests_SRS_HTTPSBATCHMESSAGE_11_005: [The JSON object shall have the field "properties" set to a JSON object which has a key-value pair for each message property, where the key is the HTTPS property name and the value is the property value.]
     @Test
-    public void addMessageSetsPropertiesCorrectlyWhenNoPropertiesPresent(@Mocked final HttpsSingleMessage mockMsg) throws IotHubSizeExceededException
+    public void addMessageSetsPropertiesCorrectlyWhenNoPropertiesPresent(@Mocked final HttpsSingleMessage mockMsg)
     {
         //This keyword is present in the json whenever at least one app/system property is present
         final String propertiesKeyword = "properties";
@@ -134,7 +129,7 @@ public class HttpsBatchMessageTest
     @Test
     public void addMessageSetsPropertiesCorrectly(
             @Mocked final HttpsSingleMessage mockMsg,
-            @Mocked final MessageProperty mockProperty) throws IotHubSizeExceededException
+            @Mocked final MessageProperty mockProperty)
     {
         final String msgBody = "test-msg-body";
         final String propertyHttpsName = "test-property-name";
@@ -172,7 +167,7 @@ public class HttpsBatchMessageTest
     @Test
     public void addMessageSetsPropertiesCorrectlyWhenThereAreSystemProperties(
             @Mocked final HttpsSingleMessage mockMsg,
-            @Mocked final MessageProperty mockProperty) throws IotHubSizeExceededException
+            @Mocked final MessageProperty mockProperty)
     {
         final String msgBody = "test-msg-body";
         final boolean isBase64Encoded = false;
@@ -223,7 +218,7 @@ public class HttpsBatchMessageTest
 
     // Tests_SRS_HTTPSBATCHMESSAGE_11_011: [The function shall return 'application/vnd.microsoft.iothub.json'.]
     @Test
-    public void getContentTypeReturnsCorrectContentType() throws IotHubSizeExceededException
+    public void getContentTypeReturnsCorrectContentType()
     {
         List<HttpsSingleMessage> mockMessageList = new ArrayList<>();
         HttpsBatchMessage batchMsg = new HttpsBatchMessage(mockMessageList);
@@ -236,7 +231,7 @@ public class HttpsBatchMessageTest
 
     // Tests_SRS_HTTPSBATCHMESSAGE_11_012: [The function shall return an empty array.]
     @Test
-    public void getPropertiesReturnsNoProperties() throws IotHubSizeExceededException
+    public void getPropertiesReturnsNoProperties()
     {
         List<HttpsSingleMessage> mockMessageList = new ArrayList<>();
         HttpsBatchMessage batchMsg = new HttpsBatchMessage(mockMessageList);
@@ -249,7 +244,7 @@ public class HttpsBatchMessageTest
 
     // Codes_SRS_HTTPSBATCHMESSAGE_21_013: [The function shall return an empty map.]
     @Test
-    public void getSystemPropertiesReturnsNoProperties() throws IotHubSizeExceededException
+    public void getSystemPropertiesReturnsNoProperties()
     {
         List<HttpsSingleMessage> mockMessageList = new ArrayList<>();
         HttpsBatchMessage batchMsg = new HttpsBatchMessage(mockMessageList);
@@ -260,7 +255,7 @@ public class HttpsBatchMessageTest
 
     // Tests_SRS_HTTPSBATCHMESSAGE_11_010: [The function shall return the number of messages currently in the batch.]
     @Test
-    public void numMessagesInitializedCorrectly(@Mocked final HttpsSingleMessage mockMsg) throws IotHubSizeExceededException
+    public void numMessagesInitializedCorrectly(@Mocked final HttpsSingleMessage mockMsg)
     {
         List<HttpsSingleMessage> mockMessageList = new ArrayList<>();
         HttpsBatchMessage batchMsg = new HttpsBatchMessage(mockMessageList);
@@ -273,7 +268,7 @@ public class HttpsBatchMessageTest
     // Tests_SRS_HTTPSBATCHMESSAGE_11_010: [The function shall return the number of messages currently in the batch.]
     @Test
     public void numMessagesIncrementedCorrectly(
-            @Mocked final HttpsSingleMessage mockMsg) throws IotHubSizeExceededException
+            @Mocked final HttpsSingleMessage mockMsg)
     {
         final String msgBody = "test-msg-body";
         new NonStrictExpectations()
@@ -321,7 +316,7 @@ public class HttpsBatchMessageTest
             mockMessageList.add(mockMsg);
             new HttpsBatchMessage(mockMessageList);
         }
-        catch (IotHubSizeExceededException e)
+        catch (IllegalArgumentException e)
         {
             httpsBatchMessageSizeLimitVerified = true;
         }

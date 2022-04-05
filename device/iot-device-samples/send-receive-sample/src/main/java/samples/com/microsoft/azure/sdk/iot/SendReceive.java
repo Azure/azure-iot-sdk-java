@@ -4,6 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import java.io.IOException;
@@ -52,8 +53,8 @@ public class SendReceive
     protected static class MessageCallback
             implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
-        public IotHubMessageResult execute(Message msg,
-                Object context)
+        public IotHubMessageResult onCloudToDeviceMessageReceived(Message msg,
+                                                                  Object context)
         {
             Counter counter = (Counter) context;
             System.out.println(
@@ -97,7 +98,7 @@ public class SendReceive
     // from IoTHub and return COMPLETE
     protected static class MessageCallbackMqtt implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
-        public IotHubMessageResult execute(Message msg, Object context)
+        public IotHubMessageResult onCloudToDeviceMessageReceived(Message msg, Object context)
         {
             Counter counter = (Counter) context;
             System.out.println(
@@ -114,11 +115,12 @@ public class SendReceive
         }
     }
 
-    protected static class EventCallback implements IotHubEventCallback
+    protected static class EventCallback implements MessageSentCallback
     {
-        public void execute(IotHubStatusCode status, Object context)
+        public void onMessageSent(Message sentMessage, IotHubClientException exception, Object context)
         {
             Message msg = (Message) context;
+            IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
             System.out.println("IoT Hub responded to message "+ msg.getMessageId()  + " with status " + status.name());
             if (status==IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE)
             {
@@ -130,8 +132,12 @@ public class SendReceive
     protected static class IotHubConnectionStatusChangeCallbackLogger implements IotHubConnectionStatusChangeCallback
     {
         @Override
-        public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+        public void onStatusChanged(ConnectionStatusChangeContext connectionStatusChangeContext)
         {
+            IotHubConnectionStatus status = connectionStatusChangeContext.getNewStatus();
+            IotHubConnectionStatusChangeReason statusChangeReason = connectionStatusChangeContext.getNewStatusReason();
+            Throwable throwable = connectionStatusChangeContext.getCause();
+
             System.out.println();
             System.out.println("CONNECTION STATUS UPDATE: " + status);
             System.out.println("CONNECTION STATUS REASON: " + statusChangeReason);
@@ -173,21 +179,19 @@ public class SendReceive
      */
   
     public static void main(String[] args)
-            throws IOException, URISyntaxException
+            throws IOException, URISyntaxException, IotHubClientException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
 
-        String pathToCertificate = null;
-        if (args.length <= 1 || args.length >= 5)
+        if (args.length <= 1 || args.length >= 4)
         {
             System.out.format(
                     "Expected 2 or 3 arguments but received: %d.\n"
                             + "The program should be called with the following args: \n"
                             + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
                             + "2. [number of requests to send]\n"
-                            + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n"
-                            + "4. (optional) path to certificate to enable one-way authentication over ssl for amqps \n",
+                            + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n",
                     args.length);
             return;
         }
@@ -240,19 +244,9 @@ public class SendReceive
                             + "The program should be called with the following args: \n"
                             + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
                             + "2. [number of requests to send]\n"
-                            + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n"
-                            + "4. (optional) path to certificate to enable one-way authentication over ssl for amqps \n",
+                            + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n",
                         protocolStr);
                 return;
-            }
-
-            if (args.length == 3)
-            {
-                pathToCertificate = null;
-            }
-            else
-            {
-                pathToCertificate = args[3];
             }
         }
 
@@ -260,10 +254,6 @@ public class SendReceive
         System.out.format("Using communication protocol %s.\n", protocol.name());
 
         DeviceClient client = new DeviceClient(connString, protocol);
-        if (pathToCertificate != null)
-        {
-            client.setOption("SetCertificatePath", pathToCertificate);
-        }
 
         System.out.println("Successfully created an IoT Hub client.");
 
@@ -282,21 +272,15 @@ public class SendReceive
 
         System.out.println("Successfully set message callback.");
 
-        // Set your token expiry time limit here
-        long time = 2400;
-        client.setOption("SetSASTokenExpiryTime", time);
+        client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
-        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
-
-        client.open();
+        client.open(false);
 
         System.out.println("Opened connection to IoT Hub.");
 
         System.out.println("Beginning to receive messages...");
 
         System.out.println("Sending the following event messages: ");
-
-        System.out.println("Updated token expiry time to " + time);
 
         String deviceId = "MyJavaDevice";
         double temperature;
@@ -312,7 +296,7 @@ public class SendReceive
             try
             {
                 Message msg = new Message(msgStr);
-                msg.setContentTypeFinal("application/json");
+                msg.setContentType("application/json");
                 msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
                 msg.setMessageId(java.util.UUID.randomUUID().toString());
                 msg.setExpiryTime(D2C_MESSAGE_TIMEOUT);
@@ -348,7 +332,7 @@ public class SendReceive
 
         // close the connection        
         System.out.println("Closing"); 
-        client.closeNow();
+        client.close();
         
         if (!failedMessageListOnClose.isEmpty())
         {

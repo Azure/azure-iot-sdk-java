@@ -282,41 +282,22 @@ public class SecurityProviderSymmetricKeyTest
     }
 
     @Test
-    public void getSSLContextSucceeds() throws SecurityProviderException, KeyManagementException, KeyStoreException, CertificateException
+    public void getSSLContextSucceeds() throws SecurityProviderException, KeyManagementException, NoSuchAlgorithmException
     {
         //arrange
+        new Expectations()
+        {
+            {
+                SSLContext.getInstance("TLSv1.2");
+                result = mockedSslContext;
+
+                mockedSslContext.init(null, null, (SecureRandom) any);
+            }
+        };
+
         SecurityProviderSymmetricKey securityProviderSymmetricKey = new SecurityProviderSymmetricKey(testSymKey, testRegId);
 
         //act
         securityProviderSymmetricKey.getSSLContext();
-
-        new Verifications()
-        {
-            {
-                mockedKeyStore.setCertificateEntry(anyString, (Certificate) any);
-                times = 4;
-                mockedSslContext.init((KeyManager[]) any, (TrustManager[]) any, (SecureRandom) any);
-                times = 1;
-            }
-        };
     }
-
-    //SRS_SecurityClientSymmetricKey_25_005: [ This method shall throw SecurityProviderException if any of the underlying API's in generating SSL context fails. ]
-    @Test (expected = SecurityProviderException.class)
-    public void getSSLContextThrowsUnderlyingException() throws SecurityProviderException, KeyStoreException
-    {
-        //arrange
-        SecurityProviderSymmetricKey securityProviderSymmetricKey = new SecurityProviderSymmetricKey(testSymKey, testRegId);
-        new NonStrictExpectations()
-        {
-            {
-                mockedKeyStore.setCertificateEntry(anyString, (Certificate) any);
-                result = new KeyStoreException();
-            }
-        };
-
-        //act
-        securityProviderSymmetricKey.getSSLContext();
-    }
-
 }
