@@ -166,6 +166,14 @@ public class TwinTests extends TwinCommon
         com.microsoft.azure.sdk.iot.service.twin.Twin serviceClientTwin = testInstance.getServiceClientTwin();
         assertTrue(isPropertyInTwinCollection(serviceClientTwin.getReportedProperties(), reportedPropertyKey1, reportedPropertyValue1));
         assertTrue(isPropertyInTwinCollection(serviceClientTwin.getReportedProperties(), reportedPropertyKey2, reportedPropertyValue2));
+
+        // verify that metadata for these new properties is visible to a twin service client
+        com.microsoft.azure.sdk.iot.service.twin.Twin serviceTwin = testInstance.getServiceClientTwin();
+        assertNotNull(serviceTwin.getReportedProperties().getTwinMetadata());
+        assertNotNull(serviceTwin.getReportedProperties().getTwinMetadata(reportedPropertyKey1));
+        assertNotNull(serviceTwin.getReportedProperties().getTwinMetadata(reportedPropertyKey2));
+        assertNotNull(serviceTwin.getReportedProperties().getTwinMetadata(reportedPropertyKey1).getLastUpdated());
+        assertNotNull(serviceTwin.getReportedProperties().getTwinMetadata(reportedPropertyKey2).getLastUpdated());
     }
 
     @Test
