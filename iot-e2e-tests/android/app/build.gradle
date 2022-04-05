@@ -29,6 +29,10 @@ android {
         applicationId "com.iothub.azure.microsoft.com.androide2e"
         minSdkVersion 24
         targetSdkVersion 28
+        dexOptions {
+            incremental true
+            javaMaxHeapSize "4g"
+        }
         multiDexEnabled true
         versionCode 1
         versionName "1.0"
