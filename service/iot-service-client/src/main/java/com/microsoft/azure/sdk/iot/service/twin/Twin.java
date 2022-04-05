@@ -79,33 +79,34 @@ public class Twin
         twin.setVersion(twinState.getVersion());
         twin.setETag(twinState.getETag());
 
+        // Tags
         twin.getTags().setVersion(twinState.getTags().getVersion());
         if (twinState.getTags().size() > 0)
         {
             twin.getTags().putAll(twinState.getTags());
         }
 
+        // Desired properties
         twin.getDesiredProperties().setVersion(twinState.getDesiredProperties().getVersion());
         if (twinState.getDesiredProperties().size() > 0)
         {
             twin.getDesiredProperties().putAll(twinState.getDesiredProperties());
         }
 
-        twin.getReportedProperties().setVersion(twinState.getReportedProperties().getVersion());
         twin.getDesiredProperties().setTwinMetadata(twinState.getDesiredProperties().getTwinMetadata());
-
         if (twinState.getDesiredProperties().getMetadataMap().size() > 0)
         {
             twin.getDesiredProperties().getMetadataMap().putAll(twinState.getDesiredProperties().getMetadataMap());
         }
 
+        // Reported properties
+        twin.getReportedProperties().setVersion(twinState.getReportedProperties().getVersion());
         if (twinState.getReportedProperties().size() > 0)
         {
             twin.getReportedProperties().putAll(twinState.getReportedProperties());
         }
 
         twin.getReportedProperties().setTwinMetadata(twinState.getReportedProperties().getTwinMetadata());
-
         if (twinState.getReportedProperties().getMetadataMap().size() > 0)
         {
             twin.getReportedProperties().getMetadataMap().putAll(twinState.getReportedProperties().getMetadataMap());
