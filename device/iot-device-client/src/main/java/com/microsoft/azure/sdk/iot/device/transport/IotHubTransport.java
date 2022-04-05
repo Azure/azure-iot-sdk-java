@@ -278,7 +278,10 @@ public class IotHubTransport implements IotHubListener
         }
         else
         {
-            log.warn("A message was acknowledged by IoT Hub, but this client has no record of sending it ({})", message);
+            // For instance, a message is sent by a multiplexed device client, the client is unregistered, and then the
+            // client receives the acknowledgement for that sent message. Safe to ignore since the user has opted to stop
+            // tracking it.
+            log.trace("A message was acknowledged by IoT hub, but this client has already stopped tracking it ({})", message);
         }
     }
 
@@ -1046,6 +1049,38 @@ public class IotHubTransport implements IotHubListener
                 }
 
                 this.multiplexedDeviceConnectionStates.remove(newlyUnregisteredConfig.getDeviceId());
+            }
+        }
+
+        // When a client is unregistered, remove all "waiting" and "in progress" messages that it had queued.
+        for (IotHubTransportPacket waitingPacket : this.waitingPacketsQueue)
+        {
+            String deviceIdForMessage = waitingPacket.getDeviceId();
+            for (ClientConfiguration unregisteredConfig : configs)
+            {
+                if (unregisteredConfig.getDeviceId().equals(deviceIdForMessage))
+                {
+                    this.waitingPacketsQueue.remove(waitingPacket);
+                    waitingPacket.setStatus(IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE);
+                    this.addToCallbackQueue(waitingPacket);
+                }
+            }
+        }
+
+        synchronized (this.inProgressMessagesLock)
+        {
+            for (String messageId : this.inProgressPackets.keySet())
+            {
+                String deviceIdForMessage = this.inProgressPackets.get(messageId).getDeviceId();
+                for (ClientConfiguration unregisteredConfig : configs)
+                {
+                    if (unregisteredConfig.getDeviceId().equals(deviceIdForMessage))
+                    {
+                        IotHubTransportPacket cancelledPacket = this.inProgressPackets.remove(messageId);
+                        cancelledPacket.setStatus(IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE);
+                        this.addToCallbackQueue(cancelledPacket);
+                    }
+                }
             }
         }
     }
