@@ -101,6 +101,12 @@ jobs:
           testRunTitle: "Windows (Attempt $(System.JobAttempt))"
         continueOnError: true
         condition: always()
+        
+      - task: ComponentGovernanceComponentDetection@0
+        inputs:
+          scanType: 'Register'
+          verbosity: 'Verbose'
+          alertWarningLevel: 'Medium'
 
   ### Linux ###
   - job: Linux
@@ -179,6 +185,12 @@ jobs:
           testRunTitle: "Linux (Attempt $(System.JobAttempt))"
         continueOnError: true
         condition: always()
+
+      - task: ComponentGovernanceComponentDetection@0
+        inputs:
+          scanType: 'Register'
+          verbosity: 'Verbose'
+          alertWarningLevel: 'Medium'
 
   ### Android, Multi configuration build (Multiple different test groups to cover) ###
   - job: AndroidBuild
