@@ -192,6 +192,7 @@ jobs:
           scanType: 'Register'
           verbosity: 'Verbose'
           alertWarningLevel: 'Medium'
+        condition: always()
 
   ### Android, Multi configuration build (Multiple different test groups to cover) ###
   - job: AndroidBuild
