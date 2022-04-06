@@ -30,6 +30,10 @@ android {
         minSdkVersion 24
         //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 28
+        dexOptions {
+            incremental true
+            javaMaxHeapSize "12g"
+        }
         multiDexEnabled true
         versionCode 1
         versionName "1.0"
