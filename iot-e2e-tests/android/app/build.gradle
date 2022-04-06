@@ -28,14 +28,13 @@ android {
         javaCompileOptions.annotationProcessorOptions.includeCompileClasspath true
         applicationId "com.iothub.azure.microsoft.com.androide2e"
         minSdkVersion 24
+        //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 28
         multiDexEnabled true
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        //********** We can define variables here **********
         each {
-            //buildTypes.mBuildConfigFields 'DATATYPE','VARIABLE',|"GRADLE VARIABLE|"'
             buildConfigField STRING, 'IOTHUB_CONNECTION_STRING', IOTHUB_CONNECTION_STRING_ENV_VAR_NAME
             buildConfigField STRING, 'IOTHUB_CONN_STRING_INVALIDCERT', IOTHUB_CONN_STRING_INVALIDCERT
             buildConfigField STRING, 'STORAGE_ACCOUNT_CONNECTION_STRING', STORAGE_ACCOUNT_CONNECTION_STRING
@@ -57,12 +56,12 @@ android {
     buildTypes {
         release {
             minifyEnabled true
-            shrinkResources true
+            //shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
             minifyEnabled true
-            shrinkResources true
+            //shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -105,7 +104,7 @@ dependencies {
 
     androidTestImplementation 'com.android.support:support-annotations:27.1.1'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'junit:junit:4.12'
+    androidTestImplementation 'junit:junit:4.13.1'
 }
 
 repositories {
