@@ -1,6 +1,6 @@
 package tests.integration.com.microsoft.azure.sdk.iot.helpers.rules;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationAuthenticationException;
+import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientRegistrationException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -28,7 +28,7 @@ public class MultiplexingClientTestRule implements TestRule
             {
                 base.evaluate();
             }
-            catch (MultiplexingClientDeviceRegistrationAuthenticationException e)
+            catch (MultiplexingClientRegistrationException e)
             {
                 // This particular exception contains a map of deviceId -> exception that further elaborates why a given test failed and threw this exception
                 log.error("Multiplexing client test threw a MultiplexingClientDeviceRegistrationAuthenticationException");

@@ -15,7 +15,6 @@ import org.apache.qpid.proton.engine.Event;
 import org.apache.qpid.proton.engine.Handler;
 import org.apache.qpid.proton.engine.Link;
 import org.apache.qpid.proton.engine.Receiver;
-import org.apache.qpid.proton.reactor.FlowController;
 
 import java.util.HashMap;
 import java.util.Iterator;

@@ -13,6 +13,7 @@ import com.microsoft.azure.sdk.iot.device.FileUploadSasUriRequest;
 import com.microsoft.azure.sdk.iot.device.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.ProxySettings;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -156,7 +157,7 @@ public class FileUploadTests extends IntegrationTest
         proxyServer.stop();
     }
 
-    private DeviceClient setUpDeviceClient(IotHubClientProtocol protocol) throws URISyntaxException, InterruptedException, IOException, IotHubException, GeneralSecurityException
+    private DeviceClient setUpDeviceClient(IotHubClientProtocol protocol) throws URISyntaxException, InterruptedException, IOException, IotHubException, GeneralSecurityException, IotHubClientException
     {
         ClientOptions.ClientOptionsBuilder optionsBuilder = ClientOptions.builder();
         if (testInstance.withProxy)
@@ -178,7 +179,7 @@ public class FileUploadTests extends IntegrationTest
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void getAndCompleteSasUriWithoutUpload() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException
+    public void getAndCompleteSasUriWithoutUpload() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException, IotHubClientException
     {
         // arrange
         DeviceClient deviceClient = setUpDeviceClient(testInstance.protocol);
@@ -203,7 +204,7 @@ public class FileUploadTests extends IntegrationTest
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void getAndCompleteSasUriWithUpload() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException, StorageException, TimeoutException
+    public void getAndCompleteSasUriWithUpload() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException, StorageException, TimeoutException, IotHubClientException
     {
         // Android has some compatibility issues with the azure storage SDK
         assumeFalse(Tools.isAndroid());
@@ -237,7 +238,7 @@ public class FileUploadTests extends IntegrationTest
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void getAndCompleteSasUriWithMultipleUploads() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException, StorageException, TimeoutException
+    public void getAndCompleteSasUriWithMultipleUploads() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException, StorageException, TimeoutException, IotHubClientException
     {
         // Android has some compatibility issues with the azure storage SDK
         assumeFalse(Tools.isAndroid());

@@ -28,6 +28,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
+import static com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest.IF_MATCH;
 import static com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest.REQUEST_ID;
 
 /**
@@ -222,26 +223,39 @@ public final class TwinClient
     }
 
     /**
-     * This method updates device twin for the specified device.
-     * <p>This API uses the IoT Hub PATCH API when sending updates, but it sends the full twin with each patch replace.
-     * As a result, devices subscribed to twin will receive notifications that each property is changed when this API is
-     * called, even if only some of the properties were changed.</p>
+     * This method patches the twin for the specified device.
      * <p>See <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/devices/updatetwin">PATCH</a> for
      * more details.</p>
      *
-     * @param twin The device with a valid Id for which device twin is to be updated.
+     * @param twin The twin to be patched. To delete a particular property, set the value to null.
      * @throws IOException This exception is thrown if the IO operation failed.
      * @throws IotHubException This exception is thrown if the response verification failed.
      */
-    public void patch(Twin twin) throws IotHubException, IOException
+    public Twin patch(Twin twin) throws IotHubException, IOException
+    {
+        return patch(twin, null);
+    }
+
+    /**
+     * This method patches the twin for the specified device.
+     * <p>See <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/devices/updatetwin">PATCH</a> for
+     * more details.</p>
+     *
+     * @param twin The twin to be patched. To delete a particular property, set the value to null.
+     * @param ifMatch the string representing a ETag for the device twin, as per RFC7232. If null, no if-match header
+     * will be sent as a part of this request and it will be executed unconditionally.
+     * @throws IOException This exception is thrown if the IO operation failed.
+     * @throws IotHubException This exception is thrown if the response verification failed.
+     */
+    public Twin patch(Twin twin, String ifMatch) throws IotHubException, IOException
     {
         if (twin == null || twin.getDeviceId() == null || twin.getDeviceId().length() == 0)
         {
             throw new IllegalArgumentException("Instantiate a twin and set device Id to be used.");
         }
 
-        if ((twin.getDesiredMap() == null || twin.getDesiredMap().isEmpty()) &&
-                (twin.getTagsMap() == null || twin.getTagsMap().isEmpty()))
+        if ((twin.getDesiredProperties() == null || twin.getDesiredProperties().isEmpty()) &&
+                (twin.getTags() == null || twin.getTags().isEmpty()))
         {
             throw new IllegalArgumentException("Set either desired properties or tags for the device to be updated.");
         }
@@ -256,13 +270,20 @@ public final class TwinClient
             url = IotHubConnectionString.getUrlModuleTwin(this.hostName, twin.getDeviceId(), twin.getModuleId());
         }
 
-        TwinState twinState = new TwinState(twin.getTagsMap(), twin.getDesiredMap(), null);
+        TwinState twinState = new TwinState(twin.getTags(), twin.getDesiredProperties(), null);
         String twinJson = twinState.toJsonElement().toString();
 
         HttpRequest httpRequest = createRequest(url, HttpMethod.PATCH, twinJson.getBytes(StandardCharsets.UTF_8));
 
+        if (ifMatch != null)
+        {
+            httpRequest.setHeaderField(IF_MATCH, ifMatch);
+        }
+
         // no need to return http response since method returns void
-        httpRequest.send();
+        HttpResponse httpResponse = httpRequest.send();
+        String twinString = new String(httpResponse.getBody(), StandardCharsets.UTF_8);
+        return Twin.fromJson(twinString);
     }
 
     /**
@@ -276,13 +297,29 @@ public final class TwinClient
      */
     public Twin replace(Twin twin) throws IotHubException, IOException
     {
+        return replace(twin, null);
+    }
+
+    /**
+     * Replace the full twin for a given device or module with the provided twin.
+     *
+     * @param twin The twin object to replace the current twin object.
+     * @param ifMatch the string representing a ETag for the device twin, as per RFC7232. If null, no if-match header
+     * will be sent as a part of this request and it will be executed unconditionally.
+     * @throws IotHubException If any an IoT hub level exception is thrown. For instance,
+     * if the sendHttpRequest is unauthorized, an exception that extends IotHubException will be thrown.
+     * @throws IOException If the sendHttpRequest failed to send to IoT hub.
+     * @return The Twin object's current state returned from the service after the replace operation.
+     */
+    public Twin replace(Twin twin, String ifMatch) throws IotHubException, IOException
+    {
         if (twin == null || twin.getDeviceId() == null || twin.getDeviceId().length() == 0)
         {
             throw new IllegalArgumentException("Instantiate a device and set device Id to be used.");
         }
 
         URL url;
-        if ((twin.getModuleId() == null) || twin.getModuleId().length() ==0)
+        if (twin.getModuleId() == null || twin.getModuleId().length() == 0)
         {
             url = this.iotHubConnectionString.getUrlTwin(twin.getDeviceId());
         }
@@ -291,9 +328,14 @@ public final class TwinClient
             url = this.iotHubConnectionString.getUrlModuleTwin(twin.getDeviceId(), twin.getModuleId());
         }
 
-        TwinState twinState = new TwinState(twin.getTagsMap(), twin.getDesiredMap(), null);
+        TwinState twinState = new TwinState(twin.getTags(), twin.getDesiredProperties(), null);
         String twinJson = twinState.toJsonElement().toString();
         HttpRequest httpRequest = createRequest(url, HttpMethod.PUT, twinJson.getBytes(StandardCharsets.UTF_8));
+
+        if (ifMatch != null)
+        {
+            httpRequest.setHeaderField(IF_MATCH, ifMatch);
+        }
 
         HttpResponse httpResponse = httpRequest.send();
         String twinString = new String(httpResponse.getBody(), StandardCharsets.UTF_8);

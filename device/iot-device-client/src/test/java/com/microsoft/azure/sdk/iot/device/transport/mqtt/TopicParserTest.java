@@ -3,8 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.transport.mqtt.TopicParser;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import mockit.Deencapsulation;
 import org.junit.Test;
 

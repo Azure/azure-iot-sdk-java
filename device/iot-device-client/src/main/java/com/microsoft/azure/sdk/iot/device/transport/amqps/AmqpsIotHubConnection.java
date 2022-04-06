@@ -12,9 +12,7 @@ import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
 import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingDeviceUnauthorizedException;
-import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
@@ -72,9 +70,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     private final Set<ClientConfiguration> clientConfigurations;
     private IotHubListener listener;
     private TransportException savedException;
-    private boolean reconnectionScheduled = false;
     private final Object executorServiceLock = new Object();
-    private final Map<String, Boolean> reconnectionsScheduled = new ConcurrentHashMap<>();
     private ExecutorService executorService;
     private final ProxySettings proxySettings;
     private final String transportUniqueIdentifier;
@@ -216,12 +212,12 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
 
         clientConfigurations.remove(config);
+        deviceSessionsOpenedLatches.remove(config.getDeviceId());
     }
 
     public void open() throws TransportException
     {
         log.debug("Opening amqp layer...");
-        reconnectionScheduled = false;
         connectionId = UUID.randomUUID().toString();
 
         this.savedException = null;
@@ -400,7 +396,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
         if (this.savedException != null)
         {
-            this.scheduleReconnection(this.savedException);
+            this.reconnectingDeviceSessionHandlers.putAll(this.sessionHandlers);
+            this.listener.onConnectionLost(this.savedException, this.connectionId);
         }
     }
 
@@ -829,7 +826,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     @Override
     public void onSessionClosedUnexpectedly(ErrorCondition errorCondition, String deviceId)
     {
-        TransportException savedException = AmqpsExceptionTranslator.convertFromAmqpException(errorCondition);
+        this.savedException = AmqpsExceptionTranslator.convertFromAmqpException(errorCondition);
 
         if (this.isMultiplexing)
         {
@@ -841,18 +838,23 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         // If the session closes during an open call, need to decrement this latch so that the open call doesn't wait
         // for this session to open. The above call to onMultiplexedDeviceSessionRegistrationFailed will report
         // the relevant exception.
-        this.deviceSessionsOpenedLatches.get(deviceId).countDown();
+        CountDownLatch deviceSessionsOpenedLatch = this.deviceSessionsOpenedLatches.get(deviceId);
+        if (deviceSessionsOpenedLatch != null)
+        {
+            deviceSessionsOpenedLatch.countDown();
+        }
 
         if (isMultiplexing)
         {
             // When multiplexing, don't kill the connection just because a session dropped.
             log.error("Amqp session closed unexpectedly. notifying the transport layer to start reconnection logic...", this.savedException);
-            scheduleDeviceSessionReconnection(savedException, deviceId);
+            this.reconnectingDeviceSessionHandlers.putAll(this.sessionHandlers);
+            boolean isReconnecting = this.reconnectingDeviceSessionHandlers.containsKey(deviceId);
+            this.listener.onMultiplexedDeviceSessionLost(this.savedException, this.connectionId, deviceId, isReconnecting);
         }
         else
         {
             // When not multiplexing, reconnection logic will just spin up the whole connection again.
-            this.savedException = savedException;
             log.error("Amqp session closed unexpectedly. Closing this connection...", this.savedException);
             this.connection.close();
         }
@@ -869,11 +871,11 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     @Override
     public void onSessionClosedAsExpected(String deviceId)
     {
-        // don't want to signal Client_Close to transport layer if this is in the middle of a disconnected_retrying event
-        if (this.reconnectionsScheduled.get(deviceId) == null || !this.reconnectionsScheduled.get(deviceId))
+        if (this.isMultiplexing)
         {
             log.trace("onSessionClosedAsExpected callback executed, notifying transport layer");
-            this.listener.onMultiplexedDeviceSessionLost(null, this.connectionId, deviceId);
+            boolean isReconnecting = this.reconnectingDeviceSessionHandlers.containsKey(deviceId);
+            this.listener.onMultiplexedDeviceSessionLost(this.savedException, this.connectionId, deviceId, isReconnecting);
         }
     }
 
@@ -1018,30 +1020,6 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
     }
 
-    private void scheduleReconnection(TransportException exception)
-    {
-        if (!reconnectionScheduled)
-        {
-            reconnectionScheduled = true;
-            log.warn("Amqp connection was closed, creating a thread to notify transport layer", exception);
-
-            // preserve the session handlers through the reconnection attempts
-            this.reconnectingDeviceSessionHandlers.putAll(this.sessionHandlers);
-
-            ReconnectionNotifier.notifyDisconnectAsync(exception, this.listener, this.connectionId);
-        }
-    }
-
-    private void scheduleDeviceSessionReconnection(TransportException exception, String deviceId)
-    {
-        if (this.reconnectionsScheduled.get(deviceId) == null || !this.reconnectionsScheduled.get(deviceId))
-        {
-            this.reconnectionsScheduled.put(deviceId, true);
-            log.warn("Amqp session for device {} was closed, creating a thread to notify transport layer", deviceId, exception);
-            ReconnectionNotifier.notifyDeviceDisconnectAsync(exception, this.listener, this.connectionId, deviceId);
-        }
-    }
-
     private void releaseLatch(CountDownLatch latch)
     {
         for (int i = 0; i < latch.getCount(); i++)
@@ -1183,8 +1161,6 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 {
                     this.sasTokenRenewalHandlers.remove(sasTokenRenewalHandlerToRemove);
                 }
-
-                this.reconnectionsScheduled.remove(configToUnregister.getDeviceId());
 
                 log.debug("Closing device session for multiplexed device {}", configToUnregister.getDeviceId());
                 amqpsSessionHandler.closeSession();

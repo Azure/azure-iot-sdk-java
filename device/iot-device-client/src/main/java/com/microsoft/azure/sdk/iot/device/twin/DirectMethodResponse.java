@@ -6,12 +6,19 @@ package com.microsoft.azure.sdk.iot.device.twin;
 public class DirectMethodResponse
 {
     private int status;
-    private String responseMessage;
+    private Object payload;
 
-    public DirectMethodResponse(int status, String responseMessage)
+    /**
+     * Constructor for a DirectMethodResponse.
+     * @param status the status in DirectMethodResponse which is returned by the device
+     * @param payload the payload attached to that method. This parameter can be
+         * Null: the DirectMethodResponse object will not include the "payload" field
+         * Primitive type (e.g., String, Int)/Array/List/Map/custom type: will be serialized as value of the "payload" field using GSON.
+     */
+    public DirectMethodResponse(int status, Object payload)
     {
         this.status = status;
-        this.responseMessage = responseMessage;
+        this.payload = payload;
     }
 
     public int getStatus()
@@ -19,14 +26,14 @@ public class DirectMethodResponse
         return status;
     }
 
-    public String getResponseMessage()
+    public Object getPayload()
     {
-        return responseMessage;
+        return payload;
     }
 
-    public void setResponseMessage(String responseMessage)
+    public void setPayload(String payload)
     {
-        this.responseMessage = responseMessage;
+        this.payload = payload;
     }
 
     public void setStatus(int status)

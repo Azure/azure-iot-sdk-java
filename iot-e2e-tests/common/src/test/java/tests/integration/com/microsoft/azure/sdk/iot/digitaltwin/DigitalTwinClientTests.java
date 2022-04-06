@@ -4,26 +4,16 @@
 package tests.integration.com.microsoft.azure.sdk.iot.digitaltwin;
 
 import com.azure.core.credential.AzureSasCredential;
-import com.microsoft.azure.sdk.iot.device.ClientOptions;
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesCallback;
+import com.google.gson.JsonElement;
+import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
-import com.microsoft.azure.sdk.iot.device.twin.Pair;
-import com.microsoft.azure.sdk.iot.device.twin.Property;
-import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
-import com.microsoft.azure.sdk.iot.device.MultiplexingClient;
-import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
 import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesCallback;
-import com.microsoft.azure.sdk.iot.device.twin.Twin;
-import com.microsoft.azure.sdk.iot.service.registry.Device;
+import com.microsoft.azure.sdk.iot.service.ProxyOptions;
+import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.ProxyOptions;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
-import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClientOptions;
@@ -35,15 +25,13 @@ import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinInvokeC
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinUpdateRequestOptions;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.serialization.BasicDigitalTwin;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.rest.RestException;
 import com.microsoft.rest.ServiceResponseWithHeaders;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -60,19 +48,10 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -125,7 +104,8 @@ public class DigitalTwinClientTests extends IntegrationTest
     }
 
     @Before
-    public void setUp() throws URISyntaxException, IOException, IotHubException {
+    public void setUp() throws URISyntaxException, IOException, IotHubException, IotHubClientException
+    {
         this.deviceClient = createDeviceClient(protocol);
         deviceClient.open(false);
         digitalTwinClient =
@@ -191,7 +171,8 @@ public class DigitalTwinClientTests extends IntegrationTest
     // the expected model Ids.
     @Test
     @StandardTierHubOnlyTest
-    public void getMultiplexedDigitalTwinsRegisteredBeforeOpen() throws IotHubException, IOException, URISyntaxException, MultiplexingClientException, InterruptedException {
+    public void getMultiplexedDigitalTwinsRegisteredBeforeOpen() throws IotHubException, IOException, URISyntaxException, InterruptedException, IotHubClientException, TimeoutException
+    {
         if (protocol == MQTT || protocol == MQTT_WS) {
             return; // multiplexing isn't supported over MQTT, so it can't be tested
         }
@@ -228,7 +209,8 @@ public class DigitalTwinClientTests extends IntegrationTest
     // Verify that their reported twin has the expected model Ids.
     @Test
     @StandardTierHubOnlyTest
-    public void getMultiplexedDigitalTwinsRegisteredAfterOpen() throws IotHubException, IOException, URISyntaxException, MultiplexingClientException, InterruptedException {
+    public void getMultiplexedDigitalTwinsRegisteredAfterOpen() throws IotHubException, IOException, URISyntaxException, InterruptedException, IotHubClientException, TimeoutException
+    {
         if (protocol == MQTT || protocol == MQTT_WS) {
             return; // multiplexing isn't supported over MQTT, so it can't be tested
         }
@@ -384,7 +366,7 @@ public class DigitalTwinClientTests extends IntegrationTest
 
     @Test
     @StandardTierHubOnlyTest
-    public void updateDigitalTwin() throws IOException, TimeoutException, InterruptedException
+    public void updateDigitalTwin() throws IOException, TimeoutException, InterruptedException, IotHubClientException
     {
         // arrange
 
@@ -429,7 +411,7 @@ public class DigitalTwinClientTests extends IntegrationTest
 
     @Test
     @StandardTierHubOnlyTest
-    public void invokeRootLevelCommand() throws IOException, InterruptedException
+    public void invokeRootLevelCommand() throws IOException, InterruptedException, IotHubClientException
     {
         // arrange
         String commandName = "getMaxMinReport";
@@ -445,7 +427,7 @@ public class DigitalTwinClientTests extends IntegrationTest
 
         // Device method callback
         MethodCallback methodCallback = (methodName, methodData, context) -> {
-            String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
+            JsonElement jsonRequest = methodData.getPayloadAsJsonElement();
             if(methodName.equalsIgnoreCase(commandName)) {
                 return new DirectMethodResponse(deviceSuccessResponseStatus, jsonRequest);
             }
@@ -455,17 +437,7 @@ public class DigitalTwinClientTests extends IntegrationTest
         };
 
         // IotHub event callback
-        final CountDownLatch subscribedToMethodsLatch = new CountDownLatch(1);
-        IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) ->
-        {
-            subscribedToMethodsLatch.countDown();
-        };
-
-        deviceClient.subscribeToMethodsAsync(methodCallback, commandName, iotHubEventCallback, commandName);
-
-        assertTrue("Timed out waiting for client to subscribe to methods", subscribedToMethodsLatch.await(1, TimeUnit.MINUTES));
-
-        deviceClient.subscribeToMethodsAsync(methodCallback, commandName, iotHubEventCallback, commandName);
+        deviceClient.subscribeToMethods(methodCallback, commandName);
 
         // act
         DigitalTwinCommandResponse responseWithNoPayload = this.digitalTwinClient.invokeCommand(deviceId, commandName, null);
@@ -475,13 +447,13 @@ public class DigitalTwinClientTests extends IntegrationTest
 
         // assert
         assertEquals(deviceSuccessResponseStatus, responseWithNoPayload.getStatus());
-        assertEquals("\"\"", responseWithNoPayload.getPayload());
+        assertEquals("{}", responseWithNoPayload.getPayload(String.class));
         assertEquals(deviceSuccessResponseStatus, responseWithJsonStringPayload.getStatus());
-        assertEquals(jsonStringInput, responseWithJsonStringPayload.getPayload());
+        assertEquals(jsonStringInput, responseWithJsonStringPayload.getPayload(String.class));
         assertEquals(deviceSuccessResponseStatus, responseWithDatePayload.getStatus());
-        assertEquals(commandInput, responseWithDatePayload.getPayload());
+        assertEquals(commandInput, responseWithDatePayload.getPayload(String.class));
         assertEquals(deviceSuccessResponseStatus, datePayloadResponseWithHeaders.body().getStatus());
-        assertEquals(commandInput, datePayloadResponseWithHeaders.body().getPayload());
+        assertEquals(commandInput, datePayloadResponseWithHeaders.body().getPayload(String.class));
     }
 
     private static DigitalTwinClient buildDigitalTwinClientWithAzureSasCredential()

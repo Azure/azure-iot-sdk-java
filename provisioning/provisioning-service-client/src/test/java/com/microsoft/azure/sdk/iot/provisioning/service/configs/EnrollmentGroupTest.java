@@ -286,7 +286,7 @@ public class EnrollmentGroupTest
         Helpers.assertDateWithError(enrollmentGroup.getLastUpdatedDateTimeUtc(), VALID_DATE_AS_STRING);
         TwinState twinState = enrollmentGroup.getInitialTwin();
         assertNotNull(twinState);
-        assertEquals("value1", twinState.getDesiredProperty().get("prop1"));
+        assertEquals("value1", twinState.getDesiredProperties().get("prop1"));
         Attestation attestation = enrollmentGroup.getAttestation();
         assertTrue("attestation is not x509", (attestation instanceof X509Attestation));
         X509Attestation x509Attestation = (X509Attestation)attestation;
@@ -334,7 +334,7 @@ public class EnrollmentGroupTest
         Helpers.assertDateWithError(enrollmentGroup.getLastUpdatedDateTimeUtc(), VALID_DATE_AS_STRING);
         TwinState twinState = enrollmentGroup.getInitialTwin();
         assertNotNull(twinState);
-        assertEquals("value1", twinState.getDesiredProperty().get("prop1"));
+        assertEquals("value1", twinState.getDesiredProperties().get("prop1"));
         Attestation attestation = enrollmentGroup.getAttestation();
         assertTrue("attestation is not Symmetric Key", (attestation instanceof SymmetricKeyAttestation));
         SymmetricKeyAttestation symmetricKeyAttestation = (SymmetricKeyAttestation)attestation;

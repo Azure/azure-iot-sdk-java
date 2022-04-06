@@ -366,6 +366,7 @@ public class MessagingClientTests extends IntegrationTest
     }
 
     @Test
+    @StandardTierHubOnlyTest
     @ContinuousIntegrationTest
     public void cloudToDeviceTelemetryWithTooLargeMessageThrows() throws IOException, GeneralSecurityException, IotHubException, URISyntaxException, TimeoutException, InterruptedException
     {
@@ -385,8 +386,6 @@ public class MessagingClientTests extends IntegrationTest
                 false);
 
         Device device = testDeviceIdentity.getDevice();
-
-        Device deviceGetBefore = registryClient.getDevice(device.getDeviceId());
 
         MessagingClientOptions messagingClientOptions =
             MessagingClientOptions.builder()

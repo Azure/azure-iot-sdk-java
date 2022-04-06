@@ -13,7 +13,7 @@ import com.microsoft.azure.sdk.iot.service.jobs.serializers.JobsStatisticsParser
 import com.microsoft.azure.sdk.iot.service.methods.serializers.MethodParser;
 import com.microsoft.azure.sdk.iot.service.twin.TwinState;
 import com.microsoft.azure.sdk.iot.service.twin.TwinCollection;
-import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
 import mockit.*;
 import org.junit.Test;
 
@@ -410,9 +410,9 @@ public class JobTest
         assertEquals(ScheduledJobStatus.completed, job.getJobStatus());
         assertNotNull(job.getCloudToDeviceMethod());
         assertNotNull(job.getOutcomeResult());
-        MethodResult methodResult = job.getOutcomeResult();
-        assertEquals(methodReturnStatus, (long)methodResult.getStatus());
-        assertEquals(methodReturnPayload, methodResult.getPayload());
+        DirectMethodResponse directMethodResponse = job.getOutcomeResult();
+        assertEquals(methodReturnStatus, (long) directMethodResponse.getStatus());
+        assertEquals(methodReturnPayload, directMethodResponse.getPayload(String.class));
         assertNotNull(job.getLastUpdatedDateTime());
         assertNull(job.getError());
     }
@@ -459,127 +459,5 @@ public class JobTest
 
         //assert
         assertNull(job.getOutcomeResult());
-    }
-
-    /* Tests_SRS_JOBRESULT_21_020: [The toString shall return a String with a pretty print json that represents this class.] */
-    @Test
-    public void  toStringReturnClassContent() throws IOException
-    {
-        //arrange
-        final String json = "validJson";
-        final Date now = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT_JSON);
-        String nowString = dateFormat.format(now);
-        final String expectedPrettyPrint =
-                "{\n" +
-                "  \"jobId\": \"validJobId\",\n" +
-                "  \"queryCondition\": \"DeviceId IN ['validDevice']\",\n" +
-                "  \"createdTime\": \"" + nowString + "\",\n" +
-                "  \"startTime\": \"" + nowString + "\",\n" +
-                "  \"lastUpdatedDateTime\": \"" + nowString + "\",\n" +
-                "  \"endTime\": \"" + nowString + "\",\n" +
-                "  \"maxExecutionTimeInSeconds\": 100,\n" +
-                "  \"jobType\": \"scheduleUpdateTwin\",\n" +
-                "  \"jobStatus\": \"enqueued\",\n" +
-                "  \"updateTwin\": {\n" +
-                "    \"deviceId\": \"validDeviceId\",\n" +
-                "    \"eTag\": \"validETag\",\n" +
-                "    \"tags\": {\n" +
-                "      \"tag1\": \"val1\"\n" +
-                "    },\n" +
-                "    \"desiredProperties\": {},\n" +
-                "    \"parentScopes\": []\n" +
-                "  },\n" +
-                "  \"failureReason\": \"This is a valid failure reason\",\n" +
-                "  \"statusMessage\": \"This is a valid status message\",\n" +
-                "  \"jobStatistics\": {\n" +
-                "    \"deviceCount\": 0,\n" +
-                "    \"failedCount\": 0,\n" +
-                "    \"succeededCount\": 0,\n" +
-                "    \"runningCount\": 0,\n" +
-                "    \"pendingCount\": 0\n" +
-                "  },\n" +
-                "  \"deviceId\": \"validDeviceId\",\n" +
-                "  \"parentJobId\": \"validParentJobId\"\n" +
-                "}";
-
-        TwinCollection tags = new TwinCollection();
-        tags.put("tag1", "val1");
-
-        TwinState twinState = new TwinState(tags, null, null);
-        twinState.setDeviceId(DEVICE_ID);
-        twinState.setETag(ETAG);
-
-        JobsResponseParserExpectations(json, twinState, null, now, null, "scheduleUpdateTwin");
-        ScheduledJob job = new ScheduledJob(json);
-
-        //act
-        String prettyPrint = job.toString();
-
-        //assert
-        assertThat(prettyPrint, is(expectedPrettyPrint));
-    }
-
-    /* Tests_SRS_JOBRESULT_21_020: [The toString shall return a String with a pretty print json that represents this class.] */
-    @Test
-    public void  toStringReturnJobTypeUnknown() throws IOException
-    {
-        //arrange
-        final String json = "validJson";
-        final Date now = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT_JSON);
-        String nowString = dateFormat.format(now);
-        final String expectedPrettyPrint =
-                "{\n" +
-                        "  \"jobId\": \"validJobId\",\n" +
-                        "  \"queryCondition\": \"DeviceId IN ['validDevice']\",\n" +
-                        "  \"createdTime\": \"" + nowString + "\",\n" +
-                        "  \"startTime\": \"" + nowString + "\",\n" +
-                        "  \"lastUpdatedDateTime\": \"" + nowString + "\",\n" +
-                        "  \"endTime\": \"" + nowString + "\",\n" +
-                        "  \"maxExecutionTimeInSeconds\": 100,\n" +
-                        "  \"jobType\": \"unknown\",\n" +
-                        "  \"jobStatus\": \"enqueued\",\n" +
-                        "  \"updateTwin\": {\n" +
-                        "    \"deviceId\": \"validDeviceId\",\n" +
-                        "    \"eTag\": \"validETag\",\n" +
-                        "    \"tags\": {\n" +
-                        "      \"tag1\": \"val1\"\n" +
-                        "    },\n" +
-                        "    \"desiredProperties\": {\n" +
-                        "      \"key1\": \"val1\"\n" +
-                        "    },\n" +
-                        "    \"parentScopes\": []\n" +
-                        "  },\n" +
-                        "  \"failureReason\": \"This is a valid failure reason\",\n" +
-                        "  \"statusMessage\": \"This is a valid status message\",\n" +
-                        "  \"jobStatistics\": {\n" +
-                        "    \"deviceCount\": 0,\n" +
-                        "    \"failedCount\": 0,\n" +
-                        "    \"succeededCount\": 0,\n" +
-                        "    \"runningCount\": 0,\n" +
-                        "    \"pendingCount\": 0\n" +
-                        "  },\n" +
-                        "  \"deviceId\": \"validDeviceId\",\n" +
-                        "  \"parentJobId\": \"validParentJobId\"\n" +
-                        "}";
-
-        TwinCollection tags = new TwinCollection();
-        tags.put("tag1", "val1");
-        TwinCollection desired = new TwinCollection();
-        desired.put("key1", "val1");
-
-        TwinState twinState = new TwinState(tags, desired, null);
-        twinState.setDeviceId(DEVICE_ID);
-        twinState.setETag(ETAG);
-
-        JobsResponseParserExpectations(json, twinState, null, now, null, "unknown");
-        ScheduledJob job = new ScheduledJob(json);
-
-        //act
-        String prettyPrint = job.toString();
-
-        //assert
-        assertThat(prettyPrint, is(expectedPrettyPrint));
     }
 }

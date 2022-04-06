@@ -8,7 +8,6 @@
 package com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 
 /**
  * Callback interface for communicating connection and message status updates from individual protocol clients
@@ -60,8 +59,10 @@ public interface IotHubListener
      * @param connectionId the Id of the connection, used to identify which of possible many reconnection attempts
      *                     this event belongs to.
      * @param deviceId the Id of the device that the session belongs to
+     * @param shouldReconnect false if the disconnect was desired by the users, and true if it is the consequence of an
+     * issue where the SDK should retry.
      */
-    void onMultiplexedDeviceSessionLost(TransportException e, String connectionId, String deviceId);
+    void onMultiplexedDeviceSessionLost(TransportException e, String connectionId, String deviceId, boolean shouldReconnect);
 
     /**
      * Callback to be fired when the multiplexed connection fails to register a device session.

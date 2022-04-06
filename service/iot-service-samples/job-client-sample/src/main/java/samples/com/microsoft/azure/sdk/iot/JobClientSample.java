@@ -10,7 +10,6 @@ import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobStatus;
 import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobsClient;
 import com.microsoft.azure.sdk.iot.service.query.SqlQueryBuilder;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
-import com.microsoft.azure.sdk.iot.service.twin.Pair;
 import com.microsoft.azure.sdk.iot.service.query.JobQueryResponse;
 import com.microsoft.azure.sdk.iot.service.query.QueryClient;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -163,16 +162,10 @@ public class JobClientSample
     {
         final String queryCondition = "DeviceId IN ['" + deviceId + "']";
         Twin updateTwin = new Twin(deviceId);
-        Set<Pair> tags = new HashSet<>();
-        tags.add(new Pair("HomeID", UUID.randomUUID()));
-        updateTwin.setTags(tags);
+        updateTwin.getTags().put("HomeID", UUID.randomUUID());
 
         System.out.println("Schedule twin job " + jobIdTwin + " for device " + deviceId + "...");
         ScheduledJob job = jobClient.scheduleUpdateTwin(jobIdTwin, queryCondition, updateTwin, startTimeUtc , maxExecutionTimeInSeconds);
-        if(job == null)
-        {
-            throw new IOException("Schedule Twin ScheduledJob returns null");
-        }
         System.out.println("Schedule twin job response");
         System.out.println(job);
         System.out.println();

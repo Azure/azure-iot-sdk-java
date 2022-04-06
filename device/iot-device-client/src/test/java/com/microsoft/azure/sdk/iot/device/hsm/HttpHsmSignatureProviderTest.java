@@ -8,7 +8,7 @@ package com.microsoft.azure.sdk.iot.device.hsm;
 import com.microsoft.azure.sdk.iot.device.ModuleClient;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignRequest;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignResponse;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -101,7 +101,7 @@ public class HttpHsmSignatureProviderTest
 
     // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_006: [This function shall create a signRequest for the hsm http client to sign, and shall return the utf-8 encoded result of that signing.]
     @Test
-    public void signSuccess(@Mocked URLEncoder mockedURLEncoder) throws NoSuchAlgorithmException, TransportException, IOException, URISyntaxException, HsmException
+    public void signSuccess(@Mocked URLEncoder mockedURLEncoder) throws NoSuchAlgorithmException, TransportException, IOException, URISyntaxException
     {
         //arrange
         final String keyName = "keyName";
@@ -150,7 +150,7 @@ public class HttpHsmSignatureProviderTest
 
     // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_007: [If the provided data is null or empty, this function shall throw an IllegalArgumentException.]
     @Test (expected = IllegalArgumentException.class)
-    public void signThrowsForNullData() throws NoSuchAlgorithmException, TransportException, IOException, URISyntaxException, HsmException
+    public void signThrowsForNullData() throws NoSuchAlgorithmException, TransportException, IOException, URISyntaxException
     {
         //arrange
         final String keyName = "keyName";

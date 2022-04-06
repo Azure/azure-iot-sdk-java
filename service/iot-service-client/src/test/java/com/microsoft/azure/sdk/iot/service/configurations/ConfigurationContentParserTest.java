@@ -37,7 +37,7 @@ public class ConfigurationContentParserTest
     {
         //arrange
         String json = "{\"modulesContent\":{\"properties\":{\"c\":\"abc\",\"d\":\"def\"}}, " +
-                "\"deviceContent\":{\"properties.desired.settings1\": {\"c\":3,\"d\":4}}}";
+                "\"deviceContent\":{\"properties.desired.settings1\": {\"c\":3,\"d\":4.1}}}";
 
         //act
         ConfigurationContentParser parser = new ConfigurationContentParser(json);
@@ -48,8 +48,8 @@ public class ConfigurationContentParserTest
         assertEquals("abc", moduleContentMap.get("c"));
         assertEquals("def", moduleContentMap.get("d"));
         Map<String, Object> deviceContentMap = ((Map<String,Object>)(parser.getDeviceContent().get("properties.desired.settings1")));
-        assertEquals((double)3, deviceContentMap.get("c"));
-        assertEquals((double)4, deviceContentMap.get("d"));
+        assertEquals(3l, deviceContentMap.get("c"));
+        assertEquals(4.1, deviceContentMap.get("d"));
     }
 
     //Tests_SRS_CONFIGURATION_CONTENT_PARSER_28_003: [If the provided json cannot be parsed into a ConfigurationContentParser

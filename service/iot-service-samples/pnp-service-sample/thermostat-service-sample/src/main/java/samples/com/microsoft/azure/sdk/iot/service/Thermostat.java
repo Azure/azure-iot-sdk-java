@@ -4,7 +4,7 @@ package samples.com.microsoft.azure.sdk.iot.service;
 
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodRequestOptions;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
-import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.service.twin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 
 // This sample uses the model - https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/Thermostat.json.
 public class Thermostat {
@@ -59,12 +58,12 @@ public class Thermostat {
         System.out.println("Updating Device twin property");
         String propertyName = "targetTemperature";
         double propertyValue = 60.2;
-        twin.setDesiredProperties(Collections.singleton(new Pair(propertyName, propertyValue)));
+        twin.getDesiredProperties().put(propertyName, propertyValue);
         twinClient.patch(twin);
 
         // Get the updated twin properties.
         twin = twinClient.get(deviceId);
-        System.out.println("The updated desired properties: " + twin.getDesiredProperties().iterator().next().getValue());
+        System.out.println("The updated desired properties: " + twin.getDesiredProperties().values().iterator().next());
     }
 
     private static void InvokeMethod() throws IOException, IotHubException {
@@ -85,7 +84,7 @@ public class Thermostat {
                 .methodResponseTimeoutSeconds(responseTimeout)
                 .build();
 
-        MethodResult result = methodClient.invoke(deviceId, methodToInvoke, options);
+        DirectMethodResponse result = methodClient.invoke(deviceId, methodToInvoke, options);
         if(result == null)
         {
             throw new IOException("Method result is null");

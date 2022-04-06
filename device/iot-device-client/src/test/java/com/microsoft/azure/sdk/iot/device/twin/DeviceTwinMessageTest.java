@@ -33,12 +33,11 @@ public class DeviceTwinMessageTest
         IotHubTransportMessage msg = new IotHubTransportMessage(actualData, MessageType.DEVICE_TWIN);
 
         //assert
-        String actualVersion = Deencapsulation.getField(msg, "version");
+        int actualVersion = Deencapsulation.getField(msg, "version");
         String actualRequestId = Deencapsulation.getField(msg, "requestId");
         String actualStatus = Deencapsulation.getField(msg, "status");
         DeviceOperations operationType = Deencapsulation.getField(msg, "operationType");
 
-        assertNull(actualVersion);
         assertNull(actualRequestId);
         assertNull(actualStatus);
         assertEquals(operationType, DeviceOperations.DEVICE_OPERATION_UNKNOWN);
@@ -62,13 +61,13 @@ public class DeviceTwinMessageTest
         IotHubTransportMessage msg = new IotHubTransportMessage(actualData, MessageType.DEVICE_TWIN);
 
         //act
-        String testVersion = msg.getVersion();
+        int testVersion = msg.getVersion();
         String testRequestId = msg.getRequestId();
         String testStatus = msg.getStatus();
         DeviceOperations testOpType = msg.getDeviceOperationType();
 
         //assert
-        String actualVersion = Deencapsulation.getField(msg, "version");
+        int actualVersion = Deencapsulation.getField(msg, "version");
         String actualRequestId = Deencapsulation.getField(msg, "requestId");
         String actualStatus = Deencapsulation.getField(msg, "status");
         DeviceOperations operationType = Deencapsulation.getField(msg, "operationType");
@@ -89,10 +88,10 @@ public class DeviceTwinMessageTest
         IotHubTransportMessage msg = new IotHubTransportMessage(actualData, MessageType.DEVICE_TWIN);
 
         //act
-       msg.setVersion("12");
+       msg.setVersion(12);
 
         //assert
-        assertEquals(msg.getVersion(), "12");
+        assertEquals(msg.getVersion(), 12);
     }
 
     /*
@@ -104,13 +103,13 @@ public class DeviceTwinMessageTest
         //arrange
         final byte[] actualData = {};
         IotHubTransportMessage msg = new IotHubTransportMessage(actualData, MessageType.DEVICE_TWIN);
-        msg.setVersion("12");
+        msg.setVersion(12);
 
         //act
-        String version = msg.getVersion();
+        int version = msg.getVersion();
 
         //assert
-        assertEquals(version, "12");
+        assertEquals(version, 12);
 
     }
 

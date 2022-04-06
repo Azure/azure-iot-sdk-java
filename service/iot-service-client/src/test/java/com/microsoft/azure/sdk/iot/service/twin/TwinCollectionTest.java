@@ -809,7 +809,7 @@ public class TwinCollectionTest
         };
 
         // act
-        JsonElement jsonElement = twinCollection.toJsonElement();
+        JsonElement jsonElement = twinCollection.toJsonObject();
 
         // assert
         Helpers.assertJson(jsonElement.toString(), JSON_SAMPLE);
@@ -851,7 +851,7 @@ public class TwinCollectionTest
                 "    }\n";
 
         // act
-        JsonElement jsonElement = twinCollection.toJsonElement();
+        JsonElement jsonElement = twinCollection.toJsonObject();
 
         // assert
         Helpers.assertJson(jsonElement.toString(), json);
@@ -867,7 +867,7 @@ public class TwinCollectionTest
         TwinCollection twinCollection = Deencapsulation.invoke(TwinCollection.class, "createFromRawCollection", rawMap);
 
         // act
-        JsonElement jsonElement = twinCollection.toJsonElement();
+        JsonElement jsonElement = twinCollection.toJsonObject();
 
         // assert
         Helpers.assertJson(jsonElement.toString(), JSON_SAMPLE);

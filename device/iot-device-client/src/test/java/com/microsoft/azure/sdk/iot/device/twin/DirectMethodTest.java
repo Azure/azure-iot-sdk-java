@@ -4,6 +4,7 @@
 package com.microsoft.azure.sdk.iot.device.twin;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import mockit.Deencapsulation;
 import mockit.Mocked;
@@ -30,7 +31,10 @@ public class DirectMethodTest
     ClientConfiguration mockedConfig;
 
     @Mocked
-    IotHubEventCallback mockedStatusCB;
+    MessageSentCallback mockedStatusCB;
+
+    @Mocked
+    SubscriptionAcknowledgedCallback mockedSubscriptionCallback;
 
     @Mocked
     MessageCallback mockeddeviceMethodResponseCB;
@@ -48,7 +52,7 @@ public class DirectMethodTest
         //arrange
 
         //act
-        DirectMethod testMethod = new DirectMethod(mockedInternalClient, mockedStatusCB, null);
+        DirectMethod testMethod = new DirectMethod(mockedInternalClient, mockedSubscriptionCallback, null);
 
         //assert
         new Verifications()
@@ -61,15 +65,11 @@ public class DirectMethodTest
 
         InternalClient testClient = Deencapsulation.getField(testMethod, "client");
         ClientConfiguration testConfig = Deencapsulation.getField(testMethod, "config");
-        IotHubEventCallback testStatusCallback = Deencapsulation.getField(testMethod, "deviceMethodStatusCallback");
 
         assertNotNull(testClient);
         assertEquals(testClient, mockedInternalClient);
         assertNotNull(testConfig);
         assertEquals(testConfig, mockedConfig);
-        assertNotNull(testStatusCallback);
-        assertEquals(testStatusCallback, mockedStatusCB);
-
     }
 
     /*
@@ -79,7 +79,7 @@ public class DirectMethodTest
     public void constructorThrowsIfClientNull() throws IllegalArgumentException
     {
         //act
-        DirectMethod testMethod = new DirectMethod(null, mockedStatusCB, null);
+        DirectMethod testMethod = new DirectMethod(null, mockedSubscriptionCallback, null);
 
     }
 
@@ -98,7 +98,7 @@ public class DirectMethodTest
     public void subscribeToMethodsSucceeds(@Mocked final IotHubTransportMessage mockedMessage) throws IllegalArgumentException
     {
         //arrange
-        DirectMethod testMethod = new DirectMethod(mockedInternalClient, mockedStatusCB, null);
+        DirectMethod testMethod = new DirectMethod(mockedInternalClient, mockedSubscriptionCallback, null);
         final String expectedDeviceId = "1234";
         new NonStrictExpectations()
         {
@@ -121,7 +121,7 @@ public class DirectMethodTest
                 mockedMessage.setConnectionDeviceId(expectedDeviceId);
                 mockedMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
                 times = 1;
-                mockedInternalClient.sendEventAsync((Message)any, (IotHubEventCallback)any, null);
+                mockedInternalClient.sendEventAsync((Message)any, (MessageSentCallback)any, null);
                 times = 1;
             }
         };
@@ -134,7 +134,7 @@ public class DirectMethodTest
     public void subscribeToMethodsThrowsIfCallbackNull() throws IllegalArgumentException
     {
         //arrange
-        DirectMethod testMethod = new DirectMethod(mockedInternalClient, mockedStatusCB, null);
+        DirectMethod testMethod = new DirectMethod(mockedInternalClient, mockedSubscriptionCallback, null);
 
         //act
         testMethod.subscribeToDirectMethods(null, null);
@@ -145,7 +145,7 @@ public class DirectMethodTest
     public void subscribeToMethodsDoesNotSubscribeIfAlreadySubscribed(@Mocked final IotHubTransportMessage mockedMessage) throws IllegalArgumentException
     {
         //arrange
-        DirectMethod testMethod = new DirectMethod(mockedInternalClient, mockedStatusCB, null);
+        DirectMethod testMethod = new DirectMethod(mockedInternalClient, mockedSubscriptionCallback, null);
 
         testMethod.subscribeToDirectMethods(mockedDeviceMethodCB, null);
 
@@ -166,7 +166,7 @@ public class DirectMethodTest
             {
                 mockedMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
                 maxTimes = 1;
-                mockedInternalClient.sendEventAsync((Message)any, (IotHubEventCallback)any, null);
+                mockedInternalClient.sendEventAsync((Message)any, (MessageSentCallback)any, null);
                 maxTimes = 1;
             }
         };
@@ -186,7 +186,7 @@ public class DirectMethodTest
     {
         //arrange
         final String expectedDeviceId = "2345";
-        DirectMethod testMethod = new DirectMethod(mockedInternalClient, mockedStatusCB, null);
+        DirectMethod testMethod = new DirectMethod(mockedInternalClient, mockedSubscriptionCallback, null);
         testMethod.subscribeToDirectMethods(mockedDeviceMethodCB, null);
 
         final DirectMethodResponse testUserData = new DirectMethodResponse(100, "Some test message");
@@ -195,7 +195,7 @@ public class DirectMethodTest
         new NonStrictExpectations()
         {
             {
-                mockedDeviceMethodCB.onMethodInvoked(anyString, any, any);
+                mockedDeviceMethodCB.onMethodInvoked(anyString, (DirectMethodPayload)any, any);
                 result = testUserData;
 
                 new IotHubTransportMessage((byte[]) any, DEVICE_METHODS);
@@ -213,7 +213,7 @@ public class DirectMethodTest
         };
 
         //act
-        IotHubMessageResult result =  testDeviceMethodResponseMessageCallback.execute(mockedTransportMessage, null);
+        IotHubMessageResult result =  testDeviceMethodResponseMessageCallback.onCloudToDeviceMessageReceived(mockedTransportMessage, null);
 
         //assert
         new Verifications()
@@ -222,7 +222,7 @@ public class DirectMethodTest
                 mockedTransportMessage.setConnectionDeviceId(expectedDeviceId);
                 times = 1;
 
-                mockedInternalClient.sendEventAsync((Message)any, (IotHubEventCallback)any, null);
+                mockedInternalClient.sendEventAsync((Message)any, (MessageSentCallback)any, null);
                 maxTimes = 1;
             }
         };
@@ -237,7 +237,7 @@ public class DirectMethodTest
     public void deviceMethodResponseCallbackAbandonsOnIncorrectMessage() throws IllegalArgumentException
     {
         //arrange
-        DirectMethod testMethod = new DirectMethod(mockedInternalClient, mockedStatusCB, null);
+        DirectMethod testMethod = new DirectMethod(mockedInternalClient, mockedSubscriptionCallback, null);
         testMethod.subscribeToDirectMethods(mockedDeviceMethodCB, null);
 
         byte[] testPayload = "TestPayload".getBytes(StandardCharsets.UTF_8);
@@ -250,13 +250,13 @@ public class DirectMethodTest
         new NonStrictExpectations()
         {
             {
-                mockedDeviceMethodCB.onMethodInvoked(anyString, any, any);
+                mockedDeviceMethodCB.onMethodInvoked(anyString, (DirectMethodPayload)any, any);
                 result = testUserData;
             }
         };
 
         //act
-        IotHubMessageResult result =  testDeviceMethodResponseMessageCallback.execute(testMessage, null);
+        IotHubMessageResult result =  testDeviceMethodResponseMessageCallback.onCloudToDeviceMessageReceived(testMessage, null);
 
         //assert
         assertNotSame(result, IotHubMessageResult.COMPLETE);
@@ -264,7 +264,7 @@ public class DirectMethodTest
         new Verifications()
         {
             {
-                mockedStatusCB.execute(IotHubStatusCode.ERROR, any);
+                mockedSubscriptionCallback.onSubscriptionAcknowledged((IotHubClientException) any, any);
             }
         };
     }
@@ -276,7 +276,7 @@ public class DirectMethodTest
     public void deviceMethodResponseCallbackSendsResponseOnlyIfNonNull() throws IllegalArgumentException
     {
         //arrange
-        DirectMethod testMethod = new DirectMethod(mockedInternalClient, mockedStatusCB, null);
+        DirectMethod testMethod = new DirectMethod(mockedInternalClient, mockedSubscriptionCallback, null);
         testMethod.subscribeToDirectMethods(mockedDeviceMethodCB, null);
 
         byte[] testPayload = "TestPayload".getBytes(StandardCharsets.UTF_8);
@@ -289,13 +289,13 @@ public class DirectMethodTest
         new NonStrictExpectations()
         {
             {
-                mockedDeviceMethodCB.onMethodInvoked(anyString, any, any);
+                mockedDeviceMethodCB.onMethodInvoked(anyString, (DirectMethodPayload)any, any);
                 result = testUserData;
             }
         };
 
         //act
-        IotHubMessageResult result =  testDeviceMethodResponseMessageCallback.execute(testMessage, null);
+        IotHubMessageResult result =  testDeviceMethodResponseMessageCallback.onCloudToDeviceMessageReceived(testMessage, null);
 
         //assert
         assertNotSame(result, IotHubMessageResult.COMPLETE);
@@ -303,7 +303,7 @@ public class DirectMethodTest
         new Verifications()
         {
             {
-                mockedStatusCB.execute(IotHubStatusCode.ERROR, any);
+                mockedSubscriptionCallback.onSubscriptionAcknowledged((IotHubClientException) any, any);
                 times = 1;
             }
         };
@@ -317,7 +317,7 @@ public class DirectMethodTest
     public void deviceMethodResponseCallbackSendsResponseMessageEvenIfNonNull() throws IllegalArgumentException
     {
         //arrange
-        DirectMethod testMethod = new DirectMethod(mockedInternalClient, mockedStatusCB, null);
+        DirectMethod testMethod = new DirectMethod(mockedInternalClient, mockedSubscriptionCallback, null);
         testMethod.subscribeToDirectMethods(mockedDeviceMethodCB, null);
 
         byte[] testPayload = "TestPayload".getBytes(StandardCharsets.UTF_8);
@@ -330,13 +330,13 @@ public class DirectMethodTest
         new NonStrictExpectations()
         {
             {
-                mockedDeviceMethodCB.onMethodInvoked(anyString, any, any);
+                mockedDeviceMethodCB.onMethodInvoked(anyString, (DirectMethodPayload)any, any);
                 result = testUserData;
             }
         };
 
         //act
-        IotHubMessageResult result =  testDeviceMethodResponseMessageCallback.execute(testMessage, null);
+        IotHubMessageResult result =  testDeviceMethodResponseMessageCallback.onCloudToDeviceMessageReceived(testMessage, null);
 
         //assert
         assertSame(result, IotHubMessageResult.COMPLETE);
@@ -344,7 +344,7 @@ public class DirectMethodTest
         new Verifications()
         {
             {
-                mockedStatusCB.execute(IotHubStatusCode.ERROR, any);
+                mockedStatusCB.onMessageSent((Message) any, (IotHubClientException) any, any);
                 times = 0;
             }
         };
@@ -355,7 +355,7 @@ public class DirectMethodTest
     public void deviceMethodResponseCallbackDoesNotHangOnUserCallbackHang() throws IllegalArgumentException
     {
         //arrange
-        DirectMethod testMethod = new DirectMethod(mockedInternalClient, mockedStatusCB, null);
+        DirectMethod testMethod = new DirectMethod(mockedInternalClient, mockedSubscriptionCallback, null);
         testMethod.subscribeToDirectMethods(mockedDeviceMethodCB, null);
 
         byte[] testPayload = "TestPayload".getBytes(StandardCharsets.UTF_8);
@@ -366,13 +366,13 @@ public class DirectMethodTest
         new NonStrictExpectations()
         {
             {
-                mockedDeviceMethodCB.onMethodInvoked(anyString, any, any);
+                mockedDeviceMethodCB.onMethodInvoked(anyString, (DirectMethodPayload)any, any);
                 result = new Exception("Test Exception");
             }
         };
 
         //act
-        IotHubMessageResult result =  testDeviceMethodResponseMessageCallback.execute(testMessage, null);
+        IotHubMessageResult result =  testDeviceMethodResponseMessageCallback.onCloudToDeviceMessageReceived(testMessage, null);
 
         //assert
         assertNotSame(result, IotHubMessageResult.COMPLETE);
@@ -380,7 +380,7 @@ public class DirectMethodTest
         new Verifications()
         {
             {
-                mockedStatusCB.execute(IotHubStatusCode.ERROR, any);
+                mockedSubscriptionCallback.onSubscriptionAcknowledged((IotHubClientException) any, any);
                 times = 1;
             }
         };
@@ -388,22 +388,22 @@ public class DirectMethodTest
     }
 
     @Test
-    public void deviceMethodRequestMessageCallbackExecutes() throws IllegalArgumentException
+    public void deviceMethodRequestMessageCallbackExecutes(@Mocked Message mockMessage) throws IllegalArgumentException
     {
         //arrange
-        DirectMethod testMethod = new DirectMethod(mockedInternalClient, mockedStatusCB, null);
+        DirectMethod testMethod = new DirectMethod(mockedInternalClient, mockedSubscriptionCallback, null);
 
-        IotHubEventCallback testDeviceMethodRequestMessageCallback = Deencapsulation.newInnerInstance("DirectMethodRequestMessageCallback", testMethod);
+        MessageSentCallback testDeviceMethodRequestMessageCallback = Deencapsulation.newInnerInstance("DirectMethodRequestMessageCallback", testMethod);
 
         //act
-        testDeviceMethodRequestMessageCallback.execute(IotHubStatusCode.ERROR, null);
+        testDeviceMethodRequestMessageCallback.onMessageSent(mockMessage, null, null);
 
         //assert
 
         new Verifications()
         {
             {
-                mockedStatusCB.execute(IotHubStatusCode.ERROR, any);
+                mockedSubscriptionCallback.onSubscriptionAcknowledged((IotHubClientException) any, any);
                 times = 1;
             }
         };

@@ -17,9 +17,6 @@ public class SampleParameters {
 
     private static final String DEVICE_CONNECTION_STRING = System.getenv("IOTHUB_DEVICE_CONNECTION_STRING");
     private static final String TRANSPORT = "mqtt";
-    private static final String NUM_REQUESTS = "3";
-    private static final String SLEEP_DURATION_IN_SECONDS = "10";
-    private static final String TIMEOUT_IN_MINUTES = "1";
 
     private static final String FOOTER = "\nFor more info, please refer to https://github.com/Azure/azure-iot-sdks";
     private static final String APPEXE = "java -jar ";
@@ -54,27 +51,6 @@ public class SampleParameters {
                     .longOpt("transportProtocol")
                     .hasArg()
                     .desc("Transport protocol [mqtt | https | amqps| amqps_ws | mqtt_ws] (optional); defaults to \"mqtt\"")
-                    .build()
-            )
-            .addOption(
-                Option.builder("r")
-                    .longOpt("requests")
-                    .hasArg()
-                    .desc("Number of requests (optional); defaults to \"3\"")
-                    .build()
-            )
-            .addOption(
-                Option.builder("d")
-                    .longOpt("sleepDuration")
-                    .hasArg()
-                    .desc("Sleep duration between requests in seconds (optional); defaults to \"10\"")
-                    .build()
-            )
-            .addOption(
-                Option.builder("o")
-                    .longOpt("timeout")
-                    .hasArg()
-                    .desc("Timeout for each request in minutes (optional); defaults to \"1\"")
                     .build()
             );
 
@@ -156,36 +132,8 @@ public class SampleParameters {
      * get transport argument from command line
      * @return string value
      */
-       public String getTransport()
+    public String getTransport()
     {
         return cmd.getOptionValue("t", TRANSPORT);
     }
-
-    /**
-     * get number of requests argument from command line
-     * @return string value
-     */
-    public String getNumRequests()
-    {
-        return cmd.getOptionValue("r", NUM_REQUESTS);
-    }
-
-    /**
-     * get sleep duration between requests argument from command line
-     * @return string value (seconds)
-     */
-    public String getSleepDuration()
-    {
-        return cmd.getOptionValue("d", SLEEP_DURATION_IN_SECONDS);
-    }
-
-    /**
-     * get timeout argument from command line
-     * @return string value (minutes)
-     */
-    public String getTimeout()
-    {
-        return cmd.getOptionValue("o", TIMEOUT_IN_MINUTES);
-    }
-
 }

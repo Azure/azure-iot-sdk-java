@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
+import com.microsoft.azure.sdk.iot.device.MessageSentCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
 import mockit.Deencapsulation;
@@ -30,7 +30,7 @@ public class IotHubTransportPacketTest
     @Mocked
     Message mockMsg;
     @Mocked
-    IotHubEventCallback mockCallback;
+    MessageSentCallback mockCallback;
 
     // Tests_SRS_IOTHUBTRANSPORTPACKET_11_001: [The constructor shall save the message, callback, status, startTimeMillis, and callback context.]
     // Tests_SRS_IOTHUBTRANSPORTPACKET_11_002: [The function shall return the message given in the constructor.]
@@ -60,10 +60,10 @@ public class IotHubTransportPacketTest
 
         //act
         IotHubTransportPacket packet = new IotHubTransportPacket(mockMsg, mockCallback, context, expectedStatus, 10, null);
-        IotHubEventCallback testCallback = packet.getCallback();
+        MessageSentCallback testCallback = packet.getCallback();
 
         //assert
-        final IotHubEventCallback expectedCallback = mockCallback;
+        final MessageSentCallback expectedCallback = mockCallback;
         assertThat(testCallback, is(expectedCallback));
         assertEquals(expectedStatus, packet.getStatus());
     }
@@ -79,10 +79,10 @@ public class IotHubTransportPacketTest
 
         //act
         IotHubTransportPacket packet = new IotHubTransportPacket(mockMsg, mockCallback, context, expectedStatus, 10, null);
-        IotHubEventCallback testCallback = packet.getCallback();
+        MessageSentCallback testCallback = packet.getCallback();
 
         //assert
-        final IotHubEventCallback expectedCallback = mockCallback;
+        final MessageSentCallback expectedCallback = mockCallback;
         assertThat(testCallback, is(expectedCallback));
         assertEquals(expectedStatus, packet.getStatus());
     }

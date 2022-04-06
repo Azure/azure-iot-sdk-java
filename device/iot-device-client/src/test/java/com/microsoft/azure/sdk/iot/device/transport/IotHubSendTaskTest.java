@@ -3,9 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubSendTask;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
 import mockit.Expectations;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -13,6 +10,7 @@ import mockit.Verifications;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.concurrent.Semaphore;
 
 /** Unit tests for IotHubSendTask. */
 public class IotHubSendTaskTest
@@ -25,12 +23,12 @@ public class IotHubSendTaskTest
     @Test
     public void runSendsAllMessages()
     {
-        final Object sendThreadLock = new Object();
+        final Semaphore sendThreadSemaphore = new Semaphore(1);
         new Expectations()
         {
             {
-                mockTransport.getSendThreadLock();
-                result = sendThreadLock;
+                mockTransport.getSendThreadSemaphore();
+                result = sendThreadSemaphore;
 
                 mockTransport.hasMessagesToSend();
                 result = true;
@@ -51,12 +49,12 @@ public class IotHubSendTaskTest
     @Test
     public void runInvokesAllCallbacks()
     {
-        final Object sendThreadLock = new Object();
+        final Semaphore sendThreadSemaphore = new Semaphore(1);
         new Expectations()
         {
             {
-                mockTransport.getSendThreadLock();
-                result = sendThreadLock;
+                mockTransport.getSendThreadSemaphore();
+                result = sendThreadSemaphore;
 
                 mockTransport.hasMessagesToSend();
                 result = false;
@@ -79,7 +77,7 @@ public class IotHubSendTaskTest
 
     // Tests_SRS_IOTHUBSENDTASK_11_005: [The function shall not crash because of an IOException thrown by the transport.]
     @Test
-    public void runDoesNotCrashFromIoException() throws DeviceClientException
+    public void runDoesNotCrashFromIoException()
     {
         new NonStrictExpectations()
         {
@@ -95,7 +93,7 @@ public class IotHubSendTaskTest
 
     // Tests_SRS_IOTHUBSENDTASK_11_008: [The function shall not crash because of any error or exception thrown by the transport.]
     @Test
-    public void runDoesNotCrashFromThrowable() throws DeviceClientException
+    public void runDoesNotCrashFromThrowable()
     {
         new NonStrictExpectations()
         {

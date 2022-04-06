@@ -124,7 +124,7 @@ final class AmqpsTwinReceiverLinkHandler extends AmqpsReceiverLinkHandler
                 }
                 else if (key.toString().equals(MESSAGE_ANNOTATION_FIELD_KEY_VERSION))
                 {
-                    iotHubTransportMessage.setVersion(value.toString());
+                    iotHubTransportMessage.setVersion(Integer.parseInt(value.toString()));
                 }
                 else if (key.toString().equals(MESSAGE_ANNOTATION_FIELD_KEY_RESOURCE) && value.toString().equals(MESSAGE_ANNOTATION_FIELD_VALUE_PROPERTIES_DESIRED))
                 {

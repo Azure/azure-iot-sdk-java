@@ -8,7 +8,6 @@ package com.microsoft.azure.sdk.iot.service.messaging;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 

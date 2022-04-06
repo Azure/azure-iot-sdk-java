@@ -35,11 +35,11 @@ public class TwinTest
         //assert
         assertNotNull(testDevice);
         TwinCollection tagsMap = Deencapsulation.getField(testDevice, "tags");
-        assertNull(tagsMap);
+        assertEquals(0, tagsMap.size());
         TwinCollection repPropMap = Deencapsulation.getField(testDevice, "reportedProperties");
-        assertNull(repPropMap);
+        assertEquals(0, repPropMap.size());
         TwinCollection desPropMap = Deencapsulation.getField(testDevice, "reportedProperties");
-        assertNull(desPropMap);
+        assertEquals(0, desPropMap.size());
     }
 
     /*
@@ -58,11 +58,11 @@ public class TwinTest
         assertEquals(deviceId, Deencapsulation.getField(testDevice, "deviceId"));
         assertNotNull(testDevice);
         TwinCollection tagsMap = Deencapsulation.getField(testDevice, "tags");
-        assertNull(tagsMap);
+        assertEquals(0, tagsMap.size());
         TwinCollection repPropMap = Deencapsulation.getField(testDevice, "reportedProperties");
-        assertNull(repPropMap);
+        assertEquals(0, repPropMap.size());
         TwinCollection desPropMap = Deencapsulation.getField(testDevice, "reportedProperties");
-        assertNull(desPropMap);
+        assertEquals(0, desPropMap.size());
     }
 
     /*
@@ -106,11 +106,11 @@ public class TwinTest
         assertEquals(moduleId, Deencapsulation.getField(testDevice, "moduleId"));
         assertNotNull(testDevice);
         TwinCollection tagsMap = Deencapsulation.getField(testDevice, "tags");
-        assertNull(tagsMap);
+        assertEquals(0, tagsMap.size());
         TwinCollection repPropMap = Deencapsulation.getField(testDevice, "reportedProperties");
-        assertNull(repPropMap);
+        assertEquals(0, repPropMap.size());
         TwinCollection desPropMap = Deencapsulation.getField(testDevice, "reportedProperties");
-        assertNull(desPropMap);
+        assertEquals(0, desPropMap.size());
     }
 
     /*
@@ -344,19 +344,19 @@ public class TwinTest
     {
         //arrange
         Twin testDevice = new Twin("testDevice");
-        Set<Pair> testTags = new HashSet<>();
-        testTags.add(new Pair("testTag", "tagObject"));
-        testDevice.setTags(testTags);
+        TwinCollection testTags = new TwinCollection();
+        testTags.put("testTag", "tagObject");
+        testDevice.getTags().putAll(testTags);
 
         //act
-        Set<Pair> actualTags = testDevice.getTags();
+        TwinCollection actualTags = testDevice.getTags();
 
         //assert
         assertEquals(testTags.size(), actualTags.size());
-        for (Pair test : actualTags)
+        for (String key : actualTags.keySet())
         {
-            assertEquals("testTag", test.getKey());
-            assertEquals("tagObject", test.getValue());
+            assertEquals("testTag", key);
+            assertEquals("tagObject", actualTags.get(key));
         }
     }
 
@@ -370,7 +370,7 @@ public class TwinTest
         Twin testDevice = new Twin("testDevice");
 
         //act
-        Set<Pair> actualTags = testDevice.getTags();
+        TwinCollection actualTags = testDevice.getTags();
 
         //assert
         assertNotNull(actualTags);
@@ -380,16 +380,17 @@ public class TwinTest
     /*
      **Codes_SRS_DEVICETWINDEVICE_21_034: [** If the tags map is null then this method shall throw IllegalArgumentException.**]**
      */
-    @Test (expected = IllegalArgumentException.class)
+    @Test
     public void getTagsVersionReturnsNullIfNoTags()
     {
         //arrange
         Twin testDevice = new Twin("testDevice");
 
         //act
-        Integer version = testDevice.getTagsVersion();
+        Integer version = testDevice.getTags().getVersion();
 
         //assert
+        assertNull(version);
     }
 
     @Test
@@ -397,12 +398,12 @@ public class TwinTest
     {
         //arrange
         Twin testDevice = new Twin("testDevice");
-        Set<Pair> testTags = new HashSet<>();
-        testTags.add(new Pair("testTag", "tagObject"));
-        testDevice.setTags(testTags);
+        TwinCollection testTags = new TwinCollection();
+        testTags.put("testTag", "tagObject");
+        testDevice.getTags().putAll(testTags);
 
         //act
-        Integer version = testDevice.getTagsVersion();
+        Integer version = testDevice.getTags().getVersion();
 
         //assert
         assertNull(version);
@@ -412,22 +413,14 @@ public class TwinTest
      **Codes_SRS_DEVICETWINDEVICE_21_035: [** The method shall return the version in the tags TwinCollection.**]**
      */
     @Test
-    public void getTagsVersionReturnsValidVersion(@Mocked final TwinCollection mockedTwinCollection)
+    public void getTagsVersionReturnsValidVersion()
     {
         //arrange
         Twin testDevice = new Twin("testDevice");
-        Deencapsulation.invoke(testDevice, "setTags", mockedTwinCollection);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockedTwinCollection.getVersion();
-                result = 5;
-            }
-        };
+        testDevice.getTags().setVersion(5);
 
         //act
-        Integer version = testDevice.getTagsVersion();
+        Integer version = testDevice.getTags().getVersion();
 
         //assert
         assertEquals(5, (int)version);
@@ -441,19 +434,19 @@ public class TwinTest
     {
         //arrange
         Twin testDevice = new Twin("testDevice");
-        Set<Pair> testDesProp = new HashSet<>();
-        testDesProp.add(new Pair("testDes", "desObject"));
-        testDevice.setDesiredProperties(testDesProp);
+        TwinCollection testDesProp = new TwinCollection();
+        testDesProp.put("testDes", "desObject");
+        testDevice.getDesiredProperties().putAll(testDesProp);
 
         //act
-        Set<Pair> actualDesProp = testDevice.getDesiredProperties();
+        TwinCollection actualDesProp = testDevice.getDesiredProperties();
 
         //assert
         assertEquals(testDesProp.size(), actualDesProp.size());
-        for (Pair test : actualDesProp)
+        for (String key : actualDesProp.keySet())
         {
-            assertEquals("testDes", test.getKey());
-            assertEquals("desObject", test.getValue());
+            assertEquals("testDes", key);
+            assertEquals("desObject", actualDesProp.get(key));
         }
     }
 
@@ -467,7 +460,7 @@ public class TwinTest
         Twin testDevice = new Twin("testDevice");
 
         //act
-        Set<Pair> actualDesProp = testDevice.getDesiredProperties();
+        TwinCollection actualDesProp = testDevice.getDesiredProperties();
 
         //assert
         assertNotNull(actualDesProp);
@@ -488,14 +481,14 @@ public class TwinTest
         Deencapsulation.setField(testDevice, "reportedProperties", repMap);
 
         //act
-        Set<Pair> actualRepProp = testDevice.getReportedProperties();
+        TwinCollection actualRepProp = testDevice.getReportedProperties();
 
         //assert
         assertEquals(repMap.size(), actualRepProp.size());
-        for (Pair test : actualRepProp)
+        for (String key : actualRepProp.keySet())
         {
-            assertEquals("testRep", test.getKey());
-            assertEquals("repObject", test.getValue());
+            assertEquals("testRep", key);
+            assertEquals("repObject", actualRepProp.get(key));
         }
     }
 
@@ -509,388 +502,11 @@ public class TwinTest
         Twin testDevice = new Twin("testDevice");
 
         //act
-        Set<Pair> actualRepProp = testDevice.getReportedProperties();
+        TwinCollection actualRepProp = testDevice.getReportedProperties();
 
         //assert
         assertNotNull(actualRepProp);
         assertEquals(0, actualRepProp.size());
-    }
-
-    /*
-     **Codes_SRS_DEVICETWINDEVICE_21_038: [** If the reported properties is null then this method shall throw IllegalArgumentException.**]**
-     */
-    @Test (expected = IllegalArgumentException.class)
-    public void getReportedPropertiesVersionReturnsNullIfNoReportedProperties()
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-
-        //act
-        Integer version = testDevice.getReportedPropertiesVersion();
-
-        //assert
-    }
-
-    @Test
-    public void getReportedPropertiesVersionReturnsNullIfNoVersionInTheReportedProperties(@Mocked final TwinCollection mockedTwinCollection)
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-        Set<Pair> testReported = new HashSet<>();
-        testReported.add(new Pair("testTag", "tagObject"));
-        Deencapsulation.invoke(testDevice, "setReportedProperties", mockedTwinCollection);
-        new NonStrictExpectations()
-        {
-            {
-                mockedTwinCollection.getVersion();
-                result = null;
-            }
-        };
-
-        //act
-        Integer version = testDevice.getReportedPropertiesVersion();
-
-        //assert
-        assertNull(version);
-    }
-
-    /*
-     **Codes_SRS_DEVICETWINDEVICE_21_039: [** The method shall return the version in the reported properties TwinCollection.**]**
-     */
-    @Test
-    public void getReportedPropertiesVersionReturnsValidVersion(@Mocked final TwinCollection mockedTwinCollection)
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-        Deencapsulation.invoke(testDevice, "setReportedProperties", mockedTwinCollection);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockedTwinCollection.getVersion();
-                result = 5;
-            }
-        };
-
-        //act
-        Integer version = testDevice.getReportedPropertiesVersion();
-
-        //assert
-        assertEquals(5, (int)version);
-    }
-
-    /*
-    **Tests_SRS_DEVICETWINDEVICE_25_007: [** This method shall convert the set of pairs of tags to a map and save it. **]**
-     */
-    @Test
-    public void setTagsSets()
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-        Set<Pair> testTags = new HashSet<>();
-        testTags.add(new Pair("testTag", "tagObject"));
-
-        //act
-        testDevice.setTags(testTags);
-
-        //assert
-        Set<Pair> actualTags = testDevice.getTags();
-        assertEquals(testTags.size(), actualTags.size());
-        for (Pair test : actualTags)
-        {
-            assertEquals("testTag", test.getKey());
-            assertEquals("tagObject", test.getValue());
-        }
-
-    }
-
-    /*
-    **Tests_SRS_DEVICETWINDEVICE_25_008: [** If the tags Set is null then this method shall throw IllegalArgumentException.**]**
-     */
-    @Test (expected = IllegalArgumentException.class)
-    public void setTagsThrowsIsNullInput()
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-        Set<Pair> testTags = null;
-
-        //act
-        testDevice.setTags(testTags);
-    }
-
-    /*
-    **Tests_SRS_DEVICETWINDEVICE_25_011: [** This method shall convert the set of pairs of desiredProperties to a map and save it. **]**
-     */
-    @Test
-    public void setDesiredPropSets()
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-        Set<Pair> testDesProp = new HashSet<>();
-        testDesProp.add(new Pair("testDes", "desObject"));
-
-        //act
-        testDevice.setDesiredProperties(testDesProp);
-
-        //assert
-        Set<Pair> actualDesProp = testDevice.getDesiredProperties();
-        assertEquals(testDesProp.size(), actualDesProp.size());
-        for (Pair test : actualDesProp)
-        {
-            assertEquals("testDes", test.getKey());
-            assertEquals("desObject", test.getValue());
-        }
-
-    }
-
-    /*
-    **Tests_SRS_DEVICETWINDEVICE_25_012: [** If the desiredProperties Set is null then this method shall throw IllegalArgumentException.**]**
-     */
-    @Test (expected = IllegalArgumentException.class)
-    public void setDesiredThrowsIfNullInput()
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-        Set<Pair> testDesProp = null;
-
-
-        //act
-        testDevice.setDesiredProperties(testDesProp);
-
-    }
-
-    /*
-     **Codes_SRS_DEVICETWINDEVICE_21_036: [** If the desired properties is null then this method shall throw IllegalArgumentException.**]**
-     */
-    @Test (expected = IllegalArgumentException.class)
-    public void getDesiredPropertiesVersionReturnsNullIfNoDesiredProperties()
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-
-        //act
-        Integer version = testDevice.getDesiredPropertiesVersion();
-
-        //assert
-    }
-
-    @Test
-    public void getDesiredPropertiesVersionReturnsNullIfNoVersionInTheDesiredProperties()
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-        Set<Pair> testDesired = new HashSet<>();
-        testDesired.add(new Pair("testTag", "tagObject"));
-        testDevice.setDesiredProperties(testDesired);
-
-        //act
-        Integer version = testDevice.getDesiredPropertiesVersion();
-
-        //assert
-        assertNull(version);
-    }
-
-    /*
-     **Codes_SRS_DEVICETWINDEVICE_21_037: [** The method shall return the version in the desired properties TwinCollection.**]**
-     */
-    @Test
-    public void getDesiredPropertiesVersionReturnsValidVersion(@Mocked final TwinCollection mockedTwinCollection)
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-        Deencapsulation.invoke(testDevice, "setDesiredProperties", mockedTwinCollection);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockedTwinCollection.getVersion();
-                result = 5;
-            }
-        };
-
-        //act
-        Integer version = testDevice.getDesiredPropertiesVersion();
-
-        //assert
-        assertEquals(5, (int)version);
-    }
-
-    @Test
-    public void setReportedPropSets()
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-        TwinCollection testRepProp = new TwinCollection();
-        testRepProp.put("testRep", "repObject");
-
-        //act
-        Deencapsulation.invoke(testDevice, "setReportedProperties", testRepProp);
-
-        //assert
-        Set<Pair> actualRepProp = testDevice.getReportedProperties();
-        assertEquals(testRepProp.size(), actualRepProp.size());
-        for (Pair test : actualRepProp)
-        {
-            assertEquals("testRep", test.getKey());
-            assertEquals("repObject", test.getValue());
-        }
-
-    }
-
-    @Test
-    public void settersAlwaysCreatesNewMaps()
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-        Set<Pair> testDesProp = new HashSet<>();
-        testDesProp.add(new Pair("testDes", "desObject"));
-
-        //act
-        testDevice.setDesiredProperties(testDesProp);
-
-        //assert
-        Set<Pair> actualDesProp = testDevice.getDesiredProperties();
-        assertEquals(testDesProp.size(), actualDesProp.size());
-        assertNotEquals(testDesProp, actualDesProp);
-
-    }
-
-    @Test
-    public void gettersAlwaysCreatesNewSets()
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-        Set<Pair> testDesProp = new HashSet<>();
-        testDesProp.add(new Pair("testDes", "desObject"));
-        testDevice.setDesiredProperties(testDesProp);
-
-        //act
-        Set<Pair> actualDesProp = testDevice.getDesiredProperties();
-
-        //assert
-        assertEquals(testDesProp.size(), actualDesProp.size());
-        assertNotEquals(testDesProp, actualDesProp);
-
-    }
-
-    /*
-    **Tests_SRS_DEVICETWINDEVICE_25_025: [** This method shall return the tags map**]**
-     */
-    @Test
-    public void getterGetsMapsTags()
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-        TwinCollection testTags = new TwinCollection();
-        testTags.put("testTag", "tagObject");
-        Deencapsulation.invoke(testDevice, "setTags", testTags);
-
-        //act
-        TwinCollection actualTags = Deencapsulation.invoke(testDevice, "getTagsMap");
-
-        //assert
-        assertEquals(testTags.size(), actualTags.size());
-
-        for (Map.Entry<String, Object> test : actualTags.entrySet())
-        {
-            assertEquals("testTag", test.getKey());
-            assertEquals("tagObject", test.getValue());
-        }
-    }
-
-    /*
-    **Tests_SRS_DEVICETWINDEVICE_25_024: [** This method shall save the tags map**]**
-     */
-    @Test
-    public void setterSetsMapsTags()
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-        TwinCollection testTags = new TwinCollection();
-        testTags.put("testTag", "tagObject");
-
-        //act
-        Deencapsulation.invoke(testDevice, "setTags", testTags);
-
-        //assert
-        TwinCollection actualTags = Deencapsulation.invoke(testDevice, "getTagsMap");
-        assertEquals(testTags.size(), actualTags.size());
-
-        for (Map.Entry<String, Object> test : actualTags.entrySet())
-        {
-            assertEquals("testTag", test.getKey());
-            assertEquals("tagObject", test.getValue());
-        }
-    }
-
-    @Test
-    public void clearClearsMapsTags()
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-        TwinCollection testTags = new TwinCollection();
-        testTags.put("testTag", "tagObject");
-        Deencapsulation.invoke(testDevice, "setTags", testTags);
-
-        //act
-        testDevice.clearTags();
-
-        //assert
-        TwinCollection actualTags = Deencapsulation.invoke(testDevice, "getDesiredMap");
-        assertNull(actualTags);
-        Set<Pair> actualTagsSet = testDevice.getTags();
-        assertEquals(0, actualTagsSet.size());
-    }
-
-    /*
-    **Tests_SRS_DEVICETWINDEVICE_25_026: [** This method shall return the reportedProperties map**]**
-     */
-    @Test
-    public void getterGetsMapsRep()
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-        TwinCollection testRep = new TwinCollection();
-        testRep.put("testRep", "repObject");
-        Deencapsulation.invoke(testDevice, "setReportedProperties", testRep);
-
-        //act
-        TwinCollection actualTags = Deencapsulation.invoke(testDevice, "getReportedMap");
-
-        //assert
-        assertEquals(testRep.size(), actualTags.size());
-
-        for (Map.Entry<String, Object> test : actualTags.entrySet())
-        {
-            assertEquals("testRep", test.getKey());
-            assertEquals("repObject", test.getValue());
-        }
-    }
-
-    /*
-    **Tests_SRS_DEVICETWINDEVICE_25_022: [** This method shall save the reportedProperties map**]**
-     */
-    @Test
-    public void setterSetsMapsRep()
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-        TwinCollection testRep = new TwinCollection();
-        testRep.put("testRep", "repObject");
-
-        //act
-        Deencapsulation.invoke(testDevice, "setReportedProperties", testRep);
-
-        //assert
-        TwinCollection actualTags = Deencapsulation.invoke(testDevice, "getReportedMap");
-
-        assertEquals(testRep.size(), actualTags.size());
-
-        for (Map.Entry<String, Object> test : actualTags.entrySet())
-        {
-            assertEquals("testRep", test.getKey());
-            assertEquals("repObject", test.getValue());
-        }
     }
 
     /*
@@ -957,102 +573,6 @@ public class TwinTest
     }
 
     /*
-    **Tests_SRS_DEVICETWINDEVICE_25_027: [** This method shall return the desiredProperties map**]**
-     */
-    @Test
-    public void getterGetsMapsDes()
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-        TwinCollection testRep = new TwinCollection();
-        testRep.put("testRep", "repObject");
-        Deencapsulation.invoke(testDevice, "setDesiredProperties", testRep);
-
-        //act
-        TwinCollection actualTags = Deencapsulation.invoke(testDevice, "getDesiredMap");
-
-        //assert
-        assertEquals(testRep.size(), actualTags.size());
-
-        for (Map.Entry<String, Object> test : actualTags.entrySet())
-        {
-            assertEquals("testRep", test.getKey());
-            assertEquals("repObject", test.getValue());
-        }
-    }
-
-    /*
-    **Tests_SRS_DEVICETWINDEVICE_25_023: [** This method shall save the desiredProperties map**]**
-     */
-    @Test
-    public void setterSetsMapsDes()
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-        TwinCollection testRep = new TwinCollection();
-        testRep.put("testRep", "repObject");
-
-        //act
-        Deencapsulation.invoke(testDevice, "setDesiredProperties", testRep);
-
-        //assert
-        TwinCollection actualTags = Deencapsulation.invoke(testDevice, "getDesiredMap");
-
-        assertEquals(testRep.size(), actualTags.size());
-
-        for (Map.Entry<String, Object> test : actualTags.entrySet())
-        {
-            assertEquals("testRep", test.getKey());
-            assertEquals("repObject", test.getValue());
-        }
-    }
-
-    @Test
-    public void clearClearsMapsDes()
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-        TwinCollection testRep = new TwinCollection();
-        testRep.put("testRep", "repObject");
-        Deencapsulation.invoke(testDevice, "setDesiredProperties", testRep);
-
-        //act
-        testDevice.clearDesiredProperties();
-
-        //assert
-        TwinCollection actualTags = Deencapsulation.invoke(testDevice, "getDesiredMap");
-
-        assertNull(actualTags);
-        Set<Pair> actualTagsSet = testDevice.getDesiredProperties();
-        assertEquals(0, actualTagsSet.size());
-    }
-
-    @Test
-    public void clearTwinClears()
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-        TwinCollection testRep = new TwinCollection();
-        testRep.put("testKey", "testObject");
-        Deencapsulation.invoke(testDevice, "setDesiredProperties", testRep);
-        Deencapsulation.invoke(testDevice, "setTags", testRep);
-
-        //act
-        testDevice.clearTwin();
-
-        //assert
-        TwinCollection actualTags = Deencapsulation.invoke(testDevice, "getTagsMap");
-        TwinCollection actualDes = Deencapsulation.invoke(testDevice, "getDesiredMap");
-
-        assertNull(actualTags);
-        assertNull(actualDes);
-        Set<Pair> actualTagsSet = testDevice.getTags();
-        assertEquals(0, actualTagsSet.size());
-        Set<Pair> actualDesSet = testDevice.getDesiredProperties();
-        assertEquals(0, actualDesSet.size());
-    }
-
-    /*
     **Tests_SRS_DEVICETWINDEVICE_25_015: [** This method shall append device id, etag, version, tags, desired and reported properties to string (if present) and return **]**
     */
     @Test
@@ -1062,15 +582,15 @@ public class TwinTest
         final String expectedModuleId = "someModuleId";
         Twin testDevice = new Twin("testDevice");
 
-        Set<Pair> testDesProp = new HashSet<>();
-        testDesProp.add(new Pair("testDes1", "desObject1"));
-        testDesProp.add(new Pair("testDes2", "desObject2"));
-        testDevice.setDesiredProperties(testDesProp);
+        TwinCollection testDesProp = new TwinCollection();
+        testDesProp.put("testDes1", "desObject1");
+        testDesProp.put("testDes2", "desObject2");
+        testDevice.getDesiredProperties().putAll((testDesProp));
 
-        Set<Pair> testTags = new HashSet<>();
-        testTags.add(new Pair("testTag1", "tagObject1"));
-        testTags.add(new Pair("testTag2", "tagObject2"));
-        testDevice.setTags(testTags);
+        TwinCollection testTags = new TwinCollection();
+        testTags.put("testTag1", "tagObject1");
+        testTags.put("testTag2", "tagObject2");
+        testDevice.getTags().putAll(testTags);
 
         Deencapsulation.setField(testDevice, "moduleId", expectedModuleId);
 
@@ -1099,15 +619,15 @@ public class TwinTest
         testDevice.setETag("validEtag");
         Deencapsulation.invoke(testDevice, "setVersion", 10);
 
-        Set<Pair> testDesProp = new HashSet<>();
-        testDesProp.add(new Pair("testDes1", "desObject1"));
-        testDesProp.add(new Pair("testDes2", "desObject2"));
-        testDevice.setDesiredProperties(testDesProp);
+        TwinCollection testDesProp = new TwinCollection();
+        testDesProp.put("testDes1", "desObject1");
+        testDesProp.put("testDes2", "desObject2");
+        testDevice.getDesiredProperties().putAll((testDesProp));
 
-        Set<Pair> testTags = new HashSet<>();
-        testTags.add(new Pair("testTag1", "tagObject1"));
-        testTags.add(new Pair("testTag2", "tagObject2"));
-        testDevice.setTags(testTags);
+        TwinCollection testTags = new TwinCollection();
+        testTags.put("testTag1", "tagObject1");
+        testTags.put("testTag2", "tagObject2");
+        testDevice.getTags().putAll(testTags);
 
         //act
         String testDeviceString = testDevice.toString();
@@ -1124,129 +644,6 @@ public class TwinTest
         assertTrue(testDeviceString.contains("tagObject1"));
         assertTrue(testDeviceString.contains("testTag2"));
         assertTrue(testDeviceString.contains("tagObject2"));
-    }
-
-    /*
-    **Tests_SRS_DEVICETWINDEVICE_25_016: [** This method shall convert the tags map to string (if present) and return **]**
-     */
-    @Test
-    public void tagsToStringReturnsTags()
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-
-        Set<Pair> testTags = new HashSet<>();
-        testTags.add(new Pair("testTag1", "tagObject1"));
-        testTags.add(new Pair("testTag2", "tagObject2"));
-        testDevice.setTags(testTags);
-
-        //act
-        String testDeviceString = testDevice.tagsToString();
-
-        //assert
-        assertTrue(testDeviceString.contains("testTag1"));
-        assertTrue(testDeviceString.contains("tagObject1"));
-        assertTrue(testDeviceString.contains("testTag2"));
-        assertTrue(testDeviceString.contains("tagObject2"));
-    }
-
-    /*
-    **Tests_SRS_DEVICETWINDEVICE_25_017: [** This method shall return an empty string if tags map is empty or null and return **]**
-     */
-    @Test
-    public void tagsToStringReturnsEmptyIfTagsEmpty()
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-
-        //act
-        String testDeviceString = testDevice.tagsToString();
-
-        //assert
-        assertEquals(0, testDeviceString.length());
-    }
-
-    /*
-    **Tests_SRS_DEVICETWINDEVICE_25_018: [** This method shall convert the desiredProperties map to string (if present) and return **]**
-     */
-    @Test
-    public void desiredToStringReturnsDesired()
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-
-        Set<Pair> testDesProp = new HashSet<>();
-        testDesProp.add(new Pair("testDes1", "desObject1"));
-        testDesProp.add(new Pair("testDes2", "desObject2"));
-        testDevice.setDesiredProperties(testDesProp);
-
-        //act
-        String testDeviceString = testDevice.desiredPropertiesToString();
-
-        //assert
-        assertTrue(testDeviceString.contains("testDes1"));
-        assertTrue(testDeviceString.contains("desObject1"));
-        assertTrue(testDeviceString.contains("testDes2"));
-        assertTrue(testDeviceString.contains("desObject2"));
-
-    }
-
-    /*
-    **Tests_SRS_DEVICETWINDEVICE_25_019: [** This method shall return an empty string if desiredProperties map is empty or null and return **]**
-     */
-    @Test
-    public void desToStringReturnsEmptyIfTagsEmpty()
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-
-        //act
-        String testDeviceString = testDevice.desiredPropertiesToString();
-
-        //assert
-        assertEquals(0, testDeviceString.length());
-    }
-
-    /*
-    **Tests_SRS_DEVICETWINDEVICE_25_020: [** This method shall convert the reportedProperties map to string (if present) and return **]**
-     */
-    @Test
-    public void reportedToStringReturnsReported()
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-
-        TwinCollection testRepProp = new TwinCollection();
-        testRepProp.put("testRep1", "repObject1");
-        testRepProp.put("testRep2", "repObject2");
-
-        Deencapsulation.invoke(testDevice, "setReportedProperties", testRepProp);
-
-        //act
-        String testDeviceString = testDevice.reportedPropertiesToString();
-
-        //assert
-        assertTrue(testDeviceString.contains("testRep1"));
-        assertTrue(testDeviceString.contains("repObject1"));
-        assertTrue(testDeviceString.contains("testRep2"));
-        assertTrue(testDeviceString.contains("repObject2"));
-
-    }
-
-    /*
-    **Tests_SRS_DEVICETWINDEVICE_25_021: [** This method shall return an empty string if reportedProperties map is empty or null and return **]**
-     */
-    @Test
-    public void repToStringReturnsEmptyIfTagsEmpty()
-    {
-        //arrange
-        Twin testDevice = new Twin("testDevice");
-
-        //act
-        String testDeviceString = testDevice.reportedPropertiesToString();
-
-        //assert
-        assertEquals(0, testDeviceString.length());
     }
 
     // Tests_SRS_DEVICETWINDEVICE_34_040: [This method shall save the provided moduleId.]

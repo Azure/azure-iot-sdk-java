@@ -533,7 +533,7 @@ public class ProvisioningCommon extends IntegrationTest
 
                 assertNotNull(testInstance.enrollmentGroup.getInitialTwin());
                 assertEquals(TEST_VALUE_TAG, testInstance.enrollmentGroup.getInitialTwin().getTags().get(TEST_KEY_TAG));
-                assertEquals(TEST_VALUE_DP, testInstance.enrollmentGroup.getInitialTwin().getDesiredProperty().get(TEST_KEY_DP));
+                assertEquals(TEST_VALUE_DP, testInstance.enrollmentGroup.getInitialTwin().getDesiredProperties().get(TEST_KEY_DP));
 
                 SymmetricKeyAttestation symmetricKeyAttestation = (SymmetricKeyAttestation) attestation;
                 byte[] derivedPrimaryKey = SecurityProviderSymmetricKey.ComputeDerivedSymmetricKey(symmetricKeyAttestation.getPrimaryKey().getBytes(StandardCharsets.UTF_8), testInstance.registrationId);
@@ -576,7 +576,7 @@ public class ProvisioningCommon extends IntegrationTest
             Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Unexpected device id assigned", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), testInstance.provisionedDeviceId, testInstance.individualEnrollment.getDeviceId());
             assertNotNull(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Expected twin to not be null", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), testInstance.individualEnrollment.getInitialTwin());
             Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Unexpected tags found", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), TEST_VALUE_TAG, testInstance.individualEnrollment.getInitialTwin().getTags().get(TEST_KEY_TAG));
-            Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Unexpected desired properties", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), TEST_VALUE_DP, testInstance.individualEnrollment.getInitialTwin().getDesiredProperty().get(TEST_KEY_DP));
+            Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Unexpected desired properties", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), TEST_VALUE_DP, testInstance.individualEnrollment.getInitialTwin().getDesiredProperties().get(TEST_KEY_DP));
         }
 
         return securityProvider;
