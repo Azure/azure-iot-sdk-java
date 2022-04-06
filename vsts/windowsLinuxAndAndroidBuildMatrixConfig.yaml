@@ -107,6 +107,7 @@ jobs:
           scanType: 'Register'
           verbosity: 'Verbose'
           alertWarningLevel: 'Medium'
+        condition: always()
 
   ### Linux ###
   - job: Linux
