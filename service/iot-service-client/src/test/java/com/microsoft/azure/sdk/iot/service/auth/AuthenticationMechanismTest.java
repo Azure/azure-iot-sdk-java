@@ -111,7 +111,6 @@ public class AuthenticationMechanismTest
         //assert
         assertEquals(expectedSecondaryThumbprint, actualAuthentication.getSecondaryThumbprint());
         assertEquals(expectedPrimaryThumbprint, actualAuthentication.getPrimaryThumbprint());
-        assertEquals(AuthenticationType.SELF_SIGNED, actualAuthentication.getAuthenticationType());
     }
 
     //Tests_SRS_AUTHENTICATION_MECHANISM_34_016: [This function shall set this object's secondary thumbprint to the provided value.]
@@ -128,7 +127,6 @@ public class AuthenticationMechanismTest
 
         //assert
         assertEquals(expectedSecondaryThumbprint, actualAuthentication.getSecondaryThumbprint());
-        assertEquals(AuthenticationType.SELF_SIGNED, actualAuthentication.getAuthenticationType());
     }
 
     //Tests_SRS_AUTHENTICATION_MECHANISM_34_009: [This function shall return the AuthenticationType of this object.]
@@ -144,39 +142,6 @@ public class AuthenticationMechanismTest
         assertEquals(AuthenticationType.SAS, authenticationWithSymmetricKey.getAuthenticationType());
         assertEquals(AuthenticationType.CERTIFICATE_AUTHORITY, authenticationCASigned.getAuthenticationType());
         assertEquals(AuthenticationType.SELF_SIGNED, authenticationSelfSigned.getAuthenticationType());
-    }
-
-    //Tests_SRS_AUTHENTICATION_MECHANISM_34_012: [This constructor shall throw an IllegalArgumentException if the provided symmetricKey is null.]
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsIllegalArgumentExceptionForNullSymmetricKey()
-    {
-        //arrange
-        SymmetricKey key = null;
-
-        //act
-        new AuthenticationMechanism(key);
-    }
-
-    //Tests_SRS_AUTHENTICATION_MECHANISM_34_013: [If the provided symmetricKey is null, this function shall throw an IllegalArgumentException.]
-    @Test (expected = IllegalArgumentException.class)
-    public void setSymmetricKeyThrowsForNullSymmetricKey()
-    {
-        //arrange
-        AuthenticationMechanism authentication = new AuthenticationMechanism(expectedSymmetricKey);
-
-        //act
-        authentication.setSymmetricKey(null);
-    }
-
-    //Tests_SRS_AUTHENTICATION_MECHANISM_34_014: [If the provided type is null, this function shall throw an IllegalArgumentException.]
-    @Test (expected = IllegalArgumentException.class)
-    public void setAuthenticationTypeThrowsForNullType()
-    {
-        //arrange
-        AuthenticationMechanism authentication = new AuthenticationMechanism(expectedSymmetricKey);
-
-        //act
-        authentication.setAuthenticationType(null);
     }
 
     //Tests_SRS_AUTHENTICATION_MECHANISM_34_023: [If the provided authentication type is self signed, a thumbprint will be generated, but no symmetric key will be generated.]

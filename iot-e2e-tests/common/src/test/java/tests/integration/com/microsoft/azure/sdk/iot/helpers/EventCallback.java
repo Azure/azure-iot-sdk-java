@@ -3,10 +3,15 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
-import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
+import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.MessageSentCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.MessagesSentCallback;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 
-public class EventCallback implements IotHubEventCallback
+import java.util.List;
+
+public class EventCallback implements MessageSentCallback, MessagesSentCallback
 {
     private final IotHubStatusCode expectedStatusCode;
     public EventCallback(IotHubStatusCode expectedStatusCode)
@@ -14,7 +19,7 @@ public class EventCallback implements IotHubEventCallback
         this.expectedStatusCode = expectedStatusCode;
     }
 
-    public void execute(IotHubStatusCode status, Object context)
+    public void onMessageSent(Message sentMessage, IotHubClientException e, Object context)
     {
         if (context != null)
         {
@@ -23,12 +28,31 @@ public class EventCallback implements IotHubEventCallback
             //null case is for testing that the callback is fired, but not caring what the status code was.
             // In some error injection scenarios, the status code reported cannot be predicted, but the callback
             // still must have been fired.
-            success.setResult(this.expectedStatusCode == null || status.equals(expectedStatusCode));
+            if (this.expectedStatusCode == null)
+            {
+                success.setResult(true);
+            }
+            else if (this.expectedStatusCode == IotHubStatusCode.OK && e == null)
+            {
+                success.setResult(true);
+            }
+            else
+            {
+                success.setResult(e.getStatusCode().equals(expectedStatusCode));
+            }
+
+            success.setCallbackStatusCode(e == null ? IotHubStatusCode.OK : e.getStatusCode());
 
             success.callbackWasFired();
 
-            success.setCallbackStatusCode(status);
         }
+    }
+
+    @Override
+    public void onMessagesSent(List<Message> sentMessages, IotHubClientException clientException, Object callbackContext)
+    {
+        // just call the single message callback since they will behave the same for these tests
+        this.onMessageSent(null, clientException, callbackContext);
     }
 }
 

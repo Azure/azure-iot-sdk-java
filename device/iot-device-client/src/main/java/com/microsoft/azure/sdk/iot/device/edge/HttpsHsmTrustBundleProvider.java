@@ -5,13 +5,11 @@
 
 package com.microsoft.azure.sdk.iot.device.edge;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.hsm.HsmException;
 import com.microsoft.azure.sdk.iot.device.hsm.HttpsHsmClient;
 import com.microsoft.azure.sdk.iot.device.hsm.UnixDomainSocketChannel;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.TrustBundleResponse;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 
 /**
@@ -29,11 +27,8 @@ public class HttpsHsmTrustBundleProvider implements TrustBundleProvider
      * this argument is null and unix domain socket communication is required, this method will through an {@link IllegalArgumentException}.
      * @return the raw string containing all of the certificates to be trusted. May be one certificate or many certificates
      * @throws URISyntaxException if the providerUri cannot be parsed as a uri
-     * @throws TransportException if the hsm cannot be reacheed
-     * @throws IOException if the hsm cannot be reached
-     * @throws HsmException if the hsm cannot give the trust bundle
      */
-    public String getTrustBundleCerts(String providerUri, String apiVersion, UnixDomainSocketChannel unixDomainSocketChannel) throws URISyntaxException, TransportException, IOException, HsmException
+    public String getTrustBundleCerts(String providerUri, String apiVersion, UnixDomainSocketChannel unixDomainSocketChannel) throws URISyntaxException, TransportException
     {
         HttpsHsmClient httpsHsmClient = new HttpsHsmClient(providerUri, unixDomainSocketChannel);
         TrustBundleResponse response = httpsHsmClient.getTrustBundle(apiVersion);

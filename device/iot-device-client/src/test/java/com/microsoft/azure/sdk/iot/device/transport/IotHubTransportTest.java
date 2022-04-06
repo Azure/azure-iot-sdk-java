@@ -3,46 +3,21 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.ClientConfiguration;
-import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
-import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
-import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
-import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
-import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
-import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.device.MessageCallback;
-import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
-import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
-import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.exceptions.UnauthorizedException;
+import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpConnectionThrottledException;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpUnauthorizedAccessException;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsIotHubConnection;
+import com.microsoft.azure.sdk.iot.device.transport.https.exceptions.UnauthorizedException;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.MqttUnauthorizedException;
-import mockit.Deencapsulation;
-import mockit.Expectations;
-import mockit.Mock;
-import mockit.MockUp;
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-import mockit.Verifications;
+import mockit.*;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
+import java.util.concurrent.*;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason.*;
 import static com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus.*;
@@ -70,7 +45,7 @@ public class IotHubTransportTest
     IotHubTransportPacket mockedPacket;
 
     @Mocked
-    IotHubEventCallback mockedEventCallback;
+    MessageSentCallback mockedEventCallback;
 
     @Mocked
     ScheduledExecutorService mockedScheduledExecutorService;
@@ -295,7 +270,7 @@ public class IotHubTransportTest
 
     //Tests_SRS_IOTHUBTRANSPORT_34_016: [If the connection status of this object is DISCONNECTED_RETRYING, this function shall throw a TransportException.]
     @Test (expected = TransportException.class)
-    public void openThrowsIfConnectionStatusIsDisconnectedRetrying() throws DeviceClientException
+    public void openThrowsIfConnectionStatusIsDisconnectedRetrying() throws IotHubClientException, TransportException
     {
         //arrange
         new Expectations()
@@ -316,7 +291,7 @@ public class IotHubTransportTest
 
     //Tests_SRS_IOTHUBTRANSPORT_34_019: [This function shall open the invoke the method openConnection.]
     @Test
-    public void openCallsOpenConnection() throws DeviceClientException
+    public void openCallsOpenConnection() throws IotHubClientException, TransportException
     {
         //arrange
         final StringBuilder verifier = new StringBuilder();
@@ -355,7 +330,7 @@ public class IotHubTransportTest
 
     //Tests_SRS_IOTHUBTRANSPORT_34_017: [If the connection status of this object is CONNECTED, this function shall do nothing.]
     @Test
-    public void openDoesNothingIfConnectionStatusIsConnected() throws DeviceClientException
+    public void openDoesNothingIfConnectionStatusIsConnected() throws IotHubClientException, TransportException
     {
         //arrange
         new MockUp<IotHubTransport>()
@@ -386,7 +361,7 @@ public class IotHubTransportTest
 
     //Tests_SRS_IOTHUBTRANSPORT_34_026: [If the supplied reason is null, this function shall throw an IllegalArgumentException.]
     @Test (expected = IllegalArgumentException.class)
-    public void closeThrowsForNullReason() throws DeviceClientException
+    public void closeThrowsForNullReason() throws IotHubClientException, TransportException
     {
         //arrange
         new Expectations()
@@ -408,7 +383,7 @@ public class IotHubTransportTest
     //Tests_SRS_IOTHUBTRANSPORT_34_024: [This function shall close the connection.]
     //Tests_SRS_IOTHUBTRANSPORT_34_025: [This function shall invoke updateStatus with status DISCONNECTED and the supplied reason and cause.]
     @Test
-    public void closeMovesAllWaitingAndInProgressMessagesToCallbackQueueWithStatusMessageCancelledOnClose() throws DeviceClientException
+    public void closeMovesAllWaitingAndInProgressMessagesToCallbackQueueWithStatusMessageCancelledOnClose() throws IotHubClientException, TransportException
     {
         //arrange
         final StringBuilder methodsCalled = new StringBuilder();
@@ -1237,7 +1212,7 @@ public class IotHubTransportTest
         new Verifications()
         {
             {
-                mockedEventCallback.execute(mockedStatus, context);
+                mockedEventCallback.onMessageSent(mockedMessage, (IotHubClientException) any, context);
                 times = 3;
             }
         };
@@ -1245,7 +1220,7 @@ public class IotHubTransportTest
 
     //Tests_SRS_IOTHUBTRANSPORT_34_046: [If this object's connection status is not CONNEECTED, this function shall do nothing.]
     @Test
-    public void handleMessageDoesNothingIfNotConnected() throws DeviceClientException
+    public void handleMessageDoesNothingIfNotConnected() throws IotHubClientException, TransportException
     {
         //arrange
         new MockUp<IotHubTransport>()
@@ -1282,7 +1257,7 @@ public class IotHubTransportTest
     //Tests_SRS_IOTHUBTRANSPORT_34_047: [If this object's connection status is CONNECTED and is using HTTPS,
     // this function shall invoke addReceivedMessagesOverHttpToReceivedQueue.]
     @Test
-    public void handleMessageChecksForHttpMessages() throws DeviceClientException
+    public void handleMessageChecksForHttpMessages() throws IotHubClientException, TransportException
     {
         //arrange
         final StringBuilder methodsCalled = new StringBuilder();
@@ -1330,7 +1305,7 @@ public class IotHubTransportTest
     //Tests_SRS_IOTHUBTRANSPORT_34_048: [If this object's connection status is CONNECTED and there is a
     // received message in the queue, this function shall acknowledge the received message
     @Test
-    public void handleMessageAcknowledgesAReceivedMessages() throws DeviceClientException
+    public void handleMessageAcknowledgesAReceivedMessages() throws IotHubClientException, TransportException
     {
         //arrange
         final StringBuilder methodsCalled = new StringBuilder();
@@ -1430,7 +1405,7 @@ public class IotHubTransportTest
                 mockedTransportMessage.getMessageCallbackContext();
                 result = context;
 
-                mockedMessageCallback.execute(mockedTransportMessage, context);
+                mockedMessageCallback.onCloudToDeviceMessageReceived(mockedTransportMessage, context);
                 result = IotHubMessageResult.COMPLETE;
             }
         };
@@ -1473,7 +1448,7 @@ public class IotHubTransportTest
                 mockedTransportMessage.getMessageCallbackContext();
                 result = context;
 
-                mockedMessageCallback.execute(mockedTransportMessage, context);
+                mockedMessageCallback.onCloudToDeviceMessageReceived(mockedTransportMessage, context);
                 result = IotHubMessageResult.COMPLETE;
 
                 mockedIotHubTransportConnection.sendMessageResult(mockedTransportMessage, IotHubMessageResult.COMPLETE);
@@ -2008,11 +1983,7 @@ public class IotHubTransportTest
         new Verifications()
         {
             {
-                mockedIotHubConnectionStatusChangeCallback.onStatusChanged(
-                        (IotHubConnectionStatus)any,
-                        (IotHubConnectionStatusChangeReason)any,
-                        (Throwable)any,
-                        any);
+                mockedIotHubConnectionStatusChangeCallback.onStatusChanged((ConnectionStatusChangeContext) any);
                 times = 1;
             }
         };
@@ -2044,11 +2015,7 @@ public class IotHubTransportTest
         new Verifications()
         {
             {
-                mockedIotHubConnectionStatusChangeCallback.onStatusChanged(
-                        (IotHubConnectionStatus)any,
-                        (IotHubConnectionStatusChangeReason)any,
-                        (Throwable)any,
-                        any);
+                mockedIotHubConnectionStatusChangeCallback.onStatusChanged((ConnectionStatusChangeContext) any);
                 times = 0;
             }
         };
@@ -2146,7 +2113,7 @@ public class IotHubTransportTest
 
     //Tests_SRS_IOTHUBTRANSPORT_28_002: [This function shall add the packet to the callback queue if it has a callback.]
     @Test
-    public void addToCallbackQueuePacketHasCallback(@Mocked final IotHubEventCallback mockCallback)
+    public void addToCallbackQueuePacketHasCallback(@Mocked final MessageSentCallback mockCallback)
     {
         //arrange
         new Expectations()
@@ -2176,7 +2143,7 @@ public class IotHubTransportTest
 
     //Tests_SRS_IOTHUBTRANSPORT_28_002: [This function shall add the packet to the callback queue if it has a callback.]
     @Test
-    public void addToCallbackQueuePacketNoCallback(@Mocked final IotHubEventCallback mockCallback)
+    public void addToCallbackQueuePacketNoCallback(@Mocked final MessageSentCallback mockCallback)
     {
         //arrange
         new Expectations()
@@ -2470,7 +2437,7 @@ public class IotHubTransportTest
                 result = true;
 
                 mockedHttpsIotHubConnection.sendMessage((Message) any);
-                result = IotHubStatusCode.HUB_OR_DEVICE_ID_NOT_FOUND;
+                result = IotHubStatusCode.NOT_FOUND;
             }
         };
 
@@ -2636,34 +2603,6 @@ public class IotHubTransportTest
         assertEquals("handleMessageException", methodsCalled.toString());
     }
 
-    //Tests_SRS_IOTHUBTRANSPORT_34_079: [If the provided transportException is an AmqpConnectionThrottledException,
-    // this function shall set the status of the callback packet to the error code for THROTTLED.]
-    @Test
-    public void handleMessageExceptionChecksForAmqpThrottling()
-    {
-        //arrange
-        new Expectations()
-        {
-            {
-                mockedConfig.getDeviceId();
-                result = "someDeviceId";
-            }
-        };
-        final IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
-
-        //act
-        Deencapsulation.invoke(transport, "handleMessageException", new Class[] {IotHubTransportPacket.class, TransportException.class}, mockedPacket, new AmqpConnectionThrottledException());
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockedPacket.setStatus(IotHubStatusCode.THROTTLED);
-                times = 1;
-            }
-        };
-    }
-
     @Test
     public void sendMessagesChecksForExpiredMessagesInWaitingQueue()
     {
@@ -2760,7 +2699,7 @@ public class IotHubTransportTest
     }
 
     @Test
-    public void openWithRetryThrowsIfOperationTimesOut()
+    public void openWithRetryThrowsIfOperationTimesOut() throws IotHubClientException
     {
         //arrange
         new NonStrictExpectations()
@@ -2811,7 +2750,7 @@ public class IotHubTransportTest
     }
 
     @Test
-    public void openWithRetryThrowsIfRetryExpires()
+    public void openWithRetryThrowsIfRetryExpires() throws IotHubClientException
     {
         //arrange
         new NonStrictExpectations()

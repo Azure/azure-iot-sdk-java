@@ -5,6 +5,7 @@ package com.microsoft.azure.sdk.iot.service.digitaltwin.helpers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonPrimitive;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinGetDigitalTwinHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinInvokeComponentCommandHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinInvokeRootLevelCommandHeaders;
@@ -39,7 +40,7 @@ public final class Tools {
     public static final Func1<ServiceResponseWithHeaders<Object, DigitalTwinInvokeRootLevelCommandHeaders>, Observable<ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders>>> FUNC_TO_DIGITAL_TWIN_COMMAND_RESPONSE = object -> {
         try {
             DigitalTwinCommandResponse digitalTwinCommandResponse = new DigitalTwinCommandResponse();
-            digitalTwinCommandResponse.setPayload(objectMapper.writeValueAsString(object.body()));
+            digitalTwinCommandResponse.setPayload(new JsonPrimitive(objectMapper.writeValueAsString(object.body())));
             digitalTwinCommandResponse.setStatus(object.headers().xMsCommandStatuscode());
             DigitalTwinInvokeCommandHeaders digitalTwinInvokeCommandHeaders = new DigitalTwinInvokeCommandHeaders();
             digitalTwinInvokeCommandHeaders.setRequestId(object.headers().xMsRequestId());
@@ -55,7 +56,7 @@ public final class Tools {
     public static final Func1<ServiceResponseWithHeaders<Object, DigitalTwinInvokeComponentCommandHeaders>, Observable<ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders>>> FUNC_TO_DIGITAL_TWIN_COMPONENT_COMMAND_RESPONSE = object -> {
         try {
             DigitalTwinCommandResponse digitalTwinCommandResponse = new DigitalTwinCommandResponse();
-            digitalTwinCommandResponse.setPayload(objectMapper.writeValueAsString(object.body()));
+            digitalTwinCommandResponse.setPayload(new JsonPrimitive(objectMapper.writeValueAsString(object.body())));
             digitalTwinCommandResponse.setStatus(object.headers().xMsCommandStatuscode());
             DigitalTwinInvokeCommandHeaders digitalTwinInvokeCommandHeaders = new DigitalTwinInvokeCommandHeaders();
             digitalTwinInvokeCommandHeaders.setRequestId(object.headers().xMsRequestId());

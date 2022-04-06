@@ -506,7 +506,7 @@ public class ConfigurationsClientTest
                 mockedConfigurationContent.toConfigurationContentParser();
                 result = mockedConfigurationContentParser;
 
-                mockedConfigurationContentParser.toJson();
+                mockedConfigurationContentParser.toJsonElement().toString();
                 result = expectedJson;
             }
         };

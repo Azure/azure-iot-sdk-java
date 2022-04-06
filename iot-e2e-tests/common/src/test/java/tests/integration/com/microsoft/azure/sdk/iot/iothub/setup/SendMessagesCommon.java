@@ -13,6 +13,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.ProxySettings;
 import com.microsoft.azure.sdk.iot.device.SasTokenProvider;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
@@ -331,7 +332,7 @@ public class SendMessagesCommon extends IntegrationTest
             messageString = "Java client " + deviceAmqps.getDeviceId() + " test e2e message over AMQP protocol";
         }
 
-        public void openConnection() throws IOException, URISyntaxException
+        public void openConnection() throws IOException, URISyntaxException, IotHubClientException
         {
             client = new DeviceClient(connString, protocol);
             client.open(false);

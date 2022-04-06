@@ -6,15 +6,13 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.twin;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.twin.GetTwinCorrelatingMessageCallback;
-import com.microsoft.azure.sdk.iot.device.twin.Twin;
-import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesUpdateCorrelatingMessageCallback;
+import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesUpdateResponse;
+import com.microsoft.azure.sdk.iot.device.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.twin.Pair;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,39 +26,39 @@ import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.TwinCommon;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 @IotHubTest
 @StandardTierHubOnlyTest
 @RunWith(Parameterized.class)
 public class TwinTests extends TwinCommon
 {
-    public TwinTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException, InterruptedException, IotHubException, URISyntaxException, GeneralSecurityException, ModuleClientException
+    public TwinTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException, InterruptedException, IotHubException, URISyntaxException, GeneralSecurityException
     {
         super(protocol, authenticationType, clientType);
     }
 
     @Before
-    public void setup() throws GeneralSecurityException, ModuleClientException, IOException, InterruptedException, URISyntaxException, IotHubException
+    public void setup() throws GeneralSecurityException, IOException, InterruptedException, URISyntaxException, IotHubException, IotHubClientException
     {
         this.testInstance.setup();
     }
 
     @Test
-    public void testBasicTwinFlow() throws InterruptedException, IOException, IotHubException, TimeoutException
+    public void testBasicTwinFlow() throws InterruptedException, IOException, IotHubException, TimeoutException, IotHubClientException
     {
         super.testBasicTwinFlow(true);
     }
 
     @Test
-    public void receiveMultipleDesiredPropertiesAtOnce() throws IOException, InterruptedException, IotHubException, TimeoutException
+    public void receiveMultipleDesiredPropertiesAtOnce() throws IOException, InterruptedException, IotHubException, TimeoutException, IotHubClientException
     {
         final String desiredPropertyKey1 = UUID.randomUUID().toString();
         final String desiredPropertyValue1 = UUID.randomUUID().toString();
@@ -80,10 +78,8 @@ public class TwinTests extends TwinCommon
             null);
 
         // send a desired property update and wait for it to be received by the device/module
-        Set<Pair> desiredProperties = new HashSet<>();
-        desiredProperties.add(new Pair(desiredPropertyKey1, desiredPropertyValue1));
-        desiredProperties.add(new Pair(desiredPropertyKey2, desiredPropertyValue2));
-        testInstance.serviceTwin.setDesiredProperties(desiredProperties);
+        testInstance.serviceTwin.getDesiredProperties().put(desiredPropertyKey1, desiredPropertyValue1);
+        testInstance.serviceTwin.getDesiredProperties().put(desiredPropertyKey2, desiredPropertyValue2);
         testInstance.twinServiceClient.patch(testInstance.serviceTwin);
 
         desiredPropertyUpdatedLatch.await();
@@ -95,7 +91,7 @@ public class TwinTests extends TwinCommon
     }
 
     @Test
-    public void receiveMultipleDesiredPropertiesSequentially() throws IOException, InterruptedException, IotHubException, TimeoutException
+    public void receiveMultipleDesiredPropertiesSequentially() throws IOException, InterruptedException, IotHubException, TimeoutException, IotHubClientException
     {
         final String desiredPropertyKey1 = UUID.randomUUID().toString();
         final String desiredPropertyValue1 = UUID.randomUUID().toString();
@@ -125,10 +121,8 @@ public class TwinTests extends TwinCommon
             null);
 
         // send a desired property update and wait for it to be received by the device/module
-        Set<Pair> desiredProperties = new HashSet<>();
-        desiredProperties.add(new Pair(desiredPropertyKey1, desiredPropertyValue1));
-        testInstance.serviceTwin.setDesiredProperties(desiredProperties);
-        testInstance.twinServiceClient.patch(testInstance.serviceTwin);
+        testInstance.serviceTwin.getDesiredProperties().put(desiredPropertyKey1, desiredPropertyValue1);
+        testInstance.serviceTwin = testInstance.twinServiceClient.patch(testInstance.serviceTwin);
 
         desiredProperty1UpdatedLatch.await();
         com.microsoft.azure.sdk.iot.device.twin.Twin desiredPropertyUpdate = desiredPropertyUpdateAtomicReference.get();
@@ -136,10 +130,9 @@ public class TwinTests extends TwinCommon
         // the desired property update received by the device must match the key/value pair sent by the service client
         assertTrue(isPropertyInTwinCollection(desiredPropertyUpdate.getDesiredProperties(), desiredPropertyKey1, desiredPropertyValue1));
 
-        desiredProperties.clear();
-        desiredProperties.add(new Pair(desiredPropertyKey2, desiredPropertyValue2));
-        testInstance.serviceTwin.setDesiredProperties(desiredProperties);
-        testInstance.twinServiceClient.patch(testInstance.serviceTwin);
+        testInstance.serviceTwin.getDesiredProperties().clear();
+        testInstance.serviceTwin.getDesiredProperties().put(desiredPropertyKey2, desiredPropertyValue2);
+        testInstance.serviceTwin = testInstance.twinServiceClient.patch(testInstance.serviceTwin);
 
         desiredProperty2UpdatedLatch.await();
         desiredPropertyUpdate = desiredPropertyUpdateAtomicReference.get();
@@ -148,7 +141,7 @@ public class TwinTests extends TwinCommon
     }
 
     @Test
-    public void sendMultipleReportedPropertiesAtOnce() throws IOException, TimeoutException, InterruptedException, IotHubException
+    public void sendMultipleReportedPropertiesAtOnce() throws IOException, TimeoutException, InterruptedException, IotHubException, IotHubClientException
     {
         final String reportedPropertyKey1 = UUID.randomUUID().toString();
         final String reportedPropertyValue1 = UUID.randomUUID().toString();
@@ -163,20 +156,28 @@ public class TwinTests extends TwinCommon
             },
             null);
 
-        com.microsoft.azure.sdk.iot.device.twin.TwinCollection twinCollection = new com.microsoft.azure.sdk.iot.device.twin.TwinCollection();
-        twinCollection.put(reportedPropertyKey1, reportedPropertyValue1);
-        twinCollection.put(reportedPropertyKey2, reportedPropertyValue2);
-        IotHubStatusCode statusCode = testInstance.testIdentity.getClient().updateReportedProperties(twinCollection);
+        Twin twin = testInstance.testIdentity.getClient().getTwin();
+        twin.getReportedProperties().put(reportedPropertyKey1, reportedPropertyValue1);
+        twin.getReportedProperties().put(reportedPropertyKey2, reportedPropertyValue2);
+        ReportedPropertiesUpdateResponse response = testInstance.testIdentity.getClient().updateReportedProperties(twin.getReportedProperties());
 
-        assertEquals(IotHubStatusCode.OK, statusCode);
+        assertTrue(response.getVersion() > 0);
 
         com.microsoft.azure.sdk.iot.service.twin.Twin serviceClientTwin = testInstance.getServiceClientTwin();
-        assertTrue(isPropertyInSet(serviceClientTwin.getReportedProperties(), reportedPropertyKey1, reportedPropertyValue1));
-        assertTrue(isPropertyInSet(serviceClientTwin.getReportedProperties(), reportedPropertyKey2, reportedPropertyValue2));
+        assertTrue(isPropertyInTwinCollection(serviceClientTwin.getReportedProperties(), reportedPropertyKey1, reportedPropertyValue1));
+        assertTrue(isPropertyInTwinCollection(serviceClientTwin.getReportedProperties(), reportedPropertyKey2, reportedPropertyValue2));
+
+        // verify that metadata for these new properties is visible to a twin service client
+        com.microsoft.azure.sdk.iot.service.twin.Twin serviceTwin = testInstance.getServiceClientTwin();
+        assertNotNull(serviceTwin.getReportedProperties().getTwinMetadata());
+        assertNotNull(serviceTwin.getReportedProperties().getTwinMetadata(reportedPropertyKey1));
+        assertNotNull(serviceTwin.getReportedProperties().getTwinMetadata(reportedPropertyKey2));
+        assertNotNull(serviceTwin.getReportedProperties().getTwinMetadata(reportedPropertyKey1).getLastUpdated());
+        assertNotNull(serviceTwin.getReportedProperties().getTwinMetadata(reportedPropertyKey2).getLastUpdated());
     }
 
     @Test
-    public void sendMultipleReportedPropertiesSequentially() throws TimeoutException, InterruptedException, IOException, IotHubException
+    public void sendMultipleReportedPropertiesSequentially() throws TimeoutException, InterruptedException, IOException, IotHubException, IotHubClientException
     {
         final String reportedPropertyKey1 = UUID.randomUUID().toString();
         final String reportedPropertyValue1 = UUID.randomUUID().toString();
@@ -192,27 +193,56 @@ public class TwinTests extends TwinCommon
             null);
 
         // send one reported property
-        com.microsoft.azure.sdk.iot.device.twin.TwinCollection twinCollection = new com.microsoft.azure.sdk.iot.device.twin.TwinCollection();
-        twinCollection.put(reportedPropertyKey1, reportedPropertyValue1);
-        IotHubStatusCode statusCode = testInstance.testIdentity.getClient().updateReportedProperties(twinCollection);
-        assertEquals(IotHubStatusCode.OK, statusCode);
+        Twin twin = testInstance.testIdentity.getClient().getTwin();
+        twin.getReportedProperties().put(reportedPropertyKey1, reportedPropertyValue1);
+        ReportedPropertiesUpdateResponse response = testInstance.testIdentity.getClient().updateReportedProperties(twin.getReportedProperties());
+        twin.getReportedProperties().setVersion(response.getVersion());
 
         // send a different reported property
-        twinCollection.clear();
-        twinCollection.put(reportedPropertyKey2, reportedPropertyValue2);
-        statusCode = testInstance.testIdentity.getClient().updateReportedProperties(twinCollection);
-        assertEquals(IotHubStatusCode.OK, statusCode);
+        twin.getReportedProperties().clear();
+        twin.getReportedProperties().put(reportedPropertyKey2, reportedPropertyValue2);
+        response = testInstance.testIdentity.getClient().updateReportedProperties(twin.getReportedProperties());
+        twin.getReportedProperties().setVersion(response.getVersion());
 
         com.microsoft.azure.sdk.iot.service.twin.Twin serviceClientTwin = testInstance.getServiceClientTwin();
-        assertTrue(isPropertyInSet(serviceClientTwin.getReportedProperties(), reportedPropertyKey1, reportedPropertyValue1));
-        assertTrue(isPropertyInSet(serviceClientTwin.getReportedProperties(), reportedPropertyKey2, reportedPropertyValue2));
+        assertTrue(isPropertyInTwinCollection(serviceClientTwin.getReportedProperties(), reportedPropertyKey1, reportedPropertyValue1));
+        assertTrue(isPropertyInTwinCollection(serviceClientTwin.getReportedProperties(), reportedPropertyKey2, reportedPropertyValue2));
+    }
+
+    @Test
+    public void canDeleteReportedProperties() throws IOException, TimeoutException, InterruptedException, IotHubException, IotHubClientException
+    {
+        final String reportedPropertyKey = UUID.randomUUID().toString();
+        final String reportedPropertyValue = UUID.randomUUID().toString();
+
+        testInstance.testIdentity.getClient().subscribeToDesiredProperties(
+                (twin, context) ->
+                {
+                    // don't care about desired properties for this test. Just need to open twin links
+                },
+                null);
+
+        Twin twin = testInstance.testIdentity.getClient().getTwin();
+        twin.getReportedProperties().put(reportedPropertyKey, reportedPropertyValue);
+        ReportedPropertiesUpdateResponse response = testInstance.testIdentity.getClient().updateReportedProperties(twin.getReportedProperties());
+
+        assertTrue(response.getVersion() > 0);
+
+        twin.getReportedProperties().setVersion(response.getVersion());
+        twin.getReportedProperties().put(reportedPropertyKey, null);
+        response = testInstance.testIdentity.getClient().updateReportedProperties(twin.getReportedProperties());
+
+        assertTrue(response.getVersion() > 0);
+
+        com.microsoft.azure.sdk.iot.service.twin.Twin serviceClientTwin = testInstance.getServiceClientTwin();
+        assertFalse(isPropertyInTwinCollection(serviceClientTwin.getReportedProperties(), reportedPropertyKey, reportedPropertyValue));
     }
 
     // Both updateReportedPropertiesAsync and getTwinAsync have overloads that expose a verbose state callback detailing
     // when a message is queued, sent, ack'd, etc. This test makes sure that those callbacks are all executed as expected and in order.
     @ContinuousIntegrationTest
     @Test
-    public void testCorrelatingMessageCallbackOverloads() throws TimeoutException, InterruptedException, IOException, IotHubException
+    public void testCorrelatingMessageCallbackOverloads() throws TimeoutException, InterruptedException, IOException, IotHubException, IotHubClientException
     {
         final String desiredPropertyKey = UUID.randomUUID().toString();
         final String desiredPropertyValue = UUID.randomUUID().toString();
@@ -260,7 +290,7 @@ public class TwinTests extends TwinCommon
                 }
 
                 @Override
-                public void onRequestAcknowledged(Message message, Object callbackContext, TransportException e)
+                public void onRequestAcknowledged(Message message, Object callbackContext, IotHubClientException e)
                 {
                     if (message != null && callbackContext.equals(expectedGetTwinContext) && e == null)
                     {
@@ -269,7 +299,7 @@ public class TwinTests extends TwinCommon
                 }
 
                 @Override
-                public void onResponseReceived(Twin twin, Message message, Object callbackContext, IotHubStatusCode statusCode, TransportException e)
+                public void onResponseReceived(Twin twin, Message message, Object callbackContext, IotHubStatusCode statusCode, IotHubClientException e)
                 {
                     if (message != null && callbackContext.equals(expectedGetTwinContext) && e == null && statusCode == IotHubStatusCode.OK)
                     {
@@ -289,11 +319,11 @@ public class TwinTests extends TwinCommon
             },
             expectedGetTwinContext);
 
-        getTwinOnRequestQueuedLatch.await();
-        getTwinOnRequestSentLatch.await();
-        getTwinOnRequestAcknowledgedLatch.await();
-        getTwinOnResponseReceivedLatch.await();
-        getTwinOnResponseAcknowledgedLatch.await();
+        assertTrue("Timed out waiting for a callback", getTwinOnRequestQueuedLatch.await(TWIN_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS));
+        assertTrue("Timed out waiting for a callback", getTwinOnRequestSentLatch.await(TWIN_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS));
+        assertTrue("Timed out waiting for a callback", getTwinOnRequestAcknowledgedLatch.await(TWIN_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS));
+        assertTrue("Timed out waiting for a callback", getTwinOnResponseReceivedLatch.await(TWIN_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS));
+        assertTrue("Timed out waiting for a callback", getTwinOnResponseAcknowledgedLatch.await(TWIN_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS));
 
         Twin twin = twinAtomicReference.get();
 
@@ -304,9 +334,7 @@ public class TwinTests extends TwinCommon
         assertFalse(twin.getDesiredProperties().containsKey(desiredPropertyKey));
 
         // send a desired property update and wait for it to be received by the device/module
-        Set<Pair> desiredProperties = new HashSet<>();
-        desiredProperties.add(new Pair(desiredPropertyKey, desiredPropertyValue));
-        testInstance.serviceTwin.setDesiredProperties(desiredProperties);
+        testInstance.serviceTwin.getDesiredProperties().put(desiredPropertyKey, desiredPropertyValue);
         testInstance.twinServiceClient.patch(testInstance.serviceTwin);
 
         desiredPropertyUpdatedLatch.await();
@@ -320,8 +348,7 @@ public class TwinTests extends TwinCommon
         // create some reported properties
         final String reportedPropertyKey = UUID.randomUUID().toString();
         final String reportedPropertyValue = UUID.randomUUID().toString();
-        TwinCollection reportedProperties = new TwinCollection();
-        reportedProperties.put(reportedPropertyKey, reportedPropertyValue);
+        twin.getReportedProperties().put(reportedPropertyKey, reportedPropertyValue);
 
         // send the reported properties and wait for the service to have acknowledged them
         final Object expectedUpdateReportedPropertiesContext = new Object();
@@ -333,7 +360,7 @@ public class TwinTests extends TwinCommon
 
         AtomicReference<IotHubStatusCode> iotHubStatusCodeAtomicReference = new AtomicReference<>();
         testInstance.testIdentity.getClient().updateReportedPropertiesAsync(
-            reportedProperties,
+                twin.getReportedProperties(),
             new ReportedPropertiesUpdateCorrelatingMessageCallback()
             {
                 @Override
@@ -355,7 +382,7 @@ public class TwinTests extends TwinCommon
                 }
 
                 @Override
-                public void onRequestAcknowledged(Message message, Object callbackContext, TransportException e)
+                public void onRequestAcknowledged(Message message, Object callbackContext, IotHubClientException e)
                 {
                     if (message != null && callbackContext.equals(expectedUpdateReportedPropertiesContext) && e == null)
                     {
@@ -364,7 +391,7 @@ public class TwinTests extends TwinCommon
                 }
 
                 @Override
-                public void onResponseReceived(Message message, Object callbackContext, IotHubStatusCode statusCode, TransportException e)
+                public void onResponseReceived(Message message, Object callbackContext, IotHubStatusCode statusCode, ReportedPropertiesUpdateResponse response, IotHubClientException e)
                 {
                     if (message != null && callbackContext.equals(expectedUpdateReportedPropertiesContext) && e == null && statusCode == IotHubStatusCode.OK)
                     {
@@ -384,11 +411,11 @@ public class TwinTests extends TwinCommon
             },
             expectedUpdateReportedPropertiesContext);
 
-        updateReportedPropertiesOnRequestQueuedLatch.await();
-        updateReportedPropertiesOnRequestSentLatch.await();
-        updateReportedPropertiesOnRequestAcknowledgedLatch.await();
-        updateReportedPropertiesOnResponseReceivedLatch.await();
-        updateReportedPropertiesOnResponseAcknowledgedLatch.await();
+        assertTrue("Timed out waiting for a callback", updateReportedPropertiesOnRequestQueuedLatch.await(TWIN_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS));
+        assertTrue("Timed out waiting for a callback", updateReportedPropertiesOnRequestSentLatch.await(TWIN_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS));
+        assertTrue("Timed out waiting for a callback", updateReportedPropertiesOnRequestAcknowledgedLatch.await(TWIN_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS));
+        assertTrue("Timed out waiting for a callback", updateReportedPropertiesOnResponseReceivedLatch.await(TWIN_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS));
+        assertTrue("Timed out waiting for a callback", updateReportedPropertiesOnResponseAcknowledgedLatch.await(TWIN_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS));
 
         IotHubStatusCode statusCode = iotHubStatusCodeAtomicReference.get();
 
@@ -398,8 +425,50 @@ public class TwinTests extends TwinCommon
         // get the twin from the service client to check if the reported property is now present
         testInstance.serviceTwin = testInstance.getServiceClientTwin();
 
-        Set<Pair> reportedPropertiesSet = testInstance.serviceTwin.getReportedProperties();
-        assertTrue(reportedPropertiesSet.size() > 0);
-        assertTrue("Did not find expected reported property key and/or value after the device reported it", isPropertyInSet(reportedPropertiesSet, reportedPropertyKey, reportedPropertyValue));
+        com.microsoft.azure.sdk.iot.service.twin.TwinCollection reportedProperties = testInstance.serviceTwin.getReportedProperties();
+        assertTrue(reportedProperties.size() > 0);
+        assertTrue("Did not find expected reported property key and/or value after the device reported it", isPropertyInTwinCollection(reportedProperties, reportedPropertyKey, reportedPropertyValue));
+    }
+
+    // If the user sends a reported properties update with an out of date reported properties version, the client should
+    // throw a PRECONDITION_FAILED error code
+    @Test
+    public void sendMultipleReportedPropertiesChecksForVersion() throws Exception
+    {
+        // IoT hub appears to ignore the sent version for AMQP. Probably a service bug.
+        assumeFalse(testInstance.protocol == IotHubClientProtocol.AMQPS || testInstance.protocol == IotHubClientProtocol.AMQPS_WS);
+
+        final String reportedPropertyKey1 = UUID.randomUUID().toString();
+        final String reportedPropertyValue1 = UUID.randomUUID().toString();
+
+        final String reportedPropertyKey2 = UUID.randomUUID().toString();
+        final String reportedPropertyValue2 = UUID.randomUUID().toString();
+
+        testInstance.testIdentity.getClient().subscribeToDesiredProperties(
+                (twin, context) ->
+                {
+                    // don't care about desired properties for this test. Just need to open twin links
+                },
+                null);
+
+        // send one reported property
+        Twin twin = testInstance.testIdentity.getClient().getTwin();
+        twin.getReportedProperties().put(reportedPropertyKey1, reportedPropertyValue1);
+        testInstance.testIdentity.getClient().updateReportedProperties(twin.getReportedProperties());
+
+        // send a different reported property
+        twin.getReportedProperties().clear();
+        twin.getReportedProperties().put(reportedPropertyKey2, reportedPropertyValue2);
+        twin.getReportedProperties().setVersion(0); // deliberately set an out of date reported properties twin version
+
+        try
+        {
+            testInstance.testIdentity.getClient().updateReportedProperties(twin.getReportedProperties());
+            fail("Expected a precondition failed error since an out of date reported properties version was set");
+        }
+        catch (IotHubClientException e)
+        {
+            assertEquals(IotHubStatusCode.PRECONDITION_FAILED, e.getStatusCode());
+        }
     }
 }

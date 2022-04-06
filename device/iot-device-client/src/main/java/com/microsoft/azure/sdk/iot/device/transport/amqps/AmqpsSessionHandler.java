@@ -569,5 +569,7 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
             childrenIterator.next();
             childrenIterator.remove();
         }
+
+        this.session.free();
     }
 }

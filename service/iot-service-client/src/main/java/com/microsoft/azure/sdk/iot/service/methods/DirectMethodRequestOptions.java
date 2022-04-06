@@ -10,7 +10,11 @@ import lombok.Getter;
 public final class DirectMethodRequestOptions
 {
     /**
-     * The payload of the direct method request. May be null.
+     * The payload of the direct method request. This parameter can be
+         * Null: the DirectMethodRequestOptions object will not include the "payload" field;
+         * Primitive type (e.g., String, Int)/Array/List/Map/custom type: will be serialized as value of the "payload" field using GSON.
+     * For a full list of end-to-end tests with different payload types, please refer to:
+     * https://github.com/Azure/azure-iot-sdk-java/blob/main/iot-e2e-tests/common/src/test/java/tests/integration/com/microsoft/azure/sdk/iot/iothub/methods/DirectMethodsTests.java
      */
     @Getter
     private final Object payload;

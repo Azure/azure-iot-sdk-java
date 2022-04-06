@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
+import com.microsoft.azure.sdk.iot.device.MessageSentCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
 
@@ -14,7 +14,7 @@ import com.microsoft.azure.sdk.iot.device.Message;
 public final class IotHubTransportPacket
 {
     private final Message message;
-    private final IotHubEventCallback eventCallback;
+    private final MessageSentCallback eventCallback;
     private final Object callbackContext;
     private IotHubStatusCode status;
     private final long startTimeMillis;
@@ -34,7 +34,7 @@ public final class IotHubTransportPacket
      * @throws IllegalArgumentException if startTimeMillis is 0 or negative
      */
     public IotHubTransportPacket(Message message,
-                                 IotHubEventCallback eventCallback,
+                                 MessageSentCallback eventCallback,
                                  Object callbackContext,
                                  IotHubStatusCode status,
                                  long startTimeMillis,
@@ -73,7 +73,7 @@ public final class IotHubTransportPacket
      *
      * @return the eventCallback function. It can be {@code null}.
      */
-    public IotHubEventCallback getCallback()
+    public MessageSentCallback getCallback()
     {
         return this.eventCallback;
     }

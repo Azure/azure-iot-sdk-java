@@ -107,11 +107,6 @@ public class RegistryIdentity
      */
     public void setSymmetricKey(SymmetricKey symmetricKey) throws  IllegalArgumentException
     {
-        if (symmetricKey == null)
-        {
-            throw new IllegalArgumentException("Symmetric key cannot be null");
-        }
-
         if (this.authentication == null)
         {
             this.authentication = new AuthenticationMechanism(symmetricKey);
@@ -161,11 +156,6 @@ public class RegistryIdentity
      */
     public final void setThumbprint(String primaryThumbprint, String secondaryThumbprint)
     {
-        if (primaryThumbprint == null || primaryThumbprint.isEmpty() || secondaryThumbprint == null || secondaryThumbprint.isEmpty())
-        {
-            throw new IllegalArgumentException("Thumbprint may not be null or empty");
-        }
-
         if (this.authentication == null)
         {
             this.authentication = new AuthenticationMechanism(AuthenticationType.SELF_SIGNED);
@@ -275,20 +265,12 @@ public class RegistryIdentity
      */
     RegistryIdentity(RegistryIdentityParser parser) throws IllegalArgumentException
     {
-        if (parser.getAuthenticationParser() == null || parser.getAuthenticationParser().getType() == null)
-        {
-            throw new IllegalArgumentException("deviceParser must have an authentication type assigned");
-        }
-
         if (parser.getDeviceId() == null)
         {
             throw new IllegalArgumentException("deviceParser must have a deviceId assigned");
         }
 
-        AuthenticationType authenticationType = AuthenticationType.valueOf(parser.getAuthenticationParser().getType().toString());
-
         this.deviceId = parser.getDeviceId();
-        this.authentication = new AuthenticationMechanism(authenticationType);
 
         this.cloudToDeviceMessageCount = parser.getCloudToDeviceMessageCount();
         this.deviceId = parser.getDeviceId();
@@ -310,38 +292,21 @@ public class RegistryIdentity
             this.connectionState = DeviceConnectionState.valueOf(parser.getConnectionState());
         }
 
-        this.authentication = new AuthenticationMechanism(authenticationType);
+        if (parser.getAuthenticationParser() != null && parser.getAuthenticationParser().getType() != null)
+        {
+            AuthenticationType authenticationType = AuthenticationType.valueOf(parser.getAuthenticationParser().getType().toString());
+            this.authentication = new AuthenticationMechanism(authenticationType);
 
-        //noinspection StatementWithEmptyBody
-        if (authenticationType == AuthenticationType.CERTIFICATE_AUTHORITY)
-        {
-            //do nothing
-        }
-        else if (authenticationType == AuthenticationType.SELF_SIGNED)
-        {
-            if (parser.getAuthenticationParser().getThumbprint() != null
-                    && parser.getAuthenticationParser().getThumbprint().getPrimaryThumbprint() != null
-                    && parser.getAuthenticationParser().getThumbprint().getSecondaryThumbprint() != null)
+            if (parser.getAuthenticationParser().getThumbprint() != null && (parser.getAuthenticationParser().getThumbprint().getPrimaryThumbprint() != null || parser.getAuthenticationParser().getThumbprint().getSecondaryThumbprint() != null))
             {
-                this.setThumbprint(parser.getAuthenticationParser().getThumbprint().getPrimaryThumbprint(), parser.getAuthenticationParser().getThumbprint().getSecondaryThumbprint());
+                this.setThumbprint(
+                        parser.getAuthenticationParser().getThumbprint().getPrimaryThumbprint(),
+                        parser.getAuthenticationParser().getThumbprint().getSecondaryThumbprint());
             }
-            else
-            {
-                throw new IllegalArgumentException("AuthenticationParser object in the provided RegistryIdentityParser object is missing one or more thumbprint values");
-            }
-        }
-        else if (authenticationType == AuthenticationType.SAS)
-        {
-            if (parser.getAuthenticationParser().getSymmetricKey() != null
-                    && parser.getAuthenticationParser().getSymmetricKey().getPrimaryKey() != null
-                    && parser.getAuthenticationParser().getSymmetricKey().getSecondaryKey() != null)
+            else if (parser.getAuthenticationParser().getSymmetricKey() != null && this.getSymmetricKey() != null)
             {
                 this.getSymmetricKey().setPrimaryKey(parser.getAuthenticationParser().getSymmetricKey().getPrimaryKey());
                 this.getSymmetricKey().setSecondaryKey(parser.getAuthenticationParser().getSymmetricKey().getSecondaryKey());
-            }
-            else
-            {
-                throw new IllegalArgumentException("AuthenticationParser object in the provided RegistryIdentityParser object is missing one or more symmetric keys");
             }
         }
     }

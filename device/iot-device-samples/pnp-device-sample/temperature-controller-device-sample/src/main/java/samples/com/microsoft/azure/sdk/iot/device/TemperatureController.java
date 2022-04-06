@@ -5,6 +5,7 @@ package samples.com.microsoft.azure.sdk.iot.device;
 
 import com.google.gson.Gson;
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.twin.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
@@ -20,6 +21,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -40,7 +42,7 @@ public class TemperatureController {
         }
     }
 
-    private static final ReportedPropertiesCallback sendReportedPropertiesResponseCallback = (statusCode, e, callbackContext) ->
+    private static final ReportedPropertiesCallback sendReportedPropertiesResponseCallback = (statusCode, version, e, callbackContext) ->
     {
         if (statusCode == OK)
         {
@@ -116,7 +118,8 @@ public class TemperatureController {
         }
     }
 
-    public static void main(String[] args) throws IOException, URISyntaxException, ProvisioningDeviceClientException, InterruptedException {
+    public static void main(String[] args) throws IOException, URISyntaxException, ProvisioningDeviceClientException, InterruptedException, IotHubClientException, TimeoutException
+    {
 
         // This sample follows the following workflow:
         // -> Initialize device client instance.
@@ -167,17 +170,26 @@ public class TemperatureController {
 
         log.debug("Set handler for \"reboot\" command.");
         log.debug("Set handler for \"getMaxMinReport\" command.");
-        deviceClient.subscribeToMethodsAsync(new MethodCallback(), null, new MethodIotHubEventCallback(), null);
+        deviceClient.subscribeToMethods(new MethodCallback(), null);
 
         log.debug("Set handler to receive \"targetTemperature\" updates.");
         deviceClient.subscribeToDesiredPropertiesAsync(
-            (statusCode, context) ->
+            (twin, context) ->
             {
-                if (statusCode == OK)
+                TwinCollection desiredProperties = twin.getDesiredProperties();
+                for (String desiredPropertyKey : desiredProperties.keySet())
+                {
+                    TargetTemperatureUpdateCallback.onPropertyChanged(new Property(desiredPropertyKey, desiredProperties.get(desiredPropertyKey)), null);
+                }
+            },
+            null,
+            (exception, context) ->
+            {
+                if (exception == null)
                 {
                     log.info("Successfully subscribed to desired properties. Getting initial state");
                     deviceClient.getTwinAsync(
-                        (twin, getTwinContext) ->
+                        (twin, getTwinException, getTwinContext) ->
                         {
                             log.info("Initial twin state received");
                             log.info(twin.toString());
@@ -186,17 +198,8 @@ public class TemperatureController {
                 }
                 else
                 {
-                    log.info("Failed to subscribe to desired properties. Error code {}", statusCode);
+                    log.info("Failed to subscribe to desired properties. Error code {}", exception.getStatusCode());
                     System.exit(-1);
-                }
-            },
-            null,
-            (twin, context) ->
-            {
-                TwinCollection desiredProperties = twin.getDesiredProperties();
-                for (String desiredPropertyKey : desiredProperties.keySet())
-                {
-                    TargetTemperatureUpdateCallback.onPropertyChanged(new Property(desiredPropertyKey, desiredProperties.get(desiredPropertyKey)), null);
                 }
             },
             null);
@@ -243,7 +246,8 @@ public class TemperatureController {
                 && (deviceSymmetricKey == null || deviceSymmetricKey.isEmpty()));
     }
 
-    private static void initializeAndProvisionDevice() throws ProvisioningDeviceClientException, IOException, URISyntaxException, InterruptedException {
+    private static void initializeAndProvisionDevice() throws ProvisioningDeviceClientException, IOException, URISyntaxException, InterruptedException, IotHubClientException
+    {
         SecurityProviderSymmetricKey securityClientSymmetricKey = new SecurityProviderSymmetricKey(deviceSymmetricKey.getBytes(StandardCharsets.UTF_8), registrationId);
         ProvisioningDeviceClient provisioningDeviceClient;
         ProvisioningStatus provisioningStatus = new ProvisioningStatus();
@@ -288,13 +292,15 @@ public class TemperatureController {
      * Initialize the device client instance over Mqtt protocol, setting the ModelId into ClientOptions.
      * This method also sets a connection status change callback, that will get triggered any time the device's connection status changes.
      */
-    private static void initializeDeviceClient() throws URISyntaxException, IOException {
+    private static void initializeDeviceClient() throws URISyntaxException, IOException, IotHubClientException
+    {
         ClientOptions options = ClientOptions.builder().modelId(MODEL_ID).build();
         deviceClient = new DeviceClient(deviceConnectionString, protocol, options);
 
-        deviceClient.setConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> {
-            log.debug("Connection status change registered: status={}, reason={}", status, statusChangeReason);
+        deviceClient.setConnectionStatusChangeCallback((context) -> {
+            log.debug("Connection status change registered: status={}, reason={}", context.getNewStatus(), context.getNewStatusReason());
 
+            Throwable throwable = context.getCause();
             if (throwable != null) {
                 log.debug("The connection status change was caused by the following Throwable: {}", throwable.getMessage());
                 throwable.printStackTrace();
@@ -315,8 +321,8 @@ public class TemperatureController {
 
         @SneakyThrows(InterruptedException.class)
         @Override
-        public DirectMethodResponse onMethodInvoked(String methodName, Object methodData, Object context) {
-            String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
+        public DirectMethodResponse onMethodInvoked(String methodName, DirectMethodPayload methodData, Object context) {
+            String jsonRequest = methodData.getPayload(String.class);
 
             switch (methodName) {
                 case reboot:
@@ -463,7 +469,7 @@ public class TemperatureController {
         double workingSet = 1024;
 
         Message message = PnpConvention.createIotHubMessageUtf8(telemetryName, workingSet);
-        deviceClient.sendEventAsync(message, new MessageIotHubEventCallback(), message);
+        deviceClient.sendEventAsync(message, new MessageSentCallback(), message);
         log.debug("Telemetry: Sent - {\"{}\": {}KiB }", telemetryName, workingSet);
     }
 
@@ -490,7 +496,7 @@ public class TemperatureController {
         double currentTemperature = temperature.get(componentName);
 
         Message message = PnpConvention.createIotHubMessageUtf8(telemetryName, currentTemperature, componentName);
-        deviceClient.sendEventAsync(message, new MessageIotHubEventCallback(), message);
+        deviceClient.sendEventAsync(message, new MessageSentCallback(), message);
         log.debug("Telemetry: Sent - {\"{}\": {}°C} with message Id {}.", telemetryName, currentTemperature, message.getMessageId());
 
         // Add the current temperature entry to the list of temperature readings.
@@ -514,26 +520,13 @@ public class TemperatureController {
     }
 
     /**
-     * The callback to be invoked in response to command invocation from IoT Hub.
-     */
-    private static class MethodIotHubEventCallback implements IotHubEventCallback {
-
-        @Override
-        public void execute(IotHubStatusCode responseStatus, Object callbackContext) {
-            String commandName = (String) callbackContext;
-            log.debug("Command - Response from IoT Hub: command name={}, status={}", commandName, responseStatus.name());
-        }
-    }
-
-    /**
      * The callback to be invoked when a telemetry response is received from IoT Hub.
      */
-    private static class MessageIotHubEventCallback implements IotHubEventCallback {
-
+    private static class MessageSentCallback implements com.microsoft.azure.sdk.iot.device.MessageSentCallback {
         @Override
-        public void execute(IotHubStatusCode responseStatus, Object callbackContext) {
+        public void onMessageSent(Message sentMessage, IotHubClientException exception, Object callbackContext) {
             Message msg = (Message) callbackContext;
-            log.debug("Telemetry - Response from IoT Hub: message Id={}, status={}", msg.getMessageId(), responseStatus.name());
+            log.debug("Telemetry - Response from IoT Hub: message Id={}, status={}", msg.getMessageId(), exception == null ? OK : exception.getStatusCode());
         }
     }
 

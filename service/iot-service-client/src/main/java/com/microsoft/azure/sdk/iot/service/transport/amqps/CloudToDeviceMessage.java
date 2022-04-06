@@ -92,10 +92,7 @@ class CloudToDeviceMessage
         if (message.getProperties() != null && message.getProperties().size() > 0)
         {
             Map<String, Object> applicationPropertiesMap = new HashMap<>(message.getProperties().size());
-            for (Map.Entry<String, String> entry : message.getProperties().entrySet())
-            {
-                applicationPropertiesMap.put(entry.getKey(), entry.getValue());
-            }
+            applicationPropertiesMap.putAll(message.getProperties());
 
             ApplicationProperties applicationProperties = new ApplicationProperties(applicationPropertiesMap);
             protonMessage.setApplicationProperties(applicationProperties);

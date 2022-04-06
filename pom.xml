@@ -79,22 +79,22 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>2.12.2</version>
+                <version>2.13.2.1</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-joda</artifactId>
-                <version>2.12.2</version>
+                <version>2.13.2</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
-                <version>2.12.2</version>
+                <version>2.13.2</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
-                <version>2.12.2</version>
+                <version>2.13.2</version>
             </dependency>
             <dependency>
                 <groupId>commons-codec</groupId>
@@ -185,8 +185,8 @@
         <dice-provider-artifact-id>dice-provider</dice-provider-artifact-id>
         <x509-provider-artifact-id>x509-provider</x509-provider-artifact-id>
 
-        <iot-device-client-version>2.0.0</iot-device-client-version>
-        <iot-service-client-version>2.0.0</iot-service-client-version>
+        <iot-device-client-version>2.0.1</iot-device-client-version>
+        <iot-service-client-version>2.0.1</iot-service-client-version>
         <provisioning-device-client-version>2.0.0</provisioning-device-client-version>
         <provisioning-service-client-version>2.0.0</provisioning-service-client-version>
         <security-provider-version>2.0.0</security-provider-version>

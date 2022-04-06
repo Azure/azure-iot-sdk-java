@@ -16,8 +16,6 @@ import com.microsoft.azure.sdk.iot.service.messaging.MessageFeedbackProcessorCli
 import com.microsoft.azure.sdk.iot.service.messaging.MessageFeedbackProcessorClientOptions;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Scanner;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;

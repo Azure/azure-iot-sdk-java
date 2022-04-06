@@ -1,7 +1,7 @@
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
@@ -136,6 +136,7 @@ class AmqpsSasTokenRenewalHandler extends BaseHandler implements AuthenticationM
     {
         if (this.scheduledTask != null)
         {
+            this.scheduledTask.cancel();
             this.scheduledTask.attachments().clear();
         }
 

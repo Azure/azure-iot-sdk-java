@@ -3,22 +3,11 @@
 
 package com.microsoft.azure.sdk.iot.service.methods.serializers;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import static com.microsoft.azure.sdk.iot.service.ParserUtility.getJsonObjectValue;
 import static com.microsoft.azure.sdk.iot.service.ParserUtility.resolveJsonElement;
@@ -267,10 +256,6 @@ public class MethodParser
      */
     public Object getPayload()
     {
-        if (payload instanceof JsonElement && ((JsonElement) payload).isJsonPrimitive() && ((JsonPrimitive) payload).isString())
-        {
-            return ((JsonPrimitive) payload).getAsString();
-        }
         return payload;
     }
 
@@ -289,45 +274,7 @@ public class MethodParser
     @SuppressWarnings("unchecked")
     private JsonElement jsonizePayload(Object payload)
     {
-        if (payload == null)
-        {
-            return JsonNull.INSTANCE;
-        }
-        else if (payload instanceof JsonElement)
-        {
-            return (JsonElement) payload;
-        }
-        else if (payload instanceof Map)
-        {
-            JsonObject jsonObject = new JsonObject();
-            Set<Entry<String, Object>> entrySet = ((Map<String, Object>) payload).entrySet();
-            for (Entry<String, Object> entry : entrySet)
-            {
-                jsonObject.add(entry.getKey(), jsonizePayload(entry.getValue()));
-            }
-            return jsonObject;
-        }
-        else
-        {
-            JsonParser parser = new JsonParser();
-            try
-            {
-                String json = payload.toString();
-                JsonElement jsonElement = parser.parse(json);
-                if (jsonElement.isJsonNull())
-                {
-                    return new JsonPrimitive(json);
-                }
-                else
-                {
-                    return jsonElement;
-                }
-            }
-            catch (JsonSyntaxException e)
-            {
-                return new Gson().toJsonTree(payload);
-            }
-        }
+        return new GsonBuilder().create().toJsonTree(payload);
     }
 
     /**

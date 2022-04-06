@@ -5,7 +5,7 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
-import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
+import com.microsoft.azure.sdk.iot.device.transport.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
@@ -335,5 +335,7 @@ abstract class AmqpsSenderLinkHandler extends BaseHandler
             childrenIterator.next();
             childrenIterator.remove();
         }
+
+        this.senderLink.free();
     }
 }
