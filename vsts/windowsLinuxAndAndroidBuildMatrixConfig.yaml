@@ -103,10 +103,11 @@ jobs:
         condition: always()
         
       - task: ComponentGovernanceComponentDetection@0
+        displayName: Component Governance Detection
         inputs:
           scanType: 'Register'
           verbosity: 'Verbose'
-          alertWarningLevel: 'Medium'
+          alertWarningLevel: 'Low' # The task will present a warning, but will not cause the build to fail
         condition: always()
 
   ### Linux ###
@@ -188,10 +189,11 @@ jobs:
         condition: always()
 
       - task: ComponentGovernanceComponentDetection@0
+        displayName: Component Governance Detection
         inputs:
           scanType: 'Register'
           verbosity: 'Verbose'
-          alertWarningLevel: 'Medium'
+          alertWarningLevel: 'Low' # The task will present a warning, but will not cause the build to fail
         condition: always()
 
   ### Android, Multi configuration build (Multiple different test groups to cover) ###
