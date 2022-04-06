@@ -130,18 +130,10 @@ public class TwinProperties
         if (desired != null)
         {
             this.desired = TwinCollection.createFromRawCollection(desired);
-            if (desired.getVersion() != null)
-            {
-                this.desired.setVersion(desired.getVersion());
-            }
         }
         if (reported != null)
         {
             this.reported = TwinCollection.createFromRawCollection(reported);
-            if (reported.getVersion() != null)
-            {
-                this.reported.setVersion(reported.getVersion());
-            }
         }
     }
 

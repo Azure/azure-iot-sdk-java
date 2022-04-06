@@ -39,10 +39,10 @@ import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.UUID;
 
-import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.HTTPS;
+import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
-import static junit.framework.TestCase.assertTrue;
-import static junit.framework.TestCase.fail;
+import static junit.framework.TestCase.*;
+import static org.junit.Assume.assumeFalse;
 
 /**
  * Test class containing all non error injection tests to be run on JVM and android pertaining to sending messages from a device/module.
@@ -147,7 +147,7 @@ public class SendMessagesTests extends SendMessagesCommon
     public void sendManySmallMessagesAsBatch() throws Exception
     {
         // Only send batch messages in large quantities when using HTTPS protocol.
-        Assume.assumeFalse(this.testInstance.protocol != HTTPS);
+        assumeFalse(this.testInstance.protocol != HTTPS);
 
         this.testInstance.setup();
 
@@ -183,7 +183,7 @@ public class SendMessagesTests extends SendMessagesCommon
     public void expiredMessagesAreNotSent() throws Exception
     {
         // Not worth testing for both w/ and w/o proxy
-        Assume.assumeFalse(testInstance.useHttpProxy);
+        assumeFalse(testInstance.useHttpProxy);
 
         this.testInstance.setup();
 
@@ -194,7 +194,7 @@ public class SendMessagesTests extends SendMessagesCommon
     public void sendMessagesWithCustomSSLContextAndSasAuth() throws Exception
     {
         //only testing sas based auth with custom ssl context here
-        Assume.assumeFalse(testInstance.authenticationType != SAS);
+        assumeFalse(testInstance.authenticationType != SAS);
 
         this.testInstance.setup(SSLContextBuilder.buildSSLContext());
 
@@ -206,10 +206,10 @@ public class SendMessagesTests extends SendMessagesCommon
     public void sendMessagesWithECCCertificate() throws GeneralSecurityException, IOException, IotHubException, URISyntaxException, InterruptedException, IotHubClientException
     {
         // test is only applicable for self-signed device clients
-        Assume.assumeFalse(testInstance.authenticationType != AuthenticationType.SELF_SIGNED || testInstance.clientType != ClientType.DEVICE_CLIENT);
+        assumeFalse(testInstance.authenticationType != AuthenticationType.SELF_SIGNED || testInstance.clientType != ClientType.DEVICE_CLIENT);
 
         // ECC cert generation is broken for Android. "ECDSA KeyPairGenerator is not available"
-        Assume.assumeFalse(Tools.isAndroid());
+        assumeFalse(Tools.isAndroid());
 
         X509CertificateGenerator eccCertGenerator =
             new X509CertificateGenerator(X509CertificateGenerator.CertificateAlgorithm.ECC);
@@ -225,5 +225,28 @@ public class SendMessagesTests extends SendMessagesCommon
 
         deviceClient.open(false);
         deviceClient.close();
+    }
+
+    @Test
+    @ContinuousIntegrationTest
+    public void sendTooLargeMessage() throws Exception
+    {
+        // The service responds to a excessively large message by killing the TCP connection when connecting over MQTT
+        // and doesn't have a mechanism for providing an error code, so this scenario can't be tested over MQTT
+        assumeFalse(testInstance.protocol == MQTT || testInstance.protocol == MQTT_WS);
+
+        this.testInstance.setup();
+
+        this.testInstance.identity.getClient().open(true);
+
+        try
+        {
+            this.testInstance.identity.getClient().sendEvent(new Message(new byte[MAX_MESSAGE_PAYLOAD_SIZE + 10000]));
+            fail("Expected client to throw an exception for sending a message that was too large");
+        }
+        catch (IotHubClientException e)
+        {
+            assertEquals(IotHubStatusCode.REQUEST_ENTITY_TOO_LARGE, e.getStatusCode());
+        }
     }
 }
