@@ -3,8 +3,8 @@
 
 package samples.com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.deps.convention.ClientPropertyCollection;
-import com.microsoft.azure.sdk.iot.deps.convention.WritablePropertyResponse;
+import com.microsoft.azure.sdk.iot.device.convention.ClientPropertyCollection;
+import com.microsoft.azure.sdk.iot.device.convention.WritablePropertyResponse;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.convention.*;
@@ -157,7 +157,7 @@ public class TemperatureController {
 
         log.debug("Set handler to receive \"targetTemperature\" updates.");
         deviceClient.startDeviceTwin(new TwinIotHubEventCallback(), null, new GenericPropertyUpdateCallback(), null);
-        deviceClient.subscribeToWritablePropertiesEvent(new TargetTemperatureUpdateCallback(), null);
+        deviceClient.subscribeToWritablePropertiesAsync(new TargetTemperatureUpdateCallback(), null);
 
         updateDeviceInformation();
         sendDeviceMemory();
@@ -384,7 +384,7 @@ public class TemperatureController {
         final List<String> thermostatList = new ArrayList<String>() {{ add("thermostat1"); add("thermostat2"); }};
 
         @SneakyThrows({InterruptedException.class})
-        public void onWritablePropertyCallbackReceived(ClientPropertyCollection propertyCollection, Object context)
+        public void onWritablePropertiesUpdated(ClientPropertyCollection propertyCollection, Object context)
         {
             for (String componentName : thermostatList)
             {

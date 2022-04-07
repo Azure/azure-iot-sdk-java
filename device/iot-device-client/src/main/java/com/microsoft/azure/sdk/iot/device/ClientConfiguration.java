@@ -3,13 +3,11 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.deps.convention.DefaultPayloadConvention;
-import com.microsoft.azure.sdk.iot.deps.convention.PayloadConvention;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
+import com.microsoft.azure.sdk.iot.device.convention.DefaultPayloadConvention;
+import com.microsoft.azure.sdk.iot.device.convention.PayloadConvention;
 import com.microsoft.azure.sdk.iot.device.auth.*;
 import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
 import com.microsoft.azure.sdk.iot.device.twin.Pair;
-import com.microsoft.azure.sdk.iot.device.auth.*;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
@@ -19,7 +17,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;

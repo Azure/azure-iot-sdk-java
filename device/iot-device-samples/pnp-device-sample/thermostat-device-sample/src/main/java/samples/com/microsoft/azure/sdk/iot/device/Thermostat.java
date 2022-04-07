@@ -3,7 +3,6 @@
 
 package samples.com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.deps.convention.*;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.convention.*;
@@ -91,7 +90,7 @@ public class Thermostat
         }
     }
 
-    static class ClientPropertiesCallback implements com.microsoft.azure.sdk.iot.device.convention.ClientPropertiesCallback
+    static class GetClientPropertiesCallback implements com.microsoft.azure.sdk.iot.device.convention.GetClientPropertiesCallback
     {
         @Override
         public void execute(ClientProperties responseStatus, Object callbackContext)
@@ -167,9 +166,9 @@ public class Thermostat
 
             deviceClient.startDeviceTwin(new TwinIotHubEventCallback(), null, dataCollector, null);
 
-            deviceClient.subscribeToWritablePropertiesEvent(new TargetTemperatureUpdateCallback(), null);
+            deviceClient.subscribeToWritablePropertiesAsync(new TargetTemperatureUpdateCallback(), null);
 
-            deviceClient.getClientPropertiesAsync(new ClientPropertiesCallback(), null);
+            deviceClient.getClientPropertiesAsync(new GetClientPropertiesCallback(), null);
 
             log.debug("Set handler to receive \"getMaxMinReport\" command.");
             String methodName = "getMaxMinReport";
@@ -291,7 +290,7 @@ public class Thermostat
             final String propertyName = "targetTemperature";
 
             @SneakyThrows({InterruptedException.class})
-            public void onWritablePropertyCallbackReceived(ClientPropertyCollection propertyCollection, Object context)
+            public void onWritablePropertiesUpdated(ClientPropertyCollection propertyCollection, Object context)
             {
 
                 // Each of these properties will be a WritablePropertyResponse we can simply copy the value over and ack each one

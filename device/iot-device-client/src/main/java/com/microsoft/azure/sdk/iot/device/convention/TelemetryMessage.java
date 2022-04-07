@@ -3,8 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.device.convention;
 
-import com.microsoft.azure.sdk.iot.deps.convention.PayloadCollection;
-import com.microsoft.azure.sdk.iot.deps.convention.PayloadConvention;
 import com.microsoft.azure.sdk.iot.device.Message;
 import lombok.Getter;
 import lombok.Setter;

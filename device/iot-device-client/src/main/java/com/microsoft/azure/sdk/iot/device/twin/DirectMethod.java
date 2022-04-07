@@ -13,18 +13,18 @@ import lombok.extern.slf4j.Slf4j;
 import java.nio.charset.StandardCharsets;
 
 @Slf4j
-public final class DirectMethod
+public class DirectMethod
 {
     private MethodCallback methodCallback;
     private Object deviceMethodCallbackContext;
-    private final MessageSentCallback deviceMethodStatusCallback;
-    private final Object deviceMethodStatusCallbackContext;
-    private final Object DEVICE_METHOD_LOCK = new Object();
+    protected MessageSentCallback deviceMethodStatusCallback;
+    protected Object deviceMethodStatusCallbackContext;
+    protected final Object DEVICE_METHOD_LOCK = new Object();
 
     protected boolean isSubscribed = false;
 
-    private final InternalClient client;
-    private final ClientConfiguration config;
+    protected final InternalClient client;
+    protected final ClientConfiguration config;
 
     private final class DirectMethodResponseCallback implements MessageCallback
     {
@@ -155,14 +155,9 @@ public final class DirectMethod
 
         this.client = client;
         this.config = client.getConfig();
-        this.deviceMethodStatusCallback = new MessageSentCallback()
-        {
-            @Override
-            public void onMessageSent(Message sentMessage, IotHubClientException clientException, Object callbackContext)
-            {
-                deviceMethodStatusCallback.onSubscriptionAcknowledged(clientException, callbackContext);
-            }
-        };
+        this.deviceMethodStatusCallback = (sentMessage, clientException, callbackContext)
+                -> deviceMethodStatusCallback.onSubscriptionAcknowledged(clientException, callbackContext);
+
         this.deviceMethodStatusCallbackContext = deviceMethodStatusCallbackContext;
         this.config.setDirectMethodsMessageCallback(new DirectMethodResponseCallback(), null);
     }

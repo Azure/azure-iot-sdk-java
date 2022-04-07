@@ -1,11 +1,6 @@
 package com.microsoft.azure.sdk.iot.device.convention;
 
-import com.microsoft.azure.sdk.iot.deps.convention.ConventionConstants;
-import com.microsoft.azure.sdk.iot.deps.convention.DefaultPayloadConvention;
-import com.microsoft.azure.sdk.iot.deps.convention.GsonWritablePropertyResponse;
-import com.microsoft.azure.sdk.iot.deps.convention.WritablePropertyResponse;
 import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.deps.convention.ClientPropertyCollection;
 import lombok.Builder;
 import lombok.Data;
 import org.junit.Test;

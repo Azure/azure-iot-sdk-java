@@ -3,17 +3,19 @@
 
 package com.microsoft.azure.sdk.iot.device.convention;
 
-import com.microsoft.azure.sdk.iot.deps.convention.ClientPropertyCollection;
+import com.microsoft.azure.sdk.iot.device.twin.SubscriptionAcknowledgedCallback;
 
 /**
- * A callback used to respond to all writable property requests. See {@link com.microsoft.azure.sdk.iot.device.InternalClient#subscribeToWritablePropertiesEvent(WritablePropertiesRequestsCallback, Object)} for more information.
+ * A callback used to respond to all writable property requests. See
+ * {@link com.microsoft.azure.sdk.iot.device.InternalClient#subscribeToWritablePropertiesAsync(WritablePropertiesRequestsCallback, Object, SubscriptionAcknowledgedCallback, Object)}
+ * for more information.
  */
 public interface WritablePropertiesRequestsCallback
 {
     /**
      * The method to execute.
-     * @param writablePropertiesRequestsCollection A collection of properties to be updated.
+     * @param clientProperties A collection of properties that were updated.
      * @param context User supplied context.
      */
-    void onWritablePropertyCallbackReceived(ClientPropertyCollection writablePropertiesRequestsCollection, Object context);
+    void onWritablePropertiesUpdated(ClientProperties clientProperties, Object context);
 }

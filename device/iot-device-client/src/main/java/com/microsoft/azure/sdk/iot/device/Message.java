@@ -108,6 +108,8 @@ public class Message
     @Setter
     private IotHubConnectionString iotHubConnectionString;
 
+    @Getter
+    @Setter
     private CorrelatingMessageCallback correlatingMessageCallback;
 
     /**

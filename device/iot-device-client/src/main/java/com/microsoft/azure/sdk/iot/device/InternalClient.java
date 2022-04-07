@@ -5,15 +5,13 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.deps.convention.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.convention.*;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.device.twin.*;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceTwin;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -49,64 +47,18 @@ public class InternalClient
     private Object connectionStatusChangeCallbackContext;
 
     private DeviceTwin twin;
-    private DeviceMethod method;
+    private DirectMethod method;
     private DeviceCommand command;
 
     @Getter
     @Setter(AccessLevel.PRIVATE)
     private PayloadConvention payloadConvention = DefaultPayloadConvention.getInstance();
 
-    InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis, ClientOptions clientOptions)
-    {
-        /* Codes_SRS_INTERNALCLIENT_21_004: [If the connection string is null or empty, the function shall throw an IllegalArgumentException.] */
-        commonConstructorVerification(iotHubConnectionString, protocol);
-
-        this.config = new DeviceClientConfig(iotHubConnectionString, clientOptions);
-        this.config.setProtocol(protocol);
-        if (clientOptions != null) {
-            this.config.modelId = clientOptions.getModelId();
-        }
-        this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
-        setPayloadConvetionInternal();
-    }
-
-    InternalClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis) throws IOException, TransportException
-    {
-        this.config = new DeviceClientConfig(iotHubAuthenticationProvider);
-        this.config.setProtocol(protocol);
-        this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
-        setPayloadConvetionInternal();
-    }
-
-    InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, String publicKeyCertificate, boolean isCertificatePath, String privateKey, boolean isPrivateKeyPath, long sendPeriodMillis, long receivePeriodMillis) throws URISyntaxException
-    {
-        // Codes_SRS_INTERNALCLIENT_34_078: [If the connection string or protocol is null, this function shall throw an IllegalArgumentException.]
-        commonConstructorVerification(iotHubConnectionString, protocol);
-
-        // Codes_SRS_INTERNALCLIENT_34_079: [This function shall save a new config using the provided connection string, and x509 certificate information.]
-        this.config = new DeviceClientConfig(iotHubConnectionString, publicKeyCertificate, isCertificatePath, privateKey, isPrivateKeyPath);
-        this.config.setProtocol(protocol);
-
-        // Codes_SRS_INTERNALCLIENT_34_080: [This function shall save a new DeviceIO instance using the created config and the provided send/receive periods.]
-        this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
-        setPayloadConvetionInternal();
-    }
-
-    private void setPayloadConvetionInternal()
-    {
-        if (config.getPayloadConvention() != null)
-        {
-            setPayloadConvention(config.getPayloadConvention());
-        }
-    }
-
-    InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, SSLContext sslContext, long sendPeriodMillis, long receivePeriod)
+    InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, ClientOptions clientOptions)
     {
         commonConstructorVerification(iotHubConnectionString, protocol);
-
-        this.config = new ClientConfiguration(iotHubConnectionString, sslContext, protocol);
-        this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriod);
-        setPayloadConvetionInternal();
+        this.config = new ClientConfiguration(iotHubConnectionString, protocol, clientOptions);
+        this.deviceIO = new DeviceIO(this.config);
         setClientOptionValues(clientOptions);
     }
 
@@ -146,7 +98,7 @@ public class InternalClient
         }
 
         //Codes_SRS_INTERNALCLIENT_34_067: [The constructor shall initialize the IoT hub transport for the protocol specified, creating a instance of the deviceIO.]
-        this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
+        this.deviceIO = new DeviceIO(this.config);
 
         setPayloadConvetionInternal();
         this.config = new ClientConfiguration(connectionString, securityProvider, protocol, clientOptions);
@@ -173,7 +125,7 @@ public class InternalClient
 
     private void setClientOptionValues(ClientOptions clientOptions)
     {
-        this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
+        this.deviceIO = new DeviceIO(this.config);
 
         setPayloadConvetionInternal();
 
@@ -1142,11 +1094,82 @@ public class InternalClient
      * @param callback The callback to be used for receiving client properties.
      * @param callbackContext An optional user context to be sent to the callback.
      */
-    public void getClientPropertiesAsync(ClientPropertiesCallback callback, Object callbackContext)
+    public void getClientPropertiesAsync(GetClientPropertiesCallback callback, Object callbackContext)
+    {
+        GetClientPropertiesCorrelatingMessageCallback getClientPropertiesCorrelatingMessageCallback = new GetClientPropertiesCorrelatingMessageCallback()
+        {
+            @Override
+            public void onRequestQueued(Message message, Object callbackContext)
+            {
+                // do nothing, user opted not to care about this event by using this API
+            }
+
+            @Override
+            public void onRequestSent(Message message, Object callbackContext)
+            {
+                // do nothing, user opted not to care about this event by using this API
+            }
+
+            @Override
+            public void onRequestAcknowledged(Message message, Object callbackContext, IotHubClientException e)
+            {
+                // do nothing, user opted not to care about this event by using this API
+            }
+
+            @Override
+            public void onResponseReceived(ClientProperties clientProperties, Message message, Object callbackContext, IotHubStatusCode statusCode, IotHubClientException e)
+            {
+                callback.onClientPropertiesReceived(clientProperties, e, callbackContext);
+            }
+
+            @Override
+            public void onResponseAcknowledged(Message message, Object callbackContext)
+            {
+                // do nothing, user opted not to care about this event by using this API
+            }
+        };
+
+        this.getClientPropertiesAsync(getClientPropertiesCorrelatingMessageCallback, callbackContext);
+    }
+
+    /**
+     * Retreieve the client properties.
+     * @param callback The callback to be used for receiving client properties.
+     * @param callbackContext An optional user context to be sent to the callback.
+     */
+    public void getClientPropertiesAsync(GetClientPropertiesCorrelatingMessageCallback callback, Object callbackContext)
     {
         // In Java we don't return an object for the DeviceTwin, but instead we pass a Map<String, Object> in the form of a Device
         // this map gets populated with a number of callbacks.
         twin.getClientProperties(callback, callbackContext);
+    }
+
+    /**
+     * Set the global writable properties callback handler.
+     *
+     * TODO ADD SYNC ON SUBSCRIPTION
+     * @param writablePropertyUpdateCallback The callback to be used for writable properties.
+     * @param callbackContext An optional user context to be sent to the callback.
+     */
+    public void subscribeToWritablePropertiesAsync(
+            WritablePropertiesRequestsCallback writablePropertyUpdateCallback,
+            Object writablePropertyUpdateCallbackContext,
+            SubscriptionAcknowledgedCallback subscriptionAcknowledgedCallback,
+            Object subscriptionAcknowledgedCallbackContext)
+    {
+        DesiredPropertiesCallback desiredPropertiesCallback = new DesiredPropertiesCallback()
+        {
+            @Override
+            public void onDesiredPropertiesUpdated(Twin twin, Object context)
+            {
+                //TODO this is equivalent to returning a twin object with no reported properties. Is that right? This is also not setting the payload convention at all which is a problem, right?
+                ClientPropertyCollection clientPropertyCollection = ClientPropertyCollection.fromMap(twin.getDesiredProperties());
+                ClientProperties clientProperties = new ClientProperties(clientPropertyCollection, null);
+                writablePropertyUpdateCallback.onWritablePropertiesUpdated(clientProperties, context);
+            }
+        };
+
+        twin.subscribeToDesiredPropertiesAsync(subscriptionAcknowledgedCallback, subscriptionAcknowledgedCallbackContext, desiredPropertiesCallback, writablePropertyUpdateCallbackContext);
     }
 
     /**
@@ -1158,34 +1181,53 @@ public class InternalClient
      * TODO ADD THE CLIENT PROPERTIES RESPONSE
      * @throws IOException Thrown from the underlying DeviceIO
      */
-    public void updateClientPropertiesAsync(ClientPropertyCollection clientProperties, IotHubEventCallback callback, Object callbackContext) throws IOException
+    public void updateClientPropertiesAsync(ClientPropertyCollection clientProperties, WritablePropertiesCallback callback, Object callbackContext) throws IOException
+    {
+        ClientPropertiesUpdateCorrelatingMessageCallback correlatingMessageCallback = new ClientPropertiesUpdateCorrelatingMessageCallback()
+        {
+
+            @Override
+            public void onRequestQueued(Message message, Object callbackContext)
+            {
+                // do nothing, user opted not to care about this event by using this API
+            }
+
+            @Override
+            public void onRequestSent(Message message, Object callbackContext)
+            {
+                // do nothing, user opted not to care about this event by using this API
+            }
+
+            @Override
+            public void onRequestAcknowledged(Message message, Object callbackContext, IotHubClientException e)
+            {
+                // do nothing, user opted not to care about this event by using this API
+            }
+
+            @Override
+            public void onResponseReceived(Message message, Object callbackContext, IotHubStatusCode statusCode, WritablePropertiesUpdateResponse response, IotHubClientException e)
+            {
+                callback.onWritablePropertiesUpdateAcknowledged(statusCode, response, e, callbackContext);
+            }
+
+            @Override
+            public void onResponseAcknowledged(Message message, Object callbackContext)
+            {
+                // do nothing, user opted not to care about this event by using this API
+            }
+        };
+
+        this.updateClientPropertiesAsync(clientProperties, correlatingMessageCallback, callbackContext);
+    }
+
+    public void updateClientPropertiesAsync(ClientPropertyCollection clientProperties, ClientPropertiesUpdateCorrelatingMessageCallback callback, Object callbackContext) throws IOException
     {
         if (clientProperties == null)
         {
             throw new IllegalArgumentException("clientProperties property cannot be null");
         }
 
-        clientProperties.setConvention(getPayloadConvention());
-
-        verifyRegisteredIfMultiplexing();
-        verifyTwinOperationsAreSupported();
-
-        verifyReportedProperties(ClientProperties.getCollectionAsSetOfProperty(clientProperties));
-
-        this.twin.updateClientProperties(clientProperties, null, null,null, callback, callbackContext);
-    }
-
-    /**
-     * Set the global writable properties callback handler.
-     *
-     * TODO ADD SYNC ON SUBSCRIPTION
-     * @param writablePropertyUpdateCallback The callback to be used for writable properties.
-     * @param callbackContext An optional user context to be sent to the callback.
-     * @throws IOException if called when client is not opened or called before starting twin.
-     */
-    public void subscribeToWritablePropertiesEvent(WritablePropertiesRequestsCallback writablePropertyUpdateCallback, Object callbackContext) throws IOException
-    {
-        twin.subscribeToWritablePropertyRequests(writablePropertyUpdateCallback, callbackContext);
+        this.twin.updateClientProperties(clientProperties, callback, callbackContext);
     }
 
     /**
@@ -1194,7 +1236,7 @@ public class InternalClient
      * @param callback the callback to be invoked when a response is received. Can be {@code null}.
      * @param callbackContext a context to be passed to the callback. Can be {@code null} if no callback is provided.
      */
-    public void sendTelemetryAsync(TelemetryMessage telemetryMessage, IotHubEventCallback callback, Object callbackContext)
+    public void sendTelemetryAsync(TelemetryMessage telemetryMessage, MessageSentCallback callback, Object callbackContext)
     {
         if (telemetryMessage == null)
         {
@@ -1205,7 +1247,7 @@ public class InternalClient
         {
             telemetryMessage.getTelemetry().setConvention(getPayloadConvention());
             telemetryMessage.setContentEncoding(getPayloadConvention().getPayloadEncoder().getContentEncoding().name());
-            telemetryMessage.setContentTypeFinal(getPayloadConvention().getPayloadSerializer().getContentType());
+            telemetryMessage.setContentType(getPayloadConvention().getPayloadSerializer().getContentType());
         }
 
         sendEventAsync(telemetryMessage, callback, callbackContext);
@@ -1222,7 +1264,7 @@ public class InternalClient
      * @throws IOException if called when client is not opened.
      */
     void subscribeToCommandsInternal(@NonNull DeviceCommandCallback deviceCommandCallback, Object deviceCommandCallbackContext,
-                                     @NonNull IotHubEventCallback deviceCommandStatusCallback, Object deviceCommandStatusCallbackContext)
+                                     @NonNull SubscriptionAcknowledgedCallback deviceCommandStatusCallback, Object deviceCommandStatusCallbackContext)
             throws IOException
     {
         verifyRegisteredIfMultiplexing();
@@ -1235,9 +1277,17 @@ public class InternalClient
 
         if (this.command == null)
         {
-            this.command = new DeviceCommand(this.deviceIO, this.config, deviceCommandStatusCallback, deviceCommandStatusCallbackContext, getPayloadConvention());
+            this.command = new DeviceCommand(this, deviceCommandStatusCallback, deviceCommandStatusCallbackContext, getPayloadConvention());
         }
 
         this.command.subscribeToDeviceCommand(deviceCommandCallback, deviceCommandCallbackContext);
+    }
+
+    private void setPayloadConvetionInternal()
+    {
+        if (config.getPayloadConvention() != null)
+        {
+            setPayloadConvention(config.getPayloadConvention());
+        }
     }
 }

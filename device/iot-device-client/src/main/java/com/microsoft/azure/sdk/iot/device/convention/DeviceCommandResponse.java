@@ -15,7 +15,7 @@ public class DeviceCommandResponse
     private int status;
 
     /**
-     * The device command data constructor. This will be used with the {@link com.microsoft.azure.sdk.iot.deps.convention.PayloadConvention} set for the device client.
+     * The device command data constructor. This will be used with the {@link com.microsoft.azure.sdk.iot.device.convention.PayloadConvention} set for the device client.
      * @param status A response status code.
      * @param responseMessage The response message that will be
      */

@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.deps.convention;
+package com.microsoft.azure.sdk.iot.device.convention;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
-import com.microsoft.azure.sdk.iot.deps.util.Tools;
+import com.microsoft.azure.sdk.iot.device.twin.ParserUtility;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,7 +31,7 @@ public class ClientPropertyCollection extends PayloadCollection
     private static final String VERSION_TAG = "$version";
 
     @Getter
-    private Long version;
+    private Integer version;
 
     // the Twin collection metadata
     private static final String METADATA_TAG = "$metadata";
@@ -57,8 +56,8 @@ public class ClientPropertyCollection extends PayloadCollection
     public ClientPropertyCollection(byte[] clientPropertyMessage, PayloadConvention convention, boolean createWritablePropertyCollection)
     {
         super();
-        Convention = convention;
-        Map<String, Object> collectionToCopy = Convention.getObjectFromBytes(clientPropertyMessage, ClientPropertyCollection.class);
+        this.convention = convention;
+        Map<String, Object> collectionToCopy = this.convention.getObjectFromBytes(clientPropertyMessage, ClientPropertyCollection.class);
         if (createWritablePropertyCollection)
         {
             putAllAsWritableStart(collectionToCopy);
@@ -192,7 +191,7 @@ public class ClientPropertyCollection extends PayloadCollection
         }
 
         // If it's not a Map<> we're likely looking at a JsonObject
-        return Convention.getPayloadSerializer().getNestedObjectValue(this.get(componentName), propertyName, typeOfT);
+        return convention.getPayloadSerializer().getNestedObjectValue(this.get(componentName), propertyName, typeOfT);
     }
 
     /**
@@ -362,7 +361,7 @@ public class ClientPropertyCollection extends PayloadCollection
             }
         }
 
-        if ((lastUpdatedVersion != null) || !Tools.isNullOrEmpty(lastUpdated))
+        if ((lastUpdatedVersion != null) || (lastUpdated != null && !lastUpdated.isEmpty()))
         {
             clientPropertyCollection.setMetadata(new ClientMetadata(lastUpdated, lastUpdatedVersion, lastUpdatedBy, lastUpdatedByDigest));
         }
@@ -410,9 +409,9 @@ public class ClientPropertyCollection extends PayloadCollection
         }
 
         // if it's not we should try to deserialize it with our convention serializer
-        if (objectToGet != null && Convention != null)
+        if (objectToGet != null && convention != null)
         {
-            return Convention.getPayloadSerializer().convertFromObject(objectToGet, typeOfT);
+            return convention.getPayloadSerializer().convertFromObject(objectToGet, typeOfT);
         }
 
         return null;
@@ -424,7 +423,7 @@ public class ClientPropertyCollection extends PayloadCollection
         {
             throw new IllegalArgumentException("map to add cannot be null or empty.");
         }
-        this.version = ((Number) map.get(VERSION_TAG)).longValue();
+        this.version = ((Number) map.get(VERSION_TAG)).intValue();
 
         // Loop through the toplevel properties
         for (Map.Entry<? extends String, ?> rootOfMap : map.entrySet())
@@ -439,12 +438,12 @@ public class ClientPropertyCollection extends PayloadCollection
                 {
                     for (Map.Entry<? extends String, ?> componentProperty : componentMapFromMap.entrySet())
                     {
-                        this.putComponentProperty(rootOfMap.getKey(), componentProperty.getKey(), Convention.createWritablePropertyResponse(componentProperty.getValue(), 0, this.version));
+                        this.putComponentProperty(rootOfMap.getKey(), componentProperty.getKey(), convention.createWritablePropertyResponse(componentProperty.getValue(), 0, this.version));
                     }
                 }
                 else
                 {
-                    this.put(rootOfMap.getKey(), Convention.createWritablePropertyResponse(rootOfMap.getValue(), 0, this.version));
+                    this.put(rootOfMap.getKey(), convention.createWritablePropertyResponse(rootOfMap.getValue(), 0, this.version));
                 }
             }
         }
@@ -469,7 +468,7 @@ public class ClientPropertyCollection extends PayloadCollection
                     throw new IllegalArgumentException("version is not a number");
                 }
 
-                clientPropertyCollection.version = ((Number) entry.getValue()).longValue();
+                clientPropertyCollection.version = ((Number) entry.getValue()).intValue();
             }
             else if (entry.getKey().equals(METADATA_TAG))
             {
@@ -486,5 +485,4 @@ public class ClientPropertyCollection extends PayloadCollection
             ClientPropertyCollection.addMetadata(clientPropertyCollection, metadata);
         }
     }
-
 }

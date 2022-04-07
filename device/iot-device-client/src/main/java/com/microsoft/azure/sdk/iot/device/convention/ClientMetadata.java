@@ -1,17 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.deps.convention;
+package com.microsoft.azure.sdk.iot.device.convention;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
-import com.microsoft.azure.sdk.iot.deps.twin.TwinMetadata;
-import com.microsoft.azure.sdk.iot.deps.util.Tools;
-import lombok.Getter;
-
-import java.util.Date;
-import java.util.Map;
+import com.microsoft.azure.sdk.iot.device.twin.TwinMetadata;
 
 /**
  * Representation of a single metadata item for the {@code ClientPropertyCollection}.

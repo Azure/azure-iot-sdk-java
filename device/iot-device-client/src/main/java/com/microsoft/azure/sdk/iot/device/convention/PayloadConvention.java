@@ -1,4 +1,4 @@
-package com.microsoft.azure.sdk.iot.deps.convention;
+package com.microsoft.azure.sdk.iot.device.convention;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -83,5 +83,4 @@ public abstract class PayloadConvention
     {
         return getPayloadSerializer().createWritablePropertyResponse(value, statusCode, version, null);
     }
-
 }

@@ -3,21 +3,22 @@
 
 package com.microsoft.azure.sdk.iot.device.convention;
 
-import com.microsoft.azure.sdk.iot.deps.convention.PayloadConvention;
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethod;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceOperations;
+import com.microsoft.azure.sdk.iot.device.twin.DirectMethod;
+import com.microsoft.azure.sdk.iot.device.twin.SubscriptionAcknowledgedCallback;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 /**
  * The command callback execution class.
  */
-public class DeviceCommand extends DeviceMethod
+@Slf4j
+public class DeviceCommand extends DirectMethod
 {
     private DeviceCommandCallback deviceCommandCallback;
 
@@ -27,7 +28,7 @@ public class DeviceCommand extends DeviceMethod
 
     private final class deviceCommandResponseCallback implements MessageCallback
     {
-        final DeviceClientConfig nestedConfig = config;
+        final ClientConfiguration nestedConfig = config;
 
         @Setter(AccessLevel.PRIVATE)
         @Getter(AccessLevel.PRIVATE)
@@ -39,7 +40,7 @@ public class DeviceCommand extends DeviceMethod
         }
 
         @Override
-        public IotHubMessageResult execute(Message message, Object callbackContext)
+        public IotHubMessageResult onCloudToDeviceMessageReceived(Message message, Object callbackContext)
         {
             synchronized (DEVICE_METHOD_LOCK)
             {
@@ -49,7 +50,7 @@ public class DeviceCommand extends DeviceMethod
                 if (message.getMessageType() != MessageType.DEVICE_METHODS)
                 {
                     log.error("Unexpected message type received {}", message.getMessageType());
-                    deviceMethodStatusCallback.execute(iotHubStatus, deviceMethodStatusCallbackContext);
+                    deviceMethodStatusCallback.onMessageSent(message, IotHubStatusCode.toException(iotHubStatus), deviceMethodStatusCallbackContext);
                     return IotHubMessageResult.ABANDON;
                 }
 
@@ -95,20 +96,21 @@ public class DeviceCommand extends DeviceMethod
                                 responseMessage.setStatus(String.valueOf(responseData.getStatus()));
                                 responseMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_SEND_RESPONSE);
 
-                                deviceIO.sendEventAsync(responseMessage, new deviceMethodRequestMessageCallback(), null, nestedConfig.getDeviceId());
+                                client.sendEventAsync(responseMessage, new DirectMethodRequestMessageCallback(), null);
                                 result = IotHubMessageResult.COMPLETE;
                             }
                             else
                             {
                                 log.info("User callback did not send any data for command response");
                                 result = IotHubMessageResult.REJECT;
-                                deviceMethodStatusCallback.execute(iotHubStatus, deviceMethodStatusCallbackContext);
+                                deviceMethodStatusCallback.onMessageSent(message, IotHubStatusCode.toException(iotHubStatus), deviceMethodStatusCallbackContext);
                             }
-                        } catch (Exception e)
+                        }
+                        catch (Exception e)
                         {
                             log.info("User callback did not succeed");
                             result = IotHubMessageResult.REJECT;
-                            deviceMethodStatusCallback.execute(iotHubStatus, deviceMethodStatusCallbackContext);
+                            deviceMethodStatusCallback.onMessageSent(message, IotHubStatusCode.toException(iotHubStatus), deviceMethodStatusCallbackContext);
                         }
                     }
                     else
@@ -126,12 +128,12 @@ public class DeviceCommand extends DeviceMethod
         }
     }
 
-    private final class deviceMethodRequestMessageCallback implements IotHubEventCallback
+    private final class DirectMethodRequestMessageCallback implements MessageSentCallback
     {
         @Override
-        public void execute(IotHubStatusCode responseStatus, Object callbackContext)
+        public void onMessageSent(Message sentMessage, IotHubClientException exception, Object callbackContext)
         {
-            deviceMethodStatusCallback.execute(responseStatus, deviceMethodStatusCallbackContext);
+            deviceMethodStatusCallback.onMessageSent(sentMessage, exception, deviceMethodStatusCallbackContext);
         }
     }
 
@@ -139,18 +141,18 @@ public class DeviceCommand extends DeviceMethod
      * This constructor creates an instance of device command class which helps facilitate the interation for device commands
      * between the user and IotHub.
      *
-     * @param deviceIO                          Device client object for this connection instance for the device. Cannot be {@code null}
-     * @param config                            Device client configuration Cannot be {@code null}
-     * @param deviceCommandStatusCallback        Callback to provide status for device command state with IotHub. Cannot be {@code null}.
-     * @param deviceCommandStatusCallbackContext Context to be passed when device command status is invoked. Can be {@code null}
+     * @param client  Device client  object for this connection instance for the device. Cannot be {@code null}
+     * @param deviceMethodStatusCallback Callback to provide status for device method state with IotHub. Cannot be {@code null}.
+     * @param deviceMethodStatusCallbackContext Context to be passed when device method status is invoked. Can be {@code null}
+     * @param deviceMethodStatusCallbackContext Context to be passed when device command status is invoked. Can be {@code null}
      * @param payloadConvention                 The payload convention to be used for the command
      * @throws IllegalArgumentException This exception is thrown if either deviceIO or config or deviceCommandStatusCallback are null
      */
-    public DeviceCommand(DeviceIO deviceIO, DeviceClientConfig config, IotHubEventCallback deviceCommandStatusCallback, Object deviceCommandStatusCallbackContext, PayloadConvention payloadConvention) throws IllegalArgumentException
+    public DeviceCommand(InternalClient client, SubscriptionAcknowledgedCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext, PayloadConvention payloadConvention) throws IllegalArgumentException
     {
-        super(deviceIO, config, deviceCommandStatusCallback, deviceCommandStatusCallbackContext);
+        super(client, deviceMethodStatusCallback, deviceMethodStatusCallbackContext);
         setPayloadConvention(payloadConvention);
-        this.config.setDeviceMethodsMessageCallback(new deviceCommandResponseCallback(payloadConvention), null);
+        client.getConfig().setDirectMethodsMessageCallback(new deviceCommandResponseCallback(payloadConvention), null);
     }
 
     /**
@@ -169,14 +171,14 @@ public class DeviceCommand extends DeviceMethod
         }
 
         this.deviceCommandCallback = deviceMethodCallback;
-        this.deviceMethodCallbackContext = deviceMethodCallbackContext;
+        this.deviceMethodStatusCallbackContext = deviceMethodCallbackContext;
 
         if (!isSubscribed)
         {
             IotHubTransportMessage subscribeMessage = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_METHODS);
             subscribeMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
             subscribeMessage.setConnectionDeviceId(this.config.getDeviceId());
-            this.deviceIO.sendEventAsync(subscribeMessage, new deviceMethodRequestMessageCallback(), null, this.config.getDeviceId());
+            this.client.sendEventAsync(subscribeMessage, new DirectMethodRequestMessageCallback(), null);
         }
     }
 }

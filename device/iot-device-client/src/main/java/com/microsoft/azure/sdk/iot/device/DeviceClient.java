@@ -3,13 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.convention.DeviceCommandCallback;
-import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
-import com.microsoft.azure.sdk.iot.device.fileupload.FileUploadTask;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
@@ -280,7 +274,7 @@ public final class DeviceClient extends InternalClient
     }
 
     /**
-     * Subscribes to device commands. Commands will make use of the {@link com.microsoft.azure.sdk.iot.deps.convention.PayloadSerializer}
+     * Subscribes to device commands. Commands will make use of the {@link com.microsoft.azure.sdk.iot.device.convention.PayloadSerializer}
      * which will allow the {@code deviceCommandCallback} to receieve an object rather than bytes.
      *
      * @param deviceCommandCallback Callback on which device commands shall be invoked. Cannot be {@code null}.

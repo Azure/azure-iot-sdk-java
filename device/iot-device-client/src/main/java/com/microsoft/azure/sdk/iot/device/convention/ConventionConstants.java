@@ -1,4 +1,4 @@
-package com.microsoft.azure.sdk.iot.deps.convention;
+package com.microsoft.azure.sdk.iot.device.convention;
 
 public final class ConventionConstants
 {
