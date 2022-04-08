@@ -4,9 +4,7 @@
 package com.microsoft.azure.sdk.iot.device.transport.https;
 
 import com.microsoft.azure.sdk.iot.device.ProxySettings;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.transport.https.HttpsConnection;
-import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.HttpProxySocketFactory;
 import mockit.*;
 import org.junit.Assert;

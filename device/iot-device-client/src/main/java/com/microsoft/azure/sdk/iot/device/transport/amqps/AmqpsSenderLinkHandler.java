@@ -5,7 +5,7 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
-import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
+import com.microsoft.azure.sdk.iot.device.transport.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
@@ -128,6 +128,7 @@ abstract class AmqpsSenderLinkHandler extends BaseHandler
         {
             log.debug("{} sender link with address {} and link correlation id {} was closed remotely unexpectedly", getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId);
             link.close();
+            clearHandlers();
             this.amqpsLinkStateCallback.onLinkClosedUnexpectedly(link.getRemoteCondition());
         }
         else
@@ -164,6 +165,7 @@ abstract class AmqpsSenderLinkHandler extends BaseHandler
         {
             log.debug("Closing {} sender link with address {} and link correlation id {}", getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId);
             this.senderLink.close();
+            clearHandlers();
         }
     }
 
@@ -315,5 +317,25 @@ abstract class AmqpsSenderLinkHandler extends BaseHandler
         Section section = new Data(binary);
         outgoingMessage.setBody(section);
         return outgoingMessage;
+    }
+
+    // Removes any children of this handler (such as LoggingFlowController) and disassociates this handler
+    // from the proton reactor. By removing the reference of the proton reactor to this handler, this handler becomes
+    // eligible for garbage collection by the JVM. This is important for multiplexed connections where links come and go
+    // but the reactor stays alive for a long time.
+    private void clearHandlers()
+    {
+        this.senderLink.attachments().clear();
+
+        // a sender link shouldn't have any children, but other handlers may be added as this SDK grows and this protects
+        // against potential memory leaks
+        Iterator<Handler> childrenIterator = this.children();
+        while (childrenIterator.hasNext())
+        {
+            childrenIterator.next();
+            childrenIterator.remove();
+        }
+
+        this.senderLink.free();
     }
 }

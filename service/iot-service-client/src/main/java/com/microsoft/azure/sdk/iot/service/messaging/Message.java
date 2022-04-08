@@ -11,7 +11,6 @@ import lombok.Setter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -164,10 +163,7 @@ public class Message
 
     public void setProperties(Map<String, String> properties)
     {
-        for (Map.Entry<String, String> entry : properties.entrySet())
-        {
-            this.properties.put(entry.getKey(), entry.getValue());
-        }
+        this.properties.putAll(properties);
     }
 
     public void clearCustomProperties()

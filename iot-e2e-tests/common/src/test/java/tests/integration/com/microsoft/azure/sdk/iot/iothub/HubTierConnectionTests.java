@@ -2,9 +2,12 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.twin.DirectMethodPayload;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
+import com.microsoft.azure.sdk.iot.device.twin.SubscriptionAcknowledgedCallback;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
@@ -173,16 +176,17 @@ public class HubTierConnectionTests extends IntegrationTest
     protected static class MethodCallback implements com.microsoft.azure.sdk.iot.device.twin.MethodCallback
     {
         @Override
-        public DirectMethodResponse onMethodInvoked(String methodName, Object methodData, Object context)
+        public DirectMethodResponse onMethodInvoked(String methodName, DirectMethodPayload methodData, Object context)
         {
             return new DirectMethodResponse(200, "payload");
         }
     }
 
-    protected static class DirectMethodStatusCallback implements IotHubEventCallback
+    protected static class DirectMethodStatusCallback implements SubscriptionAcknowledgedCallback
     {
-        public void execute(IotHubStatusCode status, Object context)
+        public void onSubscriptionAcknowledged(IotHubClientException e, Object context)
         {
+            IotHubStatusCode status = e == null ? IotHubStatusCode.OK : e.getStatusCode();
             System.out.println("Device Client: IoT Hub responded to device method operation with status " + status.name());
         }
     }
@@ -190,11 +194,11 @@ public class HubTierConnectionTests extends IntegrationTest
     @Test
     @BasicTierHubOnlyTest
     @ContinuousIntegrationTest
-    public void enableMethodFailedWithBasicTier() throws IOException, InterruptedException
+    public void enableMethodFailedWithBasicTier() throws IOException, InterruptedException, IotHubClientException
     {
         //arrange
         List<Pair<IotHubConnectionStatus, Throwable>> connectionStatusUpdates = new ArrayList<>();
-        testInstance.client.setConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> connectionStatusUpdates.add(new Pair<>(status, throwable)), null);
+        testInstance.client.setConnectionStatusChangeCallback((context) -> connectionStatusUpdates.add(new Pair<>(context.getNewStatus(), context.getCause())), null);
 
         testInstance.client.open(false);
 

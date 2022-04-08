@@ -4,6 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -106,11 +107,11 @@ public class SendSerializedEvent
         }
     }
 
-    protected static class EventCallback implements IotHubEventCallback
+    protected static class EventCallback implements MessageSentCallback
     {
-        public void execute(IotHubStatusCode status, Object context)
+        public void onMessageSent(Message sentMessage, IotHubClientException exception, Object context)
         {
-            System.out.println("IoT Hub responded to message with status " + status.name());
+            System.out.println("IoT Hub responded to message with status " + (exception == null ? IotHubStatusCode.OK : exception.getStatusCode()));
 
             CountDownLatch countDownLatch = (CountDownLatch) context;
             countDownLatch.countDown();

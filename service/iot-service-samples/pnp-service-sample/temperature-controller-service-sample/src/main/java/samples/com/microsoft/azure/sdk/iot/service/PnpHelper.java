@@ -4,12 +4,9 @@
 package samples.com.microsoft.azure.sdk.iot.service;
 
 import com.google.gson.JsonObject;
-import java.util.Set;
 
-import com.microsoft.azure.sdk.iot.service.twin.Pair;
-
+import com.microsoft.azure.sdk.iot.service.twin.TwinCollection;
 import lombok.NonNull;
-import static java.util.Collections.singleton;
 
 /*
  A helper class for formatting command requests and properties as per plug and play convention.
@@ -33,12 +30,14 @@ public class PnpHelper {
      *        "value": "hello"
      *      }
      */
-    public static Set<Pair> CreateComponentPropertyPatch(@NonNull String propertyName, @NonNull double propertyValue, @NonNull String componentName)
+    public static TwinCollection CreateComponentPropertyPatch(@NonNull String propertyName, @NonNull double propertyValue, @NonNull String componentName)
     {
         JsonObject patchJson = new JsonObject();
         patchJson.addProperty(PROPERTY_COMPONENT_IDENTIFIER_KEY, PROPERTY_COMPONENT_IDENTIFIER_VALUE);
         patchJson.addProperty(propertyName, propertyValue);
-        return singleton(new Pair(componentName, patchJson));
+        TwinCollection twinCollection = new TwinCollection();
+        twinCollection.put(componentName, patchJson);
+        return twinCollection;
     }
 
     /**

@@ -29,6 +29,7 @@ public class HttpRequest
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String AUTHORIZATION = "Authorization";
     public static final String REQUEST_ID = "Request-Id";
+    public static final String IF_MATCH = "If-Match";
 
     /** The underlying HTTPS connection. */
     private final HttpsURLConnection connection;

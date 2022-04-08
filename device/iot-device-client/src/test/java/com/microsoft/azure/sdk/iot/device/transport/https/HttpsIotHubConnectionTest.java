@@ -4,9 +4,9 @@
 package com.microsoft.azure.sdk.iot.device.transport.https;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
-import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubServiceException;
+import com.microsoft.azure.sdk.iot.device.transport.ProtocolException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import mockit.*;
@@ -1892,7 +1892,7 @@ public class HttpsIotHubConnectionTest
                 mockResponse.getStatus();
                 result = 404;
                 IotHubStatusCode.getIotHubStatusCode(404);
-                result = IotHubStatusCode.HUB_OR_DEVICE_ID_NOT_FOUND;
+                result = IotHubStatusCode.NOT_FOUND;
                 mockResponse.getHeaderField(withMatch("(?i)etag"));
                 result = eTag;
             }

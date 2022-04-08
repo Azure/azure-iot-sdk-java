@@ -7,6 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 
 import com.azure.core.credential.AzureSasCredential;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.service.jobs.DirectMethodsJobOptions;
 import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJob;
 import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobStatus;
@@ -24,8 +25,7 @@ import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
-import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
-import com.microsoft.azure.sdk.iot.service.twin.Pair;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnauthorizedException;
 import com.microsoft.azure.sdk.iot.service.jobs.ScheduledJobsClientOptions;
@@ -98,7 +98,7 @@ public class JobClientTests extends IntegrationTest
     private static final int MAX_EXECUTION_TIME_IN_SECONDS = 15;
 
     @BeforeClass
-    public static void setUp() throws IOException, IotHubException, InterruptedException, URISyntaxException
+    public static void setUp() throws IOException, IotHubException, InterruptedException, URISyntaxException, IotHubClientException
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
@@ -155,9 +155,7 @@ public class JobClientTests extends IntegrationTest
                 try
                 {
                     Twin twin = new Twin(deviceId);
-                    Set<Pair> testDesProp = new HashSet<>();
-                    testDesProp.add(new Pair(STANDARD_PROPERTY_HOMETEMP, jobTemperature));
-                    twin.setDesiredProperties(testDesProp);
+                    twin.getDesiredProperties().put(STANDARD_PROPERTY_HOMETEMP, jobTemperature);
                     twinExpectedTemperature.put(jobId, jobTemperature);
 
                     jobClient.scheduleUpdateTwin(
@@ -289,10 +287,10 @@ public class JobClientTests extends IntegrationTest
         for (Map.Entry<String, ScheduledJob> jobResult : jobResults.entrySet())
         {
             assertNotNull(jobResult.getValue());
-            MethodResult methodResult = jobResult.getValue().getOutcomeResult();
-            assertNotNull("Device method didn't return any outcome", methodResult);
-            assertEquals(200L, (long) methodResult.getStatus());
-            assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, methodResult.getPayload());
+            DirectMethodResponse directMethodResponse = jobResult.getValue().getOutcomeResult();
+            assertNotNull("Device method didn't return any outcome", directMethodResponse);
+            assertEquals(200L, (long) directMethodResponse.getStatus());
+            assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, directMethodResponse.getPayload(String.class));
         }
 
         // asserts for the client side.
@@ -379,10 +377,10 @@ public class JobClientTests extends IntegrationTest
             fail("Failed to schedule a method invocation, job status " + job.getJobStatus() + ":" + job.getStatusMessage());
         }
 
-        MethodResult methodResult = job.getOutcomeResult();
-        assertNotNull("Device method didn't return any outcome", methodResult);
-        assertEquals(200L, (long) methodResult.getStatus());
-        assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, methodResult.getPayload());
+        DirectMethodResponse directMethodResponse = job.getOutcomeResult();
+        assertNotNull("Device method didn't return any outcome", directMethodResponse);
+        assertEquals(200L, (long) directMethodResponse.getStatus());
+        assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, directMethodResponse.getPayload(String.class));
 
         // asserts for the client side.
         assertEquals(0, deviceTestManger.getStatusError());
@@ -433,9 +431,7 @@ public class JobClientTests extends IntegrationTest
                     else
                     {
                         Twin twin = new Twin(deviceId);
-                        Set<Pair> testDesProp = new HashSet<>();
-                        testDesProp.add(new Pair(STANDARD_PROPERTY_HOMETEMP, jobTemperature));
-                        twin.setDesiredProperties(testDesProp);
+                        twin.getDesiredProperties().put(STANDARD_PROPERTY_HOMETEMP, jobTemperature);
                         twinExpectedTemperature.put(jobId, jobTemperature);
 
                         jobClient.scheduleUpdateTwin(
@@ -496,10 +492,10 @@ public class JobClientTests extends IntegrationTest
             assertNotNull(jobResult);
             if (jobResult.getJobType() == ScheduledJobType.scheduleDeviceMethod)
             {
-                MethodResult methodResult = jobResult.getOutcomeResult();
-                assertNotNull("Device method didn't return any outcome", methodResult);
-                assertEquals(200L, (long) methodResult.getStatus());
-                assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, methodResult.getPayload());
+                DirectMethodResponse directMethodResponse = jobResult.getOutcomeResult();
+                assertNotNull("Device method didn't return any outcome", directMethodResponse);
+                assertEquals(200L, (long) directMethodResponse.getStatus());
+                assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, directMethodResponse.getPayload(String.class));
             }
             else
             {

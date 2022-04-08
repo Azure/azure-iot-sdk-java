@@ -4,7 +4,7 @@ package samples.com.microsoft.azure.sdk.iot.service;
 
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodRequestOptions;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
-import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.service.twin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
@@ -64,12 +64,12 @@ public class TemperatureController {
         String propertyName = "targetTemperature";
         double propertyValue = 60.2;
         String componentName = "thermostat1";
-        twin.setDesiredProperties(PnpHelper.CreateComponentPropertyPatch(propertyName, propertyValue, componentName));
+        twin.getDesiredProperties().putAll(PnpHelper.CreateComponentPropertyPatch(propertyName, propertyValue, componentName));
         twinClient.patch(twin);
 
         // Get the updated twin properties.
         twin = twinClient.get(deviceId);
-        System.out.println("The updated desired properties: " + twin.getDesiredProperties().iterator().next().getValue());
+        System.out.println("The updated desired properties: " + twin.getDesiredProperties().values().iterator().next());
     }
 
     private static void InvokeMethodOnRootLevel() throws IOException, IotHubException {
@@ -89,7 +89,7 @@ public class TemperatureController {
                 .methodResponseTimeoutSeconds(responseTimeout)
                 .build();
 
-        MethodResult result = methodClient.invoke(deviceId, methodToInvoke, options);
+        DirectMethodResponse result = methodClient.invoke(deviceId, methodToInvoke, options);
 
         if(result == null)
         {
@@ -121,7 +121,7 @@ public class TemperatureController {
                 .methodResponseTimeoutSeconds(responseTimeout)
                 .build();
 
-        MethodResult result = methodClient.invoke(deviceId, methodToInvoke, options);
+        DirectMethodResponse result = methodClient.invoke(deviceId, methodToInvoke, options);
         if(result == null)
         {
             throw new IOException("Method invoke returns null");

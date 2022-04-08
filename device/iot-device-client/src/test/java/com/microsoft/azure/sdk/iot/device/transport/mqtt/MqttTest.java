@@ -5,11 +5,10 @@ package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 import com.microsoft.azure.sdk.iot.device.ClientConfiguration;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
-import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.ProtocolException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
-import com.microsoft.azure.sdk.iot.device.transport.ReconnectionNotifier;
 import mockit.*;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -759,7 +758,7 @@ public class MqttTest
 
     //Tests_SRS_Mqtt_34_045: [If this object has a saved listener, this function shall notify the listener that connection was lost.]
     @Test
-    public void connectionLostAttemptsToReconnectWithSASTokenStillValid(final @Mocked ReconnectionNotifier reconnectionTask, final @Mocked TransportException mockedTransportException) throws IOException, MqttException
+    public void connectionLostAttemptsToReconnectWithSASTokenStillValid(final @Mocked TransportException mockedTransportException) throws IOException, MqttException
     {
         //arrange
         Mqtt mockMqtt;
@@ -770,7 +769,7 @@ public class MqttTest
             {
                 new TransportException(t);
                 result = mockedTransportException;
-                ReconnectionNotifier.notifyDisconnectAsync(mockedTransportException, mockedIotHubListener, anyString);
+                mockedIotHubListener.onConnectionLost(mockedTransportException, anyString);
             }
         };
 

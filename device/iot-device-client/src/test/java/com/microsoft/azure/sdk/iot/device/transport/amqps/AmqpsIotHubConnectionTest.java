@@ -15,14 +15,13 @@ import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
 import com.microsoft.azure.sdk.iot.device.ProxySettings;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubX509SoftwareAuthenticationProvider;
-import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.ProtocolException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.https.IotHubUri;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpConnectionThrottledException;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpSessionWindowViolationException;
 import mockit.Deencapsulation;
 import mockit.Expectations;
 import mockit.Mock;
@@ -1059,44 +1058,6 @@ public class AmqpsIotHubConnectionTest {
         // assert
         IotHubListener listener = Deencapsulation.getField(connection, "listener");
         assertEquals(mockedIotHubListener, listener);
-    }
-
-    //Tests_SRS_AMQPSIOTHUBCONNECTION_34_060 [If the provided event object's transport holds an error condition object, this function shall report the associated TransportException to this object's listeners.]
-    @Test
-    public void OnTransportErrorReportsErrorCodeIfPresent() throws TransportException
-    {
-        //arrange
-        final StringBuilder methodsCalled = new StringBuilder();
-        new MockUp<AmqpsIotHubConnection>()
-        {
-            @Mock void scheduleReconnection(TransportException throwable)
-            {
-                methodsCalled.append("scheduleReconnection");
-            }
-        };
-        baseExpectations();
-        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig, "");
-        connection.setListener(mockedIotHubListener);
-        new NonStrictExpectations()
-        {
-            {
-                mockEvent.getTransport();
-                result = mockTransport;
-                mockTransport.getCondition();
-                result = mockedErrorCondition;
-                mockedErrorCondition.getCondition();
-                result = mockedSymbol;
-                mockedSymbol.toString();
-                result = AmqpSessionWindowViolationException.errorCode;
-                Deencapsulation.invoke(connection, "scheduleReconnection", new Class[] {TransportException.class}, (TransportException) any);
-            }
-        };
-
-        //act
-        connection.onTransportError(mockEvent);
-
-        //assert
-        assertTrue(methodsCalled.toString().contains("scheduleReconnection"));
     }
 
     // Tests_SRS_AMQPSTRANSPORT_34_072: [If the provided message is not saved in the saved map of messages to acknowledge, this function shall return false.]

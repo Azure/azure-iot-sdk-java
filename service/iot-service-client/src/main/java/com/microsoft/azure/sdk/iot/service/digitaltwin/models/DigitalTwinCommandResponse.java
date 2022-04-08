@@ -3,6 +3,9 @@
 
 package com.microsoft.azure.sdk.iot.service.digitaltwin.models;
 
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+
 /**
  * Represents the device command invocation results.
  */
@@ -15,7 +18,7 @@ public final class DigitalTwinCommandResponse {
     /**
      *  Command invocation result payload, as supplied by the device.
      */
-    private String payload;
+    private JsonElement payload;
 
     public Integer getStatus()
     {
@@ -27,12 +30,36 @@ public final class DigitalTwinCommandResponse {
         this.status = status;
     }
 
-    public String getPayload()
+    /**
+     * Return the DigitalTwinCommandResponse payload in JsonElement type
+     * @return the DigitalTwinCommandResponse payload in JsonElement type
+     */
+    public JsonElement getPayloadAsJsonElement()
     {
         return payload;
     }
 
-    public void setPayload(String payload)
+    /**
+     * Return the DigitalTwinCommandResponse payload in json string
+     * Use this if you wish to deserialize to a specific type using a deserialization library of your choice
+     * @return the DigitalTwinCommandResponse payload in json string
+     */
+    public String getPayloadAsJsonString()
+    {
+        return payload.toString();
+    }
+
+    /**
+     * Return the DigitalTwinCommandResponse payload in a custom type of your choosing
+     * @param clazz the Custom type into which the payload can be deserialized
+     * @return the DigitalTwinCommandResponse payload in Custom type
+     */
+    public <T> T getPayload(Class<T> clazz)
+    {
+        return new GsonBuilder().create().fromJson(payload, clazz);
+    }
+
+    public void setPayload(JsonElement payload)
     {
         this.payload = payload;
     }

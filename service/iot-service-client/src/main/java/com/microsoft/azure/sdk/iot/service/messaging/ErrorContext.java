@@ -5,9 +5,7 @@ package com.microsoft.azure.sdk.iot.service.messaging;
 
 import com.azure.core.annotation.Immutable;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.io.IOException;
 

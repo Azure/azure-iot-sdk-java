@@ -1,6 +1,6 @@
 package com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
+import com.microsoft.azure.sdk.iot.device.transport.ProtocolException;
 
 public class ProtonIOException extends ProtocolException
 {

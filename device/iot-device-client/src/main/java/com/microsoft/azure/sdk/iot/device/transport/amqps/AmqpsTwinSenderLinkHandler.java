@@ -92,7 +92,7 @@ final class AmqpsTwinSenderLinkHandler extends AmqpsSenderLinkHandler
     private static void setMessageAnnotationMapOnProtonMessage(
             MessageImpl protonMessage,
             DeviceOperations deviceOperationType,
-            String deviceTwinMessageVersion)
+            Integer deviceTwinMessageVersion)
     {
         Map<Symbol, Object> messageAnnotationsMap = new HashMap<>();
         switch (deviceOperationType)
@@ -105,14 +105,7 @@ final class AmqpsTwinSenderLinkHandler extends AmqpsSenderLinkHandler
                 messageAnnotationsMap.put(Symbol.valueOf(MESSAGE_ANNOTATION_FIELD_KEY_RESOURCE), MESSAGE_ANNOTATION_FIELD_VALUE_PROPERTIES_REPORTED);
                 if (deviceTwinMessageVersion != null)
                 {
-                    try
-                    {
-                        messageAnnotationsMap.put(Symbol.valueOf(MESSAGE_ANNOTATION_FIELD_KEY_VERSION), Long.parseLong(deviceTwinMessageVersion));
-                    }
-                    catch (NumberFormatException e)
-                    {
-                        log.error("Failed to convert device twin version into a long, can't add version annotation to message.");
-                    }
+                    messageAnnotationsMap.put(Symbol.valueOf(MESSAGE_ANNOTATION_FIELD_KEY_VERSION), deviceTwinMessageVersion);
                 }
                 break;
             case DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST:

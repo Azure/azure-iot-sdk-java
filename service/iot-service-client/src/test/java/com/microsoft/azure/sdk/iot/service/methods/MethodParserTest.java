@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.service.methods;
 
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.microsoft.azure.sdk.iot.service.Helpers;
 import com.microsoft.azure.sdk.iot.service.methods.serializers.MethodParser;
@@ -16,7 +17,6 @@ import java.util.Map;
 import static java.util.Arrays.asList;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
-import static com.microsoft.azure.sdk.iot.service.Helpers.assertMap;
 
 /**
  * Unit tests for Method serializer
@@ -35,18 +35,9 @@ public class MethodParserTest
     private static final String STANDARD_NAME = "validName";
     private static final int STANDARD_TIMEOUT = 20;
     private static final int ILLEGAL_NEGATIVE_TIMEOUT = -20;
-    private static final Map<String, Object> PAYLOAD_MAP = new HashMap<String, Object>()
-    {{
-        put("string", "STRING");
-        put("int", 123);
-        put("double", 1E10);
-        put("long", 12345678901L);
-        put("boolean", true);
-        put("map", new HashMap<String, Object>()
-        {{
-            put("innerKey", "innerVal");
-        }});
-    }};
+
+    // One-liner map may cause incorrect serializing by Gson.toJson(). This seems a known issue mentioned here: https://github.com/google/gson/issues/1080.
+    private static final Map<String, Object> PAYLOAD_MAP = mapGenerator();
     private static final String PAYLOAD_MAP_JSON_STRING = "{\"string\":\"STRING\",\"int\":123,\"double\":1.0E10,\"long\":12345678901,\"boolean\":true,\"map\":{\"innerKey\":\"innerVal\"}}";
 
     private static final String METHOD_REQUEST_PATTERN_WITH_TIMEOUT = "{\"methodName\":\"%s\",\"responseTimeoutInSeconds\":%d,\"connectTimeoutInSeconds\":%d,\"payload\":%s}";
@@ -98,8 +89,8 @@ public class MethodParserTest
             createMethodResponse("{\"methodName\":\"\"}"),
             createMethodResponse("{\"methodName\":}")
     );
-	
-	private static class TestMethod
+
+    private static class TestMethod
     {
 
         String name;
@@ -146,22 +137,7 @@ public class MethodParserTest
         assertEquals(actualConnectTimeout, expectedConnectTimeout);
         assertEquals(actualStatus, expectedStatus);
         assertEquals(actualOperation.toString(), expectedOperation);
-        if (expectedPayload instanceof Number)
-        {
-            assertEquals(((Number) expectedPayload).doubleValue(), ((Number) actualPayload).doubleValue(), 1e-10);
-        }
-        else if (expectedPayload instanceof List)
-        {
-            Helpers.assertListEquals((List) expectedPayload, (List) actualPayload);
-        }
-        else if (actualPayload instanceof Map)
-        {
-            Helpers.assertMap((Map) expectedPayload, (Map) actualPayload);
-        }
-        else
-        {
-            assertEquals(expectedPayload, actualPayload);
-        }
+        assertEquals(new GsonBuilder().create().toJsonTree(expectedPayload), new GsonBuilder().create().toJsonTree(actualPayload));
     }
 
     /**
@@ -173,11 +149,11 @@ public class MethodParserTest
      * @param expectedOperation       is the expected operation type.
      */
     private static void assertMethod(
-        MethodParser methodParser,
-        String expectedName,
-        Integer expectedStatus,
-        Object expectedPayload,
-        String expectedOperation
+            MethodParser methodParser,
+            String expectedName,
+            Integer expectedStatus,
+            Object expectedPayload,
+            String expectedOperation
     )
     {
         assertNotNull(methodParser);
@@ -190,22 +166,7 @@ public class MethodParserTest
         assertEquals(actualName, expectedName);
         assertEquals(actualStatus, expectedStatus);
         assertEquals(actualOperation.toString(), expectedOperation);
-        if (expectedPayload instanceof Number)
-        {
-            assertEquals(((Number) expectedPayload).doubleValue(), ((Number) actualPayload).doubleValue(), 1e-10);
-        }
-        else if (expectedPayload instanceof List)
-        {
-            Helpers.assertListEquals((List) expectedPayload, (List) actualPayload);
-        }
-        else if (actualPayload instanceof Map)
-        {
-            Helpers.assertMap((Map) expectedPayload, (Map) actualPayload);
-        }
-        else
-        {
-            assertEquals(expectedPayload, actualPayload);
-        }
+        assertEquals(new GsonBuilder().create().toJsonTree(expectedPayload), new GsonBuilder().create().toJsonTree(actualPayload));
     }
 
     /* Tests_SRS_METHODPARSER_21_029: [The constructor shall create an instance of the methodParser.] */
@@ -241,7 +202,7 @@ public class MethodParserTest
 
             // Assert
             assertMethod(methodParser, testCase.name, testCase.responseTimeout, testCase.connectTimeout,
-                         null, testCase.payload, "invoke"
+                    null, testCase.payload, "invoke"
             );
         }
     }
@@ -377,7 +338,7 @@ public class MethodParserTest
 
             // Assert
             assertMethod(methodParser, testCase.name, testCase.responseTimeout, testCase.connectTimeout,
-                         null, testCase.payload, "invoke"
+                    null, testCase.payload, "invoke"
             );
         }
     }
@@ -629,5 +590,20 @@ public class MethodParserTest
         TestMethod testMethod = new TestMethod();
         testMethod.json = json;
         return testMethod;
+    }
+
+    private static Map mapGenerator()
+    {
+        Map<String, Object> map = new HashMap<>();
+        map.put("string", "STRING");
+        map.put("int", 123);
+        map.put("double", 1E10);
+        map.put("long", 12345678901L);
+        map.put("boolean", true);
+        Map<String, Object> innerMap = new HashMap<>();
+        innerMap.put("innerKey", "innerVal");
+        map.put("map", innerMap);
+
+        return map;
     }
 }

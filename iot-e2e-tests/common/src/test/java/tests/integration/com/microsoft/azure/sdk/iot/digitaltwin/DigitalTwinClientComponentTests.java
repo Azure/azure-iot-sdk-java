@@ -3,7 +3,9 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.digitaltwin;
 
+import com.google.gson.*;
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.twin.*;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
@@ -22,14 +24,12 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.digitaltwin.helpers.E2ETestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.Success;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.DigitalTwinTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -76,7 +76,8 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
     }
 
     @Before
-    public void setUp() throws URISyntaxException, IOException, IotHubException {
+    public void setUp() throws URISyntaxException, IOException, IotHubException, IotHubClientException
+    {
         this.deviceClient = createDeviceClient(protocol);
         deviceClient.open(false);
         digitalTwinClient = DigitalTwinClient.createFromConnectionString(IOTHUB_CONNECTION_STRING);
@@ -147,7 +148,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
 
     @Test
     @StandardTierHubOnlyTest
-    public void invokeComponentLevelCommand() throws IOException, InterruptedException
+    public void invokeComponentLevelCommand() throws IOException, InterruptedException, IotHubClientException
     {
         // arrange
         String componentName = "thermostat1";
@@ -165,7 +166,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
         // Device method callback
         String componentCommandName = componentName + "*" + commandName;
         MethodCallback methodCallback = (methodName, methodData, context) -> {
-            String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
+            JsonElement jsonRequest = methodData.getPayloadAsJsonElement();
             if(methodName.equalsIgnoreCase(componentCommandName)) {
                 return new DirectMethodResponse(deviceSuccessResponseStatus, jsonRequest);
             }
@@ -174,16 +175,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
             }
         };
 
-        final CountDownLatch subscribedToMethodsLatch = new CountDownLatch(1);
-        // IotHub event callback
-        IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) ->
-        {
-            subscribedToMethodsLatch.countDown();
-        };
-
-        deviceClient.subscribeToMethodsAsync(methodCallback, commandName, iotHubEventCallback, commandName);
-
-        assertTrue("Timed out waiting for client to subscribe to methods", subscribedToMethodsLatch.await(1, TimeUnit.MINUTES));
+        deviceClient.subscribeToMethods(methodCallback, commandName);
 
         // act
         DigitalTwinCommandResponse responseWithNoPayload = this.digitalTwinClient.invokeComponentCommand(deviceId, componentName, commandName, null);
@@ -193,18 +185,18 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
 
         // assert
         assertEquals(deviceSuccessResponseStatus, responseWithNoPayload.getStatus());
-        assertEquals("\"\"", responseWithNoPayload.getPayload());
+        assertEquals("{}", responseWithNoPayload.getPayload(String.class));
         assertEquals(deviceSuccessResponseStatus, responseWithJsonStringPayload.getStatus());
-        assertEquals(jsonStringInput, responseWithJsonStringPayload.getPayload());
+        assertEquals(jsonStringInput, responseWithJsonStringPayload.getPayload(String.class));
         assertEquals(deviceSuccessResponseStatus, responseWithDatePayload.getStatus());
-        assertEquals(commandInput, responseWithDatePayload.getPayload());
+        assertEquals(commandInput, responseWithDatePayload.getPayload(String.class));
         assertEquals(deviceSuccessResponseStatus, datePayloadResponseWithHeaders.body().getStatus());
-        assertEquals(commandInput, datePayloadResponseWithHeaders.body().getPayload());
+        assertEquals(commandInput, datePayloadResponseWithHeaders.body().getPayload(String.class));
     }
 
     @Test
     @StandardTierHubOnlyTest
-    public void invokeRootLevelCommand() throws IOException, InterruptedException
+    public void invokeRootLevelCommand() throws IOException, InterruptedException, IotHubClientException
     {
         // arrange
         String commandName = "reboot";
@@ -220,7 +212,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
 
         // Device method callback
         MethodCallback methodCallback = (methodName, methodData, context) -> {
-            String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
+            JsonElement jsonRequest = methodData.getPayloadAsJsonElement();
             if(methodName.equalsIgnoreCase(commandName)) {
                 return new DirectMethodResponse(deviceSuccessResponseStatus, jsonRequest);
             }
@@ -229,16 +221,8 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
             }
         };
 
-        final CountDownLatch subscribedToMethodsLatch = new CountDownLatch(1);
         // IotHub event callback
-        IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) ->
-        {
-            subscribedToMethodsLatch.countDown();
-        };
-
-        deviceClient.subscribeToMethodsAsync(methodCallback, commandName, iotHubEventCallback, commandName);
-
-        assertTrue("Timed out waiting for client to subscribe to methods", subscribedToMethodsLatch.await(1, TimeUnit.MINUTES));
+        deviceClient.subscribeToMethods(methodCallback, commandName);
 
         // act
         DigitalTwinCommandResponse responseWithNoPayload = this.digitalTwinClient.invokeCommand(deviceId, commandName, null);
@@ -248,12 +232,12 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
 
         // assert
         assertEquals(deviceSuccessResponseStatus, responseWithNoPayload.getStatus());
-        assertEquals("\"\"", responseWithNoPayload.getPayload());
+        assertEquals("{}", responseWithNoPayload.getPayload(String.class));
         assertEquals(deviceSuccessResponseStatus, responseWithJsonStringPayload.getStatus());
-        assertEquals(jsonStringInput, responseWithJsonStringPayload.getPayload());
+        assertEquals(jsonStringInput, responseWithJsonStringPayload.getPayload(String.class));
         assertEquals(deviceSuccessResponseStatus, responseWithDatePayload.getStatus());
-        assertEquals(commandInput, responseWithDatePayload.getPayload());
+        assertEquals(commandInput, responseWithDatePayload.getPayload(String.class));
         assertEquals(deviceSuccessResponseStatus, datePayloadResponseWithHeaders.body().getStatus());
-        assertEquals(commandInput, datePayloadResponseWithHeaders.body().getPayload());
+        assertEquals(commandInput, datePayloadResponseWithHeaders.body().getPayload(String.class));
     }
 }

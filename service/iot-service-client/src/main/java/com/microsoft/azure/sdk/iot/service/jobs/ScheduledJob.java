@@ -10,14 +10,10 @@ import com.microsoft.azure.sdk.iot.service.jobs.serializers.JobsResponseParser;
 import com.microsoft.azure.sdk.iot.service.jobs.serializers.JobsStatisticsParser;
 import com.microsoft.azure.sdk.iot.service.twin.TwinState;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
-import com.microsoft.azure.sdk.iot.service.methods.MethodResult;
-import com.microsoft.azure.sdk.iot.service.twin.Pair;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
 import lombok.Getter;
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Metadata for a particular job created with the {@link ScheduledJobsClient}.
@@ -121,7 +117,7 @@ public class ScheduledJob
     private final String parentJobId;
 
     @Getter
-    private MethodResult outcomeResult;
+    private DirectMethodResponse outcomeResult;
 
     /**
      * The error message of the job in query, if any.
@@ -166,7 +162,9 @@ public class ScheduledJob
             {
                 try
                 {
-                    this.outcomeResult = new MethodResult(jobsResponseParser.getCloudToDeviceMethod().getStatus(), jobsResponseParser.getCloudToDeviceMethod().getPayload());
+                    this.outcomeResult = new DirectMethodResponse(
+                        jobsResponseParser.getCloudToDeviceMethod().getStatus(),
+                        new GsonBuilder().create().toJsonTree(jobsResponseParser.getCloudToDeviceMethod().getPayload()));
                 }
                 catch (IllegalArgumentException e)
                 {
@@ -186,8 +184,16 @@ public class ScheduledJob
             this.updateTwin = twinState.getDeviceId() == null || twinState.getDeviceId().isEmpty() ?
                 new Twin() : new Twin(twinState.getDeviceId());
             this.updateTwin.setETag(twinState.getETag());
-            this.updateTwin.setTags(mapToSet(twinState.getTags()));
-            this.updateTwin.setDesiredProperties(mapToSet(twinState.getDesiredProperty()));
+
+            if (twinState.getTags() != null && twinState.getTags().size() > 0)
+            {
+                this.updateTwin.getTags().putAll(twinState.getTags());
+            }
+
+            if (twinState.getDesiredProperties() != null && twinState.getDesiredProperties().size() > 0)
+            {
+                this.updateTwin.getDesiredProperties().putAll(twinState.getDesiredProperties());
+            }
         }
 
         this.failureReason = jobsResponseParser.getFailureReason();
@@ -212,20 +218,5 @@ public class ScheduledJob
     {
         Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
         return gson.toJson(this);
-    }
-
-    private Set<Pair> mapToSet(Map<String, Object> map)
-    {
-        Set<Pair> setPair = new HashSet<>();
-
-        if (map != null)
-        {
-            for (Map.Entry<String, Object> setEntry : map.entrySet())
-            {
-                setPair.add(new Pair(setEntry.getKey(), setEntry.getValue()));
-            }
-        }
-
-        return setPair;
     }
 }

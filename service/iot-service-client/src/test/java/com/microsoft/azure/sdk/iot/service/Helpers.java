@@ -75,10 +75,6 @@ public class Helpers
             {
                 assertEquals(expected.size(), actual.size());
             }
-            else
-            {
-                assertEquals(message, expected.size(), actual.size());
-            }
 
             for (Map.Entry entry : expected.entrySet())
             {

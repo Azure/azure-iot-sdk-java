@@ -10,12 +10,12 @@ import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.SignatureProvider;
 import com.microsoft.azure.sdk.iot.device.edge.HttpsHsmTrustBundleProvider;
-import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
-import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
+import com.microsoft.azure.sdk.iot.device.edge.DirectMethodRequest;
+import com.microsoft.azure.sdk.iot.device.edge.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.device.edge.TrustBundleProvider;
-import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.hsm.HsmException;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubServiceException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import com.microsoft.azure.sdk.iot.device.hsm.HttpHsmSignatureProvider;
 import com.microsoft.azure.sdk.iot.device.hsm.IotHubSasTokenHsmAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.hsm.UnixDomainSocketChannel;
@@ -147,9 +147,9 @@ public class ModuleClient extends InternalClient
      * socket communication is required, and this argument can be set to null. If its value is present and is prefixed
      * with "unix", then unix domain socket communication will be required, and this argument must not be null.
      * @return the created module client instance
-     * @throws ModuleClientException if the module client cannot be created
+     * @throws IotHubClientException if the module client cannot be created
      */
-    public static ModuleClient createFromEnvironment(UnixDomainSocketChannel unixDomainSocketChannel) throws ModuleClientException
+    public static ModuleClient createFromEnvironment(UnixDomainSocketChannel unixDomainSocketChannel) throws IotHubClientException
     {
         return createFromEnvironment(unixDomainSocketChannel, IotHubClientProtocol.AMQPS);
     }
@@ -165,9 +165,9 @@ public class ModuleClient extends InternalClient
      * with "unix", then unix domain socket communication will be required, and this argument must not be null.
      * @param protocol the protocol the module client instance will use
      * @return the created module client instance
-     * @throws ModuleClientException if the module client cannot be created
+     * @throws IotHubClientException if the module client cannot be created
      */
-    public static ModuleClient createFromEnvironment(UnixDomainSocketChannel unixDomainSocketChannel, IotHubClientProtocol protocol) throws ModuleClientException
+    public static ModuleClient createFromEnvironment(UnixDomainSocketChannel unixDomainSocketChannel, IotHubClientProtocol protocol) throws IotHubClientException
     {
         return createFromEnvironment(unixDomainSocketChannel, protocol, null);
     }
@@ -184,9 +184,9 @@ public class ModuleClient extends InternalClient
      * @param protocol the protocol the module client instance will use
      * @param clientOptions The options that allow configuration of the module client instance during initialization
      * @return the created module client instance
-     * @throws ModuleClientException if the module client cannot be created
+     * @throws IotHubClientException if the module client cannot be created
      */
-    public static ModuleClient createFromEnvironment(UnixDomainSocketChannel unixDomainSocketChannel, IotHubClientProtocol protocol, ClientOptions clientOptions) throws ModuleClientException
+    public static ModuleClient createFromEnvironment(UnixDomainSocketChannel unixDomainSocketChannel, IotHubClientProtocol protocol, ClientOptions clientOptions) throws IotHubClientException
     {
         log.info("Creating module client from environment with protocol {}...", protocol);
         Map<String, String> envVariables = System.getenv();
@@ -216,7 +216,7 @@ public class ModuleClient extends InternalClient
                 }
                 catch (CertificateException | IOException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException e)
                 {
-                    throw new ModuleClientException("Failed to create an SSLContext instance from the provided trusted cert file path", e);
+                    throw new IotHubClientException(IotHubStatusCode.ERROR, "Failed to create an SSLContext instance from the provided trusted cert file path", e);
                 }
             }
             else
@@ -249,37 +249,37 @@ public class ModuleClient extends InternalClient
 
             if (edgedUri == null)
             {
-                throw new ModuleClientException("Environment variable " + IotEdgedUriVariableName + " is required.");
+                throw new IllegalStateException("Environment variable " + IotEdgedUriVariableName + " is required.");
             }
 
             if (deviceId == null)
             {
-                throw new ModuleClientException("Environment variable " + DeviceIdVariableName + " is required.");
+                throw new IllegalStateException("Environment variable " + DeviceIdVariableName + " is required.");
             }
 
             if (moduleId == null)
             {
-                throw new ModuleClientException("Environment variable " + ModuleIdVariableName + " is required.");
+                throw new IllegalStateException("Environment variable " + ModuleIdVariableName + " is required.");
             }
 
             if (hostname == null)
             {
-                throw new ModuleClientException("Environment variable " + IotHubHostnameVariableName + " is required.");
+                throw new IllegalStateException("Environment variable " + IotHubHostnameVariableName + " is required.");
             }
 
             if (authScheme == null)
             {
-                throw new ModuleClientException("Environment variable " + AuthSchemeVariableName + " is required.");
+                throw new IllegalStateException("Environment variable " + AuthSchemeVariableName + " is required.");
             }
 
             if (generationId == null)
             {
-                throw new ModuleClientException("Environment variable " + ModuleGenerationIdVariableName + " is required");
+                throw new IllegalStateException("Environment variable " + ModuleGenerationIdVariableName + " is required");
             }
 
             if (!authScheme.equalsIgnoreCase(SasTokenAuthScheme))
             {
-                throw new ModuleClientException("Unsupported authentication scheme. Supported scheme is " + SasTokenAuthScheme + ".");
+                throw new IllegalStateException("Unsupported authentication scheme. Supported scheme is " + SasTokenAuthScheme + ".");
             }
 
             SignatureProvider signatureProvider;
@@ -289,7 +289,7 @@ public class ModuleClient extends InternalClient
             }
             catch (NoSuchAlgorithmException | URISyntaxException e)
             {
-                throw new ModuleClientException("Could not use Hsm Signature Provider", e);
+                throw new IotHubClientException(IotHubStatusCode.ERROR, "Could not use Hsm Signature Provider", e);
             }
 
             try
@@ -321,9 +321,17 @@ public class ModuleClient extends InternalClient
 
                 return new ModuleClient(iotHubAuthenticationProvider, protocol);
             }
-            catch (IOException | TransportException | HsmException | URISyntaxException | CertificateException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e)
+            catch (URISyntaxException | CertificateException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e)
             {
-                throw new ModuleClientException(e);
+                throw new IotHubClientException(IotHubStatusCode.ERROR, "Failed to handle the provided certificates", e);
+            }
+            catch (TransportException e)
+            {
+                throw e.toIotHubClientException();
+            }
+            catch (IOException e)
+            {
+                throw new IotHubClientException(IotHubStatusCode.IO_ERROR, e);
             }
         }
     }
@@ -335,15 +343,63 @@ public class ModuleClient extends InternalClient
     }
 
     /**
+     * Synchronously sends a message to to a particular outputName.
+     *
+     * @param message the message to be sent.
+     * @param outputName the outputName to route the message to
+     *
+     * @throws InterruptedException if the operation is interrupted while waiting on the telemetry to be acknowledged by the service.
+     * @throws IllegalStateException if the client has not been opened yet or is already closed.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
+     */
+    public void sendEvent(Message message, String outputName)
+            throws IllegalStateException, InterruptedException, IotHubClientException
+    {
+        this.sendEvent(message, outputName, DEFAULT_TIMEOUT_MILLISECONDS);
+    }
+
+    /**
+     * Synchronously sends a message to to a particular outputName.
+     *
+     * @param message the message to be sent.
+     * @param outputName the outputName to route the message to
+     * @param timeoutMilliseconds The maximum number of milliseconds to wait for the service to acknowledge this message.
+     * If 0, then it will wait indefinitely.
+     *
+     * @throws InterruptedException if the operation is interrupted while waiting on the telemetry to be acknowledged by the service.
+     * @throws IllegalStateException if the client has not been opened yet or is already closed.
+     * @throws IotHubClientException if the request is rejected by the service for any reason of if the synchronous operation times out.
+     */
+    public void sendEvent(Message message, String outputName, int timeoutMilliseconds)
+            throws IllegalStateException, InterruptedException, IotHubClientException
+    {
+        if (outputName == null || outputName.isEmpty())
+        {
+            throw new IllegalArgumentException("outputName cannot be null or empty");
+        }
+
+        message.setOutputName(outputName);
+        this.sendEvent(message, timeoutMilliseconds);
+    }
+
+    @Override
+    public void sendEvent(Message message)
+            throws IllegalArgumentException, InterruptedException, IotHubClientException
+    {
+        message.setConnectionModuleId(this.config.getModuleId());
+        super.sendEvent(message);
+    }
+
+    /**
      * Sends a message to a particular outputName asynchronously
      *
      * @param outputName the outputName to route the message to
      * @param message the message to send
      * @param callback the callback to be fired when the message is acknowledged by the service
      * @param callbackContext the context to be included in the callback when fired
-     * @throws IllegalArgumentException if the provided outputName is null or empty
+     * @throws IllegalStateException if the client has not been opened yet or is already closed.
      */
-    public void sendEventAsync(Message message, IotHubEventCallback callback, Object callbackContext, String outputName) throws IllegalArgumentException
+    public void sendEventAsync(Message message, MessageSentCallback callback, Object callbackContext, String outputName) throws IllegalStateException
     {
         if (outputName == null || outputName.isEmpty())
         {
@@ -355,7 +411,7 @@ public class ModuleClient extends InternalClient
     }
 
     @Override
-    public void sendEventAsync(Message message, IotHubEventCallback callback, Object callbackContext) throws IllegalArgumentException
+    public void sendEventAsync(Message message, MessageSentCallback callback, Object callbackContext) throws IllegalArgumentException
     {
         message.setConnectionModuleId(this.config.getModuleId());
         super.sendEventAsync(message, callback, callbackContext);
@@ -364,12 +420,12 @@ public class ModuleClient extends InternalClient
     /**
      * Invoke a method on a device
      * @param deviceId the device to invoke a method on
-     * @param methodRequest the request containing the method to invoke on the device
+     * @param directMethodRequest the request containing the method to invoke on the device
      * @return the result of the method call
-     * @throws ModuleClientException if the method cannot be invoked
+     * @throws IotHubClientException if the method cannot be invoked
      * @throws IllegalArgumentException if deviceId is null or empty
      */
-    public MethodResult invokeMethod(String deviceId, MethodRequest methodRequest) throws ModuleClientException, IllegalArgumentException
+    public DirectMethodResponse invokeMethod(String deviceId, DirectMethodRequest directMethodRequest) throws IotHubClientException
     {
         if (deviceId == null || deviceId.isEmpty())
         {
@@ -380,11 +436,19 @@ public class ModuleClient extends InternalClient
         {
             HttpsTransportManager httpsTransportManager = new HttpsTransportManager(this.config);
             httpsTransportManager.open();
-            return httpsTransportManager.invokeMethod(methodRequest, deviceId, "");
+            return httpsTransportManager.invokeMethod(directMethodRequest, deviceId, "");
         }
-        catch (URISyntaxException | IOException | TransportException e)
+        catch (IotHubServiceException e)
         {
-            throw new ModuleClientException("Could not invoke method", e);
+            throw new IotHubClientException(e.getStatusCode(), "Could not invoke method", e);
+        }
+        catch (TransportException e)
+        {
+            throw new IotHubClientException(IotHubStatusCode.IO_ERROR, "Could not invoke method", e);
+        }
+        catch (IOException e)
+        {
+            throw new IotHubClientException(IotHubStatusCode.IO_ERROR, e);
         }
     }
 
@@ -392,12 +456,12 @@ public class ModuleClient extends InternalClient
      * Invoke a method on a module
      * @param deviceId the device the module belongs to
      * @param moduleId the module to invoke the method on
-     * @param methodRequest the request containing the method to invoke on the device
+     * @param directMethodRequest the request containing the method to invoke on the device
      * @return the result of the method call
-     * @throws ModuleClientException if the method cannot be invoked
+     * @throws IotHubClientException if the method cannot be invoked
      * @throws IllegalArgumentException if deviceId is null or empty, or if moduleId is null or empty
      */
-    public MethodResult invokeMethod(String deviceId, String moduleId, MethodRequest methodRequest) throws ModuleClientException, IllegalArgumentException
+    public DirectMethodResponse invokeMethod(String deviceId, String moduleId, DirectMethodRequest directMethodRequest) throws IotHubClientException
     {
         if (deviceId == null || deviceId.isEmpty())
         {
@@ -413,11 +477,19 @@ public class ModuleClient extends InternalClient
         {
             HttpsTransportManager httpsTransportManager = new HttpsTransportManager(this.config);
             httpsTransportManager.open();
-            return httpsTransportManager.invokeMethod(methodRequest, deviceId, moduleId);
+            return httpsTransportManager.invokeMethod(directMethodRequest, deviceId, moduleId);
         }
-        catch (URISyntaxException | IOException | TransportException e)
+        catch (IotHubServiceException e)
         {
-            throw new ModuleClientException("Could not invoke method", e);
+            throw new IotHubClientException(e.getStatusCode(), "Could not invoke method", e);
+        }
+        catch (TransportException e)
+        {
+            throw new IotHubClientException(IotHubStatusCode.IO_ERROR, "Could not invoke method", e);
+        }
+        catch (IOException e)
+        {
+            throw new IotHubClientException(IotHubStatusCode.IO_ERROR, e);
         }
     }
 
@@ -431,8 +503,6 @@ public class ModuleClient extends InternalClient
      *
      * @throws IllegalArgumentException if the callback is {@code null} but a context is
      * passed in.
-     * @throws IllegalStateException if the callback is set after the client is
-     * closed.
      */
     public ModuleClient setMessageCallback(MessageCallback callback, Object context)
     {

@@ -122,13 +122,11 @@ public class TwinProperties
      */
     TwinProperties(TwinCollection desired, TwinCollection reported)
     {
-        /* SRS_TWIN_PROPERTIES_21_001: [The constructor shall throw IllegalArgumentException if the provided desired and reported properties is null.] */
         if ((desired == null) && (reported == null))
         {
             throw new IllegalArgumentException("Desired property cannot be null.");
         }
 
-        /* SRS_TWIN_PROPERTIES_21_002: [The constructor shall store the provided desired and reported properties converting from the row collection.] */
         if (desired != null)
         {
             this.desired = TwinCollection.createFromRawCollection(desired);
@@ -154,16 +152,13 @@ public class TwinProperties
      */
     JsonElement toJsonElement()
     {
-        /* SRS_TWIN_PROPERTIES_21_003: [The toJsonElement shall return a JsonElement with the information in this class in a JSON format.] */
         JsonObject twinJson = new JsonObject();
 
-        /* SRS_TWIN_PROPERTIES_21_004: [If the desired property is null, the toJsonElement shall not include the `desired` in the final JSON.] */
         if (this.desired != null)
         {
             twinJson.add(DESIRED_PROPERTIES_TAG, this.desired.toJsonElement());
         }
 
-        /* SRS_TWIN_PROPERTIES_21_005: [If the reported property is null, the toJsonElement shall not include the `reported` in the final JSON.] */
         if (this.reported != null)
         {
             twinJson.add(REPORTED_PROPERTIES_TAG, this.reported.toJsonElement());
@@ -190,16 +185,13 @@ public class TwinProperties
      */
     JsonElement toJsonElementWithMetadata()
     {
-        /* SRS_TWIN_PROPERTIES_21_006: [The toJsonElementWithMetadata shall return a JsonElement with the information in this class, including metadata, in a JSON format.] */
         JsonObject twinJson = new JsonObject();
 
-        /* SRS_TWIN_PROPERTIES_21_007: [If the desired property is null, the toJsonElementWithMetadata shall not include the `desired` in the final JSON.] */
         if (this.desired != null)
         {
             twinJson.add(DESIRED_PROPERTIES_TAG, this.desired.toJsonElementWithMetadata());
         }
 
-        /* SRS_TWIN_PROPERTIES_21_008: [If the reported property is null, the toJsonElementWithMetadata shall not include the `reported` in the final JSON.] */
         if (this.reported != null)
         {
             twinJson.add(REPORTED_PROPERTIES_TAG, this.reported.toJsonElementWithMetadata());
@@ -215,12 +207,7 @@ public class TwinProperties
      */
     public TwinCollection getDesired()
     {
-        /* SRS_TWIN_PROPERTIES_21_009: [The getDesired shall return a TwinCollection with the stored desired property.] */
-        if (this.desired == null)
-        {
-            return null;
-        }
-        return new TwinCollection(this.desired);
+        return this.desired;
     }
 
     /**
@@ -230,12 +217,7 @@ public class TwinProperties
      */
     public TwinCollection getReported()
     {
-        /* SRS_TWIN_PROPERTIES_21_010: [The getReported shall return a TwinCollection with the stored reported property.] */
-        if (this.reported == null)
-        {
-            return null;
-        }
-        return new TwinCollection(this.reported);
+        return this.reported;
     }
 
     /**
@@ -246,7 +228,6 @@ public class TwinProperties
     @Override
     public String toString()
     {
-        /* SRS_TWIN_PROPERTIES_21_011: [The toString shall return a String with the information in this class in a pretty print JSON.] */
         return toJsonElementWithMetadata().toString();
     }
 
@@ -260,6 +241,5 @@ public class TwinProperties
     @SuppressWarnings("unused")
     TwinProperties()
     {
-        /* SRS_TWIN_PROPERTIES_21_012: [The TwinProperties shall provide an empty constructor to make GSON happy.] */
     }
 }

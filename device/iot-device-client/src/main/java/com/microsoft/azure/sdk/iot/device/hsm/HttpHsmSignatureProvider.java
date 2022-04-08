@@ -6,13 +6,13 @@
 package com.microsoft.azure.sdk.iot.device.hsm;
 
 import com.microsoft.azure.sdk.iot.device.auth.SignatureProvider;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignRequest;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignResponse;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.Mac;
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
@@ -64,10 +64,8 @@ public class HttpHsmSignatureProvider implements SignatureProvider
      * @param data the data to be signed
      * @param generationId the generation id
      * @return the signed data
-     * @throws IOException If the http client cannot reach the signing party
-     * @throws TransportException If the http client cannot reach the signing party
      */
-    public String sign(String keyName, String data, String generationId) throws IOException, TransportException, HsmException
+    public String sign(String keyName, String data, String generationId) throws TransportException, UnsupportedEncodingException
     {
         if (data == null || data.isEmpty())
         {

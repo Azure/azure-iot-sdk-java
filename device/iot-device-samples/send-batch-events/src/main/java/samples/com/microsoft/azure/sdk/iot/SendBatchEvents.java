@@ -4,6 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import java.io.IOException;
@@ -20,12 +21,11 @@ public class SendBatchEvents
 
     // Sample can safely assume the context will always be a List<Message> so the cast is safe
     @SuppressWarnings("unchecked")
-    protected static class EventCallback implements IotHubEventCallback
+    protected static class MessagesSentCallbackImpl implements MessagesSentCallback
     {
-        public void execute(IotHubStatusCode status, Object context)
+        public void onMessagesSent(List<Message> messages, IotHubClientException exception, Object context)
         {
-            List<Message> messages = (List<Message>) context;
-
+            IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
             System.out.println("IoT Hub responded to the batch message with status " + status.name());
 
             if (status==IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE)
@@ -38,8 +38,12 @@ public class SendBatchEvents
     protected static class IotHubConnectionStatusChangeCallbackLogger implements IotHubConnectionStatusChangeCallback
     {
         @Override
-        public void onStatusChanged(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+        public void onStatusChanged(ConnectionStatusChangeContext connectionStatusChangeContext)
         {
+            IotHubConnectionStatus status = connectionStatusChangeContext.getNewStatus();
+            IotHubConnectionStatusChangeReason statusChangeReason = connectionStatusChangeContext.getNewStatusReason();
+            Throwable throwable = connectionStatusChangeContext.getCause();
+
             System.out.println();
             System.out.println("CONNECTION STATUS UPDATE: " + status);
             System.out.println("CONNECTION STATUS REASON: " + statusChangeReason);
@@ -79,7 +83,7 @@ public class SendBatchEvents
      * args[2] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws')
      */
     public static void main(String[] args)
-            throws IOException, URISyntaxException
+            throws IOException, URISyntaxException, IotHubClientException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
@@ -191,8 +195,8 @@ public class SendBatchEvents
 
         try
         {
-            EventCallback callback = new EventCallback();
-            client.sendEventAsync(messageList, callback, messageList);
+            MessagesSentCallbackImpl messagesSentCallbackImpl = new MessagesSentCallbackImpl();
+            client.sendEventsAsync(messageList, messagesSentCallbackImpl, null);
         }
         catch (Exception e)
         {

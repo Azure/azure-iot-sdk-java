@@ -487,11 +487,11 @@ public class DirectMethodsClientTest
         };
 
         //act
-        MethodResult result = testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME);
+        DirectMethodResponse result = testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME);
 
         //assert
         assertThat(result.getStatus(), is(123));
-        assertThat(result.getPayload().toString(), is(STANDARD_PAYLOAD_STR));
+        assertThat(result.getPayload(String.class), is(STANDARD_PAYLOAD_STR));
         new Verifications()
         {
             {

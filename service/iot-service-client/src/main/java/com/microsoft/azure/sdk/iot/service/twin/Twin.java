@@ -32,9 +32,9 @@ public class Twin
     @Setter(AccessLevel.PACKAGE)
     private Integer version;
 
-    private TwinCollection tags;
-    private TwinCollection reportedProperties;
-    private TwinCollection desiredProperties;
+    private final TwinCollection tags = new TwinCollection();
+    private final TwinCollection reportedProperties = new TwinCollection();
+    private final TwinCollection desiredProperties = new TwinCollection();
 
     @Getter
     @Setter(AccessLevel.PACKAGE)
@@ -78,9 +78,40 @@ public class Twin
         Twin twin = new Twin(twinState.getDeviceId());
         twin.setVersion(twinState.getVersion());
         twin.setETag(twinState.getETag());
-        twin.setTags(twinState.getTags());
-        twin.setDesiredProperties(twinState.getDesiredProperty());
-        twin.setReportedProperties(twinState.getReportedProperty());
+
+        // Tags
+        twin.getTags().setVersion(twinState.getTags().getVersion());
+        if (twinState.getTags().size() > 0)
+        {
+            twin.getTags().putAll(twinState.getTags());
+        }
+
+        // Desired properties
+        twin.getDesiredProperties().setVersion(twinState.getDesiredProperties().getVersion());
+        if (twinState.getDesiredProperties().size() > 0)
+        {
+            twin.getDesiredProperties().putAll(twinState.getDesiredProperties());
+        }
+
+        twin.getDesiredProperties().setTwinMetadata(twinState.getDesiredProperties().getTwinMetadata());
+        if (twinState.getDesiredProperties().getMetadataMap().size() > 0)
+        {
+            twin.getDesiredProperties().getMetadataMap().putAll(twinState.getDesiredProperties().getMetadataMap());
+        }
+
+        // Reported properties
+        twin.getReportedProperties().setVersion(twinState.getReportedProperties().getVersion());
+        if (twinState.getReportedProperties().size() > 0)
+        {
+            twin.getReportedProperties().putAll(twinState.getReportedProperties());
+        }
+
+        twin.getReportedProperties().setTwinMetadata(twinState.getReportedProperties().getTwinMetadata());
+        if (twinState.getReportedProperties().getMetadataMap().size() > 0)
+        {
+            twin.getReportedProperties().getMetadataMap().putAll(twinState.getReportedProperties().getMetadataMap());
+        }
+
         twin.setCapabilities(twinState.getCapabilities());
         twin.setConnectionState(twinState.getConnectionState());
         twin.setConfigurations(twinState.getConfigurations());
@@ -117,6 +148,7 @@ public class Twin
         {
             throw new IllegalArgumentException("deviceId cannot be null or empty.");
         }
+
         this.deviceId = deviceId;
     }
 
@@ -140,23 +172,9 @@ public class Twin
         {
             throw new IllegalArgumentException("moduleId cannot be null or empty.");
         }
+
         this.deviceId = deviceId;
         this.moduleId = moduleId;
-    }
-
-    /**
-     * Setter for twin tags.
-     *
-     * @param tags A set of tag key/value pairs.
-     * @throws IllegalArgumentException This exception is thrown if the set tags is {@code null}.
-     */
-    public void setTags(Set<Pair> tags) throws IllegalArgumentException
-    {
-        if (tags == null)
-        {
-            throw new IllegalArgumentException("tags cannot be null");
-        }
-        this.tags = this.setToMap(tags);
     }
 
     /**
@@ -164,32 +182,9 @@ public class Twin
      *
      * @return A set of tag key/value pairs.
      */
-    public Set<Pair> getTags()
+    public TwinCollection getTags()
     {
-        return this.mapToSet(this.tags);
-    }
-
-    /**
-     * Clears the tags set so far.
-     */
-    public void clearTags()
-    {
-        this.tags = null;
-    }
-
-    /**
-     * Getter for the tag version.
-     *
-     * @return The {@code Integer} with the tags collection version.
-     * @throws IllegalArgumentException If the tags is {@code null}.
-     */
-    public Integer getTagsVersion()
-    {
-        if (this.tags == null)
-        {
-            throw new IllegalArgumentException("tag is null");
-        }
-        return this.tags.getVersion();
+        return this.tags;
     }
 
     /**
@@ -197,56 +192,9 @@ public class Twin
      *
      * @return A set of desired property pairs.
      */
-    public Set<Pair> getDesiredProperties()
+    public TwinCollection getDesiredProperties()
     {
-        return this.mapToSet(this.desiredProperties);
-    }
-
-    /**
-     * Setter for the desired properties.
-     *
-     * @param desiredProperties A set of key/value pairs for desired properties.
-     * @throws IllegalArgumentException This exception is thrown if the set is {@code null}.
-     */
-    public void setDesiredProperties(Set<Pair> desiredProperties) throws IllegalArgumentException
-    {
-        if (desiredProperties == null)
-        {
-            throw new IllegalArgumentException("desiredProperties cannot be null");
-        }
-        this.desiredProperties = this.setToMap(desiredProperties);
-    }
-
-    /**
-     * Clears the desired properties set so far.
-     */
-    public void clearDesiredProperties()
-    {
-        this.desiredProperties = null;
-    }
-
-    /**
-     * Getter for the desired properties version.
-     *
-     * @return The desired properties collection version.
-     * @throws IllegalArgumentException If the desired properties is {@code null}.
-     */
-    public Integer getDesiredPropertiesVersion()
-    {
-        if (this.desiredProperties == null)
-        {
-            throw new IllegalArgumentException("desiredProperties is null.");
-        }
-        return this.desiredProperties.getVersion();
-    }
-
-    /**
-     * Clear tags and desired properties set so far.
-     */
-    public void clearTwin()
-    {
-        this.clearTags();
-        this.clearDesiredProperties();
+        return this.desiredProperties;
     }
 
     /**
@@ -254,82 +202,7 @@ public class Twin
      *
      * @return A set of reported property pairs.
      */
-    public Set<Pair> getReportedProperties()
-    {
-        return this.mapToSet(this.reportedProperties);
-    }
-
-    /**
-     * Getter for the reported properties version.
-     *
-     * @return The desired properties collection version.
-     * @throws IllegalArgumentException if the reported properties is {@code null}.
-     */
-    public Integer getReportedPropertiesVersion()
-    {
-        if (this.reportedProperties == null)
-        {
-            throw new IllegalArgumentException("reportedProperties is null");
-        }
-        return this.reportedProperties.getVersion();
-    }
-
-    /**
-     * Setter for the reported properties.
-     *
-     * @param reportedProperties A map of validated key/value pairs for reported properties.
-     */
-    void setReportedProperties(TwinCollection reportedProperties)
-    {
-        this.reportedProperties = reportedProperties;
-    }
-
-    /**
-     * Setter for the desired properties.
-     *
-     * @param desiredProperties A map of validated key/value pairs for desired properties.
-     */
-    void setDesiredProperties(TwinCollection desiredProperties)
-    {
-        this.desiredProperties = desiredProperties;
-    }
-
-    /**
-     * Setter for tags.
-     *
-     * @param tags A map of validated key/value pairs for tags.
-     */
-    void setTags(TwinCollection tags)
-    {
-        this.tags = tags;
-    }
-
-    /**
-     * Getter for tags.
-     *
-     * @return  A map of validated key/value pairs for tags.
-     */
-    TwinCollection getTagsMap()
-    {
-        return this.tags;
-    }
-
-    /**
-     * Getter for desired properties.
-     *
-     * @return  A map of validated key/value pairs for desired properties.
-     */
-    protected TwinCollection getDesiredMap()
-    {
-        return this.desiredProperties;
-    }
-
-    /**
-     * Getter for reported properties.
-     *
-     * @return  A map of validated key/value pairs for reported properties.
-     */
-    protected TwinCollection getReportedMap()
+    public TwinCollection getReportedProperties()
     {
         return this.reportedProperties;
     }
@@ -395,7 +268,7 @@ public class Twin
      *
      * @return String representation for this device tags.
      */
-    public String tagsToString()
+    private String tagsToString()
     {
         StringBuilder thisDeviceTags = new StringBuilder();
         if (tags != null)
@@ -410,7 +283,7 @@ public class Twin
      *
      * @return  String representation for this device desired properties.
      */
-    public String desiredPropertiesToString()
+    private String desiredPropertiesToString()
     {
         StringBuilder thisDeviceRepProp = new StringBuilder();
         if (this.desiredProperties != null)
@@ -425,7 +298,7 @@ public class Twin
      *
      * @return  String representation for this device reported properties.
      */
-    public String reportedPropertiesToString()
+    private String reportedPropertiesToString()
     {
         StringBuilder thisDeviceDesProp = new StringBuilder();
         if (this.reportedProperties != null)
@@ -435,41 +308,5 @@ public class Twin
                     .append("\n");
         }
         return thisDeviceDesProp.toString();
-    }
-
-    private Set<Pair> mapToSet(TwinCollection map)
-    {
-        Set<Pair> setPair = new HashSet<>();
-
-        if (map != null)
-        {
-            for (Map.Entry<String, Object> setEntry : map.entrySet())
-            {
-                setPair.add(new Pair(setEntry.getKey(), setEntry.getValue()));
-            }
-        }
-
-        return setPair;
-    }
-
-    private TwinCollection setToMap(Set<Pair> set)
-    {
-        TwinCollection map = new TwinCollection();
-
-        if (set != null)
-        {
-            for (Pair p : set)
-            {
-                if (map.containsKey(p.getKey()))
-                {
-                    throw new IllegalArgumentException(
-                            "Set must not contain multiple pairs with the same keys. Duplicate key: " + p.getKey());
-                }
-
-                map.put(p.getKey(), p.getValue());
-            }
-        }
-
-        return map;
     }
 }

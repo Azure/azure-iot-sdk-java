@@ -3,8 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-
 public class TransportUtils
 {
     public static final String IOTHUB_API_VERSION = "2020-09-30";
@@ -17,18 +15,4 @@ public class TransportUtils
     private static final String PROCESSOR_ARCHITECTURE = System.getProperty("os.arch");
 
     public final static String USER_AGENT_STRING = JAVA_DEVICE_CLIENT_IDENTIFIER + "/" + CLIENT_VERSION + " (" + JAVA_RUNTIME + "; " + OPERATING_SYSTEM +"; " + PROCESSOR_ARCHITECTURE + ")";
-
-    public static void throwTransportExceptionWithIotHubServiceType(String message, TransportException.IotHubService service) throws TransportException
-    {
-        TransportException transportException = new TransportException(message);
-        transportException.setIotHubService(service);
-        throw transportException;
-    }
-
-    public static void throwTransportExceptionWithIotHubServiceType(Exception e, TransportException.IotHubService service) throws TransportException
-    {
-        TransportException transportException = new TransportException(e);
-        transportException.setIotHubService(service);
-        throw transportException;
-    }
 }

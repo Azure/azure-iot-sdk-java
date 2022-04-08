@@ -20,9 +20,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import static com.microsoft.azure.sdk.iot.device.twin.ParserUtility.getJsonObjectValue;
-import static com.microsoft.azure.sdk.iot.device.twin.ParserUtility.resolveJsonElement;
-
 /**
  * Representation of a single Direct Method Access collection with a Json serializer and deserializer.
  */
@@ -70,7 +67,7 @@ public class MethodParser
     private static final String PAYLOAD_TAG = "payload";
     @SerializedName(PAYLOAD_TAG)
     @Setter
-    private Object payload;
+    private JsonElement payload;
 
     /**
      * CONSTRUCTOR
@@ -97,7 +94,7 @@ public class MethodParser
      * @param payload - Object that contains the payload defined by the user. It can be {@code null}.
      * @throws IllegalArgumentException This exception is thrown if the one of the provided information do not fits the requirements.
      */
-    public MethodParser(String name, Long responseTimeout, Long connectTimeout, Object payload) throws IllegalArgumentException
+    public MethodParser(String name, Long responseTimeout, Long connectTimeout, JsonElement payload) throws IllegalArgumentException
     {
         this();
 
@@ -127,7 +124,7 @@ public class MethodParser
      *
      * @param payload - Object that contains the payload defined by the user. It can be {@code null}.
      */
-    public MethodParser(Object payload)
+    public MethodParser(JsonElement payload)
     {
         this();
 
@@ -147,7 +144,7 @@ public class MethodParser
     public synchronized void fromJson(String json) throws IllegalArgumentException
     {
 
-        if ((json == null) || json.isEmpty())
+        if (json == null || json.isEmpty())
         {
             throw new IllegalArgumentException("Invalid json.");
         }
@@ -168,7 +165,7 @@ public class MethodParser
                        2.6
                  */
                 this.operation = Operation.payload;
-                this.payload = resolveJsonElement(jsonElement);
+                this.payload = jsonElement;
             }
             else if (jsonElement instanceof JsonObject)
             {
@@ -188,7 +185,7 @@ public class MethodParser
                            }
                          */
                         operation = Operation.payload;
-                        payload = getJsonObjectValue(jsonObject);
+                        payload = jsonObject;
                     }
                     else
                     {
@@ -208,7 +205,7 @@ public class MethodParser
                         JsonElement payloadNode = jsonObject.get(PAYLOAD_TAG);
                         if (payloadNode != null)
                         {
-                            payload = resolveJsonElement(payloadNode);
+                            payload = payloadNode;
                         }
                     }
                 }
@@ -246,7 +243,7 @@ public class MethodParser
                         JsonElement payloadNode = jsonObject.get(PAYLOAD_TAG);
                         if (payloadNode != null)
                         {
-                            payload = resolveJsonElement(payloadNode);
+                            payload = payloadNode;
                         }
                     }
                     else
@@ -267,17 +264,24 @@ public class MethodParser
         }
     }
 
+    public JsonElement getPayloadFromJson(String json)
+    {
+        if (json == null || json.isEmpty())
+        {
+            return new JsonObject();
+        }
+
+        JsonElement jsonElement = new JsonParser().parse(json);
+        return jsonElement;
+    }
+
     /**
      * Return an Object with the payload.
      *
      * @return An Object with the payload. It can be {@code null}.
      */
-    public Object getPayload()
+    public JsonElement getPayload()
     {
-        if (payload instanceof JsonElement && ((JsonElement) payload).isJsonPrimitive() && ((JsonPrimitive) payload).isString())
-        {
-            return ((JsonPrimitive) payload).getAsString();
-        }
         return payload;
     }
 

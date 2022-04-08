@@ -5,7 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.device.hsm;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
+import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.ErrorResponse;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignRequest;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignResponse;
@@ -103,7 +104,7 @@ public class HttpsHsmClientTest
     // Tests_SRS_HSMHTTPCLIENT_34_003: [This function shall build an http request with headers ContentType and Accept with value application/json.]
     // Tests_SRS_HSMHTTPCLIENT_34_004: [If the response from the http call is 200, this function shall return the SignResponse built from the response body json.]
     @Test
-    public void signSuccessHttps(final @Mocked URI mockedURI) throws IOException, TransportException, URISyntaxException, HsmException
+    public void signSuccessHttps(final @Mocked URI mockedURI) throws IOException, TransportException, URISyntaxException
     {
         //arrange
         final String expectedUrl = expectedBaseUrl + "/modules/" + URLEncoder.encode(expectedName, "UTF-8") + "/genid/" + URLEncoder.encode(expectedGenId, "UTF-8") + "/sign?api-version=" + URLEncoder.encode(expectedApiVersion, "UTF-8");
@@ -160,7 +161,7 @@ public class HttpsHsmClientTest
     }
 
     @Test
-    public void signSuccessHttp(final @Mocked URI mockedURI) throws IOException, TransportException, URISyntaxException, HsmException
+    public void signSuccessHttp(final @Mocked URI mockedURI) throws IOException, TransportException, URISyntaxException
     {
         //arrange
         final String expectedUrl = expectedBaseUrl + "/modules/" + URLEncoder.encode(expectedName, "UTF-8") + "/genid/" + URLEncoder.encode(expectedGenId, "UTF-8") + "/sign?api-version=" + URLEncoder.encode(expectedApiVersion, "UTF-8");
@@ -218,7 +219,7 @@ public class HttpsHsmClientTest
 
     // Tests_SRS_HSMHTTPCLIENT_34_006: [If the scheme of the provided url is Unix, this function shall send the http request using unix domain sockets.]
     @Test
-    public void signSuccessWithUnix(@Mocked final URI mockedURI) throws IOException, TransportException, URISyntaxException, HsmException
+    public void signSuccessWithUnix(@Mocked final URI mockedURI) throws IOException, TransportException, URISyntaxException
     {
         //arrange
         final String expectedJson = "some json";
@@ -332,7 +333,7 @@ public class HttpsHsmClientTest
         {
             client.sign(expectedApiVersion, expectedName, mockedSignRequest, expectedGenId);
         }
-        catch (HsmException e)
+        catch (TransportException e)
         {
             transportExceptionThrown = true;
         }
@@ -354,7 +355,7 @@ public class HttpsHsmClientTest
 
     // Tests_SRS_HSMHTTPCLIENT_34_007: [If the provided api version is null or empty, this function shall throw an IllegalArgumentException.]
     @Test (expected = IllegalArgumentException.class)
-    public void getTrustBundleThrowsForNullApiVersion(final @Mocked URI mockedURI) throws URISyntaxException, TransportException, IOException, HsmException
+    public void getTrustBundleThrowsForNullApiVersion(final @Mocked URI mockedURI) throws URISyntaxException, TransportException, IOException
     {
         //arrange
         new NonStrictExpectations()
@@ -378,7 +379,7 @@ public class HttpsHsmClientTest
     // Tests_SRS_HSMHTTPCLIENT_34_009: [This function shall send a GET http request to the built url.]
     // Tests_SRS_HSMHTTPCLIENT_34_010: [If the response from the http request is 200, this function shall return the trust bundle response.]
     @Test
-    public void getTrustBundleSuccess(final @Mocked URI mockedURI) throws URISyntaxException, TransportException, IOException, HsmException
+    public void getTrustBundleSuccess(final @Mocked URI mockedURI) throws URISyntaxException, TransportException, IOException
     {
         //arrange
         final String expectedUrl = expectedBaseUrl + "/trust-bundle?api-version=" + expectedApiVersion;
@@ -422,7 +423,7 @@ public class HttpsHsmClientTest
 
     // Tests_SRS_HSMHTTPCLIENT_34_011: [If the response from the http request is not 200, this function shall throw an HSMException.]
     @Test
-    public void getTrustBundleThrowsIfResponseNot200(final @Mocked URI mockedURI) throws URISyntaxException, TransportException, MalformedURLException, HsmException, UnsupportedEncodingException
+    public void getTrustBundleThrowsIfResponseNot200(final @Mocked URI mockedURI) throws URISyntaxException, TransportException, MalformedURLException, UnsupportedEncodingException
     {
         //assert
         final String expectedUrl = expectedBaseUrl + "/trust-bundle?api-version=" + expectedApiVersion;
@@ -470,10 +471,8 @@ public class HttpsHsmClientTest
         {
             client.getTrustBundle(expectedApiVersion);
         }
-        catch (HsmException e)
+        catch (TransportException e)
         {
-            assertTrue(e.getMessage().contains(""+expectedStatusCode));
-            assertTrue(e.getMessage().contains(expectedErrorMessage));
             correctExceptionEncountered = true;
         }
         catch (Exception e)

@@ -9,7 +9,6 @@ import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Map;
 
 /**
  * Expose all connections string properties and methods

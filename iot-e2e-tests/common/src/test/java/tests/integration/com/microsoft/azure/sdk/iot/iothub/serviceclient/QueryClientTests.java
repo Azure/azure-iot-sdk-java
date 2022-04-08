@@ -18,7 +18,6 @@ import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
-import com.microsoft.azure.sdk.iot.service.twin.Pair;
 import com.microsoft.azure.sdk.iot.service.twin.Twin;
 import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -217,9 +216,7 @@ public class QueryClientTests extends IntegrationTest
 
             final String queryCondition = "DeviceId IN ['" + deviceId + "']";
             Twin twinUpdate = new Twin();
-            Set<Pair> desiredProperties = new HashSet<>();
-            desiredProperties.add(new Pair("key", "value"));
-            twinUpdate.setDesiredProperties(desiredProperties);
+            twinUpdate.getDesiredProperties().put("key", "value");
             Date now = new Date(System.currentTimeMillis());
             try
             {
@@ -293,9 +290,7 @@ public class QueryClientTests extends IntegrationTest
             for (int i = 0; i < deviceCount; i++)
             {
                 Twin twin = twinClient.get(devices[i].getDeviceId());
-                Set<Pair> desiredProperties = twin.getDesiredProperties();
-                desiredProperties.add(new Pair(queryProperty, queryPropertyValue));
-                twin.setDesiredProperties(desiredProperties);
+                twin.getDesiredProperties().put(queryProperty, queryPropertyValue);
                 twinClient.patch(twin);
             }
 
@@ -363,9 +358,7 @@ public class QueryClientTests extends IntegrationTest
     private void scheduleJobToBeQueried(String deviceId) throws IOException, IotHubException
     {
         Twin twinUpdate = new Twin();
-        Set<Pair> desiredProperties = new HashSet<>();
-        desiredProperties.add(new Pair("key", "value"));
-        twinUpdate.setDesiredProperties(desiredProperties);
+        twinUpdate.getDesiredProperties().put("key", "value");
 
         String jobId = UUID.randomUUID().toString();
         final String queryCondition = "DeviceId IN ['" + deviceId + "']";

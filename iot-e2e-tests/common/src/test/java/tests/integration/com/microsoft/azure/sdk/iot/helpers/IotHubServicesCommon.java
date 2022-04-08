@@ -6,6 +6,7 @@
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
@@ -48,7 +49,7 @@ public class IotHubServicesCommon
                                     final long RETRY_MILLISECONDS,
                                     final long SEND_TIMEOUT_MILLISECONDS,
                                     long interMessageDelay,
-                                    List<Pair<IotHubConnectionStatus, Throwable>> statusUpdates) throws IOException, InterruptedException
+                                    List<Pair<IotHubConnectionStatus, Throwable>> statusUpdates) throws IOException, InterruptedException, IotHubClientException
     {
         try
         {
@@ -108,7 +109,7 @@ public class IotHubServicesCommon
                                     final long RETRY_MILLISECONDS,
                                     final long SEND_TIMEOUT_MILLISECONDS,
                                     long interMessageDelay,
-                                    List<Pair<IotHubConnectionStatus, Throwable>> statusUpdates) throws IOException, InterruptedException
+                                    List<Pair<IotHubConnectionStatus, Throwable>> statusUpdates) throws IOException, InterruptedException, IotHubClientException
     {
         try
         {
@@ -134,7 +135,7 @@ public class IotHubServicesCommon
         }
     }
 
-    public static void sendSecurityMessages(InternalClient client, IotHubClientProtocol protocol, List<Pair<IotHubConnectionStatus, Throwable>> statusUpdates) throws IOException
+    public static void sendSecurityMessages(InternalClient client, IotHubClientProtocol protocol, List<Pair<IotHubConnectionStatus, Throwable>> statusUpdates) throws IOException, IotHubClientException
     {
         try
         {
@@ -163,10 +164,10 @@ public class IotHubServicesCommon
                                                                          final long SEND_TIMEOUT_MILLISECONDS,
                                                                          final IotHubConnectionStatus expectedStatus,
                                                                          int interMessageDelay,
-                                                                         AuthenticationType authType) throws IOException, InterruptedException
+                                                                         AuthenticationType authType) throws IOException, InterruptedException, IotHubClientException
     {
         final List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates = new ArrayList<>();
-        client.setConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> actualStatusUpdates.add(new Pair<>(status, throwable)), new Object());
+        client.setConnectionStatusChangeCallback((context) -> actualStatusUpdates.add(new Pair<>(context.getNewStatus(), context.getCause())), new Object());
 
         sendMessages(client, protocol, messagesToSend, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, interMessageDelay, actualStatusUpdates);
 
@@ -257,10 +258,10 @@ public class IotHubServicesCommon
     public static void sendMessagesExpectingUnrecoverableConnectionLossAndTimeout(InternalClient client,
                                                                                   IotHubClientProtocol protocol,
                                                                                   Message errorInjectionMessage,
-                                                                                  AuthenticationType authType) throws IOException, InterruptedException
+                                                                                  AuthenticationType authType) throws IOException, InterruptedException, IotHubClientException
     {
         final List<Pair<IotHubConnectionStatus, Throwable>> statusUpdates = new ArrayList<>();
-        client.setConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> statusUpdates.add(new Pair<>(status, throwable)), new Object());
+        client.setConnectionStatusChangeCallback((context) -> statusUpdates.add(new Pair<>(context.getNewStatus(), context.getCause())), new Object());
 
         client.open(false);
 
@@ -336,7 +337,7 @@ public class IotHubServicesCommon
         {
             Success messageSent = new Success();
             EventCallback callback = new EventCallback(messagesAndResults.statusCode);
-            client.sendEventAsync(messagesAndResults.messages, callback, messageSent);
+            client.sendEventsAsync(messagesAndResults.messages, callback, messageSent);
 
             long startTime = System.currentTimeMillis();
             while (!messageSent.wasCallbackFired())

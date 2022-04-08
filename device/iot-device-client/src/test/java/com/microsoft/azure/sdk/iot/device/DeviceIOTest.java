@@ -3,11 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubReceiveTask;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubSendTask;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
+import com.microsoft.azure.sdk.iot.device.transport.*;
 import mockit.*;
 import org.junit.Test;
 
@@ -54,7 +51,7 @@ public class DeviceIOTest
     private final static Collection<ClientConfiguration> configs = new ArrayList<>();
 
     @Mocked
-    IotHubEventCallback mockedIotHubEventCallback;
+    MessageSentCallback mockedMessageSentCallback;
 
     private final static long SEND_PERIOD_MILLIS = 10L;
     private final static long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
@@ -151,7 +148,7 @@ public class DeviceIOTest
     /* Tests_SRS_DEVICE_IO_21_014: [The open shall schedule receive tasks to run every RECEIVE_PERIOD_MILLIS milliseconds.] */
     /* Tests_SRS_DEVICE_IO_21_016: [The open shall set the `state` as `CONNECTED`.] */
     @Test
-    public void openSuccess() throws DeviceClientException, IOException
+    public void openSuccess() throws TransportException, IOException, IotHubClientException
     {
         // arrange
         final Object deviceIO = newDeviceIO();
@@ -168,32 +165,9 @@ public class DeviceIOTest
         };
     }
 
-    /* Tests_SRS_DEVICE_IO_21_015: [If an error occurs in opening the transport, the open shall throw an IOException.] */
-    @Test (expected = IOException.class)
-    public void openThrowsIOExceptionIfTransportOpenThrows() throws DeviceClientException
-    {
-        // arrange
-        final Object deviceIO = newDeviceIO();
-
-        new NonStrictExpectations()
-        {
-            {
-                mockedTransport.open(false);
-                result = new DeviceClientException();
-                times = 1;
-            }
-        };
-
-        // act
-        Deencapsulation.invoke(deviceIO, "open", false);
-
-        // assert
-        assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
-    }
-
     /* Tests_SRS_DEVICE_IO_21_019: [The close shall close the transport.] */
     @Test
-    public void closeClosesTransportSuccess() throws IOException, DeviceClientException
+    public void closeClosesTransportSuccess() throws IOException, IotHubClientException
     {
         // arrange
         final Object deviceIO = newDeviceIO();
@@ -274,18 +248,18 @@ public class DeviceIOTest
     @Test
     public void sendEventAsyncAddsMessageToTransportSuccess(
             @Mocked final Message mockMsg,
-            @Mocked final IotHubEventCallback mockCallback)
+            @Mocked final MessageSentCallback mockCallback)
             throws IOException
     {
         // arrange
-        final Map<String, Object> context = new HashMap<>();
         final DeviceIO deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
-        Deencapsulation.invoke(deviceIO, "onStatusChanged", IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
+        ConnectionStatusChangeContext context = new ConnectionStatusChangeContext(IotHubConnectionStatus.CONNECTED, IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
+        Deencapsulation.invoke(deviceIO, "onStatusChanged", context);
 
         // act
         Deencapsulation.invoke(deviceIO, "sendEventAsync",
-                new Class[] {Message.class, IotHubEventCallback.class, Object.class, String.class},
+                new Class[] {Message.class, MessageSentCallback.class, Object.class, String.class},
                 mockMsg, mockCallback, context, "someDeviceId");
 
         // assert
@@ -303,7 +277,7 @@ public class DeviceIOTest
     /* Tests_SRS_DEVICE_IO_21_023: [If the message given is null, the sendEventAsync shall throw an IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void sendEventAsyncRejectsNullMessageThrows(
-            @Mocked final IotHubEventCallback mockCallback)
+            @Mocked final MessageSentCallback mockCallback)
             throws IOException
     {
         // arrange
@@ -313,7 +287,7 @@ public class DeviceIOTest
 
         // act
         Deencapsulation.invoke(deviceIO, "sendEventAsync",
-                new Class[] {Message.class, IotHubEventCallback.class, Object.class, IotHubConnectionString.class},
+                new Class[] {Message.class, MessageSentCallback.class, Object.class, IotHubConnectionString.class},
                 null, mockCallback, context, mockConfig.getDeviceId());
     }
 
@@ -321,7 +295,7 @@ public class DeviceIOTest
     @Test (expected = IllegalStateException.class)
     public void sendEventAsyncClientNotOpenedThrows(
             @Mocked final Message mockMsg,
-            @Mocked final IotHubEventCallback mockCallback)
+            @Mocked final MessageSentCallback mockCallback)
     {
         // arrange
         final Map<String, Object> context = new HashMap<>();
@@ -329,7 +303,7 @@ public class DeviceIOTest
 
         // act
         Deencapsulation.invoke(deviceIO, "sendEventAsync",
-                new Class[] {Message.class, IotHubEventCallback.class, Object.class, String.class},
+                new Class[] {Message.class, MessageSentCallback.class, Object.class, String.class},
                 mockMsg, mockCallback, context, mockConfig.getDeviceId());
     }
 
@@ -337,7 +311,7 @@ public class DeviceIOTest
     @Test (expected = IllegalStateException.class)
     public void sendEventAsyncClientAlreadyClosedThrows(
             @Mocked final Message mockMsg,
-            @Mocked final IotHubEventCallback mockCallback)
+            @Mocked final MessageSentCallback mockCallback)
             throws IOException
     {
         // arrange
@@ -348,7 +322,7 @@ public class DeviceIOTest
         assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
 
         // act
-        Deencapsulation.invoke(deviceIO, "sendEventAsync", new Class[] {Message.class, IotHubEventCallback.class, Object.class, String.class}, mockMsg, mockCallback, context, mockConfig.getDeviceId());
+        Deencapsulation.invoke(deviceIO, "sendEventAsync", new Class[] {Message.class, MessageSentCallback.class, Object.class, String.class}, mockMsg, mockCallback, context, mockConfig.getDeviceId());
     }
 
     @Test
@@ -497,8 +471,9 @@ public class DeviceIOTest
         // arrange
         final DeviceIO deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
-        Deencapsulation.invoke(deviceIO, "onStatusChanged", IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
-
+        ConnectionStatusChangeContext context = new ConnectionStatusChangeContext(IotHubConnectionStatus.CONNECTED, IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
+        Deencapsulation.invoke(deviceIO, "onStatusChanged", context);
+        
         // act
         boolean isOpen = Deencapsulation.invoke(deviceIO, "isOpen" );
 
@@ -528,10 +503,12 @@ public class DeviceIOTest
         // arrange
         final DeviceIO deviceIO = newDeviceIO();
         openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
-        Deencapsulation.invoke(deviceIO, "onStatusChanged", IotHubConnectionStatus.DISCONNECTED_RETRYING, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
+
+        ConnectionStatusChangeContext context = new ConnectionStatusChangeContext(IotHubConnectionStatus.DISCONNECTED_RETRYING, IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
+        Deencapsulation.invoke(deviceIO, "onStatusChanged", context);
 
         // act
-        boolean isOpen = Deencapsulation.invoke(deviceIO, "isOpen" );
+        boolean isOpen = Deencapsulation.invoke(deviceIO, "isOpen");
 
         // assert
         assertTrue(isOpen);
@@ -546,7 +523,8 @@ public class DeviceIOTest
         Deencapsulation.setField(deviceIO, "receiveTaskScheduler", mockScheduler);
 
         // act
-        Deencapsulation.invoke(deviceIO, "onStatusChanged", IotHubConnectionStatus.DISCONNECTED_RETRYING, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
+        ConnectionStatusChangeContext context = new ConnectionStatusChangeContext(IotHubConnectionStatus.DISCONNECTED_RETRYING, IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
+        Deencapsulation.invoke(deviceIO, "onStatusChanged", context);
 
         // assert
         new Verifications()
@@ -566,7 +544,8 @@ public class DeviceIOTest
         Deencapsulation.setField(deviceIO, "sendTaskScheduler", mockScheduler);
 
         // act
-        Deencapsulation.invoke(deviceIO, "onStatusChanged", IotHubConnectionStatus.DISCONNECTED_RETRYING, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
+        ConnectionStatusChangeContext context = new ConnectionStatusChangeContext(IotHubConnectionStatus.DISCONNECTED_RETRYING, IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
+        Deencapsulation.invoke(deviceIO, "onStatusChanged", context);
 
         // assert
         new Verifications()
@@ -586,7 +565,8 @@ public class DeviceIOTest
         Deencapsulation.setField(deviceIO, "receiveTaskScheduler", mockScheduler);
 
         // act
-        Deencapsulation.invoke(deviceIO, "onStatusChanged", IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
+        ConnectionStatusChangeContext context = new ConnectionStatusChangeContext(IotHubConnectionStatus.CONNECTED, IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
+        Deencapsulation.invoke(deviceIO, "onStatusChanged", context);
 
         // assert
         new Verifications()
@@ -608,7 +588,8 @@ public class DeviceIOTest
         Deencapsulation.setField(deviceIO, "sendTaskScheduler", mockScheduler);
 
         // act
-        Deencapsulation.invoke(deviceIO, "onStatusChanged", IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
+        ConnectionStatusChangeContext context = new ConnectionStatusChangeContext(IotHubConnectionStatus.CONNECTED, IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
+        Deencapsulation.invoke(deviceIO, "onStatusChanged", context);
 
         // assert
         new Verifications()

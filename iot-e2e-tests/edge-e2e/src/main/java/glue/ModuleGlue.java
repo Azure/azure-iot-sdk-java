@@ -1,27 +1,12 @@
 package glue;
 
-import com.microsoft.azure.sdk.iot.device.ClientOptions;
-import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
-import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
-import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
-import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.device.ModuleClient;
+import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
-import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
-import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
-import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.edge.DirectMethodRequest;
+import com.microsoft.azure.sdk.iot.device.edge.DirectMethodResponse;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.hsm.UnixDomainSocketChannel;
-import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesSubscriptionCallback;
-import com.microsoft.azure.sdk.iot.device.twin.DesiredPropertiesCallback;
-import com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse;
-import com.microsoft.azure.sdk.iot.device.twin.GetTwinCallback;
-import com.microsoft.azure.sdk.iot.device.twin.MethodCallback;
-import com.microsoft.azure.sdk.iot.device.twin.Property;
-import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesCallback;
-import com.microsoft.azure.sdk.iot.device.twin.Twin;
-import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
+import com.microsoft.azure.sdk.iot.device.twin.*;
 import io.swagger.server.api.MainApiException;
 import io.swagger.server.api.model.Certificate;
 import io.swagger.server.api.model.ConnectResponse;
@@ -31,7 +16,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
-import jnr.ffi.annotations.In;
 import samples.com.microsoft.azure.sdk.iot.UnixDomainSocketSample;
 
 import java.io.IOException;
@@ -41,16 +25,12 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.sql.Time;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeoutException;
-
 
 @SuppressWarnings("ALL")
 public class ModuleGlue
@@ -126,7 +106,7 @@ public class ModuleGlue
             ConnectResponse cr = new ConnectResponse();
             cr.setConnectionId(connectionId);
             handler.handle(Future.succeededFuture(cr));
-        } catch (ModuleClientException | IOException e)
+        } catch (Exception e)
         {
             handler.handle(Future.failedFuture(e));
         }
@@ -176,7 +156,7 @@ public class ModuleGlue
             cr.setConnectionId(connectionId);
             handler.handle(Future.succeededFuture(cr));
         }
-        catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException e)
+        catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException | IotHubClientException e)
         {
             handler.handle(Future.failedFuture(e));
         }
@@ -197,12 +177,12 @@ public class ModuleGlue
             String payload = params.getString("payload");
             int responseTimeout = params.getInteger("responseTimeoutInSeconds", 0);
             int connectionTimeout = params.getInteger("connectTimeoutInSeconds", 0);
-            MethodRequest request = new MethodRequest(methodName, payload, responseTimeout, connectionTimeout);
+            DirectMethodRequest request = new DirectMethodRequest(methodName, payload, responseTimeout, connectionTimeout);
             try
             {
-                MethodResult result = client.invokeMethod(deviceId, request);
+                DirectMethodResponse result = client.invokeMethod(deviceId, request);
                 handler.handle(Future.succeededFuture(makeMethodResultThatEncodesCorrectly(result)));
-            } catch (ModuleClientException e)
+            } catch (Exception e)
             {
                 handler.handle(Future.failedFuture(e));
             }
@@ -325,7 +305,7 @@ public class ModuleGlue
         }, 2000);
     }
 
-    private static class IotHubEventCallbackImpl implements IotHubEventCallback
+    private static class IotHubEventCallbackImpl implements MessageSentCallback
     {
         Handler<AsyncResult<Void>> _handler = null;
 
@@ -335,8 +315,9 @@ public class ModuleGlue
         }
 
         @Override
-        public void execute(IotHubStatusCode status, Object context)
+        public void onMessageSent(Message sentMessage, IotHubClientException exception, Object context)
         {
+            IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
             System.out.println("IoT Hub responded to operation with status " + status.name());
             Handler<AsyncResult<Void>> handler = this._handler;
             this._handler = null;
@@ -399,14 +380,14 @@ public class ModuleGlue
 
                 handler.handle(Future.succeededFuture());
             }
-            catch (TimeoutException | InterruptedException e)
+            catch (InterruptedException | IotHubClientException e)
             {
                 handler.handle(Future.failedFuture(e));
             }
         }
     }
 
-    private static class EventCallback implements IotHubEventCallback
+    private static class EventCallback implements MessageSentCallback
     {
         Handler<AsyncResult<Void>> _handler;
 
@@ -415,8 +396,9 @@ public class ModuleGlue
             this._handler = handler;
         }
 
-        public synchronized void execute(IotHubStatusCode status, Object context)
+        public synchronized void onMessageSent(Message sentMessage, IotHubClientException exception, Object context)
         {
+            IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
             System.out.printf("EventCallback called with status %s%n", status.toString());
             this._handler.handle(Future.succeededFuture());
         }
@@ -466,7 +448,7 @@ public class ModuleGlue
             this._handler = handler;
         }
 
-        public synchronized IotHubMessageResult execute(Message msg, Object context)
+        public synchronized IotHubMessageResult onCloudToDeviceMessageReceived(Message msg, Object context)
         {
             System.out.println("MessageCallback called");
             this._client.setMessageCallback(this._inputName, null, null);
@@ -517,7 +499,7 @@ public class ModuleGlue
         this._handler = null;
     }
 
-    public DirectMethodResponse handleMethodInvocation(String methodName, Object methodData, Object context)
+    public com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse handleMethodInvocation(String methodName, Object methodData, Object context)
     {
         System.out.printf("method %s called%n", methodName);
         if (methodName.equals(this._methodName))
@@ -530,7 +512,7 @@ public class ModuleGlue
             {
                 this._handler.handle(Future.failedFuture(e));
                 this.reset();
-                return new DirectMethodResponse(500, "exception parsing methodData");
+                return new com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse(500, "exception parsing methodData");
             }
             System.out.printf("methodData: %s%n", methodDataString);
 
@@ -540,21 +522,21 @@ public class ModuleGlue
                 System.out.printf("Method data looks correct.  Returning result: %s%n", _methodResponseBody);
                 this._handler.handle(Future.succeededFuture());
                 this.reset();
-                return new DirectMethodResponse(this._methodStatusCode, this._methodResponseBody);
+                return new com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse(this._methodStatusCode, this._methodResponseBody);
             }
             else
             {
                 System.out.printf("method data does not match.  Expected %s%n", this._methodRequestBody);
                 this._handler.handle(Future.failedFuture("methodData does not match"));
                 this.reset();
-                return new DirectMethodResponse(500, "methodData not received as expected");
+                return new com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse(500, "methodData not received as expected");
             }
         }
         else
         {
             this._handler.handle(Future.failedFuture("unexpected call: " + methodName));
             this.reset();
-            return new DirectMethodResponse(404, "method " + methodName + " not handled");
+            return new com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse(404, "method " + methodName + " not handled");
         }
     }
 
@@ -571,20 +553,20 @@ public class ModuleGlue
             callback.setHandler(handler);
             try
             {
-                IotHubStatusCode statusCode = client.subscribeToMethods(
+                client.subscribeToMethods(
                     new MethodCallback()
                     {
                         @Override
-                        public DirectMethodResponse onMethodInvoked(String methodName, Object methodData, Object context)
+                        public com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse onMethodInvoked(String methodName, DirectMethodPayload methodData, Object context)
                         {
                             return handleMethodInvocation(methodName, methodData, context);
                         }
                     },
                     null);
 
-                callback.execute(statusCode, null);
+                callback.onMessageSent(null, null, null);
             }
-            catch (IllegalStateException | InterruptedException | TimeoutException e)
+            catch (IllegalStateException | InterruptedException | IotHubClientException e)
             {
                 handler.handle(Future.failedFuture(e));
             }
@@ -610,7 +592,7 @@ public class ModuleGlue
         }
     }
 
-    private JsonObject makeMethodResultThatEncodesCorrectly(MethodResult result)
+    private JsonObject makeMethodResultThatEncodesCorrectly(DirectMethodResponse result)
     {
         // Our JSON encoder doesn't like the way the MethodClass implements getPayload and getPayloadObject.  It
         // produces JSON that had both fields and the we want to return payloadObject, but we want to return it
@@ -618,7 +600,7 @@ public class ModuleGlue
         // values over manually.  I'm sure there's a better way, but this is test code.
         JsonObject fixedObject = new JsonObject();
         fixedObject.put("status", result.getStatus());
-        fixedObject.put("payload", result.getPayloadObject());
+        fixedObject.put("payload", result.getPayloadAsJsonElement());
         return fixedObject;
     }
 
@@ -637,12 +619,12 @@ public class ModuleGlue
             String payload = params.getString("payload");
             int responseTimeout = params.getInteger("responseTimeoutInSeconds", 0);
             int connectionTimeout = params.getInteger("connectTimeoutInSeconds", 0);
-            MethodRequest request = new MethodRequest(methodName, payload, responseTimeout, connectionTimeout);
+            DirectMethodRequest request = new DirectMethodRequest(methodName, payload, responseTimeout, connectionTimeout);
             try
             {
-                MethodResult result = client.invokeMethod(deviceId, moduleId, request);
+                DirectMethodResponse result = client.invokeMethod(deviceId, moduleId, request);
                 handler.handle(Future.succeededFuture(makeMethodResultThatEncodesCorrectly(result)));
-            } catch (ModuleClientException e)
+            } catch (Exception e)
             {
                 handler.handle(Future.failedFuture(e));
             }
@@ -705,7 +687,7 @@ public class ModuleGlue
                     onPropertyChanged(new Property(key, desiredProperties.get(key)), null);
                 }
             }
-            catch (IllegalStateException | InterruptedException | TimeoutException e)
+            catch (IllegalStateException | InterruptedException | IotHubClientException e)
             {
                 handler.handle(Future.failedFuture(e));
             }
@@ -746,7 +728,7 @@ public class ModuleGlue
             {
                 client.updateReportedProperties(reportedProperties);
             }
-            catch (IllegalStateException | InterruptedException | TimeoutException e)
+            catch (IllegalStateException | InterruptedException | IotHubClientException e)
             {
                 this._deviceTwinStatusCallback.setHandler(null);
                 handler.handle(Future.failedFuture(e));
