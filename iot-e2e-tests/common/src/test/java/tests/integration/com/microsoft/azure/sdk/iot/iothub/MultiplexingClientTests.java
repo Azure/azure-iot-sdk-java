@@ -920,7 +920,7 @@ public class MultiplexingClientTests extends IntegrationTest
     private static void testReportedPropertiesFlow(DeviceClient deviceClient, TwinClient twinClientServiceClient, String expectedPropertyKey, String expectedPropertyValue) throws IOException, IotHubException, InterruptedException, TimeoutException, IotHubClientException
     {
         String expectedReportedPropertyValue = expectedPropertyValue + "-reported";
-        TwinCollection reportedProperties = new TwinCollection();
+        TwinCollection reportedProperties = deviceClient.getTwin().getReportedProperties();
         reportedProperties.put(expectedPropertyKey, expectedReportedPropertyValue);
         deviceClient.updateReportedProperties(reportedProperties);
 
