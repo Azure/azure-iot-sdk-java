@@ -46,6 +46,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.rules.RuleChain;
+import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.littleshoot.proxy.HttpProxyServer;
@@ -59,6 +61,8 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestDeviceIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.*;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.rules.RerunFailedTestRule;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.rules.ThrottleResistantTestRule;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -90,11 +94,14 @@ public class MultiplexingClientTests extends IntegrationTest
 {
     private static final int DEVICE_MULTIPLEX_COUNT = 3;
 
+    // Longer than the default test timeout since some tests involve creating and using hundreds of devices which
+    // can take a while
+    private static final int MULTIPLEXING_TEST_TIMEOUT_MILLISECONDS = 5 * 60 * 1000; // 5 minutes
+
     private static final int MESSAGE_SEND_TIMEOUT_MILLIS = 60 * 1000;
     private static final int FAULT_INJECTION_RECOVERY_TIMEOUT_MILLIS = 2 * 60 * 1000;
     private static final int FAULT_INJECTION_TIMEOUT_MILLIS = 20 * 1000;
     private static final int FAULT_INJECTION_RETRY_ATTEMPTS = 6; // retry attempts to cause a fault, not to recover from a fault
-    private static final int DEVICE_METHOD_SUBSCRIBE_TIMEOUT_MILLISECONDS = 60 * 1000;
     private static final int DESIRED_PROPERTY_CALLBACK_TIMEOUT_MILLIS = 60 * 1000;
     private static final int DEVICE_SESSION_OPEN_TIMEOUT = 60 * 1000;
     private static final int DEVICE_SESSION_CLOSE_TIMEOUT = 60 * 1000;
@@ -112,7 +119,6 @@ public class MultiplexingClientTests extends IntegrationTest
 
     // Semmle flags this as a security issue, but this is a test password so the warning can be suppressed
     protected static final char[] testProxyPass = "1234".toCharArray(); // lgtm
-
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection inputs() throws Exception
@@ -134,6 +140,11 @@ public class MultiplexingClientTests extends IntegrationTest
     public MultiplexingClientTests(IotHubClientProtocol protocol)
     {
         this.testInstance = new MultiplexingClientTestInstance(protocol);
+
+        // This overrides the IntegrationTest level timeout that is too short for this particular test suite
+        testRerunRuleChain = RuleChain.outerRule(new RerunFailedTestRule())
+                .around(new ThrottleResistantTestRule())
+                .around(new Timeout(MULTIPLEXING_TEST_TIMEOUT_MILLISECONDS));
     }
 
     public MultiplexingClientTestInstance testInstance;
@@ -907,7 +918,7 @@ public class MultiplexingClientTests extends IntegrationTest
     private static void testReportedPropertiesFlow(DeviceClient deviceClient, TwinClient twinClientServiceClient, String expectedPropertyKey, String expectedPropertyValue) throws IOException, IotHubException, InterruptedException, TimeoutException, IotHubClientException
     {
         String expectedReportedPropertyValue = expectedPropertyValue + "-reported";
-        TwinCollection reportedProperties = new TwinCollection();
+        TwinCollection reportedProperties = deviceClient.getTwin().getReportedProperties();
         reportedProperties.put(expectedPropertyKey, expectedReportedPropertyValue);
         deviceClient.updateReportedProperties(reportedProperties);
 
@@ -915,7 +926,7 @@ public class MultiplexingClientTests extends IntegrationTest
         Twin serviceClientTwin = twinClientServiceClient.get(deviceClient.getConfig().getDeviceId());
 
         com.microsoft.azure.sdk.iot.service.twin.TwinCollection retrievedReportedProperties = serviceClientTwin.getReportedProperties();
-        assertEquals(1, retrievedReportedProperties.size());
+        assertTrue(retrievedReportedProperties.size() > 0);
         String retrievedReportedPropertyKey = retrievedReportedProperties.keySet().iterator().next();
         assertEquals(expectedPropertyKey, retrievedReportedPropertyKey);
         String actualReportedPropertyValue = (String) retrievedReportedProperties.get(retrievedReportedPropertyKey);
