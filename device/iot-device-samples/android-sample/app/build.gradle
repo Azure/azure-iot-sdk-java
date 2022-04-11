@@ -3,6 +3,11 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 27
 
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
+
     defaultConfig {
         applicationId "com.iothub.azure.microsoft.com.androidsample"
         minSdkVersion 26
@@ -13,11 +18,11 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -44,16 +49,14 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support:multidex:1.0.3'
 
-    // testing dependencies
-    testImplementation 'junit:junit:4.12'
-
     // Remote binary dependency
-    api ('com.microsoft.azure.sdk.iot:iot-device-client:2.0.1') {
+    implementation ('com.microsoft.azure.sdk.iot:iot-device-client:2.0.1') {
         exclude module: 'slf4j-api'
+        exclude module: 'log4j-slf4j-impl'
     }
+    implementation ('org.apache.commons:commons-lang3:3.6')
+    implementation ('javax.xml.stream:stax-api:1.0-2')
     implementation 'org.slf4j:slf4j-android:1.7.29'
-    implementation 'org.apache.commons:commons-lang3:3.6'
-    implementation 'javax.xml.stream:stax-api:1.0-2'
 }
 
 repositories {
