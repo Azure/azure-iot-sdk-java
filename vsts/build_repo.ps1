@@ -1,4 +1,4 @@
-﻿./vsts/determine_tests_to_run.ps1
+﻿#./vsts/determine_tests_to_run.ps1
 
 $targetBranch = ($env:TARGET_BRANCH)
 $isPullRequestBuild = "true";
@@ -12,4 +12,4 @@ else
     Write-Host "Pull request build detected"
 }
 
-mvn -DRUN_PROVISIONING_TESTS="$Env:runProvisioningTests" -DRUN_DIGITAL_TESTS="$Env:runDigitalTwinTests" -DRUN_IOTHUB_TESTS="$Env:runIotHubTests" -DIS_PULL_REQUEST="$isPullRequestBuild" install -T 2C
+mvn -DRUN_PROVISIONING_TESTS="true" -DRUN_DIGITAL_TESTS="true" -DRUN_IOTHUB_TESTS="true" -DIS_PULL_REQUEST="$isPullRequestBuild" install -T 2C
