@@ -154,7 +154,7 @@ public class DeviceTwinSample
 
         try
         {
-            System.out.println("Opening connection to IoT Hub");
+            System.out.println("Opening connection to IoT hub");
             client.open(false);
 
             System.out.println("Subscribing to desired properties");
