@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
- * Twin Sample for sending module twin updates to an IoT Hub. Default protocol is to use
+ * Twin Sample for sending module twin updates to an IoT hub. Default protocol is to use
  * MQTT transport.
  */
 public class ModuleTwinSample
