@@ -5,7 +5,7 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
-import org.littleshoot.proxy.ProxyAuthenticator;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.ProxyAuthenticator;
 
 public class BasicProxyAuthenticator implements ProxyAuthenticator
 {
