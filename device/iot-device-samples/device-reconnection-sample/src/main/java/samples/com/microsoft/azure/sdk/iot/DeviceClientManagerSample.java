@@ -35,8 +35,7 @@ public class DeviceClientManagerSample
             case "https":
                 log.error("This sample is designed to show the best practices for stateful protocols such as AMQPS and MQTT. " +
                         "Since HTTP is not a stateful protocol, this sample should not be used as a reference.");
-                System.exit(-1);
-                break;
+                return;
             case "amqps":
                 argProtocol = IotHubClientProtocol.AMQPS;
                 break;
