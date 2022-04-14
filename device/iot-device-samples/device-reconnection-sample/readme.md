@@ -4,7 +4,7 @@ This sample shows the best practices for handling a device (or module) client us
 over the course of its lifetime. This sample is intended to be a starting point for a user developing a production application 
 wherein their device client must handle unexpected connection loss events and transient errors such as throttling, internal server errors, and timeouts. 
 
-Included in this sample is the recommended patterns for sending reported properties and receiving desired properties, for
+Included in this sample are the recommended patterns for sending reported properties and receiving desired properties, for
 sending telemetry, for receiving cloud to device messages, and for receiving direct methods.
 
 ## Sample Structure
