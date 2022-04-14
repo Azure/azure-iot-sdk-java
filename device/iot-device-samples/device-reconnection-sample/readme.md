@@ -9,7 +9,7 @@ sending telemetry, for receiving cloud to device messages, and for receiving dir
 
 ## Sample Structure
 
-The sample uses two threads to accomplish these best practices. The threads, and their purpose is as follows:
+The sample uses two threads to accomplish these best practices. The threads, and their purpose, is as follows:
 - "Iot-Hub-Connection-Manager-Thread"
   - This thread is responsible for ensuring that the device client is either connected to the service or is attempting to reconnect.
   - When the device client is connected or when the device client's internal retry logic is running, this thread is dormant.
