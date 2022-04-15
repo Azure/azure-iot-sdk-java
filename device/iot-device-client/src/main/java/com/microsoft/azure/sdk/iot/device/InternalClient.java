@@ -168,6 +168,8 @@ public class InternalClient
     public void close()
     {
         this.deviceIO.close();
+        this.method = null;
+        this.twin = null;
     }
 
     /**
