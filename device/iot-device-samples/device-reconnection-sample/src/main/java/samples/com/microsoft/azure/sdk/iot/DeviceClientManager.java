@@ -54,61 +54,61 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
         try
         {
             this.deviceClient.setConnectionStatusChangeCallback(
-                    (connectionStatusChangeContext) ->
+                (connectionStatusChangeContext) ->
+                {
+                    IotHubConnectionStatus newStatus = connectionStatusChangeContext.getNewStatus();
+                    IotHubConnectionStatusChangeReason newStatusReason = connectionStatusChangeContext.getNewStatusReason();
+                    IotHubConnectionStatus previousStatus = connectionStatusChangeContext.getPreviousStatus();
+
+                    this.connectionStatus = newStatus;
+
+                    if (newStatusReason == IotHubConnectionStatusChangeReason.BAD_CREDENTIAL)
                     {
-                        IotHubConnectionStatus newStatus = connectionStatusChangeContext.getNewStatus();
-                        IotHubConnectionStatusChangeReason newStatusReason = connectionStatusChangeContext.getNewStatusReason();
-                        IotHubConnectionStatus previousStatus = connectionStatusChangeContext.getPreviousStatus();
+                        // Should only happen if using a custom SAS token provider and the user-generated SAS token
+                        // was incorrectly formatted. Users who construct the device client with a connection string
+                        // will never see this, and users who use x509 authentication will never see this.
+                        log.error("Ending sample because the provided credentials were incorrect or malformed");
+                        System.exit(-1);
+                    }
 
-                        this.connectionStatus = newStatus;
+                    if (newStatus == IotHubConnectionStatus.DISCONNECTED && newStatusReason == IotHubConnectionStatusChangeReason.EXPIRED_SAS_TOKEN)
+                    {
+                        // Should only happen if the user provides a shared access signature instead of a connection string.
+                        // indicates that the device client is now unusable because there is no way to renew the shared
+                        // access signature. Users who want to pass in these tokens instead of using a connection string
+                        // should see the custom SAS token provider sample in this repo.
+                        // https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-samples/custom-sas-token-provider-sample/src/main/java/samples/com/microsoft/azure/sdk/iot/CustomSasTokenProviderSample.java
+                        log.error("Ending sample because the provided credentials have expired.");
+                        System.exit(-1);
+                    }
 
-                        if (newStatusReason == IotHubConnectionStatusChangeReason.BAD_CREDENTIAL)
+                    if (newStatus == IotHubConnectionStatus.DISCONNECTED
+                            && newStatusReason != IotHubConnectionStatusChangeReason.CLIENT_CLOSE)
+                    {
+                        // only need to reconnect if the device client reaches a DISCONNECTED state and if it wasn't
+                        // from intentionally closing the client.
+                        synchronized (this.reconnectionLock)
                         {
-                            // Should only happen if using a custom SAS token provider and the user-generated SAS token
-                            // was incorrectly formatted. Users who construct the device client with a connection string
-                            // will never see this, and users who use x509 authentication will never see this.
-                            log.error("Ending sample because the provided credentials were incorrect or malformed");
-                            System.exit(-1);
+                            // Note that you cannot call "deviceClient.open()" or "deviceClient.close()" from here
+                            // since this is a callback thread. You must open/close the client from a different thread.
+                            // Because of that, this sample wakes up the Iot-Hub-Connection-Manager-Thread to do that.
+                            log.debug("Notifying the connection manager thread to start re-opening this client");
+                            this.reconnectionLock.notify();
                         }
+                    }
 
-                        if (newStatus == IotHubConnectionStatus.DISCONNECTED && newStatusReason == IotHubConnectionStatusChangeReason.EXPIRED_SAS_TOKEN)
-                        {
-                            // Should only happen if the user provides a shared access signature instead of a connection string.
-                            // indicates that the device client is now unusable because there is no way to renew the shared
-                            // access signature. Users who want to pass in these tokens instead of using a connection string
-                            // should see the custom SAS token provider sample in this repo.
-                            // https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-samples/custom-sas-token-provider-sample/src/main/java/samples/com/microsoft/azure/sdk/iot/CustomSasTokenProviderSample.java
-                            log.error("Ending sample because the provided credentials have expired.");
-                            System.exit(-1);
-                        }
-
-                        if (newStatus == IotHubConnectionStatus.DISCONNECTED
-                                && newStatusReason != IotHubConnectionStatusChangeReason.CLIENT_CLOSE)
-                        {
-                            // only need to reconnect if the device client reaches a DISCONNECTED state and if it wasn't
-                            // from intentionally closing the client.
-                            synchronized (this.reconnectionLock)
-                            {
-                                // Note that you cannot call "deviceClient.open()" or "deviceClient.close()" from here
-                                // since this is a callback thread. You must open/close the client from a different thread.
-                                // Because of that, this sample wakes up the Iot-Hub-Connection-Manager-Thread to do that.
-                                log.debug("Notifying the connection manager thread to start re-opening this client");
-                                this.reconnectionLock.notify();
-                            }
-                        }
-
-                        // upon reconnecting, it is optional, but recommended, to get the current twin state. This will
-                        // allow you to get the current desired properties state in case this client missed any desired
-                        // property updates while it was temporarily disconnected.
-                        if (previousStatus == IotHubConnectionStatus.DISCONNECTED_RETRYING
-                                && newStatus == IotHubConnectionStatus.CONNECTED)
-                        {
-                            // hold off on sending any new reported properties until the twin has been retrieved
-                            this.gettingTwinAfterReconnection = true;
-                            this.deviceClient.getTwinAsync(this, null);
-                        }
-                    },
-                    null);
+                    // upon reconnecting, it is optional, but recommended, to get the current twin state. This will
+                    // allow you to get the current desired properties state in case this client missed any desired
+                    // property updates while it was temporarily disconnected.
+                    if (previousStatus == IotHubConnectionStatus.DISCONNECTED_RETRYING
+                            && newStatus == IotHubConnectionStatus.CONNECTED)
+                    {
+                        // hold off on sending any new reported properties until the twin has been retrieved
+                        this.gettingTwinAfterReconnection = true;
+                        this.deviceClient.getTwinAsync(this, null);
+                    }
+                },
+                null);
 
             Thread.currentThread().setName("Iot-Hub-Connection-Manager-Thread");
             while (true)
@@ -294,12 +294,15 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
 
         if (e.isRetryable())
         {
-            log.warn("Failed to send message with correlation Id {} due to retryable error with status code {}. Requeueing message.", sentMessage.getCorrelationId(), e.getStatusCode().name());
+            log.warn("Failed to send message with correlation Id {} due to retryable error with status code {}. " +
+                "Requeueing message.", sentMessage.getCorrelationId(), e.getStatusCode().name());
+
             telemetryToResend.add(sentMessage);
         }
         else
         {
-            log.error("Failed to send message with correlation Id {} due to an unretryable error with status code {}. Discarding message as it can never be sent", sentMessage.getCorrelationId(), e.getStatusCode().name());
+            log.error("Failed to send message with correlation Id {} due to an unretryable error with status code {}. " +
+                "Discarding message as it can never be sent", sentMessage.getCorrelationId(), e.getStatusCode().name());
         }
     }
     // endregion
@@ -319,7 +322,10 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
 
         try
         {
-            this.deviceClient.updateReportedPropertiesAsync(this.reportedPropertiesToSend, this, newPropertyKey);
+            this.deviceClient.updateReportedPropertiesAsync(
+                this.reportedPropertiesToSend,
+                this,
+                newPropertyKey);
         }
         catch (IllegalStateException e)
         {
@@ -330,7 +336,11 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
 
     // callback for when a reported properties update request has been acknowledged by the service
     @Override
-    public void onReportedPropertiesUpdateAcknowledged(IotHubStatusCode statusCode, ReportedPropertiesUpdateResponse response, IotHubClientException e, Object context)
+    public void onReportedPropertiesUpdateAcknowledged(
+        IotHubStatusCode statusCode,
+        ReportedPropertiesUpdateResponse response,
+        IotHubClientException e,
+        Object context)
     {
         String newReportedPropertyKey = (String) context;
 
@@ -344,7 +354,9 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
         {
             for (String propertyKey : this.reportedPropertiesToSend.keySet())
             {
-                log.debug("Successfully updated reported properties with new key {} with value {}", propertyKey, this.reportedPropertiesToSend.get(propertyKey));
+                log.debug("Successfully updated reported properties with new key {} with value {}",
+                    propertyKey,
+                    this.reportedPropertiesToSend.get(propertyKey));
             }
 
             int newReportedPropertiesVersion = response.getVersion();
@@ -366,7 +378,9 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
         {
             for (String propertyKey : this.reportedPropertiesToSend.keySet())
             {
-                log.debug("Failed to update reported properties with new key {} with value {} due to the reported properties version being out of date. Will try sending again later after updating the reported properties version.", propertyKey, this.reportedPropertiesToSend.get(propertyKey));
+                log.debug("Failed to update reported properties with new key {} with value {} due to the reported " +
+                        "properties version being out of date. Will try sending again later after updating the " +
+                        "reported properties version.", propertyKey, this.reportedPropertiesToSend.get(propertyKey));
             }
 
             this.reportedPropertiesToSend.setVersion(twin.getReportedProperties().getVersion());
@@ -375,13 +389,21 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
         {
             for (String propertyKey : this.reportedPropertiesToSend.keySet())
             {
-                log.warn("Failed to update reported properties with new key {} with value {} due to retryable error with status code {}. Will try sending again later.", propertyKey, this.reportedPropertiesToSend.get(propertyKey), statusCode.name());
+                log.warn("Failed to update reported properties with new key {} with value {} due to retryable error " +
+                    "with status code {}. Will try sending again later.",
+                    propertyKey,
+                    this.reportedPropertiesToSend.get(propertyKey),
+                    statusCode.name());
             }
         }
         else
         {
             String newReportedPropertyValue = (String) twin.getReportedProperties().remove(newReportedPropertyKey);
-            log.error("Failed to update reported properties with new key {} with value {} due to an unretryable error with status code {}. Removing new property from twin.", newReportedPropertyKey, newReportedPropertyValue, statusCode.name());
+            log.error("Failed to update reported properties with new key {} with value {} due to an unretryable error " +
+                "with status code {}. Removing new property from twin.",
+                newReportedPropertyKey,
+                newReportedPropertyValue,
+                statusCode.name());
         }
     }
 
@@ -415,12 +437,15 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
         }
         else if (e.isRetryable())
         {
-            log.warn("Encountered a retryable error with status code {} while trying to get the client's twin. Trying again...", e.getStatusCode());
+            log.warn("Encountered a retryable error with status code {} while trying to get the client's twin. " +
+                    "Trying again...", e.getStatusCode());
+
             this.deviceClient.getTwinAsync(this, null);
         }
         else
         {
-            log.error("Encountered a non retryable error with status code {} while trying to get the client's twin. Abandoning getting twin.", e.getStatusCode());
+            log.error("Encountered a non retryable error with status code {} while trying to get the client's twin. " +
+                    "Abandoning getting twin.", e.getStatusCode());
         }
 
     }
