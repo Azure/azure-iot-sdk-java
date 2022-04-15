@@ -11,8 +11,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * Manages the lifetime of a DeviceClient instance such that it is always either connected or attempting to reconnect. It
- * also demonstrates the best practices for handling a client's twin. See this sample's readme for a more detailed
+ * Manages the lifetime of a DeviceClient instance such that it is always either connected or attempting to reconnect.
+ * It also demonstrates the best practices for handling a client's twin. See this sample's readme for a more detailed
  * explanation on how this sample works and how it can be modified to fit your needs.
  */
 @Slf4j
@@ -83,7 +83,7 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
                     }
 
                     if (newStatus == IotHubConnectionStatus.DISCONNECTED
-                            && newStatusReason != IotHubConnectionStatusChangeReason.CLIENT_CLOSE)
+                        && newStatusReason != IotHubConnectionStatusChangeReason.CLIENT_CLOSE)
                     {
                         // only need to reconnect if the device client reaches a DISCONNECTED state and if it wasn't
                         // from intentionally closing the client.
@@ -101,7 +101,7 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
                     // allow you to get the current desired properties state in case this client missed any desired
                     // property updates while it was temporarily disconnected.
                     if (previousStatus == IotHubConnectionStatus.DISCONNECTED_RETRYING
-                            && newStatus == IotHubConnectionStatus.CONNECTED)
+                        && newStatus == IotHubConnectionStatus.CONNECTED)
                     {
                         // hold off on sending any new reported properties until the twin has been retrieved
                         this.gettingTwinAfterReconnection = true;
@@ -227,8 +227,9 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
     }
 
     /**
-     * Sends telemetry and updates reported properties periodically. Returns if the client's connection was lost during this.
-     *
+     * Sends telemetry and updates reported properties periodically. Returns if the client's connection was lost during
+     * this.
+     * <p>
      * This method simulates typical useage of a client, but can be modified to fit your use case without losing the
      * automatic reconnection and retry that this sample has.
      *
@@ -379,8 +380,8 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
             for (String propertyKey : this.reportedPropertiesToSend.keySet())
             {
                 log.debug("Failed to update reported properties with new key {} with value {} due to the reported " +
-                        "properties version being out of date. Will try sending again later after updating the " +
-                        "reported properties version.", propertyKey, this.reportedPropertiesToSend.get(propertyKey));
+                    "properties version being out of date. Will try sending again later after updating the " +
+                    "reported properties version.", propertyKey, this.reportedPropertiesToSend.get(propertyKey));
             }
 
             this.reportedPropertiesToSend.setVersion(twin.getReportedProperties().getVersion());
@@ -390,7 +391,7 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
             for (String propertyKey : this.reportedPropertiesToSend.keySet())
             {
                 log.warn("Failed to update reported properties with new key {} with value {} due to retryable error " +
-                    "with status code {}. Will try sending again later.",
+                        "with status code {}. Will try sending again later.",
                     propertyKey,
                     this.reportedPropertiesToSend.get(propertyKey),
                     statusCode.name());
@@ -400,7 +401,7 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
         {
             String newReportedPropertyValue = (String) twin.getReportedProperties().remove(newReportedPropertyKey);
             log.error("Failed to update reported properties with new key {} with value {} due to an unretryable error " +
-                "with status code {}. Removing new property from twin.",
+                    "with status code {}. Removing new property from twin.",
                 newReportedPropertyKey,
                 newReportedPropertyValue,
                 statusCode.name());
@@ -438,14 +439,14 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
         else if (e.isRetryable())
         {
             log.warn("Encountered a retryable error with status code {} while trying to get the client's twin. " +
-                    "Trying again...", e.getStatusCode());
+                "Trying again...", e.getStatusCode());
 
             this.deviceClient.getTwinAsync(this, null);
         }
         else
         {
             log.error("Encountered a non retryable error with status code {} while trying to get the client's twin. " +
-                    "Abandoning getting twin.", e.getStatusCode());
+                "Abandoning getting twin.", e.getStatusCode());
         }
 
     }
