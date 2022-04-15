@@ -95,22 +95,7 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.5</version>
         </dependency>
-        <dependency>
-            <groupId>org.littleshoot</groupId>
-            <artifactId>dnssec4j</artifactId>
-            <version>0.1.6</version>
-            <optional>true</optional>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.littleshoot</groupId>
-                    <artifactId>dnsjava</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>

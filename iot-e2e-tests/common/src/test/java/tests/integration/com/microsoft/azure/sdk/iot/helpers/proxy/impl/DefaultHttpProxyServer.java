@@ -781,7 +781,7 @@ public class DefaultHttpProxyServer implements HttpProxyServer {
         @Override
         public HttpProxyServerBootstrap withUseDnsSec(boolean useDnsSec) {
             if (useDnsSec) {
-                this.serverResolver = new DnsSecServerResolver();
+                throw new UnsupportedOperationException();
             } else {
                 this.serverResolver = new DefaultHostResolver();
             }
