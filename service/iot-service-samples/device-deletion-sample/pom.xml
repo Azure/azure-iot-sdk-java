@@ -73,16 +73,6 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.5</version>
-        </dependency>
-        <dependency>
-            <groupId>com.microsoft.azure</groupId>
-            <artifactId>azure-storage</artifactId>
-            <version>4.0.0</version>
-        </dependency>
-        <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
             <artifactId>provisioning-service-client</artifactId>
             <version>${provisioning-service-client-version}</version>
