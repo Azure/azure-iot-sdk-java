@@ -210,6 +210,8 @@ public enum IotHubStatusCode
             case THROTTLED:
             case INTERNAL_SERVER_ERROR:
             case SERVER_BUSY:
+            case IO_ERROR:
+            case DEVICE_OPERATION_TIMED_OUT:
                 return true;
             default:
                 return false; // even for OK case, return false here since it wouldn't need to be retried.
