@@ -1,56 +1,63 @@
 # Device Reconnection Sample
 
-This sample code demonstrates the various connection status changes and connection status change reasons the Device Client can return, and how to handle them.
+This sample shows the best practices for handling a device (or module) client using a stateful protocol (AMQPS or MQTT) 
+over the course of its lifetime. This sample is intended to be a starting point for a user developing a production application 
+wherein their device client must handle unexpected connection loss events and transient errors such as throttling, internal server errors, and timeouts. 
 
-The device client exhibits the following connection status changes with reason:
+Included in this sample are the recommended patterns for sending reported properties and receiving desired properties, for
+sending telemetry, for receiving cloud to device messages, and for receiving direct methods.
 
-<table>
-  <tr>
-    <th> Connection Status </th>
-    <th> Change Reason </th>
-    <th> Ownership of connectivity </th>
-    <th> Comments </th>
-  </tr>
-  <tr>
-    <td> CONNECTED </td>
-    <td> CONNECTED_OK </td>
-    <td> SDK </td>
-    <td> SDK tries to remain connected to the service and can carry out all operation as normal </td>
-  </tr>
-  <tr>
-    <td rowspan="2"> DISCONNECTED_RETRYING </td>
-    <td> NO_NETWORK </td>
-    <td rowspan="2"> SDK </td>
-    <td rowspan="2"> When disconnection happens because of any reason (network failures, transient loss of connectivity etc.), SDK makes best attempt to connect back to IotHub. The RetryPolicy applied on the DeviceClient will be used to determine the count of reconnection attempts for <em>retriable</em> errors </td>
-  </tr>
-  <tr>
-    <td> COMMUNICATION_ERROR </td>
-  </tr>
-  <tr>
-    <td rowspan="5"> DISCONNECTED </td>
-    <td> CLIENT_CLOSE </td>
-    <td rowspan="5"> Application </td>
-    <td> This is state when SDK was asked to close the connection by application </td>
-  </tr>
-  <tr>
-    <td> BAD_CREDENTIAL </td>
-    <td> Supplied credential isn’t good for device to connect to service - Fix the supplied credentials before attempting to reconnect again </td>
-  </tr>
-  <tr>
-    <td> EXPIRED_SAS_TOKEN </td>
-    <td> Supplied SAS Token has expired - Fix the supplied SAS token before attempting to reconnect again </td>
-  </tr>
-  <tr>
-    <td> COMMUNICATION_ERROR </td>
-    <td> This is the state when SDK landed up in a non-retriable error during communication - Inspect the <em>throwable</em> supplied in the <code>IotHubConnectionStatusChangeCallback</code> to get the stacktrace of the exception </td>
-  </tr>
-  <tr>
-    <td> RETRY_EXPIRED </td>
-    <td> This is the state when SDK attempted maximum retries set by the application </td>
-  </tr>
-</table>
+## Sample Structure
 
-For status `CLIENT_CLOSE`, `COMMUNICATION_ERROR` and `RETRY_EXPIRED`, the application can attempt to reconnect by closing and opening the client again eg. calling `deviceClient.close();` `deviceClient.open();` in a separate thread.
+The sample uses two threads to accomplish these best practices. The threads, and their purpose, is as follows:
+- "Iot-Hub-Connection-Manager-Thread"
+  - This thread is responsible for ensuring that the device client is either connected to the service or is attempting to reconnect.
+  - When the device client is connected or when the device client's internal retry logic is running, this thread is dormant.
+  - Once a terminal disconnection event happens, this thread is woken up to attempt to reconnect indefinitely. 
+- "Iot-Hub-Worker-Thread"
+  - This thread queues outgoing work such as sending device-to-cloud telemetry and updating reported properties.
+  - This thread is active when the client is connected or the device client's internal retry logic is running.
+  - This thread ends when the client reaches a terminal disconnection state and the Iot-Hub-Connection-Manager-Thread is working to restore the connection.
+  - This thread starts again once the connection has been restored.
 
-We would like to highlight here that a separate thread should be used to call `open()`/ `closeNow()`. These calls should never be made from the same thread in the `IotHubConnectionStatusChangeCallback`. 
+## Modifying this sample to fit your application
 
+This sample is written such that users can copy this code and modify it to fit their needs by removing the parts they 
+don't need all while still getting the best practices for managing the client's connection.
+
+For instance, if your client will never receive direct methods, you can safely delete this code snippet from the sample:
+
+```java
+// region direct methods setup
+// This region can be removed if no direct methods will be invoked on this client
+this.deviceClient.subscribeToMethods(this, null);
+// endregion
+```
+
+and you can delete this code snippet as well:
+
+```java
+// region direct methods
+// callback for when a direct method is invoked on this device
+@Override
+public DirectMethodResponse onMethodInvoked(String methodName, DirectMethodPayload payload, Object context)
+{
+    // Typically there would be some method handling that differs based on the name of the method and/or the payload
+    // provided, but this sample's method handling is simplified for brevity. There are other samples in this repo
+    // that demonstrate handling methods in more depth.
+    log.debug("Method {} invoked on device.", methodName);
+    return new DirectMethodResponse(200, null);
+}
+// endregion
+```
+
+Similarly, if your device client will only ever be receiving cloud to device messages and direct methods, you can remove the
+entire "Iot-Hub-Worker-Thread" code and you will still retain the best practices for receving cloud to device messages, direct methods,
+and for handling disconnection events.
+
+## Boundary cases
+
+There are a few places in this sample where ```System.exit(-1);``` is executed. These cases indicate that something 
+fundamentally wrong has happened and that the client's connection cannot continue. For instance, if you provide incorrect
+or badly formatted credentials, this sample will exit like this. These cases should not happen in production applications
+since the credentials should be correct, so these cases can be removed when writing your application.

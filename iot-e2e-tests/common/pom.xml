@@ -84,23 +84,21 @@
             <artifactId>jmockit</artifactId>
             <version>1.24</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.littleshoot/littleproxy -->
-        <dependency>
-            <groupId>org.littleshoot</groupId>
-            <artifactId>littleproxy</artifactId>
-            <version>1.1.2</version>
-            <exclusions>
-                <!--Littleproxy is Android compatible except for this dependency. Luckily, we don't need this dependency for our tests-->
-                <exclusion>
-                    <groupId>com.barchart.udt</groupId>
-                    <artifactId>barchart-udt-bundle</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
         </dependency>
         <!--
         This newer Azure storage SDK has some compatibility issues with Android. Leaving this dependency alone
