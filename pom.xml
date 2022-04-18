@@ -185,8 +185,8 @@
         <dice-provider-artifact-id>dice-provider</dice-provider-artifact-id>
         <x509-provider-artifact-id>x509-provider</x509-provider-artifact-id>
 
-        <iot-device-client-version>2.0.1</iot-device-client-version>
-        <iot-service-client-version>2.0.1</iot-service-client-version>
+        <iot-device-client-version>2.0.2</iot-device-client-version>
+        <iot-service-client-version>2.0.2</iot-service-client-version>
         <provisioning-device-client-version>2.0.0</provisioning-device-client-version>
         <provisioning-service-client-version>2.0.0</provisioning-service-client-version>
         <security-provider-version>2.0.0</security-provider-version>
