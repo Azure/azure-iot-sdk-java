@@ -90,6 +90,30 @@
             <version>1.3</version>
             <scope>test</scope>
         </dependency>
+
+        <!--Nested dependencies that need to be explicitly declared for the versions defined in the main
+        pom.xml file's dependency management section to be enforced. Otherwise, the versions of these nested dependencies
+        will be chosen based by the dependency they are nested under. For instance, we are using the library
+        com.microsoft.rest:client-runtime which has a dependency on guava version 20.0 which has vulnerabilities. In our
+        dependency management section in the main pom.xml file we override this version to be 31.1-jre. Even with that, though,
+        we still need to declare the dependency here in order to enforce this version override.-->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-joda</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <!--end of nested dependencies-->
     </dependencies>
     <build>
         <plugins>
