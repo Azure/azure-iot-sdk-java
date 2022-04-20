@@ -48,24 +48,4 @@
         android:onClick="btnUpdateReportedOnClick"
         android:text="Update Reported Properties" />
 
-    <Button
-        android:id="@+id/btnFileUpload"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/button4"
-        android:layout_toStartOf="@+id/btnGetTwin"
-        android:onClick="btnFileUploadOnClick"
-        android:text="File Upload" />
-
-    <EditText
-        android:id="@+id/editTextFileName"
-        android:layout_width="180dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignTop="@+id/btnFileUpload"
-        android:layout_marginEnd="13dp"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:text="DefaultFile1.txt" />
-
 </RelativeLayout>

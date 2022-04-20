@@ -35,14 +35,15 @@ import org.junit.*;
 import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.littleshoot.proxy.HttpProxyServer;
-import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import tests.integration.com.microsoft.azure.sdk.iot.digitaltwin.helpers.E2ETestConstants;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.BasicProxyAuthenticator;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenTools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.DigitalTwinTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.HttpProxyServer;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.impl.DefaultHttpProxyServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -144,8 +145,8 @@ public class DigitalTwinClientTests extends IntegrationTest
     public static void startProxy()
     {
         proxyServer = DefaultHttpProxyServer.bootstrap()
-            .withPort(testProxyPort)
-            .start();
+                .withPort(testProxyPort)
+                .start();
     }
 
     @AfterClass

@@ -193,6 +193,8 @@ public class InternalClient
     public void close()
     {
         this.deviceIO.close();
+        this.method = null;
+        this.twin = null;
     }
 
     /**
@@ -922,7 +924,7 @@ public class InternalClient
      * between the module and the IoT Edge device hasn't changed.
      *
      * <p>Note that the thread used to deliver this callback should not be used to call open()/closeNow() on the client
-     * that this callback belongs to. All open()/closeNow() operations should be done on a separate thread</p>
+     * that this callback belongs to. All open()/close() operations should be done on a separate thread</p>
      *
      * @param callback The callback to be fired when the connection status of the device changes. Can be null to
      *                 unset this listener as long as the provided callbackContext is also null.
