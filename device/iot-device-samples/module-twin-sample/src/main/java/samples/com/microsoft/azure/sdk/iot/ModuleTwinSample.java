@@ -11,12 +11,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
-
-import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 
 /**
- * Device Twin Sample for sending module twin updates to an IoT Hub. Default protocol is to use
+ * Twin Sample for sending module twin updates to an IoT hub. Default protocol is to use
  * MQTT transport.
  */
 public class ModuleTwinSample
@@ -29,6 +26,29 @@ public class ModuleTwinSample
     private static final String SAMPLE_USAGE_WITH_INVALID_PROTOCOL = "Expected argument 2 to be one of 'mqtt', 'amqps' or 'amqps_ws' but received %s\n" + SAMPLE_USAGE;
 
     private enum LIGHTS{ ON, OFF }
+
+    private static Twin twin;
+
+    private static class DesiredPropertiesUpdatedHandler implements DesiredPropertiesCallback
+    {
+        @Override
+        public void onDesiredPropertiesUpdated(Twin desiredPropertyUpdateTwin, Object context)
+        {
+            if (twin == null)
+            {
+                // No need to care about this update because these properties will be present in the twin retrieved by getTwin.
+                System.out.println("Received desired properties update before getting current twin. Ignoring this update.");
+                return;
+            }
+
+            // desiredPropertyUpdateTwin.getDesiredProperties() contains all the newly updated desired properties
+            // as well as the new version of the desired properties
+            twin.getDesiredProperties().putAll(desiredPropertyUpdateTwin.getDesiredProperties());
+            twin.getDesiredProperties().setVersion(desiredPropertyUpdateTwin.getDesiredProperties().getVersion());
+            System.out.println("Received desired property update. Current twin:");
+            System.out.println(twin);
+        }
+    }
 
     protected static class IotHubConnectionStatusChangeCallbackLogger implements IotHubConnectionStatusChangeCallback
     {
@@ -54,7 +74,7 @@ public class ModuleTwinSample
             {
                 System.out.println("The connection was lost, and is not being re-established." +
                         " Look at provided exception for how to resolve this issue." +
-                        " Cannot send messages until this issue is resolved, and you manually re-open the device client");
+                        " Cannot send messages until this issue is resolved, and you manually re-open the module client");
             }
             else if (status == IotHubConnectionStatus.DISCONNECTED_RETRYING)
             {
@@ -133,70 +153,49 @@ public class ModuleTwinSample
             System.out.println("Open connection to IoT Hub.");
             client.open(false);
 
-            System.out.println("Start device Twin and get remaining properties...");
-            CountDownLatch twinInitializedLatch = new CountDownLatch(1);
-            client.subscribeToDesiredPropertiesAsync(
-                (twin, context) ->
-                {
-                    for (String propertyKey : twin.getDesiredProperties().keySet())
-                    {
-                        Object propertyValue = twin.getDesiredProperties().get(propertyKey);
-                        System.out.println("Received desired property update with property key " + propertyKey + " and value " + propertyValue);
-                    }
-                },
-            null,
-                (exception, context) ->
-                {
-                    if (exception != null)
-                    {
-                        System.out.println("Successfully subscribed to desired properties. Getting initial twin state");
+            System.out.println("Subscribing to desired properties");
+            client.subscribeToDesiredProperties(new DesiredPropertiesUpdatedHandler(), null);
 
-                        // It is recommended to get the initial twin state after every time you have subscribed to desired
-                        // properties, but is not mandatory. The benefit is that you are up to date on any twin updates
-                        // your client may have missed while not being subscribed, but the cost is that the get twin request
-                        // may not provide any new twin updates while still requiring some messaging between the client and service.
-                        client.getTwinAsync(
-                                (twin, getTwinException, getTwinContext) ->
-                                {
-                                    System.out.println("Received initial twin state");
-                                    System.out.println(twin.toString());
-                                    twinInitializedLatch.countDown();
-                                },
-                                null);
-                    }
-                    else
-                    {
-                        System.out.println("Failed to subscribe to desired properties with status code " + exception.getStatusCode());
-                        System.exit(-1);
-                    }
-                },
-                null);
+            // It is recommended to get the initial twin state after every time you have subscribed to desired
+            // properties, but is not mandatory. The benefit is that you are up to date on any twin updates
+            // your client may have missed while not being subscribed, but the cost is that the get twin request
+            // may not provide any new twin updates while still requiring some messaging between the client and service.
+            System.out.println("Getting current twin");
+            twin = client.getTwin();
+            System.out.println("Received current twin:");
+            System.out.println(twin);
 
-            System.out.println("Update reported properties...");
-            TwinCollection reportedProperties = new TwinCollection();
-            reportedProperties.put("HomeTemp(F)", 70);
+            // After getting the current twin, you can begin sending reported property updates. You can send reported
+            // property updates without getting the current twin as long as you have the correct reported properties
+            // version. If you send reported properties and receive a "precondition failed" error, then your reported
+            // properties version is out of date. Get the latest version by calling getTwin() again.
+            TwinCollection reportedProperties = twin.getReportedProperties();
+            int newTemperature = new Random().nextInt(80);
+            reportedProperties.put("HomeTemp(F)", newTemperature);
+            System.out.println("Updating reported property \"HomeTemp(F)\" to value " + newTemperature);
+            ReportedPropertiesUpdateResponse response = client.updateReportedProperties(reportedProperties);
+            System.out.println("Successfully set property \"HomeTemp(F)\" to value " + newTemperature);
+
+            // After a successful update of the module's reported properties, the service will provide the new
+            // reported properties version for the twin. You'll need to save this value in your twin object's reported
+            // properties object so that subsequent updates don't fail with a "precondition failed" error.
+            twin.getReportedProperties().setVersion(response.getVersion());
+
+            System.out.println("Current twin:");
+            System.out.println(twin);
+
             reportedProperties.put("LivingRoomLights", LIGHTS.ON);
             reportedProperties.put("BedroomRoomLights", LIGHTS.OFF);
-            CountDownLatch twinReportedPropertiesSentLatch = new CountDownLatch(1);
-            client.updateReportedPropertiesAsync(
-                reportedProperties,
-                (statusCode, version, e, callbackContext) ->
-                {
-                    if (statusCode == OK)
-                    {
-                        System.out.println("Reported properties updated successfully");
-                    }
-                    else
-                    {
-                        System.out.println("Reported properties failed to be updated. Status code: " + statusCode);
-                        e.printStackTrace();
-                    }
+            System.out.println("Updating reported property \"LivingRoomLights\" to value ON");
+            System.out.println("Updating reported property \"BedroomRoomLights\" to value OFF");
+            response = client.updateReportedProperties(reportedProperties);
+            System.out.println("Successfully set property \"LivingRoomLights\" to value ON");
+            System.out.println("Successfully set property \"BedroomRoomLights\" to value OFF");
 
-                    twinReportedPropertiesSentLatch.countDown();
-                },
-                null);
+            twin.getReportedProperties().setVersion(response.getVersion());
 
-            twinReportedPropertiesSentLatch.await();
+            System.out.println("Current twin:");
+            System.out.println(twin);
         }
         catch (Exception e)
         {

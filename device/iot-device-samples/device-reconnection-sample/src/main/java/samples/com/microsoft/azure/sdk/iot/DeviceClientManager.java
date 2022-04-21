@@ -4,11 +4,18 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.device.twin.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+/**
+ * Manages the lifetime of a DeviceClient instance such that it is always either connected or attempting to reconnect.
+ * It also demonstrates the best practices for handling a client's twin. See this sample's readme for a more detailed
+ * explanation on how this sample works and how it can be modified to fit your needs.
+ */
+@Slf4j
 public class DeviceClientManager implements DesiredPropertiesCallback, MethodCallback, MessageSentCallback, MessageCallback, GetTwinCallback, ReportedPropertiesCallback
 {
     // The client. Can be replaced with a module client for writing the equivalent code for a module.
@@ -17,18 +24,29 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
     // The twin for this client. Stays up to date as reported properties are sent and desired properties are received.
     private Twin twin;
 
-    // Outgoing work queue of the client
+    // Outgoing work queues of the client
     private final Queue<Message> telemetryToResend = new ConcurrentLinkedQueue<>();
     private final TwinCollection reportedPropertiesToSend = new TwinCollection();
 
-    // Connection state of the client
+    // Connection state of the client. This sample is written in such a way that you do not actually need to check this
+    // value before performing any operations, but it is provided here anyways.
     private IotHubConnectionStatus connectionStatus = IotHubConnectionStatus.DISCONNECTED;
-    private boolean reconnectNeeded = false;
+
+    // This lock is used to wake up the Iot-Hub-Connection-Manager-Thread when a terminal disconnection event occurs
+    // and the device client needs to be manually re-opened.
+    private final Object reconnectionLock = new Object();
+
+    // State flag that signals that the client is in the process of getting the current twin for this client and that
+    // any outgoing reported properties should hold off on being sent until this twin has been retrieved.
     private boolean gettingTwinAfterReconnection = false;
 
-    public DeviceClientManager(DeviceClient deviceClient)
+    public DeviceClientManager(String deviceConnectionString, IotHubClientProtocol protocol)
     {
-        this.deviceClient = deviceClient;
+        // Lower keep alive interval values help the client recognize disconnection events sooner, but do require
+        // sending keep-alive pings more frequently. Scenarios that prioritize minimizing network traffic should have
+        // higher values. Scenarios that prioritize minimizing time spent disconnected should have lower values.
+        ClientOptions clientOptions = ClientOptions.builder().keepAliveInterval(100).build();
+        this.deviceClient = new DeviceClient(deviceConnectionString, protocol, clientOptions);
     }
 
     public void run()
@@ -36,56 +54,63 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
         try
         {
             this.deviceClient.setConnectionStatusChangeCallback(
-                    (connectionStatusChangeContext) ->
+                (connectionStatusChangeContext) ->
+                {
+                    IotHubConnectionStatus newStatus = connectionStatusChangeContext.getNewStatus();
+                    IotHubConnectionStatusChangeReason newStatusReason = connectionStatusChangeContext.getNewStatusReason();
+                    IotHubConnectionStatus previousStatus = connectionStatusChangeContext.getPreviousStatus();
+
+                    this.connectionStatus = newStatus;
+
+                    if (newStatusReason == IotHubConnectionStatusChangeReason.BAD_CREDENTIAL)
                     {
-                        IotHubConnectionStatus newStatus = connectionStatusChangeContext.getNewStatus();
-                        IotHubConnectionStatusChangeReason newStatusReason = connectionStatusChangeContext.getNewStatusReason();
-                        IotHubConnectionStatus previousStatus = connectionStatusChangeContext.getPreviousStatus();
+                        // Should only happen if using a custom SAS token provider and the user-generated SAS token
+                        // was incorrectly formatted. Users who construct the device client with a connection string
+                        // will never see this, and users who use x509 authentication will never see this.
+                        log.error("Ending sample because the provided credentials were incorrect or malformed");
+                        System.exit(-1);
+                    }
 
-                        this.connectionStatus = newStatus;
+                    if (newStatus == IotHubConnectionStatus.DISCONNECTED && newStatusReason == IotHubConnectionStatusChangeReason.EXPIRED_SAS_TOKEN)
+                    {
+                        // Should only happen if the user provides a shared access signature instead of a connection string.
+                        // indicates that the device client is now unusable because there is no way to renew the shared
+                        // access signature. Users who want to pass in these tokens instead of using a connection string
+                        // should see the custom SAS token provider sample in this repo.
+                        // https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-samples/custom-sas-token-provider-sample/src/main/java/samples/com/microsoft/azure/sdk/iot/CustomSasTokenProviderSample.java
+                        log.error("Ending sample because the provided credentials have expired.");
+                        System.exit(-1);
+                    }
 
-                        if (newStatusReason == IotHubConnectionStatusChangeReason.BAD_CREDENTIAL)
+                    if (newStatus == IotHubConnectionStatus.DISCONNECTED
+                        && newStatusReason != IotHubConnectionStatusChangeReason.CLIENT_CLOSE)
+                    {
+                        // only need to reconnect if the device client reaches a DISCONNECTED state and if it wasn't
+                        // from intentionally closing the client.
+                        synchronized (this.reconnectionLock)
                         {
-                            // Should only happen if using a custom SAS token provider and the user-generated SAS token
-                            // was incorrectly formatted. Users who construct the device client with a connection string
-                            // will never see this, and users who use x509 authentication will never see this.
-                            System.out.println("Ending sample because the provided credentials were incorrect or malformed");
-                            System.exit(-1);
+                            // Note that you cannot call "deviceClient.open()" or "deviceClient.close()" from here
+                            // since this is a callback thread. You must open/close the client from a different thread.
+                            // Because of that, this sample wakes up the Iot-Hub-Connection-Manager-Thread to do that.
+                            log.debug("Notifying the connection manager thread to start re-opening this client");
+                            this.reconnectionLock.notify();
                         }
+                    }
 
-                        if (newStatus == IotHubConnectionStatus.DISCONNECTED && newStatusReason == IotHubConnectionStatusChangeReason.EXPIRED_SAS_TOKEN)
-                        {
-                            // should only happen if the user provides a shared access signature instead of a connection string.
-                            // indicates that the device client is now unusable because there is no way to renew the shared
-                            // access signature. Users who want to pass in these tokens instead of using a connection string
-                            // should see the custom SAS token provider sample in this repo.
-                            // https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-samples/custom-sas-token-provider-sample/src/main/java/samples/com/microsoft/azure/sdk/iot/CustomSasTokenProviderSample.java
-                            System.out.println("Ending sample because the provided credentials have expired.");
-                            System.exit(-1);
-                        }
+                    // upon reconnecting, it is optional, but recommended, to get the current twin state. This will
+                    // allow you to get the current desired properties state in case this client missed any desired
+                    // property updates while it was temporarily disconnected.
+                    if (previousStatus == IotHubConnectionStatus.DISCONNECTED_RETRYING
+                        && newStatus == IotHubConnectionStatus.CONNECTED)
+                    {
+                        // hold off on sending any new reported properties until the twin has been retrieved
+                        this.gettingTwinAfterReconnection = true;
+                        this.deviceClient.getTwinAsync(this, null);
+                    }
+                },
+                null);
 
-                        if (newStatus == IotHubConnectionStatus.DISCONNECTED
-                                && newStatusReason != IotHubConnectionStatusChangeReason.CLIENT_CLOSE)
-                        {
-                            // only need to reconnect if the device client reaches a DISCONNECTED state and if it wasn't
-                            // from intentionally closing the client.
-                            reconnectNeeded = true;
-                        }
-
-                        // upon reconnecting, it is optional, but recommended, to get the current twin state. This will
-                        // allow you to get the current desired properties state in case this client missed any desired
-                        // property updates while it was temporarily disconnected.
-                        if (previousStatus == IotHubConnectionStatus.DISCONNECTED_RETRYING
-                                && newStatus == IotHubConnectionStatus.CONNECTED)
-                        {
-                            // hold off on sending any new reported properties until the twin has been retrieved
-                            this.gettingTwinAfterReconnection = true;
-                            this.deviceClient.getTwinAsync(this, null);
-                        }
-
-                    },
-                    null);
-
+            Thread.currentThread().setName("Iot-Hub-Connection-Manager-Thread");
             while (true)
             {
                 boolean encounteredFatalException = !openDeviceClientWithRetry();
@@ -95,22 +120,35 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
                     return;
                 }
 
-                try
+                new Thread(() ->
                 {
-                    // this function simulates how a user may use a device client instance once it is open. In this
-                    // sample, it includes sending telemetry and updating reported properties.
-                    doWork();
-                }
-                catch (IllegalStateException e)
+                    try
+                    {
+                        Thread.currentThread().setName("Iot-Hub-Worker-Thread");
+                        // this function simulates how a user may use a device client instance once it is open. In this
+                        // sample, it includes sending telemetry and updating reported properties.
+                        doWork();
+                    }
+                    catch (IllegalStateException e)
+                    {
+                        log.debug("Client was closed while doing work. Ending worker thread while re-opening the client.");
+                    }
+                }).start();
+
+                synchronized (this.reconnectionLock)
                 {
-                    System.out.println("Client was closed while doing work. Re-opening client before doing more work");
-                    return;
+                    // Wait until the client needs to be re-opened. This happens when the client reaches a
+                    // terminal DISCONNECTED state unexpectedly. For instance, if the client loses network connectivity
+                    // and does not regain network connectivity before the SDK's retry logic has timed out.
+                    this.reconnectionLock.wait();
                 }
+
+                log.debug("Connection manager thread woken up to start re-opening this client");
             }
         }
         catch (InterruptedException e)
         {
-            System.out.println("Connection management function interrupted, likely because the sample has ended");
+            log.debug("Connection management function interrupted, likely because the sample has ended");
         }
         finally
         {
@@ -126,9 +164,9 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
             {
                 this.deviceClient.close();
 
-                System.out.println("Attempting to open the device client");
+                log.debug("Attempting to open the device client");
                 this.deviceClient.open(false);
-                System.out.println("Successfully opened the device client");
+                log.debug("Successfully opened the device client");
 
                 // region cloud to device messaging setup
                 // This region can be removed if no cloud to device messaging will be sent to this client
@@ -151,8 +189,8 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
 
                 this.reportedPropertiesToSend.setVersion(twin.getReportedProperties().getVersion());
 
-                System.out.println("Initial twin received:");
-                System.out.println(this.twin.toString());
+                log.debug("Current twin received:");
+                log.debug(this.twin.toString());
                 // endregion
 
                 return true;
@@ -162,32 +200,36 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
                 switch (e.getStatusCode())
                 {
                     case UNAUTHORIZED:
-                        System.out.println("Failed to open the device client due to incorrect or badly formatted credentials: " + e.getMessage());
+                        log.error("Failed to open the device client due to incorrect or badly formatted credentials", e);
                         return false;
                     case NOT_FOUND:
-                        System.out.println("Failed to open the device client because the device is not registered on your IoT Hub: " + e.getMessage());
+                        log.error("Failed to open the device client because the device is not registered on your IoT Hub", e);
                         return false;
                 }
 
                 if (e.isRetryable())
                 {
-                    System.out.println("Failed to open the device client due to a retryable exception" + e.getMessage());
+                    log.debug("Failed to open the device client due to a retryable exception", e);
                 }
                 else
                 {
-                    System.out.println("Failed to open the device client due to a non-retryable exception" + e.getMessage());
+                    log.error("Failed to open the device client due to a non-retryable exception", e);
                     return false;
                 }
             }
 
-            System.out.println("Sleeping a bit before retrying to open device client");
+            // Users may want to have this delay determined by an exponential backoff in order to avoid flooding the
+            // service with reconnect attempts. Lower delays mean a client will be reconnected sooner, but at the risk
+            // of wasting CPU cycles with attempts that the service is too overwhelmed to handle anyways.
+            log.debug("Sleeping a bit before retrying to open device client");
             Thread.sleep(1000);
         }
     }
 
     /**
-     * Sends telemetry and updates reported properties periodically. Returns if the client's connection was lost during this.
-     *
+     * Sends telemetry and updates reported properties periodically. Returns if the client's connection was lost during
+     * this.
+     * <p>
      * This method simulates typical useage of a client, but can be modified to fit your use case without losing the
      * automatic reconnection and retry that this sample has.
      *
@@ -196,7 +238,7 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
      */
     private void doWork() throws IllegalStateException
     {
-        while (!reconnectNeeded)
+        while (true)
         {
             sendTelemetryAsync();
             updateReportedPropertiesAsync();
@@ -208,7 +250,7 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
             }
             catch (InterruptedException e)
             {
-                System.out.println("Worker function interrupted, likely because the sample is being stopped.");
+                log.debug("Worker function interrupted, likely because the sample is being stopped.");
                 return;
             }
         }
@@ -235,7 +277,7 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
         }
         catch (IllegalStateException e)
         {
-            System.out.println("Device client was closed, so requeueing the message locally");
+            log.debug("Device client was closed, so requeueing the message locally");
             this.telemetryToResend.add(messageToSend);
             throw e;
         }
@@ -247,18 +289,21 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
     {
         if (e == null)
         {
-            System.out.println("Successfully sent message with correlation Id " + sentMessage.getCorrelationId());
+            log.debug("Successfully sent message with correlation Id {}", sentMessage.getCorrelationId());
             return;
         }
 
         if (e.isRetryable())
         {
-            System.out.println("Failed to send message with correlation Id " + sentMessage.getCorrelationId() + " due to retryable error with status code " + e.getStatusCode().name() + ". Requeueing message.");
+            log.warn("Failed to send message with correlation Id {} due to retryable error with status code {}. " +
+                "Requeueing message.", sentMessage.getCorrelationId(), e.getStatusCode().name());
+
             telemetryToResend.add(sentMessage);
         }
         else
         {
-            System.out.println("Failed to send message with correlation Id " + sentMessage.getCorrelationId() + " due to an unretryable error with status code " + e.getStatusCode().name() + ". Discarding message as it can never be sent");
+            log.error("Failed to send message with correlation Id {} due to an unretryable error with status code {}. " +
+                "Discarding message as it can never be sent", sentMessage.getCorrelationId(), e.getStatusCode().name());
         }
     }
     // endregion
@@ -272,47 +317,60 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
 
         if (this.gettingTwinAfterReconnection)
         {
-            System.out.println("Delaying sending new reported properties update until the full twin has been retrieved after the most recent disconnection");
+            log.debug("Delaying sending new reported properties update until the full twin has been retrieved after the most recent disconnection");
             return;
         }
 
         try
         {
-            this.deviceClient.updateReportedPropertiesAsync(this.reportedPropertiesToSend, this, newPropertyKey);
+            this.deviceClient.updateReportedPropertiesAsync(
+                this.reportedPropertiesToSend,
+                this,
+                newPropertyKey);
         }
         catch (IllegalStateException e)
         {
-            System.out.println("Device client was closed. Waiting until the connection has been re-opened to update reported properties.");
+            log.debug("Device client was closed. Waiting until the connection has been re-opened to update reported properties.");
             throw e;
         }
     }
 
     // callback for when a reported properties update request has been acknowledged by the service
     @Override
-    public void onReportedPropertiesUpdateAcknowledged(IotHubStatusCode statusCode, ReportedPropertiesUpdateResponse response, IotHubClientException e, Object context)
+    public void onReportedPropertiesUpdateAcknowledged(
+        IotHubStatusCode statusCode,
+        ReportedPropertiesUpdateResponse response,
+        IotHubClientException e,
+        Object context)
     {
         String newReportedPropertyKey = (String) context;
 
         if (e != null)
         {
             // no need to do anything with the error here. Below, the status code is checked in order to figure out how to respond
-            System.out.println("Encountered an issue sending a reported properties update request: " + e.getMessage());
+            log.warn("Encountered an issue sending a reported properties update request", e);
         }
 
         if (e == null)
         {
             for (String propertyKey : this.reportedPropertiesToSend.keySet())
             {
-                System.out.println("Successfully updated reported properties with new key " + propertyKey + " with value " + this.reportedPropertiesToSend.get(propertyKey));
+                log.debug("Successfully updated reported properties with new key {} with value {}",
+                    propertyKey,
+                    this.reportedPropertiesToSend.get(propertyKey));
             }
 
             int newReportedPropertiesVersion = response.getVersion();
-            System.out.println("New reported properties version is " + newReportedPropertiesVersion);
+            log.debug("New reported properties version is {}", newReportedPropertiesVersion);
             this.reportedPropertiesToSend.setVersion(newReportedPropertiesVersion);
 
             // update the local twin object now that the reported properties have been sent
             twin.getReportedProperties().setVersion(newReportedPropertiesVersion);
-            twin.getReportedProperties().putAll(this.reportedPropertiesToSend);
+
+            if (!this.reportedPropertiesToSend.isEmpty())
+            {
+                twin.getReportedProperties().putAll(this.reportedPropertiesToSend);
+            }
 
             // no need to send these properties again in the next reported properties update, so clear these properties.
             this.reportedPropertiesToSend.clear();
@@ -321,7 +379,9 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
         {
             for (String propertyKey : this.reportedPropertiesToSend.keySet())
             {
-                System.out.println("Failed to update reported properties with new key " + propertyKey + " with value " + this.reportedPropertiesToSend.get(propertyKey) + " due to the reported properties version being out of date. Will try sending again later after updating the reported properties version.");
+                log.debug("Failed to update reported properties with new key {} with value {} due to the reported " +
+                    "properties version being out of date. Will try sending again later after updating the " +
+                    "reported properties version.", propertyKey, this.reportedPropertiesToSend.get(propertyKey));
             }
 
             this.reportedPropertiesToSend.setVersion(twin.getReportedProperties().getVersion());
@@ -330,13 +390,21 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
         {
             for (String propertyKey : this.reportedPropertiesToSend.keySet())
             {
-                System.out.println("Failed to update reported properties with new key " + propertyKey + " with value " + this.reportedPropertiesToSend.get(propertyKey) + " due to retryable error with status code " + statusCode.name() + ". Will try sending again later.");
+                log.warn("Failed to update reported properties with new key {} with value {} due to retryable error " +
+                        "with status code {}. Will try sending again later.",
+                    propertyKey,
+                    this.reportedPropertiesToSend.get(propertyKey),
+                    statusCode.name());
             }
         }
         else
         {
             String newReportedPropertyValue = (String) twin.getReportedProperties().remove(newReportedPropertyKey);
-            System.out.println("Failed to update reported properties with new key " + newReportedPropertyKey + " with value " + newReportedPropertyValue + " due to an unretryable error with status code " + statusCode.name() + ". Removing new property from twin.");
+            log.error("Failed to update reported properties with new key {} with value {} due to an unretryable error " +
+                    "with status code {}. Removing new property from twin.",
+                newReportedPropertyKey,
+                newReportedPropertyValue,
+                statusCode.name());
         }
     }
 
@@ -344,12 +412,16 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
     @Override
     public void onDesiredPropertiesUpdated(Twin newTwin, Object context)
     {
-        System.out.println("Desired properties update received by device");
-        this.twin.getDesiredProperties().putAll(newTwin.getDesiredProperties());
+        log.debug("Desired properties update received by device");
+        if (!newTwin.getDesiredProperties().isEmpty())
+        {
+            this.twin.getDesiredProperties().putAll(newTwin.getDesiredProperties());
+        }
+
         this.twin.getDesiredProperties().setVersion(newTwin.getDesiredProperties().getVersion());
 
-        System.out.println("New twin state from device side:");
-        System.out.println(this.twin.toString());
+        log.debug("New twin state from device side:");
+        log.debug(this.twin.toString());
     }
 
     // callback for when a get twin call has succeeded and the current twin has been retrieved.
@@ -358,20 +430,23 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
     {
         if (e == null)
         {
-            System.out.println("Received the current twin state: ");
-            System.out.println(twin.toString());
+            log.debug("Received the current twin state: ");
+            log.debug(twin.toString());
             this.twin = twin;
             this.reportedPropertiesToSend.setVersion(twin.getReportedProperties().getVersion());
             this.gettingTwinAfterReconnection = false;
         }
         else if (e.isRetryable())
         {
-            System.out.println("Encountered a retryable error with status code while trying to get the client's twin. Trying again...");
+            log.warn("Encountered a retryable error with status code {} while trying to get the client's twin. " +
+                "Trying again...", e.getStatusCode());
+
             this.deviceClient.getTwinAsync(this, null);
         }
         else
         {
-            System.out.println("Encountered a non retryable error while trying to get the client's twin. Abandoning getting twin.");
+            log.error("Encountered a non retryable error with status code {} while trying to get the client's twin. " +
+                "Abandoning getting twin.", e.getStatusCode());
         }
 
     }
@@ -385,7 +460,7 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
         // Typically there would be some method handling that differs based on the name of the method and/or the payload
         // provided, but this sample's method handling is simplified for brevity. There are other samples in this repo
         // that demonstrate handling methods in more depth.
-        System.out.println("Method " + methodName + " invoked on device.");
+        log.debug("Method {} invoked on device.", methodName);
         return new DirectMethodResponse(200, null);
     }
     // endregion
@@ -395,7 +470,7 @@ public class DeviceClientManager implements DesiredPropertiesCallback, MethodCal
     @Override
     public IotHubMessageResult onCloudToDeviceMessageReceived(Message message, Object callbackContext)
     {
-        System.out.println("Received cloud to device message with correlation Id " + message.getCorrelationId());
+        log.debug("Received cloud to device message with correlation Id {}", message.getCorrelationId());
         return IotHubMessageResult.COMPLETE;
     }
     // endregion

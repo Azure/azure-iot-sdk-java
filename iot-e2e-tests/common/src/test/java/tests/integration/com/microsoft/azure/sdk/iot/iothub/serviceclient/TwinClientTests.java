@@ -54,6 +54,9 @@ public class TwinClientTests extends IntegrationTest
         TwinClient twinClient = new TwinClient(iotHubConnectionString, twinClientOptions);
         Twin twin = twinClient.get(testDeviceIdentity.getDeviceId());
 
+        assertNotNull(twin.getTags());
+        assertNull(twin.getTags().getTwinMetadata());
+
         String expectedTagKey = UUID.randomUUID().toString();
         String expectedTagValue = UUID.randomUUID().toString();
 
@@ -92,6 +95,9 @@ public class TwinClientTests extends IntegrationTest
         // assert
         assertTrue(TwinCommon.isPropertyInTwinCollection(twin.getDesiredProperties(), expectedDesiredPropertyKey, expectedDesiredPropertyValue));
         assertNotNull(twin.getDesiredProperties().getVersion());
+        assertNotNull(twin.getDesiredProperties().getTwinMetadata());
+        assertNotNull(twin.getDesiredProperties().getTwinMetadata(expectedDesiredPropertyKey));
+        assertNotNull(twin.getDesiredProperties().getTwinMetadata(expectedDesiredPropertyKey).getLastUpdated());
     }
 
     @Test
