@@ -50,17 +50,17 @@ public final class ClientConfiguration
 
     private boolean useWebsocket;
 
-    /**
-     * The device ModelId to be used with Azure IoT Plug and Play devices. This value must be set with the {@link ClientOptions} configuration.
-     *
-     * @return The current value of the device ModelId.
-     */
     @Getter
     @Setter(AccessLevel.PACKAGE)
     private ProxySettings proxySettings;
 
     private final String deviceClientUniqueIdentifier = UUID.randomUUID().toString().substring(0,8);
 
+    /**
+     * The device ModelId to be used with Azure IoT Plug and Play devices. This value must be set with the {@link ClientOptions} configuration.
+     *
+     * @return The current value of the device ModelId.
+     */
     @Getter
     @Setter(AccessLevel.PACKAGE)
     String modelId;
@@ -198,11 +198,8 @@ public final class ClientConfiguration
         this.useWebsocket = false;
         this.productInfo = new ProductInfo();
 
-        if (clientOptions != null) {
-            this.payloadConvention = clientOptions.getPayloadConvention();
-        } else {
-            this.payloadConvention = DefaultPayloadConvention.getInstance();
-        }
+        this.payloadConvention = clientOptions != null ? clientOptions.getPayloadConvention() : DefaultPayloadConvention.getInstance();
+
         log.debug("Device configured to use SAS token provided authentication provider");
     }
 

@@ -5,12 +5,15 @@ package com.microsoft.azure.sdk.iot.device.convention;
 
 import lombok.Data;
 
-@Data
 /**
  * The response to a command to be sent by the client.
  */
+@Data
 public class DeviceCommandResponse
 {
+    //TODO is "Device" very future proof here?
+    //TODO check that payload types are supported like in direct methods
+
     private Object responseMessage;
     private int status;
 

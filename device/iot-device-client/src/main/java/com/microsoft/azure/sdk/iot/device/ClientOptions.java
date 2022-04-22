@@ -52,8 +52,6 @@ public final class ClientOptions
     private PayloadConvention payloadConvention = DefaultPayloadConvention.getInstance();
 
     /**
-     * Gets the keep alive interval in seconds. This value defines the
-     * maximum time interval between messages sent or received. It enables the
      * The proxy settings for this client to connect through. If null then no proxy will be used.
      */
     @Getter

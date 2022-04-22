@@ -19,7 +19,7 @@ import java.util.Map;
  *     }
  * </p>
  */
-public class ReflectionUtility
+class ReflectionUtility
 {
     public enum TypeToReflect {
         BOOL,
@@ -35,7 +35,7 @@ public class ReflectionUtility
     private final Map<Class<?>, TypeToReflect> primitiveToJavaTypeMap = new HashMap<>();
     private final Map<Class<?>, TypeToReflect> javaToPrimitiveTypeMap = new HashMap<>();
 
-    public static final ReflectionUtility INSTANCE = new ReflectionUtility();
+    static final ReflectionUtility INSTANCE = new ReflectionUtility();
 
     private ReflectionUtility()
     {
@@ -63,7 +63,7 @@ public class ReflectionUtility
      * @param typeToCheck
      * @return
      */
-    public TypeToReflect canCastPrimitive(Class<?> typeToCheck)
+    TypeToReflect canCastPrimitive(Class<?> typeToCheck)
     {
         if (javaToPrimitiveTypeMap.containsKey(typeToCheck))
         {

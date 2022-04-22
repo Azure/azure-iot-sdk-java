@@ -174,7 +174,6 @@
         </dependencies>
     </dependencyManagement>
     <properties>
-        <snapshot></snapshot>
         <iot-device-client-artifact-id>iot-device-client</iot-device-client-artifact-id>
         <iot-service-client-artifact-id>iot-service-client</iot-service-client-artifact-id>
         <provisioning-device-client-artifact-id>provisioning-device-client</provisioning-device-client-artifact-id>

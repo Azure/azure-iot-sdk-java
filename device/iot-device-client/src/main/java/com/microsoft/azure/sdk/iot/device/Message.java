@@ -316,7 +316,6 @@ public class Message
      */
     public String getCorrelationId()
     {
-        // Codes_SRS_MESSAGE_34_045: [The function shall return the message's correlation ID.]
         if (correlationId == null)
         {
             return "";
