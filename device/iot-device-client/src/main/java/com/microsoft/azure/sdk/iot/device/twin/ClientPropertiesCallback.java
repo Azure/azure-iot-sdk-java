@@ -9,7 +9,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 /**
  * Callback to be executed when a reported properties update request has completed.
  */
-public interface WritablePropertiesCallback
+public interface ClientPropertiesCallback
 {
     /**
      * The callback that is executed when the reported properties update request has completed.
@@ -20,7 +20,8 @@ public interface WritablePropertiesCallback
      * does not apply this reported properties update immediately.
      * @param e The exception that was encountered if any exception was encountered.
      * @param context The context that was provided for this callback in
-     * {@link com.microsoft.azure.sdk.iot.device.InternalClient#updateReportedPropertiesAsync(TwinCollection, WritablePropertiesCallback, Object)}
+     * {@link com.microsoft.azure.sdk.iot.device.InternalClient#updateReportedPropertiesAsync(TwinCollection, ClientPropertiesCallback, Object)}
      */
-    void onWritablePropertiesUpdateAcknowledged(IotHubStatusCode statusCode, WritablePropertiesUpdateResponse response, IotHubClientException e, Object context);
+    //TODO is this name right?
+    void onClientPropertiesUpdateAcknowledged(IotHubStatusCode statusCode, ClientPropertiesUpdateResponse response, IotHubClientException e, Object context);
 }

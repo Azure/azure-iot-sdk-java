@@ -3,12 +3,12 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.convention.DeviceCommandCallback;
+import com.microsoft.azure.sdk.iot.device.convention.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
-import com.microsoft.azure.sdk.iot.device.twin.SubscriptionAcknowledgedCallback;
+import com.microsoft.azure.sdk.iot.device.twin.*;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -273,24 +273,6 @@ public final class DeviceClient extends InternalClient
         return this.isMultiplexed;
     }
 
-    /**
-     * Subscribes to device commands. Commands will make use of the {@link com.microsoft.azure.sdk.iot.device.convention.PayloadSerializer}
-     * which will allow the {@code deviceCommandCallback} to receieve an object rather than bytes.
-     *
-     * @param deviceCommandCallback Callback on which device commands shall be invoked. Cannot be {@code null}.
-     * @param deviceCommandCallbackContext Context for device command callback. Can be {@code null}.
-     * @param deviceCommandCallbackStatusCallback Callback for providing IotHub status for device commands. Cannot be {@code null}.
-     * @param deviceCommandCallbackStatusCallbackContext Context for device command status callback. Can be {@code null}.
-     *
-     * @throws IOException if called when client is not opened.
-     */
-    public void subscribeToDeviceComamnds(@NonNull DeviceCommandCallback deviceCommandCallback, Object deviceCommandCallbackContext,
-                                          @NonNull SubscriptionAcknowledgedCallback deviceCommandCallbackStatusCallback, Object deviceCommandCallbackStatusCallbackContext)
-            throws IOException
-    {
-        this.subscribeToCommandsInternal(deviceCommandCallback, deviceCommandCallbackContext, deviceCommandCallbackStatusCallback, deviceCommandCallbackStatusCallbackContext);
-    }
-
     // Used by multiplexing clients to signal to this client what kind of multiplexing client is using this device client
     void markAsMultiplexed()
     {
@@ -301,5 +283,144 @@ public final class DeviceClient extends InternalClient
     private DeviceClient()
     {
         // empty constructor for mocking purposes only
+    }
+
+    public ClientProperties getClientProperties() throws IotHubClientException, InterruptedException, IllegalStateException
+    {
+        return getClientPropertiesInternal();
+    }
+
+    public ClientProperties getClientProperties(int timeoutMilliseconds) throws InterruptedException, IotHubClientException, IllegalStateException
+    {
+        return getClientPropertiesInternal(timeoutMilliseconds);
+    }
+
+    /**
+     * Retreieve the client properties.
+     * @param callback The callback to be used for receiving client properties.
+     * @param callbackContext An optional user context to be sent to the callback.
+     */
+    public void getClientPropertiesAsync(GetClientPropertiesCallback callback, Object callbackContext) throws IllegalStateException
+    {
+        getClientPropertiesInternalAsync(callback, callbackContext);
+    }
+
+    /**
+     * Retreieve the client properties.
+     * @param callback The callback to be used for receiving client properties.
+     * @param callbackContext An optional user context to be sent to the callback.
+     */
+    public void getClientPropertiesAsync(GetClientPropertiesCorrelatingMessageCallback callback, Object callbackContext) throws IllegalStateException
+    {
+        getClientPropertiesAsync(callback, callbackContext);
+    }
+
+    public void subscribeToWritableProperties(WritablePropertiesCallback writablePropertyUpdateCallback, Object writablePropertyUpdateCallbackContext)
+        throws InterruptedException, IllegalStateException, IotHubClientException
+    {
+        subscribeToWritablePropertiesInternal(writablePropertyUpdateCallback, writablePropertyUpdateCallbackContext);
+    }
+
+    public void subscribeToWritableProperties(WritablePropertiesCallback writablePropertyUpdateCallback, Object writablePropertyUpdateCallbackContext, int timeoutMilliseconds)
+        throws InterruptedException, IllegalStateException, IotHubClientException
+    {
+        subscribeToWritablePropertiesInternal(writablePropertyUpdateCallback, writablePropertyUpdateCallbackContext, timeoutMilliseconds);
+    }
+
+    public void subscribeToWritablePropertiesAsync(
+        WritablePropertiesCallback writablePropertyUpdateCallback,
+        Object writablePropertyUpdateCallbackContext,
+        SubscriptionAcknowledgedCallback subscriptionAcknowledgedCallback,
+        Object subscriptionAcknowledgedCallbackContext) throws IllegalStateException
+    {
+        subscribeToWritablePropertiesInternalAsync(
+            writablePropertyUpdateCallback,
+            writablePropertyUpdateCallbackContext,
+            subscriptionAcknowledgedCallback,
+            subscriptionAcknowledgedCallbackContext);
+    }
+
+    public ClientPropertiesUpdateResponse updateClientProperties(ClientPropertyCollection clientProperties)
+        throws InterruptedException, IllegalStateException, IotHubClientException
+    {
+        return updateClientPropertiesInternal(clientProperties);
+    }
+
+    public ClientPropertiesUpdateResponse updateClientProperties(ClientPropertyCollection clientProperties, int timeoutMilliseconds)
+        throws InterruptedException, IllegalStateException, IotHubClientException
+    {
+        return updateClientPropertiesInternal(clientProperties, timeoutMilliseconds);
+    }
+
+    /**
+     * Update the client properties.
+     * @param clientProperties The client properties to send.
+     * @param callback The callback to be used for updating client properties.
+     * @param callbackContext An optional user context to be sent to the callback.
+     *
+     * TODO ADD THE CLIENT PROPERTIES RESPONSE
+     * @throws IOException Thrown from the underlying DeviceIO
+     */
+    public void updateClientPropertiesAsync(ClientPropertyCollection clientProperties, ClientPropertiesCallback callback, Object callbackContext) throws IllegalStateException
+    {
+        updateClientPropertiesInternalAsync(clientProperties, callback, callbackContext);
+    }
+
+    public void updateClientPropertiesAsync(ClientPropertyCollection clientProperties, ClientPropertiesUpdateCorrelatingMessageCallback callback, Object callbackContext) throws IllegalStateException
+    {
+        updateClientPropertiesInternalAsync(clientProperties, callback, callbackContext);
+    }
+
+    public void sendTelemetry(TelemetryMessage telemetryMessage) throws InterruptedException, IllegalStateException, IotHubClientException
+    {
+        sendTelemetryInternal(telemetryMessage);
+    }
+
+    public void sendTelemetry(TelemetryMessage telemetryMessage, int timeoutMilliseconds) throws InterruptedException, IllegalStateException, IotHubClientException
+    {
+        sendTelemetryInternal(telemetryMessage, timeoutMilliseconds);
+    }
+
+    /**
+     * Sends the TelemetryMessage to IoT hub.
+     * @param telemetryMessage The user supplied telemetry message.
+     * @param callback the callback to be invoked when a response is received. Can be {@code null}.
+     * @param callbackContext a context to be passed to the callback. Can be {@code null} if no callback is provided.
+     */
+    public void sendTelemetryAsync(TelemetryMessage telemetryMessage, MessageSentCallback callback, Object callbackContext) throws IllegalStateException
+    {
+        sendTelemetryInternalAsync(telemetryMessage, callback, callbackContext);
+    }
+
+    public void subscribeToCommands(CommandCallback commandCallback, Object commandCallbackContext)
+        throws IllegalStateException, InterruptedException, IotHubClientException
+    {
+        subscribeToCommandsInternal(commandCallback, commandCallbackContext);
+    }
+
+    public void subscribeToCommands(CommandCallback commandCallback, Object commandCallbackContext, int timeoutMilliseconds)
+        throws IllegalStateException, InterruptedException, IotHubClientException
+    {
+        subscribeToCommandsInternal(commandCallback, commandCallbackContext, timeoutMilliseconds);
+    }
+
+    /**
+     * Sets the global command handler.
+     *
+     * @param commandCallback Callback on which commands shall be invoked. Cannot be {@code null}.
+     * @param commandCallbackContext Context for command callback. Can be {@code null}.
+     * @param commandSubscriptionCallback Callback for providing IotHub status for command. Cannot be {@code null}.
+     * @param commandSubscriptionCallbackContext Context for command status callback. Can be {@code null}.
+     *
+     * @throws IOException if called when client is not opened.
+     */
+    public void subscribeToCommandsAsync(
+        @NonNull CommandCallback commandCallback,
+        Object commandCallbackContext,
+        @NonNull SubscriptionAcknowledgedCallback commandSubscriptionCallback,
+        Object commandSubscriptionCallbackContext)
+            throws IllegalStateException
+    {
+        subscribeToCommandsInternalAsync(commandCallback, commandCallbackContext, commandSubscriptionCallback, commandSubscriptionCallbackContext);
     }
 }

@@ -7,10 +7,10 @@ import com.microsoft.azure.sdk.iot.device.twin.SubscriptionAcknowledgedCallback;
 
 /**
  * A callback used to respond to all writable property requests. See
- * {@link com.microsoft.azure.sdk.iot.device.InternalClient#subscribeToWritablePropertiesAsync(WritablePropertiesRequestsCallback, Object, SubscriptionAcknowledgedCallback, Object)}
+ * {@link com.microsoft.azure.sdk.iot.device.InternalClient#subscribeToWritablePropertiesAsync(WritablePropertiesCallback, Object, SubscriptionAcknowledgedCallback, Object)}
  * for more information.
  */
-public interface WritablePropertiesRequestsCallback
+public interface WritablePropertiesCallback
 {
     /**
      * The method to execute.

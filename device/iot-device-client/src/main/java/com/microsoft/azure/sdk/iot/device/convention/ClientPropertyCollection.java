@@ -31,6 +31,7 @@ public class ClientPropertyCollection extends PayloadCollection
     private static final String VERSION_TAG = "$version";
 
     @Getter
+    @Setter
     private Integer version;
 
     // the Twin collection metadata

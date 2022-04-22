@@ -45,7 +45,7 @@ public class IotHubTransportMessage extends Message
      */
     @Getter
     @Setter
-    private Integer version;
+    private int version;
 
     /**
      * The message id.

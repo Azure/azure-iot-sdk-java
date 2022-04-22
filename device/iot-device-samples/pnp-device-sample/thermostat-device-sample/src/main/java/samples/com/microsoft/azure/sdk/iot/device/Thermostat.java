@@ -4,12 +4,13 @@
 package samples.com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.convention.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
+import com.microsoft.azure.sdk.iot.device.twin.ClientPropertiesCallback;
+import com.microsoft.azure.sdk.iot.device.twin.ClientPropertiesUpdateResponse;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -22,7 +23,6 @@ import java.util.*;
 @Slf4j
 public class Thermostat
 {
-
     public enum StatusCode
     {
         COMPLETED(200),
@@ -38,8 +38,8 @@ public class Thermostat
     }
 
     // DTDL interface used: https://github.com/Azure/iot-plugandplay-models/blob/main/dtmi/com/example/thermostat-1.json
-    private static final String deviceConnectionString = "HostName=ghissue2163.azure-devices.net;DeviceId=pnpclient;SharedAccessKey=vvJZpP86pzWsaPYO+cY5//HpMaAcz772Mvg+44WbvpY=";//System.getenv("IOTHUB_DEVICE_CONNECTION_STRING");
-    private static final String deviceSecurityType = "connectionString"; //System.getenv("IOTHUB_DEVICE_SECURITY_TYPE");
+    private static final String deviceConnectionString = System.getenv("IOTHUB_DEVICE_CONNECTION_STRING");
+    private static final String deviceSecurityType = System.getenv("IOTHUB_DEVICE_SECURITY_TYPE");
     private static final String MODEL_ID = "dtmi:com:example:Thermostat;1";
 
     // Environmental variables for Dps
@@ -52,7 +52,7 @@ public class Thermostat
     private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 1000; // in milli seconds
 
     // Plug and play features are available over MQTT, MQTT_WS, AMQPS, and AMQPS_WS.
-    private static final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+    private static final IotHubClientProtocol iotHubProtocol = IotHubClientProtocol.MQTT;
 
     private static final Random random = new Random();
 
@@ -62,6 +62,7 @@ public class Thermostat
     private static final Map<Date, Double> temperatureReadings = new HashMap<>();
 
     private static DeviceClient deviceClient;
+    private static ClientProperties clientProperties;
     private static double temperature = 0.0d;
     private static double maxTemperature = 0.0d;
     private static boolean temperatureReset = true;
@@ -92,19 +93,7 @@ public class Thermostat
 
     static class GetClientPropertiesCallback implements com.microsoft.azure.sdk.iot.device.convention.GetClientPropertiesCallback
     {
-        @Override
-        public void execute(ClientProperties responseStatus, Object callbackContext)
-        {
-            for (Map.Entry<? extends String, ?> entry : responseStatus.getReportedFromClient().entrySet())
-            {
-                    if (entry.getKey() == "NAME")
-                    {
-                        Integer i = (Integer) entry.getValue();
-                    }
-            }
-        }
-
-        public static void main(String[] args) throws URISyntaxException, IOException, ProvisioningDeviceClientException, InterruptedException
+        public static void main(String[] args) throws URISyntaxException, IOException, ProvisioningDeviceClientException, InterruptedException, IotHubClientException
         {
 
             // This sample follows the following workflow:
@@ -154,49 +143,52 @@ public class Thermostat
             }
 
             log.debug("Start twin and set handler to receive \"targetTemperature\" updates.");
-            Device dataCollector = new Device()
-            {
-                // Print details when a property value changes
-                @Override
-                public void PropertyCall(String propertyKey, Object propertyValue, Object context)
-                {
-                    System.out.println(propertyKey + " changed to " + propertyValue);
-                }
-            };
+            deviceClient.subscribeToWritableProperties(new TargetTemperatureUpdateCallback(), null);
 
-            deviceClient.startDeviceTwin(new TwinIotHubEventCallback(), null, dataCollector, null);
-
-            deviceClient.subscribeToWritablePropertiesAsync(new TargetTemperatureUpdateCallback(), null);
-
-            deviceClient.getClientPropertiesAsync(new GetClientPropertiesCallback(), null);
+            clientProperties = deviceClient.getClientProperties();
 
             log.debug("Set handler to receive \"getMaxMinReport\" command.");
-            String methodName = "getMaxMinReport";
-            deviceClient.subscribeToDeviceComamnds(new GetMaxMinReportMethodCallback(), methodName, new MethodIotHubEventCallback(), methodName);
+            deviceClient.subscribeToCommands(new GetMaxMinReportMethodCallback(), null);
 
-            new Thread(new Runnable()
+            new Thread(() ->
             {
-                @SneakyThrows({InterruptedException.class, IOException.class})
-                @Override
-                public void run()
+                while (true)
                 {
-                    while (true)
+                    if (temperatureReset)
                     {
-                        if (temperatureReset)
-                        {
-                            // Generate a random value between 5.0°C and 45.0°C for the current temperature reading.
-                            temperature = BigDecimal.valueOf(random.nextDouble() * 40 + 5).setScale(1, RoundingMode.HALF_UP).doubleValue();
-                            temperatureReset = false;
-                        }
+                        // Generate a random value between 5.0°C and 45.0°C for the current temperature reading.
+                        temperature = BigDecimal.valueOf(random.nextDouble() * 40 + 5).setScale(1, RoundingMode.HALF_UP).doubleValue();
+                        temperatureReset = false;
+                    }
 
+                    try
+                    {
                         sendTemperatureReading();
+                    }
+                    catch (IotHubClientException e)
+                    {
+                        //TODO
+                    }
+                    catch (InterruptedException e)
+                    {
+                        log.debug("Temperature reading sender thread interrupted. Ending the thread.");
+                        return;
+                    }
+
+                    try
+                    {
                         Thread.sleep(5 * 1000);
+                    }
+                    catch (InterruptedException e)
+                    {
+                        log.debug("Temperature reading sender thread interrupted. Ending the thread.");
+                        return;
                     }
                 }
             }).start();
         }
 
-        private static void initializeAndProvisionDevice() throws ProvisioningDeviceClientException, IOException, URISyntaxException, InterruptedException
+        private static void initializeAndProvisionDevice() throws ProvisioningDeviceClientException, IOException, IotHubClientException, URISyntaxException, InterruptedException
         {
             SecurityProviderSymmetricKey securityClientSymmetricKey = new SecurityProviderSymmetricKey(deviceSymmetricKey.getBytes(), registrationId);
             ProvisioningDeviceClient provisioningDeviceClient;
@@ -223,9 +215,11 @@ public class Thermostat
                 Thread.sleep(MAX_TIME_TO_WAIT_FOR_REGISTRATION);
             }
 
-            ClientOptions options = new ClientOptions();
-            options.setModelId(MODEL_ID);
-            options.setPayloadConvention(DefaultPayloadConvention.getInstance());
+            ClientOptions options =
+                ClientOptions.builder()
+                    .modelId(MODEL_ID)
+                    .payloadConvention(DefaultPayloadConvention.getInstance())
+                    .build();
 
             if (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED)
             {
@@ -236,8 +230,8 @@ public class Thermostat
                 String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
 
                 log.debug("Opening the device client.");
-                deviceClient = DeviceClient.createFromSecurityProvider(iotHubUri, deviceId, securityClientSymmetricKey, IotHubClientProtocol.MQTT, options);
-                deviceClient.open();
+                deviceClient = new DeviceClient(iotHubUri, deviceId, securityClientSymmetricKey, IotHubClientProtocol.MQTT, options);
+                deviceClient.open(true);
             }
         }
 
@@ -258,63 +252,82 @@ public class Thermostat
          * Initialize the device client instance over Mqtt protocol, setting the ModelId into ClientOptions.
          * This method also sets a connection status change callback, that will get triggered any time the device's connection status changes.
          */
-        private static void initializeDeviceClient() throws URISyntaxException, IOException
+        private static void initializeDeviceClient() throws URISyntaxException, IOException, IotHubClientException
         {
             ClientOptions options = ClientOptions.builder()
-                    .ModelId(MODEL_ID)
+                    .modelId(MODEL_ID)
                     .build();
 
-            deviceClient = new DeviceClient(deviceConnectionString, protocol, options);
+            deviceClient = new DeviceClient(deviceConnectionString, iotHubProtocol, options);
 
-            deviceClient.registerConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) ->
+            deviceClient.setConnectionStatusChangeCallback((statusChangeCallback) ->
             {
-                log.debug("Connection status change registered: status={}, reason={}", status, statusChangeReason);
+                log.debug("Connection status change registered: status={}, reason={}", statusChangeCallback.getNewStatus(), statusChangeCallback.getNewStatusReason());
 
-                if (throwable != null)
+                if (statusChangeCallback.getCause() != null)
                 {
-                    log.debug("The connection status change was caused by the following Throwable: {}", throwable.getMessage());
-                    throwable.printStackTrace();
+                    log.debug("The connection status change was caused by the following Throwable: {}", statusChangeCallback.getCause().getMessage());
+                    statusChangeCallback.getCause().printStackTrace();
                 }
             }, deviceClient);
 
-            deviceClient.open();
+            deviceClient.open(true);
+        }
+
+        @Override
+        public void onClientPropertiesReceived(ClientProperties clientProperties, IotHubClientException clientException, Object context)
+        {
+            for (Map.Entry<? extends String, ?> entry : clientProperties.getWritableProperties().entrySet())
+            {
+                if (entry.getKey() == "NAME")
+                {
+                    Integer i = (Integer) entry.getValue();
+                }
+            }
         }
 
         /**
          * The desired property update callback, which receives the target temperature as a desired property update,
          * and updates the current temperature value over telemetry and reported property update.
          */
-        private static class TargetTemperatureUpdateCallback implements WritablePropertiesRequestsCallback
+        private static class TargetTemperatureUpdateCallback implements WritablePropertiesCallback
         {
-
             final String propertyName = "targetTemperature";
 
-            @SneakyThrows({InterruptedException.class})
-            public void onWritablePropertiesUpdated(ClientPropertyCollection propertyCollection, Object context)
+            @Override
+            public void onWritablePropertiesUpdated(ClientProperties clientProperties, Object context)
             {
-
                 // Each of these properties will be a WritablePropertyResponse we can simply copy the value over and ack each one
                 // or we can modify each property and ack the whole collection.
-                for (String key : propertyCollection.keySet())
+                for (String key : clientProperties.getWritableProperties().keySet())
                 {
                     if (key.equalsIgnoreCase(propertyName))
                     {
                         ClientPropertyCollection collection = new ClientPropertyCollection();
 
-                        WritablePropertyResponse targetTemperature = propertyCollection.getValue(key, WritablePropertyResponse.class);
+                        WritablePropertyResponse targetTemperature = clientProperties.getWritableProperties().getValue(key, WritablePropertyResponse.class);
                         log.debug("Property: Received - {\"{}\": {}°C}.", propertyName, targetTemperature.getValue());
 
                         targetTemperature.setAckCode(StatusCode.IN_PROGRESS.value);
                         collection.put(propertyName, targetTemperature);
 
-                        try
-                        {
-                            deviceClient.updateClientPropertiesAsync(collection, null, null);
-                        }
-                        catch (IOException e)
-                        {
-                            throw new RuntimeException("IOException when sending reported property update: ", e);
-                        }
+                        deviceClient.updateClientPropertiesAsync(
+                            collection,
+                            (statusCode, response, e, callbackContext) ->
+                            {
+                                if (e == null)
+                                {
+                                    log.debug("Successfully updated client property: {\"{}\": {}°C} is {}", propertyName, temperature, StatusCode.COMPLETED);
+                                }
+                                else
+                                {
+                                    log.debug("Failed to update client property: {\"{}\": {}°C}. Status code {}", propertyName, temperature, statusCode);
+                                }
+
+                                clientProperties.getReportedFromClient().setVersion(response.getVersion());
+                            },
+                            null);
+
                         log.debug("Property: Update - {\"{}\": {}°C} is {}", propertyName, targetTemperature.getValue(), StatusCode.IN_PROGRESS);
 
                         // Update temperature in 2 steps
@@ -322,18 +335,17 @@ public class Thermostat
                         for (int i = 1; i <= 2; i++)
                         {
                             temperature = BigDecimal.valueOf(temperature + step).setScale(1, RoundingMode.HALF_UP).doubleValue();
-                            Thread.sleep(5 * 1000);
                         }
 
                         targetTemperature.setAckCode(StatusCode.COMPLETED.value);
-                        try
-                        {
-                            deviceClient.updateClientPropertiesAsync(collection, null, null);
-                        }
-                        catch (IOException e)
-                        {
-                            throw new RuntimeException("IOException when sending reported property update: ", e);
-                        }
+                            deviceClient.updateClientPropertiesAsync(
+                                collection,
+                                (statusCode, response, e, context1) ->
+                                {
+                                    //TODO
+                                    ///TODODODODODODODO
+                                },
+                                null);
 
                         log.debug("Property: Update - {\"{}\": {}°C} is {}", propertyName, temperature, StatusCode.COMPLETED);
                     }
@@ -349,7 +361,7 @@ public class Thermostat
          * The callback to handle "getMaxMinReport" command.
          * This method will returns the max, min and average temperature from the specified time to the current time.
          */
-        private static class GetMaxMinReportMethodCallback implements DeviceCommandCallback
+        private static class GetMaxMinReportMethodCallback implements CommandCallback
         {
             final String commandName = "getMaxMinReport";
 
@@ -366,7 +378,6 @@ public class Thermostat
                 public String endTime;
             }
 
-            @SneakyThrows
             @Override
             public DeviceCommandResponse onDeviceCommandReceived(DeviceCommandRequest deviceCommandRequest)
             {
@@ -427,47 +438,26 @@ public class Thermostat
         }
 
         /**
-         * The callback to be invoked in response to device twin operations in IoT Hub.
-         */
-        private static class TwinIotHubEventCallback implements IotHubEventCallback
-        {
-
-            @Override
-            public void execute(IotHubStatusCode responseStatus, Object callbackContext)
-            {
-                log.debug("Property - Response from IoT Hub: {}", responseStatus.name());
-            }
-        }
-
-        /**
-         * The callback to be invoked in response to command invocation from IoT Hub.
-         */
-        private static class MethodIotHubEventCallback implements IotHubEventCallback
-        {
-
-            @Override
-            public void execute(IotHubStatusCode responseStatus, Object callbackContext)
-            {
-                String commandName = (String) callbackContext;
-                log.debug("Command - Response from IoT Hub: command name={}, status={}", commandName, responseStatus.name());
-            }
-        }
-
-        /**
          * The callback to be invoked when a telemetry response is received from IoT Hub.
          */
-        private static class MessageIotHubEventCallback implements IotHubEventCallback
+        private static class MessageSentCallbackImpl implements MessageSentCallback
         {
-
             @Override
-            public void execute(IotHubStatusCode responseStatus, Object callbackContext)
+            public void onMessageSent(Message sentMessage, IotHubClientException clientException, Object callbackContext)
             {
                 Message msg = (Message) callbackContext;
-                log.debug("Telemetry - Response from IoT Hub: message Id={}, status={}", msg.getMessageId(), responseStatus.name());
+                if (clientException == null)
+                {
+                    log.debug("Telemetry - Response from IoT Hub: message Id={}, status={}", msg.getMessageId(), IotHubStatusCode.OK);
+                }
+                else
+                {
+                    log.debug("Telemetry - Response from IoT Hub: message Id={}, status={}", msg.getMessageId(), clientException.getStatusCode());
+                }
             }
         }
 
-        private static void sendTemperatureReading() throws IOException
+        private static void sendTemperatureReading() throws IotHubClientException, InterruptedException
         {
             sendTemperatureTelemetry();
 
@@ -485,19 +475,19 @@ public class Thermostat
 
             TelemetryMessage message = new TelemetryMessage();
             message.getTelemetry().put(telemetryName, temperature);
-            deviceClient.sendTelemetryAsync(message, new MessageIotHubEventCallback(), message);
+            deviceClient.sendTelemetryAsync(message, new MessageSentCallbackImpl(), message);
 
             log.debug("Telemetry: Sent - {\"{}\": {}°C} with message Id {}.", telemetryName, temperature, message.getMessageId());
             temperatureReadings.put(new Date(), temperature);
         }
 
-        private static void updateMaxTemperatureSinceLastReboot() throws IOException
+        private static void updateMaxTemperatureSinceLastReboot() throws IotHubClientException, InterruptedException
         {
             String propertyName = "maxTempSinceLastReboot";
 
-            ClientPropertyCollection collection = new ClientPropertyCollection();
-            collection.put(propertyName, maxTemperature);
-            deviceClient.updateClientPropertiesAsync(collection, null, null);
+            ClientPropertyCollection reportedFromClient = clientProperties.getReportedFromClient();
+            reportedFromClient.put(propertyName, maxTemperature);
+            deviceClient.updateClientProperties(reportedFromClient);
             log.debug("Property: Update - {\"{}\": {}°C} is {}.", propertyName, maxTemperature, StatusCode.COMPLETED);
         }
     }

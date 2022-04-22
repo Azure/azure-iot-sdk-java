@@ -3,7 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.device.convention;
 
-import com.microsoft.azure.sdk.iot.device.convention.PayloadConvention;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,7 +16,7 @@ import lombok.Setter;
  *     will all be set by the SDK.
  * </p>
  *  <p>
- *      Example usage inside of the {@link DeviceCommandCallback}
+ *      Example usage inside of the {@link CommandCallback}
  *  </p>
  *  <pre>
  *{@code

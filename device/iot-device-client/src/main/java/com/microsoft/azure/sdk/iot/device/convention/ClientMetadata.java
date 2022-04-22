@@ -45,7 +45,7 @@ import com.microsoft.azure.sdk.iot.device.twin.TwinMetadata;
 @SuppressWarnings("unchecked")
 public class ClientMetadata extends TwinMetadata {
     public ClientMetadata(ClientMetadata clientMetadata) {
-        super((TwinMetadata)clientMetadata);
+        super(clientMetadata);
     }
 
     public ClientMetadata(String lastUpdated, Integer lastUpdatedVersion, String lastUpdatedBy, String lastUpdatedByDigest) {

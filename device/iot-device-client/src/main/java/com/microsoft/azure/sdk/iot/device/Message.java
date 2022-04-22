@@ -476,6 +476,11 @@ public class Message
         this.isSecurityClient = true;
     }
 
+    public boolean isSecurityMessage()
+    {
+        return this.isSecurityClient;
+    }
+
     @Override
     public String toString()
     {

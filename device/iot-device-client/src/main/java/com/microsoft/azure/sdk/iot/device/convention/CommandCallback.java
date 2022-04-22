@@ -6,7 +6,7 @@ package com.microsoft.azure.sdk.iot.device.convention;
 /**
  * The command callback to be executed for all commands.
  */
-public interface DeviceCommandCallback
+public interface CommandCallback
 {
     /**
      * The call to be implemented.

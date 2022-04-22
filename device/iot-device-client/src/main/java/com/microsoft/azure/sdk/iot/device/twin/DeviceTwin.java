@@ -375,7 +375,7 @@ public class DeviceTwin implements MessageCallback
                 if (callback != null)
                 {
                     log.trace("Executing twin status callback for device operation twin update reported properties response with status " + iotHubStatus);
-                    callback.onResponseReceived(message, callbackContext, iotHubStatus, new WritablePropertiesUpdateResponse(dtMessage.getVersion()), e);
+                    callback.onResponseReceived(message, callbackContext, iotHubStatus, new ClientPropertiesUpdateResponse(dtMessage.getVersion()), e);
                 }
             }
 

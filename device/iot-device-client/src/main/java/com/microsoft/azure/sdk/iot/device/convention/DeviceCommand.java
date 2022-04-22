@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DeviceCommand extends DirectMethod
 {
-    private DeviceCommandCallback deviceCommandCallback;
+    private CommandCallback deviceCommandCallback;
 
     @Getter
     @Setter(AccessLevel.PROTECTED)
@@ -163,7 +163,7 @@ public class DeviceCommand extends DirectMethod
      *                                    callback.
      * @throws IllegalArgumentException This exception is thrown when deviceMethodCallback is provided null.
      */
-    public void subscribeToDeviceCommand(DeviceCommandCallback deviceMethodCallback, Object deviceMethodCallbackContext) throws IllegalArgumentException
+    public void subscribeToCommands(CommandCallback deviceMethodCallback, Object deviceMethodCallbackContext) throws IllegalArgumentException
     {
         if (deviceMethodCallback == null)
         {

@@ -54,7 +54,7 @@ public interface ClientPropertiesUpdateCorrelatingMessageCallback
      * does not apply this reported properties update immediately.
      * @param e The error or exception given by the transport. If there are no errors this will be {@code null}.
      */
-    void onResponseReceived(Message message, Object callbackContext, IotHubStatusCode statusCode, WritablePropertiesUpdateResponse response, IotHubClientException e);
+    void onResponseReceived(Message message, Object callbackContext, IotHubStatusCode statusCode, ClientPropertiesUpdateResponse response, IotHubClientException e);
 
     /**
      * Called when a response to the message has been sent by IoT hub and has been acknowledged by the transport.

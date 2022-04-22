@@ -8,7 +8,6 @@ package com.microsoft.azure.sdk.iot.device;
 import com.microsoft.azure.sdk.iot.device.convention.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.device.twin.*;
 import com.microsoft.azure.sdk.iot.device.twin.DeviceTwin;
@@ -1091,12 +1090,58 @@ public class InternalClient
         }
     }
 
+    ClientProperties getClientPropertiesInternal() throws IotHubClientException, InterruptedException, IllegalStateException
+    {
+        return getClientPropertiesInternal(DEFAULT_TIMEOUT_MILLISECONDS);
+    }
+
+    ClientProperties getClientPropertiesInternal(int timeoutMilliseconds) throws InterruptedException, IotHubClientException, IllegalStateException
+    {
+        final CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<IotHubClientException> iotHubClientExceptionReference = new AtomicReference<>();
+        AtomicReference<ClientProperties> clientPropertiesReference = new AtomicReference<>();
+        getClientPropertiesInternalAsync(
+            (clientProperties, exception, context) ->
+            {
+                iotHubClientExceptionReference.set(exception);
+                clientPropertiesReference.set(clientProperties);
+                latch.countDown();
+            },
+            null);
+
+        if (timeoutMilliseconds == 0)
+        {
+            latch.await();
+        }
+        else
+        {
+            boolean timedOut = !latch.await(timeoutMilliseconds, TimeUnit.MILLISECONDS);
+
+            if (timedOut)
+            {
+                throw new IotHubClientException(IotHubStatusCode.DEVICE_OPERATION_TIMED_OUT, "Timed out waiting for service to respond to client properties request");
+            }
+        }
+
+        IotHubClientException exception = iotHubClientExceptionReference.get();
+        if (exception != null)
+        {
+            // This exception was thrown from an internal thread that the user does not directly call, so its stacktrace
+            // is not very traceable for a user. Rather than throw the exception as is, create a new one so the stacktrace
+            // the user receives points them to this synchronous method and has a nested exception with the internal thread's
+            // stacktrace that can be used for our debugging purposes.
+            throw new IotHubClientException(exception.getStatusCode(), exception.getMessage(), exception);
+        }
+
+        return clientPropertiesReference.get();
+    }
+
     /**
      * Retreieve the client properties.
      * @param callback The callback to be used for receiving client properties.
      * @param callbackContext An optional user context to be sent to the callback.
      */
-    public void getClientPropertiesAsync(GetClientPropertiesCallback callback, Object callbackContext)
+    void getClientPropertiesInternalAsync(GetClientPropertiesCallback callback, Object callbackContext) throws IllegalStateException
     {
         GetClientPropertiesCorrelatingMessageCallback getClientPropertiesCorrelatingMessageCallback = new GetClientPropertiesCorrelatingMessageCallback()
         {
@@ -1131,7 +1176,7 @@ public class InternalClient
             }
         };
 
-        this.getClientPropertiesAsync(getClientPropertiesCorrelatingMessageCallback, callbackContext);
+        this.getClientPropertiesInternalAsync(getClientPropertiesCorrelatingMessageCallback, callbackContext);
     }
 
     /**
@@ -1139,25 +1184,64 @@ public class InternalClient
      * @param callback The callback to be used for receiving client properties.
      * @param callbackContext An optional user context to be sent to the callback.
      */
-    public void getClientPropertiesAsync(GetClientPropertiesCorrelatingMessageCallback callback, Object callbackContext)
+    void getClientPropertiesInternalAsync(GetClientPropertiesCorrelatingMessageCallback callback, Object callbackContext) throws IllegalStateException
     {
         // In Java we don't return an object for the DeviceTwin, but instead we pass a Map<String, Object> in the form of a Device
         // this map gets populated with a number of callbacks.
         twin.getClientProperties(callback, callbackContext);
     }
 
-    /**
-     * Set the global writable properties callback handler.
-     *
-     * TODO ADD SYNC ON SUBSCRIPTION
-     * @param writablePropertyUpdateCallback The callback to be used for writable properties.
-     * @param callbackContext An optional user context to be sent to the callback.
-     */
-    public void subscribeToWritablePropertiesAsync(
-            WritablePropertiesRequestsCallback writablePropertyUpdateCallback,
+    void subscribeToWritablePropertiesInternal(WritablePropertiesCallback writablePropertyUpdateCallback, Object writablePropertyUpdateCallbackContext)
+        throws InterruptedException, IllegalStateException, IotHubClientException
+    {
+        subscribeToWritablePropertiesInternal(writablePropertyUpdateCallback, writablePropertyUpdateCallbackContext, DEFAULT_TIMEOUT_MILLISECONDS);
+    }
+
+    void subscribeToWritablePropertiesInternal(WritablePropertiesCallback writablePropertyUpdateCallback, Object writablePropertyUpdateCallbackContext, int timeoutMilliseconds)
+        throws InterruptedException, IllegalStateException, IotHubClientException
+    {
+        AtomicReference<IotHubClientException> iotHubClientExceptionReference = new AtomicReference<>();
+        CountDownLatch latch = new CountDownLatch(1);
+        this.subscribeToWritablePropertiesInternalAsync(
+            writablePropertyUpdateCallback,
+            writablePropertyUpdateCallbackContext,
+            (exception, context) ->
+            {
+                iotHubClientExceptionReference.set(exception);
+                latch.countDown();
+            },
+            null);
+
+        if (timeoutMilliseconds == 0)
+        {
+            latch.await();
+        }
+        else
+        {
+            boolean timedOut = !latch.await(timeoutMilliseconds, TimeUnit.MILLISECONDS);
+
+            if (timedOut)
+            {
+                throw new IotHubClientException(IotHubStatusCode.DEVICE_OPERATION_TIMED_OUT, "Timed out waiting for service to acknowledge writable properties subscription request");
+            }
+        }
+
+        IotHubClientException exception = iotHubClientExceptionReference.get();
+        if (exception != null)
+        {
+            // This exception was thrown from an internal thread that the user does not directly call, so its stacktrace
+            // is not very traceable for a user. Rather than throw the exception as is, create a new one so the stacktrace
+            // the user receives points them to this synchronous method and has a nested exception with the internal thread's
+            // stacktrace that can be used for our debugging purposes.
+            throw new IotHubClientException(exception.getStatusCode(), exception.getMessage(), exception);
+        }
+    }
+
+    void subscribeToWritablePropertiesInternalAsync(
+            WritablePropertiesCallback writablePropertyUpdateCallback,
             Object writablePropertyUpdateCallbackContext,
             SubscriptionAcknowledgedCallback subscriptionAcknowledgedCallback,
-            Object subscriptionAcknowledgedCallbackContext)
+            Object subscriptionAcknowledgedCallbackContext) throws IllegalStateException
     {
         DesiredPropertiesCallback desiredPropertiesCallback = new DesiredPropertiesCallback()
         {
@@ -1174,6 +1258,55 @@ public class InternalClient
         twin.subscribeToDesiredPropertiesAsync(subscriptionAcknowledgedCallback, subscriptionAcknowledgedCallbackContext, desiredPropertiesCallback, writablePropertyUpdateCallbackContext);
     }
 
+    ClientPropertiesUpdateResponse updateClientPropertiesInternal(ClientPropertyCollection clientProperties)
+        throws InterruptedException, IllegalStateException, IotHubClientException
+    {
+        return updateClientPropertiesInternal(clientProperties, DEFAULT_TIMEOUT_MILLISECONDS);
+    }
+
+    ClientPropertiesUpdateResponse updateClientPropertiesInternal(ClientPropertyCollection clientProperties, int timeoutMilliseconds)
+        throws InterruptedException, IllegalStateException, IotHubClientException
+    {
+        AtomicReference<IotHubClientException> iotHubClientExceptionAtomicReference = new AtomicReference<>();
+        AtomicReference<ClientPropertiesUpdateResponse> responseAtomicReference = new AtomicReference<>();
+        CountDownLatch latch = new CountDownLatch(1);
+        this.updateClientPropertiesInternalAsync(
+            clientProperties,
+            (statusCode, response, e, callbackContext) ->
+            {
+                iotHubClientExceptionAtomicReference.set(e);
+                responseAtomicReference.set(response);
+                latch.countDown();
+            },
+            null);
+
+        if (timeoutMilliseconds == 0)
+        {
+            latch.await();
+        }
+        else
+        {
+            boolean timedOut = !latch.await(timeoutMilliseconds, TimeUnit.MILLISECONDS);
+
+            if (timedOut)
+            {
+                throw new IotHubClientException(IotHubStatusCode.DEVICE_OPERATION_TIMED_OUT, "Timed out waiting for service to acknowledge client properties update");
+            }
+        }
+
+        IotHubClientException exception = iotHubClientExceptionAtomicReference.get();
+        if (exception != null)
+        {
+            // This exception was thrown from an internal thread that the user does not directly call, so its stacktrace
+            // is not very traceable for a user. Rather than throw the exception as is, create a new one so the stacktrace
+            // the user receives points them to this synchronous method and has a nested exception with the internal thread's
+            // stacktrace that can be used for our debugging purposes.
+            throw new IotHubClientException(exception.getStatusCode(), exception.getMessage(), exception);
+        }
+
+        return responseAtomicReference.get();
+    }
+
     /**
      * Update the client properties.
      * @param clientProperties The client properties to send.
@@ -1183,7 +1316,7 @@ public class InternalClient
      * TODO ADD THE CLIENT PROPERTIES RESPONSE
      * @throws IOException Thrown from the underlying DeviceIO
      */
-    public void updateClientPropertiesAsync(ClientPropertyCollection clientProperties, WritablePropertiesCallback callback, Object callbackContext) throws IOException
+    void updateClientPropertiesInternalAsync(ClientPropertyCollection clientProperties, ClientPropertiesCallback callback, Object callbackContext) throws IllegalStateException
     {
         ClientPropertiesUpdateCorrelatingMessageCallback correlatingMessageCallback = new ClientPropertiesUpdateCorrelatingMessageCallback()
         {
@@ -1207,9 +1340,9 @@ public class InternalClient
             }
 
             @Override
-            public void onResponseReceived(Message message, Object callbackContext, IotHubStatusCode statusCode, WritablePropertiesUpdateResponse response, IotHubClientException e)
+            public void onResponseReceived(Message message, Object callbackContext, IotHubStatusCode statusCode, ClientPropertiesUpdateResponse response, IotHubClientException e)
             {
-                callback.onWritablePropertiesUpdateAcknowledged(statusCode, response, e, callbackContext);
+                callback.onClientPropertiesUpdateAcknowledged(statusCode, response, e, callbackContext);
             }
 
             @Override
@@ -1219,10 +1352,10 @@ public class InternalClient
             }
         };
 
-        this.updateClientPropertiesAsync(clientProperties, correlatingMessageCallback, callbackContext);
+        this.updateClientPropertiesInternalAsync(clientProperties, correlatingMessageCallback, callbackContext);
     }
 
-    public void updateClientPropertiesAsync(ClientPropertyCollection clientProperties, ClientPropertiesUpdateCorrelatingMessageCallback callback, Object callbackContext) throws IOException
+    void updateClientPropertiesInternalAsync(ClientPropertyCollection clientProperties, ClientPropertiesUpdateCorrelatingMessageCallback callback, Object callbackContext) throws IllegalStateException
     {
         if (clientProperties == null)
         {
@@ -1232,13 +1365,57 @@ public class InternalClient
         this.twin.updateClientProperties(clientProperties, callback, callbackContext);
     }
 
+    void sendTelemetryInternal(TelemetryMessage telemetryMessage) throws InterruptedException, IllegalStateException, IotHubClientException
+    {
+        sendEvent(telemetryMessage, DEFAULT_TIMEOUT_MILLISECONDS);
+    }
+
+    void sendTelemetryInternal(TelemetryMessage telemetryMessage, int timeoutMilliseconds) throws InterruptedException, IllegalStateException, IotHubClientException
+    {
+        verifyRegisteredIfMultiplexing();
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<IotHubClientException> iotHubClientExceptionReference = new AtomicReference<>();
+        MessageSentCallback eventCallback = (sentMessage, exception, callbackContext) ->
+        {
+            iotHubClientExceptionReference.set(exception);
+            latch.countDown();
+        };
+
+        this.sendTelemetryInternalAsync(telemetryMessage, eventCallback, null);
+
+        if (timeoutMilliseconds == 0)
+        {
+            latch.await();
+        }
+        else
+        {
+            boolean timedOut = !latch.await(timeoutMilliseconds, TimeUnit.MILLISECONDS);
+
+            if (timedOut)
+            {
+                throw new IotHubClientException(IotHubStatusCode.DEVICE_OPERATION_TIMED_OUT, "Timed out waiting for service to acknowledge telemetry");
+            }
+        }
+
+        IotHubClientException exception = iotHubClientExceptionReference.get();
+        if (exception != null)
+        {
+            // This exception was thrown from an internal thread that the user does not directly call, so its stacktrace
+            // is not very traceable for a user. Rather than throw the exception as is, create a new one so the stacktrace
+            // the user receives points them to this synchronous method and has a nested exception with the internal thread's
+            // stacktrace that can be used for our debugging purposes.
+            throw new IotHubClientException(exception.getStatusCode(), exception.getMessage(), exception);
+        }
+    }
+
     /**
      * Sends the TelemetryMessage to IoT hub.
      * @param telemetryMessage The user supplied telemetry message.
      * @param callback the callback to be invoked when a response is received. Can be {@code null}.
      * @param callbackContext a context to be passed to the callback. Can be {@code null} if no callback is provided.
      */
-    public void sendTelemetryAsync(TelemetryMessage telemetryMessage, MessageSentCallback callback, Object callbackContext)
+    void sendTelemetryInternalAsync(TelemetryMessage telemetryMessage, MessageSentCallback callback, Object callbackContext) throws IllegalStateException
     {
         if (telemetryMessage == null)
         {
@@ -1255,34 +1432,83 @@ public class InternalClient
         sendEventAsync(telemetryMessage, callback, callbackContext);
     }
 
+    void subscribeToCommandsInternal(CommandCallback commandCallback, Object commandCallbackContext)
+        throws IllegalStateException, InterruptedException, IotHubClientException
+    {
+        this.subscribeToCommandsInternal(commandCallback, commandCallbackContext, DEFAULT_TIMEOUT_MILLISECONDS);
+    }
+
+    void subscribeToCommandsInternal(CommandCallback commandCallback, Object commandCallbackContext, int timeoutMilliseconds)
+        throws IllegalStateException, InterruptedException, IotHubClientException
+    {
+        final CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<IotHubClientException> iotHubClientExceptionReference = new AtomicReference<>();
+        subscribeToCommandsInternalAsync(
+            commandCallback,
+            commandCallbackContext,
+            (exception, callbackContext) ->
+            {
+                iotHubClientExceptionReference.set(exception);
+                latch.countDown();
+            },
+            null);
+
+        if (timeoutMilliseconds == 0)
+        {
+            latch.await();
+        }
+        else
+        {
+            boolean timedOut = !latch.await(timeoutMilliseconds, TimeUnit.MILLISECONDS);
+
+            if (timedOut)
+            {
+                throw new IotHubClientException(IotHubStatusCode.DEVICE_OPERATION_TIMED_OUT, "Timed out waiting for service to respond to direct method subscription request");
+            }
+        }
+
+        IotHubClientException exception = iotHubClientExceptionReference.get();
+        if (exception != null)
+        {
+            // This exception was thrown from an internal thread that the user does not directly call, so its stacktrace
+            // is not very traceable for a user. Rather than throw the exception as is, create a new one so the stacktrace
+            // the user receives points them to this synchronous method and has a nested exception with the internal thread's
+            // stacktrace that can be used for our debugging purposes.
+            throw new IotHubClientException(exception.getStatusCode(), exception.getMessage(), exception);
+        }
+    }
+
     /**
      * Sets the global command handler.
      *
-     * @param deviceCommandCallback Callback on which commands shall be invoked. Cannot be {@code null}.
-     * @param deviceCommandCallbackContext Context for command callback. Can be {@code null}.
-     * @param deviceCommandStatusCallback Callback for providing IotHub status for command. Cannot be {@code null}.
-     * @param deviceCommandStatusCallbackContext Context for command status callback. Can be {@code null}.
+     * @param commandCallback Callback on which commands shall be invoked. Cannot be {@code null}.
+     * @param commandCallbackContext Context for command callback. Can be {@code null}.
+     * @param commandSubscriptionCallback Callback for providing IotHub status for command. Cannot be {@code null}.
+     * @param commandSubscriptionCallbackContext Context for command status callback. Can be {@code null}.
      *
      * @throws IOException if called when client is not opened.
      */
-    void subscribeToCommandsInternal(@NonNull DeviceCommandCallback deviceCommandCallback, Object deviceCommandCallbackContext,
-                                     @NonNull SubscriptionAcknowledgedCallback deviceCommandStatusCallback, Object deviceCommandStatusCallbackContext)
-            throws IOException
+    void subscribeToCommandsInternalAsync(
+        @NonNull CommandCallback commandCallback,
+        Object commandCallbackContext,
+        @NonNull SubscriptionAcknowledgedCallback commandSubscriptionCallback,
+        Object commandSubscriptionCallbackContext)
+            throws IllegalStateException
     {
         verifyRegisteredIfMultiplexing();
         verifyMethodsAreSupported();
 
         if (!this.deviceIO.isOpen())
         {
-            throw new IOException("Open the client connection before using it.");
+            throw new IllegalStateException("Open the client connection before using it.");
         }
 
         if (this.command == null)
         {
-            this.command = new DeviceCommand(this, deviceCommandStatusCallback, deviceCommandStatusCallbackContext, getPayloadConvention());
+            this.command = new DeviceCommand(this, commandSubscriptionCallback, commandSubscriptionCallbackContext, getPayloadConvention());
         }
 
-        this.command.subscribeToDeviceCommand(deviceCommandCallback, deviceCommandCallbackContext);
+        this.command.subscribeToCommands(commandCallback, commandCallbackContext);
     }
 
     private void setPayloadConvetionInternal()

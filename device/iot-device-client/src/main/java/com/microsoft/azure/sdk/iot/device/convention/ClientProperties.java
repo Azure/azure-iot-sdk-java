@@ -3,11 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.device.convention;
 
-import com.google.gson.Gson;
-import com.microsoft.azure.sdk.iot.device.twin.Tools;
-import com.microsoft.azure.sdk.iot.device.twin.Twin;
-import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
-import com.microsoft.azure.sdk.iot.device.twin.TwinGsonBuilder;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

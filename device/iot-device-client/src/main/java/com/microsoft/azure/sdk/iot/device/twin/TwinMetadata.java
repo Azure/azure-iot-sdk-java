@@ -74,7 +74,7 @@ public class TwinMetadata
      * @param lastUpdatedVersion the {@code Integer} with the version of the last update on the entity. It can be {@code null}.
      * @throws IllegalArgumentException If no valid parameter was provide and the class will be empty, or if the DateTime is invalid.
      */
-    TwinMetadata(String lastUpdated, Integer lastUpdatedVersion, String lastUpdatedBy, String lastUpdatedByDigest) {
+    public TwinMetadata(String lastUpdated, Integer lastUpdatedVersion, String lastUpdatedBy, String lastUpdatedByDigest) {
         if (!Tools.isNullOrEmpty(lastUpdated)) {
             this.lastUpdated = ParserUtility.getDateTimeUtc(lastUpdated);
         }
@@ -101,7 +101,7 @@ public class TwinMetadata
      *
      * @param metadata the original {@code TwinMetadata} to copy.
      */
-    TwinMetadata(TwinMetadata metadata) {
+    public TwinMetadata(TwinMetadata metadata) {
         if (metadata == null) {
             throw new IllegalArgumentException("metadata to copy cannot be null");
         }
@@ -146,7 +146,7 @@ public class TwinMetadata
      * data and version metadata, or {@code null} for the other cases.
      * @throws IllegalArgumentException If no valid parameter was provide and the class will be empty, or if the DateTime is invalid.
      */
-    static TwinMetadata tryExtractFromMap(Object metadata) {
+    public static TwinMetadata tryExtractFromMap(Object metadata) {
         if (!(metadata instanceof Map)) {
             return null;
         }

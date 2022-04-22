@@ -7,7 +7,7 @@ import lombok.Getter;
  * The response fields for a reported properties update request.
  */
 @AllArgsConstructor
-public class WritablePropertiesUpdateResponse
+public class ClientPropertiesUpdateResponse
 {
     /**
      * The new version of the reported properties after a successful reported properties update. If the client updating
