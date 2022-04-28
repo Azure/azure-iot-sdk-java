@@ -58,7 +58,7 @@ final class AmqpsTwinSenderLinkHandler extends AmqpsSenderLinkHandler
         this.senderLinkAddress = getAddress(clientConfiguration);
 
         //Note that this correlation id value must be equivalent to the correlation id in the twin receiver link that it is paired with
-        this.amqpProperties.put(Symbol.getSymbol(CORRELATION_ID_KEY), Symbol.getSymbol(CORRELATION_ID_KEY_PREFIX + this.linkCorrelationId));
+        this.amqpProperties.put(Symbol.getSymbol(CORRELATION_ID_KEY), CORRELATION_ID_KEY_PREFIX + this.linkCorrelationId);
         this.amqpProperties.put(Symbol.getSymbol(VERSION_IDENTIFIER_KEY), clientConfiguration.getProductInfo().getUserAgentString());
 
         this.twinOperationCorrelationMap = twinOperationCorrelationMap;

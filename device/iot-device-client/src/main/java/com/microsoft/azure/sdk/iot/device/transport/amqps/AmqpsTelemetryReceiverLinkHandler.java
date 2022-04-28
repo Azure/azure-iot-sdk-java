@@ -44,11 +44,11 @@ final class AmqpsTelemetryReceiverLinkHandler extends AmqpsReceiverLinkHandler
         String moduleId = this.clientConfiguration.getModuleId();
         if (moduleId != null)
         {
-            this.amqpProperties.put(Symbol.getSymbol(CORRELATION_ID_KEY), Symbol.getSymbol(this.clientConfiguration.getDeviceId() + "/" + moduleId));
+            this.amqpProperties.put(Symbol.getSymbol(CORRELATION_ID_KEY), this.clientConfiguration.getDeviceId() + "/" + moduleId);
         }
         else
         {
-            this.amqpProperties.put(Symbol.getSymbol(CORRELATION_ID_KEY), Symbol.getSymbol(this.clientConfiguration.getDeviceId()));
+            this.amqpProperties.put(Symbol.getSymbol(CORRELATION_ID_KEY), this.clientConfiguration.getDeviceId());
         }
     }
 
