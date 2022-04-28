@@ -333,7 +333,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         {
             // proton-j occasionally throws this exception if there is an issue with the internal state of the reactor
             // while freeing the relevant resources. It is safe to ignore since we won't need to worry about the reactor's
-            // internal state since it will be garbage collected by the JVM soon.
+            // internal state since it won't be used anymore.
             log.trace("Failed to free the reactor. Moving forward with cleanup anyways.", e);
         }
 
