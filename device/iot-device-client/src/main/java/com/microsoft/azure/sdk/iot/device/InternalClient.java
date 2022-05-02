@@ -675,11 +675,7 @@ public class InternalClient
             throw new IllegalStateException("Open the client connection before using it");
         }
 
-        if (this.twin == null)
-        {
-            this.twin = new DeviceTwin(this);
-        }
-
+        this.twin = new DeviceTwin(this);
         this.twin.subscribeToDesiredPropertiesAsync(
             subscriptionAcknowledgedCallback,
             desiredPropertiesSubscriptionCallbackContext,
@@ -880,11 +876,7 @@ public class InternalClient
             throw new IllegalArgumentException("Callback cannot be null");
         }
 
-        if (this.method == null)
-        {
-            this.method = new DirectMethod(this, methodStatusCallback, methodStatusCallbackContext);
-        }
-
+        this.method = new DirectMethod(this, methodStatusCallback, methodStatusCallbackContext);
         this.method.subscribeToDirectMethods(methodCallback, methodCallbackContext);
     }
 
