@@ -7,10 +7,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
-import com.microsoft.azure.sdk.iot.device.twin.GetTwinCorrelatingMessageCallback;
-import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesUpdateCorrelatingMessageCallback;
-import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesUpdateResponse;
-import com.microsoft.azure.sdk.iot.device.twin.Twin;
+import com.microsoft.azure.sdk.iot.device.twin.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.Before;
@@ -30,6 +27,7 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.*;
@@ -470,5 +468,46 @@ public class TwinTests extends TwinCommon
         {
             assertEquals(IotHubStatusCode.PRECONDITION_FAILED, e.getStatusCode());
         }
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
+    public void subscribeToDesiredPropertiesOverwritesPreviousCallbacks() throws Exception
+    {
+        this.testInstance.setup();
+        AtomicBoolean oldCallbackCalled = new AtomicBoolean(false);
+        AtomicBoolean newCallbackCalled = new AtomicBoolean(false);
+
+        CountDownLatch desiredPropertiesReceivedLatch = new CountDownLatch(1);
+
+        // set the initial callback
+        this.testInstance.testIdentity.getClient().subscribeToDesiredProperties(
+            (twin, context) ->
+            {
+                oldCallbackCalled.set(true);
+                desiredPropertiesReceivedLatch.countDown();
+            },
+            null);
+
+
+        // set the new callback that should overwrite the previous callback
+        this.testInstance.testIdentity.getClient().subscribeToDesiredProperties(
+            (twin, context) ->
+            {
+                newCallbackCalled.set(true);
+                desiredPropertiesReceivedLatch.countDown();
+            },
+            null);
+
+        // Send a new desired property so that the device/module desired porperty callback will execute
+        testInstance.serviceTwin.getDesiredProperties().put(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        testInstance.twinServiceClient.patch(testInstance.serviceTwin);
+
+        boolean timedOut = !desiredPropertiesReceivedLatch.await(TWIN_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS);
+
+        assertFalse("Timed out waiting for desired properties callback to execute on client", timedOut);
+        assertFalse("Old callback should not have been called since it was overwritten.", oldCallbackCalled.get());
+        assertTrue("New callback should have been called.", newCallbackCalled.get());
     }
 }
