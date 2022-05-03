@@ -185,7 +185,7 @@
         <dice-provider-artifact-id>dice-provider</dice-provider-artifact-id>
         <x509-provider-artifact-id>x509-provider</x509-provider-artifact-id>
 
-        <iot-device-client-version>2.0.2</iot-device-client-version>
+        <iot-device-client-version>2.0.3</iot-device-client-version>
         <iot-service-client-version>2.0.2</iot-service-client-version>
         <provisioning-device-client-version>2.0.0</provisioning-device-client-version>
         <provisioning-service-client-version>2.0.0</provisioning-service-client-version>
@@ -194,7 +194,7 @@
         <tpm-provider-version>2.0.0</tpm-provider-version>
         <dice-provider-emulator-version>2.0.0</dice-provider-emulator-version>
         <dice-provider-version>2.0.0</dice-provider-version>
-        <x509-provider-version>2.0.0</x509-provider-version>
+        <x509-provider-version>2.0.1</x509-provider-version>
     </properties>
     <reporting>
         <plugins>
