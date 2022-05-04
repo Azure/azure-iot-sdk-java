@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_METHODS;
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_TWIN;
 import static com.microsoft.azure.sdk.iot.device.transport.mqtt.Mqtt.MAX_IN_FLIGHT_COUNT;
+import static org.eclipse.paho.client.mqttv3.MqttConnectOptions.MQTT_VERSION_3_1_1;
 
 @Slf4j
 public class MqttIotHubConnection implements IotHubTransportConnection, MqttMessageListener
@@ -42,7 +43,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private static final String SSL_PREFIX = "ssl://";
     private static final String SSL_PORT_SUFFIX = ":8883";
 
-    private static final int MQTT_VERSION = 4;
+    private static final int MQTT_VERSION = MQTT_VERSION_3_1_1;
     private static final boolean SET_CLEAN_SESSION = false;
 
     private static final String MODEL_ID = "model-id";
