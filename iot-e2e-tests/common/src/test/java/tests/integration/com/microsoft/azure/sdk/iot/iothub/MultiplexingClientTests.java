@@ -322,6 +322,7 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.multiplexingClient.close();
     }
 
+    @Ignore // This test passes, but is intensive enough on the service to disrupt other tests since it requires creating hundreds of devices
     @ContinuousIntegrationTest
     @Test
     public void sendMessagesMaxDevicesAllowed() throws Exception
