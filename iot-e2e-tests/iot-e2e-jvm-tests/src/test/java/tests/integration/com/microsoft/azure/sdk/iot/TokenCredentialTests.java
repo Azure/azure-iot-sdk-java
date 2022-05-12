@@ -92,7 +92,7 @@ public class TokenCredentialTests
     {
         Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
 
-        RegistryClient registryClient = new RegistryClient(iotHubConnectionString);
+        RegistryClient registryClient = buildRegistryClientWithTokenCredential();
         DeviceClient deviceClient = createDeviceClient(MQTT, registryClient);
         deviceClient.open(false);
 
