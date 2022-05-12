@@ -62,10 +62,8 @@ public class TokenCredentialTests
 
     private static final int METHOD_SUBSCRIPTION_TIMEOUT_MILLISECONDS = 60 * 1000;
 
-    private static final String testPrefix = "provisioningservicecliente2etests-";
-
     @Ignore // TODO the service throws a 500 error in Canary environments
-    @Test
+    @Test (timeout = 10000)
     public void cloudToDeviceTelemetryWithTokenCredential() throws Exception
     {
         Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
@@ -98,12 +96,12 @@ public class TokenCredentialTests
     }
 
     @Ignore // TODO the service throws a 500 error in Canary environments
-    @Test
+    @Test (timeout = 10000)
     public void getDigitalTwinWithTokenCredential() throws IOException, IotHubException, URISyntaxException, IotHubClientException
     {
         Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
 
-        RegistryClient registryClient = new RegistryClient(iotHubConnectionString);
+        RegistryClient registryClient = buildRegistryClientWithTokenCredential();
         DeviceClient deviceClient = createDeviceClient(MQTT, registryClient);
         deviceClient.open(false);
 
@@ -121,7 +119,7 @@ public class TokenCredentialTests
     }
 
     @Ignore // TODO the service throws a 500 error in Canary environments
-    @Test
+    @Test (timeout = 10000)
     public void deviceLifecycleWithTokenCredential() throws Exception
     {
         //-Create-//
@@ -148,7 +146,7 @@ public class TokenCredentialTests
     }
 
     @Ignore // TODO the service throws a 500 error in Canary environments
-    @Test
+    @Test (timeout = 10000)
     public void invokeMethodSucceedWithTokenCredential() throws Exception
     {
         Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
@@ -172,7 +170,7 @@ public class TokenCredentialTests
     }
 
     @Ignore // TODO the service throws a 500 error in Canary environments
-    @Test
+    @Test (timeout = 10000)
     public void testGetDeviceTwinWithTokenCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException
     {
         Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
@@ -189,7 +187,7 @@ public class TokenCredentialTests
     }
 
     @Ignore // TODO the service throws a 500 error in Canary environments
-    @Test
+    @Test (timeout = 10000)
     public void testQueryTwinWithTokenCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException
     {
         Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
