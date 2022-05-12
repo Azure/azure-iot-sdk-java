@@ -55,7 +55,7 @@ public class TokenCredentialTests
 
     private static final int METHOD_SUBSCRIPTION_TIMEOUT_MILLISECONDS = 60 * 1000;
 
-    @Test (timeout = 10000)
+    @Test
     public void cloudToDeviceTelemetryWithTokenCredential() throws Exception
     {
         Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
@@ -87,7 +87,7 @@ public class TokenCredentialTests
         assertEquals(1, deviceGetAfter.getCloudToDeviceMessageCount());
     }
 
-    @Test (timeout = 10000)
+    @Test
     public void getDigitalTwinWithTokenCredential() throws IOException, IotHubException, URISyntaxException, IotHubClientException
     {
         Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
@@ -109,7 +109,7 @@ public class TokenCredentialTests
         assertEquals(responseWithHeaders.body().getMetadata().getModelId(), THERMOSTAT_MODEL_ID);
     }
 
-    @Test (timeout = 10000)
+    @Test
     public void deviceLifecycleWithTokenCredential() throws Exception
     {
         //-Create-//
@@ -135,7 +135,7 @@ public class TokenCredentialTests
         assertEquals(DeviceStatus.Disabled, deviceUpdated.getStatus());
     }
 
-    @Test (timeout = 10000)
+    @Test
     public void invokeMethodSucceedWithTokenCredential() throws Exception
     {
         Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
@@ -158,7 +158,7 @@ public class TokenCredentialTests
         assertEquals(successStatusCode, (long) result.getStatus());
     }
 
-    @Test (timeout = 10000)
+    @Test
     public void testGetDeviceTwinWithTokenCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException
     {
         Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
@@ -174,7 +174,7 @@ public class TokenCredentialTests
         assertNotNull(twin.getETag());
     }
 
-    @Test (timeout = 10000)
+    @Test
     public void testQueryTwinWithTokenCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException
     {
         Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
