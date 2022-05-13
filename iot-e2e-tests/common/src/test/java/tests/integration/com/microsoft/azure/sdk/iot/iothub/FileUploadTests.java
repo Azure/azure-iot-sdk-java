@@ -26,9 +26,11 @@ import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.HttpProxyServer;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.impl.DefaultHttpProxyServer;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
@@ -64,6 +66,7 @@ import static org.junit.Assume.assumeFalse;
 @Slf4j
 @IotHubTest
 @RunWith(Parameterized.class)
+@ContinuousIntegrationTest // Tests are very flakey in Canary in particular
 public class FileUploadTests extends IntegrationTest
 {
     // Max time to wait to see it on Hub
