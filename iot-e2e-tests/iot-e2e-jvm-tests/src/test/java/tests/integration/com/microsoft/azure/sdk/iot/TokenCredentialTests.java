@@ -60,7 +60,7 @@ public class TokenCredentialTests
 {
     private static final String THERMOSTAT_MODEL_ID = "dtmi:com:example:Thermostat;1";
 
-    private static final int METHOD_SUBSCRIPTION_TIMEOUT_MILLISECONDS = 60 * 1000;
+    private static final String testPrefix = "provisioningservicecliente2etests-";
 
     @Ignore // TODO the service throws a 500 error in Canary environments
     @Test (timeout = 10000)
