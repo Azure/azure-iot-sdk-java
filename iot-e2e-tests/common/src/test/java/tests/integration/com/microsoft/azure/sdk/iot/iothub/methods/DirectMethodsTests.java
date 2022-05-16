@@ -6,20 +6,20 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.methods;
 
 import com.azure.core.credential.AzureSasCredential;
-import com.microsoft.azure.sdk.iot.service.exceptions.ErrorCodeDescription;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnauthorizedException;
-import com.microsoft.azure.sdk.iot.service.methods.DirectMethodRequestOptions;
-import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
-import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClientOptions;
-import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
+import com.microsoft.azure.sdk.iot.service.exceptions.ErrorCodeDescription;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubGatewayTimeoutException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnauthorizedException;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodRequestOptions;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClientOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,6 +33,8 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestModuleIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.HttpProxyServer;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.impl.DefaultHttpProxyServer;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.CustomObject;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DirectMethodsCommon;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.NestedCustomObject;
@@ -43,6 +45,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
@@ -409,5 +412,49 @@ public class DirectMethodsTests extends DirectMethodsCommon
         CustomObject customObject = new CustomObject("some test message", 1, true, new NestedCustomObject("some nested test message", 2));
         super.subscribeToMethodAndReceiveAsDifferentTypes(customObject.getClass().getSimpleName());
         super.invokeHelper(customObject);
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
+    public void subscribeToDirectMethodsOverwritesPreviousCallbacks() throws Exception
+    {
+        this.testInstance.setup();
+        AtomicBoolean oldCallbackCalled = new AtomicBoolean(false);
+        AtomicBoolean newCallbackCalled = new AtomicBoolean(false);
+
+        this.testInstance.identity.getClient().open(true);
+
+        // set the initial callback
+        this.testInstance.identity.getClient().subscribeToMethods(
+            (methodName, methodPayload, context) ->
+            {
+                oldCallbackCalled.set(true);
+                return new com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse(200, null);
+            },
+            null);
+
+        // set the new callback that should overwrite the previous callback
+        this.testInstance.identity.getClient().subscribeToMethods(
+            (methodName, methodPayload, context) ->
+            {
+                newCallbackCalled.set(true);
+                return new com.microsoft.azure.sdk.iot.device.twin.DirectMethodResponse(200, null);
+            },
+            null);
+
+        // invoke a method so that the device/module method callback will execute
+        if (testInstance.identity instanceof TestModuleIdentity)
+        {
+            testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(),
+                ((TestModuleIdentity)testInstance.identity).getModule().getId(), METHOD_MODIFY);
+        }
+        else
+        {
+            testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), METHOD_MODIFY);
+        }
+
+        assertFalse("Old callback should not have been called since it was overwritten.", oldCallbackCalled.get());
+        assertTrue("New callback should have been called.", newCallbackCalled.get());
     }
 }
