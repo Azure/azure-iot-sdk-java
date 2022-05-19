@@ -290,10 +290,23 @@ public class Tools
                 testDeviceIdentity = testSasDeviceQueue.remove();
             }
 
-            ClientOptions clientOptions = optionsBuilder
+            optionsBuilder
                 .amqpAuthenticationSessionTimeout(AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS)
-                .amqpDeviceSessionTimeout(AMQP_DEVICE_SESSION_TIMEOUT_SECONDS)
-                .build();
+                .amqpDeviceSessionTimeout(AMQP_DEVICE_SESSION_TIMEOUT_SECONDS);
+
+            if (protocol == IotHubClientProtocol.HTTPS)
+            {
+                // By default, the SDK sends an HTTP request checking for c2d messages once every 10 milliseconds. This is
+                // more aggressive than it needs to be for test purposes and likely causes unnecessary work from the service
+                // in handling these requests. This option increases this period to lessen that burden without sacrificing
+                // the test's speed by more than 1 second.
+                //
+                // This option isn't applicable to MQTT/MQTT_WS/AMQPS/AMQPS_WS since they don't need to poll the service
+                // in order to receive c2d messages.
+                optionsBuilder.receiveInterval(HTTP_RECEIVE_PERIOD);
+            }
+
+            ClientOptions clientOptions = optionsBuilder.build();
 
             testDeviceIdentity.setDeviceClient(new DeviceClient(getDeviceConnectionString(iotHubConnectionString, testDeviceIdentity.getDevice()), protocol, clientOptions));
             return testDeviceIdentity;
