@@ -7,9 +7,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.samples.service</groupId>
-    <artifactId>device-method-sample</artifactId>
+    <artifactId>direct-method-sample</artifactId>
     <version>1.18.0</version>
-    <name>Device Method Sample</name>
+    <name>Direct Method Sample</name>
     <developers>
         <developer>
             <id>microsoft</id>
@@ -29,7 +29,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>samples.com.microsoft.azure.sdk.iot.service.DeviceMethodSample</mainClass>
+                            <mainClass>samples.com.microsoft.azure.sdk.iot.service.DirectMethodSample</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
