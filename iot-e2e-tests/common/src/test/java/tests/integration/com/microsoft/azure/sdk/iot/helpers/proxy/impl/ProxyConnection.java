@@ -10,6 +10,7 @@ import io.netty.util.ReferenceCounted;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.Promise;
+import lombok.extern.slf4j.Slf4j;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.HttpFilters;
 
 import javax.net.ssl.SSLEngine;
@@ -60,9 +61,9 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.impl.C
  *            the type of "initial" message. This will be either
  *            {@link HttpResponse} or {@link HttpRequest}.
  */
+@Slf4j
 abstract class ProxyConnection<I extends HttpObject> extends
         SimpleChannelInboundHandler<Object> {
-    protected final ProxyConnectionLogger LOG = new ProxyConnectionLogger(this);
 
     protected final DefaultHttpProxyServer proxyServer;
     protected final boolean runsAsSslClient;
@@ -108,7 +109,7 @@ abstract class ProxyConnection<I extends HttpObject> extends
      * @param msg
      */
     protected void read(Object msg) {
-        LOG.debug("Reading: {}", msg);
+        log.trace("Reading: {}", msg);
 
         lastReadTime = System.currentTimeMillis();
 
@@ -138,7 +139,7 @@ abstract class ProxyConnection<I extends HttpObject> extends
                 // state if the proxy responded to an earlier request with a 502 or 504 response, or a short-circuit
                 // response from a filter. The client may have sent some chunked HttpContent associated with the request
                 // after the short-circuit response was sent. We can safely drop them.
-                LOG.debug("Dropping message because HTTP object was not an HttpMessage. HTTP object may be orphaned content from a short-circuited response. Message: {}", httpObject);
+                log.warn("Dropping message because HTTP object was not an HttpMessage. HTTP object may be orphaned content from a short-circuited response. Message: {}", httpObject);
             }
             break;
         case AWAITING_CHUNK:
@@ -160,22 +161,20 @@ abstract class ProxyConnection<I extends HttpObject> extends
             }
             break;
         case CONNECTING:
-            LOG.warn("Attempted to read from connection that's in the process of connecting.  This shouldn't happen.");
+            log.warn("Attempted to read from connection that's in the process of connecting.  This shouldn't happen.");
             break;
         case NEGOTIATING_CONNECT:
-            LOG.debug("Attempted to read from connection that's in the process of negotiating an HTTP CONNECT.  This is probably the LastHttpContent of a chunked CONNECT.");
+            log.trace("Attempted to read from connection that's in the process of negotiating an HTTP CONNECT.  This is probably the LastHttpContent of a chunked CONNECT.");
             break;
         case AWAITING_CONNECT_OK:
-            LOG.warn("AWAITING_CONNECT_OK should have been handled by ProxyToServerConnection.read()");
+            log.warn("AWAITING_CONNECT_OK should have been handled by ProxyToServerConnection.read()");
             break;
         case HANDSHAKING:
-            LOG.warn(
-                    "Attempted to read from connection that's in the process of handshaking.  This shouldn't happen.",
-                    channel);
+            log.warn("Attempted to read from connection that's in the process of handshaking.  This shouldn't happen.");
             break;
         case DISCONNECT_REQUESTED:
         case DISCONNECTED:
-            LOG.info("Ignoring message since the connection is closed or about to close");
+            log.info("Ignoring message since the connection is closed or about to close");
             break;
         }
         become(nextState);
@@ -217,7 +216,7 @@ abstract class ProxyConnection<I extends HttpObject> extends
      */
     void write(Object msg) {
         if (msg instanceof ReferenceCounted) {
-            LOG.debug("Retaining reference counted message");
+            log.trace("Retaining reference counted message");
             ((ReferenceCounted) msg).retain();
         }
 
@@ -225,7 +224,7 @@ abstract class ProxyConnection<I extends HttpObject> extends
     }
 
     void doWrite(Object msg) {
-        LOG.debug("Writing: {}", msg);
+        log.debug("Writing: {}", msg);
 
         try {
             if (msg instanceof HttpObject) {
@@ -234,7 +233,7 @@ abstract class ProxyConnection<I extends HttpObject> extends
                 writeRaw((ByteBuf) msg);
             }
         } finally {
-            LOG.debug("Wrote: {}", msg);
+            log.trace("Wrote: {}", msg);
         }
     }
 
@@ -246,7 +245,7 @@ abstract class ProxyConnection<I extends HttpObject> extends
     protected void writeHttp(HttpObject httpObject) {
         if (ProxyUtils.isLastChunk(httpObject)) {
             channel.write(httpObject);
-            LOG.debug("Writing an empty buffer to signal the end of our chunked transfer");
+            log.trace("Writing an empty buffer to signal the end of our chunked transfer");
             writeToChannel(Unpooled.EMPTY_BUFFER);
         } else {
             writeToChannel(httpObject);
@@ -278,7 +277,7 @@ abstract class ProxyConnection<I extends HttpObject> extends
      * established.
      */
     protected void connected() {
-        LOG.debug("Connected");
+        log.trace("Connected");
     }
 
     /**
@@ -287,7 +286,7 @@ abstract class ProxyConnection<I extends HttpObject> extends
      */
     protected void disconnected() {
         become(DISCONNECTED);
-        LOG.debug("Disconnected");
+        log.trace("Disconnected");
     }
 
     /**
@@ -368,7 +367,7 @@ abstract class ProxyConnection<I extends HttpObject> extends
     protected Future<Channel> encrypt(ChannelPipeline pipeline,
             SSLEngine sslEngine,
             boolean authenticateClients) {
-        LOG.debug("Enabling encryption with SSLEngine: {}",
+        log.trace("Enabling encryption with SSLEngine: {}",
                 sslEngine);
         this.sslEngine = sslEngine;
         sslEngine.setUseClientMode(runsAsSslClient);
@@ -429,14 +428,14 @@ abstract class ProxyConnection<I extends HttpObject> extends
      * Callback that's invoked if this connection becomes saturated.
      */
     protected void becameSaturated() {
-        LOG.debug("Became saturated");
+        log.trace("Became saturated");
     }
 
     /**
      * Callback that's invoked when this connection becomes writeable again.
      */
     protected void becameWritable() {
-        LOG.debug("Became writeable");
+        log.trace("Became writeable");
     }
 
     /**
@@ -548,7 +547,7 @@ abstract class ProxyConnection<I extends HttpObject> extends
      * Call this to stop reading.
      */
     protected void stopReading() {
-        LOG.debug("Stopped reading");
+        log.trace("Stopped reading");
         this.channel.config().setAutoRead(false);
     }
 
@@ -556,7 +555,7 @@ abstract class ProxyConnection<I extends HttpObject> extends
      * Call this to resume reading.
      */
     protected void resumeReading() {
-        LOG.debug("Resumed reading");
+        log.trace("Resumed reading");
         this.channel.config().setAutoRead(true);
     }
 
@@ -572,10 +571,6 @@ abstract class ProxyConnection<I extends HttpObject> extends
      */
     protected HttpFilters getHttpFiltersFromProxyServer(HttpRequest httpRequest) {
         return proxyServer.getFiltersSource().filterRequest(httpRequest, ctx);
-    }
-
-    ProxyConnectionLogger getLOG() {
-        return LOG;
     }
 
     /***************************************************************************
@@ -627,7 +622,7 @@ abstract class ProxyConnection<I extends HttpObject> extends
     @Override
     public final void channelWritabilityChanged(ChannelHandlerContext ctx)
             throws Exception {
-        LOG.debug("Writability changed. Is writable: {}", channel.isWritable());
+        log.trace("Writability changed. Is writable: {}", channel.isWritable());
         try {
             if (this.channel.isWritable()) {
                 becameWritable();
@@ -661,7 +656,7 @@ abstract class ProxyConnection<I extends HttpObject> extends
             throws Exception {
         try {
             if (evt instanceof IdleStateEvent) {
-                LOG.debug("Got idle");
+                log.trace("Got idle");
                 timedOut();
             }
         } finally {
@@ -687,7 +682,7 @@ abstract class ProxyConnection<I extends HttpObject> extends
                     bytesRead(((ByteBuf) msg).readableBytes());
                 }
             } catch (Throwable t) {
-                LOG.warn("Unable to record bytesRead", t);
+                log.warn("Unable to record bytesRead", t);
             } finally {
                 super.channelRead(ctx, msg);
             }
@@ -710,7 +705,7 @@ abstract class ProxyConnection<I extends HttpObject> extends
                     requestRead((HttpRequest) msg);
                 }
             } catch (Throwable t) {
-                LOG.warn("Unable to record bytesRead", t);
+                log.warn("Unable to record bytesRead", t);
             } finally {
                 super.channelRead(ctx, msg);
             }
@@ -733,7 +728,7 @@ abstract class ProxyConnection<I extends HttpObject> extends
                     responseRead((HttpResponse) msg);
                 }
             } catch (Throwable t) {
-                LOG.warn("Unable to record bytesRead", t);
+                log.warn("Unable to record bytesRead", t);
             } finally {
                 super.channelRead(ctx, msg);
             }
@@ -757,7 +752,7 @@ abstract class ProxyConnection<I extends HttpObject> extends
                     bytesWritten(((ByteBuf) msg).readableBytes());
                 }
             } catch (Throwable t) {
-                LOG.warn("Unable to record bytesRead", t);
+                log.warn("Unable to record bytesRead", t);
             } finally {
                 super.write(ctx, msg, promise);
             }
@@ -827,7 +822,7 @@ abstract class ProxyConnection<I extends HttpObject> extends
                     responseWritten(((HttpResponse) msg));
                 }
             } catch (Throwable t) {
-                LOG.warn("Error while invoking responseWritten callback", t);
+                log.warn("Error while invoking responseWritten callback", t);
             } finally {
                 super.write(ctx, msg, promise);
             }
