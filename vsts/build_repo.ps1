@@ -12,11 +12,11 @@ else
     Write-Host "Pull request build detected"
 }
 
-if ($env:JAVA_VERSION == 8)
+if (($env:JAVA_VERSION).equals(("8"))
 {
     mvn -DRUN_PROVISIONING_TESTS="$Env:runProvisioningTests" -DRUN_DIGITAL_TESTS="$Env:runDigitalTwinTests" -DRUN_IOTHUB_TESTS="$Env:runIotHubTests" -DIS_PULL_REQUEST="$isPullRequestBuild" install -T 2C
 }
-elseif ($env:JAVA_VERSION == 11)
+elseif (($env:JAVA_VERSION).equals(("11"))
 {
     mvn install -DskipTests -T 2C
 
