@@ -25,7 +25,7 @@ jobs:
           JAVA_VERSION: 11
     pool:
       vmImage: windows-latest
-    displayName: Windows JDK
+    displayName: Windows
     steps:
       - powershell: ./vsts/echo_versions.ps1
         displayName: 'Echo Versions'
@@ -123,7 +123,7 @@ jobs:
     pool:
       # If this is changed, don't forget to update supported_platforms.md in the root directory. That document outlines what OS we test on and should stay up to date.
       vmImage: 'ubuntu-18.04'
-    displayName: Linux JDK
+    displayName: Linux
     strategy:
       maxParallel: 100
       matrix:
