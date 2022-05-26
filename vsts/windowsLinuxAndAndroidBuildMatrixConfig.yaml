@@ -16,10 +16,16 @@ jobs:
   ### Windows ###
   - job: Windows
     timeoutInMinutes: 180
+    strategy:
+      maxParallel: 100
+      matrix:
+        JDK 8:
+          JAVA_VERSION: 8
+        JDK 11:
+          JAVA_VERSION: 11
     pool:
       vmImage: windows-latest
-    displayName: Windows
-    condition: succeeded()
+    displayName: Windows JDK
     steps:
       - powershell: ./vsts/echo_versions.ps1
         displayName: 'Echo Versions'
@@ -36,6 +42,7 @@ jobs:
       - powershell: ./vsts/build_repo.ps1
         displayName: 'Build and Test'
         env:
+          JAVA_VERSION: $(JAVA_VERSION)
           IOT_DPS_CONNECTION_STRING: $(WINDOWS-IOT-DPS-CONNECTION-STRING)
           IOT_DPS_ID_SCOPE: $(WINDOWS-IOT-DPS-ID-SCOPE)
           IOTHUB_CONNECTION_STRING: $(WINDOWS-IOTHUB-CONNECTION-STRING)
@@ -98,7 +105,7 @@ jobs:
         displayName: 'Publish Test Results'
         inputs:
           mergeTestResults: true
-          testRunTitle: "Windows (Attempt $(System.JobAttempt))"
+          testRunTitle: "Windows JDK $(JAVA_VERSION) (Attempt $(System.JobAttempt))"
         continueOnError: true
         condition: always()
         
@@ -116,8 +123,14 @@ jobs:
     pool:
       # If this is changed, don't forget to update supported_platforms.md in the root directory. That document outlines what OS we test on and should stay up to date.
       vmImage: 'ubuntu-18.04'
-    displayName: Linux
-    condition: succeeded()
+    displayName: Linux JDK
+    strategy:
+      maxParallel: 100
+      matrix:
+        JDK 8:
+          JAVA_VERSION: 8
+        JDK 11:
+          JAVA_VERSION: 11
     steps:
       - task: CmdLine@2
         displayName: 'Print Linux version'
@@ -145,6 +158,7 @@ jobs:
       - powershell: ./vsts/build_repo.ps1
         displayName: 'Build and Test'
         env:
+          JAVA_VERSION: $(JAVA_VERSION)
           IOT_DPS_CONNECTION_STRING: $(LINUX-IOT-DPS-CONNECTION-STRING)
           IOT_DPS_ID_SCOPE: $(LINUX-IOT-DPS-ID-SCOPE)
           IOTHUB_CONNECTION_STRING: $(LINUX-IOTHUB-CONNECTION-STRING)
@@ -184,7 +198,7 @@ jobs:
         displayName: 'Publish Test Results'
         inputs:
           mergeTestResults: true
-          testRunTitle: "Linux (Attempt $(System.JobAttempt))"
+          testRunTitle: "Linux JDK $(JAVA_VERSION) (Attempt $(System.JobAttempt))"
         continueOnError: true
         condition: always()
 
@@ -202,6 +216,7 @@ jobs:
     pool:
       vmImage: windows-latest
     displayName: Android Build
+    condition: eq(variables.testEmpty, 'asdf')
 
     steps:
       - powershell: ./vsts/echo_versions.ps1

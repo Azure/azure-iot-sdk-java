@@ -12,4 +12,22 @@ else
     Write-Host "Pull request build detected"
 }
 
-mvn -DRUN_PROVISIONING_TESTS="$Env:runProvisioningTests" -DRUN_DIGITAL_TESTS="$Env:runDigitalTwinTests" -DRUN_IOTHUB_TESTS="$Env:runIotHubTests" -DIS_PULL_REQUEST="$isPullRequestBuild" install -T 2C
+if ($env:JAVA_VERSION == 8)
+{
+    mvn -DRUN_PROVISIONING_TESTS="$Env:runProvisioningTests" -DRUN_DIGITAL_TESTS="$Env:runDigitalTwinTests" -DRUN_IOTHUB_TESTS="$Env:runIotHubTests" -DIS_PULL_REQUEST="$isPullRequestBuild" install -T 2C
+}
+else if ($env:JAVA_VERSION == 11)
+{
+    mvn install -DskipTests -T 2C
+
+    cd "azure-iot-sdk-java/iot-e2e-tests"
+
+    $env:JAVA_HOME=$env:JAVA_HOME_11_X64
+
+    mvn -DRUN_PROVISIONING_TESTS="$Env:runProvisioningTests" -DRUN_DIGITAL_TESTS="$Env:runDigitalTwinTests" -DRUN_IOTHUB_TESTS="$Env:runIotHubTests" -DIS_PULL_REQUEST="$isPullRequestBuild" install -T 2C
+}
+else
+{
+    Write-Host "Unrecognized or unsupported JDK version: " $env:JAVA_VERSION
+    exit -1
+}
