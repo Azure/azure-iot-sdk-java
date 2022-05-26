@@ -20,7 +20,7 @@ elseif (($env:JAVA_VERSION).equals("11"))
 {
     mvn install -DskipTests -T 2C
 
-    cd "./azure-iot-sdk-java/iot-e2e-tests"
+    cd "./iot-e2e-tests"
 
     $env:JAVA_HOME=$env:JAVA_HOME_11_X64
 
