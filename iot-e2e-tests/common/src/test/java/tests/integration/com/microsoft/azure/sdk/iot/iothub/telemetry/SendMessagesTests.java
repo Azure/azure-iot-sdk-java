@@ -70,7 +70,7 @@ public class SendMessagesTests extends SendMessagesCommon
             fail("JDK 11 detected!" + version);
         }
 
-        int a = 1;
+        fail("JDK ????? detected!" + version);
     }
 
     @Test
