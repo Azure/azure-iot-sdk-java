@@ -17,12 +17,14 @@ jobs:
   - job: Windows
     timeoutInMinutes: 180
     strategy:
-      maxParallel: 100
+      maxParallel: 1
       matrix:
         JDK 8:
           JAVA_VERSION: 8
         JDK 11:
           JAVA_VERSION: 11
+        JDK 17:
+          JAVA_VERSION: 17
     pool:
       vmImage: windows-latest
     displayName: Windows
@@ -125,12 +127,14 @@ jobs:
       vmImage: 'ubuntu-18.04'
     displayName: Linux
     strategy:
-      maxParallel: 100
+      maxParallel: 1
       matrix:
         JDK 8:
           JAVA_VERSION: 8
         JDK 11:
           JAVA_VERSION: 11
+        JDK 17:
+          JAVA_VERSION: 17
     steps:
       - task: CmdLine@2
         displayName: 'Print Linux version'

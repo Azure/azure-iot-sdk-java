@@ -58,22 +58,6 @@ public class SendMessagesTests extends SendMessagesCommon
     }
 
     @Test
-    public void test()
-    {
-        String version = System.getProperty("java.version");
-        if (version.startsWith("1.8."))
-        {
-            fail("JDK 8 detected!" + version);
-        }
-        else if (version.startsWith("1.11."))
-        {
-            fail("JDK 11 detected!" + version);
-        }
-
-        fail("JDK ????? detected!" + version);
-    }
-
-    @Test
     public void sendMessages() throws Exception
     {
         this.testInstance.setup();
