@@ -220,7 +220,6 @@ jobs:
     pool:
       vmImage: windows-latest
     displayName: Android Build
-    condition: eq(variables.testEmpty, 'asdf')
 
     steps:
       - powershell: ./vsts/echo_versions.ps1
