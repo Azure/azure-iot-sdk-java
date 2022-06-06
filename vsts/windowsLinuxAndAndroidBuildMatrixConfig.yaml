@@ -19,11 +19,11 @@ jobs:
     strategy:
       maxParallel: 1
       matrix:
-        ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
+        JDK 11: # always run Java 11
+          JAVA_VERSION: 11
+        ${{ if ne(variables['Build.Reason'], 'PullRequest') }}: # Only run Java 8 if doing a nightly build
           JDK 8:
             JAVA_VERSION: 8
-        JDK 11:
-          JAVA_VERSION: 11
     pool:
       vmImage: windows-latest
     displayName: Windows
@@ -129,10 +129,11 @@ jobs:
     strategy:
       maxParallel: 1
       matrix:
-        JDK 8:
-          JAVA_VERSION: 8
-        JDK 11:
+        JDK 11: # always run Java 11
           JAVA_VERSION: 11
+        ${{ if ne(variables['Build.Reason'], 'PullRequest') }}: # Only run Java 8 if doing a nightly build
+          JDK 8:
+            JAVA_VERSION: 8
     condition: or(eq(variables['JAVA_VERSION'], 11), ne(variables['Build.Reason'], 'PullRequest')) # only run this job if this is Java 11 or if this isn't a pull request
     steps:
       - task: CmdLine@2
