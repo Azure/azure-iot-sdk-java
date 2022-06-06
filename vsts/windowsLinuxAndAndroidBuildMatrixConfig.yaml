@@ -26,6 +26,7 @@ jobs:
     pool:
       vmImage: windows-latest
     displayName: Windows
+    condition: or(eq(variables['JAVA_VERSION'], 11), ne(variables['Build.Reason'], 'PullRequest')) # only run this job if this is Java 11 or if this isn't a pull request
     steps:
       - powershell: ./vsts/echo_versions.ps1
         displayName: 'Echo Versions'
@@ -37,7 +38,7 @@ jobs:
         displayName: 'Start TPM Simulator'
         env:
           COMMIT_FROM: $(COMMIT_FROM)
-        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
+        condition: always()
 
       - powershell: ./vsts/build_repo.ps1
         displayName: 'Build and Test'
@@ -59,7 +60,7 @@ jobs:
           IOTHUB_CLIENT_SECRET: $(IOTHUB-CLIENT-SECRET)
           IOTHUB_CLIENT_ID: $(IOTHUB-CLIENT-ID)
           MSFT_TENANT_ID: $(MSFT-TENANT-ID)
-        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
+        condition: always()
 
       - task: CopyFiles@2
         displayName: 'Copy Test Results to Artifact Staging Directory'
@@ -131,6 +132,7 @@ jobs:
           JAVA_VERSION: 8
         JDK 11:
           JAVA_VERSION: 11
+    condition: or(eq(variables['JAVA_VERSION'], 11), ne(variables['Build.Reason'], 'PullRequest')) # only run this job if this is Java 11 or if this isn't a pull request
     steps:
       - task: CmdLine@2
         displayName: 'Print Linux version'
