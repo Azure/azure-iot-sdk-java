@@ -37,7 +37,7 @@ jobs:
         displayName: 'Start TPM Simulator'
         env:
           COMMIT_FROM: $(COMMIT_FROM)
-        condition: always()
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
 
       - powershell: ./vsts/build_repo.ps1
         displayName: 'Build and Test'
@@ -59,7 +59,7 @@ jobs:
           IOTHUB_CLIENT_SECRET: $(IOTHUB-CLIENT-SECRET)
           IOTHUB_CLIENT_ID: $(IOTHUB-CLIENT-ID)
           MSFT_TENANT_ID: $(MSFT-TENANT-ID)
-        condition: always()
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
 
       - task: CopyFiles@2
         displayName: 'Copy Test Results to Artifact Staging Directory'
