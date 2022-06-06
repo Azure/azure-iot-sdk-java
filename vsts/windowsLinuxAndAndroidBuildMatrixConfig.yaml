@@ -21,27 +21,27 @@ jobs:
       matrix:
         JDK 11: # always run Java 11
           JAVA_VERSION: 11
-        ${{ if ne(variables['Build.Reason'], 'PullRequest') }}: # Only run Java 8 if doing a nightly build
-          JDK 8:
-            JAVA_VERSION: 8
+        JDK 8: # only run Java 8 in nightly or CI builds.
+          JAVA_VERSION: 8
     pool:
       vmImage: windows-latest
     displayName: Windows
     steps:
       - powershell: ./vsts/echo_versions.ps1
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         displayName: 'Echo Versions'
         env:
           COMMIT_FROM: $(COMMIT_FROM)
-        condition: always()
 
       - powershell: ./vsts/start_tpm_windows.ps1
         displayName: 'Start TPM Simulator'
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         env:
           COMMIT_FROM: $(COMMIT_FROM)
-        condition: always()
 
       - powershell: ./vsts/build_repo.ps1
         displayName: 'Build and Test'
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         env:
           JAVA_VERSION: $(JAVA_VERSION)
           IOT_DPS_CONNECTION_STRING: $(WINDOWS-IOT-DPS-CONNECTION-STRING)
@@ -60,10 +60,10 @@ jobs:
           IOTHUB_CLIENT_SECRET: $(IOTHUB-CLIENT-SECRET)
           IOTHUB_CLIENT_ID: $(IOTHUB-CLIENT-ID)
           MSFT_TENANT_ID: $(MSFT-TENANT-ID)
-        condition: always()
 
       - task: CopyFiles@2
         displayName: 'Copy Test Results to Artifact Staging Directory'
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         inputs:
           SourceFolder: '$(Build.SourcesDirectory)'
           Contents: |
@@ -71,10 +71,10 @@ jobs:
             **/*.xml
           TargetFolder: '$(Build.ArtifactStagingDirectory)'
         continueOnError: true
-        condition: always()
-      
+
       - task: CopyFiles@2
         displayName: 'Copy Build Results to Artifact Staging Directory'
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         inputs:
           flattenFolders: true
           SourceFolder: '$(Build.SourcesDirectory)'
@@ -90,33 +90,33 @@ jobs:
             !**/*test*/**/target/**
           TargetFolder: '$(Build.ArtifactStagingDirectory)/buildOutput'
         continueOnError: true
-        condition: always()
 
       - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
         displayName: 'Generate SBOM for Build Artifacts'
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         inputs:
           BuildDropPath: '$(Build.ArtifactStagingDirectory)/buildOutput'
 
       - task: PublishBuildArtifacts@1
         displayName: 'Publish Artifact Staging Directory'
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         continueOnError: true
-        condition: always()
 
       - task: PublishTestResults@2
         displayName: 'Publish Test Results'
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         inputs:
           mergeTestResults: true
           testRunTitle: "Windows JDK $(JAVA_VERSION) (Attempt $(System.JobAttempt))"
         continueOnError: true
-        condition: always()
-        
+
       - task: ComponentGovernanceComponentDetection@0
         displayName: Component Governance Detection
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         inputs:
           scanType: 'Register'
           verbosity: 'Verbose'
           alertWarningLevel: 'Low' # The task will present a warning, but will not cause the build to fail
-        condition: always()
 
   ### Linux ###
   - job: Linux
@@ -130,23 +130,24 @@ jobs:
       matrix:
         JDK 11: # always run Java 11
           JAVA_VERSION: 11
-        ${{ if ne(variables['Build.Reason'], 'PullRequest') }}: # Only run Java 8 if doing a nightly build
-          JDK 8:
-            JAVA_VERSION: 8
+        JDK 8: # only run Java 8 in nightly or CI builds.
+          JAVA_VERSION: 8
     steps:
       - task: CmdLine@2
         displayName: 'Print Linux version'
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         inputs:
           script: 'cat /etc/*release'
 
       - powershell: ./vsts/echo_versions.ps1
         displayName: 'Echo Versions'
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         env:
           COMMIT_FROM: $(COMMIT_FROM)
-        condition: always()
 
       - task: Docker@1
         displayName: 'Start TPM Simulator'
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         inputs:
           containerregistrytype: 'Container Registry'
           command: 'Run an image'
@@ -159,6 +160,7 @@ jobs:
 
       - powershell: ./vsts/build_repo.ps1
         displayName: 'Build and Test'
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         env:
           JAVA_VERSION: $(JAVA_VERSION)
           IOT_DPS_CONNECTION_STRING: $(LINUX-IOT-DPS-CONNECTION-STRING)
@@ -178,9 +180,9 @@ jobs:
           IOTHUB_CLIENT_ID: $(IOTHUB-CLIENT-ID)
           MSFT_TENANT_ID: $(MSFT-TENANT-ID)
           RECYCLE_TEST_IDENTITIES: true
-        condition: always()
 
       - task: CopyFiles@2
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         displayName: 'Copy Test Results to Artifact Staging Directory'
         inputs:
           SourceFolder: '$(Build.SourcesDirectory)'
@@ -189,28 +191,27 @@ jobs:
             **/*.xml
           TargetFolder: '$(Build.ArtifactStagingDirectory)'
         continueOnError: true
-        condition: always()
 
       - task: PublishBuildArtifacts@1
         displayName: 'Publish Artifact Staging Directory'
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         continueOnError: true
-        condition: always()
 
       - task: PublishTestResults@2
         displayName: 'Publish Test Results'
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         inputs:
           mergeTestResults: true
           testRunTitle: "Linux JDK $(JAVA_VERSION) (Attempt $(System.JobAttempt))"
         continueOnError: true
-        condition: always()
 
       - task: ComponentGovernanceComponentDetection@0
         displayName: Component Governance Detection
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         inputs:
           scanType: 'Register'
           verbosity: 'Verbose'
           alertWarningLevel: 'Low' # The task will present a warning, but will not cause the build to fail
-        condition: always()
 
   ### Android, Multi configuration build (Multiple different test groups to cover) ###
   - job: AndroidBuild
