@@ -27,7 +27,6 @@ jobs:
     pool:
       vmImage: windows-latest
     displayName: Windows
-    condition: or(eq(variables['JAVA_VERSION'], 11), ne(variables['Build.Reason'], 'PullRequest')) # only run this job if this is Java 11 or if this isn't a pull request
     steps:
       - powershell: ./vsts/echo_versions.ps1
         displayName: 'Echo Versions'
@@ -134,7 +133,6 @@ jobs:
         ${{ if ne(variables['Build.Reason'], 'PullRequest') }}: # Only run Java 8 if doing a nightly build
           JDK 8:
             JAVA_VERSION: 8
-    condition: or(eq(variables['JAVA_VERSION'], 11), ne(variables['Build.Reason'], 'PullRequest')) # only run this job if this is Java 11 or if this isn't a pull request
     steps:
       - task: CmdLine@2
         displayName: 'Print Linux version'
