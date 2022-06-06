@@ -19,7 +19,7 @@ jobs:
     strategy:
       maxParallel: 1
       matrix:
-        ${{ if or(eq(variables['JAVA_VERSION'], 11), ne(variables['Build.Reason'], 'PullRequest'))) }}:
+        ${{ if ne(variables['Build.Reason'], 'PullRequest')) }}:
           JDK 8:
             JAVA_VERSION: 8
         JDK 11:
