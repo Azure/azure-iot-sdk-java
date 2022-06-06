@@ -33,10 +33,11 @@ elseif (($env:JAVA_VERSION).equals("11"))
 {
     $env:JAVA_HOME=$env:JAVA_HOME_11_X64
 }
-elseif (($env:JAVA_VERSION).equals("17"))
-{
-    $env:JAVA_HOME=$env:JAVA_HOME_17_X64
-}
+# Leaving this commented out to make it easy to add Java 17 support later
+#elseif (($env:JAVA_VERSION).equals("17"))
+#{
+#    $env:JAVA_HOME=$env:JAVA_HOME_17_X64
+#}
 else
 {
     Write-Host "Unrecognized or unsupported JDK version: " $env:JAVA_VERSION

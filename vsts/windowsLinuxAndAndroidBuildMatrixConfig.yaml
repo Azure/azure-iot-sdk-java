@@ -23,8 +23,6 @@ jobs:
           JAVA_VERSION: 8
         JDK 11:
           JAVA_VERSION: 11
-        JDK 17:
-          JAVA_VERSION: 17
     pool:
       vmImage: windows-latest
     displayName: Windows
@@ -133,8 +131,6 @@ jobs:
           JAVA_VERSION: 8
         JDK 11:
           JAVA_VERSION: 11
-        JDK 17:
-          JAVA_VERSION: 17
     steps:
       - task: CmdLine@2
         displayName: 'Print Linux version'
