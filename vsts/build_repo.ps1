@@ -23,7 +23,7 @@ if (!($env:JAVA_VERSION).equals("8"))
     cd "./iot-e2e-tests"
 }
 
-# Set the Java home equal to the Java version under test. Currently, Azure Devops hosted agents only support Java 8, 11 and 17 currently
+# Set the Java home equal to the Java version under test. Currently, Azure Devops hosted agents only support Java 8, 11 and 17
 # Since they are the current Java LTS versions
 if (($env:JAVA_VERSION).equals("8"))
 {
