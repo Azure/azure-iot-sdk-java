@@ -16,6 +16,8 @@ jobs:
   ### Windows ###
   - job: Windows
     timeoutInMinutes: 180
+    variables:
+      shouldRun: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
     strategy:
       maxParallel: 1
       matrix:
@@ -28,7 +30,7 @@ jobs:
     displayName: Windows
     steps:
       - powershell: ./vsts/echo_versions.ps1
-        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
+        condition: shouldRun
         displayName: 'Echo Versions'
         env:
           COMMIT_FROM: $(COMMIT_FROM)
