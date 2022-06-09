@@ -17,7 +17,6 @@ jobs:
   - job: Windows
     timeoutInMinutes: 180
     variables:
-      # defines if a step should be run or if it can be skipped. We skip running Java 8 e2e tests in pull request builds.
       shouldRun: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
     strategy:
       maxParallel: 1
@@ -38,13 +37,13 @@ jobs:
 
       - powershell: ./vsts/start_tpm_windows.ps1
         displayName: 'Start TPM Simulator'
-        condition: shouldRun
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         env:
           COMMIT_FROM: $(COMMIT_FROM)
 
       - powershell: ./vsts/build_repo.ps1
         displayName: 'Build and Test'
-        condition: shouldRun
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         env:
           JAVA_VERSION: $(JAVA_VERSION)
           IOT_DPS_CONNECTION_STRING: $(WINDOWS-IOT-DPS-CONNECTION-STRING)
@@ -66,7 +65,7 @@ jobs:
 
       - task: CopyFiles@2
         displayName: 'Copy Test Results to Artifact Staging Directory'
-        condition: shouldRun
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         inputs:
           SourceFolder: '$(Build.SourcesDirectory)'
           Contents: |
@@ -77,7 +76,7 @@ jobs:
 
       - task: CopyFiles@2
         displayName: 'Copy Build Results to Artifact Staging Directory'
-        condition: shouldRun
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         inputs:
           flattenFolders: true
           SourceFolder: '$(Build.SourcesDirectory)'
@@ -96,18 +95,18 @@ jobs:
 
       - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
         displayName: 'Generate SBOM for Build Artifacts'
-        condition: shouldRun
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         inputs:
           BuildDropPath: '$(Build.ArtifactStagingDirectory)/buildOutput'
 
       - task: PublishBuildArtifacts@1
         displayName: 'Publish Artifact Staging Directory'
-        condition: shouldRun
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         continueOnError: true
 
       - task: PublishTestResults@2
         displayName: 'Publish Test Results'
-        condition: shouldRun
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         inputs:
           mergeTestResults: true
           testRunTitle: "Windows JDK $(JAVA_VERSION) (Attempt $(System.JobAttempt))"
@@ -115,7 +114,7 @@ jobs:
 
       - task: ComponentGovernanceComponentDetection@0
         displayName: Component Governance Detection
-        condition: shouldRun
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         inputs:
           scanType: 'Register'
           verbosity: 'Verbose'
@@ -124,9 +123,6 @@ jobs:
   ### Linux ###
   - job: Linux
     timeoutInMinutes: 180
-    variables:
-      # defines if a step should be run or if it can be skipped. We skip running Java 8 e2e tests in pull request builds.
-      shouldRun: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
     pool:
       # If this is changed, don't forget to update supported_platforms.md in the root directory. That document outlines what OS we test on and should stay up to date.
       vmImage: 'ubuntu-18.04'
@@ -141,19 +137,19 @@ jobs:
     steps:
       - task: CmdLine@2
         displayName: 'Print Linux version'
-        condition: shouldRun
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         inputs:
           script: 'cat /etc/*release'
 
       - powershell: ./vsts/echo_versions.ps1
         displayName: 'Echo Versions'
-        condition: shouldRun
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         env:
           COMMIT_FROM: $(COMMIT_FROM)
 
       - task: Docker@1
         displayName: 'Start TPM Simulator'
-        condition: shouldRun
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         inputs:
           containerregistrytype: 'Container Registry'
           command: 'Run an image'
@@ -166,7 +162,7 @@ jobs:
 
       - powershell: ./vsts/build_repo.ps1
         displayName: 'Build and Test'
-        condition: shouldRun
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         env:
           JAVA_VERSION: $(JAVA_VERSION)
           IOT_DPS_CONNECTION_STRING: $(LINUX-IOT-DPS-CONNECTION-STRING)
@@ -188,7 +184,7 @@ jobs:
           RECYCLE_TEST_IDENTITIES: true
 
       - task: CopyFiles@2
-        condition: shouldRun
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         displayName: 'Copy Test Results to Artifact Staging Directory'
         inputs:
           SourceFolder: '$(Build.SourcesDirectory)'
@@ -200,12 +196,12 @@ jobs:
 
       - task: PublishBuildArtifacts@1
         displayName: 'Publish Artifact Staging Directory'
-        condition: shouldRun
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         continueOnError: true
 
       - task: PublishTestResults@2
         displayName: 'Publish Test Results'
-        condition: shouldRun
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         inputs:
           mergeTestResults: true
           testRunTitle: "Linux JDK $(JAVA_VERSION) (Attempt $(System.JobAttempt))"
@@ -213,7 +209,7 @@ jobs:
 
       - task: ComponentGovernanceComponentDetection@0
         displayName: Component Governance Detection
-        condition: shouldRun
+        condition: or(eq(variables['JAVA_VERSION'], 11) , ne(variables['Build.Reason'], 'PullRequest'))
         inputs:
           scanType: 'Register'
           verbosity: 'Verbose'
