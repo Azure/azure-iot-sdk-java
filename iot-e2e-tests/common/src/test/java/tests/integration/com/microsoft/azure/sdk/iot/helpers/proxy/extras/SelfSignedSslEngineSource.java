@@ -11,6 +11,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -28,7 +29,7 @@ public class SelfSignedSslEngineSource implements SslEngineSource
 
     private static final String ALIAS = "littleproxy";
     private static final String PASSWORD = "Be Your Own Lantern";
-    private static final String PROTOCOL = "TLS";
+    private static final String PROTOCOL = "TLSv1.2";
     private final File keyStoreFile;
     private final boolean trustAllServers;
     private final boolean sendCerts;
@@ -120,15 +121,45 @@ public class SelfSignedSslEngineSource implements SslEngineSource
                 trustManagers = new TrustManager[] { new X509TrustManager() {
                     // TrustManager that trusts all servers
                     @Override
-                    public void checkClientTrusted(X509Certificate[] arg0,
-                            String arg1)
+                    public void checkClientTrusted(X509Certificate[] certs,
+                            String authType)
                             throws CertificateException {
                     }
 
                     @Override
-                    public void checkServerTrusted(X509Certificate[] arg0,
-                            String arg1)
+                    public void checkServerTrusted(X509Certificate[] certs,
+                            String authType)
                             throws CertificateException {
+                        if (certs == null || certs.length == 0)
+                        {
+                            throw new IllegalArgumentException("Null or zero-length certificate chain");
+                        }
+                        if (authType == null || authType.length() == 0)
+                        {
+                            throw new IllegalArgumentException("Null or zero-length authentication type");
+                        }
+                        // Checks if any certificate in the certificate chain is stored in the key store.
+                        boolean isChainTrusted = false;
+                        try
+                        {
+                            for (X509Certificate cert : certs)
+                            {
+                                if (ks.getCertificateAlias(cert) != null)
+                                {
+                                    isChainTrusted = true;
+                                    break;
+                                }
+                            }
+                        }
+                        catch(KeyStoreException e)
+                        {
+                            isChainTrusted = false;
+                        }
+
+                        if (!isChainTrusted)
+                        {
+                            throw new CertificateException("Certificate chain is not trusted by this TrustManager");
+                        }
                     }
 
                     @Override
@@ -137,7 +168,7 @@ public class SelfSignedSslEngineSource implements SslEngineSource
                     }
                 } };
             }
-            
+
             KeyManager[] keyManagers = null;
             if (sendCerts) {
                 keyManagers = kmf.getKeyManagers();
