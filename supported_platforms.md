@@ -30,7 +30,9 @@ Note that, while we only directly test on Ubuntu 18.04, we do generally support 
 
 Nightly test platform details:
 Apache Maven 3.8.1
-Java version: 1.8.0_292, vendor: AdoptOpenJDK
+
+Java 8 version: 1.8.0_332, vendor: Eclipse Temurin
+Java 11 version: 11.0.15_10, vendor: Eclipse Temurin
 
 Default locale: en_US, platform encoding: UTF-8
 
