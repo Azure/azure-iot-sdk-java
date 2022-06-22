@@ -121,6 +121,15 @@ public class QueryClientTests extends IntegrationTest
             assertEquals(2, twinList.size());
             assertTrue(twinList.get(0).getDeviceId().equals(deviceId1) || twinList.get(0).getDeviceId().equals(deviceId2));
             assertTrue(twinList.get(1).getDeviceId().equals(deviceId1) || twinList.get(1).getDeviceId().equals(deviceId2));
+
+            assertNotNull(twinList.get(0).getStatus());
+            assertNotNull(twinList.get(0).getConnectionState());
+            assertNotNull(twinList.get(0).getLastActivityTime());
+
+            assertNotNull(twinList.get(1).getStatus());
+            assertNotNull(twinList.get(1).getConnectionState());
+            assertNotNull(twinList.get(1).getLastActivityTime());
+
         }
         finally
         {
