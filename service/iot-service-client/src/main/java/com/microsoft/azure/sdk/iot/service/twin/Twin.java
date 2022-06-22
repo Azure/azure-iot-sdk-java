@@ -29,6 +29,22 @@ public class Twin
     private String eTag;
 
     @Getter
+    @Setter
+    private TwinStatus status;
+
+    @Getter
+    @Setter
+    private String statusUpdateTime;
+
+    @Getter
+    @Setter
+    private String lastActivityTime;
+
+    @Getter
+    @Setter
+    private String cloudToDeviceMessageCount;
+
+    @Getter
     @Setter(AccessLevel.PACKAGE)
     private Integer version;
 
@@ -78,6 +94,12 @@ public class Twin
         Twin twin = new Twin(twinState.getDeviceId());
         twin.setVersion(twinState.getVersion());
         twin.setETag(twinState.getETag());
+        twin.setStatus(twinState.getStatus());
+        twin.setStatusUpdateTime(twinState.getStatusUpdatedTime());
+        twin.setConnectionState(twinState.getConnectionState());
+        twin.setLastActivityTime(twinState.getLastActivityTime());
+        twin.setCloudToDeviceMessageCount(twinState.getCloudToDeviceMessageCount());
+
 
         // Tags
         twin.getTags().setVersion(twinState.getTags().getVersion());
@@ -255,6 +277,12 @@ public class Twin
                     .append(String.join(",", this.parentScopes))
                     .append("\n");
         }
+
+        thisDevice.append("Status: ").append(this.status.toString()).append("\n");
+        thisDevice.append("StatusUpdateTime: ").append(this.statusUpdateTime).append("\n");
+        thisDevice.append("ConnectionState: ").append(this.connectionState).append("\n");
+        thisDevice.append("LastActivityTime: ").append(this.lastActivityTime).append("\n");
+        thisDevice.append("CloudToDeviceMessageCount:").append(this.cloudToDeviceMessageCount).append("\n");
 
         thisDevice.append(tagsToString());
         thisDevice.append(reportedPropertiesToString());
