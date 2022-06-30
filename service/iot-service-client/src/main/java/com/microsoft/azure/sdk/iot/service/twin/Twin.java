@@ -278,11 +278,30 @@ public class Twin
                     .append("\n");
         }
 
-        thisDevice.append("Status: ").append(this.status.toString()).append("\n");
-        thisDevice.append("StatusUpdateTime: ").append(this.statusUpdateTime).append("\n");
-        thisDevice.append("ConnectionState: ").append(this.connectionState).append("\n");
-        thisDevice.append("LastActivityTime: ").append(this.lastActivityTime).append("\n");
-        thisDevice.append("CloudToDeviceMessageCount:").append(this.cloudToDeviceMessageCount).append("\n");
+        if (this.status != null)
+        {
+            thisDevice.append("Status: ").append(this.status.toString()).append("\n");
+        }
+
+        if (this.statusUpdateTime != null)
+        {
+            thisDevice.append("StatusUpdateTime: ").append(this.statusUpdateTime).append("\n");
+        }
+
+        if (this.connectionState != null)
+        {
+            thisDevice.append("ConnectionState: ").append(this.connectionState).append("\n");
+        }
+
+        if (this.lastActivityTime != null)
+        {
+            thisDevice.append("LastActivityTime: ").append(this.lastActivityTime).append("\n");
+        }
+
+        if (this.cloudToDeviceMessageCount != null)
+        {
+            thisDevice.append("CloudToDeviceMessageCount:").append(this.cloudToDeviceMessageCount).append("\n");
+        }
 
         thisDevice.append(tagsToString());
         thisDevice.append(reportedPropertiesToString());
