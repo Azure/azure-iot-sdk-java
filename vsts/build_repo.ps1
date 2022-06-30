@@ -12,27 +12,26 @@ else
     Write-Host "Pull request build detected"
 }
 
-# This repo can only run unit tests when using Java 8 currently due to outdated unit test code packages. Because of that,
-# we will run unit tests on Java 8 regardless of what Java version this run of the pipeline is configured for.
-if (!($env:JAVA_VERSION).equals("8"))
-{
-    # Build the repo with Java 8 as configured in the project itself. Run unit tests, but skip e2e tests. The e2e tests will run later
-    # with the appropriate JDK
-    mvn install -DRUN_PROVISIONING_TESTS="false" -DRUN_IOTHUB_TESTS="false" -T 2C
-
-    # go into the e2e tests folder so the next mvn install only runs the e2e tests instead of running e2e tests + unit tests.
-    cd "./iot-e2e-tests"
-}
-
 # Set the Java home equal to the Java version under test. Currently, Azure Devops hosted agents only support Java 8, 11 and 17
 # Since they are the current Java LTS versions
 if (($env:JAVA_VERSION).equals("8"))
 {
     $env:JAVA_HOME=$env:JAVA_HOME_8_X64
+
+    if ($isPullRequestBuild.equals("true"))
+    {
+        Write-Host "Skipping e2e tests since only Java 11 runs e2e tests during a pull request build"
+        mvn install -T 2C -DskipIntegrationTests=true
+    }
+    else
+    {
+        mvn -DRUN_PROVISIONING_TESTS="$Env:runProvisioningTests" -DRUN_DIGITAL_TESTS="$Env:runDigitalTwinTests" -DRUN_IOTHUB_TESTS="$Env:runIotHubTests" -DIS_PULL_REQUEST="$isPullRequestBuild" install -T 2C
+    }
 }
 elseif (($env:JAVA_VERSION).equals("11"))
 {
     $env:JAVA_HOME=$env:JAVA_HOME_11_X64
+    mvn -DRUN_PROVISIONING_TESTS="$Env:runProvisioningTests" -DRUN_DIGITAL_TESTS="$Env:runDigitalTwinTests" -DRUN_IOTHUB_TESTS="$Env:runIotHubTests" -DIS_PULL_REQUEST="$isPullRequestBuild" install -T 2C -DskipUnitTests=true
 }
 # Leaving this commented out to make it easy to add Java 17 support later
 #elseif (($env:JAVA_VERSION).equals("17"))
@@ -44,7 +43,3 @@ else
     Write-Host "Unrecognized or unsupported JDK version: " $env:JAVA_VERSION
     exit -1
 }
-
-# Run the e2e tests with the Java version under test
-mvn -DRUN_PROVISIONING_TESTS="$Env:runProvisioningTests" -DRUN_DIGITAL_TESTS="$Env:runDigitalTwinTests" -DRUN_IOTHUB_TESTS="$Env:runIotHubTests" -DIS_PULL_REQUEST="$isPullRequestBuild" install -T 2C
-
