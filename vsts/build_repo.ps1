@@ -13,7 +13,7 @@ else
 }
 
 # This repo can only run unit tests when using Java 8 currently due to outdated unit test code packages. Because of that,
-# we will run unit tests on Java 8 regardless of what Jave version this run of the pipeline is configured for.
+# we will run unit tests on Java 8 regardless of what Java version this run of the pipeline is configured for.
 if (!($env:JAVA_VERSION).equals("8"))
 {
     # Build the repo with Java 8 as configured in the project itself. Run unit tests, but skip e2e tests. The e2e tests will run later
