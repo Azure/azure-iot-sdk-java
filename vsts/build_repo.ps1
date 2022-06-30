@@ -13,11 +13,12 @@ else
 }
 
 # This repo can only run unit tests when using Java 8 currently due to outdated unit test code packages. Because of that,
-# we can only run e2e tests for Java versions other than Java 8.
+# we will run unit tests on Java 8 regardless of what Jave version this run of the pipeline is configured for.
 if (!($env:JAVA_VERSION).equals("8"))
 {
-    #Build the repo with Java 8 as configured in the project itself
-    mvn install -DskipTests -T 2C
+    # Build the repo with Java 8 as configured in the project itself. Run unit tests, but skip e2e tests. The e2e tests will run later
+    # with the appropriate JDK
+    mvn install -DRUN_PROVISIONING_TESTS="false" -DRUN_IOTHUB_TESTS="false" -T 2C
 
     # go into the e2e tests folder so the next mvn install only runs the e2e tests instead of running e2e tests + unit tests.
     cd "./iot-e2e-tests"

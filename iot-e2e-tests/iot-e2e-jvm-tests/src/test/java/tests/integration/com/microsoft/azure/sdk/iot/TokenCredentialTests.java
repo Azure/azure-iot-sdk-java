@@ -53,8 +53,6 @@ public class TokenCredentialTests
 {
     private static final String THERMOSTAT_MODEL_ID = "dtmi:com:example:Thermostat;1";
 
-    private static final int METHOD_SUBSCRIPTION_TIMEOUT_MILLISECONDS = 60 * 1000;
-
     @Test (timeout = 10000)
     public void cloudToDeviceTelemetryWithTokenCredential() throws Exception
     {
