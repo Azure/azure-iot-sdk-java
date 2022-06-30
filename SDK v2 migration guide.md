@@ -155,7 +155,8 @@ This client has been removed in v2. It is replaced by the MultiplexingClient. Se
 | DeviceTwin   | TwinClient  |
 | DeviceMethod |  DirectMethodsClient | 
 | ServiceClient   | MessagingClient, FileUploadNotificationProcessorClient, MessageFeedbackProcessorClient   |   
-| JobClient  |  BlockBlobClient, RegistryClient  |  
+| JobClient  |  ScheduledJobClient, RegistryClient  |  
+| Query, RawTwinQuery | QueryClient |
 
 For v1 classes with more than one equivalent v2 classes, the methods that were in the v1 class have been split up to 
 create clients with more cohesive capabilities. For instance, configurations CRUD was in the v1 RegistryManager, but has 
