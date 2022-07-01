@@ -218,7 +218,7 @@ public class TwinState
     @SerializedName(CLOUD_TO_DEVICE_MESSAGE_COUNT)
     @Getter
     @Setter
-    private String cloudToDeviceMessageCount = null;
+    private Integer cloudToDeviceMessageCount = null;
 
     /**
      * Datetime of last time the device authenticated, received, or sent a message.

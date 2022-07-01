@@ -125,10 +125,12 @@ public class QueryClientTests extends IntegrationTest
             assertNotNull(twinList.get(0).getStatus());
             assertNotNull(twinList.get(0).getConnectionState());
             assertNotNull(twinList.get(0).getLastActivityTime());
+            assertNotNull(twinList.get(0).getCloudToDeviceMessageCount());
 
             assertNotNull(twinList.get(1).getStatus());
             assertNotNull(twinList.get(1).getConnectionState());
             assertNotNull(twinList.get(1).getLastActivityTime());
+            assertNotNull(twinList.get(0).getCloudToDeviceMessageCount());
 
         }
         finally

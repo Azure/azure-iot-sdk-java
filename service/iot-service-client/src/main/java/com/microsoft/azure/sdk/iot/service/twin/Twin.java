@@ -42,7 +42,7 @@ public class Twin
 
     @Getter
     @Setter
-    private String cloudToDeviceMessageCount;
+    private Integer cloudToDeviceMessageCount;
 
     @Getter
     @Setter(AccessLevel.PACKAGE)
@@ -277,7 +277,6 @@ public class Twin
                     .append(String.join(",", this.parentScopes))
                     .append("\n");
         }
-
         if (this.status != null)
         {
             thisDevice.append("Status: ").append(this.status.toString()).append("\n");
@@ -300,7 +299,7 @@ public class Twin
 
         if (this.cloudToDeviceMessageCount != null)
         {
-            thisDevice.append("CloudToDeviceMessageCount:").append(this.cloudToDeviceMessageCount).append("\n");
+            thisDevice.append("CloudToDeviceMessageCount:").append(this.cloudToDeviceMessageCount.toString()).append("\n");
         }
 
         thisDevice.append(tagsToString());
