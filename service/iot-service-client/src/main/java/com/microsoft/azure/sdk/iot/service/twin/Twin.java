@@ -282,7 +282,7 @@ public class Twin
         thisDevice.append("StatusUpdateTime: ").append(this.statusUpdateTime).append("\n");
         thisDevice.append("ConnectionState: ").append(this.connectionState).append("\n");
         thisDevice.append("LastActivityTime: ").append(this.lastActivityTime).append("\n");
-        thisDevice.append("CloudToDeviceMessageCount:").append(this.cloudToDeviceMessageCount).append("\n");
+        thisDevice.append("CloudToDeviceMessageCount:").append(this.cloudToDeviceMessageCount.toString()).append("\n");
 
         thisDevice.append(tagsToString());
         thisDevice.append(reportedPropertiesToString());
