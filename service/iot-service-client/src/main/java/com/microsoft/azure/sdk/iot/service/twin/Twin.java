@@ -277,12 +277,6 @@ public class Twin
                     .append(String.join(",", this.parentScopes))
                     .append("\n");
         }
-
-        thisDevice.append("Status: ").append(this.status.toString()).append("\n");
-        thisDevice.append("StatusUpdateTime: ").append(this.statusUpdateTime).append("\n");
-        thisDevice.append("ConnectionState: ").append(this.connectionState).append("\n");
-        thisDevice.append("LastActivityTime: ").append(this.lastActivityTime).append("\n");
-        thisDevice.append("CloudToDeviceMessageCount:").append(this.cloudToDeviceMessageCount.toString()).append("\n");
         if (this.status != null)
         {
             thisDevice.append("Status: ").append(this.status.toString()).append("\n");
