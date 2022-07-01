@@ -57,6 +57,13 @@
             <version>${tpm-provider-emulator-version}</version>
         </dependency>
     </dependencies>
+    <properties>
+        <!--
+        By default, don't skip integration tests. Can override this behavior by passing in
+        "-DskipIntegrationTests=true" to your maven command such as "mvn install -DskipIntegrationTests=true"
+        -->
+        <skipIntegrationTests>false</skipIntegrationTests>
+    </properties>
     <build>
         <plugins>
             <plugin>
@@ -84,6 +91,7 @@
                 </executions>
                 <configuration>
                     <rerunFailingTestsCount>2</rerunFailingTestsCount>
+                    <skipTests>${skipIntegrationTests}</skipTests>
                     <includes>
                         <!--By default, only test files that end in ___Test.java are recognized as tests. This statement extends that to ___Tests.java files-->
                         <include>*Tests.java</include>

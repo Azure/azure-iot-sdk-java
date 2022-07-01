@@ -34,6 +34,11 @@
         <url>https://github.com/Azure/azure-iot-sdk-java.git</url>
     </scm>
     <properties>
+        <!--
+        By default, don't skip unit tests. Can override this behavior by passing in
+        "-DskipUnitTests=true" to your maven command such as "mvn install -DskipUnitTests=true"
+        -->
+        <skipUnitTests>false</skipUnitTests>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
@@ -130,6 +135,7 @@
                 <version>2.22.0</version>
                 <configuration>
                     <rerunFailingTestsCount>2</rerunFailingTestsCount>
+                    <skipTests>${skipUnitTests}</skipTests>
                 </configuration>
             </plugin>
         </plugins>
