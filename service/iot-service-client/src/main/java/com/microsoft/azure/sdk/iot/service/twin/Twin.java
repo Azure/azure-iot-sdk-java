@@ -42,7 +42,7 @@ public class Twin
 
     @Getter
     @Setter
-    private String cloudToDeviceMessageCount;
+    private Integer cloudToDeviceMessageCount;
 
     @Getter
     @Setter(AccessLevel.PACKAGE)
