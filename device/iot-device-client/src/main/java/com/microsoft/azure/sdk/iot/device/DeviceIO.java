@@ -152,9 +152,9 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
         // Note that this is scheduleWithFixedDelay, not scheduleAtFixedRate. There is no reason to spawn a new
         // send/receive thread until after the previous one has finished.
         this.sendTaskScheduler.scheduleWithFixedDelay(this.sendTask, 0,
-                sendPeriodInMilliseconds, TimeUnit.MILLISECONDS);
+            sendPeriodInMilliseconds, TimeUnit.MILLISECONDS);
         this.receiveTaskScheduler.scheduleWithFixedDelay(this.receiveTask, 0,
-                receivePeriodInMilliseconds, TimeUnit.MILLISECONDS);
+            receivePeriodInMilliseconds, TimeUnit.MILLISECONDS);
 
         // This is only set to null if the client as a whole has been closed. This thread pool stays active through disconnected_retrying.
         if (this.reconnectTaskScheduler == null)
@@ -162,7 +162,7 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
             this.reconnectTaskScheduler = Executors.newScheduledThreadPool(1);
 
             this.reconnectTaskScheduler.scheduleWithFixedDelay(this.reconnectTask, 0,
-                    receivePeriodInMilliseconds, TimeUnit.MILLISECONDS);
+                receivePeriodInMilliseconds, TimeUnit.MILLISECONDS);
         }
 
         this.state = IotHubConnectionStatus.CONNECTED;
@@ -271,11 +271,8 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
             // close the old scheduler and start a new one with the new receive period
             this.receiveTaskScheduler.shutdown();
             this.receiveTaskScheduler = Executors.newScheduledThreadPool(1);
-            this.receiveTaskScheduler.scheduleAtFixedRate(
-                this.receiveTask,
-                0,
-                this.receivePeriodInMilliseconds,
-                TimeUnit.MILLISECONDS);
+            this.receiveTaskScheduler.scheduleAtFixedRate(this.receiveTask, 0,
+                this.receivePeriodInMilliseconds, TimeUnit.MILLISECONDS);
         }
     }
 
@@ -299,11 +296,8 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
             // close the old scheduler and start a new one with the new send period
             this.sendTaskScheduler.shutdown();
             this.sendTaskScheduler = Executors.newScheduledThreadPool(1);
-            this.sendTaskScheduler.scheduleAtFixedRate(
-                this.sendTask,
-                0,
-                this.sendPeriodInMilliseconds,
-                TimeUnit.MILLISECONDS);
+            this.sendTaskScheduler.scheduleAtFixedRate(this.sendTask, 0,
+                this.sendPeriodInMilliseconds, TimeUnit.MILLISECONDS);
         }
     }
 
