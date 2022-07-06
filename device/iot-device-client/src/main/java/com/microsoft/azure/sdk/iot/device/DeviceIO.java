@@ -160,7 +160,6 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
         if (this.reconnectTaskScheduler == null)
         {
             this.reconnectTaskScheduler = Executors.newScheduledThreadPool(1);
-
             this.reconnectTaskScheduler.scheduleWithFixedDelay(this.reconnectTask, 0,
                 receivePeriodInMilliseconds, TimeUnit.MILLISECONDS);
         }
@@ -357,12 +356,13 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
 
             if (status == IotHubConnectionStatus.DISCONNECTED)
             {
+                // Stop reconnect task only when the client as a whole has been closed.
                 this.stopReconnectThreads();
             }
         }
         else if (status == IotHubConnectionStatus.CONNECTED)
         {
-            // Restart the task scheduler so that send/receive/reconnect tasks start spawning again.
+            // Restart the task scheduler so that send/receive tasks start spawning again.
             this.startWorkerThreads();
         }
 
