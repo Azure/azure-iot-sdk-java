@@ -136,13 +136,11 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
         // while startWorkerThreads should never be called when threads are already active, it doesn't hurt to double
         // check that any previous thread pools have been shut down.
         stopSendAndReceiveThreads();
-        stopReconnectThreads();
 
         log.debug("Starting worker threads");
 
         this.sendTaskScheduler = Executors.newScheduledThreadPool(1);
         this.receiveTaskScheduler = Executors.newScheduledThreadPool(1);
-        this.reconnectTaskScheduler = Executors.newScheduledThreadPool(1);
 
         // Note that even though these threads are scheduled at a fixed interval, the sender/receiver threads will wait
         // if no messages are available to process. These waiting threads will still count against the pool size defined above,
@@ -152,13 +150,20 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
         // will never overlap.
 
         // Note that this is scheduleWithFixedDelay, not scheduleAtFixedRate. There is no reason to spawn a new
-        // send/receive/reconnect thread until after the previous one has finished.
+        // send/receive thread until after the previous one has finished.
         this.sendTaskScheduler.scheduleWithFixedDelay(this.sendTask, 0,
                 sendPeriodInMilliseconds, TimeUnit.MILLISECONDS);
         this.receiveTaskScheduler.scheduleWithFixedDelay(this.receiveTask, 0,
                 receivePeriodInMilliseconds, TimeUnit.MILLISECONDS);
-        this.reconnectTaskScheduler.scheduleWithFixedDelay(this.reconnectTask, 0,
-                receivePeriodInMilliseconds, TimeUnit.MILLISECONDS);
+
+        // This is only set to null if the client as a whole has been closed. This thread pool stays active through disconnected_retrying.
+        if (this.reconnectTaskScheduler == null)
+        {
+            this.reconnectTaskScheduler = Executors.newScheduledThreadPool(1);
+
+            this.reconnectTaskScheduler.scheduleWithFixedDelay(this.reconnectTask, 0,
+                    receivePeriodInMilliseconds, TimeUnit.MILLISECONDS);
+        }
 
         this.state = IotHubConnectionStatus.CONNECTED;
     }
