@@ -336,7 +336,7 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
 
     /*
      * IotHubTransport layer will notify this layer when the connection is established and when it is lost. This layer should start/stop
-     * the send/receive threads accordingly
+     * the send/receive/reconnect threads accordingly.
      */
     @Override
     public void onStatusChanged(ConnectionStatusChangeContext connectionStatusChangeContext)
@@ -347,13 +347,13 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
 
         if (status == this.state)
         {
-            // no change in status, so no need to start/stop worker threads.
+            // No change in status, so no need to start/stop worker threads.
             return;
         }
 
         if (status == IotHubConnectionStatus.DISCONNECTED || status == IotHubConnectionStatus.DISCONNECTED_RETRYING)
         {
-            // No need to keep spawning send/receive tasks during reconnection or when the client is closed
+            // No need to keep spawning send/receive tasks during reconnection or when the client is closed.
             this.stopSendAndReceiveThreads();
 
             if (status == IotHubConnectionStatus.DISCONNECTED)
@@ -363,7 +363,7 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
         }
         else if (status == IotHubConnectionStatus.CONNECTED)
         {
-            // Restart the task scheduler so that send/receive/reconnect tasks start spawning again
+            // Restart the task scheduler so that send/receive/reconnect tasks start spawning again.
             this.startWorkerThreads();
         }
 
