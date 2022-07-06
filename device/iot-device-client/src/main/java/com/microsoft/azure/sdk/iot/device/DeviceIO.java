@@ -135,7 +135,8 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
     {
         // while startWorkerThreads should never be called when threads are already active, it doesn't hurt to double
         // check that any previous thread pools have been shut down.
-        stopWorkerThreads();
+        stopSendAndReceiveThreads();
+        stopReconnectThreads();
 
         log.debug("Starting worker threads");
 
@@ -147,12 +148,11 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
         // if no messages are available to process. These waiting threads will still count against the pool size defined above,
         // so threads will not be needlessly scheduled during times when this SDK has no messages to process.
 
-        // the scheduler waits until each execution is finished before
-        // scheduling the next one, so executions of a given task
+        // the scheduler waits until each execution is finished before scheduling the next one, so executions of a given task
         // will never overlap.
 
         // Note that this is scheduleWithFixedDelay, not scheduleAtFixedRate. There is no reason to spawn a new
-        // send/receive thread until after the previous one has finished.
+        // send/receive/reconnect thread until after the previous one has finished.
         this.sendTaskScheduler.scheduleWithFixedDelay(this.sendTask, 0,
                 sendPeriodInMilliseconds, TimeUnit.MILLISECONDS);
         this.receiveTaskScheduler.scheduleWithFixedDelay(this.receiveTask, 0,
@@ -163,7 +163,7 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
         this.state = IotHubConnectionStatus.CONNECTED;
     }
 
-    private void stopWorkerThreads()
+    private void stopSendAndReceiveThreads()
     {
         if (this.sendTaskScheduler != null)
         {
@@ -354,7 +354,7 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
         if (status == IotHubConnectionStatus.DISCONNECTED || status == IotHubConnectionStatus.DISCONNECTED_RETRYING)
         {
             // No need to keep spawning send/receive tasks during reconnection or when the client is closed
-            this.stopWorkerThreads();
+            this.stopSendAndReceiveThreads();
 
             if (status == IotHubConnectionStatus.DISCONNECTED)
             {
@@ -363,7 +363,7 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
         }
         else if (status == IotHubConnectionStatus.CONNECTED)
         {
-            // Restart the task scheduler so that send/receive tasks start spawning again
+            // Restart the task scheduler so that send/receive/reconnect tasks start spawning again
             this.startWorkerThreads();
         }
 
