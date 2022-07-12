@@ -43,7 +43,7 @@ function CreateJavadocReleaseBranch(
 
     #Some local samples rely on packages we don't publish publicly, so install everything locally before generating javadocs
     Write-Host "Installing jars locally"
-    mvn `-DskipTests `-Dmaven.javadoc.skip=true install -T 2C
+    mvn `-DskipIntegrationTests `DskipUnitTests `-Dmaven.javadoc.skip=true install -T 2C
 
     Write-Host "Generating javadocs, placing them in apidocs folder at the root of the repository"
     mvn javadoc:javadoc -T 2C
