@@ -373,17 +373,17 @@ public abstract class Mqtt implements MqttCallback
     public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken)
     {
         Message deliveredMessage = null;
-        log.trace("Mqtt message with message id {} was acknowledge by service", iMqttDeliveryToken.getMessageId());
+        log.trace("Mqtt message with message id {} was acknowledged by service", iMqttDeliveryToken.getMessageId());
         synchronized (this.unacknowledgedSentMessagesLock)
         {
             if (unacknowledgedSentMessages.containsKey(iMqttDeliveryToken.getMessageId()))
             {
-                log.trace("Mqtt message with message id {} that was acknowledge by service was sent by this client", iMqttDeliveryToken.getMessageId());
+                log.trace("Mqtt message with message id {} that was acknowledged by service was sent by this client", iMqttDeliveryToken.getMessageId());
                 deliveredMessage = unacknowledgedSentMessages.remove(iMqttDeliveryToken.getMessageId());
             }
             else
             {
-                log.warn("Mqtt message with message id {} that was acknowledge by service was not sent by this client, will be ignored", iMqttDeliveryToken.getMessageId());
+                log.warn("Mqtt message with message id {} that was acknowledged by service was not sent by this client, will be ignored", iMqttDeliveryToken.getMessageId());
             }
         }
 
