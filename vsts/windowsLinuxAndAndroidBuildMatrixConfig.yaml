@@ -30,6 +30,7 @@ jobs:
       - powershell: ./vsts/echo_versions.ps1
         displayName: 'Echo Versions'
         env:
+          JAVA_VERSION: $(JAVA_VERSION)
           COMMIT_FROM: $(COMMIT_FROM)
 
       - powershell: ./vsts/start_tpm_windows.ps1
@@ -137,6 +138,7 @@ jobs:
       - powershell: ./vsts/echo_versions.ps1
         displayName: 'Echo Versions'
         env:
+          JAVA_VERSION: $(JAVA_VERSION)
           COMMIT_FROM: $(COMMIT_FROM)
 
       - task: Docker@1
