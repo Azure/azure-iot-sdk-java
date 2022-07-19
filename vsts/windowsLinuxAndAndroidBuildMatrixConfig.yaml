@@ -30,6 +30,7 @@ jobs:
       - powershell: ./vsts/echo_versions.ps1
         displayName: 'Echo Versions'
         env:
+          JAVA_VERSION: $(JAVA_VERSION)
           COMMIT_FROM: $(COMMIT_FROM)
 
       - powershell: ./vsts/start_tpm_windows.ps1
@@ -137,6 +138,7 @@ jobs:
       - powershell: ./vsts/echo_versions.ps1
         displayName: 'Echo Versions'
         env:
+          JAVA_VERSION: $(JAVA_VERSION)
           COMMIT_FROM: $(COMMIT_FROM)
 
       - task: Docker@1
@@ -217,6 +219,7 @@ jobs:
         displayName: 'Echo Versions'
         env:
           COMMIT_FROM: $(COMMIT_FROM)
+          JAVA_VERSION: 8 # Android build doesn't need to run for both JDK 8 and 11
         condition: always()
 
       - powershell: ./vsts/build_e2e_tests.cmd
