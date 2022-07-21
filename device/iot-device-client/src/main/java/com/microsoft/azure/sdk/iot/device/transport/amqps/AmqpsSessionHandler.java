@@ -35,6 +35,9 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
     private IotHubTransportMessage explicitInProgressTwinSubscriptionMessage;
     private IotHubTransportMessage explicitInProgressMethodsSubscriptionMessage;
 
+    //Carries over state between reconnections
+    private boolean subscribeToMethodsOnReconnection = false;
+    private boolean subscribeToTwinOnReconnection = false;
     private final AmqpsSessionStateCallback amqpsSessionStateCallback;
 
     //Should not carry over state between reconnects
@@ -333,12 +336,12 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
             createTelemetryLinksAsync();
         }
 
-        if (!alreadyCreatedTwinLinks)
+        if (subscribeToTwinOnReconnection && !alreadyCreatedTwinLinks)
         {
             createTwinLinksAsync();
         }
 
-        if (!alreadyCreatedMethodLinks)
+        if (subscribeToMethodsOnReconnection && !alreadyCreatedMethodLinks)
         {
             createMethodLinksAsync();
         }
@@ -525,6 +528,7 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
         Receiver receiver = session.receiver(AmqpsMethodsReceiverLinkHandler.getTag(clientConfiguration, methodsLinkCorrelationId));
         this.receiverLinkHandlers.put(DEVICE_METHODS, new AmqpsMethodsReceiverLinkHandler(receiver, this, this.clientConfiguration, methodsLinkCorrelationId));
 
+        this.subscribeToMethodsOnReconnection = true;
         this.alreadyCreatedMethodLinks = true;
     }
 
@@ -545,6 +549,7 @@ class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
         Receiver receiver = session.receiver(AmqpsTwinReceiverLinkHandler.getTag(clientConfiguration, twinLinkCorrelationId));
         this.receiverLinkHandlers.put(DEVICE_TWIN, new AmqpsTwinReceiverLinkHandler(receiver, this, this.clientConfiguration, twinLinkCorrelationId, twinOperationCorrelationMap));
 
+        this.subscribeToTwinOnReconnection = true;
         this.alreadyCreatedTwinLinks = true;
     }
 
