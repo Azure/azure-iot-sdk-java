@@ -49,7 +49,7 @@ function CreateJavadocReleaseBranch(
         $UpdateDiceProviderEmulatorDocs -eq "false" -and
         $UpdateDiceProviderDocs -eq "false" -and
         $UpdateSecurityProviderDocs -eq "false" -and
-        $UpdateX509ProviderDocs -eq "false" -and) {
+        $UpdateX509ProviderDocs -eq "false") {
         throw "Must specify at least one package to update the javadocs for"
     }
 
