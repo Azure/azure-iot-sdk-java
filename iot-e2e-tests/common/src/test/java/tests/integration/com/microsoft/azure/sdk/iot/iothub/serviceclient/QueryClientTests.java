@@ -211,6 +211,7 @@ public class QueryClientTests extends IntegrationTest
     }
 
     @StandardTierHubOnlyTest
+    @FlakeyTest
     @Test
     public void testQueryJobsByType() throws IOException, IotHubException, InterruptedException
     {
