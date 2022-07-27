@@ -39,6 +39,20 @@ function CreateJavadocReleaseBranch(
         throw "GitHubEmail is null or empty"
     }
 
+    if ($UpdateDeviceClientDocs -eq "false" -and
+        $UpdateDeviceClientDocs -eq "false" -and
+        $UpdateServiceClientDocs -eq "false" -and    
+        $UpdateProvisioningDeviceClientDocs -eq "false" -and
+        $UpdateProvisioningServiceClientDocs -eq "false" -and    
+        $UpdateTpmProviderEmulatorDocs -eq "false" -and
+        $UpdateTpmProviderDocs -eq "false" -and
+        $UpdateDiceProviderEmulatorDocs -eq "false" -and
+        $UpdateDiceProviderDocs -eq "false" -and
+        $UpdateSecurityProviderDocs -eq "false" -and
+        $UpdateX509ProviderDocs -eq "false") {
+        throw "Must specify at least one package to update the javadocs for"
+    }
+
     Set-Location $Sources -ErrorAction Stop
 
     #Some local samples rely on packages we don't publish publicly, so install everything locally before generating javadocs
