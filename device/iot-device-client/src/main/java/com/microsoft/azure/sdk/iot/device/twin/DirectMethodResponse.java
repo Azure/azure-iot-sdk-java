@@ -31,7 +31,7 @@ public class DirectMethodResponse
         return payload;
     }
 
-    public void setPayload(String payload)
+    public void setPayload(Object payload)
     {
         this.payload = payload;
     }
