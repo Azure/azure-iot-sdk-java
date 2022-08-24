@@ -44,7 +44,7 @@ public class ScheduledJobParserTest
     }
 
     /* Tests_SRS_JOBSPARSER_21_001: [The constructor shall evaluate and store the commons parameters using the internal function commonFields.] */
-    /* Tests_SRS_JOBSPARSER_21_014: [The commonFields shall store the jobId, queryCondition, and maxExecutionTimeSeconds.] */
+    /* Tests_SRS_JOBSPARSER_21_014: [The commonFields shall store the jobId, queryCondition, and maxExecutionTimeInSeconds.] */
     @Test
     public void constructorMethodCommonParsSucceed()
     {
@@ -131,7 +131,7 @@ public class ScheduledJobParserTest
     }
 
     /* Tests_SRS_JOBSPARSER_21_002: [If any common parameter is invalid, the constructor shall throws IllegalArgumentException.] */
-    /* Tests_SRS_JOBSPARSER_21_017: [If the maxExecutionTimeSeconds is negative, the commonFields shall throws IllegalArgumentException.] */
+    /* Tests_SRS_JOBSPARSER_21_017: [If the maxExecutionTimeInSeconds is negative, the commonFields shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorMethodInvalidMaxExecutionTimeInSecondsThrows()
     {
@@ -251,7 +251,7 @@ public class ScheduledJobParserTest
                         "\"updateTwin\":null," +
                         "\"queryCondition\":\"" + queryCondition + "\"," +
                         "\"startTime\":\"" + Helpers.formatUTC(startTime) + "\"," +
-                        "\"maxExecutionTimeSeconds\":" + maxExecutionTimeInSeconds +
+                        "\"maxExecutionTimeInSeconds\":" + maxExecutionTimeInSeconds +
                 "}";
 
         // Act
@@ -265,7 +265,7 @@ public class ScheduledJobParserTest
 
 
     /* Tests_SRS_JOBSPARSER_21_007: [The constructor shall evaluate and store the commons parameters using the internal function commonFields.] */
-    /* Tests_SRS_JOBSPARSER_21_014: [The commonFields shall store the jobId, queryCondition, and maxExecutionTimeSeconds.] */
+    /* Tests_SRS_JOBSPARSER_21_014: [The commonFields shall store the jobId, queryCondition, and maxExecutionTimeInSeconds.] */
     @Test
     public void ConstructorTwinCommonParsSucceed()
     {
@@ -352,7 +352,7 @@ public class ScheduledJobParserTest
     }
 
     /* Tests_SRS_JOBSPARSER_21_008: [If any common parameter is invalid, the constructor shall throws IllegalArgumentException.] */
-    /* Tests_SRS_JOBSPARSER_21_017: [If the maxExecutionTimeSeconds is negative, the commonFields shall throws IllegalArgumentException.] */
+    /* Tests_SRS_JOBSPARSER_21_017: [If the maxExecutionTimeInSeconds is negative, the commonFields shall throws IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)
     public void ConstructorInvalidMaxExecutionTimeInSecondsThrows()
     {
@@ -472,7 +472,7 @@ public class ScheduledJobParserTest
                         "\"updateTwin\":" + twinState.toJsonElement().toString() + "," +
                         "\"queryCondition\":\"" + queryCondition + "\"," +
                         "\"startTime\":\"" + Helpers.formatUTC(startTime) + "\"," +
-                        "\"maxExecutionTimeSeconds\":" + maxExecutionTimeInSeconds +
+                        "\"maxExecutionTimeInSeconds\":" + maxExecutionTimeInSeconds +
                 "}";
 
         // Act

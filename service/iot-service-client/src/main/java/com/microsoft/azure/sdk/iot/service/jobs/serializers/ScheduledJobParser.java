@@ -71,7 +71,7 @@ public class ScheduledJobParser
     private String startTime;
 
     // Max execution time in seconds (ttl duration)
-    private static final String MAXEXECUTIONTIMEINSECONDS_TAG = "maxExecutionTimeSeconds";
+    private static final String MAXEXECUTIONTIMEINSECONDS_TAG = "maxExecutionTimeInSeconds";
     @Expose(deserialize = false)
     @SerializedName(MAXEXECUTIONTIMEINSECONDS_TAG)
     private long maxExecutionTimeInSeconds;
