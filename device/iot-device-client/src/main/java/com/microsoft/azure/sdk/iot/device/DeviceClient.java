@@ -28,7 +28,7 @@ import java.io.IOException;
  * the network comes back online. It also batches messages to improve
  * communication efficiency (HTTPS only).
  * </p>
- * The client supports HTTPS 1.1 and AMQPS 1.0 transports.
+ * The client supports MQTT 3.1.1, HTTPS 1.1 and AMQPS 1.0 transports.
  */
 @Slf4j
 public final class DeviceClient extends InternalClient
