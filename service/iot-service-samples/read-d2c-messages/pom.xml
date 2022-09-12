@@ -6,7 +6,6 @@
         <artifactId>iot-service-samples</artifactId>
         <version>1.18.0</version>
     </parent>
-    <groupId>com.microsoft.docs.iothub.samples</groupId>
     <artifactId>read-d2c-messages</artifactId>
     <version>1.0.0</version>
     <name>Read device-to-cloud messages</name>
