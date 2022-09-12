@@ -18,7 +18,6 @@
         <module>service</module>
         <module>iot-e2e-tests</module>
         <module>provisioning</module>
-        <module>Quickstarts/read-d2c-messages</module>
     </modules>
     <dependencyManagement>
         <dependencies>
