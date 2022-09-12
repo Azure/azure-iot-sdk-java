@@ -31,6 +31,7 @@
         <module>messaging-client-sample</module>
         <module>messaging-client-performance-sample</module>
         <module>message-feedback-processor-client-sample</module>
+        <module>read-d2c-messages</module>
     </modules>
     <dependencies>
         <dependency>
