@@ -50,7 +50,7 @@ dependencies {
     implementation 'com.android.support:multidex:1.0.3'
 
     // Remote binary dependency
-    implementation ('com.microsoft.azure.sdk.iot:iot-device-client:2.1.0') {
+    implementation ('com.microsoft.azure.sdk.iot:iot-device-client:2.1.1') {
         exclude module: 'slf4j-api'
         exclude module: 'log4j-slf4j-impl'
     }
