@@ -60,7 +60,7 @@ public class DeviceManagerX509Sample
 
         if (isSelfSigned)
         {
-            device = new Device(SampleUtils.deviceId, AuthenticationType.SELF_SIGNED);
+            device = new Device(SampleUtils.deviceId, AuthenticationType.selfSigned);
         }
         else
         {
@@ -115,7 +115,7 @@ public class DeviceManagerX509Sample
         Device device;
         if (isSelfSigned)
         {
-            device = new Device(SampleUtils.deviceId, AuthenticationType.SELF_SIGNED);
+            device = new Device(SampleUtils.deviceId, AuthenticationType.selfSigned);
         }
         else
         {

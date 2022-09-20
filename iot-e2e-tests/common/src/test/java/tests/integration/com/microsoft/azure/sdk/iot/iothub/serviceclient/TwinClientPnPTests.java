@@ -33,12 +33,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
-import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
+import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.selfSigned;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -73,8 +72,8 @@ public class TwinClientPnPTests extends IntegrationTest
                                 {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT},
 
                                 //x509 device client, no proxy
-                                {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT},
-                                {AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT},
+                                {MQTT, selfSigned, ClientType.DEVICE_CLIENT},
+                                {AMQPS, selfSigned, ClientType.DEVICE_CLIENT},
 
                                 //sas token device client, with proxy
                                 {MQTT_WS, SAS, ClientType.DEVICE_CLIENT},
@@ -94,8 +93,8 @@ public class TwinClientPnPTests extends IntegrationTest
                             {AMQPS_WS, SAS, ClientType.MODULE_CLIENT},
 
                             //x509 module client, no proxy
-                            {MQTT, SELF_SIGNED, ClientType.MODULE_CLIENT},
-                            {AMQPS, SELF_SIGNED, ClientType.MODULE_CLIENT},
+                            {MQTT, selfSigned, ClientType.MODULE_CLIENT},
+                            {AMQPS, selfSigned, ClientType.MODULE_CLIENT},
 
                             //sas token module client, with proxy
                             {MQTT_WS, SAS, ClientType.MODULE_CLIENT},
@@ -154,9 +153,9 @@ public class TwinClientPnPTests extends IntegrationTest
             Device device = new Device(deviceId);
             Module module = new Module(deviceId, moduleId);
 
-            Device deviceX509 = new Device(deviceX509Id, AuthenticationType.SELF_SIGNED);
+            Device deviceX509 = new Device(deviceX509Id, AuthenticationType.selfSigned);
             deviceX509.setThumbprint(x509Thumbprint, x509Thumbprint);
-            Module moduleX509 = new Module(deviceX509Id, moduleX509Id, AuthenticationType.SELF_SIGNED);
+            Module moduleX509 = new Module(deviceX509Id, moduleX509Id, AuthenticationType.selfSigned);
             moduleX509.setThumbprint(x509Thumbprint, x509Thumbprint);
             device = Tools.addDeviceWithRetry(registryClient, device);
             deviceX509 = Tools.addDeviceWithRetry(registryClient, deviceX509);
@@ -170,7 +169,7 @@ public class TwinClientPnPTests extends IntegrationTest
                     this.client = new DeviceClient(Tools.getDeviceConnectionString(iotHubConnectionString, device), protocol, clientOptionsBuilder.build());
                     this.identity = device;
                 }
-                else if (authenticationType == SELF_SIGNED)
+                else if (authenticationType == selfSigned)
                 {
                     //x509 device client
                     SSLContext sslContext = SSLContextBuilder.buildSSLContext(x509CertificateGenerator.getX509Certificate(), x509CertificateGenerator.getPrivateKey());
@@ -195,7 +194,7 @@ public class TwinClientPnPTests extends IntegrationTest
                     this.identity = module;
                     this.twin = new Twin(deviceId, moduleId);
                 }
-                else if (authenticationType == SELF_SIGNED)
+                else if (authenticationType == selfSigned)
                 {
                     //x509 module client
                     moduleX509 = Tools.addModuleWithRetry(registryClient, moduleX509);

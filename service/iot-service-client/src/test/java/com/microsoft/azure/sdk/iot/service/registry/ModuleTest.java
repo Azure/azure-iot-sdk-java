@@ -325,7 +325,7 @@ public class ModuleTest
     public void conversionToDeviceParserWithSelfSignedAuthentication()
     {
         // arrange
-        Module moduleSelf = new Module("deviceSelf", "moduleSelf", AuthenticationType.SELF_SIGNED);
+        Module moduleSelf = new Module("deviceSelf", "moduleSelf", AuthenticationType.selfSigned);
 
         // act
         RegistryIdentityParser parserSelf = reflectivelyInvokeToDeviceParser(moduleSelf);
@@ -391,7 +391,7 @@ public class ModuleTest
         assertNull(moduleSelf.getSymmetricKey());
         assertNotNull(moduleSelf.getPrimaryThumbprint());
         assertNotNull(moduleSelf.getSecondaryThumbprint());
-        assertEquals(AuthenticationType.SELF_SIGNED, moduleSelf.getAuthenticationType());
+        assertEquals(AuthenticationType.selfSigned, moduleSelf.getAuthenticationType());
         assertEquals("xyz", moduleSelf.getManagedBy());
     }
 

@@ -206,7 +206,7 @@ public class SendMessagesTests extends SendMessagesCommon
     public void sendMessagesWithECCCertificate() throws GeneralSecurityException, IOException, IotHubException, URISyntaxException, InterruptedException, IotHubClientException
     {
         // test is only applicable for self-signed device clients
-        assumeFalse(testInstance.authenticationType != AuthenticationType.SELF_SIGNED || testInstance.clientType != ClientType.DEVICE_CLIENT);
+        assumeFalse(testInstance.authenticationType != AuthenticationType.selfSigned || testInstance.clientType != ClientType.DEVICE_CLIENT);
 
         // ECC cert generation is broken for Android. "ECDSA KeyPairGenerator is not available"
         assumeFalse(Tools.isAndroid());
@@ -216,7 +216,7 @@ public class SendMessagesTests extends SendMessagesCommon
 
         SSLContext sslContext = SSLContextBuilder.buildSSLContext(eccCertGenerator.getX509Certificate(), eccCertGenerator.getPrivateKey());
 
-        Device eccDevice = new Device(UUID.randomUUID().toString(), AuthenticationType.SELF_SIGNED);
+        Device eccDevice = new Device(UUID.randomUUID().toString(), AuthenticationType.selfSigned);
         eccDevice.setThumbprint(eccCertGenerator.getX509Thumbprint(), eccCertGenerator.getX509Thumbprint());
         eccDevice = registryClient.addDevice(eccDevice);
 

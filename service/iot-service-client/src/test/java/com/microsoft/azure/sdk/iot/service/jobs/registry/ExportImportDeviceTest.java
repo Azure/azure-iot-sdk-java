@@ -84,7 +84,7 @@ public class ExportImportDeviceTest
 
         ExportImportDevice deviceSelf = new ExportImportDevice();
         deviceSelf.setId("deviceSelf");
-        deviceSelf.setAuthentication(new AuthenticationMechanism(AuthenticationType.SELF_SIGNED));
+        deviceSelf.setAuthentication(new AuthenticationMechanism(AuthenticationType.selfSigned));
 
         ExportImportDevice deviceSAS = new ExportImportDevice();
         deviceSAS.setId("deviceSAS");
@@ -172,7 +172,7 @@ public class ExportImportDeviceTest
         //arrange
         ExportImportDevice device = new ExportImportDevice();
         device.setId("someDevice");
-        AuthenticationMechanism authentication = new AuthenticationMechanism(AuthenticationType.SELF_SIGNED);
+        AuthenticationMechanism authentication = new AuthenticationMechanism(AuthenticationType.selfSigned);
         Deencapsulation.setField(authentication, "thumbprint", null);
         device.setAuthentication(authentication);
 
@@ -187,7 +187,7 @@ public class ExportImportDeviceTest
         //arrange
         ExportImportDevice device = new ExportImportDevice();
         device.setId("someDevice");
-        AuthenticationMechanism authentication = new AuthenticationMechanism(AuthenticationType.SELF_SIGNED);
+        AuthenticationMechanism authentication = new AuthenticationMechanism(AuthenticationType.selfSigned);
         X509Thumbprint thumbprint = Deencapsulation.newInstance(X509Thumbprint.class);
         Deencapsulation.setField(thumbprint, "primaryThumbprint", null);
         Deencapsulation.setField(authentication, "thumbprint", thumbprint);

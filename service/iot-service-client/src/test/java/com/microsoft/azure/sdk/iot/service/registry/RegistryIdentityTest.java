@@ -191,7 +191,7 @@ public class RegistryIdentityTest
     public void conversionToDeviceParserWithSelfSignedAuthentication()
     {
         // arrange
-        RegistryIdentity deviceSelf = Deencapsulation.newInstance(RegistryIdentity.class, "deviceSelf", AuthenticationType.SELF_SIGNED);
+        RegistryIdentity deviceSelf = Deencapsulation.newInstance(RegistryIdentity.class, "deviceSelf", AuthenticationType.selfSigned);
 
         // act
         RegistryIdentityParser parserSelf = reflectivelyInvokeToDeviceParser(deviceSelf);
@@ -252,7 +252,7 @@ public class RegistryIdentityTest
         assertNull(deviceSelf.getSymmetricKey());
         assertNotNull(deviceSelf.getPrimaryThumbprint());
         assertNotNull(deviceSelf.getSecondaryThumbprint());
-        assertEquals(AuthenticationType.SELF_SIGNED, deviceSelf.getAuthenticationType());
+        assertEquals(AuthenticationType.selfSigned, deviceSelf.getAuthenticationType());
     }
 
 
@@ -323,7 +323,7 @@ public class RegistryIdentityTest
     public void deviceConstructorWithSelfSignedGeneratesKeysCorrectly()
     {
         // act
-        RegistryIdentity device = Deencapsulation.newInstance(RegistryIdentity.class, new Class[] { String.class, AuthenticationType.class }, "someDevice", AuthenticationType.SELF_SIGNED);
+        RegistryIdentity device = Deencapsulation.newInstance(RegistryIdentity.class, new Class[] { String.class, AuthenticationType.class }, "someDevice", AuthenticationType.selfSigned);
 
         // assert
         assertNotNull(device.getPrimaryThumbprint());

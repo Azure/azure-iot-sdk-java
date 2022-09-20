@@ -145,7 +145,7 @@ public class ExportImportDevice
                 {
                     //do nothing
                 }
-                else if (this.getAuthentication().getAuthenticationType() == AuthenticationType.SELF_SIGNED)
+                else if (this.getAuthentication().getAuthenticationType() == AuthenticationType.selfSigned)
                 {
                     if (this.authentication.getPrimaryThumbprint() != null && this.authentication.getSecondaryThumbprint() != null)
                     {

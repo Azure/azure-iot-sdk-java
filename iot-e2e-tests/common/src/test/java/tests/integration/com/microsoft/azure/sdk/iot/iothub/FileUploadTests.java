@@ -96,11 +96,11 @@ public class FileUploadTests extends IntegrationTest
                         {
                                 //without proxy
                                 {IotHubClientProtocol.HTTPS, AuthenticationType.SAS, false},
-                                {IotHubClientProtocol.HTTPS, AuthenticationType.SELF_SIGNED, false},
+                                {IotHubClientProtocol.HTTPS, AuthenticationType.selfSigned, false},
 
                                 //with proxy
                                 {IotHubClientProtocol.HTTPS, AuthenticationType.SAS, true},
-                                {IotHubClientProtocol.HTTPS, AuthenticationType.SELF_SIGNED, true}
+                                {IotHubClientProtocol.HTTPS, AuthenticationType.selfSigned, true}
                         });
     }
 
@@ -244,7 +244,7 @@ public class FileUploadTests extends IntegrationTest
         assumeFalse(Tools.isAndroid());
 
         // This test is moreso for the service client, so don't parameterize on device side options
-        assumeFalse(testInstance.withProxy || testInstance.authenticationType == AuthenticationType.SELF_SIGNED);
+        assumeFalse(testInstance.withProxy || testInstance.authenticationType == AuthenticationType.selfSigned);
 
         // arrange
         int fileUploadCount = 5;

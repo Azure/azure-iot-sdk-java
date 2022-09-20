@@ -5,9 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service.auth;
 
-import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
-import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
 import mockit.Deencapsulation;
 import mockit.integration.junit4.JMockit;
 import org.junit.Before;
@@ -141,7 +138,7 @@ public class AuthenticationMechanismTest
         //assert
         assertEquals(AuthenticationType.SAS, authenticationWithSymmetricKey.getAuthenticationType());
         assertEquals(AuthenticationType.CERTIFICATE_AUTHORITY, authenticationCASigned.getAuthenticationType());
-        assertEquals(AuthenticationType.SELF_SIGNED, authenticationSelfSigned.getAuthenticationType());
+        assertEquals(AuthenticationType.selfSigned, authenticationSelfSigned.getAuthenticationType());
     }
 
     //Tests_SRS_AUTHENTICATION_MECHANISM_34_023: [If the provided authentication type is self signed, a thumbprint will be generated, but no symmetric key will be generated.]
@@ -149,7 +146,7 @@ public class AuthenticationMechanismTest
     public void testSelfSignedAuthenticationTypeConstructor()
     {
         //act
-        AuthenticationMechanism selfSignedAuth = new AuthenticationMechanism(AuthenticationType.SELF_SIGNED);
+        AuthenticationMechanism selfSignedAuth = new AuthenticationMechanism(AuthenticationType.selfSigned);
 
         //assert
         assertNotNull(selfSignedAuth.getPrimaryThumbprint());

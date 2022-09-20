@@ -291,7 +291,7 @@ public class RegistryClientTests extends IntegrationTest
     {
         //-Create-//
         RegistryClientTestInstance testInstance = new RegistryClientTestInstance();
-        Device deviceAdded = new Device(testInstance.deviceId, AuthenticationType.SELF_SIGNED);
+        Device deviceAdded = new Device(testInstance.deviceId, AuthenticationType.selfSigned);
         deviceAdded.setThumbprint(primaryThumbprint, secondaryThumbprint);
         Tools.addDeviceWithRetry(testInstance.registryClient, deviceAdded);
 
@@ -309,8 +309,8 @@ public class RegistryClientTests extends IntegrationTest
         // Assert
         assertEquals(buildExceptionMessage("", hostName), testInstance.deviceId, deviceAdded.getDeviceId());
         assertEquals(buildExceptionMessage("", hostName), testInstance.deviceId, deviceRetrieved.getDeviceId());
-        assertEquals(buildExceptionMessage("", hostName), AuthenticationType.SELF_SIGNED, deviceAdded.getAuthenticationType());
-        assertEquals(buildExceptionMessage("", hostName), AuthenticationType.SELF_SIGNED, deviceRetrieved.getAuthenticationType());
+        assertEquals(buildExceptionMessage("", hostName), AuthenticationType.selfSigned, deviceAdded.getAuthenticationType());
+        assertEquals(buildExceptionMessage("", hostName), AuthenticationType.selfSigned, deviceRetrieved.getAuthenticationType());
         assertEquals(buildExceptionMessage("", hostName), primaryThumbprint, deviceAdded.getPrimaryThumbprint());
         assertEquals(buildExceptionMessage("", hostName), secondaryThumbprint, deviceAdded.getSecondaryThumbprint());
         assertEquals(buildExceptionMessage("", hostName), primaryThumbprint, deviceRetrieved.getPrimaryThumbprint());
@@ -414,7 +414,7 @@ public class RegistryClientTests extends IntegrationTest
         deleteModuleIfItExistsAlready(testInstance.registryClient, testInstance.deviceId, testInstance.moduleId);
 
         //-Create-//
-        Module moduleAdded = new Module(testInstance.deviceId, testInstance.moduleId, AuthenticationType.SELF_SIGNED);
+        Module moduleAdded = new Module(testInstance.deviceId, testInstance.moduleId, AuthenticationType.selfSigned);
         moduleAdded.setThumbprint(primaryThumbprint, secondaryThumbprint);
         Tools.addModuleWithRetry(testInstance.registryClient, moduleAdded);
 
@@ -434,8 +434,8 @@ public class RegistryClientTests extends IntegrationTest
         assertEquals(buildExceptionMessage("", hostName), testInstance.moduleId, moduleAdded.getId());
         assertEquals(buildExceptionMessage("", hostName), testInstance.deviceId, moduleRetrieved.getDeviceId());
         assertEquals(buildExceptionMessage("", hostName), testInstance.moduleId, moduleRetrieved.getId());
-        assertEquals(buildExceptionMessage("", hostName), AuthenticationType.SELF_SIGNED, moduleAdded.getAuthenticationType());
-        assertEquals(buildExceptionMessage("", hostName), AuthenticationType.SELF_SIGNED, moduleRetrieved.getAuthenticationType());
+        assertEquals(buildExceptionMessage("", hostName), AuthenticationType.selfSigned, moduleAdded.getAuthenticationType());
+        assertEquals(buildExceptionMessage("", hostName), AuthenticationType.selfSigned, moduleRetrieved.getAuthenticationType());
         assertEquals(buildExceptionMessage("", hostName), primaryThumbprint, moduleAdded.getPrimaryThumbprint());
         assertEquals(buildExceptionMessage("", hostName), secondaryThumbprint, moduleAdded.getSecondaryThumbprint());
         assertEquals(buildExceptionMessage("", hostName), primaryThumbprint, moduleRetrieved.getPrimaryThumbprint());
