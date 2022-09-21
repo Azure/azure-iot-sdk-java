@@ -16,5 +16,6 @@ public enum AuthenticationType
     SAS,
     @SerializedName("selfSigned")
     SELF_SIGNED,
+    @SerializedName("certificateAuthority")
     CERTIFICATE_AUTHORITY
 }
