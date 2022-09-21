@@ -6,12 +6,12 @@ package com.microsoft.azure.sdk.iot.service.auth;
 /**
  * Enum for the type of authentication used.
  * SAS - shared access signature
- * selfSigned - self signed certificate
+ * SELF_SIGNED - self signed certificate
  * CERTIFICATE_AUTHORITY - certificate authority signed certificate
  */
 public enum AuthenticationType
 {
     SAS,
-    selfSigned,
+    SELF_SIGNED,
     CERTIFICATE_AUTHORITY
 }

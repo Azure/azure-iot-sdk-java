@@ -30,7 +30,7 @@ import java.util.concurrent.TimeoutException;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
-import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.selfSigned;
+import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
 import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 
 /**
@@ -62,9 +62,9 @@ public class ReceiveMessagesCommon extends IntegrationTest
                                 {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT},
 
                                 //x509 module client
-                                {HTTPS, selfSigned, ClientType.DEVICE_CLIENT},
-                                {MQTT, selfSigned, ClientType.DEVICE_CLIENT},
-                                {AMQPS, selfSigned, ClientType.DEVICE_CLIENT}
+                                {HTTPS, SELF_SIGNED, ClientType.DEVICE_CLIENT},
+                                {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT},
+                                {AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT}
                         }
         ));
 
@@ -80,8 +80,8 @@ public class ReceiveMessagesCommon extends IntegrationTest
                                     {AMQPS_WS, SAS, ClientType.MODULE_CLIENT},
 
                                     //x509 module client
-                                    {MQTT, selfSigned, ClientType.MODULE_CLIENT},
-                                    {AMQPS, selfSigned, ClientType.MODULE_CLIENT}
+                                    {MQTT, SELF_SIGNED, ClientType.MODULE_CLIENT},
+                                    {AMQPS, SELF_SIGNED, ClientType.MODULE_CLIENT}
                             }
             ));
         }

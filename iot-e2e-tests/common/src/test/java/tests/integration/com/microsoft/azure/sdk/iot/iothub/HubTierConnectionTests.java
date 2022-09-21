@@ -33,7 +33,7 @@ import java.util.*;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS_WS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
-import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.selfSigned;
+import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
 import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 
 @IotHubTest
@@ -85,7 +85,7 @@ public class HubTierConnectionTests extends IntegrationTest
         String deviceIdX509 = "java-tier-connection-e2e-test-X509".concat("-" + uuid);
 
         Device device = new Device(deviceId);
-        Device deviceX509 = new Device(deviceIdX509, selfSigned);
+        Device deviceX509 = new Device(deviceIdX509, SELF_SIGNED);
 
         deviceX509.setThumbprint(x509Thumbprint, x509Thumbprint);
 
@@ -108,7 +108,7 @@ public class HubTierConnectionTests extends IntegrationTest
                                 {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS, false},
 
                                 //x509 device client
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, options), AMQPS, deviceX509, selfSigned, false},
+                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, options), AMQPS, deviceX509, SELF_SIGNED, false},
 
                                 //sas token device client, with proxy
                                 {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS, options), AMQPS_WS, device, SAS, true}

@@ -335,7 +335,7 @@ public class Tools
                     List<Device> devicesToAdd = new ArrayList<>();
                     for (int i = 0; i < PROACTIVE_TEST_DEVICE_REGISRATION_COUNT; i++)
                     {
-                        Device deviceToAdd = new Device("test-device-" + UUID.randomUUID().toString(), AuthenticationType.selfSigned);
+                        Device deviceToAdd = new Device("test-device-" + UUID.randomUUID().toString(), AuthenticationType.SELF_SIGNED);
                         String x509Thumbprint = IntegrationTest.x509CertificateGenerator.getX509Thumbprint();
                         deviceToAdd.setThumbprint(x509Thumbprint, x509Thumbprint);
                         devicesToAdd.add(deviceToAdd);
@@ -505,9 +505,9 @@ public class Tools
                     List<Module> modulesToAdd = new ArrayList<>();
                     for (int i = 0; i < PROACTIVE_TEST_DEVICE_REGISRATION_COUNT; i++)
                     {
-                        TestDeviceIdentity testDeviceIdentity = getTestDevice(iotHubConnectionString, protocol, AuthenticationType.selfSigned, needCleanTwin);
+                        TestDeviceIdentity testDeviceIdentity = getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SELF_SIGNED, needCleanTwin);
                         devices.add(testDeviceIdentity.device);
-                        Module module = new Module(testDeviceIdentity.device.getDeviceId(), "test-module-" + UUID.randomUUID(), AuthenticationType.selfSigned);
+                        Module module = new Module(testDeviceIdentity.device.getDeviceId(), "test-module-" + UUID.randomUUID(), AuthenticationType.SELF_SIGNED);
                         String x509Thumbprint = IntegrationTest.x509CertificateGenerator.getX509Thumbprint();
                         module.setThumbprint(x509Thumbprint, x509Thumbprint);
                         modulesToAdd.add(module);

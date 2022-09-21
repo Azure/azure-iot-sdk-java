@@ -260,7 +260,7 @@ public class DeviceTest
     public void conversionToDeviceParserWithSelfSignedAuthentication()
     {
         // arrange
-        Device deviceSelf = new Device("deviceSelf", AuthenticationType.selfSigned);
+        Device deviceSelf = new Device("deviceSelf", AuthenticationType.SELF_SIGNED);
 
         // act
         RegistryIdentityParser parserSelf = reflectivelyInvokeToDeviceParser(deviceSelf);
@@ -321,7 +321,7 @@ public class DeviceTest
         assertNull(deviceSelf.getSymmetricKey());
         assertNotNull(deviceSelf.getPrimaryThumbprint());
         assertNotNull(deviceSelf.getSecondaryThumbprint());
-        assertEquals(AuthenticationType.selfSigned, deviceSelf.getAuthenticationType());
+        assertEquals(AuthenticationType.SELF_SIGNED, deviceSelf.getAuthenticationType());
     }
 
     //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_014: [This constructor shall create a new Device object using the values within the provided parser.]

@@ -1528,7 +1528,7 @@ public class MultiplexingClientTests extends IntegrationTest
     {
         // Create a new device client that uses x509 auth, which should throw an UnsupportedOperationException
         // since x509 auth isn't supported while multiplexing
-        Device x509Device = Tools.getTestDevice(iotHubConnectionString, IotHubClientProtocol.MQTT, AuthenticationType.selfSigned, false).getDevice();
+        Device x509Device = Tools.getTestDevice(iotHubConnectionString, IotHubClientProtocol.MQTT, AuthenticationType.SELF_SIGNED, false).getDevice();
         String deviceConnectionString = Tools.getDeviceConnectionString(iotHubConnectionString, x509Device);
         ClientOptions options = ClientOptions.builder().sslContext(new IotHubSSLContext().getSSLContext()).build();
         DeviceClient x509DeviceClient = new DeviceClient(deviceConnectionString, testInstance.protocol, options);

@@ -28,7 +28,7 @@ import java.util.List;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
-import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.selfSigned;
+import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
 
 /**
  * Test class containing all error injection tests to be run on JVM and android pertaining to Device methods.
@@ -155,7 +155,7 @@ public class DirectMethodsErrInjTests extends DirectMethodsCommon
             return;
         }
 
-        if (testInstance.protocol == AMQPS && testInstance.authenticationType == selfSigned)
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
         {
             //TODO error injection seems to fail under these circumstances. C2D link is never dropped even if waiting a long time
             // Need to talk to service folks about this strange behavior
@@ -178,7 +178,7 @@ public class DirectMethodsErrInjTests extends DirectMethodsCommon
             return;
         }
 
-        if (testInstance.protocol == AMQPS && testInstance.authenticationType == selfSigned)
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
         {
             //TODO error injection seems to fail under these circumstances. Method Req is never dropped even if waiting a long time
             // Need to talk to service folks about this strange behavior
@@ -201,7 +201,7 @@ public class DirectMethodsErrInjTests extends DirectMethodsCommon
             return;
         }
 
-        if (testInstance.protocol == AMQPS && testInstance.authenticationType == selfSigned)
+        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
         {
             //TODO error injection seems to fail under these circumstances. Method Resp is never dropped even if waiting a long time
             // Need to talk to service folks about this strange behavior

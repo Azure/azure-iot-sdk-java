@@ -35,7 +35,7 @@ public class AuthenticationMechanism
     public AuthenticationMechanism(String primaryThumbprint, String secondaryThumbprint)
     {
         this.thumbprint = new X509Thumbprint(primaryThumbprint, secondaryThumbprint);
-        this.type = AuthenticationType.selfSigned;
+        this.type = AuthenticationType.SELF_SIGNED;
     }
 
     /**
@@ -52,7 +52,7 @@ public class AuthenticationMechanism
         {
             //do nothing
         }
-        else if (this.type == AuthenticationType.selfSigned)
+        else if (this.type == AuthenticationType.SELF_SIGNED)
         {
             this.thumbprint = new X509Thumbprint();
         }
@@ -122,7 +122,7 @@ public class AuthenticationMechanism
         }
 
         this.thumbprint.setPrimaryThumbprint(primaryThumbprint);
-        this.type = AuthenticationType.selfSigned;
+        this.type = AuthenticationType.SELF_SIGNED;
     }
 
     /**
@@ -137,7 +137,7 @@ public class AuthenticationMechanism
         }
 
         this.thumbprint.setSecondaryThumbprint(secondaryThumbprint);
-        this.type = AuthenticationType.selfSigned;
+        this.type = AuthenticationType.SELF_SIGNED;
     }
 
     /**

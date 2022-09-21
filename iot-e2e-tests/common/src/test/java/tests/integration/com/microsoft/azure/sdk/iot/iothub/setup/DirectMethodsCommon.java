@@ -34,7 +34,7 @@ import java.util.*;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
-import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.selfSigned;
+import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -88,7 +88,7 @@ public class DirectMethodsCommon extends IntegrationTest
                         {
                             inputs.add(makeSubArray(protocol, authenticationType, clientType));
                         }
-                        else if (authenticationType == selfSigned)
+                        else if (authenticationType == SELF_SIGNED)
                         {
                             if (protocol != AMQPS_WS && protocol != MQTT_WS)
                             {

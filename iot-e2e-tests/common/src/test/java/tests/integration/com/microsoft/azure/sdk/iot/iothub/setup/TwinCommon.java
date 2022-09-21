@@ -6,6 +6,7 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesUpdateResponse;
@@ -33,13 +34,15 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
-import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.selfSigned;
+import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
 import static org.junit.Assert.*;
 
 /**
@@ -71,8 +74,8 @@ public class TwinCommon extends IntegrationTest
                                         {MQTT_WS, SAS, ClientType.DEVICE_CLIENT},
 
                                         //x509, device client
-                                        {AMQPS, selfSigned, ClientType.DEVICE_CLIENT},
-                                        {MQTT, selfSigned, ClientType.DEVICE_CLIENT},
+                                        {AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT},
+                                        {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT},
                                 }
                 ));
             }

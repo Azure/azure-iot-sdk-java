@@ -158,7 +158,7 @@ public class RegistryIdentity
     {
         if (this.authentication == null)
         {
-            this.authentication = new AuthenticationMechanism(AuthenticationType.selfSigned);
+            this.authentication = new AuthenticationMechanism(AuthenticationType.SELF_SIGNED);
         }
 
         this.authentication.setPrimaryThumbprint(primaryThumbprint);
@@ -244,7 +244,7 @@ public class RegistryIdentity
         {
             // do nothing
         }
-        else if (this.authentication.getAuthenticationType() == AuthenticationType.selfSigned)
+        else if (this.authentication.getAuthenticationType() == AuthenticationType.SELF_SIGNED)
         {
             registryIdentityParser.getAuthenticationParser().setThumbprint(new X509ThumbprintParser(this.getPrimaryThumbprint(), this.getSecondaryThumbprint()));
         }

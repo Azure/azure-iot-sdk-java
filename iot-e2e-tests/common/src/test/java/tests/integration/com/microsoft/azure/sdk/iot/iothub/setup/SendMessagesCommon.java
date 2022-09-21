@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
-import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.selfSigned;
+import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
 import static junit.framework.TestCase.fail;
 
 /**
@@ -75,16 +75,16 @@ public class SendMessagesCommon extends IntegrationTest
                                 {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT, false},
 
                                 //x509 device client, no proxy
-                                {HTTPS, selfSigned, ClientType.DEVICE_CLIENT, false},
-                                {MQTT, selfSigned, ClientType.DEVICE_CLIENT, false},
-                                {AMQPS, selfSigned, ClientType.DEVICE_CLIENT, false},
+                                {HTTPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false},
+                                {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT, false},
+                                {AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false},
 
                                 //sas token device client, with proxy
                                 {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, true},
                                 {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT, true},
 
                                 //x509 device client, with proxy
-                                {HTTPS, selfSigned, ClientType.DEVICE_CLIENT, true}
+                                {HTTPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, true}
                         }
         ));
 
@@ -100,8 +100,8 @@ public class SendMessagesCommon extends IntegrationTest
                                     {AMQPS_WS, SAS, ClientType.MODULE_CLIENT, false},
 
                                     //x509 module client, no proxy
-                                    {MQTT, selfSigned, ClientType.MODULE_CLIENT, false},
-                                    {AMQPS, selfSigned, ClientType.MODULE_CLIENT, false},
+                                    {MQTT, SELF_SIGNED, ClientType.MODULE_CLIENT, false},
+                                    {AMQPS, SELF_SIGNED, ClientType.MODULE_CLIENT, false},
 
                                     //sas token module client, with proxy
                                     {MQTT_WS, SAS, ClientType.MODULE_CLIENT, true},

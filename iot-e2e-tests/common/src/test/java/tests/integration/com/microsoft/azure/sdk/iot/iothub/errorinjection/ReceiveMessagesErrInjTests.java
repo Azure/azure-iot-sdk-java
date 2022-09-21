@@ -99,7 +99,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
             return;
         }
 
-        if (testInstance.authenticationType == selfSigned || testInstance.authenticationType == CERTIFICATE_AUTHORITY)
+        if (testInstance.authenticationType == SELF_SIGNED || testInstance.authenticationType == CERTIFICATE_AUTHORITY)
         {
             //cbs links aren't established in these scenarios, so it would be impossible/irrelevant if a cbs link dropped
             return;
@@ -120,7 +120,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
             return;
         }
 
-        if (testInstance.authenticationType == selfSigned || testInstance.authenticationType == CERTIFICATE_AUTHORITY)
+        if (testInstance.authenticationType == SELF_SIGNED || testInstance.authenticationType == CERTIFICATE_AUTHORITY)
         {
             //cbs links aren't established in these scenarios, so it would be impossible/irrelevant if a cbs link dropped
             return;
