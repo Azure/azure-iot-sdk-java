@@ -20,9 +20,10 @@
     <properties>
         <!--
         By default, don't skip integration tests. Can override this behavior by passing in
-        "-DskipIntegrationTests=true" to your maven command such as "mvn install -DskipIntegrationTests=true"
+        "-DskipIntegrationTests=true", "-DskipIntegrationTests", "-DskipTests=true" or "-DskipTests" to your maven command such as "mvn install -DskipIntegrationTests"
         -->
         <skipIntegrationTests>false</skipIntegrationTests>
+        <skipTests>false</skipTests>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
@@ -127,6 +128,31 @@
     </dependencies>
     <build>
         <plugins>
+            <!--
+            pom.xml properties don't natively support conditional expressions such as "value = someBoolean || someOtherBoolean",
+            but this plugin allows us to create a pom.xml property at build time using such a conditional. This allows
+            us to skip running tests in this package either if the user passes in "-DskipIntegrationTests" or "-DskipTests"
+            -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.12</version>
+                <executions>
+                    <execution>
+                        <id>negate-prop</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>bsh-property</goal>
+                        </goals>
+                        <configuration>
+                            <source>shouldSkipTests = ${skipIntegrationTests} || ${skipTests};</source> <!--Users can skip running tests in this package with either "-DskipTests" or "-DskipIntegrationTests"-->
+                            <properties>
+                                <property>shouldSkipTests</property>
+                            </properties>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -170,7 +196,7 @@
                         <include>*Tests.java</include>
                     </includes>
                     <forkCount>1</forkCount>
-                    <skipTests>${skipIntegrationTests}</skipTests>
+                    <skipTests>${shouldSkipTests}</skipTests> <!--This property is created at build time by the build-helper-maven-plugin, so it will appear as a compilation issue even though it will build just fine.-->
                     <parallel>both</parallel>
 
                     <!--Maven will spawn up as many threads as it wants/can while running tests in parallel-->

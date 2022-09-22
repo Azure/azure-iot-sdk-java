@@ -28,7 +28,7 @@
     <properties>
         <!--
         By default, don't skip unit tests. Can override this behavior by passing in
-        "-DskipUnitTests=true" to your maven command such as "mvn install -DskipUnitTests=true"
+        "-DskipUnitTests=true", "-DskipUnitTests", "-DskipTests=true" or "-DskipTests"  to your maven command such as "mvn install -DskipUnitTests"
         -->
         <skipUnitTests>false</skipUnitTests>
     </properties>

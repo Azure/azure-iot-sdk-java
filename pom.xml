@@ -232,6 +232,11 @@
                 </configuration>
             </plugin>
             <plugin>
+                <!--
+                pom.xml properties don't natively support conditional expressions such as "value = someBoolean || someOtherBoolean",
+                but this plugin allows us to create a pom.xml property at build time using such a conditional. This allows
+                us to skip running tests in this package either if the user passes in "-DskipUnitTests" or "-DskipTests"
+                -->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
                 <version>1.1.0</version>
