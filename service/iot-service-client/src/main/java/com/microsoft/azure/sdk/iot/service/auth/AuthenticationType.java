@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.service.auth;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Enum for the type of authentication used.
  * SAS - shared access signature
@@ -11,7 +13,10 @@ package com.microsoft.azure.sdk.iot.service.auth;
  */
 public enum AuthenticationType
 {
+    @SerializedName("sas")
     SAS,
+    @SerializedName("selfSigned")
     SELF_SIGNED,
+    @SerializedName("certificateAuthority")
     CERTIFICATE_AUTHORITY
 }
