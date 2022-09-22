@@ -13,6 +13,7 @@ import com.google.gson.annotations.SerializedName;
  */
 public enum AuthenticationType
 {
+    @SerializedName("sas")
     SAS,
     @SerializedName("selfSigned")
     SELF_SIGNED,
