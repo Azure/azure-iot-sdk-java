@@ -51,13 +51,7 @@ public class Twin
     @Getter
     @Setter
     private TwinCollection tags = new TwinCollection();
-
-    @Getter
-    @Setter
     private TwinCollection reportedProperties  = new TwinCollection();
-
-    @Getter
-    @Setter
     private TwinCollection desiredProperties = new TwinCollection();
 
     @Getter
