@@ -28,11 +28,7 @@ public abstract class Mqtt implements MqttCallback
     private static final int DISCONNECTION_TIMEOUT = 60 * 1000;
 
     //mqtt connection options
-    private static final int MESSAGE_QOS = 1;
-    private static final int SUBSCRIPTION_MESSAGE_QOS = 1;
-
-    // QoS of acknowledgement messages should always be 0 because the service does not send acknowledgements that it received an acknowledgement.
-    private static final int ACKNOWLEDGEMENT_QOS = 0;
+    private static final int QOS = 1;
     private static final int MAX_SUBSCRIBE_ACK_WAIT_TIME = 15 * 1000;
 
     // relatively arbitrary, but only because Paho doesn't have any particular recommendations here. Just a high enough
@@ -223,7 +219,7 @@ public abstract class Mqtt implements MqttCallback
 
             MqttMessage mqttMessage = (payload.length == 0) ? new MqttMessage() : new MqttMessage(payload);
 
-            mqttMessage.setQos(MESSAGE_QOS);
+            mqttMessage.setQos(QOS);
 
             synchronized (this.unacknowledgedSentMessagesLock)
             {
@@ -271,7 +267,7 @@ public abstract class Mqtt implements MqttCallback
 
                 log.debug("Sending MQTT SUBSCRIBE packet for topic {}", topic);
 
-                IMqttToken subToken = this.mqttAsyncClient.subscribe(topic, SUBSCRIPTION_MESSAGE_QOS);
+                IMqttToken subToken = this.mqttAsyncClient.subscribe(topic, QOS);
 
                 subToken.waitForCompletion(MAX_SUBSCRIBE_ACK_WAIT_TIME);
                 log.debug("Sent MQTT SUBSCRIBE packet for topic {} was acknowledged", topic);
@@ -423,7 +419,7 @@ public abstract class Mqtt implements MqttCallback
         log.trace("Sending mqtt ack for received message with mqtt message id {}", messageId);
         try
         {
-            this.mqttAsyncClient.messageArrivedComplete(messageId, ACKNOWLEDGEMENT_QOS);
+            this.mqttAsyncClient.messageArrivedComplete(messageId, QOS);
         }
         catch (MqttException e)
         {
@@ -476,15 +472,6 @@ public abstract class Mqtt implements MqttCallback
             if (propertyString.contains("="))
             {
                 //Expected format is <key>=<value> where both key and value may be encoded
-                String[] keyAndValue = propertyString.split("=");
-
-                if (keyAndValue.length != 2)
-                {
-                    // This case indicates a key/value pair that is missing either the key or the value. Skip it and
-                    // move onto the next pair.
-                    continue;
-                }
-
                 String key = propertyString.split("=")[PROPERTY_KEY_INDEX];
                 String value = propertyString.split("=")[PROPERTY_VALUE_INDEX];
 
