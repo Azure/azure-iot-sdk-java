@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.util.Map;
 import java.util.Queue;
@@ -39,7 +40,7 @@ class MqttDirectMethod extends Mqtt
         String deviceId,
         MqttConnectOptions connectOptions,
         Map<Integer, Message> unacknowledgedSentMessages,
-        Queue<Pair<String, byte[]>> receivedMessages)
+        Queue<Pair<String, MqttMessage>> receivedMessages)
     {
         super(null, deviceId, connectOptions, unacknowledgedSentMessages, receivedMessages);
 
@@ -121,7 +122,7 @@ class MqttDirectMethod extends Mqtt
         {
             IotHubTransportMessage message = null;
 
-            Pair<String, byte[]> messagePair = this.receivedMessages.peek();
+            Pair<String, MqttMessage> messagePair = this.receivedMessages.peek();
 
             if (messagePair != null)
             {
@@ -129,7 +130,8 @@ class MqttDirectMethod extends Mqtt
 
                 if (topic != null && topic.length() > 0)
                 {
-                    byte[] data = messagePair.getValue();
+                    MqttMessage mqttMessage = messagePair.getValue();
+                    byte[] data = mqttMessage.getPayload();
 
                     if (topic.length() > METHOD.length() && topic.startsWith(METHOD))
                     {
@@ -151,6 +153,7 @@ class MqttDirectMethod extends Mqtt
                             }
 
                             message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
+                            message.setQualityOfService(mqttMessage.getQos());
 
                             String methodName = topicParser.getMethodName(METHOD_TOKEN);
                             message.setMethodName(methodName);

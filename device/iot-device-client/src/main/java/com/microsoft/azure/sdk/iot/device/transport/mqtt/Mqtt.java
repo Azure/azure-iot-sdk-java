@@ -45,7 +45,7 @@ public abstract class Mqtt implements MqttCallback
     private final Map<Integer, Message> unacknowledgedSentMessages;
 
     final Object receivedMessagesLock; // lock for making operations on the receivedMessagesQueue atomic
-    final Queue<Pair<String, byte[]>> receivedMessages;
+    final Queue<Pair<String, MqttMessage>> receivedMessages;
 
     /* Each property is separated by & and all system properties start with an encoded $ (except for iothub-ack) */
     final static char MESSAGE_PROPERTY_SEPARATOR = '&';
@@ -92,7 +92,7 @@ public abstract class Mqtt implements MqttCallback
         String deviceId,
         MqttConnectOptions connectOptions,
         Map<Integer, Message> unacknowledgedSentMessages,
-        Queue<Pair<String, byte[]>> receivedMessages)
+        Queue<Pair<String, MqttMessage>> receivedMessages)
     {
         this.deviceId = deviceId;
         this.receivedMessages = receivedMessages;
@@ -295,19 +295,19 @@ public abstract class Mqtt implements MqttCallback
     {
         synchronized (this.receivedMessagesLock)
         {
-            Pair<String, byte[]> messagePair = this.receivedMessages.peek();
+            Pair<String, MqttMessage> messagePair = this.receivedMessages.peek();
             if (messagePair != null)
             {
                 String topic = messagePair.getKey();
                 if (topic != null)
                 {
-                    byte[] data = messagePair.getValue();
-                    if (data != null)
+                    MqttMessage message = messagePair.getValue();
+                    if (message != null)
                     {
                         // remove this message from the queue as this is the correct handler
                         this.receivedMessages.poll();
 
-                        return constructMessage(data, topic);
+                        return constructMessage(message, topic);
                     }
                     else
                     {
@@ -361,7 +361,7 @@ public abstract class Mqtt implements MqttCallback
     public void messageArrived(String topic, MqttMessage mqttMessage)
     {
         log.trace("Mqtt message arrived on topic {} with mqtt message id {}", topic, mqttMessage.getId());
-        this.receivedMessages.add(new MutablePair<>(topic, mqttMessage.getPayload()));
+        this.receivedMessages.add(new MutablePair<>(topic, mqttMessage));
 
         if (this.messageListener != null)
         {
@@ -431,15 +431,12 @@ public abstract class Mqtt implements MqttCallback
         }
     }
 
-    /**
-     * Converts the provided data and topic string into an instance of Message
-     * @param data the payload from the topic
-     * @param topic the topic string for this message
-     * @return a new instance of Message containing the payload and all the properties in the topic string
-     */
-    private IotHubTransportMessage constructMessage(byte[] data, String topic)
+    // Converts an MQTT message into our native "IoT hub" message
+    private IotHubTransportMessage constructMessage(MqttMessage mqttMessage, String topic)
     {
-        IotHubTransportMessage message = new IotHubTransportMessage(data, MessageType.DEVICE_TELEMETRY);
+        IotHubTransportMessage message = new IotHubTransportMessage(mqttMessage.getPayload(), MessageType.DEVICE_TELEMETRY);
+
+        message.setQualityOfService(mqttMessage.getQos());
 
         int propertiesStringStartingIndex = topic.indexOf(MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_ENCODED);
         if (propertiesStringStartingIndex != -1)
@@ -479,6 +476,14 @@ public abstract class Mqtt implements MqttCallback
             if (propertyString.contains("="))
             {
                 //Expected format is <key>=<value> where both key and value may be encoded
+                String[] keyAndValue = propertyString.split("=");
+
+                if (keyAndValue.length != 2)
+                {
+                    // This case indicates a key/value pair that is missing either the key or the value. Skip it and
+                    // move onto the next pair.
+                    continue;
+                }
 
                 String key = propertyString.split("=")[PROPERTY_KEY_INDEX];
                 String value = propertyString.split("=")[PROPERTY_VALUE_INDEX];

@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import javax.net.ssl.SSLContext;
@@ -61,6 +62,8 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private final MqttMessaging deviceMessaging;
     private final MqttTwin deviceTwin;
     private final MqttDirectMethod directMethod;
+
+    private final Map<IotHubTransportMessage, Integer> receivedMessagesToAcknowledge = new ConcurrentHashMap<>();
 
     /**
      * Constructs an instance from the given {@link ClientConfiguration}
@@ -212,7 +215,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
 
         // these variables are shared between the messaging, twin and method subclients
         Map<Integer, Message> unacknowledgedSentMessages = new ConcurrentHashMap<>();
-        Queue<Pair<String, byte[]>> receivedMessages = new ConcurrentLinkedQueue<>();
+        Queue<Pair<String, MqttMessage>> receivedMessages = new ConcurrentLinkedQueue<>();
 
         this.deviceMessaging = new MqttMessaging(
             deviceId,
@@ -383,6 +386,49 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     @Override
     public boolean sendMessageResult(IotHubTransportMessage message, IotHubMessageResult result) throws TransportException
     {
+        if (message == null || result == null)
+        {
+            throw new TransportException(new IllegalArgumentException("message and result must be non-null"));
+        }
+
+        if (message.getQualityOfService() == 0)
+        {
+            // messages that the service sent with QoS 0 don't need to be acknowledged.
+            return true;
+        }
+
+        int messageId;
+        log.trace("Checking if MQTT layer can acknowledge the received message ({})", message);
+        if (receivedMessagesToAcknowledge.containsKey(message))
+        {
+            messageId = receivedMessagesToAcknowledge.get(message);
+        }
+        else
+        {
+            TransportException e = new TransportException(new IllegalArgumentException("Provided message cannot be acknowledged because it was already acknowledged or was never received from service"));
+            log.error("Mqtt layer could not acknowledge received message because it has no mapping to an outstanding mqtt message id ({})", message, e);
+            throw e;
+        }
+
+        log.trace("Sending MQTT ACK for a received message ({})", message);
+        if (message.getMessageType() == DEVICE_METHODS)
+        {
+            this.directMethod.start();
+            this.directMethod.sendMessageAcknowledgement(messageId);
+        }
+        else if (message.getMessageType() == DEVICE_TWIN)
+        {
+            this.deviceTwin.start();
+            this.deviceTwin.sendMessageAcknowledgement(messageId);
+        }
+        else
+        {
+            this.deviceMessaging.sendMessageAcknowledgement(messageId);
+        }
+
+        log.trace("MQTT ACK was sent for a received message so it has been removed from the messages to acknowledge list ({})", message);
+        this.receivedMessagesToAcknowledge.remove(message);
+
         return true;
     }
 
@@ -425,6 +471,16 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         }
         else
         {
+            if (transportMessage.getQualityOfService() == 0)
+            {
+                log.trace("MQTT received message with QoS 0 so it has not been added to the messages to acknowledge list ({})", transportMessage);
+            }
+            else
+            {
+                log.trace("MQTT received message so it has been added to the messages to acknowledge list ({})", transportMessage);
+                this.receivedMessagesToAcknowledge.put(transportMessage, messageId);
+            }
+
             switch (transportMessage.getMessageType())
             {
                 case DEVICE_TWIN:
@@ -460,7 +516,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             throw PahoExceptionTranslator.convertToMqttException(e, "Failed to create mqtt client");
         }
 
-        mqttAsyncClient.setManualAcks(false);
+        mqttAsyncClient.setManualAcks(true);
         return mqttAsyncClient;
     }
 }

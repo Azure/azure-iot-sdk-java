@@ -14,6 +14,7 @@ import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -40,7 +41,7 @@ public class MqttDirectMethodTest
     @Mocked
     MqttConnectOptions mockConnectOptions;
 
-    private ConcurrentLinkedQueue<Pair<String, byte[]>> testreceivedMessages;
+    private ConcurrentLinkedQueue<Pair<String, MqttMessage>> testreceivedMessages;
 
     @Before
     public void baseConstructorExpectation()
