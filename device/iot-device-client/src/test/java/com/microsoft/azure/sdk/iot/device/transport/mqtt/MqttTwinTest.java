@@ -52,7 +52,7 @@ public class MqttTwinTest
         //arrange
 
         //act
-        MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         //assert
         String actualSubscribeTopic = Deencapsulation.getField(testTwin, "subscribeTopic");
         assertNotNull(actualSubscribeTopic);
@@ -65,7 +65,7 @@ public class MqttTwinTest
     public void startSubscribesToDeviceTwinResponse(@Mocked final Mqtt mockMqtt) throws TransportException
     {
         //arrange
-        MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
 
         //act
 
@@ -95,7 +95,7 @@ public class MqttTwinTest
             }
         };
 
-        MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
 
         //act
         testTwin.start();
@@ -110,7 +110,7 @@ public class MqttTwinTest
         //arrange
         final byte[] actualPayload = {0x61, 0x62, 0x63};
         final String expectedTopic = "$iothub/twin/GET/?$rid="+mockReqId;
-        MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         testTwin.start();
         new NonStrictExpectations()
         {
@@ -151,7 +151,7 @@ public class MqttTwinTest
         try
         {
             //arrange
-            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
             testTwin.start();
             new NonStrictExpectations()
             {
@@ -194,7 +194,7 @@ public class MqttTwinTest
         //arrange
         final byte[] actualPayload = {0x61, 0x62, 0x63};
         final String expectedTopic = "$iothub/twin/PATCH/properties/reported/?$rid="+ mockReqId + "&$version=" + mockVersion;
-        MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         testTwin.start();
         new NonStrictExpectations()
         {
@@ -237,7 +237,7 @@ public class MqttTwinTest
         try
         {
             //arrange
-            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
             testTwin.start();
             new NonStrictExpectations()
             {
@@ -280,7 +280,7 @@ public class MqttTwinTest
         //arrange
         final byte[] actualPayload = {0x61, 0x62, 0x63};
         final String expectedTopic = "$iothub/twin/PATCH/properties/desired/#";
-        MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         testTwin.start();
         new NonStrictExpectations()
         {
@@ -320,7 +320,7 @@ public class MqttTwinTest
     {
         //arrange
         final byte[] actualPayload = {0x61, 0x62, 0x63};
-        MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         testTwin.start();
         new NonStrictExpectations()
         {
@@ -366,7 +366,7 @@ public class MqttTwinTest
         final byte[] actualPayload = {0x61, 0x62, 0x63};
         final String expectedTopic = "$iothub/twin/PATCH/properties/desired/?$version="+ mockVersion;
         final String expectedSubscribeTopic = "$iothub/twin/PATCH/properties/desired/#";
-        MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         testTwin.start();
         new NonStrictExpectations()
         {
@@ -409,7 +409,7 @@ public class MqttTwinTest
         try
         {
             //arrange
-            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
 
             //act
             testTwin.send(null);
@@ -441,7 +441,7 @@ public class MqttTwinTest
         try
         {
             //arrange
-            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
             Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
             testreceivedMessages.add(new MutablePair<>(expectedTopic, actualPayload));
             Deencapsulation.setField(testTwin, "receivedMessages", testreceivedMessages);
@@ -478,7 +478,7 @@ public class MqttTwinTest
         try
         {
             //arrange
-            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
             Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
             testreceivedMessages.add(new MutablePair<>(expectedTopic, actualPayload));
             Deencapsulation.setField(testTwin, "receivedMessages", testreceivedMessages);
@@ -514,7 +514,7 @@ public class MqttTwinTest
         try
         {
             //arrange
-            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
             Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
             testreceivedMessages.add(new MutablePair<>(expectedTopic, actualPayload));
             Deencapsulation.setField(testTwin, "receivedMessages", testreceivedMessages);
@@ -546,7 +546,7 @@ public class MqttTwinTest
         try
         {
             //arrange
-            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
             Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
             testreceivedMessages.add(new MutablePair<>(expectedTopic, actualPayload));
             Deencapsulation.setField(testTwin, "receivedMessages", testreceivedMessages);
@@ -572,7 +572,7 @@ public class MqttTwinTest
         try
         {
             //arrange
-            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
             Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
             testreceivedMessages.add(new MutablePair<>(expectedTopic, actualPayload));
             Deencapsulation.setField(testTwin, "receivedMessages", testreceivedMessages);
@@ -600,7 +600,7 @@ public class MqttTwinTest
         try
         {
             //arrange
-            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
             Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
             testreceivedMessages.add(new MutablePair<>(expectedTopic, actualPayload));
             Deencapsulation.setField(testTwin, "receivedMessages", testreceivedMessages);
@@ -636,7 +636,7 @@ public class MqttTwinTest
         try
         {
             //arrange
-            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
             Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
             testreceivedMessages.add(new MutablePair<>(expectedTopic, actualPayload));
             Deencapsulation.setField(testTwin, "receivedMessages", testreceivedMessages);
@@ -673,7 +673,7 @@ public class MqttTwinTest
         try
         {
             //arrange
-            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
             Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
             testreceivedMessages.add(new MutablePair<>(expectedTopic, actualPayload));
             Deencapsulation.setField(testTwin, "receivedMessages", testreceivedMessages);
@@ -711,7 +711,7 @@ public class MqttTwinTest
         try
         {
             //arrange
-            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
             Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
             testreceivedMessages.add(new MutablePair<>(expectedTopic, actualPayload));
             Deencapsulation.setField(testTwin, "receivedMessages", testreceivedMessages);
@@ -746,7 +746,7 @@ public class MqttTwinTest
         try
         {
             //arrange
-            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
             Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
             testreceivedMessages.add(new MutablePair<>(expectedTopic, actualPayload));
             Deencapsulation.setField(testTwin, "receivedMessages", testreceivedMessages);
@@ -796,7 +796,7 @@ public class MqttTwinTest
         try
         {
             //arrange
-            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
             Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
             testreceivedMessages.add(new MutablePair<>(expectedTopic, actualPayload));
             Deencapsulation.setField(testTwin, "receivedMessages", testreceivedMessages);
@@ -836,7 +836,7 @@ public class MqttTwinTest
         try
         {
             //arrange
-            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
             Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
             testreceivedMessages.add(new MutablePair<>(expectedTopic, actualPayload));
             Deencapsulation.setField(testTwin, "receivedMessages", testreceivedMessages);
@@ -876,7 +876,7 @@ public class MqttTwinTest
         try
         {
             //arrange
-            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
             Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
             testreceivedMessages.add(new MutablePair<>(expectedTopic, actualPayload));
             Deencapsulation.setField(testTwin, "receivedMessages", testreceivedMessages);
@@ -915,7 +915,7 @@ public class MqttTwinTest
         try
         {
             //arrange
-            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
             Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
             testreceivedMessages.add(new MutablePair<>(expectedTopic, actualPayload));
             Deencapsulation.setField(testTwin, "receivedMessages", testreceivedMessages);
@@ -950,7 +950,7 @@ public class MqttTwinTest
     public void receiveReturnsNullMessageIfTopicNotFound(@Mocked final Mqtt mockMqtt) throws TransportException
     {
         //arrange
-        MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
         testreceivedMessages.add(new MutablePair<String, byte[]>(null, new byte[5]));
         Deencapsulation.setField(testTwin, "receivedMessages", testreceivedMessages);
