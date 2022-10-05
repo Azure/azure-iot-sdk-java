@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -51,7 +52,7 @@ class MqttTwin extends Mqtt
         String deviceId,
         MqttConnectOptions connectOptions,
         Map<Integer, Message> unacknowledgedSentMessages,
-        Queue<Pair<String, byte[]>> receivedMessages)
+        Queue<Pair<String, MqttMessage>> receivedMessages)
     {
         super(null, deviceId, connectOptions, unacknowledgedSentMessages, receivedMessages);
 
@@ -252,7 +253,7 @@ class MqttTwin extends Mqtt
         {
             IotHubTransportMessage message = null;
 
-            Pair<String, byte[]> messagePair = this.receivedMessages.peek();
+            Pair<String, MqttMessage> messagePair = this.receivedMessages.peek();
 
             if (messagePair != null)
             {
@@ -262,7 +263,8 @@ class MqttTwin extends Mqtt
                 {
                     if (topic.length() > TWIN.length() && topic.startsWith(TWIN))
                     {
-                        byte[] data = messagePair.getValue();
+                        MqttMessage mqttMessage = messagePair.getValue();
+                        byte[] data = mqttMessage.getPayload();
 
                         //remove this message from the queue as this is the correct handler
                         this.receivedMessages.poll();
@@ -279,8 +281,10 @@ class MqttTwin extends Mqtt
                             {
                                 // Case for $iothub/twin/res/{status}/?$rid={request id}
                                 message = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_TWIN); // empty body
-
                             }
+
+                            message.setQualityOfService(mqttMessage.getQos());
+
                             message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
 
                             // Case for $iothub/twin/res/{status}/?$rid={request id}&$version={new version}
