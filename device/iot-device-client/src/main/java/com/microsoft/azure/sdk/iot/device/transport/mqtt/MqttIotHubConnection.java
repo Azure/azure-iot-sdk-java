@@ -473,6 +473,8 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         {
             if (transportMessage.getQualityOfService() == 0)
             {
+                // Direct method messages and Twin messages are always sent with QoS 0, so there is no need for this SDK
+                // to acknowledge them.
                 log.trace("MQTT received message with QoS 0 so it has not been added to the messages to acknowledge list ({})", transportMessage);
             }
             else
