@@ -235,90 +235,6 @@ public class ProvisioningTests extends ProvisioningCommon
         customAllocationFlow(EnrollmentType.INDIVIDUAL);
     }
 
-    /***
-     * This test flow uses a custom allocation policy to decide which of the two hubs a device should be provisioned to.
-     * The custom allocation policy has a webhook to an Azure function, and that function will always dictate to provision
-     * the device to the hub with the longest host name. This test verifies that an enrollment with a custom allocation policy
-     * pointing to that Azure function will always enroll to the hub with the longest name
-     * @param enrollmentType The type of the enrollment to test
-     * @throws Exception if an exception occurs during provisioning or while creating the security provider
-     */
-    protected void customAllocationFlow(EnrollmentType enrollmentType) throws Exception
-    {
-        if (enrollmentType == EnrollmentType.GROUP && testInstance.attestationType != AttestationType.SYMMETRIC_KEY)
-        {
-            //tpm doesn't support group, and x509 group test has not been implemented yet
-            return;
-        }
-
-        List<String> possibleStartingHubHostNames = new ArrayList<>();
-        String farAwayIotHubHostname = IotHubConnectionString.createIotHubConnectionString(farAwayIotHubConnectionString).getHostName();
-        String iothubHostName = IotHubConnectionString.createIotHubConnectionString(iotHubConnectionString).getHostName();
-        possibleStartingHubHostNames.add(farAwayIotHubHostname);
-        possibleStartingHubHostNames.add(iothubHostName);
-
-        String expectedHubToProvisionTo;
-        if (farAwayIotHubHostname.length() > iothubHostName.length())
-        {
-            expectedHubToProvisionTo = farAwayIotHubHostname;
-        }
-        else if (iothubHostName.length() > farAwayIotHubHostname.length())
-        {
-            expectedHubToProvisionTo = iothubHostName;
-        }
-        else
-        {
-            throw new IllegalArgumentException("Both possible hub's cannot have a host name of the same length for this test to work");
-        }
-
-        CustomAllocationDefinition customAllocationDefinition = new CustomAllocationDefinition();
-        customAllocationDefinition.setApiVersion(CUSTOM_ALLOCATION_WEBHOOK_API_VERSION);
-        customAllocationDefinition.setWebhookUrl(customAllocationWebhookUrl);
-
-        testInstance.securityProvider = getSecurityProviderInstance(enrollmentType, AllocationPolicy.CUSTOM, null, customAllocationDefinition, possibleStartingHubHostNames);
-
-        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, null, expectedHubToProvisionTo, null);
-    }
-
-    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
-    protected void reprovisioningFlow(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubsToStartAt, List<String> iothubsToFinishAt) throws Exception
-    {
-        DeviceCapabilities capabilities = new DeviceCapabilities();
-        capabilities.setIotEdge(false);
-        reprovisioningFlow(enrollmentType, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubsToStartAt, iothubsToFinishAt, capabilities);
-    }
-
-    protected void reprovisioningFlow(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubsToStartAt, List<String> iothubsToFinishAt, DeviceCapabilities capabilities) throws Exception
-    {
-        if (enrollmentType == EnrollmentType.GROUP && testInstance.attestationType != AttestationType.SYMMETRIC_KEY)
-        {
-            //tpm doesn't support group, and x509 group test has not been implemented yet
-            return;
-        }
-
-        testInstance.securityProvider = getSecurityProviderInstance(enrollmentType, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubsToStartAt, capabilities);
-
-        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, iothubsToStartAt);
-
-        assertProvisionedDeviceCapabilitiesAreExpected(capabilities, farAwayIotHubConnectionString);
-
-        String expectedReportedPropertyName = "someProperty";
-        String expectedReportedPropertyValue = "someValue";
-        sendReportedPropertyUpdate(expectedReportedPropertyName, expectedReportedPropertyValue, testInstance.provisionedIotHubUri, testInstance.provisionedDeviceId);
-
-        updateEnrollmentToForceReprovisioning(enrollmentType, iothubsToFinishAt);
-
-        if (testInstance.securityProvider instanceof SecurityProviderTPMEmulator)
-        {
-            ((SecurityProviderTPMEmulator) testInstance.securityProvider).shutDown();
-            testInstance.securityProvider = new SecurityProviderTPMEmulator(testInstance.registrationId);
-        }
-
-        //re-register device, test which hub it was provisioned to
-        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, reprovisionPolicy.getUpdateHubAssignment() ? iothubsToFinishAt : iothubsToStartAt);
-        assertTwinIsCorrect(reprovisionPolicy, expectedReportedPropertyName, expectedReportedPropertyValue, !reprovisionPolicy.getUpdateHubAssignment());
-    }
-
     private void enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType enrollmentType) throws Exception
     {
         if (enrollmentType == EnrollmentType.GROUP && testInstance.attestationType != AttestationType.SYMMETRIC_KEY)
@@ -369,60 +285,6 @@ public class ProvisioningTests extends ProvisioningCommon
         assertTrue("Expected an exception to be thrown due to invalid server certificates", expectedExceptionEncountered);
     }
 
-    private void assertTwinIsCorrect(ReprovisionPolicy reprovisionPolicy, String expectedPropertyName, String expectedPropertyValue, boolean inFarAwayHub) throws IOException, IotHubException
-    {
-        if (reprovisionPolicy != null && reprovisionPolicy.getMigrateDeviceData())
-        {
-            TwinClient twinClient;
-            if (inFarAwayHub)
-            {
-                twinClient = new TwinClient(farAwayIotHubConnectionString, TwinClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
-            }
-            else
-            {
-                twinClient = new TwinClient(iotHubConnectionString, TwinClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
-            }
-
-            Twin device = twinClient.get(testInstance.provisionedDeviceId);
-
-            if (reprovisionPolicy.getMigrateDeviceData())
-            {
-                //twin change from before reprovisioning was migrated
-                Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Twin size is unexpected value", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId),
-                        1, device.getReportedProperties().size());
-                boolean expectedKeyPairFound = false;
-                for (String reportedPropertyKey : device.getReportedProperties().keySet())
-                {
-                    expectedKeyPairFound |= (reportedPropertyKey.equals(expectedPropertyName) && device.getReportedProperties().get(reportedPropertyKey).equals(expectedPropertyValue));
-                }
-                assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Reported property that was sent was not found", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId),
-                        expectedKeyPairFound);
-            }
-            else
-            {
-                //twin change from before reprovisioning was reset
-                assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Twin size is unexpected value", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId),
-                        0, device.getReportedProperties().size());
-            }
-        }
-    }
-
-    private List<String> getStartingHubs()
-    {
-        String farAwayIotHubHostname = IotHubConnectionString.createIotHubConnectionString(farAwayIotHubConnectionString).getHostName();
-        List<String> iotHubsToStartAt = new ArrayList<>();
-        iotHubsToStartAt.add(farAwayIotHubHostname);
-        return iotHubsToStartAt;
-    }
-
-    private List<String> getHubsToReprovisionTo()
-    {
-        String iothubHostName = IotHubConnectionString.createIotHubConnectionString(iotHubConnectionString).getHostName();
-        List<String> iotHubsToReprovisionTo = new ArrayList<>();
-        iotHubsToReprovisionTo.add(iothubHostName);
-        return iotHubsToReprovisionTo;
-    }
-
     private void sendReportedPropertyUpdate(String expectedReportedPropertyName, String expectedReportedPropertyValue, String iothubUri, String deviceId) throws InterruptedException, IOException, URISyntaxException, TimeoutException, IotHubClientException
     {
         //hardcoded AMQP here only because we aren't testing this connection. We just need to open a connection to send a twin update so that
@@ -440,19 +302,5 @@ public class ProvisioningTests extends ProvisioningCommon
         twinCollection.put(expectedReportedPropertyName, expectedReportedPropertyValue);
         deviceClient.updateReportedProperties(twinCollection);
         deviceClient.close();
-    }
-
-    private void updateEnrollmentToForceReprovisioning(EnrollmentType enrollmentType, List<String> iothubsToFinishAt) throws ProvisioningServiceClientException
-    {
-        if (enrollmentType == EnrollmentType.GROUP)
-        {
-            testInstance.enrollmentGroup.setIotHubs(iothubsToFinishAt);
-            testInstance.provisioningServiceClient.createOrUpdateEnrollmentGroup(testInstance.enrollmentGroup);
-        }
-        else
-        {
-            testInstance.individualEnrollment.setIotHubs(iothubsToFinishAt);
-            testInstance.provisioningServiceClient.createOrUpdateIndividualEnrollment(testInstance.individualEnrollment);
-        }
     }
 }
