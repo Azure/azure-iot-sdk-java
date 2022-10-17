@@ -22,7 +22,8 @@ public class ProvisioningServiceClientTests
 {
     public static final String provisioningServiceConnectionString = Tools.retrieveEnvironmentVariableValue(DPS_CONNECTION_STRING_ENV_VAR_NAME);
 
-    // This is not an actual webhook that works for provisioning, but is fine for the purposes of this test.
+    // This is not an actual webhook that works for provisioning, but is fine for the purposes of these tests as
+    // they never actually provision a device using this custom allocation policy webhook.
     public static final String customAllocationWebhookUrl = "www.microsoft.com";
 
     public ProvisioningServiceClient provisioningServiceClient = null;
