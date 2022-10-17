@@ -5,6 +5,7 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.provisioning.setup;
 
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
@@ -264,7 +265,7 @@ public class ProvisioningCommon extends IntegrationTest
         public ProvisioningDeviceClient provisioningDeviceClient;
     }
 
-    public class ProvisioningDeviceClientRegistrationCallbackImpl implements ProvisioningDeviceClientRegistrationCallback
+    public static class ProvisioningDeviceClientRegistrationCallbackImpl implements ProvisioningDeviceClientRegistrationCallback
     {
         @Override
         public void run(ProvisioningDeviceClientRegistrationResult provisioningDeviceClientRegistrationResult, Exception exception, Object context)
@@ -373,7 +374,6 @@ public class ProvisioningCommon extends IntegrationTest
                     String returnJson = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningPayload();
                     assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Payload received from service is not the same values. Sent Json: " + jsonPayload + " returned json " + returnJson, getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), returnJson, jsonPayload);
                 }
-                assertProvisionedIntoCorrectHub(expectedIotHubsToProvisionTo, provisionedHubUri);
                 assertProvisionedDeviceWorks(provisionedHubUri, deviceId);
                 deviceRegisteredSuccessfully = true;
             }
@@ -407,54 +407,11 @@ public class ProvisioningCommon extends IntegrationTest
         return provisioningStatus;
     }
 
-    private void assertProvisionedIntoCorrectHub(List<String> iothubsToFinishAt, String actualReprovisionedHub)
+    private void assertProvisionedDeviceWorks(String iothubUri, String deviceId) throws IOException, IotHubClientException, URISyntaxException
     {
-            assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Device was not provisioned into an expected hub: " + actualReprovisionedHub, getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId),
-                    iothubsToFinishAt.contains(actualReprovisionedHub));
-    }
-
-    private void assertProvisionedDeviceWorks(String iothubUri, String deviceId) throws IOException, URISyntaxException
-    {
-        for (IotHubClientProtocol iotHubClientProtocol: IotHubClientProtocol.values())
-        {
-            if (iotHubClientProtocol == IotHubClientProtocol.MQTT_WS || iotHubClientProtocol == IotHubClientProtocol.AMQPS_WS)
-            {
-                // MQTT_WS/AMQP_WS does not support X509 because of a bug on service
-                continue;
-            }
-
-            DeviceClient deviceClient = new DeviceClient(iothubUri, deviceId, testInstance.securityProvider, iotHubClientProtocol);
-            deviceClient.close();
-        }
-    }
-
-    protected void assertProvisionedDeviceCapabilitiesAreExpected(DeviceCapabilities expectedDeviceCapabilities, String provisionedHubConnectionString) throws IOException, IotHubException, InterruptedException {
-        TwinClient twinClient = new TwinClient(provisionedHubConnectionString, TwinClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
-
-        boolean deviceFoundInCorrectHub = false;
-        long startTime = System.currentTimeMillis();
-        Twin twin = new Twin();
-        while (!deviceFoundInCorrectHub)
-        {
-            twin = twinClient.get(testInstance.provisionedDeviceId);
-            deviceFoundInCorrectHub = twin.getCapabilities() != null;
-
-            Thread.sleep(3000);
-
-            if (System.currentTimeMillis() - startTime > QUERY_TIMEOUT_MILLISECONDS)
-            {
-                fail(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Timed out waiting for provisioned device " + testInstance.provisionedDeviceId + " to be found in expected hub", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId));
-            }
-        }
-
-        if (expectedDeviceCapabilities.isIotEdge())
-        {
-            assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Provisioned device isn't edge device: " + testInstance.provisionedDeviceId, getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), twin.getCapabilities().isIotEdge());
-        }
-        else
-        {
-            assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Provisioned device shouldn't be edge device " + testInstance.provisionedDeviceId, getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), twin.getCapabilities() == null || !twin.getCapabilities().isIotEdge());
-        }
+        DeviceClient deviceClient = new DeviceClient(iothubUri, deviceId, testInstance.securityProvider, IotHubClientProtocol.MQTT);
+        deviceClient.open(true);
+        deviceClient.close();
     }
 
     //Parses connection String to retrieve iothub hostname

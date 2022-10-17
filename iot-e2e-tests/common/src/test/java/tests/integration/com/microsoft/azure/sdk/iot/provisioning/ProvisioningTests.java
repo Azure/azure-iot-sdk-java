@@ -51,6 +51,8 @@ import static junit.framework.TestCase.fail;
 import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 
 @DeviceProvisioningServiceTest
 @RunWith(Parameterized.class)
@@ -61,41 +63,30 @@ public class ProvisioningTests extends ProvisioningCommon
         super(protocol, attestationType);
     }
 
+    @Test
+    @ContinuousIntegrationTest
+    public void individualEnrollmentRegistration() throws Exception
+    {
+        basicRegistrationFlow(EnrollmentType.INDIVIDUAL);
+    }
+
+    @Test
+    @ContinuousIntegrationTest
+    public void enrollmentGroupRegistration() throws Exception
+    {
+        // test code not written for the x509 group scenario, and enrollment groups don't support tpm attestation
+        assumeTrue("Skipping this test because only Symmetric Key attestion can be tested for enrollment groups",
+            this.testInstance.attestationType == AttestationType.SYMMETRIC_KEY);
+
+        basicRegistrationFlow(EnrollmentType.INDIVIDUAL);
+    }
+
     @Ignore // The DPS instance we use for this test is currently offline, so this test cannot be run
     @Test
     @ContinuousIntegrationTest
     public void individualEnrollmentWithInvalidRemoteServerCertificateFails() throws Exception
     {
         enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType.INDIVIDUAL);
-    }
-
-    @Test
-    public void ProvisioningWithCustomPayloadFlow() throws Exception
-    {
-        String jsonPayload = "{\"a\":\"b\"}";
-        String expectedHubToProvisionTo;
-        String farAwayIotHubHostname = IotHubConnectionString.createIotHubConnectionString(farAwayIotHubConnectionString).getHostName();
-        String iothubHostName = IotHubConnectionString.createIotHubConnectionString(iotHubConnectionString).getHostName();
-
-        if (farAwayIotHubHostname.length() > iothubHostName.length())
-        {
-            expectedHubToProvisionTo = farAwayIotHubHostname;
-        }
-        else if (iothubHostName.length() > farAwayIotHubHostname.length())
-        {
-            expectedHubToProvisionTo = iothubHostName;
-        }
-        else
-        {
-            throw new IllegalArgumentException("Both possible hub's cannot have a host name of the same length for this test to work");
-        }
-
-        CustomAllocationDefinition allocDefinition = new CustomAllocationDefinition();
-        allocDefinition.setApiVersion(CUSTOM_ALLOCATION_WEBHOOK_API_VERSION);
-        allocDefinition.setWebhookUrl(customAllocationWebhookUrl);
-
-        testInstance.securityProvider = getSecurityProviderInstance(EnrollmentType.INDIVIDUAL, AllocationPolicy.CUSTOM, null, allocDefinition, null);
-        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, jsonPayload, expectedHubToProvisionTo);
     }
 
     @Ignore // The DPS instance we use for this test is currently offline, so this test cannot be run
@@ -107,101 +98,14 @@ public class ProvisioningTests extends ProvisioningCommon
     }
 
     @Test
-    @StandardTierHubOnlyTest
-    public void groupEnrollmentReprovisioningCanKeepTwin() throws Exception
-    {
-        ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
-        reprovisionPolicy.setMigrateDeviceData(true);
-        reprovisionPolicy.setUpdateHubAssignment(true);
-
-        DeviceCapabilities deviceCapabilities = new DeviceCapabilities();
-        deviceCapabilities.setIotEdge(true);
-
-        reprovisioningFlow(EnrollmentType.GROUP, null, reprovisionPolicy, null, getStartingHubs(), getHubsToReprovisionTo(), deviceCapabilities);
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    @ContinuousIntegrationTest
-    public void groupEnrollmentReprovisioningCanResetTwin() throws Exception
-    {
-        ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
-        reprovisionPolicy.setMigrateDeviceData(false);
-        reprovisionPolicy.setUpdateHubAssignment(true);
-
-        reprovisioningFlow(EnrollmentType.GROUP, null, reprovisionPolicy, null, getStartingHubs(), getHubsToReprovisionTo());
-    }
-
-    @Test
-    @ContinuousIntegrationTest
-    public void groupEnrollmentCanBlockReprovisioning() throws Exception
-    {
-        ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
-        reprovisionPolicy.setUpdateHubAssignment(false);
-
-        reprovisioningFlow(EnrollmentType.GROUP, null, reprovisionPolicy, null, getStartingHubs(), getHubsToReprovisionTo());
-    }
-
-    @Test
-    public void groupEnrollmentWithCustomAllocationPolicy() throws Exception
-    {
-        customAllocationFlow(EnrollmentType.GROUP);
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    public void individualEnrollmentReprovisioningCanKeepTwin() throws Exception
-    {
-        ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
-        reprovisionPolicy.setMigrateDeviceData(true);
-        reprovisionPolicy.setUpdateHubAssignment(true);
-
-        reprovisioningFlow(EnrollmentType.INDIVIDUAL, null, reprovisionPolicy, null, getStartingHubs(), getHubsToReprovisionTo());
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    @ContinuousIntegrationTest
-    public void individualEnrollmentReprovisioningCanResetTwin() throws Exception
-    {
-        ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
-        reprovisionPolicy.setMigrateDeviceData(false);
-        reprovisionPolicy.setUpdateHubAssignment(true);
-
-        reprovisioningFlow(EnrollmentType.INDIVIDUAL, null, reprovisionPolicy, null, getStartingHubs(), getHubsToReprovisionTo());
-    }
-
-    @Test
-    @ContinuousIntegrationTest
-    public void individualEnrollmentCanBlockReprovisioning() throws Exception
-    {
-        ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
-        reprovisionPolicy.setUpdateHubAssignment(false);
-
-        reprovisioningFlow(EnrollmentType.INDIVIDUAL, null, reprovisionPolicy, null, getStartingHubs(), getHubsToReprovisionTo());
-    }
-
-    @Test
-    public void individualEnrollmentWithCustomAllocationPolicy() throws Exception
-    {
-        customAllocationFlow(EnrollmentType.INDIVIDUAL);
-    }
-
-    @Test
     public void individualEnrollmentGetAttestationMechanismTPM() throws ProvisioningServiceClientException, SecurityProviderException
     {
         //This test fits in better with the other provisioning service client tests, but it needs to be run sequentially
         // with the other TPM tests, so it lives here with them
-        if (testInstance.attestationType != AttestationType.TPM)
-        {
-            return;
-        }
+        assumeTrue("Skipping because this test is only applicable to TPM attestation", testInstance.attestationType == AttestationType.TPM);
 
-        if (testInstance.protocol != HTTPS)
-        {
-            //The test protocol has no bearing on this test since it only uses the provisioning service client, so the test should only run once.
-            return;
-        }
+        //The test protocol has no bearing on this test since it only uses the provisioning service client, so the test should only run once.
+        assumeTrue(testInstance.protocol == HTTPS);
 
         SecurityProvider securityProvider = new SecurityProviderTPMEmulator(testInstance.registrationId, MAX_TPM_CONNECT_RETRY_ATTEMPTS);
         Attestation attestation = new TpmAttestation(new String(encodeBase64(((SecurityProviderTpm) securityProvider).getEndorsementKey())));
@@ -219,28 +123,26 @@ public class ProvisioningTests extends ProvisioningCommon
     @Test
     public void individualEnrollmentWithECCCertificates() throws Exception
     {
-        if (testInstance.attestationType != AttestationType.X509)
-        {
-            // test is only relevant for x509 authentication
-            return;
-        }
+        assumeTrue("Skipping test because it is only applicable for x509 attestation", testInstance.attestationType == AttestationType.X509);
 
-        if (Tools.isAndroid())
-        {
-            // ECC cert generation is broken for Android. "ECDSA KeyPairGenerator is not available"
-            return;
-        }
+        // ECC cert generation is broken for Android. "ECDSA KeyPairGenerator is not available"
+        assumeFalse("Skipping test because it is being run on Android", Tools.isAndroid());
 
         testInstance.certificateAlgorithm = X509CertificateGenerator.CertificateAlgorithm.ECC;
-        customAllocationFlow(EnrollmentType.INDIVIDUAL);
+        basicRegistrationFlow(EnrollmentType.INDIVIDUAL);
+    }
+
+    private void basicRegistrationFlow(EnrollmentType enrollmentType) throws Exception
+    {
+        testInstance.securityProvider = getSecurityProviderInstance(enrollmentType);
+        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, false, null, null, null);
     }
 
     private void enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType enrollmentType) throws Exception
     {
-        if (enrollmentType == EnrollmentType.GROUP && testInstance.attestationType != AttestationType.SYMMETRIC_KEY)
-        {
-            return; // test code not written for the x509 group scenario, and group enrollment does not support tpm attestation
-        }
+        // test code not written for the x509 group scenario, and enrollment groups don't support tpm attestation
+        assumeTrue("Skipping this test because only Symmetric Key attestion can be tested for enrollment groups",
+            this.testInstance.attestationType == AttestationType.SYMMETRIC_KEY);
 
         boolean expectedExceptionEncountered = false;
         testInstance.securityProvider = getSecurityProviderInstance(enrollmentType);
@@ -283,24 +185,5 @@ public class ProvisioningTests extends ProvisioningCommon
         }
 
         assertTrue("Expected an exception to be thrown due to invalid server certificates", expectedExceptionEncountered);
-    }
-
-    private void sendReportedPropertyUpdate(String expectedReportedPropertyName, String expectedReportedPropertyValue, String iothubUri, String deviceId) throws InterruptedException, IOException, URISyntaxException, TimeoutException, IotHubClientException
-    {
-        //hardcoded AMQP here only because we aren't testing this connection. We just need to open a connection to send a twin update so that
-        // we can test if the twin updates carry over after reprovisioning
-        DeviceClient deviceClient = new DeviceClient(iothubUri, deviceId, testInstance.securityProvider, IotHubClientProtocol.AMQPS);
-        deviceClient.open(false);
-        deviceClient.subscribeToDesiredProperties(
-            (twin, context) ->
-            {
-                // don't care about handling desired properties for this test
-            },
-            null);
-
-        TwinCollection twinCollection = new TwinCollection();
-        twinCollection.put(expectedReportedPropertyName, expectedReportedPropertyValue);
-        deviceClient.updateReportedProperties(twinCollection);
-        deviceClient.close();
     }
 }
