@@ -120,7 +120,7 @@ jobs:
     timeoutInMinutes: 180
     pool:
       # If this is changed, don't forget to update supported_platforms.md in the root directory. That document outlines what OS we test on and should stay up to date.
-      vmImage: 'ubuntu-18.04'
+      vmImage: 'ubuntu-22.04'
     displayName: Linux
     strategy:
       maxParallel: 1
