@@ -24,7 +24,7 @@ public class ProvisioningServiceClientTests
 
     // This is not an actual webhook that works for provisioning, but is fine for the purposes of these tests as
     // they never actually provision a device using this custom allocation policy webhook.
-    public static final String customAllocationWebhookUrl = "www.microsoft.com";
+    public static final String customAllocationWebhookUrl = "https://www.microsoft.com";
 
     public ProvisioningServiceClient provisioningServiceClient = null;
 
