@@ -78,7 +78,6 @@ public class ProvisioningCommon extends IntegrationTest
         provisioningServiceIdScope = Tools.retrieveEnvironmentVariableValue(DPS_ID_SCOPE_ENV_VAR_NAME);
         provisioningServiceGlobalEndpointWithInvalidCert = Tools.retrieveEnvironmentVariableValue(DPS_GLOBAL_ENDPOINT_WITH_INVALID_CERT_ENV_VAR_NAME);
         provisioningServiceWithInvalidCertConnectionString = Tools.retrieveEnvironmentVariableValue(DPS_CONNECTION_STRING_WITH_INVALID_CERT_ENV_VAR_NAME);
-        provisioningServiceGlobalEndpoint = Tools.retrieveEnvironmentVariableValue(DPS_GLOBAL_ENDPOINT_ENV_VAR_NAME, "global.azure-devices-provisioning.net");
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
     }
 
@@ -111,8 +110,7 @@ public class ProvisioningCommon extends IntegrationTest
     public static final String DPS_CONNECTION_STRING_WITH_INVALID_CERT_ENV_VAR_NAME = "PROVISIONING_CONNECTION_STRING_INVALIDCERT";
     public static String provisioningServiceWithInvalidCertConnectionString = "";
 
-    public static final String DPS_GLOBAL_ENDPOINT_ENV_VAR_NAME = "DPS_GLOBALDEVICEENDPOINT";
-    public static String provisioningServiceGlobalEndpoint = "";
+    public static String provisioningServiceGlobalEndpoint = "global.azure-devices-provisioning.net";
 
     public static final String DPS_GLOBAL_ENDPOINT_WITH_INVALID_CERT_ENV_VAR_NAME = "DPS_GLOBALDEVICEENDPOINT_INVALIDCERT";
     public static String provisioningServiceGlobalEndpointWithInvalidCert = "";
@@ -124,8 +122,6 @@ public class ProvisioningCommon extends IntegrationTest
     public static final int QUERY_TIMEOUT_MILLISECONDS = 4 * 60 * 1000; // 4 minutes
 
     public static final int MAX_TPM_CONNECT_RETRY_ATTEMPTS = 10;
-
-    protected static final String CUSTOM_ALLOCATION_WEBHOOK_API_VERSION = "2019-03-31";
 
     public RegistryClient registryClient = null;
 
@@ -432,15 +428,15 @@ public class ProvisioningCommon extends IntegrationTest
 
     public SecurityProvider getSecurityProviderInstance(EnrollmentType enrollmentType) throws ProvisioningServiceClientException, GeneralSecurityException, IOException, SecurityProviderException, InterruptedException
     {
-        return getSecurityProviderInstance(enrollmentType, null, null, null, null);
+        return getSecurityProviderInstance(enrollmentType, null, null);
     }
 
-    public SecurityProvider getSecurityProviderInstance(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubs) throws ProvisioningServiceClientException, GeneralSecurityException, IOException, SecurityProviderException
+    public SecurityProvider getSecurityProviderInstance(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy) throws ProvisioningServiceClientException, GeneralSecurityException, IOException, SecurityProviderException
     {
-        return getSecurityProviderInstance(enrollmentType, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, null);
+        return getSecurityProviderInstance(enrollmentType, allocationPolicy, reprovisionPolicy, null);
     }
 
-    public SecurityProvider getSecurityProviderInstance(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubs, DeviceCapabilities deviceCapabilities) throws ProvisioningServiceClientException, GeneralSecurityException, SecurityProviderException, IOException
+    public SecurityProvider getSecurityProviderInstance(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, DeviceCapabilities deviceCapabilities) throws ProvisioningServiceClientException, GeneralSecurityException, SecurityProviderException, IOException
     {
         SecurityProvider securityProvider = null;
         TwinCollection tags = new TwinCollection();
@@ -473,8 +469,6 @@ public class ProvisioningCommon extends IntegrationTest
                 testInstance.enrollmentGroup.setInitialTwin(twinState);
                 testInstance.enrollmentGroup.setAllocationPolicy(allocationPolicy);
                 testInstance.enrollmentGroup.setReprovisionPolicy(reprovisionPolicy);
-                testInstance.enrollmentGroup.setCustomAllocationDefinition(customAllocationDefinition);
-                testInstance.enrollmentGroup.setIotHubs(iothubs);
                 testInstance.enrollmentGroup.setCapabilities(deviceCapabilities);
                 testInstance.enrollmentGroup = testInstance.provisioningServiceClient.createOrUpdateEnrollmentGroup(testInstance.enrollmentGroup);
                 Attestation attestation = testInstance.enrollmentGroup.getAttestation();
@@ -496,7 +490,7 @@ public class ProvisioningCommon extends IntegrationTest
             {
                 securityProvider = new SecurityProviderTPMEmulator(testInstance.registrationId, MAX_TPM_CONNECT_RETRY_ATTEMPTS);
                 Attestation attestation = new TpmAttestation(new String(encodeBase64(((SecurityProviderTpm) securityProvider).getEndorsementKey())));
-                createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, twinState, deviceCapabilities);
+                createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, twinState, deviceCapabilities);
             }
             else if (testInstance.attestationType == AttestationType.X509)
             {
@@ -506,7 +500,7 @@ public class ProvisioningCommon extends IntegrationTest
 
                 Collection<X509Certificate> signerCertificates = new LinkedList<>();
                 Attestation attestation = X509Attestation.createFromClientCertificates(leafPublicPem);
-                createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, twinState, deviceCapabilities);
+                createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, twinState, deviceCapabilities);
 
                 X509Certificate leafPublicCert = parsePublicKeyCertificate(leafPublicPem);
                 Key leafPrivateKey = parsePrivateKey(leafPrivateKeyPem);
@@ -516,7 +510,7 @@ public class ProvisioningCommon extends IntegrationTest
             else if (testInstance.attestationType == AttestationType.SYMMETRIC_KEY)
             {
                 Attestation attestation = new SymmetricKeyAttestation(null, null);
-                createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, twinState, deviceCapabilities);
+                createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, twinState, deviceCapabilities);
                 assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Expected symmetric key attestation", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), testInstance.individualEnrollment.getAttestation() instanceof  SymmetricKeyAttestation);
                 SymmetricKeyAttestation symmetricKeyAttestation = (SymmetricKeyAttestation) testInstance.individualEnrollment.getAttestation();
                 securityProvider = new SecurityProviderSymmetricKey(symmetricKeyAttestation.getPrimaryKey().getBytes(StandardCharsets.UTF_8), testInstance.registrationId);
@@ -531,15 +525,13 @@ public class ProvisioningCommon extends IntegrationTest
         return securityProvider;
     }
 
-    private void createTestIndividualEnrollment(Attestation attestation, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubs, TwinState twinState, DeviceCapabilities deviceCapabilities) throws ProvisioningServiceClientException
+    private void createTestIndividualEnrollment(Attestation attestation, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, TwinState twinState, DeviceCapabilities deviceCapabilities) throws ProvisioningServiceClientException
     {
         testInstance.individualEnrollment = new IndividualEnrollment(testInstance.registrationId, attestation);
         testInstance.individualEnrollment.setDeviceId(testInstance.provisionedDeviceId);
         testInstance.individualEnrollment.setCapabilities(deviceCapabilities);
         testInstance.individualEnrollment.setAllocationPolicy(allocationPolicy);
         testInstance.individualEnrollment.setReprovisionPolicy(reprovisionPolicy);
-        testInstance.individualEnrollment.setCustomAllocationDefinition(customAllocationDefinition);
-        testInstance.individualEnrollment.setIotHubs(iothubs);
         testInstance.individualEnrollment.setInitialTwin(twinState);
         testInstance.individualEnrollment = testInstance.provisioningServiceClient.createOrUpdateIndividualEnrollment(testInstance.individualEnrollment);
     }
