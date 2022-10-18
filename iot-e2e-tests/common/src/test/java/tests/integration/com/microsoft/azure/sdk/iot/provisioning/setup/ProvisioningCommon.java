@@ -5,6 +5,7 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.provisioning.setup;
 
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
@@ -75,11 +76,8 @@ public class ProvisioningCommon extends IntegrationTest
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         provisioningServiceConnectionString = Tools.retrieveEnvironmentVariableValue(DPS_CONNECTION_STRING_ENV_VAR_NAME);
         provisioningServiceIdScope = Tools.retrieveEnvironmentVariableValue(DPS_ID_SCOPE_ENV_VAR_NAME);
-        farAwayIotHubConnectionString = Tools.retrieveEnvironmentVariableValue(FAR_AWAY_IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
-        customAllocationWebhookUrl = Tools.retrieveEnvironmentVariableValue(CUSTOM_ALLOCATION_WEBHOOK_URL_VAR_NAME);
         provisioningServiceGlobalEndpointWithInvalidCert = Tools.retrieveEnvironmentVariableValue(DPS_GLOBAL_ENDPOINT_WITH_INVALID_CERT_ENV_VAR_NAME);
         provisioningServiceWithInvalidCertConnectionString = Tools.retrieveEnvironmentVariableValue(DPS_CONNECTION_STRING_WITH_INVALID_CERT_ENV_VAR_NAME);
-        provisioningServiceGlobalEndpoint = Tools.retrieveEnvironmentVariableValue(DPS_GLOBAL_ENDPOINT_ENV_VAR_NAME, "global.azure-devices-provisioning.net");
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
     }
 
@@ -106,20 +104,13 @@ public class ProvisioningCommon extends IntegrationTest
     public static final String IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONNECTION_STRING";
     public static String iotHubConnectionString = "";
 
-    public static final String FAR_AWAY_IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "FAR_AWAY_IOTHUB_CONNECTION_STRING";
-    public static String farAwayIotHubConnectionString = "";
-
-    public static final String CUSTOM_ALLOCATION_WEBHOOK_URL_VAR_NAME = "CUSTOM_ALLOCATION_POLICY_WEBHOOK";
-    public static String customAllocationWebhookUrl = "";
-
     public static final String DPS_CONNECTION_STRING_ENV_VAR_NAME = "IOT_DPS_CONNECTION_STRING";
     public static String provisioningServiceConnectionString = "";
 
     public static final String DPS_CONNECTION_STRING_WITH_INVALID_CERT_ENV_VAR_NAME = "PROVISIONING_CONNECTION_STRING_INVALIDCERT";
     public static String provisioningServiceWithInvalidCertConnectionString = "";
 
-    public static final String DPS_GLOBAL_ENDPOINT_ENV_VAR_NAME = "DPS_GLOBALDEVICEENDPOINT";
-    public static String provisioningServiceGlobalEndpoint = "";
+    public static String provisioningServiceGlobalEndpoint = "global.azure-devices-provisioning.net";
 
     public static final String DPS_GLOBAL_ENDPOINT_WITH_INVALID_CERT_ENV_VAR_NAME = "DPS_GLOBALDEVICEENDPOINT_INVALIDCERT";
     public static String provisioningServiceGlobalEndpointWithInvalidCert = "";
@@ -131,8 +122,6 @@ public class ProvisioningCommon extends IntegrationTest
     public static final int QUERY_TIMEOUT_MILLISECONDS = 4 * 60 * 1000; // 4 minutes
 
     public static final int MAX_TPM_CONNECT_RETRY_ATTEMPTS = 10;
-
-    protected static final String CUSTOM_ALLOCATION_WEBHOOK_API_VERSION = "2019-03-31";
 
     public RegistryClient registryClient = null;
 
@@ -272,7 +261,7 @@ public class ProvisioningCommon extends IntegrationTest
         public ProvisioningDeviceClient provisioningDeviceClient;
     }
 
-    public class ProvisioningDeviceClientRegistrationCallbackImpl implements ProvisioningDeviceClientRegistrationCallback
+    public static class ProvisioningDeviceClientRegistrationCallbackImpl implements ProvisioningDeviceClientRegistrationCallback
     {
         @Override
         public void run(ProvisioningDeviceClientRegistrationResult provisioningDeviceClientRegistrationResult, Exception exception, Object context)
@@ -381,7 +370,6 @@ public class ProvisioningCommon extends IntegrationTest
                     String returnJson = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningPayload();
                     assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Payload received from service is not the same values. Sent Json: " + jsonPayload + " returned json " + returnJson, getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), returnJson, jsonPayload);
                 }
-                assertProvisionedIntoCorrectHub(expectedIotHubsToProvisionTo, provisionedHubUri);
                 assertProvisionedDeviceWorks(provisionedHubUri, deviceId);
                 deviceRegisteredSuccessfully = true;
             }
@@ -415,54 +403,11 @@ public class ProvisioningCommon extends IntegrationTest
         return provisioningStatus;
     }
 
-    private void assertProvisionedIntoCorrectHub(List<String> iothubsToFinishAt, String actualReprovisionedHub)
+    private void assertProvisionedDeviceWorks(String iothubUri, String deviceId) throws IOException, IotHubClientException, URISyntaxException
     {
-            assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Device was not provisioned into an expected hub: " + actualReprovisionedHub, getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId),
-                    iothubsToFinishAt.contains(actualReprovisionedHub));
-    }
-
-    private void assertProvisionedDeviceWorks(String iothubUri, String deviceId) throws IOException, URISyntaxException
-    {
-        for (IotHubClientProtocol iotHubClientProtocol: IotHubClientProtocol.values())
-        {
-            if (iotHubClientProtocol == IotHubClientProtocol.MQTT_WS || iotHubClientProtocol == IotHubClientProtocol.AMQPS_WS)
-            {
-                // MQTT_WS/AMQP_WS does not support X509 because of a bug on service
-                continue;
-            }
-
-            DeviceClient deviceClient = new DeviceClient(iothubUri, deviceId, testInstance.securityProvider, iotHubClientProtocol);
-            deviceClient.close();
-        }
-    }
-
-    protected void assertProvisionedDeviceCapabilitiesAreExpected(DeviceCapabilities expectedDeviceCapabilities, String provisionedHubConnectionString) throws IOException, IotHubException, InterruptedException {
-        TwinClient twinClient = new TwinClient(provisionedHubConnectionString, TwinClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
-
-        boolean deviceFoundInCorrectHub = false;
-        long startTime = System.currentTimeMillis();
-        Twin twin = new Twin();
-        while (!deviceFoundInCorrectHub)
-        {
-            twin = twinClient.get(testInstance.provisionedDeviceId);
-            deviceFoundInCorrectHub = twin.getCapabilities() != null;
-
-            Thread.sleep(3000);
-
-            if (System.currentTimeMillis() - startTime > QUERY_TIMEOUT_MILLISECONDS)
-            {
-                fail(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Timed out waiting for provisioned device " + testInstance.provisionedDeviceId + " to be found in expected hub", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId));
-            }
-        }
-
-        if (expectedDeviceCapabilities.isIotEdge())
-        {
-            assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Provisioned device isn't edge device: " + testInstance.provisionedDeviceId, getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), twin.getCapabilities().isIotEdge());
-        }
-        else
-        {
-            assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Provisioned device shouldn't be edge device " + testInstance.provisionedDeviceId, getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), twin.getCapabilities() == null || !twin.getCapabilities().isIotEdge());
-        }
+        DeviceClient deviceClient = new DeviceClient(iothubUri, deviceId, testInstance.securityProvider, IotHubClientProtocol.MQTT);
+        deviceClient.open(true);
+        deviceClient.close();
     }
 
     //Parses connection String to retrieve iothub hostname
@@ -483,15 +428,15 @@ public class ProvisioningCommon extends IntegrationTest
 
     public SecurityProvider getSecurityProviderInstance(EnrollmentType enrollmentType) throws ProvisioningServiceClientException, GeneralSecurityException, IOException, SecurityProviderException, InterruptedException
     {
-        return getSecurityProviderInstance(enrollmentType, null, null, null, null);
+        return getSecurityProviderInstance(enrollmentType, null, null);
     }
 
-    public SecurityProvider getSecurityProviderInstance(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubs) throws ProvisioningServiceClientException, GeneralSecurityException, IOException, SecurityProviderException
+    public SecurityProvider getSecurityProviderInstance(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy) throws ProvisioningServiceClientException, GeneralSecurityException, IOException, SecurityProviderException
     {
-        return getSecurityProviderInstance(enrollmentType, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, null);
+        return getSecurityProviderInstance(enrollmentType, allocationPolicy, reprovisionPolicy, null);
     }
 
-    public SecurityProvider getSecurityProviderInstance(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubs, DeviceCapabilities deviceCapabilities) throws ProvisioningServiceClientException, GeneralSecurityException, SecurityProviderException, IOException
+    public SecurityProvider getSecurityProviderInstance(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, DeviceCapabilities deviceCapabilities) throws ProvisioningServiceClientException, GeneralSecurityException, SecurityProviderException, IOException
     {
         SecurityProvider securityProvider = null;
         TwinCollection tags = new TwinCollection();
@@ -524,8 +469,6 @@ public class ProvisioningCommon extends IntegrationTest
                 testInstance.enrollmentGroup.setInitialTwin(twinState);
                 testInstance.enrollmentGroup.setAllocationPolicy(allocationPolicy);
                 testInstance.enrollmentGroup.setReprovisionPolicy(reprovisionPolicy);
-                testInstance.enrollmentGroup.setCustomAllocationDefinition(customAllocationDefinition);
-                testInstance.enrollmentGroup.setIotHubs(iothubs);
                 testInstance.enrollmentGroup.setCapabilities(deviceCapabilities);
                 testInstance.enrollmentGroup = testInstance.provisioningServiceClient.createOrUpdateEnrollmentGroup(testInstance.enrollmentGroup);
                 Attestation attestation = testInstance.enrollmentGroup.getAttestation();
@@ -547,7 +490,7 @@ public class ProvisioningCommon extends IntegrationTest
             {
                 securityProvider = new SecurityProviderTPMEmulator(testInstance.registrationId, MAX_TPM_CONNECT_RETRY_ATTEMPTS);
                 Attestation attestation = new TpmAttestation(new String(encodeBase64(((SecurityProviderTpm) securityProvider).getEndorsementKey())));
-                createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, twinState, deviceCapabilities);
+                createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, twinState, deviceCapabilities);
             }
             else if (testInstance.attestationType == AttestationType.X509)
             {
@@ -557,7 +500,7 @@ public class ProvisioningCommon extends IntegrationTest
 
                 Collection<X509Certificate> signerCertificates = new LinkedList<>();
                 Attestation attestation = X509Attestation.createFromClientCertificates(leafPublicPem);
-                createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, twinState, deviceCapabilities);
+                createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, twinState, deviceCapabilities);
 
                 X509Certificate leafPublicCert = parsePublicKeyCertificate(leafPublicPem);
                 Key leafPrivateKey = parsePrivateKey(leafPrivateKeyPem);
@@ -567,7 +510,7 @@ public class ProvisioningCommon extends IntegrationTest
             else if (testInstance.attestationType == AttestationType.SYMMETRIC_KEY)
             {
                 Attestation attestation = new SymmetricKeyAttestation(null, null);
-                createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, twinState, deviceCapabilities);
+                createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, twinState, deviceCapabilities);
                 assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Expected symmetric key attestation", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), testInstance.individualEnrollment.getAttestation() instanceof  SymmetricKeyAttestation);
                 SymmetricKeyAttestation symmetricKeyAttestation = (SymmetricKeyAttestation) testInstance.individualEnrollment.getAttestation();
                 securityProvider = new SecurityProviderSymmetricKey(symmetricKeyAttestation.getPrimaryKey().getBytes(StandardCharsets.UTF_8), testInstance.registrationId);
@@ -582,15 +525,13 @@ public class ProvisioningCommon extends IntegrationTest
         return securityProvider;
     }
 
-    private void createTestIndividualEnrollment(Attestation attestation, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubs, TwinState twinState, DeviceCapabilities deviceCapabilities) throws ProvisioningServiceClientException
+    private void createTestIndividualEnrollment(Attestation attestation, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, TwinState twinState, DeviceCapabilities deviceCapabilities) throws ProvisioningServiceClientException
     {
         testInstance.individualEnrollment = new IndividualEnrollment(testInstance.registrationId, attestation);
         testInstance.individualEnrollment.setDeviceId(testInstance.provisionedDeviceId);
         testInstance.individualEnrollment.setCapabilities(deviceCapabilities);
         testInstance.individualEnrollment.setAllocationPolicy(allocationPolicy);
         testInstance.individualEnrollment.setReprovisionPolicy(reprovisionPolicy);
-        testInstance.individualEnrollment.setCustomAllocationDefinition(customAllocationDefinition);
-        testInstance.individualEnrollment.setIotHubs(iothubs);
         testInstance.individualEnrollment.setInitialTwin(twinState);
         testInstance.individualEnrollment = testInstance.provisioningServiceClient.createOrUpdateIndividualEnrollment(testInstance.individualEnrollment);
     }
