@@ -228,6 +228,10 @@ vertx.log.lck
 **/.gradle
 **/build
 
+# This package file is used to allow our clients to check their own package version at runtime so they can
+# generate a user agent string with that info
+!package.properties
+
 # =========================
 # Samples logging config
 # =========================
