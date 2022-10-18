@@ -78,7 +78,7 @@ public class ProvisioningTests extends ProvisioningCommon
         assumeTrue("Skipping this test because only Symmetric Key attestion can be tested for enrollment groups",
             this.testInstance.attestationType == AttestationType.SYMMETRIC_KEY);
 
-        basicRegistrationFlow(EnrollmentType.INDIVIDUAL);
+        basicRegistrationFlow(EnrollmentType.GROUP);
     }
 
     @Ignore // The DPS instance we use for this test is currently offline, so this test cannot be run
