@@ -46,10 +46,10 @@ public class SDKUtils
         return PROVISIONING_SERVICE_CLIENT + PROVISIONING_SERVICE_CLIENT_VERSION + " (" + JAVA_RUNTIME + "; " + OPERATING_SYSTEM +"; " + PROCESSOR_ARCHITECTURE + ")";
     }
 
-    // Gets the version of this SDK package from the package.properties file
+    // Gets the version of this SDK package from the provisioning-service-client.properties file
     private static String getPackageVersion()
     {
-        Map<String, String> properties = getProperties("package.properties");
+        Map<String, String> properties = getProperties("provisioning-service-client.properties");
         return properties.getOrDefault("version", "UnknownVersion");
     }
 

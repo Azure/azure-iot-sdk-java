@@ -240,14 +240,14 @@
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
                 <includes>
-                    <include>**/package.properties</include>
+                    <include>**/iothub-service-client.properties</include>
                 </includes>
             </resource>
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>false</filtering>
                 <excludes>
-                    <exclude>**/package.properties</exclude>
+                    <exclude>**/iothub-service-client.properties</exclude>
                 </excludes>
             </resource>
         </resources>

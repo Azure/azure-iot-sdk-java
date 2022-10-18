@@ -3,7 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -27,10 +26,10 @@ public class TransportUtils
 
     public final static String USER_AGENT_STRING = JAVA_DEVICE_CLIENT_IDENTIFIER + "/" + CLIENT_VERSION + " (" + JAVA_RUNTIME + "; " + OPERATING_SYSTEM +"; " + PROCESSOR_ARCHITECTURE + ")";
 
-    // Gets the version of this SDK package from the package.properties file
+    // Gets the version of this SDK package from the iothub-device-client.properties file
     private static String getPackageVersion()
     {
-        Map<String, String> properties = getProperties("package.properties");
+        Map<String, String> properties = getProperties("iothub-device-client.properties");
         return properties.getOrDefault("version", "UnknownVersion");
     }
 

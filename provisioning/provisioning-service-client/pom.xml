@@ -163,14 +163,14 @@
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
                 <includes>
-                    <include>**/package.properties</include>
+                    <include>**/provisioning-service-client.properties</include>
                 </includes>
             </resource>
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>false</filtering>
                 <excludes>
-                    <exclude>**/package.properties</exclude>
+                    <exclude>**/provisioning-service-client.properties</exclude>
                 </excludes>
             </resource>
         </resources>

@@ -27,10 +27,10 @@ public class TransportUtils
     public static final String USER_AGENT_STRING = javaServiceClientIdentifier + serviceVersion + " (" + JAVA_RUNTIME + "; " + OPERATING_SYSTEM +"; " + PROCESSOR_ARCHITECTURE + ")";
     public static final String IOTHUB_API_VERSION = "2021-04-12";
 
-    // Gets the version of this SDK package from the package.properties file
+    // Gets the version of this SDK package from the iothub-service-client.properties file
     private static String getPackageVersion()
     {
-        Map<String, String> properties = getProperties("package.properties");
+        Map<String, String> properties = getProperties("iothub-service-client.properties");
         return properties.getOrDefault("version", "UnknownVersion");
     }
 
