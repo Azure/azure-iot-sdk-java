@@ -228,6 +228,13 @@ vertx.log.lck
 **/.gradle
 **/build
 
+# These properties files are used to allow our clients to check their own package version at runtime so they can
+# generate a user agent string with that info
+!iothub-device-client.properties
+!iothub-service-client.properties
+!provisioning-device-client.properties
+!provisioning-service-client.properties
+
 # =========================
 # Samples logging config
 # =========================

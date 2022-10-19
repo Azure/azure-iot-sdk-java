@@ -165,5 +165,23 @@
                 </configuration>
             </plugin>
         </plugins>
+
+        <!--This block allows this package to read the SDK package version/artifactId/groupId from this pom file-->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/provisioning-device-client.properties</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>**/provisioning-device-client.properties</exclude>
+                </excludes>
+            </resource>
+        </resources>
     </build>
 </project>
