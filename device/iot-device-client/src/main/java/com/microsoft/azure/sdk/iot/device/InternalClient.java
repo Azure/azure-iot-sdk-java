@@ -315,6 +315,9 @@ public class InternalClient
      * Start receiving desired property updates for this client. After subscribing to desired properties, this client can
      * freely send reported property updates and make getTwin calls.
      * <p>
+     * This call can only be made after the client has been successfully opened.
+     * </p>
+     * <p>
      * This subscription is preserved between reconnect attempts. However, it is not preserved after a client has
      * been closed because the user called {@link #close()} or because this client lost its connection and its retry
      * policy was exhausted.
@@ -335,6 +338,9 @@ public class InternalClient
     /**
      * Start receiving desired property updates for this client. After subscribing to desired properties, this client can
      * freely send reported property updates and make getTwin calls.
+     * <p>
+     * This call can only be made after the client has been successfully opened.
+     * </p>
      * <p>
      * This subscription is preserved between reconnect attempts. However, it is not preserved after a client has
      * been closed because the user called {@link #close()} or because this client lost its connection and its retry
@@ -530,6 +536,9 @@ public class InternalClient
     /**
      * Subscribes to direct methods.
      * <p>
+     * This call can only be made after the client has been successfully opened.
+     * </p>
+     * <p>
      * This subscription is preserved between reconnect attempts. However, it is not preserved after a client has
      * been closed because the user called {@link #close()} or because this client lost its connection and its retry
      * policy was exhausted.
@@ -549,6 +558,9 @@ public class InternalClient
 
     /**
      * Subscribes to direct methods.
+     * <p>
+     * This call can only be made after the client has been successfully opened.
+     * </p>
      * <p>
      * This subscription is preserved between reconnect attempts. However, it is not preserved after a client has
      * been closed because the user called {@link #close()} or because this client lost its connection and its retry
@@ -668,6 +680,9 @@ public class InternalClient
     /**
      * Start receiving desired property updates for this client asynchronously. After subscribing to desired properties, this client can
      * freely send reported property updates and make getTwin calls.
+     * <p>
+     * This call can only be made after the client has been successfully opened.
+     * </p>
      * <p>
      * This subscription is preserved between reconnect attempts. However, it is not preserved after a client has
      * been closed because the user called {@link #close()} or because this client lost its connection and its retry
@@ -867,6 +882,9 @@ public class InternalClient
 
     /**
      * Subscribes to direct methods.
+     * <p>
+     * This call can only be made after the client has been successfully opened.
+     * </p>
      * <p>
      * This subscription is preserved between reconnect attempts. However, it is not preserved after a client has
      * been closed because the user called {@link #close()} or because this client lost its connection and its retry
