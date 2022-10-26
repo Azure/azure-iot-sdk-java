@@ -109,7 +109,7 @@
             <dependency>
                 <groupId>com.azure</groupId>
                 <artifactId>azure-identity</artifactId>
-                <version>1.4.0</version> <!--e2e tests and samples only-->
+                <version>1.6.1</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
