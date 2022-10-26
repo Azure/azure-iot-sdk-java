@@ -126,6 +126,11 @@
                 <artifactId>guava</artifactId>
                 <version>31.1-jre</version> <!-- Nested dependency from ms client runtime. Overriding the version to use newer version-->
             </dependency>
+            <dependency>
+                <groupId>com.fasterxml.woodstox</groupId>
+                <artifactId>woodstox-core</artifactId>
+                <version>6.4.0</version>  <!-- Nested dependency from azure core. Overriding the version to use newer version-->
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <properties>
