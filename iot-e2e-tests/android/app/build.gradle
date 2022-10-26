@@ -24,7 +24,7 @@ android {
     defaultConfig {
         javaCompileOptions.annotationProcessorOptions.includeCompileClasspath true
         applicationId "com.iothub.azure.microsoft.com.androide2e"
-        minSdkVersion 24
+        minSdkVersion 26
         targetSdkVersion 28
         multiDexEnabled true
         versionCode 1
