@@ -101,24 +101,16 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.5</version>
         </dependency>
-
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
+            <version>4.1.77.Final</version>
         </dependency>
-        <!--
-        This newer Azure storage SDK has some compatibility issues with Android. Leaving this dependency alone
-        until this issue can be investigated further
-        -->
         <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-storage-blob</artifactId>
             <version>12.8.0</version>
         </dependency>
-        <!--
-        This older Azure storage SDK works fine for our test purposes, but upgrading to a more modern SDK may
-        be necessary in the future
-        -->
         <dependency>
             <groupId>com.microsoft.azure</groupId>
             <artifactId>azure-storage</artifactId>
