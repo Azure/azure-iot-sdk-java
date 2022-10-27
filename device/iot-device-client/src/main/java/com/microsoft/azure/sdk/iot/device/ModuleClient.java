@@ -495,7 +495,13 @@ public class ModuleClient extends InternalClient
 
     /**
      * Sets the message callback.
-     *
+     * <p>
+     * This should be set before opening the client. If it is set after opening the client, any messages sent by the
+     * service may be missed.
+     * </p>
+     * <p>
+     * This callback is preserved between reconnection attempts and preserved after re-opening a previously closed client.
+     * </p>
      * @param callback the message callback. Can be {@code null}.
      * @param context the context to be passed to the callback. Can be {@code null}.
      *

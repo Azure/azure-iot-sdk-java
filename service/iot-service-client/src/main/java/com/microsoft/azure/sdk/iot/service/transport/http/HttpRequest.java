@@ -112,7 +112,7 @@ public class HttpRequest
             this.connection.setRequestMethod(method.name());
         }
 
-        this.setHeaderField(USER_AGENT, TransportUtils.javaServiceClientIdentifier + TransportUtils.serviceVersion);
+        this.setHeaderField(USER_AGENT, TransportUtils.USER_AGENT_STRING);
         this.setHeaderField(ACCEPT, ACCEPT_VALUE);
         this.setHeaderField(CONTENT_TYPE, ACCEPT_VALUE + "; " + ACCEPT_CHARSET);
         this.setHeaderField(AUTHORIZATION, authorizationToken);

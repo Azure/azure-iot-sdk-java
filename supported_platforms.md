@@ -24,13 +24,15 @@ Default locale: en_US, platform encoding: Cp1252
 
 OS name: "windows server 2016", version: "10.0", arch: "amd64", family: "windows"
 
-## Ubuntu 1604
+## Ubuntu 2204
 
-Note that, while we only directly test on Ubuntu 18.04, we do generally support other popular Linux distributions. 
+Note that, while we only directly test on Ubuntu 22.04, we do generally support other popular Linux distributions. 
 
 Nightly test platform details:
 Apache Maven 3.8.1
-Java version: 1.8.0_292, vendor: AdoptOpenJDK
+
+Java 8 version: 1.8.0_332, vendor: Eclipse Temurin
+Java 11 version: 11.0.15_10, vendor: Eclipse Temurin
 
 Default locale: en_US, platform encoding: UTF-8
 

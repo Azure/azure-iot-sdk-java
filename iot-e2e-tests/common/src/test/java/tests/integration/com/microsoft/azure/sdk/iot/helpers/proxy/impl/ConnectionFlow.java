@@ -2,6 +2,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.impl;
 
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -11,6 +12,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * establishing a socket connection, SSL handshaking, HTTP CONNECT request
  * processing, and so on.
  */
+@Slf4j
 class ConnectionFlow {
     private Queue<ConnectionFlowStep> steps = new ConcurrentLinkedQueue<ConnectionFlowStep>();
 
@@ -110,9 +112,8 @@ class ConnectionFlow {
      */
     private void processCurrentStep() {
         final ProxyConnection connection = currentStep.getConnection();
-        final ProxyConnectionLogger LOG = connection.getLOG();
 
-        LOG.debug("Processing connection flow step: {}", currentStep);
+        log.debug("Processing connection flow step: {}", currentStep);
         connection.become(currentStep.getState());
         suppressInitialRequest = suppressInitialRequest
                 || currentStep.shouldSuppressInitialRequest();
@@ -121,22 +122,20 @@ class ConnectionFlow {
             connection.ctx.executor().submit(new Runnable() {
                 @Override
                 public void run() {
-                    doProcessCurrentStep(LOG);
+                    doProcessCurrentStep();
                 }
             });
         } else {
-            doProcessCurrentStep(LOG);
+            doProcessCurrentStep();
         }
     }
 
     /**
      * Does the work of processing the current step, checking the result and
      * handling success/failure.
-     * 
-     * @param LOG
      */
     @SuppressWarnings("unchecked")
-    private void doProcessCurrentStep(final ProxyConnectionLogger LOG) {
+    private void doProcessCurrentStep() {
         currentStep.execute().addListener(
                 new GenericFutureListener<Future<?>>() {
                     public void operationComplete(
@@ -144,11 +143,11 @@ class ConnectionFlow {
                             throws Exception {
                         synchronized (connectLock) {
                             if (future.isSuccess()) {
-                                LOG.debug("ConnectionFlowStep succeeded");
+                                log.trace("ConnectionFlowStep succeeded");
                                 currentStep
                                         .onSuccess(ConnectionFlow.this);
                             } else {
-                                LOG.debug("ConnectionFlowStep failed",
+                                log.error("ConnectionFlowStep failed",
                                         future.cause());
                                 fail(future.cause());
                             }
@@ -163,7 +162,7 @@ class ConnectionFlow {
      */
     void succeed() {
         synchronized (connectLock) {
-            serverConnection.getLOG().debug(
+            log.trace(
                     "Connection flow completed successfully: {}", currentStep);
             serverConnection.connectionSucceeded(!suppressInitialRequest);
             notifyThreadsWaitingForConnection();

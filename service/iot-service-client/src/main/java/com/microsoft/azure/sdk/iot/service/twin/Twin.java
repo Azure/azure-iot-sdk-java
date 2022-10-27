@@ -29,6 +29,22 @@ public class Twin
     private String eTag;
 
     @Getter
+    @Setter
+    private TwinStatus status;
+
+    @Getter
+    @Setter
+    private String statusUpdateTime;
+
+    @Getter
+    @Setter
+    private String lastActivityTime;
+
+    @Getter
+    @Setter
+    private Integer cloudToDeviceMessageCount;
+
+    @Getter
     @Setter(AccessLevel.PACKAGE)
     private Integer version;
 
@@ -78,6 +94,12 @@ public class Twin
         Twin twin = new Twin(twinState.getDeviceId());
         twin.setVersion(twinState.getVersion());
         twin.setETag(twinState.getETag());
+        twin.setStatus(twinState.getStatus());
+        twin.setStatusUpdateTime(twinState.getStatusUpdatedTime());
+        twin.setConnectionState(twinState.getConnectionState());
+        twin.setLastActivityTime(twinState.getLastActivityTime());
+        twin.setCloudToDeviceMessageCount(twinState.getCloudToDeviceMessageCount());
+
 
         // Tags
         twin.getTags().setVersion(twinState.getTags().getVersion());
@@ -254,6 +276,30 @@ public class Twin
             thisDevice.append("Parent scopes: ")
                     .append(String.join(",", this.parentScopes))
                     .append("\n");
+        }
+        if (this.status != null)
+        {
+            thisDevice.append("Status: ").append(this.status.toString()).append("\n");
+        }
+
+        if (this.statusUpdateTime != null)
+        {
+            thisDevice.append("StatusUpdateTime: ").append(this.statusUpdateTime).append("\n");
+        }
+
+        if (this.connectionState != null)
+        {
+            thisDevice.append("ConnectionState: ").append(this.connectionState).append("\n");
+        }
+
+        if (this.lastActivityTime != null)
+        {
+            thisDevice.append("LastActivityTime: ").append(this.lastActivityTime).append("\n");
+        }
+
+        if (this.cloudToDeviceMessageCount != null)
+        {
+            thisDevice.append("CloudToDeviceMessageCount:").append(this.cloudToDeviceMessageCount.toString()).append("\n");
         }
 
         thisDevice.append(tagsToString());

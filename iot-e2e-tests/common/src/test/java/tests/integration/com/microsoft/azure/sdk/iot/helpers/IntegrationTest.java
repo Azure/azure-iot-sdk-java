@@ -95,5 +95,8 @@ public abstract class IntegrationTest
     public static int AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS = 4 * 60;
     public static int AMQP_DEVICE_SESSION_TIMEOUT_SECONDS = 4 * 60;
 
+    // Http specific period value for polling the service in order to see if any c2d messages are ready to be received
+    public static int HTTP_RECEIVE_PERIOD = 1000;
+
     public static X509CertificateGenerator x509CertificateGenerator = new X509CertificateGenerator();
 }

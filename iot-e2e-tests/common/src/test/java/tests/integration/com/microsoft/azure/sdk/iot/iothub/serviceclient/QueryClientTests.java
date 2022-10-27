@@ -121,6 +121,17 @@ public class QueryClientTests extends IntegrationTest
             assertEquals(2, twinList.size());
             assertTrue(twinList.get(0).getDeviceId().equals(deviceId1) || twinList.get(0).getDeviceId().equals(deviceId2));
             assertTrue(twinList.get(1).getDeviceId().equals(deviceId1) || twinList.get(1).getDeviceId().equals(deviceId2));
+
+            assertNotNull(twinList.get(0).getStatus());
+            assertNotNull(twinList.get(0).getConnectionState());
+            assertNotNull(twinList.get(0).getLastActivityTime());
+            assertNotNull(twinList.get(0).getCloudToDeviceMessageCount());
+
+            assertNotNull(twinList.get(1).getStatus());
+            assertNotNull(twinList.get(1).getConnectionState());
+            assertNotNull(twinList.get(1).getLastActivityTime());
+            assertNotNull(twinList.get(0).getCloudToDeviceMessageCount());
+
         }
         finally
         {
@@ -201,6 +212,7 @@ public class QueryClientTests extends IntegrationTest
 
     @Ignore //TODO this test fails with 400 level error when scheduling a job, but only in Canary
     @StandardTierHubOnlyTest
+    @FlakeyTest
     @Test
     public void testQueryJobsByType() throws IOException, IotHubException, InterruptedException
     {
@@ -247,10 +259,7 @@ public class QueryClientTests extends IntegrationTest
 
             assertNotNull(job.getJobId());
             assertNotNull(job.getJobType());
-            assertNotNull(job.getStartTime());
-            assertNotNull(job.getEndTime());
             assertNotNull(job.getCreatedTime());
-            assertNotNull(job.getMaxExecutionTimeInSeconds());
             assertNotNull(job.getJobStatus());
             assertNotNull(job.getJobStatistics());
         }

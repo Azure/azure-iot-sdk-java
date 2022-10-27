@@ -34,6 +34,12 @@
         <url>https://github.com/Azure/azure-iot-sdk-java.git</url>
     </scm>
     <properties>
+        <!--
+        By default, don't skip unit tests. Can override this behavior by passing in
+        "-DskipUnitTests=true", "-DskipUnitTests", "-DskipTests=true" or "-DskipTests"  to your maven command such as "mvn install -DskipUnitTests"
+        -->
+        <skipUnitTests>false</skipUnitTests>
+        <skipTests>false</skipTests>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
@@ -84,6 +90,31 @@
     <build>
         <plugins>
             <plugin>
+                <!--
+                pom.xml properties don't natively support conditional expressions such as "value = someBoolean || someOtherBoolean",
+                but this plugin allows us to create a pom.xml property at build time using such a conditional. This allows
+                us to skip running tests in this package either if the user passes in "-DskipUnitTests" or "-DskipTests"
+                -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.12</version>
+                <executions>
+                    <execution>
+                        <id>negate-prop</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>bsh-property</goal>
+                        </goals>
+                        <configuration>
+                            <source>shouldSkipTests = ${skipUnitTests} || ${skipTests};</source> <!--Users can skip running tests in this package with either "-DskipTests" or "-DskipUnitTests"-->
+                            <properties>
+                                <property>shouldSkipTests</property>
+                            </properties>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.3</version>
@@ -130,8 +161,27 @@
                 <version>2.22.0</version>
                 <configuration>
                     <rerunFailingTestsCount>2</rerunFailingTestsCount>
+                    <skipTests>${shouldSkipTests}</skipTests> <!--This property is created at build time by the build-helper-maven-plugin, so it will appear as a compilation issue even though it will build just fine.-->
                 </configuration>
             </plugin>
         </plugins>
+
+        <!--This block allows this package to read the SDK package version/artifactId/groupId from this pom file-->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/provisioning-device-client.properties</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>**/provisioning-device-client.properties</exclude>
+                </excludes>
+            </resource>
+        </resources>
     </build>
 </project>

@@ -45,6 +45,13 @@
             <version>1.0.56</version>
         </dependency>
 
+        <!--This upgrades a sub-dependency from the above io.swagger:swagger-parser package-->
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.32</version>
+        </dependency>
+
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
@@ -128,5 +135,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

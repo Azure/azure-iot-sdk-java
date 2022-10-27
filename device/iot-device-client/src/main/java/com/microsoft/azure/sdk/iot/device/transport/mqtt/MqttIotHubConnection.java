@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import javax.net.ssl.SSLContext;
@@ -214,7 +215,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
 
         // these variables are shared between the messaging, twin and method subclients
         Map<Integer, Message> unacknowledgedSentMessages = new ConcurrentHashMap<>();
-        Queue<Pair<String, byte[]>> receivedMessages = new ConcurrentLinkedQueue<>();
+        Queue<Pair<String, MqttMessage>> receivedMessages = new ConcurrentLinkedQueue<>();
 
         this.deviceMessaging = new MqttMessaging(
             deviceId,
@@ -390,6 +391,12 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             throw new TransportException(new IllegalArgumentException("message and result must be non-null"));
         }
 
+        if (message.getQualityOfService() == 0)
+        {
+            // messages that the service sent with QoS 0 don't need to be acknowledged.
+            return true;
+        }
+
         int messageId;
         log.trace("Checking if MQTT layer can acknowledge the received message ({})", message);
         if (receivedMessagesToAcknowledge.containsKey(message))
@@ -464,8 +471,17 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         }
         else
         {
-            log.trace("MQTT received message so it has been added to the messages to acknowledge list ({})", transportMessage);
-            this.receivedMessagesToAcknowledge.put(transportMessage, messageId);
+            if (transportMessage.getQualityOfService() == 0)
+            {
+                // Direct method messages and Twin messages are always sent with QoS 0, so there is no need for this SDK
+                // to acknowledge them.
+                log.trace("MQTT received message with QoS 0 so it has not been added to the messages to acknowledge list ({})", transportMessage);
+            }
+            else
+            {
+                log.trace("MQTT received message so it has been added to the messages to acknowledge list ({})", transportMessage);
+                this.receivedMessagesToAcknowledge.put(transportMessage, messageId);
+            }
 
             switch (transportMessage.getMessageType())
             {

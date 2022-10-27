@@ -95,14 +95,14 @@ public class MqttTest
     {
         if (withParameters)
         {
-            MqttMessaging mqttMessaging = new MqttMessaging(CLIENT_ID, mockedMessageListener, "", false, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+            MqttMessaging mqttMessaging = new MqttMessaging(CLIENT_ID, mockedMessageListener, "", false, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
             Deencapsulation.invoke(mqttMessaging, "setListener", new Class[]{IotHubListener.class}, listener);
             Deencapsulation.invoke(mqttMessaging, "setMqttAsyncClient", mockMqttAsyncClient);
             return mqttMessaging;
         }
         else
         {
-            MqttTwin mqttTwin = new MqttTwin(null, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+            MqttTwin mqttTwin = new MqttTwin(null, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
             Deencapsulation.invoke(mqttTwin, "setListener", new Class[]{IotHubListener.class}, listener);
             Deencapsulation.invoke(mqttTwin, "setMqttAsyncClient", mockMqttAsyncClient);
             return mqttTwin;
@@ -616,19 +616,21 @@ public class MqttTest
         final byte[] payload = {0x61, 0x62, 0x63};
         baseConnectExpectation();
 
-       final Mqtt mockMqtt = new MqttMessaging(CLIENT_ID, null, "", false, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+       final Mqtt mockMqtt = new MqttMessaging(CLIENT_ID, null, "", false, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
        Deencapsulation.invoke(mockMqtt, "setMqttAsyncClient", mockMqttAsyncClient);
        new NonStrictExpectations()
         {
             {
                 mockMqttAsyncClient.isConnected();
                 result = true;
+                mockMqttMessage.getPayload();
+                result = payload;
             }
         };
 
-       Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
+       Queue<Pair<String, MqttMessage>> testreceivedMessages = new ConcurrentLinkedQueue<>();
+        testreceivedMessages.add(new MutablePair<>(MOCK_PARSE_TOPIC, mockMqttMessage));
        Deencapsulation.setField(mockMqtt, "receivedMessages", testreceivedMessages);
-       testreceivedMessages.add(new MutablePair<>(MOCK_PARSE_TOPIC, payload));
 
         Deencapsulation.invoke(mockMqtt, "connect");
 
@@ -659,19 +661,21 @@ public class MqttTest
         final byte[] payload = {0x61, 0x62, 0x63};
         baseConnectExpectation();
 
-        final Mqtt mockMqtt = new MqttMessaging(CLIENT_ID, null, "", false, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        final Mqtt mockMqtt = new MqttMessaging(CLIENT_ID, null, "", false, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         Deencapsulation.invoke(mockMqtt, "setMqttAsyncClient", mockMqttAsyncClient);
         new NonStrictExpectations()
         {
             {
                 mockMqttAsyncClient.isConnected();
                 result = true;
+                mockMqttMessage.getPayload();
+                result = payload;
             }
         };
 
-        Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
+        Queue<Pair<String, MqttMessage>> testreceivedMessages = new ConcurrentLinkedQueue<>();
         Deencapsulation.setField(mockMqtt, "receivedMessages", testreceivedMessages);
-        testreceivedMessages.add(new MutablePair<>(MOCK_PARSE_TOPIC_WITH_INPUT_NAME, payload));
+        testreceivedMessages.add(new MutablePair<>(MOCK_PARSE_TOPIC_WITH_INPUT_NAME, mockMqttMessage));
 
         Deencapsulation.invoke(mockMqtt, "connect");
 
@@ -690,7 +694,7 @@ public class MqttTest
         //arrange
         final byte[] payload = {0x61, 0x62, 0x63};
         baseConnectExpectation();
-        final Mqtt mockMqtt = new MqttMessaging(CLIENT_ID,  null, "", false, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        final Mqtt mockMqtt = new MqttMessaging(CLIENT_ID,  null, "", false, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         Deencapsulation.invoke(mockMqtt, "setMqttAsyncClient", mockMqttAsyncClient);
 
         new NonStrictExpectations()
@@ -735,12 +739,12 @@ public class MqttTest
         mockMqtt.messageArrived(MOCK_PARSE_TOPIC, new MqttMessage(actualPayload));
 
         //assert
-        Queue<Pair<String, byte[]>> actualQueue = Deencapsulation.getField(mockMqtt, "receivedMessages");
-        Pair<String, byte[]> messagePair = actualQueue.poll();
+        Queue<Pair<String, MqttMessage>> actualQueue = Deencapsulation.getField(mockMqtt, "receivedMessages");
+        Pair<String, MqttMessage> messagePair = actualQueue.poll();
         assertNotNull(messagePair);
         assertEquals(messagePair.getKey(), MOCK_PARSE_TOPIC);
 
-        byte[] receivedPayload = messagePair.getValue();
+        byte[] receivedPayload = messagePair.getValue().getPayload();
         assertEquals(actualPayload.length, receivedPayload.length);
         for (int i = 0; i < actualPayload.length; i++)
         {
@@ -795,7 +799,7 @@ public class MqttTest
         try
         {
             //arrange
-            MqttMessaging testMqttClient = new MqttMessaging("deviceId", null, "", false, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+            MqttMessaging testMqttClient = new MqttMessaging("deviceId", null, "", false, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
             Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
             Deencapsulation.setField(testMqttClient, "receivedMessages", testreceivedMessages);
 
@@ -820,19 +824,21 @@ public class MqttTest
         final String mockParseTopicInvalidPropertyFormat = "devices/deviceID/messages/devicebound/%24.mid=69ea4caf-d83e-454b-81f2-caafda4c81c8&%24.exp=99999&%24.to=%2Fdevices%2FdeviceID%2Fmessages%2FdeviceBound&%24.cid=169c34b3-99b0-49f9-b0f6-8fa9d2c99345&iothub-ack=full&property1value1";
         baseConnectExpectation();
 
-        final Mqtt mockMqtt = new MqttMessaging(CLIENT_ID, null, "", false, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        final Mqtt mockMqtt = new MqttMessaging(CLIENT_ID, null, "", false, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         Deencapsulation.invoke(mockMqtt, "setMqttAsyncClient", mockMqttAsyncClient);
         new NonStrictExpectations()
         {
             {
                 mockMqttAsyncClient.isConnected();
                 result = true;
+                mockMqttMessage.getPayload();
+                result = payload;
             }
         };
 
-        Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
+        Queue<Pair<String, MqttMessage>> testreceivedMessages = new ConcurrentLinkedQueue<>();
         Deencapsulation.setField(mockMqtt, "receivedMessages", testreceivedMessages);
-        testreceivedMessages.add(new MutablePair<>(mockParseTopicInvalidPropertyFormat, payload));
+        testreceivedMessages.add(new MutablePair<>(mockParseTopicInvalidPropertyFormat, mockMqttMessage));
 
         Deencapsulation.invoke(mockMqtt, "connect");
 
@@ -851,7 +857,7 @@ public class MqttTest
         final String mockParseTopicNoCustomProperties = "devices/deviceID/messages/devicebound/%24.mid=69ea4caf-d83e-454b-81f2-caafda4c81c8&%24.exp=0&%24.to=%2Fdevices%2FdeviceID%2Fmessages%2FdeviceBound&%24.cid=169c34b3-99b0-49f9-b0f6-8fa9d2c99345&iothub-ack=full";
         baseConnectExpectation();
 
-        final Mqtt mockMqtt = new MqttMessaging(CLIENT_ID, null, "", false, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        final Mqtt mockMqtt = new MqttMessaging(CLIENT_ID, null, "", false, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         Deencapsulation.invoke(mockMqtt, "setMqttAsyncClient", mockMqttAsyncClient);
 
         new NonStrictExpectations()
@@ -859,12 +865,14 @@ public class MqttTest
             {
                 mockMqttAsyncClient.isConnected();
                 result = true;
+                mockMqttMessage.getPayload();
+                result = payload;
             }
         };
 
-        Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
+        Queue<Pair<String, MqttMessage>> testreceivedMessages = new ConcurrentLinkedQueue<>();
         Deencapsulation.setField(mockMqtt, "receivedMessages", testreceivedMessages);
-        testreceivedMessages.add(new MutablePair<>(mockParseTopicNoCustomProperties, payload));
+        testreceivedMessages.add(new MutablePair<>(mockParseTopicNoCustomProperties, mockMqttMessage));
 
         Deencapsulation.invoke(mockMqtt, "connect");
 
@@ -886,19 +894,21 @@ public class MqttTest
         final String mockParseTopicWithUnusualCharacters = "devices/deviceID/messages/devicebound/%24.mid=69ea4caf-d83e-454b-81f2-caafda4c81c8&%24.exp=0&%24.to=%2Fdevices%2FdeviceID%2Fmessages%2FdeviceBound&%24.cid=169c34b3-99b0-49f9-b0f6-8fa9d2c99345&iothub-ack=full&property1=%24&property2=%26&%25=_&finalProperty=.";
         baseConnectExpectation();
 
-        final Mqtt mockMqtt = new MqttMessaging(CLIENT_ID, null, "", false, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        final Mqtt mockMqtt = new MqttMessaging(CLIENT_ID, null, "", false, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         Deencapsulation.invoke(mockMqtt, "setMqttAsyncClient", mockMqttAsyncClient);
         new NonStrictExpectations()
         {
             {
                 mockMqttAsyncClient.isConnected();
                 result = true;
+                mockMqttMessage.getPayload();
+                result = payload;
             }
         };
 
-        Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
+        Queue<Pair<String, MqttMessage>> testreceivedMessages = new ConcurrentLinkedQueue<>();
         Deencapsulation.setField(mockMqtt, "receivedMessages", testreceivedMessages);
-        testreceivedMessages.add(new MutablePair<>(mockParseTopicWithUnusualCharacters, payload));
+        testreceivedMessages.add(new MutablePair<>(mockParseTopicWithUnusualCharacters, mockMqttMessage));
 
         Deencapsulation.invoke(mockMqtt, "connect");
 
@@ -937,21 +947,23 @@ public class MqttTest
         final String mockParseTopicWithUnusualCharacters = "devices/deviceID/messages/devicebound/%24.mid=" + msgId + "&%24.exp=" + expTime + "&%24.to=" + URLEncoder.encode(to, StandardCharsets.UTF_8.name()) + "&%24.cid=" + corId + "&iothub-ack=full&%24.ce=" + contentEncoding + "&%24.ct=" + URLEncoder.encode(contentType, StandardCharsets.UTF_8.name()) + "&%24.on=" + outputName + "&property1=%24&property2=%26&%25=_&finalProperty=.";
         baseConnectExpectation();
 
-        final Mqtt mockMqtt = new MqttMessaging(CLIENT_ID, null, "", false, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        final Mqtt mockMqtt = new MqttMessaging(CLIENT_ID, null, "", false, mockMqttConnectionOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         Deencapsulation.invoke(mockMqtt, "setMqttAsyncClient", mockMqttAsyncClient);
         new NonStrictExpectations()
         {
             {
                 mockMqttAsyncClient.isConnected();
                 result = true;
+                mockMqttMessage.getPayload();
+                result = payload;
             }
         };
 
         Deencapsulation.invoke(mockMqtt, "connect");
 
-        Queue<Pair<String, byte[]>> testreceivedMessages = new ConcurrentLinkedQueue<>();
+        Queue<Pair<String, MqttMessage>> testreceivedMessages = new ConcurrentLinkedQueue<>();
         Deencapsulation.setField(mockMqtt, "receivedMessages", testreceivedMessages);
-        testreceivedMessages.add(new MutablePair<>(mockParseTopicWithUnusualCharacters, payload));
+        testreceivedMessages.add(new MutablePair<>(mockParseTopicWithUnusualCharacters, mockMqttMessage));
 
         //act
         Message receivedMessage = mockMqtt.receive();

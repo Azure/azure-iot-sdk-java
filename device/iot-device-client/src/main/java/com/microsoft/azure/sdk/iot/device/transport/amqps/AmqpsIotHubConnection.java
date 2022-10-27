@@ -583,12 +583,10 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
         this.savedException = AmqpsExceptionTranslator.convertFromAmqpException(errorCondition);
 
-        if (this.isMultiplexing)
-        {
-            // transport errors involve closing the entire amqp connection, so save all the previous sessions
-            // so that their twin/methods subscriptions can persist
-            this.reconnectingDeviceSessionHandlers.putAll(this.sessionHandlers);
-        }
+
+        // transport errors involve closing the entire amqp connection, so save all the previous sessions
+        // so that their twin/methods subscriptions can persist
+        this.reconnectingDeviceSessionHandlers.putAll(this.sessionHandlers);
 
         // In the event that we get a local error and the connection is already in the closed state we need to manually call
         // onConnectionLocalClose. Proton will not queue the CONNECTION_LOCAL_CLOSE event since the Endpoint status is CLOSED

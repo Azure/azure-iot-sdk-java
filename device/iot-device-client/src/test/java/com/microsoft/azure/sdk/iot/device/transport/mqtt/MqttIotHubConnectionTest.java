@@ -776,6 +776,15 @@ public class MqttIotHubConnectionTest
         //arrange
         baseExpectations();
         openExpectations(null);
+
+        new Expectations()
+        {
+            {
+                mockedTransportMessage.getQualityOfService();
+                result = 1;
+            }
+        };
+
         final IotHubMessageResult expectedResult = IotHubMessageResult.COMPLETE;
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
@@ -819,9 +828,6 @@ public class MqttIotHubConnectionTest
         connection.sendMessageResult(mockedTransportMessage, null);
     }
 
-    //Tests_SRS_MQTTIOTHUBCONNECTION_34_053: [If the provided message has message type DEVICE_METHODS, this function shall invoke the methods client to send the ack and return the result.]
-    //Tests_SRS_MQTTIOTHUBCONNECTION_34_056: [If the ack was sent successfully, this function shall remove the provided message from the saved map of messages to acknowledge.]
-    //Tests_SRS_MQTTIOTHUBCONNECTION_34_052: [If this object has received the provided message from the service, this function shall retrieve the Mqtt messageId for that message.]
     @Test
     public void sendMessageResultForMethods() throws TransportException, IOException, MqttException
     {
@@ -832,19 +838,13 @@ public class MqttIotHubConnectionTest
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open();
-        final int expectedMessageId = 12;
         Map<IotHubTransportMessage, Integer> receivedMessagesToAcknowledge = new ConcurrentHashMap<>();
-        receivedMessagesToAcknowledge.put(mockedTransportMessage, expectedMessageId);
         Deencapsulation.setField(connection, "receivedMessagesToAcknowledge", receivedMessagesToAcknowledge);
         new NonStrictExpectations()
         {
             {
-                mockedTransportMessage.getMessageType();
-                result = MessageType.DEVICE_METHODS;
-
-                Deencapsulation.invoke(mockDeviceMethod, "sendMessageAcknowledgement", expectedMessageId);
-                Deencapsulation.invoke(mockDeviceTwin, "sendMessageAcknowledgement", expectedMessageId);
-                Deencapsulation.invoke(mockDeviceMessaging, "sendMessageAcknowledgement", expectedMessageId);
+                mockedTransportMessage.getQualityOfService();
+                result = 0;
             }
         };
 
@@ -856,19 +856,6 @@ public class MqttIotHubConnectionTest
         receivedMessagesToAcknowledge = Deencapsulation.getField(connection, "receivedMessagesToAcknowledge");
         assertTrue(receivedMessagesToAcknowledge.isEmpty());
         assertTrue(sendMessageResult);
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockDeviceMethod, "sendMessageAcknowledgement", expectedMessageId);
-                times = 1;
-
-                Deencapsulation.invoke(mockDeviceTwin, "sendMessageAcknowledgement", expectedMessageId);
-                times = 0;
-
-                Deencapsulation.invoke(mockDeviceMessaging, "sendMessageAcknowledgement", expectedMessageId);
-                times = 0;
-            }
-        };
     }
 
     //Tests_SRS_MQTTIOTHUBCONNECTION_34_054: [If the provided message has message type DEVICE_TWIN, this function shall invoke the twin client to send the ack and return the result.]
@@ -889,12 +876,8 @@ public class MqttIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                mockedTransportMessage.getMessageType();
-                result = MessageType.DEVICE_TWIN;
-
-                Deencapsulation.invoke(mockDeviceMethod, "sendMessageAcknowledgement", expectedMessageId);
-                Deencapsulation.invoke(mockDeviceTwin, "sendMessageAcknowledgement", expectedMessageId);
-                Deencapsulation.invoke(mockDeviceMessaging, "sendMessageAcknowledgement", expectedMessageId);
+                mockedTransportMessage.getQualityOfService();
+                result = 0;
             }
         };
 
@@ -904,19 +887,6 @@ public class MqttIotHubConnectionTest
 
         //assert
         assertTrue(sendMessageResult);
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockDeviceMethod, "sendMessageAcknowledgement", expectedMessageId);
-                times = 0;
-
-                Deencapsulation.invoke(mockDeviceTwin, "sendMessageAcknowledgement", expectedMessageId);
-                times = 1;
-
-                Deencapsulation.invoke(mockDeviceMessaging, "sendMessageAcknowledgement", expectedMessageId);
-                times = 0;
-            }
-        };
     }
 
     //Tests_SRS_MQTTIOTHUBCONNECTION_34_055: [If the provided message has message type other than DEVICE_METHODS and DEVICE_TWIN, this function shall invoke the telemetry client to send the ack and return the result.]
@@ -939,6 +909,9 @@ public class MqttIotHubConnectionTest
             {
                 mockedTransportMessage.getMessageType();
                 result = MessageType.DEVICE_TELEMETRY;
+
+                mockedTransportMessage.getQualityOfService();
+                result = 1;
 
                 Deencapsulation.invoke(mockDeviceMethod, "sendMessageAcknowledgement", expectedMessageId);
                 Deencapsulation.invoke(mockDeviceTwin, "sendMessageAcknowledgement", expectedMessageId);
@@ -1012,10 +985,7 @@ public class MqttIotHubConnectionTest
 
         //assert
         Map<IotHubTransportMessage, Integer> receivedMessagesToAcknowledge = Deencapsulation.getField(connection, "receivedMessagesToAcknowledge");
-        assertEquals(1, receivedMessagesToAcknowledge.size());
-        assertTrue(receivedMessagesToAcknowledge.containsKey(mockedTransportMessage));
-        assertEquals(expectedMessageId, (int) receivedMessagesToAcknowledge.get(mockedTransportMessage));
-
+        assertEquals(0, receivedMessagesToAcknowledge.size());
     }
 
 
