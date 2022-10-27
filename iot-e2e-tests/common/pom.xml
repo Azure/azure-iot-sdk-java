@@ -105,6 +105,7 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
+            <version>4.1.82.Final</version>
         </dependency>
         <!--
         This newer Azure storage SDK has some compatibility issues with Android. Leaving this dependency alone

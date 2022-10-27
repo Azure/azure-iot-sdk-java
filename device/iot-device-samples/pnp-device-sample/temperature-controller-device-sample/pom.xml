@@ -21,6 +21,7 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
             <scope>compile</scope>
+            <version>2.14.0-rc1</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
