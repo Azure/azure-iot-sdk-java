@@ -226,6 +226,14 @@ public class IndividualEnrollment extends Serializable
     @Setter
     private Collection<String> iotHubs;
 
+    // The issuance policy for DPS client certificates.
+    private static final String CLIENT_CERT_ISSUANCE_POLICY = "clientCertIssuancePolicy";
+    @Expose
+    @SerializedName(CLIENT_CERT_ISSUANCE_POLICY)
+    @Getter
+    @Setter
+    private ClientCertificateIssuancePolicy clientCertIssuancePolicy;
+
     /**
      * CONSTRUCTOR
      *
