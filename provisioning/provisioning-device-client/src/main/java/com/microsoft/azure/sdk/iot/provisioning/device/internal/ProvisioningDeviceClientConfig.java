@@ -50,6 +50,9 @@ public final class ProvisioningDeviceClientConfig
     @Setter
     private String payload;
 
+    @Getter
+    private String clientCertIssuancePolicy;
+
     /**
      * Setter for the Registration Callback.
      * @param registrationCallback  Registration Callback to be triggered.

@@ -13,7 +13,6 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.Provisionin
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
-import com.microsoft.azure.sdk.iot.provisioning.device.AdditionalData;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.Callable;

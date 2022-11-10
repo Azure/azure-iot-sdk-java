@@ -42,4 +42,7 @@ public class ProvisioningDeviceClientRegistrationResult
 
     @Getter
     protected String provisioningPayload;
+
+    @Getter
+    protected String issuedClientCertifiate;
 }
