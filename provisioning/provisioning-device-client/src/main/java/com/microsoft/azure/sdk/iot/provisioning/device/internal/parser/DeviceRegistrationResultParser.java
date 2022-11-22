@@ -78,6 +78,11 @@ public class DeviceRegistrationResultParser
     @Getter
     private X509RegistrationResultParser x509;
 
+    private static final String CERTIFICATE = "certificate";
+    @SerializedName(CERTIFICATE)
+    @Getter
+    private String certificate;
+
     private static final String PAYLOAD = "payload";
     @SerializedName(PAYLOAD)
     @Getter
