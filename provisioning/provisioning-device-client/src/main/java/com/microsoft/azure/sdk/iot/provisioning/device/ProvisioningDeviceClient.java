@@ -15,6 +15,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.Provi
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import lombok.extern.slf4j.Slf4j;
 
+import java.security.cert.Certificate;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -37,12 +38,12 @@ public class ProvisioningDeviceClient
      * @return An instance of ProvisioningDeviceClient
      * @throws ProvisioningDeviceClientException if any of the underlying API calls fail to process.
      */
-    public static ProvisioningDeviceClient create(String globalEndpoint, String idScope, ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider) throws ProvisioningDeviceClientException
+    public static ProvisioningDeviceClient create(String globalEndpoint, String idScope, ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider, Certificate certificate) throws ProvisioningDeviceClientException
     {
-        return new ProvisioningDeviceClient(globalEndpoint, idScope, protocol, securityProvider);
+        return new ProvisioningDeviceClient(globalEndpoint, idScope, protocol, securityProvider, certificate);
     }
 
-    private ProvisioningDeviceClient(String globalEndpoint, String idScope, ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider) throws ProvisioningDeviceClientException
+    private ProvisioningDeviceClient(String globalEndpoint, String idScope, ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider, Certificate certificate) throws ProvisioningDeviceClientException
     {
         if (globalEndpoint == null || globalEndpoint.isEmpty())
         {
@@ -66,6 +67,12 @@ public class ProvisioningDeviceClient
         {
             //SRS_ProvisioningDeviceClient_25_004: [ The constructor shall throw IllegalArgumentException if securityProvider is null. ]
             throw new IllegalArgumentException("Security provider cannot be null");
+        }
+
+        if (certificate == null)
+        {
+            //SRS_ProvisioningDeviceClient_25_004: [ The constructor shall throw IllegalArgumentException if certificate is null. ]
+            throw new IllegalArgumentException("Certificate cannot be null");
         }
 
         //SRS_ProvisioningDeviceClient_25_005: [ The constructor shall create provisioningDeviceClientConfig and set all the provided values to it.. ]
