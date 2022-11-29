@@ -15,7 +15,6 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.Provi
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import lombok.extern.slf4j.Slf4j;
 
-import java.security.cert.Certificate;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -38,12 +37,12 @@ public class ProvisioningDeviceClient
      * @return An instance of ProvisioningDeviceClient
      * @throws ProvisioningDeviceClientException if any of the underlying API calls fail to process.
      */
-    public static ProvisioningDeviceClient create(String globalEndpoint, String idScope, ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider, Certificate certificate) throws ProvisioningDeviceClientException
+    public static ProvisioningDeviceClient create(String globalEndpoint, String idScope, ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider, String certificate) throws ProvisioningDeviceClientException
     {
         return new ProvisioningDeviceClient(globalEndpoint, idScope, protocol, securityProvider, certificate);
     }
 
-    private ProvisioningDeviceClient(String globalEndpoint, String idScope, ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider, Certificate certificate) throws ProvisioningDeviceClientException
+    private ProvisioningDeviceClient(String globalEndpoint, String idScope, ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider, String certificate) throws ProvisioningDeviceClientException
     {
         if (globalEndpoint == null || globalEndpoint.isEmpty())
         {
@@ -82,6 +81,7 @@ public class ProvisioningDeviceClient
         this.provisioningDeviceClientConfig.setIdScope(idScope);
         this.provisioningDeviceClientConfig.setProtocol(protocol);
         this.provisioningDeviceClientConfig.setSecurityProvider(securityProvider);
+        this.provisioningDeviceClientConfig.setClientCertIssuancePolicy(certificate);
 
         //SRS_ProvisioningDeviceClient_25_006: [ The constructor shall create provisioningDeviceClientContract with the given config. ]
         this.provisioningDeviceClientContract = ProvisioningDeviceClientContract.createProvisioningContract(this.provisioningDeviceClientConfig);
