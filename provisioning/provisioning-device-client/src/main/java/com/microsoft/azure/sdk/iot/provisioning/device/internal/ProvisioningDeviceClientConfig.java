@@ -51,6 +51,7 @@ public final class ProvisioningDeviceClientConfig
     private String payload;
 
     @Getter
+    @Setter
     private String clientCertIssuancePolicy;
 
     /**
