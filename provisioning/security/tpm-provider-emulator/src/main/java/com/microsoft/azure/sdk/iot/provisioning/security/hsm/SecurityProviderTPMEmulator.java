@@ -10,6 +10,8 @@ package com.microsoft.azure.sdk.iot.provisioning.security.hsm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import lombok.extern.slf4j.Slf4j;
+
+import java.nio.charset.StandardCharsets;
 import java.util.Random;
 import tss.*;
 import tss.tpm.*;
@@ -19,6 +21,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.BufferUnderflowException;
 import java.util.Arrays;
+
+import static org.apache.commons.codec.binary.Base64.decodeBase64;
 
 @Slf4j
 public class SecurityProviderTPMEmulator extends SecurityProviderTpm
@@ -105,7 +109,7 @@ public class SecurityProviderTPMEmulator extends SecurityProviderTpm
     public static SecurityProviderTPMEmulator createProviderFromKey(String authenticationKey) throws SecurityProviderException
     {
         SecurityProviderTPMEmulator securityProviderTPMEmulator = new SecurityProviderTPMEmulator();
-        securityProviderTPMEmulator.activateIdentityKey(authenticationKey.getBytes());
+        securityProviderTPMEmulator.activateIdentityKey(decodeBase64(authenticationKey.getBytes(StandardCharsets.UTF_8)));
 
         return securityProviderTPMEmulator;
     }
