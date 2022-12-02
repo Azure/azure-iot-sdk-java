@@ -10,7 +10,10 @@ package com.microsoft.azure.sdk.iot.provisioning.device.internal.task;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientRegistrationResult;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientSubstatus;
+import com.microsoft.azure.sdk.iot.provisioning.device.TpmRegistrationResult;
 
+// Need this class due to not having JAR level access modifier for these setters to ensure only the sdk can set these, not the user
+// ProvisioningTask (which sets these fields) ProvisioningDeviceClientRegistrationResult are in seperate packages, which is why we can't use package level access modifiers
 class RegistrationResult extends ProvisioningDeviceClientRegistrationResult
 {
     /**
@@ -57,5 +60,10 @@ class RegistrationResult extends ProvisioningDeviceClientRegistrationResult
     void setLastUpdatesDateTimeUtc(String lastUpdatesDateTimeUtc)
     {
         this.lastUpdatesDateTimeUtc = lastUpdatesDateTimeUtc;
+    }
+
+    void setTpmRegistrationResult(TpmRegistrationResult tpmRegistrationResult)
+    {
+        this.tpmRegistrationResult = tpmRegistrationResult;
     }
 }

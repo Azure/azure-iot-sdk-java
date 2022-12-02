@@ -240,6 +240,9 @@ public class ProvisioningTask implements Callable<Object>
                         //Codes_SRS_ProvisioningTask_34_016: [Upon reaching the terminal state ASSIGNED, if the saved security client is an instance of SecurityClientTpm, the security client shall decrypt and store the authentication key from the statusResponseParser.]
                         String authenticationKey = registrationStatus.getTpm().getAuthenticationKey();
                         ((SecurityProviderTpm) this.securityProvider).activateIdentityKey(decodeBase64(authenticationKey.getBytes(StandardCharsets.UTF_8)));
+                        Tpm tpmRegistrationResult = new Tpm();
+                        tpmRegistrationResult.setAuthenticationKey(authenticationKey);
+                        registrationInfo.setTpmRegistrationResult(tpmRegistrationResult);
                     }
                     log.info("Device provisioning service assigned the device successfully");
                     this.invokeRegistrationCallback(registrationInfo, null);

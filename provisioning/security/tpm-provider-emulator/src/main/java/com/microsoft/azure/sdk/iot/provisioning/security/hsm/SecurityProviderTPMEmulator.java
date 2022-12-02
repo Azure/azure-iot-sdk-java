@@ -102,6 +102,14 @@ public class SecurityProviderTPMEmulator extends SecurityProviderTpm
         srkPublic = createPersistentPrimary(tpm, SRK_PERSISTENT_HANDLE, TPM_RH.OWNER, SRK_TEMPLATE, "SRK");
     }
 
+    public static SecurityProviderTPMEmulator createProviderFromKey(String authenticationKey) throws SecurityProviderException
+    {
+        SecurityProviderTPMEmulator securityProviderTPMEmulator = new SecurityProviderTPMEmulator();
+        securityProviderTPMEmulator.activateIdentityKey(authenticationKey.getBytes());
+
+        return securityProviderTPMEmulator;
+    }
+
     /**
      * Constructor for creating a Security Provider on TPM Simulator with the supplied Registration ID
      * @param registrationId A non {@code null} or empty value tied to this registration
