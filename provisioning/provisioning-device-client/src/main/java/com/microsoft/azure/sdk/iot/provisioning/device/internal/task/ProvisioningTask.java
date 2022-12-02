@@ -93,7 +93,7 @@ public class ProvisioningTask implements Callable<Object>
         this.executor = Executors.newFixedThreadPool(MAX_THREADS_TO_RUN);
     }
 
-    private void invokeRegistrationCallback(RegistrationResult registrationInfo, Exception e) throws ProvisioningDeviceClientException
+    private void invokeRegistrationCallback(RegistrationResultInternal registrationInfo, Exception e) throws ProvisioningDeviceClientException
     {
         if (this.provisioningDeviceClientRegistrationCallback != null)
         {
@@ -215,7 +215,7 @@ public class ProvisioningTask implements Callable<Object>
                         throw new ProvisioningDeviceClientException("Could not retrieve Assigned Hub or Device ID and status changed to Assigned");
                     }
 
-                    RegistrationResult registrationInfo = new RegistrationResult(
+                    RegistrationResultInternal registrationInfo = new RegistrationResultInternal(
                                                             registrationStatus.getAssignedHub(),
                                                             registrationStatus.getDeviceId(),
                                                             registrationStatus.getPayload(), PROVISIONING_DEVICE_STATUS_ASSIGNED);
@@ -240,7 +240,7 @@ public class ProvisioningTask implements Callable<Object>
                         //Codes_SRS_ProvisioningTask_34_016: [Upon reaching the terminal state ASSIGNED, if the saved security client is an instance of SecurityClientTpm, the security client shall decrypt and store the authentication key from the statusResponseParser.]
                         String authenticationKey = registrationStatus.getTpm().getAuthenticationKey();
                         ((SecurityProviderTpm) this.securityProvider).activateIdentityKey(decodeBase64(authenticationKey.getBytes(StandardCharsets.UTF_8)));
-                        Tpm tpmRegistrationResult = new Tpm();
+                        TpmRegistrationResultInternal tpmRegistrationResult = new TpmRegistrationResultInternal();
                         tpmRegistrationResult.setAuthenticationKey(authenticationKey);
                         registrationInfo.setTpmRegistrationResult(tpmRegistrationResult);
                     }
@@ -253,7 +253,7 @@ public class ProvisioningTask implements Callable<Object>
                     String errorMessage = statusRegistrationOperationStatusParser.getRegistrationState().getErrorMessage();
                     ProvisioningDeviceHubException dpsHubException = new ProvisioningDeviceHubException(errorMessage);
                     dpsHubException.setErrorCode(registrationOperationStatusParser.getRegistrationState().getErrorCode());
-                    registrationInfo = new RegistrationResult(null, null, null, PROVISIONING_DEVICE_STATUS_FAILED);
+                    registrationInfo = new RegistrationResultInternal(null, null, null, PROVISIONING_DEVICE_STATUS_FAILED);
                     log.error("Device provisioning service failed to provision the device, finished with status FAILED: {}", errorMessage);
                     this.invokeRegistrationCallback(registrationInfo, dpsHubException);
                     isContinue = false;
@@ -263,7 +263,7 @@ public class ProvisioningTask implements Callable<Object>
                     String disabledErrorMessage = statusRegistrationOperationStatusParser.getRegistrationState().getErrorMessage();
                     dpsHubException = new ProvisioningDeviceHubException(disabledErrorMessage);
                     dpsHubException.setErrorCode(registrationOperationStatusParser.getRegistrationState().getErrorCode());
-                    registrationInfo = new RegistrationResult(null, null, null, PROVISIONING_DEVICE_STATUS_DISABLED);
+                    registrationInfo = new RegistrationResultInternal(null, null, null, PROVISIONING_DEVICE_STATUS_DISABLED);
                     log.error("Device provisioning service failed to provision the device, finished with status DISABLED: {}", disabledErrorMessage);
                     this.invokeRegistrationCallback(registrationInfo, dpsHubException);
                     isContinue = false;
@@ -346,7 +346,7 @@ public class ProvisioningTask implements Callable<Object>
         {
             //SRS_ProvisioningTask_25_006: [ This method shall invoke the status callback, if any of the task fail or throw any exception. ]
             this.dpsStatus = PROVISIONING_DEVICE_STATUS_ERROR;
-            invokeRegistrationCallback(new RegistrationResult(null, null, null, PROVISIONING_DEVICE_STATUS_ERROR), e);
+            invokeRegistrationCallback(new RegistrationResultInternal(null, null, null, PROVISIONING_DEVICE_STATUS_ERROR), e);
             //SRS_ProvisioningTask_25_015: [ This method shall invoke close call on the contract and close the threads started.]
             this.close();
         }

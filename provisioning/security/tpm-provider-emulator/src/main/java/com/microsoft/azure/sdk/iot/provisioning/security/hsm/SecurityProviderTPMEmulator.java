@@ -10,9 +10,6 @@ package com.microsoft.azure.sdk.iot.provisioning.security.hsm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import lombok.extern.slf4j.Slf4j;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Random;
 import tss.*;
 import tss.tpm.*;
 
@@ -20,7 +17,9 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.BufferUnderflowException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Random;
 
 import static org.apache.commons.codec.binary.Base64.decodeBase64;
 

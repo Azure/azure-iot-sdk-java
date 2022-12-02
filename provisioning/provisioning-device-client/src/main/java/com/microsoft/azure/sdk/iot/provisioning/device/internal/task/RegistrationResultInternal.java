@@ -14,7 +14,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.TpmRegistrationResult;
 
 // Need this class due to not having JAR level access modifier for these setters to ensure only the sdk can set these, not the user
 // ProvisioningTask (which sets these fields) ProvisioningDeviceClientRegistrationResult are in seperate packages, which is why we can't use package level access modifiers
-class RegistrationResult extends ProvisioningDeviceClientRegistrationResult
+class RegistrationResultInternal extends ProvisioningDeviceClientRegistrationResult
 {
     /**
      * Constructor to set iothub uri, device id and status of the service as retrieved
@@ -23,7 +23,7 @@ class RegistrationResult extends ProvisioningDeviceClientRegistrationResult
      * @param jsonPayload Value of custom json payload. Can be {@code null}
      * @param dpsStatus Status of the service.
      */
-    RegistrationResult(String iothubUri, String deviceId, String jsonPayload, ProvisioningDeviceClientStatus dpsStatus)
+    RegistrationResultInternal(String iothubUri, String deviceId, String jsonPayload, ProvisioningDeviceClientStatus dpsStatus)
     {
         super();
         this.iothubUri = iothubUri;
