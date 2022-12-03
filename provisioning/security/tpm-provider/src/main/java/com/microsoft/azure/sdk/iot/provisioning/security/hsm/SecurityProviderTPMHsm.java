@@ -10,11 +10,17 @@ package com.microsoft.azure.sdk.iot.provisioning.security.hsm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import lombok.extern.slf4j.Slf4j;
-import tss.*;
+import tss.Tpm;
+import tss.TpmBuffer;
+import tss.TpmFactory;
+import tss.TpmHelpers;
 import tss.tpm.*;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Random;
+
+import static org.apache.commons.codec.binary.Base64.decodeBase64;
 
 @Slf4j
 public class SecurityProviderTPMHsm extends SecurityProviderTpm
@@ -93,6 +99,20 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
         tpm = TpmFactory.platformTpm();
         ekPublic = createPersistentPrimary(tpm, EK_PERSISTENT_HANDLE, TPM_RH.OWNER, EK_TEMPLATE, "EK");
         srkPublic = createPersistentPrimary(tpm, SRK_PERSISTENT_HANDLE, TPM_RH.OWNER, SRK_TEMPLATE, "SRK");
+    }
+
+    /**
+     * Constructor for creating a Security Provider on TPM Simulator with a cached nonce from the provisioning service
+     * Used for reconnecting via TPM only after device has been provisioned
+     * @param authenticationKey A non {@code null} or empty value recieved upon registration
+     * @throws SecurityProviderException If the constructor could not start the TPM
+     */
+    public static SecurityProviderTPMHsm createProviderFromKey(String authenticationKey) throws SecurityProviderException
+    {
+        SecurityProviderTPMHsm securityProviderTPMHsm = new SecurityProviderTPMHsm();
+        securityProviderTPMHsm.activateIdentityKey(decodeBase64(authenticationKey.getBytes(StandardCharsets.UTF_8)));
+
+        return securityProviderTPMHsm;
     }
 
     /**
