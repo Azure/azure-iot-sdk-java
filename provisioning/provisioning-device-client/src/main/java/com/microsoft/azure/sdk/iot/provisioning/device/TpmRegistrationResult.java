@@ -13,6 +13,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TpmRegistrationResult
 {
+    /**
+     * Getter for the nonce provided by the service after provisioning a device through TPM.
+     *
+     * @see <a href="https://learn.microsoft.com/en-us/azure/iot-dps/concepts-tpm-attestation">TPM attestation</a>
+     */
     @Getter
     protected String authenticationKey;
 }

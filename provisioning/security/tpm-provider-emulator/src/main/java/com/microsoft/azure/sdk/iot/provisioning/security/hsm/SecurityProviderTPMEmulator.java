@@ -105,6 +105,12 @@ public class SecurityProviderTPMEmulator extends SecurityProviderTpm
         srkPublic = createPersistentPrimary(tpm, SRK_PERSISTENT_HANDLE, TPM_RH.OWNER, SRK_TEMPLATE, "SRK");
     }
 
+    /**
+     * Constructor for creating a Security Provider on TPM Simulator with a cached nonce from the provisioning service
+     * Used for reconnecting via TPM only after device has been provisioned
+     * @param authenticationKey A non {@code null} or empty value recieved upon registration
+     * @throws SecurityProviderException If the constructor could not start the TPM
+     */
     public static SecurityProviderTPMEmulator createProviderFromKey(String authenticationKey) throws SecurityProviderException
     {
         SecurityProviderTPMEmulator securityProviderTPMEmulator = new SecurityProviderTPMEmulator();
