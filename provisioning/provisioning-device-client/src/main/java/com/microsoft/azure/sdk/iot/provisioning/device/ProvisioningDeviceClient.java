@@ -46,31 +46,26 @@ public class ProvisioningDeviceClient
     {
         if (globalEndpoint == null || globalEndpoint.isEmpty())
         {
-            //SRS_ProvisioningDeviceClient_25_001: [ The constructor shall throw IllegalArgumentException if globalEndpoint is null or empty. ]
             throw new IllegalArgumentException("global endpoint cannot be null or empty");
         }
 
         if (idScope == null || idScope.isEmpty())
         {
-            //SRS_ProvisioningDeviceClient_25_002: [ The constructor shall throw IllegalArgumentException if idScope is null or empty. ]
             throw new IllegalArgumentException("scope id cannot be null or empty");
         }
 
         if (protocol == null)
         {
-            //SRS_ProvisioningDeviceClient_25_003: [ The constructor shall throw IllegalArgumentException if protocol is null. ]
             throw new IllegalArgumentException("protocol cannot be null");
         }
 
         if (securityProvider == null)
         {
-            //SRS_ProvisioningDeviceClient_25_004: [ The constructor shall throw IllegalArgumentException if securityProvider is null. ]
             throw new IllegalArgumentException("Security provider cannot be null");
         }
 
-        if (certificate == null)
+        if (certificate == null || certificate.isEmpty())
         {
-            //SRS_ProvisioningDeviceClient_25_004: [ The constructor shall throw IllegalArgumentException if certificate is null. ]
             throw new IllegalArgumentException("Certificate cannot be null");
         }
 
