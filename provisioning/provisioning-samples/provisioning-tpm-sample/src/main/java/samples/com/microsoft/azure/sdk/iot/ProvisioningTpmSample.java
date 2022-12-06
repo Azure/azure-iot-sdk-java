@@ -75,10 +75,13 @@ public class ProvisioningTpmSample
             AtomicReference<ProvisioningDeviceClientRegistrationResult> registrationResultReference = new AtomicReference<>();
             AtomicReference<Exception> registrationExceptionReference = new AtomicReference<>();
 
-            // This function will notify the provided callback once registration has finished (successfully or unsuccessfully)
             provisioningDeviceClient.registerDevice(
                 (callbackRegistrationResult, callbackException, callbackContext) -> {
-                    // save the returned registration result and exception (if there was one)
+                    // This callback function executes once the registration request has completed
+                    // (successfully or unsuccessfully) with the details of the new registration
+                    // including what IoT hub it was provisioned to, what its device Id is, and more.
+
+                    // Save the returned registration result and exception (if there was one)
                     registrationResultReference.set(callbackRegistrationResult);
                     registrationExceptionReference.set(callbackException);
 
