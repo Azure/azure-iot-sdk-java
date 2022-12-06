@@ -87,13 +87,19 @@ public class ProvisioningTpmSample
                     registrationResultReference.set(callbackRegistrationResult);
                     registrationExceptionReference.set(callbackException);
 
-                    // Unlock the deviceRegistrationLock so the sample can continue
-                    deviceRegistrationLock.notify();
+                    synchronized (deviceRegistrationLock)
+                    {
+                        // Unlock the deviceRegistrationLock so the sample can continue
+                        deviceRegistrationLock.notify();
+                    }
                 },
                 null);
 
             System.out.println("Waiting for Provisioning Service to register");
-            deviceRegistrationLock.wait(MAX_TIME_TO_WAIT_FOR_REGISTRATION);
+            synchronized (deviceRegistrationLock)
+            {
+                deviceRegistrationLock.wait(MAX_TIME_TO_WAIT_FOR_REGISTRATION);
+            }
 
             ProvisioningDeviceClientRegistrationResult registrationResult = registrationResultReference.get();
             Exception registrationException = registrationExceptionReference.get();
