@@ -29,23 +29,18 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64;
 public class ProvisioningTpmSample
 {
     private static final String SCOPE_ID = "[Your scope ID here]";
-    private static final String GLOBAL_ENDPOINT = "[Your Provisioning Service Global Endpoint here]";
+
+    // Note that a different value is required here when connecting to a private or government cloud instance. This
+    // value is fine for most DPS instances otherwise.
+    private static final String GLOBAL_ENDPOINT = "global.azure-devices-provisioning.net";
+
     private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.HTTPS;
     //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.MQTT;
     //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.MQTT_WS;
     //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.AMQPS;
     //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.AMQPS_WS;
-    private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 10000; // in milliseconds
 
-    private static class MessageSentCallbackImpl implements MessageSentCallback
-    {
-        @Override
-        public void onMessageSent(Message sentMessage, IotHubClientException exception, Object callbackContext)
-        {
-            IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
-            System.out.println("Message received! Response status: " + status);
-        }
-    }
+    private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 10000; // in milliseconds
 
     public static void main(String[] args) throws Exception
     {
@@ -128,7 +123,7 @@ public class ProvisioningTpmSample
                     Message messageToSendFromDeviceToHub =  new Message("Whatever message you would like to send");
 
                     System.out.println("Sending message from device to IoT Hub...");
-                    deviceClient.sendEventAsync(messageToSendFromDeviceToHub, new MessageSentCallbackImpl(), null);
+                    deviceClient.sendEvent(messageToSendFromDeviceToHub);
                 }
                 catch (IOException e)
                 {
