@@ -190,6 +190,7 @@ public class ProvisioningCommon extends IntegrationTest
         public String registrationId;
         public String provisionedDeviceId;
         public SecurityProvider securityProvider;
+        public ProvisioningStatus provisioningStatus;
         public String provisionedIotHubUri;
         public ProvisioningServiceClient provisioningServiceClient;
         public X509CertificateGenerator.CertificateAlgorithm certificateAlgorithm;

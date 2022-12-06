@@ -119,6 +119,21 @@ public class ProvisioningTests extends ProvisioningCommon
         assertNotNull(retrievedTpmAttestation.getEndorsementKey());
     }
 
+    @Test
+    public void recreateProviderWithKeyTPM() throws Exception
+    {
+        assumeTrue("Skipping because this test is only applicable to TPM attestation", testInstance.attestationType == AttestationType.TPM);
+
+        //The test protocol has no bearing on this test since it only uses the provisioning service client, so the test should only run once.
+        assumeTrue(testInstance.protocol == MQTT);
+
+        basicRegistrationFlow(EnrollmentType.INDIVIDUAL);
+        String authenticationKey = testInstance.provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getTpmRegistrationResult().getAuthenticationKey();
+
+        SecurityProviderTPMEmulator securityProvider = SecurityProviderTPMEmulator.createProviderFromKey(authenticationKey);
+        DeviceClient deviceClient = new DeviceClient(testInstance.provisionedIotHubUri, testInstance.provisionedDeviceId, securityProvider, IotHubClientProtocol.MQTT);
+    }
+
     @ContinuousIntegrationTest
     @Test
     public void individualEnrollmentWithECCCertificates() throws Exception
@@ -135,7 +150,7 @@ public class ProvisioningTests extends ProvisioningCommon
     private void basicRegistrationFlow(EnrollmentType enrollmentType) throws Exception
     {
         testInstance.securityProvider = getSecurityProviderInstance(enrollmentType);
-        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, false, null, null, null);
+        testInstance.provisioningStatus = registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, false, null, null, null);
     }
 
     private void enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType enrollmentType) throws Exception
