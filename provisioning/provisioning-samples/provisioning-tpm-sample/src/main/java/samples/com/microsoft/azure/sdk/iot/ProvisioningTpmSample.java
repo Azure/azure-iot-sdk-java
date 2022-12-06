@@ -90,7 +90,7 @@ public class ProvisioningTpmSample
                 },
                 null);
 
-            System.out.println("Waiting for Provisioning Service to register");
+            System.out.println("Waiting for the Provisioning service to finish your device registration.");
             synchronized (deviceRegistrationLock)
             {
                 deviceRegistrationLock.wait(MAX_TIME_TO_WAIT_FOR_REGISTRATION);
@@ -106,7 +106,12 @@ public class ProvisioningTpmSample
                 System.exit(-1);
             }
 
-            if (registrationResult.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED)
+            if (registrationResult.getProvisioningDeviceClientStatus() != ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED)
+            {
+                System.out.println("Device provisioning completed unsuccessfully. Encountered an unexpected registration status: " + registrationResult.getStatus());
+                System.exit(-1);
+            }
+            else
             {
                 System.out.println("Device provisioning completed successfully");
                 System.out.println("IotHUb Uri : " + registrationResult.getIothubUri());
@@ -133,11 +138,6 @@ public class ProvisioningTpmSample
                         deviceClient.close();
                     }
                 }
-            }
-            else
-            {
-                System.out.println("Device provisioning completed unsuccessfully. Encountered an unexpected registration status: " + registrationResult.getStatus());
-                System.exit(-1);
             }
         }
         catch (ProvisioningDeviceClientException | InterruptedException e)
