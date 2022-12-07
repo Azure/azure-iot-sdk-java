@@ -3,14 +3,9 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 33
 
-    compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
-    }
-
     defaultConfig {
         applicationId "com.iothub.azure.microsoft.com.androidsample"
-        minSdkVersion 26
+        minSdkVersion 23
         targetSdkVersion 33
         multiDexEnabled true
         versionCode 1
@@ -19,11 +14,7 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-        debug {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 
@@ -38,25 +29,18 @@ android {
         exclude 'thirdpartynotice.txt'
     }
 
-    lintOptions {
-        ignore 'InvalidPackage'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
 dependencies {
-    // app dependencies
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'com.android.support:multidex:1.0.3'
 
-    // Remote binary dependency
-    implementation ('com.microsoft.azure.sdk.iot:iot-device-client:2.1.2') {
-        exclude module: 'slf4j-api'
-        exclude module: 'log4j-slf4j-impl'
-    }
-    implementation ('org.apache.commons:commons-lang3:3.6')
-    implementation ('javax.xml.stream:stax-api:1.0-2')
-    implementation 'org.slf4j:slf4j-android:1.7.29'
+    implementation ('com.microsoft.azure.sdk.iot:iot-service-client:2.1.4')
 }
 
 repositories {
