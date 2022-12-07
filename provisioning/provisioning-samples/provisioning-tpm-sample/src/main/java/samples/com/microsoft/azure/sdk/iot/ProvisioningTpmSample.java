@@ -18,6 +18,7 @@ import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderTPM
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.apache.commons.codec.binary.Base64.encodeBase64;
 
@@ -28,47 +29,18 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64;
 public class ProvisioningTpmSample
 {
     private static final String SCOPE_ID = "[Your scope ID here]";
-    private static final String GLOBAL_ENDPOINT = "[Your Provisioning Service Global Endpoint here]";
+
+    // Note that a different value is required here when connecting to a private or government cloud instance. This
+    // value is fine for most DPS instances otherwise.
+    private static final String GLOBAL_ENDPOINT = "global.azure-devices-provisioning.net";
+
     private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.HTTPS;
     //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.MQTT;
     //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.MQTT_WS;
     //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.AMQPS;
     //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.AMQPS_WS;
-    private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 10000; // in milli seconds
 
-    static class ProvisioningStatus
-    {
-        ProvisioningDeviceClientRegistrationResult provisioningDeviceClientRegistrationInfoClient = new ProvisioningDeviceClientRegistrationResult();
-        Exception exception;
-    }
-
-    static class ProvisioningDeviceClientRegistrationCallbackImpl implements ProvisioningDeviceClientRegistrationCallback
-    {
-        @Override
-        public void run(ProvisioningDeviceClientRegistrationResult provisioningDeviceClientRegistrationResult, Exception exception, Object context)
-        {
-            if (context instanceof ProvisioningStatus)
-            {
-                ProvisioningStatus status = (ProvisioningStatus) context;
-                status.provisioningDeviceClientRegistrationInfoClient = provisioningDeviceClientRegistrationResult;
-                status.exception = exception;
-            }
-            else
-            {
-                System.out.println("Received unknown context");
-            }
-        }
-    }
-
-    private static class MessageSentCallbackImpl implements MessageSentCallback
-    {
-        @Override
-        public void onMessageSent(Message sentMessage, IotHubClientException exception, Object callbackContext)
-        {
-            IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
-            System.out.println("Message received! Response status: " + status);
-        }
-    }
+    private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 10000; // in milliseconds
 
     public static void main(String[] args) throws Exception
     {
@@ -76,7 +48,6 @@ public class ProvisioningTpmSample
         System.out.println("Beginning setup.");
         SecurityProviderTpm securityClientTPMEmulator = null;
         Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
-        DeviceClient deviceClient = null;
 
         try
         {
@@ -89,39 +60,70 @@ public class ProvisioningTpmSample
         }
         catch (SecurityProviderException e)
         {
+            System.out.println("Communication with the TPM failed. Exiting sample...");
             e.printStackTrace();
+            System.exit(-1);
         }
 
         ProvisioningDeviceClient provisioningDeviceClient = null;
         try
         {
-            ProvisioningStatus provisioningStatus = new ProvisioningStatus();
 
             provisioningDeviceClient = ProvisioningDeviceClient.create(GLOBAL_ENDPOINT, SCOPE_ID, PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL, securityClientTPMEmulator);
 
-            provisioningDeviceClient.registerDevice(new ProvisioningDeviceClientRegistrationCallbackImpl(), provisioningStatus);
-            while (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() != ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED)
+            final Object deviceRegistrationLock = new Object();
+            AtomicReference<ProvisioningDeviceClientRegistrationResult> registrationResultReference = new AtomicReference<>();
+            AtomicReference<Exception> registrationExceptionReference = new AtomicReference<>();
+
+            provisioningDeviceClient.registerDevice(
+                (callbackRegistrationResult, callbackException, callbackContext) -> {
+                    // This callback function executes once the registration request has completed
+                    // (successfully or unsuccessfully) with the details of the new registration
+                    // including what IoT hub it was provisioned to, what its device Id is, and more.
+
+                    // Save the returned registration result and exception (if there was one)
+                    registrationResultReference.set(callbackRegistrationResult);
+                    registrationExceptionReference.set(callbackException);
+
+                    synchronized (deviceRegistrationLock)
+                    {
+                        // Unlock the deviceRegistrationLock so the sample can continue
+                        deviceRegistrationLock.notify();
+                    }
+                },
+                null);
+
+            System.out.println("Waiting for the Provisioning service to finish your device registration.");
+            synchronized (deviceRegistrationLock)
             {
-                if (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ERROR ||
-                        provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_DISABLED ||
-                        provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_FAILED)
-                {
-                    provisioningStatus.exception.printStackTrace();
-                    System.out.println("Registration error, bailing out");
-                    break;
-                }
-                System.out.println("Waiting for Provisioning Service to register");
-                Thread.sleep(MAX_TIME_TO_WAIT_FOR_REGISTRATION);
+                deviceRegistrationLock.wait(MAX_TIME_TO_WAIT_FOR_REGISTRATION);
             }
 
-            if (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED)
+            ProvisioningDeviceClientRegistrationResult registrationResult = registrationResultReference.get();
+            Exception registrationException = registrationExceptionReference.get();
+
+            if (registrationException != null)
             {
-                System.out.println("IotHUb Uri : " + provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri());
-                System.out.println("Device ID : " + provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId());
+                System.out.println("Encountered an exception while registering your device");
+                registrationException.printStackTrace();
+                System.exit(-1);
+            }
+
+            if (registrationResult.getProvisioningDeviceClientStatus() != ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED)
+            {
+                System.out.println("Device provisioning completed unsuccessfully. Encountered an unexpected registration status: " + registrationResult.getStatus());
+                System.exit(-1);
+            }
+            else
+            {
+                System.out.println("Device provisioning completed successfully");
+                System.out.println("IotHUb Uri : " + registrationResult.getIothubUri());
+                System.out.println("Device ID : " + registrationResult.getDeviceId());
 
                 // connect to iothub
-                String iotHubUri = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri();
-                String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
+                String iotHubUri = registrationResult.getIothubUri();
+                String deviceId = registrationResult.getDeviceId();
+                DeviceClient deviceClient = null;
                 try
                 {
                     deviceClient = new DeviceClient(iotHubUri, deviceId, securityClientTPMEmulator, IotHubClientProtocol.MQTT);
@@ -129,7 +131,7 @@ public class ProvisioningTpmSample
                     Message messageToSendFromDeviceToHub =  new Message("Whatever message you would like to send");
 
                     System.out.println("Sending message from device to IoT Hub...");
-                    deviceClient.sendEventAsync(messageToSendFromDeviceToHub, new MessageSentCallbackImpl(), null);
+                    deviceClient.sendEvent(messageToSendFromDeviceToHub);
                 }
                 catch (IOException e)
                 {
@@ -151,17 +153,12 @@ public class ProvisioningTpmSample
         }
 
         System.out.println("Press any key to exit...");
-
         scanner.nextLine();
+
+        System.out.println("Shutting down...");
         if (provisioningDeviceClient != null)
         {
             provisioningDeviceClient.close();
         }
-        if (deviceClient != null)
-        {
-            deviceClient.close();
-        }
-
-        System.out.println("Shutting down...");
     }
 }
