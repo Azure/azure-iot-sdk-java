@@ -124,7 +124,7 @@ public class ProvisioningTests extends ProvisioningCommon
     {
         assumeTrue("Skipping because this test is only applicable to TPM attestation", testInstance.attestationType == AttestationType.TPM);
 
-        //The test protocol has no bearing on this test since it only uses the provisioning service client, so the test should only run once.
+        //The device protocol has no bearing on this test since it is about testing the security provider.
         assumeTrue(testInstance.protocol == MQTT);
 
         basicRegistrationFlow(EnrollmentType.INDIVIDUAL);
