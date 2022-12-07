@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity
     private final Handler handler = new Handler();
 
     private final int responseTimeout = 200;
-    private final int connectTimeout = 5;;
+    private final int connectTimeout = 5;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
