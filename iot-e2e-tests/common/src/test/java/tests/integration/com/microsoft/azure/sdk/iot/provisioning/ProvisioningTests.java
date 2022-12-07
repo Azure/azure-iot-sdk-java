@@ -130,8 +130,8 @@ public class ProvisioningTests extends ProvisioningCommon
         basicRegistrationFlow(EnrollmentType.INDIVIDUAL);
         String authenticationKey = testInstance.provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getTpmRegistrationResult().getAuthenticationKey();
 
-        SecurityProviderTPMEmulator securityProvider = SecurityProviderTPMEmulator.createProviderFromKey(authenticationKey);
-        DeviceClient deviceClient = new DeviceClient(testInstance.provisionedIotHubUri, testInstance.provisionedDeviceId, securityProvider, IotHubClientProtocol.MQTT);
+        testInstance.securityProvider = SecurityProviderTPMEmulator.createProviderFromKey(authenticationKey);
+        assertProvisionedDeviceWorks(testInstance.provisionedIotHubUri, testInstance.provisionedDeviceId);
     }
 
     @ContinuousIntegrationTest
