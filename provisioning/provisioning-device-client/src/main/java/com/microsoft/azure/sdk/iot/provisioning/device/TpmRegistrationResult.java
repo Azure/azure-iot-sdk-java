@@ -1,8 +1,6 @@
 /*
- *
  *  Copyright (c) Microsoft. All rights reserved.
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
- *
  */
 
 package com.microsoft.azure.sdk.iot.provisioning.device;
@@ -10,13 +8,16 @@ package com.microsoft.azure.sdk.iot.provisioning.device;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * Class for getting the TPM specific {@code authenticationKey} from {@code ProvisioningDeviceClientRegistrationResult}
+ */
 @NoArgsConstructor
 public class TpmRegistrationResult
 {
     /**
      * Getter for the nonce provided by the service after provisioning a device through TPM.
      *
-     * @see <a href="https://learn.microsoft.com/en-us/azure/iot-dps/concepts-tpm-attestation">TPM attestation</a>
+     * @see <a href="https://learn.microsoft.com/azure/iot-dps/concepts-tpm-attestation">TPM attestation</a>
      */
     @Getter
     protected String authenticationKey;

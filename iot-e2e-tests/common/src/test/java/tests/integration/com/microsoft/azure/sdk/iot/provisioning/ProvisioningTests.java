@@ -120,7 +120,7 @@ public class ProvisioningTests extends ProvisioningCommon
     }
 
     @Test
-    public void recreateProviderWithKeyTPM() throws Exception
+    public void recreateProviderWithKeyTpm() throws Exception
     {
         assumeTrue("Skipping because this test is only applicable to TPM attestation", testInstance.attestationType == AttestationType.TPM);
 

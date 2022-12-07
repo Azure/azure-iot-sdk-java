@@ -404,7 +404,7 @@ public class ProvisioningCommon extends IntegrationTest
         return provisioningStatus;
     }
 
-    private void assertProvisionedDeviceWorks(String iothubUri, String deviceId) throws IOException, IotHubClientException, URISyntaxException
+    protected void assertProvisionedDeviceWorks(String iothubUri, String deviceId) throws IOException, IotHubClientException, URISyntaxException
     {
         DeviceClient deviceClient = new DeviceClient(iothubUri, deviceId, testInstance.securityProvider, IotHubClientProtocol.MQTT);
         deviceClient.open(true);
