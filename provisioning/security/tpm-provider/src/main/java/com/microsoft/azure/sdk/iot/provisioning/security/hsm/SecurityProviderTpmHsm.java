@@ -23,7 +23,7 @@ import java.util.Random;
 import static org.apache.commons.codec.binary.Base64.decodeBase64;
 
 @Slf4j
-public class SecurityProviderTPMHsm extends SecurityProviderTpm
+public class SecurityProviderTpmHsm extends SecurityProviderTpm
 {
     private static Random rand;
     private static final String REGEX_FOR_VALID_REGISTRATION_ID = "^[a-z0-9-]{1,128}$";
@@ -65,13 +65,13 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
      * Constructor for creating a Security Provider on TPM hardware
      * @throws SecurityProviderException If the constructor could not start the TPM
      */
-    public SecurityProviderTPMHsm() throws SecurityProviderException
+    public SecurityProviderTpmHsm() throws SecurityProviderException
     {
-        //SRS_SecurityProviderTPMHsm_25_001: [ The constructor shall start the tpm, clear persistent for EK and SRK if it exist, create persistent primary for EK and SRK. ]
+        //SRS_SecurityProviderTpmHsm_25_001: [ The constructor shall start the tpm, clear persistent for EK and SRK if it exist, create persistent primary for EK and SRK. ]
         tpm = TpmFactory.platformTpm();
         ekPublic = createPersistentPrimary(tpm, EK_PERSISTENT_HANDLE, TPM_RH.OWNER, EK_TEMPLATE, "EK");
         srkPublic = createPersistentPrimary(tpm, SRK_PERSISTENT_HANDLE, TPM_RH.OWNER, SRK_TEMPLATE, "SRK");
-        //SRS_SecurityProviderTPMHsm_25_002: [ The constructor shall set the registration Id to null if none was provided. ]
+        //SRS_SecurityProviderTpmHsm_25_002: [ The constructor shall set the registration Id to null if none was provided. ]
         this.registrationId = null;
     }
 
@@ -80,21 +80,21 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
      * @param registrationId A non {@code null} or empty value tied to this registration
      * @throws SecurityProviderException If the constructor could not start the TPM
      */
-    public SecurityProviderTPMHsm(String registrationId) throws SecurityProviderException
+    public SecurityProviderTpmHsm(String registrationId) throws SecurityProviderException
     {
         if (registrationId == null || registrationId.isEmpty())
         {
-            //SRS_SecurityProviderTPMHsm_25_003: [ The constructor shall throw IllegalArgumentException if registration id was null or empty. ]
+            //SRS_SecurityProviderTpmHsm_25_003: [ The constructor shall throw IllegalArgumentException if registration id was null or empty. ]
             throw new IllegalArgumentException("Registration Id cannot be null or empty");
         }
         if (!registrationId.matches(REGEX_FOR_VALID_REGISTRATION_ID))
         {
-            //SRS_SecurityProviderTPMHsm_25_004: [ The constructor shall validate and throw IllegalArgumentException if registration id is invalid. Valid registration Id
+            //SRS_SecurityProviderTpmHsm_25_004: [ The constructor shall validate and throw IllegalArgumentException if registration id is invalid. Valid registration Id
             // shall be alphanumeric, lowercase, and may contain hyphens. Max characters allowed is 128 . ]
             throw new IllegalArgumentException("The registration ID is alphanumeric, lowercase, and may contain hyphens. Max characters allowed is 128.");
         }
 
-        //SRS_SecurityProviderTPMHsm_25_005: [ The constructor shall save the registration Id if it was provided. ]
+        //SRS_SecurityProviderTpmHsm_25_005: [ The constructor shall save the registration Id if it was provided. ]
         this.registrationId = registrationId;
         tpm = TpmFactory.platformTpm();
         ekPublic = createPersistentPrimary(tpm, EK_PERSISTENT_HANDLE, TPM_RH.OWNER, EK_TEMPLATE, "EK");
@@ -107,9 +107,9 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
      * @param authenticationKey A non {@code null} or empty value recieved upon registration
      * @throws SecurityProviderException If the constructor could not start the TPM
      */
-    public static SecurityProviderTPMHsm createProviderFromKey(String authenticationKey) throws SecurityProviderException
+    public static SecurityProviderTpmHsm createProviderFromKey(String authenticationKey) throws SecurityProviderException
     {
-        SecurityProviderTPMHsm securityProviderTPMHsm = new SecurityProviderTPMHsm();
+        SecurityProviderTpmHsm securityProviderTPMHsm = new SecurityProviderTpmHsm();
         securityProviderTPMHsm.activateIdentityKey(decodeBase64(authenticationKey.getBytes(StandardCharsets.UTF_8)));
 
         return securityProviderTPMHsm;
@@ -125,12 +125,12 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
     {
         if (this.registrationId != null)
         {
-            //SRS_SecurityProviderTPMHsm_25_006: [ This method shall return registration Id if it was provided. ]
+            //SRS_SecurityProviderTpmHsm_25_006: [ This method shall return registration Id if it was provided. ]
             return this.registrationId;
         }
         else
         {
-            //SRS_SecurityProviderTPMHsm_25_007: [ This method shall call its super method if registration Id was not provided. ]
+            //SRS_SecurityProviderTpmHsm_25_007: [ This method shall call its super method if registration Id was not provided. ]
             return super.getRegistrationId();
         }
     }
@@ -238,37 +238,37 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
 
         if (idKeyPub == null)
         {
-            //SRS_SecurityProviderTPMHsm_25_008: [ This method shall throw SecurityProviderException if ID Key Public could not be extracted form TPM. ]
+            //SRS_SecurityProviderTpmHsm_25_008: [ This method shall throw SecurityProviderException if ID Key Public could not be extracted form TPM. ]
             throw new SecurityProviderException("Id Key Public cannot be null");
         }
 
         //
         // Prepare a policy session to be used with ActivateCredential()
         //
-        //SRS_SecurityProviderTPMHsm_25_009: [ This method shall start Authorization session with TPM. ]
+        //SRS_SecurityProviderTpmHsm_25_009: [ This method shall start Authorization session with TPM. ]
         StartAuthSessionResponse sasResp = tpm.StartAuthSession(TPM_HANDLE.NULL, TPM_HANDLE.NULL,
                                                                 getRandom(20), new byte[0], TPM_SE.POLICY,
                                                                 new TPMT_SYM_DEF(TPM_ALG_ID.NULL, 0, TPM_ALG_ID.NULL), TPM_ALG_ID.SHA256);
 
         if (sasResp == null)
         {
-            //SRS_SecurityProviderTPMHsm_25_010: [ This method shall throw  SecurityProviderException if Authorization session with TPM could not be started. ]
+            //SRS_SecurityProviderTpmHsm_25_010: [ This method shall throw  SecurityProviderException if Authorization session with TPM could not be started. ]
             throw new SecurityProviderException("StartAuthSessionResponse cannot be null");
         }
 
-        //SRS_SecurityProviderTPMHsm_25_011: [ This method shall set the policy secret on to TPM using the endorsement. ]
+        //SRS_SecurityProviderTpmHsm_25_011: [ This method shall set the policy secret on to TPM using the endorsement. ]
         tpm.PolicySecret(TPM_HANDLE.from(TPM_RH.ENDORSEMENT), sasResp.handle,
                          new byte[0], new byte[0], new byte[0], 0);
 
         // Use ActivateCredential() to decrypt symmetric key that is used as an inner protector
         // of the duplication blob of the new Device ID key generated by Service.
-        //SRS_SecurityProviderTPMHsm_25_012: [ This method shall activate the credential for the session. ]
+        //SRS_SecurityProviderTpmHsm_25_012: [ This method shall activate the credential for the session. ]
         byte[] innerWrapKey = tpm._withSessions(TPM_HANDLE.pwSession(new byte[0]), sasResp.handle)
                 .ActivateCredential(SRK_PERSISTENT_HANDLE, EK_PERSISTENT_HANDLE, credBlob.credential, encSecret.secret);
 
         if (innerWrapKey == null)
         {
-            //SRS_SecurityProviderTPMHsm_25_013: [ This method shall throw SecurityProviderException if activating the credential for the session fails. ]
+            //SRS_SecurityProviderTpmHsm_25_013: [ This method shall throw SecurityProviderException if activating the credential for the session fails. ]
             throw new SecurityProviderException("innerWrapKey cannot be null");
         }
 
@@ -279,34 +279,34 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
         //
         // Import the new Device ID key issued by Service into the device's TPM
         //
-        //SRS_SecurityProviderTPMHsm_25_014: [ This method shall import the activated credential onto TPM. ]
+        //SRS_SecurityProviderTpmHsm_25_014: [ This method shall import the activated credential onto TPM. ]
         TPM2B_PRIVATE idKeyPrivate = tpm.Import(SRK_PERSISTENT_HANDLE, innerWrapKey, idKeyPub.publicArea, idKeyDupBlob, encWrapKey.secret, symDef);
 
         if (idKeyPrivate == null)
         {
-            //SRS_SecurityProviderTPMHsm_25_015: [ This method shall throw SecurityProviderException if importing the activated credential onto TPM fails. ]
+            //SRS_SecurityProviderTpmHsm_25_015: [ This method shall throw SecurityProviderException if importing the activated credential onto TPM fails. ]
             throw new SecurityProviderException("idKeyPrivate cannot be null");
         }
 
         //
         // Load and persist new Device ID key issued by Service
         //
-        //SRS_SecurityProviderTPMHsm_25_016: [ This method shall load SRK onto TPM. ]
+        //SRS_SecurityProviderTpmHsm_25_016: [ This method shall load SRK onto TPM. ]
         TPM_HANDLE hIdKey = tpm.Load(SRK_PERSISTENT_HANDLE, idKeyPrivate, idKeyPub.publicArea);
 
         if (hIdKey == null)
         {
-            //SRS_SecurityProviderTPMHsm_25_017: [ This method shall throw SecurityProviderException if loading SRK onto TPM fails. ]
+            //SRS_SecurityProviderTpmHsm_25_017: [ This method shall throw SecurityProviderException if loading SRK onto TPM fails. ]
             throw new SecurityProviderException("hIdKey cannot be null");
         }
 
-        //SRS_SecurityProviderTPMHsm_25_018: [ This method shall clear the persistent for key role "ID Key" . ]
+        //SRS_SecurityProviderTpmHsm_25_018: [ This method shall clear the persistent for key role "ID Key" . ]
         clearPersistent(tpm, ID_KEY_PERSISTENT_HANDLE, "ID Key");
 
-        //SRS_SecurityProviderTPMHsm_25_019: [ This method Evict Control once done . ]
+        //SRS_SecurityProviderTpmHsm_25_019: [ This method Evict Control once done . ]
         tpm.EvictControl(TPM_HANDLE.from(TPM_RH.OWNER), hIdKey, ID_KEY_PERSISTENT_HANDLE);
 
-        //SRS_SecurityProviderTPMHsm_25_020: [ This method Flush the context once done . ]
+        //SRS_SecurityProviderTpmHsm_25_020: [ This method Flush the context once done . ]
         tpm.FlushContext(hIdKey);
 
         //
@@ -318,7 +318,7 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
 
         if (encUriData.buffer.length > maxUriDataSize)
         {
-            //SRS_SecurityProviderTPMHsm_25_021: [ This method shall throw SecurityProviderException if the encoded Uri length is greater than Maximum Uri Length . ]
+            //SRS_SecurityProviderTpmHsm_25_021: [ This method shall throw SecurityProviderException if the encoded Uri length is greater than Maximum Uri Length . ]
             throw new SecurityProviderException("Too long encrypted URI data string. Max supported length is " + maxUriDataSize);
         }
 
@@ -337,38 +337,38 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
 
         // URI data are encrypted with the same symmetric key used as the inner protector of the new Device ID key duplication blob.
         TPMS_SENSITIVE_CREATE sensCreate = new TPMS_SENSITIVE_CREATE (new byte[0], innerWrapKey);
-        //SRS_SecurityProviderTPMHsm_25_022: [ This method shall create TPMS_SENSITIVE_CREATE for the inner wrap key . ]
+        //SRS_SecurityProviderTpmHsm_25_022: [ This method shall create TPMS_SENSITIVE_CREATE for the inner wrap key . ]
         CreateResponse crResp = tpm.Create(SRK_PERSISTENT_HANDLE, sensCreate, symTemplate, new byte[0], new TPMS_PCR_SELECTION[0]);
 
         if (crResp == null)
         {
-            //SRS_SecurityProviderTPMHsm_25_023: [ This method shall throw SecurityProviderException if creating TPMS_SENSITIVE_CREATE for the inner wrap key fails. ]
+            //SRS_SecurityProviderTpmHsm_25_023: [ This method shall throw SecurityProviderException if creating TPMS_SENSITIVE_CREATE for the inner wrap key fails. ]
             throw new SecurityProviderException("CreateResponse cannot be null");
         }
 
-        //SRS_SecurityProviderTPMHsm_25_024: [ This method shall load the created response private onto TPM. ]
+        //SRS_SecurityProviderTpmHsm_25_024: [ This method shall load the created response private onto TPM. ]
         TPM_HANDLE hSymKey = tpm.Load(SRK_PERSISTENT_HANDLE, crResp.outPrivate, crResp.outPublic);
 
 
         if (hSymKey == null)
         {
-            //SRS_SecurityProviderTPMHsm_25_025: [ This method shall throw if loading the created response private onto TPM fails. ]
+            //SRS_SecurityProviderTpmHsm_25_025: [ This method shall throw if loading the created response private onto TPM fails. ]
             throw new SecurityProviderException("hSymKey cannot be null");
         }
 
         byte[] iv = new byte[innerWrapKey.length];
 
-        //SRS_SecurityProviderTPMHsm_25_026: [ This method shall Encrypt Decrypt the symmetric Key. ]
+        //SRS_SecurityProviderTpmHsm_25_026: [ This method shall Encrypt Decrypt the symmetric Key. ]
         //TODO : Use software encryption/decryption using AES instead of TPM command to support international markets.
         EncryptDecrypt2Response edResp = tpm.EncryptDecrypt2(hSymKey, encUriData.buffer, (byte)1, TPM_ALG_ID.CFB, iv);
 
         if (edResp == null)
         {
-            //SRS_SecurityProviderTPMHsm_25_0027: [ This method shall throw if Encrypt Decrypt the symmetric Key fails. ]
+            //SRS_SecurityProviderTpmHsm_25_0027: [ This method shall throw if Encrypt Decrypt the symmetric Key fails. ]
             throw new SecurityProviderException("EncryptDecryptResponse cannot be null");
         }
 
-        //SRS_SecurityProviderTPMHsm_25_028: [ This method shall flush the context for the symmetric Key. ]
+        //SRS_SecurityProviderTpmHsm_25_028: [ This method shall flush the context for the symmetric Key. ]
         tpm.FlushContext(hSymKey);
         return null;
     }
@@ -384,19 +384,19 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
     {
         if (deviceIdData == null || deviceIdData.length == 0)
         {
-            //SRS_SecurityProviderTPMHsm_25_029: [ This method shall throw IllegalArgumentException if `deviceIdData` is null or empty. ]
+            //SRS_SecurityProviderTpmHsm_25_029: [ This method shall throw IllegalArgumentException if `deviceIdData` is null or empty. ]
             throw new IllegalArgumentException("deviceIdData cannot be null or empty");
         }
 
         if (idKeyPub == null)
         {
-            //SRS_SecurityProviderTPMHsm_25_030: [ This method shall throw SecurityProviderException if ID KEY public was not instantiated. ]
+            //SRS_SecurityProviderTpmHsm_25_030: [ This method shall throw SecurityProviderException if ID KEY public was not instantiated. ]
             throw new SecurityProviderException("activateIdentityKey first before signing");
         }
         //
         // Generate token data, and sign it using the new Device ID key
         //
-        //SRS_SecurityProviderTPMHsm_25_031: [ This method shall sign the device ID data. ]
+        //SRS_SecurityProviderTpmHsm_25_031: [ This method shall sign the device ID data. ]
         return signData(tpm, idKeyPub.publicArea, deviceIdData);
     }
 
@@ -407,7 +407,7 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
     @Override
     public byte[] getEndorsementKey()
     {
-        //SRS_SecurityProviderTPMHsm_25_032: [ This method shall return the TPM2B_PUBLIC form of EK. ]
+        //SRS_SecurityProviderTpmHsm_25_032: [ This method shall return the TPM2B_PUBLIC form of EK. ]
         return (new TPM2B_PUBLIC(ekPublic)).toTpm();
     }
 
@@ -418,7 +418,7 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
     @Override
     public byte[] getStorageRootKey()
     {
-        //SRS_SecurityProviderTPMHsm_25_033: [ This method shall return the TPM2B_PUBLIC form of SRK. ]
+        //SRS_SecurityProviderTpmHsm_25_033: [ This method shall return the TPM2B_PUBLIC form of SRK. ]
         return (new TPM2B_PUBLIC(srkPublic)).toTpm();
     }
 

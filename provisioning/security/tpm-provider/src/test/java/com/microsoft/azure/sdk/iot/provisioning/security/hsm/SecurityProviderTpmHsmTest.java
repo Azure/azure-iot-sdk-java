@@ -8,7 +8,6 @@
 package com.microsoft.azure.sdk.iot.provisioning.security.hsm;
 
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
-import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderTPMHsm;
 import mockit.*;
 import org.junit.Test;
 import tss.Tpm;
@@ -24,11 +23,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /*
- *  Unit tests for  SecurityProviderTPMHsm
+ *  Unit tests for  SecurityProviderTpmHsm
  *  Coverage : 100% Method, 100% Lines
  */
 
-public class SecurityProviderTPMHsmTest
+public class SecurityProviderTpmHsmTest
 {
     private static final String[] INVALID_REGISTRATION_IDS = {"UPPERCASE", "UPPERandLowerMix",
             "greaterthan128lengthgreaterthan128lengthgreaterthan128lengthgreaterthan128lengthgreaterthan128lengthgreaterthan128lengthgreaterthan128lengthgreaterthan128lengthgreaterthan128lengthgreaterthan128length",
@@ -125,15 +124,15 @@ public class SecurityProviderTPMHsmTest
         };
     }
 
-    //SRS_SecurityProviderTPMHsm_25_001: [ The constructor shall start the tpm, clear persistent for EK and SRK if it exist, create persistent primary for EK and SRK. ]
-    //SRS_SecurityProviderTPMHsm_25_002: [ The constructor shall set the registration Id to null if none was provided. ]
+    //SRS_SecurityProviderTpmHsm_25_001: [ The constructor shall start the tpm, clear persistent for EK and SRK if it exist, create persistent primary for EK and SRK. ]
+    //SRS_SecurityProviderTpmHsm_25_002: [ The constructor shall set the registration Id to null if none was provided. ]
     @Test
     public void constructorSucceeds() throws Exception
     {
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
 
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm();
 
         new Verifications()
         {
@@ -158,7 +157,7 @@ public class SecurityProviderTPMHsmTest
             }
         };
 
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm();
 
         new Verifications()
         {
@@ -183,7 +182,7 @@ public class SecurityProviderTPMHsmTest
         };
 
         //act
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm();
     }
 
     @Test (expected = SecurityProviderException.class)
@@ -202,7 +201,7 @@ public class SecurityProviderTPMHsmTest
         };
 
         //act
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm();
     }
 
 
@@ -222,7 +221,7 @@ public class SecurityProviderTPMHsmTest
         };
 
         //act
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm();
     }
 
     @Test (expected = SecurityProviderException.class)
@@ -244,10 +243,10 @@ public class SecurityProviderTPMHsmTest
         };
 
         //act
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm();
     }
 
-    //SRS_SecurityProviderTPMHsm_25_005: [ The constructor shall save the registration Id if it was provided. ]
+    //SRS_SecurityProviderTpmHsm_25_005: [ The constructor shall save the registration Id if it was provided. ]
     @Test
     public void constructorSavesValidRegistrationId() throws Exception
     {
@@ -256,7 +255,7 @@ public class SecurityProviderTPMHsmTest
             createPersistentPrimaryExpectations();
             createPersistentPrimaryExpectations();
 
-            SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm(regId);
+            SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm(regId);
 
             new Verifications()
             {
@@ -268,7 +267,7 @@ public class SecurityProviderTPMHsmTest
         }
     }
 
-    //SRS_SecurityProviderTPMHsm_25_004: [ The constructor shall validate and throw IllegalArgumentException if registration id is invalid. Valid registration Id
+    //SRS_SecurityProviderTpmHsm_25_004: [ The constructor shall validate and throw IllegalArgumentException if registration id is invalid. Valid registration Id
     @Test
     public void constructorThrowsOnInvalidRegistrationId() throws Exception
     {
@@ -278,7 +277,7 @@ public class SecurityProviderTPMHsmTest
 
             try
             {
-                SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm(regId);
+                SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm(regId);
             }
             catch (IllegalArgumentException e)
             {
@@ -289,21 +288,21 @@ public class SecurityProviderTPMHsmTest
         }
     }
 
-    //SRS_SecurityProviderTPMHsm_25_003: [ The constructor shall throw IllegalArgumentException if registration id was null or empty. ]
+    //SRS_SecurityProviderTpmHsm_25_003: [ The constructor shall throw IllegalArgumentException if registration id was null or empty. ]
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnNullRegistrationId() throws Exception
     {
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm(null);
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm(null);
     }
 
-    //SRS_SecurityProviderTPMHsm_25_006: [ This method shall return registration Id if it was provided. ]
+    //SRS_SecurityProviderTpmHsm_25_006: [ This method shall return registration Id if it was provided. ]
     @Test
     public void getterReturnsRegistrationIdIfFound() throws Exception
     {
         //arrange
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm(VALID_REGISTRATION_IDS[0]);
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm(VALID_REGISTRATION_IDS[0]);
         //act
         String testRegId = securityProviderTPMEmulator.getRegistrationId();
         //assert
@@ -311,32 +310,32 @@ public class SecurityProviderTPMHsmTest
 
     }
 
-    //SRS_SecurityProviderTPMHsm_25_007: [ This method shall call its super method if registration Id was not provided. ]
+    //SRS_SecurityProviderTpmHsm_25_007: [ This method shall call its super method if registration Id was not provided. ]
     @Test
     public void getterCallsSuperRegistrationIdIfNotFound() throws Exception
     {
         //arrange
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm();
         //act
         String testRegId = securityProviderTPMEmulator.getRegistrationId();
         //assert
         assertNotNull(testRegId);
     }
 
-    //SRS_SecurityProviderTPMHsm_25_009: [ This method shall start Authorization session with TPM. ]
-    //SRS_SecurityProviderTPMHsm_25_011: [ This method shall set the policy secret on to TPM using the endorsement. ]
-    //SRS_SecurityProviderTPMHsm_25_012: [ This method shall activate the credential for the session. ]
-    //SRS_SecurityProviderTPMHsm_25_014: [ This method shall import the activated credential onto TPM. ]
-    //SRS_SecurityProviderTPMHsm_25_016: [ This method shall load SRK onto TPM. ]
-    //SRS_SecurityProviderTPMHsm_25_018: [ This method shall clear the persistent for key role "ID Key" . ]
-    //SRS_SecurityProviderTPMHsm_25_019: [ This method Evict Control once done . ]
-    //SRS_SecurityProviderTPMHsm_25_020: [ This method Flush the context once done . ]
-    //SRS_SecurityProviderTPMHsm_25_022: [ This method shall create TPMS_SENSITIVE_CREATE for the inner wrap key . ]
-    //SRS_SecurityProviderTPMHsm_25_024: [ This method shall load the created response private onto TPM. ]
-    //SRS_SecurityProviderTPMHsm_25_026: [ This method shall Encrypt Decrypt the symmetric Key. ]
-    //SRS_SecurityProviderTPMHsm_25_028: [ This method shall flush the context for the symmetric Key. ]
+    //SRS_SecurityProviderTpmHsm_25_009: [ This method shall start Authorization session with TPM. ]
+    //SRS_SecurityProviderTpmHsm_25_011: [ This method shall set the policy secret on to TPM using the endorsement. ]
+    //SRS_SecurityProviderTpmHsm_25_012: [ This method shall activate the credential for the session. ]
+    //SRS_SecurityProviderTpmHsm_25_014: [ This method shall import the activated credential onto TPM. ]
+    //SRS_SecurityProviderTpmHsm_25_016: [ This method shall load SRK onto TPM. ]
+    //SRS_SecurityProviderTpmHsm_25_018: [ This method shall clear the persistent for key role "ID Key" . ]
+    //SRS_SecurityProviderTpmHsm_25_019: [ This method Evict Control once done . ]
+    //SRS_SecurityProviderTpmHsm_25_020: [ This method Flush the context once done . ]
+    //SRS_SecurityProviderTpmHsm_25_022: [ This method shall create TPMS_SENSITIVE_CREATE for the inner wrap key . ]
+    //SRS_SecurityProviderTpmHsm_25_024: [ This method shall load the created response private onto TPM. ]
+    //SRS_SecurityProviderTpmHsm_25_026: [ This method shall Encrypt Decrypt the symmetric Key. ]
+    //SRS_SecurityProviderTpmHsm_25_028: [ This method shall flush the context for the symmetric Key. ]
     @Test
     public void activateIdentityKeySucceeds() throws Exception
     {
@@ -344,7 +343,7 @@ public class SecurityProviderTPMHsmTest
         final byte[] testKey = "testKey".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm();
         new NonStrictExpectations()
         {
             {
@@ -404,7 +403,7 @@ public class SecurityProviderTPMHsmTest
         securityProviderTPMEmulator.activateIdentityKey(testKey);
     }
 
-    //SRS_SecurityProviderTPMHsm_25_008: [ This method shall throw SecurityProviderException if ID Key Public could not be extracted form TPM. ]
+    //SRS_SecurityProviderTpmHsm_25_008: [ This method shall throw SecurityProviderException if ID Key Public could not be extracted form TPM. ]
     @Test (expected = SecurityProviderException.class)
     public void activateIdentityKeyThrowsOnNullIdKeyPub() throws Exception
     {
@@ -412,7 +411,7 @@ public class SecurityProviderTPMHsmTest
         final byte[] testKey = "testKey".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm();
         new NonStrictExpectations()
         {
             {
@@ -425,7 +424,7 @@ public class SecurityProviderTPMHsmTest
         securityProviderTPMEmulator.activateIdentityKey(testKey);
     }
 
-    //SRS_SecurityProviderTPMHsm_25_010: [ This method shall throw  SecurityProviderException if Authorization session with TPM could not be started. ]
+    //SRS_SecurityProviderTpmHsm_25_010: [ This method shall throw  SecurityProviderException if Authorization session with TPM could not be started. ]
     @Test (expected = SecurityProviderException.class)
     public void activateIdentityKeyThrowsOnStartAuthSessionFail() throws Exception
     {
@@ -433,7 +432,7 @@ public class SecurityProviderTPMHsmTest
         final byte[] testKey = "testKey".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm();
         new NonStrictExpectations()
         {
             {
@@ -452,7 +451,7 @@ public class SecurityProviderTPMHsmTest
 
     }
 
-    //SRS_SecurityProviderTPMHsm_25_013: [ This method shall throw SecurityProviderException if activating the credential for the session fails. ]
+    //SRS_SecurityProviderTpmHsm_25_013: [ This method shall throw SecurityProviderException if activating the credential for the session fails. ]
     @Test (expected = SecurityProviderException.class)
     public void activateIdentityKeyThrowsOnInnerWrapKeyNull() throws Exception
     {
@@ -460,7 +459,7 @@ public class SecurityProviderTPMHsmTest
         final byte[] testKey = "testKey".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm();
         new NonStrictExpectations()
         {
             {
@@ -485,7 +484,7 @@ public class SecurityProviderTPMHsmTest
 
     }
 
-    //SRS_SecurityProviderTPMHsm_25_015: [ This method shall throw SecurityProviderException if importing the activated credential onto TPM fails. ]
+    //SRS_SecurityProviderTpmHsm_25_015: [ This method shall throw SecurityProviderException if importing the activated credential onto TPM fails. ]
     @Test (expected = SecurityProviderException.class)
     public void activateIdentityKeyThrowsOnIdKeyPrivateNull() throws Exception
     {
@@ -493,7 +492,7 @@ public class SecurityProviderTPMHsmTest
         final byte[] testKey = "testKey".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm();
         new NonStrictExpectations()
         {
             {
@@ -522,7 +521,7 @@ public class SecurityProviderTPMHsmTest
 
     }
 
-    //SRS_SecurityProviderTPMHsm_25_017: [ This method shall throw SecurityProviderException if loading SRK onto TPM fails. ]
+    //SRS_SecurityProviderTpmHsm_25_017: [ This method shall throw SecurityProviderException if loading SRK onto TPM fails. ]
     @Test (expected = SecurityProviderException.class)
     public void activateIdentityKeyThrowsOnHIdKeyNull() throws Exception
     {
@@ -530,7 +529,7 @@ public class SecurityProviderTPMHsmTest
         final byte[] testKey = "testKey".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm();
         new NonStrictExpectations()
         {
             {
@@ -561,7 +560,7 @@ public class SecurityProviderTPMHsmTest
         securityProviderTPMEmulator.activateIdentityKey(testKey);
     }
 
-    //SRS_SecurityProviderTPMHsm_25_021: [ This method shall throw SecurityProviderException if the encoded Uri length is greater than Maximum Uri Length . ]
+    //SRS_SecurityProviderTpmHsm_25_021: [ This method shall throw SecurityProviderException if the encoded Uri length is greater than Maximum Uri Length . ]
     @Test (expected = SecurityProviderException.class)
     public void activateIdentityKeyThrowsOnInvalidLengthOfEncUriData() throws Exception
     {
@@ -569,7 +568,7 @@ public class SecurityProviderTPMHsmTest
         final byte[] testKey = "testKey".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm();
         new NonStrictExpectations()
         {
             {
@@ -618,7 +617,7 @@ public class SecurityProviderTPMHsmTest
         securityProviderTPMEmulator.activateIdentityKey(testKey);
     }
 
-    //SRS_SecurityProviderTPMHsm_25_023: [ This method shall throw SecurityProviderException if creating TPMS_SENSITIVE_CREATE for the inner wrap key fails. ]
+    //SRS_SecurityProviderTpmHsm_25_023: [ This method shall throw SecurityProviderException if creating TPMS_SENSITIVE_CREATE for the inner wrap key fails. ]
     @Test (expected = SecurityProviderException.class)
     public void activateIdentityKeyThrowsOnCreateResponseNull() throws Exception
     {
@@ -626,7 +625,7 @@ public class SecurityProviderTPMHsmTest
         final byte[] testKey = "testKey".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm();
         new NonStrictExpectations()
         {
             {
@@ -678,7 +677,7 @@ public class SecurityProviderTPMHsmTest
         securityProviderTPMEmulator.activateIdentityKey(testKey);
     }
 
-    //SRS_SecurityProviderTPMHsm_25_025: [ This method shall throw if loading the created response private onto TPM fails. ]
+    //SRS_SecurityProviderTpmHsm_25_025: [ This method shall throw if loading the created response private onto TPM fails. ]
     @Test (expected = SecurityProviderException.class)
     public void activateIdentityKeyThrowsOnHSymKeyNull() throws Exception
     {
@@ -686,7 +685,7 @@ public class SecurityProviderTPMHsmTest
         final byte[] testKey = "testKey".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm();
         new NonStrictExpectations()
         {
             {
@@ -756,7 +755,7 @@ public class SecurityProviderTPMHsmTest
         securityProviderTPMEmulator.activateIdentityKey(testKey);
     }
 
-    //SRS_SecurityProviderTPMHsm_25_0027: [ This method shall throw if Encrypt Decrypt the symmetric Key fails. ]
+    //SRS_SecurityProviderTpmHsm_25_0027: [ This method shall throw if Encrypt Decrypt the symmetric Key fails. ]
     @Test (expected = SecurityProviderException.class)
     public void activateIdentityKeyThrowsOnEncryptDecryptResponseNull() throws Exception
     {
@@ -764,7 +763,7 @@ public class SecurityProviderTPMHsmTest
         final byte[] testKey = "testKey".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm();
         new NonStrictExpectations()
         {
             {
@@ -822,7 +821,7 @@ public class SecurityProviderTPMHsmTest
         securityProviderTPMEmulator.activateIdentityKey(testKey);
     }
 
-    //SRS_SecurityProviderTPMHsm_25_031: [ This method shall sign the device ID data. ]
+    //SRS_SecurityProviderTpmHsm_25_031: [ This method shall sign the device ID data. ]
     @Test
     public void signWithIdentitySucceeds(@Mocked TPM_ALG_ID mockedTpmAlgId,
                                          @Mocked TPMU_ASYM_SCHEME mockedTpmuAsymScheme,
@@ -834,7 +833,7 @@ public class SecurityProviderTPMHsmTest
         final byte[] deviceIdData = "deviceIdData".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm();
         new NonStrictExpectations()
         {
             {
@@ -863,7 +862,7 @@ public class SecurityProviderTPMHsmTest
         securityProviderTPMEmulator.signWithIdentity(deviceIdData);
     }
 
-    //SRS_SecurityProviderTPMHsm_25_030: [ This method shall throw SecurityProviderException if ID KEY public was not instantiated. ]
+    //SRS_SecurityProviderTpmHsm_25_030: [ This method shall throw SecurityProviderException if ID KEY public was not instantiated. ]
     @Test (expected = SecurityProviderException.class)
     public void signWithIdentityThrowsOnNullIdKeyPub() throws Exception
     {
@@ -871,7 +870,7 @@ public class SecurityProviderTPMHsmTest
         final byte[] deviceIdData = "deviceIdData".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm();
         new NonStrictExpectations()
         {
             {
@@ -883,7 +882,7 @@ public class SecurityProviderTPMHsmTest
         securityProviderTPMEmulator.signWithIdentity(deviceIdData);
     }
 
-    //SRS_SecurityProviderTPMHsm_25_029: [ This method shall throw IllegalArgumentException if `deviceIdData` is null or empty. ]
+    //SRS_SecurityProviderTpmHsm_25_029: [ This method shall throw IllegalArgumentException if `deviceIdData` is null or empty. ]
     @Test (expected = IllegalArgumentException.class)
     public void signWithIdentityThrowsOnNullDeviceIdData() throws Exception
     {
@@ -891,7 +890,7 @@ public class SecurityProviderTPMHsmTest
         final byte[] deviceIdData = null;
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm();
 
         //act
         securityProviderTPMEmulator.signWithIdentity(deviceIdData);
@@ -908,7 +907,7 @@ public class SecurityProviderTPMHsmTest
         final byte[] deviceIdData = "less<10".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm();
         new NonStrictExpectations()
         {
             {
@@ -943,7 +942,7 @@ public class SecurityProviderTPMHsmTest
         final byte[] deviceIdData = "deviceIdData".getBytes(StandardCharsets.UTF_8);
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm();
         new NonStrictExpectations()
         {
             {
@@ -968,27 +967,27 @@ public class SecurityProviderTPMHsmTest
         securityProviderTPMEmulator.signWithIdentity(deviceIdData);
     }
 
-    //SRS_SecurityProviderTPMHsm_25_032: [ This method shall return the TPM2B_PUBLIC form of EK. ]
+    //SRS_SecurityProviderTpmHsm_25_032: [ This method shall return the TPM2B_PUBLIC form of EK. ]
     @Test
     public void getEndorsementKeySucceeds() throws Exception
     {
         //arrange
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm();
 
         //act //assert
         assertNotNull(securityProviderTPMEmulator.getEndorsementKey());
     }
 
-    //SRS_SecurityProviderTPMHsm_25_033: [ This method shall return the TPM2B_PUBLIC form of SRK. ]
+    //SRS_SecurityProviderTpmHsm_25_033: [ This method shall return the TPM2B_PUBLIC form of SRK. ]
     @Test
     public void getStorageRootSucceeds() throws Exception
     {
         //arrange
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
-        SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
+        SecurityProviderTpmHsm securityProviderTPMEmulator = new SecurityProviderTpmHsm();
 
         //act //assert
         assertNotNull(securityProviderTPMEmulator.getStorageRootKey());
