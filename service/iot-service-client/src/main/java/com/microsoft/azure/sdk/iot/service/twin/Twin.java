@@ -100,7 +100,6 @@ public class Twin
         twin.setLastActivityTime(twinState.getLastActivityTime());
         twin.setCloudToDeviceMessageCount(twinState.getCloudToDeviceMessageCount());
 
-
         // Tags
         twin.getTags().setVersion(twinState.getTags().getVersion());
         if (twinState.getTags().size() > 0)
@@ -109,29 +108,35 @@ public class Twin
         }
 
         // Desired properties
-        twin.getDesiredProperties().setVersion(twinState.getDesiredProperties().getVersion());
-        if (twinState.getDesiredProperties().size() > 0)
+        if (twinState.getDesiredProperties() != null)
         {
-            twin.getDesiredProperties().putAll(twinState.getDesiredProperties());
-        }
+            twin.getDesiredProperties().setVersion(twinState.getDesiredProperties().getVersion());
+            if (twinState.getDesiredProperties().size() > 0)
+            {
+                twin.getDesiredProperties().putAll(twinState.getDesiredProperties());
+            }
 
-        twin.getDesiredProperties().setTwinMetadata(twinState.getDesiredProperties().getTwinMetadata());
-        if (twinState.getDesiredProperties().getMetadataMap().size() > 0)
-        {
-            twin.getDesiredProperties().getMetadataMap().putAll(twinState.getDesiredProperties().getMetadataMap());
+            twin.getDesiredProperties().setTwinMetadata(twinState.getDesiredProperties().getTwinMetadata());
+            if (twinState.getDesiredProperties().getMetadataMap().size() > 0)
+            {
+                twin.getDesiredProperties().getMetadataMap().putAll(twinState.getDesiredProperties().getMetadataMap());
+            }
         }
 
         // Reported properties
-        twin.getReportedProperties().setVersion(twinState.getReportedProperties().getVersion());
-        if (twinState.getReportedProperties().size() > 0)
+        if (twinState.getReportedProperties() != null)
         {
-            twin.getReportedProperties().putAll(twinState.getReportedProperties());
-        }
+            twin.getReportedProperties().setVersion(twinState.getReportedProperties().getVersion());
+            if (twinState.getReportedProperties().size() > 0)
+            {
+                twin.getReportedProperties().putAll(twinState.getReportedProperties());
+            }
 
-        twin.getReportedProperties().setTwinMetadata(twinState.getReportedProperties().getTwinMetadata());
-        if (twinState.getReportedProperties().getMetadataMap().size() > 0)
-        {
-            twin.getReportedProperties().getMetadataMap().putAll(twinState.getReportedProperties().getMetadataMap());
+            twin.getReportedProperties().setTwinMetadata(twinState.getReportedProperties().getTwinMetadata());
+            if (twinState.getReportedProperties().getMetadataMap().size() > 0)
+            {
+                twin.getReportedProperties().getMetadataMap().putAll(twinState.getReportedProperties().getMetadataMap());
+            }
         }
 
         twin.setCapabilities(twinState.getCapabilities());
@@ -166,11 +171,9 @@ public class Twin
     {
         this();
 
-        if (Tools.isNullOrEmpty(deviceId))
-        {
-            throw new IllegalArgumentException("deviceId cannot be null or empty.");
-        }
-
+        // The deviceId field is allowed to be null because users can query twins and filter down to specific fields
+        // such as status. In cases like that, the service doesn't return the deviceId, so we can't throw
+        // an argument exception here if it is null.
         this.deviceId = deviceId;
     }
 
@@ -185,16 +188,9 @@ public class Twin
     {
         this();
 
-        if (Tools.isNullOrEmpty(deviceId))
-        {
-            throw new IllegalArgumentException("deviceId cannot be null or empty.");
-        }
-
-        if (Tools.isNullOrEmpty(moduleId))
-        {
-            throw new IllegalArgumentException("moduleId cannot be null or empty.");
-        }
-
+        // Both these fields are allowed to be null because users can query twins and filter down to specific fields
+        // such as status. In cases like that, the service doesn't return the deviceId/moduleId, so we can't throw
+        // an argument exception here if they are null.
         this.deviceId = deviceId;
         this.moduleId = moduleId;
     }
@@ -316,12 +312,7 @@ public class Twin
      */
     private String tagsToString()
     {
-        StringBuilder thisDeviceTags = new StringBuilder();
-        if (tags != null)
-        {
-            thisDeviceTags.append("Tags: ").append(this.tags.toString()).append("\n");
-        }
-        return thisDeviceTags.toString();
+        return "Tags: " + this.tags.toString() + "\n";
     }
 
     /**
@@ -331,12 +322,7 @@ public class Twin
      */
     private String desiredPropertiesToString()
     {
-        StringBuilder thisDeviceRepProp = new StringBuilder();
-        if (this.desiredProperties != null)
-        {
-            thisDeviceRepProp.append("Desired properties: ").append(this.desiredProperties.toString()).append("\n");
-        }
-        return thisDeviceRepProp.toString();
+        return "Desired properties: " + this.desiredProperties.toString() + "\n";
     }
 
     /**
@@ -346,13 +332,6 @@ public class Twin
      */
     private String reportedPropertiesToString()
     {
-        StringBuilder thisDeviceDesProp = new StringBuilder();
-        if (this.reportedProperties != null)
-        {
-            thisDeviceDesProp.append("Reported properties: ")
-                    .append(this.reportedProperties.toString())
-                    .append("\n");
-        }
-        return thisDeviceDesProp.toString();
+        return "Reported properties: " + this.reportedProperties.toString() + "\n";
     }
 }

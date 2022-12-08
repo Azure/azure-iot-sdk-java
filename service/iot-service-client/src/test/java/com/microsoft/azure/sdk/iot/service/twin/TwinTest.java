@@ -66,29 +66,6 @@ public class TwinTest
     }
 
     /*
-     **Tests_SRS_DEVICETWINDEVICE_25_002: [** The constructor shall throw IllegalArgumentException if the input string is empty or null.**]**
-     */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorCreatesNewDeviceEmptyDeviceId()
-    {
-        //arrange
-        final String deviceId = "";
-
-        //act
-        new Twin(deviceId);
-    }
-
-    /*
-     **Tests_SRS_DEVICETWINDEVICE_25_002: [** The constructor shall throw IllegalArgumentException if the input string is empty or null.**]**
-     */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorCreatesNewDeviceNullDeviceId()
-    {
-        //act
-        new Twin(null);
-    }
-
-    /*
      **Tests_SRS_DEVICETWINDEVICE_25_003: [** The constructor shall create a new instance of twin object for this device and store the device id.**]**
      */
     @Test
@@ -111,60 +88,6 @@ public class TwinTest
         assertEquals(0, repPropMap.size());
         TwinCollection desPropMap = Deencapsulation.getField(testDevice, "reportedProperties");
         assertEquals(0, desPropMap.size());
-    }
-
-    /*
-     **Tests_SRS_DEVICETWINDEVICE_28__005: [** The constructor shall throw IllegalArgumentException if the deviceId is empty or null.**]**
-     */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorCreatesNewDeviceForModuleEmptyDeviceId()
-    {
-        //arrange
-        final String deviceId = "";
-        final String moduleId = "somemodule";
-
-        //act
-        new Twin(deviceId, moduleId);
-    }
-
-    /*
-     **Tests_SRS_DEVICETWINDEVICE_28_005: [** The constructor shall throw IllegalArgumentException if the deviceId is empty or null.**]**
-     */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorCreatesNewDeviceForModuleNullDeviceId()
-    {
-        //arrange
-        final String moduleId = "somemodule";
-
-        //act
-        new Twin(null, moduleId);
-    }
-
-    /*
-     **Tests_SRS_DEVICETWINDEVICE_28__006: [** The constructor shall throw IllegalArgumentException if the moduleId is empty or null.**]**
-     */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorCreatesNewDeviceForModuleEmptyModuleId()
-    {
-        //arrange
-        final String deviceId = "somedevice";
-        final String moduleId = "";
-
-        //act
-        new Twin(deviceId, moduleId);
-    }
-
-    /*
-     **Tests_SRS_DEVICETWINDEVICE_28_006: [** The constructor shall throw IllegalArgumentException if the moduleId is empty or null.**]**
-     */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorCreatesNewDeviceForModuleNullModuleId()
-    {
-        //arrange
-        final String deviceId = "somedevice";
-
-        //act
-        new Twin(deviceId, null);
     }
 
     /*
@@ -659,5 +582,33 @@ public class TwinTest
 
         //assert
         assertEquals(expectedModuleId, Deencapsulation.getField(testTwin, "moduleId"));
+    }
+
+
+    // Twins returned by the service as query results won't necessarily have any particular field since a query
+    // can filter on any field like status. This checks that we can still deserialize a twin even when it has no
+    // device Id or when it only has a device Id
+    @Test
+    public void nullValueParsingWorks()
+    {
+        Twin twin = Twin.fromJson("{\"deviceId\":\"someDeviceId\"}");
+        assertNull(twin.getETag());
+        assertNull(twin.getConnectionState());
+        assertNull(twin.getModuleId());
+        assertNull(twin.getCloudToDeviceMessageCount());
+        assertNull(twin.getLastActivityTime());
+        assertNull(twin.getStatus());
+        assertNull(twin.getVersion());
+        assertNotNull(twin.getDeviceId());
+
+        twin = Twin.fromJson("{\"status\":\"enabled\"}");
+        assertNull(twin.getETag());
+        assertNull(twin.getConnectionState());
+        assertNull(twin.getModuleId());
+        assertNull(twin.getCloudToDeviceMessageCount());
+        assertNull(twin.getLastActivityTime());
+        assertNull(twin.getVersion());
+        assertNull(twin.getDeviceId());
+        assertNotNull(twin.getStatus());
     }
 }
