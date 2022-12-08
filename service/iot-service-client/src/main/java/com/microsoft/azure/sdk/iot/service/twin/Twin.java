@@ -92,14 +92,41 @@ public class Twin
         TwinState twinState = new TwinState(json);
 
         Twin twin = new Twin(twinState.getDeviceId());
-        twin.setVersion(twinState.getVersion());
-        twin.setETag(twinState.getETag());
-        twin.setStatus(twinState.getStatus());
-        twin.setStatusUpdateTime(twinState.getStatusUpdatedTime());
-        twin.setConnectionState(twinState.getConnectionState());
-        twin.setLastActivityTime(twinState.getLastActivityTime());
-        twin.setCloudToDeviceMessageCount(twinState.getCloudToDeviceMessageCount());
 
+        if (twinState.getVersion() != null)
+        {
+            twin.setVersion(twinState.getVersion());
+        }
+
+        if (twinState.getETag() != null)
+        {
+            twin.setETag(twinState.getETag());
+        }
+
+        if (twinState.getStatus() != null)
+        {
+            twin.setStatus(twinState.getStatus());
+        }
+
+        if (twinState.getStatusUpdatedTime() != null)
+        {
+            twin.setStatusUpdateTime(twinState.getStatusUpdatedTime());
+        }
+
+        if (twinState.getConnectionState() != null)
+        {
+            twin.setConnectionState(twinState.getConnectionState());
+        }
+
+        if (twinState.getLastActivityTime() != null)
+        {
+            twin.setLastActivityTime(twinState.getLastActivityTime());
+        }
+
+        if (twinState.getCloudToDeviceMessageCount() != null)
+        {
+            twin.setCloudToDeviceMessageCount(twinState.getCloudToDeviceMessageCount());
+        }
 
         // Tags
         twin.getTags().setVersion(twinState.getTags().getVersion());
@@ -109,29 +136,35 @@ public class Twin
         }
 
         // Desired properties
-        twin.getDesiredProperties().setVersion(twinState.getDesiredProperties().getVersion());
-        if (twinState.getDesiredProperties().size() > 0)
+        if (twinState.getDesiredProperties() != null)
         {
-            twin.getDesiredProperties().putAll(twinState.getDesiredProperties());
+            twin.getDesiredProperties().setVersion(twinState.getDesiredProperties().getVersion());
+            if (twinState.getDesiredProperties().size() > 0)
+            {
+                twin.getDesiredProperties().putAll(twinState.getDesiredProperties());
+            }
+
+            twin.getDesiredProperties().setTwinMetadata(twinState.getDesiredProperties().getTwinMetadata());
+            if (twinState.getDesiredProperties().getMetadataMap().size() > 0)
+            {
+                twin.getDesiredProperties().getMetadataMap().putAll(twinState.getDesiredProperties().getMetadataMap());
+            }
         }
 
-        twin.getDesiredProperties().setTwinMetadata(twinState.getDesiredProperties().getTwinMetadata());
-        if (twinState.getDesiredProperties().getMetadataMap().size() > 0)
+        if (twinState.getReportedProperties() != null)
         {
-            twin.getDesiredProperties().getMetadataMap().putAll(twinState.getDesiredProperties().getMetadataMap());
-        }
+            // Reported properties
+            twin.getReportedProperties().setVersion(twinState.getReportedProperties().getVersion());
+            if (twinState.getReportedProperties().size() > 0)
+            {
+                twin.getReportedProperties().putAll(twinState.getReportedProperties());
+            }
 
-        // Reported properties
-        twin.getReportedProperties().setVersion(twinState.getReportedProperties().getVersion());
-        if (twinState.getReportedProperties().size() > 0)
-        {
-            twin.getReportedProperties().putAll(twinState.getReportedProperties());
-        }
-
-        twin.getReportedProperties().setTwinMetadata(twinState.getReportedProperties().getTwinMetadata());
-        if (twinState.getReportedProperties().getMetadataMap().size() > 0)
-        {
-            twin.getReportedProperties().getMetadataMap().putAll(twinState.getReportedProperties().getMetadataMap());
+            twin.getReportedProperties().setTwinMetadata(twinState.getReportedProperties().getTwinMetadata());
+            if (twinState.getReportedProperties().getMetadataMap().size() > 0)
+            {
+                twin.getReportedProperties().getMetadataMap().putAll(twinState.getReportedProperties().getMetadataMap());
+            }
         }
 
         twin.setCapabilities(twinState.getCapabilities());
