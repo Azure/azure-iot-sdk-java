@@ -100,7 +100,6 @@ public class Twin
         twin.setLastActivityTime(twinState.getLastActivityTime());
         twin.setCloudToDeviceMessageCount(twinState.getCloudToDeviceMessageCount());
 
-
         // Tags
         twin.getTags().setVersion(twinState.getTags().getVersion());
         if (twinState.getTags().size() > 0)
@@ -172,6 +171,9 @@ public class Twin
     {
         this();
 
+        // The deviceId field is allowed to be null because users can query twins and filter down to specific fields
+        // such as status. In cases like that, the service doesn't return the deviceId, so we can't throw
+        // an argument exception here if it is null.
         this.deviceId = deviceId;
     }
 
@@ -186,6 +188,9 @@ public class Twin
     {
         this();
 
+        // Both these fields are allowed to be null because users can query twins and filter down to specific fields
+        // such as status. In cases like that, the service doesn't return the deviceId/moduleId, so we can't throw
+        // an argument exception here if they are null.
         this.deviceId = deviceId;
         this.moduleId = moduleId;
     }
