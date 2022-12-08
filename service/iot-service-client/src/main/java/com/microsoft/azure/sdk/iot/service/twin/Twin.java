@@ -123,9 +123,9 @@ public class Twin
             }
         }
 
+        // Reported properties
         if (twinState.getReportedProperties() != null)
         {
-            // Reported properties
             twin.getReportedProperties().setVersion(twinState.getReportedProperties().getVersion());
             if (twinState.getReportedProperties().size() > 0)
             {
@@ -312,12 +312,7 @@ public class Twin
      */
     private String tagsToString()
     {
-        StringBuilder thisDeviceTags = new StringBuilder();
-        if (tags != null)
-        {
-            thisDeviceTags.append("Tags: ").append(this.tags.toString()).append("\n");
-        }
-        return thisDeviceTags.toString();
+        return "Tags: " + this.tags.toString() + "\n";
     }
 
     /**
@@ -327,12 +322,7 @@ public class Twin
      */
     private String desiredPropertiesToString()
     {
-        StringBuilder thisDeviceRepProp = new StringBuilder();
-        if (this.desiredProperties != null)
-        {
-            thisDeviceRepProp.append("Desired properties: ").append(this.desiredProperties.toString()).append("\n");
-        }
-        return thisDeviceRepProp.toString();
+        return "Desired properties: " + this.desiredProperties.toString() + "\n";
     }
 
     /**
@@ -342,13 +332,6 @@ public class Twin
      */
     private String reportedPropertiesToString()
     {
-        StringBuilder thisDeviceDesProp = new StringBuilder();
-        if (this.reportedProperties != null)
-        {
-            thisDeviceDesProp.append("Reported properties: ")
-                    .append(this.reportedProperties.toString())
-                    .append("\n");
-        }
-        return thisDeviceDesProp.toString();
+        return "Reported properties: " + this.reportedProperties.toString() + "\n";
     }
 }
