@@ -535,6 +535,11 @@ public class TwinState
      */
     public String getConnectionState()
     {
+        if (this.connectionState == null)
+        {
+            return null;
+        }
+
         return this.connectionState.toString();
     }
 
