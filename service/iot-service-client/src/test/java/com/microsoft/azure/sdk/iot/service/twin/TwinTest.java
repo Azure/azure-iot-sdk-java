@@ -660,4 +660,32 @@ public class TwinTest
         //assert
         assertEquals(expectedModuleId, Deencapsulation.getField(testTwin, "moduleId"));
     }
+
+
+    // Twins returned by the service as query results won't necessarily have any particular field since a query
+    // can filter on any field like status. This checks that we can still deserialize a twin even when it has no
+    // device Id or when it only has a device Id
+    @Test
+    public void nullValueParsingWorks()
+    {
+        Twin twin = Twin.fromJson("{\"deviceId\":\"someDeviceId\"}");
+        assertNull(twin.getETag());
+        assertNull(twin.getConnectionState());
+        assertNull(twin.getModuleId());
+        assertNull(twin.getCloudToDeviceMessageCount());
+        assertNull(twin.getLastActivityTime());
+        assertNull(twin.getStatus());
+        assertNull(twin.getVersion());
+        assertNotNull(twin.getDeviceId());
+
+        twin = Twin.fromJson("{\"status\":\"enabled\"}");
+        assertNull(twin.getETag());
+        assertNull(twin.getConnectionState());
+        assertNull(twin.getModuleId());
+        assertNull(twin.getCloudToDeviceMessageCount());
+        assertNull(twin.getLastActivityTime());
+        assertNull(twin.getVersion());
+        assertNull(twin.getDeviceId());
+        assertNotNull(twin.getStatus());
+    }
 }

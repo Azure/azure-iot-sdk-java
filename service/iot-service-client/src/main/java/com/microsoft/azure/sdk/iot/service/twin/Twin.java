@@ -92,41 +92,14 @@ public class Twin
         TwinState twinState = new TwinState(json);
 
         Twin twin = new Twin(twinState.getDeviceId());
+        twin.setVersion(twinState.getVersion());
+        twin.setETag(twinState.getETag());
+        twin.setStatus(twinState.getStatus());
+        twin.setStatusUpdateTime(twinState.getStatusUpdatedTime());
+        twin.setConnectionState(twinState.getConnectionState());
+        twin.setLastActivityTime(twinState.getLastActivityTime());
+        twin.setCloudToDeviceMessageCount(twinState.getCloudToDeviceMessageCount());
 
-        if (twinState.getVersion() != null)
-        {
-            twin.setVersion(twinState.getVersion());
-        }
-
-        if (twinState.getETag() != null)
-        {
-            twin.setETag(twinState.getETag());
-        }
-
-        if (twinState.getStatus() != null)
-        {
-            twin.setStatus(twinState.getStatus());
-        }
-
-        if (twinState.getStatusUpdatedTime() != null)
-        {
-            twin.setStatusUpdateTime(twinState.getStatusUpdatedTime());
-        }
-
-        if (twinState.getConnectionState() != null)
-        {
-            twin.setConnectionState(twinState.getConnectionState());
-        }
-
-        if (twinState.getLastActivityTime() != null)
-        {
-            twin.setLastActivityTime(twinState.getLastActivityTime());
-        }
-
-        if (twinState.getCloudToDeviceMessageCount() != null)
-        {
-            twin.setCloudToDeviceMessageCount(twinState.getCloudToDeviceMessageCount());
-        }
 
         // Tags
         twin.getTags().setVersion(twinState.getTags().getVersion());
@@ -199,11 +172,6 @@ public class Twin
     {
         this();
 
-        if (Tools.isNullOrEmpty(deviceId))
-        {
-            throw new IllegalArgumentException("deviceId cannot be null or empty.");
-        }
-
         this.deviceId = deviceId;
     }
 
@@ -217,16 +185,6 @@ public class Twin
     public Twin(String deviceId, String moduleId) throws IllegalArgumentException
     {
         this();
-
-        if (Tools.isNullOrEmpty(deviceId))
-        {
-            throw new IllegalArgumentException("deviceId cannot be null or empty.");
-        }
-
-        if (Tools.isNullOrEmpty(moduleId))
-        {
-            throw new IllegalArgumentException("moduleId cannot be null or empty.");
-        }
 
         this.deviceId = deviceId;
         this.moduleId = moduleId;
