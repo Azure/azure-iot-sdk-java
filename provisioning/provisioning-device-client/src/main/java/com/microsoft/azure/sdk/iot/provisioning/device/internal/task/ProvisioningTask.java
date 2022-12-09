@@ -249,7 +249,7 @@ public class ProvisioningTask implements Callable<Object>
                     this.dpsStatus = PROVISIONING_DEVICE_STATUS_FAILED;
                     String errorMessage = statusRegistrationOperationStatusParser.getRegistrationState().getErrorMessage();
                     ProvisioningDeviceHubException dpsHubException = new ProvisioningDeviceHubException(errorMessage);
-                    dpsHubException.setErrorCode(registrationOperationStatusParser.getRegistrationState().getErrorCode());
+                    dpsHubException.setErrorCode(statusRegistrationOperationStatusParser.getRegistrationState().getErrorCode());
                     registrationInfo = new RegistrationResult(null, null, null, PROVISIONING_DEVICE_STATUS_FAILED);
                     log.error("Device provisioning service failed to provision the device, finished with status FAILED: {}", errorMessage);
                     this.invokeRegistrationCallback(registrationInfo, dpsHubException);
@@ -259,7 +259,7 @@ public class ProvisioningTask implements Callable<Object>
                     this.dpsStatus = PROVISIONING_DEVICE_STATUS_DISABLED;
                     String disabledErrorMessage = statusRegistrationOperationStatusParser.getRegistrationState().getErrorMessage();
                     dpsHubException = new ProvisioningDeviceHubException(disabledErrorMessage);
-                    dpsHubException.setErrorCode(registrationOperationStatusParser.getRegistrationState().getErrorCode());
+                    dpsHubException.setErrorCode(statusRegistrationOperationStatusParser.getRegistrationState().getErrorCode());
                     registrationInfo = new RegistrationResult(null, null, null, PROVISIONING_DEVICE_STATUS_DISABLED);
                     log.error("Device provisioning service failed to provision the device, finished with status DISABLED: {}", disabledErrorMessage);
                     this.invokeRegistrationCallback(registrationInfo, dpsHubException);
