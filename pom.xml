@@ -199,12 +199,12 @@
         <iot-service-client-version>2.1.5</iot-service-client-version>
         <provisioning-device-client-version>2.0.3</provisioning-device-client-version>
         <provisioning-service-client-version>2.0.2</provisioning-service-client-version>
-        <security-provider-version>2.0.1</security-provider-version>
-        <tpm-provider-emulator-version>2.0.1</tpm-provider-emulator-version>
-        <tpm-provider-version>2.0.1</tpm-provider-version>
-        <dice-provider-emulator-version>2.0.1</dice-provider-emulator-version>
-        <dice-provider-version>2.0.1</dice-provider-version>
-        <x509-provider-version>2.0.2</x509-provider-version>
+        <security-provider-version>2.0.0</security-provider-version>
+        <tpm-provider-emulator-version>2.0.0</tpm-provider-emulator-version>
+        <tpm-provider-version>2.0.0</tpm-provider-version>
+        <dice-provider-emulator-version>2.0.0</dice-provider-emulator-version>
+        <dice-provider-version>2.0.0</dice-provider-version>
+        <x509-provider-version>2.0.1</x509-provider-version>
     </properties>
     <reporting>
         <plugins>
