@@ -254,6 +254,8 @@ public class ProvisioningTaskTest
                 result = mockedDeviceRegistrationResultParser;
                 mockedDeviceRegistrationResultParser.getErrorMessage();
                 result = "Test Error Message";
+                mockedDeviceRegistrationResultParser.getErrorCode();
+                result = null;
                 Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, String.class, ProvisioningDeviceClientStatus.class},
                         any, any, any, PROVISIONING_DEVICE_STATUS_DISABLED);
                 result = mockedRegistrationData;

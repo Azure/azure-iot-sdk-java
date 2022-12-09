@@ -180,7 +180,6 @@ public class ProvisioningTask implements Callable<Object>
 
     {
         boolean isContinue = false;
-        RegistrationOperationStatusParser statusRegistrationOperationStatusParser = registrationOperationStatusParser;
         ProvisioningStatus nextStatus = ProvisioningStatus.fromString(registrationOperationStatusParser.getStatus());
         log.info("Current provisioning status: {}", nextStatus);
         // continue invoking for status until a terminal state is reached
@@ -197,13 +196,13 @@ public class ProvisioningTask implements Callable<Object>
                     //intended fall through
                 case ASSIGNING:
                     log.trace("Polling device provisioning service for status of registration...");
-                    statusRegistrationOperationStatusParser = this.invokeStatus(registrationOperationStatusParser.getOperationId());
-                    nextStatus = ProvisioningStatus.fromString(statusRegistrationOperationStatusParser.getStatus());
+                    registrationOperationStatusParser = this.invokeStatus(registrationOperationStatusParser.getOperationId());
+                    nextStatus = ProvisioningStatus.fromString(registrationOperationStatusParser.getStatus());
                     isContinue = true;
                     break;
                 case ASSIGNED:
                     this.dpsStatus = PROVISIONING_DEVICE_STATUS_ASSIGNED;
-                    DeviceRegistrationResultParser registrationStatus = statusRegistrationOperationStatusParser.getRegistrationState();
+                    DeviceRegistrationResultParser registrationStatus = registrationOperationStatusParser.getRegistrationState();
 
                     if (registrationStatus == null
                             || registrationStatus.getAssignedHub() == null
@@ -211,7 +210,6 @@ public class ProvisioningTask implements Callable<Object>
                             || registrationStatus.getDeviceId() == null
                             || registrationStatus.getDeviceId().isEmpty())
                     {
-                        //Codes_SRS_ProvisioningTask_34_018: [Upon reaching the terminal state ASSIGNED, if the registration status json is missing an assigned hub or device id, this function shall throw a ProvisioningDeviceClientException.]
                         throw new ProvisioningDeviceClientException("Could not retrieve Assigned Hub or Device ID and status changed to Assigned");
                     }
 
@@ -233,11 +231,9 @@ public class ProvisioningTask implements Callable<Object>
                                 || registrationStatus.getTpm().getAuthenticationKey() == null
                                 || registrationStatus.getTpm().getAuthenticationKey().isEmpty())
                         {
-                            //Codes_SRS_ProvisioningTask_34_017: [Upon reaching the terminal state ASSIGNED, if the saved security client is an instance of SecurityClientTpm and if the registration status json does not contain an authentication key, this function shall throw a ProvisioningDeviceClientException.]
                             throw new ProvisioningDeviceClientException("Could not retrieve Authentication key when status was assigned");
                         }
 
-                        //Codes_SRS_ProvisioningTask_34_016: [Upon reaching the terminal state ASSIGNED, if the saved security client is an instance of SecurityClientTpm, the security client shall decrypt and store the authentication key from the statusResponseParser.]
                         String authenticationKey = registrationStatus.getTpm().getAuthenticationKey();
                         ((SecurityProviderTpm) this.securityProvider).activateIdentityKey(decodeBase64(authenticationKey.getBytes(StandardCharsets.UTF_8)));
                     }
@@ -247,9 +243,13 @@ public class ProvisioningTask implements Callable<Object>
                     break;
                 case FAILED:
                     this.dpsStatus = PROVISIONING_DEVICE_STATUS_FAILED;
-                    String errorMessage = statusRegistrationOperationStatusParser.getRegistrationState().getErrorMessage();
+                    String errorMessage = registrationOperationStatusParser.getRegistrationState().getErrorMessage();
                     ProvisioningDeviceHubException dpsHubException = new ProvisioningDeviceHubException(errorMessage);
-                    dpsHubException.setErrorCode(registrationOperationStatusParser.getRegistrationState().getErrorCode());
+                    if (registrationOperationStatusParser.getRegistrationState().getErrorCode() != null)
+                    {
+                        dpsHubException.setErrorCode(registrationOperationStatusParser.getRegistrationState().getErrorCode());
+                    }
+
                     registrationInfo = new RegistrationResult(null, null, null, PROVISIONING_DEVICE_STATUS_FAILED);
                     log.error("Device provisioning service failed to provision the device, finished with status FAILED: {}", errorMessage);
                     this.invokeRegistrationCallback(registrationInfo, dpsHubException);
@@ -257,9 +257,13 @@ public class ProvisioningTask implements Callable<Object>
                     break;
                 case DISABLED:
                     this.dpsStatus = PROVISIONING_DEVICE_STATUS_DISABLED;
-                    String disabledErrorMessage = statusRegistrationOperationStatusParser.getRegistrationState().getErrorMessage();
+                    String disabledErrorMessage = registrationOperationStatusParser.getRegistrationState().getErrorMessage();
                     dpsHubException = new ProvisioningDeviceHubException(disabledErrorMessage);
-                    dpsHubException.setErrorCode(registrationOperationStatusParser.getRegistrationState().getErrorCode());
+                    if (registrationOperationStatusParser.getRegistrationState().getErrorCode() != null)
+                    {
+                        dpsHubException.setErrorCode(registrationOperationStatusParser.getRegistrationState().getErrorCode());
+                    }
+
                     registrationInfo = new RegistrationResult(null, null, null, PROVISIONING_DEVICE_STATUS_DISABLED);
                     log.error("Device provisioning service failed to provision the device, finished with status DISABLED: {}", disabledErrorMessage);
                     this.invokeRegistrationCallback(registrationInfo, dpsHubException);
