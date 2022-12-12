@@ -6,6 +6,8 @@ package com.microsoft.azure.sdk.iot.device.transport;
 import com.microsoft.azure.sdk.iot.device.twin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Extends Message, adding transport artifacts.
@@ -29,6 +31,10 @@ public class IotHubTransportMessage extends Message
     private DeviceOperations operationType;
     private MessageCallback messageCallback;
     private Object messageCallbackContext;
+
+    @Getter
+    @Setter
+    private int qualityOfService;
 
     /**
      * Constructor with binary data and message type

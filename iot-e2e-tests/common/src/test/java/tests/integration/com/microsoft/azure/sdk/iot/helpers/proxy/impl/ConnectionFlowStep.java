@@ -1,12 +1,13 @@
 package tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.impl;
 
 import io.netty.util.concurrent.Future;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Represents a phase in a {@link ConnectionFlow}.
  */
+@Slf4j
 abstract class ConnectionFlowStep {
-    private final ProxyConnectionLogger LOG;
     private final ProxyConnection connection;
     private final ConnectionState state;
 
@@ -24,7 +25,6 @@ abstract class ConnectionFlowStep {
         super();
         this.connection = connection;
         this.state = state;
-        this.LOG = connection.getLOG();
     }
 
     ProxyConnection getConnection() {
@@ -105,7 +105,7 @@ abstract class ConnectionFlowStep {
      *            the message read from the underlying connection
      */
     void read(ConnectionFlow flow, Object msg) {
-        LOG.debug("Received message while in the middle of connecting: {}", msg);
+        log.trace("Received message while in the middle of connecting: {}", msg);
     }
 
     @Override

@@ -314,7 +314,14 @@ public class InternalClient
     /**
      * Start receiving desired property updates for this client. After subscribing to desired properties, this client can
      * freely send reported property updates and make getTwin calls.
-     *
+     * <p>
+     * This call can only be made after the client has been successfully opened.
+     * </p>
+     * <p>
+     * This subscription is preserved between reconnect attempts. However, it is not preserved after a client has
+     * been closed because the user called {@link #close()} or because this client lost its connection and its retry
+     * policy was exhausted.
+     * </p>
      * @param desiredPropertiesCallback The callback to execute each time a desired property update message is received
      * from the service. This will contain one or many properties updated at once.
      * @param desiredPropertiesCallbackContext The context that will be included in the callback of desiredPropertiesCallback. May be null.
@@ -331,7 +338,14 @@ public class InternalClient
     /**
      * Start receiving desired property updates for this client. After subscribing to desired properties, this client can
      * freely send reported property updates and make getTwin calls.
-     *
+     * <p>
+     * This call can only be made after the client has been successfully opened.
+     * </p>
+     * <p>
+     * This subscription is preserved between reconnect attempts. However, it is not preserved after a client has
+     * been closed because the user called {@link #close()} or because this client lost its connection and its retry
+     * policy was exhausted.
+     * </p>
      * @param desiredPropertiesCallback The callback to execute each time a desired property update message is received
      * from the service. This will contain one or many properties updated at once.
      * @param desiredPropertiesCallbackContext The context that will be included in the callback of desiredPropertiesCallback. May be null.
@@ -520,8 +534,15 @@ public class InternalClient
     }
 
     /**
-     * Subscribes to direct methods
-     *
+     * Subscribes to direct methods.
+     * <p>
+     * This call can only be made after the client has been successfully opened.
+     * </p>
+     * <p>
+     * This subscription is preserved between reconnect attempts. However, it is not preserved after a client has
+     * been closed because the user called {@link #close()} or because this client lost its connection and its retry
+     * policy was exhausted.
+     * </p>
      * @param methodCallback Callback on which direct methods shall be invoked. Cannot be {@code null}.
      * @param methodCallbackContext Context for device method callback. Can be {@code null}.
      *
@@ -536,8 +557,15 @@ public class InternalClient
     }
 
     /**
-     * Subscribes to direct methods
-     *
+     * Subscribes to direct methods.
+     * <p>
+     * This call can only be made after the client has been successfully opened.
+     * </p>
+     * <p>
+     * This subscription is preserved between reconnect attempts. However, it is not preserved after a client has
+     * been closed because the user called {@link #close()} or because this client lost its connection and its retry
+     * policy was exhausted.
+     * </p>
      * @param methodCallback Callback on which direct methods shall be invoked. Cannot be {@code null}.
      * @param methodCallbackContext Context for device method callback. Can be {@code null}.
      * @param timeoutMilliseconds The maximum number of milliseconds this call will wait for the service to return the twin.
@@ -652,7 +680,14 @@ public class InternalClient
     /**
      * Start receiving desired property updates for this client asynchronously. After subscribing to desired properties, this client can
      * freely send reported property updates and make getTwin calls.
-     *
+     * <p>
+     * This call can only be made after the client has been successfully opened.
+     * </p>
+     * <p>
+     * This subscription is preserved between reconnect attempts. However, it is not preserved after a client has
+     * been closed because the user called {@link #close()} or because this client lost its connection and its retry
+     * policy was exhausted.
+     * </p>
      * @param subscriptionAcknowledgedCallback The callback to execute once the service has acknowledged the subscription request.
      * @param desiredPropertiesSubscriptionCallbackContext The context that will be included in the callback of desiredPropertiesSubscriptionCallback. May be null.
      * @param desiredPropertiesCallback The callback to execute each time a desired property update message is received
@@ -675,11 +710,7 @@ public class InternalClient
             throw new IllegalStateException("Open the client connection before using it");
         }
 
-        if (this.twin == null)
-        {
-            this.twin = new DeviceTwin(this);
-        }
-
+        this.twin = new DeviceTwin(this);
         this.twin.subscribeToDesiredPropertiesAsync(
             subscriptionAcknowledgedCallback,
             desiredPropertiesSubscriptionCallbackContext,
@@ -850,8 +881,15 @@ public class InternalClient
     }
 
     /**
-     * Subscribes to direct methods
-     *
+     * Subscribes to direct methods.
+     * <p>
+     * This call can only be made after the client has been successfully opened.
+     * </p>
+     * <p>
+     * This subscription is preserved between reconnect attempts. However, it is not preserved after a client has
+     * been closed because the user called {@link #close()} or because this client lost its connection and its retry
+     * policy was exhausted.
+     * </p>
      * @param methodCallback Callback on which direct methods shall be invoked. Cannot be {@code null}.
      * @param methodCallbackContext Context for device method callback. Can be {@code null}.
      * @param methodStatusCallback Callback for providing IotHub status for direct methods. Cannot be {@code null}.
@@ -880,11 +918,7 @@ public class InternalClient
             throw new IllegalArgumentException("Callback cannot be null");
         }
 
-        if (this.method == null)
-        {
-            this.method = new DirectMethod(this, methodStatusCallback, methodStatusCallbackContext);
-        }
-
+        this.method = new DirectMethod(this, methodStatusCallback, methodStatusCallbackContext);
         this.method.subscribeToDirectMethods(methodCallback, methodCallbackContext);
     }
 

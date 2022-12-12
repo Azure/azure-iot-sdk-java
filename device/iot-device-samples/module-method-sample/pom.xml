@@ -28,7 +28,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>samples.com.microsoft.azure.sdk.iot.DirectMethodSample</mainClass>
+                            <mainClass>samples.com.microsoft.azure.sdk.iot.ModuleMethodSample</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

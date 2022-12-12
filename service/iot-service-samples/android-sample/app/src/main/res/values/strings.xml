@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Android App Sample - Service Client</string>
+    <string name="invoke">INVOKE</string>
+</resources>

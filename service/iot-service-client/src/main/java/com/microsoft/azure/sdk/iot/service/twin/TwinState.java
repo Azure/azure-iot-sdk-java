@@ -211,6 +211,16 @@ public class TwinState
     private String connectionStateUpdatedTime = null;
 
     /**
+     * Cloud to device message count.
+     */
+    private static final String CLOUD_TO_DEVICE_MESSAGE_COUNT = "cloudToDeviceMessageCount";
+    @Expose
+    @SerializedName(CLOUD_TO_DEVICE_MESSAGE_COUNT)
+    @Getter
+    @Setter
+    private Integer cloudToDeviceMessageCount = null;
+
+    /**
      * Datetime of last time the device authenticated, received, or sent a message.
      */
     private static final String LAST_ACTIVITY_TIME_TAG = "lastActivityTime";
@@ -453,6 +463,7 @@ public class TwinState
         this.setStatusReason(result.getStatusReason());
         this.setStatusUpdatedTime(result.getStatusUpdatedTime());
         this.setVersion(result.getVersion());
+        this.setCloudToDeviceMessageCount(result.cloudToDeviceMessageCount);
     }
 
     /**
@@ -524,6 +535,11 @@ public class TwinState
      */
     public String getConnectionState()
     {
+        if (this.connectionState == null)
+        {
+            return null;
+        }
+
         return this.connectionState.toString();
     }
 

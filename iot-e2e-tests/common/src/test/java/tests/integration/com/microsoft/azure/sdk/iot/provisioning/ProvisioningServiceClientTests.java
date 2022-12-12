@@ -8,19 +8,23 @@ import org.junit.Before;
 import org.junit.Test;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509CertificateGenerator;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.DeviceProvisioningServiceTest;
 
 import java.util.UUID;
 
 import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
-import static tests.integration.com.microsoft.azure.sdk.iot.provisioning.setup.ProvisioningCommon.CUSTOM_ALLOCATION_WEBHOOK_URL_VAR_NAME;
 import static tests.integration.com.microsoft.azure.sdk.iot.provisioning.setup.ProvisioningCommon.DPS_CONNECTION_STRING_ENV_VAR_NAME;
 
+@DeviceProvisioningServiceTest
 public class ProvisioningServiceClientTests
 {
     public static final String provisioningServiceConnectionString = Tools.retrieveEnvironmentVariableValue(DPS_CONNECTION_STRING_ENV_VAR_NAME);
-    public static final String customAllocationWebhookUrl = Tools.retrieveEnvironmentVariableValue(CUSTOM_ALLOCATION_WEBHOOK_URL_VAR_NAME);
+
+    // This is not an actual webhook that works for provisioning, but is fine for the purposes of these tests as
+    // they never actually provision a device using this custom allocation policy webhook.
+    public static final String customAllocationWebhookUrl = "https://www.microsoft.com";
 
     public ProvisioningServiceClient provisioningServiceClient = null;
 

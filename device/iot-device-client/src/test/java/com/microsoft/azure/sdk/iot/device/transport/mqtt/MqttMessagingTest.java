@@ -57,7 +57,7 @@ public class MqttMessagingTest
     public void constructorCallsBaseConstructorWithArguments(@Mocked final Mqtt mockMqtt) throws TransportException
     {
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttMessaging testMqttMessaging = new MqttMessaging(CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
 
         String actualPublishTopic = Deencapsulation.getField(testMqttMessaging, "publishTopic");
         assertNotNull(actualPublishTopic);
@@ -73,7 +73,7 @@ public class MqttMessagingTest
         //arrange
         final String expectedModuleId = "someModule";
         final String expectedDeviceId = "someDevice";
-        MqttMessaging testMqttMessaging = new MqttMessaging(expectedDeviceId, null, expectedModuleId, false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttMessaging testMqttMessaging = new MqttMessaging(expectedDeviceId, null, expectedModuleId, false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
 
         String actualPublishTopic = Deencapsulation.getField(testMqttMessaging, "publishTopic");
         assertEquals("devices/" + expectedDeviceId + "/modules/" + expectedModuleId +"/messages/events/", actualPublishTopic);
@@ -89,13 +89,13 @@ public class MqttMessagingTest
     @Test (expected = IllegalArgumentException.class)
     public void constructorFailsIfDeviceIDIsEmpty() throws TransportException
     {
-        MqttMessaging testMqttMessaging = new MqttMessaging( "", null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttMessaging testMqttMessaging = new MqttMessaging( "", null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
     }
 
     @Test (expected = IllegalArgumentException.class)
     public void constructorFailsIfDeviceIDIsNull() throws TransportException
     {
-        MqttMessaging testMqttMessaging = new MqttMessaging( null, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttMessaging testMqttMessaging = new MqttMessaging( null, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
     }
 
     /*
@@ -113,7 +113,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
 
         testMqttMessaging.start();
         new Verifications()
@@ -139,7 +139,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         testMqttMessaging.start();
 
         new Verifications()
@@ -167,7 +167,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         testMqttMessaging.start();
 
         new Verifications()
@@ -198,7 +198,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         testMqttMessaging.start();
         testMqttMessaging.stop();
 
@@ -224,7 +224,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         testMqttMessaging.start();
         testMqttMessaging.stop();
 
@@ -253,7 +253,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         testMqttMessaging.send(mockedMessage);
 
         //assert
@@ -282,7 +282,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         testMqttMessaging.send(null);
 
         new Verifications()
@@ -303,7 +303,7 @@ public class MqttMessagingTest
     public void sendShallThrowTransportExceptionIfMessageIsNull(@Mocked final Mqtt mockMqtt) throws TransportException
     {
 
-        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         testMqttMessaging.send(null);
 
         new Verifications()
@@ -341,7 +341,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         final String publishTopicWithCustomProperties = String.format(
                 "devices/%s/messages/events/%s=%s&%s=%s", CLIENT_ID, propertyName1, propertyValue1, propertyName2, propertyValue2);
 
@@ -378,7 +378,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
 
         //act
         testMqttMessaging.send(mockedMessage);
@@ -414,7 +414,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
 
         //act
         testMqttMessaging.send(mockedMessage);
@@ -449,7 +449,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
 
         //act
         testMqttMessaging.send(mockedMessage);
@@ -485,7 +485,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
 
         //act
         testMqttMessaging.send(mockedMessage);
@@ -521,7 +521,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
 
         //act
         testMqttMessaging.send(mockedMessage);
@@ -595,7 +595,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         final String publishTopicWithAllSystemAndCustomProperties = String.format(
                 "devices/%s/messages/events/$.mid=%s&$.cid=%s&$.uid=%s&$.to=%s&$.on=%s&$.ce=%s&$.ct=%s&$.ctime=%s&%s=%s&%s=%s", CLIENT_ID, messageId, correlationId, userId, to, outputName, contentEncoding, contentTypeEncoded, creationTimeUtcEncoded, propertyName1, propertyValue1, propertyName2, propertyValue2);
 
@@ -620,7 +620,7 @@ public class MqttMessagingTest
         String moduleId = "5678";
         final String inputsSubsriptionChannel = "devices/" + deviceId + "/modules/" + moduleId + "/inputs/#";
         final String eventsSubsriptionChannel = "devices/" + deviceId + "/modules/" + moduleId + "/messages/devicebound/#";
-        final MqttMessaging testMqttMessaging = new MqttMessaging( deviceId, null, moduleId, true, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        final MqttMessaging testMqttMessaging = new MqttMessaging( deviceId, null, moduleId, true, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
 
         //act
         testMqttMessaging.start();
@@ -647,7 +647,7 @@ public class MqttMessagingTest
         String moduleId = "5678";
         final String inputsSubsriptionChannel = "devices/" + deviceId + "/modules/" + moduleId + "/inputs/#";
         final String eventsSubsriptionChannel = "devices/" + deviceId + "/modules/" + moduleId + "/messages/devicebound/#";
-        final MqttMessaging testMqttMessaging = new MqttMessaging( deviceId, null, moduleId, false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<Pair<String, byte[]>>());
+        final MqttMessaging testMqttMessaging = new MqttMessaging( deviceId, null, moduleId, false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
 
         //act
         testMqttMessaging.start();

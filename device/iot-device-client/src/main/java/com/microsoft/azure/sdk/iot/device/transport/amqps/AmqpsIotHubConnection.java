@@ -325,7 +325,18 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
     private void closeNetworkResources()
     {
-        this.reactor.free();
+        try
+        {
+            this.reactor.free();
+        }
+        catch (IllegalStateException e)
+        {
+            // proton-j occasionally throws this exception if there is an issue with the internal state of the reactor
+            // while freeing the relevant resources. It is safe to ignore since we won't need to worry about the reactor's
+            // internal state since it won't be used anymore.
+            log.trace("Failed to free the reactor. Moving forward with cleanup anyways.", e);
+        }
+
         this.executorServicesCleanup();
     }
 
@@ -572,12 +583,10 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
         this.savedException = AmqpsExceptionTranslator.convertFromAmqpException(errorCondition);
 
-        if (this.isMultiplexing)
-        {
-            // transport errors involve closing the entire amqp connection, so save all the previous sessions
-            // so that their twin/methods subscriptions can persist
-            this.reconnectingDeviceSessionHandlers.putAll(this.sessionHandlers);
-        }
+
+        // transport errors involve closing the entire amqp connection, so save all the previous sessions
+        // so that their twin/methods subscriptions can persist
+        this.reconnectingDeviceSessionHandlers.putAll(this.sessionHandlers);
 
         // In the event that we get a local error and the connection is already in the closed state we need to manually call
         // onConnectionLocalClose. Proton will not queue the CONNECTION_LOCAL_CLOSE event since the Endpoint status is CLOSED

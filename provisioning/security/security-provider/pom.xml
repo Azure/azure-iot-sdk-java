@@ -36,6 +36,12 @@
         <url>https://github.com/Azure/azure-iot-sdk-java.git</url>
     </scm>
     <properties>
+        <!--
+        By default, don't skip unit tests. Can override this behavior by passing in
+        "-DskipUnitTests=true", "-DskipUnitTests", "-DskipTests=true" or "-DskipTests"  to your maven command such as "mvn install -DskipUnitTests"
+        -->
+        <skipUnitTests>false</skipUnitTests>
+        <skipTests>false</skipTests>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
@@ -60,12 +66,49 @@
     <build>
         <plugins>
             <plugin>
+                <!--
+                pom.xml properties don't natively support conditional expressions such as "value = someBoolean || someOtherBoolean",
+                but this plugin allows us to create a pom.xml property at build time using such a conditional. This allows
+                us to skip running tests in this package either if the user passes in "-DskipUnitTests" or "-DskipTests"
+                -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.12</version>
+                <executions>
+                    <execution>
+                        <id>negate-prop</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>bsh-property</goal>
+                        </goals>
+                        <configuration>
+                            <source>shouldSkipTests = ${skipUnitTests} || ${skipTests};</source> <!--Users can skip running tests in this package with either "-DskipTests" or "-DskipUnitTests"-->
+                            <properties>
+                                <property>shouldSkipTests</property>
+                            </properties>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.3</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Automatic-Module-Name>com.microsoft.provisioning.security.provider</Automatic-Module-Name>
+                        </manifestEntries>
+                    </archive>
                 </configuration>
             </plugin>
             <plugin>
@@ -97,6 +140,15 @@
                     <!--This configures the "mvn javadoc:javadoc" created artifacts are outputted to <reportOutputDirectory>/<destDir>-->
                     <reportOutputDirectory>${session.executionRootDirectory}/apidocs</reportOutputDirectory>
                     <destDir>provisioning/security/security-provider</destDir>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.0</version>
+                <configuration>
+                    <rerunFailingTestsCount>2</rerunFailingTestsCount>
+                    <skipTests>${shouldSkipTests}</skipTests> <!--This property is created at build time by the build-helper-maven-plugin, so it will appear as a compilation issue even though it will build just fine.-->
                 </configuration>
             </plugin>
         </plugins>

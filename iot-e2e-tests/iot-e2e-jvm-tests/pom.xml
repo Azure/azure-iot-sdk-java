@@ -19,7 +19,7 @@
         <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-core</artifactId>
-            <version>1.21.0</version>
+            <version>1.28.0</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -57,8 +57,41 @@
             <version>${tpm-provider-emulator-version}</version>
         </dependency>
     </dependencies>
+    <properties>
+        <!--
+        By default, don't skip integration tests. Can override this behavior by passing in
+        "-DskipIntegrationTests=true", "-DskipIntegrationTests", "-DskipTests=true" or "-DskipTests" to your maven command such as "mvn install -DskipIntegrationTests"
+        -->
+        <skipIntegrationTests>false</skipIntegrationTests>
+        <skipTests>false</skipTests>
+    </properties>
     <build>
         <plugins>
+            <plugin>
+                <!--
+                pom.xml properties don't natively support conditional expressions such as "value = someBoolean || someOtherBoolean",
+                but this plugin allows us to create a pom.xml property at build time using such a conditional. This allows
+                us to skip running tests in this package either if the user passes in "-DskipIntegrationTests" or "-DskipTests"
+                -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.12</version>
+                <executions>
+                    <execution>
+                        <id>negate-prop</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>bsh-property</goal>
+                        </goals>
+                        <configuration>
+                            <source>shouldSkipTests = ${skipIntegrationTests} || ${skipTests};</source> <!--Users can skip running tests in this package with either "-DskipTests" or "-DskipIntegrationTests"-->
+                            <properties>
+                                <property>shouldSkipTests</property>
+                            </properties>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -84,6 +117,7 @@
                 </executions>
                 <configuration>
                     <rerunFailingTestsCount>2</rerunFailingTestsCount>
+                    <skipTests>${shouldSkipTests}</skipTests> <!--This property is created at build time by the build-helper-maven-plugin, so it will appear as a compilation issue even though it will build just fine.-->
                     <includes>
                         <!--By default, only test files that end in ___Test.java are recognized as tests. This statement extends that to ___Tests.java files-->
                         <include>*Tests.java</include>

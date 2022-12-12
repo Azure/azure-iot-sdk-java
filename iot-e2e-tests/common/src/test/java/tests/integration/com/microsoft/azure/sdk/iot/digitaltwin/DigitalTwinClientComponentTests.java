@@ -26,6 +26,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.digitaltwin.helpers.E2ETest
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.DigitalTwinTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 
 import java.io.IOException;
@@ -42,6 +43,7 @@ import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
 
 @DigitalTwinTest
+@IotHubTest
 @Slf4j
 @RunWith(Parameterized.class)
 public class DigitalTwinClientComponentTests extends IntegrationTest

@@ -178,9 +178,9 @@ public class SendMessagesCommon extends IntegrationTest
     public static void startProxy()
     {
         proxyServer = DefaultHttpProxyServer.bootstrap()
-                .withPort(testProxyPort)
-                .withProxyAuthenticator(new BasicProxyAuthenticator(testProxyUser, testProxyPass))
-                .start();
+            .withPort(testProxyPort)
+            .withProxyAuthenticator(new BasicProxyAuthenticator(testProxyUser, testProxyPass))
+            .start();
     }
 
     @AfterClass
@@ -236,7 +236,7 @@ public class SendMessagesCommon extends IntegrationTest
 
                 if (customSSLContext != null)
                 {
-                    ClientOptions options = ClientOptions.builder().sslContext(customSSLContext).build();
+                    ClientOptions options = optionsBuilder.sslContext(customSSLContext).build();
                     DeviceClient clientWithCustomSSLContext = new DeviceClient(Tools.getDeviceConnectionString(iotHubConnectionString, testInstance.identity.getDevice()), protocol, options);
                     ((TestDeviceIdentity)this.identity).setDeviceClient(clientWithCustomSSLContext);
                 }

@@ -21,7 +21,7 @@
         <module>device-manager-sample</module>
         <module>file-upload-notification-processor-client-sample</module>
         <module>device-twin-sample</module>
-        <module>device-method-sample</module>
+        <module>direct-method-sample</module>
         <module>job-client-sample</module>
         <module>pnp-service-sample</module>
         <module>digitaltwin-service-samples/temperature-controller-service-sample</module>
@@ -32,6 +32,7 @@
         <module>messaging-client-sample</module>
         <module>messaging-client-performance-sample</module>
         <module>message-feedback-processor-client-sample</module>
+        <module>read-d2c-messages</module>
     </modules>
     <dependencies>
         <dependency>
