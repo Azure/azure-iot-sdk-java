@@ -106,10 +106,13 @@ function PackageArtifacts($Sources, $Tools, $Output) {
 
             # copy notice file to temp folder
 
-            Copy-Item "LICENSE.txt" $job.Resources
-            Copy-Item "thirdpartynotice.txt" $job.Resources
-
             Set-Location $job.Source  # set current directory to the folder mvn expects for build and package
+
+            $licensePath = Join-Path $Sources "LICENSE.txt"
+            $thirdPartyNoticePath = Join-Path $Sources "thirdpartynotice.txt"
+
+            Copy-Item $licensePath $job.Resources
+            Copy-Item $thirdPartyNoticePath $job.Resources
 
             mvn package -DskipTests -T 2C # Attempt to package
             TestLastExitCode
