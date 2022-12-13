@@ -18,4 +18,11 @@ public class AdditionalData
     @Getter
     @Setter
     private String provisioningPayload;
+
+    /**
+     * The custom CA issuance policy to send to DPS during the registration process.
+     */
+    @Getter
+    @Setter
+    private String clientCertificateCsr;
 }

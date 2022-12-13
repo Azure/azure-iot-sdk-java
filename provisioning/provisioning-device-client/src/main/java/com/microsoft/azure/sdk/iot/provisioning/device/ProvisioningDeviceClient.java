@@ -37,12 +37,12 @@ public class ProvisioningDeviceClient
      * @return An instance of ProvisioningDeviceClient
      * @throws ProvisioningDeviceClientException if any of the underlying API calls fail to process.
      */
-    public static ProvisioningDeviceClient create(String globalEndpoint, String idScope, ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider, String certificate) throws ProvisioningDeviceClientException
+    public static ProvisioningDeviceClient create(String globalEndpoint, String idScope, ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider) throws ProvisioningDeviceClientException
     {
-        return new ProvisioningDeviceClient(globalEndpoint, idScope, protocol, securityProvider, certificate);
+        return new ProvisioningDeviceClient(globalEndpoint, idScope, protocol, securityProvider);
     }
 
-    private ProvisioningDeviceClient(String globalEndpoint, String idScope, ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider, String certificate) throws ProvisioningDeviceClientException
+    private ProvisioningDeviceClient(String globalEndpoint, String idScope, ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider) throws ProvisioningDeviceClientException
     {
         if (globalEndpoint == null || globalEndpoint.isEmpty())
         {
@@ -64,11 +64,6 @@ public class ProvisioningDeviceClient
             throw new IllegalArgumentException("Security provider cannot be null");
         }
 
-        if (certificate == null || certificate.isEmpty())
-        {
-            throw new IllegalArgumentException("Certificate cannot be null");
-        }
-
         //SRS_ProvisioningDeviceClient_25_005: [ The constructor shall create provisioningDeviceClientConfig and set all the provided values to it.. ]
         this.provisioningDeviceClientConfig = new ProvisioningDeviceClientConfig();
 
@@ -76,7 +71,6 @@ public class ProvisioningDeviceClient
         this.provisioningDeviceClientConfig.setIdScope(idScope);
         this.provisioningDeviceClientConfig.setProtocol(protocol);
         this.provisioningDeviceClientConfig.setSecurityProvider(securityProvider);
-        this.provisioningDeviceClientConfig.setClientCertIssuancePolicy(certificate);
 
         //SRS_ProvisioningDeviceClient_25_006: [ The constructor shall create provisioningDeviceClientContract with the given config. ]
         this.provisioningDeviceClientContract = ProvisioningDeviceClientContract.createProvisioningContract(this.provisioningDeviceClientConfig);
@@ -127,6 +121,7 @@ public class ProvisioningDeviceClient
         }
 
         this.provisioningDeviceClientConfig.setPayload(additionalData.getProvisioningPayload());
+        this.provisioningDeviceClientConfig.setClientCertIssuancePolicy(additionalData.getClientCertificateCsr());
 
         //SRS_ProvisioningDeviceClient_25_009: [ This method shall set the config with the callback. ]
         this.provisioningDeviceClientConfig.setRegistrationCallback(provisioningDeviceClientRegistrationCallback, context);
