@@ -32,3 +32,11 @@ jobs:
       IOTHUB_CONNECTION_STRING: $(WINDOWS-IOTHUB-CONNECTION-STRING)
       IOT_DPS_CONNECTION_STRING: $(WINDOWS-IOT-DPS-CONNECTION-STRING)
     condition: always()
+    
+  - task: ComponentGovernanceComponentDetection@0
+    displayName: Component Governance Detection
+    condition: always()
+    inputs:
+      scanType: 'Register'
+      verbosity: 'Verbose'
+      alertWarningLevel: 'Low'
