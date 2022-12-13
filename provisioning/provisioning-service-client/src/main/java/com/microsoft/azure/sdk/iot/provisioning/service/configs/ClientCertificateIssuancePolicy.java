@@ -13,5 +13,9 @@ public class ClientCertificateIssuancePolicy
     // The CA name that can issue an operational certificate for a device on behalf of DPS.
     @Getter
     @Setter
-    public PrivateKey CertificateAuthorityName;
+    public String CertificateAuthorityName;
+
+    // The CA's private key
+    @Getter
+    public PrivateKey CertificateAuthorityPrivateKey;
 }
