@@ -1166,6 +1166,10 @@ public class IotHubTransport implements IotHubListener
                     {
                         CorrelatingMessageCallback callback = correlationCallbacks.get(correlationId);
 
+                        // We need to remove the CorrelatingMessageCallback with the current correlation ID from the map after the received C2D
+                        // message has been acknowledged. Otherwise, the size of map will grow endlessly which results in OutOfMemory eventually.
+                        correlationCallbacks.remove(correlationId);
+
                         if (callback != null)
                         {
                             Object context = correlationCallbackContexts.get(correlationId);
