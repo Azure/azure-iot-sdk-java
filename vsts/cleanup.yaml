@@ -16,6 +16,14 @@ jobs:
   displayName: Windows Cleanup
   condition: succeeded()
   steps:
+  - task: ComponentGovernanceComponentDetection@0
+    displayName: Component Governance Detection
+    condition: always()
+    inputs:
+      scanType: 'Register'
+      verbosity: 'Verbose'
+      alertWarningLevel: 'Low'
+
   - powershell: ./vsts/cleanup.ps1
     displayName: 'Run Cleanup script'
     env:
@@ -32,11 +40,3 @@ jobs:
       IOTHUB_CONNECTION_STRING: $(WINDOWS-IOTHUB-CONNECTION-STRING)
       IOT_DPS_CONNECTION_STRING: $(WINDOWS-IOT-DPS-CONNECTION-STRING)
     condition: always()
-    
-  - task: ComponentGovernanceComponentDetection@0
-    displayName: Component Governance Detection
-    condition: always()
-    inputs:
-      scanType: 'Register'
-      verbosity: 'Verbose'
-      alertWarningLevel: 'Low'
