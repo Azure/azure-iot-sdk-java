@@ -10,7 +10,6 @@ package com.microsoft.azure.sdk.iot.device.transport;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.*;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsIotHubConnection;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpConnectionThrottledException;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpUnauthorizedAccessException;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.https.exceptions.UnauthorizedException;
@@ -33,6 +32,8 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 public class IotHubTransport implements IotHubListener
 {
     private static final int DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD = 10;
+
+    private static final int DEFAULT_CORRELATION_ID_LIVE_TIME = 60000;
 
     // For tracking the state of this layer in particular. If multiplexing, this value may be CONNECTED while a
     // device specific state is DISCONNECTED_RETRYING. If this state is DISCONNECTED_RETRYING, then the multiplexed
@@ -117,6 +118,9 @@ public class IotHubTransport implements IotHubListener
     // Used to store the CorrelationCallbackMessage for a correlationId
     private final Map<String, CorrelatingMessageCallback> correlationCallbacks = new ConcurrentHashMap<>();
     private final Map<String, Object> correlationCallbackContexts = new ConcurrentHashMap<>();
+
+    // Used to store the number of milliseconds since epoch that this packet was created for a correlationId
+    private final Map<String, Long> correlationStartTimeMillis = new ConcurrentHashMap<>();
 
     /**
      * Constructor for an IotHubTransport object with default values
@@ -723,6 +727,7 @@ public class IotHubTransport implements IotHubListener
     public void sendMessages()
     {
         checkForExpiredMessages();
+        checkForOldMessages();
 
         if (this.connectionStatus == IotHubConnectionStatus.DISCONNECTED
                 || this.connectionStatus == IotHubConnectionStatus.DISCONNECTED_RETRYING)
@@ -826,6 +831,22 @@ public class IotHubTransport implements IotHubListener
                 IotHubTransportPacket expiredPacket = this.inProgressPackets.remove(messageId);
                 expiredPacket.setStatus(IotHubStatusCode.MESSAGE_EXPIRED);
                 this.addToCallbackQueue(expiredPacket);
+            }
+        }
+    }
+
+    private void checkForOldMessages()
+    {
+        // Check if the "correlationCallbacks" map contains any correlation ID which has existed over the
+        // default correlation ID live time. If so, remove the old correlation IDs from the map. Otherwise,
+        // the size of map will grow endlessly which results in OutOfMemory eventually.
+        for (String correlationId : correlationCallbacks.keySet())
+        {
+            if (System.currentTimeMillis() - correlationStartTimeMillis.get(correlationId) >= DEFAULT_CORRELATION_ID_LIVE_TIME)
+            {
+                correlationCallbacks.remove(correlationId);
+                correlationCallbackContexts.remove(correlationId);
+                correlationStartTimeMillis.remove(correlationId);
             }
         }
     }
@@ -1165,10 +1186,6 @@ public class IotHubTransport implements IotHubListener
                     if (!correlationId.isEmpty())
                     {
                         CorrelatingMessageCallback callback = correlationCallbacks.get(correlationId);
-
-                        // We need to remove the CorrelatingMessageCallback with the current correlation ID from the map after the received C2D
-                        // message has been acknowledged. Otherwise, the size of map will grow endlessly which results in OutOfMemory eventually.
-                        correlationCallbacks.remove(correlationId);
 
                         if (callback != null)
                         {
@@ -1816,6 +1833,8 @@ public class IotHubTransport implements IotHubListener
                     if (!correlationId.isEmpty() && correlationCallback != null)
                     {
                         correlationCallbacks.put(correlationId, correlationCallback);
+                        correlationStartTimeMillis.put(correlationId, System.currentTimeMillis());
+
                         Object correlationCallbackContext = message.getCorrelatingMessageCallbackContext();
                         if (correlationCallbackContext != null)
                         {
