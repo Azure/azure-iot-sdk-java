@@ -835,19 +835,26 @@ public class IotHubTransport implements IotHubListener
         }
     }
 
+    // Check if the "correlationCallbacks" map contains any correlation ID which has existed over the
+    // default correlation ID live time. If so, remove the old correlation IDs from the map. Otherwise,
+    // the size of map will grow endlessly which results in OutOfMemory eventually.
     private void checkForOldMessages()
     {
-        // Check if the "correlationCallbacks" map contains any correlation ID which has existed over the
-        // default correlation ID live time. If so, remove the old correlation IDs from the map. Otherwise,
-        // the size of map will grow endlessly which results in OutOfMemory eventually.
+        List<String> correlationIdsToRemove = new ArrayList<>();
+
         for (String correlationId : correlationCallbacks.keySet())
         {
             if (System.currentTimeMillis() - correlationStartTimeMillis.get(correlationId) >= DEFAULT_CORRELATION_ID_LIVE_TIME)
             {
-                correlationCallbacks.remove(correlationId);
+                correlationIdsToRemove.add(correlationId);
                 correlationCallbackContexts.remove(correlationId);
                 correlationStartTimeMillis.remove(correlationId);
             }
+        }
+
+        for (String correlationId : correlationIdsToRemove)
+        {
+            correlationCallbacks.remove(correlationId);
         }
     }
 
@@ -1191,7 +1198,14 @@ public class IotHubTransport implements IotHubListener
                         {
                             Object context = correlationCallbackContexts.get(correlationId);
                             callback.onResponseAcknowledged(receivedMessage, context);
+
+                            correlationCallbackContexts.remove(correlationId);
                         }
+
+                        // We need to remove the CorrelatingMessageCallback with the current correlation ID from the map after the received C2D
+                        // message has been acknowledged. Otherwise, the size of map will grow endlessly which results in OutOfMemory eventually.
+                        correlationCallbacks.remove(correlationId);
+                        correlationStartTimeMillis.remove(correlationId);
                     }
                 }
                 catch (Exception ex)
