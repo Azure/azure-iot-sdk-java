@@ -115,9 +115,6 @@ public class IotHubTransport implements IotHubListener
     // Flag set when close() starts. Acts as a signal to any running reconnection logic to not try again.
     private boolean isClosing;
 
-    // Lock on operations on the correlation-related maps: correlationCallbacks, correlationCallbackContexts and correlationStartTimeMillis
-    private final Object correlationLock = new Object();
-
     // Used to store the CorrelationCallbackMessage for a correlationId
     private final Map<String, CorrelatingMessageCallback> correlationCallbacks = new ConcurrentHashMap<>();
     private final Map<String, Object> correlationCallbackContexts = new ConcurrentHashMap<>();
@@ -263,20 +260,17 @@ public class IotHubTransport implements IotHubListener
 
                 if (!correlationId.isEmpty())
                 {
-                    synchronized (this.correlationLock)
-                    {
-                        CorrelatingMessageCallback callback = correlationCallbacks.get(correlationId);
+                    CorrelatingMessageCallback callback = correlationCallbacks.get(correlationId);
 
-                        if (callback != null)
+                    if (callback != null)
+                    {
+                        Object context = correlationCallbackContexts.get(correlationId);
+                        IotHubClientException clientException = null;
+                        if (e != null)
                         {
-                            Object context = correlationCallbackContexts.get(correlationId);
-                            IotHubClientException clientException = null;
-                            if (e != null)
-                            {
-                                clientException = e.toIotHubClientException();
-                            }
-                            callback.onRequestAcknowledged(packet.getMessage(), context, clientException);
+                            clientException = e.toIotHubClientException();
                         }
+                        callback.onRequestAcknowledged(packet.getMessage(), context, clientException);
                     }
                 }
 
@@ -319,34 +313,31 @@ public class IotHubTransport implements IotHubListener
                 String correlationId = message.getCorrelationId();
                 if (!correlationId.isEmpty())
                 {
-                    synchronized (this.correlationLock)
+                    CorrelatingMessageCallback callback = correlationCallbacks.get(correlationId);
+
+                    if (callback != null)
                     {
-                        CorrelatingMessageCallback callback = correlationCallbacks.get(correlationId);
-
-                        if (callback != null)
+                        Object context = correlationCallbackContexts.get(correlationId);
+                        IotHubClientException clientException = null;
+                        if (e != null)
                         {
-                            Object context = correlationCallbackContexts.get(correlationId);
-                            IotHubClientException clientException = null;
-                            if (e != null)
-                            {
-                                // This case indicates that the transport layer failed to construct a valid message out of
-                                // a message delivered by the service
-                                clientException = e.toIotHubClientException();
-                            }
-                            else
-                            {
-                                // This case indicates that the transport layer constructed a valid message out of a message
-                                // delivered by the service, but that message may contain an unsuccessful status code in cases
-                                // such as if an operation was rejected because it was badly formatted.
-                                IotHubStatusCode statusCode = IotHubStatusCode.getIotHubStatusCode(Integer.parseInt(message.getStatus()));
-                                if (!IotHubStatusCode.isSuccessful(statusCode))
-                                {
-                                    clientException = new IotHubClientException(statusCode, "Received an unsuccessful operation error code from the service: " + statusCode);
-                                }
-                            }
-
-                            callback.onResponseReceived(message, context, clientException);
+                            // This case indicates that the transport layer failed to construct a valid message out of
+                            // a message delivered by the service
+                            clientException = e.toIotHubClientException();
                         }
+                        else
+                        {
+                            // This case indicates that the transport layer constructed a valid message out of a message
+                            // delivered by the service, but that message may contain an unsuccessful status code in cases
+                            // such as if an operation was rejected because it was badly formatted.
+                            IotHubStatusCode statusCode = IotHubStatusCode.getIotHubStatusCode(Integer.parseInt(message.getStatus()));
+                            if (!IotHubStatusCode.isSuccessful(statusCode))
+                            {
+                                clientException = new IotHubClientException(statusCode, "Received an unsuccessful operation error code from the service: " + statusCode);
+                            }
+                        }
+
+                        callback.onResponseReceived(message, context, clientException);
                     }
                 }
             }
@@ -765,15 +756,12 @@ public class IotHubTransport implements IotHubListener
 
                         if (!correlationId.isEmpty())
                         {
-                            synchronized (this.correlationLock)
-                            {
-                                CorrelatingMessageCallback callback = correlationCallbacks.get(correlationId);
+                            CorrelatingMessageCallback callback = correlationCallbacks.get(correlationId);
 
-                                if (callback != null)
-                                {
-                                    Object context = correlationCallbackContexts.get(correlationId);
-                                    callback.onRequestSent(message, context);
-                                }
+                            if (callback != null)
+                            {
+                                Object context = correlationCallbackContexts.get(correlationId);
+                                callback.onRequestSent(message, context);
                             }
                         }
                     }
@@ -854,22 +842,19 @@ public class IotHubTransport implements IotHubListener
     {
         List<String> correlationIdsToRemove = new ArrayList<>();
 
-        synchronized (this.correlationLock)
+        for (String correlationId : correlationCallbacks.keySet())
         {
-            for (String correlationId : correlationCallbacks.keySet())
+            if (System.currentTimeMillis() - correlationStartTimeMillis.get(correlationId) >= DEFAULT_CORRELATION_ID_LIVE_TIME)
             {
-                if (System.currentTimeMillis() - correlationStartTimeMillis.get(correlationId) >= DEFAULT_CORRELATION_ID_LIVE_TIME)
-                {
-                    correlationIdsToRemove.add(correlationId);
-                    correlationCallbackContexts.remove(correlationId);
-                    correlationStartTimeMillis.remove(correlationId);
-                }
+                correlationIdsToRemove.add(correlationId);
+                correlationCallbackContexts.remove(correlationId);
+                correlationStartTimeMillis.remove(correlationId);
             }
+        }
 
-            for (String correlationId : correlationIdsToRemove)
-            {
-                correlationCallbacks.remove(correlationId);
-            }
+        for (String correlationId : correlationIdsToRemove)
+        {
+            correlationCallbacks.remove(correlationId);
         }
     }
 
@@ -1207,22 +1192,19 @@ public class IotHubTransport implements IotHubListener
                     String correlationId = receivedMessage.getCorrelationId();
                     if (!correlationId.isEmpty())
                     {
-                        synchronized (this.correlationLock)
+                        CorrelatingMessageCallback callback = correlationCallbacks.get(correlationId);
+
+                        if (callback != null)
                         {
-                            CorrelatingMessageCallback callback = correlationCallbacks.get(correlationId);
-
-                            if (callback != null)
-                            {
-                                Object context = correlationCallbackContexts.get(correlationId);
-                                callback.onResponseAcknowledged(receivedMessage, context);
-                            }
-
-                            // We need to remove the CorrelatingMessageCallback with the current correlation ID from the map after the received C2D
-                            // message has been acknowledged. Otherwise, the size of map will grow endlessly which results in OutOfMemory eventually.
-                            correlationCallbacks.remove(correlationId);
-                            correlationCallbackContexts.remove(correlationId);
-                            correlationStartTimeMillis.remove(correlationId);
+                            Object context = correlationCallbackContexts.get(correlationId);
+                            callback.onResponseAcknowledged(receivedMessage, context);
                         }
+
+                        // We need to remove the CorrelatingMessageCallback with the current correlation ID from the map after the received C2D
+                        // message has been acknowledged. Otherwise, the size of map will grow endlessly which results in OutOfMemory eventually.
+                        correlationCallbacks.remove(correlationId);
+                        correlationCallbackContexts.remove(correlationId);
+                        correlationStartTimeMillis.remove(correlationId);
                     }
                 }
                 catch (Exception ex)
@@ -1259,15 +1241,12 @@ public class IotHubTransport implements IotHubListener
                 String correlationId = transportMessage.getCorrelationId();
                 if (!correlationId.isEmpty())
                 {
-                    synchronized (this.correlationLock)
-                    {
-                        CorrelatingMessageCallback callback = correlationCallbacks.get(correlationId);
+                    CorrelatingMessageCallback callback = correlationCallbacks.get(correlationId);
 
-                        if (callback != null)
-                        {
-                            Object context = correlationCallbackContexts.get(correlationId);
-                            callback.onResponseReceived(transportMessage, context, null);
-                        }
+                    if (callback != null)
+                    {
+                        Object context = correlationCallbackContexts.get(correlationId);
+                        callback.onResponseReceived(transportMessage, context, null);
                     }
                 }
             }
@@ -1866,18 +1845,15 @@ public class IotHubTransport implements IotHubListener
                     CorrelatingMessageCallback correlationCallback = message.getCorrelatingMessageCallback();
                     if (!correlationId.isEmpty() && correlationCallback != null)
                     {
-                        synchronized (this.correlationLock)
-                        {
-                            correlationCallbacks.put(correlationId, correlationCallback);
-                            correlationStartTimeMillis.put(correlationId, System.currentTimeMillis());
+                        correlationCallbacks.put(correlationId, correlationCallback);
+                        correlationStartTimeMillis.put(correlationId, System.currentTimeMillis());
 
-                            Object correlationCallbackContext = message.getCorrelatingMessageCallbackContext();
-                            if (correlationCallbackContext != null)
-                            {
-                                correlationCallbackContexts.put(correlationId, correlationCallbackContext);
-                            }
-                            correlationCallback.onRequestQueued(message, correlationCallbackContext);
+                        Object correlationCallbackContext = message.getCorrelatingMessageCallbackContext();
+                        if (correlationCallbackContext != null)
+                        {
+                            correlationCallbackContexts.put(correlationId, correlationCallbackContext);
                         }
+                        correlationCallback.onRequestQueued(message, correlationCallbackContext);
                     }
                 }
             }
