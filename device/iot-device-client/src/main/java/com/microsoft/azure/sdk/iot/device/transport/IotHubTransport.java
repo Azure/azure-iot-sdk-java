@@ -33,7 +33,7 @@ public class IotHubTransport implements IotHubListener
 {
     private static final int DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD = 10;
 
-    private static final int DEFAULT_CORRELATION_ID_LIVE_TIME = 30000;
+    private static final int DEFAULT_CORRELATION_ID_LIVE_TIME = 20000;
 
     // For tracking the state of this layer in particular. If multiplexing, this value may be CONNECTED while a
     // device specific state is DISCONNECTED_RETRYING. If this state is DISCONNECTED_RETRYING, then the multiplexed
