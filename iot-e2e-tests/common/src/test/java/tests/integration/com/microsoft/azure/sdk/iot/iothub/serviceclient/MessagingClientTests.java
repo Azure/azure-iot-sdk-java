@@ -336,7 +336,6 @@ public class MessagingClientTests extends IntegrationTest
         Tools.disposeTestIdentity(testDeviceIdentity, iotHubConnectionString);
     }
 
-    @Ignore // The IoT Hub instance we use for this test is currently offline, so this test cannot be run
     @Test
     @ContinuousIntegrationTest
     public void messagingClientValidatesRemoteCertificateWhenSendingTelemetry() throws InterruptedException
