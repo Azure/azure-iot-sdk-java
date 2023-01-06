@@ -81,7 +81,6 @@ public class ProvisioningTests extends ProvisioningCommon
         basicRegistrationFlow(EnrollmentType.GROUP);
     }
 
-    @Ignore // The DPS instance we use for this test is currently offline, so this test cannot be run
     @Test
     @ContinuousIntegrationTest
     public void individualEnrollmentWithInvalidRemoteServerCertificateFails() throws Exception
@@ -89,7 +88,6 @@ public class ProvisioningTests extends ProvisioningCommon
         enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType.INDIVIDUAL);
     }
 
-    @Ignore // The DPS instance we use for this test is currently offline, so this test cannot be run
     @Test
     @ContinuousIntegrationTest
     public void groupEnrollmentWithInvalidRemoteServerCertificateFails() throws Exception
