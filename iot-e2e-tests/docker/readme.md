@@ -6,7 +6,7 @@ See [e2eTestsSetup.ps1](https://github.com/Azure/azure-iot-sdk-csharp/blob/main/
 
 Before running docker-setup.sh script:
 
-- Install WSL (See installation details here: https://docs.microsoft.com/en-us/windows/wsl/install). Reboot after install.
+- Install WSL (See installation details here: https://docs.microsoft.com/windows/wsl/install). Reboot after install.
 
 - Install Docker on WSL (For docker on Ubuntu, see installation details here: https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository, see installation details for other Linux distribution here: https://docs.docker.com/engine/install/). Reboot after install.
   
