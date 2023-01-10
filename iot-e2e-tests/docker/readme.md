@@ -2,8 +2,6 @@
 
 This script will setup docker images and run instances of these images to support E2E testing.
 
-See [e2eTestsSetup.ps1](https://github.com/Azure/azure-iot-sdk-csharp/blob/main/e2e/test/prerequisites/E2ETestsSetup/e2eTestsSetup.ps1) script for E2E test setup prerequisites.
-
 Before running docker-setup.sh script:
 
 - Install WSL (See installation details here: https://docs.microsoft.com/windows/wsl/install). Reboot after install.
@@ -14,7 +12,7 @@ Running the docker-setup.sh script:
 
 - Run wsl (See click on the linux distribution installed or open powershell and enter 'wsl')
   
-- Change directory to the folder in the repo with the script [docker-setup.sh](https://github.com/Azure/azure-iot-sdk-csharp/blob/main/e2e/test/docker/docker-setup.sh)
+- Change directory to the folder in the repo with the script [docker-setup.sh](https://github.com/Azure/azure-iot-sdk-java/iot-e2e-tests/docker/docker-setup.sh)
   
   ```Shell
   cd <repo directory>/e2e/test/docker
