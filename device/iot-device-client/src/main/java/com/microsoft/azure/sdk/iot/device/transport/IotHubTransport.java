@@ -33,8 +33,6 @@ public class IotHubTransport implements IotHubListener
 {
     private static final int DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD = 10;
 
-    private static final int DEFAULT_CORRELATION_ID_LIVE_TIME = 20000;
-
     // For tracking the state of this layer in particular. If multiplexing, this value may be CONNECTED while a
     // device specific state is DISCONNECTED_RETRYING. If this state is DISCONNECTED_RETRYING, then the multiplexed
     // connection will be completely torn down and re-opened.
@@ -727,7 +725,6 @@ public class IotHubTransport implements IotHubListener
     public void sendMessages()
     {
         checkForExpiredMessages();
-        checkForOldMessages();
 
         if (this.connectionStatus == IotHubConnectionStatus.DISCONNECTED
                 || this.connectionStatus == IotHubConnectionStatus.DISCONNECTED_RETRYING)
@@ -832,29 +829,6 @@ public class IotHubTransport implements IotHubListener
                 expiredPacket.setStatus(IotHubStatusCode.MESSAGE_EXPIRED);
                 this.addToCallbackQueue(expiredPacket);
             }
-        }
-    }
-
-    // Check if the "correlationCallbacks" map contains any correlation ID which has existed over the
-    // default correlation ID live time. If so, remove the old correlation IDs from the map. Otherwise,
-    // the size of map will grow endlessly which results in OutOfMemory eventually.
-    private void checkForOldMessages()
-    {
-        List<String> correlationIdsToRemove = new ArrayList<>();
-
-        for (String correlationId : correlationCallbacks.keySet())
-        {
-            if (System.currentTimeMillis() - correlationStartTimeMillis.get(correlationId) >= DEFAULT_CORRELATION_ID_LIVE_TIME)
-            {
-                correlationIdsToRemove.add(correlationId);
-                correlationCallbackContexts.remove(correlationId);
-                correlationStartTimeMillis.remove(correlationId);
-            }
-        }
-
-        for (String correlationId : correlationIdsToRemove)
-        {
-            correlationCallbacks.remove(correlationId);
         }
     }
 
