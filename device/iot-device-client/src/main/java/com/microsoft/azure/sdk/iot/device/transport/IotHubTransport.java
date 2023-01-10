@@ -117,9 +117,6 @@ public class IotHubTransport implements IotHubListener
     private final Map<String, CorrelatingMessageCallback> correlationCallbacks = new ConcurrentHashMap<>();
     private final Map<String, Object> correlationCallbackContexts = new ConcurrentHashMap<>();
 
-    // Used to store the number of milliseconds since epoch that this packet was created for a correlationId
-    private final Map<String, Long> correlationStartTimeMillis = new ConcurrentHashMap<>();
-
     /**
      * Constructor for an IotHubTransport object with default values
      *
@@ -1178,7 +1175,6 @@ public class IotHubTransport implements IotHubListener
                         // message has been acknowledged. Otherwise, the size of map will grow endlessly which results in OutOfMemory eventually.
                         correlationCallbacks.remove(correlationId);
                         correlationCallbackContexts.remove(correlationId);
-                        correlationStartTimeMillis.remove(correlationId);
                     }
                 }
                 catch (Exception ex)
@@ -1820,7 +1816,6 @@ public class IotHubTransport implements IotHubListener
                     if (!correlationId.isEmpty() && correlationCallback != null)
                     {
                         correlationCallbacks.put(correlationId, correlationCallback);
-                        correlationStartTimeMillis.put(correlationId, System.currentTimeMillis());
 
                         Object correlationCallbackContext = message.getCorrelatingMessageCallbackContext();
                         if (correlationCallbackContext != null)
