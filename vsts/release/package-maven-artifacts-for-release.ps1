@@ -1,7 +1,6 @@
 # This script builds all of the maven artifacts needed to release a java package
 
 param (
- [string]$deps,
  [string]$securityProvider,
  [string]$tpmProvider,
  [string]$x509Provider,
@@ -106,10 +105,13 @@ function PackageArtifacts($Sources, $Tools, $Output) {
 
             # copy notice file to temp folder
 
-            Copy-Item "LICENSE.txt" $job.Resources
-            Copy-Item "thirdpartynotice.txt" $job.Resources
-
             Set-Location $job.Source  # set current directory to the folder mvn expects for build and package
+
+            $licensePath = Join-Path $Sources "LICENSE.txt"
+            $thirdPartyNoticePath = Join-Path $Sources "thirdpartynotice.txt"
+
+            Copy-Item $licensePath $job.Resources
+            Copy-Item $thirdPartyNoticePath $job.Resources
 
             mvn package -DskipTests -T 2C # Attempt to package
             TestLastExitCode
@@ -162,7 +164,6 @@ function ValidateInputParameter($parameter, $parameterName, $packageName, $path)
 $iotHubBasePomPath = Join-Path $env:sources "pom.xml"
 
 $Clients = @{ }
-ValidateInputParameter $deps "deps" "iot-deps" "deps"
 ValidateInputParameter $securityProvider "securityProvider" "security-provider" "provisioning/security/security-provider"
 ValidateInputParameter $tpmProvider "tpmProvider" "tpm-provider" "provisioning/security/tpm-provider"
 ValidateInputParameter $x509Provider "x509Provider" "x509-provider" "provisioning/security/x509-provider"
@@ -171,7 +172,7 @@ ValidateInputParameter $provisioningServiceClient "provisioningServiceClient" "p
 ValidateInputParameter $iotDeviceClient "iotDeviceClient" "iot-device-client" "device/iot-device-client"
 ValidateInputParameter $iotServiceClient "iotServiceClient" "iot-service-client" "service/iot-service-client"
 
-if (($deps -eq "False") -and ($securityProvider -eq "False") -and ($tpmProvider -eq "False") -and ($x509Provider -eq "False") -and ($provisioningDeviceClient -eq "False") -and ($provisioningServiceClient -eq "False") -and ($iotDeviceClient -eq "False") -and ($iotServiceClient -eq "False"))
+if (($securityProvider -eq "False") -and ($tpmProvider -eq "False") -and ($x509Provider -eq "False") -and ($provisioningDeviceClient -eq "False") -and ($provisioningServiceClient -eq "False") -and ($iotDeviceClient -eq "False") -and ($iotServiceClient -eq "False"))
 {
     echo "No packages were configured to be released, so this pipeline would do nothing. Please schedule a new run of this pipeline, and configure at least one package to be released."
     exit 1
