@@ -727,12 +727,7 @@ public class IotHubTransport implements IotHubListener
     public void sendMessages()
     {
         checkForExpiredMessages();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                checkForOldMessages();
-            }
-        }).start();
+        new Thread(() -> checkForOldMessages()).start();
 
         if (this.connectionStatus == IotHubConnectionStatus.DISCONNECTED
                 || this.connectionStatus == IotHubConnectionStatus.DISCONNECTED_RETRYING)
@@ -1207,13 +1202,11 @@ public class IotHubTransport implements IotHubListener
 
                         // We need to remove the CorrelatingMessageCallback with the current correlation ID from the map after the received C2D
                         // message has been acknowledged. Otherwise, the size of map will grow endlessly which results in OutOfMemory eventually.
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                correlationCallbacks.remove(correlationId);
-                                correlationCallbackContexts.remove(correlationId);
-                                correlationStartTimeMillis.remove(correlationId);
-                            }
+                        new Thread(() ->
+                        {
+                            correlationCallbacks.remove(correlationId);
+                            correlationCallbackContexts.remove(correlationId);
+                            correlationStartTimeMillis.remove(correlationId);
                         }).start();
                     }
                 }
