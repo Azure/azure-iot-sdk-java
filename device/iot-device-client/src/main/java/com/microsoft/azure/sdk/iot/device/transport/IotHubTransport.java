@@ -732,7 +732,7 @@ public class IotHubTransport implements IotHubListener
             public void run() {
                 checkForOldMessages();
             }
-        });
+        }).start();
 
         if (this.connectionStatus == IotHubConnectionStatus.DISCONNECTED
                 || this.connectionStatus == IotHubConnectionStatus.DISCONNECTED_RETRYING)
@@ -1214,7 +1214,7 @@ public class IotHubTransport implements IotHubListener
                                 correlationCallbackContexts.remove(correlationId);
                                 correlationStartTimeMillis.remove(correlationId);
                             }
-                        });
+                        }).start();
                     }
                 }
                 catch (Exception ex)
