@@ -105,8 +105,6 @@ public class DeviceTwinSample
     {
         deviceTwin.getDesiredProperties().put("temp", new Random().nextInt(TEMPERATURE_RANGE));
 
-        // By replacing the twin rather than patching it, any desired properties that existed on the twin prior to this call
-        // that aren't present on the new set of desired properties will be deleted.
         System.out.println("Replacing Device twin");
         deviceTwin = twinClient.replace(deviceTwin);
 
