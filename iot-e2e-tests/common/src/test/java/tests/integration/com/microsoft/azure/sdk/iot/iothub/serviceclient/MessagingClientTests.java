@@ -336,7 +336,7 @@ public class MessagingClientTests extends IntegrationTest
     @ContinuousIntegrationTest
     public void messagingClientValidatesRemoteCertificateWhenSendingTelemetry() throws InterruptedException
     {
-        Assume.assumeTrue(!System.getProperty("os.name").toLowerCase().contains("windows"));
+        Assume.assumeTrue(System.getProperty("os.name").toLowerCase().contains("linux"));
         boolean expectedExceptionWasCaught = false;
 
         MessagingClient messagingClient = new MessagingClient(invalidCertificateServerConnectionString, testInstance.protocol);
