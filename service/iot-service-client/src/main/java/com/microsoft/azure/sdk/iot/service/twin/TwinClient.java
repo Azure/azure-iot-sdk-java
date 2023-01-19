@@ -321,11 +321,11 @@ public final class TwinClient
         URL url;
         if (twin.getModuleId() == null || twin.getModuleId().length() == 0)
         {
-            url = this.iotHubConnectionString.getUrlTwin(twin.getDeviceId());
+            url = IotHubConnectionString.getUrlTwin(this.hostName, twin.getDeviceId());
         }
         else
         {
-            url = this.iotHubConnectionString.getUrlModuleTwin(twin.getDeviceId(), twin.getModuleId());
+            url = IotHubConnectionString.getUrlModuleTwin(this.hostName, twin.getDeviceId(), twin.getModuleId());
         }
 
         TwinState twinState = new TwinState(twin.getTags(), twin.getDesiredProperties(), null);
