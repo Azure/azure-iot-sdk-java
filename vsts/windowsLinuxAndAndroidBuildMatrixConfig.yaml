@@ -304,6 +304,36 @@ jobs:
           JAVA_VERSION: 8 # Android build doesn't need to run for both JDK 8 and 11
         condition: always()
 
+      - task : Docker@2
+        displayName : "Login to ACR"
+        inputs :
+          command : "login"
+          containerRegistry : "Azure IoT ACR"
+
+      - task : PowerShell@2
+        displayName : 'Cert Validation - Setup Certificate Proxy'
+        inputs :
+          targetType : 'inline'
+          script : |
+            Write-Host "============"
+            Write-Host "check docker"
+            Write-Host "============"
+            docker images
+            docker ps -a
+            gci -Path $(Build.SourcesDirectory)/iot-e2e-tests/docker -Recurse -Force -Name
+            Write-Host "==========================="
+            Write-Host "uncompress self-signed cert"
+            Write-Host "==========================="
+            gzip -d -N -S ".bin" $(Build.SourcesDirectory)/iot-e2e-tests/docker/haproxy/haproxy.bin
+            gci -Path $(Build.SourcesDirectory)/iot-e2e-tests/docker -Recurse -Force -Name
+            Write-Host "====================="
+            Write-Host "Docker run containers"
+            Write-Host "====================="
+            docker run -h invalidcertgde1.westus.cloudapp.azure.com --name invalid-gde --expose=443 --expose=5671 --expose=8883 -v $(Build.SourcesDirectory)/iot-e2e-tests/docker/haproxy:/usr/local/etc/haproxy:ro -d aziotacr.azurecr.io/haproxy haproxy -f /usr/local/etc/haproxy/haproxygde.cfg
+            docker run -h invalidcertdps1.westus.cloudapp.azure.com --name invalid-dps --expose=443 --expose=5671 --expose=8883 -v $(Build.SourcesDirectory)/iot-e2e-tests/docker/haproxy:/usr/local/etc/haproxy:ro -d aziotacr.azurecr.io/haproxy haproxy -f /usr/local/etc/haproxy/haproxydps.cfg
+            docker run -h invalidcertiothub1.westus.cloudapp.azure.com --name invalid-hub --expose=443 --expose=5671 --expose=8883 -v $(Build.SourcesDirectory)/iot-e2e-tests/docker/haproxy:/usr/local/etc/haproxy:ro -d aziotacr.azurecr.io/haproxy haproxy -f /usr/local/etc/haproxy/haproxyhub.cfg
+            docker ps -a
+
       - powershell: ./vsts/build_e2e_tests.cmd
         displayName: 'E2E Tests Build'
         condition: always()
@@ -395,36 +425,6 @@ jobs:
           TEST_GROUP_ID: $(ANDROID_TEST_GROUP_ID)
           IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
           TARGET_BRANCH: $(System.PullRequest.TargetBranch)
-
-      - task : Docker@2
-        displayName : "Login to ACR"
-        inputs :
-          command : "login"
-          containerRegistry : "Azure IoT ACR"
-
-      - task : PowerShell@2
-        displayName : 'Cert Validation - Setup Certificate Proxy'
-        inputs :
-          targetType : 'inline'
-          script : |
-            Write-Host "============"
-            Write-Host "check docker"
-            Write-Host "============"
-            docker images
-            docker ps -a
-            gci -Path $(Build.SourcesDirectory)/iot-e2e-tests/docker -Recurse -Force -Name
-            Write-Host "==========================="
-            Write-Host "uncompress self-signed cert"
-            Write-Host "==========================="
-            gzip -d -N -S ".bin" $(Build.SourcesDirectory)/iot-e2e-tests/docker/haproxy/haproxy.bin
-            gci -Path $(Build.SourcesDirectory)/iot-e2e-tests/docker -Recurse -Force -Name
-            Write-Host "====================="
-            Write-Host "Docker run containers"
-            Write-Host "====================="
-            docker run -h invalidcertgde1.westus.cloudapp.azure.com --name invalid-gde --expose=443 --expose=5671 --expose=8883 -v $(Build.SourcesDirectory)/iot-e2e-tests/docker/haproxy:/usr/local/etc/haproxy:ro -d aziotacr.azurecr.io/haproxy haproxy -f /usr/local/etc/haproxy/haproxygde.cfg
-            docker run -h invalidcertdps1.westus.cloudapp.azure.com --name invalid-dps --expose=443 --expose=5671 --expose=8883 -v $(Build.SourcesDirectory)/iot-e2e-tests/docker/haproxy:/usr/local/etc/haproxy:ro -d aziotacr.azurecr.io/haproxy haproxy -f /usr/local/etc/haproxy/haproxydps.cfg
-            docker run -h invalidcertiothub1.westus.cloudapp.azure.com --name invalid-hub --expose=443 --expose=5671 --expose=8883 -v $(Build.SourcesDirectory)/iot-e2e-tests/docker/haproxy:/usr/local/etc/haproxy:ro -d aziotacr.azurecr.io/haproxy haproxy -f /usr/local/etc/haproxy/haproxyhub.cfg
-            docker ps -a
 
       - task : Bash@3
         displayName : 'Cert Validation - Setup local hostname'
