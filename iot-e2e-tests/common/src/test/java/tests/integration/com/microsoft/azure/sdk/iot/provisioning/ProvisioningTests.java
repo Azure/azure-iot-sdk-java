@@ -64,7 +64,7 @@ public class ProvisioningTests extends ProvisioningCommon
     @ContinuousIntegrationTest
     public void individualEnrollmentWithInvalidRemoteServerCertificateFails() throws Exception
     {
-        Assume.assumeTrue(System.getProperty("os.name").toLowerCase().contains("linux"));
+        Assume.assumeTrue(Tools.isLinux());
         enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType.INDIVIDUAL);
     }
 
@@ -72,7 +72,7 @@ public class ProvisioningTests extends ProvisioningCommon
     @ContinuousIntegrationTest
     public void groupEnrollmentWithInvalidRemoteServerCertificateFails() throws Exception
     {
-        Assume.assumeTrue(System.getProperty("os.name").toLowerCase().contains("linux"));
+        Assume.assumeTrue(Tools.isLinux());
         enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType.GROUP);
     }
 

@@ -4,13 +4,13 @@ This script will setup docker images and run instances of these images to suppor
 
 Before running docker-setup.sh script:
 
-- Install WSL (See installation details here: https://docs.microsoft.com/windows/wsl/install). Reboot after install.
+- Install WSL (See installation details [here](https://docs.microsoft.com/windows/wsl/install)). Reboot after install.
 
-- Install Docker on WSL (For docker on Ubuntu, see installation details here: https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository, see installation details for other Linux distribution here: https://docs.docker.com/engine/install/). Reboot after install.
+- Install Docker on WSL (For docker on Ubuntu, see installation details [here](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository)), see installation details for other Linux distribution [here](https://docs.docker.com/engine/install/)). Reboot after install.
   
 Running the docker-setup.sh script:
 
-- Run wsl (See click on the linux distribution installed or open powershell and enter 'wsl')
+- Run wsl (See click on the linux distribution installed or open powershell and enter 'wsl').
   
 - Change directory to the folder in the repo with the script [docker-setup.sh](https://github.com/Azure/azure-iot-sdk-java/iot-e2e-tests/docker/docker-setup.sh)
   
@@ -19,7 +19,7 @@ Running the docker-setup.sh script:
   .\docker-setup.sh
   ```
 
-- The script output a list of IPs to hosts mapping at completion, copy these entries to the host system /etc/hosts file (default in $Env:windir\System32\drivers\etc\hosts, not in WSL)
+- The script output a list of IPs to hosts mapping at completion, copy these entries to the host system /etc/hosts file (default in $Env:windir\System32\drivers\etc\hosts, not in WSL).
 
 ## Common script issues
 
@@ -29,7 +29,7 @@ Running the docker-setup.sh script:
 
 - Update the host file in the host system where the E2E test code and IDE will run on (not WSL).
 
-- If after running the script, the output does not show valid IP addresses for the hostnames, restart the PC and re-run this script
+- If after running the script, the output does not show valid IP addresses for the hostnames, restart the PC and re-run this script.
 
-- If the docker instances exit immediately, restart the PC and re-run this script
+- If the docker instances exit immediately, restart the PC and re-run this script.
 
