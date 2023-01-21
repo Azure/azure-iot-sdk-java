@@ -962,6 +962,11 @@ public class Tools
         return ExceptionUtils.getStackTrace(throwable);
     }
 
+    public static boolean isLinux()
+    {
+        return System.getProperty("os.name").toLowerCase().contains("linux");
+    }
+
     public static boolean isAndroid()
     {
         return IS_ANDROID;
