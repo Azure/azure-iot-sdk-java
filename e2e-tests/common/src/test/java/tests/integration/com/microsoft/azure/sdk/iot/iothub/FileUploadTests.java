@@ -6,6 +6,8 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
 
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.BlobClientBuilder;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.FileUploadCompletionNotification;
@@ -21,8 +23,6 @@ import com.microsoft.azure.sdk.iot.service.messaging.AcknowledgementType;
 import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotification;
 import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationProcessorClient;
 import com.microsoft.azure.sdk.iot.service.messaging.FileUploadNotificationProcessorClientOptions;
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -203,7 +203,7 @@ public class FileUploadTests extends IntegrationTest
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void getAndCompleteSasUriWithUpload() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException, StorageException, TimeoutException, IotHubClientException
+    public void getAndCompleteSasUriWithUpload() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException, TimeoutException, IotHubClientException
     {
         // Android has some compatibility issues with the azure storage SDK
         assumeFalse(Tools.isAndroid());
@@ -215,8 +215,12 @@ public class FileUploadTests extends IntegrationTest
         FileUploadSasUriResponse sasUriResponse = deviceClient.getFileUploadSasUri(new FileUploadSasUriRequest(testInstance.fileUploadState.blobName));
 
         log.info("Uploading from device {} to blob {}", deviceClient.getConfig().getDeviceId(), sasUriResponse.getBlobName());
-        CloudBlockBlob blob = new CloudBlockBlob(sasUriResponse.getBlobUri());
-        blob.upload(testInstance.fileUploadState.fileInputStream, testInstance.fileUploadState.fileLength);
+        BlobClient blobClient =
+            new BlobClientBuilder()
+                .endpoint(sasUriResponse.getBlobUri().toString())
+                .buildClient();
+
+        blobClient.upload(testInstance.fileUploadState.fileInputStream, testInstance.fileUploadState.fileLength);
 
         FileUploadCompletionNotification fileUploadCompletionNotification = new FileUploadCompletionNotification();
         fileUploadCompletionNotification.setCorrelationId(sasUriResponse.getCorrelationId());
@@ -237,7 +241,7 @@ public class FileUploadTests extends IntegrationTest
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void getAndCompleteSasUriWithMultipleUploads() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException, StorageException, TimeoutException, IotHubClientException
+    public void getAndCompleteSasUriWithMultipleUploads() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException, TimeoutException, IotHubClientException
     {
         // Android has some compatibility issues with the azure storage SDK
         assumeFalse(Tools.isAndroid());
@@ -256,8 +260,13 @@ public class FileUploadTests extends IntegrationTest
             fileUploadStates[i] = new FileUploadState();
             FileUploadSasUriResponse sasUriResponse = deviceClient.getFileUploadSasUri(new FileUploadSasUriRequest(fileUploadStates[i].blobName));
 
-            CloudBlockBlob blob = new CloudBlockBlob(sasUriResponse.getBlobUri());
-            blob.upload(fileUploadStates[i].fileInputStream, fileUploadStates[i].fileLength);
+            BlobClient blobClient =
+                new BlobClientBuilder()
+                    .endpoint(sasUriResponse.getBlobUri().toString())
+                    .buildClient();
+
+            blobClient.upload(fileUploadStates[i].fileInputStream, fileUploadStates[i].fileLength);
+
 
             expectedBlobNames.add(deviceClient.getConfig().getDeviceId() + "/" + fileUploadStates[i].blobName);
 
