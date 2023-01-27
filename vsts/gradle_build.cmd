@@ -6,7 +6,7 @@ set build-root=%~dp0..
 SET isPullRequestBuild=true
 if "%TARGET_BRANCH%" == "$(System.PullRequest.TargetBranch)" (SET isPullRequestBuild=false)
 
-cd %build-root%\iot-e2e-tests\android
+cd %build-root%\e2e-tests\android
 call gradle wrapper --gradle-version 6.8.3
 call gradlew :clean :app:clean :app:assembleDebug
 
