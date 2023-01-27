@@ -49,22 +49,22 @@ public class DeviceTwinSample
         {
             // Manage complete twin
             // ============================== get initial twin properties =============================
-            Twin device = getInitialState(twinClient, deviceId);
+            getInitialState(twinClient, deviceId);
 
             // ================================ patch desired property ===============================
-            patchDesiredProperties(twinClient, device);
+            patchDesiredProperties(twinClient);
 
             // ================================ replace desired property ===============================
-            replaceDesiredProperties(twinClient, device);
+            replaceDesiredProperties(twinClient);
 
             // ============================ schedule update desired property ==========================
-            scheduleUpdateDesiredProperties(twinClient, device, jobClient);
+            scheduleUpdateDesiredProperties(twinClient, jobClient);
 
             // =================================== cancel job scheduled ===============================
-            cancelJob(twinClient, device, jobClient);
+            cancelJob(twinClient, jobClient);
 
             // ================================= remove desired property ==============================
-            removeDesiredProperties(twinClient, device);
+            removeDesiredProperties(twinClient);
 
             // ======================================= query twin =====================================
             queryTwin(queryClient);
@@ -88,50 +88,57 @@ public class DeviceTwinSample
         return deviceTwin;
     }
 
-    private static void patchDesiredProperties(TwinClient twinClient, Twin deviceTwin) throws IOException, IotHubException
+    private static void patchDesiredProperties(TwinClient twinClient) throws IOException, IotHubException
     {
-        deviceTwin.getDesiredProperties().put("temp", new Random().nextInt(TEMPERATURE_RANGE));
-        deviceTwin.getDesiredProperties().put("hum", new Random().nextInt(HUMIDITY_RANGE));
+        Twin newTwins = new Twin(deviceId);
+        newTwins.getDesiredProperties().put("temp", new Random().nextInt(TEMPERATURE_RANGE));
+        newTwins.getDesiredProperties().put("hum", new Random().nextInt(HUMIDITY_RANGE));
 
         System.out.println("Updating Device twin (new temp, hum)");
-        twinClient.patch(deviceTwin);
+        twinClient.patch(newTwins);
 
         System.out.println("Getting the updated Device twin");
-        deviceTwin = twinClient.get(deviceTwin.getDeviceId());
-        System.out.println(deviceTwin);
+        Twin updatedTwin = twinClient.get(deviceId);
+        System.out.println(updatedTwin);
     }
 
-    private static void replaceDesiredProperties(TwinClient twinClient, Twin deviceTwin) throws IOException, IotHubException
+    private static void replaceDesiredProperties(TwinClient twinClient) throws IOException, IotHubException
     {
-        deviceTwin.getDesiredProperties().put("temp", new Random().nextInt(TEMPERATURE_RANGE));
+        Twin newTwins = new Twin(deviceId);
+        newTwins.getDesiredProperties().put("temp", new Random().nextInt(TEMPERATURE_RANGE));
 
+        // By replacing the twin rather than patching it, any desired properties that existed on the twin prior to this call
+        // that aren't present on the new set of desired properties will be deleted.
         System.out.println("Replacing Device twin");
-        deviceTwin = twinClient.replace(deviceTwin);
+        twinClient.replace(newTwins);
 
         System.out.println("Getting the updated Device twin");
-        deviceTwin = twinClient.get(deviceTwin.getDeviceId());
-        System.out.println(deviceTwin);
+        Twin updatedTwin = twinClient.get(deviceId);
+        System.out.println(updatedTwin);
     }
 
-    private static void removeDesiredProperties(TwinClient twinClient, Twin deviceTwin) throws IOException, IotHubException
+    private static void removeDesiredProperties(TwinClient twinClient) throws IOException, IotHubException
     {
-        deviceTwin.getDesiredProperties().put("hum", null);
+        Twin newTwins = new Twin(deviceId);
+        newTwins.getDesiredProperties().put("hum", null);
+
         System.out.println("Updating Device twin (remove hum)");
-        twinClient.patch(deviceTwin);
+        twinClient.patch(newTwins);
 
         System.out.println("Getting the updated Device twin");
-        deviceTwin = twinClient.get(deviceTwin.getDeviceId());
-        System.out.println(deviceTwin);
+        Twin updatedTwin = twinClient.get(deviceId);
+        System.out.println(updatedTwin);
     }
 
-    private static void scheduleUpdateDesiredProperties(TwinClient twinClient, Twin deviceTwin, ScheduledJobsClient jobClient) throws IOException, IotHubException, InterruptedException
+    private static void scheduleUpdateDesiredProperties(TwinClient twinClient, ScheduledJobsClient jobClient) throws IOException, IotHubException, InterruptedException
     {
         // new set of desired properties
-        deviceTwin.getDesiredProperties().put("temp", new Random().nextInt(TEMPERATURE_RANGE));
-        deviceTwin.getDesiredProperties().put("hum", new Random().nextInt(HUMIDITY_RANGE));
+        Twin newTwins = new Twin(deviceId);
+        newTwins.getDesiredProperties().put("temp", new Random().nextInt(TEMPERATURE_RANGE));
+        newTwins.getDesiredProperties().put("hum", new Random().nextInt(HUMIDITY_RANGE));
 
         // ScheduleUpdateTwin job type is a force update, which only accepts '*' as the Etag
-        deviceTwin.setETag("*");
+        newTwins.setETag("*");
 
         // date when the update shall be executed
         Date updateDateInFuture = new Date(new Date().getTime() + ADD_10_SECONDS_IN_MILLISECONDS); // 10 seconds in the future.
@@ -141,7 +148,7 @@ public class DeviceTwinSample
 
         System.out.println("Schedule updating Device twin (new temp, hum) in 10 seconds");
         String jobId = UUID.randomUUID().toString();
-        ScheduledJob job = jobClient.scheduleUpdateTwin(jobId, queryCondition, deviceTwin, updateDateInFuture, MAX_EXECUTION_TIME_IN_SECONDS);
+        ScheduledJob job = jobClient.scheduleUpdateTwin(jobId, queryCondition, newTwins, updateDateInFuture, MAX_EXECUTION_TIME_IN_SECONDS);
 
         System.out.println("Wait for job completed...");
         while (job.getJobStatus() != ScheduledJobStatus.completed)
@@ -152,18 +159,19 @@ public class DeviceTwinSample
         System.out.println("job completed");
 
         System.out.println("Getting the updated Device twin");
-        deviceTwin = twinClient.get(deviceTwin.getDeviceId());
-        System.out.println(deviceTwin);
+        Twin updatedTwin = twinClient.get(deviceId);
+        System.out.println(updatedTwin);
     }
 
-    private static void cancelJob(TwinClient twinClient, Twin deviceTwin, ScheduledJobsClient jobClient) throws IOException, IotHubException, InterruptedException
+    private static void cancelJob(TwinClient twinClient, ScheduledJobsClient jobClient) throws IOException, IotHubException, InterruptedException
     {
         // new set of desired properties
-        deviceTwin.getDesiredProperties().put("temp", new Random().nextInt(TEMPERATURE_RANGE));
-        deviceTwin.getDesiredProperties().put("hum", new Random().nextInt(HUMIDITY_RANGE));
+        Twin newTwins = new Twin(deviceId);
+        newTwins.getDesiredProperties().put("temp", new Random().nextInt(TEMPERATURE_RANGE));
+        newTwins.getDesiredProperties().put("hum", new Random().nextInt(HUMIDITY_RANGE));
 
         // ScheduleUpdateTwin job type is a force update, which only accepts '*' as the Etag
-        deviceTwin.setETag("*");
+        newTwins.setETag("*");
 
         // date when the update shall be executed
         Date updateDateInFuture = new Date(new Date().getTime() + ADD_10_MINUTES_IN_MILLISECONDS); // 10 minutes in the future.
@@ -173,7 +181,7 @@ public class DeviceTwinSample
 
         System.out.println("Cancel updating Device twin (new temp, hum) in 10 minutes");
         String jobId = UUID.randomUUID().toString();
-        ScheduledJob job = jobClient.scheduleUpdateTwin(jobId, queryCondition, deviceTwin, updateDateInFuture, MAX_EXECUTION_TIME_IN_SECONDS);
+        ScheduledJob job = jobClient.scheduleUpdateTwin(jobId, queryCondition, newTwins, updateDateInFuture, MAX_EXECUTION_TIME_IN_SECONDS);
 
         Thread.sleep(WAIT_1_SECOND_TO_CANCEL_IN_MILLISECONDS);
         System.out.println("Cancel job after 1 second");
@@ -189,8 +197,8 @@ public class DeviceTwinSample
         System.out.println("job cancelled");
 
         System.out.println("Getting the updated Device twin (no changes)");
-        deviceTwin = twinClient.get(deviceTwin.getDeviceId());
-        System.out.println(deviceTwin);
+        Twin updatedTwin = twinClient.get(deviceId);
+        System.out.println(updatedTwin);
     }
 
     private static void queryTwin(QueryClient queryClient) throws IOException, IotHubException
