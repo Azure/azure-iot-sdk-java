@@ -6,7 +6,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>edge-e2e-wrapper</artifactId>
+    <artifactId>edge-wrapper</artifactId>
     <version>1.0.0</version>
     <name>IoT SDK Edge E2E wrappers</name>
 

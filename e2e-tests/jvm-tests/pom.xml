@@ -9,14 +9,9 @@
     </parent>
     <name>IoT Hub Java E2E JVM Tests</name>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>e2e-jvm-tests</artifactId>
+    <artifactId>jvm-tests</artifactId>
     <version>1.0.0</version>
     <dependencies>
-        <dependency>
-            <groupId>com.azure</groupId>
-            <artifactId>azure-core</artifactId>
-            <version>1.28.0</version>
-        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -26,16 +21,6 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.13.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>${iot-device-client-artifact-id}</artifactId>
-            <version>${iot-device-client-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>${iot-service-client-artifact-id}</artifactId>
-            <version>${iot-service-client-version}</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
