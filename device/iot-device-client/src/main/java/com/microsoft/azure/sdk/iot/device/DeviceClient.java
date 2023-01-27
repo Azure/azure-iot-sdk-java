@@ -37,6 +37,8 @@ public final class DeviceClient extends InternalClient
 
     private FileUpload fileUpload;
 
+    private HttpsTransportManager httpsTransportManager;
+
     private static final String MULTIPLEXING_CLOSE_ERROR_MESSAGE = "Cannot close a multiplexed client through this method. Must use multiplexingClient.unregisterDeviceClient(deviceClient)";
     private static final String MULTIPLEXING_OPEN_ERROR_MESSAGE = "Cannot open a multiplexed client through this method. Must use multiplexingClient.registerDeviceClient(deviceClient)";
 
@@ -199,6 +201,10 @@ public final class DeviceClient extends InternalClient
         }
 
         super.open(withRetry);
+        if (httpsTransportManager != null)
+        {
+            httpsTransportManager.open();
+        }
 
         log.info("Device client opened successfully");
     }
@@ -244,7 +250,8 @@ public final class DeviceClient extends InternalClient
     {
         if (this.fileUpload == null)
         {
-            this.fileUpload = new FileUpload(new HttpsTransportManager(this.config));
+            httpsTransportManager = new HttpsTransportManager(this.config);
+            this.fileUpload = new FileUpload(httpsTransportManager);
         }
 
         return this.fileUpload.getFileUploadSasUri(request);
@@ -259,7 +266,8 @@ public final class DeviceClient extends InternalClient
     {
         if (this.fileUpload == null)
         {
-            this.fileUpload = new FileUpload(new HttpsTransportManager(this.config));
+            httpsTransportManager = new HttpsTransportManager(this.config);
+            this.fileUpload = new FileUpload(httpsTransportManager);
         }
 
         this.fileUpload.sendNotification(notification);
