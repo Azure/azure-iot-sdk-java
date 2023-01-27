@@ -152,18 +152,18 @@ jobs:
             Write-Host "============"
             docker images
             docker ps -a
-            gci -Path $(Build.SourcesDirectory)/iot-e2e-tests/docker -Recurse -Force -Name
+            gci -Path $(Build.SourcesDirectory)/e2e-tests/docker -Recurse -Force -Name
             Write-Host "==========================="
             Write-Host "uncompress self-signed cert"
             Write-Host "==========================="
-            gzip -d -N -S ".bin" $(Build.SourcesDirectory)/iot-e2e-tests/docker/haproxy/haproxy.bin
-            gci -Path $(Build.SourcesDirectory)/iot-e2e-tests/docker -Recurse -Force -Name
+            gzip -d -N -S ".bin" $(Build.SourcesDirectory)/e2e-tests/docker/haproxy/haproxy.bin
+            gci -Path $(Build.SourcesDirectory)/e2e-tests/docker -Recurse -Force -Name
             Write-Host "====================="
             Write-Host "Docker run containers"
             Write-Host "====================="
-            docker run -h invalidcertgde1.westus.cloudapp.azure.com --name invalid-gde --expose=443 --expose=5671 --expose=8883 -v $(Build.SourcesDirectory)/iot-e2e-tests/docker/haproxy:/usr/local/etc/haproxy:ro -d aziotacr.azurecr.io/haproxy haproxy -f /usr/local/etc/haproxy/haproxygde.cfg
-            docker run -h invalidcertdps1.westus.cloudapp.azure.com --name invalid-dps --expose=443 --expose=5671 --expose=8883 -v $(Build.SourcesDirectory)/iot-e2e-tests/docker/haproxy:/usr/local/etc/haproxy:ro -d aziotacr.azurecr.io/haproxy haproxy -f /usr/local/etc/haproxy/haproxydps.cfg
-            docker run -h invalidcertiothub1.westus.cloudapp.azure.com --name invalid-hub --expose=443 --expose=5671 --expose=8883 -v $(Build.SourcesDirectory)/iot-e2e-tests/docker/haproxy:/usr/local/etc/haproxy:ro -d aziotacr.azurecr.io/haproxy haproxy -f /usr/local/etc/haproxy/haproxyhub.cfg
+            docker run -h invalidcertgde1.westus.cloudapp.azure.com --name invalid-gde --expose=443 --expose=5671 --expose=8883 -v $(Build.SourcesDirectory)/e2e-tests/docker/haproxy:/usr/local/etc/haproxy:ro -d aziotacr.azurecr.io/haproxy haproxy -f /usr/local/etc/haproxy/haproxygde.cfg
+            docker run -h invalidcertdps1.westus.cloudapp.azure.com --name invalid-dps --expose=443 --expose=5671 --expose=8883 -v $(Build.SourcesDirectory)/e2e-tests/docker/haproxy:/usr/local/etc/haproxy:ro -d aziotacr.azurecr.io/haproxy haproxy -f /usr/local/etc/haproxy/haproxydps.cfg
+            docker run -h invalidcertiothub1.westus.cloudapp.azure.com --name invalid-hub --expose=443 --expose=5671 --expose=8883 -v $(Build.SourcesDirectory)/e2e-tests/docker/haproxy:/usr/local/etc/haproxy:ro -d aziotacr.azurecr.io/haproxy haproxy -f /usr/local/etc/haproxy/haproxyhub.cfg
             docker ps -a
 
       - task: Bash@3
@@ -322,7 +322,7 @@ jobs:
       - task: CopyFiles@2
         displayName: 'Copy Test Results to Artifact Staging Directory'
         inputs:
-          SourceFolder: '$(Build.SourcesDirectory)/iot-e2e-tests/android/app/build/outputs/apk'
+          SourceFolder: '$(Build.SourcesDirectory)/e2e-tests/android/app/build/outputs/apk'
           Contents: |
             *.*
           TargetFolder: '$(Build.ArtifactStagingDirectory)'
@@ -332,7 +332,7 @@ jobs:
       - task: PublishPipelineArtifact@0
         inputs:
           artifactName: 'androidBuildFiles'
-          targetPath: 'iot-e2e-tests/android/app/build/outputs/apk'
+          targetPath: 'e2e-tests/android/app/build/outputs/apk'
 
       - task: ComponentGovernanceComponentDetection@0
         displayName: Component Governance Detection
@@ -392,7 +392,7 @@ jobs:
         condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
         inputs:
           artifactName: 'androidBuildFiles'
-          targetPath: $(Build.SourcesDirectory)/iot-e2e-tests/android/app/build/outputs/apk
+          targetPath: $(Build.SourcesDirectory)/e2e-tests/android/app/build/outputs/apk
 
       - task: Bash@3
         condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
