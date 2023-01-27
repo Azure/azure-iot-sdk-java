@@ -26,7 +26,7 @@ Thank you for raising a feature request! To get started, here's a few things to 
 
 As an open source project, we welcome PRs for new features, and we don't want to reject any hard work you've done to contribute. **So propose your solution through an issue first** so we can discuss the changes, and if things look good we will ask you submit a PR to implement the changes.
 
-Note that feature requests that only affect unsupported platforms may be closed as "won't fix" if we have no plans to support that platform. See [this document](../../supported_platforms.md) for details on which platforms are officially supported. 
+Note that feature requests that only affect unsupported platforms may be closed as "won't fix" if we have no plans to support that platform. See [this document](../../doc/supported_platforms.md) for details on which platforms are officially supported. 
 
 Note that the IoT hub service client SDK has been moved to [this repo](https://www.github.com/Azure/azure-iot-service-sdk-java) so if you want to create a feature request for that package, please file it [here](https://www.github.com/Azure/azure-iot-service-sdk-java/issues) instead.
 

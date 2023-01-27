@@ -8,7 +8,7 @@ encouraged to migrate from the 1.X.X releases to the new 2.0.0 releases. We have
 [one final LTS release](https://github.com/Azure/azure-iot-sdk-java/releases/tag/2022-03-04) for the 1.X.X packages that will
 be supported like any other LTS release.
 
-If you need any help migrating your code to try out the new 2.X.X clients, please see this [migration guide](./SDK%20v2%20migration%20guide.md).
+If you need any help migrating your code to try out the new 2.X.X clients, please see this [migration guide](./doc/SDK%20v2%20migration%20guide.md).
 
 ## Critical upcoming change notice
 
@@ -23,7 +23,7 @@ For a more in depth explanation as to why the IoT services are doing this, pleas
 [this article](https://techcommunity.microsoft.com/t5/internet-of-things/azure-iot-tls-critical-changes-are-almost-here-and-why-you/ba-p/2393169).
 
 Users of this Java IoT SDK in particular will need to follow slightly different instructions in order to handle this 
-upcoming change. See [this document](./upcoming_certificate_changes_readme.md) for a more in depth explanation of how 
+upcoming change. See [this document](./doc/upcoming_certificate_changes_readme.md) for a more in depth explanation of how 
 to prepare your devices for this certificate migration.
 
 **Users who don't follow these instructions will begin experiencing unrecoverable, consistent connection failures from 
@@ -67,7 +67,7 @@ Devices and data sources in an IoT solution can range from a simple network-conn
 * On Android: our Java device SDK can be used on Android:
   * [Device SDK][device-android]
 
-For more details on what platforms this SDK supports, see [this document](./supported_platforms.md).
+For more details on what platforms this SDK supports, see [this document](doc/supported_platforms.md).
 
 ## API reference
 
@@ -127,7 +127,7 @@ Within the repository, you can find various types of simple samples that can hel
 
 ## Logging
 
-In order to learn more about logging within this SDK and how to capture its logs, see [here](./logging.md).
+In order to learn more about logging within this SDK and how to capture its logs, see [here](doc/logging.md).
 
 ## Contribution, feedback and issues
 
@@ -152,7 +152,7 @@ Here is what you can expect Microsoft Support to be able to help with:
 * [Prepare your development environment to use the Azure IoT device SDK for Java][devbox-setup]
 * [Setup IoT Hub][setup-iothub]
 * [Java SDKs API reference][java-api-reference]
-* [Configure TLS Protocol Version and Ciphers](./configure_tls_protocol_version_and_ciphers.md)
+* [Configure TLS Protocol Version and Ciphers](doc/configure_tls_protocol_version_and_ciphers.md)
 
 ## SDK folder structure
 

@@ -20,7 +20,7 @@ are outlines of the notable breaking changes as well as a mapping from v1 APIs t
 ## Why the v1 SDK is being replaced
 
 There are a number of reasons why the Azure IoT SDK team chose to do a major version revision. Here are a few of the more important reasons:
-  - [Upcoming certificate changes](./upcoming_certificate_changes_readme.md) dictated that the SDK needed to stop pinning on a specific IoT Hub public certificate and start reading certificates from the device certificate store.
+  - [Upcoming certificate changes](../upcoming_certificate_changes_readme.md) dictated that the SDK needed to stop pinning on a specific IoT Hub public certificate and start reading certificates from the device certificate store.
   - Several 3rd party dependencies (Bouncycastle, JNR Unixsocket, Azure Storage SDK) were becoming harder to carry due to security concerns and they could only be removed by removing or alterring existing APIs.
   - Many existing client classes (RegistryManager, DeviceTwin, DeviceMethod, ServiceClient, etc.) were confusingly named and contained methods that weren't always consistent with the client's assumed responsibilities.
   - Many existing clients had a mix of standard constructors (```new DeviceClient(...)```) and static builder constructors (```DeviceClient.createFromSecurityProvider(...)```) that caused some confusion among users.
@@ -31,7 +31,7 @@ There are a number of reasons why the Azure IoT SDK team chose to do a major ver
 
 We have released [one final LTS version](https://github.com/Azure/azure-iot-sdk-java/releases/tag/2022-03-04) of the v1 SDK that
 we will support like any other LTS release (security bug fixes, some non-security bug fixes as needed), but users are still encouraged
-to migrate to v2 when they have the chance. For more details on LTS releases, see [this document](./readme.md#long-term-support).
+to migrate to v2 when they have the chance. For more details on LTS releases, see [this document](../readme.md#long-term-support).
 
 ## Migration Guide
 
@@ -132,7 +132,7 @@ This client has been removed in v2. It is replaced by the MultiplexingClient. Se
 
 - Trust certificates are read from the physical device's trusted root certification authorities certificate store rather than from source.
   - Users are expected to install the required public certificates into this certificate store if they are not present already.
-  - See [this document](./upcoming_certificate_changes_readme.md) for additional context on which certificates need to be installed.
+  - See [this document](../upcoming_certificate_changes_readme.md) for additional context on which certificates need to be installed.
   - For most users, no action is needed here since IoT Hub uses the [DigiCert Global G2 CA root](https://global-root-g2.chain-demos.digicert.com/info/index.html) certificate which is already installed on most devices.
 - DeviceClient and ModuleClient constructors that take public certificates and private keys as strings have been removed.
   - Users must provide an instance of SSLContext that has their public certificates and private keys loaded into it instead.
@@ -269,7 +269,7 @@ been moved to a new ConfigurationsClient in v2.
 
 - Trust certificates are read from the physical device's trusted root certification authorities certificate store rather than from source.
   - Users are expected to install the required public certificates into this certificate store if they are not present already.
-  - See [this document](./upcoming_certificate_changes_readme.md) for additional context on which certificates need to be installed.
+  - See [this document](../upcoming_certificate_changes_readme.md) for additional context on which certificates need to be installed.
   - For most users, no action is needed here since IoT Hub uses the [DigiCert Global G2 CA root](https://global-root-g2.chain-demos.digicert.com/info/index.html) certificate which is already installed on most devices.
 - The Bouncycastle dependencies have been removed.
   - The Bouncycastle dependencies were used for some certificate parsing logic that has been removed from the SDK.
@@ -293,7 +293,7 @@ No client APIs have changed for this package, but there are a few notable breaki
 
 - Trust certificates are read from the physical device's trusted root certification authorities certificate store rather than from source.
   - Users are expected to install the required public certificates into this certificate store if they are not present already.
-  - See [this document](./upcoming_certificate_changes_readme.md) for additional context on which certificates need to be installed.
+  - See [this document](../upcoming_certificate_changes_readme.md) for additional context on which certificates need to be installed.
   - For most users, no action is needed here since IoT Hub uses the [DigiCert Global G2 CA root](https://global-root-g2.chain-demos.digicert.com/info/index.html) certificate which is already installed on most devices.
 - Reduced access levels to classes and methods that were never intended to be public where possible.
 - Reduce default SAS token time to live from 1 year to 1 hour for security purposes.
@@ -304,7 +304,7 @@ No client APIs have changed for this package, but there are a few notable breaki
 Breaking changes:
 - Trust certificates are read from the physical device's trusted root certification authorities certificate store rather than from source.
   - Users are expected to install the required public certificates into this certificate store if they are not present already.
-  - See [this document](./upcoming_certificate_changes_readme.md) for additional context on which certificates need to be installed.
+  - See [this document](../upcoming_certificate_changes_readme.md) for additional context on which certificates need to be installed.
   - For most users, no action is needed here since IoT Hub uses the [DigiCert Global G2 CA root](https://global-root-g2.chain-demos.digicert.com/info/index.html) certificate which is already installed on most devices.
 - Users of the X509 SecurityProvider are expected to pass in the parsed certificates and keys as Java security primitives rather than as strings.
   - See [this sample](./provisioning/provisioning-samples/provisioning-X509-sample) for a demonstration on how to create these Java security primitives from strings.
@@ -353,7 +353,7 @@ Question:
 Answer:
 > You will need to install the public certificate for IoT hub to your device's trusted root certification authorities certificate store.
 >
-> For a link to the necessary public certificates and more details on a critical upcoming change related to these certificates, see [this document](./upcoming_certificate_changes_readme.md).
+> For a link to the necessary public certificates and more details on a critical upcoming change related to these certificates, see [this document](../upcoming_certificate_changes_readme.md).
 
 Question:
 > If the SDK now reads certificates from my device's trusted root certification authorities certificate store, does it also read any private keys that I have installed on my device?
