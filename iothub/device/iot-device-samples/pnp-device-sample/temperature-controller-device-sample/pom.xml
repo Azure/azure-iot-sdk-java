@@ -1,0 +1,55 @@
+<!-- Copyright (c) Microsoft. All rights reserved. --><!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. -->
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.microsoft.azure.sdk.iot.samples.device</groupId>
+    <artifactId>temperature-controller-device-sample</artifactId>
+    <name>Plug and play Temperature Controller device sample</name>
+    <developers>
+        <developer>
+            <id>microsoft</id>
+            <name>Microsoft</name>
+        </developer>
+    </developers>
+    <dependencies>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
+            <artifactId>provisioning-device-client</artifactId>
+            <version>${provisioning-device-client-version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.1</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <parent>
+        <artifactId>pnp-device-sample</artifactId>
+        <groupId>com.microsoft.azure.sdk.iot.samples</groupId>
+        <version>1.0.0</version>
+    </parent>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven-jar-plugin-version}</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>samples.com.microsoft.azure.sdk.iot.device.TemperatureController</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

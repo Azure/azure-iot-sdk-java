@@ -158,7 +158,7 @@ When you're ready to use the Java service SDK in your own project, include this 
 
 This repository contains various [simple sample applications][device-samples] that illustrate how to use the Microsoft Azure IoT device SDK for Java.
 
-[device-samples]: ../device/iot-device-samples
+[device-samples]: ../iothub/device/iot-device-samples
 [android-studio]: https://developer.android.com/studio/index.html
 [certify-iot-device-android]:https://github.com/Azure/azure-iot-sdks/blob/master/doc/iotcertification/iot_certification_android_java/iot_certification_android_java.md
 [maven-repository]:http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.microsoft.azure.sdk.iot%22

@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot</groupId>
     <artifactId>iot-sdk-java</artifactId>
-    <version>0.26.0</version>
+    <version>1.0.0</version>
     <name>Azure IoT Sdk Java</name>
     <packaging>pom</packaging>
     <developers>
@@ -14,8 +14,8 @@
         </developer>
     </developers>
     <modules>
-        <module>device</module>
-        <module>iot-e2e-tests</module>
+        <module>iothub</module>
+        <module>e2e-tests</module>
         <module>provisioning</module>
     </modules>
     <dependencyManagement>
