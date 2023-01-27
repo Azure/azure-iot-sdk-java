@@ -135,28 +135,6 @@ public class IotHubServicesCommon
         }
     }
 
-    public static void sendSecurityMessages(InternalClient client, IotHubClientProtocol protocol, List<Pair<IotHubConnectionStatus, Throwable>> statusUpdates) throws IOException, IotHubClientException
-    {
-        try
-        {
-            client.open(false);
-
-            // Send the initial message
-            MessageAndResult messageToSend = new MessageAndResult(new Message("test message"), IotHubStatusCode.OK);
-            sendMessageAndWaitForResponse(client, messageToSend, protocol);
-
-            // Send the security message
-            String event_uuid = UUID.randomUUID().toString();
-            MessageAndResult securityMessage = new MessageAndResult(new Message(String.format(TEST_ASC_SECURITY_MESSAGE, event_uuid)), IotHubStatusCode.OK);
-            securityMessage.message.setAsSecurityMessage();
-            sendSecurityMessageAndCheckResponse(client, securityMessage, event_uuid, protocol);
-        }
-        finally
-        {
-            client.close();
-        }
-    }
-
     public static void sendMessagesExpectingConnectionStatusChangeUpdate(InternalClient client,
                                                                          IotHubClientProtocol protocol,
                                                                          List<MessageAndResult> messagesToSend,
@@ -353,32 +331,6 @@ public class IotHubServicesCommon
             if (messagesAndResults.statusCode != null && messageSent.getCallbackStatusCode() != messagesAndResults.statusCode)
             {
                 Assert.fail(buildExceptionMessage("Sending message over " + protocol + " protocol failed: expected " + messagesAndResults.statusCode + " but received " + messageSent.getCallbackStatusCode(), client));
-            }
-        }
-        catch (Exception e)
-        {
-            Assert.fail(buildExceptionMessage("Sending message over " + protocol + " protocol failed: Exception encountered while sending and waiting on a message: " + e.getMessage(), client));
-        }
-    }
-
-    public static void sendSecurityMessageAndCheckResponse(InternalClient client, MessageAndResult messageAndResult, String eventId, IotHubClientProtocol protocol)
-    {
-        try
-        {
-            Success messageSent = new Success();
-            EventCallback callback = new EventCallback(messageAndResult.statusCode);
-            client.sendEventAsync(messageAndResult.message, callback, messageSent);
-
-            boolean messageFound = true;
-            long startTime = System.currentTimeMillis();
-            while (System.currentTimeMillis() - startTime > TIMEOUT_MILLISECONDS)
-            {
-                if (messageSent.wasCallbackFired())
-                {
-                    Assert.fail(buildExceptionMessage("Security message was received by IoTHub and should have been routed to ASC", client));
-                    break;
-                }
-                Thread.sleep(CHECK_INTERVAL_MILLISECONDS);
             }
         }
         catch (Exception e)

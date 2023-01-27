@@ -958,7 +958,7 @@ public class MultiplexingClientTests extends IntegrationTest
             }
             else
             {
-                log.info("Received status update of {} with reason {} for device {}", status, statusChangeReason, (String) callbackContext);
+                log.info("Received status update of {} with reason {} for device {}", status, statusChangeReason, callbackContext);
             }
 
             if (status == IotHubConnectionStatus.CONNECTED)

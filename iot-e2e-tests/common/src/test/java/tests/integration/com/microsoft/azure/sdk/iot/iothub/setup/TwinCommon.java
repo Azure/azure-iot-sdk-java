@@ -6,7 +6,6 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.device.twin.ReportedPropertiesUpdateResponse;
@@ -34,9 +33,7 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 

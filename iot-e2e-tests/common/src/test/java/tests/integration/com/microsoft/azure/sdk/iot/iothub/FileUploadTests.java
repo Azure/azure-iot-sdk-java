@@ -54,7 +54,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
 import static com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol.AMQPS_WS;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeFalse;
 

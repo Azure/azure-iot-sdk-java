@@ -328,9 +328,8 @@ public class ProxyToServerConnection extends ProxyConnection<HttpResponse>
             chainedProxy.filterRequest(httpObject);
         }
         if (httpObject instanceof HttpRequest) {
-            HttpRequest httpRequest = (HttpRequest) httpObject;
             // Remember that we issued this HttpRequest for later
-            currentHttpRequest = httpRequest;
+            currentHttpRequest = (HttpRequest) httpObject;
         }
         super.writeHttp(httpObject);
     }

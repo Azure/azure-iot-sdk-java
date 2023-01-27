@@ -43,9 +43,10 @@ Due to security considerations, build logs are not publicly available.
 This repository contains the following:
 
 * **Azure IoT Hub device SDK for Java**: connect client devices to Azure IoT Hub
-* **Azure IoT Hub service SDK for Java**: enables developing back-end applications for Azure IoT
 * **Azure IoT Device Provisioning device SDK for Java**: provision devices to Azure IoT Hub using Azure IoT Device Provisioning
 * **Azure IoT Device Provisioning service SDK for Java**: manage your Provisioning service instance from a back-end Java application
+
+**Note that the IoT Hub service SDK has been moved to [this repo](https://www.github.com/Azure/azure-iot-service-sdk-java).**
 
 To find SDKs in other languages for Azure IoT, please refer to the [azure-iot-sdks][azure-iot-sdks] repository
 
@@ -60,11 +61,9 @@ Devices and data sources in an IoT solution can range from a simple network-conn
 * On Linux and Windows:
   * **Using Maven**: the simplest way to use the Azure IoT SDKs for Java to develop apps is to leverage Maven packages:
     * [Device SDK][device-maven]
-    * [Service SDK][service-maven]
   * **Clone the repository**: `git clone https://github.com/Azure/azure-iot-sdk-java.git`
   * **Working with the SDKs code**: if you are working with the SDKs code to modify it or contribute changes, then you can clone the repository and build the libraries:
     * [Build Device SDK from code][device-code]
-    * [Build Service SDK from code][service-code]
 * On Android: our Java device SDK can be used on Android:
   * [Device SDK][device-android]
 
@@ -73,7 +72,6 @@ For more details on what platforms this SDK supports, see [this document](./supp
 ## API reference
 
 * [Azure IoT Hub device SDK][java-api-reference-device]
-* [Azure IoT Hub service SDK][java-api-reference-service]
 * [Azure IoT Hub Device Provisioning device SDK][java-api-reference-device-dps]
 * [Azure IoT Hub Device Provisioning service SDK][java-api-reference-service-dps]
 
@@ -95,21 +93,6 @@ For more details on what platforms this SDK supports, see [this document](./supp
 | Retry policies                                                                                                   | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | Retry policy for unsuccessful device-to-cloud messages have three options: no try, exponential backoff with jitter (default) and custom.  Detail implementation is documented [here](https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-client/devdoc/requirement_docs/com/microsoft/azure/iothub/retryPolicy.md).                                                                                                                                                                                                    |
 | Devices multiplexing over single connection                                                                      | :heavy_minus_sign:       | :heavy_minus_sign:       | :heavy_check_mark: | :heavy_check_mark: | :heavy_multiplication_x: |                                                                                                                                                                                                                                                                                                                                             |
 | Connection Pooling * Specifying number of connections                                                            | :heavy_minus_sign:       | :heavy_minus_sign:       | :heavy_multiplication_x:       | :heavy_multiplication_x:       | :heavy_multiplication_x:       |                                                                                                                                                                                                                                                                                                                                             |
-
-## Service client SDK
-
-:heavy_check_mark: feature available  :heavy_multiplication_x: feature planned but not supported  :heavy_minus_sign: no support planned
-
-| Features                                                                                                      | Support             | Description                                                                                                                        |
-|---------------------------------------------------------------------------------------------------------------|---------------------|------------------------------------------------------------------------------------------------------------------------------------|
-| [Identity registry (CRUD)](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-identity-registry) | :heavy_check_mark:  | Use your backend app to perform CRUD operation for individual device or in bulk.                                                   |
-| [Cloud-to-device messaging](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-messages-c2d)     | :heavy_check_mark:  | Use your backend app to send cloud-to-device messages in AMQP and AMQP-WS, and set up cloud-to-device message receivers.           |
-| [Direct Methods operations](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-direct-methods)   | :heavy_check_mark:  | Use your backend app to invoke direct method on device.                                                                            |
-| [Device Twins operations](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-device-twins)       | :heavy_check_mark:* | Use your backend app to perform device twin operations.  *Twin reported property update callback and replace twin are in progress. |
-| [Query](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-query-language)                       | :heavy_check_mark:  | Use your backend app to perform query for information.                                                                             |
-| [Jobs](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-jobs)                                  | :heavy_check_mark:  | Use your backend app to perform job operation.                                                                                     |
-| [File Upload](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-file-upload)                    | :heavy_check_mark:  | Set up your backend app to send file upload notification receiver.                                                                 |
-| [Digital Twin Client](https://docs.microsoft.com/en-us/azure/iot-pnp/overview-iot-plug-and-play)              | :heavy_check_mark:  | Set up your backend app to perform operations on plug and play devices.                                                                 |
 
 ## Provisioning client SDK
 
@@ -189,10 +172,6 @@ This folder contains end to end tests source code for running on jvm and android
 
 This folder contains scripts to build and run Java SDK provided proper environmental variables are set, as well as azure pipeline resources used for our gating process
 
-### /service
-
-Contains libraries that enable interactions with the IoT Hub service to perform operations such as sending messages to devices and managing the device identity registry. Refer to API documentation and samples for more details.
-
 ## Certificates - Important to know
 
 For guidance and important information about certificates, please refer to [this blog post](https://techcommunity.microsoft.com/t5/internet-of-things/azure-iot-tls-changes-are-coming-and-why-you-should-care/ba-p/1658456) from the security team.
@@ -230,12 +209,9 @@ Microsoft collects performance and usage information which may be used to provid
 [iot-hub-documentation]: https://docs.microsoft.com/en-us/azure/iot-hub/
 [azure-iot-sdks]: http://github.com/azure/azure-iot-sdks
 [device-maven]: ./doc/java-devbox-setup.md#install-maven
-[service-maven]: ./doc/java-devbox-setup.md#install-maven
 [device-code]: ./doc/java-devbox-setup.md#build-azure-iot-device-and-service-sdks-for-java-from-the-source-code
-[service-code]: ./doc/java-devbox-setup.md#build-azure-iot-device-and-service-sdks-for-java-from-the-source-code
 [device-android]: ./doc/java-devbox-setup.md#building-for-android-device
 [java-api-reference-device]: https://docs.microsoft.com/java/api/com.microsoft.azure.sdk.iot.device
-[java-api-reference-service]: https://docs.microsoft.com/java/api/com.microsoft.azure.sdk.iot.service
 [devbox-setup]: doc/java-devbox-setup.md
 [java-api-reference]: https://azure.github.io/azure-iot-sdk-java/
 [setup-iothub]: https://aka.ms/howtocreateazureiothub

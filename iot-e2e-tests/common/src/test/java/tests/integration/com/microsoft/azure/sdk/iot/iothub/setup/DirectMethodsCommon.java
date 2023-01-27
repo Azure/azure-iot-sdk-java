@@ -328,16 +328,15 @@ public class DirectMethodsCommon extends IntegrationTest
 
                     try
                     {
-                        switch (methodName)
+                        if (METHOD_MODIFY.equals(methodName))
                         {
-                            case METHOD_MODIFY:
-                                result = modifyPayload(methodDataAsDifferentTypeObject);
-                                status = 1 + new Random().nextInt(998); // random number bound from 1 to 999
-                                break;
-                            default:
-                                result = "unknown:" + methodName;
-                                status = METHOD_NOT_DEFINED;
-                                break;
+                            result = modifyPayload(methodDataAsDifferentTypeObject);
+                            status = 1 + new Random().nextInt(998); // random number bound from 1 to 999
+                        }
+                        else
+                        {
+                            result = "unknown:" + methodName;
+                            status = METHOD_NOT_DEFINED;
                         }
                     }
                     catch (Exception e)
@@ -384,7 +383,7 @@ public class DirectMethodsCommon extends IntegrationTest
 
         // Assert
         assertNotNull(result);
-        assertEquals((long)METHOD_SUCCESS, (long)result.getStatus());
+        assertEquals(METHOD_SUCCESS, (long)result.getStatus());
         assertEquals(METHOD_LOOPBACK + ":" + PAYLOAD_STRING, result.getPayload(String.class));
     }
 
@@ -412,7 +411,7 @@ public class DirectMethodsCommon extends IntegrationTest
             // e2e test for DirectMethodRequestOptions and DirectMethodPayload
             assertPayloadHelper(options.getPayload(), this.testInstance.directMethodPayload.getPayload(Boolean.class));
             // e2e test for DirectMethodResponse between device/module and service
-            assertEquals((long)this.testInstance.statusCode, (long)result.getStatus());
+            assertEquals(this.testInstance.statusCode, (long)result.getStatus());
             assertPayloadHelper(this.testInstance.directMethodResponse.getPayload(), result.getPayload(Boolean.class));
         }
         else if (payload instanceof byte[])
@@ -421,7 +420,7 @@ public class DirectMethodsCommon extends IntegrationTest
             assertPayloadHelper(new String((byte[]) options.getPayload(), StandardCharsets.UTF_8),
                     new String(this.testInstance.directMethodPayload.getPayload(byte[].class), StandardCharsets.UTF_8));
             // e2e test for DirectMethodResponse between device/module and service
-            assertEquals((long)this.testInstance.statusCode, (long)result.getStatus());
+            assertEquals(this.testInstance.statusCode, (long)result.getStatus());
             assertPayloadHelper(new String((byte[]) this.testInstance.directMethodResponse.getPayload(), StandardCharsets.UTF_8),
                     new String(result.getPayload(byte[].class), StandardCharsets.UTF_8));
         }
@@ -430,7 +429,7 @@ public class DirectMethodsCommon extends IntegrationTest
             // e2e test for DirectMethodRequestOptions and DirectMethodPayload
             assertPayloadHelper(options.getPayload(), this.testInstance.directMethodPayload.getPayload(List.class));
             // e2e test for DirectMethodResponse between device/module and service
-            assertEquals((long)this.testInstance.statusCode, (long)result.getStatus());
+            assertEquals(this.testInstance.statusCode, (long)result.getStatus());
             assertPayloadHelper(this.testInstance.directMethodResponse.getPayload(), result.getPayload(List.class));
         }
         else if (payload instanceof Map)
@@ -438,7 +437,7 @@ public class DirectMethodsCommon extends IntegrationTest
             // e2e test for DirectMethodRequestOptions and DirectMethodPayload
             assertPayloadHelper(options.getPayload(), this.testInstance.directMethodPayload.getPayload(Map.class));
             // e2e test for DirectMethodResponse between device/module and service
-            assertEquals((long)this.testInstance.statusCode, (long)result.getStatus());
+            assertEquals(this.testInstance.statusCode, (long)result.getStatus());
             assertPayloadHelper(this.testInstance.directMethodResponse.getPayload(), result.getPayload(Map.class));
         }
         else if (payload instanceof CustomObject)
@@ -446,7 +445,7 @@ public class DirectMethodsCommon extends IntegrationTest
             // e2e test for DirectMethodRequestOptions and DirectMethodPayload
             assertPayloadHelper(options.getPayload(), this.testInstance.directMethodPayload.getPayload(CustomObject.class));
             // e2e test for DirectMethodResponse between device/module and service
-            assertEquals((long)this.testInstance.statusCode, (long)result.getStatus());
+            assertEquals(this.testInstance.statusCode, (long)result.getStatus());
             assertPayloadHelper(this.testInstance.directMethodResponse.getPayload(), result.getPayload(CustomObject.class));
         }
         else
@@ -454,7 +453,7 @@ public class DirectMethodsCommon extends IntegrationTest
             // e2e test for DirectMethodRequestOptions and DirectMethodPayload
             assertPayloadHelper(options.getPayload(), this.testInstance.directMethodPayload.getPayload(String.class));
             // e2e test for DirectMethodResponse between device/module and service
-            assertEquals((long)this.testInstance.statusCode, (long)result.getStatus());
+            assertEquals(this.testInstance.statusCode, (long)result.getStatus());
             assertPayloadHelper(this.testInstance.directMethodResponse.getPayload(), result.getPayload(String.class));
         }
     }
@@ -468,7 +467,7 @@ public class DirectMethodsCommon extends IntegrationTest
 
         if (senderPayload instanceof CustomObject && receiverPayload instanceof CustomObject)
         {
-            assertEquals(((CustomObject)senderPayload).toString(), ((CustomObject)receiverPayload).toString());
+            assertEquals(senderPayload.toString(), receiverPayload.toString());
         }
         else
         {

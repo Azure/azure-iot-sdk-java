@@ -6,7 +6,6 @@
 package tests.integration.com.microsoft.azure.sdk.iot.provisioning.setup;
 
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
-import com.microsoft.azure.sdk.iot.provisioning.service.configs.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
@@ -22,10 +21,6 @@ import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
-import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
-import com.microsoft.azure.sdk.iot.service.twin.TwinClientOptions;
-import com.microsoft.azure.sdk.iot.service.twin.Twin;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import junit.framework.AssertionFailedError;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;

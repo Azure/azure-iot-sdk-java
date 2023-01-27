@@ -12,10 +12,6 @@
         {
           "placeholder": "1234567890abcdefghijklmnopqrstvwxyz=",
           "_justification": "Fake credential for test purposes"
-        },
-        {
-          "file": "RegistryClientTest.java",
-          "_justification": "Fake credentials for test purposes"
         }
     ]
 }
