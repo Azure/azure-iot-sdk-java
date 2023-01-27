@@ -25,6 +25,8 @@ function CreateJavadocReleaseBranch(
     $UpdateProvisioningServiceClientDocs,    
     $UpdateTpmProviderEmulatorDocs,
     $UpdateTpmProviderDocs,
+    $UpdateDiceProviderEmulatorDocs,
+    $UpdateDiceProviderDocs,
     $UpdateSecurityProviderDocs,
     $UpdateX509ProviderDocs) {
 
@@ -112,6 +114,22 @@ function CreateJavadocReleaseBranch(
         New-Item -Path ..\$FolderName\provisioning\security\tpm-provider -ItemType Directory
         Copy-Item -Force -Path .\provisioning\security\tpm-provider\* -Destination ..\$FolderName\provisioning\security\tpm-provider
         Copy-Item -Recurse -Force -Path .\provisioning\security\tpm-provider\com -Destination ..\$FolderName\provisioning\security\tpm-provider
+    }
+
+    if ($UpdateDiceProviderEmulatorDocs -eq "True")
+    {
+        Remove-Item ..\$FolderName\provisioning\security\dice-provider-emulator -Force -Recurse
+        New-Item -Path ..\$FolderName\provisioning\security\dice-provider-emulator -ItemType Directory
+        Copy-Item -Force -Path .\provisioning\security\dice-provider-emulator\* -Destination ..\$FolderName\provisioning\security\dice-provider-emulator
+        Copy-Item -Recurse -Force -Path .\provisioning\security\dice-provider-emulator\com -Destination ..\$FolderName\provisioning\security\dice-provider-emulator
+    }
+
+    if ($UpdateDiceProviderDocs -eq "True")
+    {
+        Remove-Item ..\$FolderName\provisioning\security\dice-provider -Force -Recurse
+        New-Item -Path ..\$FolderName\provisioning\security\dice-provider -ItemType Directory
+        Copy-Item -Force -Path .\provisioning\security\dice-provider\* -Destination ..\$FolderName\provisioning\security\dice-provider
+        Copy-Item -Recurse -Force -Path .\provisioning\security\dice-provider\com -Destination ..\$FolderName\provisioning\security\dice-provider
     }
 
     if ($UpdateSecurityProviderDocs -eq "True")

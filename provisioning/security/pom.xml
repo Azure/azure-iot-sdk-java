@@ -19,6 +19,8 @@
     <url>http://azure.github.io/azure-iot-sdk-java/</url>
     <modules>
         <module>x509-provider</module>
+        <module>dice-provider</module>
+        <module>dice-provider-emulator</module>
         <module>tpm-provider</module>
         <module>tpm-provider-emulator</module>
         <module>security-provider</module>
