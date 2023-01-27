@@ -20,7 +20,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.runners.Parameterized;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.telemetry.ReceiveMessagesTests;
 
@@ -110,7 +109,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
         this.testInstance = new ReceiveMessagesTestInstance(protocol, authenticationType, clientType);
     }
 
-    public class ReceiveMessagesTestInstance
+    public static class ReceiveMessagesTestInstance
     {
         public IotHubClientProtocol protocol;
         public TestIdentity identity;

@@ -6,7 +6,6 @@
 package tests.integration.com.microsoft.azure.sdk.iot.provisioning;
 
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderTPMEmulator;
@@ -86,8 +85,8 @@ public class ProvisioningTests extends ProvisioningCommon
         //The test protocol has no bearing on this test since it only uses the provisioning service client, so the test should only run once.
         assumeTrue(testInstance.protocol == HTTPS);
 
-        SecurityProvider securityProvider = new SecurityProviderTPMEmulator(testInstance.registrationId, MAX_TPM_CONNECT_RETRY_ATTEMPTS);
-        Attestation attestation = new TpmAttestation(new String(encodeBase64(((SecurityProviderTpm) securityProvider).getEndorsementKey())));
+        SecurityProviderTpm securityProvider = new SecurityProviderTPMEmulator(testInstance.registrationId, MAX_TPM_CONNECT_RETRY_ATTEMPTS);
+        Attestation attestation = new TpmAttestation(new String(encodeBase64(securityProvider.getEndorsementKey())));
         IndividualEnrollment individualEnrollment = new IndividualEnrollment(testInstance.registrationId, attestation);
         testInstance.provisioningServiceClient.createOrUpdateIndividualEnrollment(individualEnrollment);
 
