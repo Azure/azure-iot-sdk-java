@@ -10,7 +10,7 @@
     <artifactId>e2e-common</artifactId>
     <name>IoT Hub Java E2E Common Tests</name>
     <version>1.0.0</version>
-    <description>Test suite fot the Microsoft Azure IoT Device SDK for Java</description>
+    <description>Test suite for the Microsoft Azure IoT SDKs for Java</description>
     <developers>
         <developer>
             <id>microsoft</id>
@@ -110,7 +110,7 @@
         <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-storage-blob</artifactId>
-            <version>12.8.0</version>
+            <version>12.20.2</version>
         </dependency>
     </dependencies>
     <build>
