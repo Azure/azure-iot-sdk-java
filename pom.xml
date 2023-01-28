@@ -61,11 +61,6 @@
                 <version>1.7.32</version>
             </dependency>
             <dependency>
-                <groupId>com.microsoft.rest</groupId>
-                <artifactId>client-runtime</artifactId>
-                <version>1.7.14</version>
-            </dependency>
-            <dependency>
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>annotations</artifactId>
                 <version>3.0.1</version>
