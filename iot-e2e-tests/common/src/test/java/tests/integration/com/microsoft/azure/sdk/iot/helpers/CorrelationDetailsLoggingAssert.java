@@ -6,7 +6,6 @@
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
 import com.microsoft.azure.sdk.iot.device.InternalClient;
-import org.junit.ComparisonFailure;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

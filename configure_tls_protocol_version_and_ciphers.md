@@ -14,7 +14,7 @@ $ java -Djdk.tls.client.protocols="TLSv1.2" yourApp
 
 ## How to configure TLS ciphers
 
-Additionally, if one wishes to control which ciphers are employed by TLS when used by their application, one should use the **jdk.tls.disabledAlgorithms** property of the **java.security** file. This file works as a blacklist, disabling unsupported ciphers.
+Additionally, if one wishes to control which ciphers are employed by TLS when used by their application, one should use the **jdk.tls.disabledAlgorithms** property of the **java.security** file. This file works as a ban list, disabling unsupported ciphers.
 
 On JDK 8 and earlier, the **java.security** file is under folder **%JAVA_HOME%/lib/security**. For JDK 9, it’s under folder **%JAVA_HOME%/conf/security**.
 
