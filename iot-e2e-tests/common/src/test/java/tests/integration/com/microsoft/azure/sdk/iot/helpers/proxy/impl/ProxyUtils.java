@@ -80,8 +80,7 @@ public class ProxyUtils {
         if (slashIndex == -1) {
             return "/";
         }
-        final String noHostUri = noHttpUri.substring(slashIndex);
-        return noHostUri;
+        return noHttpUri.substring(slashIndex);
     }
 
     /**
@@ -160,8 +159,7 @@ public class ProxyUtils {
      * @return The host and port string.
      */
     public static String parseHostAndPort(final HttpRequest httpRequest) {
-        final String uriHostAndPort = parseHostAndPort(httpRequest.getUri());
-        return uriHostAndPort;
+        return parseHostAndPort(httpRequest.getUri());
     }
 
     /**
@@ -235,13 +233,11 @@ public class ProxyUtils {
      * @param alias the alias to provide in the Via header for this proxy
      */
     public static void addVia(HttpMessage httpMessage, String alias) {
-        String newViaHeader =  new StringBuilder()
-                .append(httpMessage.getProtocolVersion().majorVersion())
-                .append('.')
-                .append(httpMessage.getProtocolVersion().minorVersion())
-                .append(' ')
-                .append(alias)
-                .toString();
+        String newViaHeader = String.valueOf(httpMessage.getProtocolVersion().majorVersion()) +
+            '.' +
+            httpMessage.getProtocolVersion().minorVersion() +
+            ' ' +
+            alias;
 
         final List<String> vias;
         if (httpMessage.headers().contains(HttpHeaders.Names.VIA)) {
@@ -417,15 +413,12 @@ public class ProxyUtils {
         }
 
         String contentLengthHeader = HttpHeaders.getHeader(response, HttpHeaders.Names.CONTENT_LENGTH);
-        if (contentLengthHeader != null && !contentLengthHeader.isEmpty()) {
-            return true;
-        }
+        return contentLengthHeader != null && !contentLengthHeader.isEmpty();
 
         // not checking for multipart/byteranges, since it is seldom used and its use as a message length indicator was removed in RFC 7230
 
         // none of the other message length indicators are present, so the only way the server can indicate the end
         // of this message is to close the connection
-        return false;
     }
 
     /**

@@ -21,4 +21,6 @@ If you have a question specifically on a Microsoft page you've read, please open
 
 For more information on the support options available to you, please see [Azure IoT support and help options](https://aka.ms/IoTHelp).
 
+Note that the IoT hub service client SDK has been moved to [this repo](https://www.github.com/Azure/azure-iot-service-sdk-java) so if you have a question about that package, please file it [here](https://www.github.com/Azure/azure-iot-service-sdk-java/issues) instead.
+
 ------------------------------- delete above -------------------------------

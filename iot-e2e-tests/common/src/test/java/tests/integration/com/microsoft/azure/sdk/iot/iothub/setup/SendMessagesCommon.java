@@ -45,7 +45,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
-import static junit.framework.TestCase.fail;
 
 /**
  * Utility functions, setup and teardown for all D2C telemetry integration tests. This class should not contain any tests,

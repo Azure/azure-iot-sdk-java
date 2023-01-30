@@ -67,7 +67,7 @@ public class SasTokenGenerator
     {
         try
         {
-            byte[] textToSign = new String(resourceUri + "\n" + expiryTime).getBytes(StandardCharsets.UTF_8);
+            byte[] textToSign = (resourceUri + "\n" + expiryTime).getBytes(StandardCharsets.UTF_8);
             byte[] decodedDeviceKey = decodeBase64(devicePrimaryKey.getBytes(StandardCharsets.UTF_8));
             byte[] signature = encryptHmacSha256(textToSign, decodedDeviceKey);
             byte[] encryptedSignature = encodeBase64(signature);

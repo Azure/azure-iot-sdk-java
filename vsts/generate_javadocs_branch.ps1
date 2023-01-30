@@ -21,7 +21,6 @@ function CreateJavadocReleaseBranch(
     $Sources,
     $FolderName,
     $UpdateDeviceClientDocs,
-    $UpdateServiceClientDocs,    
     $UpdateProvisioningDeviceClientDocs,
     $UpdateProvisioningServiceClientDocs,    
     $UpdateTpmProviderEmulatorDocs,
@@ -41,7 +40,6 @@ function CreateJavadocReleaseBranch(
 
     if ($UpdateDeviceClientDocs -eq "false" -and
         $UpdateDeviceClientDocs -eq "false" -and
-        $UpdateServiceClientDocs -eq "false" -and    
         $UpdateProvisioningDeviceClientDocs -eq "false" -and
         $UpdateProvisioningServiceClientDocs -eq "false" -and    
         $UpdateTpmProviderEmulatorDocs -eq "false" -and
@@ -84,14 +82,6 @@ function CreateJavadocReleaseBranch(
         New-item -Path ..\$FolderName\device -ItemType Directory
         Copy-Item -Force -Path .\device\* -Destination ..\$FolderName\device
         Copy-Item -Recurse -Force -Path .\device\com -Destination ..\$FolderName\device
-    }
-
-    if ($UpdateServiceClientDocs -eq "True")
-    {
-        Remove-Item ..\$FolderName\service -Force -Recurse
-        New-item -Path ..\$FolderName\service -ItemType Directory
-        Copy-Item -Force -Path .\service\* -Destination ..\$FolderName\service
-        Copy-Item -Recurse -Force -Path .\service\com -Destination ..\$FolderName\service
     }
 
     if ($UpdateProvisioningDeviceClientDocs -eq "True")
