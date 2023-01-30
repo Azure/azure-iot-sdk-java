@@ -10,7 +10,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.provisioning.samples</groupId>
-    <artifactId>provisioning-samples</artifactId>
+    <artifactId>provisioning-device-client-samples</artifactId>
     <name>Provisioning Device Client Samples</name>
     <version>1.0.0</version>
     <packaging>pom</packaging>
