@@ -37,7 +37,6 @@ public class FileUploadTest
         new Expectations()
         {
             {
-                mockHttpsTransportManager.open();
                 times = 1;
             }
         };
@@ -54,9 +53,7 @@ public class FileUploadTest
         new Expectations()
         {
             {
-                mockHttpsTransportManager.open();
                 times = 1;
-
                 mockFileUploadSasUriRequest.toJson();
                 result = mockJson;
 
@@ -93,9 +90,7 @@ public class FileUploadTest
         new Expectations()
         {
             {
-                mockHttpsTransportManager.open();
                 times = 1;
-
                 mockFileUploadCompletionNotification.toJson();
                 result = mockJson;
 

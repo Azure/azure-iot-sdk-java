@@ -47,37 +47,7 @@ public class HttpsTransportManager
 
         //Codes_SRS_HTTPSTRANSPORTMANAGER_21_001: [The constructor shall store the device client configuration `config`.]
         this.config = config;
-    }
-
-    /**
-     * Opens the connection by creating a new instance of the HttpsIotHubConnection.
-     */
-    public void open()
-    {
-        //Codes_SRS_HTTPSTRANSPORTMANAGER_21_003: [The open shall create and store a new transport connection `HttpsIotHubConnection`.]
         this.httpsIotHubConnection = new HttpsIotHubConnection(config);
-    }
-
-    /**
-     * Opens the connection by creating a new instance of the HttpsIotHubConnection.
-     * The provided topics have no effect for HTTPS protocol, and it is ignored.
-     *
-     * @param topics is a list of topics to signed in.
-     */
-    public void open(String[] topics)
-    {
-        //Codes_SRS_HTTPSTRANSPORTMANAGER_21_004: [The open shall create and store a new transport connection `HttpsIotHubConnection`.]
-        //Codes_SRS_HTTPSTRANSPORTMANAGER_21_005: [The open shall ignore the parameter `topics`.]
-        this.httpsIotHubConnection = new HttpsIotHubConnection(config);
-    }
-
-    /**
-     * Close the connection destroying the HttpsIotHubConnection instance.
-     */
-    public void close()
-    {
-        //Codes_SRS_HTTPSTRANSPORTMANAGER_21_006: [The close shall destroy the transport connection `HttpsIotHubConnection`.]
-        this.httpsIotHubConnection = null;
     }
 
     public HttpsResponse getFileUploadSasUri(IotHubTransportMessage message) throws IOException

@@ -435,7 +435,6 @@ public class ModuleClient extends InternalClient
         try
         {
             HttpsTransportManager httpsTransportManager = new HttpsTransportManager(this.config);
-            httpsTransportManager.open();
             return httpsTransportManager.invokeMethod(directMethodRequest, deviceId, "");
         }
         catch (IotHubServiceException e)
@@ -476,7 +475,6 @@ public class ModuleClient extends InternalClient
         try
         {
             HttpsTransportManager httpsTransportManager = new HttpsTransportManager(this.config);
-            httpsTransportManager.open();
             return httpsTransportManager.invokeMethod(directMethodRequest, deviceId, moduleId);
         }
         catch (IotHubServiceException e)
