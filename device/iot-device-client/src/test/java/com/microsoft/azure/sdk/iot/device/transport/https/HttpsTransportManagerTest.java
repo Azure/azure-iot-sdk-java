@@ -73,69 +73,6 @@ public class HttpsTransportManagerTest
         Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, config);
     }
 
-    /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_003: [The open shall create and store a new transport connection `HttpsIotHubConnection`.] */
-    @Test
-    public void openSucceed()
-    {
-        // arrange
-        final HttpsIotHubConnection httpsIotHubConnection = mockConn;
-        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, mockConfig);
-        new NonStrictExpectations()
-        {
-            {
-                Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {ClientConfiguration.class}, mockConfig);
-                result = httpsIotHubConnection;
-                times = 1;
-            }
-        };
-
-        // act
-        Deencapsulation.invoke(httpsTransportManager, "open");
-
-        // assert
-        assertNotNull(Deencapsulation.getField(httpsTransportManager, "httpsIotHubConnection"));
-    }
-
-    /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_004: [The open shall create and store a new transport connection `HttpsIotHubConnection`.] */
-    /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_005: [The open shall ignore the parameter `topics`.] */
-    @Test
-    public void openWithTopicsSucceed()
-    {
-        // arrange
-        final HttpsIotHubConnection httpsIotHubConnection = mockConn;
-        final String[] topics = new String[]{ "a", "b"};
-        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, mockConfig);
-        new NonStrictExpectations()
-        {
-            {
-                Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {ClientConfiguration.class}, mockConfig);
-                result = httpsIotHubConnection;
-                times = 1;
-            }
-        };
-
-        // act
-        Deencapsulation.invoke(httpsTransportManager, "open", new Class<?>[] {String[].class}, (Object)topics);
-
-        // assert
-        assertNotNull(Deencapsulation.getField(httpsTransportManager, "httpsIotHubConnection"));
-    }
-
-    /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_006: [The close shall destroy the transport connection `HttpsIotHubConnection`.] */
-    @Test
-    public void closeSucceed()
-    {
-        // arrange
-        final HttpsIotHubConnection httpsIotHubConnection = mockConn;
-        HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, mockConfig);
-
-        // act
-        Deencapsulation.invoke(httpsTransportManager, "close");
-
-        // assert
-        assertNull(Deencapsulation.getField(httpsTransportManager, "httpsIotHubConnection"));
-    }
-
 
     /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_007: [The send shall create a new instance of the `HttpMessage`, by parsing the Message with `parseHttpsJsonMessage` from `HttpsSingleMessage`.] */
     @Test
@@ -160,7 +97,6 @@ public class HttpsTransportManagerTest
             }
         };
         HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, mockConfig);
-        Deencapsulation.invoke(httpsTransportManager, "open");
 
         // act
         Deencapsulation.invoke(httpsTransportManager, "send", new Class[] {IotHubTransportMessage.class, Map.class}, mockTransportMsg, new HashMap<String, String>());
@@ -192,7 +128,6 @@ public class HttpsTransportManagerTest
             }
         };
         HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, mockConfig);
-        Deencapsulation.invoke(httpsTransportManager, "open");
 
         // act
         Deencapsulation.invoke(httpsTransportManager, "send", new Class[] {IotHubTransportMessage.class, Map.class}, mockTransportMsg, new HashMap<String, String>());
@@ -221,7 +156,6 @@ public class HttpsTransportManagerTest
             }
         };
         HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, mockConfig);
-        Deencapsulation.invoke(httpsTransportManager, "open");
 
         // act
         Deencapsulation.invoke(httpsTransportManager, "send", new Class[] {IotHubTransportMessage.class, Map.class}, mockTransportMsg, new HashMap<String, String>());
@@ -259,7 +193,6 @@ public class HttpsTransportManagerTest
             }
         };
         HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, mockConfig);
-        Deencapsulation.invoke(httpsTransportManager, "open");
 
         // act
         Deencapsulation.invoke(httpsTransportManager, "send", new Class[] {IotHubTransportMessage.class, Map.class}, mockTransportMsg, new HashMap<String, String>());
@@ -293,7 +226,6 @@ public class HttpsTransportManagerTest
             }
         };
         HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, mockConfig);
-        Deencapsulation.invoke(httpsTransportManager, "open");
 
         // act
         Deencapsulation.invoke(httpsTransportManager, "send", new Class[] {IotHubTransportMessage.class, Map.class}, mockTransportMsg, new HashMap<String, String>());
@@ -323,7 +255,6 @@ public class HttpsTransportManagerTest
             }
         };
         HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, mockConfig);
-        Deencapsulation.invoke(httpsTransportManager, "open");
 
         // act
         Deencapsulation.invoke(httpsTransportManager, "send", new Class[] {IotHubTransportMessage.class, Map.class}, mockTransportMsg, new HashMap<String, String>());
@@ -361,7 +292,6 @@ public class HttpsTransportManagerTest
             }
         };
         HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, mockConfig);
-        Deencapsulation.invoke(httpsTransportManager, "open");
 
         // act
         Deencapsulation.invoke(httpsTransportManager, "send", new Class[] {IotHubTransportMessage.class, Map.class}, mockTransportMsg, new HashMap<String, String>());
@@ -384,7 +314,6 @@ public class HttpsTransportManagerTest
             }
         };
         HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, mockConfig);
-        Deencapsulation.invoke(httpsTransportManager, "open");
 
         // act
         Deencapsulation.invoke(httpsTransportManager, "receive");
@@ -416,7 +345,6 @@ public class HttpsTransportManagerTest
             }
         };
         HttpsTransportManager httpsTransportManager = Deencapsulation.newInstance(HttpsTransportManager.class, new Class[] {ClientConfiguration.class}, mockConfig);
-        Deencapsulation.invoke(httpsTransportManager, "open");
 
         // act
         Deencapsulation.invoke(httpsTransportManager, "receive");
