@@ -81,10 +81,10 @@ dependencies {
     implementation 'com.android.support:multidex:1.0.3'
 
     // This jar contains the test code that will be run on android. This jar isn't in the m2 folder, but rather it is in this cloned repo after mvn install is run
-    implementation files('../../common/target/iot-e2e-common-0.26.0-tests.jar')
+    implementation files('../../common/target/iot-e2e-common-1.0.0-tests.jar')
 
     // This jar contains the dependencies of the test code. DeviceClient, for instance. This jar isn't in the m2 folder, but rather it is in this cloned repo after mvn install is run
-    implementation files('../../common/target/iot-e2e-common-0.26.0-with-deps.jar')
+    implementation files('../../common/target/iot-e2e-common-1.0.0-with-deps.jar')
 
     implementation ('org.apache.commons:commons-lang3:3.6')
     implementation ('javax.xml.stream:stax-api:1.0-2')
